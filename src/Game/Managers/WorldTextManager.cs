@@ -38,155 +38,57 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class WorldTextManager : IUpdateable
+    internal class TextRenderer
     {
-        private readonly Dictionary<Serial, OverheadDamage> _damages = new Dictionary<Serial, OverheadDamage>();
-        //private readonly List<GameObject> _staticToUpdate = new List<GameObject>();
-        private readonly List<Tuple<Serial, Serial>> _subst = new List<Tuple<Serial, Serial>>();
-        private readonly List<Serial> _toRemoveDamages = new List<Serial>();
-
-
         private readonly List<Rectangle> _bounds = new List<Rectangle>();
-        private MessageInfo _firstNode = new MessageInfo(), _drawPointer;
+        protected MessageInfo _firstNode = new MessageInfo(), _drawPointer;
 
-        public void Update(double totalMS, double frameMS)
+        public virtual void Update(double totalMS, double frameMS)
         {
             ProcessWorldText(false);
-
-            UpdateDamageOverhead(totalMS, frameMS);
-
-            if (_toRemoveDamages.Count > 0)
-            {
-                foreach ( Serial s in _toRemoveDamages)
-                {
-                    _damages.Remove(s);
-                }
-
-                _toRemoveDamages.Clear();
-            }
         }
 
-
-
-        private void DrawTextOverheads(UltimaBatcher2D batcher, int startX, int startY, float scale, int renderIndex)
+        public void Select(int startX, int startY, int renderIndex)
         {
-            int screenX = Engine.Profile.Current.GameWindowPosition.X;
-            int screenY = Engine.Profile.Current.GameWindowPosition.Y;
-            int screenW = Engine.Profile.Current.GameWindowSize.X;
-            int screenH = Engine.Profile.Current.GameWindowSize.Y;
-            
-         
             ProcessWorldText(false);
 
-            bool health = Engine.Profile.Current.ShowMobilesHP;
-            int alwaysHP = Engine.Profile.Current.MobileHPShowWhen;
-            int mode = Engine.Profile.Current.MobileHPType;
             int mouseX = Mouse.Position.X;
             int mouseY = Mouse.Position.Y;
 
-            for (var o = _drawPointer; o != null; o = o.Left)
+            for (var item = _drawPointer; item != null; item = item.Left)
             {
-                if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.Time < Engine.Ticks /*|| o.Parent.Parent.Tile == null*/)
+                if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null)
                     continue;
 
-                var parent = o.Owner;
-
-                int x = startX + parent.RealScreenPosition.X;
-                int y = startY + parent.RealScreenPosition.Y;
-
-                int offY = 0;
-
-                if (parent is Mobile m)
+                if (item.Time >= Engine.Ticks)
                 {
-                    if (health && mode != 1 && ((alwaysHP >= 1 && m.Hits != m.HitsMax) || alwaysHP == 0))
-                    {
-                        offY += 22;
-                    }
-
-                    if (!m.IsMounted)
-                        offY -= 22;
-
-                    FileManager.Animations.GetAnimationDimensions(m.AnimIndex, 
-                                                                  m.GetGraphicForAnimation(), 
-                                                                  /*(byte) m.GetDirectionForAnimation()*/ 0,
-                                                                  /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0, 
-                                                                  m.IsMounted,
-                                                                  /*(byte) m.AnimIndex*/ 0, 
-                                                                  out _,
-                                                                  out int centerY,
-                                                                  out _,
-                                                                  out int height);
-                    x += (int)m.Offset.X;
-                    x += 22;
-                    y += (int)(m.Offset.Y - m.Offset.Z - (height + centerY + 8));
-                }
-                else if (parent.Texture != null)
-                {
-                    if (renderIndex != parent.UseInRender)
+                    if (item.Owner == null /*|| item.Owner.UseInRender != renderIndex*/)
                         continue;
-
-                    switch (parent)
-                    {
-                        case Item _: offY = -22;
-
-                            if (parent.Texture is ArtTexture t)
-                                y -= t.ImageRectangle.Height >> 1;
-                            else
-                                y -= parent.Texture.Height >> 1;
-
-                            break;
-
-                        case Static _:
-                        case Multi _: offY = -44;
-
-                            if (parent.Texture is ArtTexture t1)
-                                y -= t1.ImageRectangle.Height >> 1;
-                            else
-                                y -= parent.Texture.Height >> 1;
-
-                            break;
-
-                        default:
-                            y -= parent.Texture.Height >> 1;
-                            break;
-                    }
-
-                    x += 22;
                 }
 
-                x = (int)(x / scale);
-                y = (int)(y / scale);
+                if (item.RenderedText.Texture.Contains(mouseX - startX - item.RealScreenPosition.X, mouseY - startY - item.RealScreenPosition.Y))
+                {
+                    SelectedObject.LastObject = item;
+                }
+            }
+        }
 
-                x -= (int)(screenX / scale);
-                y -= (int)(screenY / scale);
+        public virtual void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex)
+        {
+            ProcessWorldText(false);
 
-                x += screenX;
-                y += screenY;
+            int mouseX = Mouse.Position.X;
+            int mouseY = Mouse.Position.Y;
 
+            GameScene scene = Engine.SceneManager.GetScene<GameScene>();
 
-
-                int minX = screenX + (o.RenderedText.Width >> 1) + 6;
-                int maxX = screenX + screenW - ((o.RenderedText.Width >> 1) - 3);
-
-                if (x < minX)
-                    x = minX;
-                else if (x > maxX)
-                    x = maxX;
+            float scale = scene?.Scale ?? 1;
 
 
-                int minY = screenY + parent.TextContainer.TotalHeight + offY;
-                int maxY = screenY + screenH + offY + 6;
-
-                if (y < minY)
-                    y = minY;
-                else if (y > maxY)
-                    y = maxY;
-
-                offY += o.OffsetY;
-
-                o.X = x - (o.RenderedText.Width >> 1);
-                o.Y = y - offY - o.RenderedText.Height;
-
+            for (var o = _drawPointer; o != null; o = o.Left)
+            {
+                if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < Engine.Ticks)
+                    continue;
 
                 ushort hue = 0;
 
@@ -198,7 +100,7 @@ namespace ClassicUO.Game.Managers
                         alpha = 1f - 0x7F / 255f;
                 }
 
-                if (o.RenderedText.Texture.Contains(mouseX - o.X, mouseY - o.Y))
+                if (o.RenderedText.Texture.Contains( mouseX - startX - o.RealScreenPosition.X, mouseY - startY - o.RealScreenPosition.Y))
                 {
                     SelectedObject.Object = o;
                 }
@@ -208,34 +110,8 @@ namespace ClassicUO.Game.Managers
                     hue = 0x35;
                 }
 
-
-                o.RenderedText.Draw(batcher, o.X, o.Y, alpha, hue);
+                o.RenderedText.Draw(batcher, (int) ( (startX + o.RealScreenPosition.X) / scale), (int) ((startY +  o.RealScreenPosition.Y) / scale), alpha, hue);
             }
-        }
-
-        public void Select(int renderIndex)
-        {
-            //ProcessWorldText(false);
-
-            //int mouseX = Mouse.Position.X;
-            //int mouseY = Mouse.Position.Y;
-
-            //for (var item = _drawPointer; item != null; item = item.Left)
-            //{
-            //    if (item.RenderedText == null || item.RenderedText.IsDestroyed)
-            //        continue;
-
-            //    if (item.Time >= Engine.Ticks)
-            //    {
-            //        if (item.Owner == null || item.Owner.UseInRender != renderIndex)
-            //            continue;
-            //    }
-
-            //    if (item.RenderedText.Texture.Contains(mouseX - item.X, mouseY - item.Y))
-            //    {
-            //        SelectedObject.Object = item;
-            //    }
-            //}
         }
 
         public void MoveToTopIfSelected()
@@ -288,12 +164,11 @@ namespace ClassicUO.Game.Managers
                 if (_drawPointer.Right == null)
                     break;
             }
-
         }
 
         private void CalculateAlpha(MessageInfo msg)
         {
-            int delta = (int) (msg.Time - Engine.Ticks);
+            int delta = (int)(msg.Time - Engine.Ticks);
 
             if (delta >= 0 && delta <= 1000)
             {
@@ -308,7 +183,7 @@ namespace ClassicUO.Game.Managers
 
                 if (!msg.IsTransparent || delta <= 0x7F)
                 {
-                    msg.Alpha = (byte) delta;
+                    msg.Alpha = (byte)delta;
                 }
 
                 msg.IsTransparent = true;
@@ -321,8 +196,8 @@ namespace ClassicUO.Game.Managers
 
             Rectangle rect = new Rectangle()
             {
-                X = msg.X,
-                Y = msg.Y,
+                X = msg.RealScreenPosition.X,
+                Y = msg.RealScreenPosition.Y,
                 Width = msg.RenderedText.Width,
                 Height = msg.RenderedText.Height
             };
@@ -345,12 +220,6 @@ namespace ClassicUO.Game.Managers
             if (obj == null)
                 return;
 
-            //if ((obj.Owner is Static || obj.Owner is Multi))
-            //{
-            //    if (!_staticToUpdate.Contains(obj.Owner))
-            //        _staticToUpdate.Add(obj.Owner);
-            //}
-            
             var item = _firstNode;
 
             if (item != null)
@@ -373,11 +242,128 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public bool Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex)
+
+        public virtual void Clear()
         {
+            _firstNode = new MessageInfo();
+            _drawPointer = null;
+        }
+    }
+
+    internal class WorldTextManager : TextRenderer
+    {
+        private readonly Dictionary<Serial, OverheadDamage> _damages = new Dictionary<Serial, OverheadDamage>();
+        private readonly List<Tuple<Serial, Serial>> _subst = new List<Tuple<Serial, Serial>>();
+        private readonly List<Serial> _toRemoveDamages = new List<Serial>();
+
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+
+            UpdateDamageOverhead(totalMS, frameMS);
+
+            if (_toRemoveDamages.Count > 0)
+            {
+                foreach ( Serial s in _toRemoveDamages)
+                {
+                    _damages.Remove(s);
+                }
+
+                _toRemoveDamages.Clear();
+            }
+        }
+
+
+
+        private void DrawTextOverheads(UltimaBatcher2D batcher, int startX, int startY, float scale, int renderIndex)
+        {
+
+            int screenX = Engine.Profile.Current.GameWindowPosition.X;
+            int screenY = Engine.Profile.Current.GameWindowPosition.Y;
+            int screenW = Engine.Profile.Current.GameWindowSize.X;
+            int screenH = Engine.Profile.Current.GameWindowSize.Y;
+            
+            
+            int mouseX = Mouse.Position.X;
+            int mouseY = Mouse.Position.Y;
+
+            for (var o = _drawPointer; o != null; o = o.Left)
+            {
+                if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < Engine.Ticks /*|| o.Parent.Parent.Tile == null*/)
+                    continue;
+
+                var parent = o.Owner;
+
+                int x = startX + o.RealScreenPosition.X;
+                int y = startY + o.RealScreenPosition.Y;
+
+
+                x = (int)(x / scale);
+                y = (int)(y / scale);
+
+                x -= (int)(screenX / scale);
+                y -= (int)(screenY / scale);
+
+                x += screenX;
+                y += screenY;
+
+
+
+                int minX = screenX + 6;
+                int maxX = screenX + screenW - 3;
+
+                if (x < minX)
+                    x = minX;
+                else if (x > maxX)
+                    x = maxX;
+
+
+                int minY = screenY + parent.TextContainer.TotalHeight;
+                int maxY = screenY + screenH + 6;
+
+                if (y < minY)
+                    y = minY;
+                else if (y > maxY)
+                    y = maxY;
+
+                ushort hue = 0;
+
+                float alpha = 1f - o.Alpha / 255f;
+
+                if (o.IsTransparent)
+                {
+                    if (o.Alpha == 0xFF)
+                        alpha = 1f - 0x7F / 255f;
+                }
+
+                if (o.RenderedText.Texture.Contains(mouseX - x, mouseY - y))
+                {
+                    SelectedObject.Object = o;
+                }
+
+                if (SelectedObject.LastObject == o)
+                {
+                    hue = 0x35;
+                }
+
+
+                o.RenderedText.Draw(batcher, x, y, alpha, hue);
+            }
+        }
+
+      
+
+        public override void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex)
+        {
+            //ProcessWorldText(false);
+
             float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
 
-            DrawTextOverheads(batcher, startX, startY, scale, renderIndex);
+            //DrawTextOverheads(batcher, startX, startY, 1, renderIndex);
+
+            base.Draw(batcher, 0, 0, renderIndex);
 
             foreach (KeyValuePair<Serial, OverheadDamage> overheadDamage in _damages)
             {
@@ -406,8 +392,6 @@ namespace ClassicUO.Game.Managers
 
                 overheadDamage.Value.Draw(batcher, x, y, scale);
             }
-
-            return true;
         }
 
         private void UpdateDamageOverhead(double totalMS, double frameMS)
@@ -446,7 +430,7 @@ namespace ClassicUO.Game.Managers
             dm.Add(dmg);
         }
 
-        public void Clear()
+        public override void Clear()
         {
             if (_toRemoveDamages.Count > 0)
             {
@@ -462,8 +446,7 @@ namespace ClassicUO.Game.Managers
 
             //_staticToUpdate.Clear();
 
-            _firstNode = new MessageInfo();
-            _drawPointer = null;
+            base.Clear();
         }
     }
 }

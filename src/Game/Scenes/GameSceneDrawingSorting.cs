@@ -375,13 +375,13 @@ namespace ClassicUO.Game.Scenes
                         obj.ProcessAlpha(0xFF);
                 }
 
-                obj.UpdateTextCoords();
-
                 if (_renderListCount >= _renderList.Length)
                 {
                     int newsize = _renderList.Length + 1000;
                     Array.Resize(ref _renderList, newsize);
                 }
+
+                obj.UpdateTextCoords();
 
                 _renderList[_renderListCount++] = obj;
                 obj.UseInRender = (byte) _renderIndex;

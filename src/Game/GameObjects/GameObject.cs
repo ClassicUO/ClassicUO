@@ -39,6 +39,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal abstract class BaseGameObject
     {
+        public Point RealScreenPosition;
     }
 
 
@@ -47,9 +48,7 @@ namespace ClassicUO.Game.GameObjects
         private Position _position = Position.INVALID;
         private Point _screenPosition;
 
-
         public Vector3 Offset;
-        public Point RealScreenPosition;
 
 
         public bool IsPositionChanged { get; protected set; }
@@ -232,15 +231,134 @@ namespace ClassicUO.Game.GameObjects
 
             int offY = 0;
 
+            bool health = Engine.Profile.Current.ShowMobilesHP;
+            int alwaysHP = Engine.Profile.Current.MobileHPShowWhen;
+            int mode = Engine.Profile.Current.MobileHPType;
+
+
+
             for (; last != null; last = last.ListLeft)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                 {
+                    if (offY == 0 && last.Time < Engine.Ticks)
+                        continue;
+
+                    int x = RealScreenPosition.X;
+                    int y = RealScreenPosition.Y;
+
+                    if (this is Mobile m)
+                    {
+                        if (health && mode != 1 && ((alwaysHP >= 1 && m.Hits != m.HitsMax) || alwaysHP == 0))
+                        {
+                            offY += 22;
+                        }
+
+                        if (!m.IsMounted)
+                            offY -= 22;
+
+                        FileManager.Animations.GetAnimationDimensions(m.AnimIndex,
+                                                                      m.GetGraphicForAnimation(),
+                                                                      /*(byte) m.GetDirectionForAnimation()*/ 0,
+                                                                      /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
+                                                                      m.IsMounted,
+                                                                      /*(byte) m.AnimIndex*/ 0,
+                                                                      out _,
+                                                                      out int centerY,
+                                                                      out _,
+                                                                      out int height);
+                        x += (int)m.Offset.X;
+                        x += 22;
+                        y += (int)(m.Offset.Y - m.Offset.Z - (height + centerY + 8));
+                    }
+                    else if (this is Item it && it.Container.IsValid)
+                    {
+                        x = last.X;
+                        y = last.Y;
+                    }
+                    else if (Texture != null)
+                    {
+                        switch (this)
+                        {
+                            case Item _:
+                                offY = -22;
+
+                                if (Texture is ArtTexture t)
+                                    y -= t.ImageRectangle.Height >> 1;
+                                else
+                                    y -= Texture.Height >> 1;
+
+                                break;
+
+                            case Static _:
+                            case Multi _:
+                                offY = -44;
+
+                                if (Texture is ArtTexture t1)
+                                    y -= t1.ImageRectangle.Height >> 1;
+                                else
+                                    y -= Texture.Height >> 1;
+
+                                break;
+
+                            default:
+                                y -= Texture.Height >> 1;
+                                break;
+                        }
+
+                        x += 22;
+                    }
+
+
+                   
+
                     last.OffsetY = offY;
                     TextContainer.TotalHeight += last.RenderedText.Height;
                     offY += last.RenderedText.Height;
+
+                    last.RealScreenPosition.X = x - (last.RenderedText.Width >> 1);
+                    last.RealScreenPosition.Y = y - offY;
                 }
             }
+
+            FixTextCoordinatesInScreen();
+        }
+
+        private void FixTextCoordinatesInScreen()
+        {
+            if (this is Item it && it.Container.IsValid)
+                return;
+
+
+            int offsetY = 0;
+
+            int minX = Engine.Profile.Current.GameWindowPosition.X + 6;
+            int maxX = minX + Engine.Profile.Current.GameWindowSize.X - 6;
+            int minY = Engine.Profile.Current.GameWindowPosition.Y;
+
+            for (var item = TextContainer.Items; item != null; item = item.ListRight)
+            {
+                if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null || item.Time < Engine.Ticks)
+                    continue;
+
+                int startX = item.RealScreenPosition.X;
+                int endX = startX + item.RenderedText.Width;
+
+                if (startX < minX)
+                    item.RealScreenPosition.X += minX - startX;
+
+                if (endX > maxX)
+                    item.RealScreenPosition.X -= endX - maxX;
+
+                int startY = item.RealScreenPosition.Y;
+
+                if (startY < minY && offsetY == 0)
+                    offsetY = minY - startY;
+
+                if (offsetY != 0)
+                    item.RealScreenPosition.Y += offsetY;
+            }
+
         }
 
         public void AddOverhead(MessageType type, string text, byte font, Hue hue, bool isunicode)
@@ -254,9 +372,30 @@ namespace ClassicUO.Game.GameObjects
             var msg = CreateMessage(text, hue, font, isunicode, type);
             msg.Owner = this;
             TextContainer.Add(msg);
-            World.WorldTextManager.AddMessage(msg);
+
+            if (this is Item it && it.Container.IsValid)
+            {
+                UpdateTextCoords();
+            }
+            else
+                World.WorldTextManager.AddMessage(msg);
         }
 
+        public void AddMessage(MessageInfo msg)
+        {
+            if (TextContainer == null)
+                TextContainer = new TextContainer();
+
+            msg.Owner = this;
+            TextContainer.Add(msg);
+
+            if (this is Item it && it.Container.IsValid)
+            {
+                UpdateTextCoords();
+            }
+            else
+                World.WorldTextManager.AddMessage(msg);
+        }
         private static MessageInfo CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type)
         {
             if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
@@ -281,7 +420,7 @@ namespace ClassicUO.Game.GameObjects
                 Time = CalculateTimeToLive(rtext),
                 Type = type,
                 Hue = hue,
-            }; 
+            };
         }
 
         private static long CalculateTimeToLive(RenderedText rtext)

@@ -220,7 +220,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 case Buttons.NextArrow:
                     SaveCheckboxStatus();
-                    Engine.SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
+                    if (!_textboxAccount.IsDisposed)
+                        Engine.SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
 
                     break;
 

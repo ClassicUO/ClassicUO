@@ -37,7 +37,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class PaperDollGump : Gump
+    internal class PaperDollGump : TextContainerGump
     {
         private static readonly ushort[] PeaceModeBtnGumps =
         {
@@ -50,7 +50,6 @@ namespace ClassicUO.Game.UI.Gumps
         private GumpPic _combatBook, _racialAbilitiesBook;
         private bool _isWarMode;
 
-        private Point _lastClick;
         private PaperDollInteractable _paperDollInteractable;
         private GumpPic _partyManifestPic;
         private GumpPic _profilePic;
@@ -79,21 +78,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public Mobile Mobile { get; set; }
 
-        public TextContainer TextContainer { get; } = new TextContainer();
-
-        public void AddLabel(string text, ushort hue, byte font, bool isunicode, Serial serial)
-        {
-            if (World.ClientFlags.TooltipsEnabled)
-                return;
-
-            TextContainer.Add(text, hue, font, isunicode, _lastClick.X, _lastClick.Y, serial);
-        }
-
         public override void Dispose()
         {
             Engine.UI.SavePosition(LocalSerial, Location);
-
-            TextContainer.Clear();
 
             if (Mobile == World.Player)
             {
@@ -256,12 +243,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            if (button == MouseButton.Left)
-            {
-                _lastClick.X = x;
-                _lastClick.Y = y;
-            }
-
             GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
             if (!gs.IsHoldingItem || !gs.IsMouseOverUI || _paperDollInteractable.IsOverBackpack)
@@ -330,19 +311,11 @@ namespace ClassicUO.Game.UI.Gumps
                 _warModeBtn.ButtonGraphicOver = btngumps[2];
             }
 
-            TextContainer.Update();
 
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-        {
-            base.Draw(batcher, x, y);
 
-            TextContainer.Draw(batcher, x, y);
-
-            return true;
-        }
 
         //public override bool Contains(int x, int y)
         //{

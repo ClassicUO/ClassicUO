@@ -29,6 +29,10 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Input;
+using ClassicUO.IO;
+using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -135,14 +139,28 @@ namespace ClassicUO.Game
                     if (parent == null)
                         break;
 
+                    MessageInfo msg = CreateMessage(text, hue, font, unicode, type);
+                    msg.Owner = parent;
+
                     if (parent is Item it && !it.OnGround)
                     {
+                        msg.X = Mouse.LastClickPosition.X;
+                        msg.Y = Mouse.LastClickPosition.Y;
+
                         Gump gump = Engine.UI.GetGump<Gump>(it.Container);
 
                         if (gump is PaperDollGump paperDoll)
-                            paperDoll.AddLabel(text, hue, font, unicode, it);
+                        {
+                            msg.X -= paperDoll.ScreenCoordinateX;
+                            msg.Y -= paperDoll.ScreenCoordinateY;
+                            paperDoll.AddText(msg);
+                        }
                         else if (gump is ContainerGump container)
-                            container.AddLabel(text, hue, font, unicode, it);
+                        {
+                            msg.X -= container.ScreenCoordinateX;
+                            msg.Y -= container.ScreenCoordinateY;
+                            container.AddText(msg);
+                        }
                         else
                         {
                             Entity ent = World.Get(it.RootContainer);
@@ -163,13 +181,17 @@ namespace ClassicUO.Game
                             }
 
                             if (trade != null)
-                                trade.AddLabel(text, hue, font, unicode, it);
+                            {
+                                msg.X -= trade.ScreenCoordinateX;
+                                msg.Y -= trade.ScreenCoordinateY;
+                                trade.AddText(msg);
+                            }
                             else
                                 Log.Message(LogTypes.Warning, "Missing label handler for this control: 'UNKNOWN'. Report it!!");
                         }
                     }
-                    else
-                        parent.AddOverhead(type, text, font, hue, unicode);
+
+                    parent.AddMessage(msg);
 
                     break;
 
@@ -201,6 +223,61 @@ namespace ClassicUO.Game
         {
             LocalizedMessageReceived.Raise(args, entity);
         }
+
+
+        private static MessageInfo CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type)
+        {
+            if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
+            {
+                font = Engine.Profile.Current.ChatFont;
+                isunicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
+            }
+
+            int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, msg) : FileManager.Fonts.GetWidthASCII(font, msg);
+
+            if (width > 200)
+                width = isunicode ? FileManager.Fonts.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder) : FileManager.Fonts.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder);
+            else
+                width = 0;
+
+            RenderedText rtext = RenderedText.Create(msg, hue, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, width, 30, false, false, true);
+
+            return new MessageInfo
+            {
+                Alpha = 255,
+                RenderedText = rtext,
+                Time = CalculateTimeToLive(rtext),
+                Type = type,
+                Hue = hue,
+            };
+        }
+
+        private static long CalculateTimeToLive(RenderedText rtext)
+        {
+            long timeToLive;
+
+            if (Engine.Profile.Current.ScaleSpeechDelay)
+            {
+                int delay = Engine.Profile.Current.SpeechDelay;
+
+                if (delay < 10)
+                    delay = 10;
+
+                timeToLive = (long)(4000 * rtext.LinesCount * delay / 100.0f);
+            }
+            else
+            {
+                long delay = (5497558140000 * Engine.Profile.Current.SpeechDelay) >> 32 >> 5;
+
+                timeToLive = (delay >> 31) + delay;
+            }
+
+            timeToLive += Engine.Ticks;
+
+            return timeToLive;
+        }
+
+
     }
 
     internal class UOMessageEventArgs : EventArgs

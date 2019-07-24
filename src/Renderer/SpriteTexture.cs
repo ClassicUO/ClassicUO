@@ -80,7 +80,7 @@ namespace ClassicUO.Renderer
 
         public bool Contains(int x, int y, bool pixelCheck = true)
         {
-            if (x >= 0 && y >= 0 && x < Width && y < Height)
+            if (_hitMap != null && x >= 0 && y >= 0 && x < Width && y < Height)
             {
                 if (!pixelCheck)
                     return true;

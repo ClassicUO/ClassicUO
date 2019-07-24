@@ -35,13 +35,12 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal sealed class TradingGump : Gump
+    internal sealed class TradingGump : TextContainerGump
     {
         private readonly string _name;
         private GumpPic _hisPic;
 
         private bool _imAccepting, _heIsAccepting;
-        private Point _lastClick;
 
         private DataBox _myBox, _hisBox;
         private Checkbox _myCheckbox;
@@ -91,39 +90,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public TextContainer TextContainer { get; } = new TextContainer();
-
-        public void AddLabel(string text, ushort hue, byte font, bool isunicode, Serial serial)
-        {
-            if (World.ClientFlags.TooltipsEnabled)
-                return;
-
-            TextContainer.Add(text, hue, font, isunicode, _lastClick.X, _lastClick.Y, serial);
-        }
-
-        public override void Update(double totalMS, double frameMS)
-        {
-            base.Update(totalMS, frameMS);
-
-            TextContainer.Update();
-        }
-
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-        {
-            base.Draw(batcher, x, y);
-            TextContainer.Draw(batcher, x, y);
-
-            return true;
-        }
-
-        protected override void OnMouseUp(int x, int y, MouseButton button)
-        {
-            if (button == MouseButton.Left)
-            {
-                _lastClick.X = x;
-                _lastClick.Y = y;
-            }
-        }
 
         public void UpdateContent()
         {
