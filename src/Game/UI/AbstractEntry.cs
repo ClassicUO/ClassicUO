@@ -53,8 +53,17 @@ namespace ClassicUO.Game.UI
 
         public ushort Hue
         {
-            get;
-            set;
+            get => RenderCaret.Hue;
+            set
+            {
+                if (RenderCaret.Hue != value)
+                {
+                    RenderCaret.Hue = value;
+                    RenderText.Hue = value;
+                    RenderCaret.CreateTexture();
+                    RenderText.CreateTexture();
+                }
+            }
         }
 
         public virtual string Text
@@ -94,9 +103,7 @@ namespace ClassicUO.Game.UI
         public void Destroy()
         {
             RenderText?.Destroy();
-            RenderText = null;
             RenderCaret?.Destroy();
-            RenderCaret = null;
         }
 
         public bool RemoveChar(bool fromleft)
@@ -226,7 +233,7 @@ namespace ClassicUO.Game.UI
                             (rx, ry) = FileManager.Fonts.GetCaretPosUnicode(RenderText.Font, RenderText.Text, i, Width, RenderText.Align, (ushort) RenderText.FontStyle);
                         else
                             (rx, ry) = FileManager.Fonts.GetCaretPosASCII(RenderText.Font, RenderText.Text, i, Width, RenderText.Align, (ushort) RenderText.FontStyle);
-                        RenderCaret.Draw(batcher, x + rx, y + ry, 0, Hue);
+                        RenderCaret.Draw(batcher, x + rx, y + ry);
                     }
                 }
             }

@@ -236,7 +236,7 @@ namespace ClassicUO.Renderer
             return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, srcX, srcY, srcWidth, srcHeight, ref _hueVector);
         }
 
-        private void CreateTexture()
+        public void CreateTexture()
         {
             if (Texture != null && !Texture.IsDisposed)
             {

@@ -154,10 +154,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            TxEntry.RenderText.Draw(batcher, x + TxEntry.Offset, y, 0, Hue);
+            TxEntry.RenderText.Draw(batcher, x + TxEntry.Offset, y);
 
             if (IsEditable && HasKeyboardFocus)
-                TxEntry.RenderCaret.Draw(batcher, x + TxEntry.Offset + TxEntry.CaretPosition.X, y + TxEntry.CaretPosition.Y, 0, Hue);
+                TxEntry.RenderCaret.Draw(batcher, x + TxEntry.Offset + TxEntry.CaretPosition.X, y + TxEntry.CaretPosition.Y);
 
             return base.Draw(batcher, x, y);
         }
