@@ -19,14 +19,9 @@ namespace ClassicUO.Game.UI.Gumps
 {
     abstract class TextContainerGump : Gump
     {
-        //private readonly TextContainer _textContainer;
-
         protected TextContainerGump(Serial local, Serial server) : base(local, server)
         {
-            //_textContainer = new TextContainer
-            //{
-            //    MaxSize = 10
-            //};
+
         }
 
         public TextRenderer TextRenderer { get; } = new TextRenderer();
@@ -54,16 +49,6 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
-        public override bool Contains(int x, int y)
-        {
-            if (!Mouse.IsDragging)
-            {
-                //TextRenderer.Select(ScreenCoordinateX, ScreenCoordinateY, -1);
-                //TextRenderer.MoveToTopIfSelected();
-            }
-
-            return base.Contains(x, y);
-        }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {

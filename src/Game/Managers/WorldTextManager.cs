@@ -61,7 +61,7 @@ namespace ClassicUO.Game.Managers
 
                 if (item.Time >= Engine.Ticks)
                 {
-                    if (item.Owner == null /*|| item.Owner.UseInRender != renderIndex*/)
+                    if (item.Owner == null || item.Owner.UseInRender != renderIndex)
                         continue;
                 }
 
@@ -79,6 +79,7 @@ namespace ClassicUO.Game.Managers
             int mouseX = Mouse.Position.X;
             int mouseY = Mouse.Position.Y;
 
+            MessageInfo last = null;
 
             for (var o = _drawPointer; o != null; o = o.Left)
             {
@@ -98,6 +99,7 @@ namespace ClassicUO.Game.Managers
                 if (o.RenderedText.Texture.Contains( mouseX - startX - o.RealScreenPosition.X, mouseY - startY - o.RealScreenPosition.Y))
                 {
                     SelectedObject.Object = o;
+                    last = o;
                 }
 
                 if (SelectedObject.LastObject == o)
@@ -107,29 +109,49 @@ namespace ClassicUO.Game.Managers
 
                 o.RenderedText.Draw(batcher, startX + o.RealScreenPosition.X, startY + o.RealScreenPosition.Y, alpha, hue);
             }
+
+            if (last != null)
+            {
+                if (last.Right != null)
+                    last.Right.Left = last.Left;
+
+                if (last.Left != null)
+                    last.Left.Right = last.Right;
+
+                last.Left = last.Right = null;
+
+
+                var next = _firstNode.Right;
+                _firstNode.Right = last;
+                last.Left = _firstNode;
+                last.Right = next;
+
+                if (next != null)
+                    next.Left = last;
+            }
         }
 
         public void MoveToTopIfSelected()
         {
-            if (_firstNode != null && SelectedObject.LastObject is MessageInfo msg)
-            {
-                if (msg.Right != null)
-                    msg.Right.Left = msg.Left;
+            //if (_firstNode != null && SelectedObject.LastObject is MessageInfo msg)
+            //{
+            //    if (msg.Right != null)
+            //        msg.Right.Left = msg.Left;
 
-                if (msg.Left != null)
-                    msg.Left.Right = msg.Right;
+            //    if (msg.Left != null)
+            //        msg.Left.Right = msg.Right;
 
-                msg.Left = msg.Right = null;
+            //    msg.Left = msg.Right = null;
 
 
-                var next = _firstNode.Right;
-                _firstNode.Right = msg;
-                msg.Left = _firstNode;
-                msg.Right = next;
+            //    var next = _firstNode.Right;
+            //    _firstNode.Right = msg;
+            //    msg.Left = _firstNode;
+            //    msg.Right = next;
 
-                if (next != null)
-                    next.Left = msg;
-            }
+            //    if (next != null)
+            //        next.Left = msg;
+            //}
         }
 
         public void ProcessWorldText(bool doit)
