@@ -281,7 +281,6 @@ namespace ClassicUO.Game.GameObjects
                         switch (this)
                         {
                             case Item _:
-                                offY = -22;
 
                                 if (Texture is ArtTexture t)
                                     y -= t.ImageRectangle.Height >> 1;
