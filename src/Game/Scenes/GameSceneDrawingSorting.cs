@@ -428,14 +428,35 @@ namespace ClassicUO.Game.Scenes
                     Rectangle r = mob.Texture.Bounds;
                     //this is a raw optimization, since every object is at least 44*44, we consider the minimum 4096 (optimized to avoid division and use bit shift operands)
                     //so we can calculate an approximated area occupied by the animation in tiles, and use an area of 2 for priority drawing at minimum
-                    area = Math.Max(4096, r.Width * r.Height) >> 11;
-                    if (area > 3)
-                        area = 3;
-                    if (area >= 2)
-                    {
-                        if (dir % 2 != 0)
-                            area--;
-                    }
+                    
+                    //area = Math.Max(4096, r.Width * r.Height) >> 11;
+                    //area >>= 2;
+
+                    //if (area > 5)
+                    //    area = 5;
+                    //else if (area < 2)
+                    //    area = 2;
+
+                    
+                    area = Math.Max(r.Width, r.Height);
+
+                    if (area < 32)
+                        area = 44;
+
+                    area >>= 5;
+
+                    if (area > 2)
+                        area >>= 1;
+                    else if (area < 1)
+                        area = 1;
+
+                    //if (area > 3)
+                    //    area = 3;
+                    //if (area >= 2)
+                    //{
+                    //    if (dir % 2 != 0)
+                    //        area--;
+                    //}
                 }
                 else
                     area = 0;
