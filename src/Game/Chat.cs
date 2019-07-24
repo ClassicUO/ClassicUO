@@ -107,7 +107,7 @@ namespace ClassicUO.Game
                     //server hue color per default
                     if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue(text, out SpellDefinition spell))
                     {
-                        if (Engine.Profile.Current.EnabledSpellFormat && !string.IsNullOrWhiteSpace(Engine.Profile.Current.SpellDisplayFormat))
+                        if (Engine.Profile.Current != null && Engine.Profile.Current.EnabledSpellFormat && !string.IsNullOrWhiteSpace(Engine.Profile.Current.SpellDisplayFormat))
                         {
                             StringBuilder sb = new StringBuilder(Engine.Profile.Current.SpellDisplayFormat);
                             sb.Replace("{power}", spell.PowerWords);
@@ -196,7 +196,12 @@ namespace ClassicUO.Game
                     break;
 
                 case MessageType.Emote:
-                    parent?.AddOverhead(type, $"*{text}*", font, hue, unicode);
+                    if (parent == null)
+                        break;
+
+                    msg = CreateMessage($"*{text}*", hue, font, unicode, type);
+
+                    parent.AddMessage(msg);
 
                     break;
 
@@ -211,7 +216,12 @@ namespace ClassicUO.Game
                     break;
 
                 default:
-                    parent?.AddOverhead(type, text, font, hue, unicode);
+                    if (parent == null)
+                        break;
+
+                    msg = CreateMessage(text, hue, font, unicode, type);
+
+                    parent.AddMessage(msg);
 
                     break;
             }

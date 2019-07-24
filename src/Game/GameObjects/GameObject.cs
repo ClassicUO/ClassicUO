@@ -210,9 +210,9 @@ namespace ClassicUO.Game.GameObjects
             return Position.DistanceTo(entity.Position);
         }
 
-        public void AddOverhead(MessageType type, string message)
+        public void AddMessage(MessageType type, string message)
         {
-            AddOverhead(type, message, Engine.Profile.Current.ChatFont, Engine.Profile.Current.SpeechHue, true);
+            AddMessage(type, message, Engine.Profile.Current.ChatFont, Engine.Profile.Current.SpeechHue, true);
         }
 
         public void UpdateTextCoords()
@@ -235,7 +235,10 @@ namespace ClassicUO.Game.GameObjects
             int alwaysHP = Engine.Profile.Current.MobileHPShowWhen;
             int mode = Engine.Profile.Current.MobileHPType;
 
-
+            int startX = Engine.Profile.Current.GameWindowPosition.X;
+            int startY = Engine.Profile.Current.GameWindowPosition.Y;
+            var scene = Engine.SceneManager.GetScene<GameScene>();
+            float scale = scene?.Scale ?? 1;
 
             for (; last != null; last = last.ListLeft)
             {
@@ -275,6 +278,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         x = last.X;
                         y = last.Y;
+                        scale = 1;
                     }
                     else if (Texture != null)
                     {
@@ -315,8 +319,8 @@ namespace ClassicUO.Game.GameObjects
                     TextContainer.TotalHeight += last.RenderedText.Height;
                     offY += last.RenderedText.Height;
 
-                    last.RealScreenPosition.X = x - (last.RenderedText.Width >> 1);
-                    last.RealScreenPosition.Y = y - offY;
+                    last.RealScreenPosition.X = startX + (int) ((x - (last.RenderedText.Width >> 1)) / scale);
+                    last.RealScreenPosition.Y = startY + (int) ((y - offY) / scale);
                 }
             }
 
@@ -360,24 +364,13 @@ namespace ClassicUO.Game.GameObjects
 
         }
 
-        public void AddOverhead(MessageType type, string text, byte font, Hue hue, bool isunicode)
+        public void AddMessage(MessageType type, string text, byte font, Hue hue, bool isunicode)
         {
             if (string.IsNullOrEmpty(text))
                 return;
 
-            if (TextContainer == null)
-                TextContainer = new TextContainer();
-
             var msg = CreateMessage(text, hue, font, isunicode, type);
-            msg.Owner = this;
-            TextContainer.Add(msg);
-
-            if (this is Item it && it.Container.IsValid)
-            {
-                UpdateTextCoords();
-            }
-            else
-                World.WorldTextManager.AddMessage(msg);
+            AddMessage(msg);
         }
 
         public void AddMessage(MessageInfo msg)
@@ -393,7 +386,10 @@ namespace ClassicUO.Game.GameObjects
                 UpdateTextCoords();
             }
             else
+            {
+                IsPositionChanged = true;
                 World.WorldTextManager.AddMessage(msg);
+            }
         }
         private static MessageInfo CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type)
         {

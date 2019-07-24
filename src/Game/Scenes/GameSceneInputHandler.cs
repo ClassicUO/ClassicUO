@@ -33,6 +33,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Network;
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -464,11 +465,11 @@ namespace ClassicUO.Game.Scenes
                         string name = st.Name;
                         if (string.IsNullOrEmpty(name))
                             name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
-                        obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+                        obj.AddMessage(MessageType.Label, name, 3, 0, false);
+
 
                         if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
                             obj.TextContainer.MaxSize = 1;
-
                         break;
 
                     case Multi multi:
@@ -476,7 +477,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (string.IsNullOrEmpty(name))
                             name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
-                        obj.AddOverhead(MessageType.Label, name, 3, 0, false);
+                        obj.AddMessage(MessageType.Label, name, 3, 0, false);
 
                         if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
                             obj.TextContainer.MaxSize = 1;
@@ -486,7 +487,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (Keyboard.Alt)
                         {
-                            World.Player.AddOverhead(MessageType.Regular, "Now following.", 3, 0, false);
+                            World.Player.AddMessage(MessageType.Regular, "Now following.", 3, 0, false);
                             _followingMode = true;
                             _followingTarget = ent;
                         }
@@ -569,7 +570,7 @@ namespace ClassicUO.Game.Scenes
                 _followingMode = false;
                 _followingTarget = Serial.INVALID;
                 Pathfinder.StopAutoWalk();
-                World.Player.AddOverhead(MessageType.Regular, "Stopped following.", 3, 0, false);
+                World.Player.AddMessage(MessageType.Regular, "Stopped following.", 3, 0, false);
             }
         }
 
@@ -598,7 +599,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (SelectedObject.Object is GameObject obj && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                     {
-                        World.Player.AddOverhead(MessageType.Label, "Pathfinding!", 3, 0, false);
+                        World.Player.AddMessage(MessageType.Label, "Pathfinding!", 3, 0, false);
 
                         return true;
                     }

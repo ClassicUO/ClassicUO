@@ -80,10 +80,6 @@ namespace ClassicUO.Game.Managers
             int mouseX = Mouse.Position.X;
             int mouseY = Mouse.Position.Y;
 
-            GameScene scene = Engine.SceneManager.GetScene<GameScene>();
-
-            float scale = scene?.Scale ?? 1;
-
 
             for (var o = _drawPointer; o != null; o = o.Left)
             {
@@ -110,7 +106,7 @@ namespace ClassicUO.Game.Managers
                     hue = 0x35;
                 }
 
-                o.RenderedText.Draw(batcher, (int) ( (startX + o.RealScreenPosition.X) / scale), (int) ((startY +  o.RealScreenPosition.Y) / scale), alpha, hue);
+                o.RenderedText.Draw(batcher, startX + o.RealScreenPosition.X, startY + o.RealScreenPosition.Y, alpha, hue);
             }
         }
 
@@ -277,91 +273,10 @@ namespace ClassicUO.Game.Managers
 
 
 
-        private void DrawTextOverheads(UltimaBatcher2D batcher, int startX, int startY, float scale, int renderIndex)
-        {
-
-            int screenX = Engine.Profile.Current.GameWindowPosition.X;
-            int screenY = Engine.Profile.Current.GameWindowPosition.Y;
-            int screenW = Engine.Profile.Current.GameWindowSize.X;
-            int screenH = Engine.Profile.Current.GameWindowSize.Y;
-            
-            
-            int mouseX = Mouse.Position.X;
-            int mouseY = Mouse.Position.Y;
-
-            for (var o = _drawPointer; o != null; o = o.Left)
-            {
-                if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < Engine.Ticks /*|| o.Parent.Parent.Tile == null*/)
-                    continue;
-
-                var parent = o.Owner;
-
-                int x = startX + o.RealScreenPosition.X;
-                int y = startY + o.RealScreenPosition.Y;
-
-
-                x = (int)(x / scale);
-                y = (int)(y / scale);
-
-                x -= (int)(screenX / scale);
-                y -= (int)(screenY / scale);
-
-                x += screenX;
-                y += screenY;
-
-
-
-                int minX = screenX + 6;
-                int maxX = screenX + screenW - 3;
-
-                if (x < minX)
-                    x = minX;
-                else if (x > maxX)
-                    x = maxX;
-
-
-                int minY = screenY + parent.TextContainer.TotalHeight;
-                int maxY = screenY + screenH + 6;
-
-                if (y < minY)
-                    y = minY;
-                else if (y > maxY)
-                    y = maxY;
-
-                ushort hue = 0;
-
-                float alpha = 1f - o.Alpha / 255f;
-
-                if (o.IsTransparent)
-                {
-                    if (o.Alpha == 0xFF)
-                        alpha = 1f - 0x7F / 255f;
-                }
-
-                if (o.RenderedText.Texture.Contains(mouseX - x, mouseY - y))
-                {
-                    SelectedObject.Object = o;
-                }
-
-                if (SelectedObject.LastObject == o)
-                {
-                    hue = 0x35;
-                }
-
-
-                o.RenderedText.Draw(batcher, x, y, alpha, hue);
-            }
-        }
-
-      
 
         public override void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex)
         {
-            //ProcessWorldText(false);
-
             float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
-
-            //DrawTextOverheads(batcher, startX, startY, 1, renderIndex);
 
             base.Draw(batcher, 0, 0, renderIndex);
 

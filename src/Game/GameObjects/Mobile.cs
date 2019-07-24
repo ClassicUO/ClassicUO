@@ -841,7 +841,7 @@ namespace ClassicUO.Game.GameObjects
                             if (Z - step.Z >= 22)
                             {
                                 // oUCH!!!!
-                                AddOverhead(MessageType.Label, "Ouch!");
+                                AddMessage(MessageType.Label, "Ouch!");
                             }
 
 #if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
