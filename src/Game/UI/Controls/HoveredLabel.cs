@@ -30,11 +30,12 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class HoveredLabel : Label
     {
-        private readonly ushort _overHue;
+        private readonly ushort _overHue, _normalHue;
 
         public HoveredLabel(string text, bool isunicode, ushort hue, ushort overHue, int maxwidth = 0, byte font = 255, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : base(text, isunicode, hue, maxwidth, font, style, align)
         {
             _overHue = overHue;
+            _normalHue = hue;
             AcceptMouseInput = true;
         }
         public bool DrawBackgroundCurrentIndex { get; set; }
@@ -46,8 +47,8 @@ namespace ClassicUO.Game.UI.Controls
                 if (Hue != _overHue)
                     Hue = _overHue;
             }
-            else if (Hue != 0)
-                    Hue = 0;
+            else if (Hue != _normalHue)
+                    Hue = _normalHue;
             
 
             base.Update(totalMS, frameMS);
