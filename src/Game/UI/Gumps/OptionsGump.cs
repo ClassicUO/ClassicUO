@@ -95,6 +95,11 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _restorezoomCheckbox, _savezoomCheckbox, _zoomCheckbox;
         private TextBox _rows, _columns, _highlightAmount;
 
+        // infobar
+        private List<InfoBarBuilderControl> _infoBarBuilderControls;
+        private Checkbox _showInfoBar;
+        private Combobox _infoBarHighlightType;
+
         // speech
         private Checkbox _scaleSpeechDelay, _saveJournalCheckBox;
         private Combobox _shardType, _auraType;
@@ -154,6 +159,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new NiceButton(10, 10 + 30 * 7, 140, 25, ButtonAction.SwitchPage, "Counters") {ButtonParameter = 9});
             Add(new NiceButton(10, 10 + 30 * 8, 140, 25, ButtonAction.SwitchPage, "Experimental") {ButtonParameter = 10});
             Add(new NiceButton(10, 10 + 30 * 9, 140, 25, ButtonAction.SwitchPage, "Network") {ButtonParameter = 11});
+            Add(new NiceButton(10, 10 + 30 * 10, 140, 25, ButtonAction.SwitchPage, "Info Bar") { ButtonParameter = 12 });
 
 
             Add(new Line(160, 5, 1, HEIGHT - 10, Color.Gray.PackedValue));
@@ -197,6 +203,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildCounters();
             BuildExperimental();
             BuildNetwork();
+            BuildInfoBar();
 
             ChangePage(1);
         }
@@ -622,6 +629,62 @@ namespace ClassicUO.Game.UI.Gumps
             _xBR = CreateCheckBox(rightArea, "Use xBR effect [BETA]", Engine.Profile.Current.UseXBR, 0, 0);
 
             Add(rightArea, PAGE);
+        }
+
+        private void BuildInfoBar()
+        {
+            const int PAGE = 12;
+
+            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
+
+            _showInfoBar = CreateCheckBox(rightArea, "Show Info Bar", Engine.Profile.Current.ShowInfoBar, 0, 0);
+
+
+            ScrollAreaItem _infoBarHighlightScrollArea = new ScrollAreaItem();
+
+            _infoBarHighlightScrollArea.Add(new Label("Data highlight type:", true, 999));
+            _infoBarHighlightType = new Combobox(130, 0, 150, new[] { "Text color", "Colored bars" }, Engine.Profile.Current.InfoBarHighlightType);
+            _infoBarHighlightScrollArea.Add(_infoBarHighlightType);
+
+            rightArea.Add(_infoBarHighlightScrollArea);
+
+
+            NiceButton nb = new NiceButton(0, 10, 90, 20, ButtonAction.Activate, "+ Add item", 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT) { ButtonParameter = 999 };
+            nb.MouseUp += (sender, e) =>
+            {
+                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(new InfoBarItem("", InfoBarVars.HP, 0x3B9));
+                _infoBarBuilderControls.Add(ibbc);
+                rightArea.Add(ibbc);
+            };
+            rightArea.Add(nb);
+
+
+            ScrollAreaItem _infobarBuilderLabels = new ScrollAreaItem();
+
+            _infobarBuilderLabels.Add(new Label("Label", true, 999) { Y = 15 } );
+            _infobarBuilderLabels.Add(new Label("Color", true, 999) { X = 150, Y = 15 });
+            _infobarBuilderLabels.Add(new Label("Data", true, 999) { X = 200, Y = 15 });
+
+            rightArea.Add(_infobarBuilderLabels);
+            rightArea.Add(new Line(0, 0, rightArea.Width, 1, Color.Gray.PackedValue));
+            rightArea.Add(new Line(0, 0, rightArea.Width, 5, Color.Black.PackedValue));
+
+
+            InfoBarManager ibmanager = Engine.SceneManager.GetScene<GameScene>().InfoBars;
+
+            List<InfoBarItem> _infoBarItems = ibmanager.GetInfoBars();
+
+            _infoBarBuilderControls = new List<InfoBarBuilderControl>();
+
+            for (int i = 0; i < _infoBarItems.Count; i++)
+            {
+                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(_infoBarItems[i]);
+                _infoBarBuilderControls.Add(ibbc);
+                rightArea.Add(ibbc);
+            }
+
+            Add(rightArea, PAGE);
+
         }
 
         private void BuildCommands()
@@ -1363,6 +1426,10 @@ namespace ClassicUO.Game.UI.Gumps
                     _showNetStats.IsChecked = false;
 
                     break;
+
+                case 12:
+
+                    break;
             }
         }
 
@@ -1737,6 +1804,49 @@ namespace ClassicUO.Game.UI.Gumps
             // network
             Engine.Profile.Current.ShowNetworkStats = _showNetStats.IsChecked;
 
+            // infobar
+            Engine.Profile.Current.ShowInfoBar = _showInfoBar.IsChecked;
+            Engine.Profile.Current.InfoBarHighlightType = _infoBarHighlightType.SelectedIndex;
+
+
+            InfoBarManager ibmanager = Engine.SceneManager.GetScene<GameScene>().InfoBars;
+            ibmanager.Clear();
+
+            for (int i = 0; i < _infoBarBuilderControls.Count; i++)
+            {
+                if (!_infoBarBuilderControls[i].IsDisposed)
+                    ibmanager.AddItem(new InfoBarItem(_infoBarBuilderControls[i].LabelText, _infoBarBuilderControls[i].Var, _infoBarBuilderControls[i].Hue));
+            }
+
+            Engine.Profile.Current.InfoBarItems = ibmanager.GetInfoBars().ToArray();
+
+
+            InfoBarGump infoBarGump = Engine.UI.GetGump<InfoBarGump>();
+
+            if (Engine.Profile.Current.ShowInfoBar)
+            {
+                if (infoBarGump == null)
+                {
+                    Engine.UI.Add(new InfoBarGump() { X = 300, Y = 300 });
+                }
+                else
+                {
+                    infoBarGump.ResetItems();
+                    infoBarGump.SetInScreen();
+                }
+            }
+            else
+            {
+                if (infoBarGump != null)
+                {
+                    infoBarGump.Dispose();
+                }
+            }
+
+
+            
+
+
 
             Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
         }
@@ -1854,46 +1964,6 @@ namespace ClassicUO.Game.UI.Gumps
             DeleteMacro,
 
             Last = DeleteMacro
-        }
-
-        private class ClickableColorBox : ColorBox
-        {
-            private const int CELL = 12;
-
-            private readonly SpriteTexture _background;
-
-            public ClickableColorBox(int x, int y, int w, int h, ushort hue, uint color) : base(w, h, hue, color)
-            {
-                X = x + 3;
-                Y = y + 3;
-                WantUpdateSize = false;
-
-                _background = FileManager.Gumps.GetTexture(0x00D4);
-            }
-
-            public override void Update(double totalMS, double frameMS)
-            {
-                _background.Ticks = (long) totalMS;
-
-                base.Update(totalMS, frameMS);
-            }
-
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-            {
-                ResetHueVector();
-                batcher.Draw2D(_background, x - 3, y - 3, ref _hueVector);
-
-                return base.Draw(batcher, x, y);
-            }
-
-            protected override void OnMouseUp(int x, int y, MouseButton button)
-            {
-                if (button == MouseButton.Left)
-                {
-                    ColorPickerGump pickerGump = new ColorPickerGump(0, 0, 100, 100, s => SetColor(s, FileManager.Hues.GetPolygoneColor(CELL, s)));
-                    Engine.UI.Add(pickerGump);
-                }
-            }
         }
 
         private class FontSelector : Control

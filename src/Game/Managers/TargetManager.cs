@@ -170,8 +170,8 @@ namespace ClassicUO.Game.Managers
 
             if (selectedEntity is GameEffect effect && effect.Source != null)
                 selectedEntity = effect.Source;
-            else if (selectedEntity is MessageInfo overhead && overhead.Parent.Parent != null)
-                selectedEntity = overhead.Parent.Parent;
+            else if (selectedEntity is MessageInfo overhead && overhead.Owner != null)
+                selectedEntity = overhead.Owner;
 
             if (TargetingState == CursorTarget.SetGrabBag)
             {
@@ -239,7 +239,7 @@ namespace ClassicUO.Game.Managers
 
                 Mouse.CancelDoubleClick = true;
             }
-            else if (selectedEntity is GameObject gobj)
+            else if (TargeringType == TargetType.Neutral && selectedEntity is GameObject gobj)
             {
                 Graphic modelNumber = 0;
                 short z = gobj.Z;

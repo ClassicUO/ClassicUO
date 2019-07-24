@@ -32,12 +32,8 @@ namespace ClassicUO.Network
     {
         private readonly Stopwatch _pingStopwatch = new Stopwatch();
 
-        private readonly RenderedText _renderedText = new RenderedText
-        {
-            Font = 0xFF,
-            FontStyle = FontStyle.BlackBorder,
-            IsUnicode = true
-        };
+        private readonly RenderedText _renderedText = RenderedText.Create(String.Empty, style: FontStyle.BlackBorder);
+
         private uint _currentTotalBytesSended, _currentTotalByteReceived, _currentTotalPacketsSended, _currentTotalPacketsReceived;
         private uint _lastTotalBytesSended, _lastTotalByteReceived, _lastTotalPacketsSended, _lastTotalPacketsReceived;
 

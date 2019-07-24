@@ -59,17 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Hue hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (Hue) 0x0481;
 
-            _renderedText = new RenderedText
-            {
-                IsUnicode = true,
-                Font = 0xFF,
-                Hue = hue,
-                MaxWidth = 100,
-                FontStyle = FontStyle.BlackBorder | FontStyle.Cropped,
-                Align = TEXT_ALIGN_TYPE.TS_CENTER,
-                IsHTML = true
-            };
-
+            _renderedText = RenderedText.Create(String.Empty, hue, 0xFF, true, FontStyle.BlackBorder | FontStyle.Cropped, TEXT_ALIGN_TYPE.TS_CENTER, 100, 30, true);
 
             Add(_background = new AlphaBlendControl(.3f)
             {

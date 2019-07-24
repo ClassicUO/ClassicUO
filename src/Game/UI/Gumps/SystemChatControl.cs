@@ -648,15 +648,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public ChatLineTime(string text, byte font, bool isunicode, Hue hue)
             {
-                _renderedText = new RenderedText
-                {
-                    IsUnicode = isunicode,
-                    Font = font,
-                    MaxWidth = 320,
-                    FontStyle = FontStyle.BlackBorder,
-                    Hue = hue,
-                    Text = text
-                };
+                _renderedText = RenderedText.Create(text, hue, font, isunicode, FontStyle.BlackBorder, maxWidth: 320);
                 _createdTime = Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT;
             }
 

@@ -55,7 +55,10 @@ namespace ClassicUO.Game.Scenes
                     Engine.SetPreferredBackBufferSize(Engine.Profile.Current.WindowClientBounds.X, Engine.Profile.Current.WindowClientBounds.Y);
 
                     if (!Engine.Profile.Current.RestoreLastGameSize)
-                        Engine.IsMaximized = true;
+                    {
+                        if (!Bootstrap.StartInLittleWindow)
+                            Engine.IsMaximized = true;
+                    }
                     else
                     {
                         Engine.WindowWidth = Engine.Profile.Current.WindowClientBounds.X;

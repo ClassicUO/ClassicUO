@@ -756,6 +756,41 @@ namespace ClassicUO.Game.GameObjects
             return item;
         }
 
+        public Item FindItemByGraphic(ushort graphic)
+        {
+            Item backpack = Equipment[(int)Layer.Backpack];
+
+            if (backpack != null)
+            {
+                return FindItemInContainerRecursive(backpack, graphic);
+            }
+
+            return null;
+        }
+
+        private Item FindItemInContainerRecursive(Item container, ushort graphic)
+        {
+            Item found = null;
+            if (container != null)
+            {
+                foreach (var item in container.Items)
+                {
+                    if (item.Graphic == graphic)
+                        return item;
+
+                    if (item.Items.Count != 0)
+                    {
+                        found = FindItemInContainerRecursive(item, graphic);
+
+                        if (found != null && found.Graphic == graphic)
+                            return found;
+                    }
+                }
+            }
+
+            return found;
+        }
+
         public void AddBuff(Graphic graphic, uint time, string text)
         {
             _buffIcons[graphic] = new BuffIcon(graphic, time, text);

@@ -111,7 +111,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     batcher.EnableScissorTest(true);
 
-                    TxEntry.RenderText.Draw(batcher, x + TxEntry.Offset, y);
+                    TxEntry.RenderText.Draw(batcher, x + TxEntry.Offset, y, 0, TxEntry.Hue);
 
                     if (IsEditable)
                     {
@@ -125,7 +125,7 @@ namespace ClassicUO.Game.UI.Controls
             }
             else
             {
-                TxEntry.RenderText.Draw(batcher, x + TxEntry.Offset, y);
+                TxEntry.RenderText.Draw(batcher, x + TxEntry.Offset, y, 0, TxEntry.Hue);
 
                 if (IsEditable)
                 {

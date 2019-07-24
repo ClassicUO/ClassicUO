@@ -165,11 +165,6 @@ namespace ClassicUO.Game.GameObjects
             if (d.HasFlag(Delta.Properties)) PropertiesChanged.Raise(this);
         }
 
-        protected override void InitializeTextContainer()
-        {
-            if (EntityTextContainerContainer == null)
-                EntityTextContainerContainer = new EntityTextContainer(this, 5);
-        }
 
         public override void Update(double totalMS, double frameMS)
         {

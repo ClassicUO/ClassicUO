@@ -27,6 +27,9 @@ using System.Runtime.CompilerServices;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Interfaces;
+using ClassicUO.IO;
+using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
 
@@ -36,7 +39,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal abstract class BaseGameObject
     {
-        //bool IsSelected { get; set; }
     }
 
 
@@ -49,9 +51,10 @@ namespace ClassicUO.Game.GameObjects
         public Vector3 Offset;
         public Point RealScreenPosition;
 
-        public EntityTextContainer EntityTextContainerContainer { get; protected set; }
 
         public bool IsPositionChanged { get; protected set; }
+
+        public TextContainer TextContainer { get; private set; }
 
         public Position Position
         {
@@ -100,27 +103,6 @@ namespace ClassicUO.Game.GameObjects
 
         public short PriorityZ { get; set; }
 
-
-        //public Tile Tile
-        //{
-        //    get => _tile;
-        //    set
-        //    {
-        //        if (_tile != value)
-        //        {
-        //            _tile?.RemoveGameObject(this);
-        //            _tile = value;
-
-        //            if (_tile != null)
-        //                _tile.AddGameObject(this);
-        //            else
-        //            {
-        //                if (this != World.Player && !IsDisposed) Dispose();
-        //            }
-        //        }
-        //    }
-        //}
-
         public bool IsDestroyed { get; protected set; }
 
         public int Distance
@@ -156,13 +138,11 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public Tile Tile { get; private set; }
-
         public GameObject Left { get; set; }
         public GameObject Right { get; set; }
 
         public virtual void Update(double totalMS, double frameMS)
         {
-            EntityTextContainerContainer?.Update();
         }
 
         [MethodImpl(256)]
@@ -219,10 +199,10 @@ namespace ClassicUO.Game.GameObjects
         }
 
         [MethodImpl(256)]
-        public void UpdateRealScreenPosition(ref Point offset)
+        public void UpdateRealScreenPosition(int offsetX, int offsetY)
         {
-            RealScreenPosition.X = _screenPosition.X - offset.X - 22;
-            RealScreenPosition.Y = _screenPosition.Y - offset.Y - 22;
+            RealScreenPosition.X = _screenPosition.X - offsetX - 22;
+            RealScreenPosition.Y = _screenPosition.Y - offsetY - 22;
             IsPositionChanged = false;
         }
 
@@ -236,21 +216,99 @@ namespace ClassicUO.Game.GameObjects
             AddOverhead(type, message, Engine.Profile.Current.ChatFont, Engine.Profile.Current.SpeechHue, true);
         }
 
-        public void AddOverhead(MessageType type, string text, byte font, Hue hue, bool isunicode, float timeToLive = 0.0f)
+        public void UpdateTextCoords()
+        {
+            if (TextContainer == null)
+                return;
+
+            var last = TextContainer.Items;
+
+            while (last?.ListRight != null)
+                last = last.ListRight;
+
+            TextContainer.TotalHeight = 0;
+            if (last == null)
+                return;
+
+            int offY = 0;
+
+            for (; last != null; last = last.ListLeft)
+            {
+                if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
+                {
+                    last.OffsetY = offY;
+                    TextContainer.TotalHeight += last.RenderedText.Height;
+                    offY += last.RenderedText.Height;
+                }
+            }
+        }
+
+        public void AddOverhead(MessageType type, string text, byte font, Hue hue, bool isunicode)
         {
             if (string.IsNullOrEmpty(text))
                 return;
 
-            InitializeTextContainer();
+            if (TextContainer == null)
+                TextContainer = new TextContainer();
 
-            if (EntityTextContainerContainer != null)
-                World.WorldTextManager.AddMessage(EntityTextContainerContainer.AddMessage(text, hue, font, isunicode, type));
+            var msg = CreateMessage(text, hue, font, isunicode, type);
+            msg.Owner = this;
+            TextContainer.Add(msg);
+            World.WorldTextManager.AddMessage(msg);
         }
 
-        protected virtual void InitializeTextContainer()
+        private static MessageInfo CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type)
         {
+            if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
+            {
+                font = Engine.Profile.Current.ChatFont;
+                isunicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
+            }
 
+            int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, msg) : FileManager.Fonts.GetWidthASCII(font, msg);
+
+            if (width > 200)
+                width = isunicode ? FileManager.Fonts.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder) : FileManager.Fonts.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder);
+            else
+                width = 0;
+
+            RenderedText rtext = RenderedText.Create(msg, hue, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, width, 30, false, false, true);
+
+            return new MessageInfo
+            {
+                Alpha = 255,
+                RenderedText = rtext,
+                Time = CalculateTimeToLive(rtext),
+                Type = type,
+                Hue = hue,
+            }; 
         }
+
+        private static long CalculateTimeToLive(RenderedText rtext)
+        {
+            long timeToLive;
+
+            if (Engine.Profile.Current.ScaleSpeechDelay)
+            {
+                int delay = Engine.Profile.Current.SpeechDelay;
+
+                if (delay < 10)
+                    delay = 10;
+
+                timeToLive = (long)(4000 * rtext.LinesCount * delay / 100.0f);
+            }
+            else
+            {
+                long delay = (5497558140000 * Engine.Profile.Current.SpeechDelay) >> 32 >> 5;
+
+                timeToLive = (delay >> 31) + delay;
+            }
+
+            timeToLive += Engine.Ticks;
+
+            return timeToLive;
+        }
+
 
         protected virtual void OnPositionChanged()
         {
@@ -268,8 +326,7 @@ namespace ClassicUO.Game.GameObjects
             Tile?.RemoveGameObject(this);
             Tile = null;
 
-            EntityTextContainerContainer?.Destroy();
-            EntityTextContainerContainer = null;
+            TextContainer?.Clear();
 
             IsDestroyed = true;
             PriorityZ = 0;
@@ -289,8 +346,7 @@ namespace ClassicUO.Game.GameObjects
             Bounds = Rectangle.Empty;
             FrameInfo = Rectangle.Empty;
             DrawTransparent = false;
-           
-
+            
             Texture = null;
         }
     }

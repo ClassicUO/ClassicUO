@@ -70,6 +70,7 @@ namespace ClassicUO.Game.GameObjects
                 m._isFoliage = m.ItemData.IsFoliage;
                 m.AllowedToDraw = !GameObjectHelper.IsNoDrawable(m.Graphic);
                 m.AlphaHue = 0;
+                m.IsFromTarget = false;
 
                 if (m.ItemData.Height > 5)
                     m._canBeTransparent = 1;
@@ -110,12 +111,6 @@ namespace ClassicUO.Game.GameObjects
         public override void UpdateGraphicBySeason()
         {
             Graphic = Season.GetSeasonGraphic(World.Season, _originalGraphic);
-        }
-
-        protected override void InitializeTextContainer()
-        {
-            if (EntityTextContainerContainer == null)
-                EntityTextContainerContainer = new EntityTextContainer(this, 1);
         }
 
         public override void Destroy()

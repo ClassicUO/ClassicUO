@@ -1818,16 +1818,16 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public void EnableScissorTest(bool enable)
+        public bool EnableScissorTest(bool enable)
         {
             if (enable == _useScissor)
-                return;
+                return false;
 
             Flush();
 
-            //_rasterizerState?.Dispose();
-
             _useScissor = enable;
+
+            return true;
         }
 
         [MethodImpl(256)]

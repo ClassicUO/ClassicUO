@@ -183,14 +183,13 @@ namespace ClassicUO.Game.Scenes
                     continue;
 
                 if (UpdateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
-                    obj.UpdateRealScreenPosition(ref _offset);
+                    obj.UpdateRealScreenPosition(_offset.X, _offset.Y);
 
                 obj.UseInRender = 0xFF;
 
                 int drawX = obj.RealScreenPosition.X;
                 int drawY = obj.RealScreenPosition.Y;
 
- 
                 if (drawX < _minPixel.X || drawX > _maxPixel.X)
                     break;
 
@@ -224,7 +223,6 @@ namespace ClassicUO.Game.Scenes
 
                         if (GameObjectHelper.TryGetStaticData(obj, out itemData))
                         {
-
                             if (itemData.IsFoliage && World.Season >= Seasons.Winter)
                             {
                                 continue;
@@ -248,7 +246,6 @@ namespace ClassicUO.Game.Scenes
                                 else
                                     changinAlpha = obj.AlphaHue != 0;
 
-
                                 if (!changinAlpha)
                                     continue;
                             }
@@ -269,7 +266,8 @@ namespace ClassicUO.Game.Scenes
                                             iscorpse ||
                                             obj is Item it && (!it.IsLocked || it.IsLocked && itemData.IsContainer) && !it.IsMulti) &&
                                            !obj.ClosedObjectHandles && _objectHandlesCount <= 400;
-                    _objectHandlesCount++;
+                    if (obj.UseObjectHandles)
+                        _objectHandlesCount++;
                 }
                 else if (obj.ClosedObjectHandles)
                 {
@@ -377,18 +375,16 @@ namespace ClassicUO.Game.Scenes
                         obj.ProcessAlpha(0xFF);
                 }
 
+                obj.UpdateTextCoords();
+
                 if (_renderListCount >= _renderList.Length)
                 {
                     int newsize = _renderList.Length + 1000;
                     Array.Resize(ref _renderList, newsize);
                 }
 
-
-               
-
-                _renderList[_renderListCount] = obj;
+                _renderList[_renderListCount++] = obj;
                 obj.UseInRender = (byte) _renderIndex;
-                _renderListCount++;
             }
         }
 
@@ -566,6 +562,9 @@ namespace ClassicUO.Game.Scenes
                 height = MAX;
 
             int size = Math.Max(width, height);
+
+            if (size < World.ClientViewRange)
+                size = World.ClientViewRange;
 
             int realMinRangeX = World.Player.X - size;
 

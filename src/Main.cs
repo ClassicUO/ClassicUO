@@ -21,10 +21,32 @@ namespace ClassicUO
 
             if (CheckUpdate(args))
                 return;
+            ParseAdditionalArgs(args);
 
             Engine.Run(args);
         }
 
+        public static bool StartMinimized { get; set; }
+        public static bool StartInLittleWindow { get; set; }
+
+
+        private static void ParseAdditionalArgs(string[] args)
+        {
+            int count = args.Length - 1;
+
+            for (int i = 0; i <= count; i++)
+            {
+                switch (args[i])
+                {
+                    case "-minimized":
+                        StartMinimized = true;
+                        break;
+                    case "-littlewindow":
+                        StartInLittleWindow = true;
+                        break;
+                }
+            }
+        }
 
         private static bool CheckUpdate(string[] args)
         {

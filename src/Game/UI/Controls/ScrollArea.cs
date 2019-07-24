@@ -73,6 +73,7 @@ namespace ClassicUO.Game.UI.Controls
             CanMove = true;
         }
 
+
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
@@ -133,7 +134,9 @@ namespace ClassicUO.Game.UI.Controls
                         // do nothing
                     }
                     else if (height + child.Height <= maxheight)
+                    {
                         child.Draw(batcher, x + child.X, y + child.Y);
+                    }
                     else
                     {
                         if (drawOnly1)

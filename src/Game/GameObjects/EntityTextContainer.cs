@@ -30,237 +30,72 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal class EntityTextContainer
+
+    class TextContainer
     {
-        public Rectangle _rectangle;
-        private readonly Deque<MessageInfo> _messages = new Deque<MessageInfo>();
+        public MessageInfo Items;
 
+        public int Size, MaxSize = 5, TotalHeight;
 
-        public EntityTextContainer(GameObject parent, int maxSize)
+        public void Add(MessageInfo obj)
         {
-            Parent = parent;
-            MaxSize = maxSize;
-        }
-
-        public int MaxSize { get; }
-
-        public GameObject Parent { get; }
-        public bool IsDestroyed { get; private set; }
-
-        public EntityTextContainer Left, Right;
-
-        public bool IsEmpty => _messages.Count == 0;
-
-        private static long CalculateTimeToLive(RenderedText rtext)
-        {
-            long timeToLive;
-
-            if (Engine.Profile.Current.ScaleSpeechDelay)
+            if (obj != null)
             {
-                int delay = Engine.Profile.Current.SpeechDelay;
-
-                if (delay < 10)
-                    delay = 10;
-
-                timeToLive = (long) (4000 * rtext.LinesCount * delay / 100.0f);
-            }
-            else
-            {
-                long delay = (5497558140000 * Engine.Profile.Current.SpeechDelay) >> 32 >> 5;
-
-                timeToLive = (delay >> 31) + delay;
-            }
-
-            timeToLive += Engine.Ticks;
-
-            return timeToLive;
-        }
-
-        public MessageInfo AddMessage(string msg, Hue hue, byte font, bool isunicode, MessageType type)
-        {
-            if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
-            {
-                font = Engine.Profile.Current.ChatFont;
-                isunicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
-            }
-
-            //for (int i = 0; i < _messages.Count; i++)
-            //{
-            //    var a = _messages[i];
-
-            //    if (type == MessageType.Label && a.RenderedText != null && (ishealthmessage && a.IsHealthMessage || a.RenderedText.Text == msg) && a.Type == type)
-            //    {
-            //        if (a.RenderedText.Hue != hue || ishealthmessage)
-            //        {
-            //            a.Hue = hue;
-            //            a.RenderedText.Hue = hue;
-
-            //            if (ishealthmessage)
-            //            {
-            //                a.Time = CalculateTimeToLive(a.RenderedText);
-            //                a.RenderedText.Text = msg;
-            //            }
-            //            else
-            //                a.RenderedText.CreateTexture();
-            //        }
-                    
-            //        _messages.RemoveAt(i);
-
-            //        if (_messages.Count == 0 || _messages.Front().Type != MessageType.Label)
-            //            _messages.AddToFront(a);
-            //        else
-            //            _messages.Insert(1, a);
-
-            //        return null;
-            //    }
-            //}
-
-
-            int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, msg) : FileManager.Fonts.GetWidthASCII(font, msg);
-
-            if (width > 200)
-                width = isunicode ? FileManager.Fonts.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder) : FileManager.Fonts.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder);
-            else
-                width = 0;
-
-            RenderedText rtext = new RenderedText
-            {
-                Font = font,
-                MaxWidth = width,
-                Hue = hue,
-                IsUnicode = isunicode,
-                SaveHitMap = true,
-                FontStyle = FontStyle.BlackBorder,
-                Text = msg
-            };
-
-
-            var msgInfo = new MessageInfo
-            {
-                Alpha = 255,
-                RenderedText = rtext,
-                Time = CalculateTimeToLive(rtext),
-                Type = type,
-                Hue = hue,
-                Parent = this,
-            };
-
-            //int max = Parent is Static || Parent is Multi || Parent is AnimatedItemEffect ef && ef.Source is Static ? 0 : 4;
-
-            for (int i = 0, limit3 = 0; i < _messages.Count; i++)
-            {
-                if (i < MaxSize - 1)
+                if (Items == null)
+                    Items = obj;
+                else
                 {
-                    var c = _messages[i];
+                    var curr = Items;
 
-                    if (c.Type == MessageType.Limit3Spell)
+                    while (curr.ListRight != null)
                     {
-                        if (++limit3 > 3)
-                        {
-                            c.RenderedText.Destroy();
-                            _messages.RemoveAt(i--);
-
-                            if (c.Right != null)
-                                c.Right.Left = c.Left;
-
-                            if (c.Left != null)
-                                c.Left.Right = c.Right;
-
-                            c.Left = c.Right = null;
-                        }
+                        curr = curr.ListRight;
                     }
-                }
-                else
-                {
-                    var c = _messages[i];
-                    c.RenderedText.Destroy();
-                    _messages.RemoveAt(i--);
 
-                    if (c.Right != null)
-                        c.Right.Left = c.Left;
-
-                    if (c.Left != null)
-                        c.Left.Right = c.Right;
-
-                    c.Left = c.Right = null;
+                    curr.ListRight = obj;
+                    obj.ListLeft = curr;
                 }
             }
 
-
-            _messages.AddToFront(msgInfo);
-
-            //if (_messages.Count == 0 || _messages.Front().Type != MessageType.Label)
-            //    _messages.AddToFront(msgInfo);
-            //else
-            //    _messages.Insert(1, msgInfo);
-
-
-          
-            return msgInfo;
-        }
-
-      
-
-
-
-        public void Update()
-        {
-            if (Parent == null || Parent.IsDestroyed)
-                Destroy();
-
-            if (IsDestroyed)
-                return;
-
-            _rectangle.Width = 0;
-            _rectangle.Height = 0;
-
-            int offY = 0;
-            
-            for (int i = 0; i < _messages.Count; i++)
+            if (Size >= MaxSize)
             {
-                var obj1 = _messages[i];
-
-                long delta = obj1.Time - Engine.Ticks;
-                if (delta <= 0)
+                if (Items != null)
                 {
-                    obj1.RenderedText.Destroy();
+                    var items = Items;
 
-                    _messages.RemoveAt(i--);
+                    Items = Items.ListRight;
 
-                    if (obj1.Right != null)
-                        obj1.Right.Left = obj1.Left;
+                    if (Items != null)
+                        Items.ListLeft = null;
 
-                    if (obj1.Left != null)
-                        obj1.Left.Right = obj1.Right;
+                    items.ListRight = null;
+                    items.ListLeft = null;
+                    items.RenderedText?.Destroy();
 
-                    obj1.Left = obj1.Right = null;
+                    if (items.Right != null)
+                        items.Right.Left = items.Left;
+
+                    if (items.Left != null)
+                        items.Left.Right = items.Right;
+                    items.Left = null;
+                    items.Right = null;
                 }
-                else
-                {
-                    if (_rectangle.Width < obj1.RenderedText.Width)
-                        _rectangle.Width = obj1.RenderedText.Width;
-
-                    if (_rectangle.Height < obj1.RenderedText.Height)
-                        _rectangle.Height = obj1.RenderedText.Height;
-
-                    obj1.OffsetY = offY;
-                    offY += obj1.RenderedText.Height;
-                }
-                
             }
+            else
+                Size++;
         }
 
 
         public void Clear()
         {
-            foreach (var item in _messages)
-            {
-                item.RenderedText.Destroy();
+            var item = Items;
+            Items = null;
 
+            while (item != null)
+            {
                 if (item.Right != null)
                     item.Right.Left = item.Left;
 
@@ -268,21 +103,226 @@ namespace ClassicUO.Game.GameObjects
                     item.Left.Right = item.Right;
 
                 item.Left = item.Right = null;
+                
+                var next = item.ListRight;
+                item.ListRight = null;
+                item.RenderedText?.Destroy();
+                item = next;
             }
 
-            _messages.Clear();
-        }
-
-        public void Destroy()
-        {
-            if (IsDestroyed)
-                return;
-
-            IsDestroyed = true;
-
-            Clear();
+            Size = 0;
+            TotalHeight = 0;
         }
     }
+
+    //internal class EntityTextContainer
+    //{
+    //    public Rectangle _rectangle;
+    //    private readonly Deque<MessageInfo> _messages = new Deque<MessageInfo>();
+
+
+    //    public EntityTextContainer(GameObject parent, int maxSize)
+    //    {
+    //        Parent = parent;
+    //        MaxSize = maxSize;
+    //    }
+
+    //    public int MaxSize { get; }
+
+    //    public GameObject Parent { get; }
+    //    public bool IsDestroyed { get; private set; }
+
+
+    //    public bool IsEmpty => _messages.Count == 0;
+
+    //    private static long CalculateTimeToLive(RenderedText rtext)
+    //    {
+    //        long timeToLive;
+
+    //        if (Engine.Profile.Current.ScaleSpeechDelay)
+    //        {
+    //            int delay = Engine.Profile.Current.SpeechDelay;
+
+    //            if (delay < 10)
+    //                delay = 10;
+
+    //            timeToLive = (long) (4000 * rtext.LinesCount * delay / 100.0f);
+    //        }
+    //        else
+    //        {
+    //            long delay = (5497558140000 * Engine.Profile.Current.SpeechDelay) >> 32 >> 5;
+
+    //            timeToLive = (delay >> 31) + delay;
+    //        }
+
+    //        timeToLive += Engine.Ticks;
+
+    //        return timeToLive;
+    //    }
+
+    //    public MessageInfo AddMessage(string msg, Hue hue, byte font, bool isunicode, MessageType type)
+    //    {
+    //        if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
+    //        {
+    //            font = Engine.Profile.Current.ChatFont;
+    //            isunicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
+    //        }
+
+    //        int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, msg) : FileManager.Fonts.GetWidthASCII(font, msg);
+
+    //        if (width > 200)
+    //            width = isunicode ? FileManager.Fonts.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder) : FileManager.Fonts.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder);
+    //        else
+    //            width = 0;
+
+    //        RenderedText rtext = RenderedText.Create(msg, hue, font, isunicode, );
+    //        {
+    //            Font = font,
+    //            MaxWidth = width,
+    //            Hue = hue,
+    //            IsUnicode = isunicode,
+    //            SaveHitMap = true,
+    //            FontStyle = FontStyle.BlackBorder,
+    //            Text = msg
+    //        };
+
+            
+
+    //        var msgInfo = new MessageInfo
+    //        {
+    //            Alpha = 255,
+    //            RenderedText = rtext,
+    //            Time = CalculateTimeToLive(rtext),
+    //            Type = type,
+    //            Hue = hue,
+    //            //Parent = this,
+    //        };
+
+    //        for (int i = 0, limit3 = 0; i < _messages.Count; i++)
+    //        {
+    //            if (i < MaxSize - 1)
+    //            {
+    //                var c = _messages[i];
+
+    //                if (c.Type == MessageType.Limit3Spell)
+    //                {
+    //                    if (++limit3 > 3)
+    //                    {
+    //                        c.RenderedText.Destroy();
+    //                        _messages.RemoveAt(i--);
+
+    //                        if (c.Right != null)
+    //                            c.Right.Left = c.Left;
+
+    //                        if (c.Left != null)
+    //                            c.Left.Right = c.Right;
+
+    //                        c.Left = c.Right = null;
+    //                    }
+    //                }
+    //            }
+    //            else
+    //            {
+    //                var c = _messages[i];
+    //                c.RenderedText.Destroy();
+    //                _messages.RemoveAt(i--);
+
+    //                if (c.Right != null)
+    //                    c.Right.Left = c.Left;
+
+    //                if (c.Left != null)
+    //                    c.Left.Right = c.Right;
+
+    //                c.Left = c.Right = null;
+    //            }
+    //        }
+
+
+    //        _messages.AddToFront(msgInfo);
+
+    //        return msgInfo;
+    //    }
+
+      
+
+
+
+    //    public void Update()
+    //    {
+    //        if (Parent == null || Parent.IsDestroyed)
+    //            Destroy();
+
+    //        if (IsDestroyed)
+    //            return;
+
+    //        _rectangle.Width = 0;
+    //        _rectangle.Height = 0;
+
+    //        int offY = 0;
+            
+    //        for (int i = 0; i < _messages.Count; i++)
+    //        {
+    //            var obj1 = _messages[i];
+
+    //            long delta = obj1.Time - Engine.Ticks;
+    //            if (delta <= 0)
+    //            {
+    //                obj1.RenderedText.Destroy();
+
+    //                _messages.RemoveAt(i--);
+
+    //                if (obj1.Right != null)
+    //                    obj1.Right.Left = obj1.Left;
+
+    //                if (obj1.Left != null)
+    //                    obj1.Left.Right = obj1.Right;
+
+    //                obj1.Left = obj1.Right = null;
+    //            }
+    //            else
+    //            {
+    //                if (_rectangle.Width < obj1.RenderedText.Width)
+    //                    _rectangle.Width = obj1.RenderedText.Width;
+
+    //                if (_rectangle.Height < obj1.RenderedText.Height)
+    //                    _rectangle.Height = obj1.RenderedText.Height;
+
+    //                obj1.OffsetY = offY;
+    //                offY += obj1.RenderedText.Height;
+    //            }
+                
+    //        }
+    //    }
+
+
+    //    public void Clear()
+    //    {
+    //        foreach (var item in _messages)
+    //        {
+    //            item.RenderedText.Destroy();
+
+    //            if (item.Right != null)
+    //                item.Right.Left = item.Left;
+
+    //            if (item.Left != null)
+    //                item.Left.Right = item.Right;
+
+    //            item.Left = item.Right = null;
+    //        }
+
+    //        _messages.Clear();
+    //    }
+
+    //    public void Destroy()
+    //    {
+    //        if (IsDestroyed)
+    //            return;
+
+    //        IsDestroyed = true;
+
+    //        Clear();
+    //    }
+    //}
 
     internal class OverheadDamage
     {
@@ -313,13 +353,7 @@ namespace ClassicUO.Game.GameObjects
         {
             _messages.AddToFront(new MessageInfo
             {
-                RenderedText = new RenderedText
-                {
-                    IsUnicode = false,
-                    Font = 3,
-                    Hue = (Hue) (Parent == World.Player ? 0x0034 : 0x0021),
-                    Text = damage.ToString()
-                },
+                RenderedText = RenderedText.Create(damage.ToString(), (Hue)(Parent == World.Player ? 0x0034 : 0x0021), 3, false),
                 Time = Engine.Ticks + 1500
             });
 
@@ -480,12 +514,14 @@ namespace ClassicUO.Game.GameObjects
         public ushort Hue;
         public bool IsTransparent;
 
-        public EntityTextContainer Parent;
         public RenderedText RenderedText;
         public long Time, SecondTime;
         public MessageType Type;
         public int X, Y, OffsetY;
+        public GameObject Owner;
 
         public MessageInfo Left, Right;
+
+        public MessageInfo ListLeft, ListRight;
     }
 }

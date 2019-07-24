@@ -32,23 +32,8 @@ namespace ClassicUO.Game.UI
     {
         public MultiLineEntry(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool unicode = true, FontStyle style = FontStyle.None, ushort hue = 0xFFFF) : base(maxcharlength, width, maxWidth)
         {
-            RenderText = new RenderedText
-            {
-                IsUnicode = unicode,
-                Font = font,
-                MaxWidth = width,
-                FontStyle = style,
-                Hue = hue
-            };
-
-            RenderCaret = new RenderedText
-            {
-                IsUnicode = unicode,
-                Font = font,
-                Hue = hue,
-                FontStyle = (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None,
-                Text = "_"
-            };
+            RenderText = RenderedText.Create(string.Empty, hue, font, unicode, style, maxWidth: width);
+            RenderCaret = RenderedText.Create("_", hue, font, unicode, (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None, maxWidth: width);
             MaxLines = 0;
         }
 

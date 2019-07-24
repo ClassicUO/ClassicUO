@@ -53,12 +53,51 @@ namespace ClassicUO.Renderer
         private byte _font;
         private string _text;
 
-        public RenderedText()
+        private static readonly Queue<RenderedText> _pool = new Queue<RenderedText>();
+
+        private RenderedText()
         {
-            Hue = 0xFFFF;
-            Cell = 30;
+
         }
 
+        public static RenderedText Create(string text, ushort hue = 0xFFFF, byte font = 0xFF, bool isunicode = true, FontStyle style = 0, TEXT_ALIGN_TYPE align = 0, 
+                                          int maxWidth = 0, byte cell = 30, bool isHTML = false, 
+                                          bool recalculateWidthByInfo = false, bool saveHitmap = false)
+        {
+            RenderedText r;
+            if (_pool.Count != 0)
+            {
+                r = _pool.Dequeue();
+                r.IsDestroyed = false;
+                r.Links.Clear();
+            }
+            else
+            {
+                r = new RenderedText();
+            }
+
+            r.Hue = hue;
+            r.Font = font;
+            r.IsUnicode = isunicode;
+            r.FontStyle = style;
+            r.Cell = cell;
+            r.Align = align;
+            r.MaxWidth = maxWidth;
+            r.IsHTML = isHTML;
+            r.RecalculateWidthByInfo = recalculateWidthByInfo;
+            r.Width = 0;
+            r.Height = 0;
+            r.SaveHitMap = saveHitmap;
+            r.HTMLColor = 0xFFFF_FFFF;
+            r.HasBackgroundColor = false;
+            r.IsPartialHue = false;
+
+            if (r.Text != text)
+                r.Text = text; // here makes the texture
+            else 
+                r.CreateTexture();
+            return r;
+        }
 
         public bool IsUnicode { get; set; }
 
@@ -122,9 +161,9 @@ namespace ClassicUO.Renderer
 
         public int LinesCount => Texture == null || Texture.IsDisposed ? 0 : Texture.LinesCount;
 
-        public bool IsPartialHue { get; set; }
+        public bool IsPartialHue { get; private set; }
 
-        public bool SaveHitMap { get; set; }
+        public bool SaveHitMap { get; private set; }
 
         public bool IsDestroyed { get; private set; }
 
@@ -179,17 +218,25 @@ namespace ClassicUO.Renderer
                 return false;
 
             _hueVector.X = hue;
-            _hueVector.Y = 0;
-            _hueVector.Z = 0;
 
             if (hue != 0)
-                _hueVector.Y = 1;
+            {
+                if (IsUnicode)
+                    _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE_NO_BALCK;
+                else if (Font != 5 && Font != 8)
+                    _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE_NO_BALCK;
+                else
+                    _hueVector.Y = ShaderHuesTraslator.SHADER_HUED;
+            }
+            else
+                _hueVector.Y = 0;
+
             _hueVector.Z = alpha;
 
             return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, srcX, srcY, srcWidth, srcHeight, ref _hueVector);
         }
 
-        public void CreateTexture()
+        private void CreateTexture()
         {
             if (Texture != null && !Texture.IsDisposed)
             {
@@ -231,6 +278,8 @@ namespace ClassicUO.Renderer
 
             if (Texture != null && !Texture.IsDisposed)
                 Texture.Dispose();
+
+            _pool.Enqueue(this);
         }
     }
 }

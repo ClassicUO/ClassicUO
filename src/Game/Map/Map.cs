@@ -131,16 +131,10 @@ namespace ClassicUO.Game.Map
 
             while (obj != null)
             {
-                switch (obj)
-                {
-                    case Land land:
-                        groundZ = land.Z;
-                        break;
-                    case Static stat:
-                        staticZ = stat.Z;
-                        break;
-                }
-
+                if (obj is Land)
+                    groundZ = obj.Z;
+                else if (staticZ < obj.Z)
+                    staticZ = obj.Z;
                 obj = obj.Right;
             }
         }

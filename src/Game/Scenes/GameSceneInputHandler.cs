@@ -83,6 +83,8 @@ namespace ClassicUO.Game.Scenes
         private bool _requestedWarMode;
         private bool _rightMousePressed, _continueRunning, _useObjectHandles, _arrowKeyPressed, _numPadKeyPressed;
         private (int, int) _selectionStart, _selectionEnd;
+        private uint _holdMouse2secOverItemTime;
+        private bool _isMouseLeftDown;
 
         public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
         public bool IsMouseOverViewport => Engine.UI.MouseOverControl is WorldViewport;
@@ -301,12 +303,24 @@ namespace ClassicUO.Game.Scenes
                     _isSelectionActive = true;
                 }
             }
+            else
+            {
+                _isMouseLeftDown = true;
+                _holdMouse2secOverItemTime = Engine.Ticks;
+            }
         }
 
         internal override void OnLeftMouseUp()
         {
+            if (_isMouseLeftDown)
+            {
+                _isMouseLeftDown = false;
+                _holdMouse2secOverItemTime = 0;
+            }
+
             //  drag-select code comes first to allow selection finish on mouseup outside of viewport
-            if (_selectionStart.Item1 == Mouse.Position.X && _selectionStart.Item2 == Mouse.Position.Y) _isSelectionActive = false;
+            if (_selectionStart.Item1 == Mouse.Position.X && _selectionStart.Item2 == Mouse.Position.Y)
+                _isSelectionActive = false;
 
             if (_isSelectionActive)
             {
@@ -447,27 +461,25 @@ namespace ClassicUO.Game.Scenes
                 switch (obj)
                 {
                     case Static st:
-                        if (st.EntityTextContainerContainer == null || st.EntityTextContainerContainer.IsEmpty)
-                        {
-                            string name = st.Name;
+                        string name = st.Name;
+                        if (string.IsNullOrEmpty(name))
+                            name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
+                        obj.AddOverhead(MessageType.Label, name, 3, 0, false);
 
-                            if (string.IsNullOrEmpty(name))
-                                name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
-                            obj.AddOverhead(MessageType.Label, name, 3, 0, false);
-                        }
+                        if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
+                            obj.TextContainer.MaxSize = 1;
 
                         break;
 
                     case Multi multi:
-                        if (multi.EntityTextContainerContainer == null || multi.EntityTextContainerContainer.IsEmpty)
-                        {
-                            string name = multi.Name;
+                        name = multi.Name;
 
-                            if (string.IsNullOrEmpty(name))
-                                name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
-                            obj.AddOverhead(MessageType.Label, name, 3, 0, false);
-                        }
+                        if (string.IsNullOrEmpty(name))
+                            name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
+                        obj.AddOverhead(MessageType.Label, name, 3, 0, false);
 
+                        if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
+                            obj.TextContainer.MaxSize = 1;
                         break;
 
                     case Entity ent:
@@ -526,7 +538,7 @@ namespace ClassicUO.Game.Scenes
 
                     break;
 
-                case MessageInfo msg when msg.Parent.Parent is Entity entity:
+                case MessageInfo msg when msg.Owner is Entity entity:
                     result = true;
                     GameActions.DoubleClick(entity);
 

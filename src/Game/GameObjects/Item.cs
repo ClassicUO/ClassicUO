@@ -354,6 +354,7 @@ namespace ClassicUO.Game.GameObjects
                     m.MultiOffsetY = y;
                     m.MultiOffsetZ = z;
                     m.Hue = Hue;
+                    m.AlphaHue = 255;
 
                     house.Components.Add(m);
                 }

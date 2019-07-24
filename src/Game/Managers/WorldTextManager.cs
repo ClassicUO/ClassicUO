@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Managers
     internal class WorldTextManager : IUpdateable
     {
         private readonly Dictionary<Serial, OverheadDamage> _damages = new Dictionary<Serial, OverheadDamage>();
-        private readonly List<GameObject> _staticToUpdate = new List<GameObject>();
+        //private readonly List<GameObject> _staticToUpdate = new List<GameObject>();
         private readonly List<Tuple<Serial, Serial>> _subst = new List<Tuple<Serial, Serial>>();
         private readonly List<Serial> _toRemoveDamages = new List<Serial>();
 
@@ -51,15 +51,7 @@ namespace ClassicUO.Game.Managers
 
         public void Update(double totalMS, double frameMS)
         {
-            for (int i = 0; i < _staticToUpdate.Count; i++)
-            {
-                var st = _staticToUpdate[i];
-                st.Update(totalMS, frameMS);
-
-                if (st.IsDestroyed || st.EntityTextContainerContainer == null || st.EntityTextContainerContainer.IsEmpty)
-                    _staticToUpdate.RemoveAt(i--);
-            }
-
+            ProcessWorldText(false);
 
             UpdateDamageOverhead(totalMS, frameMS);
 
@@ -78,50 +70,26 @@ namespace ClassicUO.Game.Managers
 
         private void DrawTextOverheads(UltimaBatcher2D batcher, int startX, int startY, float scale, int renderIndex)
         {
-            int mouseX = Mouse.Position.X;
-            int mouseY = Mouse.Position.Y;
-
             int screenX = Engine.Profile.Current.GameWindowPosition.X;
             int screenY = Engine.Profile.Current.GameWindowPosition.Y;
             int screenW = Engine.Profile.Current.GameWindowSize.X;
             int screenH = Engine.Profile.Current.GameWindowSize.Y;
-
-
-
-
-            if (_firstNode != null && SelectedObject.LastObject is MessageInfo msg && _firstNode != msg)
-            {
-                if (msg.Right != null)
-                    msg.Right.Left = msg.Left;
-
-                if (msg.Left != null)
-                    msg.Left.Right = msg.Right;
-
-                msg.Left = msg.Right = null;
-
-
-                var next = _firstNode.Right;
-                _firstNode.Right = msg;
-                msg.Left = _firstNode;
-                msg.Right = next;
-
-                if (next != null)
-                    next.Left = msg;
-            }
-
+            
          
             ProcessWorldText(false);
 
             bool health = Engine.Profile.Current.ShowMobilesHP;
             int alwaysHP = Engine.Profile.Current.MobileHPShowWhen;
             int mode = Engine.Profile.Current.MobileHPType;
+            int mouseX = Mouse.Position.X;
+            int mouseY = Mouse.Position.Y;
 
             for (var o = _drawPointer; o != null; o = o.Left)
             {
                 if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.Time < Engine.Ticks /*|| o.Parent.Parent.Tile == null*/)
                     continue;
 
-                var parent = o.Parent.Parent;
+                var parent = o.Owner;
 
                 int x = startX + parent.RealScreenPosition.X;
                 int y = startY + parent.RealScreenPosition.Y;
@@ -144,9 +112,9 @@ namespace ClassicUO.Game.Managers
                                                                   /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0, 
                                                                   m.IsMounted,
                                                                   /*(byte) m.AnimIndex*/ 0, 
-                                                                  out int centerX, 
+                                                                  out _,
                                                                   out int centerY,
-                                                                  out int width, 
+                                                                  out _,
                                                                   out int height);
                     x += (int)m.Offset.X;
                     x += 22;
@@ -154,6 +122,9 @@ namespace ClassicUO.Game.Managers
                 }
                 else if (parent.Texture != null)
                 {
+                    if (renderIndex != parent.UseInRender)
+                        continue;
+
                     switch (parent)
                     {
                         case Item _: offY = -22;
@@ -192,27 +163,30 @@ namespace ClassicUO.Game.Managers
                 x += screenX;
                 y += screenY;
 
-                var p = o.Parent;
+
+
+                int minX = screenX + (o.RenderedText.Width >> 1) + 6;
+                int maxX = screenX + screenW - ((o.RenderedText.Width >> 1) - 3);
+
+                if (x < minX)
+                    x = minX;
+                else if (x > maxX)
+                    x = maxX;
+
+
+                int minY = screenY + parent.TextContainer.TotalHeight + offY;
+                int maxY = screenY + screenH + offY + 6;
+
+                if (y < minY)
+                    y = minY;
+                else if (y > maxY)
+                    y = maxY;
 
                 offY += o.OffsetY;
 
-                if (x - (p._rectangle.Width >> 1) + 6 < screenX)
-                    x = screenX + (p._rectangle.Width >> 1) + 6;
-                else if (x > screenX + screenW - ((p._rectangle.Width >> 1) - 3))
-                    x = screenX + screenW - ((p._rectangle.Width >> 1) - 3);
-
-                if (y < screenY + p._rectangle.Height + offY)
-                    y = screenY + p._rectangle.Height + offY;
-                else if (y > screenY + screenH + offY)
-                    y = screenY + screenH + offY;
-
-
-                p._rectangle.X = x - (p._rectangle.Width >> 1);
-                p._rectangle.Y = y - offY - p._rectangle.Height;
-
-
                 o.X = x - (o.RenderedText.Width >> 1);
                 o.Y = y - offY - o.RenderedText.Height;
+
 
                 ushort hue = 0;
 
@@ -224,42 +198,68 @@ namespace ClassicUO.Game.Managers
                         alpha = 1f - 0x7F / 255f;
                 }
 
-                if (Engine.Profile.Current.HighlightGameObjects)
-                {
-                    if (SelectedObject.LastObject == o)
-                    {
-                        hue = 23;
-
-                        alpha = 0;
-                        o.Alpha = 255;
-                    }
-                }
-                else if (SelectedObject.LastObject == o)
-                {
-                    if (o.RenderedText.Hue != 0xFF)
-                    {
-                        o.RenderedText.Hue = 0xFF;
-                        o.RenderedText.CreateTexture();
-                    }
-
-                    alpha = 0;
-                    o.Alpha = 255;
-                }
-                else if (o.RenderedText.Hue != o.Hue)
-                {
-                    o.RenderedText.Hue = o.Hue;
-                    o.RenderedText.CreateTexture();
-                }
-
-                o.RenderedText.Draw(batcher, o.X, o.Y, alpha, hue);
-
                 if (o.RenderedText.Texture.Contains(mouseX - o.X, mouseY - o.Y))
                 {
                     SelectedObject.Object = o;
                 }
+
+                if (SelectedObject.LastObject == o)
+                {
+                    hue = 0x35;
+                }
+
+
+                o.RenderedText.Draw(batcher, o.X, o.Y, alpha, hue);
             }
         }
 
+        public void Select(int renderIndex)
+        {
+            //ProcessWorldText(false);
+
+            //int mouseX = Mouse.Position.X;
+            //int mouseY = Mouse.Position.Y;
+
+            //for (var item = _drawPointer; item != null; item = item.Left)
+            //{
+            //    if (item.RenderedText == null || item.RenderedText.IsDestroyed)
+            //        continue;
+
+            //    if (item.Time >= Engine.Ticks)
+            //    {
+            //        if (item.Owner == null || item.Owner.UseInRender != renderIndex)
+            //            continue;
+            //    }
+
+            //    if (item.RenderedText.Texture.Contains(mouseX - item.X, mouseY - item.Y))
+            //    {
+            //        SelectedObject.Object = item;
+            //    }
+            //}
+        }
+
+        public void MoveToTopIfSelected()
+        {
+            if (_firstNode != null && SelectedObject.LastObject is MessageInfo msg)
+            {
+                if (msg.Right != null)
+                    msg.Right.Left = msg.Left;
+
+                if (msg.Left != null)
+                    msg.Left.Right = msg.Right;
+
+                msg.Left = msg.Right = null;
+
+
+                var next = _firstNode.Right;
+                _firstNode.Right = msg;
+                msg.Left = _firstNode;
+                msg.Right = next;
+
+                if (next != null)
+                    next.Left = msg;
+            }
+        }
 
         public void ProcessWorldText(bool doit)
         {
@@ -271,13 +271,13 @@ namespace ClassicUO.Game.Managers
 
             for (_drawPointer = _firstNode; _drawPointer != null; _drawPointer = _drawPointer.Right)
             {
+                var t = _drawPointer;
+
                 if (doit)
                 {
-                    var t = _drawPointer;
-
                     if (t.Time >= Engine.Ticks && !t.RenderedText.IsDestroyed)
                     {
-                        if (t.Parent.Parent != null)
+                        if (t.Owner != null)
                         {
                             t.IsTransparent = Collides(t);
                             CalculateAlpha(t);
@@ -324,7 +324,7 @@ namespace ClassicUO.Game.Managers
                 X = msg.X,
                 Y = msg.Y,
                 Width = msg.RenderedText.Width,
-                Height =  msg.RenderedText.Height
+                Height = msg.RenderedText.Height
             };
 
             for (int i = 0; i < _bounds.Count; i++)
@@ -345,11 +345,11 @@ namespace ClassicUO.Game.Managers
             if (obj == null)
                 return;
 
-            if ((obj.Parent.Parent is Static || obj.Parent.Parent is Multi))
-            {
-                if (!_staticToUpdate.Contains(obj.Parent.Parent))
-                    _staticToUpdate.Add(obj.Parent.Parent);
-            }
+            //if ((obj.Owner is Static || obj.Owner is Multi))
+            //{
+            //    if (!_staticToUpdate.Contains(obj.Owner))
+            //        _staticToUpdate.Add(obj.Owner);
+            //}
             
             var item = _firstNode;
 
@@ -460,7 +460,7 @@ namespace ClassicUO.Game.Managers
 
             _subst.Clear();
 
-            _staticToUpdate.Clear();
+            //_staticToUpdate.Clear();
 
             _firstNode = new MessageInfo();
             _drawPointer = null;

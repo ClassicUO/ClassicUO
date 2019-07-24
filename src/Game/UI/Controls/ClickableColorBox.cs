@@ -1,4 +1,4 @@
-#region license
+﻿#region license
 
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
@@ -21,43 +21,51 @@
 
 #endregion
 
-using System.Collections.Generic;
 
+using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class CroppedText : Control
+    internal class ClickableColorBox : ColorBox
     {
-        private readonly RenderedText _gameText;
+        private const int CELL = 12;
 
-        public CroppedText(string text, Hue hue, int maxWidth = 0)
+        private readonly SpriteTexture _background;
+
+        public ClickableColorBox(int x, int y, int w, int h, ushort hue, uint color) : base(w, h, hue, color)
         {
-            _gameText = RenderedText.Create(text, hue, (byte)(FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0), true, maxWidth > 0 ? FontStyle.BlackBorder | FontStyle.Cropped : FontStyle.BlackBorder,
-                                            maxWidth: maxWidth);
-            AcceptMouseInput = false;
+            X = x + 3;
+            Y = y + 3;
+            WantUpdateSize = false;
+
+            _background = FileManager.Gumps.GetTexture(0x00D4);
         }
 
-        public CroppedText(List<string> parts, string[] lines) : this(lines[int.Parse(parts[6])], (Hue) (Hue.Parse(parts[5]) + 1), int.Parse(parts[3]))
+        public override void Update(double totalMS, double frameMS)
         {
-            X = int.Parse(parts[1]);
-            Y = int.Parse(parts[2]);
-            Width = int.Parse(parts[3]);
-            Height = int.Parse(parts[4]);
+            _background.Ticks = (long) totalMS;
+
+            base.Update(totalMS, frameMS);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            _gameText.Draw(batcher, x, y);
+            ResetHueVector();
+            batcher.Draw2D(_background, x - 3, y - 3, ref _hueVector);
 
             return base.Draw(batcher, x, y);
         }
 
-        public override void Dispose()
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            base.Dispose();
-            _gameText?.Destroy();
+            if (button == MouseButton.Left)
+            {
+                ColorPickerGump pickerGump = new ColorPickerGump(0, 0, 100, 100, s => SetColor(s, FileManager.Hues.GetPolygoneColor(CELL, s)));
+                Engine.UI.Add(pickerGump);
+            }
         }
     }
 }

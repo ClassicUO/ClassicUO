@@ -33,7 +33,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class DebugGump : Gump
     {
-        private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2}), Scale: {3}\n";
+        private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2}), Scale: {3}, Total Objs: {4}\n";
         private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
         private const string DEBUG_STRING_2 = "- CharPos: {0}\n- Mouse: {1}\n- InGamePos: {2}\n";
         private const string DEBUG_STRING_3 = "- Selected: {0}";
@@ -110,7 +110,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (FullDisplayMode)
             {
-                _sb.AppendFormat(DEBUG_STRING_0, Engine.CurrentFPS, Engine.FPSMin == int.MaxValue ? 0 : Engine.FPSMin, Engine.FPSMax, !World.InGame ? 1f : scene.Scale);
+                _sb.AppendFormat(DEBUG_STRING_0, Engine.CurrentFPS, Engine.FPSMin == int.MaxValue ? 0 : Engine.FPSMin, Engine.FPSMax, !World.InGame ? 1f : scene.Scale, scene.RenderedObjectsCount);
                 _sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
                 _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.INVALID, Mouse.Position, (SelectedObject.Object as GameObject)?.Position ?? Position.INVALID);
                 _sb.AppendFormat(DEBUG_STRING_3, ReadObject(SelectedObject.Object));
