@@ -485,7 +485,7 @@ namespace ClassicUO.Game.Scenes
 
                     case Entity ent:
 
-                        if (Keyboard.Alt)
+                        if (Keyboard.Alt && ent is Mobile)
                         {
                             World.Player.AddMessage(MessageType.Regular, "Now following.", 3, 0, false);
                             _followingMode = true;
