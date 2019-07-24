@@ -225,7 +225,6 @@ namespace ClassicUO.Game.GameObjects
             while (last?.ListRight != null)
                 last = last.ListRight;
 
-            TextContainer.TotalHeight = 0;
             if (last == null)
                 return;
 
@@ -235,8 +234,8 @@ namespace ClassicUO.Game.GameObjects
             int alwaysHP = Engine.Profile.Current.MobileHPShowWhen;
             int mode = Engine.Profile.Current.MobileHPType;
 
-            int startX = Engine.Profile.Current.GameWindowPosition.X;
-            int startY = Engine.Profile.Current.GameWindowPosition.Y;
+            int startX = Engine.Profile.Current.GameWindowPosition.X + 6;
+            int startY = Engine.Profile.Current.GameWindowPosition.Y + 6;
             var scene = Engine.SceneManager.GetScene<GameScene>();
             float scale = scene?.Scale ?? 1;
 
@@ -254,11 +253,11 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (health && mode != 1 && ((alwaysHP >= 1 && m.Hits != m.HitsMax) || alwaysHP == 0))
                         {
-                            offY += 22;
+                            y -= 22;
                         }
 
                         if (!m.IsMounted)
-                            offY -= 22;
+                            y += 22;
 
                         FileManager.Animations.GetAnimationDimensions(m.AnimIndex,
                                                                       m.GetGraphicForAnimation(),
@@ -295,7 +294,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case Static _:
                             case Multi _:
-                                offY = -44;
+                                y += 44;
 
                                 if (Texture is ArtTexture t1)
                                     y -= t1.ImageRectangle.Height >> 1;
@@ -316,7 +315,6 @@ namespace ClassicUO.Game.GameObjects
                    
 
                     last.OffsetY = offY;
-                    TextContainer.TotalHeight += last.RenderedText.Height;
                     offY += last.RenderedText.Height;
 
                     last.RealScreenPosition.X = startX + (int) ((x - (last.RenderedText.Width >> 1)) / scale);

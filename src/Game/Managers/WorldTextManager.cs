@@ -34,7 +34,6 @@ using ClassicUO.Utility.Collections;
 
 using Microsoft.Xna.Framework;
 
-using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.Managers
 {
