@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
@@ -44,6 +45,14 @@ namespace ClassicUO.Game.Managers
         public List<InfoBarItem> GetInfoBars()
         {
             return infoBarItems;
+        }
+
+        public static string[] GetVars(int shardtype)
+        {
+            if(shardtype != 2)
+                return Enum.GetNames(typeof(InfoBarVars));
+            else
+                return Enum.GetNames(typeof(InfoBarVarsOutlands));
         }
 
         public void AddItem(InfoBarItem ibi)
@@ -88,6 +97,35 @@ namespace ClassicUO.Game.Managers
         DamageChanceInc,
         SwingSpeedInc,
         StatsCap,
+        NameNotoriety
+    }
+
+    internal enum InfoBarVarsOutlands
+    {
+        HP = 0,
+        Mana,
+        Stamina,
+        Weight,
+        Followers,
+        Gold,
+        Damage,
+        Armor,
+        FoodSatisfaction,
+        MurderTimer,
+        CriminalTimer,
+        PvpCooldown,
+        BandageTimer,
+        LowerReagentCost,
+        SpellDamageInc,
+        FasterCasting,
+        FasterCastRecovery,
+        HitChanceInc,
+        DefenseChanceInc,
+        LowerManaCost,
+        DamageChanceInc,
+        SwingSpeedInc,
+        MurderCount,
+        NameNotoriety
     }
 
     [JsonObject]

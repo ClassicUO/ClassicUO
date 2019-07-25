@@ -181,6 +181,7 @@ namespace ClassicUO.Configuration
         [JsonProperty]
         public InfoBarItem[] InfoBarItems { get; set; } =
         {
+            new InfoBarItem("", InfoBarVars.NameNotoriety, 0x3D2),
             new InfoBarItem("Hits", InfoBarVars.HP, 0x1B6),
             new InfoBarItem("Mana", InfoBarVars.Mana, 0x1ED),
             new InfoBarItem("Stam", InfoBarVars.Stamina, 0x22E),

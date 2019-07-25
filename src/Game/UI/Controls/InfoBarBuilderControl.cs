@@ -41,7 +41,8 @@ namespace ClassicUO.Game.UI.Controls
         {
             infoLabel = new TextBox(0xFF, 10, 80, 80) { X = 5, Y = 0, Width = 130, Height = 30, Text = item.label };
 
-            varStat = new Combobox(200, 0, 170, Enum.GetNames(typeof(InfoBarVars)), (int) item.var);
+            string[] dataVars = InfoBarManager.GetVars(Engine.GlobalSettings.ShardType);
+            varStat = new Combobox(200, 0, 170, dataVars, (int) item.var);
 
             uint color = 0xFF7F7F7F;
 
