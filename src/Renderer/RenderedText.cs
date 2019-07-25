@@ -182,7 +182,7 @@ namespace ClassicUO.Renderer
 
         public bool Draw(UltimaBatcher2D batcher, int dx, int dy, int dwidth, int dheight, int offsetX, int offsetY, float alpha = 0, ushort hue = 0)
         {
-            if (string.IsNullOrEmpty(Text))
+            if (string.IsNullOrEmpty(Text) || Texture == null)
                 return false;
 
 
@@ -213,9 +213,6 @@ namespace ClassicUO.Renderer
                 srcHeight = Height - srcY;
                 dheight = srcHeight;
             }
-
-            if (Texture == null)
-                return false;
 
             _hueVector.X = hue;
 
