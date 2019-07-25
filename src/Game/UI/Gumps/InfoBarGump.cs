@@ -50,9 +50,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height });
 
-            _name = new Label(World.Player.Name, true, 999) { X = 5, Hue = World.Player.Hue };
-            Add(_name);
-
             ResetItems();
         }
 
@@ -80,10 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _refreshTime = (long) totalMS + 125;
 
-                _name.Text = World.Player.Name;
-                _name.Hue = Notoriety.GetHue(World.Player.NotorietyFlag);
-
-                int x = _name.Bounds.Right + 5;
+                int x = 5;
 
                 foreach (Control c in Children.OfType<InfoBarControl>())
                 {
@@ -141,7 +135,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _data.Text = GetVarData(_var);
                 
-                if (Engine.Profile.Current.InfoBarHighlightType == 0)
+                if (Engine.Profile.Current.InfoBarHighlightType == 0 || _var == InfoBarVars.NameNotoriety)
                 {
                     _data.Hue = GetVarHue(_var);
                 }
@@ -165,7 +159,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Vector3 dataHue = Vector3.Zero;
 
-            if (Engine.Profile.Current.InfoBarHighlightType == 1 && _warningLinesHue != 0x0481)
+            if (_var != InfoBarVars.NameNotoriety && Engine.Profile.Current.InfoBarHighlightType == 1 && _warningLinesHue != 0x0481)
             {
                 ShaderHuesTraslator.GetHueVector(ref dataHue, _warningLinesHue);
                 batcher.Draw2D(Textures.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY, _data.Width, 2, ref dataHue);
@@ -225,6 +219,8 @@ namespace ClassicUO.Game.UI.Gumps
                     return World.Player.SwingSpeedIncrease.ToString();
                 case InfoBarVars.StatsCap:
                     return World.Player.StatsCap.ToString();
+                case InfoBarVars.NameNotoriety:
+                    return World.Player.Name;
                 default:
                     return "";
             }
@@ -275,6 +271,8 @@ namespace ClassicUO.Game.UI.Gumps
                         return 0x0035;
                     else
                         return 0x0481;
+                case InfoBarVars.NameNotoriety:
+                    return Notoriety.GetHue(World.Player.NotorietyFlag);
                 default:
                     return 0x0481;
             }
