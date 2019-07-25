@@ -233,14 +233,14 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollAreaItem fpsItem = new ScrollAreaItem();
             Label text = new Label("- FPS:", true, HUE_FONT);
             fpsItem.Add(text);
-            _sliderFPS = new HSliderBar(text.X + 90, 5, 250, 15, 250, Engine.Profile.Current.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+            _sliderFPS = new HSliderBar(text.X + 90, 5, 250, Constants.MIN_FPS, Constants.MAX_FPS, Engine.Profile.Current.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             fpsItem.Add(_sliderFPS);
             rightArea.Add(fpsItem);
 
             fpsItem = new ScrollAreaItem();
             text = new Label("- Login FPS:", true, HUE_FONT);
             fpsItem.Add(text);
-            _sliderFPSLogin = new HSliderBar(text.X + 90, 5, 250, 15, 250, Engine.GlobalSettings.MaxLoginFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+            _sliderFPSLogin = new HSliderBar(text.X + 90, 5, 250, Constants.MIN_FPS, Constants.MAX_FPS, Engine.GlobalSettings.MaxLoginFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             fpsItem.Add(_sliderFPSLogin);
             rightArea.Add(fpsItem);
 
