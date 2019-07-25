@@ -27,6 +27,7 @@ using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
@@ -868,6 +869,17 @@ namespace ClassicUO.Game.GameObjects
                         }
 
                         Position = new Position((ushort) step.X, (ushort) step.Y, step.Z);
+
+                        if (World.InGame && Serial == World.Player)
+                        {
+                            foreach (var s in Engine.UI.Gumps.OfType<ContainerGump>())
+                            {
+                                var item = World.Items.Get(s.LocalSerial);
+                                if (item == null || item.IsDestroyed || item.OnGround && item.Distance > 3)
+                                    s.Dispose();
+                            }
+                        }
+
                         Direction = (Direction) step.Direction;
                         IsRunning = step.Run;
                         Offset.X = 0;

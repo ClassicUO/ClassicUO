@@ -49,6 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
         }
 
+
         public ContainerGump(Item item, Graphic gumpid) : this()
         {
             _item = item;
@@ -147,7 +148,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            if (_item == null || _item.OnGround && _item.Distance > 3)
+            if (_item == null || _item.IsDestroyed)
                 Dispose();
 
             if (IsDisposed) return;
