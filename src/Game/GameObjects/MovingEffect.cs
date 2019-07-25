@@ -273,8 +273,11 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 countY -= (int) Offset.Z + ((tz - sz) << 2);
-                float angle = (float) (Math.Atan2(countY, countX) * 57.295780);
-                AngleToTarget = -(float) (angle * Math.PI) / 180.0f;
+                if (AnimDataFrame.FrameCount > 0)
+                {
+                    float angle = (float)(Math.Atan2(countY, countX) * 57.295780);
+                    AngleToTarget = -(float)(angle * Math.PI) / 180.0f;
+                }
 
                 if (sx != newX || sy != newY)
                 {
