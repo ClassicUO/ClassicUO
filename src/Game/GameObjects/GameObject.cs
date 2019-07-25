@@ -275,8 +275,8 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else if (this is Item it && it.Container.IsValid)
                     {
-                        x = last.X;
-                        y = last.Y;
+                        x = last.X - startX;
+                        y = last.Y - startY;
                         scale = 1;
                     }
                     else if (Texture != null)
