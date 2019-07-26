@@ -36,13 +36,13 @@ namespace ClassicUO.Game.UI.Gumps
     internal class InfoGump : Gump
     {
         private const int WIDTH = 500;
-        private const int HEIGHT = 600;
+        private const int HEIGHT = 710;
         private readonly ScrollArea _scrollArea;
 
         public InfoGump(GameObject obj) : base(0, 0)
         {
             X = 200;
-            Y = 200;
+            Y = 100;
             CanMove = true;
             AcceptMouseInput = false;
             Add(new GameBorder(0, 0, WIDTH, HEIGHT, 4));
@@ -58,10 +58,10 @@ namespace ClassicUO.Game.UI.Gumps
                 IsTransparent = true,
                 Alpha = 0.5f
             });
-            Add(new Label("Object Information", true, 1153, font: 3) {X = 20, Y = 20});
-            Add(new Line(20, 50, WIDTH - 50, 1, 0xFFFFFFFF));
+            Add(new Label("Object Information", true, 1153, font: 3) {X = 20, Y = 10});
+            Add(new Line(20, 30, WIDTH - 50, 1, 0xFFFFFFFF));
 
-            _scrollArea = new ScrollArea(20, 60, WIDTH - 40, 510, true)
+            _scrollArea = new ScrollArea(20, 35, WIDTH - 40, HEIGHT - 45, true)
             {
                 AcceptMouseInput = true
             };

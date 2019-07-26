@@ -45,7 +45,8 @@ namespace ClassicUO.Renderer
         Fixed = 0x0020,
         Cropped = 0x0040,
         BQ = 0x0080,
-        ExtraHeight = 0x0100
+        ExtraHeight = 0x0100,
+        CropTexture = 0x0200
     }
 
     internal sealed class RenderedText
@@ -115,6 +116,8 @@ namespace ClassicUO.Renderer
         public TEXT_ALIGN_TYPE Align { get; set; }
 
         public int MaxWidth { get; set; }
+
+        public int MaxHeight { get; set; } = 0;
 
         public FontStyle FontStyle { get; set; }
 
@@ -249,9 +252,9 @@ namespace ClassicUO.Renderer
             bool ispartial = false;
 
             if (IsUnicode)
-                Texture = FileManager.Fonts.GenerateUnicode(Font, Text, Hue, Cell, MaxWidth, Align, (ushort) FontStyle, SaveHitMap);
+                Texture = FileManager.Fonts.GenerateUnicode(Font, Text, Hue, Cell, MaxWidth, Align, (ushort)FontStyle, SaveHitMap, MaxHeight);
             else
-                Texture = FileManager.Fonts.GenerateASCII(Font, Text, Hue, MaxWidth, Align, (ushort) FontStyle, out ispartial, SaveHitMap);
+                Texture = FileManager.Fonts.GenerateASCII(Font, Text, Hue, MaxWidth, Align, (ushort)FontStyle, out ispartial, SaveHitMap, MaxHeight);
             IsPartialHue = ispartial;
 
             if (Texture != null)

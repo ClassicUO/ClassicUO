@@ -47,6 +47,7 @@ namespace ClassicUO.IO.Resources
         private const int UOFONT_CROPPED = 0x0040;
         private const int UOFONT_BQ = 0x0080;
         private const int UOFONT_EXTRAHEIGHT = 0x0100;
+        private const int UOFONT_CROPTEXTURE = 0x0200;
         private const int UNICODE_SPACE_WIDTH = 8;
         private const int MAX_HTML_TEXT_HEIGHT = 18;
         private const float ITALIC_FONT_KOEFFICIENT = 3.3f;
@@ -293,15 +294,12 @@ namespace ClassicUO.IO.Resources
             return textHeight;
         }
 
-        public FontTexture GenerateASCII(byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial, bool saveHitmap)
+        public FontTexture GenerateASCII(byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial, bool saveHitmap, int height)
         {
-            int linesCount = 0;
             isPartial = false;
 
-            if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0)
+            if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0 || (flags & UOFONT_CROPTEXTURE) != 0)
             {
-                linesCount--;
-
                 if (width == 0 || string.IsNullOrEmpty(str))
                     return null;
 
@@ -310,7 +308,18 @@ namespace ClassicUO.IO.Resources
                 if (realWidth > width)
                 {
                     string newstr = GetTextByWidthASCII(font, str, width, (flags & UOFONT_CROPPED) != 0, align, flags);
-
+                    if((flags & UOFONT_CROPTEXTURE) != 0)
+                    {
+                        int totalheight = 0;
+                        while(totalheight < height)
+                        {
+                            totalheight += GetHeightASCII(font, newstr, width, align, flags);
+                            if (str.Length > newstr.Length)
+                                newstr += GetTextByWidthASCII(font, str.Substring(newstr.Length), width, (flags & UOFONT_CROPPED) != 0, align, flags);
+                            else
+                                break;
+                        }
+                    }
                     return GeneratePixelsASCII(font, newstr, color, width, align, flags, out isPartial, saveHitmap);
                 }
             }
@@ -716,9 +725,9 @@ namespace ClassicUO.IO.Resources
             _HTMLBackgroundCanBeColored = backgroundCanBeColored;
         }
 
-        public FontTexture GenerateUnicode(byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags, bool saveHitmap)
+        public FontTexture GenerateUnicode(byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags, bool saveHitmap, int height)
         {
-            if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0)
+            if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0 || (flags & UOFONT_CROPTEXTURE) != 0)
             {
                 if (width == 0 || string.IsNullOrEmpty(str)) return null;
 
@@ -726,9 +735,20 @@ namespace ClassicUO.IO.Resources
 
                 if (realWidth > width)
                 {
-                    string newstring = GetTextByWidthUnicode(font, str, width, (flags & UOFONT_CROPPED) != 0, align, flags);
-
-                    return GeneratePixelsUnicode(font, newstring, color, cell, width, align, flags, saveHitmap);
+                    string newstr = GetTextByWidthUnicode(font, str, width, (flags & UOFONT_CROPPED) != 0, align, flags);
+                    if ((flags & UOFONT_CROPTEXTURE) != 0)
+                    {
+                        int totalheight = 0;
+                        while (totalheight < height)
+                        {
+                            totalheight += GetHeightUnicode(font, newstr, width, align, flags);
+                            if (str.Length > newstr.Length)
+                                newstr += GetTextByWidthUnicode(font, str.Substring(newstr.Length), width, (flags & UOFONT_CROPPED) != 0, align, flags);
+                            else
+                                break;
+                        }
+                    }
+                    return GeneratePixelsUnicode(font, newstr, color, cell, width, align, flags, saveHitmap);
                 }
             }
 
@@ -741,7 +761,6 @@ namespace ClassicUO.IO.Resources
                 return string.Empty;
 
             uint* table = (uint*) _unicodeFontAddress[font];
-
 
             StringBuilder sb = new StringBuilder();
 

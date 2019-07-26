@@ -98,6 +98,8 @@ namespace ClassicUO.Game.UI
         public void SetHeight(int h)
         {
             _height = h;
+            if (h > 0)
+                RenderText.MaxHeight = h;
         }
 
         public void Destroy()
