@@ -285,16 +285,16 @@ namespace ClassicUO.Game.UI.Controls
                                 X = 18,
                                 Y = b.Height + 2,
                                 Width = 240,
-                                Height = b.Height * 3 + 4
+                                Height = b.Height * 2 + 4
                             });
 
-                            TextBox textbox = new TextBox(new TextEntry(0xFF, 144, 0, 236, true, FontStyle.BlackBorder), true)
+                            TextBox textbox = new TextBox(new TextEntry(0xFF, 80, 0, 236, true, FontStyle.BlackBorder), true)
                             {
                                 X = 20,
                                 Y = b.Height + 5,
-                                Height = b.Height * 3
+                                Height = b.Height * 2
                             };
-                            textbox.TxEntry.SetHeight(b.Height * 3);
+                            textbox.TxEntry.SetHeight(b.Height * 2);
 
                             textbox.TextChanged += (sss, eee) =>
                             {
@@ -350,16 +350,16 @@ namespace ClassicUO.Game.UI.Controls
                             X = 18,
                             Y = box.Height + 2,
                             Width = 240,
-                            Height = box.Height * 3 + 4
+                            Height = box.Height * 2 + 4
                         });
 
-                        TextBox textbox = new TextBox(new TextEntry(0xFF, 144, 0, 236, true, FontStyle.BlackBorder), true)
+                        TextBox textbox = new TextBox(new TextEntry(0xFF, 80, 0, 236, true, FontStyle.BlackBorder), true)
                         {
                             X = 20,
                             Y = box.Height + 5,
-                            Height = box.Height * 3
+                            Height = box.Height * 2
                         };
-                        textbox.TxEntry.SetHeight(box.Height * 3);
+                        textbox.TxEntry.SetHeight(box.Height * 2);
                         textbox.SetText(obj.HasString() ? ((MacroObjectString)obj).Text : string.Empty);
                         textbox.TextChanged += (sss, eee) =>
                         {
