@@ -143,13 +143,20 @@ namespace ClassicUO.Game.UI
                     return false;
             }
 
-            if (start != -1)
+            if (start > -1)
+            {
                 Text = Text.Remove(start, end - start);
-            else if (CaretIndex < Text.Length)
-                Text = Text.Remove(CaretIndex, 1);
-            else if (CaretIndex > Text.Length)
-                Text = Text.Remove(Text.Length - 1);
-
+            }
+            else
+            {
+                if (CaretIndex >= 0 && Text.Length > 0)
+                {
+                    if (CaretIndex < Text.Length)
+                        Text = Text.Remove(CaretIndex, 1);
+                    else if (CaretIndex > Text.Length)
+                        Text = Text.Remove(Text.Length - 1);
+                }
+            }
             return true;
         }
 
