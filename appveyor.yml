@@ -38,6 +38,6 @@ deploy:
   artifact: ClassicUO-dev-preview-release.zip
   draft: false
   prerelease: true
-  force_update: true
+  force_update: false
   on:
     branch: dev
