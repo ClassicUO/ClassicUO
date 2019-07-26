@@ -38,6 +38,8 @@ deploy:
   artifact: ClassicUO-dev-preview-release.zip
   draft: false
   prerelease: true
-  force_update: false
+  force_update: true
+  tag: $(APPVEYOR_REPO_TAG_NAME)
   on:
     branch: dev
+    appveyor_repo_tag: true
