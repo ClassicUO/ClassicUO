@@ -30,7 +30,7 @@ artifacts:
   name: ClassicUO
 deploy:
 - provider: GitHub
-  release: ClassicUO-dev-preview-v${appveyor_build_version)
+  release: ClassicUO-dev-preview-v${appveyor_build_version}
   description: 'Appveyor autodeploy.\nThis build may not be safe: use it at your own risk.\nIt does not contain Razor.'
   auth_token:
     secure: sFMPr0POE5r5CFP5XbTD0e5pZVRO/12A3LgkqKVDD2uB2Webo6gstCTm63KzcbaW
