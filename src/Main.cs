@@ -56,7 +56,7 @@ namespace ClassicUO
 
         private static bool CheckUpdate(string[] args)
         {
-            string currentPath = Environment.CurrentDirectory;
+            string currentPath = Engine.ExePath;
 
             string path = string.Empty;
             string action = string.Empty;
@@ -72,6 +72,7 @@ namespace ClassicUO
                     pid = int.Parse(args[i + 1]);
             }
 
+            Console.WriteLine("CURRENT PATH: {0}", currentPath);
             Console.WriteLine("Args: \tpath={0}\taction={1}\tpid={2}", path, action, pid);
 
             if (action == "update")
