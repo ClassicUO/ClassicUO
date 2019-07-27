@@ -110,11 +110,11 @@ namespace ClassicUO.Network
         }
 
 
-        public void Check()
+        public bool Check()
         {
             try
             {
-                Download();
+                return Download();
             }
             catch (Exception e)
             {
@@ -122,12 +122,14 @@ namespace ClassicUO.Network
 
                 _client.DownloadProgressChanged -= ClientOnDownloadProgressChanged;
             }
+
+            return false;
         }
 
-        private void Download()
+        private bool Download()
         {
             if (IsDownloading)
-                return;
+                return false;
 
             Interlocked.Increment(ref _countDownload);
 
@@ -220,11 +222,13 @@ namespace ClassicUO.Network
                     Process.Start(prefix + Path.Combine(Path.Combine(Engine.ExePath, "update-temp"), "ClassicUO.exe"), $"--source \"{Engine.ExePath}\" --pid {currentProcess.Id} --action update");
                     currentProcess.Kill();
 
-                    break;
+                    return true;
                 }
             }
 
             Interlocked.Decrement(ref _countDownload);
+
+            return false;
         }
 
         private void Reset()

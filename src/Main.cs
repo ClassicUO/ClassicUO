@@ -22,7 +22,8 @@ namespace ClassicUO
 
 #if DEV_BUILD
             Updater updater = new Updater();
-            updater.Check();
+            if (updater.Check())
+                return;
 #endif
 
             if (CheckUpdate(args))
