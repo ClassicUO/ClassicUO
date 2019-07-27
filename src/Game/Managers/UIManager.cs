@@ -34,6 +34,7 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -91,11 +92,11 @@ namespace ClassicUO.Game.Managers
                 {
                     if (IsModalControlOpen)
                     {
-                        Gumps.ForEach(s =>
+                        foreach (Control s in Gumps)
                         {
                             if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
                                 s.Dispose();
-                        });
+                        }
                     }
                 }
             };
@@ -157,11 +158,11 @@ namespace ClassicUO.Game.Managers
                 {
                     if (IsModalControlOpen)
                     {
-                        Gumps.ForEach(s =>
+                        foreach (Control s in Gumps)
                         {
                             if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
                                 s.Dispose();
-                        });
+                        }
                     }
                 }
 
@@ -228,7 +229,7 @@ namespace ClassicUO.Game.Managers
 
         public AnchorManager AnchorManager { get; }
 
-        public List<Control> Gumps { get; } = new List<Control>();
+        public Deque<Control> Gumps { get; } = new Deque<Control>();
 
         public Control MouseOverControl { get; private set; }
 
@@ -718,7 +719,10 @@ namespace ClassicUO.Game.Managers
 
         public void Clear()
         {
-            Gumps.ForEach(s => { s.Dispose(); });
+            foreach (Control s in Gumps)
+            {
+                s.Dispose();
+            }
         }
 
 
