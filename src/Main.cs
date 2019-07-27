@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -57,7 +58,7 @@ namespace ClassicUO
 
         private static bool CheckUpdate(string[] args)
         {
-            string currentPath = Directory.GetCurrentDirectory();
+            string currentPath = Assembly.GetExecutingAssembly().Location;
 
             string path = string.Empty;
             string action = string.Empty;
