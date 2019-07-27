@@ -139,16 +139,41 @@ namespace ClassicUO.Network
 
             JArray data = JsonConvert.DeserializeObject<JArray>(json);
 
+#if DEV_BUILD
+            FileInfo fileLastCommit = new FileInfo(Path.Combine(Engine.ExePath, "version.txt"));
+#endif
+            
+
             foreach (JToken releaseToken in data.Children())
             {
                 string tagName = releaseToken["tag_name"].ToString();
 
                 Log.Message(LogTypes.Trace, "Fetching: " + tagName);
 
+#if DEV_BUILD
+                if (tagName == "ClassicUO-dev-preview")
+                {
+                    bool ok = false;
+
+                    string commitID = releaseToken["target_commitish"].ToString();
+
+                    if (fileLastCommit.Exists)
+                    {
+                        string lastCommit = File.ReadAllText(fileLastCommit.FullName);
+                        ok = lastCommit != commitID;
+                    }
+
+                    if (!ok)
+                    {
+                        File.WriteAllText(fileLastCommit.FullName, commitID);
+                        break;
+                    }
+#else
                 if (Version.TryParse(tagName, out Version version) && version > Engine.Version)
                 {
                     Log.Message(LogTypes.Trace, "Found new version available: " + version);
 
+#endif
                     string name = releaseToken["name"].ToString();
                     string body = releaseToken["body"].ToString();
 

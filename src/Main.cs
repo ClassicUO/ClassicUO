@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using ClassicUO.Configuration;
+using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -18,6 +19,11 @@ namespace ClassicUO
         static void Main(string[] args)
         {
             Engine.Configure();
+
+#if DEV_BUILD
+            Updater updater = new Updater();
+            updater.Check();
+#endif
 
             if (CheckUpdate(args))
                 return;
