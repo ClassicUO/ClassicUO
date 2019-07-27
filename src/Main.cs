@@ -20,10 +20,10 @@ namespace ClassicUO
         {
             Engine.Configure();
 
-#if DEV_BUILD
-            Updater updater = new Updater();
-            updater.Check();
-#endif
+//#if DEV_BUILD
+//            Updater updater = new Updater();
+//            updater.Check();
+//#endif
 
             if (CheckUpdate(args))
                 return;
