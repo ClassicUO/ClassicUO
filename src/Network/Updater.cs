@@ -124,7 +124,7 @@ namespace ClassicUO.Network
             }
         }
 
-        private async void Download()
+        private void Download()
         {
             if (IsDownloading)
                 return;
@@ -135,7 +135,7 @@ namespace ClassicUO.Network
 
             Reset();
 
-            string json = await _client.DownloadStringTaskAsync(string.Format(API_RELEASES_LINK, REPO_USER, REPO_NAME));
+            string json = _client.DownloadString(string.Format(API_RELEASES_LINK, REPO_USER, REPO_NAME));
 
             JArray data = JsonConvert.DeserializeObject<JArray>(json);
 
@@ -201,7 +201,7 @@ namespace ClassicUO.Network
 
                     _client.DownloadProgressChanged += ClientOnDownloadProgressChanged;
 
-                    await _client.DownloadFileTaskAsync(downloadUrl, zipFile);
+                    _client.DownloadFile(downloadUrl, zipFile);
 
                     Log.Message(LogTypes.Trace, assetName + "..... done");
 
@@ -217,7 +217,7 @@ namespace ClassicUO.Network
 
                     string prefix = Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? "mono " : string.Empty;
 
-                    Process.Start(prefix + Path.Combine(Path.Combine(Engine.ExePath, "update-temp"), "ClassicUO.exe"), $"--source {Engine.ExePath} --pid {currentProcess.Id} --action update");
+                    Process.Start(prefix + Path.Combine(Path.Combine(Engine.ExePath, "update-temp"), "ClassicUO.exe"), $"--source \"{Engine.ExePath}\" --pid {currentProcess.Id} --action update");
                     currentProcess.Kill();
 
                     break;
