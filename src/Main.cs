@@ -88,12 +88,15 @@ namespace ClassicUO
 
                 //File.SetAttributes(Path.GetDirectoryName(path), FileAttributes.Normal);
 
-                foreach (string file in Directory.EnumerateFiles(currentPath, "*", SearchOption.AllDirectories))
-                {
-                    string sub = Path.Combine(file, file.Replace(currentPath, path));
-                    Console.WriteLine("COPIED {0} over {1}", file, sub);
-                    File.Copy(file, sub, true);
-                }
+                //foreach (string file in Directory.EnumerateFiles(currentPath, "*", SearchOption.AllDirectories))
+                //{
+                //    string sub = Path.Combine(file, file.Replace(currentPath, path));
+                //    Console.WriteLine("COPIED {0} over {1}", file, sub);
+                //    File.Copy(file, sub, true);
+                //}
+
+                DirectoryInfo dd = new DirectoryInfo(currentPath);
+                dd.CopyAllTo(new DirectoryInfo(path));
 
                 string prefix = Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? "mono " : string.Empty;
 
