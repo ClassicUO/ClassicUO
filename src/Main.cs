@@ -68,8 +68,11 @@ namespace ClassicUO
                     path = args[i + 1];
                 else if (args[i] == "--action" && i < args.Length - 1)
                     action = args[i + 1];
-                else if (args[i] == "--pid" && i < args.Length - 1) pid = int.Parse(args[i + 1]);
+                else if (args[i] == "--pid" && i < args.Length - 1)
+                    pid = int.Parse(args[i + 1]);
             }
+
+            Console.WriteLine("Args: \tpath={0}\taction={1}\tpid={2}", path, action, pid);
 
             if (action == "update")
             {
