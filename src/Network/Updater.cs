@@ -216,8 +216,6 @@ namespace ClassicUO.Network
 
                     File.Delete(zipFile);
 
-                    Process currentProcess = Process.GetCurrentProcess();
-
                     string prefix = Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? "mono " : string.Empty;
 
                     string workingDir = Path.Combine(Engine.ExePath, "update-temp");
@@ -227,14 +225,14 @@ namespace ClassicUO.Network
                         StartInfo =
                         {
                             WorkingDirectory = workingDir,
-                            FileName =prefix + Path.Combine(workingDir, "ClassicUO.exe"),
+                            FileName = prefix + Path.Combine(workingDir, "ClassicUO.exe"),
                             UseShellExecute = false,
                             Arguments =
-                                $"--source \"{Engine.ExePath}\" --pid {currentProcess.Id} --action update"
+                                $"--source \"{Engine.ExePath}\" --pid {Process.GetCurrentProcess().Id} --action update"
                         }
                     }.Start();
 
-                    currentProcess.Kill();
+                    //currentProcess.Kill();
 
                     return true;
                 }
