@@ -58,7 +58,7 @@ namespace ClassicUO
 
         private static bool CheckUpdate(string[] args)
         {
-            string currentPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+            string currentPath = Engine.ExePath;
 
             string path = string.Empty;
             string action = string.Empty;

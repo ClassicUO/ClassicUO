@@ -483,7 +483,7 @@ namespace ClassicUO
             ThreadID = Thread.CurrentThread.ManagedThreadId;
 
             Log.Start(LogTypes.All);
-            ExePath = Environment.CurrentDirectory;
+            ExePath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName); // Environment.CurrentDirectory;
 
 #if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
