@@ -218,14 +218,13 @@ namespace ClassicUO.Network
 
                     string prefix = Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? "mono " : string.Empty;
 
-                    string workingDir = Path.Combine(Engine.ExePath, "update-temp");
 
                     new Process
                     {
                         StartInfo =
                         {
-                            WorkingDirectory = workingDir,
-                            FileName = prefix + Path.Combine(workingDir, "ClassicUO.exe"),
+                            WorkingDirectory = tempPath,
+                            FileName = prefix + Path.Combine(tempPath, "ClassicUO.exe"),
                             UseShellExecute = false,
                             Arguments =
                                 $"--source \"{Engine.ExePath}\" --pid {Process.GetCurrentProcess().Id} --action update"
