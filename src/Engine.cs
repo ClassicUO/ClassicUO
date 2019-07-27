@@ -475,7 +475,7 @@ namespace ClassicUO
             IsQuitted = true;
             base.OnExiting(sender, args);
         }
-
+         
 
         internal static void Configure()
         {
