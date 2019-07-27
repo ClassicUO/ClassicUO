@@ -26,6 +26,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 
@@ -219,7 +220,20 @@ namespace ClassicUO.Network
 
                     string prefix = Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? "mono " : string.Empty;
 
-                    Process.Start(prefix + Path.Combine(Path.Combine(Engine.ExePath, "update-temp"), "ClassicUO.exe"), $"--source \"{Engine.ExePath}\" --pid {currentProcess.Id} --action update");
+                    string workingDir = Path.Combine(Engine.ExePath, "update-temp");
+
+                    new Process
+                    {
+                        StartInfo =
+                        {
+                            WorkingDirectory = workingDir,
+                            FileName =prefix + Path.Combine(workingDir, "ClassicUO.exe"),
+                            UseShellExecute = false,
+                            Arguments =
+                                $"--source \"{Engine.ExePath}\" --pid {currentProcess.Id} --action update"
+                        }
+                    }.Start();
+
                     currentProcess.Kill();
 
                     return true;
