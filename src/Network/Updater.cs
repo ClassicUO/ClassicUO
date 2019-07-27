@@ -163,9 +163,9 @@ namespace ClassicUO.Network
                         ok = lastCommit != commitID;
                     }
 
+                    File.WriteAllText(fileLastCommit.FullName, commitID);
                     if (!ok)
                     {
-                        File.WriteAllText(fileLastCommit.FullName, commitID);
                         break;
                     }
 #else
