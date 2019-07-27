@@ -20,10 +20,10 @@ namespace ClassicUO
         {
             Engine.Configure();
 
-//#if DEV_BUILD
-//            Updater updater = new Updater();
-//            updater.Check();
-//#endif
+#if DEV_BUILD
+            Updater updater = new Updater();
+            updater.Check();
+#endif
 
             if (CheckUpdate(args))
                 return;
@@ -91,8 +91,8 @@ namespace ClassicUO
                 foreach (string file in Directory.EnumerateFiles(currentPath, "*", SearchOption.AllDirectories))
                 {
                     string sub = Path.Combine(file, file.Replace(currentPath, path));
-                    File.Copy(file, sub, true);
                     Console.WriteLine("COPIED {0} over {1}", file, sub);
+                    File.Copy(file, sub, true);
                 }
 
                 string prefix = Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? "mono " : string.Empty;

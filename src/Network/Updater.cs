@@ -194,8 +194,10 @@ namespace ClassicUO.Network
                     string tempPath = Path.Combine(Engine.ExePath, "update-temp");
                     string zipFile = Path.Combine(tempPath, assetName);
 
-                    if (!Directory.Exists(tempPath))
-                        Directory.CreateDirectory(tempPath);
+                    if (Directory.Exists(tempPath))
+                        Directory.Delete(tempPath);
+
+                    Directory.CreateDirectory(tempPath);
 
                     Log.Message(LogTypes.Trace, "Downloading: " + assetName);
 
