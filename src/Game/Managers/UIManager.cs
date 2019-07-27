@@ -707,7 +707,7 @@ namespace ClassicUO.Game.Managers
         {
             if (!gump.IsDisposed)
             {
-                Gumps.Insert(0, gump);
+                Gumps.AddToFront(gump);
                 _needSort = true;
             }
         }
@@ -831,7 +831,7 @@ namespace ClassicUO.Game.Managers
                 {
                     Control cm = Gumps[i];
                     Gumps.RemoveAt(i);
-                    Gumps.Insert(0, cm);
+                    Gumps.AddToFront(cm);
                     _needSort = true;
                 }
             }
