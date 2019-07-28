@@ -1927,6 +1927,10 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
+            if (FileManager.ClientVersion > ClientVersions.CV_7000)
+                if (Flags.HasFlag(Flags.Frozen))
+                    return false;
+
             if (Walker.WalkingFailed || Walker.LastStepRequestTime > Engine.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT)
                 return false;
 
