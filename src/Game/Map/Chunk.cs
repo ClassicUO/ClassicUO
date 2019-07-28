@@ -105,7 +105,7 @@ namespace ClassicUO.Game.Map
                 {
                     for (int y = 0; y < 8; y++)
                     {
-                        int pos = y * 8 + x;
+                        int pos = (y << 3) + x;
                         ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
                         sbyte z = cells[pos].Z;
 
@@ -137,7 +137,7 @@ namespace ClassicUO.Game.Map
                             {
                                 ushort x = sb->X;
                                 ushort y = sb->Y;
-                                int pos = y * 8 + x;
+                                int pos = (y << 3) + x;
 
                                 if (pos >= 64)
                                     continue;
@@ -188,7 +188,7 @@ namespace ClassicUO.Game.Map
                             {
                                 ushort x = sb->X;
                                 ushort y = sb->Y;
-                                int pos = y * 8 + x;
+                                int pos = (y << 3) + x;
 
                                 if (pos >= 64)
                                     continue;
@@ -228,7 +228,7 @@ namespace ClassicUO.Game.Map
                 {
                     for (int y = 0; y < 8; y++)
                     {
-                        int pos = y * 8 + x;
+                        int pos = (y << 3) + x;
                         ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
                         sbyte z = cells[pos].Z;
 

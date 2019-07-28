@@ -240,8 +240,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                     RadarMapBlock mb = mbbv.Value;
                     Chunk block = World.Map.Chunks[blockIndex];
-                    int realBlockX = i * 8;
-                    int realBlockY = j * 8;
+                    int realBlockX = i << 3;
+                    int realBlockY = j << 3;
 
                     for (int x = 0; x < 8; x++)
                     {

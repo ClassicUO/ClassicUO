@@ -113,7 +113,7 @@ namespace ClassicUO.Game.Map
                 MapBlock* mp = (MapBlock*) blockIndex.MapAddress;
                 MapCells* cells = (MapCells*) &mp->Cells;
 
-                return cells[my * 8 + mx].Z;
+                return cells[(my << 3) + mx].Z;
             }
         }
 

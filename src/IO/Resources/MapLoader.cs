@@ -430,7 +430,7 @@ namespace ClassicUO.IO.Resources
             {
                 for (int y = 0; y < 8; y++)
                 {
-                    ref MapCells cell = ref cells[y * 8 + x];
+                    ref MapCells cell = ref cells[(y << 3) + x];
                     ref RadarMapcells outcell = ref mb.Cells[x, y];
                     outcell.Graphic = cell.TileID;
                     outcell.Z = cell.Z;
