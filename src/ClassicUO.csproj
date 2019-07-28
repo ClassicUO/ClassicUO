@@ -94,7 +94,7 @@
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -508,6 +508,7 @@
     <None Include="libs\osx\libFAudio.0.dylib">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="packages.config" />
     <None Include="shaders\compile_shaders.bat" />
     <None Include="shaders\IsometricWorld.fx" />
     <EmbeddedResource Include="shaders\IsometricWorld.fxc" />
@@ -535,7 +536,6 @@
     <None Include="libs\osx\libtheorafile.dylib">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="packages.config" />
     <None Include="README.md" />
     <EmbeddedResource Include="shaders\xBR.fxc" />
   </ItemGroup>
@@ -576,12 +576,6 @@
     <Content Include="libs\x64\zlib.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\packages\ErrorProne.NET.CoreAnalyzers.0.1.2\analyzers\dotnet\cs\ErrorProne.Net.CoreAnalyzers.dll" />
-    <Analyzer Include="..\packages\ErrorProne.NET.Structs.0.1.2\analyzers\dotnet\cs\ErrorProne.NET.Core.dll" />
-    <Analyzer Include="..\packages\ErrorProne.NET.Structs.0.1.2\analyzers\dotnet\cs\ErrorProne.Net.StructAnalyzers.dll" />
-    <Analyzer Include="..\packages\ErrorProne.NET.Structs.0.1.2\analyzers\dotnet\cs\RuntimeContracts.dll" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Renderer\UI\Layouts\" />
