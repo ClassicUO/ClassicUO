@@ -294,14 +294,14 @@ namespace ClassicUO.IO.Resources
             return textHeight;
         }
 
-        public FontTexture GenerateASCII(byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial, bool saveHitmap, int height)
+        public void GenerateASCII(ref FontTexture texture, byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial, bool saveHitmap, int height)
         {
             isPartial = false;
 
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0 || (flags & UOFONT_CROPTEXTURE) != 0)
             {
                 if (width == 0 || string.IsNullOrEmpty(str))
-                    return null;
+                    return;
 
                 int realWidth = GetWidthASCII(font, str);
 
@@ -320,11 +320,13 @@ namespace ClassicUO.IO.Resources
                                 break;
                         }
                     }
-                    return GeneratePixelsASCII(font, newstr, color, width, align, flags, out isPartial, saveHitmap);
+                    GeneratePixelsASCII(ref texture, font, newstr, color, width, align, flags, out isPartial, saveHitmap);
+
+                    return;
                 }
             }
 
-            return GeneratePixelsASCII(font, str, color, width, align, flags, out isPartial, saveHitmap);
+            GeneratePixelsASCII(ref texture, font, str, color, width, align, flags, out isPartial, saveHitmap);
         }
 
         private string GetTextByWidthASCII(byte font, string str, int width, bool isCropped, TEXT_ALIGN_TYPE align, ushort flags)
@@ -373,17 +375,17 @@ namespace ClassicUO.IO.Resources
             return sb.ToString();
         }
 
-        private FontTexture GeneratePixelsASCII(byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial, bool saveHitmap)
+        private void GeneratePixelsASCII(ref FontTexture texture, byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial, bool saveHitmap)
         {
             isPartial = false;
 
             if (font >= FontCount)
-                return null;
+                return;
 
             int len = str.Length;
 
-            if (len <= 0)
-                return null;
+            if (len == 0)
+                return;
 
             ref readonly FontData fd = ref _font[font];
 
@@ -391,12 +393,12 @@ namespace ClassicUO.IO.Resources
                 width = GetWidthASCII(font, str);
 
             if (width <= 0)
-                return null;
+                return ;
 
             MultilinesFontInfo info = GetInfoASCII(font, str, len, align, flags, width);
 
             if (info == null)
-                return null;
+                return;
 
             width += 4;
             int height = GetHeightASCII(info);
@@ -413,7 +415,7 @@ namespace ClassicUO.IO.Resources
                     info = null;
                 }
 
-                return null;
+                return;
             }
 
             int blocksize = height * width;
@@ -508,15 +510,19 @@ namespace ClassicUO.IO.Resources
                 info = null;
             }
 
-            FontTexture ftexture = new FontTexture(width, height, linesCount, new List<WebLinkRect>());
+            if (texture == null || texture.IsDisposed)
+                texture = new FontTexture(width, height, linesCount, new List<WebLinkRect>());
+            else
+            {
+                texture.Links.Clear();
+                texture.LinesCount = linesCount;
+            }
 
             if (saveHitmap)
-                ftexture.SetDataHitMap32(pData);
+                texture.SetDataHitMap32(pData);
             else
-                ftexture.SetData(pData);
-            ;
-
-            return ftexture;
+                texture.SetData(pData);
+            
         }
 
         public int GetFontOffsetY(byte font, byte index)
@@ -725,11 +731,12 @@ namespace ClassicUO.IO.Resources
             _HTMLBackgroundCanBeColored = backgroundCanBeColored;
         }
 
-        public FontTexture GenerateUnicode(byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags, bool saveHitmap, int height)
+        public void GenerateUnicode(ref FontTexture texture, byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags, bool saveHitmap, int height)
         {
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0 || (flags & UOFONT_CROPTEXTURE) != 0)
             {
-                if (width == 0 || string.IsNullOrEmpty(str)) return null;
+                if (width == 0 || string.IsNullOrEmpty(str))
+                    return;
 
                 int realWidth = GetWidthUnicode(font, str);
 
@@ -748,11 +755,13 @@ namespace ClassicUO.IO.Resources
                                 break;
                         }
                     }
-                    return GeneratePixelsUnicode(font, newstr, color, cell, width, align, flags, saveHitmap);
+                    GeneratePixelsUnicode(ref texture, font, newstr, color, cell, width, align, flags, saveHitmap);
+
+                    return;
                 }
             }
 
-            return GeneratePixelsUnicode(font, str, color, cell, width, align, flags, saveHitmap);
+            GeneratePixelsUnicode(ref texture, font, str, color, cell, width, align, flags, saveHitmap);
         }
 
         public unsafe string GetTextByWidthUnicode(byte font, string str, int width, bool isCropped, TEXT_ALIGN_TYPE align, ushort flags)
@@ -1075,19 +1084,19 @@ namespace ClassicUO.IO.Resources
             return info;
         }
 
-        private unsafe FontTexture GeneratePixelsUnicode(byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags, bool saveHitmap)
+        private unsafe void GeneratePixelsUnicode(ref FontTexture texture, byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags, bool saveHitmap)
         {
 #if !DEBUG
             try
             {
 #endif
                 if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero)
-                    return null;
+                    return;
 
                 int len = str.Length;
 
                 if (len == 0)
-                    return null;
+                    return;
 
                 int oldWidth = width;
 
@@ -1096,13 +1105,13 @@ namespace ClassicUO.IO.Resources
                     width = GetWidthUnicode(font, str);
 
                     if (width == 0)
-                        return null;
+                        return;
                 }
 
                 MultilinesFontInfo info = GetInfoUnicode(font, str, len, align, flags, width);
 
                 if (info == null)
-                    return null;
+                    return;
 
                 if (IsUsingHTML && (_leftMargin != 0 || _rightMargin != 0))
                 {
@@ -1121,7 +1130,7 @@ namespace ClassicUO.IO.Resources
                     info = GetInfoUnicode(font, str, len, align, flags, newWidth);
 
                     if (info == null)
-                        return null;
+                        return;
                 }
 
                 if (oldWidth == 0 && RecalculateWidthByInfo)
@@ -1150,7 +1159,7 @@ namespace ClassicUO.IO.Resources
                         ptr1 = null;
                     }
 
-                    return null;
+                    return;
                 }
 
                 height += _topMargin + _bottomMargin + 4;
@@ -1568,14 +1577,20 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                FontTexture ftexture = new FontTexture(width, height, linesCount, links);
+                if (texture == null || texture.IsDisposed)
+                    texture = new FontTexture(width, height, linesCount, links);
+                else
+                {
+                    texture.Links.Clear();
+                    texture.Links.AddRange(links);
+                    texture.LinesCount = linesCount;
+                }
 
                 if (saveHitmap)
-                    ftexture.SetDataHitMap32(pData);
+                    texture.SetDataHitMap32(pData);
                 else
-                    ftexture.SetData(pData);
+                    texture.SetData(pData);
 
-                return ftexture;
 #if !DEBUG
             }
             catch (Exception ex)
@@ -1591,7 +1606,7 @@ namespace ClassicUO.IO.Resources
 
                 Chat.HandleMessage(World.Player, "An issue has been reported in /Logs.\nPlease report to CUO devs", "CUO ERROR", 32, MessageType.Regular, 1, true);
 
-                return null;
+                return;
             }
 #endif
         }

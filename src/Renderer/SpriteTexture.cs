@@ -110,7 +110,7 @@ namespace ClassicUO.Renderer
             Links = links;
         }
 
-        public int LinesCount { get; }
+        public int LinesCount { get; set; }
 
         public List<WebLinkRect> Links { get; }
     }
