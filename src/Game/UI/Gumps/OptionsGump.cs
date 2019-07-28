@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _cellSize;
 
         // video
-        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread;
+        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread, _useColoredLights;
         private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
         private Combobox _dragSelectModifierKey;
         private HSliderBar _brighlight;
@@ -601,6 +601,7 @@ namespace ClassicUO.Game.UI.Gumps
             item.Add(_lightBar);
             rightArea.Add(item);
 
+            _useColoredLights = CreateCheckBox(rightArea, "Use colored lights", Engine.Profile.Current.UseColoredLights, 0, 0);
 
             _enableShadows = new Checkbox(0x00D2, 0x00D3, "Shadows", FONT, HUE_FONT)
             {
@@ -1333,6 +1334,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom = 1f;
                     _lightBar.Value = 0;
                     _enableLight.IsChecked = false;
+                    _useColoredLights.IsChecked = false;
                     _brighlight.Value = 0;
                     _enableShadows.IsChecked = true;
                     _auraType.SelectedIndex = 0;
@@ -1668,6 +1670,8 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Light.Overall = World.Light.RealOverall;
                 World.Light.Personal = World.Light.RealPersonal;
             }
+
+            Engine.Profile.Current.UseColoredLights = _useColoredLights.IsChecked;
 
             Engine.Profile.Current.Brighlight = _brighlight.Value / 100f;
 

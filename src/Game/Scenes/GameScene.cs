@@ -367,7 +367,7 @@ namespace ClassicUO.Game.Scenes
                 if (light.ID >= Constants.MAX_LIGHTS_DATA_INDEX_COUNT)
                     return;
 
-                light.Color = LightColors.GetHue(graphic);
+                light.Color = Engine.Profile.Current.UseColoredLights ? LightColors.GetHue(graphic) : (ushort) 0;
 
                 light.DrawX = x;
                 light.DrawY = y;

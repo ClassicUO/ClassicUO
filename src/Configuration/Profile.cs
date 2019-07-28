@@ -146,6 +146,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool TopbarGumpIsDisabled { get; set; }
         [JsonProperty] public bool UseCustomLightLevel { get; set; }
         [JsonProperty] public byte LightLevel { get; set; }
+        [JsonProperty] public bool UseColoredLights { get; set; }
         [JsonProperty] public int CloseHealthBarType { get; set; } // 0 = none, 1 == not exists, 2 == is dead
         [JsonProperty] public bool ActivateChatAfterEnter { get; set; }
         [JsonProperty] public bool ActivateChatStatus { get; set; } = true;
