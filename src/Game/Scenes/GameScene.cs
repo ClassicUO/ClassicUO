@@ -711,7 +711,12 @@ namespace ClassicUO.Game.Scenes
             batcher.GraphicsDevice.SetRenderTarget(null);
             batcher.GraphicsDevice.SetRenderTarget(_darkness);
 
-            _vectorClear.X = _vectorClear.Y = _vectorClear.Z = World.Light.IsometricLevel;
+            var lightColor = World.Light.IsometricLevel;
+
+            if (!Engine.Profile.Current.UseDarkNights)
+                lightColor += 0.2f;
+
+            _vectorClear.X = _vectorClear.Y = _vectorClear.Z = lightColor;
 
             batcher.GraphicsDevice.Clear(Color.Black);
             batcher.GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer | ClearOptions.Stencil, _vectorClear, 0, 0);
@@ -726,7 +731,7 @@ namespace ClassicUO.Game.Scenes
 
             for (int i = 0; i < _lightCount; i++)
             {
-                ref var l = ref _lights[i];
+                ref readonly var l = ref _lights[i];
 
                 SpriteTexture texture = FileManager.Lights.GetTexture(l.ID);
 
