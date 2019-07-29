@@ -1624,7 +1624,6 @@ namespace ClassicUO.Renderer
 
         private readonly MatrixEffect _defaultEffect;
         private readonly IndexBuffer _indexBuffer;
-        private readonly Vector3 _minVector3 = new Vector3(0, 0, -150);
         private readonly RasterizerState _rasterizerState;
         private readonly VertexBuffer _vertexBuffer;
         protected readonly Texture2D[] TextureInfo;
@@ -1664,6 +1663,9 @@ namespace ClassicUO.Renderer
             _stencil = Stencil;
 
             _defaultEffect = defaultEffect;
+
+            GraphicsDevice.Indices = _indexBuffer;
+
         }
 
         public MatrixEffect DefaultEffect => _defaultEffect;
@@ -1701,7 +1703,9 @@ namespace ClassicUO.Renderer
             EnsureNotStarted();
             _started = true;
 
-            DrawingArea.Min = _minVector3;
+            DrawingArea.Min.X = 0;
+            DrawingArea.Min.Y = 0;
+            DrawingArea.Min.Z = -150;
             DrawingArea.Max.X = GraphicsDevice.Viewport.Width;
             DrawingArea.Max.Y = GraphicsDevice.Viewport.Height;
             DrawingArea.Max.Z = 150;
@@ -1768,8 +1772,6 @@ namespace ClassicUO.Renderer
 
 
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
-            GraphicsDevice.Indices = _indexBuffer;
-
 
             _defaultEffect.ApplyStates();
         }
