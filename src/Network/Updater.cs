@@ -227,11 +227,10 @@ namespace ClassicUO.Network
                             FileName = prefix + Path.Combine(tempPath, "ClassicUO.exe"),
                             UseShellExecute = false,
                             Arguments =
-                                $"--source \"{ Directory.GetCurrentDirectory()}\" --pid {Process.GetCurrentProcess().Id} --action update"
+                                $"--source \"{Engine.ExePath}\" --pid {Process.GetCurrentProcess().Id} --action update"
                         }
                     }.Start();
 
-                    //currentProcess.Kill();
 
                     return true;
                 }
