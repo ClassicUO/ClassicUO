@@ -224,7 +224,7 @@ namespace ClassicUO.Game.Scenes
 
                     case Land _:
                         island = true;
-                        break;
+                        goto SKIP_HANDLES_CHECK;
 
                     case Item it when it.IsCorpse:
                         iscorpse = true;
@@ -294,15 +294,23 @@ namespace ClassicUO.Game.Scenes
                     obj.UseObjectHandles = false;
                 }
 
+
+                SKIP_HANDLES_CHECK:
+
                 if (maxObjectZ > maxZ)
                     break;
 
                 obj.CurrentRenderIndex = _renderIndex;
-                obj.UpdateTextCoords();
 
+                if (!island)
+                    obj.UpdateTextCoords();
+                else
+                    goto SKIP_INTERNAL_CHECK;
 
                 if (!ismobile && !iscorpse && !island && itemData.IsInternal)
                     continue;
+
+                SKIP_INTERNAL_CHECK:
 
                 int z = obj.Z;
 
@@ -381,7 +389,7 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
 
-                if (_alphaChanged && !changinAlpha)
+                if (!island && _alphaChanged && !changinAlpha)
                 {
                     if (itemData.IsTranslucent)
                         obj.ProcessAlpha(178);
@@ -422,6 +430,7 @@ namespace ClassicUO.Game.Scenes
                 }
                 else
                     dir = (byte)mob.Direction;
+
                 if (mob.Texture != null)
                 {
                     Rectangle r = mob.Texture.Bounds;
