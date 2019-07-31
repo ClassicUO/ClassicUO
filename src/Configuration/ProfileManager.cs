@@ -46,7 +46,17 @@ namespace ClassicUO.Configuration
                                                               {
                                                                   TypeNameHandling = TypeNameHandling.All,
                                                                   MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
-                                                              }) ?? new Profile(username, servername, charactername);
+                                                              });
+                if (Current == null)
+                {
+                    Current = new Profile(username, servername, charactername);
+                }
+                else
+                {
+                    Current.Username = username;
+                    Current.ServerName = servername;
+                    Current.CharacterName = charactername;
+                }
             }
         }
 
