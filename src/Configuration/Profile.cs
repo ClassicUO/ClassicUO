@@ -48,9 +48,9 @@ namespace ClassicUO.Configuration
             CharacterName = charactername;
         }
 
-        [JsonProperty] public string Username { get; }
-        [JsonProperty] public string ServerName { get; }
-        [JsonProperty] public string CharacterName { get; }
+        [JsonIgnore] public string Username { get; set; }
+        [JsonIgnore] public string ServerName { get; set;  }
+        [JsonIgnore] public string CharacterName { get; set;  }
 
         // sounds
         [JsonProperty] public bool EnableSound { get; set; } = true;
