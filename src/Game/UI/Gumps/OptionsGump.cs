@@ -580,12 +580,14 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(item);
 
             item = new ScrollAreaItem();
+            item.Y = 30;
             text = new Label("- Brighlight:", true, HUE_FONT)
             {
-                Y = 30
+                Y = 30,
+                IsVisible = false,
             };
             _brighlight = new HSliderBar(text.Width + 10, text.Y + 5, 250, 0, 100, (int) (Engine.Profile.Current.Brighlight * 100f), HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
-
+            _brighlight.IsVisible = false;
             item.Add(text);
             item.Add(_brighlight);
             rightArea.Add(item);
