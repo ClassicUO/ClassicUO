@@ -174,6 +174,13 @@ namespace ClassicUO.IO.Resources
             UOFile file = _filesMap[i];
             UOFile fileidx = _filesIdxStatics[i];
             UOFile staticfile = _filesStatics[i];
+
+            if (fileidx == null && i == 1)
+                fileidx = _filesIdxStatics[0];
+
+            if (staticfile == null && i == 1)
+                staticfile = _filesStatics[0];
+
             ulong staticidxaddress = (ulong) fileidx.StartAddress;
             ulong endstaticidxaddress = staticidxaddress + (ulong) fileidx.Length;
             ulong staticaddress = (ulong) staticfile.StartAddress;

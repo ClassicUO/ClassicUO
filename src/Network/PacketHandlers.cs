@@ -50,7 +50,6 @@ namespace ClassicUO.Network
     {
         private static Serial _requestedGridLoot;
 
-
         private readonly Action<Packet>[] _handlers = new Action<Packet>[0x100];
 
         static PacketHandlers()
@@ -3453,7 +3452,13 @@ namespace ClassicUO.Network
             byte[] data = p.ReadArray((int) clen);
             byte[] decData = new byte[dlen];
             ZLib.Decompress(data, 0, decData, dlen);
-            string layout = Encoding.UTF8.GetString(decData).Trim('\0');
+            StringBuilder sb = new StringBuilder(decData.Length - 1);
+            for (int i = 0; i < decData.Length; i++)
+            {
+                if (decData[i] == 0)
+                    break;
+                sb.Append((char)decData[i]);
+            }
             uint linesNum = p.ReadUInt();
             string[] lines = new string[0];
 
@@ -3477,7 +3482,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            Engine.UI.Create(sender, gumpID, (int) x, (int) y, layout, lines);
+            Engine.UI.Create(sender, gumpID, (int) x, (int) y, sb.ToString(), lines);
         }
 
         private static void UpdateMobileStatus(Packet p)

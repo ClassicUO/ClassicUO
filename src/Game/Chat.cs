@@ -116,7 +116,7 @@ namespace ClassicUO.Game
                         }
 
                         //server hue color per default if not enabled
-                        if (Engine.Profile.Current.EnabledSpellHue)
+                        if (Engine.Profile.Current != null && Engine.Profile.Current.EnabledSpellHue)
                         {
                             if (spell.TargetType == TargetType.Beneficial)
                                 hue = Engine.Profile.Current.BeneficHue;
