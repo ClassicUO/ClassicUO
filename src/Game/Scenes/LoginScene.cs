@@ -370,7 +370,10 @@ namespace ClassicUO.Game.Scenes
         {
             Log.Message(LogTypes.Info, "Connected!");
             CurrentLoginStep = LoginStep.VerifyingAccount;
-            NetClient.LoginSocket.Send(new PSeed(NetClient.LoginSocket.ClientAddress, FileManager.ClientBufferVersion));
+            if (FileManager.ClientVersion > ClientVersions.CV_6040)
+                NetClient.LoginSocket.Send(new PSeed(NetClient.LoginSocket.ClientAddress, FileManager.ClientBufferVersion));
+            else
+                NetClient.LoginSocket.Send(BitConverter.GetBytes(NetClient.LoginSocket.ClientAddress));
             NetClient.LoginSocket.Send(new PFirstLogin(Account, Password));
         }
 
