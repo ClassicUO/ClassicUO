@@ -108,7 +108,7 @@ namespace ClassicUO.Game.UI.Gumps
             _sb.Clear();
             GameScene scene = Engine.SceneManager.GetScene<GameScene>();
 
-            if (FullDisplayMode)
+            if (FullDisplayMode && scene != null)
             {
                 _sb.AppendFormat(DEBUG_STRING_0, Engine.CurrentFPS, Engine.FPSMin == int.MaxValue ? 0 : Engine.FPSMin, Engine.FPSMax, !World.InGame ? 1f : scene.Scale, scene.RenderedObjectsCount);
                 _sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);

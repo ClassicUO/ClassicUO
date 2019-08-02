@@ -402,16 +402,12 @@ namespace ClassicUO.Network
             bool encoded = entries != null && entries.Count != 0;
 
             List<byte> codeBytes = new List<byte>();
-            string utf8 = string.Empty;
+            byte[] utf8 = Encoding.UTF8.GetBytes(text);
 
             if (encoded)
             {
                 type |= MessageType.Encoded;
-
-                utf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetBytes(text));
-
                 len = utf8.Length;
-                len++;
 
                 int length = entries.Count;
                 codeBytes.Add((byte) (length >> 4));
@@ -458,7 +454,8 @@ namespace ClassicUO.Network
                 for (int i = 0; i < codeBytes.Count; i++)
                     WriteByte(codeBytes[i]);
 
-                WriteASCII(utf8, len);
+                WriteBytes(utf8, 0, len);
+                WriteByte(0);
             }
             else
                 WriteUnicode(text, size);
