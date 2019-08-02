@@ -394,21 +394,21 @@ namespace ClassicUO.Network
     {
         public PUnicodeSpeechRequest(string text, MessageType type, byte font, Hue hue, string lang) : base(0xAD)
         {
-            int len = text.Length;
-            int size = 12;
-
             var entries = FileManager.Speeches.GetKeywords(text);
 
             bool encoded = entries != null && entries.Count != 0;
+            if(encoded)
+                type |= MessageType.Encoded;
 
-            List<byte> codeBytes = new List<byte>();
-            byte[] utf8 = Encoding.UTF8.GetBytes(text);
+            WriteByte((byte)type);
+            WriteUShort(hue);
+            WriteUShort(font);
+            WriteASCII(lang, 4);
 
             if (encoded)
             {
-                type |= MessageType.Encoded;
-                len = utf8.Length;
-
+                List<byte> codeBytes = new List<byte>();
+                byte[] utf8 = Encoding.UTF8.GetBytes(text);
                 int length = entries.Count;
                 codeBytes.Add((byte) (length >> 4));
                 int num3 = length & 15;
@@ -436,29 +436,16 @@ namespace ClassicUO.Network
 
                 if (!flag) codeBytes.Add((byte) (num3 << 4));
 
-                size += codeBytes.Count;
-            }
-            else
-            {
-                size += len * 2;
-                size += 2;
-            }
-
-            WriteByte((byte) type);
-            WriteUShort(hue);
-            WriteUShort(font);
-            WriteASCII(lang, 4);
-
-            if (encoded)
-            {
                 for (int i = 0; i < codeBytes.Count; i++)
                     WriteByte(codeBytes[i]);
 
-                WriteBytes(utf8, 0, len);
+                WriteBytes(utf8, 0, utf8.Length);
                 WriteByte(0);
             }
             else
-                WriteUnicode(text, size);
+            {
+                WriteUnicode(text, 14 + text.Length * 2);
+            }
         }
     }
 
