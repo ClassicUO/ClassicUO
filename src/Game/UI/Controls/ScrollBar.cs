@@ -41,8 +41,8 @@ namespace ClassicUO.Game.UI.Controls
         private int _min;
         private Rectangle _rectDownButton, _rectUpButton, _rectSlider, _emptySpace;
         private float _sliderPosition, _value;
-        private SpriteTexture _textureSlider;
-        private SpriteTexture[] _textureUpButton, _textureDownButton, _textureBackground;
+        private UOTexture _textureSlider;
+        private UOTexture[] _textureUpButton, _textureDownButton, _textureBackground;
         private uint _timeUntilNextClick;
 
         public ScrollBar(int x, int y, int height)
@@ -106,13 +106,13 @@ namespace ClassicUO.Game.UI.Controls
         protected override void OnInitialize()
         {
             base.OnInitialize();
-            _textureUpButton = new SpriteTexture[2];
+            _textureUpButton = new UOTexture[2];
             _textureUpButton[0] = FileManager.Gumps.GetTexture(251);
             _textureUpButton[1] = FileManager.Gumps.GetTexture(250);
-            _textureDownButton = new SpriteTexture[2];
+            _textureDownButton = new UOTexture[2];
             _textureDownButton[0] = FileManager.Gumps.GetTexture(253);
             _textureDownButton[1] = FileManager.Gumps.GetTexture(252);
-            _textureBackground = new SpriteTexture[3];
+            _textureBackground = new UOTexture[3];
             _textureBackground[0] = FileManager.Gumps.GetTexture(257);
             _textureBackground[1] = FileManager.Gumps.GetTexture(256);
             _textureBackground[2] = FileManager.Gumps.GetTexture(255);

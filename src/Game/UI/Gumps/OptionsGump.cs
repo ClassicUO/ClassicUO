@@ -45,7 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int WIDTH = 700;
         private const int HEIGHT = 500;
 
-        private static SpriteTexture _logoTexture2D;
+        private static UOTexture _logoTexture2D;
         private ScrollAreaItem _activeChatArea;
         private Combobox _autoOpenCorpseOptions;
         private TextBox _autoOpenCorpseRange;
@@ -208,7 +208,7 @@ namespace ClassicUO.Game.UI.Gumps
             ChangePage(1);
         }
 
-        private static SpriteTexture LogoTexture
+        private static UOTexture LogoTexture
         {
             get
             {
@@ -217,7 +217,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("ClassicUO.cuologo.png");
                     Texture2D.TextureDataFromStreamEXT(stream, out int w, out int h, out byte[] pixels, 350, 365);
 
-                    _logoTexture2D = new SpriteTexture(w, h);
+                    _logoTexture2D = new UOTexture32(w, h);
                     _logoTexture2D.SetData(pixels);
                 }
 

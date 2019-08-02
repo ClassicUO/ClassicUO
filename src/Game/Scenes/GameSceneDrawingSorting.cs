@@ -298,7 +298,9 @@ namespace ClassicUO.Game.Scenes
                 SKIP_HANDLES_CHECK:
 
                 if (maxObjectZ > maxZ)
+                {
                     break;
+                }
 
                 obj.CurrentRenderIndex = _renderIndex;
 
@@ -324,12 +326,21 @@ namespace ClassicUO.Game.Scenes
                             changinAlpha = obj.AlphaHue != 0;
 
                         if (!changinAlpha)
+                        {
+                            obj.UseInRender = (byte)_renderIndex;
                             continue;
+                        }
                     }
                 }
 
-                int testMinZ = drawY + (z << 2);
                 int testMaxZ = drawY;
+
+                if (testMaxZ > _maxPixel.Y)
+                {
+                    continue;
+                }
+
+                int testMinZ = drawY + (z << 2);
 
                 if (island)
                 {
@@ -343,8 +354,10 @@ namespace ClassicUO.Game.Scenes
                 else
                     testMinZ = testMaxZ;
 
-                if (testMinZ < _minPixel.Y || testMaxZ > _maxPixel.Y)
+                if (testMinZ < _minPixel.Y)
+                {
                     continue;
+                }
 
                 if (ismobile || iscorpse)
                     AddOffsetCharacterTileToRenderList(obj, useObjectHandles);
@@ -404,7 +417,7 @@ namespace ClassicUO.Game.Scenes
                 }
 
                 _renderList[_renderListCount++] = obj;
-                obj.UseInRender = (byte) _renderIndex;
+                obj.UseInRender = (byte)_renderIndex;
             }
         }
 

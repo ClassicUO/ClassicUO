@@ -38,7 +38,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class WorldMapGump : Gump
     {
-        private SpriteTexture _mapTexture;
+        private UOTexture _mapTexture;
 
         public WorldMapGump() : base(0, 0)
         {
@@ -134,7 +134,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            _mapTexture = new SpriteTexture(FileManager.Map.MapsDefaultSize[World.MapIndex, 0], FileManager.Map.MapsDefaultSize[World.MapIndex, 1], false);
+            _mapTexture = new UOTexture16(FileManager.Map.MapsDefaultSize[World.MapIndex, 0], FileManager.Map.MapsDefaultSize[World.MapIndex, 1]);
             _mapTexture.SetData(buffer);
         }
 
@@ -216,7 +216,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            _mapTexture = new SpriteTexture(Width, Height, false);
+            _mapTexture = new UOTexture16(Width, Height);
             _mapTexture.SetData(data);
 
             return _mapTexture;

@@ -29,7 +29,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class TexmapsLoader : ResourceLoader<SpriteTexture>
+    internal class TexmapsLoader : ResourceLoader<UOTexture>
     {
         private readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
         private readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
@@ -116,16 +116,16 @@ namespace ClassicUO.IO.Resources
             //}
         }
 
-        public override SpriteTexture GetTexture(uint g)
+        public override UOTexture GetTexture(uint g)
         {
-            if (!ResourceDictionary.TryGetValue(g, out SpriteTexture texture) || texture.IsDisposed)
+            if (!ResourceDictionary.TryGetValue(g, out UOTexture texture) || texture.IsDisposed)
             {
                 ushort[] pixels = GetTextmapTexture((ushort) g, out int size);
 
                 if (pixels == null || pixels.Length == 0)
                     return null;
 
-                texture = new SpriteTexture(size, size, false);
+                texture = new UOTexture16(size, size);
                 texture.SetData(pixels);
                 //_usedIndex.Add(g);
                 ResourceDictionary.Add(g, texture);
@@ -149,7 +149,7 @@ namespace ClassicUO.IO.Resources
         //    for (int i = 0; i < _usedIndex.Count; i++)
         //    {
         //        uint g = _usedIndex[i];
-        //        SpriteTexture texture = ResourceDictionary[g];
+        //        UOTexture texture = ResourceDictionary[g];
 
         //        if (texture.Ticks < ticks)
         //        {
@@ -168,7 +168,7 @@ namespace ClassicUO.IO.Resources
         //    for (int i = 0; i < _usedIndex.Count; i++)
         //    {
         //        uint g = _usedIndex[i];
-        //        SpriteTexture texture = ResourceDictionary[g];
+        //        UOTexture texture = ResourceDictionary[g];
         //        texture.Dispose();
         //        _usedIndex.RemoveAt(i--);
         //        ResourceDictionary.Remove(g);

@@ -733,7 +733,7 @@ namespace ClassicUO.Game.Scenes
             {
                 ref readonly var l = ref _lights[i];
 
-                SpriteTexture texture = FileManager.Lights.GetTexture(l.ID);
+                UOTexture texture = FileManager.Lights.GetTexture(l.ID);
 
                 hue.X = l.Color;
                 hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;

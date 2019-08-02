@@ -171,7 +171,7 @@ namespace ClassicUO.Game.Data
 
         public static void CalculateContainerPosition(Graphic g)
         {
-            SpriteTexture texture = FileManager.Gumps.GetTexture(g);
+            UOTexture texture = FileManager.Gumps.GetTexture(g);
 
             int passed = 0;
 

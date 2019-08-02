@@ -24,6 +24,7 @@
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -31,7 +32,7 @@ namespace ClassicUO.Game.UI.Controls
     {
         public override bool CanUseAlpha => false;
 
-        protected readonly SpriteTexture _texture;
+        protected readonly Texture2D _texture;
 
         public HitBox(int x, int y, int w, int h)
         {
@@ -39,12 +40,8 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = true;
             Alpha = 0.75f;
             IsTransparent = true;
-            _texture = new SpriteTexture(1, 1);
+            _texture = Textures.GetTexture(Color.White);
 
-            _texture.SetData(new uint[1]
-            {
-                0xFFFF_FFFF
-            });
             X = x;
             Y = y;
             Width = w;
@@ -55,14 +52,6 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override ClickPriority Priority { get; } = ClickPriority.High;
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            if (IsDisposed)
-                return;
-
-            base.Update(totalMS, frameMS);
-            _texture.Ticks = (long) totalMS;
-        }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -78,12 +67,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             return base.Draw(batcher, x, y);
-        }
-
-        public override void Dispose()
-        {
-            base.Dispose();
-            _texture?.Dispose();
         }
     }
 }

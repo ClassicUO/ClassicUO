@@ -28,7 +28,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class LightsLoader : ResourceLoader<SpriteTexture>
+    internal class LightsLoader : ResourceLoader<UOTexture16>
     {
         private UOFileMul _file;
 
@@ -48,14 +48,14 @@ namespace ClassicUO.IO.Resources
         {
         }
 
-        public override SpriteTexture GetTexture(uint id)
+        public override UOTexture16 GetTexture(uint id)
         {
             if (!ResourceDictionary.TryGetValue(id, out var texture))
             {
                 ushort[] pixels = GetLight(id, out int w, out int h);
 
-                texture = new SpriteTexture(w, h, false);
-                texture.SetData(pixels);
+                texture = new UOTexture16(w, h);
+                texture.PushData(pixels);
                 ResourceDictionary.Add(id, texture);
             }
 

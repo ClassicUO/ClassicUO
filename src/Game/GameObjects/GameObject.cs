@@ -336,6 +336,7 @@ namespace ClassicUO.Game.GameObjects
             int minX = Engine.Profile.Current.GameWindowPosition.X + 6;
             int maxX = minX + Engine.Profile.Current.GameWindowSize.X - 6;
             int minY = Engine.Profile.Current.GameWindowPosition.Y;
+            //int maxY = minY + Engine.Profile.Current.GameWindowSize.Y - 6;
 
             for (var item = TextContainer.Items; item != null; item = item.ListRight)
             {
@@ -355,6 +356,12 @@ namespace ClassicUO.Game.GameObjects
 
                 if (startY < minY && offsetY == 0)
                     offsetY = minY - startY;
+
+                //int endY = startY + item.RenderedText.Height;
+
+                //if (endY > maxY)
+                //    UseInRender = 0xFF;
+                //    //item.RealScreenPosition.Y -= endY - maxY;
 
                 if (offsetY != 0)
                     item.RealScreenPosition.Y += offsetY;

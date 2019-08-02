@@ -30,7 +30,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class GumpsLoader : ResourceLoader<SpriteTexture>
+    internal class GumpsLoader : ResourceLoader<UOTexture16>
     {
         private UOFile _file;
         //private readonly List<uint> _usedIndex = new List<uint>();
@@ -88,17 +88,17 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public override SpriteTexture GetTexture(uint g)
+        public override UOTexture16 GetTexture(uint g)
         {
-            if (!ResourceDictionary.TryGetValue(g, out SpriteTexture texture) || texture.IsDisposed)
+            if (!ResourceDictionary.TryGetValue(g, out UOTexture16 texture) || texture.IsDisposed)
             {
                 ushort[] pixels = GetGumpPixels(g, out int w, out int h);
 
                 if (pixels == null || pixels.Length == 0)
                     return null;
 
-                texture = new SpriteTexture(w, h, false);
-                texture.SetDataHitMap16(pixels);
+                texture = new UOTexture16(w, h);
+                texture.PushData(pixels);
                 ResourceDictionary.Add(g, texture);
             }
 
@@ -110,7 +110,7 @@ namespace ClassicUO.IO.Resources
             //for (int i = 0; i < _usedIndex.Count; i++)
             //{
             //    uint g = _usedIndex[i];
-            //    SpriteTexture texture = ResourceDictionary[g];
+            //    UOTexture texture = ResourceDictionary[g];
             //    texture.Dispose();
             //    _usedIndex.RemoveAt(i--);
             //    ResourceDictionary.Remove(g);
@@ -120,7 +120,7 @@ namespace ClassicUO.IO.Resources
 
             //long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
-            ////foreach (SpriteTexture t in ResourceDictionary.Values.Where(s => s.Ticks < ticks).Take(20).)
+            ////foreach (UOTexture t in ResourceDictionary.Values.Where(s => s.Ticks < ticks).Take(20).)
             ////{
             ////    t.Dispose();
             ////}
@@ -152,7 +152,7 @@ namespace ClassicUO.IO.Resources
         //    //for (int i = 0; i < _usedIndex.Count; i++)
         //    //{
         //    //    uint g = _usedIndex[i];
-        //    //    SpriteTexture texture = ResourceDictionary[g];
+        //    //    UOTexture texture = ResourceDictionary[g];
 
         //    //    if (texture.Ticks < ticks)
         //    //    {

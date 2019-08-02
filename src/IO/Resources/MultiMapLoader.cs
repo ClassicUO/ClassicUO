@@ -55,7 +55,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public unsafe SpriteTexture LoadMap(int width, int height, int startx, int starty, int endx, int endy)
+        public unsafe UOTexture LoadMap(int width, int height, int startx, int starty, int endx, int endy)
         {
             if (_file == null || _file.Length == 0)
             {
@@ -173,8 +173,8 @@ namespace ClassicUO.IO.Resources
 
                 Marshal.FreeHGlobal(ptr);
 
-                SpriteTexture texture = new SpriteTexture(width, height, false);
-                texture.SetData(worldMap);
+                UOTexture16 texture = new UOTexture16(width, height);
+                texture.PushData(worldMap);
 
                 return texture;
             }
@@ -182,7 +182,7 @@ namespace ClassicUO.IO.Resources
             return null;
         }
 
-        public SpriteTexture LoadFacet(int facet, int width, int height, int startx, int starty, int endx, int endy)
+        public UOTexture16 LoadFacet(int facet, int width, int height, int startx, int starty, int endx, int endy)
         {
             if (_file == null || facet < 0 || facet > 5 || _facets[facet] == null)
                 return null;
@@ -225,8 +225,8 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            SpriteTexture texture = new SpriteTexture(pwidth, pheight, false);
-            texture.SetData(map);
+            UOTexture16 texture = new UOTexture16(pwidth, pheight);
+            texture.PushData(map);
 
             return texture;
         }

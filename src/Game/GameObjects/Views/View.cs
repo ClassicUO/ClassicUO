@@ -51,7 +51,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool AllowedToDraw { get; set; } = true;
 
-        public SpriteTexture Texture { get; set; }
+        public UOTexture Texture { get; set; }
 
 
 

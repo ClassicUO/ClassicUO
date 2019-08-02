@@ -478,7 +478,7 @@
     <Compile Include="Renderer\RenderedText.cs" />
     <Compile Include="Renderer\ShaderHuesTraslator.cs" />
     <Compile Include="Renderer\ScissorStack.cs" />
-    <Compile Include="Renderer\SpriteTexture.cs" />
+    <Compile Include="Renderer\UOTexture.cs" />
     <Compile Include="Utility\Collections\Bag.cs" />
     <Compile Include="Utility\Collections\Deque.cs" />
     <Compile Include="Utility\Exstentions.cs" />

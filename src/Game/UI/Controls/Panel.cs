@@ -30,7 +30,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class Panel : Control
     {
-        private readonly SpriteTexture[] _frame = new SpriteTexture[9];
+        private readonly UOTexture[] _frame = new UOTexture[9];
 
         public Panel(ushort background)
         {
@@ -40,7 +40,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            foreach (SpriteTexture t in _frame)
+            foreach (UOTexture t in _frame)
             {
                 if (t != null)
                     t.Ticks = (long) totalMS;

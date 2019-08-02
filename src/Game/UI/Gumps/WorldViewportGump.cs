@@ -202,7 +202,7 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class GameBorder : Control
     {
-        private readonly SpriteTexture[] _borders = new SpriteTexture[2];
+        private readonly UOTexture[] _borders = new UOTexture[2];
         private readonly int _borderSize;
 
         public GameBorder(int x, int y, int w, int h, int borderSize)
@@ -220,7 +220,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            foreach (SpriteTexture t in _borders)
+            foreach (UOTexture t in _borders)
                 t.Ticks = (long) totalMS;
 
             base.Update(totalMS, frameMS);

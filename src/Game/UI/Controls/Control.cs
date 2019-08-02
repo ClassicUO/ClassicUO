@@ -301,7 +301,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public int TooltipMaxLength { get; private set; }
 
-        public SpriteTexture Texture { get; set; }
+        public UOTexture Texture { get; set; }
 
         public virtual bool Draw(UltimaBatcher2D batcher, int x, int y)
         {

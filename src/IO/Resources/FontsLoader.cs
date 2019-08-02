@@ -518,11 +518,7 @@ namespace ClassicUO.IO.Resources
                 texture.LinesCount = linesCount;
             }
 
-            if (saveHitmap)
-                texture.SetDataHitMap32(pData);
-            else
-                texture.SetData(pData);
-            
+            texture.PushData(pData);
         }
 
         public int GetFontOffsetY(byte font, byte index)
@@ -1586,10 +1582,7 @@ namespace ClassicUO.IO.Resources
                     texture.LinesCount = linesCount;
                 }
 
-                if (saveHitmap)
-                    texture.SetDataHitMap32(pData);
-                else
-                    texture.SetData(pData);
+                texture.PushData(pData);
 
 #if !DEBUG
             }

@@ -30,7 +30,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.IO
 {
-    internal abstract class ResourceLoader<T> where T : SpriteTexture, IDisposable
+    internal abstract class ResourceLoader<T> where T : UOTexture, IDisposable
     {
         private readonly string[] _paths;
 

@@ -1288,7 +1288,7 @@ namespace ClassicUO.IO.Resources
                         CenterY = imageCenterY
                     };
 
-                    f.SetDataHitMap16(data);
+                    f.PushData(data);
                     animDirection.Frames[i] = f; //uniqueAnimationIndex;
                     //ResourceDictionary.Add(uniqueAnimationIndex, f);
                 }
@@ -1370,7 +1370,7 @@ namespace ClassicUO.IO.Resources
                     CenterY = imageCenterY
                 };
 
-                f.SetDataHitMap16(data);
+                f.PushData(data);
 
                 animDir.Frames[i] = f;
                 //ResourceDictionary.Add(uniqueAnimationIndex, f);

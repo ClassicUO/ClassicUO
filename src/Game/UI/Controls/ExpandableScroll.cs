@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Controls
             CanMove = true;
             AcceptMouseInput = true;
 
-            var textures = new SpriteTexture[4];
+            var textures = new UOTexture[4];
 
             for (int i = 0; i < 4; i++)
             {

@@ -39,7 +39,7 @@ namespace ClassicUO.IO.Resources
         private static readonly ushort[] _empty = { };
 
         private static readonly ushort[] _landBytes = new ushort[44 * 44];
-        private readonly Dictionary<uint, SpriteTexture> _landDictionary = new Dictionary<uint, SpriteTexture>();
+        private readonly Dictionary<uint, UOTexture16> _landDictionary = new Dictionary<uint, UOTexture16>();
         private UOFile _file;
 
         public override void Load()
@@ -71,14 +71,14 @@ namespace ClassicUO.IO.Resources
             return texture;
         }
 
-        public SpriteTexture GetLandTexture(uint g)
+        public UOTexture16 GetLandTexture(uint g)
         {
-            if (!_landDictionary.TryGetValue(g, out SpriteTexture texture) || texture.IsDisposed)
+            if (!_landDictionary.TryGetValue(g, out UOTexture16 texture) || texture.IsDisposed)
             {
                 const int SIZE = 44;
                 ushort[] pixels = ReadLandArt((ushort) g);
-                texture = new SpriteTexture(SIZE, SIZE, false);
-                texture.SetDataHitMap16(pixels);
+                texture = new UOTexture16(SIZE, SIZE);
+                texture.PushData(pixels);
                 _landDictionary.Add(g, texture);
             }
 
@@ -421,7 +421,7 @@ namespace ClassicUO.IO.Resources
             imageRectangle.Height = maxY - minY;
 
             texture = new ArtTexture(imageRectangle, width, height);
-            texture.SetDataHitMap16(pixels);
+            texture.PushData(pixels);
         }
 
         public void ClearCaveTextures()

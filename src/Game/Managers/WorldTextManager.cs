@@ -83,7 +83,7 @@ namespace ClassicUO.Game.Managers
 
             for (var o = _drawPointer; o != null; o = o.Left)
             {
-                if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < Engine.Ticks)
+                if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < Engine.Ticks || o.Owner.UseInRender != renderIndex)
                     continue;
 
                 ushort hue = 0;

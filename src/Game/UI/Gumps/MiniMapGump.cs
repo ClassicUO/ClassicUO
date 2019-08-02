@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private bool _draw;
         //private bool _forceUpdate;
-        private SpriteTexture _gumpTexture, _mapTexture;
+        private UOTexture _gumpTexture, _mapTexture;
         private int _lastMap = -1;
         private Texture2D _playerIndicator, _mobilesIndicator;
         private long _timeMS;
@@ -284,8 +284,8 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            _mapTexture = new SpriteTexture(Width, Height, false);
-            _mapTexture.SetDataHitMap16(data);
+            _mapTexture = new UOTexture16(Width, Height);
+            _mapTexture.SetData(data);
         }
 
         private void CreatePixels(ushort[] data, int color, int x, int y, int w, int h, Point[] table, int count)
