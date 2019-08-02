@@ -140,7 +140,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 			}
 		}
 	}
-	else if (mode == 4 || (mode == 3 && (color.r > 0.031 || color.g > 0.031 || color.b > 0.031)))
+	else if (mode == 4 || (mode == 3 && (color.r > 0.08 /*|| color.g > 0.08 || color.b > 0.08*/)))
 	{
 		color.rgb = get_rgb(color.r + 90, IN.Hue.x, swap);
 	}
