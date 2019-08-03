@@ -72,7 +72,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public virtual void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex)
+        public virtual void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex, bool isGump = false)
         {
             ProcessWorldText(false);
 
@@ -83,7 +83,7 @@ namespace ClassicUO.Game.Managers
 
             for (var o = _drawPointer; o != null; o = o.Left)
             {
-                if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < Engine.Ticks || o.Owner.UseInRender != renderIndex)
+                if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < Engine.Ticks || (o.Owner.UseInRender != renderIndex && !isGump))
                     continue;
 
                 ushort hue = 0;
@@ -295,11 +295,11 @@ namespace ClassicUO.Game.Managers
 
 
 
-        public override void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex)
+        public override void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex, bool isGump = false)
         {
             float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
 
-            base.Draw(batcher, 0, 0, renderIndex);
+            base.Draw(batcher, 0, 0, renderIndex, isGump);
 
             foreach (KeyValuePair<Serial, OverheadDamage> overheadDamage in _damages)
             {
