@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -42,20 +43,23 @@ namespace ClassicUO.IO.Resources
         private readonly Dictionary<uint, UOTexture16> _landDictionary = new Dictionary<uint, UOTexture16>();
         private UOFile _file;
 
-        public override void Load()
+        public override Task Load()
         {
-            string filepath = Path.Combine(FileManager.UoFolderPath, "artLegacyMUL.uop");
-
-            if (File.Exists(filepath))
-                _file = new UOFileUop(filepath, ".tga", Constants.MAX_STATIC_DATA_INDEX_COUNT);
-            else
+            return Task.Run(() =>
             {
-                filepath = Path.Combine(FileManager.UoFolderPath, "art.mul");
-                string idxpath = Path.Combine(FileManager.UoFolderPath, "artidx.mul");
+                string filepath = Path.Combine(FileManager.UoFolderPath, "artLegacyMUL.uop");
 
-                if (File.Exists(filepath) && File.Exists(idxpath))
-                    _file = new UOFileMul(filepath, idxpath, Constants.MAX_STATIC_DATA_INDEX_COUNT);
-            }
+                if (File.Exists(filepath))
+                    _file = new UOFileUop(filepath, ".tga", Constants.MAX_STATIC_DATA_INDEX_COUNT);
+                else
+                {
+                    filepath = Path.Combine(FileManager.UoFolderPath, "art.mul");
+                    string idxpath = Path.Combine(FileManager.UoFolderPath, "artidx.mul");
+
+                    if (File.Exists(filepath) && File.Exists(idxpath))
+                        _file = new UOFileMul(filepath, idxpath, Constants.MAX_STATIC_DATA_INDEX_COUNT);
+                }
+            });
         }
 
         public override ArtTexture GetTexture(uint g)

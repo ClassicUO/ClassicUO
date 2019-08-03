@@ -22,8 +22,10 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Game.Managers;
@@ -135,61 +137,65 @@ namespace ClassicUO.IO
         public static MultiMapLoader Multimap { get; private set; }
         public static ProfessionLoader Profession { get; private set; }
 
-        public static void LoadFiles()
+        public static async void LoadFiles()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 
+            List<Task> tasks = new List<Task>();
+
             Animations = new AnimationsLoader();
-            Animations.Load();
+            tasks.Add(Animations.Load());
 
             AnimData = new AnimDataLoader();
-            AnimData.Load();
+            tasks.Add(AnimData.Load());
 
             Art = new ArtLoader();
-            Art.Load();
+            tasks.Add(Art.Load());
 
             Map = new MapLoader();
-            Map.Load();
+            tasks.Add(Map.Load());
 
             Cliloc = new ClilocLoader();
-            Cliloc.Load(Engine.GlobalSettings.ClilocFile);
+            tasks.Add(Cliloc.Load(Engine.GlobalSettings.ClilocFile));
 
             Gumps = new GumpsLoader();
-            Gumps.Load();
+            tasks.Add(Gumps.Load());
 
             Fonts = new FontsLoader();
-            Fonts.Load();
+            tasks.Add(Fonts.Load());
 
             Hues = new HuesLoader();
-            Hues.Load();
+            tasks.Add(Hues.Load());
 
             TileData = new TileDataLoader();
-            TileData.Load();
+            tasks.Add(TileData.Load());
 
             Multi = new MultiLoader();
-            Multi.Load();
+            tasks.Add(Multi.Load());
 
             Skills = new SkillsLoader();
-            Skills.Load();
+            tasks.Add(Skills.Load());
 
             Textmaps = new TexmapsLoader();
-            Textmaps.Load();
+            tasks.Add(Textmaps.Load());
 
             Speeches = new SpeechesLoader();
-            Speeches.Load();
+            tasks.Add(Speeches.Load());
 
             Lights = new LightsLoader();
-            Lights.Load();
+            tasks.Add(Lights.Load());
 
             Sounds = new SoundsLoader();
-            Sounds.Load();
+            tasks.Add(Sounds.Load());
 
             Multimap = new MultiMapLoader();
-            Multimap.Load();
+            tasks.Add(Multimap.Load());
 
             Profession = new ProfessionLoader();
-            Profession.Load();
+            tasks.Add(Profession.Load());
 
+
+            Task.WhenAll(tasks).Wait();
 
             var verdata = Verdata.File;
 

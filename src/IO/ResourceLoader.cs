@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
@@ -53,7 +54,7 @@ namespace ClassicUO.IO
         public bool IsDisposed { get; private set; }
 
 
-        public abstract void Load();
+        public abstract Task Load();
 
         public abstract T GetTexture(uint id);
 
@@ -123,7 +124,7 @@ namespace ClassicUO.IO
             CleanResources();
         }
 
-        public abstract void Load();
+        public abstract Task Load();
 
         protected abstract void CleanResources();
     }

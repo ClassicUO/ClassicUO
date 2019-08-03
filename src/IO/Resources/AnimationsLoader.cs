@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -180,8 +181,12 @@ namespace ClassicUO.IO.Resources
         };
 
 
-        public override void Load()
+        public override Task Load()
         {
+            return Task.Run(() =>
+            {
+
+            
             Dictionary<ulong, UopFileData> hashes = new Dictionary<ulong, UopFileData>();
             int[] un = {0x40000, 0x10000, 0x20000, 0x20000, 0x20000};
 
@@ -580,6 +585,8 @@ namespace ClassicUO.IO.Resources
                     }
                 }
             }
+
+            });
         }
 
         private void LoadUop(Dictionary<ulong, UopFileData> hashes)

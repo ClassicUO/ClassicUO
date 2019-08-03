@@ -27,6 +27,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
@@ -84,103 +85,106 @@ namespace ClassicUO.IO.Resources
 
 
 
-        public override void Load()
+        public override Task Load()
         {
-            UOFileMul fonts = new UOFileMul(Path.Combine(FileManager.UoFolderPath, "fonts.mul"), false);
-            UOFileMul[] uniFonts = new UOFileMul[20];
-
-            for (int i = 0; i < 20; i++)
+            return Task.Run(() =>
             {
-                string path = Path.Combine(FileManager.UoFolderPath, "unifont" + (i == 0 ? "" : i.ToString()) + ".mul");
+                UOFileMul fonts = new UOFileMul(Path.Combine(FileManager.UoFolderPath, "fonts.mul"), false);
+                UOFileMul[] uniFonts = new UOFileMul[20];
 
-                if (File.Exists(path))
+                for (int i = 0; i < 20; i++)
                 {
-                    uniFonts[i] = new UOFileMul(path, false);
-                    _unicodeFontAddress[i] = uniFonts[i].StartAddress;
-                    _unicodeFontSize[i] = uniFonts[i].Length;
-                }
-            }
+                    string path = Path.Combine(FileManager.UoFolderPath, "unifont" + (i == 0 ? "" : i.ToString()) + ".mul");
 
-            int fontHeaderSize = UnsafeMemoryManager.SizeOf<FontHeader>();
-            FontCount = 0;
-
-            while (fonts.Position < fonts.Length)
-            {
-                bool exit = false;
-                fonts.Skip(1);
-
-                unsafe
-                {
-                    for (int i = 0; i < 224; i++)
+                    if (File.Exists(path))
                     {
-                        FontHeader* fh = (FontHeader*) fonts.PositionAddress;
-
-                        if (fonts.Position + fontHeaderSize >= fonts.Length)
-                            continue;
-
-                        fonts.Skip(fontHeaderSize);
-                        int bcount = fh->Width * fh->Height * 2;
-
-                        if (fonts.Position + bcount > fonts.Length)
-                        {
-                            exit = true;
-
-                            break;
-                        }
-
-                        fonts.Skip(bcount);
+                        uniFonts[i] = new UOFileMul(path, false);
+                        _unicodeFontAddress[i] = uniFonts[i].StartAddress;
+                        _unicodeFontSize[i] = uniFonts[i].Length;
                     }
                 }
 
-                if (exit)
-                    break;
-
-                FontCount++;
-            }
-
-            if (FontCount < 1)
-            {
+                int fontHeaderSize = UnsafeMemoryManager.SizeOf<FontHeader>();
                 FontCount = 0;
 
-                return;
-            }
-
-            _font = new FontData[FontCount];
-            fonts.Seek(0);
-
-            for (int i = 0; i < FontCount; i++)
-            {
-                byte header = fonts.ReadByte();
-
-                FontCharacterData[] datas = new FontCharacterData[224];
-
-                for (int j = 0; j < 224; j++)
+                while (fonts.Position < fonts.Length)
                 {
-                    if (fonts.Position + 3 >= fonts.Length)
-                        continue;
-
-                    byte w = fonts.ReadByte();
-                    byte h = fonts.ReadByte();
+                    bool exit = false;
                     fonts.Skip(1);
-                    ushort[] data = fonts.ReadArray<ushort>(w * h);
 
-                    datas[j] = new FontCharacterData(w, h, data);
+                    unsafe
+                    {
+                        for (int i = 0; i < 224; i++)
+                        {
+                            FontHeader* fh = (FontHeader*) fonts.PositionAddress;
+
+                            if (fonts.Position + fontHeaderSize >= fonts.Length)
+                                continue;
+
+                            fonts.Skip(fontHeaderSize);
+                            int bcount = fh->Width * fh->Height * 2;
+
+                            if (fonts.Position + bcount > fonts.Length)
+                            {
+                                exit = true;
+
+                                break;
+                            }
+
+                            fonts.Skip(bcount);
+                        }
+                    }
+
+                    if (exit)
+                        break;
+
+                    FontCount++;
                 }
 
-                _font[i] = new FontData(header, datas);
-            }
+                if (FontCount < 1)
+                {
+                    FontCount = 0;
 
-            if (_unicodeFontAddress[1] == IntPtr.Zero)
-            {
-                _unicodeFontAddress[1] = _unicodeFontAddress[0];
-                _unicodeFontSize[1] = _unicodeFontSize[0];
-            }
+                    return;
+                }
 
-            for (int i = 0; i < 256; i++)
-            {
-                if (_fontIndex[i] >= 0xE0)
-                    _fontIndex[i] = _fontIndex[' '];
-            }
+                _font = new FontData[FontCount];
+                fonts.Seek(0);
+
+                for (int i = 0; i < FontCount; i++)
+                {
+                    byte header = fonts.ReadByte();
+
+                    FontCharacterData[] datas = new FontCharacterData[224];
+
+                    for (int j = 0; j < 224; j++)
+                    {
+                        if (fonts.Position + 3 >= fonts.Length)
+                            continue;
+
+                        byte w = fonts.ReadByte();
+                        byte h = fonts.ReadByte();
+                        fonts.Skip(1);
+                        ushort[] data = fonts.ReadArray<ushort>(w * h);
+
+                        datas[j] = new FontCharacterData(w, h, data);
+                    }
+
+                    _font[i] = new FontData(header, datas);
+                }
+
+                if (_unicodeFontAddress[1] == IntPtr.Zero)
+                {
+                    _unicodeFontAddress[1] = _unicodeFontAddress[0];
+                    _unicodeFontSize[1] = _unicodeFontSize[0];
+                }
+
+                for (int i = 0; i < 256; i++)
+                {
+                    if (_fontIndex[i] >= 0xE0)
+                        _fontIndex[i] = _fontIndex[' '];
+                }
+            });
         }
 
         protected override void CleanResources()

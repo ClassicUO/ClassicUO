@@ -22,6 +22,7 @@
 #endregion
 
 using System.IO;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
@@ -32,15 +33,17 @@ namespace ClassicUO.IO.Resources
     {
         private UOFileMul _file;
 
-        public override void Load()
+        public override Task Load()
         {
-            string path = Path.Combine(FileManager.UoFolderPath, "light.mul");
-            string pathidx = Path.Combine(FileManager.UoFolderPath, "lightidx.mul");
+            return Task.Run(() => {
+                string path = Path.Combine(FileManager.UoFolderPath, "light.mul");
+                string pathidx = Path.Combine(FileManager.UoFolderPath, "lightidx.mul");
 
-            if (!File.Exists(path) || !File.Exists(pathidx))
-                throw new FileNotFoundException();
+                if (!File.Exists(path) || !File.Exists(pathidx))
+                    throw new FileNotFoundException();
 
-            _file = new UOFileMul(path, pathidx, Constants.MAX_LIGHTS_DATA_INDEX_COUNT);
+                _file = new UOFileMul(path, pathidx, Constants.MAX_LIGHTS_DATA_INDEX_COUNT);
+            });
         }
 
 

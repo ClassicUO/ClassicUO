@@ -27,6 +27,7 @@ using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
@@ -608,61 +609,64 @@ namespace ClassicUO.IO
                 }
             }
 
-            public override void Load()
+            public override Task Load()
             {
-                if (FileManager.Map is ULMapLoader)
-                    return;
-
-                FileManager.MapLoaderReLoad(this);
-                _UL._EOF = new uint[NumMaps];
-                _filesStaticsStream = new FileStream[NumMaps];
-                bool foundedOneMap = false;
-
-                for (int i = 0; i < NumMaps; i++)
+                return Task.Run(() =>
                 {
-                    string path = Path.Combine(_UL.ShardName, $"map{i}.mul");
+                    if (FileManager.Map is ULMapLoader)
+                        return;
 
-                    if (File.Exists(path))
+                    FileManager.MapLoaderReLoad(this);
+                    _UL._EOF = new uint[NumMaps];
+                    _filesStaticsStream = new FileStream[NumMaps];
+                    bool foundedOneMap = false;
+
+                    for (int i = 0; i < NumMaps; i++)
                     {
-                        _filesMap[i] = new ULFileMul(path, false);
-                        foundedOneMap = true;
+                        string path = Path.Combine(_UL.ShardName, $"map{i}.mul");
+
+                        if (File.Exists(path))
+                        {
+                            _filesMap[i] = new ULFileMul(path, false);
+                            foundedOneMap = true;
+                        }
+
+                        path = Path.Combine(_UL.ShardName, $"statics{i}.mul");
+
+                        if (!File.Exists(path))
+                        {
+                            foundedOneMap = false;
+
+                            break;
+                        }
+
+                        _filesStatics[i] = new ULFileMul(path, true);
+                        _filesStaticsStream[i] = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+                        _UL._EOF[i] = (uint) new FileInfo(path).Length;
+
+                        path = Path.Combine(_UL.ShardName, $"staidx{i}.mul");
+
+                        if (!File.Exists(path))
+                        {
+                            foundedOneMap = false;
+
+                            break;
+                        }
+
+                        _filesIdxStatics[i] = new ULFileMul(path, false);
                     }
 
-                    path = Path.Combine(_UL.ShardName, $"statics{i}.mul");
+                    if (!foundedOneMap)
+                        throw new FileNotFoundException($"No maps, staidx or statics found on {_UL.ShardName}.");
 
-                    if (!File.Exists(path))
+                    for (int i = 0; i < NumMaps; i++)
                     {
-                        foundedOneMap = false;
-
-                        break;
+                        MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
+                        MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
+                        //on ultimalive map always preload
+                        LoadMap(i);
                     }
-
-                    _filesStatics[i] = new ULFileMul(path, true);
-                    _filesStaticsStream[i] = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
-                    _UL._EOF[i] = (uint) new FileInfo(path).Length;
-
-                    path = Path.Combine(_UL.ShardName, $"staidx{i}.mul");
-
-                    if (!File.Exists(path))
-                    {
-                        foundedOneMap = false;
-
-                        break;
-                    }
-
-                    _filesIdxStatics[i] = new ULFileMul(path, false);
-                }
-
-                if (!foundedOneMap)
-                    throw new FileNotFoundException($"No maps, staidx or statics found on {_UL.ShardName}.");
-
-                for (int i = 0; i < NumMaps; i++)
-                {
-                    MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
-                    MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
-                    //on ultimalive map always preload
-                    LoadMap(i);
-                }
+                });
             }
 
             internal static void CheckForShardMapFile(int mapID)

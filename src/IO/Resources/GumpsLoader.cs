@@ -24,6 +24,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
@@ -35,57 +36,60 @@ namespace ClassicUO.IO.Resources
         private UOFile _file;
         //private readonly List<uint> _usedIndex = new List<uint>();
 
-        public override void Load()
+        public override Task Load()
         {
-            string path = Path.Combine(FileManager.UoFolderPath, "gumpartLegacyMUL.uop");
+            return Task.Run(() => {
 
-            if (File.Exists(path))
-            {
-                _file = new UOFileUop(path, ".tga", Constants.MAX_GUMP_DATA_INDEX_COUNT, true);
-                FileManager.UseUOPGumps = true;
-            }
-            else
-            {
-                path = Path.Combine(FileManager.UoFolderPath, "Gumpart.mul");
-                string pathidx = Path.Combine(FileManager.UoFolderPath, "Gumpidx.mul");
+                string path = Path.Combine(FileManager.UoFolderPath, "gumpartLegacyMUL.uop");
 
-                if (File.Exists(path) && File.Exists(pathidx))
-                    _file = new UOFileMul(path, pathidx, Constants.MAX_GUMP_DATA_INDEX_COUNT, 12);
-                FileManager.UseUOPGumps = false;
-            }
-
-            string pathdef = Path.Combine(FileManager.UoFolderPath, "gump.def");
-
-            if (!File.Exists(pathdef))
-                return;
-
-            using (DefReader defReader = new DefReader(pathdef, 3))
-            {
-                while (defReader.Next())
+                if (File.Exists(path))
                 {
-                    int ingump = defReader.ReadInt();
+                    _file = new UOFileUop(path, ".tga", Constants.MAX_GUMP_DATA_INDEX_COUNT, true);
+                    FileManager.UseUOPGumps = true;
+                }
+                else
+                {
+                    path = Path.Combine(FileManager.UoFolderPath, "Gumpart.mul");
+                    string pathidx = Path.Combine(FileManager.UoFolderPath, "Gumpidx.mul");
 
-                    if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT ||
-                        ingump >= _file.Entries.Length ||
-                        _file.Entries[ingump].Length > 0)
-                        continue;
+                    if (File.Exists(path) && File.Exists(pathidx))
+                        _file = new UOFileMul(path, pathidx, Constants.MAX_GUMP_DATA_INDEX_COUNT, 12);
+                    FileManager.UseUOPGumps = false;
+                }
 
-                    int[] group = defReader.ReadGroup();
+                string pathdef = Path.Combine(FileManager.UoFolderPath, "gump.def");
 
-                    for (int i = 0; i < group.Length; i++)
+                if (!File.Exists(pathdef))
+                    return;
+
+                using (DefReader defReader = new DefReader(pathdef, 3))
+                {
+                    while (defReader.Next())
                     {
-                        int checkIndex = group[i];
+                        int ingump = defReader.ReadInt();
 
-                        if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT || checkIndex >= _file.Entries.Length ||
-                            _file.Entries[checkIndex].Length <= 0)
+                        if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT ||
+                            ingump >= _file.Entries.Length ||
+                            _file.Entries[ingump].Length > 0)
                             continue;
 
-                        _file.Entries[ingump] = _file.Entries[checkIndex];
+                        int[] group = defReader.ReadGroup();
 
-                        break;
+                        for (int i = 0; i < group.Length; i++)
+                        {
+                            int checkIndex = group[i];
+
+                            if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT || checkIndex >= _file.Entries.Length ||
+                                _file.Entries[checkIndex].Length <= 0)
+                                continue;
+
+                            _file.Entries[ingump] = _file.Entries[checkIndex];
+
+                            break;
+                        }
                     }
                 }
-            }
+            });
         }
 
         public override UOTexture16 GetTexture(uint g)
