@@ -137,7 +137,7 @@ namespace ClassicUO.IO
         public static MultiMapLoader Multimap { get; private set; }
         public static ProfessionLoader Profession { get; private set; }
 
-        public static async void LoadFiles()
+        public static void LoadFiles()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 
@@ -195,7 +195,10 @@ namespace ClassicUO.IO
             tasks.Add(Profession.Load());
 
 
-            Task.WhenAll(tasks).Wait();
+            if (!Task.WhenAll(tasks).Wait(TimeSpan.FromSeconds(10)))
+            {
+                Log.Message(LogTypes.Panic, "Loading files timeout.");
+            }
 
             var verdata = Verdata.File;
 
