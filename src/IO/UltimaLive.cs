@@ -291,7 +291,7 @@ namespace ClassicUO.IO
                     {
                         ULMapLoader loader = new ULMapLoader(maps);
                         for (int i = 0; i < maps; i++) ULMapLoader.CheckForShardMapFile(i);
-                        loader.Load();
+                        loader.Load().Wait();
                         _UL._ULMap = loader;
                         _UL._filesMap = new ULFileMul[maps];
                         _UL._filesIdxStatics = new ULFileMul[maps];
