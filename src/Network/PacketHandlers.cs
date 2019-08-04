@@ -1659,7 +1659,29 @@ namespace ClassicUO.Network
 
         private static void GraphicEffect(Packet p)
         {
+            if (World.Player == null)
+                return;
+
             GraphicEffectType type = (GraphicEffectType) p.ReadByte();
+
+            if (type > GraphicEffectType.FixedFrom)
+            {
+                if (type == GraphicEffectType.ScreenFade && p.ID == 0x70)
+                {
+                    p.Skip(8);
+                    ushort val = p.ReadUShort();
+
+                    if (val > 4)
+                    {
+                        val = 4;
+                    }
+
+                    Log.Message(LogTypes.Warning, "Effect not implemented");
+                }
+
+                return;
+            }
+
             Serial source = p.ReadUInt();
             Serial target = p.ReadUInt();
             Graphic graphic = p.ReadUShort();
@@ -1676,7 +1698,7 @@ namespace ClassicUO.Network
             if (p.ID != 0x70)
             {
                 hue = (ushort) p.ReadUInt();
-                blendmode = (GraphicEffectBlendMode) p.ReadUInt();
+                blendmode = (GraphicEffectBlendMode) (p.ReadUInt() % 7);
             }
 
             World.AddEffect(type, source, target, graphic, hue, srcPos, targPos, speed, duration, fixedDirection, doesExplode, false, blendmode);
