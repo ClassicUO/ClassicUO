@@ -1927,11 +1927,14 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
-            if (FileManager.ClientVersion > ClientVersions.CV_7000)
-                if (Flags.HasFlag(Flags.Frozen))
-                    return false;
+            if (Walker.StepsCount >= Constants.MAX_STEP_COUNT)
+            {
+                Log.Message(LogTypes.Panic, ">> STEP LIMIT REACHED!!! << ");
+                return false;
+            }
 
-            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Engine.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT)
+            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Engine.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || 
+                (FileManager.ClientVersion > ClientVersions.CV_7000 && IsParalyzed))
                 return false;
 
             if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead)
