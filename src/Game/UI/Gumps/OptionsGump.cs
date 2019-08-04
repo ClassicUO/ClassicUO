@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator;
         private Combobox _overrideContainerLocationSetting;
 
         // sounds
@@ -1225,6 +1225,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(_containerGumpLocation);
 
+            _showTargetRangeIndicator = new Checkbox(0x00D2, 0x00D3, "Show target range indicator", FONT, HUE_FONT, true)
+            {
+                IsChecked = Engine.Profile.Current.ShowTargetRangeIndicator,
+            };
+
+            rightArea.Add(_showTargetRangeIndicator);
 
             Add(rightArea, PAGE);
 
@@ -1447,6 +1453,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _overrideContainerLocation.IsChecked = false;
                     _overrideContainerLocationSetting.SelectedIndex = 0;
                     _dragSelectHumanoidsOnly.IsChecked = false;
+                    _showTargetRangeIndicator.IsChecked = false;
 
                     break;
 
@@ -1836,6 +1843,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             Engine.Profile.Current.OverrideContainerLocation = _overrideContainerLocation.IsChecked;
             Engine.Profile.Current.OverrideContainerLocationSetting = _overrideContainerLocationSetting.SelectedIndex;
+
+            Engine.Profile.Current.ShowTargetRangeIndicator = _showTargetRangeIndicator.IsChecked;
 
             // network
             Engine.Profile.Current.ShowNetworkStats = _showNetStats.IsChecked;
