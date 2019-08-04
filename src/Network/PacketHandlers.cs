@@ -1927,8 +1927,8 @@ namespace ClassicUO.Network
             if (World.Mobiles.Add(mobile))
                 World.Mobiles.ProcessDelta();
 
-            if (mobile == World.Player)
-                return;
+            //if (mobile == World.Player)
+            //    return;
 
             Direction dir = direction & Direction.Up;
             bool isrun = (direction & Direction.Running) != 0;
