@@ -105,7 +105,9 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool InWarMode { get; set; }
 
+#if MOVEMENT2
         public Deque<Step> RequestedSteps { get; } = new Deque<Step>();
+#endif
 
         public IReadOnlyDictionary<Graphic, BuffIcon> BuffIcons => _buffIcons;
 
