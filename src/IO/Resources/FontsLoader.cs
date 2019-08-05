@@ -342,22 +342,22 @@ namespace ClassicUO.IO.Resources
 
             StringBuilder sb = new StringBuilder();
 
-            if (IsUsingHTML)
-            {
-                int strLen = str.Length;
-                GetHTMLData(font, str, ref strLen, align, flags);
-                sb.Append(str.Substring(0, str.Length - strLen));
-                str = str.Substring(str.Length - strLen, strLen);
+            //if (IsUsingHTML)
+            //{
+            //    int strLen = str.Length;
+            //    GetHTMLData(font, str, ref strLen, align, flags);
+            //    sb.Append(str.Substring(0, str.Length - strLen));
+            //    str = str.Substring(str.Length - strLen, strLen);
 
 
-                int newWidth = GetWidthExASCII(font, str, width, align, flags);
+            //    int newWidth = GetWidthExASCII(font, str, width, align, flags);
 
-                if (newWidth <= width)
-                {
-                    sb.Append(str);
-                    return sb.ToString();
-                }
-            }
+            //    if (newWidth <= width)
+            //    {
+            //        sb.Append(str);
+            //        return sb.ToString();
+            //    }
+            //}
 
             if (isCropped)
                 width -= fd.Chars[_fontIndex[(byte) '.']].Width * 3;
@@ -773,22 +773,22 @@ namespace ClassicUO.IO.Resources
 
             StringBuilder sb = new StringBuilder();
 
-            if (IsUsingHTML)
-            {
-                int strLen = str.Length;
+            //if (IsUsingHTML)
+            //{
+            //    int strLen = str.Length;
 
-                GetHTMLData(font, str, ref strLen, align, flags);
-                sb.Append(str.Substring(0, str.Length - strLen));
-                str = str.Substring(str.Length - strLen, strLen);
+            //    GetHTMLData(font, str, ref strLen, align, flags);
+            //    sb.Append(str.Substring(0, str.Length - strLen));
+            //    str = str.Substring(str.Length - strLen, strLen);
 
-                int newWidth = GetWidthExUnicode(font, str, width, align, flags);
+            //    int newWidth = GetWidthExUnicode(font, str, width, align, flags);
 
-                if (newWidth <= width)
-                {
-                    sb.Append(str);
-                    return sb.ToString();
-                }
-            }
+            //    if (newWidth <= width)
+            //    {
+            //        sb.Append(str);
+            //        return sb.ToString();
+            //    }
+            //}
 
             if (isCropped)
             {

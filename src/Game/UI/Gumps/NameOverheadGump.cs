@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Hue hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (Hue) 0x0481;
 
-            _renderedText = RenderedText.Create(String.Empty, hue, 0xFF, true, FontStyle.BlackBorder | FontStyle.Cropped, TEXT_ALIGN_TYPE.TS_CENTER, 100, 30, true);
+            _renderedText = RenderedText.Create(String.Empty, hue, 0xFF, true, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, 100, 30, true);
 
             Add(_background = new AlphaBlendControl(.3f)
             {
@@ -97,15 +97,22 @@ namespace ClassicUO.Game.UI.Gumps
                     FileManager.Fonts.SetUseHTML(true);
                     FileManager.Fonts.RecalculateWidthByInfo = true;
 
+
                     int width = FileManager.Fonts.GetWidthUnicode(_renderedText.Font, t);
 
                     if (width > 100)
+                    {
+                        t = FileManager.Fonts.GetTextByWidthUnicode(_renderedText.Font, t, 100, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
                         width = 100;
+                    }
 
-                    width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, t, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) (FontStyle.BlackBorder | FontStyle.Cropped));
+                    //if (width > 100)
+                    //    width = 100;
 
-                    if (width > 100)
-                        width = 100;
+                    //width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, t, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) (FontStyle.BlackBorder /*| FontStyle.Cropped*/));
+
+                    //if (width > 100)
+                    //    width = 100;
 
                     _renderedText.MaxWidth = width;
 
@@ -125,19 +132,29 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!string.IsNullOrEmpty(Entity.Name))
                 {
-                    int width = FileManager.Fonts.GetWidthUnicode(_renderedText.Font, Entity.Name);
+                    string t = Entity.Name;
 
-                    if (width > 200)
-                        width = 200;
+                    int width = FileManager.Fonts.GetWidthUnicode(_renderedText.Font, t);
 
-                    width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, Entity.Name, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)(FontStyle.BlackBorder | FontStyle.Cropped));
+                    if (width > 100)
+                    {
+                        t = FileManager.Fonts.GetTextByWidthUnicode(_renderedText.Font, t, 100, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
+                        width = 100;
+                    }
 
-                    if (width > 200)
-                        width = 200;
+                    //int width = FileManager.Fonts.GetWidthUnicode(_renderedText.Font, Entity.Name);
+
+                    //if (width > 200)
+                    //    width = 200;
+
+                    //width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, Entity.Name, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)(FontStyle.BlackBorder));
+
+                    //if (width > 200)
+                    //    width = 200;
 
                     _renderedText.MaxWidth = width;
 
-                    _renderedText.Text = Entity.Name;
+                    _renderedText.Text = t;
 
                     Width = _background.Width = Math.Max(_renderedText.Width + 4, MIN_WIDTH);                    
                     Height = _background.Height = _renderedText.Height + 4;
