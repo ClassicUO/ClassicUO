@@ -28,6 +28,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.IO;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -48,11 +49,38 @@ namespace ClassicUO.Game.UI.Gumps
                 TitleGumpID = 0x82A
             });
 
+            const ushort DARK_MODE_JOURNAL_HUE = 903;
+
+            string str = "Dark mode";
+            int width = FileManager.Fonts.GetWidthASCII(6, str);
+
+            Checkbox darkMode;
+            Add(darkMode = new Checkbox(0x00D2, 0x00D3, str, 6, 0x0288, false)
+            {
+                X = _background.Width - width -2, 
+                Y = 7,
+                IsChecked = Engine.Profile.Current.JournalDarkMode
+            });
+
+            Hue = (ushort)(Engine.Profile.Current.JournalDarkMode ? DARK_MODE_JOURNAL_HUE : 0);
+            darkMode.ValueChanged += (sender, e) =>
+            {
+                var ok = Engine.Profile.Current.JournalDarkMode = !Engine.Profile.Current.JournalDarkMode;
+                Hue = (ushort) (ok ? DARK_MODE_JOURNAL_HUE : 0);
+            };
+
             _scrollBar = new ScrollFlag(-25, 36, Height, true);
 
             Add(_journalEntries = new RenderedTextList(25, 36, _background.Width - (_scrollBar.Width >> 1) - 5, 200, _scrollBar));
 
             Add(_scrollBar);
+        }
+
+
+        public Hue Hue
+        {
+            get => _background.Hue;
+            set => _background.Hue = value;
         }
 
         protected override void OnMouseWheel(MouseEvent delta)
