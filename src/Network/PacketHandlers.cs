@@ -1267,6 +1267,9 @@ namespace ClassicUO.Network
             item.Amount = 1;
             Mobile mobile = World.Mobiles.Get(item.Container);
 
+            World.Items.Add(item);
+            World.Items.ProcessDelta();
+
             if (mobile != null)
             {
                 mobile.Equipment[(int) item.Layer] = item;
@@ -1276,8 +1279,6 @@ namespace ClassicUO.Network
 
             if (item.Layer >= Layer.ShopBuyRestock && item.Layer <= Layer.ShopSell) item.Items.Clear();
 
-            if (World.Items.Add(item))
-                World.Items.ProcessDelta();
 
             if (mobile == World.Player && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded))
                 World.Player.UpdateAbilities();
@@ -1286,6 +1287,8 @@ namespace ClassicUO.Network
 
             if (gs.HeldItem.Serial == item.Serial)
                 gs.HeldItem.Clear();
+
+          
         }
 
         private static void UpdateSkills(Packet p)
