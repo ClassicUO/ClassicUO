@@ -782,10 +782,8 @@ namespace ClassicUO.Network
 
         private static void UpdatePlayer(Packet p)
         {
-            if (World.Player == null) return;
-
-            if (p.ReadUInt() != World.Player)
-                throw new Exception("OnMobileStatus");
+            if (World.Player == null || p.ReadUInt() != World.Player)
+                return;
 
             bool oldDead = World.Player.IsDead;
             ushort oldGraphic = World.Player.Graphic;
@@ -1097,6 +1095,7 @@ namespace ClassicUO.Network
                         item.Layer = hold.Layer;
                         item.Container = hold.Container;
                         item.Position = hold.Position;
+                        item.UpdateProperties(hold.Properties);
 
                         container.Items.Add(item);
 
@@ -1119,6 +1118,7 @@ namespace ClassicUO.Network
                         item.Layer = hold.Layer;
                         item.Container = hold.Container;
                         item.Position = hold.Position;
+                        item.UpdateProperties(hold.Properties);
 
                         if (!hold.OnGround)
                         {
@@ -1907,61 +1907,71 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
 
-            Mobile mobile = World.Mobiles.Get(p.ReadUInt()); //World.GetOrCreateMobile(p.ReadUInt());
+            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
             if (mobile == null)
                 return;
 
             if (!mobile.Exists)
                 GameActions.RequestMobileStatus(mobile);
 
-            mobile.Graphic = p.ReadUShort();
+            ushort graphic = p.ReadUShort();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
             sbyte z = p.ReadSByte();
             Direction direction = (Direction) p.ReadByte();
-            mobile.Hue = p.ReadUShort();
-            mobile.Flags = (Flags) p.ReadByte();
-            mobile.NotorietyFlag = (NotorietyFlag) p.ReadByte();
-            mobile.ProcessDelta();
+            ushort hue = p.ReadUShort();
 
-            if (World.Mobiles.Add(mobile))
-                World.Mobiles.ProcessDelta();
 
-            if (mobile == World.Player)
-                return;
+            mobile.Flags = (Flags)p.ReadByte();
+            mobile.NotorietyFlag = (NotorietyFlag)p.ReadByte();
 
-            Direction dir = direction & Direction.Up;
-            bool isrun = (direction & Direction.Running) != 0;
-
-            //if (World.Get(mobile) == null || mobile.Position == Position.INVALID)
-            //{
-            //    mobile.Position = new Position(x, y, z);
-            //    mobile.Direction = dir;
-            //    mobile.IsRunning = isrun;
-
-            //    mobile.AddToTile();
-            //}
-
-            if (!mobile.EnqueueStep(x, y, z, dir, isrun))
+            if (mobile != World.Player)
             {
-                mobile.Position = new Position(x, y, z);
-                mobile.Direction = dir;
-                mobile.IsRunning = isrun;
-                mobile.ClearSteps();
+                //if (mobile.IsMoving && (byte) mobile.Direction == mobile.Steps.Back().Direction)
+                //{
+                //    var step = mobile.Steps.Back();
+
+                //    mobile.Position = new Position((ushort) step.X, (ushort) step.Y, step.Z);
+                //    mobile.Direction = (Direction) step.Direction;
+                //    mobile.IsRunning = step.Run;
+                //    mobile.Steps.Clear();
+                //    mobile.AddToTile();
+                //}
+
+                mobile.Graphic = graphic;
+                mobile.Hue = hue;
+
+                Direction dir = direction & Direction.Up;
+                bool isrun = (direction & Direction.Running) != 0;
+
+                if (!mobile.EnqueueStep(x, y, z, dir, isrun))
+                {
+                    mobile.Position = new Position(x, y, z);
+                    mobile.Direction = dir;
+                    mobile.IsRunning = isrun;
+                    mobile.ClearSteps();
+                    mobile.AddToTile();
+                }
+
+                mobile.ProcessDelta();
+
+                if (World.Mobiles.Add(mobile))
+                    World.Mobiles.ProcessDelta();
+
+            }
+            else
+            {
+                mobile.ProcessDelta();
                 mobile.AddToTile();
             }
         }
 
         private static void UpdateObject(Packet p)
         {
-            if (World.Player == null) return;
+            if (World.Player == null)
+                return;
 
             Serial serial = p.ReadUInt();
-            Mobile mobile = World.GetOrCreateMobile(serial);
-
-            if (!mobile.Exists)
-                GameActions.RequestMobileStatus(serial);
-
             Graphic graphic = p.ReadUShort();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
@@ -1970,6 +1980,13 @@ namespace ClassicUO.Network
             Hue hue = p.ReadUShort();
             Flags flags = (Flags) p.ReadByte();
             NotorietyFlag notoriety = (NotorietyFlag) p.ReadByte();
+
+
+            Mobile mobile = World.GetOrCreateMobile(serial);
+
+            if (!mobile.Exists)
+                GameActions.RequestMobileStatus(serial);
+
             mobile.Graphic = graphic;
             mobile.Hue = hue;
             mobile.Flags = flags;
@@ -2047,9 +2064,6 @@ namespace ClassicUO.Network
             if (World.Mobiles.Add(mobile))
                 World.Mobiles.ProcessDelta();
             World.Items.ProcessDelta();
-
-            //if (string.IsNullOrEmpty(mobile.Name))
-            //    NetClient.Socket.Send(new PNameRequest(mobile));
 
             if (mobile != World.Player && !mobile.IsClicked && Engine.Profile.Current.ShowNewMobileNameIncoming)
                 GameActions.SingleClick(mobile);
