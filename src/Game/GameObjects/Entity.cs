@@ -152,8 +152,9 @@ namespace ClassicUO.Game.GameObjects
         public void UpdateProperties(List<Property> props)
         {
             Properties.Clear();
-            foreach (Property p in props)
-                Properties.Add(p);
+            if (props != null)
+                foreach (Property p in props)
+                    Properties.Add(p);
             _delta |= Delta.Properties;
         }
 
