@@ -21,6 +21,8 @@
 
 #endregion
 
+using System.Runtime.CompilerServices;
+
 namespace ClassicUO.Game.Scenes
 {
     public enum ScenesType
@@ -76,9 +78,13 @@ namespace ClassicUO.Game.Scenes
             CurrentScene?.Load();
         }
 
+        [MethodImpl(256)]
         public T GetScene<T>() where T : Scene
         {
-            return CurrentScene?.GetType() == typeof(T) ? (T) CurrentScene : null;
+            if (CurrentScene is T s)
+                return s;
+
+            return null;
         }
     }
 }
