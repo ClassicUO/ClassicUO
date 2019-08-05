@@ -102,11 +102,7 @@ namespace ClassicUO.Game.Managers
 
         public void DenyWalk(byte sequence, int x, int y, sbyte z)
         {
-            World.Player.Steps.Clear();
-
-            World.Player.Offset.X = 0;
-            World.Player.Offset.Y = 0;
-            World.Player.Offset.Z = 0;
+            World.Player.ClearSteps();
 
             Reset();
 
