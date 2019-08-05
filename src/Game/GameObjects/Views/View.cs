@@ -21,6 +21,8 @@
 
 #endregion
 
+using System.Runtime.CompilerServices;
+
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -98,6 +100,7 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
+        [MethodImpl(256)]
         protected static void ResetHueVector()
         {
             HueVector.X = 0;
@@ -122,6 +125,7 @@ namespace ClassicUO.Game.GameObjects
             return false;
         }
 
+        [MethodImpl(256)]
         public bool ProcessAlpha(int max)
         {
             bool result = false;
