@@ -690,7 +690,7 @@ namespace ClassicUO.Game.Scenes
 
         private void ParseFlags(Packet p)
         {
-            World.ClientFlags.SetFlags((CharacterListFlag) p.ReadUInt());
+            World.ClientFeatures.SetFlags((CharacterListFlags) p.ReadUInt());
         }
     }
 

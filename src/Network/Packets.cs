@@ -143,7 +143,7 @@ namespace ClassicUO.Network
             WriteASCII(character.Name, 30);
             WriteUShort(0x00);
             uint clientflag = 0;
-            ushort flags = (ushort) World.ClientFlags.Flags;
+            uint flags = (uint) FileManager.ClientFlags;
 
             for (ushort i = 0; i < flags; i++)
                 clientflag |= (uint) (1 << i);
@@ -232,9 +232,10 @@ namespace ClassicUO.Network
             Skip(2);
             uint clientFlag = 0;
 
-            for (int i = 0; i < (int) World.ClientFlags.Flags; i++) clientFlag |= (uint) (1 << i);
+            for (int i = 0; i < (uint) FileManager.ClientFlags; i++)
+                clientFlag |= (uint) (1 << i);
 
-            WriteUInt(clientFlag);
+            WriteUInt((uint) FileManager.ClientFlags);
             Skip(24);
             WriteUInt(index);
             WriteUInt(ipclient);
@@ -922,7 +923,7 @@ namespace ClassicUO.Network
             WriteByte(0x0A);
             uint clientFlag = 0;
 
-            for (int i = 0; i < (int) World.ClientFlags.Flags; i++)
+            for (int i = 0; i < (uint) FileManager.ClientFlags; i++)
                 clientFlag |= (uint) (1 << i);
 
             WriteUInt(clientFlag);

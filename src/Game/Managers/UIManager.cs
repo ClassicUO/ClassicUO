@@ -546,7 +546,7 @@ namespace ClassicUO.Game.Managers
 
                     case "tooltip":
 
-                        if (World.ClientFlags.TooltipsEnabled)
+                        if (World.ClientFeatures.TooltipsEnabled)
                         {
                             string cliloc = FileManager.Cliloc.GetString(int.Parse(gparams[1]));
 
@@ -569,7 +569,7 @@ namespace ClassicUO.Game.Managers
 
                     case "itemproperty":
 
-                        if (World.ClientFlags.TooltipsEnabled)
+                        if (World.ClientFeatures.TooltipsEnabled)
                         {
                             var entity = World.Get(Serial.Parse(gparams[1]));
                             var lastControl = gump.Children.LastOrDefault();

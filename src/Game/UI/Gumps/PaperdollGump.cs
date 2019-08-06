@@ -171,7 +171,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int profileX = 25;
                 const int SCROLLS_STEP = 14;
 
-                if (World.ClientFlags.PaperdollBooks)
+                if (World.ClientFeatures.PaperdollBooks)
                 {
                     Add(_combatBook = new GumpPic(156, 200, 0x2B34, 0));
                     _combatBook.MouseDoubleClick += (sender, e) => { GameActions.OpenAbilitiesBook(); };

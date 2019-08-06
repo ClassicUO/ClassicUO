@@ -345,7 +345,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _clickTiming = 0;
                     _isPressed = false;
 
-                    if (!World.ClientFlags.TooltipsEnabled)
+                    if (!World.ClientFeatures.TooltipsEnabled)
                         GameActions.SingleClick(Entity);
                     GameActions.OpenPopupMenu(Entity);
                 }

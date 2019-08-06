@@ -28,6 +28,7 @@ using System.IO;
 using System.Threading.Tasks;
 
 using ClassicUO.Game;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Logging;
@@ -106,12 +107,29 @@ namespace ClassicUO.IO
 
                 ClientVersion = (ClientVersions) (((major & 0xFF) << 24) | ((minor & 0xFF) << 16) | ((build & 0xFF) << 8) | (extra & 0xFF));
                 Log.Message(LogTypes.Trace, $"Client version: {Engine.GlobalSettings.ClientVersion} - {ClientVersion}");
+
+                ClientFlags = ClientFlags.CF_T2A;
+
+                if (ClientVersion >= ClientVersions.CV_200)
+                    ClientFlags |= ClientFlags.CF_RE;
+                if (ClientVersion >= ClientVersions.CV_300)
+                    ClientFlags |= ClientFlags.CF_TD;
+                if (ClientVersion >= ClientVersions.CV_308)
+                    ClientFlags |= ClientFlags.CF_LBR;
+                if (ClientVersion >= ClientVersions.CV_308Z)
+                    ClientFlags |= ClientFlags.CF_AOS;
+                if (ClientVersion >= ClientVersions.CV_405A)
+                    ClientFlags |= ClientFlags.CF_SE;
+                if (ClientVersion >= ClientVersions.CV_60144)
+                    ClientFlags |= ClientFlags.CF_SA;
             }
         }
 
         public static byte[] ClientBufferVersion { get; } = new byte[4];
 
         public static ClientVersions ClientVersion { get; private set; }
+
+        public static ClientFlags ClientFlags { get; private set; }
 
         public static bool IsUOPInstallation => ClientVersion >= ClientVersions.CV_70240;
 

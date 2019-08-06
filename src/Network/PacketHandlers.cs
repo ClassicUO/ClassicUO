@@ -3469,7 +3469,7 @@ namespace ClassicUO.Network
 
         private static void OPLInfo(Packet p)
         {
-            if (World.ClientFlags.TooltipsEnabled)
+            if (World.ClientFeatures.TooltipsEnabled)
             {
                 Serial serial = p.ReadUInt();
                 uint revision = p.ReadUInt();

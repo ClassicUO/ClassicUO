@@ -507,7 +507,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = height;
                 WantUpdateSize = false;
 
-                if (World.ClientFlags.TooltipsEnabled) SetTooltip(item);
+                if (World.ClientFeatures.TooltipsEnabled) SetTooltip(item);
             }
 
             internal string ShopItemName => _name.Text;
