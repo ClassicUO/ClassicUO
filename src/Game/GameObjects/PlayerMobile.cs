@@ -1936,7 +1936,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             if (Walker.WalkingFailed || Walker.LastStepRequestTime > Engine.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || 
-                (FileManager.ClientVersion > ClientVersions.CV_7000 && IsParalyzed))
+                (FileManager.ClientVersion >= ClientVersions.CV_60142 && IsParalyzed))
                 return false;
 
             if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead)
