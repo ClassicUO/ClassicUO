@@ -102,7 +102,7 @@ namespace ClassicUO.Game.Managers
                     last = o;
                 }
 
-                if (SelectedObject.LastObject == o)
+                if (!isGump && SelectedObject.LastObject == o)
                 {
                     hue = 0x35;
                 }
