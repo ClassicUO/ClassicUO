@@ -435,7 +435,7 @@ namespace ClassicUO.Game.Scenes
                         Tile tile = World.Map.GetTile(x, y);
 
                         if (tile != null)
-                            AddTileToRenderList(tile.FirstNode, x, y, _useObjectHandles, 150, null);
+                            AddTileToRenderList(tile.FirstNode, x, y, _useObjectHandles, 150/*, null*/);
                         x++;
                         y--;
                     }
