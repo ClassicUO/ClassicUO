@@ -212,19 +212,19 @@ namespace ClassicUO.Game.UI.Gumps
             });
 
             // Virtue menu
-            Add(_virtueMenuPic = new GumpPic(79, 4, 0x0071, 0));
+            Add(_virtueMenuPic = new GumpPic(80, 4, 0x0071, 0));
             _virtueMenuPic.MouseDoubleClick += VirtueMenu_MouseDoubleClickEvent;
 
             // Equipment slots for hat/earrings/neck/ring/bracelet
-            Add(new EquipmentSlot(2, 76, Mobile, Layer.Helmet));
-            Add(new EquipmentSlot(2, 76 + 22, Mobile, Layer.Earrings));
-            Add(new EquipmentSlot(2, 76 + 22 * 2, Mobile, Layer.Necklace));
-            Add(new EquipmentSlot(2, 76 + 22 * 3, Mobile, Layer.Ring));
-            Add(new EquipmentSlot(2, 76 + 22 * 4, Mobile, Layer.Bracelet));
-            Add(new EquipmentSlot(2, 76 + 22 * 5, Mobile, Layer.Tunic));
+            Add(new EquipmentSlot(2, 75, Mobile, Layer.Helmet));
+            Add(new EquipmentSlot(2, 75 + 21, Mobile, Layer.Earrings));
+            Add(new EquipmentSlot(2, 75 + 21 * 2, Mobile, Layer.Necklace));
+            Add(new EquipmentSlot(2, 75 + 21 * 3, Mobile, Layer.Ring));
+            Add(new EquipmentSlot(2, 75 + 21 * 4, Mobile, Layer.Bracelet));
+            Add(new EquipmentSlot(2, 75 + 21 * 5, Mobile, Layer.Tunic));
 
             // Paperdoll control!
-            _paperDollInteractable = new PaperDollInteractable(8, 21, Mobile);
+            _paperDollInteractable = new PaperDollInteractable(8, 19, Mobile);
             //_paperDollInteractable.MouseOver += (sender, e) =>
             //{
             //    OnMouseOver(e.X, e.Y);
