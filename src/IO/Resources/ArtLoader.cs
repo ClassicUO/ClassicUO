@@ -435,7 +435,8 @@ namespace ClassicUO.IO.Resources
                 if (index == 0x0550)
                     continue;
 
-                GetTexture(index).Ticks = 0;
+                if (ResourceDictionary.TryGetValue(index, out ArtTexture texture))
+                    texture.Ticks = 0;
             }
 
             CleaUnusedResources();
