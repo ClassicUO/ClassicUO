@@ -134,34 +134,24 @@ namespace ClassicUO.IO.Resources
                 if (_filesMap[0].Length / mapblocksize == 393216 || FileManager.ClientVersion < ClientVersions.CV_4011D)
                     MapsDefaultSize[0, 0] = MapsDefaultSize[1, 0] = 6144;
 
-                for (int i = 0; i < MAPS_COUNT; i++)
+                //for (int i = 0; i < MAPS_COUNT; i++)
+                Parallel.For(0, MAPS_COUNT, i =>
                 {
                     MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
                     MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
-
-                    //if (Engine.GlobalSettings.PreloadMaps)
                     LoadMap(i);
-                }
+                });
 
             });
         }
 
-        private bool LoadDif(ref UOFileMul mul, string path)
-        {
-            if (!File.Exists(path))
-                return false;
-
-            return true;
-        }
-
         protected override void CleanResources()
         {
-            //for (int i = 0; i < MAPS_COUNT; i++)
-            //    UnloadMap(i);
+           
         }
 
 
-        public unsafe void LoadMap(int i)
+        internal unsafe void LoadMap(int i)
         {
             if (i < 0 || i > 5 || _filesMap[i] == null)
                 i = 0;
@@ -478,7 +468,6 @@ namespace ClassicUO.IO.Resources
         }
 
         [MethodImpl(256)]
-
         public ref IndexMap GetIndex(int map, int x, int y)
         {
             int block = x * MapBlocksSize[map, 1] + y;

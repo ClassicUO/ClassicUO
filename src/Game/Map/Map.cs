@@ -45,7 +45,6 @@ namespace ClassicUO.Game.Map
         public Map(int index)
         {
             Index = index;
-            FileManager.Map.LoadMap(index);
             MapBlockIndex = FileManager.Map.MapBlocksSize[Index, 0] * FileManager.Map.MapBlocksSize[Index, 1];
             Chunks = new Chunk[MapBlockIndex];
         }
