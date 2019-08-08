@@ -329,7 +329,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (mode != 0 && mode > 2)
                 mode = 0;
 
-            _hpComboBoxShowWhen = new Combobox(text.Bounds.Right + 10, 20, 100, new[]
+            _hpComboBoxShowWhen = new Combobox(text.Bounds.Right + 10, 20, 150, new[]
             {
                 "Always", "Less than 100%", "Smart"
             }, mode);
