@@ -69,7 +69,7 @@ namespace ClassicUO.Game.Managers
                     if (speed == 0)
                         speed++;
 
-                    effect = new MovingEffect(source, target, srcPos.X, srcPos.Y, srcPos.Z, targPos.X, targPos.Y, targPos.Z, graphic, hue)
+                    effect = new MovingEffect(source, target, srcPos.X, srcPos.Y, srcPos.Z, targPos.X, targPos.Y, targPos.Z, graphic, hue, fixedDir)
                     {
                         Blend = blendmode,
                         MovingDelay = (byte) (speed)
