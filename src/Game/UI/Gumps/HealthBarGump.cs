@@ -150,9 +150,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!_outOfRange)
                 {
-                    _poisoned = false;
-                    _yellowHits = false;
-                    _normalHits = true;
+                    //_poisoned = false;
+                    //_yellowHits = false;
+                    //_normalHits = true;
 
                     _outOfRange = true;
 
