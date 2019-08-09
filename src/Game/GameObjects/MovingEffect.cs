@@ -211,7 +211,7 @@ namespace ClassicUO.Game.GameObjects
             int newX = playerX + newCoordX;
             int newY = playerY + newCoordY;
 
-            if (newX == tx && newY == ty && sz == tz)
+            if ( (newX == tx && newY == ty && sz == tz) || (Target != null && Target.IsDestroyed))
             {
                 if (Explode)
                 {
