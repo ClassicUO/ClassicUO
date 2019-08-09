@@ -26,7 +26,7 @@ using System.Globalization;
 
 namespace ClassicUO.Game
 {
-    internal readonly struct Serial : IComparable<uint>
+    internal readonly struct Serial : IComparable<Serial>, IComparable<uint>
     {
         public const uint INVALID = 0;
         public const uint MINUS_ONE = 0xFFFF_FFFF;
@@ -88,6 +88,11 @@ namespace ClassicUO.Game
         {
             return Value.CompareTo(other);
         }
+        public int CompareTo(Serial other)
+        {
+            return Value.CompareTo(other.Value);
+        }
+
 
         public override string ToString()
         {
