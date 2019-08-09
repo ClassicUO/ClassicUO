@@ -924,7 +924,7 @@ namespace ClassicUO.Game.GameObjects
 
                     while (start != null && result == 0)
                     {
-                        if ((start is Item || start is Static) && Math.Abs(Z - start.Z) <= 1)
+                        if ((start is Item || start is Static || start is Multi) && Math.Abs(Z - start.Z) <= 1)
                         {
                             ushort graphic = start.Graphic;
 
