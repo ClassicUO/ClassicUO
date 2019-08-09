@@ -24,6 +24,7 @@
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -164,6 +165,9 @@ namespace ClassicUO.Game.GameObjects
 
             // SpriteRenderer.DrawStaticArt(DisplayedGraphic, Hue, (int)position.X, (int)position.Y);
             // return true;
+
+            if (!Serial.IsValid && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+                HueVector.Z = 0.5f;
 
             return base.Draw(batcher, posX, posY);
         }
@@ -314,6 +318,9 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
+            if (!Serial.IsValid && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+                return;
+
             if (SelectedObject.Object == this)
                 return;
 

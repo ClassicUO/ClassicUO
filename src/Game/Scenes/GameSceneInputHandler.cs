@@ -402,28 +402,13 @@ namespace ClassicUO.Game.Scenes
                     case CursorTarget.SetGrabBag:
                     case CursorTarget.Position:
                     case CursorTarget.Object:
+                    case CursorTarget.MultiPlacement:
+
                         var obj = SelectedObject.Object;
 
                         if (obj != null)
                         {
                             TargetManager.TargetGameObject(obj);
-                            Mouse.LastLeftButtonClickTime = 0;
-                        }
-
-                        break;
-
-                    case CursorTarget.MultiPlacement:
-
-                        if (SelectedObject.Object is GameObject gobj)
-                        {
-                            Position pos2 = gobj.Tile?.FirstNode.Position ?? gobj.Position;
-
-                            World.Map.GetMapZ(pos2.X, pos2.Y, out sbyte groundZ, out sbyte staticZ);
-
-                            if (gobj is Static st && st.ItemData.IsWet)
-                                groundZ = gobj.Z;
-
-                            TargetManager.SendMultiTarget((ushort)(pos2.X /*- pos.X*/), (ushort)(pos2.Y /*- pos.Y*/), groundZ);
                             Mouse.LastLeftButtonClickTime = 0;
                         }
 

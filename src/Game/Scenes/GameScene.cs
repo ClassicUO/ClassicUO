@@ -558,10 +558,10 @@ namespace ClassicUO.Game.Scenes
                         IsMulti = true,
                     };
 
-                if (Game.SelectedObject.Object != null && Game.SelectedObject.Object is GameObject gobj)
+                if (SelectedObject.Object is GameObject gobj)
                 {
                     Position pos = TargetManager.MultiTargetInfo.Offset;
-                    Position pos2 = gobj.Tile?.FirstNode.Position ?? gobj.Position;
+                    Position pos2 = gobj.Tile?.FirstNode?.Position ?? gobj.Position;
 
                     World.Map.GetMapZ(pos2.X, pos2.Y, out sbyte groundZ, out sbyte staticZ);
 
