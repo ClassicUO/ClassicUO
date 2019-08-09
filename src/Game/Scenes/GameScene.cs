@@ -555,6 +555,7 @@ namespace ClassicUO.Game.Scenes
                     _multi = new Item(Serial.INVALID)
                     {
                         Graphic = TargetManager.MultiTargetInfo.Model,
+                        Hue = TargetManager.MultiTargetInfo.Hue,
                         IsMulti = true,
                     };
 

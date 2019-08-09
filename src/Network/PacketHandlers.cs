@@ -2354,7 +2354,8 @@ namespace ClassicUO.Network
             var xOff = p.ReadUShort();
             var yOff = p.ReadUShort();
             var zOff = p.ReadUShort();
-            TargetManager.SetTargetingMulti(targID, multiID, xOff, yOff, zOff);
+            Hue hue = p.ReadUShort();
+            TargetManager.SetTargetingMulti(targID, multiID, xOff, yOff, zOff, hue);
         }
 
         private static void ASCIIPrompt(Packet p)
