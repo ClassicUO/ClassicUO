@@ -87,9 +87,35 @@ namespace ClassicUO.Game.Managers
 
                 Item found = World.Items.Get(serial);
 
+                if (found == null)
+                    return true;
+
                 distance += found.MultiDistanceBonus;
 
                 return Math.Abs(found.X - currX) <= distance && Math.Abs(found.Y - currY) <= distance;
+            }
+
+            return false;
+        }
+
+        public bool EntityIntoHouse(Serial house, GameObject obj)
+        {
+            if (obj != null && TryGetHouse(house, out _))
+            {
+                Item found = World.Items.Get(house);
+
+                if (found == null)
+                    return true;
+
+                int minX = found.X + found.MultiInfo.MinX;
+                int maxX = found.X + found.MultiInfo.MaxX;
+                int minY = found.Y + found.MultiInfo.MinY;
+                int maxY = found.Y + found.MultiInfo.MaxY;
+
+                return obj.X >= minX &&
+                       obj.X <= maxX &&
+                       obj.Y >= minY &&
+                       obj.Y <= maxY;
             }
 
             return false;
@@ -101,6 +127,15 @@ namespace ClassicUO.Game.Managers
             {
                 house.ClearComponents();
                 _houses.Remove(serial);
+            }
+        }
+
+        public void RemoveMultiTargetHouse()
+        {
+            if (_houses.TryGetValue(0, out var house))
+            {
+                house.ClearComponents();
+                _houses.Remove(0);
             }
         }
 

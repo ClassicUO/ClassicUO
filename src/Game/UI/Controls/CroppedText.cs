@@ -34,15 +34,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public CroppedText(string text, Hue hue, int maxWidth = 0)
         {
-            _gameText = new RenderedText
-            {
-                IsUnicode = true,
-                Font = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0),
-                FontStyle = maxWidth > 0 ? FontStyle.BlackBorder | FontStyle.Cropped : FontStyle.BlackBorder,
-                Hue = hue,
-                MaxWidth = maxWidth,
-                Text = text
-            };
+            _gameText = RenderedText.Create(text, hue, (byte)(FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0), true, maxWidth > 0 ? FontStyle.BlackBorder | FontStyle.Cropped : FontStyle.BlackBorder,
+                                            maxWidth: maxWidth);
             AcceptMouseInput = false;
         }
 

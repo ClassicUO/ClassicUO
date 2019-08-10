@@ -48,9 +48,9 @@ namespace ClassicUO.Configuration
             CharacterName = charactername;
         }
 
-        [JsonProperty] public string Username { get; }
-        [JsonProperty] public string ServerName { get; }
-        [JsonProperty] public string CharacterName { get; }
+        [JsonIgnore] public string Username { get; set; }
+        [JsonIgnore] public string ServerName { get; set;  }
+        [JsonIgnore] public string CharacterName { get; set;  }
 
         // sounds
         [JsonProperty] public bool EnableSound { get; set; } = true;
@@ -102,6 +102,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool HighlightMobilesByFlags { get; set; } = true;
         [JsonProperty] public bool ShowMobilesHP { get; set; }
         [JsonProperty] public int MobileHPType { get; set; } // 0 = %, 1 = line, 2 = both
+        [JsonProperty] public int MobileHPShowWhen { get; set; } // 0 = Always, 1 - <100%
         [JsonProperty] public bool DrawRoofs { get; set; } = true;
         [JsonProperty] public bool TreeToStumps { get; set; }
         [JsonProperty] public bool EnableCaveBorder { get; set; }
@@ -145,6 +146,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool TopbarGumpIsDisabled { get; set; }
         [JsonProperty] public bool UseCustomLightLevel { get; set; }
         [JsonProperty] public byte LightLevel { get; set; }
+        [JsonProperty] public bool UseColoredLights { get; set; } = true;
+        [JsonProperty] public bool UseDarkNights { get; set; }
         [JsonProperty] public int CloseHealthBarType { get; set; } // 0 = none, 1 == not exists, 2 == is dead
         [JsonProperty] public bool ActivateChatAfterEnter { get; set; }
         [JsonProperty] public bool ActivateChatStatus { get; set; } = true;
@@ -170,8 +173,22 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool DisableCtrlQWBtn { get; set; }
         [JsonProperty] public bool EnableDragSelect { get; set; }
         [JsonProperty] public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift
-        [JsonProperty] public bool OpenContainersNearRealPosition { get; set; }
+        [JsonProperty] public bool OverrideContainerLocation { get; set; }
+        [JsonProperty] public int OverrideContainerLocationSetting { get; set; } // 0 = container position, 1 = top right of screen, 2 = last dragged position
+        [JsonProperty] public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
         [JsonProperty] public bool DragSelectHumanoidsOnly { get; set; }
+
+        [JsonProperty] public bool ShowInfoBar { get; set; }
+        [JsonProperty] public int InfoBarHighlightType { get; set; } // 0 = text colour changes, 1 = underline
+        [JsonProperty]
+        public InfoBarItem[] InfoBarItems { get; set; } =
+        {
+            new InfoBarItem("", InfoBarVars.NameNotoriety, 0x3D2),
+            new InfoBarItem("Hits", InfoBarVars.HP, 0x1B6),
+            new InfoBarItem("Mana", InfoBarVars.Mana, 0x1ED),
+            new InfoBarItem("Stam", InfoBarVars.Stamina, 0x22E),
+            new InfoBarItem("Weight", InfoBarVars.Weight, 0x3D2),
+        };
 
         [JsonProperty] public int MaxFPS { get; set; } = 60;
 
@@ -265,6 +282,10 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool OverrideAllFontsIsUnicode { get; set; } = true;
 
         [JsonProperty] public bool SallosEasyGrab { get; set; }
+
+        [JsonProperty] public float Brighlight { get; set; }
+
+        [JsonProperty] public bool JournalDarkMode { get; set; }
 
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");

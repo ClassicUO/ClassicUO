@@ -27,6 +27,7 @@ using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -66,6 +67,7 @@ namespace ClassicUO.Game.GameObjects
             //{
             //    var i = _pool.Dequeue();
             //    i.IsDestroyed = false;
+            //    i.Graphic = 0;
             //    i.Serial = serial;
             //    i._amount = 0;
             //    i._animDataFrame = default;
@@ -81,7 +83,7 @@ namespace ClassicUO.Game.GameObjects
 
             //    i.LightID = 0;
             //    i.MultiDistanceBonus = 0;
-            //    i.BookType = 0;
+            //    i.BookType = SpellBookType.Unknown;
             //    i.Flags = 0;
             //    i.WantUpdateMulti = true;
             //    i._force = false;
@@ -94,13 +96,14 @@ namespace ClassicUO.Game.GameObjects
             //    i.Direction = 0;
             //    i.Equipment = null;
             //    i.LastAnimationChangeTime = 0;
-            //    i.Items.Clear();
+            //    i.Items = new EntityCollection<Item>();
             //    i.IsClicked = false;
             //    i.Properties.Clear();
             //    i._delta = 0;
             //    i.PropertiesHash = 0;
 
             //    i._itemData = null;
+                
 
             //    return i;
             //}
@@ -351,7 +354,7 @@ namespace ClassicUO.Game.GameObjects
                     m.MultiOffsetY = y;
                     m.MultiOffsetZ = z;
                     m.Hue = Hue;
-                    m.AlphaHue = 0xFF;
+                    m.AlphaHue = 255;
 
                     house.Components.Add(m);
                 }
@@ -374,6 +377,9 @@ namespace ClassicUO.Game.GameObjects
             house.Generate();
 
             Engine.UI.GetGump<MiniMapGump>()?.ForceUpdate();
+
+            if (World.HouseManager.EntityIntoHouse(Serial, World.Player))
+                Engine.SceneManager.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
         }
 
 
@@ -832,7 +838,7 @@ namespace ClassicUO.Game.GameObjects
                         if (ItemData.AnimID != 0)
                             graphic = ItemData.AnimID;
                         else
-                            graphic = 0x00C8;
+                            graphic = 0xFFFF;
 
                         break;
                     }

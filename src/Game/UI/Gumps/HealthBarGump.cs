@@ -150,9 +150,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!_outOfRange)
                 {
-                    _poisoned = false;
-                    _yellowHits = false;
-                    _normalHits = true;
+                    //_poisoned = false;
+                    //_yellowHits = false;
+                    //_normalHits = true;
 
                     _outOfRange = true;
 
@@ -427,7 +427,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    Add(_textBox = new TextBox(3, width: 109, maxWidth: 109, isunicode: false, style: FontStyle.Cropped, hue: Notoriety.GetHue(mobile?.NotorietyFlag ?? NotorietyFlag.Gray))
+                    Add(_textBox = new TextBox(3, width: 109, isunicode: false, style: FontStyle.Fixed | FontStyle.BlackBorder, hue: Notoriety.GetHue(mobile?.NotorietyFlag ?? NotorietyFlag.Gray))
                     {
                         X = 0,
                         Y = -2,

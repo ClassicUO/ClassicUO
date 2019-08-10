@@ -103,9 +103,11 @@ namespace ClassicUO.Game
         {
             Engine.SceneManager.GetScene<GameScene>()?.DoubleClickDelayed(serial);
         }
+
         public static void DoubleClick(Serial serial)
         {
-            LastObject = serial;
+            if (serial.IsItem)
+                LastObject = serial;
             Socket.Send(new PDoubleClickRequest(serial));
         }
 

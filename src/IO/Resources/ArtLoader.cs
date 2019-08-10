@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -39,23 +40,26 @@ namespace ClassicUO.IO.Resources
         private static readonly ushort[] _empty = { };
 
         private static readonly ushort[] _landBytes = new ushort[44 * 44];
-        private readonly Dictionary<uint, SpriteTexture> _landDictionary = new Dictionary<uint, SpriteTexture>();
+        private readonly Dictionary<uint, UOTexture16> _landDictionary = new Dictionary<uint, UOTexture16>();
         private UOFile _file;
 
-        public override void Load()
+        public override Task Load()
         {
-            string filepath = Path.Combine(FileManager.UoFolderPath, "artLegacyMUL.uop");
-
-            if (File.Exists(filepath))
-                _file = new UOFileUop(filepath, ".tga", Constants.MAX_STATIC_DATA_INDEX_COUNT);
-            else
+            return Task.Run(() =>
             {
-                filepath = Path.Combine(FileManager.UoFolderPath, "art.mul");
-                string idxpath = Path.Combine(FileManager.UoFolderPath, "artidx.mul");
+                string filepath = Path.Combine(FileManager.UoFolderPath, "artLegacyMUL.uop");
 
-                if (File.Exists(filepath) && File.Exists(idxpath))
-                    _file = new UOFileMul(filepath, idxpath, Constants.MAX_STATIC_DATA_INDEX_COUNT);
-            }
+                if (File.Exists(filepath))
+                    _file = new UOFileUop(filepath, ".tga", Constants.MAX_STATIC_DATA_INDEX_COUNT);
+                else
+                {
+                    filepath = Path.Combine(FileManager.UoFolderPath, "art.mul");
+                    string idxpath = Path.Combine(FileManager.UoFolderPath, "artidx.mul");
+
+                    if (File.Exists(filepath) && File.Exists(idxpath))
+                        _file = new UOFileMul(filepath, idxpath, Constants.MAX_STATIC_DATA_INDEX_COUNT);
+                }
+            });
         }
 
         public override ArtTexture GetTexture(uint g)
@@ -71,14 +75,14 @@ namespace ClassicUO.IO.Resources
             return texture;
         }
 
-        public SpriteTexture GetLandTexture(uint g)
+        public UOTexture16 GetLandTexture(uint g)
         {
-            if (!_landDictionary.TryGetValue(g, out SpriteTexture texture) || texture.IsDisposed)
+            if (!_landDictionary.TryGetValue(g, out UOTexture16 texture) || texture.IsDisposed)
             {
                 const int SIZE = 44;
                 ushort[] pixels = ReadLandArt((ushort) g);
-                texture = new SpriteTexture(SIZE, SIZE, false);
-                texture.SetDataHitMap16(pixels);
+                texture = new UOTexture16(SIZE, SIZE);
+                texture.PushData(pixels);
                 _landDictionary.Add(g, texture);
             }
 
@@ -421,7 +425,7 @@ namespace ClassicUO.IO.Resources
             imageRectangle.Height = maxY - minY;
 
             texture = new ArtTexture(imageRectangle, width, height);
-            texture.SetDataHitMap16(pixels);
+            texture.PushData(pixels);
         }
 
         public void ClearCaveTextures()
@@ -431,7 +435,8 @@ namespace ClassicUO.IO.Resources
                 if (index == 0x0550)
                     continue;
 
-                GetTexture(index).Ticks = 0;
+                if (ResourceDictionary.TryGetValue(index, out ArtTexture texture))
+                    texture.Ticks = 0;
             }
 
             CleaUnusedResources();

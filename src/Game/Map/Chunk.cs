@@ -39,8 +39,8 @@ namespace ClassicUO.Game.Map
             Y = y;
             Tiles = new Tile[8, 8];
 
-            x *= 8;
-            y *= 8;
+            x <<= 3;
+            y <<= 3;
 
             for (int i = 0; i < 8; i++)
             {
@@ -64,8 +64,8 @@ namespace ClassicUO.Game.Map
                 c.Y = y;
                 c.LastAccessTime = Engine.Ticks + Constants.CLEAR_TEXTURES_DELAY;
 
-                x *= 8;
-                y *= 8;
+                x <<= 3;
+                y <<= 3;
 
                 for (int i = 0; i < 8; i++)
                 {
@@ -98,23 +98,16 @@ namespace ClassicUO.Game.Map
             {
                 MapBlock* block = (MapBlock*) im.MapAddress;
                 MapCells* cells = (MapCells*) &block->Cells;
-                int bx = X * 8;
-                int by = Y * 8;
+                int bx = X << 3;
+                int by = Y << 3;
 
                 for (int x = 0; x < 8; x++)
                 {
                     for (int y = 0; y < 8; y++)
                     {
-                        int pos = y * 8 + x;
+                        int pos = (y << 3) + x;
                         ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
                         sbyte z = cells[pos].Z;
-
-
-                        //Land land = new Land(tileID)
-                        //{
-                        //    AverageZ = z,
-                        //    MinZ = z
-                        //};
 
                         Land land = Land.Create(tileID);
                         land.AverageZ = z;
@@ -144,7 +137,7 @@ namespace ClassicUO.Game.Map
                             {
                                 ushort x = sb->X;
                                 ushort y = sb->Y;
-                                int pos = y * 8 + x;
+                                int pos = (y << 3) + x;
 
                                 if (pos >= 64)
                                     continue;
@@ -153,11 +146,6 @@ namespace ClassicUO.Game.Map
 
                                 ushort staticX = (ushort) (bx + x);
                                 ushort staticY = (ushort) (by + y);
-
-                                //Static staticObject = new Static(sb->Color, sb->Hue, pos)
-                                //{
-                                //    Position = new Position(staticX, staticY, z)
-                                //};
 
                                 Static staticObject = Static.Create(sb->Color, sb->Hue, pos);
                                 staticObject.Position = new Position(staticX, staticY, z);
@@ -183,8 +171,8 @@ namespace ClassicUO.Game.Map
 
             if (im.MapAddress != 0)
             {
-                int bx = X * 8;
-                int by = Y * 8;
+                int bx = X << 3;
+                int by = Y << 3;
 
                 if (im.StaticAddress != 0)
                 {
@@ -200,7 +188,7 @@ namespace ClassicUO.Game.Map
                             {
                                 ushort x = sb->X;
                                 ushort y = sb->Y;
-                                int pos = y * 8 + x;
+                                int pos = (y << 3) + x;
 
                                 if (pos >= 64)
                                     continue;
@@ -210,10 +198,8 @@ namespace ClassicUO.Game.Map
                                 ushort staticX = (ushort) (bx + x);
                                 ushort staticY = (ushort) (by + y);
 
-                                Static staticObject = new Static(sb->Color, sb->Hue, pos)
-                                {
-                                    Position = new Position(staticX, staticY, z)
-                                };
+                                Static staticObject = Static.Create(sb->Color, sb->Hue, pos);
+                                staticObject.Position = new Position(staticX, staticY, z);
 
                                 if (staticObject.ItemData.IsAnimated)
                                     World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
@@ -235,25 +221,21 @@ namespace ClassicUO.Game.Map
             {
                 MapBlock* block = (MapBlock*) im.MapAddress;
                 MapCells* cells = (MapCells*) &block->Cells;
-                int bx = X * 8;
-                int by = Y * 8;
+                int bx = X << 3;
+                int by = Y << 3;
 
                 for (int x = 0; x < 8; x++)
                 {
                     for (int y = 0; y < 8; y++)
                     {
-                        int pos = y * 8 + x;
+                        int pos = (y << 3) + x;
                         ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
                         sbyte z = cells[pos].Z;
 
-                        Land land = new Land(tileID)
-                        {
-                            Graphic = tileID,
-                            AverageZ = z,
-                            MinZ = z
-                        };
+                        Land land = Land.Create(tileID);
+                        land.AverageZ = z;
+                        land.MinZ = z;
 
-                        
                         ushort tileX = (ushort) (bx + x);
                         ushort tileY = (ushort) (by + y);
 

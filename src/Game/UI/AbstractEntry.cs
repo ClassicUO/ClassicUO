@@ -53,14 +53,15 @@ namespace ClassicUO.Game.UI
 
         public ushort Hue
         {
-            get => RenderText.Hue;
+            get => RenderCaret.Hue;
             set
             {
-                if (RenderText.Hue != value)
+                if (RenderCaret.Hue != value)
                 {
-                    RenderCaret.Hue = RenderText.Hue = value;
-                    RenderText.CreateTexture();
+                    RenderCaret.Hue = value;
+                    RenderText.Hue = value;
                     RenderCaret.CreateTexture();
+                    RenderText.CreateTexture();
                 }
             }
         }
@@ -97,14 +98,14 @@ namespace ClassicUO.Game.UI
         public void SetHeight(int h)
         {
             _height = h;
+            if (h > 0)
+                RenderText.MaxHeight = h;
         }
 
         public void Destroy()
         {
             RenderText?.Destroy();
-            RenderText = null;
             RenderCaret?.Destroy();
-            RenderCaret = null;
         }
 
         public bool RemoveChar(bool fromleft)
@@ -142,13 +143,20 @@ namespace ClassicUO.Game.UI
                     return false;
             }
 
-            if (start != -1)
+            if (start > -1)
+            {
                 Text = Text.Remove(start, end - start);
-            else if (CaretIndex < Text.Length)
-                Text = Text.Remove(CaretIndex, 1);
-            else if (CaretIndex > Text.Length)
-                Text = Text.Remove(Text.Length - 1);
-
+            }
+            else
+            {
+                if (CaretIndex >= 0 && Text.Length > 0)
+                {
+                    if (CaretIndex < Text.Length)
+                        Text = Text.Remove(CaretIndex, 1);
+                    else if (CaretIndex > Text.Length)
+                        Text = Text.Remove(Text.Length - 1);
+                }
+            }
             return true;
         }
 

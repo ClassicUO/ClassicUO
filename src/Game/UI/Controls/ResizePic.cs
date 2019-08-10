@@ -35,7 +35,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ResizePic : Control
     {
-        private readonly SpriteTexture[] _gumpTexture = new SpriteTexture[9];
+        private readonly UOTexture[] _gumpTexture = new UOTexture[9];
 
         public ResizePic(Graphic graphic)
         {
@@ -44,7 +44,7 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 0; i < _gumpTexture.Length; i++)
             {
-                SpriteTexture t = FileManager.Gumps.GetTexture((Graphic) (graphic + i));
+                UOTexture t = FileManager.Gumps.GetTexture((Graphic) (graphic + i));
 
                 if (t == null)
                 {
@@ -77,7 +77,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            foreach (SpriteTexture t in _gumpTexture)
+            foreach (UOTexture t in _gumpTexture)
                 t.Ticks = (long) totalMS;
 
             base.Update(totalMS, frameMS);
@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            SpriteTexture[] th = _gumpTexture;
+            UOTexture[] th = _gumpTexture;
 
             int offsetTop = Math.Max(th[0].Height, th[2].Height) - th[1].Height;
             int offsetBottom = Math.Max(th[5].Height, th[7].Height) - th[6].Height;
@@ -182,7 +182,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        private static bool PixelsInXY(SpriteTexture texture, int x, int y, int width = 0, int height = 0)
+        private static bool PixelsInXY(UOTexture texture, int x, int y, int width = 0, int height = 0)
         {
             if (x < 0 || y < 0 || (width > 0 && x >= width) || (height > 0 && y >= height))
                 return false;
@@ -233,7 +233,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             for (int i = 0; i < 9; i++)
             {
-                SpriteTexture t = _gumpTexture[i];
+                UOTexture t = _gumpTexture[i];
                 int drawWidth = t.Width;
                 int drawHeight = t.Height;
                 int drawX = x;

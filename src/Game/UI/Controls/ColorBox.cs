@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Controls
                 _colorRGBA.A = 0xFF;
 
             if (Texture == null || Texture.IsDisposed)
-                Texture = new SpriteTexture(1, 1);
+                Texture = new UOTexture32(1, 1);
             Texture.SetData(new Color[1] {_colorRGBA});
         }
 

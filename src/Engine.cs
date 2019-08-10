@@ -32,6 +32,7 @@ using System.Text;
 using System.Threading;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
@@ -69,9 +70,6 @@ namespace ClassicUO
 
     internal class Engine : Microsoft.Xna.Framework.Game
     {
-        private const int MIN_FPS = 15;
-        private const int MAX_FPS = 250;
-        private const int LOGIN_SCREEN_FPS = 60;
         private const int INACTIVE_FPS_DELAY = 217; // 5 fps
 
         private static GameWindow _window;
@@ -139,7 +137,7 @@ namespace ClassicUO
             }
 
 
-            TargetElapsedTime = TimeSpan.FromSeconds(1.0f / MAX_FPS);
+            TargetElapsedTime = TimeSpan.FromSeconds(1.0f / Constants.MAX_FPS);
             IsFixedTimeStep = _settings.FixedTimeStep;
 
             _graphicDeviceManager = new GraphicsDeviceManager(this);
@@ -185,6 +183,9 @@ namespace ClassicUO
             IsMouseVisible = _settings.RunMouseInASeparateThread;
 
             Window.Title = $"ClassicUO - {Version}";
+
+            if (Bootstrap.StartMinimized)
+                SDL.SDL_MinimizeWindow(Window.Handle);
         }
 
         public bool IsQuitted { get; private set; }
@@ -202,10 +203,10 @@ namespace ClassicUO
                 {
                     _fpsLimit = value;
 
-                    if (_fpsLimit < MIN_FPS)
-                        _fpsLimit = MIN_FPS;
-                    else if (_fpsLimit > MAX_FPS)
-                        _fpsLimit = MAX_FPS;
+                    if (_fpsLimit < Constants.MIN_FPS)
+                        _fpsLimit = Constants.MIN_FPS;
+                    else if (_fpsLimit > Constants.MAX_FPS)
+                        _fpsLimit = Constants.MAX_FPS;
                     FrameDelay[0] = FrameDelay[1] = (uint) (1000 / _fpsLimit);
                     FrameDelay[1] = FrameDelay[1] >> 1;
 
@@ -474,7 +475,7 @@ namespace ClassicUO
             IsQuitted = true;
             base.OnExiting(sender, args);
         }
-
+         
 
         internal static void Configure()
         {
@@ -482,7 +483,7 @@ namespace ClassicUO
             ThreadID = Thread.CurrentThread.ManagedThreadId;
 
             Log.Start(LogTypes.All);
-            ExePath = Environment.CurrentDirectory;
+            ExePath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName); // Environment.CurrentDirectory;
 
 #if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
@@ -549,7 +550,7 @@ namespace ClassicUO
             _sceneManager = new SceneManager();
             _debugInfo = new DebugInfo();
 
-            FpsLimit = LOGIN_SCREEN_FPS;
+            FpsLimit = Constants.LOGIN_SCREEN_FPS;
 
 
             Log.Message(LogTypes.Trace, "Loading UI Fonts...");

@@ -27,12 +27,14 @@ using System.Linq;
 using System.Text;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -90,11 +92,11 @@ namespace ClassicUO.Game.Managers
                 {
                     if (IsModalControlOpen)
                     {
-                        Gumps.ForEach(s =>
+                        foreach (Control s in Gumps)
                         {
                             if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
                                 s.Dispose();
-                        });
+                        }
                     }
                 }
             };
@@ -156,11 +158,11 @@ namespace ClassicUO.Game.Managers
                 {
                     if (IsModalControlOpen)
                     {
-                        Gumps.ForEach(s =>
+                        foreach (Control s in Gumps)
                         {
                             if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
                                 s.Dispose();
-                        });
+                        }
                     }
                 }
 
@@ -227,7 +229,7 @@ namespace ClassicUO.Game.Managers
 
         public AnchorManager AnchorManager { get; }
 
-        public List<Control> Gumps { get; } = new List<Control>();
+        public Deque<Control> Gumps { get; } = new Deque<Control>();
 
         public Control MouseOverControl { get; private set; }
 
@@ -544,7 +546,7 @@ namespace ClassicUO.Game.Managers
 
                     case "tooltip":
 
-                        if (World.ClientFlags.TooltipsEnabled)
+                        if (World.ClientFeatures.TooltipsEnabled)
                         {
                             string cliloc = FileManager.Cliloc.GetString(int.Parse(gparams[1]));
 
@@ -567,7 +569,7 @@ namespace ClassicUO.Game.Managers
 
                     case "itemproperty":
 
-                        if (World.ClientFlags.TooltipsEnabled)
+                        if (World.ClientFeatures.TooltipsEnabled)
                         {
                             var entity = World.Get(Serial.Parse(gparams[1]));
                             var lastControl = gump.Children.LastOrDefault();
@@ -705,7 +707,7 @@ namespace ClassicUO.Game.Managers
         {
             if (!gump.IsDisposed)
             {
-                Gumps.Insert(0, gump);
+                Gumps.AddToFront(gump);
                 _needSort = true;
             }
         }
@@ -717,13 +719,17 @@ namespace ClassicUO.Game.Managers
 
         public void Clear()
         {
-            Gumps.ForEach(s => { s.Dispose(); });
+            foreach (Control s in Gumps)
+            {
+                s.Dispose();
+            }
         }
 
 
         private void HandleKeyboardInput()
         {
-            if (KeyboardFocusControl != null && _keyboardFocusControl.IsDisposed) _keyboardFocusControl = null;
+            if (KeyboardFocusControl != null && _keyboardFocusControl.IsDisposed)
+                _keyboardFocusControl = null;
         }
 
         private void HandleMouseInput()
@@ -825,7 +831,7 @@ namespace ClassicUO.Game.Managers
                 {
                     Control cm = Gumps[i];
                     Gumps.RemoveAt(i);
-                    Gumps.Insert(0, cm);
+                    Gumps.AddToFront(cm);
                     _needSort = true;
                 }
             }
@@ -906,7 +912,7 @@ namespace ClassicUO.Game.Managers
 
         public void AttemptDragControl(Control control, Point mousePosition, bool attemptAlwaysSuccessful = false)
         {
-            if (_isDraggingControl)
+            if (_isDraggingControl || (Engine.SceneManager.CurrentScene is GameScene gs && gs.IsHoldingItem))
                 return;
 
             Control dragTarget = control;

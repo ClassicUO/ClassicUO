@@ -24,6 +24,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 using ClassicUO.Utility;
 
@@ -34,46 +35,49 @@ namespace ClassicUO.IO.Resources
         private readonly Dictionary<int, StringEntry> _entries = new Dictionary<int, StringEntry>();
         private string _cliloc;
 
-        public void Load(string cliloc)
+        public Task Load(string cliloc)
         {
             _cliloc = cliloc;
 
             if (!File.Exists(Path.Combine(FileManager.UoFolderPath, cliloc)))
                 _cliloc = "Cliloc.enu";
 
-            Load();
+            return Load();
         }
 
-        public override void Load()
+        public override Task Load()
         {
-            if (string.IsNullOrEmpty(_cliloc))
-                _cliloc = "Cliloc.enu";
+            return Task.Run(() => {
+                if (string.IsNullOrEmpty(_cliloc))
+                    _cliloc = "Cliloc.enu";
 
-            string path = Path.Combine(FileManager.UoFolderPath, _cliloc);
+                string path = Path.Combine(FileManager.UoFolderPath, _cliloc);
 
-            if (!File.Exists(path))
-                return;
+                if (!File.Exists(path))
+                    return;
 
-            using (BinaryReader reader = new BinaryReader(new FileStream(path, FileMode.Open, FileAccess.Read)))
-            {
-                reader.ReadInt32();
-                reader.ReadInt16();
-                byte[] buffer = new byte[1024];
-
-                while (reader.BaseStream.Length != reader.BaseStream.Position)
+                using (BinaryReader reader = new BinaryReader(new FileStream(path, FileMode.Open, FileAccess.Read)))
                 {
-                    int number = reader.ReadInt32();
-                    byte flag = reader.ReadByte();
-                    int length = reader.ReadInt16();
+                    reader.ReadInt32();
+                    reader.ReadInt16();
+                    byte[] buffer = new byte[1024];
 
-                    if (length > buffer.Length)
-                        buffer = new byte[(length + 1023) & ~1023];
-                    reader.Read(buffer, 0, length);
-                    string text = string.Intern(Encoding.UTF8.GetString(buffer, 0, length));
+                    while (reader.BaseStream.Length != reader.BaseStream.Position)
+                    {
+                        int number = reader.ReadInt32();
+                        byte flag = reader.ReadByte();
+                        int length = reader.ReadInt16();
 
-                    _entries[number] = new StringEntry(number, text);
+                        if (length > buffer.Length)
+                            buffer = new byte[(length + 1023) & ~1023];
+                        reader.Read(buffer, 0, length);
+                        string text = string.Intern(Encoding.UTF8.GetString(buffer, 0, length));
+
+                        _entries[number] = new StringEntry(number, text);
+                    }
                 }
-            }
+            });
+          
         }
 
         protected override void CleanResources()

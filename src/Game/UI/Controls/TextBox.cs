@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Controls
             Font = font;
         }
 
-        public TextBox(List<string> parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : -1, 0, int.Parse(parts[3]), style: FontStyle.BlackBorder, hue: (Hue)(Hue.Parse(parts[5]) + 1))
+        public TextBox(List<string> parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : byte.MaxValue, 0, int.Parse(parts[3]), style: FontStyle.BlackBorder | FontStyle.CropTexture, hue: (Hue)(Hue.Parse(parts[5]) + 1))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -113,6 +113,8 @@ namespace ClassicUO.Game.UI.Controls
             get => TxEntry.Text;
             set => SetText(value);
         }
+
+        public bool AllowDeleteKey { get; set; } = true;
 
         public override AbstractEntry EntryValue => TxEntry;
 
@@ -243,6 +245,8 @@ namespace ClassicUO.Game.UI.Controls
 
                         case SDL.SDL_Keycode.SDLK_DELETE:
 
+                            if (!AllowDeleteKey)
+                                break;
                             if (!IsEditable)
                                 return;
 

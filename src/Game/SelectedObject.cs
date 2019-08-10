@@ -22,6 +22,7 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -238,24 +239,17 @@ namespace ClassicUO.Game
             return false;
         }
 
-        public static bool IsPointInStatic(ushort graphic, int x, int y)
+
+        [MethodImpl(256)]
+        public static bool IsPointInStatic(UOTexture texture, ushort graphic, int x, int y)
         {
-            SpriteTexture texture = FileManager.Art.GetTexture(graphic);
-
-            if (texture != null)
-                return texture.Contains(TranslatedMousePositionByViewport.X - x, TranslatedMousePositionByViewport.Y - y);
-
-            return false;
+            return texture != null && texture.Contains(TranslatedMousePositionByViewport.X - x, TranslatedMousePositionByViewport.Y - y);
         }
 
-        public static bool IsPointInLand(ushort graphic, int x, int y)
+        [MethodImpl(256)]
+        public static bool IsPointInLand(UOTexture texture, ushort graphic, int x, int y)
         {
-            SpriteTexture texture = FileManager.Art.GetLandTexture(graphic);
-
-            if (texture != null)
-                return texture.Contains(TranslatedMousePositionByViewport.X - x, TranslatedMousePositionByViewport.Y - y);
-
-            return false;
+            return texture != null && texture.Contains(TranslatedMousePositionByViewport.X - x, TranslatedMousePositionByViewport.Y - y);
         }
 
         public static bool IsPointInStretchedLand(Rectangle rect, int x, int y)

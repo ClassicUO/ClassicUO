@@ -24,6 +24,7 @@
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -93,6 +94,9 @@ namespace ClassicUO.Game.GameObjects
 
             if (_originalGraphic != DisplayedGraphic || _force || Texture == null || Texture.IsDisposed)
             {
+                if (_originalGraphic == 0)
+                    _originalGraphic = DisplayedGraphic;
+
                 Texture = FileManager.Art.GetTexture(_originalGraphic);
                 Bounds.X = (Texture.Width >> 1) - 22;
                 Bounds.Y = Texture.Height - 44;
@@ -106,8 +110,8 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (CharacterIsBehindFoliage)
                 {
-                    if (AlphaHue != 76)
-                        ProcessAlpha(76);
+                    if (AlphaHue != Constants.FOLIAGE_ALPHA)
+                        ProcessAlpha(Constants.FOLIAGE_ALPHA);
                 }
                 else
                 {
@@ -161,6 +165,9 @@ namespace ClassicUO.Game.GameObjects
 
             // SpriteRenderer.DrawStaticArt(DisplayedGraphic, Hue, (int)position.X, (int)position.Y);
             // return true;
+
+            if (!Serial.IsValid && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+                HueVector.Z = 0.5f;
 
             return base.Draw(batcher, posX, posY);
         }
@@ -311,6 +318,9 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
+            if (!Serial.IsValid && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+                return;
+
             if (SelectedObject.Object == this)
                 return;
 
@@ -321,7 +331,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if (SelectedObject.IsPointInStatic(_originalGraphic, x - Bounds.X, y - Bounds.Y))
+                if (SelectedObject.IsPointInStatic(Texture, _originalGraphic, x - Bounds.X, y - Bounds.Y))
                     SelectedObject.Object = this;
             }
         }

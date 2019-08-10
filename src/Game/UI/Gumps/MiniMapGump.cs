@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private bool _draw;
         //private bool _forceUpdate;
-        private SpriteTexture _gumpTexture, _mapTexture;
+        private UOTexture16 _gumpTexture, _mapTexture;
         private int _lastMap = -1;
         private Texture2D _playerIndicator, _mobilesIndicator;
         private long _timeMS;
@@ -54,8 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             CanBeSaved = true;
         }
-
-
+        
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);
@@ -103,6 +102,12 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public bool ToggleSize()
+        {
+            _useLargeMap = !_useLargeMap;
+            CreateMap();
+            return _useLargeMap;
+        }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -160,9 +165,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButton.Left)
             {
-                _useLargeMap = !_useLargeMap;
-                CreateMap();
-
+                ToggleSize();
                 return true;
             }
 
@@ -237,8 +240,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                     RadarMapBlock mb = mbbv.Value;
                     Chunk block = World.Map.Chunks[blockIndex];
-                    int realBlockX = i * 8;
-                    int realBlockY = j * 8;
+                    int realBlockX = i << 3;
+                    int realBlockY = j << 3;
 
                     for (int x = 0; x < 8; x++)
                     {
@@ -281,8 +284,8 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            _mapTexture = new SpriteTexture(Width, Height, false);
-            _mapTexture.SetDataHitMap16(data);
+            _mapTexture = new UOTexture16(Width, Height);
+            _mapTexture.PushData(data);
         }
 
         private void CreatePixels(ushort[] data, int color, int x, int y, int w, int h, Point[] table, int count)

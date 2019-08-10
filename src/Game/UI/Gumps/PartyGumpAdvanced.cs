@@ -341,7 +341,7 @@ namespace ClassicUO.Game.UI.Gumps
                               };
             Add(name1);
 
-            Mobile mobile = member.Mobile;
+            Mobile mobile = World.Mobiles.Get(member.Serial);
 
             //======================================================
             Add(_status = new GumpPic(240, 0, 0x29F6, (Hue) (mobile != null && mobile.IsDead ? 0 : 0x43)));
@@ -376,7 +376,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (IsDisposed)
                 return;
 
-            Mobile mobile = member.Mobile;
+            Mobile mobile = World.Mobiles.Get(member.Serial);
 
             if (mobile != null && mobile.IsDead)
             {

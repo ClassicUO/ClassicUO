@@ -409,6 +409,7 @@ namespace ClassicUO.Game.Managers
                                         Engine.UI.Add(new MiniMapGump());
                                     else
                                     {
+                                        miniMapGump.ToggleSize();
                                         miniMapGump.SetInScreen();
                                         miniMapGump.BringOnTop();
                                     }
@@ -623,7 +624,25 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.LastObject:
-                    GameActions.DoubleClick(GameActions.LastObject);
+
+                    if (World.Get(GameActions.LastObject) != null)
+                        GameActions.DoubleClick(GameActions.LastObject);
+
+                    break;
+
+                case MacroType.UseItemInHand:
+                    Item itemInLeftHand = World.Player.Equipment[(int)Layer.OneHanded];
+                    if (itemInLeftHand != null)
+                    {
+                        GameActions.DoubleClick(itemInLeftHand.Serial);
+                    } else
+                    {
+                        Item itemInRightHand = World.Player.Equipment[(int)Layer.TwoHanded];
+                        if (itemInRightHand != null)
+                        {
+                            GameActions.DoubleClick(itemInRightHand.Serial);
+                        }
+                    }
 
                     break;
 
@@ -1032,6 +1051,17 @@ namespace ClassicUO.Game.Managers
                     NameOverHeadManager.ToggleOverheads();
 
                     break;
+
+                case MacroType.UsePotion:
+                    scantype = macro.SubCode - MacroSubType.ConfusionBlastPotion;
+
+                    ushort start = (ushort) (0x0F06 + scantype);
+
+                    Item potion = World.Player.FindItemByGraphic(start);
+                    if (potion != null)
+                        GameActions.DoubleClick(potion);
+
+                    break;
             }
 
 
@@ -1126,7 +1156,7 @@ namespace ClassicUO.Game.Managers
             {
                 case MacroType.Walk:
                     offset = (int) MacroSubType.NW;
-                    count = (int) MacroSubType.Configuration - (int) MacroSubType.NW;
+                    count = MacroSubType.Configuration - MacroSubType.NW;
 
                     break;
 
@@ -1135,31 +1165,31 @@ namespace ClassicUO.Game.Managers
                 case MacroType.Minimize:
                 case MacroType.Maximize:
                     offset = (int) MacroSubType.Configuration;
-                    count = (int) MacroSubType.Anatomy - (int) MacroSubType.Configuration;
+                    count = MacroSubType.Anatomy - MacroSubType.Configuration;
 
                     break;
 
                 case MacroType.UseSkill:
                     offset = (int) MacroSubType.Anatomy;
-                    count = (int) MacroSubType.LeftHand - (int) MacroSubType.Anatomy;
+                    count = MacroSubType.LeftHand - MacroSubType.Anatomy;
 
                     break;
 
                 case MacroType.ArmDisarm:
                     offset = (int) MacroSubType.LeftHand;
-                    count = (int) MacroSubType.Honor - (int) MacroSubType.LeftHand;
+                    count = MacroSubType.Honor - MacroSubType.LeftHand;
 
                     break;
 
                 case MacroType.InvokeVirtue:
                     offset = (int) MacroSubType.Honor;
-                    count = (int) MacroSubType.Clumsy - (int) MacroSubType.Honor;
+                    count = MacroSubType.Clumsy - MacroSubType.Honor;
 
                     break;
 
                 case MacroType.CastSpell:
                     offset = (int) MacroSubType.Clumsy;
-                    count = (int) MacroSubType.Hostile - (int) MacroSubType.Clumsy;
+                    count = MacroSubType.Hostile - MacroSubType.Clumsy;
 
                     break;
 
@@ -1167,7 +1197,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.SelectPrevious:
                 case MacroType.SelectNearest:
                     offset = (int) MacroSubType.Hostile;
-                    count = (int) MacroSubType.MscTotalCount - (int) MacroSubType.Hostile;
+                    count = MacroSubType.MscTotalCount - MacroSubType.Hostile;
 
                     break;
 
@@ -1175,6 +1205,11 @@ namespace ClassicUO.Game.Managers
                     offset = (int) MacroSubType.Top;
                     count = 4;
 
+                    break;
+
+                case MacroType.UsePotion:
+                    offset = (int) MacroSubType.ConfusionBlastPotion;
+                    count = MacroSubType.ExplosionPotion - MacroSubType.ConfusionBlastPotion;
                     break;
             }
         }
@@ -1204,6 +1239,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.SelectPrevious:
                 case MacroType.SelectNearest:
                 case MacroType.MovePlayer:
+                case MacroType.UsePotion:
 
                     if (sub == MacroSubType.MSC_NONE)
                     {
@@ -1333,7 +1369,12 @@ namespace ClassicUO.Game.Managers
         AuraOnOff,
         Grab,
         SetGrabBag,
-        NamesOnOff
+        NamesOnOff,
+        UseItemInHand,
+
+       
+        UsePotion,
+
     }
 
     internal enum MacroSubType
@@ -1553,6 +1594,16 @@ namespace ClassicUO.Game.Managers
         Top,
         Right,
         Down,
-        Left
+        Left,
+
+
+        ConfusionBlastPotion,
+        CurePotion,
+        AgilityPotion,
+        StrengthPotion,
+        PoisonPotion,
+        RefreshPotion,
+        HealPotion,
+        ExplosionPotion,
     }
 }

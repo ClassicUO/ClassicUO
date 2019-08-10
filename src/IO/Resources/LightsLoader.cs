@@ -22,25 +22,28 @@
 #endregion
 
 using System.IO;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class LightsLoader : ResourceLoader<SpriteTexture>
+    internal class LightsLoader : ResourceLoader<UOTexture16>
     {
         private UOFileMul _file;
 
-        public override void Load()
+        public override Task Load()
         {
-            string path = Path.Combine(FileManager.UoFolderPath, "light.mul");
-            string pathidx = Path.Combine(FileManager.UoFolderPath, "lightidx.mul");
+            return Task.Run(() => {
+                string path = Path.Combine(FileManager.UoFolderPath, "light.mul");
+                string pathidx = Path.Combine(FileManager.UoFolderPath, "lightidx.mul");
 
-            if (!File.Exists(path) || !File.Exists(pathidx))
-                throw new FileNotFoundException();
+                if (!File.Exists(path) || !File.Exists(pathidx))
+                    throw new FileNotFoundException();
 
-            _file = new UOFileMul(path, pathidx, Constants.MAX_LIGHTS_DATA_INDEX_COUNT);
+                _file = new UOFileMul(path, pathidx, Constants.MAX_LIGHTS_DATA_INDEX_COUNT);
+            });
         }
 
 
@@ -48,14 +51,14 @@ namespace ClassicUO.IO.Resources
         {
         }
 
-        public override SpriteTexture GetTexture(uint id)
+        public override UOTexture16 GetTexture(uint id)
         {
             if (!ResourceDictionary.TryGetValue(id, out var texture))
             {
                 ushort[] pixels = GetLight(id, out int w, out int h);
 
-                texture = new SpriteTexture(w, h, false);
-                texture.SetData(pixels);
+                texture = new UOTexture16(w, h);
+                texture.PushData(pixels);
                 ResourceDictionary.Add(id, texture);
             }
 

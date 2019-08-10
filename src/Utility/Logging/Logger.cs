@@ -87,12 +87,14 @@ namespace ClassicUO.Utility.Logging
 
         public void Message(LogTypes logType, string text, ConsoleColor highlightColor)
         {
-            SetLogger(logType, text, highlightColor);
+            lock (_syncObject)
+                SetLogger(logType, text, highlightColor);
         }
 
         public void NewLine()
         {
-            SetLogger(LogTypes.None, string.Empty, ConsoleColor.Black);
+            lock (_syncObject)
+                SetLogger(LogTypes.None, string.Empty, ConsoleColor.Black);
         }
 
         public void Clear()
@@ -112,6 +114,7 @@ namespace ClassicUO.Utility.Logging
             if (_indent < 0)
                 _indent = 0;
         }
+        private readonly object _syncObject = new object();
 
         private void SetLogger(LogTypes type, string text, ConsoleColor highlightColor)
         {

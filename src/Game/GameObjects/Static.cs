@@ -124,7 +124,7 @@ namespace ClassicUO.Game.GameObjects
 
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
         }
-
+     
         public override void Destroy()
         {
             if (IsDestroyed)

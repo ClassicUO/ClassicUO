@@ -42,7 +42,30 @@ namespace ClassicUO.Utility
             return char.ToUpper(str[0]) + str.Substring(1);
         }
 
+
         public static string CapitalizeAllWords(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+                return string.Empty;
+
+            if (str.Length == 1)
+                return char.ToUpper(str[0]).ToString();
+
+            _sb.Clear();
+
+            bool capitalizeNext = true;
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                _sb.Append(capitalizeNext ? char.ToUpper(str[i]) : str[i]);
+                if (!char.IsWhiteSpace(str[i]))
+                    capitalizeNext = i + 1 < str.Length && char.IsWhiteSpace(str[i + 1]);
+            }
+
+            return _sb.ToString();
+        }
+
+        public static string CapitalizeWordsByLimitator(string str)
         {
             if (string.IsNullOrEmpty(str))
                 return string.Empty;

@@ -63,6 +63,9 @@ namespace ClassicUO.Game
 
         public static int OldMusicIndex { get; set; }
 
+        public static WorldTextManager WorldTextManager { get; } = new WorldTextManager();
+
+        public static JournalManager Journal { get; } = new JournalManager();
 
         public static int MapIndex
         {
@@ -123,7 +126,7 @@ namespace ClassicUO.Game
 
         public static LockedFeatures ClientLockedFeatures { get; } = new LockedFeatures();
 
-        public static ClientFeatures ClientFlags { get; } = new ClientFeatures();
+        public static ClientFeatures ClientFeatures { get; } = new ClientFeatures();
 
         public static string ServerName { get; set; }
 
@@ -208,6 +211,8 @@ namespace ClassicUO.Game
                 }
 
                 _effectManager.Update(totalMS, frameMS);
+
+                WorldTextManager.Update(totalMS, frameMS);
             }
         }
 
@@ -274,6 +279,7 @@ namespace ClassicUO.Game
             foreach (Item i in item.Items)
                 RemoveItem(i);
 
+
             item.Items.Clear();
             item.Destroy();
 
@@ -317,7 +323,7 @@ namespace ClassicUO.Game
             Map = null;
             Light.Overall = Light.RealOverall = 0;
             Light.Personal = Light.RealPersonal = 0;
-            ClientFlags.SetFlags(0);
+            ClientFeatures.SetFlags(0);
             ClientLockedFeatures.SetFlags(0);
             HouseManager.Clear();
             Party.Clear();
@@ -330,6 +336,9 @@ namespace ClassicUO.Game
 
             Season = Seasons.Summer;
             OldSeason = Seasons.Summer;
+
+            Journal.Clear();
+            WorldTextManager.Clear();
         }
 
         private static void InternalMapChangeClear(bool noplayer)

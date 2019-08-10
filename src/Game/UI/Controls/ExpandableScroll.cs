@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Controls
             CanMove = true;
             AcceptMouseInput = true;
 
-            var textures = new SpriteTexture[4];
+            var textures = new UOTexture[4];
 
             for (int i = 0; i < 4; i++)
             {
@@ -132,6 +132,11 @@ namespace ClassicUO.Game.UI.Controls
 
         public int SpecialHeight { get; set; }
 
+        public Hue Hue
+        {
+            get => _gumpTop.Hue;
+            set => _gumpTop.Hue = _gumpBottom.Hue = _gumpMiddle.Hue = _gumpRight.Hue = value;
+        }
 
         public override void Dispose()
         {

@@ -27,8 +27,10 @@ using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 
@@ -229,7 +231,10 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsDead
         {
-            get => MathHelper.InRange(Graphic, 0x0192, 0x0193) || MathHelper.InRange(Graphic, 0x025F, 0x0260) || MathHelper.InRange(Graphic, 0x02B6, 0x02B7) || _isDead;
+            get => Graphic == 0x0192 ||
+                   Graphic == 0x0193 ||
+                   (Graphic >= 0x025F && Graphic <= 0x0260) ||
+                   Graphic == 0x2B6 || Graphic == 0x02B7 || _isDead;
             set => _isDead = value;
         }
 
@@ -241,11 +246,30 @@ namespace ClassicUO.Game.GameObjects
             set { }
         }
 
-        public bool IsHuman => MathHelper.InRange(Graphic, 0x0190, 0x0193) || MathHelper.InRange(Graphic, 0x00B7, 0x00BA) || MathHelper.InRange(Graphic, 0x025D, 0x0260) || MathHelper.InRange(Graphic, 0x029A, 0x029B) || MathHelper.InRange(Graphic, 0x02B6, 0x02B7) || Graphic == 0x03DB || Graphic == 0x03DF || Graphic == 0x03E2 || Graphic == 0x02E8 || Graphic == 0x02E9; // Vampiric
+        public bool IsHuman => (Graphic >= 0x0190 && Graphic <= 0x0193) ||
+                               (Graphic >= 0x00B7 && Graphic <= 0x00BA) ||
+                               (Graphic >= 0x025D && Graphic <= 0x0260) ||
+                               Graphic == 0x029A || Graphic == 0x029B ||
+                               Graphic == 0x02B6 || Graphic == 0x02B7 ||
+                               Graphic == 0x03DB || Graphic == 0x03DF || Graphic == 0x03E2 || Graphic == 0x02E8 || Graphic == 0x02E9; // Vampiric
 
         public override bool Exists => World.Contains(Serial);
 
-        public bool IsMounted => HasEquipment && Equipment[(int) Layer.Mount] != null;
+        public bool IsMounted => HasEquipment && Equipment[0x19] != null && !IsDrivingBoat;
+
+        public bool IsDrivingBoat
+        {
+            get
+            {
+                if (FileManager.ClientVersion >= ClientVersions.CV_70331 && HasEquipment)
+                {
+                    Item m = Equipment[0x19];
+                    return m != null && m.Graphic == 0x3E96; // TODO: im not sure if each server sends this value ever
+                }
+
+                return false;
+            }
+        }
 
         public bool IsRunning { get; internal set; }
 
@@ -818,7 +842,7 @@ namespace ClassicUO.Game.GameObjects
                             if (Z - step.Z >= 22)
                             {
                                 // oUCH!!!!
-                                AddOverhead(MessageType.Label, "Ouch!");
+                                AddMessage(MessageType.Label, "Ouch!");
                             }
 
 #if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
@@ -845,6 +869,17 @@ namespace ClassicUO.Game.GameObjects
                         }
 
                         Position = new Position((ushort) step.X, (ushort) step.Y, step.Z);
+
+                        if (World.InGame && Serial == World.Player)
+                        {
+                            foreach (var s in Engine.UI.Gumps.OfType<ContainerGump>())
+                            {
+                                var item = World.Items.Get(s.LocalSerial);
+                                if (item == null || item.IsDestroyed || item.OnGround && item.Distance > 3)
+                                    s.Dispose();
+                            }
+                        }
+
                         Direction = (Direction) step.Direction;
                         IsRunning = step.Run;
                         Offset.X = 0;
@@ -889,7 +924,7 @@ namespace ClassicUO.Game.GameObjects
 
                     while (start != null && result == 0)
                     {
-                        if ((start is Item || start is Static) && Math.Abs(Z - start.Z) <= 1)
+                        if ((start is Item || start is Static || start is Multi) && Math.Abs(Z - start.Z) <= 1)
                         {
                             ushort graphic = start.Graphic;
 
@@ -1021,6 +1056,9 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Destroy()
         {
+            HitsTexture?.Destroy();
+            HitsTexture = null;
+
             if (HasEquipment)
             {
                 for (int i = 0; i < Equipment.Length; i++)

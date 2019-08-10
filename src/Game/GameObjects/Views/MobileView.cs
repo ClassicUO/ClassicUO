@@ -44,6 +44,29 @@ namespace ClassicUO.Game.GameObjects
         private static int _startCharacterFeetY;
         private static int _characterFrameHeight;
 
+        public byte HitsPercentage { get; set; }
+        public RenderedText HitsTexture { get; set; }
+
+        public void UpdateHits(byte perc)
+        {
+            if (perc != HitsPercentage || (HitsTexture == null || HitsTexture.IsDestroyed))
+            {
+                HitsPercentage = perc;
+
+                ushort color = 0x0044;
+
+                if (perc < 30)
+                    color = 0x0021;
+                else if (perc < 50)
+                    color = 0x0030;
+                else if (perc < 80)
+                    color = 0x0058;
+
+                HitsTexture?.Destroy();
+                HitsTexture = RenderedText.Create($"[{perc}%]", color, 3, false);
+            }
+        }
+
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             //if (IsDestroyed)
@@ -160,16 +183,19 @@ namespace ClassicUO.Game.GameObjects
 
                 ushort mountGraphic = mount.GetGraphicForAnimation();
 
-                if (hasShadow)
+                if (mountGraphic != 0xFFFF) 
                 {
-                    DrawInternal(batcher, this, null, drawX, drawY + 10, mirror, animIndex, true, graphic);
-                    FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
-                    DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, true, mountGraphic);
-                }
-                else
-                    FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
+                    if (hasShadow)
+                    {
+                        DrawInternal(batcher, this, null, drawX, drawY + 10, mirror, animIndex, true, graphic);
+                        FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
+                        DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, true, mountGraphic);
+                    }
+                    else
+                        FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
 
-                drawY += DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, false, mountGraphic);
+                    drawY += DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, false, mountGraphic);
+                }
             }
             else
             {

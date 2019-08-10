@@ -45,7 +45,6 @@ namespace ClassicUO.Game.Map
         public Map(int index)
         {
             Index = index;
-            FileManager.Map.LoadMap(index);
             MapBlockIndex = FileManager.Map.MapBlocksSize[Index, 0] * FileManager.Map.MapBlocksSize[Index, 1];
             Chunks = new Chunk[MapBlockIndex];
         }
@@ -113,30 +112,28 @@ namespace ClassicUO.Game.Map
                 MapBlock* mp = (MapBlock*) blockIndex.MapAddress;
                 MapCells* cells = (MapCells*) &mp->Cells;
 
-                return cells[my * 8 + mx].Z;
+                return cells[(my << 3) + mx].Z;
             }
         }
 
         public void GetMapZ(int x, int y, out sbyte groundZ, out sbyte staticZ)
         {
             var tile = GetTile(x, y);
-
-            var obj = tile.FirstNode;
-
             groundZ = staticZ = 0;
+
+            if (tile == null)
+            {
+                return;
+            }
+            
+            var obj = tile.FirstNode;
 
             while (obj != null)
             {
-                switch (obj)
-                {
-                    case Land land:
-                        groundZ = land.Z;
-                        break;
-                    case Static stat:
-                        staticZ = stat.Z;
-                        break;
-                }
-
+                if (obj is Land)
+                    groundZ = obj.Z;
+                else if (staticZ < obj.Z)
+                    staticZ = obj.Z;
                 obj = obj.Right;
             }
         }

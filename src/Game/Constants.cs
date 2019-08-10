@@ -39,6 +39,10 @@ namespace ClassicUO.Game
 
         public const string WIKI_LINK = "https://github.com/andreakarasho/ClassicUO/wiki";
 
+        public const int MIN_FPS = 15;
+        public const int MAX_FPS = 250;
+        public const int LOGIN_SCREEN_FPS = 60;
+
         public const int CHARACTER_ANIMATION_DELAY = 80;
         public const int ITEM_EFFECT_ANIMATION_DELAY = 50;
 
@@ -64,13 +68,9 @@ namespace ClassicUO.Game
 
         public const int MAX_FAST_WALK_STACK_SIZE = 5;
 
-        public const int MAX_HOUSE_DISTANCE = 50;
+        public const byte FOLIAGE_ALPHA = 76;
+        public const byte ALPHA_TIME = 20;
 
-        public const float FOLIAGE_ALPHA = .7f;
-        public const int ALPHA_TIME = 25;
-
-        public const float ALPHA_OBJECT_VALUE = 200.0f;
-        public const int ALPHA_OBJECT_TIME = 200;
 
         public const int SPELLBOOK_1_SPELLS_COUNT = 64;
         public const int SPELLBOOK_2_SPELLS_COUNT = 17;
@@ -99,7 +99,7 @@ namespace ClassicUO.Game
         public const ushort FIELD_REPLACE_GRAPHIC = 0x1826;
         public const ushort TREE_REPLACE_GRAPHIC = 0x0E59;
 
-        public const int MIN_CIRCLE_OF_TRANSPARENCY_RADIUS = 2;
+        public const int MIN_CIRCLE_OF_TRANSPARENCY_RADIUS = 1;
         public const int MAX_CIRCLE_OF_TRANSPARENCY_RADIUS = 8;
 
         public const int MAX_ABILITIES_COUNT = 32;

@@ -35,10 +35,10 @@ namespace ClassicUO.Game.UI.Controls
     internal class ScrollFlag : Control, IScrollBar
     {
         private const int TIME_BETWEEN_CLICKS = 150;
-        private readonly SpriteTexture _downButton;
+        private readonly UOTexture _downButton;
 
         private readonly bool _showButtons;
-        private readonly SpriteTexture _upButton;
+        private readonly UOTexture _upButton;
         private bool _btUpClicked, _btDownClicked, _btnSliderClicked;
 
         private Point _clickPosition;

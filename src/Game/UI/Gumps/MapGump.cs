@@ -86,7 +86,7 @@ namespace ClassicUO.Game.UI.Gumps
       
         public int PlotState { get; private set; }
 
-        public void SetMapTexture(SpriteTexture texture)
+        public void SetMapTexture(UOTexture texture)
         {
             _textureControl.Texture?.Dispose();
             _textureControl.WantUpdateSize = true;
@@ -343,11 +343,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = y;
 
 
-                _text = new RenderedText()
-                {
-                    Font = 0,
-                    IsUnicode = false,
-                };
+                _text = RenderedText.Create(String.Empty, font: 0, isunicode: false);
 
                 _pic = new GumpPic(0, 0, 0x139B, 0);
                 Add(_pic);

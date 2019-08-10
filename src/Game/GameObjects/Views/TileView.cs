@@ -88,7 +88,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Texture.Ticks = Engine.Ticks;
 
-            if (batcher.DrawSpriteLand(Texture, posX, posY + Z * 4, ref Rectangle, ref Normals, ref HueVector))
+            if (batcher.DrawSpriteLand(Texture, posX, posY + (Z << 2), ref Rectangle, ref Normals, ref HueVector))
             {
                 Select(posX, posY);
 
@@ -110,7 +110,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if (SelectedObject.IsPointInLand(Graphic, x - Bounds.X, y - Bounds.Y))
+                if (SelectedObject.IsPointInLand(Texture, Graphic, x - Bounds.X, y - Bounds.Y))
                     SelectedObject.Object = this;
             }
         }

@@ -69,15 +69,16 @@ namespace ClassicUO.Game.Managers
                     if (speed == 0)
                         speed++;
 
-                    effect = new MovingEffect(source, target, srcPos.X, srcPos.Y, srcPos.Z, targPos.X, targPos.Y, targPos.Z, graphic, hue)
+                    effect = new MovingEffect(source, target, srcPos.X, srcPos.Y, srcPos.Z, targPos.X, targPos.Y, targPos.Z, graphic, hue, fixedDir)
                     {
                         Blend = blendmode,
-                        MovingDelay = speed
+                        MovingDelay = (byte) (speed)
                     };
 
                     if (doesExplode)
                         effect.AddChildEffect(new AnimatedItemEffect(target, targPos.X, targPos.Y, targPos.Z, 0x36Cb, hue, 9));
 
+                    effect.Update(Engine.Ticks, 0);
                     break;
 
                 case GraphicEffectType.Lightning:

@@ -282,19 +282,19 @@ namespace ClassicUO.Game.UI.Controls
 
                             b.Parent.Add(new ResizePic(0x0BB8)
                             {
-                                X = 20,
+                                X = 18,
                                 Y = b.Height + 2,
-                                Width = 180,
-                                Height = b.Height
+                                Width = 240,
+                                Height = b.Height * 2 + 4
                             });
 
-                            TextBox textbox = new TextBox(0xFF, 178, 178, 178, true, FontStyle.BlackBorder)
+                            TextBox textbox = new TextBox(new TextEntry(0xFF, 80, 0, 236, true, FontStyle.BlackBorder), true)
                             {
-                                X = 22,
+                                X = 20,
                                 Y = b.Height + 5,
-                                Width = 178,
-                                Height = b.Height
+                                Height = b.Height * 2
                             };
+                            textbox.TxEntry.SetHeight(b.Height * 2);
 
                             textbox.TextChanged += (sss, eee) =>
                             {
@@ -347,21 +347,20 @@ namespace ClassicUO.Game.UI.Controls
 
                         box.Parent.Add(new ResizePic(0x0BB8)
                         {
-                            X = 20,
+                            X = 18,
                             Y = box.Height + 2,
-                            Width = 180,
-                            Height = box.Height
+                            Width = 240,
+                            Height = box.Height * 2 + 4
                         });
 
-                        TextBox textbox = new TextBox(0xFF, 178, 178, 178, true, FontStyle.BlackBorder)
+                        TextBox textbox = new TextBox(new TextEntry(0xFF, 80, 0, 236, true, FontStyle.BlackBorder), true)
                         {
-                            X = 22,
+                            X = 20,
                             Y = box.Height + 5,
-                            Width = 178,
-                            Height = box.Height,
-                            Text = obj.HasString() ? ((MacroObjectString) obj).Text : string.Empty
+                            Height = box.Height * 2
                         };
-
+                        textbox.TxEntry.SetHeight(box.Height * 2);
+                        textbox.SetText(obj.HasString() ? ((MacroObjectString)obj).Text : string.Empty);
                         textbox.TextChanged += (sss, eee) =>
                         {
                             if (obj.HasString())

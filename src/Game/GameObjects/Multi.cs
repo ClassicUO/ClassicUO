@@ -70,6 +70,7 @@ namespace ClassicUO.Game.GameObjects
                 m._isFoliage = m.ItemData.IsFoliage;
                 m.AllowedToDraw = !GameObjectHelper.IsNoDrawable(m.Graphic);
                 m.AlphaHue = 0;
+                m.IsFromTarget = false;
 
                 if (m.ItemData.Height > 5)
                     m._canBeTransparent = 1;

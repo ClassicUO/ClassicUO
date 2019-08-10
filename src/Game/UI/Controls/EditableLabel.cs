@@ -42,7 +42,8 @@ namespace ClassicUO.Game.UI.Controls
                 Text = text,
                 Width = width,
                 Height = 15,
-                IsEditable = false
+                IsEditable = false,
+                AllowDeleteKey = false
             };
 
 

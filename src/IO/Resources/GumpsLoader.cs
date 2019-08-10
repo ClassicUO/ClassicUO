@@ -24,81 +24,85 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class GumpsLoader : ResourceLoader<SpriteTexture>
+    internal class GumpsLoader : ResourceLoader<UOTexture16>
     {
         private UOFile _file;
         //private readonly List<uint> _usedIndex = new List<uint>();
 
-        public override void Load()
+        public override Task Load()
         {
-            string path = Path.Combine(FileManager.UoFolderPath, "gumpartLegacyMUL.uop");
+            return Task.Run(() => {
 
-            if (File.Exists(path))
-            {
-                _file = new UOFileUop(path, ".tga", Constants.MAX_GUMP_DATA_INDEX_COUNT, true);
-                FileManager.UseUOPGumps = true;
-            }
-            else
-            {
-                path = Path.Combine(FileManager.UoFolderPath, "Gumpart.mul");
-                string pathidx = Path.Combine(FileManager.UoFolderPath, "Gumpidx.mul");
+                string path = Path.Combine(FileManager.UoFolderPath, "gumpartLegacyMUL.uop");
 
-                if (File.Exists(path) && File.Exists(pathidx))
-                    _file = new UOFileMul(path, pathidx, Constants.MAX_GUMP_DATA_INDEX_COUNT, 12);
-                FileManager.UseUOPGumps = false;
-            }
-
-            string pathdef = Path.Combine(FileManager.UoFolderPath, "gump.def");
-
-            if (!File.Exists(pathdef))
-                return;
-
-            using (DefReader defReader = new DefReader(pathdef, 3))
-            {
-                while (defReader.Next())
+                if (File.Exists(path))
                 {
-                    int ingump = defReader.ReadInt();
+                    _file = new UOFileUop(path, ".tga", Constants.MAX_GUMP_DATA_INDEX_COUNT, true);
+                    FileManager.UseUOPGumps = true;
+                }
+                else
+                {
+                    path = Path.Combine(FileManager.UoFolderPath, "Gumpart.mul");
+                    string pathidx = Path.Combine(FileManager.UoFolderPath, "Gumpidx.mul");
 
-                    if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT ||
-                        ingump >= _file.Entries.Length ||
-                        _file.Entries[ingump].Length > 0)
-                        continue;
+                    if (File.Exists(path) && File.Exists(pathidx))
+                        _file = new UOFileMul(path, pathidx, Constants.MAX_GUMP_DATA_INDEX_COUNT, 12);
+                    FileManager.UseUOPGumps = false;
+                }
 
-                    int[] group = defReader.ReadGroup();
+                string pathdef = Path.Combine(FileManager.UoFolderPath, "gump.def");
 
-                    for (int i = 0; i < group.Length; i++)
+                if (!File.Exists(pathdef))
+                    return;
+
+                using (DefReader defReader = new DefReader(pathdef, 3))
+                {
+                    while (defReader.Next())
                     {
-                        int checkIndex = group[i];
+                        int ingump = defReader.ReadInt();
 
-                        if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT || checkIndex >= _file.Entries.Length ||
-                            _file.Entries[checkIndex].Length <= 0)
+                        if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT ||
+                            ingump >= _file.Entries.Length ||
+                            _file.Entries[ingump].Length > 0)
                             continue;
 
-                        _file.Entries[ingump] = _file.Entries[checkIndex];
+                        int[] group = defReader.ReadGroup();
 
-                        break;
+                        for (int i = 0; i < group.Length; i++)
+                        {
+                            int checkIndex = group[i];
+
+                            if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT || checkIndex >= _file.Entries.Length ||
+                                _file.Entries[checkIndex].Length <= 0)
+                                continue;
+
+                            _file.Entries[ingump] = _file.Entries[checkIndex];
+
+                            break;
+                        }
                     }
                 }
-            }
+            });
         }
 
-        public override SpriteTexture GetTexture(uint g)
+        public override UOTexture16 GetTexture(uint g)
         {
-            if (!ResourceDictionary.TryGetValue(g, out SpriteTexture texture) || texture.IsDisposed)
+            if (!ResourceDictionary.TryGetValue(g, out UOTexture16 texture) || texture.IsDisposed)
             {
                 ushort[] pixels = GetGumpPixels(g, out int w, out int h);
 
                 if (pixels == null || pixels.Length == 0)
                     return null;
 
-                texture = new SpriteTexture(w, h, false);
-                texture.SetDataHitMap16(pixels);
+                texture = new UOTexture16(w, h);
+                texture.PushData(pixels);
                 ResourceDictionary.Add(g, texture);
             }
 
@@ -110,7 +114,7 @@ namespace ClassicUO.IO.Resources
             //for (int i = 0; i < _usedIndex.Count; i++)
             //{
             //    uint g = _usedIndex[i];
-            //    SpriteTexture texture = ResourceDictionary[g];
+            //    UOTexture texture = ResourceDictionary[g];
             //    texture.Dispose();
             //    _usedIndex.RemoveAt(i--);
             //    ResourceDictionary.Remove(g);
@@ -120,7 +124,7 @@ namespace ClassicUO.IO.Resources
 
             //long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
-            ////foreach (SpriteTexture t in ResourceDictionary.Values.Where(s => s.Ticks < ticks).Take(20).)
+            ////foreach (UOTexture t in ResourceDictionary.Values.Where(s => s.Ticks < ticks).Take(20).)
             ////{
             ////    t.Dispose();
             ////}
@@ -152,7 +156,7 @@ namespace ClassicUO.IO.Resources
         //    //for (int i = 0; i < _usedIndex.Count; i++)
         //    //{
         //    //    uint g = _usedIndex[i];
-        //    //    SpriteTexture texture = ResourceDictionary[g];
+        //    //    UOTexture texture = ResourceDictionary[g];
 
         //    //    if (texture.Ticks < ticks)
         //    //    {

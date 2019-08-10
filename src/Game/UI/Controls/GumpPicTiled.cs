@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Controls
             Height = int.Parse(parts[4]);
         }
 
-        internal GumpPicTiled(int x, int y, int width, int heigth, SpriteTexture texture)
+        internal GumpPicTiled(int x, int y, int width, int heigth, UOTexture texture)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -71,6 +71,8 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         public Graphic Graphic { get; set; }
+
+        public Hue Hue { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -87,7 +89,7 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, IsTransparent ? Alpha : 0, true);
+            ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, false, IsTransparent ? Alpha : 0, true);
 
             batcher.Draw2DTiled(Texture, x, y, Width, Height, ref _hueVector);
 

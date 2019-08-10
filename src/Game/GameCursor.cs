@@ -60,7 +60,7 @@ namespace ClassicUO.Game
         private Vector3 _auraVector = new Vector3(0, 13, 0);
 
         private IntPtr _cursor, _surface;
-        private SpriteTexture _draggedItemTexture;
+        private UOTexture _draggedItemTexture;
         private Graphic _graphic = 0x2073;
 
         private ItemHold _itemHold;
@@ -374,7 +374,7 @@ namespace ClassicUO.Game
         {
             if (Engine.SceneManager.CurrentScene is GameScene gs)
             {
-                if (!World.ClientFlags.TooltipsEnabled || gs.IsHoldingItem)
+                if (!World.ClientFeatures.TooltipsEnabled || gs.IsHoldingItem)
                 {
                     if (!_tooltip.IsEmpty)
                         _tooltip.Clear();

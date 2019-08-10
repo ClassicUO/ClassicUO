@@ -23,6 +23,7 @@
 
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Utility;
@@ -38,53 +39,56 @@ namespace ClassicUO.IO.Resources
 
         public int Count { get; private set; }
 
-        public override void Load()
+        public override Task Load()
         {
-            string path = Path.Combine(FileManager.UoFolderPath, "multi.mul");
-            string pathidx = Path.Combine(FileManager.UoFolderPath, "multi.idx");
-
-            if (File.Exists(path) && File.Exists(pathidx))
-                _file = new UOFileMul(path, pathidx, Constants.MAX_MULTI_DATA_INDEX_COUNT, 14);
-            else
-                throw new FileNotFoundException();
-
-            Count = _itemOffset = FileManager.ClientVersion >= ClientVersions.CV_7090 ? UnsafeMemoryManager.SizeOf<MultiBlockNew>() : UnsafeMemoryManager.SizeOf<MultiBlock>();
-
-
-            string uopPath = Path.Combine(FileManager.UoFolderPath, "MultiCollection.uop");
-
-            if (File.Exists(uopPath))
+            return Task.Run(() =>
             {
-                Count = Constants.MAX_MULTI_DATA_INDEX_COUNT;
-                _fileUop = new UOFileUopNoFormat(uopPath);
-                _reader = new DataReader();
+                string path = Path.Combine(FileManager.UoFolderPath, "multi.mul");
+                string pathidx = Path.Combine(FileManager.UoFolderPath, "multi.idx");
 
-                for (int i = 0; i < _fileUop.Entries.Length; i++)
+                if (File.Exists(path) && File.Exists(pathidx))
+                    _file = new UOFileMul(path, pathidx, Constants.MAX_MULTI_DATA_INDEX_COUNT, 14);
+                else
+                    throw new FileNotFoundException();
+
+                Count = _itemOffset = FileManager.ClientVersion >= ClientVersions.CV_7090 ? UnsafeMemoryManager.SizeOf<MultiBlockNew>() : UnsafeMemoryManager.SizeOf<MultiBlock>();
+
+
+                string uopPath = Path.Combine(FileManager.UoFolderPath, "MultiCollection.uop");
+
+                if (File.Exists(uopPath))
                 {
-                    long offset = _fileUop.Entries[i].Offset;
-                    int csize = _fileUop.Entries[i].Length;
-                    int dsize = _fileUop.Entries[i].DecompressedLength;
+                    Count = Constants.MAX_MULTI_DATA_INDEX_COUNT;
+                    _fileUop = new UOFileUopNoFormat(uopPath);
+                    _reader = new DataReader();
 
-                    _fileUop.Seek(offset);
-                    byte[] cdata = _fileUop.ReadArray<byte>(csize);
-                    byte[] ddata = new byte[dsize];
-
-                    ZLib.Decompress(cdata, 0, ddata, dsize);
-                    _reader.SetData(ddata, dsize);
-
-                    uint id = _reader.ReadUInt();
-
-                    if (id < Constants.MAX_MULTI_DATA_INDEX_COUNT && id < _file.Entries.Length)
+                    for (int i = 0; i < _fileUop.Entries.Length; i++)
                     {
-                        ref UOFileIndex3D index = ref _file.Entries[id];
-                        int count = _reader.ReadInt();
+                        long offset = _fileUop.Entries[i].Offset;
+                        int csize = _fileUop.Entries[i].Length;
+                        int dsize = _fileUop.Entries[i].DecompressedLength;
 
-                        index = new UOFileIndex3D(offset, csize, dsize, (int) MathHelper.Combine(count, index.Extra));
+                        _fileUop.Seek(offset);
+                        byte[] cdata = _fileUop.ReadArray<byte>(csize);
+                        byte[] ddata = new byte[dsize];
+
+                        ZLib.Decompress(cdata, 0, ddata, dsize);
+                        _reader.SetData(ddata, dsize);
+
+                        uint id = _reader.ReadUInt();
+
+                        if (id < Constants.MAX_MULTI_DATA_INDEX_COUNT && id < _file.Entries.Length)
+                        {
+                            ref UOFileIndex3D index = ref _file.Entries[id];
+                            int count = _reader.ReadInt();
+
+                            index = new UOFileIndex3D(offset, csize, dsize, (int) MathHelper.Combine(count, index.Extra));
+                        }
                     }
-                }
 
-                _reader.ReleaseData();
-            }
+                    _reader.ReleaseData();
+                }
+            });
         }
 
         protected override void CleanResources()

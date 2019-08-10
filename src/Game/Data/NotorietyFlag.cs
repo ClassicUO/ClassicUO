@@ -25,7 +25,6 @@ using System;
 
 namespace ClassicUO.Game.Data
 {
-    [Flags]
     public enum NotorietyFlag : byte
     {
         Unknown = 0x00,

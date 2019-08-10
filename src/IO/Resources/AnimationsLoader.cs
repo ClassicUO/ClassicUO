@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -180,8 +181,12 @@ namespace ClassicUO.IO.Resources
         };
 
 
-        public override void Load()
+        public override Task Load()
         {
+            return Task.Run(() =>
+            {
+
+            
             Dictionary<ulong, UopFileData> hashes = new Dictionary<ulong, UopFileData>();
             int[] un = {0x40000, 0x10000, 0x20000, 0x20000, 0x20000};
 
@@ -580,6 +585,8 @@ namespace ClassicUO.IO.Resources
                     }
                 }
             }
+
+            });
         }
 
         private void LoadUop(Dictionary<ulong, UopFileData> hashes)
@@ -1193,8 +1200,10 @@ namespace ClassicUO.IO.Resources
                     uint pixelOffset = reader.ReadUInt();
                     //int vsize = pixelDataOffsets.Count;
 
-                    UOPFrameData data = new UOPFrameData(start, pixelOffset);
-                    pixelDataOffsets[i] = data;
+                    ref UOPFrameData data = ref pixelDataOffsets[i];
+                    data.DataStart = start;
+                    data.PixelDataOffset = pixelOffset;
+
                     //if (vsize + 1 < data.FrameID)
                     //{
                     //    while (vsize + 1 != data.FrameID)
@@ -1230,7 +1239,7 @@ namespace ClassicUO.IO.Resources
                     if (animDirection.Frames[i] != null)
                         continue;
 
-                    UOPFrameData frameData = pixelDataOffsets[i + dirFrameStartIdx];
+                    ref readonly UOPFrameData frameData = ref pixelDataOffsets[i + dirFrameStartIdx];
 
                     if (frameData.DataStart == 0)
                         continue;
@@ -1267,10 +1276,14 @@ namespace ClassicUO.IO.Resources
                             ushort* cur = ptrData + y * imageWidth + x;
                             ushort* end = cur + (header & 0xFFF);
                             int filecounter = 0;
-                            byte[] filedata = reader.ReadArray(header & 0xFFF);
+                            //byte[] filedata = reader.ReadArray(header & 0xFFF);
 
+                            byte* filedata = (byte*)reader.PositionAddress;
+                            reader.Skip(header & 0xFFF);
                             while (cur < end)
+                            {
                                 *cur++ = (ushort) (0x8000 | palette[filedata[filecounter++]]);
+                            }
                         }
                     }
 
@@ -1282,7 +1295,7 @@ namespace ClassicUO.IO.Resources
                         CenterY = imageCenterY
                     };
 
-                    f.SetDataHitMap16(data);
+                    f.PushData(data);
                     animDirection.Frames[i] = f; //uniqueAnimationIndex;
                     //ResourceDictionary.Add(uniqueAnimationIndex, f);
                 }
@@ -1364,7 +1377,7 @@ namespace ClassicUO.IO.Resources
                     CenterY = imageCenterY
                 };
 
-                f.SetDataHitMap16(data);
+                f.PushData(data);
 
                 animDir.Frames[i] = f;
                 //ResourceDictionary.Add(uniqueAnimationIndex, f);
@@ -1372,6 +1385,18 @@ namespace ClassicUO.IO.Resources
 
             _usedTextures.Add(animDir);
             //_usedTextures.Add(new ToRemoveInfo(AnimID, AnimGroup, Direction));
+        }
+
+        public void GetAnimationDimensions(sbyte animIndex, ushort graphic, byte dir, byte animGroup, bool ismounted, byte frameIndex, out int centerX, out int centerY, out int width, out int height)
+        {
+            dir &= 0x7F;
+            bool mirror = false;
+            FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
+
+            if (frameIndex == 0xFF)
+                frameIndex = (byte) animIndex;
+            FileManager.Animations.GetAnimationDimensions(frameIndex, graphic, dir, animGroup, out centerX, out centerY, out width, out height);
+            if (centerX == 0 && centerY == 0 && width == 0 && height == 0) height = ismounted ? 100 : 60;
         }
 
         public unsafe void GetAnimationDimensions(byte frameIndex, ushort id, byte dir, byte animGroup, out int x, out int y, out int w, out int h)
@@ -1586,16 +1611,10 @@ namespace ClassicUO.IO.Resources
             public readonly bool DrawBack;
         }
 
-        private readonly struct UOPFrameData
+        private struct UOPFrameData
         {
-            public UOPFrameData(long ptr, uint offset)
-            {
-                DataStart = ptr;
-                PixelDataOffset = offset;
-            }
-
-            public readonly long DataStart;
-            public readonly uint PixelDataOffset;
+            public long DataStart;
+            public uint PixelDataOffset;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

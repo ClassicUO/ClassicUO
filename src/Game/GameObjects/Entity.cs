@@ -42,7 +42,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected long LastAnimationChangeTime { get; set; }
 
-        public EntityCollection<Item> Items { get; private set; }
+        public EntityCollection<Item> Items { get; protected set; }
 
         public bool HasEquipment => _equipment != null;
 
@@ -55,7 +55,7 @@ namespace ClassicUO.Game.GameObjects
         public Serial Serial { get; set; }
         public bool IsClicked { get; set; }
 
-        public ConcurrentDictionary<int, Property> Properties { get; } = new ConcurrentDictionary<int, Property>();
+        public List<Property> Properties { get; } = new List<Property>();
 
         public override Graphic Graphic
         {
@@ -149,11 +149,12 @@ namespace ClassicUO.Game.GameObjects
 
         public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged, PropertiesChanged;
 
-        public void UpdateProperties(IEnumerable<Property> props)
+        public void UpdateProperties(List<Property> props)
         {
             Properties.Clear();
-            int temp = 0;
-            foreach (Property p in props) Properties.TryAdd(temp++, p);
+            if (props != null)
+                foreach (Property p in props)
+                    Properties.Add(p);
             _delta |= Delta.Properties;
         }
 
@@ -164,6 +165,7 @@ namespace ClassicUO.Game.GameObjects
             if (d.HasFlag(Delta.Attributes)) AttributesChanged.Raise(this);
             if (d.HasFlag(Delta.Properties)) PropertiesChanged.Raise(this);
         }
+
 
         public override void Update(double totalMS, double frameMS)
         {

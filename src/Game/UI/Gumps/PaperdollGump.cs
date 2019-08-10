@@ -37,7 +37,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class PaperDollGump : Gump
+    internal class PaperDollGump : TextContainerGump
     {
         private static readonly ushort[] PeaceModeBtnGumps =
         {
@@ -50,7 +50,6 @@ namespace ClassicUO.Game.UI.Gumps
         private GumpPic _combatBook, _racialAbilitiesBook;
         private bool _isWarMode;
 
-        private Point _lastClick;
         private PaperDollInteractable _paperDollInteractable;
         private GumpPic _partyManifestPic;
         private GumpPic _profilePic;
@@ -79,21 +78,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public Mobile Mobile { get; set; }
 
-        public TextContainer TextContainer { get; } = new TextContainer();
-
-        public void AddLabel(string text, ushort hue, byte font, bool isunicode, Serial serial)
-        {
-            if (World.ClientFlags.TooltipsEnabled)
-                return;
-
-            TextContainer.Add(text, hue, font, isunicode, _lastClick.X, _lastClick.Y, serial);
-        }
-
         public override void Dispose()
         {
             Engine.UI.SavePosition(LocalSerial, Location);
-
-            TextContainer.Clear();
 
             if (Mobile == World.Player)
             {
@@ -127,7 +114,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            AcceptMouseInput = true;
+            //AcceptMouseInput = true;
             CanBeSaved = true;
             CanMove = true;
             LocalSerial = Mobile.Serial;
@@ -180,16 +167,11 @@ namespace ClassicUO.Game.UI.Gumps
                     X = 185, Y = 44 + 27 * 6, ButtonAction = ButtonAction.Activate
                 });
 
-                // STATUS BUTTON
-                Add(new Button((int) Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
-                {
-                    X = 185, Y = 44 + 27 * 7, ButtonAction = ButtonAction.Activate
-                });
-
+                
                 int profileX = 25;
                 const int SCROLLS_STEP = 14;
 
-                if (World.ClientFlags.PaperdollBooks)
+                if (World.ClientFeatures.PaperdollBooks)
                 {
                     Add(_combatBook = new GumpPic(156, 200, 0x2B34, 0));
                     _combatBook.MouseDoubleClick += (sender, e) => { GameActions.OpenAbilitiesBook(); };
@@ -217,30 +199,32 @@ namespace ClassicUO.Game.UI.Gumps
             else
             {
                 Add(new GumpPic(0, 0, 0x07d1, 0));
-
-                // STATUS BUTTON
-                Add(new Button((int) Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
-                {
-                    X = 185,
-                    Y = 44 + 27 * 7,
-                    ButtonAction = ButtonAction.Activate
-                });
+                Add(_profilePic = new GumpPic(25, 196, 0x07D2, 0));
+                _profilePic.MouseDoubleClick += Profile_MouseDoubleClickEvent;
             }
 
+            // STATUS BUTTON
+            Add(new Button((int)Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
+            {
+                X = 185,
+                Y = 44 + 27 * 7,
+                ButtonAction = ButtonAction.Activate
+            });
+
             // Virtue menu
-            Add(_virtueMenuPic = new GumpPic(79, 4, 0x0071, 0));
+            Add(_virtueMenuPic = new GumpPic(80, 4, 0x0071, 0));
             _virtueMenuPic.MouseDoubleClick += VirtueMenu_MouseDoubleClickEvent;
 
             // Equipment slots for hat/earrings/neck/ring/bracelet
-            Add(new EquipmentSlot(2, 76, Mobile, Layer.Helmet));
-            Add(new EquipmentSlot(2, 76 + 22, Mobile, Layer.Earrings));
-            Add(new EquipmentSlot(2, 76 + 22 * 2, Mobile, Layer.Necklace));
-            Add(new EquipmentSlot(2, 76 + 22 * 3, Mobile, Layer.Ring));
-            Add(new EquipmentSlot(2, 76 + 22 * 4, Mobile, Layer.Bracelet));
-            Add(new EquipmentSlot(2, 76 + 22 * 5, Mobile, Layer.Tunic));
+            Add(new EquipmentSlot(2, 75, Mobile, Layer.Helmet));
+            Add(new EquipmentSlot(2, 75 + 21, Mobile, Layer.Earrings));
+            Add(new EquipmentSlot(2, 75 + 21 * 2, Mobile, Layer.Necklace));
+            Add(new EquipmentSlot(2, 75 + 21 * 3, Mobile, Layer.Ring));
+            Add(new EquipmentSlot(2, 75 + 21 * 4, Mobile, Layer.Bracelet));
+            Add(new EquipmentSlot(2, 75 + 21 * 5, Mobile, Layer.Tunic));
 
             // Paperdoll control!
-            _paperDollInteractable = new PaperDollInteractable(8, 21, Mobile);
+            _paperDollInteractable = new PaperDollInteractable(8, 19, Mobile);
             //_paperDollInteractable.MouseOver += (sender, e) =>
             //{
             //    OnMouseOver(e.X, e.Y);
@@ -259,12 +243,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            if (button == MouseButton.Left)
-            {
-                _lastClick.X = x;
-                _lastClick.Y = y;
-            }
-
             GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
             if (!gs.IsHoldingItem || !gs.IsMouseOverUI || _paperDollInteractable.IsOverBackpack)
@@ -322,6 +300,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
+
             // This is to update the state of the war mode button.
             if (_isWarMode != Mobile.InWarMode && Mobile == World.Player)
             {
@@ -332,19 +311,28 @@ namespace ClassicUO.Game.UI.Gumps
                 _warModeBtn.ButtonGraphicOver = btngumps[2];
             }
 
-            TextContainer.Update();
 
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-        {
-            base.Draw(batcher, x, y);
 
-            TextContainer.Draw(batcher, x, y);
 
-            return true;
-        }
+        //public override bool Contains(int x, int y)
+        //{
+        //    //x = Mouse.Position.X - ScreenCoordinateX;
+        //    //y = Mouse.Position.Y - ScreenCoordinateY;
+
+
+        //    for (int i = 0; i < Children.Count; i++)
+        //    {
+        //        var c = Children[i];
+
+        //        if (c.Contains(x, y))
+        //            return true;
+        //    }
+
+        //    return false;
+        //}
 
 
         public override void Save(BinaryWriter writer)

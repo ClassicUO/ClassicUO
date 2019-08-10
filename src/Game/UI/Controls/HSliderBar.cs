@@ -48,8 +48,8 @@ namespace ClassicUO.Game.UI.Controls
         private Point _clickPosition;
 
         private readonly bool _drawUp;
-        private SpriteTexture[] _gumpSpliderBackground;
-        private SpriteTexture _gumpWidget;
+        private UOTexture[] _gumpSpliderBackground;
+        private UOTexture _gumpWidget;
         private Rectangle _rect;
 
         //private int _newValue;
@@ -63,10 +63,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (hasText)
             {
-                _text = new RenderedText
-                {
-                    Font = font, Hue = color, IsUnicode = unicode
-                };
+                _text = RenderedText.Create(string.Empty, color, font, unicode);
                 _drawUp = drawUp;
             }
 
@@ -129,7 +126,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     case HSliderBarStyle.MetalWidgetRecessedBar:
 
-                        _gumpSpliderBackground = new SpriteTexture[3]
+                        _gumpSpliderBackground = new UOTexture[3]
                         {
                             FileManager.Gumps.GetTexture(213), FileManager.Gumps.GetTexture(214), FileManager.Gumps.GetTexture(215)
                         };
@@ -151,7 +148,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_gumpSpliderBackground != null)
             {
-                foreach (SpriteTexture t in _gumpSpliderBackground)
+                foreach (UOTexture t in _gumpSpliderBackground)
                     t.Ticks = (long) totalMS;
             }
 

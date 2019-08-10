@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class ShopGump : Gump
     {
-        private static SpriteTexture[] _shopGumpParts;
+        private static UOTexture[] _shopGumpParts;
         private readonly GumpPicTiled _middleGumpLeft, _middleGumpRight;
         private readonly Dictionary<Item, ShopItem> _shopItems;
         private readonly ScrollArea _shopScrollArea, _transactionScrollArea;
@@ -176,9 +176,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void GenerateVirtualTextures()
         {
-            _shopGumpParts = new SpriteTexture[12];
-            SpriteTexture t = FileManager.Gumps.GetTexture(0x0870);
-            SpriteTexture[][] splits = new SpriteTexture[4][];
+            _shopGumpParts = new UOTexture[12];
+            UOTexture t = FileManager.Gumps.GetTexture(0x0870);
+            UOTexture[][] splits = new UOTexture[4][];
 
             splits[0] = GraphicHelper.SplitTexture16(t,
                                                      new int[3, 4]
@@ -409,7 +409,7 @@ namespace ClassicUO.Game.UI.Gumps
             public ShopItem(Item item)
             {
                 Item = item;
-                string itemName = StringHelper.CapitalizeAllWords(item.Name);
+                string itemName = StringHelper.CapitalizeWordsByLimitator(item.Name);
 
                 TextureControl control;
 
@@ -507,7 +507,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = height;
                 WantUpdateSize = false;
 
-                if (World.ClientFlags.TooltipsEnabled) SetTooltip(item);
+                if (World.ClientFeatures.TooltipsEnabled) SetTooltip(item);
             }
 
             internal string ShopItemName => _name.Text;
@@ -616,12 +616,13 @@ namespace ClassicUO.Game.UI.Gumps
                 const int increm = 50;
 
                 float t0 = Engine.Ticks;
+                bool pressedAdd = false;
 
                 buttonAdd.MouseOver += (sender, e) =>
-                {
+                { 
                     if (status == 2)
                     {
-                        if (Mouse.LButtonPressed && Engine.Ticks > t0)
+                        if (pressedAdd && Engine.Ticks > t0)
                         {
                             t0 = Engine.Ticks + (increm - _StepChanger);
                             OnButtonClick(0);
@@ -631,22 +632,22 @@ namespace ClassicUO.Game.UI.Gumps
                                 _StepChanger++;
                         }
                     }
-                    else if (Engine.Ticks > t0)
-                    {
-                        status = 2;
-                        t0 = 0;
-                    }
                 };
 
                 buttonAdd.MouseDown += (sender, e) =>
                 {
+                    if (e.Button != MouseButton.Left)
+                        return;
+
+                    pressedAdd = true;
                     _StepChanger = 0;
-                    status = 1;
-                    t0 = Engine.Ticks + 200;
+                    status = 2;
+                    t0 = Engine.Ticks + 500;
                 };
 
                 buttonAdd.MouseUp += (sender, e) =>
                 {
+                    pressedAdd = false;
                     status = 0;
                     _StepsDone = _StepChanger = 1;
                 };
@@ -663,12 +664,13 @@ namespace ClassicUO.Game.UI.Gumps
                 }); // Minus
 
                 float t1 = Engine.Ticks;
+                bool pressedRemove = false;
 
                 buttonRemove.MouseOver += (sender, e) =>
                 {
                     if (status == 2)
                     {
-                        if (Mouse.LButtonPressed && Engine.Ticks > t1)
+                        if (pressedRemove && Engine.Ticks > t1)
                         {
                             t1 = Engine.Ticks + (increm - _StepChanger);
                             OnButtonClick(1);
@@ -678,22 +680,22 @@ namespace ClassicUO.Game.UI.Gumps
                                 _StepChanger++;
                         }
                     }
-                    else if (Engine.Ticks > t1)
-                    {
-                        status = 2;
-                        t1 = 0;
-                    }
                 };
 
                 buttonRemove.MouseDown += (sender, e) =>
                 {
+                    if (e.Button != MouseButton.Left)
+                        return;
+
+                    pressedRemove = true;
                     _StepChanger = 0;
-                    status = 1;
-                    t1 = Engine.Ticks + 200;
+                    status = 2;
+                    t1 = Engine.Ticks + 500;
                 };
 
                 buttonRemove.MouseUp += (sender, e) =>
                 {
+                    pressedRemove = false;
                     status = 0;
                     _StepsDone = _StepChanger = 1;
                 };
@@ -736,7 +738,7 @@ namespace ClassicUO.Game.UI.Gumps
         private class ResizePicLine : Control
         {
             private readonly Graphic _graphic;
-            private readonly SpriteTexture[] _gumpTexture = new SpriteTexture[3];
+            private readonly UOTexture[] _gumpTexture = new UOTexture[3];
 
             public ResizePicLine(Graphic graphic)
             {
@@ -755,7 +757,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override void Update(double totalMS, double frameMS)
             {
-                foreach (SpriteTexture t in _gumpTexture)
+                foreach (UOTexture t in _gumpTexture)
                 {
                     if (t != null)
                         t.Ticks = (long) totalMS;

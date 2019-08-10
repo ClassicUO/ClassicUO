@@ -22,10 +22,13 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Logging;
@@ -104,12 +107,29 @@ namespace ClassicUO.IO
 
                 ClientVersion = (ClientVersions) (((major & 0xFF) << 24) | ((minor & 0xFF) << 16) | ((build & 0xFF) << 8) | (extra & 0xFF));
                 Log.Message(LogTypes.Trace, $"Client version: {Engine.GlobalSettings.ClientVersion} - {ClientVersion}");
+
+                ClientFlags = ClientFlags.CF_T2A;
+
+                if (ClientVersion >= ClientVersions.CV_200)
+                    ClientFlags |= ClientFlags.CF_RE;
+                if (ClientVersion >= ClientVersions.CV_300)
+                    ClientFlags |= ClientFlags.CF_TD;
+                if (ClientVersion >= ClientVersions.CV_308)
+                    ClientFlags |= ClientFlags.CF_LBR;
+                if (ClientVersion >= ClientVersions.CV_308Z)
+                    ClientFlags |= ClientFlags.CF_AOS;
+                if (ClientVersion >= ClientVersions.CV_405A)
+                    ClientFlags |= ClientFlags.CF_SE;
+                if (ClientVersion >= ClientVersions.CV_60144)
+                    ClientFlags |= ClientFlags.CF_SA;
             }
         }
 
         public static byte[] ClientBufferVersion { get; } = new byte[4];
 
         public static ClientVersions ClientVersion { get; private set; }
+
+        public static ClientFlags ClientFlags { get; private set; }
 
         public static bool IsUOPInstallation => ClientVersion >= ClientVersions.CV_70240;
 
@@ -139,57 +159,64 @@ namespace ClassicUO.IO
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 
+            List<Task> tasks = new List<Task>();
+
             Animations = new AnimationsLoader();
-            Animations.Load();
+            tasks.Add(Animations.Load());
 
             AnimData = new AnimDataLoader();
-            AnimData.Load();
+            tasks.Add(AnimData.Load());
 
             Art = new ArtLoader();
-            Art.Load();
+            tasks.Add(Art.Load());
 
             Map = new MapLoader();
-            Map.Load();
+            tasks.Add(Map.Load());
 
             Cliloc = new ClilocLoader();
-            Cliloc.Load(Engine.GlobalSettings.ClilocFile);
+            tasks.Add(Cliloc.Load(Engine.GlobalSettings.ClilocFile));
 
             Gumps = new GumpsLoader();
-            Gumps.Load();
+            tasks.Add(Gumps.Load());
 
             Fonts = new FontsLoader();
-            Fonts.Load();
+            tasks.Add(Fonts.Load());
 
             Hues = new HuesLoader();
-            Hues.Load();
+            tasks.Add(Hues.Load());
 
             TileData = new TileDataLoader();
-            TileData.Load();
+            tasks.Add(TileData.Load());
 
             Multi = new MultiLoader();
-            Multi.Load();
+            tasks.Add(Multi.Load());
 
             Skills = new SkillsLoader();
-            Skills.Load();
+            tasks.Add(Skills.Load());
 
             Textmaps = new TexmapsLoader();
-            Textmaps.Load();
+            tasks.Add(Textmaps.Load());
 
             Speeches = new SpeechesLoader();
-            Speeches.Load();
+            tasks.Add(Speeches.Load());
 
             Lights = new LightsLoader();
-            Lights.Load();
+            tasks.Add(Lights.Load());
 
             Sounds = new SoundsLoader();
-            Sounds.Load();
+            tasks.Add(Sounds.Load());
 
             Multimap = new MultiMapLoader();
-            Multimap.Load();
+            tasks.Add(Multimap.Load());
 
             Profession = new ProfessionLoader();
-            Profession.Load();
+            tasks.Add(Profession.Load());
 
+
+            if (!Task.WhenAll(tasks).Wait(TimeSpan.FromSeconds(10)))
+            {
+                Log.Message(LogTypes.Panic, "Loading files timeout.");
+            }
 
             var verdata = Verdata.File;
 
