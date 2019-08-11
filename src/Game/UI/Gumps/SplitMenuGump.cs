@@ -41,9 +41,15 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _firstChange;
         private int _lastValue;
 
-        public SplitMenuGump(Item item, Point offset) : base(item, 0)
+        public SplitMenuGump(Serial serial, Point offset) : base(serial, 0)
         {
-            Item = item;
+            Item item = World.Items.Get(serial);
+
+            if (item == null || item.IsDestroyed)
+            {
+                Dispose();
+                return;
+            }
 
             _offsert = offset;
 
@@ -72,25 +78,24 @@ namespace ClassicUO.Game.UI.Gumps
             _textBox.SetText(item.Amount.ToString());
         }
 
-        public Item Item { get; }
-
-
      
         private void OkButtonOnMouseClick(object sender, MouseEventArgs e)
         {
-            if (_slider.Value > 0) GameActions.PickUp(Item, _offsert, _slider.Value);
+            if (_slider.Value > 0) GameActions.PickUp(LocalSerial, _offsert, _slider.Value);
             Dispose();
         }
 
         public override void OnKeyboardReturn(int textID, string text)
         {
-            if (_slider.Value > 0) GameActions.PickUp(Item, _offsert, _slider.Value);
+            if (_slider.Value > 0) GameActions.PickUp(LocalSerial, _offsert, _slider.Value);
             Dispose();
         }
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (Item == null || Item.IsDestroyed)
+            Item item = World.Items.Get(LocalSerial);
+
+            if (item == null || item.IsDestroyed)
                 Dispose();
 
             if (IsDisposed)
