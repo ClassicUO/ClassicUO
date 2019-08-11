@@ -119,10 +119,7 @@ namespace ClassicUO.Game.Managers
 
                     for (int i = 0; i < PARTY_SIZE; i++)
                     {
-                        if (Members[i] == null)
-                            break;
-
-                        if (Members[i].Serial == ser)
+                        if (Members[i] != null && Members[i].Serial == ser)
                         {
                             Chat.HandleMessage(null, name, Members[i].Name, Engine.Profile.Current.PartyMessageHue, MessageType.Party, 3);
 
@@ -153,7 +150,8 @@ namespace ClassicUO.Game.Managers
 
         public void Clear()
         {
-            for (int i = 0; i < PARTY_SIZE; i++) Members[i] = null;
+            for (int i = 0; i < PARTY_SIZE; i++)
+                Members[i] = null;
         }
     }
     
