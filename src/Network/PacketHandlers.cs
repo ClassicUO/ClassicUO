@@ -862,6 +862,7 @@ namespace ClassicUO.Network
             ushort y = p.ReadUShort();
             Direction direction = (Direction) p.ReadByte();
             direction &= Direction.Up;
+            direction &= Direction.Running;
             sbyte z = p.ReadSByte();
 
 
