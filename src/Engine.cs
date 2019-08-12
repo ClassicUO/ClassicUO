@@ -77,7 +77,6 @@ namespace ClassicUO
         private static Engine _engine;
 
         public static bool DebugFocus = false;
-        public static string SettingsFile = "settings.json";
         private readonly GraphicsDeviceManager _graphicDeviceManager;
         private readonly bool _isHighDPI;
         private readonly Settings _settings;
@@ -100,7 +99,7 @@ namespace ClassicUO
             Instance = this;
 
             // By default try to load settings from main settings file
-            _settings = ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, SettingsFile));
+            _settings = ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, Settings.SETTINGS_FILENAME));
 
             // Try to apply any settings passed from the command-line/shortcut to what we loaded from file
             // NOTE: If nothing was loaded from settings file (file doesn't exist), then it will create
@@ -111,8 +110,8 @@ namespace ClassicUO
             //   then show an error, generate default settings file and exit
             if (_settings == null)
             {
-                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION, "No `" + SettingsFile + "`", "A `" + SettingsFile + "` has been created into ClassicUO main folder.\nPlease fill it!", SDL.SDL_GL_GetCurrentWindow());
-                Log.Message(LogTypes.Trace, SettingsFile + " file not found");
+                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION, $"No `{Settings.SETTINGS_FILENAME}`", "A `" + Settings.SETTINGS_FILENAME + "` has been created into ClassicUO main folder.\nPlease fill it!", SDL.SDL_GL_GetCurrentWindow());
+                Log.Message(LogTypes.Trace, Settings.SETTINGS_FILENAME + " file not found");
                 _settings = new Settings();
                 _settings.Save();
                 IsQuitted = true;
