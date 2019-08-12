@@ -759,8 +759,6 @@ namespace ClassicUO.Game.Scenes
                 renderIndex = 99;
 
 
-            //World.WorldTextManager.Select(renderIndex);
-            World.WorldTextManager.MoveToTopIfSelected();
             World.WorldTextManager.ProcessWorldText(true);
             World.WorldTextManager.Draw(batcher, x, y, renderIndex);
 
