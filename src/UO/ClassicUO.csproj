@@ -159,7 +159,6 @@
     <Compile Include="Game\UI\Gumps\UseAbilityButtonGump.cs" />
     <Compile Include="Game\UI\MultiLineEntry.cs" />
     <Compile Include="Game\GameObjects\Views\MultiView.cs" />
-    <Compile Include="Input\Keyboard.cs" />
     <Compile Include="Interfaces\IPoolable.cs" />
     <Compile Include="IO\Audio\Sound.cs" />
     <Compile Include="IO\Audio\AudioEffects.cs" />
@@ -282,7 +281,6 @@
     <Compile Include="Game\UI\Tooltip.cs" />
     <Compile Include="Game\GameObjects\Views\LightningEffectView.cs" />
     <Compile Include="Game\GameObjects\Views\MovingEffectView.cs" />
-    <Compile Include="Input\Mouse.cs" />
     <Compile Include="Interfaces\INode.cs" />
     <Compile Include="Interfaces\ISmoothMovable.cs" />
     <Compile Include="IO\UltimaLive.cs" />
@@ -387,14 +385,7 @@
     <Compile Include="Game\GameObjects\Views\TileView.cs" />
     <Compile Include="Game\GameObjects\Views\View.cs" />
     <Compile Include="Game\World.cs" />
-    <Compile Include="Input\EventArgs.cs" />
-    <Compile Include="Input\InputEvent.cs" />
-    <Compile Include="Input\InputKeyboardEvent.cs" />
     <Compile Include="Input\InputManager.cs" />
-    <Compile Include="Input\InputMouseEvent.cs" />
-    <Compile Include="Input\KeyboardEvent.cs" />
-    <Compile Include="Input\MouseButtons.cs" />
-    <Compile Include="Input\MouseEvent.cs" />
     <Compile Include="Input\MouseOverList.cs" />
     <Compile Include="Input\MousePicker.cs" />
     <Compile Include="Input\PickerType.cs" />
@@ -551,6 +542,12 @@
     <Content Include="libs\x86\SDL2_image.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Engine\Engine.csproj">
+      <Project>{5cee85e2-8524-463a-9b04-496b9030c152}</Project>
+      <Name>Engine</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

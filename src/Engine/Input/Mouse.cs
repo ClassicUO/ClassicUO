@@ -24,7 +24,7 @@ using SDL2;
 
 namespace ClassicUO.Input
 {
-    internal static class Mouse
+    public static class Mouse
     {
         public const int MOUSE_DELAY_DOUBLE_CLICK = 350;
         private static Point _position;
