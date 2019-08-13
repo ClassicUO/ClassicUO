@@ -263,8 +263,8 @@ namespace ClassicUO.Game.UI.Controls
 
                         Item item = _mobile.Equipment[layerIndex];
                         bool isfake = false;
-                        bool canPickUp = World.Player.Graphic == 0x03DB || World.Player == Mobile || (World.Player.Flags & Flags.IgnoreMobiles) != 0 || 
-                            (Mobile.NotorietyFlag == NotorietyFlag.Invulnerable && (Mobile.Flags & Flags.IgnoreMobiles) == 0);
+                        bool canPickUp = World.InGame && (World.Player.Graphic == 0x03DB || World.Player == Mobile || (World.Player.Flags & Flags.IgnoreMobiles) != 0 || 
+                            (Mobile.NotorietyFlag == NotorietyFlag.Invulnerable && (Mobile.Flags & Flags.IgnoreMobiles) == 0));
                         ref var itemGump = ref _pgumps[layerIndex];
 
                         if (_fakeItem != null && _fakeItem.ItemData.Layer == layerIndex)
