@@ -34,12 +34,6 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class JournalGump : MinimizableGump
     {
-        private readonly GumpPic _Iconized = new GumpPic(0, 0, 0x830, 0);
-        internal override GumpPic Iconized => _Iconized;
-
-        private readonly GumpPic _IconizerButton = new GumpPic(160, 0, 0x82D, 0);
-        internal override GumpPic IconizerButton => _IconizerButton;
-
         private readonly ExpandableScroll _background;
         private readonly RenderedTextList _journalEntries;
         private readonly ScrollFlag _scrollBar;
@@ -82,6 +76,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_scrollBar);
         }
+
+        internal override GumpPic Iconized { get; } = new GumpPic(0, 0, 0x830, 0);
+        internal override GumpPic IconizerButton { get; } = new GumpPic(160, 0, 0x82D, 0);
+
 
 
         public Hue Hue
