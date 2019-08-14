@@ -522,9 +522,10 @@ namespace ClassicUO.Game.GameObjects
                     robe = mobile.Equipment[(int) Layer.Robe];
                     Item tunic = mobile.Equipment[(int) Layer.Tunic];
 
-                    if (robe != null && robe.Graphic != 0)
+                    /*if (robe != null && robe.Graphic != 0)
                         return true;
-                    else if (tunic != null && tunic.Graphic == 0x0238)
+                    else*/
+                    if (tunic != null && tunic.Graphic == 0x0238)
                         return robe != null && robe.Graphic != 0x9985 && robe.Graphic != 0x9986;
 
                     break;
