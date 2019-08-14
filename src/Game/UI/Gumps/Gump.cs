@@ -158,4 +158,60 @@ namespace ClassicUO.Game.UI.Gumps
             ActivePage = pageIndex;
         }
     }
+
+    internal abstract class MinimizableGump : Gump
+    {
+        private bool _IsMinimized = false;
+        internal bool IsMinimized
+        {
+            get => _IsMinimized;
+            private set
+            {
+                if (value != _IsMinimized)
+                {
+                    _IsMinimized = value;
+                    if (value)
+                    {
+                        if (_Orphaned == null)
+                            _Orphaned = new List<Control>(Children);
+                        _Orphaned.ForEach(c => Remove(c));
+                        Add(Iconized);
+                    }
+                    else
+                    {
+                        Remove(Iconized);
+                        _Orphaned?.ForEach(c => Add(c));
+                    }
+                }
+            }
+        }
+        private List<Control> _Orphaned = null;
+
+        internal MinimizableGump(Serial local, Serial server) : base(local, server)
+        {
+            Add(IconizerButton);
+            IconizerButton.MouseUp += IconizerButton_MouseUp;
+            Iconized.MouseDoubleClick += Iconized_MouseDoubleClick;
+        }
+
+        private void Iconized_MouseDoubleClick(object sender, Input.MouseDoubleClickEventArgs e)
+        {
+            if(e.Button == Input.MouseButton.Left)
+            {
+                IsMinimized = false;
+            }
+        }
+
+        private void IconizerButton_MouseUp(object sender, Input.MouseEventArgs e)
+        {
+            if(e.Button == Input.MouseButton.Left)
+            {
+                IsMinimized = true;
+            }
+        }
+
+
+        internal abstract GumpPic Iconized { get; }
+        internal abstract GumpPic IconizerButton { get; }
+    }
 }
