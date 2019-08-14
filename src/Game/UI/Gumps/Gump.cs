@@ -161,37 +161,74 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal abstract class MinimizableGump : Gump
     {
-        private bool _IsMinimized = false;
+        private int _w, _h;
+
+        private readonly List<Control> _childrenHidded = new List<Control>();
+
         internal bool IsMinimized
         {
-            get => _IsMinimized;
+            get => Iconized != null && IconizerButton != null && Iconized.IsVisible;
             private set
             {
-                if (value != _IsMinimized)
+                if (Iconized != null && IconizerButton != null && Iconized.IsVisible != value)
                 {
-                    _IsMinimized = value;
+
                     if (value)
                     {
-                        if (_Orphaned == null)
-                            _Orphaned = new List<Control>(Children);
-                        _Orphaned.ForEach(c => Remove(c));
-                        Add(Iconized);
+                        _w = Width;
+                        _h = Height;
+                        Width = Iconized.Width;
+                        Height = Iconized.Height;
+
+                        foreach (Control child in Children)
+                        {
+                            if (child.IsVisible)
+                            {
+                                _childrenHidded.Add(child);
+
+                                child.IsEnabled = false;
+                                child.IsVisible = false;
+                                child.AcceptMouseInput = false;
+                            }
+                        }
+
                     }
                     else
                     {
-                        Remove(Iconized);
-                        _Orphaned?.ForEach(c => Add(c));
+                        Width = _w;
+                        Height = _h;
+
+
+                        foreach (Control child in _childrenHidded)
+                        {
+                            child.IsEnabled = true;
+                            child.IsVisible = true;
+                            child.AcceptMouseInput = true;
+                        }
+
+                        _childrenHidded.Clear();
                     }
+
+                    Iconized.IsVisible = value;
+
                 }
             }
         }
-        private List<Control> _Orphaned = null;
 
         internal MinimizableGump(Serial local, Serial server) : base(local, server)
         {
-            Add(IconizerButton);
-            IconizerButton.MouseUp += IconizerButton_MouseUp;
-            Iconized.MouseDoubleClick += Iconized_MouseDoubleClick;
+            if (IconizerButton != null && Iconized != null)
+            {
+                Iconized.Initialize();
+                Iconized.IsVisible = false;
+                Iconized.AcceptMouseInput = true;
+                Iconized.CanMove = true;
+                Add(Iconized);
+
+                Add(IconizerButton);
+                IconizerButton.MouseUp += IconizerButton_MouseUp;
+                Iconized.MouseDoubleClick += Iconized_MouseDoubleClick;
+            }
         }
 
         private void Iconized_MouseDoubleClick(object sender, Input.MouseDoubleClickEventArgs e)
@@ -210,6 +247,21 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            if (IsMinimized)
+            {
+                Iconized.Draw(batcher, x + Iconized.X, y + Iconized.Y);
+                return true;
+            }
+            else
+                return base.Draw(batcher, x, y);
+        }
+
+        public override bool Contains(int x, int y)
+        {
+            return IsMinimized ? Iconized.Contains(x, y) : base.Contains(x, y);
+        }
 
         internal abstract GumpPic Iconized { get; }
         internal abstract GumpPic IconizerButton { get; }
