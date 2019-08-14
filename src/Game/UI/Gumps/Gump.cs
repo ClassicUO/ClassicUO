@@ -163,7 +163,6 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private int _w, _h;
 
-        private readonly List<Control> _childrenHidded = new List<Control>();
 
         internal bool IsMinimized
         {
@@ -184,11 +183,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if (child.IsVisible)
                             {
-                                _childrenHidded.Add(child);
-
-                                child.IsEnabled = false;
                                 child.IsVisible = false;
-                                child.AcceptMouseInput = false;
                             }
                         }
 
@@ -199,14 +194,10 @@ namespace ClassicUO.Game.UI.Gumps
                         Height = _h;
 
 
-                        foreach (Control child in _childrenHidded)
+                        foreach (Control child in Children)
                         {
-                            child.IsEnabled = true;
                             child.IsVisible = true;
-                            child.AcceptMouseInput = true;
                         }
-
-                        _childrenHidded.Clear();
                     }
 
                     Iconized.IsVisible = value;
