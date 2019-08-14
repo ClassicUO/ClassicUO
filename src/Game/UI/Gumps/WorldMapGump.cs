@@ -24,6 +24,7 @@
 using System;
 
 using ClassicUO.Game.Map;
+using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -56,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
         private unsafe void Load()
         {
             int size = FileManager.Map.MapsDefaultSize[World.MapIndex, 0] * FileManager.Map.MapsDefaultSize[World.MapIndex, 1];
-            ushort[] buffer = new ushort[size];
+            uint[] buffer = new uint[size];
             int maxBlock = size - 1;
 
             for (int bx = 0; bx < FileManager.Map.MapBlocksSize[World.MapIndex, 0]; bx++)
@@ -121,12 +122,46 @@ namespace ClassicUO.Game.UI.Gumps
 
                         for (int x = 0; x < 8; x++)
                         {
-                            ushort color = (ushort) (0x8000 | FileManager.Hues.GetRadarColorData(infoCells[pos].TileID));
 
-                            buffer[block] = color;
+                            ref readonly var c = ref infoCells[pos];
+                            ushort color = (ushort)(0x8000 | FileManager.Hues.GetRadarColorData(c.TileID));
+
+                            Color cc;
+
+                            if (x > 0)
+                            {
+                                int index = (y * 8) + (x - 1);
+
+                                if (c.Z < infoCells[index].Z)
+                                {
+                                    cc = new Color((((color >> 10) & 31) / 31f) * 80 / 100,
+                                                   (((color >> 5) & 31) / 31f) * 80 / 100,
+                                                   ((color & 31) / 31f) * 80 / 100);
+
+                                }
+                                else if (c.Z > infoCells[index].Z)
+                                {
+                                    cc = new Color((((color >> 10) & 31) / 31f) * 100 / 80,
+                                                   (((color >> 5) & 31) / 31f) * 100 / 80,
+                                                   ((color & 31) / 31f) * 100 / 80);
+                                }
+                                else
+                                    cc = new Color((((color >> 10) & 31) / 31f),
+                                                   (((color >> 5) & 31) / 31f),
+                                                   ((color & 31) / 31f));
+                            }
+                            else
+                            {
+                                cc = new Color((((color >> 10) & 31) / 31f),
+                                               (((color >> 5) & 31) / 31f),
+                                               ((color & 31) / 31f));
+                            }
+
+                            buffer[block] = cc.PackedValue;
 
                             if (y < 7 && x < 7 && block < maxBlock)
-                                buffer[block + 1] = color;
+                                buffer[block + 1] = cc.PackedValue;
+
                             block++;
                             pos++;
                         }
@@ -134,7 +169,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            _mapTexture = new UOTexture16(FileManager.Map.MapsDefaultSize[World.MapIndex, 0], FileManager.Map.MapsDefaultSize[World.MapIndex, 1]);
+            _mapTexture = new UOTexture32(FileManager.Map.MapsDefaultSize[World.MapIndex, 0], FileManager.Map.MapsDefaultSize[World.MapIndex, 1]);
             _mapTexture.SetData(buffer);
         }
 
@@ -243,7 +278,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int block = gy * w + gx;
 
-                if (data[block] == 0x8421)
+                //if (data[block] == 0x8421)
                     data[block] = (ushort) color;
             }
         }
@@ -266,6 +301,23 @@ namespace ClassicUO.Game.UI.Gumps
             return rotatedPoint;
         }
 
+        private int _scale = 1;
+
+        protected override void OnMouseWheel(MouseEvent delta)
+        {
+            if (delta == MouseEvent.WheelScrollUp)
+            {
+                _scale++;
+            }
+            else
+                _scale--;
+
+            if (_scale <= 0)
+                _scale = 1;
+
+            base.OnMouseWheel(delta);
+        }
+
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             int sx = World.Player.X;
@@ -275,19 +327,28 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResetHueVector();
 
-            //var v = RotateVector2(new Vector2(x + (sx - (sw >> 1)), y + (sy - (sh >> 1))),
+            //var v = RotateVector2(new Vector2(x + (sx - (sw >> 0)), y + (sy - (sh >> 0))),
             //                      45,
-            //                      new Vector2(x + (sx - (sw >> 1)), y + (sy - (sh >> 1)) / 2));
+            //                      new Vector2(x + (sx - (sw >> 0)), y + (sy - (sh >> 0))));
 
-            //batcher.Draw2DRotated(_mapTexture, 
+            //batcher.Draw2DRotated(_mapTexture,
             //                      x + (sx - (sw >> 1)),
-            //                      y + (sy - (sh >> 1)), 
+            //                      y + (sy - (sh >> 1)),
             //                      x + sw,
-            //                      y + sh, 
-            //                      x + (sx - (sw >> 1)),
-            //                      y + (sy - (sh >> 1)));
+            //                      y + sh,
+            //                      x + sw,
+            //                      y + sh);
 
-            batcher.Draw2D(_mapTexture, x, y, Width, Height, sx - (sw >> 1), sy - (sh >> 1), sw, sh, ref _hueVector);
+            batcher.Draw2D(_mapTexture, x, y,
+                           Width, Height,
+
+                           sx - (sw),
+                           sy - (sh), 
+                           Width / _scale, 
+                           Height / _scale,
+
+                           ref _hueVector);
+
             return base.Draw(batcher, x, y);
         }
 
