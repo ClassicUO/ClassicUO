@@ -163,7 +163,6 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private int _w, _h;
 
-
         internal bool IsMinimized
         {
             get => Iconized != null && IconizerButton != null && Iconized.IsVisible;
@@ -178,30 +177,14 @@ namespace ClassicUO.Game.UI.Gumps
                         _h = Height;
                         Width = Iconized.Width;
                         Height = Iconized.Height;
-
-                        foreach (Control child in Children)
-                        {
-                            if (child.IsVisible)
-                            {
-                                child.IsVisible = false;
-                            }
-                        }
-
                     }
                     else
                     {
                         Width = _w;
                         Height = _h;
-
-
-                        foreach (Control child in Children)
-                        {
-                            child.IsVisible = true;
-                        }
                     }
 
                     Iconized.IsVisible = value;
-
                 }
             }
         }
