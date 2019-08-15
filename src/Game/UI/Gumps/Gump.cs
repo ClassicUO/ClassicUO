@@ -159,7 +159,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
     }
 
-    internal abstract class MinimizableGump : Gump
+    internal abstract class MinimizableGump : TextContainerGump
     {
         internal bool IsMinimized
         {

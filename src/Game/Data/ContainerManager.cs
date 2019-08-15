@@ -223,13 +223,14 @@ namespace ClassicUO.Game.Data
 
     internal readonly struct ContainerData
     {
-        public ContainerData(Graphic graphic, ushort sound, ushort closed, int x, int y, int w, int h, HitBox iconizerarea = null)
+        public ContainerData(Graphic graphic, ushort sound, ushort closed, int x, int y, int w, int h, HitBox iconizerarea = null, ushort iconizedgraphic = 0x0)
         {
             Graphic = graphic;
             Bounds = new Rectangle(x, y, w, h);
             OpenSound = sound;
             ClosedSound = closed;
             IconizerArea = iconizerarea;
+            IconizedGraphic = iconizedgraphic;
         }
 
         public Graphic Graphic { get; }
@@ -241,5 +242,7 @@ namespace ClassicUO.Game.Data
         public ushort ClosedSound { get; }
 
         public HitBox IconizerArea { get; }
+
+        public ushort IconizedGraphic { get; }
     }
 }

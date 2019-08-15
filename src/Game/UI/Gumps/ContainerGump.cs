@@ -49,7 +49,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
         }
 
-
         public ContainerGump(Item item, Graphic gumpid) : this()
         {
             _item = item;
