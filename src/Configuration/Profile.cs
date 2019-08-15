@@ -325,7 +325,7 @@ namespace ClassicUO.Configuration
         {
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "gumps.bin"))))
             {
-                const uint VERSION = 1;
+                const uint VERSION = 2;
 
                 writer.Write(VERSION);
                 writer.Write(0);
@@ -359,6 +359,7 @@ namespace ClassicUO.Configuration
                 SkillsGroupManager.Save(writer);
         }
 
+        public static uint GumpsVersion { get; private set; }
         public List<Gump> ReadGumps()
         {
             string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username, ServerName, CharacterName);
@@ -391,7 +392,7 @@ namespace ClassicUO.Configuration
             {
                 if (reader.BaseStream.Position + 12 < reader.BaseStream.Length)
                 {
-                    uint version = reader.ReadUInt32();
+                    GumpsVersion = reader.ReadUInt32();
                     uint empty = reader.ReadUInt32();
 
                     int count = reader.ReadInt32();
