@@ -29,6 +29,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
@@ -392,7 +393,7 @@ namespace ClassicUO.Game
 
                     if (Engine.UI.IsMouseOverAControl)
                     {
-                        Item it = null;
+                        Entity it = null;
 
                         switch (Engine.UI.MouseOverControl)
                         {
@@ -409,6 +410,10 @@ namespace ClassicUO.Game
                             case Control control when control.Tooltip is Item i:
                                 it = i;
 
+                                break;
+
+                            case NameOverheadGump overhead:
+                                it = overhead.Entity;
                                 break;
                         }
 
