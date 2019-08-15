@@ -76,14 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (Entity is Item item)
                 {
-                    string t;
-
-                    if (item.Properties.Any())
-                    {
-                        Property prop = item.Properties.FirstOrDefault();
-                        t = FileManager.Cliloc.Translate((int) prop.Cliloc, prop.Args, true);
-                    }
-                    else
+                    if (!World.OPL.TryGetNameAndData(item, out string t, out _))
                     {
                         t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
 

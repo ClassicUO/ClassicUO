@@ -381,7 +381,7 @@ namespace ClassicUO.Game
                 }
                 else
                 {
-                    if (gs.IsMouseOverViewport && SelectedObject.Object is Entity item && item.Properties.Count > 0)
+                    if (gs.IsMouseOverViewport && SelectedObject.Object is Entity item && World.OPL.Contains(item))
                     {
                         if (_tooltip.IsEmpty || item != _tooltip.Object)
                             _tooltip.SetGameObject(item);
@@ -412,7 +412,7 @@ namespace ClassicUO.Game
                                 break;
                         }
 
-                        if (it != null && it.Properties.Count != 0)
+                        if (it != null && World.OPL.Contains(it))
                         {
                             if (_tooltip.IsEmpty || it != _tooltip.Object)
                                 _tooltip.SetGameObject(it);

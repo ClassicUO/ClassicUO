@@ -56,7 +56,6 @@ namespace ClassicUO.Game.GameObjects
         public Serial Serial { get; set; }
         public bool IsClicked { get; set; }
 
-        public List<Property> Properties { get; } = new List<Property>();
 
         public override Graphic Graphic
         {
@@ -166,7 +165,6 @@ namespace ClassicUO.Game.GameObjects
 
         public virtual bool Exists => World.Contains(Serial);
 
-        public uint PropertiesHash { get; set; }
 
         protected Entity(Serial serial)
         {
@@ -175,23 +173,14 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged, PropertiesChanged;
+        public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged;
 
-        public void UpdateProperties(List<Property> props)
-        {
-            Properties.Clear();
-            if (props != null)
-                foreach (Property p in props)
-                    Properties.Add(p);
-            _delta |= Delta.Properties;
-        }
 
         protected virtual void OnProcessDelta(Delta d)
         {
             if (d.HasFlag(Delta.Appearance)) AppearanceChanged.Raise(this);
             if (d.HasFlag(Delta.Position)) PositionChanged.Raise(this);
             if (d.HasFlag(Delta.Attributes)) AttributesChanged.Raise(this);
-            if (d.HasFlag(Delta.Properties)) PropertiesChanged.Raise(this);
         }
 
 
@@ -229,7 +218,6 @@ namespace ClassicUO.Game.GameObjects
         public override void Destroy()
         {
             _equipment = null;
-            Properties.Clear();
             base.Destroy();
         }
 
