@@ -171,13 +171,7 @@ namespace ClassicUO.Game.UI.Gumps
                         c.Width = _rectSize - 4;
                         c.Height = _rectSize - 4;
 
-                        TextureControl textControl = c.Children.OfType<TextureControl>().FirstOrDefault();
-
-                        if (textControl != null)
-                        {
-                            textControl.Width = c.Width;
-                            textControl.Height = c.Height;
-                        }
+                        c.SetGraphic(c.Graphic, c.Hue);
 
                         indices[index] = -1;
                     }
@@ -246,12 +240,11 @@ namespace ClassicUO.Game.UI.Gumps
         private class CounterItem : Control
         {
             private int _amount;
-            private TextureControl _controlPic;
             private Graphic _graphic;
             private Hue _hue;
             private uint _time;
-            private readonly Label _countText;
 
+            private ImageWithText _image;
 
             public CounterItem(int x, int y, int w, int h)
             {
@@ -264,13 +257,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = w;
                 Height = h;
 
-                _countText = new Label("", true, 0x35, 0, 1, FontStyle.BlackBorder)
-                {
-                    X = 2,
-                    Y = Height - 15,
-                };
-
-                Add(_countText);
+                _image = new ImageWithText(Width, Height);
+                Add(_image);
             }
 
             public ushort Graphic => _graphic;
@@ -278,26 +266,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void SetGraphic(ushort graphic, ushort hue)
             {
+                _image.ChangeGraphic(graphic, hue);
+
                 if (graphic == 0)
                     return;
 
                 _graphic = graphic;
                 _hue = hue;
-
-                _controlPic?.Dispose();
-
-                _controlPic = new TextureControl
-                {
-                    ScaleTexture = true,
-                    Texture = FileManager.Art.GetTexture(_graphic),
-                    Hue = hue,
-                    //Hue = gs.HeldItem.Hue,
-                    //IsPartial = gs.HeldItem.IsPartialHue,
-                    Width = Width,
-                    Height = Height,
-                    AcceptMouseInput = false
-                };
-                Add(_controlPic);
             }
 
             protected override void OnMouseUp(int x, int y, MouseButton button)
@@ -320,7 +295,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (button == MouseButton.Right && Keyboard.Alt && _graphic != 0)
                 {
-                    _controlPic?.Dispose();
+                    _image.ChangeGraphic(0, 0);
                     _amount = 0;
                     _graphic = 0;
                 }
@@ -344,30 +319,36 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.Update(totalMS, frameMS);
 
-
                 if (_time < Engine.Ticks)
                 {
                     _time = Engine.Ticks + 100;
 
-                    _amount = 0;
-                    GetAmount(World.Player.Equipment[(int)Layer.Backpack], _graphic, _hue, ref _amount);
-
-                    string text = _amount.ToString();
-
-                    if (_amount >= 1000)
+                    if (_graphic == 0)
                     {
-                        if (text.Length > 4)
-                        {
-                            if (text.Length > 5) // >= 100.000
-                                text = $"{text.Substring(0, 3)}K+";
-                            else // <= 10.000
-                                text = $"{text.Substring(0, 2)}K+";
-                        }
-                        else // 1.000
-                            text = $"{text[0]}K+";
+                        _image.SetAmount(string.Empty);
                     }
+                    else
+                    {
+                        _amount = 0;
+                        GetAmount(World.Player.Equipment[(int)Layer.Backpack], _graphic, _hue, ref _amount);
 
-                    _countText.Text = text;
+                        string text = _amount.ToString();
+
+                        if (_amount >= 1000)
+                        {
+                            if (text.Length > 4)
+                            {
+                                if (text.Length > 5) // >= 100.000
+                                    text = $"{text.Substring(0, 3)}K+";
+                                else // <= 10.000
+                                    text = $"{text.Substring(0, 2)}K+";
+                            }
+                            else // 1.000
+                                text = $"{text[0]}K+";
+                        }
+                        _image.SetAmount(text);
+
+                    }
                 }
             }
 
@@ -396,6 +377,58 @@ namespace ClassicUO.Game.UI.Gumps
                 batcher.DrawRectangle(color, x, y, Width, Height, ref _hueVector);
 
                 return true;
+            }
+
+
+            private class ImageWithText : Control
+            {
+                private readonly TextureControl _textureControl;
+                private readonly Label _label;
+
+                public ImageWithText(int w, int h)
+                {
+                    CanMove = true;
+                    WantUpdateSize = true;
+
+                    //Width = w;
+                    //Height = h;
+
+                    _textureControl = new TextureControl()
+                    {
+                        ScaleTexture = true,
+                        AcceptMouseInput = false
+                    };
+                    Add(_textureControl);
+
+
+                    _label = new Label("", true, 0x35, 0, 1, FontStyle.BlackBorder)
+                    {
+                        X = 2,
+                        Y = Height - 15,
+                    };
+                    Add(_label);
+                }
+
+
+                public void ChangeGraphic(ushort graphic, ushort hue)
+                {
+                    if (graphic != 0)
+                    {
+                        _textureControl.Texture = FileManager.Art.GetTexture(graphic);
+                        _textureControl.Hue = hue;
+                        _textureControl.Width = Parent.Width;
+                        _textureControl.Height = Parent.Height;
+                        _label.Y = Parent.Height - 15;
+                    }
+                    else
+                        _textureControl.Texture = null;
+                }
+
+
+
+                public void SetAmount(string amount)
+                    => _label.Text = amount;
+
             }
         }
     }
