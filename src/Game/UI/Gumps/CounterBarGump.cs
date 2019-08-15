@@ -257,7 +257,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = w;
                 Height = h;
 
-                _image = new ImageWithText(Width, Height);
+                _image = new ImageWithText();
                 Add(_image);
             }
 
@@ -385,13 +385,10 @@ namespace ClassicUO.Game.UI.Gumps
                 private readonly TextureControl _textureControl;
                 private readonly Label _label;
 
-                public ImageWithText(int w, int h)
+                public ImageWithText()
                 {
                     CanMove = true;
                     WantUpdateSize = true;
-
-                    //Width = w;
-                    //Height = h;
 
                     _textureControl = new TextureControl()
                     {
