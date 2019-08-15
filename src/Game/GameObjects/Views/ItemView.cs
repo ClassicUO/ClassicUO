@@ -91,7 +91,6 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-
             if (_originalGraphic != DisplayedGraphic || _force || Texture == null || Texture.IsDisposed)
             {
                 if (_originalGraphic == 0)

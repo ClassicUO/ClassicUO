@@ -627,11 +627,17 @@ namespace ClassicUO.Game.Scenes
                 {
                     GameObject obj = Engine.Profile.Current.SallosEasyGrab && SelectedObject.LastObject is GameObject o? o : _dragginObject;
 
+
                     switch (obj)
                     {
-                        case Mobile mobile:
-                            GameActions.RequestMobileStatus(mobile);
-                            var gump = Engine.UI.GetGump<HealthBarGump>(mobile);
+                        case Mobile _:
+                            mobile:
+                            Entity entity = obj as Entity;
+                            if (entity == null)
+                                break;
+
+                            GameActions.RequestMobileStatus(entity);
+                            var gump = Engine.UI.GetGump<HealthBarGump>(entity);
                             if(gump != null)
                             {
                                 if (!gump.IsInitialized)
@@ -639,17 +645,21 @@ namespace ClassicUO.Game.Scenes
                                 gump.Dispose();
                             }
 
-                            if (mobile == World.Player)
+                            if (entity == World.Player)
                                 StatusGumpBase.GetStatusGump()?.Dispose();
 
                             Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
                             HealthBarGump currentHealthBarGump;
-                            Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                            Engine.UI.Add(currentHealthBarGump = new HealthBarGump(entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                             Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
 
                             break;
 
                         case Item item /*when !item.IsCorpse*/:
+
+                            if (item.IsDamageable)
+                                goto mobile;
+
                             PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
 
                             break;
