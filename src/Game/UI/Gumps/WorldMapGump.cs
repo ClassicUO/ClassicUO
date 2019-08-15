@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+using System.Threading.Tasks;
 
 using ClassicUO.Game.Map;
 using ClassicUO.Input;
@@ -48,10 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
             Width = 400;
             Height = 400;
 
-            //using (FileStream stream = File.OpenRead(@"D:\Progetti\UO\map\Maps\2Dmap0.png"))
-            //    _mapTexture = Texture2D.FromStream(Service.GetByLocalSerial<SpriteBatch3D>().GraphicsDevice, stream);
-
-            Load();
+            Task.Run(() => Load());
         }
 
         private unsafe void Load()
@@ -339,11 +337,14 @@ namespace ClassicUO.Game.UI.Gumps
             //                      x + sw,
             //                      y + sh);
 
+            if (_mapTexture == null)
+                return false;
+
             batcher.Draw2D(_mapTexture, x, y,
                            Width, Height,
 
-                           sx - (sw),
-                           sy - (sh), 
+                           sx - ( (Width / _scale) / 2),
+                           sy - ((Width / _scale) / 2), 
                            Width / _scale, 
                            Height / _scale,
 
