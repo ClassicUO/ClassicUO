@@ -33,7 +33,7 @@ using ClassicUO.IO;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class SpellbookGump : Gump
+    internal class SpellbookGump : MinimizableGump
     {
         private readonly Item _spellBook;
         private readonly bool[] _spells = new bool[64];
@@ -105,6 +105,7 @@ namespace ClassicUO.Game.UI.Gumps
             Clear();
             _pageCornerLeft = _pageCornerRight = null;
             GetBookInfo(_spellBookType, out Graphic bookGraphic, out Graphic minimizedGraphic, out Graphic iconStartGraphic, out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount);
+            _Iconized = new GumpPic(0, 0, minimizedGraphic, 0);
             Add(new GumpPic(0, 0, bookGraphic, 0));
             Add(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
             _pageCornerLeft.LocalSerial = 0;
@@ -898,6 +899,10 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
             }
         }
+
+        internal override HitBox IconizerArea { get; } = new HitBox(0, 98, 27, 23);
+        private GumpPic _Iconized;
+        internal override GumpPic Iconized => _Iconized;
 
         private enum ButtonCircle
         {

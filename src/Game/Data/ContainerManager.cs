@@ -25,6 +25,7 @@ using System.Collections.Generic;
 
 using ClassicUO.IO;
 using ClassicUO.Renderer;
+using ClassicUO.Game.UI.Controls;
 
 using Microsoft.Xna.Framework;
 
@@ -222,12 +223,13 @@ namespace ClassicUO.Game.Data
 
     internal readonly struct ContainerData
     {
-        public ContainerData(Graphic graphic, ushort sound, ushort closed, int x, int y, int w, int h)
+        public ContainerData(Graphic graphic, ushort sound, ushort closed, int x, int y, int w, int h, HitBox iconizerarea = null)
         {
             Graphic = graphic;
             Bounds = new Rectangle(x, y, w, h);
             OpenSound = sound;
             ClosedSound = closed;
+            IconizerArea = iconizerarea;
         }
 
         public Graphic Graphic { get; }
@@ -237,5 +239,7 @@ namespace ClassicUO.Game.Data
         public ushort OpenSound { get; }
 
         public ushort ClosedSound { get; }
+
+        public HitBox IconizerArea { get; }
     }
 }

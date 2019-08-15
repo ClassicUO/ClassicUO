@@ -37,14 +37,15 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly ExpandableScroll _background;
         private readonly RenderedTextList _journalEntries;
         private readonly ScrollFlag _scrollBar;
-        private const int _diffY = 20;
+        private const int _diffY = 22;
 
-        public JournalGump() : base(0, 0)
+        public JournalGump() : base(Constants.JOURNAL_LOCALSERIAL, 0)
         {
             Height = 300;
             CanMove = true;
             CanBeSaved = true;
 
+            Add(new GumpPic(160, 0, 0x82D, 0));
             Add(_background = new ExpandableScroll(0, _diffY, Height, 0x1F40)
             {
                 TitleGumpID = 0x82A
@@ -78,7 +79,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         internal override GumpPic Iconized { get; } = new GumpPic(0, 0, 0x830, 0);
-        internal override GumpPic IconizerButton { get; } = new GumpPic(160, 0, 0x82D, 0);
+        internal override HitBox IconizerArea { get; } = new HitBox(160, 0, 23, 24);
 
 
 
