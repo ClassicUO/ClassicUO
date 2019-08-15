@@ -102,10 +102,6 @@ namespace ClassicUO.Game.GameObjects
             {
                 _displayedGraphic = AnimationGraphic;
                 Texture = FileManager.Art.GetTexture(AnimationGraphic);
-
-                if (Source != null)
-                    Source.Texture = Texture;
-
                 Bounds.Width = Texture.Width;
                 Bounds.Height = Texture.Height;
             }

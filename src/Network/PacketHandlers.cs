@@ -298,7 +298,8 @@ namespace ClassicUO.Network
 
             Mobile mobile = World.Mobiles.Get(p.ReadUInt());
 
-            if (mobile == null) return;
+            if (mobile == null)
+                return;
 
             mobile.Name = p.ReadASCII(30);
             mobile.Hits = p.ReadUShort();
@@ -1204,7 +1205,8 @@ namespace ClassicUO.Network
         {
             Mobile mobile = World.Mobiles.Get(p.ReadUInt());
 
-            if (mobile == null) return;
+            if (mobile == null)
+                return;
 
             mobile.HitsMax = p.ReadUShort();
             mobile.Hits = p.ReadUShort();
@@ -1910,7 +1912,8 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
 
-            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            Serial serial = p.ReadUInt();
+            Mobile mobile = World.Mobiles.Get(serial);
             if (mobile == null)
                 return;
 
@@ -2417,17 +2420,16 @@ namespace ClassicUO.Network
         private static void UpdateHitpoints(Packet p)
         {
             // TODO: shards uses item with HP... it's weird but can happen :D
+            Entity entity = World.Get(p.ReadUInt());
 
-            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            if (entity == null)
+                return;
 
-            if (mobile == null) return;
+            entity.HitsMax = p.ReadUShort();
+            entity.Hits = p.ReadUShort();
+            entity.ProcessDelta();
 
-
-            mobile.HitsMax = p.ReadUShort();
-            mobile.Hits = p.ReadUShort();
-            mobile.ProcessDelta();
-
-            if (mobile == World.Player)
+            if (entity == World.Player)
                 UoAssist.SignalHits();
         }
 
@@ -3658,7 +3660,7 @@ namespace ClassicUO.Network
 
                     if (graphic == 0x2006 && Engine.Profile.Current.AutoOpenCorpses) World.Player.TryOpenCorpses();
 
-                    if (type == 2)
+                    if (type == 0x02)
                     {
                         item.IsMulti = true;
                         item.WantUpdateMulti = (graphic & 0x3FFF) != item.Graphic || item.Position != position;
@@ -3666,6 +3668,7 @@ namespace ClassicUO.Network
                     }
                     else
                     {
+                        item.IsDamageable = type == 0x03;
                         item.IsMulti = false;
                         item.Graphic = graphic;
                     }

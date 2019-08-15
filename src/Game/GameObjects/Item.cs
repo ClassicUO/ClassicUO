@@ -216,6 +216,8 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        public bool IsDamageable { get; set; }
+
         public byte LightID { get; set; }
 
         public bool WantUpdateMulti { get; set; } = true;
@@ -396,6 +398,7 @@ namespace ClassicUO.Game.GameObjects
                     if (OnGround && ItemData.IsAnimated)
                     {
                         _animDataFrame = FileManager.AnimData.CalculateCurrentGraphic(Graphic);
+
                         AnimIndex = animIndex;
                         _animSpeed = _animDataFrame.FrameInterval != 0 ? _animDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
                         LastAnimationChangeTime = Engine.Ticks;
@@ -929,6 +932,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (OnGround && _animDataFrame.FrameCount != 0 && LastAnimationChangeTime < Engine.Ticks)
             {
+
                 unsafe
                 {
                     _originalGraphic = (Graphic) (DisplayedGraphic + _animDataFrame.FrameData[AnimIndex++]);
