@@ -47,6 +47,9 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly float[] _zooms = new float[10] { 0.125f, 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f, 4f, 6f, 8f };
         private int _zoomIndex = 4;
 
+        private Point _center, _lastScroll;
+        private bool _isScrolling;
+
         public WorldMapGump() : base(400, 400, 100, 100, 0, 0)
         {
             CanMove = true;
@@ -63,7 +66,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            if (button != MouseButton.Left)
+            if (button != MouseButton.Left || _isScrolling || Keyboard.Alt)
                 return base.OnMouseDoubleClick(x, y, button);
 
             _isTopMost = !_isTopMost;
@@ -73,6 +76,60 @@ namespace ClassicUO.Game.UI.Gumps
             ControlInfo.Layer = _isTopMost ? UILayer.Over : UILayer.Default;
 
             return true;
+        }
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
+        {
+            _isScrolling = false;
+            CanMove = true;
+            base.OnMouseUp(x, y, button);
+        }
+
+        protected override void OnMouseDown(int x, int y, MouseButton button)
+        {
+            if (button == MouseButton.Left && Keyboard.Alt)
+            {
+                _isScrolling = true;
+                CanMove = false;
+            }
+
+            base.OnMouseDown(x, y, button);
+        }
+
+        protected override void OnMouseOver(int x, int y)
+        {
+            Point offset = Mouse.LDroppedOffset;
+
+            if (_isScrolling && offset != Point.Zero)
+            {
+                int scrollX = _lastScroll.X - x;
+                int scrollY = _lastScroll.Y - y;
+
+                (scrollX, scrollY) = RotatePoint(scrollX, scrollY, 1f, -1);
+
+                _center.X += (int) (scrollX / Zoom);
+                _center.Y += (int) (scrollY / Zoom);
+
+                if (_center.X < 0)
+                    _center.X = 0;
+
+                if (_center.Y < 0)
+                    _center.Y = 0;
+
+                _lastScroll.X = x;
+                _lastScroll.Y = y;
+            }
+            else
+            {
+                base.OnMouseOver(x, y);
+            }
+        }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+          
         }
 
         private unsafe void Load()
@@ -340,13 +397,20 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            if (!_isScrolling)
+            {
+                _center.X = World.Player.X;
+                _center.Y = World.Player.Y;
+            }
+
+
             int gX = x + 4;
             int gY = y + 4;
             int gWidth = Width - 8;
             int gHeight = Height - 8;
 
-            int sx = World.Player.X;
-            int sy = World.Player.Y;
+            int sx = _center.X;
+            int sy = _center.Y;
 
             int size = (int) Math.Max(gWidth * 1.75f, gHeight * 1.75f);
            
@@ -404,8 +468,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void DrawMobile(UltimaBatcher2D batcher, Mobile mobile, int x, int y, int width, int height, float zoom, Color color)
         {
-            int sx = mobile.X - World.Player.X;
-            int sy = mobile.Y - World.Player.Y;
+            int sx = mobile.X - _center.X;
+            int sy = mobile.Y - _center.Y;
 
             (int rotX, int rotY) = RotatePoint(sx, sy, zoom, 1);
 
