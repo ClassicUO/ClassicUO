@@ -44,7 +44,8 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private UOTexture _mapTexture;
         private bool _isTopMost;
-
+        private readonly float[] _zooms = new float[10] { 0.125f, 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f, 4f, 6f, 8f };
+        private int _zoomIndex = 4;
 
         public WorldMapGump() : base(400, 400, 100, 100, 0, 0)
         {
@@ -55,6 +56,10 @@ namespace ClassicUO.Game.UI.Gumps
             Load();
             OnResize();
         }
+
+
+        public float Zoom => _zooms[_zoomIndex];
+
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
@@ -311,19 +316,24 @@ namespace ClassicUO.Game.UI.Gumps
             return ((int)Math.Round(Math.Cos(dist * Math.PI / 4.0) * x - Math.Sin(dist * Math.PI / 4.0) * y), (int)Math.Round(Math.Sin(dist * Math.PI / 4.0) * x + Math.Cos(dist * Math.PI / 4.0) * y));
         }
 
-        private int _scale = 1;
 
         protected override void OnMouseWheel(MouseEvent delta)
         {
             if (delta == MouseEvent.WheelScrollUp)
             {
-                _scale++;
+                _zoomIndex++;
+
+                if (_zoomIndex >= _zooms.Length)
+                    _zoomIndex = _zooms.Length - 1;
             }
             else
-                _scale--;
+            {
+                _zoomIndex--;
 
-            if (_scale <= 0)
-                _scale = 1;
+                if (_zoomIndex < 0)
+                    _zoomIndex = 0;
+            }
+
 
             base.OnMouseWheel(delta);
         }
@@ -341,8 +351,8 @@ namespace ClassicUO.Game.UI.Gumps
             int size = (int) Math.Max(gWidth * 1.75f, gHeight * 1.75f);
            
 
-            int sw = (size / _scale);
-            int sh = (size / _scale);
+            int sw = (int) (size / Zoom);
+            int sh = (int) (size / Zoom);
 
             int halfWidth = gWidth >> 1;
             int halfHeight = gHeight >> 1;
@@ -383,10 +393,10 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (Mobile mobile in World.Mobiles)
             {
                 if (mobile != World.Player)
-                    DrawMobile(batcher, mobile, gX, gY, halfWidth, halfHeight, _scale, Color.Red);
+                    DrawMobile(batcher, mobile, gX, gY, halfWidth, halfHeight, Zoom, Color.Red);
             }
 
-            DrawMobile(batcher, World.Player, gX, gY, halfWidth, halfHeight, _scale, Color.White);
+            DrawMobile(batcher, World.Player, gX, gY, halfWidth, halfHeight, Zoom, Color.White);
 
 
             return base.Draw(batcher, x, y);
