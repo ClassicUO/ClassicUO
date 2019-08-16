@@ -39,7 +39,7 @@ namespace ClassicUO.Game.Data
                 0x9, new ContainerData(0x0009, 0x0000, 0x0000, 20, 85, 124, 196)
             },
             {
-                0x3C, new ContainerData(0x003C, 0x0048, 0x0058, 44, 65, 186, 159)
+                0x3C, new ContainerData(0x003C, 0x0048, 0x0058, 44, 65, 186, 159, 0x50, 112, 176)
             },
             {
                 0x3D, new ContainerData(0x003D, 0x0048, 0x0058, 29, 34, 137, 128)
@@ -166,7 +166,7 @@ namespace ClassicUO.Game.Data
 
         public static ContainerData Get(Graphic graphic)
         {
-            return !_data.TryGetValue(graphic, out ContainerData value) ? _data[0x3C] : value;
+            return !_data.TryGetValue(graphic, out ContainerData value) ? _data[0x3F] : value;
         }
 
 
@@ -223,13 +223,13 @@ namespace ClassicUO.Game.Data
 
     internal readonly struct ContainerData
     {
-        public ContainerData(Graphic graphic, ushort sound, ushort closed, int x, int y, int w, int h, HitBox iconizerarea = null, ushort iconizedgraphic = 0x0)
+        public ContainerData(Graphic graphic, ushort sound, ushort closed, int x, int y, int w, int h, ushort iconizedgraphic = 0, int minimizerX = 0, int minimizerY = 0)
         {
             Graphic = graphic;
             Bounds = new Rectangle(x, y, w, h);
             OpenSound = sound;
             ClosedSound = closed;
-            IconizerArea = iconizerarea;
+            MinimizerArea = (minimizerX == 0 && minimizerY == 0 ? Rectangle.Empty : new Rectangle(minimizerX, minimizerY, 16, 16));
             IconizedGraphic = iconizedgraphic;
         }
 
@@ -241,7 +241,7 @@ namespace ClassicUO.Game.Data
 
         public ushort ClosedSound { get; }
 
-        public HitBox IconizerArea { get; }
+        public Rectangle MinimizerArea { get; }
 
         public ushort IconizedGraphic { get; }
     }

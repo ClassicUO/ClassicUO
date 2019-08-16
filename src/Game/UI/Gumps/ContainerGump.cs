@@ -36,8 +36,12 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class ContainerGump : TextContainerGump
+    internal class ContainerGump : MinimizableGump
     {
+        private GumpPic _Iconized;
+        internal override GumpPic Iconized => _Iconized;
+        private HitBox _IconizerArea;
+        internal override HitBox IconizerArea => _IconizerArea;
         private readonly Item _item;
         private long _corpseEyeTicks;
         private ContainerData _data;
@@ -80,6 +84,11 @@ namespace ClassicUO.Game.UI.Gumps
             _item.Items.Removed += ItemsOnRemoved;
 
             _data = ContainerManager.Get(Graphic);
+            if(_data.MinimizerArea != Rectangle.Empty && _data.IconizedGraphic != 0)
+            {
+                _IconizerArea = new HitBox(_data.MinimizerArea.X, _data.MinimizerArea.Y, _data.MinimizerArea.Width, _data.MinimizerArea.Height);
+                _Iconized = new GumpPic(0, 0, _data.IconizedGraphic, _item.Hue);
+            }
             Graphic g = _data.Graphic;
 
             GumpPicContainer container;
