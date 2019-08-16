@@ -248,7 +248,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(IconizerArea);
                 IconizerArea.MouseUp += IconizerButton_MouseUp;
-                //IconizerArea.Alpha = 1;
+                IconizerArea.Alpha = 0.95f;
                 Iconized.MouseDoubleClick += Iconized_MouseDoubleClick;
                 if (LocalSerial != Serial.INVALID)
                 {

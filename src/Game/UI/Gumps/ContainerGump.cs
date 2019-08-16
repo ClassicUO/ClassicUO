@@ -87,7 +87,7 @@ namespace ClassicUO.Game.UI.Gumps
             if(_data.MinimizerArea != Rectangle.Empty && _data.IconizedGraphic != 0)
             {
                 _IconizerArea = new HitBox(_data.MinimizerArea.X, _data.MinimizerArea.Y, _data.MinimizerArea.Width, _data.MinimizerArea.Height);
-                _Iconized = new GumpPic(0, 0, _data.IconizedGraphic, _item.Hue);
+                _Iconized = new GumpPic(0, 0, _data.IconizedGraphic, 0);
             }
             Graphic g = _data.Graphic;
 
@@ -157,16 +157,12 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
 
             if (_item == null || _item.IsDestroyed)
-                Dispose();
-
-            if (IsDisposed) return;
-
-            if (_item != null && _item.IsDestroyed)
             {
                 Dispose();
-
                 return;
             }
+
+            if (IsDisposed) return;
 
             if (_isCorspeContainer && _corpseEyeTicks < totalMS)
             {
@@ -175,10 +171,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _eyeGumpPic.Graphic = (Graphic) (0x0045 + _eyeCorspeOffset);
                 _eyeGumpPic.Texture = FileManager.Gumps.GetTexture(_eyeGumpPic.Graphic);
             }
+            if(Iconized != null) Iconized.Hue = _item.Hue;
         }
-
-
-
 
         public override void Save(BinaryWriter writer)
         {
