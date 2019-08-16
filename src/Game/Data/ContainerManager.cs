@@ -39,7 +39,7 @@ namespace ClassicUO.Game.Data
                 0x9, new ContainerData(0x0009, 0x0000, 0x0000, 20, 85, 124, 196)
             },
             {
-                0x3C, new ContainerData(0x003C, 0x0048, 0x0058, 44, 65, 186, 159, 0x50, 112, 176)
+                0x3C, new ContainerData(0x003C, 0x0048, 0x0058, 44, 65, 186, 159, 0x50, 105, 162)
             },
             {
                 0x3D, new ContainerData(0x003D, 0x0048, 0x0058, 29, 34, 137, 128)
