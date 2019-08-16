@@ -23,6 +23,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -242,10 +243,8 @@ namespace ClassicUO.IO.Resources
             return HuesHelper.Color16To32(c);
         }
 
-        public ushort GetRadarColorData(int c)
-        {
-            return c < RadarCol.Length ? RadarCol[c] : (ushort) 0;
-        }
+        [MethodImpl(256)]
+        public ushort GetRadarColorData(int c) => c >= 0 && c < RadarCol.Length ? RadarCol[c] : (ushort) 0;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
