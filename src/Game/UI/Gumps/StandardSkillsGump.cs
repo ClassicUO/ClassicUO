@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
         internal Checkbox _checkReal, _checkCaps;
         private const int _diffY = 22;
 
-        public StandardSkillsGump() : base(0, 0)
+        public StandardSkillsGump() : base(Constants.SKILLSTD_LOCALSERIAL, 0)
         {
             CanBeSaved = true;
             AcceptMouseInput = false;

@@ -119,5 +119,6 @@ namespace ClassicUO.Game
         public const float SOUND_DELTA = 1000f;
 
         public const uint JOURNAL_LOCALSERIAL = 0xFFFFFFE1;
+        public const uint SKILLSTD_LOCALSERIAL = 0xFFFFFFE2;
     }
 }
