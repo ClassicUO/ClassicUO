@@ -208,7 +208,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (x > 0)
                             {
-                                int index = (y * 8) + (x - 1);
+                                int index = (y << 3) + (x - 1);
 
                                 if (c.Z < infoCells[index].Z)
                                 {
