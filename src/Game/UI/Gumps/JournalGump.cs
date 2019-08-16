@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanBeSaved = true;
 
             Add(new GumpPic(160, 0, 0x82D, 0));
-            Add(_background = new ExpandableScroll(0, _diffY, Height, 0x1F40)
+            Add(_background = new ExpandableScroll(0, _diffY, Height - _diffY, 0x1F40)
             {
                 TitleGumpID = 0x82A
             });
@@ -71,7 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Hue = (ushort) (ok ? DARK_MODE_JOURNAL_HUE : 0);
             };
 
-            _scrollBar = new ScrollFlag(-25, _diffY + 36, Height, true);
+            _scrollBar = new ScrollFlag(-25, _diffY + 36, Height - _diffY, true);
 
             Add(_journalEntries = new RenderedTextList(25, _diffY + 36, _background.Width - (_scrollBar.Width >> 1) - 5, 200, _scrollBar));
 

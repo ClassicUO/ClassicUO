@@ -30,20 +30,25 @@ using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class ProfileGump : Gump
+    internal class ProfileGump : MinimizableGump
     {
+        internal override GumpPic Iconized { get; } = new GumpPic(0, 0, 0x9D4, 0);
+        internal override HitBox IconizerArea { get; } = new HitBox(143, 0, 23, 24);
         private readonly string _originalText;
         private readonly ScrollArea _scrollArea;
         private readonly ExpandableScroll _scrollExp;
         private readonly MultiLineBox _textBox;
+        private const int _diffY = 22;
 
         public ProfileGump(Serial serial, string header, string footer, string body, bool canEdit) : base(serial, serial)
         {
-            Height = 300;
+            Height = 300 + _diffY;
             CanMove = true;
             AcceptKeyboardInput = true;
-            Add(_scrollExp = new ExpandableScroll(0, 0, Height, 0x0820));
-            _scrollArea = new ScrollArea(0, 32, 272, Height - 96, false);
+
+            Add(new GumpPic(143, 0, 0x82D, 0));
+            Add(_scrollExp = new ExpandableScroll(0, _diffY, Height - _diffY, 0x0820));
+            _scrollArea = new ScrollArea(0, 32 + _diffY, 272, Height - (96 + _diffY), false);
 
             Control c = new Label(header, true, 0, font: 1, maxwidth: 140)
             {
@@ -56,6 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
             _textBox = new MultiLineBox(new MultiLineEntry(1, -1, 0, 220, true, hue: 0), canEdit)
             {
                 Height = FileManager.Fonts.GetHeightUnicode(1, body, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0),
+                Width = 220,
                 X = 35,
                 Y = 0,
                 Text = _originalText = body
@@ -133,8 +139,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnPageChanged()
         {
-            Height = _scrollExp.SpecialHeight;
-            _scrollArea.Height = _scrollExp.SpecialHeight - 96;
+            Height = _scrollExp.SpecialHeight + _diffY;
+            _scrollArea.Height = _scrollExp.SpecialHeight - (96 + _diffY);
 
             foreach (Control c in _scrollArea.Children)
             {
