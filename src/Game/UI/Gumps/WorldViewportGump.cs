@@ -218,6 +218,8 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
         }
 
+        public Hue Hue { get; set; }
+
         public override void Update(double totalMS, double frameMS)
         {
             foreach (UOTexture t in _borders)
@@ -229,6 +231,12 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
+
+            if (Hue != 0)
+            {
+                _hueVector.X = Hue;
+                _hueVector.Y = 1;
+            }
 
             // sopra
             batcher.Draw2DTiled(_borders[0], x, y, Width, _borderSize, ref _hueVector);

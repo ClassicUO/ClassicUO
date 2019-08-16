@@ -155,6 +155,7 @@
     <Compile Include="Game\UI\Controls\AlphaBlendControl.cs" />
     <Compile Include="Game\UI\Controls\ArrowNumbersTextBox.cs" />
     <Compile Include="Game\UI\Controls\ClickableColorBox.cs" />
+    <Compile Include="Game\UI\Controls\ContextMenuControl.cs" />
     <Compile Include="Game\UI\Controls\InfoBarBuilderControl.cs" />
     <Compile Include="Game\UI\Controls\ColorBox.cs" />
     <Compile Include="Game\UI\Controls\EditableLabel.cs" />
@@ -170,6 +171,7 @@
     <Compile Include="Game\UI\Gumps\GridLootGump.cs" />
     <Compile Include="Game\UI\Gumps\InfoBarGump.cs" />
     <Compile Include="Game\UI\Gumps\NameOverHeadHandlerGump.cs" />
+    <Compile Include="Game\UI\Gumps\ResizableGump.cs" />
     <Compile Include="Game\UI\Gumps\StandardSkillsGump.cs" />
     <Compile Include="Game\UI\Gumps\TextContainerGump.cs" />
     <Compile Include="Game\UI\Gumps\TipNoticeGump.cs" />

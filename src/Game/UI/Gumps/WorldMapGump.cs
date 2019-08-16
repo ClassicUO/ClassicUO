@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -39,20 +40,34 @@ using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class WorldMapGump : Gump
+    internal class WorldMapGump : ResizableGump
     {
         private UOTexture _mapTexture;
+        private bool _isTopMost;
 
-        public WorldMapGump() : base(0, 0)
+
+        public WorldMapGump() : base(400, 400, 100, 100, 0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
-            Width = 400;
-            Height = 400;
+            CanCloseWithRightClick = false;
 
             Load();
+            OnResize();
+        }
 
-            Add(new GameBorder(0, 0, Width, Height, 2));
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        {
+            if (button != MouseButton.Left)
+                return base.OnMouseDoubleClick(x, y, button);
+
+            _isTopMost = !_isTopMost;
+
+            ShowBorder = !_isTopMost;
+
+            ControlInfo.Layer = _isTopMost ? UILayer.Over : UILayer.Default;
+
+            return true;
         }
 
         private unsafe void Load()
@@ -284,30 +299,13 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
         
-        public static Vector2 RotateVector2(Vector2 point, float radians, Vector2 pivot)
-        {
-            float cosRadians = (float) Math.Cos(radians);
-            float sinRadians = (float) Math.Sin(radians);
-
-            Vector2 translatedPoint = new Vector2
-            {
-                X = point.X - pivot.X, Y = point.Y - pivot.Y
-            };
-
-            Vector2 rotatedPoint = new Vector2
-            {
-                X = translatedPoint.X * cosRadians - translatedPoint.Y * sinRadians + pivot.X, Y = translatedPoint.X * sinRadians + translatedPoint.Y * cosRadians + pivot.Y
-            };
-
-            return rotatedPoint;
-        }
-
+     
         public static (int, int) RotatePoint(int x, int y, float zoom, int dist, float angle = 45f)
         {
             x = (int)(x * zoom);
             y = (int)(y * zoom);
 
-            if (angle == 0)
+            if (angle == 0.0f)
                 return (x, y);
 
             return ((int)Math.Round(Math.Cos(dist * Math.PI / 4.0) * x - Math.Sin(dist * Math.PI / 4.0) * y), (int)Math.Round(Math.Sin(dist * Math.PI / 4.0) * x + Math.Cos(dist * Math.PI / 4.0) * y));
@@ -332,17 +330,22 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            int gX = x + 4;
+            int gY = y + 4;
+            int gWidth = Width - 8;
+            int gHeight = Height - 8;
+
             int sx = World.Player.X;
             int sy = World.Player.Y;
 
-            int size = (int) Math.Max(Width * 1.75f, Height * 1.75f);
+            int size = (int) Math.Max(gWidth * 1.75f, gHeight * 1.75f);
            
 
             int sw = (size / _scale);
             int sh = (size / _scale);
 
-            int halfWidth = Width >> 1;
-            int halfHeight = Height >> 1;
+            int halfWidth = gWidth >> 1;
+            int halfHeight = gHeight >> 1;
 
             ResetHueVector();
 
@@ -350,7 +353,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_mapTexture == null)
                 return false;
 
-            var rect = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
+            var rect = ScissorStack.CalculateScissors(Matrix.Identity, gX, gY, gWidth, gHeight);
 
             if (ScissorStack.PushScissors(rect))
             {
@@ -380,10 +383,10 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (Mobile mobile in World.Mobiles)
             {
                 if (mobile != World.Player)
-                    DrawMobile(batcher, mobile, x, y, halfWidth, halfHeight, _scale, Color.Red);
+                    DrawMobile(batcher, mobile, gX, gY, halfWidth, halfHeight, _scale, Color.Red);
             }
 
-            DrawMobile(batcher, World.Player, x, y, halfWidth, halfHeight, _scale, Color.White);
+            DrawMobile(batcher, World.Player, gX, gY, halfWidth, halfHeight, _scale, Color.White);
 
 
             return base.Draw(batcher, x, y);
