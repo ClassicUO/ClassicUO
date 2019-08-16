@@ -163,10 +163,11 @@ namespace ClassicUO.Game.Data
         public static int X { get; private set; } = 40;
         public static int Y { get; private set; } = 40;
 
+        private static readonly ContainerData _DefaultData = new ContainerData(0x003C, 0x0048, 0x0058, 44, 65, 186, 159);
 
         public static ContainerData Get(Graphic graphic)
         {
-            return !_data.TryGetValue(graphic, out ContainerData value) ? _data[0x3F] : value;
+            return !_data.TryGetValue(graphic, out ContainerData value) ? _DefaultData : value;
         }
 
 
