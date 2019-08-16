@@ -22,6 +22,7 @@
 #endregion
 
 using System.Text;
+using System.Globalization;
 
 namespace ClassicUO.Utility
 {
@@ -29,7 +30,7 @@ namespace ClassicUO.Utility
     {
         private static readonly char[] _dots = {'.', ',', ';', '!'};
         private static readonly StringBuilder _sb = new StringBuilder();
-
+        public static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
 
         public static string CapitalizeFirstCharacter(string str)
         {
@@ -153,6 +154,22 @@ namespace ClassicUO.Utility
             }
 
             return _sb.ToString();
+        }
+
+        public static string IntToAbbreviatedString(int num)
+        {
+            if (num > 999999)
+            {
+                return string.Format(Culture, "{0:#,,M+}", num);
+            }
+            else if (num > 999)
+            {
+                return string.Format(Culture, "{0:#,K+}", num);
+            }
+            else
+            {
+                return num.ToString();
+            }
         }
     }
 }
