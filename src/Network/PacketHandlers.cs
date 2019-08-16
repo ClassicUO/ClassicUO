@@ -3253,10 +3253,6 @@ namespace ClassicUO.Network
 
             Serial serial = p.ReadUInt();
 
-            if (serial == 0x4013500a)
-            {
-
-            }
             p.Skip(2);
             uint revision = p.ReadUInt();
 
