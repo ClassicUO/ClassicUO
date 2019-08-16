@@ -40,6 +40,8 @@ namespace ClassicUO.Game
 
         public static Point RangeSize;
 
+        public static ObjectPropertiesListManager OPL { get; } = new ObjectPropertiesListManager();
+
         public static CorpseManager CorpseManager { get; } = new CorpseManager();
 
         public static PartyManager Party { get; } = new PartyManager();
@@ -333,6 +335,7 @@ namespace ClassicUO.Game
             _effectManager.Clear();
             _toRemove.Clear();
             CorpseManager.Clear();
+            OPL.Clear();
 
             Season = Seasons.Summer;
             OldSeason = Seasons.Summer;

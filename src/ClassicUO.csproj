@@ -146,6 +146,7 @@
     <Compile Include="Game\Managers\MacroManager.cs" />
     <Compile Include="Game\Managers\AudioManager.cs" />
     <Compile Include="Game\Managers\NameOverHeadManager.cs" />
+    <Compile Include="Game\Managers\ObjectPropertiesListManager.cs" />
     <Compile Include="Game\Managers\PoolsManager.cs" />
     <Compile Include="Game\Managers\SkillsGroupManager.cs" />
     <Compile Include="Game\SelectedObject.cs" />
