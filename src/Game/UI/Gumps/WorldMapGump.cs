@@ -24,6 +24,7 @@
 using System;
 using System.Threading.Tasks;
 
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -49,7 +50,9 @@ namespace ClassicUO.Game.UI.Gumps
             Width = 400;
             Height = 400;
 
-            Task.Run(() => Load());
+            Load();
+
+            Add(new GameBorder(0, 0, Width, Height, 2));
         }
 
         private unsafe void Load()
@@ -299,6 +302,17 @@ namespace ClassicUO.Game.UI.Gumps
             return rotatedPoint;
         }
 
+        public static (int, int) RotatePoint(int x, int y, float zoom, int dist, float angle = 45f)
+        {
+            x = (int)(x * zoom);
+            y = (int)(y * zoom);
+
+            if (angle == 0)
+                return (x, y);
+
+            return ((int)Math.Round(Math.Cos(dist * Math.PI / 4.0) * x - Math.Sin(dist * Math.PI / 4.0) * y), (int)Math.Round(Math.Sin(dist * Math.PI / 4.0) * x + Math.Cos(dist * Math.PI / 4.0) * y));
+        }
+
         private int _scale = 1;
 
         protected override void OnMouseWheel(MouseEvent delta)
@@ -320,37 +334,72 @@ namespace ClassicUO.Game.UI.Gumps
         {
             int sx = World.Player.X;
             int sy = World.Player.Y;
-            int sw = Width >> 1;
-            int sh = Height >> 1;
+
+            int size = (int) Math.Max(Width * 1.75f, Height * 1.75f);
+           
+
+            int sw = (size / _scale);
+            int sh = (size / _scale);
+
+            int halfWidth = Width >> 1;
+            int halfHeight = Height >> 1;
 
             ResetHueVector();
 
-            //var v = RotateVector2(new Vector2(x + (sx - (sw >> 0)), y + (sy - (sh >> 0))),
-            //                      45,
-            //                      new Vector2(x + (sx - (sw >> 0)), y + (sy - (sh >> 0))));
-
-            //batcher.Draw2DRotated(_mapTexture,
-            //                      x + (sx - (sw >> 1)),
-            //                      y + (sy - (sh >> 1)),
-            //                      x + sw,
-            //                      y + sh,
-            //                      x + sw,
-            //                      y + sh);
 
             if (_mapTexture == null)
                 return false;
 
-            batcher.Draw2D(_mapTexture, x, y,
-                           Width, Height,
+            var rect = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
 
-                           sx - ( (Width / _scale) / 2),
-                           sy - ((Width / _scale) / 2), 
-                           Width / _scale, 
-                           Height / _scale,
+            if (ScissorStack.PushScissors(rect))
+            {
+                batcher.EnableScissorTest(true);
 
-                           ref _hueVector);
+                int offset = size >> 1;
+
+
+                batcher.Draw2D(_mapTexture, (x - offset) + halfWidth, (y - offset) + halfHeight,
+                               size, size,
+
+                               sx - (sw >> 1),
+                               sy - (sh >> 1),
+
+                               sw,
+                               sh,
+
+                               ref _hueVector, 45);
+
+                batcher.EnableScissorTest(false);
+
+                ScissorStack.PopScissors();
+            }
+
+
+
+            foreach (Mobile mobile in World.Mobiles)
+            {
+                if (mobile != World.Player)
+                    DrawMobile(batcher, mobile, x, y, halfWidth, halfHeight, _scale, Color.Red);
+            }
+
+            DrawMobile(batcher, World.Player, x, y, halfWidth, halfHeight, _scale, Color.White);
+
 
             return base.Draw(batcher, x, y);
+        }
+
+        private void DrawMobile(UltimaBatcher2D batcher, Mobile mobile, int x, int y, int width, int height, float zoom, Color color)
+        {
+            int sx = mobile.X - World.Player.X;
+            int sy = mobile.Y - World.Player.Y;
+
+            (int rotX, int rotY) = RotatePoint(sx, sy, zoom, 1);
+
+            rotX += x + width;
+            rotY += y + height;
+
+            batcher.Draw2D(Textures.GetTexture(color), rotX, rotY, 5, 5, ref _hueVector);
         }
 
         public override void Dispose()
