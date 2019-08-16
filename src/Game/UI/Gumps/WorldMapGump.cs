@@ -50,7 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             AcceptMouseInput = true;
-            CanCloseWithRightClick = false;
+            //CanCloseWithRightClick = false;
 
             Load();
             OnResize();
