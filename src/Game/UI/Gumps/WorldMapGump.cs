@@ -144,7 +144,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 for (int by = 0; by < FileManager.Map.MapBlocksSize[World.MapIndex, 1]; by++)
                 {
-                    IndexMap indexMap = World.Map.GetIndex(bx, by);
+                    ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
 
                     if (indexMap.MapAddress == 0)
                         continue;
@@ -251,116 +251,6 @@ namespace ClassicUO.Game.UI.Gumps
             _mapTexture.SetData(buffer);
         }
 
-        public Texture2D Load2()
-        {
-            int lastX = World.Player.Position.X;
-            int lastY = World.Player.Position.Y;
-            int blockOffsetX = Width >> 2;
-            int blockOffsetY = Height >> 2;
-            int gumpCenterX = Width >> 1;
-            int gumpCenterY = Height >> 1;
-
-            //0xFF080808 - pixel32
-            //0x8421 - pixel16
-            int minBlockX = ((lastX - blockOffsetX) >> 3) - 1;
-            int minBlockY = ((lastY - blockOffsetY) >> 3) - 1;
-            int maxBlockX = ((lastX + blockOffsetX) >> 3) + 1;
-            int maxBlockY = ((lastY + blockOffsetY) >> 3) + 1;
-
-            if (minBlockX < 0)
-                minBlockX = 0;
-
-            if (minBlockY < 0)
-                minBlockY = 0;
-            int maxBlockIndex = World.Map.MapBlockIndex;
-            int mapBlockHeight = FileManager.Map.MapBlocksSize[World.MapIndex, 1];
-            ushort[] data = new ushort[Width * Height];
-
-            for (int i = minBlockX; i <= maxBlockX; i++)
-            {
-                int blockIndexOffset = i * mapBlockHeight;
-
-                for (int j = minBlockY; j <= maxBlockY; j++)
-                {
-                    int blockIndex = blockIndexOffset + j;
-
-                    if (blockIndex >= maxBlockIndex)
-                        break;
-
-                    RadarMapBlock? mbbv = FileManager.Map.GetRadarMapBlock(World.MapIndex, i, j);
-
-                    if (!mbbv.HasValue)
-                        break;
-
-                    RadarMapBlock mb = mbbv.Value;
-                    Chunk block = World.Map.Chunks[blockIndex];
-                    int realBlockX = i << 3;
-                    int realBlockY = j << 3;
-
-                    for (int x = 0; x < 8; x++)
-                    {
-                        int px = realBlockX + x - lastX + gumpCenterX;
-
-                        for (int y = 0; y < 8; y++)
-                        {
-                            int py = realBlockY + y - lastY;
-                            int gx = px - py;
-                            int gy = px + py;
-                            uint color = mb.Cells[x, y].Graphic;
-                            bool island = mb.Cells[x, y].IsLand;
-
-                            //if (block != null)
-                            //{
-                            //    ushort multicolor = block.get
-                            //}
-
-                            if (!island)
-                                color += 0x4000;
-                            int tableSize = 2;
-                            color = (uint) (0x8000 | FileManager.Hues.GetRadarColorData((int) color));
-
-                            Point[] table = new Point[2]
-                            {
-                                new Point(0, 0), new Point(0, 1)
-                            };
-                            CreatePixels(data, (int) color, gx, gy, Width, Height, table, tableSize);
-                        }
-                    }
-                }
-            }
-
-            _mapTexture = new UOTexture16(Width, Height);
-            _mapTexture.SetData(data);
-
-            return _mapTexture;
-        }
-
-        private void CreatePixels(ushort[] data, int color, int x, int y, int w, int h, Point[] table, int count)
-        {
-            int px = x;
-            int py = y;
-
-            for (int i = 0; i < count; i++)
-            {
-                px += table[i].X;
-                py += table[i].Y;
-                int gx = px;
-
-                if (gx < 0 || gx >= w)
-                    continue;
-
-                int gy = py;
-
-                if (gy < 0 || gy >= h)
-                    break;
-
-                int block = gy * w + gx;
-
-                //if (data[block] == 0x8421)
-                    data[block] = (ushort) color;
-            }
-        }
-        
      
         public static (int, int) RotatePoint(int x, int y, float zoom, int dist, float angle = 45f)
         {
