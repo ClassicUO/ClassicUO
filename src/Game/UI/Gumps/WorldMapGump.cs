@@ -56,7 +56,8 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             //CanCloseWithRightClick = false;
 
-            Load();
+            GameActions.Print("WorldMap loading...", 0x35);
+            Task.Run(Load);
             OnResize();
         }
 
@@ -249,9 +250,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             _mapTexture = new UOTexture32(FileManager.Map.MapsDefaultSize[World.MapIndex, 0], FileManager.Map.MapsDefaultSize[World.MapIndex, 1]);
             _mapTexture.SetData(buffer);
+
+            GameActions.Print("WorldMap loaded!", 0x48);
         }
 
-     
+
         public static (int, int) RotatePoint(int x, int y, float zoom, int dist, float angle = 45f)
         {
             x = (int)(x * zoom);
