@@ -257,6 +257,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool CounterBarEnabled { get; set; }
         [JsonProperty] public bool CounterBarHighlightOnUse { get; set; }
         [JsonProperty] public bool CounterBarHighlightOnAmount { get; set; }
+        [JsonProperty] public bool CounterBarDisplayAbbreviatedAmount { get; set; }
+        [JsonProperty] public int CounterBarAbbreviatedAmount { get; set; } = 1000;
         [JsonProperty] public int CounterBarHighlightAmount { get; set; } = 5;
         [JsonProperty] public int CounterBarCellSize { get; set; } = 40;
         [JsonProperty] public int CounterBarRows { get; set; } = 1;

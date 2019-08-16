@@ -334,18 +334,22 @@ namespace ClassicUO.Game.UI.Gumps
 
                         string text = _amount.ToString();
 
-                        if (_amount >= 1000)
+                        if (Engine.Profile.Current.CounterBarDisplayAbbreviatedAmount)
                         {
-                            if (text.Length > 4)
+                            if (_amount >= Engine.Profile.Current.CounterBarAbbreviatedAmount)
                             {
-                                if (text.Length > 5) // >= 100.000
-                                    text = $"{text.Substring(0, 3)}K+";
-                                else // <= 10.000
-                                    text = $"{text.Substring(0, 2)}K+";
+                                if (text.Length > 4)
+                                {
+                                    if (text.Length > 5) // >= 100.000
+                                        text = $"{text.Substring(0, 3)}K+";
+                                    else // <= 10.000
+                                        text = $"{text.Substring(0, 2)}K+";
+                                }
+                                else // 1.000
+                                    text = $"{text[0]}K+";
                             }
-                            else // 1.000
-                                text = $"{text[0]}K+";
                         }
+                        
                         _image.SetAmount(text);
 
                     }
