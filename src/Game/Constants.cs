@@ -120,5 +120,6 @@ namespace ClassicUO.Game
 
         public const uint JOURNAL_LOCALSERIAL = 0xFFFFFFE1;
         public const uint SKILLSTD_LOCALSERIAL = 0xFFFFFFE2;
+        public const uint PROFILE_LOCALSERIAL = 0xFFFFFFE3;
     }
 }
