@@ -476,7 +476,22 @@ namespace ClassicUO.Game.UI.Gumps
             rotX += x + width;
             rotY += y + height;
 
-            batcher.Draw2D(Textures.GetTexture(color), rotX, rotY, 5, 5, ref _hueVector);
+            const int DOT_SIZE = 5;
+
+            if (rotX < x)
+                rotX = x;
+
+            if (rotX > x + Width - 8 - DOT_SIZE)
+                rotX = x + Width - 8 - DOT_SIZE;
+
+            if (rotY < y)
+                rotY = y;
+
+            if (rotY > y + Height - 8 - DOT_SIZE)
+                rotY = y + Height - 8 - DOT_SIZE;
+
+
+            batcher.Draw2D(Textures.GetTexture(color), rotX, rotY, DOT_SIZE, DOT_SIZE, ref _hueVector);
         }
 
         public override void Dispose()
