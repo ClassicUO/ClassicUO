@@ -32,19 +32,21 @@ using ClassicUO.IO;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class JournalGump : Gump
+    internal class JournalGump : MinimizableGump
     {
         private readonly ExpandableScroll _background;
         private readonly RenderedTextList _journalEntries;
         private readonly ScrollFlag _scrollBar;
+        private const int _diffY = 22;
 
-        public JournalGump() : base(0, 0)
+        public JournalGump() : base(Constants.JOURNAL_LOCALSERIAL, 0)
         {
             Height = 300;
             CanMove = true;
             CanBeSaved = true;
 
-            Add(_background = new ExpandableScroll(0, 0, Height, 0x1F40)
+            Add(new GumpPic(160, 0, 0x82D, 0));
+            Add(_background = new ExpandableScroll(0, _diffY, Height - _diffY, 0x1F40)
             {
                 TitleGumpID = 0x82A
             });
@@ -58,7 +60,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(darkMode = new Checkbox(0x00D2, 0x00D3, str, 6, 0x0288, false)
             {
                 X = _background.Width - width -2, 
-                Y = 7,
+                Y = _diffY + 7,
                 IsChecked = Engine.Profile.Current.JournalDarkMode
             });
 
@@ -69,12 +71,16 @@ namespace ClassicUO.Game.UI.Gumps
                 Hue = (ushort) (ok ? DARK_MODE_JOURNAL_HUE : 0);
             };
 
-            _scrollBar = new ScrollFlag(-25, 36, Height, true);
+            _scrollBar = new ScrollFlag(-25, _diffY + 36, Height - _diffY, true);
 
-            Add(_journalEntries = new RenderedTextList(25, 36, _background.Width - (_scrollBar.Width >> 1) - 5, 200, _scrollBar));
+            Add(_journalEntries = new RenderedTextList(25, _diffY + 36, _background.Width - (_scrollBar.Width >> 1) - 5, 200, _scrollBar));
 
             Add(_scrollBar);
         }
+
+        internal override GumpPic Iconized { get; } = new GumpPic(0, 0, 0x830, 0);
+        internal override HitBox IconizerArea { get; } = new HitBox(160, 0, 23, 24);
+
 
 
         public Hue Hue
@@ -114,7 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Update(double totalMS, double frameMS)
         {
             WantUpdateSize = true;
-            _journalEntries.Height = Height - 98;
+            _journalEntries.Height = Height - (98 + _diffY);
             base.Update(totalMS, frameMS);
         }
 

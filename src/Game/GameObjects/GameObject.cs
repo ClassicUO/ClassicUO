@@ -334,7 +334,7 @@ namespace ClassicUO.Game.GameObjects
             int offsetY = 0;
 
             int minX = Engine.Profile.Current.GameWindowPosition.X + 6;
-            int maxX = minX + Engine.Profile.Current.GameWindowSize.X - 6;
+            int maxX = minX + Engine.Profile.Current.GameWindowSize.X;
             int minY = Engine.Profile.Current.GameWindowPosition.Y;
             //int maxY = minY + Engine.Profile.Current.GameWindowSize.Y - 6;
 

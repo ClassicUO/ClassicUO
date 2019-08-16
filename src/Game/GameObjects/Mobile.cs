@@ -59,8 +59,6 @@ namespace ClassicUO.Game.GameObjects
 
     internal partial class Mobile : Entity
     {
-        private ushort _hits;
-        private ushort _hitsMax;
         private bool _isDead;
         private bool _isRenamable;
         private bool _isSA_Poisoned;
@@ -116,33 +114,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
         }
-
-        public ushort Hits
-        {
-            get => _hits;
-            set
-            {
-                if (_hits != value)
-                {
-                    _hits = value;
-                    _delta |= Delta.Hits;
-                }
-            }
-        }
-
-        public ushort HitsMax
-        {
-            get => _hitsMax;
-            set
-            {
-                if (_hitsMax != value)
-                {
-                    _hitsMax = value;
-                    _delta |= Delta.Hits;
-                }
-            }
-        }
-
+       
         public ushort Mana
         {
             get => _mana;

@@ -146,6 +146,7 @@
     <Compile Include="Game\Managers\MacroManager.cs" />
     <Compile Include="Game\Managers\AudioManager.cs" />
     <Compile Include="Game\Managers\NameOverHeadManager.cs" />
+    <Compile Include="Game\Managers\ObjectPropertiesListManager.cs" />
     <Compile Include="Game\Managers\PoolsManager.cs" />
     <Compile Include="Game\Managers\SkillsGroupManager.cs" />
     <Compile Include="Game\SelectedObject.cs" />
@@ -154,6 +155,7 @@
     <Compile Include="Game\UI\Controls\AlphaBlendControl.cs" />
     <Compile Include="Game\UI\Controls\ArrowNumbersTextBox.cs" />
     <Compile Include="Game\UI\Controls\ClickableColorBox.cs" />
+    <Compile Include="Game\UI\Controls\ContextMenuControl.cs" />
     <Compile Include="Game\UI\Controls\InfoBarBuilderControl.cs" />
     <Compile Include="Game\UI\Controls\ColorBox.cs" />
     <Compile Include="Game\UI\Controls\EditableLabel.cs" />
@@ -169,6 +171,7 @@
     <Compile Include="Game\UI\Gumps\GridLootGump.cs" />
     <Compile Include="Game\UI\Gumps\InfoBarGump.cs" />
     <Compile Include="Game\UI\Gumps\NameOverHeadHandlerGump.cs" />
+    <Compile Include="Game\UI\Gumps\ResizableGump.cs" />
     <Compile Include="Game\UI\Gumps\StandardSkillsGump.cs" />
     <Compile Include="Game\UI\Gumps\TextContainerGump.cs" />
     <Compile Include="Game\UI\Gumps\TipNoticeGump.cs" />

@@ -1162,9 +1162,9 @@ namespace ClassicUO.Renderer
 
             return false;
         }
-
+        
         [MethodImpl(256)]
-        public bool Draw2D(Texture2D texture, int dx, int dy, int dwidth, int dheight, int sx, int sy, int swidth, int sheight, ref Vector3 hue)
+        public bool Draw2D(Texture2D texture, float dx, float dy, int dwidth, int dheight, int sx, int sy, int swidth, int sheight, ref Vector3 hue, float angle = 0.0f)
         {
             EnsureSize();
 
@@ -1177,8 +1177,93 @@ namespace ClassicUO.Renderer
             ref var vertex2 = ref VertexInfo[idx + 2];
             ref var vertex3 = ref VertexInfo[idx + 3];
 
-            vertex0.Position.X = dx;
-            vertex0.Position.Y = dy;
+
+            float x = dx;
+            float y = dy;
+            float w = dx + dwidth;
+            float h = dy + dheight;
+
+            if (angle != 0.0f)
+            {
+                //angle = (float)(angle * 57.295780);
+                angle = (float)(angle * Math.PI) / 180.0f;
+
+                float ww = dwidth / 2f;
+                float hh = dheight / 2f;
+
+                float sin = (float)Math.Sin(angle);
+                float cos = (float)Math.Cos(angle);
+
+                //float sinx = sin * ww;
+                //float cosx = cos * ww;
+                //float siny = sin * hh;
+                //float cosy = cos * hh;
+
+
+
+                float tempX = -ww;
+                float tempY = -hh;
+                float rotX = tempX * cos - tempY * sin;
+                float rotY = tempX * sin + tempY * cos;
+                rotX += dx + ww;
+                rotY += dy + hh;
+
+                vertex0.Position.X = rotX;
+                vertex0.Position.Y = rotY;
+
+
+
+
+                tempX = dwidth - ww;
+                tempY = -hh;
+                rotX = tempX * cos - tempY * sin;
+                rotY = tempX * sin + tempY * cos;
+                rotX += dx + ww;
+                rotY += dy + hh;
+
+                vertex1.Position.X = rotX;
+                vertex1.Position.Y = rotY;
+
+
+
+
+                tempX = -ww;
+                tempY = dheight - hh;
+                rotX = tempX * cos - tempY * sin;
+                rotY = tempX * sin + tempY * cos;
+                rotX += dx + ww;
+                rotY += dy + hh;
+
+                vertex2.Position.X = rotX;
+                vertex2.Position.Y = rotY;
+
+
+                tempX = dwidth - ww;
+                tempY = dheight - hh;
+                rotX = tempX * cos - tempY * sin;
+                rotY = tempX * sin + tempY * cos;
+                rotX += dx + ww;
+                rotY += dy + hh;
+
+                vertex3.Position.X = rotX;
+                vertex3.Position.Y = rotY;
+
+            }
+            else
+            {
+                vertex0.Position.X = x;
+                vertex0.Position.Y = y;
+
+                vertex1.Position.X = w;
+                vertex1.Position.Y = y;
+
+                vertex2.Position.X = x;
+                vertex2.Position.Y = h;
+
+                vertex3.Position.X = w;
+                vertex3.Position.Y = h;
+            }
+
             vertex0.Position.Z = 0;
             vertex0.Normal.X = 0;
             vertex0.Normal.Y = 0;
@@ -1186,8 +1271,6 @@ namespace ClassicUO.Renderer
             vertex0.TextureCoordinate.X = minX;
             vertex0.TextureCoordinate.Y = minY;
             vertex0.TextureCoordinate.Z = 0;
-            vertex1.Position.X = dx + dwidth;
-            vertex1.Position.Y = dy;
             vertex1.Position.Z = 0;
             vertex1.Normal.X = 0;
             vertex1.Normal.Y = 0;
@@ -1195,8 +1278,6 @@ namespace ClassicUO.Renderer
             vertex1.TextureCoordinate.X = maxX;
             vertex1.TextureCoordinate.Y = minY;
             vertex1.TextureCoordinate.Z = 0;
-            vertex2.Position.X = dx;
-            vertex2.Position.Y = dy + dheight;
             vertex2.Position.Z = 0;
             vertex2.Normal.X = 0;
             vertex2.Normal.Y = 0;
@@ -1204,8 +1285,6 @@ namespace ClassicUO.Renderer
             vertex2.TextureCoordinate.X = minX;
             vertex2.TextureCoordinate.Y = maxY;
             vertex2.TextureCoordinate.Z = 0;
-            vertex3.Position.X = dx + dwidth;
-            vertex3.Position.Y = dy + dheight;
             vertex3.Position.Z = 0;
             vertex3.Normal.X = 0;
             vertex3.Normal.Y = 0;
@@ -1215,7 +1294,9 @@ namespace ClassicUO.Renderer
             vertex3.TextureCoordinate.Z = 0;
             vertex0.Hue = vertex1.Hue = vertex2.Hue = vertex3.Hue = hue;
 
-            if (CheckInScreen(idx))
+
+
+            //if (CheckInScreen(idx))
             {
                 PushSprite(texture);
 
@@ -1314,6 +1395,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
+        [MethodImpl(256)]
         public bool DrawRectangle(Texture2D texture, int x, int y, int width, int height, ref Vector3 hue)
         {
             Draw2D(texture, x, y, width, 1, ref hue);

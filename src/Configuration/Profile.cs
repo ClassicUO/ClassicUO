@@ -177,6 +177,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public int OverrideContainerLocationSetting { get; set; } // 0 = container position, 1 = top right of screen, 2 = last dragged position
         [JsonProperty] public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
         [JsonProperty] public bool DragSelectHumanoidsOnly { get; set; }
+        [JsonProperty] public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
+        [JsonProperty] public bool NameOverheadToggled { get; set; } = false;
 
         [JsonProperty] public bool ShowInfoBar { get; set; }
         [JsonProperty] public int InfoBarHighlightType { get; set; } // 0 = text colour changes, 1 = underline
@@ -307,7 +309,7 @@ namespace ClassicUO.Configuration
             Log.Message(LogTypes.Trace, $"Saving path:\t\t{path}");
 
             // save settings.json
-            ConfigurationResolver.Save(this, Path.Combine(path, Engine.SettingsFile), new JsonSerializerSettings
+            ConfigurationResolver.Save(this, Path.Combine(path, "profile.json"), new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.All,
                 MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
@@ -323,7 +325,7 @@ namespace ClassicUO.Configuration
         {
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "gumps.bin"))))
             {
-                const uint VERSION = 1;
+                const uint VERSION = 2;
 
                 writer.Write(VERSION);
                 writer.Write(0);
@@ -357,6 +359,7 @@ namespace ClassicUO.Configuration
                 SkillsGroupManager.Save(writer);
         }
 
+        public static uint GumpsVersion { get; private set; }
         public List<Gump> ReadGumps()
         {
             string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username, ServerName, CharacterName);
@@ -389,7 +392,7 @@ namespace ClassicUO.Configuration
             {
                 if (reader.BaseStream.Position + 12 < reader.BaseStream.Length)
                 {
-                    uint version = reader.ReadUInt32();
+                    GumpsVersion = reader.ReadUInt32();
                     uint empty = reader.ReadUInt32();
 
                     int count = reader.ReadInt32();

@@ -487,7 +487,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 string subname = $"{itemName} at {item.Price}gp";
 
-                Add(_name = new Label(subname, true, 0x021F, 110, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, true)
+                Add(_name = new Label(subname, false, 0x021F, 110, 9, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, true)
                 {
                     Y = 0,
                     X = 55
@@ -495,7 +495,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int height = Math.Max(_name.Height, control.Height) + 10;
 
-                Add(_amountLabel = new Label(item.Amount.ToString(), true, 0x021F, 35, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_RIGHT)
+                Add(_amountLabel = new Label(item.Amount.ToString(), false, 0x021F, 35, 9, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_RIGHT)
                 {
                     X = 168,
                     Y = height >> 2
@@ -590,13 +590,13 @@ namespace ClassicUO.Game.UI.Gumps
                 Item = item;
                 Label l;
 
-                Add(l = new Label(realname, true, 0x021F, 140, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, true)
+                Add(l = new Label(realname, false, 0x021F, 140, 9, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, true)
                 {
                     X = 50,
                     Y = 0
                 });
 
-                Add(_amountLabel = new Label(amount.ToString(), true, 0x021F, 35, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_RIGHT)
+                Add(_amountLabel = new Label(amount.ToString(), false, 0x021F, 35, 9, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_RIGHT)
                 {
                     X = 10,
                     Y = 0

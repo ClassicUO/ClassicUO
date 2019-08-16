@@ -298,7 +298,8 @@ namespace ClassicUO.Network
 
             Mobile mobile = World.Mobiles.Get(p.ReadUInt());
 
-            if (mobile == null) return;
+            if (mobile == null)
+                return;
 
             mobile.Name = p.ReadASCII(30);
             mobile.Hits = p.ReadUShort();
@@ -1095,7 +1096,6 @@ namespace ClassicUO.Network
                         item.Layer = hold.Layer;
                         item.Container = hold.Container;
                         item.Position = hold.Position;
-                        item.UpdateProperties(hold.Properties);
 
                         container.Items.Add(item);
 
@@ -1118,8 +1118,7 @@ namespace ClassicUO.Network
                         item.Layer = hold.Layer;
                         item.Container = hold.Container;
                         item.Position = hold.Position;
-                        item.UpdateProperties(hold.Properties);
-
+                        
                         if (!hold.OnGround)
                         {
                             Entity container = World.Get(item.Container);
@@ -1204,7 +1203,8 @@ namespace ClassicUO.Network
         {
             Mobile mobile = World.Mobiles.Get(p.ReadUInt());
 
-            if (mobile == null) return;
+            if (mobile == null)
+                return;
 
             mobile.HitsMax = p.ReadUShort();
             mobile.Hits = p.ReadUShort();
@@ -1910,7 +1910,8 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
 
-            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            Serial serial = p.ReadUInt();
+            Mobile mobile = World.Mobiles.Get(serial);
             if (mobile == null)
                 return;
 
@@ -2025,7 +2026,7 @@ namespace ClassicUO.Network
                 mobile.Items.Add(item);
                 mobile.Equipment[(int) item.Layer] = item;
 
-                if (item.PropertiesHash == 0)
+                if (World.OPL.Contains(serial))
                     NetClient.Socket.Send(new PMegaClilocRequest(item));
                 item.CheckGraphicChange();
                 item.ProcessDelta();
@@ -2417,17 +2418,16 @@ namespace ClassicUO.Network
         private static void UpdateHitpoints(Packet p)
         {
             // TODO: shards uses item with HP... it's weird but can happen :D
+            Entity entity = World.Get(p.ReadUInt());
 
-            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            if (entity == null)
+                return;
 
-            if (mobile == null) return;
+            entity.HitsMax = p.ReadUShort();
+            entity.Hits = p.ReadUShort();
+            entity.ProcessDelta();
 
-
-            mobile.HitsMax = p.ReadUShort();
-            mobile.Hits = p.ReadUShort();
-            mobile.ProcessDelta();
-
-            if (mobile == World.Player)
+            if (entity == World.Player)
                 UoAssist.SignalHits();
         }
 
@@ -3266,37 +3266,88 @@ namespace ClassicUO.Network
 
             if (entity != null)
             {
-                entity.PropertiesHash = revision;
 
-                uint cliloc;
-                List<Property> props = new List<Property>();
-                while ((cliloc = p.ReadUInt()) != 0)
+                int cliloc;
+
+                List<string> list = new List<string>();
+
+                while ((cliloc = (int) p.ReadUInt()) != 0)
                 {
-                    ushort len = p.ReadUShort();
-                    string str = p.ReadUnicodeReversed(len);
+                    string argument = p.ReadUnicodeReversed(p.ReadUShort());
 
-                    props.Add(new Property(cliloc, str));
+                    string str = FileManager.Cliloc.Translate(cliloc, argument, true);
+
+                    bool canAdd = true;
+
+                    foreach (var tempstr in list)
+                    {
+                        if (tempstr == str)
+                        {
+                            canAdd = false;
+                            break;
+                        }
+                    }
+
+                    if (canAdd)
+                    {
+                        list.Add(str);
+                    }
                 }
-                entity.UpdateProperties(props);
-                entity.ProcessDelta();
 
-                if (serial.IsItem && entity.Properties.Any())
+                Item container = null;
+
+                if (entity is Item it && it.Container.IsValid)
                 {
-                    Property property = entity.Properties.FirstOrDefault();
-                    entity.Name = FileManager.Cliloc.Translate((int) property.Cliloc, property.Args, true);
+                    container = World.Items.Get(it.Container);
                 }
-            }
 
-            if (entity is Item it)
-            {
-                ShopGump gump = Engine.UI.GetGump<ShopGump>(it.RootContainer);
+                bool inBuyList = false;
 
-                if (gump != null)
+                if (container != null)
                 {
-                    Property property = it.Properties.FirstOrDefault();
-
-                    gump.SetNameTo(it, FileManager.Cliloc.Translate((int) property.Cliloc, property.Args, true));
+                    inBuyList = container.Layer == Layer.ShopBuy ||
+                                container.Layer == Layer.ShopBuyRestock ||
+                                container.Layer == Layer.ShopSell;
                 }
+
+
+                bool first = true;
+
+                string name = string.Empty;
+                string data = string.Empty;
+
+                if (list.Count != 0)
+                {
+                    foreach (string str in list)
+                    {
+                        if (first)
+                        {
+                            name = str;
+
+                            if (entity != null && !entity.Serial.IsMobile)
+                            {
+                                entity.Name = str;
+                            }
+
+                            first = false;
+                        }
+                        else
+                        {
+                            if (data.Length != 0)
+                                data += "\n";
+
+                            data += str;
+                        }
+                    }
+                }
+
+                World.OPL.Add(serial, revision, name, data);
+
+                if (inBuyList && container.Serial.IsValid)
+                {
+                    Engine.UI.GetGump<ShopGump>(container.RootContainer)?.SetNameTo((Item)entity, name);
+                }
+
             }
         }
 
@@ -3476,8 +3527,8 @@ namespace ClassicUO.Network
                 uint revision = p.ReadUInt();
                 Entity entity = World.Get(serial);
 
-                if (entity != null && entity.PropertiesHash != revision)
-                    NetClient.Socket.Send(new PMegaClilocRequest(entity));
+                if (entity == null || !World.OPL.IsRevisionEqual(serial, revision))
+                    NetClient.Socket.Send(new PMegaClilocRequest(serial));
             }
         }
 
@@ -3658,7 +3709,7 @@ namespace ClassicUO.Network
 
                     if (graphic == 0x2006 && Engine.Profile.Current.AutoOpenCorpses) World.Player.TryOpenCorpses();
 
-                    if (type == 2)
+                    if (type == 0x02)
                     {
                         item.IsMulti = true;
                         item.WantUpdateMulti = (graphic & 0x3FFF) != item.Graphic || item.Position != position;
@@ -3666,6 +3717,7 @@ namespace ClassicUO.Network
                     }
                     else
                     {
+                        item.IsDamageable = type == 0x03;
                         item.IsMulti = false;
                         item.Graphic = graphic;
                     }

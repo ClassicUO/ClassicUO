@@ -714,8 +714,8 @@ namespace ClassicUO.Game.Scenes
 
             var lightColor = World.Light.IsometricLevel;
 
-            if (!Engine.Profile.Current.UseDarkNights)
-                lightColor += 0.2f;
+            if (Engine.Profile.Current.UseDarkNights)
+                lightColor -= 0.02f;
 
             _vectorClear.X = _vectorClear.Y = _vectorClear.Z = lightColor;
 
@@ -759,8 +759,6 @@ namespace ClassicUO.Game.Scenes
                 renderIndex = 99;
 
 
-            //World.WorldTextManager.Select(renderIndex);
-            World.WorldTextManager.MoveToTopIfSelected();
             World.WorldTextManager.ProcessWorldText(true);
             World.WorldTextManager.Draw(batcher, x, y, renderIndex);
 

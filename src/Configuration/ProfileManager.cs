@@ -21,9 +21,11 @@
 
 #endregion
 
+using System;
 using System.IO;
 
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 using Newtonsoft.Json;
 
@@ -37,11 +39,37 @@ namespace ClassicUO.Configuration
         {
             string path = FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Data", "Profiles", username, servername, charactername);
 
-            if (!File.Exists(Path.Combine(path, Engine.SettingsFile)))
+
+
+            // this is a temporary patch to change the profile settings name safety
+            string fileToLoad = Path.Combine(path, "settings.json");
+            string newPath = Path.Combine(path, "profile.json");
+
+            if (File.Exists(newPath))
+            {
+                if (File.Exists(fileToLoad))
+                {
+                    try
+                    {
+                        File.Delete(fileToLoad);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Message(LogTypes.Warning, $"Failed to delete file: '{fileToLoad}'");
+                    }
+                }
+
+                fileToLoad = newPath;
+            }
+            //
+
+
+
+            if (!File.Exists(fileToLoad))
                 Current = new Profile(username, servername, charactername);
             else
             {
-                Current = ConfigurationResolver.Load<Profile>(Path.Combine(path, Engine.SettingsFile),
+                Current = ConfigurationResolver.Load<Profile>(fileToLoad,
                                                               new JsonSerializerSettings
                                                               {
                                                                   TypeNameHandling = TypeNameHandling.All,

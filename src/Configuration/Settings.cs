@@ -100,6 +100,8 @@ namespace ClassicUO.Configuration
         public string[] Plugins { get; set; } = {@"./Assistant/Razor.dll"};
 
 
+        public const string SETTINGS_FILENAME = "settings.json";
+
         public void Save()
         {
             // Make a copy of the settings object that we will use in the saving process
@@ -115,7 +117,7 @@ namespace ClassicUO.Configuration
 
             // NOTE: We can do any other settings clean-ups here before we save them
 
-            ConfigurationResolver.Save(settingsToSave, Path.Combine(Engine.ExePath, Engine.SettingsFile));
+            ConfigurationResolver.Save(settingsToSave, Path.Combine(Engine.ExePath, SETTINGS_FILENAME));
         }
 
         public bool IsValid()

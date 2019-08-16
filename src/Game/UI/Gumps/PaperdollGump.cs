@@ -37,8 +37,13 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class PaperDollGump : TextContainerGump
+    internal class PaperDollGump : MinimizableGump
     {
+        private readonly GumpPic _Iconized;
+        internal override GumpPic Iconized => _Iconized;
+        private readonly HitBox _IconizerArea;
+        internal override HitBox IconizerArea => _IconizerArea;
+
         private static readonly ushort[] PeaceModeBtnGumps =
         {
             0x07e5, 0x07e6, 0x07e7
@@ -68,6 +73,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Mobile = mobile;
                 Title = mobileTitle;
+                if(mobile == World.Player)
+                {
+                    _Iconized = new GumpPic(0, 0, 0x7EE, 0);
+                    _IconizerArea = new HitBox(228, 260, 16, 16);
+                }
                 BuildGump();
             }
             else
