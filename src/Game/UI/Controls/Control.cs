@@ -717,6 +717,8 @@ namespace ClassicUO.Game.UI.Controls
                     _attempToDrag = true;
                 }
             }
+            else 
+                Parent?.OnMouseOver(X + x, Y + y);
         }
 
         protected virtual void OnMouseEnter(int x, int y)

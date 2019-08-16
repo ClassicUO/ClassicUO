@@ -228,6 +228,11 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
+        protected override void OnMouseOver(int x, int y)
+        {
+            base.OnMouseOver(x, y);
+        }
+
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
