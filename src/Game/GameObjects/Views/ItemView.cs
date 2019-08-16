@@ -141,7 +141,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (SelectedObject.LastObject == this && !IsLocked)
                 {
-                    isPartial = false;
+                    isPartial = ItemData.Weight == 255;
                     hue = 0x0035;
                 }
                 else if (IsHidden)
