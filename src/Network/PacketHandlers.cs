@@ -3252,6 +3252,11 @@ namespace ClassicUO.Network
                 return;
 
             Serial serial = p.ReadUInt();
+
+            if (serial == 0x4013500a)
+            {
+
+            }
             p.Skip(2);
             uint revision = p.ReadUInt();
 
@@ -3277,21 +3282,19 @@ namespace ClassicUO.Network
 
                     string str = FileManager.Cliloc.Translate(cliloc, argument, true);
 
-                    bool canAdd = true;
 
-                    foreach (var tempstr in list)
+                    for (int i = 0; i < list.Count; i++)
                     {
+                        var tempstr = list[i];
+
                         if (tempstr == str)
                         {
-                            canAdd = false;
+                            list.RemoveAt(i);
                             break;
                         }
                     }
 
-                    if (canAdd)
-                    {
-                        list.Add(str);
-                    }
+                    list.Add(str);
                 }
 
                 Item container = null;
