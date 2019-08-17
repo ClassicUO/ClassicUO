@@ -43,22 +43,43 @@ namespace ClassicUO.Game.UI.Gumps
     internal class WorldMapGump : ResizableGump
     {
         private UOTexture _mapTexture;
+
         private bool _isTopMost;
         private readonly float[] _zooms = new float[10] { 0.125f, 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f, 4f, 6f, 8f };
         private int _zoomIndex = 4;
-
         private Point _center, _lastScroll;
         private bool _isScrolling;
+        private bool _flipMap = true;
+        private bool _freeView;
 
         public WorldMapGump() : base(400, 400, 100, 100, 0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
-            //CanCloseWithRightClick = false;
+            CanCloseWithRightClick = false;
 
             GameActions.Print("WorldMap loading...", 0x35);
             Task.Run(Load);
             OnResize();
+
+            ContextMenuControl contextMenu = new ContextMenuControl();
+            contextMenu.Add("Flip map", () => _flipMap = !_flipMap);
+            contextMenu.Add("Top Most", () => TopMost = !TopMost);
+            contextMenu.Add("Free view", () =>
+            {
+                _freeView = !_freeView;
+
+                if (!_freeView)
+                {
+                    _isScrolling = false;
+                    CanMove = true;
+                }
+            });
+            contextMenu.Add("", null);
+            contextMenu.Add("Close", Dispose);
+
+
+            Add(contextMenu);
         }
 
 
@@ -70,26 +91,42 @@ namespace ClassicUO.Game.UI.Gumps
             if (button != MouseButton.Left || _isScrolling || Keyboard.Alt)
                 return base.OnMouseDoubleClick(x, y, button);
 
-            _isTopMost = !_isTopMost;
-
-            ShowBorder = !_isTopMost;
-
-            ControlInfo.Layer = _isTopMost ? UILayer.Over : UILayer.Default;
-
+            TopMost = !TopMost;
+          
             return true;
+        }
+
+        public bool TopMost
+        {
+            get => _isTopMost;
+            set
+            {
+                _isTopMost = value;
+
+                ShowBorder = !_isTopMost;
+
+                ControlInfo.Layer = _isTopMost ? UILayer.Over : UILayer.Default;
+
+            }
         }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            _isScrolling = false;
-            CanMove = true;
+            if (!_freeView)
+            {
+                _isScrolling = false;
+                CanMove = true;
+            }
+
             base.OnMouseUp(x, y, button);
         }
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
-            if (button == MouseButton.Left && Keyboard.Alt)
+            if ((button == MouseButton.Left && Keyboard.Alt) || _freeView)
             {
+                _lastScroll.X = x;
+                _lastScroll.Y = y;
                 _isScrolling = true;
                 CanMove = false;
             }
@@ -126,12 +163,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            base.Update(totalMS, frameMS);
-
-          
-        }
 
         private unsafe void Load()
         {
@@ -290,7 +321,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (!_isScrolling)
+            if (!_isScrolling && !_freeView)
             {
                 _center.X = World.Player.X;
                 _center.Y = World.Player.Y;
@@ -338,7 +369,7 @@ namespace ClassicUO.Game.UI.Gumps
                                sw,
                                sh,
 
-                               ref _hueVector, 45);
+                               ref _hueVector, _flipMap ? 45 : 0);
 
                 batcher.EnableScissorTest(false);
 
