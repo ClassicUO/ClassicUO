@@ -332,26 +332,15 @@ namespace ClassicUO.Game.UI.Gumps
                         _amount = 0;
                         GetAmount(World.Player.Equipment[(int)Layer.Backpack], _graphic, _hue, ref _amount);
 
-                        string text = _amount.ToString();
-
                         if (Engine.Profile.Current.CounterBarDisplayAbbreviatedAmount)
                         {
                             if (_amount >= Engine.Profile.Current.CounterBarAbbreviatedAmount)
                             {
-                                if (text.Length > 4)
-                                {
-                                    if (text.Length > 5) // >= 100.000
-                                        text = $"{text.Substring(0, 3)}K+";
-                                    else // <= 10.000
-                                        text = $"{text.Substring(0, 2)}K+";
-                                }
-                                else // 1.000
-                                    text = $"{text[0]}K+";
+                                _image.SetAmount(Utility.StringHelper.IntToAbbreviatedString(_amount));
+                                return;
                             }
                         }
-                        
-                        _image.SetAmount(text);
-
+                        _image.SetAmount(_amount.ToString());
                     }
                 }
             }
