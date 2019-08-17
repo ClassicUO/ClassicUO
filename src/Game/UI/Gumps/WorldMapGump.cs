@@ -62,6 +62,7 @@ namespace ClassicUO.Game.UI.Gumps
             Task.Run(Load);
             OnResize();
 
+
             ContextMenuControl contextMenu = new ContextMenuControl();
             contextMenu.Add("Flip map", () => _flipMap = !_flipMap);
             contextMenu.Add("Top Most", () => TopMost = !TopMost);

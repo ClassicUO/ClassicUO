@@ -29,14 +29,16 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        protected override void OnInitialize()
+        public override void Update(double totalMS, double frameMS)
         {
-            base.OnInitialize();
-            Width = Parent.Width;
-            Height = Parent.Height;
+            base.Update(totalMS, frameMS);
+
+            if (Parent != null)
+            {
+                Width = Parent.Width;
+                Height = Parent.Height;
+            }
         }
-
-
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
