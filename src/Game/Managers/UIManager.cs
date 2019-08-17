@@ -95,7 +95,10 @@ namespace ClassicUO.Game.Managers
                         foreach (Control s in Gumps)
                         {
                             if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
+                            {
                                 s.Dispose();
+                                Mouse.CancelDoubleClick = true;
+                            }
                         }
                     }
                 }
@@ -161,7 +164,10 @@ namespace ClassicUO.Game.Managers
                         foreach (Control s in Gumps)
                         {
                             if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
+                            {
                                 s.Dispose();
+                                Mouse.CancelDoubleClick = true;
+                            }
                         }
                     }
                 }
