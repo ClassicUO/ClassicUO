@@ -240,9 +240,9 @@ namespace ClassicUO.Network
                 _queue = temp;
             }
 
-            while (_queue.Count != 0)
+            while (_workingQueue.Count != 0)
             {
-                var p = _queue.Dequeue();
+                var p = _workingQueue.Dequeue();
 
                 ref byte[] data = ref p.ToArray();
                 int length = p.Length;
@@ -289,7 +289,7 @@ namespace ClassicUO.Network
                         //LogPacket(data, false);
 #endif
 
-                        _workingQueue.Enqueue(new Packet(data, packetlength));
+                        _queue.Enqueue(new Packet(data, packetlength));
                         Statistics.TotalPacketsReceived++;
                     }
 
