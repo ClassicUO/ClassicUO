@@ -286,10 +286,9 @@ namespace ClassicUO.Game.GameObjects
             ushort hueFromFile = _viewHue;
             byte animGroup = FileManager.Animations.AnimGroup;
             ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hueFromFile, isParent).Direction[FileManager.Animations.Direction];
-
             FileManager.Animations.AnimID = id;
 
-            if (direction == null)
+            if (direction == null || direction.Address == -1 || direction.FileIndex == -1)
                 return 0;
 
             if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
