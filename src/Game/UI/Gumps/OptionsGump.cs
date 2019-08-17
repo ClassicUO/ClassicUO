@@ -59,8 +59,9 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _brighlight;
 
         //counters
-        private Checkbox _enableCounters, _highlightOnUse, _highlightOnAmount;
+        private Checkbox _enableCounters, _highlightOnUse, _highlightOnAmount, _enableAbbreviatedAmount;
         private Checkbox _enableDragSelect, _dragSelectHumanoidsOnly;
+        private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
         private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation;
@@ -93,7 +94,6 @@ namespace ClassicUO.Game.UI.Gumps
         // macro
         private MacroControl _macroControl;
         private Checkbox _restorezoomCheckbox, _savezoomCheckbox, _zoomCheckbox;
-        private TextBox _rows, _columns, _highlightAmount;
 
         // infobar
         private List<InfoBarBuilderControl> _infoBarBuilderControls;
@@ -999,9 +999,25 @@ namespace ClassicUO.Game.UI.Gumps
 
             _enableCounters = CreateCheckBox(rightArea, "Enable Counters", Engine.Profile.Current.CounterBarEnabled, 0, 0);
             _highlightOnUse = CreateCheckBox(rightArea, "Highlight On Use", Engine.Profile.Current.CounterBarHighlightOnUse, 0, 0);
-            _highlightOnAmount = CreateCheckBox(rightArea, "Highlight red when amount is below", Engine.Profile.Current.CounterBarHighlightOnAmount, 0, 0);
+            _enableAbbreviatedAmount = CreateCheckBox(rightArea, "Enable abbreviated amount values when amount is or exceeds", Engine.Profile.Current.CounterBarDisplayAbbreviatedAmount, 0, 0);
 
             ScrollAreaItem item = new ScrollAreaItem();
+
+            _abbreviatedAmount = CreateInputField(item, new TextBox(FONT, -1, 80, 80)
+            {
+                X = _enableAbbreviatedAmount.X + 30,
+                Y = 10,
+                Width = 50,
+                Height = 30,
+                NumericOnly = true,
+                Text = Engine.Profile.Current.CounterBarAbbreviatedAmount.ToString()
+            });
+
+            rightArea.Add(item);
+
+            _highlightOnAmount = CreateCheckBox(rightArea, "Highlight red when amount is below", Engine.Profile.Current.CounterBarHighlightOnAmount, 0, 0);
+
+            item = new ScrollAreaItem();
 
             _highlightAmount = CreateInputField(item, new TextBox(FONT, 2, 80, 80)
             {
@@ -1405,11 +1421,13 @@ namespace ClassicUO.Game.UI.Gumps
                 case 9:
                     _enableCounters.IsChecked = false;
                     _highlightOnUse.IsChecked = false;
+                    _enableAbbreviatedAmount.IsChecked = false;
                     _columns.Text = "1";
                     _rows.Text = "1";
                     _cellSize.Value = 40;
                     _highlightOnAmount.IsChecked = false;
                     _highlightAmount.Text = "5";
+                    _abbreviatedAmount.Text = "1000";
 
                     break;
 
@@ -1728,7 +1746,9 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.CounterBarHighlightOnUse = _highlightOnUse.IsChecked;
 
             Engine.Profile.Current.CounterBarHighlightAmount = int.Parse(_highlightAmount.Text);
+            Engine.Profile.Current.CounterBarAbbreviatedAmount = int.Parse(_abbreviatedAmount.Text);
             Engine.Profile.Current.CounterBarHighlightOnAmount = _highlightOnAmount.IsChecked;
+            Engine.Profile.Current.CounterBarDisplayAbbreviatedAmount = _enableAbbreviatedAmount.IsChecked;
 
             CounterBarGump counterGump = Engine.UI.GetGump<CounterBarGump>();
 
