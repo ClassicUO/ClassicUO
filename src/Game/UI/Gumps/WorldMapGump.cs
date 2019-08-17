@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 using ClassicUO.Game.GameObjects;
@@ -51,6 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _isScrolling;
         private bool _flipMap = true;
         private bool _freeView;
+        private int _mapIndex;
 
         public WorldMapGump() : base(400, 400, 100, 100, 0, 0)
         {
@@ -59,7 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = false;
 
             GameActions.Print("WorldMap loading...", 0x35);
-            Task.Run(Load);
+            Load();
             OnResize();
 
 
@@ -155,6 +157,12 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_center.Y < 0)
                     _center.Y = 0;
 
+                if (_center.X > FileManager.Map.MapsDefaultSize[World.MapIndex, 0])
+                    _center.X = FileManager.Map.MapsDefaultSize[World.MapIndex, 0];
+
+                if (_center.Y > FileManager.Map.MapsDefaultSize[World.MapIndex, 1])
+                    _center.Y = FileManager.Map.MapsDefaultSize[World.MapIndex, 1];
+
                 _lastScroll.X = x;
                 _lastScroll.Y = y;
             }
@@ -165,125 +173,138 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        private unsafe void Load()
+        public override void Update(double totalMS, double frameMS)
         {
-            int size = FileManager.Map.MapsDefaultSize[World.MapIndex, 0] * FileManager.Map.MapsDefaultSize[World.MapIndex, 1];
-            uint[] buffer = new uint[size];
-            int maxBlock = size - 1;
+            base.Update(totalMS, frameMS);
 
-            for (int bx = 0; bx < FileManager.Map.MapBlocksSize[World.MapIndex, 0]; bx++)
+            if (_mapIndex != World.MapIndex)
             {
-                int mapX = bx << 3;
+                Load();
+            }
+        }
 
-                for (int by = 0; by < FileManager.Map.MapBlocksSize[World.MapIndex, 1]; by++)
+        private unsafe Task Load()
+        {
+            _mapIndex = World.MapIndex;
+
+            return Task.Run(() => 
+            { 
+                int size = FileManager.Map.MapsDefaultSize[World.MapIndex, 0] * FileManager.Map.MapsDefaultSize[World.MapIndex, 1];
+                uint[] buffer = new uint[size];
+                int maxBlock = size - 1;
+
+                for (int bx = 0; bx < FileManager.Map.MapBlocksSize[World.MapIndex, 0]; bx++)
                 {
-                    ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
+                    int mapX = bx << 3;
 
-                    if (indexMap.MapAddress == 0)
-                        continue;
-
-                    int mapY = by << 3;
-                    MapBlock info = new MapBlock();
-                    MapCells* infoCells = (MapCells*) &info.Cells;
-                    MapBlock* mapBlock = (MapBlock*) indexMap.MapAddress;
-                    MapCells* cells = (MapCells*) &mapBlock->Cells;
-                    int pos = 0;
-
-                    for (int y = 0; y < 8; y++)
+                    for (int by = 0; by < FileManager.Map.MapBlocksSize[World.MapIndex, 1]; by++)
                     {
-                        for (int x = 0; x < 8; x++)
+                        ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
+
+                        if (indexMap.MapAddress == 0)
+                            continue;
+
+                        int mapY = by << 3;
+                        MapBlock info = new MapBlock();
+                        MapCells* infoCells = (MapCells*) &info.Cells;
+                        MapBlock* mapBlock = (MapBlock*) indexMap.MapAddress;
+                        MapCells* cells = (MapCells*) &mapBlock->Cells;
+                        int pos = 0;
+
+                        for (int y = 0; y < 8; y++)
                         {
-                            ref MapCells cell = ref cells[pos];
-                            ref MapCells infoCell = ref infoCells[pos];
-                            infoCell.TileID = cell.TileID;
-                            infoCell.Z = cell.Z;
-                            pos++;
-                        }
-                    }
-
-                    StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
-
-                    if (sb != null)
-                    {
-                        int count = (int) indexMap.StaticCount;
-
-                        for (int c = 0; c < count; c++)
-                        {
-                            ref readonly StaticsBlock staticBlock = ref sb[c];
-
-                            if (staticBlock.Color != 0 && staticBlock.Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(staticBlock.Color))
+                            for (int x = 0; x < 8; x++)
                             {
-                                pos = (staticBlock.Y << 3) + staticBlock.X;
-                                ref MapCells cell = ref infoCells[pos];
+                                ref MapCells cell = ref cells[pos];
+                                ref MapCells infoCell = ref infoCells[pos];
+                                infoCell.TileID = cell.TileID;
+                                infoCell.Z = cell.Z;
+                                pos++;
+                            }
+                        }
 
-                                if (cell.Z <= staticBlock.Z)
+                        StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
+
+                        if (sb != null)
+                        {
+                            int count = (int) indexMap.StaticCount;
+
+                            for (int c = 0; c < count; c++)
+                            {
+                                ref readonly StaticsBlock staticBlock = ref sb[c];
+
+                                if (staticBlock.Color != 0 && staticBlock.Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(staticBlock.Color))
                                 {
-                                    cell.TileID = (ushort) (staticBlock.Color + 0x4000);
-                                    cell.Z = staticBlock.Z;
+                                    pos = (staticBlock.Y << 3) + staticBlock.X;
+                                    ref MapCells cell = ref infoCells[pos];
+
+                                    if (cell.Z <= staticBlock.Z)
+                                    {
+                                        cell.TileID = (ushort) (staticBlock.Color + 0x4000);
+                                        cell.Z = staticBlock.Z;
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    pos = 0;
+                        pos = 0;
 
-                    for (int y = 0; y < 8; y++)
-                    {
-                        int block = (mapY + y) * FileManager.Map.MapsDefaultSize[World.MapIndex, 0] + mapX;
-
-                        for (int x = 0; x < 8; x++)
+                        for (int y = 0; y < 8; y++)
                         {
+                            int block = (mapY + y) * FileManager.Map.MapsDefaultSize[World.MapIndex, 0] + mapX;
 
-                            ref readonly var c = ref infoCells[pos];
-                            ushort color = (ushort)(0x8000 | FileManager.Hues.GetRadarColorData(c.TileID));
-
-                            Color cc;
-
-                            if (x > 0)
+                            for (int x = 0; x < 8; x++)
                             {
-                                int index = (y << 3) + (x - 1);
+                                ref readonly var c = ref infoCells[pos];
+                                ushort color = (ushort)(0x8000 | FileManager.Hues.GetRadarColorData(c.TileID));
+                                Color cc;
 
-                                if (c.Z < infoCells[index].Z)
+                                if (x > 0)
                                 {
-                                    cc = new Color((((color >> 10) & 31) / 31f) * 80 / 100,
-                                                   (((color >> 5) & 31) / 31f) * 80 / 100,
-                                                   ((color & 31) / 31f) * 80 / 100);
+                                    int index = (y << 3) + (x - 1);
 
-                                }
-                                else if (c.Z > infoCells[index].Z)
-                                {
-                                    cc = new Color((((color >> 10) & 31) / 31f) * 100 / 80,
-                                                   (((color >> 5) & 31) / 31f) * 100 / 80,
-                                                   ((color & 31) / 31f) * 100 / 80);
+                                    if (c.Z < infoCells[index].Z)
+                                    {
+                                        cc = new Color((((color >> 10) & 31) / 31f) * 80 / 100,
+                                                       (((color >> 5) & 31) / 31f) * 80 / 100,
+                                                       ((color & 31) / 31f) * 80 / 100);
+
+                                    }
+                                    else if (c.Z > infoCells[index].Z)
+                                    {
+                                        cc = new Color((((color >> 10) & 31) / 31f) * 100 / 80,
+                                                       (((color >> 5) & 31) / 31f) * 100 / 80,
+                                                       ((color & 31) / 31f) * 100 / 80);
+                                    }
+                                    else
+                                        cc = new Color((((color >> 10) & 31) / 31f),
+                                                       (((color >> 5) & 31) / 31f),
+                                                       ((color & 31) / 31f));
                                 }
                                 else
+                                {
                                     cc = new Color((((color >> 10) & 31) / 31f),
                                                    (((color >> 5) & 31) / 31f),
                                                    ((color & 31) / 31f));
+                                }
+
+                                buffer[block] = cc.PackedValue;
+
+                                if (y < 7 && x < 7 && block < maxBlock)
+                                    buffer[block + 1] = cc.PackedValue;
+
+                                block++;
+                                pos++;
                             }
-                            else
-                            {
-                                cc = new Color((((color >> 10) & 31) / 31f),
-                                               (((color >> 5) & 31) / 31f),
-                                               ((color & 31) / 31f));
-                            }
-
-                            buffer[block] = cc.PackedValue;
-
-                            if (y < 7 && x < 7 && block < maxBlock)
-                                buffer[block + 1] = cc.PackedValue;
-
-                            block++;
-                            pos++;
                         }
                     }
                 }
-            }
 
-            _mapTexture = new UOTexture32(FileManager.Map.MapsDefaultSize[World.MapIndex, 0], FileManager.Map.MapsDefaultSize[World.MapIndex, 1]);
-            _mapTexture.SetData(buffer);
+                _mapTexture = new UOTexture32(FileManager.Map.MapsDefaultSize[World.MapIndex, 0], FileManager.Map.MapsDefaultSize[World.MapIndex, 1]);
+                _mapTexture.SetData(buffer);
 
-            GameActions.Print("WorldMap loaded!", 0x48);
+                GameActions.Print("WorldMap loaded!", 0x48);
+            });
         }
 
 
