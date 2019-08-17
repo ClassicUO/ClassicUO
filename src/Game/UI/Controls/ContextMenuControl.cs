@@ -96,7 +96,9 @@ namespace ClassicUO.Game.UI.Controls
                     }
 
                     if (background.Width < item.Width)
+                    {
                         background.Width = item.Width;
+                    }
 
                     background.Height += item.Height;
 
@@ -104,6 +106,14 @@ namespace ClassicUO.Game.UI.Controls
 
                     y += item.Height;
                 }
+
+
+                foreach (var mitem in FindControls<ContextMenuItem>())
+                {
+                    if (mitem.Width < background.Width)
+                        mitem.Width = background.Width;
+                }
+
 
                 Width = background.Width;
                 Height = background.Height;
@@ -115,16 +125,17 @@ namespace ClassicUO.Game.UI.Controls
     class ContextMenuItem : Control
     {
         private readonly Action _action;
+        private readonly Label _label;
 
         public ContextMenuItem(string text, Action callback)
         {
             _action = callback;
-            var label = new HoveredLabel(text, true, 1150, 1150, style: FontStyle.BlackBorder)
+            _label = new HoveredLabel(text, true, 1150, 1150, style: FontStyle.BlackBorder)
             {
                 X = 3,
                 DrawBackgroundCurrentIndex = true
             };
-            label.MouseUp += (sender, e) =>
+            _label.MouseUp += (sender, e) =>
             {
                 if (e.Button == MouseButton.Left)
                 {
@@ -133,12 +144,20 @@ namespace ClassicUO.Game.UI.Controls
                     Parent?.Dispose();
                 }
             };
-            Add(label);
+            Add(_label);
 
-            Width = label.Width = 100;
-            Height = label.Height + 2;
+            Width = _label.Width;
+            Height = _label.Height + 2;
 
             WantUpdateSize = false;
+        }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (Width > _label.Width)
+                _label.Width = Width;
         }
     }
 }

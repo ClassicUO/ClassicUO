@@ -53,6 +53,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _flipMap = true;
         private bool _freeView;
         private int _mapIndex;
+        private bool _showPartyMembers;
 
         public WorldMapGump() : base(400, 400, 100, 100, 0, 0)
         {
@@ -78,6 +79,7 @@ namespace ClassicUO.Game.UI.Gumps
                     CanMove = true;
                 }
             });
+            contextMenu.Add("Show party members", () => { _showPartyMembers = !_showPartyMembers; });
             contextMenu.Add("", null);
             contextMenu.Add("Close", Dispose);
 
@@ -404,6 +406,22 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (mobile != World.Player)
                     DrawMobile(batcher, mobile, gX, gY, halfWidth, halfHeight, Zoom, Color.Red);
+            }
+
+            if (_showPartyMembers)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    var partyMember = World.Party.Members[i];
+
+                    if (partyMember != null && partyMember.Serial.IsValid)
+                    {
+                        var mob = World.Mobiles.Get(partyMember.Serial);
+
+                        if (mob != null)
+                            DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Yellow);
+                    }
+                }
             }
 
             DrawMobile(batcher, World.Player, gX, gY, halfWidth, halfHeight, Zoom, Color.White);
