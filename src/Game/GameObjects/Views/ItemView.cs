@@ -320,7 +320,7 @@ namespace ClassicUO.Game.GameObjects
             if (!Serial.IsValid && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 return;
 
-            if (SelectedObject.Object == this)
+            if (SelectedObject.Object == this || CharacterIsBehindFoliage)
                 return;
 
             if (IsCorpse)

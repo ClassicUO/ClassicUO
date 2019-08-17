@@ -131,7 +131,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
-            if (SelectedObject.Object == this)
+            if (SelectedObject.Object == this || CharacterIsBehindFoliage)
                 return;
 
             if (DrawTransparent)

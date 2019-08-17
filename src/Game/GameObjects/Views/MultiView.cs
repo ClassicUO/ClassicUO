@@ -120,7 +120,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
-            if (SelectedObject.Object == this || IsFromTarget)
+            if (SelectedObject.Object == this || IsFromTarget || CharacterIsBehindFoliage)
                 return;
 
             if (DrawTransparent)
