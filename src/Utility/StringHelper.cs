@@ -30,7 +30,7 @@ namespace ClassicUO.Utility
     {
         private static readonly char[] _dots = {'.', ',', ';', '!'};
         private static readonly StringBuilder _sb = new StringBuilder();
-        public static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
+        //public static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
 
         public static string CapitalizeFirstCharacter(string str)
         {
@@ -160,11 +160,11 @@ namespace ClassicUO.Utility
         {
             if (num > 999999)
             {
-                return string.Format(Culture, "{0:#,,M+}", num);
+                return string.Format("{0}M+", num / 1000000);
             }
             else if (num > 999)
             {
-                return string.Format(Culture, "{0:#,K+}", num);
+                return string.Format("{0}K+", num / 1000);
             }
             else
             {

@@ -243,6 +243,8 @@ namespace ClassicUO.Game
         }
 
         public bool IsLoading { get; set; }
+        public bool IsDraggingCursorForced { get; set; }
+
 
         public void SetDraggedItem(ItemHold hold)
         {
@@ -457,7 +459,7 @@ namespace ClassicUO.Game
                     return _cursorData[war, 12];
             }
 
-            if (Engine.UI.IsDragging)
+            if (Engine.UI.IsDragging || IsDraggingCursorForced)
                 return _cursorData[war, 8];
 
             if (IsLoading)

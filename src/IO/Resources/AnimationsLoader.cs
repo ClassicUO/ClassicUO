@@ -46,11 +46,11 @@ namespace ClassicUO.IO.Resources
         {
             Direction = new AnimationDirection[5]
             {
-                new AnimationDirection(),
-                new AnimationDirection(),
-                new AnimationDirection(),
-                new AnimationDirection(),
-                new AnimationDirection()
+                new AnimationDirection(){ FileIndex = -1, Address = -1},
+                new AnimationDirection(){ FileIndex = -1, Address = -1},
+                new AnimationDirection(){ FileIndex = -1, Address = -1},
+                new AnimationDirection(){ FileIndex = -1, Address = -1},
+                new AnimationDirection(){ FileIndex = -1, Address = -1}
             }
         };
         private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
@@ -1136,6 +1136,9 @@ namespace ClassicUO.IO.Resources
 
         public bool LoadDirectionGroup(ref AnimationDirection animDir)
         {
+            if (animDir.FileIndex == -1 && animDir.Address == -1)
+                return false;
+
             if (animDir.IsUOP || animDir.Address == 0 && animDir.Size == 0)
             {
                 var animData = DataIndex[AnimID].GetUopGroup(AnimGroup);
