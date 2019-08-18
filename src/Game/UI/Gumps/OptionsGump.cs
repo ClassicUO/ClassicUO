@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _cellSize;
 
         // video
-        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread, _useColoredLights, _darkNights;
+        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura;
         private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
         private Combobox _dragSelectModifierKey;
         private HSliderBar _brighlight;
@@ -111,7 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
         private HSliderBar _sliderSpeechDelay;
         private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
-        private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
+        private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox, _partyAuraColorPickerBox;
         private ColorBox _poisonColorPickerBox, _paralyzedColorPickerBox, _invulnerableColorPickerBox;
         private TextBox _spellFormatBox;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
@@ -628,7 +628,9 @@ namespace ClassicUO.Game.UI.Gumps
             item.Add(_auraType);
             rightArea.Add(item);
 
-            _runMouseInSeparateThread = CreateCheckBox(rightArea, "Run mouse in a separate thread", Engine.GlobalSettings.RunMouseInASeparateThread, 0, 0);
+            _partyAura = CreateCheckBox(rightArea, "Custom color aura for party members", Engine.Profile.Current.PartyAura, 0, 0);
+            _partyAuraColorPickerBox = CreateClickableColorBox(rightArea, 20, 5, Engine.Profile.Current.PartyAuraHue, "Party Aura Color", 40, 5);
+            _runMouseInSeparateThread = CreateCheckBox(rightArea, "Run mouse in a separate thread", Engine.GlobalSettings.RunMouseInASeparateThread, 0, 5);
             _auraMouse = CreateCheckBox(rightArea, "Aura on mouse target", Engine.Profile.Current.AuraOnMouse, 0, 0);
             _xBR = CreateCheckBox(rightArea, "Use xBR effect [BETA]", Engine.Profile.Current.UseXBR, 0, 0);
 
@@ -1361,6 +1363,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _runMouseInSeparateThread.IsChecked = true;
                     _auraMouse.IsChecked = true;
                     _xBR.IsChecked = true;
+                    _partyAura.IsChecked = true;
+                    _partyAuraColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
 
                     _windowSizeArea.IsVisible = !_gameWindowFullsize.IsChecked;
                     _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked;
@@ -1703,6 +1707,8 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Instance.IsMouseVisible = Engine.GlobalSettings.RunMouseInASeparateThread = _runMouseInSeparateThread.IsChecked;
             Engine.Profile.Current.AuraOnMouse = _auraMouse.IsChecked;
             Engine.Profile.Current.UseXBR = _xBR.IsChecked;
+            Engine.Profile.Current.PartyAura = _partyAura.IsChecked;
+            Engine.Profile.Current.PartyAuraHue = _partyAuraColorPickerBox.Hue;
 
 
             // fonts

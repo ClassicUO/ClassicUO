@@ -76,6 +76,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public ushort GuildMessageHue { get; set; } = 0x0044;
         [JsonProperty] public ushort AllyMessageHue { get; set; } = 0x0057;
         [JsonProperty] public ushort InnocentHue { get; set; } = 0x005A;
+        [JsonProperty] public ushort PartyAuraHue { get; set; } = 0x0044;
         [JsonProperty] public ushort FriendHue { get; set; } = 0x0044;
         [JsonProperty] public ushort CriminalHue { get; set; } = 0x03B2;
         [JsonProperty] public ushort AnimalHue { get; set; } = 0x03B2;
@@ -269,6 +270,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public int AuraUnderFeetType { get; set; } // 0 = NO, 1 = in warmode, 2 = ctrl+shift, 3 = always
         [JsonProperty] public bool AuraOnMouse { get; set; } = true;
         [JsonProperty] public bool ShowNetworkStats { get; set; }
+        [JsonProperty] public bool PartyAura { get; set; }
 
         [JsonProperty] public bool UseXBR { get; set; } = true;
         [JsonProperty] public bool StandardSkillsGump { get; set; } = true;

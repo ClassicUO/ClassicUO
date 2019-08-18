@@ -43,6 +43,7 @@ namespace ClassicUO.Game.GameObjects
         private static int _startCharacterKneesY;
         private static int _startCharacterFeetY;
         private static int _characterFrameHeight;
+      
 
         public byte HitsPercentage { get; set; }
         public RenderedText HitsTexture { get; set; }
@@ -83,6 +84,7 @@ namespace ClassicUO.Game.GameObjects
 
         private void DrawCharacter(UltimaBatcher2D batcher, int posX, int posY)
         {
+
             _equipConvData = null;
             _transform = false;
             FileManager.Animations.SittingValue = 0;
@@ -96,10 +98,18 @@ namespace ClassicUO.Game.GameObjects
 
             bool hasShadow = !IsDead && !IsHidden && Engine.Profile.Current.ShadowsEnabled;
 
-
             if (Engine.AuraManager.IsEnabled)
-                Engine.AuraManager.Draw(batcher, drawX + 22, drawY + 22, Notoriety.GetHue(NotorietyFlag));
-
+            { 
+                if (World.Party.Contains(this) && Engine.Profile.Current.PartyAura)
+                {
+                    Engine.AuraManager.Draw(batcher, drawX + 22, drawY + 22, Engine.Profile.Current.PartyAuraHue);
+                }
+                else 
+                {
+                    Engine.AuraManager.Draw(batcher, drawX + 22, drawY + 22, Notoriety.GetHue(NotorietyFlag));
+                }
+            }
+            
             if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 _viewHue = 0x0023;

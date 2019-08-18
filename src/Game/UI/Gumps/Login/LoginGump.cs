@@ -125,7 +125,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 X = 183,
                 Y = 345
             });
-
+          
             Add(new Label("Password", false, 0x0386, font: 2)
             {
                 X = 183,
