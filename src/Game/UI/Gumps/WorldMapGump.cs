@@ -23,6 +23,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 using ClassicUO.Game.GameObjects;
@@ -192,17 +193,23 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _mapIndex = World.MapIndex;
 
-            return Task.Run(() => 
-            { 
-                int size = FileManager.Map.MapsDefaultSize[World.MapIndex, 0] * FileManager.Map.MapsDefaultSize[World.MapIndex, 1];
-                uint[] buffer = new uint[size];
+            return Task.Run(() =>
+            {
+                int realWidth = FileManager.Map.MapsDefaultSize[World.MapIndex, 0];
+                int realHeight = FileManager.Map.MapsDefaultSize[World.MapIndex, 1];
+
+                int fixedWidth = FileManager.Map.MapBlocksSize[World.MapIndex, 0];
+                int fixedHeight = FileManager.Map.MapBlocksSize[World.MapIndex, 1];
+
+                int size = (realWidth + 2) * (realHeight + 2);
+                uint[] buffer = new uint[size]; //Enumerable.Repeat(Color.Black.PackedValue, size).ToArray();
                 int maxBlock = size - 1;
 
-                for (int bx = 0; bx < FileManager.Map.MapBlocksSize[World.MapIndex, 0]; bx++)
+                for (int bx = 0; bx < fixedWidth; bx++)
                 {
                     int mapX = bx << 3;
 
-                    for (int by = 0; by < FileManager.Map.MapBlocksSize[World.MapIndex, 1]; by++)
+                    for (int by = 0; by < fixedHeight; by++)
                     {
                         ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
 
@@ -254,9 +261,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                         pos = 0;
 
+
                         for (int y = 0; y < 8; y++)
                         {
-                            int block = (mapY + y) * FileManager.Map.MapsDefaultSize[World.MapIndex, 0] + mapX;
+                            int block = (mapY + y + 1) * (realWidth + 2) + mapX + 1;
 
                             for (int x = 0; x < 8; x++)
                             {
@@ -305,7 +313,22 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                _mapTexture = new UOTexture32(FileManager.Map.MapsDefaultSize[World.MapIndex, 0], FileManager.Map.MapsDefaultSize[World.MapIndex, 1]);
+                realWidth += 2;
+                realHeight += 2;
+
+                for (int i = 0; i < realWidth; i++)
+                {
+                    buffer[i] = 0xFF000000;
+                    buffer[(realHeight - 1) * realWidth + i] = 0xFF000000;
+                }
+
+                for (int i = 0; i < realHeight; i++)
+                {
+                    buffer[i * realWidth] = 0xFF000000;
+                    buffer[i * realWidth + realWidth - 1] = 0xFF000000;
+                }
+
+                _mapTexture = new UOTexture32(FileManager.Map.MapsDefaultSize[World.MapIndex, 0] + 2, FileManager.Map.MapsDefaultSize[World.MapIndex, 1] + 2);
                 _mapTexture.SetData(buffer);
 
                 GameActions.Print("WorldMap loaded!", 0x48);
@@ -373,6 +396,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResetHueVector();
 
+
+            batcher.Draw2D(Textures.GetTexture(Color.Black), gX, gY, gWidth, gHeight, ref _hueVector);
 
             if (_mapTexture == null)
                 return false;
