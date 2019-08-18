@@ -67,8 +67,8 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             ContextMenuControl contextMenu = new ContextMenuControl();
-            contextMenu.Add("Flip map", () => _flipMap = !_flipMap);
-            contextMenu.Add("Top Most", () => TopMost = !TopMost);
+            contextMenu.Add("Flip map", () => _flipMap = !_flipMap, true, _flipMap);
+            contextMenu.Add("Top Most", () => TopMost = !TopMost, true, _isTopMost);
             contextMenu.Add("Free view", () =>
             {
                 _freeView = !_freeView;
@@ -78,8 +78,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _isScrolling = false;
                     CanMove = true;
                 }
-            });
-            contextMenu.Add("Show party members", () => { _showPartyMembers = !_showPartyMembers; });
+            }, true, _freeView);
+            contextMenu.Add("Show party members", () => { _showPartyMembers = !_showPartyMembers; }, true, _showPartyMembers);
             contextMenu.Add("", null);
             contextMenu.Add("Close", Dispose);
 
