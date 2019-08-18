@@ -122,6 +122,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _isScrolling = false;
                 CanMove = true;
             }
+            Engine.UI.GameCursor.IsDraggingCursorForced = false;
 
             base.OnMouseUp(x, y, button);
         }
@@ -134,6 +135,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _lastScroll.Y = y;
                 _isScrolling = true;
                 CanMove = false;
+
+                Engine.UI.GameCursor.IsDraggingCursorForced = true;
             }
 
             base.OnMouseDown(x, y, button);
@@ -383,7 +386,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int offset = size >> 1;
 
-
                 batcher.Draw2D(_mapTexture, (x - offset) + halfWidth, (y - offset) + halfHeight,
                                size, size,
 
@@ -440,7 +442,7 @@ namespace ClassicUO.Game.UI.Gumps
             rotX += x + width;
             rotY += y + height;
 
-            const int DOT_SIZE = 5;
+            const int DOT_SIZE = 4;
 
             if (rotX < x)
                 rotX = x;
@@ -455,7 +457,7 @@ namespace ClassicUO.Game.UI.Gumps
                 rotY = y + Height - 8 - DOT_SIZE;
 
 
-            batcher.Draw2D(Textures.GetTexture(color), rotX, rotY, DOT_SIZE, DOT_SIZE, ref _hueVector);
+            batcher.Draw2D(Textures.GetTexture(color), rotX - (DOT_SIZE >> 1), rotY - (DOT_SIZE >> 1), DOT_SIZE, DOT_SIZE, ref _hueVector);
         }
 
         public override void Dispose()
