@@ -100,8 +100,9 @@ namespace ClassicUO.Game.GameObjects
 
             if (Engine.AuraManager.IsEnabled)
             { 
-                if (World.Party.Contains(this) && Engine.Profile.Current.PartyAura)
+                if (Engine.Profile.Current.PartyAura)
                 {
+                    if(World.Party.Contains(this))
                     Engine.AuraManager.Draw(batcher, drawX + 22, drawY + 22, Engine.Profile.Current.PartyAuraHue);
                 }
                 else 
