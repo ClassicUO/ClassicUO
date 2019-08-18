@@ -364,10 +364,9 @@ namespace ClassicUO.Game.UI.Gumps
             int sy = _center.Y;
 
             int size = (int) Math.Max(gWidth * 1.75f, gHeight * 1.75f);
-           
-
-            int sw = (int) (size / Zoom);
-            int sh = (int) (size / Zoom);
+            
+            int size_zoom = (int) (size / Zoom);
+            int size_zoom_half = size_zoom >> 1;
 
             int halfWidth = gWidth >> 1;
             int halfHeight = gHeight >> 1;
@@ -389,11 +388,11 @@ namespace ClassicUO.Game.UI.Gumps
                 batcher.Draw2D(_mapTexture, (x - offset) + halfWidth, (y - offset) + halfHeight,
                                size, size,
 
-                               sx - (sw >> 1),
-                               sy - (sh >> 1),
+                               sx -size_zoom_half,
+                               sy - size_zoom_half,
 
-                               sw,
-                               sh,
+                               size_zoom,
+                               size_zoom,
 
                                ref _hueVector, _flipMap ? 45 : 0);
 
