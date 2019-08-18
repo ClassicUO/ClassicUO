@@ -271,7 +271,6 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool AuraOnMouse { get; set; } = true;
         [JsonProperty] public bool ShowNetworkStats { get; set; }
         [JsonProperty] public bool PartyAura { get; set; }
-
         [JsonProperty] public bool UseXBR { get; set; } = true;
         [JsonProperty] public bool StandardSkillsGump { get; set; } = true;
 

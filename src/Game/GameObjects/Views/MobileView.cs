@@ -99,18 +99,18 @@ namespace ClassicUO.Game.GameObjects
             bool hasShadow = !IsDead && !IsHidden && Engine.Profile.Current.ShadowsEnabled;
 
             if (Engine.AuraManager.IsEnabled)
-            { 
-                if (Engine.Profile.Current.PartyAura)
+            {
+                if (Engine.Profile.Current.PartyAura && World.Party.Contains(this))
                 {
-                    if(World.Party.Contains(this))
-                    Engine.AuraManager.Draw(batcher, drawX + 22, drawY + 22, Engine.Profile.Current.PartyAuraHue);
+                        Engine.AuraManager.Draw(batcher, drawX + 22, drawY + 22, Engine.Profile.Current.PartyAuraHue);
                 }
-                else 
+                else
                 {
                     Engine.AuraManager.Draw(batcher, drawX + 22, drawY + 22, Notoriety.GetHue(NotorietyFlag));
                 }
             }
-            
+           
+
             if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 _viewHue = 0x0023;
