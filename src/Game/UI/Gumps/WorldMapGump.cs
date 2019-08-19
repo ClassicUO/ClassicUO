@@ -192,6 +192,8 @@ namespace ClassicUO.Game.UI.Gumps
         private unsafe Task Load()
         {
             _mapIndex = World.MapIndex;
+            _mapTexture?.Dispose();
+            _mapTexture = null;
 
             return Task.Run(() =>
             {
@@ -399,34 +401,33 @@ namespace ClassicUO.Game.UI.Gumps
 
             batcher.Draw2D(Textures.GetTexture(Color.Black), gX, gY, gWidth, gHeight, ref _hueVector);
 
-            if (_mapTexture == null)
-                return false;
-
-            var rect = ScissorStack.CalculateScissors(Matrix.Identity, gX, gY, gWidth, gHeight);
-
-            if (ScissorStack.PushScissors(rect))
+            if (_mapTexture != null)
             {
-                batcher.EnableScissorTest(true);
+                var rect = ScissorStack.CalculateScissors(Matrix.Identity, gX, gY, gWidth, gHeight);
 
-                int offset = size >> 1;
+                if (ScissorStack.PushScissors(rect))
+                {
+                    batcher.EnableScissorTest(true);
 
-                batcher.Draw2D(_mapTexture, (x - offset) + halfWidth, (y - offset) + halfHeight,
-                               size, size,
+                    int offset = size >> 1;
 
-                               sx -size_zoom_half,
-                               sy - size_zoom_half,
+                    batcher.Draw2D(_mapTexture, (x - offset) + halfWidth, (y - offset) + halfHeight,
+                                   size, size,
 
-                               size_zoom,
-                               size_zoom,
+                                   sx - size_zoom_half,
+                                   sy - size_zoom_half,
 
-                               ref _hueVector, _flipMap ? 45 : 0);
+                                   size_zoom,
+                                   size_zoom,
 
-                batcher.EnableScissorTest(false);
+                                   ref _hueVector, _flipMap ? 45 : 0);
 
-                ScissorStack.PopScissors();
+                    batcher.EnableScissorTest(false);
+
+                    ScissorStack.PopScissors();
+                }
+
             }
-
-
 
             foreach (Mobile mobile in World.Mobiles)
             {
