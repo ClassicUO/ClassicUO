@@ -212,14 +212,6 @@ namespace ClassicUO.Game.Data
                 Y += Constants.CONTAINER_RECT_STEP;
             }
         }
-
-        public static void DoStepBack()
-        {
-            if (X == DefaultX || Y == DefaultY)
-
-                X = X;
-                Y = Y;
-        }
     }
 
     internal readonly struct ContainerData
@@ -234,16 +226,11 @@ namespace ClassicUO.Game.Data
             IconizedGraphic = iconizedgraphic;
         }
 
-        public Graphic Graphic { get; }
-
-        public Rectangle Bounds { get; }
-
-        public ushort OpenSound { get; }
-
-        public ushort ClosedSound { get; }
-
-        public Rectangle MinimizerArea { get; }
-
-        public ushort IconizedGraphic { get; }
+        public readonly Graphic Graphic;
+        public readonly Rectangle Bounds;
+        public readonly ushort OpenSound;
+        public readonly ushort ClosedSound;
+        public readonly Rectangle MinimizerArea;
+        public readonly ushort IconizedGraphic;
     }
 }
