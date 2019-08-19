@@ -3658,10 +3658,35 @@ namespace ClassicUO.Network
         {
             byte type = p.ReadByte();
 
-            if (type == 0xFE)
+            bool isparty = false;
+            switch (type)
             {
-                Log.Message(LogTypes.Info, "Razor ACK sended");
-                NetClient.Socket.Send(new PRazorAnswer());
+                case 0x01: // custom party info
+                    isparty = true;
+                    goto case 0x02;
+                case 0x02: // guild track info
+                    bool locations = p.ReadBool();
+
+                    uint serial;
+
+                    while((serial = p.ReadUInt()) != 0)
+                    {
+                        if (locations)
+                        {
+                            ushort x = p.ReadUShort();
+                            ushort y = p.ReadUShort();
+                            byte map = p.ReadByte();
+                            byte hits = p.ReadByte();
+                        }
+                    }
+
+                    break;
+                case 0xF0:
+                    break;
+                case 0xFE:
+                    Log.Message(LogTypes.Info, "Razor ACK sended");
+                    NetClient.Socket.Send(new PRazorAnswer());
+                    break;
             }
         }
 
