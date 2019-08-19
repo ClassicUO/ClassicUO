@@ -462,6 +462,7 @@ namespace ClassicUO.Game.UI.Gumps
             rotY += y + height;
 
             const int DOT_SIZE = 4;
+            const int DOT_SIZE_HALF = DOT_SIZE >> 1;
 
             if (rotX < x)
                 rotX = x;
@@ -475,10 +476,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (rotY > y + Height - 8 - DOT_SIZE)
                 rotY = y + Height - 8 - DOT_SIZE;
 
-
-            int off =0/* DOT_SIZE >> 1*/;
-
-            batcher.Draw2D(Textures.GetTexture(color), rotX - off, rotY - off, DOT_SIZE, DOT_SIZE, ref _hueVector);
+            batcher.Draw2D(Textures.GetTexture(color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE, DOT_SIZE, ref _hueVector);
         }
 
         private (int, int) RotatePoint(int x, int y, float zoom, int dist, float angle = 45f)
