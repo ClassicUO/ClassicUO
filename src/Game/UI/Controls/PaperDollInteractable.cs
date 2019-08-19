@@ -91,6 +91,11 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (item != null && item.Layer >= 0 && (int) item.Layer < _pgumps.Length)
                 {
+                    if (Mobile == World.Player && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded))
+                    {
+                        World.Player.UpdateAbilities();
+                    }
+
                     ref var gump = ref _pgumps[(int)item.Layer];
                     gump?.Dispose();
                     gump = null;
@@ -113,6 +118,11 @@ namespace ClassicUO.Game.UI.Controls
 
                         if (i != null && i.Layer >= 0 && (int)i.Layer < _pgumps.Length)
                         {
+                            if (Mobile == World.Player && (i.Layer == Layer.OneHanded || i.Layer == Layer.TwoHanded))
+                            {
+                                World.Player.UpdateAbilities();
+                            }
+
                             ref var gump = ref _pgumps[(int) i.Layer];
                             gump?.Dispose();
                             gump = null;
