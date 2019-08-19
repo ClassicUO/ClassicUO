@@ -118,12 +118,16 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            if (!_freeView)
+            if (button == MouseButton.Left)
             {
-                _isScrolling = false;
-                CanMove = true;
+                if (!_freeView)
+                {
+                    _isScrolling = false;
+                    CanMove = true;
+                }
+
+                Engine.UI.GameCursor.IsDraggingCursorForced = false;
             }
-            Engine.UI.GameCursor.IsDraggingCursorForced = false;
 
             base.OnMouseUp(x, y, button);
         }
@@ -422,6 +426,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             }
 
+            //foreach (House house in World.HouseManager.Houses)
+            //{
+            //    foreach (Multi multi in house.Components)
+            //    {
+            //        batcher.Draw2D(Textures.GetTexture())
+            //    }
+            //}
+
             foreach (Mobile mobile in World.Mobiles)
             {
                 if (mobile != World.Player)
@@ -544,6 +556,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
+            Engine.UI.GameCursor.IsDraggingCursorForced = false;
+
             _mapTexture?.Dispose();
             base.Dispose();
         }
