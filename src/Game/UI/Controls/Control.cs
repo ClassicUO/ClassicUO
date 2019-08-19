@@ -97,13 +97,8 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public Rectangle Bounds
-        {
-            get => _bounds;
-            set => _bounds = value;
-        }
-
-
+        public ref Rectangle Bounds => ref _bounds;
+        
         public bool IsDisposed { get; private set; }
 
         public bool IsVisible { get; set; } = true;
@@ -867,9 +862,9 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Control c = Children[i];
                 c.Dispose();
-
-                Children.RemoveAt(i--);
             }
+
+            Children.Clear();
 
             IsDisposed = true;
 

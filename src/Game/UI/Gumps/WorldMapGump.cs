@@ -118,11 +118,15 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            if (!_freeView)
+            if (button == MouseButton.Left)
             {
-                _isScrolling = false;
-                CanMove = true;
+                if (!_freeView)
+                {
+                    _isScrolling = false;
+                    CanMove = true;
+                }
             }
+
             Engine.UI.GameCursor.IsDraggingCursorForced = false;
 
             base.OnMouseUp(x, y, button);
@@ -152,7 +156,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int scrollX = _lastScroll.X - x;
                 int scrollY = _lastScroll.Y - y;
 
-                (scrollX, scrollY) = RotatePoint(scrollX, scrollY, 1f, -1);
+                (scrollX, scrollY) = RotatePoint(scrollX, scrollY, 1f, -1, _flipMap ? 45f : 0f);
 
                 _center.X += (int) (scrollX / Zoom);
                 _center.Y += (int) (scrollY / Zoom);
@@ -192,17 +196,22 @@ namespace ClassicUO.Game.UI.Gumps
         private unsafe Task Load()
         {
             _mapIndex = World.MapIndex;
+            _mapTexture?.Dispose();
+            _mapTexture = null;
 
             return Task.Run(() =>
             {
+                const int OFFSET_PIX = 2;
+                const int OFFSET_PIX_HALF = OFFSET_PIX / 2;
+
                 int realWidth = FileManager.Map.MapsDefaultSize[World.MapIndex, 0];
                 int realHeight = FileManager.Map.MapsDefaultSize[World.MapIndex, 1];
 
                 int fixedWidth = FileManager.Map.MapBlocksSize[World.MapIndex, 0];
                 int fixedHeight = FileManager.Map.MapBlocksSize[World.MapIndex, 1];
 
-                int size = (realWidth + 2) * (realHeight + 2);
-                uint[] buffer = new uint[size]; //Enumerable.Repeat(Color.Black.PackedValue, size).ToArray();
+                int size = (realWidth + OFFSET_PIX) * (realHeight + OFFSET_PIX);
+                uint[] buffer = new uint[size];
                 int maxBlock = size - 1;
 
                 for (int bx = 0; bx < fixedWidth; bx++)
@@ -264,7 +273,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         for (int y = 0; y < 8; y++)
                         {
-                            int block = (mapY + y + 1) * (realWidth + 2) + mapX + 1;
+                            int block = (mapY + y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
 
                             for (int x = 0; x < 8; x++)
                             {
@@ -313,40 +322,30 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                realWidth += 2;
-                realHeight += 2;
-
-                for (int i = 0; i < realWidth; i++)
+                if (OFFSET_PIX > 0)
                 {
-                    buffer[i] = 0xFF000000;
-                    buffer[(realHeight - 1) * realWidth + i] = 0xFF000000;
+                    realWidth += OFFSET_PIX;
+                    realHeight += OFFSET_PIX;
+
+                    for (int i = 0; i < realWidth; i++)
+                    {
+                        buffer[i] = 0xFF000000;
+                        buffer[(realHeight - 1) * realWidth + i] = 0xFF000000;
+                    }
+
+                    for (int i = 0; i < realHeight; i++)
+                    {
+                        buffer[i * realWidth] = 0xFF000000;
+                        buffer[i * realWidth + realWidth - 1] = 0xFF000000;
+                    }
                 }
 
-                for (int i = 0; i < realHeight; i++)
-                {
-                    buffer[i * realWidth] = 0xFF000000;
-                    buffer[i * realWidth + realWidth - 1] = 0xFF000000;
-                }
-
-                _mapTexture = new UOTexture32(FileManager.Map.MapsDefaultSize[World.MapIndex, 0] + 2, FileManager.Map.MapsDefaultSize[World.MapIndex, 1] + 2);
+                _mapTexture = new UOTexture32(realWidth, realHeight);
                 _mapTexture.SetData(buffer);
 
                 GameActions.Print("WorldMap loaded!", 0x48);
             });
         }
-
-
-        public static (int, int) RotatePoint(int x, int y, float zoom, int dist, float angle = 45f)
-        {
-            x = (int)(x * zoom);
-            y = (int)(y * zoom);
-
-            if (angle == 0.0f)
-                return (x, y);
-
-            return ((int)Math.Round(Math.Cos(dist * Math.PI / 4.0) * x - Math.Sin(dist * Math.PI / 4.0) * y), (int)Math.Round(Math.Sin(dist * Math.PI / 4.0) * x + Math.Cos(dist * Math.PI / 4.0) * y));
-        }
-
 
         protected override void OnMouseWheel(MouseEvent delta)
         {
@@ -383,8 +382,8 @@ namespace ClassicUO.Game.UI.Gumps
             int gWidth = Width - 8;
             int gHeight = Height - 8;
 
-            int sx = _center.X;
-            int sy = _center.Y;
+            int sx = _center.X + 1;
+            int sy = _center.Y + 1;
 
             int size = (int) Math.Max(gWidth * 1.75f, gHeight * 1.75f);
             
@@ -399,34 +398,41 @@ namespace ClassicUO.Game.UI.Gumps
 
             batcher.Draw2D(Textures.GetTexture(Color.Black), gX, gY, gWidth, gHeight, ref _hueVector);
 
-            if (_mapTexture == null)
-                return false;
-
-            var rect = ScissorStack.CalculateScissors(Matrix.Identity, gX, gY, gWidth, gHeight);
-
-            if (ScissorStack.PushScissors(rect))
+            if (_mapTexture != null)
             {
-                batcher.EnableScissorTest(true);
+                var rect = ScissorStack.CalculateScissors(Matrix.Identity, gX, gY, gWidth, gHeight);
 
-                int offset = size >> 1;
+                if (ScissorStack.PushScissors(rect))
+                {
+                    batcher.EnableScissorTest(true);
 
-                batcher.Draw2D(_mapTexture, (x - offset) + halfWidth, (y - offset) + halfHeight,
-                               size, size,
+                    int offset = size >> 1;
 
-                               sx -size_zoom_half,
-                               sy - size_zoom_half,
+                    batcher.Draw2D(_mapTexture, (gX - offset) + halfWidth, (gY - offset) + halfHeight,
+                                   size, size,
 
-                               size_zoom,
-                               size_zoom,
+                                   sx - size_zoom_half,
+                                   sy - size_zoom_half,
 
-                               ref _hueVector, _flipMap ? 45 : 0);
+                                   size_zoom,
+                                   size_zoom,
 
-                batcher.EnableScissorTest(false);
+                                   ref _hueVector, _flipMap ? 45 : 0);
 
-                ScissorStack.PopScissors();
+                    batcher.EnableScissorTest(false);
+
+                    ScissorStack.PopScissors();
+                }
+
             }
 
-
+            //foreach (House house in World.HouseManager.Houses)
+            //{
+            //    foreach (Multi multi in house.Components)
+            //    {
+            //        batcher.Draw2D(Textures.GetTexture())
+            //    }
+            //}
 
             foreach (Mobile mobile in World.Mobiles)
             {
@@ -461,12 +467,14 @@ namespace ClassicUO.Game.UI.Gumps
             int sx = mobile.X - _center.X;
             int sy = mobile.Y - _center.Y;
 
-            (int rotX, int rotY) = RotatePoint(sx, sy, zoom, 1);
+            (int rotX, int rotY) = RotatePoint(sx, sy, zoom, 1, _flipMap ? 45f : 0f);
+            AdjustPosition(rotX, rotY, width - 4, height - 4, out rotX, out rotY);
 
             rotX += x + width;
             rotY += y + height;
 
             const int DOT_SIZE = 4;
+            const int DOT_SIZE_HALF = DOT_SIZE >> 1;
 
             if (rotX < x)
                 rotX = x;
@@ -480,12 +488,76 @@ namespace ClassicUO.Game.UI.Gumps
             if (rotY > y + Height - 8 - DOT_SIZE)
                 rotY = y + Height - 8 - DOT_SIZE;
 
+            batcher.Draw2D(Textures.GetTexture(color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE, DOT_SIZE, ref _hueVector);
+        }
 
-            batcher.Draw2D(Textures.GetTexture(color), rotX - (DOT_SIZE >> 1), rotY - (DOT_SIZE >> 1), DOT_SIZE, DOT_SIZE, ref _hueVector);
+        private (int, int) RotatePoint(int x, int y, float zoom, int dist, float angle = 45f)
+        {
+            x = (int)(x * zoom);
+            y = (int)(y * zoom);
+
+            if (angle == 0.0f)
+                return (x, y);
+
+            return ((int)Math.Round(Math.Cos(dist * Math.PI / 4.0) * x - Math.Sin(dist * Math.PI / 4.0) * y), (int)Math.Round(Math.Sin(dist * Math.PI / 4.0) * x + Math.Cos(dist * Math.PI / 4.0) * y));
+        }
+
+        private void AdjustPosition(int x, int y, int centerX, int centerY, out int newX, out int newY)
+        {
+            var offset = GetOffset(x, y, centerX, centerY);
+            var currX = x;
+            var currY = y;
+
+            while (offset != 0)
+            {
+                if ((offset & 1) != 0)
+                {
+                    currY = centerY;
+                    currX = x * currY / y;
+                }
+                else if ((offset & 2) != 0)
+                {
+                    currY = -centerY;
+                    currX = x * currY / y;
+                }
+                else if ((offset & 4) != 0)
+                {
+                    currX = centerX;
+                    currY = y * currX / x;
+                }
+                else if ((offset & 8) != 0)
+                {
+                    currX = -centerX;
+                    currY = y * currX / x;
+                }
+
+                x = currX;
+                y = currY;
+                offset = GetOffset(x, y, centerX, centerY);
+            }
+
+            newX = x;
+            newY = y;
+        }
+
+        private int GetOffset(int x, int y, int centerX, int centerY)
+        {
+            const int offset = 0;
+            if (y > centerY)
+                return 1;
+            if (y < -centerY)
+                return 2;
+            if (x > centerX)
+                return offset + 4;
+            if (x >= -centerX)
+                return offset;
+            return offset + 8;
         }
 
         public override void Dispose()
         {
+            Engine.UI.GameCursor.IsDraggingCursorForced = false;
+
             _mapTexture?.Dispose();
             base.Dispose();
         }
