@@ -125,9 +125,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _isScrolling = false;
                     CanMove = true;
                 }
-
-                Engine.UI.GameCursor.IsDraggingCursorForced = false;
             }
+
+            Engine.UI.GameCursor.IsDraggingCursorForced = false;
 
             base.OnMouseUp(x, y, button);
         }
