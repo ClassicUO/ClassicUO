@@ -233,6 +233,8 @@ namespace ClassicUO.Game.Managers
         }
 
 
+        public float Scale { get; set; } = 1f;
+
         public AnchorManager AnchorManager { get; }
 
         public Deque<Control> Gumps { get; } = new Deque<Control>();

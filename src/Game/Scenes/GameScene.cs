@@ -158,6 +158,7 @@ namespace ClassicUO.Game.Scenes
                 Scale = Engine.Profile.Current.ScaleZoom;
 
             Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom = Scale;
+            Engine.UI.Scale = Engine.Profile.Current.ContainersScale / 100f;
 
             Plugin.OnConnected();
         }

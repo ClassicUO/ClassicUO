@@ -49,6 +49,8 @@ namespace ClassicUO.Game.UI.Gumps
         private GumpPic _eyeGumpPic;
         private bool _isCorspeContainer;
 
+        private float _lastScale;
+
         public ContainerGump() : base(0, 0)
         {
         }
@@ -83,10 +85,16 @@ namespace ClassicUO.Game.UI.Gumps
             _item.Items.Added += ItemsOnAdded;
             _item.Items.Removed += ItemsOnRemoved;
 
+            float scale = Engine.UI.Scale;
+            _lastScale = scale;
+
             _data = ContainerManager.Get(Graphic);
             if(_data.MinimizerArea != Rectangle.Empty && _data.IconizedGraphic != 0)
             {
-                _IconizerArea = new HitBox(_data.MinimizerArea.X, _data.MinimizerArea.Y, _data.MinimizerArea.Width, _data.MinimizerArea.Height);
+                _IconizerArea = new HitBox((int) (_data.MinimizerArea.X* scale), 
+                                           (int) (_data.MinimizerArea.Y * scale),
+                                           (int) (_data.MinimizerArea.Width * scale),
+                                           (int) (_data.MinimizerArea.Height * scale));
                 _Iconized = new GumpPic(0, 0, _data.IconizedGraphic, 0);
             }
             Graphic g = _data.Graphic;
@@ -95,10 +103,16 @@ namespace ClassicUO.Game.UI.Gumps
             Add(container = new GumpPicContainer(0, 0, g, 0, _item));
 
             if (_isCorspeContainer)
-                Add(_eyeGumpPic = new GumpPic(45, 30, 0x0045, 0));
+            {
+                Add(_eyeGumpPic = new GumpPic((int) (45 * scale), (int) (30 * scale), 0x0045, 0));
 
-            Width = container.Width;
-            Height = container.Height;
+                _eyeGumpPic.Width = (int)(_eyeGumpPic.Width * scale);
+                _eyeGumpPic.Height = (int)(_eyeGumpPic.Height * scale);
+            }
+
+
+            Width = container.Width = (int)(container.Width * scale);
+            Height = container.Height = (int) (container.Height * scale);
 
             ContainerGump gg = Engine.UI.Gumps.OfType<ContainerGump>().FirstOrDefault(s => s.LocalSerial == LocalSerial);
 
@@ -172,6 +186,12 @@ namespace ClassicUO.Game.UI.Gumps
                 _eyeGumpPic.Texture = FileManager.Gumps.GetTexture(_eyeGumpPic.Graphic);
             }
             if(Iconized != null) Iconized.Hue = _item.Hue;
+
+            if (_lastScale != Engine.UI.Scale)
+            {
+                Dispose();
+                GameActions.DoubleClick(LocalSerial);
+            }
         }
 
         public override void Save(BinaryWriter writer)
@@ -212,35 +232,54 @@ namespace ClassicUO.Game.UI.Gumps
                     continue;
 
                 CheckItemPosition(item);
-                Add(new ItemGump(item));
+                var itemControl = new ItemGump(item);
+                float scale = Engine.UI.Scale;
+
+                itemControl.Width = (int) (itemControl.Width * scale);
+                itemControl.Height = (int)(itemControl.Height * scale);
+
+                Add(itemControl);
             }
         }
+    
 
         private void CheckItemPosition(Item item)
         {
-            int x = item.X;
-            int y = item.Y;
+            float scale = Engine.UI.Scale;
 
+            int x = (int) (item.X * scale);
+            int y = (int) (item.Y * scale);
+          
             ArtTexture texture = FileManager.Art.GetTexture(item.DisplayedGraphic);
+
+            int boundX = (int)(_data.Bounds.X * scale);
+            int boundY = (int)(_data.Bounds.Y * scale);
 
             if (texture != null && !texture.IsDisposed)
             {
-                if (x < _data.Bounds.X)
-                    x = _data.Bounds.X;
+                int boundW = (int)(_data.Bounds.Width * scale);
+                int boundH = (int)(_data.Bounds.Height * scale);
 
-                if (y < _data.Bounds.Y)
-                    y = _data.Bounds.Y;
+                int textureW = (int)(texture.Width * scale);
+                int textureH = (int)(texture.Height * scale);
 
-                if (x + texture.Width > _data.Bounds.Width)
-                    x = _data.Bounds.Width - texture.Width;
+                if (x < boundX)
+                    x = boundX;
 
-                if (y + texture.Height > _data.Bounds.Height)
-                    y = _data.Bounds.Height - texture.Height;
+                if (y < boundY)
+                    y = boundY;
+
+
+                if (x + textureW > boundW)
+                    x = boundW - textureW;
+
+                if (y + textureH > boundH)
+                    y = boundH - textureH;
             }
             else
             {
-                x = _data.Bounds.X;
-                y = _data.Bounds.Y;
+                x = boundX;
+                y = boundY;
             }
 
             if (x < 0)
@@ -248,6 +287,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (y < 0)
                 y = 0;
+
 
             if (x != item.X || y != item.Y) item.Position = new Position((ushort) x, (ushort) y);
         }
@@ -305,6 +345,11 @@ namespace ClassicUO.Game.UI.Gumps
         {
             X = Engine.Profile.Current.OverrideContainerLocationPosition.X - (Width >> 1);
             Y = Engine.Profile.Current.OverrideContainerLocationPosition.Y - (Height >> 1);
+        }
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
+        {
+            base.OnMouseUp(x, y, button);
         }
 
         public override void Dispose()
