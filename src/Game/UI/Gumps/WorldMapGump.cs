@@ -134,7 +134,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
-            if ((button == MouseButton.Left && Keyboard.Alt) || _freeView)
+            if (button == MouseButton.Left && (Keyboard.Alt || _freeView))
             {
                 _lastScroll.X = x;
                 _lastScroll.Y = y;
