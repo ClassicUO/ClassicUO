@@ -53,11 +53,15 @@ namespace ClassicUO.IO
             if (ReadInt() != UOP_MAGIC_NUMBER)
                 throw new ArgumentException("Bad uop file");
 
-            Skip(8);
+            uint version = ReadUInt();
+            uint format_timestamp = ReadUInt();
+            
             long nextblock = ReadLong();
-            Skip(4);
 
-            Entries = new UOFileIndex3D[ReadInt()];
+            uint block_size = ReadUInt();
+            uint total_file_count = ReadUInt();
+
+            Entries = new UOFileIndex3D[total_file_count];
 
             int idx = 0;
 
@@ -73,8 +77,9 @@ namespace ClassicUO.IO
                     int headerLength = ReadInt();
                     int compressedLength = ReadInt();
                     int decompressedLength = ReadInt();
-                    ulong hash = ReadULong();
-                    Skip(6);
+                    ulong filename_hash = ReadULong();
+                    uint data_hash = ReadUInt();
+                    ushort flag = ReadUShort();
 
                     if (offset == 0)
                         continue;

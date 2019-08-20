@@ -33,7 +33,7 @@ namespace ClassicUO.IO.Resources
     internal class MultiLoader : ResourceLoader
     {
         private UOFileMul _file;
-        private UOFileUopNoFormat _fileUop;
+        private UOFileUop _fileUop;
         private int _itemOffset;
         private DataReader _reader;
 
@@ -59,7 +59,7 @@ namespace ClassicUO.IO.Resources
                 if (File.Exists(uopPath))
                 {
                     Count = Constants.MAX_MULTI_DATA_INDEX_COUNT;
-                    _fileUop = new UOFileUopNoFormat(uopPath);
+                    _fileUop = new UOFileUop(uopPath, ".bin", Count);
                     _reader = new DataReader();
 
                     for (int i = 0; i < _fileUop.Entries.Length; i++)
@@ -67,6 +67,9 @@ namespace ClassicUO.IO.Resources
                         long offset = _fileUop.Entries[i].Offset;
                         int csize = _fileUop.Entries[i].Length;
                         int dsize = _fileUop.Entries[i].DecompressedLength;
+
+                        if (offset == 0 && csize == 0 && dsize == 0)
+                            continue;
 
                         _fileUop.Seek(offset);
                         byte[] cdata = _fileUop.ReadArray<byte>(csize);
@@ -79,10 +82,10 @@ namespace ClassicUO.IO.Resources
 
                         if (id < Constants.MAX_MULTI_DATA_INDEX_COUNT && id < _file.Entries.Length)
                         {
-                            ref UOFileIndex3D index = ref _file.Entries[id];
+                            ref UOFileIndex3D index = ref _fileUop.Entries[id];
                             int count = _reader.ReadInt();
 
-                            index = new UOFileIndex3D(offset, csize, dsize, (int) MathHelper.Combine(count, index.Extra));
+                            index = new UOFileIndex3D(offset, csize, dsize, (int)MathHelper.Combine(count, index.Extra));
                         }
                     }
 
@@ -138,29 +141,36 @@ namespace ClassicUO.IO.Resources
         {
             int count;
 
-            if (graphic < _file.Entries.Length)
+            //if (graphic < _file.Entries.Length)
             {
-                ref readonly UOFileIndex3D index = ref _file.Entries[graphic];
+                //ref readonly UOFileIndex3D index = ref _file.Entries[graphic];
 
-                MathHelper.GetNumbersFromCombine((ulong) index.Extra, out count, out _);
+                //MathHelper.GetNumbersFromCombine((ulong) index.Extra, out count, out _);
 
-                if (_fileUop != null && count > 0)
+                if (_fileUop != null && graphic < _fileUop.Entries.Length)
                 {
-                    uopValid = true;
+                    ref readonly UOFileIndex3D index = ref _fileUop.Entries[graphic];
+
 
                     long offset = index.Offset;
                     int csize = index.Length;
                     int dsize = index.DecompressedLength;
 
-                    _fileUop.Seek(offset);
-                    byte[] cdata = _fileUop.ReadArray<byte>(csize);
-                    byte[] ddata = new byte[dsize];
-                    ZLib.Decompress(cdata, 0, ddata, dsize);
+                    if (csize > 0 && dsize > 0)
+                    {
+                        uopValid = true;
 
-                    _reader.SetData(ddata, dsize);
-                    _reader.Skip(8);
+                        _fileUop.Seek(offset);
+                        byte[] cdata = _fileUop.ReadArray<byte>(csize);
+                        byte[] ddata = new byte[dsize];
+                        ZLib.Decompress(cdata, 0, ddata, dsize);
 
-                    return count;
+                        _reader.SetData(ddata, dsize);
+                        _reader.Skip(4);
+                        count = (int)_reader.ReadUInt();
+
+                        return count;
+                    }
                 }
             }
 

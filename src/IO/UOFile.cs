@@ -104,9 +104,10 @@ namespace ClassicUO.IO
         [MethodImpl(256)]
         internal void Fill(ref byte[] buffer, int count)
         {
+            byte* ptr = (byte*) PositionAddress;
             for (int i = 0; i < count; i++)
             {
-                buffer[i] = ((byte*)PositionAddress)[i];
+                buffer[i] = ptr[i];
             }
             //fixed (byte* ptr = buffer) Buffer.MemoryCopy((byte*) PositionAddress, ptr, count, count);
 
