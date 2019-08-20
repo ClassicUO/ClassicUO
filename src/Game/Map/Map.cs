@@ -243,9 +243,9 @@ namespace ClassicUO.Game.Map
                 ref Chunk block = ref Chunks[_usedIndices[i]];
                 block.Destroy();
                 block = null;
-                _usedIndices.RemoveAt(i--);
             }
 
+            _usedIndices.Clear();
             //FileManager.Map.UnloadMap(Index);
             Chunks = null;
         }
