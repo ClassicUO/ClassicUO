@@ -36,9 +36,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
-using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO.Game.UI.Gumps
 {
