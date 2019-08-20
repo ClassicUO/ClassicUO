@@ -148,9 +148,15 @@ namespace ClassicUO.Game
 
                                 if (stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM && (item2.ItemData.IsDoor || item2.ItemData.Weight <= 0x5A || isGM && !item2.IsLocked))
                                     dropFlags = true;
-                                else
-                                    dropFlags = graphic >= 0x3946 && graphic <= 0x3964 || graphic == 0x0082;
 
+                                else if (Engine.Profile.Current.SmoothDoors && item2.ItemData.IsDoor)
+                                {
+                                    dropFlags = true;
+                                }
+                                else
+                                { 
+                                    dropFlags = graphic >= 0x3946 && graphic <= 0x3964 || graphic == 0x0082;
+                                }
                                 break;
                         }
 
