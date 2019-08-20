@@ -190,7 +190,6 @@ namespace ClassicUO.Game.Map
             return defaultZ;
         }
 
-        private static IndexMap _none;
 
         public ref readonly IndexMap GetIndex(int blockX, int blockY)
         {
@@ -199,7 +198,7 @@ namespace ClassicUO.Game.Map
             FileManager.Map.SanitizeMapIndex(ref map);
             ref readonly IndexMap[] list = ref FileManager.Map.BlockData[map];
 
-            return ref block >= list.Length ? ref _none : ref list[block];
+            return ref block >= list.Length ? ref IndexMap.Invalid : ref list[block];
         }
 
         [MethodImpl(256)]
