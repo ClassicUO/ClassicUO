@@ -290,7 +290,8 @@ namespace ClassicUO.IO
                     if (oldlen == 0 || maps > oldlen)
                     {
                         ULMapLoader loader = new ULMapLoader(maps);
-                        for (int i = 0; i < maps; i++) ULMapLoader.CheckForShardMapFile(i);
+                        for (int i = 0; i < maps; i++)
+                            loader.CheckForShardMapFile(i);
                         loader.Load().Wait();
                         _UL._ULMap = loader;
                         _UL._filesMap = new ULFileMul[maps];
@@ -577,6 +578,7 @@ namespace ClassicUO.IO
                 MapsDefaultSize = new int[NumMaps, 2];
                 MapBlocksSize = new int[NumMaps, 2];
                 BlockData = new IndexMap[NumMaps][];
+                Entries = new UOFileIndex3D[NumMaps][];
 
                 for (int i = 0; i < NumMaps; i++)
                 {
@@ -591,6 +593,8 @@ namespace ClassicUO.IO
 
             internal (UOFile[], UOFileMul[], UOFileMul[]) GetFilesReference => (_filesMap, _filesIdxStatics, _filesStatics);
             internal uint NumMaps { get; }
+
+            internal new UOFileIndex3D[][] Entries;
 
             public override void CleanResources()
             {
@@ -628,6 +632,7 @@ namespace ClassicUO.IO
                         if (File.Exists(path))
                         {
                             _filesMap[i] = new ULFileMul(path, false);
+                            
                             foundedOneMap = true;
                         }
 
@@ -669,7 +674,7 @@ namespace ClassicUO.IO
                 });
             }
 
-            internal static void CheckForShardMapFile(int mapID)
+            internal void CheckForShardMapFile(int mapID)
             {
                 string oldmap = Path.Combine(FileManager.UoFolderPath, $"map{mapID}.mul");
                 string oldstaidx = Path.Combine(FileManager.UoFolderPath, $"staidx{mapID}.mul");
@@ -687,23 +692,26 @@ namespace ClassicUO.IO
                         CreateNewPersistantMap(mapID, mapPath, staidxPath, staticsPath);
                     else
                     {
-                        //if (mapfile is UOFileUop uop)
-                        //{
-                        //    Log.Message(LogTypes.Trace, $"UltimaLive -> converting file:\t{mapPath} from {uop.FilePath}");
+                        if (mapfile is UOFileUop uop)
+                        {
+                            Entries[mapID] = new UOFileIndex3D[uop.TotalEntriesCount];
+                            uop.FillEntries(ref Entries[mapID]);
 
-                        //    using (FileStream stream = File.Create(mapPath))
-                        //    {
-                        //        for (int x = 0; x < Entries.Length; x++)
-                        //        {
-                        //            uop.Seek(Entries[x].Offset);
-                        //            stream.Write(uop.ReadArray(Entries[x].Length), 0, uop.Entries[x].Length);
-                        //        }
+                            Log.Message(LogTypes.Trace, $"UltimaLive -> converting file:\t{mapPath} from {uop.FilePath}");
 
-                        //        stream.Flush();
-                        //    }
-                        //}
-                        //else
-                        //    CopyFile(oldmap, mapPath);
+                            using (FileStream stream = File.Create(mapPath))
+                            {
+                                for (int x = 0; x < Entries[mapID].Length; x++)
+                                {
+                                    uop.Seek(Entries[mapID][x].Offset);
+                                    stream.Write(uop.ReadArray(Entries[mapID][x].Length), 0, Entries[mapID][x].Length);
+                                }
+
+                                stream.Flush();
+                            }
+                        }
+                        else
+                            CopyFile(oldmap, mapPath);
                     }
                 }
 
@@ -799,8 +807,8 @@ namespace ClassicUO.IO
                     {
                         fileNumber = shifted;
 
-                        //if (shifted < file.Entries.Length)
-                        //    uopoffset = (ulong) file.Entries[shifted].Offset;
+                        if (shifted < Entries.Length)
+                            uopoffset = (ulong)Entries[map][shifted].Offset;
                     }
                 }
 
