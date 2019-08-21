@@ -87,6 +87,15 @@ namespace ClassicUO.Game.Data
                 case 0x12BC:
                 case 0x12BD:
 
+                case 0x3131:
+                case 0x3134:
+                case 0x3137:
+                case 0x313A:
+                case 0x0C95:
+                case 0x0C96:
+                case 0x0C99:
+                case 0x0A06:
+
                     return true;
             }
 
