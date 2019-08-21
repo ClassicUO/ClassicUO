@@ -125,10 +125,10 @@ namespace ClassicUO.Configuration
             bool valid = !string.IsNullOrWhiteSpace(UltimaOnlineDirectory);
 
 
-            if (string.IsNullOrWhiteSpace(ClientVersion) || ClientVersion == "0.0.0.0" || ClientVersion.Split(new [] { '.' }, StringSplitOptions.RemoveEmptyEntries).Length <= 2)
-            {
-                valid = false;
-            }
+            //if (string.IsNullOrWhiteSpace(ClientVersion) || ClientVersion == "0.0.0.0" || ClientVersion.Split(new [] { '.' }, StringSplitOptions.RemoveEmptyEntries).Length <= 2)
+            //{
+            //    valid = false;
+            //}
 
 
             return valid;
