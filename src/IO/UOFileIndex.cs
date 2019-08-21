@@ -40,6 +40,8 @@ namespace ClassicUO.IO
         public readonly int Length;
         public readonly int DecompressedLength;
         public readonly int Extra;
+
+        public static readonly UOFileIndex3D Invalid = new UOFileIndex3D(0, 0, 0, 0);
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

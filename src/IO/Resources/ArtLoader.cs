@@ -50,15 +50,22 @@ namespace ClassicUO.IO.Resources
                 string filepath = Path.Combine(FileManager.UoFolderPath, "artLegacyMUL.uop");
 
                 if (File.Exists(filepath))
-                    _file = new UOFileUop(filepath, ".tga", Constants.MAX_STATIC_DATA_INDEX_COUNT);
+                {
+                    _file = new UOFileUop(filepath, "build/artlegacymul/{0:D8}.tga");
+                    Entries = new UOFileIndex3D[Constants.MAX_STATIC_DATA_INDEX_COUNT];
+                }
                 else
                 {
                     filepath = Path.Combine(FileManager.UoFolderPath, "art.mul");
                     string idxpath = Path.Combine(FileManager.UoFolderPath, "artidx.mul");
 
                     if (File.Exists(filepath) && File.Exists(idxpath))
+                    {
                         _file = new UOFileMul(filepath, idxpath, Constants.MAX_STATIC_DATA_INDEX_COUNT);
+                    }
                 }
+
+                _file.FillEntries(ref Entries);
             });
         }
 
@@ -97,7 +104,7 @@ namespace ClassicUO.IO.Resources
 
             if (entry < _file.Length && entry >= 0)
             {
-                ref readonly UOFileIndex3D e = ref _file.Entries[entry];
+                ref readonly UOFileIndex3D e = ref GetValidRefEntry(entry);
 
                 address = _file.StartAddress.ToInt64() + e.Offset;
                 size = e.DecompressedLength == 0 ? e.Length : e.DecompressedLength;
@@ -148,15 +155,16 @@ namespace ClassicUO.IO.Resources
             imageRectangle.Width = 0;
             imageRectangle.Height = 0;
 
-            (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic + 0x4000);
+            ref readonly var entry = ref GetValidRefEntry(graphic + 0x4000);
 
-            if (length == 0)
+            if (entry.Length == 0)
             {
                 width = height = 0;
 
                 return _empty;
             }
 
+            _file.Seek(entry.Offset);
             _file.Skip(4);
             width = _file.ReadShort();
             height = _file.ReadShort();
@@ -290,15 +298,16 @@ namespace ClassicUO.IO.Resources
             imageRectangle.Width = 0;
             imageRectangle.Height = 0;
 
-            (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic + 0x4000);
+            ref readonly var entry = ref GetValidRefEntry(graphic + 0x4000);
 
-            if (length == 0)
+            if (entry.Length == 0)
             {
                 texture = new ArtTexture(imageRectangle, 0, 0);
 
                 return;
             }
 
+            _file.Seek(entry.Offset);
             _file.Skip(4);
             short width = _file.ReadShort();
             short height = _file.ReadShort();
@@ -445,14 +454,16 @@ namespace ClassicUO.IO.Resources
         private ushort[] ReadLandArt(ushort graphic)
         {
             graphic &= FileManager.GraphicMask;
-            (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic);
+            ref readonly var entry = ref GetValidRefEntry(graphic);
 
-            if (length == 0)
+            if (entry.Length == 0)
             {
                 Array.Clear(_landBytes, 0, _landBytes.Length);
 
                 return _landBytes;
             }
+
+            _file.Seek(entry.Offset);
 
             for (int i = 0; i < 22; i++)
             {

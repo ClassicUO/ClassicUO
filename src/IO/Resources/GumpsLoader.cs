@@ -34,7 +34,6 @@ namespace ClassicUO.IO.Resources
     internal class GumpsLoader : ResourceLoader<UOTexture16>
     {
         private UOFile _file;
-        //private readonly List<uint> _usedIndex = new List<uint>();
 
         public override Task Load()
         {
@@ -44,7 +43,8 @@ namespace ClassicUO.IO.Resources
 
                 if (File.Exists(path))
                 {
-                    _file = new UOFileUop(path, ".tga", Constants.MAX_GUMP_DATA_INDEX_COUNT, true);
+                    _file = new UOFileUop(path, "build/gumpartlegacymul/{0:D8}.tga", true);
+                    Entries = new UOFileIndex3D[Constants.MAX_GUMP_DATA_INDEX_COUNT];
                     FileManager.UseUOPGumps = true;
                 }
                 else
@@ -53,9 +53,13 @@ namespace ClassicUO.IO.Resources
                     string pathidx = Path.Combine(FileManager.UoFolderPath, "Gumpidx.mul");
 
                     if (File.Exists(path) && File.Exists(pathidx))
+                    {
                         _file = new UOFileMul(path, pathidx, Constants.MAX_GUMP_DATA_INDEX_COUNT, 12);
+                    }
                     FileManager.UseUOPGumps = false;
                 }
+
+                _file.FillEntries(ref Entries);
 
                 string pathdef = Path.Combine(FileManager.UoFolderPath, "gump.def");
 
@@ -69,8 +73,8 @@ namespace ClassicUO.IO.Resources
                         int ingump = defReader.ReadInt();
 
                         if (ingump < 0 || ingump >= Constants.MAX_GUMP_DATA_INDEX_COUNT ||
-                            ingump >= _file.Entries.Length ||
-                            _file.Entries[ingump].Length > 0)
+                            ingump >= Entries.Length ||
+                            Entries[ingump].Length > 0)
                             continue;
 
                         int[] group = defReader.ReadGroup();
@@ -79,11 +83,11 @@ namespace ClassicUO.IO.Resources
                         {
                             int checkIndex = group[i];
 
-                            if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT || checkIndex >= _file.Entries.Length ||
-                                _file.Entries[checkIndex].Length <= 0)
+                            if (checkIndex < 0 || checkIndex >= Constants.MAX_GUMP_DATA_INDEX_COUNT || checkIndex >= Entries.Length ||
+                                Entries[checkIndex].Length <= 0)
                                 continue;
 
-                            _file.Entries[ingump] = _file.Entries[checkIndex];
+                            Entries[ingump] = Entries[checkIndex];
 
                             break;
                         }
@@ -111,71 +115,14 @@ namespace ClassicUO.IO.Resources
 
         public override void CleanResources()
         {
-            //for (int i = 0; i < _usedIndex.Count; i++)
-            //{
-            //    uint g = _usedIndex[i];
-            //    UOTexture texture = ResourceDictionary[g];
-            //    texture.Dispose();
-            //    _usedIndex.RemoveAt(i--);
-            //    ResourceDictionary.Remove(g);
-            //}
-
-            //int count = 0;
-
-            //long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
-
-            ////foreach (UOTexture t in ResourceDictionary.Values.Where(s => s.Ticks < ticks).Take(20).)
-            ////{
-            ////    t.Dispose();
-            ////}
-
-            //ResourceDictionary
-            //                  .Where(s => s.Value.Ticks < ticks)
-            //                  .Take(Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
-            //                  .ToList()
-            //                  .ForEach(s => ResourceDictionary.Remove(s.Key));
+           
         }
-
-        //public void ClearUnusedTextures()
-        //{
-        //    long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
-
-        //    ResourceDictionary
-        //       .Where(s => s.Value.Ticks < ticks)
-        //       .Take(Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
-        //       .ToList()
-        //       .ForEach(s =>
-        //        {
-        //            s.Value.Dispose();
-        //            ResourceDictionary.Remove(s.Key);
-        //        });
-
-        //    //int count = 0;
-        //    //long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
-
-        //    //for (int i = 0; i < _usedIndex.Count; i++)
-        //    //{
-        //    //    uint g = _usedIndex[i];
-        //    //    UOTexture texture = ResourceDictionary[g];
-
-        //    //    if (texture.Ticks < ticks)
-        //    //    {
-        //    //        texture.Dispose();
-        //    //        _usedIndex.RemoveAt(i--);
-        //    //        ResourceDictionary.Remove(g);
-
-        //    //        if (++count >= Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
-        //    //            break;
-        //    //    }
-        //    //}
-        //}
-
 
         public unsafe ushort[] GetGumpPixels(uint index, out int width, out int height)
         {
-            (int length, int extra, bool patcher) = _file.SeekByEntryIndex((int) index);
+            ref readonly var entry = ref GetValidRefEntry((int) index);
 
-            if (extra == -1)
+            if (entry.Extra == -1)
             {
                 width = 0;
                 height = 0;
@@ -183,12 +130,13 @@ namespace ClassicUO.IO.Resources
                 return null;
             }
 
-            width = (extra >> 16) & 0xFFFF;
-            height = extra & 0xFFFF;
+            width = (entry.Extra >> 16) & 0xFFFF;
+            height = entry.Extra & 0xFFFF;
 
             if (width == 0 || height == 0)
                 return null;
 
+            _file.Seek(entry.Offset);
             //width = PaddedRowWidth(16, width, 4) >> 1;
             IntPtr dataStart = _file.PositionAddress;
             ushort[] pixels = new ushort[width * height];
@@ -201,7 +149,7 @@ namespace ClassicUO.IO.Resources
                 if (y < height - 1)
                     gsize = lookuplist[y + 1] - lookuplist[y];
                 else
-                    gsize = (length >> 2) - lookuplist[y];
+                    gsize = (entry.Length >> 2) - lookuplist[y];
                 GumpBlock* gmul = (GumpBlock*) (dataStart + (lookuplist[y] << 2));
                 int pos = y * width;
 

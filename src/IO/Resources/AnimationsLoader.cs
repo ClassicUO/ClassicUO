@@ -195,7 +195,9 @@ namespace ClassicUO.IO.Resources
                     string pathidx = Path.Combine(FileManager.UoFolderPath, "anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".idx");
 
                     if (File.Exists(pathmul) && File.Exists(pathidx))
-                        _files[i] = new UOFileMul(pathmul, pathidx, un[i], i == 0 ? 6 : -1, false);
+                    {
+                        _files[i] = new UOFileMul(pathmul, pathidx, un[i], i == 0 ? 6 : -1);
+                    }
 
                     if (i > 0 && FileManager.ClientVersion >= ClientVersions.CV_7000)
                     {
@@ -203,7 +205,7 @@ namespace ClassicUO.IO.Resources
 
                         if (File.Exists(pathuop))
                         {
-                            _filesUop[i - 1] = new UOFileUop(pathuop, ".bin", Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT, keyword: "build/animationlegacyframe/{0:D6}/{1:D2}");
+                            _filesUop[i - 1] = new UOFileUop(pathuop, "build/animationlegacyframe/{0:D6}/{0:D2}.bin");
 
                             if (!loaduop)
                                 loaduop = true;
@@ -211,7 +213,8 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                LoadUop();
+                if (loaduop)
+                    LoadUop();
 
                 int animIdxBlockSize = UnsafeMemoryManager.SizeOf<AnimIdxBlock>();
                 UOFile idxfile0 = _files[0]?.IdxFile;
@@ -595,7 +598,6 @@ namespace ClassicUO.IO.Resources
             if (FileManager.ClientVersion <= ClientVersions.CV_60144)
                 return;
 
-
             for (ushort animID = 0; animID < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)
             {
                 for (byte grpID = 0; grpID < 100; grpID++)
@@ -606,10 +608,8 @@ namespace ClassicUO.IO.Resources
                     for (int i = 0; i < _filesUop.Length; i++)
                     {
                         var uopFile = _filesUop[i];
-                        if (uopFile != null && uopFile.TryGetHash(hash, out int index) && index < uopFile.Entries.Length)
+                        if (uopFile != null && uopFile.TryGetUOPData(hash, out var data))
                         {
-                            ref readonly var entry = ref uopFile.Entries[index];
-
                             if (DataIndex[animID] == null)
                             {
                                 DataIndex[animID] = new IndexAnimation
@@ -624,9 +624,9 @@ namespace ClassicUO.IO.Resources
 
                             g = new AnimationGroupUop
                             {
-                                Offset = (uint) entry.Offset,
-                                CompressedLength = (uint) entry.Length,
-                                DecompressedLength = (uint) entry.DecompressedLength,
+                                Offset = (uint)data.Offset,
+                                CompressedLength = (uint)data.CompressedLength,
+                                DecompressedLength = (uint)data.DecompressedLength,
                                 FileIndex = i,
                                 Direction = new AnimationDirection[5]
                             };
@@ -643,6 +643,11 @@ namespace ClassicUO.IO.Resources
             }
 
 
+            for (int i = 0; i < _filesUop.Length; i++)
+            {
+                _filesUop[i]?.ClearHashes();
+            }
+
             string animationSequencePath = Path.Combine(FileManager.UoFolderPath, "AnimationSequence.uop");
 
             if (!File.Exists(animationSequencePath))
@@ -652,12 +657,14 @@ namespace ClassicUO.IO.Resources
                 return;
             }
 
-            UOFileUop animSeq = new UOFileUop(animationSequencePath, ".bin", Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT);
+            UOFileUop animSeq = new UOFileUop(animationSequencePath, "build/animationsequence/{0:D8}.bin");
+            UOFileIndex3D[] animseqEntries = new UOFileIndex3D[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT];
+            animSeq.FillEntries(ref animseqEntries);
             DataReader reader = new DataReader();
 
-            for (int i = 0; i < animSeq.Entries.Length; i++)
+            for (int i = 0; i < animseqEntries.Length; i++)
             {
-                ref readonly UOFileIndex3D entry = ref animSeq.Entries[i];
+                ref readonly UOFileIndex3D entry = ref animseqEntries[i];
 
                 if (entry.Offset == 0)
                     continue;
@@ -1933,17 +1940,19 @@ namespace ClassicUO.IO.Resources
 
     internal readonly struct UopFileData
     {
-        public UopFileData(uint offset, uint clen, uint dlen, int index)
+        public UopFileData(long offset, int clen, int dlen, int index, int extra)
         {
             Offset = offset;
             CompressedLength = clen;
             DecompressedLength = dlen;
             FileIndex = index;
+            Extra = extra;
         }
 
-        public readonly uint Offset;
-        public readonly uint CompressedLength;
-        public readonly uint DecompressedLength;
+        public readonly long Offset;
+        public readonly int CompressedLength;
+        public readonly int DecompressedLength;
         public readonly int FileIndex;
+        public readonly int Extra;
     }
 }

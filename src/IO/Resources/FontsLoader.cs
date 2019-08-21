@@ -89,7 +89,7 @@ namespace ClassicUO.IO.Resources
         {
             return Task.Run(() =>
             {
-                UOFileMul fonts = new UOFileMul(Path.Combine(FileManager.UoFolderPath, "fonts.mul"), false);
+                UOFileMul fonts = new UOFileMul(Path.Combine(FileManager.UoFolderPath, "fonts.mul"));
                 UOFileMul[] uniFonts = new UOFileMul[20];
 
                 for (int i = 0; i < 20; i++)
@@ -98,7 +98,7 @@ namespace ClassicUO.IO.Resources
 
                     if (File.Exists(path))
                     {
-                        uniFonts[i] = new UOFileMul(path, false);
+                        uniFonts[i] = new UOFileMul(path);
                         _unicodeFontAddress[i] = uniFonts[i].StartAddress;
                         _unicodeFontSize[i] = uniFonts[i].Length;
                     }
@@ -187,7 +187,7 @@ namespace ClassicUO.IO.Resources
             });
         }
 
-        protected override void CleanResources()
+        public override void CleanResources()
         {
             // do nothing
         }

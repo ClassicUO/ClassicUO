@@ -26,34 +26,33 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
+using ClassicUO.IO.Resources;
+
 namespace ClassicUO.IO
 {
     internal class UOFileUop : UOFile
     {
         private const uint UOP_MAGIC_NUMBER = 0x50594D;
-        private readonly string _extension;
+        private readonly string _pattern;
         private readonly bool _hasExtra;
-        private int _count;
-        private readonly Dictionary<ulong, int> _hashes = new Dictionary<ulong, int>();
-        private string _hashPattern;
+        private readonly Dictionary<ulong, UopFileData> _hashes = new Dictionary<ulong, UopFileData>();
 
-        public UOFileUop(string path, string extension, int count = 0, bool hasextra = false, bool loadentries = true, string keyword = null, int subCount = 0) : base(path)
+        public UOFileUop(string path, string pattern, bool hasextra = false) : base(path)
         {
-            _extension = extension;
-            _count = count;
+            _pattern = pattern;
             _hasExtra = hasextra;
-            _hashPattern = keyword;
-            Load(loadentries);
+            Load();
         }
 
+        public bool TryGetUOPData(ulong hash, out UopFileData data)
+            => _hashes.TryGetValue(hash, out data);
 
-        public bool TryGetHash(ulong hash, out int index)
-            => _hashes.TryGetValue(hash, out index);
+        public int TotalEntriesCount { get; private set; }
 
-
-        protected override void Load(bool loadentries = true)
+        protected override void Load()
         {
-            base.Load(loadentries);
+            base.Load();
+
             Seek(0);
 
             if (ReadUInt() != UOP_MAGIC_NUMBER)
@@ -65,79 +64,10 @@ namespace ClassicUO.IO
             uint block_size = ReadUInt();
             int count = ReadInt();
 
-            if (_count <= 0)
-                _count = count;
-            Entries = new UOFileIndex3D[_count];
-
-            if (string.IsNullOrWhiteSpace(_hashPattern))
-            {
-                string pattern = Path.GetFileNameWithoutExtension(FilePath).ToLowerInvariant();
-
-                for (int i = 0; i < _count; i++)
-                {
-                    string file = string.Format("build/{0}/{1:D8}{2}", pattern, i, _extension);
-                    ulong hash = CreateHash(file);
-
-                    if (!_hashes.ContainsKey(hash))
-                        _hashes.Add(hash, i);
-                }
-            }
-            else
-            {
-                string[] parts = _hashPattern.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
-
-                if (parts.Length >= 3)
-                {
-                    // 0 == build
-                    // 1 == NAME
-                    // 2 == format_count
-
-                    int subCount = 0;
-                    if (parts.Length >= 4)
-                    {
-                        // 3 == format_sub_count
-                        string sub = parts[3];
-                        int start = sub.IndexOf('[') + 1;
-                        int end = sub.IndexOf(']');
-
-                        subCount = Convert.ToInt32(sub.Substring(start, end - start));
-                    }
-
-                    if (subCount == 0)
-                    {
-                        for (int i = 0; i < _count; i++)
-                        {
-                            string file = string.Format(_hashPattern, i, _extension);
-                            ulong hash = CreateHash(file);
-
-                            if (!_hashes.ContainsKey(hash))
-                                _hashes.Add(hash, i);
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 0; i < _count; i++)
-                        {
-                            for (int j = 0; j < subCount; j++)
-                            {
-                                string file = string.Format(_hashPattern, i, j, _extension);
-                                ulong hash = CreateHash(file);
-
-                                if (!_hashes.ContainsKey(hash))
-                                    _hashes.Add(hash, i);
-                            }
-                        }
-                    }
-
-                  
-                }
-            }
-
-           
 
             Seek(nextBlock);
             int total = 0;
-
+            int real_total = 0;
             do
             {
                 int filesCount = ReadInt();
@@ -158,33 +88,52 @@ namespace ClassicUO.IO
                     if (offset == 0)
                         continue;
 
-                    if (_hashes.TryGetValue(hash, out int idx))
+                    real_total++;
+                    offset += headerLength;
+                    if (_hasExtra)
                     {
-                        if (idx < 0 || idx > Entries.Length)
-                            throw new IndexOutOfRangeException("hashes dictionary and files collection have different count of entries!");
+                        long curpos = Position;
+                        Seek(offset);
+                        int extra1 = ReadInt();
+                        int extra2 = ReadInt();
 
-                        offset += headerLength;
+                        _hashes.Add(hash, new UopFileData(offset + 8, compressedLength - 8, decompressedLength, 0, (extra1 << 16) | extra2));
 
-                        // extra?
-                        if (_hasExtra)
-                        {
-                            long curpos = Position;
-                            Seek(offset);
-                            int extra1 = ReadInt();
-                            int extra2 = ReadInt();
-
-                            Entries[idx] = new UOFileIndex3D(offset + 8, length - 8, decompressedLength, (extra1 << 16) | extra2);
-
-                            Seek(curpos);
-                        }
-                        else
-                            Entries[idx] = new UOFileIndex3D(offset, length, decompressedLength);
-
+                        Seek(curpos);
                     }
+                    else
+                        _hashes.Add(hash, new UopFileData(offset, compressedLength, decompressedLength, 0, 0));
                 }
 
                 Seek(nextBlock);
             } while (nextBlock != 0);
+
+            TotalEntriesCount = real_total;
+        }
+
+        public void ClearHashes()
+            => _hashes.Clear();
+
+        public override void Dispose()
+        {
+            ClearHashes();
+            base.Dispose();
+        }
+
+        public override void FillEntries(ref UOFileIndex3D[] entries)
+        {
+            for (int i = 0; i < entries.Length; i++)
+            {
+                string file = string.Format(_pattern, i);
+                ulong hash = CreateHash(file);
+
+                if (_hashes.TryGetValue(hash, out var data))
+                {
+                    entries[i] = new UOFileIndex3D(data.Offset, data.CompressedLength, data.DecompressedLength, data.Extra);
+                }
+            }
+
+            ClearHashes();
         }
 
         internal static ulong CreateHash(string s)

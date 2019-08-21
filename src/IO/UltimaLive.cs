@@ -494,13 +494,13 @@ namespace ClassicUO.IO
 
         internal class ULFileMul : UOFileMul
         {
-            public ULFileMul(string file, bool isstaticmul) : base(file, isstaticmul)
+            public ULFileMul(string file, bool isstaticmul) : base(file)
             {
+                LoadFile(isstaticmul);
             }
 
-            protected override void Load(bool loadentries = false) //loadentries here is for staticmul particular memory preloading
+            protected override void Load() //loadentries here is for staticmul particular memory preloading
             {
-                LoadFile(loadentries);
             }
 
             private unsafe void LoadFile(bool isstaticmul)
@@ -592,7 +592,7 @@ namespace ClassicUO.IO
             internal (UOFile[], UOFileMul[], UOFileMul[]) GetFilesReference => (_filesMap, _filesIdxStatics, _filesStatics);
             internal uint NumMaps { get; }
 
-            protected override void CleanResources()
+            public override void CleanResources()
             {
                 if (_filesStaticsStream != null)
                 {
@@ -687,23 +687,23 @@ namespace ClassicUO.IO
                         CreateNewPersistantMap(mapID, mapPath, staidxPath, staticsPath);
                     else
                     {
-                        if (mapfile is UOFileUop uop)
-                        {
-                            Log.Message(LogTypes.Trace, $"UltimaLive -> converting file:\t{mapPath} from {uop.FilePath}");
+                        //if (mapfile is UOFileUop uop)
+                        //{
+                        //    Log.Message(LogTypes.Trace, $"UltimaLive -> converting file:\t{mapPath} from {uop.FilePath}");
 
-                            using (FileStream stream = File.Create(mapPath))
-                            {
-                                for (int x = 0; x < uop.Entries.Length; x++)
-                                {
-                                    uop.Seek(uop.Entries[x].Offset);
-                                    stream.Write(uop.ReadArray(uop.Entries[x].Length), 0, uop.Entries[x].Length);
-                                }
+                        //    using (FileStream stream = File.Create(mapPath))
+                        //    {
+                        //        for (int x = 0; x < Entries.Length; x++)
+                        //        {
+                        //            uop.Seek(Entries[x].Offset);
+                        //            stream.Write(uop.ReadArray(Entries[x].Length), 0, uop.Entries[x].Length);
+                        //        }
 
-                                stream.Flush();
-                            }
-                        }
-                        else
-                            CopyFile(oldmap, mapPath);
+                        //        stream.Flush();
+                        //    }
+                        //}
+                        //else
+                        //    CopyFile(oldmap, mapPath);
                     }
                 }
 
@@ -799,8 +799,8 @@ namespace ClassicUO.IO
                     {
                         fileNumber = shifted;
 
-                        if (shifted < file.Entries.Length)
-                            uopoffset = (ulong) file.Entries[shifted].Offset;
+                        //if (shifted < file.Entries.Length)
+                        //    uopoffset = (ulong) file.Entries[shifted].Offset;
                     }
                 }
 
