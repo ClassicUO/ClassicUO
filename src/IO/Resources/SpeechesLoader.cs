@@ -47,8 +47,8 @@ namespace ClassicUO.IO.Resources
 
                 while (file.Position < file.Length)
                 {
-                    int id = (file.ReadByte() << 8) | file.ReadByte();
-                    int length = (file.ReadByte() << 8) | file.ReadByte();
+                    int id = file.ReadUShortReversed();
+                    int length = file.ReadUShortReversed();
 
                     if (length > 0)
                     {
