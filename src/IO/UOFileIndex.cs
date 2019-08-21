@@ -26,9 +26,9 @@ using System.Runtime.InteropServices;
 namespace ClassicUO.IO
 {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct UOFileIndex3D
+    internal readonly struct UOFileIndex
     {
-        public UOFileIndex3D(long offset, int length, int decompressed, int extra = 0)
+        public UOFileIndex(long offset, int length, int decompressed, int extra = 0)
         {
             Offset = offset;
             Length = length;
@@ -41,7 +41,7 @@ namespace ClassicUO.IO
         public readonly int DecompressedLength;
         public readonly int Extra;
 
-        public static readonly UOFileIndex3D Invalid = new UOFileIndex3D(0, 0, 0, 0);
+        public static readonly UOFileIndex Invalid = new UOFileIndex(0, 0, 0, 0);
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

@@ -578,7 +578,7 @@ namespace ClassicUO.IO
                 MapsDefaultSize = new int[NumMaps, 2];
                 MapBlocksSize = new int[NumMaps, 2];
                 BlockData = new IndexMap[NumMaps][];
-                Entries = new UOFileIndex3D[NumMaps][];
+                Entries = new UOFileIndex[NumMaps][];
 
                 for (int i = 0; i < NumMaps; i++)
                 {
@@ -594,7 +594,7 @@ namespace ClassicUO.IO
             internal (UOFile[], UOFileMul[], UOFileMul[]) GetFilesReference => (_filesMap, _filesIdxStatics, _filesStatics);
             internal uint NumMaps { get; }
 
-            internal new UOFileIndex3D[][] Entries;
+            internal new UOFileIndex[][] Entries;
 
             public override void CleanResources()
             {
@@ -694,7 +694,7 @@ namespace ClassicUO.IO
                     {
                         if (mapfile is UOFileUop uop)
                         {
-                            Entries[mapID] = new UOFileIndex3D[uop.TotalEntriesCount];
+                            Entries[mapID] = new UOFileIndex[uop.TotalEntriesCount];
                             uop.FillEntries(ref Entries[mapID]);
 
                             Log.Message(LogTypes.Trace, $"UltimaLive -> converting file:\t{mapPath} from {uop.FilePath}");

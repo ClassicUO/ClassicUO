@@ -52,7 +52,7 @@ namespace ClassicUO.IO.Resources
                 if (File.Exists(filepath))
                 {
                     _file = new UOFileUop(filepath, "build/artlegacymul/{0:D8}.tga");
-                    Entries = new UOFileIndex3D[Constants.MAX_STATIC_DATA_INDEX_COUNT];
+                    Entries = new UOFileIndex[Constants.MAX_STATIC_DATA_INDEX_COUNT];
                 }
                 else
                 {
@@ -104,7 +104,7 @@ namespace ClassicUO.IO.Resources
 
             if (entry < _file.Length && entry >= 0)
             {
-                ref readonly UOFileIndex3D e = ref GetValidRefEntry(entry);
+                ref readonly UOFileIndex e = ref GetValidRefEntry(entry);
 
                 address = _file.StartAddress.ToInt64() + e.Offset;
                 size = e.DecompressedLength == 0 ? e.Length : e.DecompressedLength;

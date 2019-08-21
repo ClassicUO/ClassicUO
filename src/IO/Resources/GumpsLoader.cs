@@ -44,7 +44,7 @@ namespace ClassicUO.IO.Resources
                 if (File.Exists(path))
                 {
                     _file = new UOFileUop(path, "build/gumpartlegacymul/{0:D8}.tga", true);
-                    Entries = new UOFileIndex3D[Constants.MAX_GUMP_DATA_INDEX_COUNT];
+                    Entries = new UOFileIndex[Constants.MAX_GUMP_DATA_INDEX_COUNT];
                     FileManager.UseUOPGumps = true;
                 }
                 else

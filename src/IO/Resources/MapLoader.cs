@@ -45,7 +45,7 @@ namespace ClassicUO.IO.Resources
         private readonly UOFileMul[] _staDifi = new UOFileMul[MAPS_COUNT];
         private readonly UOFileMul[] _staDifl = new UOFileMul[MAPS_COUNT];
 
-        public new UOFileIndex3D[][] Entries = new UOFileIndex3D[6][]; 
+        public new UOFileIndex[][] Entries = new UOFileIndex[6][]; 
 
         public IndexMap[][] BlockData { get; private protected set; } = new IndexMap[MAPS_COUNT][];
 
@@ -99,7 +99,7 @@ namespace ClassicUO.IO.Resources
                     if (File.Exists(path))
                     {
                         _filesMap[i] = new UOFileUop(path, $"build/map{i}legacymul/{{0:D8}}.dat");
-                        Entries[i] = new UOFileIndex3D[((UOFileUop) _filesMap[i]).TotalEntriesCount];
+                        Entries[i] = new UOFileIndex[((UOFileUop) _filesMap[i]).TotalEntriesCount];
                         ((UOFileUop)_filesMap[i]).FillEntries(ref Entries[i], false);
                         foundOneMap = true;
                     }

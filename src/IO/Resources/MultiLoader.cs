@@ -50,7 +50,7 @@ namespace ClassicUO.IO.Resources
                 {
                     Count = Constants.MAX_MULTI_DATA_INDEX_COUNT;
                     _file = new UOFileUop(uopPath, "build/multicollection/{0:D6}.bin");
-                    Entries = new UOFileIndex3D[Count];
+                    Entries = new UOFileIndex[Count];
                     _reader = new DataReader();
                 }
                 else

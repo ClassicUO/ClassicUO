@@ -86,7 +86,7 @@ namespace ClassicUO.IO
                 Log.Message(LogTypes.Error, $"{FilePath}  size must be > 0");
         }
 
-        public virtual void FillEntries(ref UOFileIndex3D[] entries)
+        public virtual void FillEntries(ref UOFileIndex[] entries)
         {
 
         }

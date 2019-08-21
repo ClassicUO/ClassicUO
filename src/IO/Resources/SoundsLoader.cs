@@ -49,7 +49,7 @@ namespace ClassicUO.IO.Resources
                 if (File.Exists(path))
                 {
                     _file = new UOFileUop(path, "build/soundlegacymul/{0:D8}.dat");
-                    Entries = new UOFileIndex3D[Constants.MAX_SOUND_DATA_INDEX_COUNT];
+                    Entries = new UOFileIndex[Constants.MAX_SOUND_DATA_INDEX_COUNT];
                 }
                 else
                 {
@@ -91,13 +91,13 @@ namespace ClassicUO.IO.Resources
                                 if (checkIndex < -1 || checkIndex >= Constants.MAX_SOUND_DATA_INDEX_COUNT)
                                     continue;
 
-                                ref UOFileIndex3D ind = ref Entries[index];
+                                ref UOFileIndex ind = ref Entries[index];
 
                                 if (checkIndex == -1)
                                     ind = default;
                                 else
                                 {
-                                    ref readonly UOFileIndex3D outInd = ref Entries[checkIndex];
+                                    ref readonly UOFileIndex outInd = ref Entries[checkIndex];
 
                                     if (outInd.Length == 0)
                                         continue;

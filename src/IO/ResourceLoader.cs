@@ -49,21 +49,21 @@ namespace ClassicUO.IO
         {
         }
 
-        public UOFileIndex3D[] Entries;
+        public UOFileIndex[] Entries;
 
         public bool IsDisposed { get; private set; }
 
         public abstract Task Load();
 
-        public ref readonly UOFileIndex3D GetValidRefEntry(int index)
+        public ref readonly UOFileIndex GetValidRefEntry(int index)
         {
             if (index < 0 || Entries == null || index >= Entries.Length)
-                return ref UOFileIndex3D.Invalid;
+                return ref UOFileIndex.Invalid;
 
-            ref readonly UOFileIndex3D entry = ref Entries[index];
+            ref readonly UOFileIndex entry = ref Entries[index];
 
             if (entry.Offset < 0 || entry.Length <= 0)
-                return ref UOFileIndex3D.Invalid;
+                return ref UOFileIndex.Invalid;
 
             return ref entry;
         }

@@ -36,7 +36,7 @@ namespace ClassicUO.IO
         private const uint UOP_MAGIC_NUMBER = 0x50594D;
         private readonly string _pattern;
         private readonly bool _hasExtra;
-        private readonly Dictionary<ulong, UopFileData> _hashes = new Dictionary<ulong, UopFileData>();
+        private readonly Dictionary<ulong, UOFileIndex> _hashes = new Dictionary<ulong, UOFileIndex>();
 
         public UOFileUop(string path, string pattern, bool hasextra = false) : base(path)
         {
@@ -45,7 +45,7 @@ namespace ClassicUO.IO
             Load();
         }
 
-        public bool TryGetUOPData(ulong hash, out UopFileData data)
+        public bool TryGetUOPData(ulong hash, out UOFileIndex data)
             => _hashes.TryGetValue(hash, out data);
 
         public int TotalEntriesCount { get; private set; }
@@ -98,12 +98,12 @@ namespace ClassicUO.IO
                         int extra1 = ReadInt();
                         int extra2 = ReadInt();
 
-                        _hashes.Add(hash, new UopFileData(offset + 8, compressedLength - 8, decompressedLength, 0, (extra1 << 16) | extra2));
+                        _hashes.Add(hash, new UOFileIndex(offset + 8, compressedLength - 8, decompressedLength, (extra1 << 16) | extra2));
 
                         Seek(curpos);
                     }
                     else
-                        _hashes.Add(hash, new UopFileData(offset, compressedLength, decompressedLength, 0, 0));
+                        _hashes.Add(hash, new UOFileIndex(offset, compressedLength, decompressedLength, 0));
                 }
 
                 Seek(nextBlock);
@@ -121,7 +121,7 @@ namespace ClassicUO.IO
             base.Dispose();
         }
 
-        public override void FillEntries(ref UOFileIndex3D[] entries)
+        public override void FillEntries(ref UOFileIndex[] entries)
         {
             for (int i = 0; i < entries.Length; i++)
             {
@@ -130,12 +130,12 @@ namespace ClassicUO.IO
 
                 if (_hashes.TryGetValue(hash, out var data))
                 {
-                    entries[i] = new UOFileIndex3D(data.Offset, data.CompressedLength, data.DecompressedLength, data.Extra);
+                    entries[i] = data;
                 }
             }
         }
 
-        public void FillEntries(ref UOFileIndex3D[] entries, bool clearHashes)
+        public void FillEntries(ref UOFileIndex[] entries, bool clearHashes)
         {
             FillEntries(ref entries);
 

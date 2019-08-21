@@ -43,15 +43,15 @@ namespace ClassicUO.IO
         public UOFile IdxFile => _idxFile;
 
 
-        public override void FillEntries(ref UOFileIndex3D[] entries)
+        public override void FillEntries(ref UOFileIndex[] entries)
         {
             UOFile file = _idxFile ?? (UOFile)this;
 
             int count = (int)file.Length / 12;
-            entries = new UOFileIndex3D[count];
+            entries = new UOFileIndex[count];
 
             for (int i = 0; i < count; i++)
-                entries[i] = new UOFileIndex3D(file.ReadInt(), file.ReadInt(), 0, file.ReadInt());
+                entries[i] = new UOFileIndex(file.ReadInt(), file.ReadInt(), 0, file.ReadInt());
         }
 
         public override void Dispose()
@@ -67,7 +67,7 @@ namespace ClassicUO.IO
                 Load();
             }
 
-            public override void FillEntries(ref UOFileIndex3D[] entries)
+            public override void FillEntries(ref UOFileIndex[] entries)
             {
             }
         }

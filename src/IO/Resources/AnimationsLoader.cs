@@ -625,7 +625,7 @@ namespace ClassicUO.IO.Resources
                             g = new AnimationGroupUop
                             {
                                 Offset = (uint)data.Offset,
-                                CompressedLength = (uint)data.CompressedLength,
+                                CompressedLength = (uint)data.Length,
                                 DecompressedLength = (uint)data.DecompressedLength,
                                 FileIndex = i,
                                 Direction = new AnimationDirection[5]
@@ -658,13 +658,13 @@ namespace ClassicUO.IO.Resources
             }
 
             UOFileUop animSeq = new UOFileUop(animationSequencePath, "build/animationsequence/{0:D8}.bin");
-            UOFileIndex3D[] animseqEntries = new UOFileIndex3D[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT];
+            UOFileIndex[] animseqEntries = new UOFileIndex[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT];
             animSeq.FillEntries(ref animseqEntries);
             DataReader reader = new DataReader();
 
             for (int i = 0; i < animseqEntries.Length; i++)
             {
-                ref readonly UOFileIndex3D entry = ref animseqEntries[i];
+                ref readonly UOFileIndex entry = ref animseqEntries[i];
 
                 if (entry.Offset == 0)
                     continue;
@@ -1932,23 +1932,5 @@ namespace ClassicUO.IO.Resources
         public readonly ushort Graphic;
         public readonly ushort Gump;
         public readonly ushort Color;
-    }
-
-    internal readonly struct UopFileData
-    {
-        public UopFileData(long offset, int clen, int dlen, int index, int extra)
-        {
-            Offset = offset;
-            CompressedLength = clen;
-            DecompressedLength = dlen;
-            FileIndex = index;
-            Extra = extra;
-        }
-
-        public readonly long Offset;
-        public readonly int CompressedLength;
-        public readonly int DecompressedLength;
-        public readonly int FileIndex;
-        public readonly int Extra;
     }
 }
