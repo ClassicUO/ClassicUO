@@ -3391,6 +3391,7 @@ namespace ClassicUO.Network
             byte planes = p.ReadByte();
 
             DataReader stream = new DataReader();
+            ref byte[] buffer = ref p.ToArray();
 
             for (int plane = 0; plane < planes; plane++)
             {
@@ -3402,7 +3403,6 @@ namespace ClassicUO.Network
 
                 if (clen <= 0) continue;
 
-                ref byte[] buffer = ref p.ToArray();
                 byte[] decompressedBytes = new byte[dlen];
 
                 fixed (byte* srcPtr = &buffer[p.Position], destPtr = decompressedBytes)
