@@ -589,7 +589,6 @@ namespace ClassicUO.IO
 
                 _writer = new AsyncWriterTasked(this, feedCancel);
                 _twriter = Task.Run(_writer.Loop);// new Thread(_writer.Loop) {Name = "UL_File_Writer", IsBackground = true};
-                _twriter.Start();
             }
 
             internal (UOFile[], UOFileMul[], UOFileMul[]) GetFilesReference => (_filesMap, _filesIdxStatics, _filesStatics);
@@ -866,7 +865,7 @@ namespace ClassicUO.IO
                     {
                         while (_toWrite.TryDequeue(out (int, long, byte[]) deq))
                             WriteArray(deq.Item1, deq.Item2, deq.Item3);
-                        m_Signal.WaitOne(25, false);
+                        m_Signal.WaitOne(10, false);
                     }
                 }
 
