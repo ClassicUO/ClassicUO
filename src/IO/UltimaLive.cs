@@ -598,12 +598,6 @@ namespace ClassicUO.IO
 
             public override void CleanResources()
             {
-                if (_filesStaticsStream != null)
-                {
-                    for (int i = _filesStaticsStream.Length - 1; i >= 0; --i) _filesStaticsStream[i]?.Dispose();
-                    _filesStaticsStream = null;
-                }
-
                 try
                 {
                     feedCancel?.Cancel();
@@ -614,6 +608,11 @@ namespace ClassicUO.IO
                 }
                 catch
                 {
+                }
+                if (_filesStaticsStream != null)
+                {
+                    for (int i = _filesStaticsStream.Length - 1; i >= 0; --i) _filesStaticsStream[i]?.Dispose();
+                    _filesStaticsStream = null;
                 }
             }
 
