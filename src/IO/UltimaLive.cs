@@ -66,7 +66,7 @@ namespace ClassicUO.IO
 
         internal static void Enable()
         {
-            Log.Message(LogTypes.Trace, "Setup packet for Ultima live");
+            Log.Message(LogTypes.Trace, "Setup packet for UltimaLive");
             PacketHandlers.ToClient.Add(0x3F, OnUltimaLivePacket);
             PacketHandlers.ToClient.Add(0x40, OnUpdateTerrainPacket);
         }
@@ -313,7 +313,6 @@ namespace ClassicUO.IO
                 }
 
                 case 0x02: //Live login confirmation
-
                 {
                     if (p.Length < 43) //fixed size
                         return;
@@ -567,12 +566,14 @@ namespace ClassicUO.IO
 
         internal class ULMapLoader : MapLoader
         {
-            private readonly Thread _twriter;
+            private protected readonly CancellationTokenSource feedCancel;
+            private readonly Task _twriter;
             private FileStream[] _filesStaticsStream;
-            internal AsyncWriterThread _writer;
+            internal AsyncWriterTasked _writer;
 
             public ULMapLoader(uint maps)
             {
+                feedCancel = new CancellationTokenSource();
                 NumMaps = maps;
                 int[,] old = MapsDefaultSize;
                 MapsDefaultSize = new int[NumMaps, 2];
@@ -586,8 +587,8 @@ namespace ClassicUO.IO
                         MapsDefaultSize[i, x] = i < old.Length ? old[i, x] : old[0, x];
                 }
 
-                _writer = new AsyncWriterThread(this);
-                _twriter = new Thread(_writer.Loop) {Name = "UL_File_Writer", IsBackground = true};
+                _writer = new AsyncWriterTasked(this, feedCancel);
+                _twriter = Task.Run(_writer.Loop);// new Thread(_writer.Loop) {Name = "UL_File_Writer", IsBackground = true};
                 _twriter.Start();
             }
 
@@ -606,7 +607,11 @@ namespace ClassicUO.IO
 
                 try
                 {
-                    _twriter?.Abort();
+                    feedCancel?.Cancel();
+                    _twriter?.Wait();
+
+                    feedCancel?.Dispose();
+                    _twriter?.Dispose();
                 }
                 catch
                 {
@@ -842,20 +847,22 @@ namespace ClassicUO.IO
                 data.OriginalStaticCount = realstaticcount;
             }
 
-            internal class AsyncWriterThread
+            internal class AsyncWriterTasked
             {
                 private readonly ULMapLoader _Map;
                 private readonly AutoResetEvent m_Signal = new AutoResetEvent(false);
                 internal ConcurrentQueue<(int, long, byte[])> _toWrite = new ConcurrentQueue<(int, long, byte[])>();
+                private readonly CancellationTokenSource _token;
 
-                public AsyncWriterThread(ULMapLoader map)
+                public AsyncWriterTasked(ULMapLoader map, CancellationTokenSource token)
                 {
                     _Map = map;
+                    _token = token;
                 }
 
                 public void Loop()
                 {
-                    while (_UL != null && !_Map.IsDisposed)
+                    while (_UL != null && !_Map.IsDisposed && !_token.IsCancellationRequested)
                     {
                         while (_toWrite.TryDequeue(out (int, long, byte[]) deq))
                             WriteArray(deq.Item1, deq.Item2, deq.Item3);
