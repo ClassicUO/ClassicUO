@@ -27,6 +27,7 @@ using System.IO;
 using System.Text;
 
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 namespace ClassicUO.IO
 {
@@ -134,6 +135,25 @@ namespace ClassicUO.IO
             }
 
             ClearHashes();
+        }
+
+        //public unsafe T[] GetData<T>(int compressedSize, int uncompressedSize) where T : struct
+        //{
+        //    T[] data = new T[uncompressedSize];
+        //    IntPtr destPtr = (IntPtr) UnsafeMemoryManager.AsPointer(ref data);
+        //    ZLib.Decompress(PositionAddress, compressedSize, 0, destPtr, uncompressedSize);
+
+        //    return data;
+        //}
+
+        public unsafe byte[] GetData(int compressedSize, int uncompressedSize) 
+        {
+            byte[] data = new byte[uncompressedSize];
+
+            fixed (byte* destPtr = data)
+                ZLib.Decompress(PositionAddress, compressedSize, 0, (IntPtr) destPtr, uncompressedSize);
+
+            return data;
         }
 
         internal static ulong CreateHash(string s)

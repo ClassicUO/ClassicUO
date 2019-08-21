@@ -670,10 +670,9 @@ namespace ClassicUO.IO.Resources
                     continue;
 
                 animSeq.Seek(entry.Offset);
-                byte[] buffer = animSeq.ReadArray<byte>(entry.Length);
-                int decLen = entry.DecompressedLength;
-                byte[] decbuffer = new byte[decLen];
-                ZLib.Decompress(buffer, 0, decbuffer, decbuffer.Length);
+
+                byte[] decbuffer = animSeq.GetData(entry.Length, entry.DecompressedLength);
+
                 reader.SetData(decbuffer, decbuffer.Length);
                 uint animID = reader.ReadUInt();
                 reader.Skip(48);
@@ -1188,9 +1187,8 @@ namespace ClassicUO.IO.Resources
             int decLen = (int)animData.DecompressedLength;
             var file = _filesUop[animData.FileIndex];
             file.Seek(animData.Offset);
-            byte[] buffer = file.ReadArray<byte>((int)animData.CompressedLength);
-            byte[] decbuffer = new byte[decLen];
-            ZLib.Decompress(buffer, 0, decbuffer, decLen);
+
+            byte[] decbuffer = file.GetData((int) animData.CompressedLength, decLen);
 
 
             fixed (byte* ptr = decbuffer)
@@ -1476,9 +1474,7 @@ namespace ClassicUO.IO.Resources
                         int decLen = (int)animDataStruct.DecompressedLength;
                         var file = _filesUop[animDataStruct.FileIndex];
                         file.Seek(animDataStruct.Offset);
-                        byte[] buffer = file.ReadArray<byte>((int)animDataStruct.CompressedLength);
-                        byte[] decbuffer = new byte[decLen];
-                        ZLib.Decompress(buffer, 0, decbuffer, decLen);
+                        byte[] decbuffer = file.GetData((int) animDataStruct.CompressedLength, decLen);
 
                         fixed (byte* ptr = decbuffer)
                         {

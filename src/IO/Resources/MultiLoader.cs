@@ -118,7 +118,7 @@ namespace ClassicUO.IO.Resources
             int count;
             ref readonly var entry = ref GetValidRefEntry(graphic);
 
-            if (_file is UOFileUop)
+            if (_file is UOFileUop uop)
             {
                 long offset = entry.Offset;
                 int csize = entry.Length;
@@ -129,9 +129,8 @@ namespace ClassicUO.IO.Resources
                     uopValid = true;
 
                     _file.Seek(offset);
-                    byte[] cdata = _file.ReadArray<byte>(csize);
-                    byte[] ddata = new byte[dsize];
-                    ZLib.Decompress(cdata, 0, ddata, dsize);
+
+                    byte[] ddata = uop.GetData(csize, dsize);
 
                     _reader.SetData(ddata, dsize);
                     _reader.Skip(4);
