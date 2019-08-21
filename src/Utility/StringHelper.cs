@@ -23,6 +23,7 @@
 
 using System.Text;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Utility
 {
@@ -107,6 +108,7 @@ namespace ClassicUO.Utility
             return Encoding.UTF8.GetString(data, (int) (ptr - data));
         }
 
+        [MethodImpl(256)]
         public static bool IsSafeChar(int c)
         {
             return c >= 0x20 && c < 0xFFFE;
