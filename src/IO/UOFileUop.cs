@@ -133,8 +133,14 @@ namespace ClassicUO.IO
                     entries[i] = new UOFileIndex3D(data.Offset, data.CompressedLength, data.DecompressedLength, data.Extra);
                 }
             }
+        }
 
-            ClearHashes();
+        public void FillEntries(ref UOFileIndex3D[] entries, bool clearHashes)
+        {
+            FillEntries(ref entries);
+
+            if (clearHashes)
+                ClearHashes();
         }
 
         //public unsafe T[] GetData<T>(int compressedSize, int uncompressedSize) where T : struct
