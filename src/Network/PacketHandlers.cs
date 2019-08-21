@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -3354,7 +3355,7 @@ namespace ClassicUO.Network
         {
         }
 
-        private static void CustomHouse(Packet p)
+        private static unsafe void CustomHouse(Packet p)
         {
             bool compressed = p.ReadByte() == 0x03;
             bool enableReponse = p.ReadBool();
@@ -3389,6 +3390,8 @@ namespace ClassicUO.Network
             short maxY = multi.MaxY;
             byte planes = p.ReadByte();
 
+            DataReader stream = new DataReader();
+
             for (int plane = 0; plane < planes; plane++)
             {
                 uint header = p.ReadUInt();
@@ -3402,16 +3405,10 @@ namespace ClassicUO.Network
                 ref byte[] buffer = ref p.ToArray();
                 byte[] decompressedBytes = new byte[dlen];
 
-                unsafe
-                {
-                    fixed (byte* srcPtr = &buffer[p.Position], destPtr = decompressedBytes)
-                        ZLib.Decompress((IntPtr)srcPtr, clen, 0, (IntPtr) destPtr, dlen);
-                }
-              
+                fixed (byte* srcPtr = &buffer[p.Position], destPtr = decompressedBytes)
+                    ZLib.Decompress((IntPtr)srcPtr, clen, 0, (IntPtr)destPtr, dlen);
 
-                Packet stream = new Packet(decompressedBytes, dlen);
-
-                // using (BinaryReader stream = new BinaryReader(new MemoryStream(decompressedBytes)))
+                stream.SetData(decompressedBytes, dlen);
                 {
                     p.Skip(clen);
                     ushort id = 0;
@@ -3420,10 +3417,10 @@ namespace ClassicUO.Network
                     switch (planeMode)
                     {
                         case 0:
-
-                            for (uint i = 0; i < decompressedBytes.Length / 5; i++)
+                            int c = dlen / 5;
+                            for (uint i = 0; i < c; i++)
                             {
-                                id = stream.ReadUShort();
+                                id = stream.ReadUShortReversed();
                                 x = stream.ReadSByte();
                                 y = stream.ReadSByte();
                                 z = stream.ReadSByte();
@@ -3446,9 +3443,10 @@ namespace ClassicUO.Network
                             else
                                 z = 0;
 
-                            for (uint i = 0; i < decompressedBytes.Length >> 2; i++)
+                            c = dlen >> 2;
+                            for (uint i = 0; i < c; i++)
                             {
-                                id = stream.ReadUShort();
+                                id = stream.ReadUShortReversed();
                                 x = stream.ReadSByte();
                                 y = stream.ReadSByte();
 
@@ -3491,9 +3489,10 @@ namespace ClassicUO.Network
                                 multiHeight = (short) (maxY - minY + 1);
                             }
 
-                            for (uint i = 0; i < decompressedBytes.Length >> 1; i++)
+                            c = dlen >> 1;
+                            for (uint i = 0; i < c; i++)
                             {
-                                id = stream.ReadUShort();
+                                id = stream.ReadUShortReversed();
                                 x = (sbyte) (i / multiHeight + offX);
                                 y = (sbyte) (i % multiHeight + offY);
 
@@ -3515,7 +3514,10 @@ namespace ClassicUO.Network
                     if (World.HouseManager.EntityIntoHouse(serial, World.Player))
                         Engine.SceneManager.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
                 }
+                stream.ReleaseData();
+
             }
+            stream.ReleaseData();
         }
 
         private static void CharacterTransferLog(Packet p)

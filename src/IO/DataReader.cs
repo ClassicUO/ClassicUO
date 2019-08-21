@@ -218,5 +218,22 @@ namespace ClassicUO.IO
             if (Position + size > Length)
                 throw new IndexOutOfRangeException();
         }
+
+
+        [MethodImpl(256)]
+        public ushort ReadUShortReversed()
+        {
+            EnsureSize(2);
+
+            return (ushort)((ReadByte() << 8) | ReadByte());
+        }
+
+        [MethodImpl(256)]
+        public uint ReadUIntReversed()
+        {
+            EnsureSize(4);
+
+            return (uint)((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
+        }
     }
 }
