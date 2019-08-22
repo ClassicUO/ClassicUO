@@ -2418,7 +2418,6 @@ namespace ClassicUO.Network
 
         private static void UpdateHitpoints(Packet p)
         {
-            // TODO: shards uses item with HP... it's weird but can happen :D
             Entity entity = World.Get(p.ReadUInt());
 
             if (entity == null)
@@ -2468,8 +2467,9 @@ namespace ClassicUO.Network
                 {
                     Process.Start(url);
                 }
-                catch
+                catch (Exception)
                 {
+                    Log.Message(LogTypes.Warning, "Failed to open url: " + url);
                 }
             }
         }
@@ -3002,7 +3002,6 @@ namespace ClassicUO.Network
                                 byte updategump = p.ReadByte();
                                 byte state = p.ReadByte();
 
-                                //TODO: drawstatlockers = true
                                 World.Player.StrLock = (Lock) ((state >> 4) & 3);
                                 World.Player.DexLock = (Lock) ((state >> 2) & 3);
                                 World.Player.IntLock = (Lock) (state & 3);
