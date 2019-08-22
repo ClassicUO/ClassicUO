@@ -302,6 +302,9 @@ namespace ClassicUO.IO.Resources
         {
             isPartial = false;
 
+            if (string.IsNullOrEmpty(str))
+                return;
+
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0 || (flags & UOFONT_CROPTEXTURE) != 0)
             {
                 if (width == 0 || string.IsNullOrEmpty(str))
@@ -732,6 +735,9 @@ namespace ClassicUO.IO.Resources
 
         public void GenerateUnicode(ref FontTexture texture, byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags, bool saveHitmap, int height)
         {
+            if (string.IsNullOrEmpty(str))
+                return;
+
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0 || (flags & UOFONT_CROPTEXTURE) != 0)
             {
                 if (width == 0 || string.IsNullOrEmpty(str))
