@@ -2032,7 +2032,7 @@ namespace ClassicUO.IO.Resources
                 string cmd = str.Substring(j, cmdLen).ToLower();
                 j = i;
 
-                while (str[i] != '>' && i < len)
+                while (i < len && str[i] != '>')
                     i++;
 
                 switch (cmd)
