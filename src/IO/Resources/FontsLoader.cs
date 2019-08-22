@@ -346,21 +346,15 @@ namespace ClassicUO.IO.Resources
             {
                 int strLen = str.Length;
 
-                var htmlData = GetHTMLData(font, str, ref strLen, align, flags);
+                GetHTMLData(font, str, ref strLen, align, flags);
                 int size = str.Length - strLen;
                 if (size > 0)
                 {
                     sb.Append(str.Substring(0, size));
                     str = str.Substring(str.Length - strLen, strLen);
 
-                    int newWidth = GetWidthExUnicode(font, str, width, align, flags);
-
-                    if (newWidth <= width)
-                    {
-                        sb.Append(str);
-
-                        return sb.ToString();
-                    }
+                    if (GetWidthASCII(font, str) < width)
+                        isCropped = false;
                 }
             }
 
@@ -782,21 +776,15 @@ namespace ClassicUO.IO.Resources
             {
                 int strLen = str.Length;
 
-                var htmlData = GetHTMLData(font, str, ref strLen, align, flags);
+                GetHTMLData(font, str, ref strLen, align, flags);
                 int size = str.Length - strLen;
                 if (size > 0)
                 {
                     sb.Append(str.Substring(0, size));
                     str = str.Substring(str.Length - strLen, strLen);
 
-                    int newWidth = GetWidthExUnicode(font, str, width, align, flags);
-
-                    if (newWidth <= width)
-                    {
-                        sb.Append(str);
-
-                        return sb.ToString();
-                    }
+                    if (GetWidthUnicode(font, str) < width)
+                        isCropped = false;
                 }
             }
 
