@@ -38,6 +38,7 @@ using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Managers
 {
@@ -330,6 +331,7 @@ namespace ClassicUO.Game.Managers
 
             List<string> cmdlist = _parser.GetTokens(layout);
             int cmdlen = cmdlist.Count;
+            bool applyCheckerTrans = false;
 
             for (int cnt = 0; cnt < cmdlen; cnt++)
             {
@@ -364,34 +366,96 @@ namespace ClassicUO.Game.Managers
                     case "checkertrans":
                         CheckerTrans t = new CheckerTrans(gparams);
 
-                        for (int i = gump.Children.Count - 1; i >= 0; i--)
-                        {
-                            Control c = gump.Children[i];
-                            c.Initialize();
+                        applyCheckerTrans = true;
+                        //bool applyTrans(int ii, int current_page)
+                        //{
+                        //    bool transparent = false;
+                        //    for (; ii < gump.Children.Count; ii++)
+                        //    {
+                        //        var child = gump.Children[ii];
 
-                            if (c is CheckerTrans)
-                                break;
+                        //        bool canDraw = /*current_page == 0 || child.Page == 0 ||*/
+                        //                       current_page == child.Page;
 
-                            if (t.Bounds.Intersects(c.Bounds))
-                            {
-                                if (c.CanUseAlpha)
-                                {
-                                    c.IsTransparent = true;
-                                    c.Alpha = 0.6f;
-                                }
-                            }
-                        }
+                        //        if (canDraw && child.IsVisible && child is CheckerTrans)
+                        //        {
+                        //            transparent = true;
+                        //        }
+                        //    }
 
-                        //float[] alpha = { 0, 0.5f };
+                        //    return transparent;
+                        //}
+
+                        //void checkerContains(int ii, float tr)
+                        //{
+                        //    var master = gump.Children[ii];
+
+                        //    for (int i = 0; i < ii; i++)
+                        //    {
+                        //        var cc = gump.Children[i];
+
+                        //        if (master.Bounds.Contains(cc.Bounds))
+                        //        {
+                        //            cc.Alpha = 1f;
+                        //        }
+                        //    }
+                        //}
+
+                        //Rectangle bounds = t.Bounds;
+                        //bool trans = false;
+                        //for (int i = gump.Children.Count - 1; i >= 0; i--)
+                        //{
+                        //    var cc = gump.Children[i];
+
+                        //    if (cc is CheckerTrans)
+                        //    {
+                        //        trans = applyTrans(i, cc.Page);
+                        //        bounds = cc.Bounds;
+                        //        continue;
+                        //    }
+
+                        //    if (bounds.Contains(cc.Bounds))
+                        //    {
+                        //        cc.Alpha = 1f;
+                        //    }
+                        //    else
+                        //        cc.Alpha = trans ? 1 : 0.5f;
+                        //}
+
+                        gump.Add(t, page);
+
+                        //  int j = 0;
+                        //  bool trans = applyTrans(j, page, null);
+                        //  float alpha = trans ? 1 : 0.5f;
+                        ////  checkerContains(j, alpha);
+                        //  for (; j < gump.Children.Count; j++)
+                        //  {
+                        //      var child = gump.Children[j];
+
+                        //      if (child is CheckerTrans tt)
+                        //      {
+                        //          trans = applyTrans(j, child.Page, tt);
+                        //          alpha = trans ? 1 : .5f;
+                        //          checkerContains(j, alpha);
+                        //      }
+                        //      else
+                        //      {
+                        //          child.Alpha = alpha != 1 ? 0.5f : alpha;
+                        //      }
+                        //  }
+
+
+                        //float[] alpha = { 1f, 0.5f };
 
                         //bool checkTransparent(Control c, int start)
                         //{
                         //    bool transparent = false;
                         //    for (int i = start; i < c.Children.Count; i++)
+                        //    //for (int i = start; i >= 0; i--)
                         //    {
                         //        var control = c.Children[i];
 
-                        //        bool canDraw = c.Page == 0 || control.Page == 0 || c.Page == control.Page;
+                        //        bool canDraw = /*c.Page == 0 || control.Page == 0 || c.Page == control.Page ||*/ control.Page == page;
 
                         //        if (canDraw && control is CheckerTrans)
                         //        {
@@ -408,6 +472,7 @@ namespace ClassicUO.Game.Managers
                         //for (int i = gump.Children.Count - 1; i >= 0; i--)
                         //{
                         //    Control g = gump.Children[i];
+                        //    g.Initialize();
                         //    g.IsTransparent = true;
 
                         //    if (g is CheckerTrans)
@@ -417,11 +482,9 @@ namespace ClassicUO.Game.Managers
                         //        continue;
                         //    }
 
-                        //    g.Alpha = alpha[trans ? 1 : 0];
+                        //    g.Alpha = alpha[trans ? 0 : 1];
                         //}
 
-
-                        gump.Add(t, page);
 
 
                         break;
@@ -597,6 +660,52 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
+            if (applyCheckerTrans)
+            {
+                bool applyTrans(int ii, int current_page)
+                {
+                    bool transparent = false;
+                    for (; ii < gump.Children.Count; ii++)
+                    {
+                        var child = gump.Children[ii];
+
+                        if (current_page == 0)
+                            current_page = child.Page;
+
+                        bool canDraw = /*current_page == 0 || child.Page == 0 ||*/
+                            current_page == child.Page;
+
+                        if (canDraw && child.IsVisible && child is CheckerTrans)
+                        {
+                            transparent = true;
+                            continue;
+                        }
+
+                        child.Alpha = transparent ? 0.5f : 0;
+                    }
+
+                    return transparent;
+                }
+
+
+                bool trans = applyTrans(0, 0);
+                float alpha = trans ? 0.5f : 0;
+                for (int i = 0; i < gump.Children.Count; i++)
+                {
+                    var cc = gump.Children[i];
+
+                    if (cc is CheckerTrans)
+                    {
+                        trans = applyTrans(i + 1, cc.Page);
+                        alpha = trans ? 0.5f : 0;
+                    }
+                    else
+                    {
+                        cc.Alpha = alpha;
+                    }
+                }
+            }
+
             Add(gump);
 
             return gump;
@@ -693,6 +802,7 @@ namespace ClassicUO.Game.Managers
             SortControlsByInfo();
 
             batcher.GraphicsDevice.Clear(Color.Transparent);
+
             batcher.Begin();
 
             for (int i = Gumps.Count - 1; i >= 0; i--)
@@ -702,7 +812,6 @@ namespace ClassicUO.Game.Managers
                 if (g.IsInitialized)
                     g.Draw(batcher, g.X, g.Y);
             }
-
 
             GameCursor?.Draw(batcher);
 

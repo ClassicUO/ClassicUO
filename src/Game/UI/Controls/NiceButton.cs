@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Controls
             if (IsSelected)
             {
                 ResetHueVector();
-                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, IsTransparent ? Alpha : 0);
+                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha);
                 batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ref _hueVector);
             }
 

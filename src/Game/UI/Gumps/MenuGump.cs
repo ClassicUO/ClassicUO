@@ -75,7 +75,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             HitBox left = new HitBox(25, 60, 10, 15)
             {
-                IsTransparent = true,
                 Alpha = 1
             };
 
@@ -91,7 +90,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             HitBox right = new HitBox(260, 60, 10, 15)
             {
-                IsTransparent = true,
                 Alpha = 1
             };
 

@@ -141,7 +141,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = LogoTexture.Width,
                 Height = LogoTexture.Height,
                 Alpha = 0.95f,
-                IsTransparent = true,
                 ScaleTexture = false,
                 Texture = LogoTexture
             };
