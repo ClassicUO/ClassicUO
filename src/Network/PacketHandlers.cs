@@ -2659,15 +2659,13 @@ namespace ClassicUO.Network
 
             string[] lines = new string[textLinesCount];
 
-            byte[] decData = p.ReadArray(p.Length - p.Position);
+            ref var buffer = ref p.ToArray();
 
-            for (int i = 0, index = 0; i < textLinesCount; i++)
+            for (int i = 0, index = p.Position; i < textLinesCount; i++)
             {
-                int length = (decData[index++] << 8) | decData[index++];
-                byte[] text = new byte[length * 2];
-                Buffer.BlockCopy(decData, index, text, 0, text.Length);
-                index += text.Length;
-                lines[i] = Encoding.BigEndianUnicode.GetString(text);
+                int length = ((buffer[index++] << 8) | buffer[index++]) << 1;
+                lines[i] = Encoding.BigEndianUnicode.GetString(buffer, index, length);
+                index += length;
             }
 
             Engine.UI.Create(sender, gumpID, x, y, cmd, lines);
