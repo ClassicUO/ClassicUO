@@ -126,17 +126,14 @@ namespace ClassicUO.Network
                 return Empty;
 
             int start = Position;
+            int end = 0;
             while (Position < Length)
             {
-                if (_data[Position] == 0)
+                if (_data[Position++] == 0)
                     break;
-
-                Position++;
+                end++;
             }
-
-            int end = Position - start;
-
-            return end <= 0 ? string.Empty : StringHelper.AsciiEncoding.GetString(_data, start, end);
+            return end <= 0 ? Empty : StringHelper.AsciiEncoding.GetString(_data, start, end);
 
             //StringBuilder sb = new StringBuilder();
             //char c;
