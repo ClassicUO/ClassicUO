@@ -26,17 +26,18 @@ namespace ClassicUO
             if (updater.Check())
                 return;
 #endif
-
-            if (CheckUpdate(args))
-                return;
             ParseAdditionalArgs(args);
+
+            if (!SkipUpdate)
+                if (CheckUpdate(args))
+                    return;
 
             Engine.Run(args);
         }
 
         public static bool StartMinimized { get; set; }
         public static bool StartInLittleWindow { get; set; }
-
+        public static bool SkipUpdate { get; set; }
 
         private static void ParseAdditionalArgs(string[] args)
         {
@@ -51,6 +52,9 @@ namespace ClassicUO
                         break;
                     case "-littlewindow":
                         StartInLittleWindow = true;
+                        break;
+                    case "-skipupdate":
+                        SkipUpdate = true;
                         break;
                 }
             }
