@@ -31,7 +31,12 @@ namespace ClassicUO.Utility
     {
         private static readonly char[] _dots = {'.', ',', ';', '!'};
         private static readonly StringBuilder _sb = new StringBuilder();
+        internal static Encoding AsciiEncoding { get; private set; }
         //public static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
+        internal static void Initialize()
+        {
+            AsciiEncoding = Encoding.GetEncoding(1252);
+        }
 
         public static string CapitalizeFirstCharacter(string str)
         {

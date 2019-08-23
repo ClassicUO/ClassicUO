@@ -19,6 +19,11 @@ namespace ClassicUO
     {
         static void Main(string[] args)
         {
+            //for .net CORE
+#if NETCOREAPP || NETSTANDARD
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+#endif
+            Utility.StringHelper.Initialize();
             Engine.Configure();
 
 #if DEV_BUILD

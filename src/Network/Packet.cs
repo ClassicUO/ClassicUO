@@ -125,11 +125,24 @@ namespace ClassicUO.Network
             if (EnsureSize(1))
                 return Empty;
 
-            StringBuilder sb = new StringBuilder();
-            char c;
-            while ((c = (char) ReadByte()) != '\0') sb.Append(c);
+            int start = Position;
+            while (Position < Length)
+            {
+                if (_data[Position] == 0)
+                    break;
 
-            return sb.ToString();
+                Position++;
+            }
+
+            int end = Position - start;
+
+            return end <= 0 ? string.Empty : StringHelper.AsciiEncoding.GetString(_data, start, end);
+
+            //StringBuilder sb = new StringBuilder();
+            //char c;
+            //while ((c = (char) ReadByte()) != '\0') sb.Append(c);
+
+            //return sb.ToString();
         }
 
         public string ReadASCII(int length, bool exitIfNull = false)
@@ -137,18 +150,27 @@ namespace ClassicUO.Network
             if (EnsureSize(length))
                 return Empty;
 
-            StringBuilder sb = new StringBuilder(length);
-
-            for (int i = 0; i < length; i++)
+            if (Position + length >= Length)
             {
-                char c = (char) ReadByte();
-
-                if (c != '\0')
-                    sb.Append(c);
-                else if (exitIfNull) break;
+                Position = Length - 1;
+                return string.Empty;
             }
+            int start = Position;
+            Position += length;
+            return StringHelper.AsciiEncoding.GetString(_data, start, length).TrimEnd('\0');
 
-            return sb.ToString();
+            //StringBuilder sb = new StringBuilder(length);
+
+            //for (int i = 0; i < length; i++)
+            //{
+            //    char c = (char) ReadByte();
+
+            //    if (c != '\0')
+            //        sb.Append(c);
+            //    else if (exitIfNull) break;
+            //}
+
+            //return sb.ToString();
         }
 
         public string ReadUTF8StringSafe()

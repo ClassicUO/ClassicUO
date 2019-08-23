@@ -500,13 +500,17 @@ namespace ClassicUO.Network
             }
         }
 
+        private static int _count = 0;
         private void ProcessRecv(SocketAsyncEventArgs e)
         {
             int bytesLen = e.BytesTransferred;
 
             if (bytesLen > 0 && e.SocketError == SocketError.Success && _circularBuffer != null)
             {
-                Statistics.TotalBytesReceived += (uint) bytesLen;
+                _count++;
+                if (_count > 1)
+                    Log.Message(LogTypes.Panic, "Double-Access to buffer! Report this error in #BUGS-HUB in CUO Channel!");
+                Statistics.TotalBytesReceived += (uint)bytesLen;
                 byte[] buffer = _recvBuffer;
 
                 if (_isCompressionEnabled)
@@ -520,6 +524,7 @@ namespace ClassicUO.Network
 
                 lock (_circularBuffer) _circularBuffer.Enqueue(buffer, 0, bytesLen);
                 ExtractPackets();
+                _count--;
             }
             else
                 Disconnect();
