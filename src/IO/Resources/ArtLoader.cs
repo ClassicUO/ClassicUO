@@ -39,7 +39,6 @@ namespace ClassicUO.IO.Resources
     {
         private static readonly ushort[] _empty = { };
 
-        private static readonly ushort[] _landBytes = new ushort[44 * 44];
         private readonly Dictionary<uint, UOTexture16> _landDictionary = new Dictionary<uint, UOTexture16>();
         private UOFile _file;
 
@@ -86,10 +85,7 @@ namespace ClassicUO.IO.Resources
         {
             if (!_landDictionary.TryGetValue(g, out UOTexture16 texture) || texture.IsDisposed)
             {
-                const int SIZE = 44;
-                ushort[] pixels = ReadLandArt((ushort) g);
-                texture = new UOTexture16(SIZE, SIZE);
-                texture.PushData(pixels);
+                ReadLandArt(ref texture, (ushort) g);
                 _landDictionary.Add(g, texture);
             }
 
@@ -451,25 +447,28 @@ namespace ClassicUO.IO.Resources
             CleaUnusedResources();
         }
 
-        private ushort[] ReadLandArt(ushort graphic)
+        private void ReadLandArt(ref UOTexture16 texture, ushort graphic)
         {
+            const int SIZE = 44 * 44;
+
             graphic &= FileManager.GraphicMask;
             ref readonly var entry = ref GetValidRefEntry(graphic);
 
             if (entry.Length == 0)
             {
-                Array.Clear(_landBytes, 0, _landBytes.Length);
-
-                return _landBytes;
+                texture = new UOTexture16(44,44);
+                return;
             }
 
             _file.Seek(entry.Offset);
+
+            ushort[] data = new ushort[SIZE];
 
             for (int i = 0; i < 22; i++)
             {
                 int start = 22 - (i + 1);
                 int pos = i * 44 + start;
-                int end = start + (i + 1) * 2;
+                int end = start + ((i + 1) << 1);
 
                 for (int j = start; j < end; j++)
                 {
@@ -477,14 +476,14 @@ namespace ClassicUO.IO.Resources
 
                     if (val != 0)
                         val = (ushort) (0x8000 | val);
-                    _landBytes[pos++] = val;
+                    data[pos++] = val;
                 }
             }
 
             for (int i = 0; i < 22; i++)
             {
                 int pos = (i + 22) * 44 + i;
-                int end = i + (22 - i) * 2;
+                int end = i + ((22 - i) << 1);
 
                 for (int j = i; j < end; j++)
                 {
@@ -492,11 +491,12 @@ namespace ClassicUO.IO.Resources
 
                     if (val != 0)
                         val = (ushort) (0x8000 | val);
-                    _landBytes[pos++] = val;
+                    data[pos++] = val;
                 }
             }
 
-            return _landBytes;
+            texture = new UOTexture16(44, 44);
+            texture.PushData(data);
         }
     }
 }
