@@ -152,7 +152,7 @@ namespace ClassicUO.Network
 
             if (Position + length >= Length)
             {
-                length = Length - 1;
+                length = Position - Length - 1;
             }
             int start = Position;
             Position += length;
