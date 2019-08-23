@@ -152,11 +152,11 @@ namespace ClassicUO.Network
 
             if (Position + length >= Length)
             {
-                length = Position - Length - 1;
+                length = Length - Position - 1;
             }
             int start = Position;
             Position += length;
-            return StringHelper.AsciiEncoding.GetString(_data, start, length).TrimEnd('\0');
+            return length <= 0 ? string.Empty : StringHelper.AsciiEncoding.GetString(_data, start, length).TrimEnd('\0');
 
             //StringBuilder sb = new StringBuilder(length);
 
