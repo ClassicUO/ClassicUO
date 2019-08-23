@@ -33,8 +33,12 @@ namespace ClassicUO.Utility
         private static readonly StringBuilder _sb = new StringBuilder();
         internal static Encoding AsciiEncoding { get; private set; }
         //public static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
-        internal static void Initialize()
+
+        static StringHelper()
         {
+#if NETCOREAPP || NETSTANDARD
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+#endif
             AsciiEncoding = Encoding.GetEncoding(1252);
         }
 
