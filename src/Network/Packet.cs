@@ -152,8 +152,7 @@ namespace ClassicUO.Network
 
             if (Position + length >= Length)
             {
-                Position = Length - 1;
-                return string.Empty;
+                length = Length - 1;
             }
             int start = Position;
             Position += length;
