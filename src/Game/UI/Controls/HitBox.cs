@@ -30,8 +30,6 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class HitBox : Control
     {
-        public override bool CanUseAlpha => false;
-
         protected readonly Texture2D _texture;
 
         public HitBox(int x, int y, int w, int h)
@@ -39,7 +37,6 @@ namespace ClassicUO.Game.UI.Controls
             CanMove = false;
             AcceptMouseInput = true;
             Alpha = 0.75f;
-            IsTransparent = true;
             _texture = Textures.GetTexture(Color.White);
 
             X = x;
@@ -61,7 +58,7 @@ namespace ClassicUO.Game.UI.Controls
             if (MouseIsOver)
             {
                 ResetHueVector();
-                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, IsTransparent ? Alpha : 0, true);
+                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
 
                 batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ref _hueVector);
             }

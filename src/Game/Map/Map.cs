@@ -99,7 +99,7 @@ namespace ClassicUO.Game.Map
             if (x < 0 || y < 0)
                 return -125;
 
-            ref IndexMap blockIndex = ref GetIndex(x >> 3, y >> 3);
+            ref readonly IndexMap blockIndex = ref GetIndex(x >> 3, y >> 3);
 
             if (blockIndex.MapAddress == 0)
                 return -125;
@@ -190,16 +190,15 @@ namespace ClassicUO.Game.Map
             return defaultZ;
         }
 
-        private static IndexMap _none;
 
-        public ref IndexMap GetIndex(int blockX, int blockY)
+        public ref readonly IndexMap GetIndex(int blockX, int blockY)
         {
             int block = GetBlock(blockX, blockY);
             int map = Index;
             FileManager.Map.SanitizeMapIndex(ref map);
-            ref IndexMap[] list = ref FileManager.Map.BlockData[map];
+            ref readonly IndexMap[] list = ref FileManager.Map.BlockData[map];
 
-            return ref block >= list.Length ? ref _none : ref list[block];
+            return ref block >= list.Length ? ref IndexMap.Invalid : ref list[block];
         }
 
         [MethodImpl(256)]
@@ -244,9 +243,9 @@ namespace ClassicUO.Game.Map
                 ref Chunk block = ref Chunks[_usedIndices[i]];
                 block.Destroy();
                 block = null;
-                _usedIndices.RemoveAt(i--);
             }
 
+            _usedIndices.Clear();
             //FileManager.Map.UnloadMap(Index);
             Chunks = null;
         }

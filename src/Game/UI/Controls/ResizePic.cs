@@ -222,8 +222,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             ResetHueVector();
 
-            if (IsTransparent)
-                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, IsTransparent ? Alpha : 0, true);
+            ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
             DrawInternal(batcher, x, y, _hueVector);
 
             return base.Draw(batcher, x, y);

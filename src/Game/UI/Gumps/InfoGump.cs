@@ -49,13 +49,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
             {
-                IsTransparent = true,
                 Alpha = 0.5f
             });
 
             Add(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
             {
-                IsTransparent = true,
                 Alpha = 0.5f
             });
             Add(new Label("Object Information", true, 1153, font: 3) {X = 20, Y = 10});

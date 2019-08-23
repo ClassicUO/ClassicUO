@@ -117,6 +117,13 @@ namespace ClassicUO.Game.UI.Controls
                 Width = background.Width;
                 Height = background.Height;
             }
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                ResetHueVector();
+                batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x - 1, y - 1, Width + 1, Height + 1, ref _hueVector);
+                return base.Draw(batcher, x, y);
+            }
         }
     }
 
@@ -163,7 +170,6 @@ namespace ClassicUO.Game.UI.Controls
                 Add(_selectedPic);
             }
 
-            Width = _label.X + _label.Width + 3;
             Height = 25;
 
 
@@ -171,9 +177,10 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_selectedPic != null)
             {
-                _label.X = _selectedPic.X + _selectedPic.Width + 2;
+                _label.X = _selectedPic.X + _selectedPic.Width + 5;
                 _selectedPic.Y = (Height >> 1) - (_selectedPic.Height >> 1);
             }
+            Width = _label.X + _label.Width + 3;
 
             WantUpdateSize = false;
         }

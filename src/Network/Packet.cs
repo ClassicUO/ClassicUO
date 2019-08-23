@@ -125,11 +125,21 @@ namespace ClassicUO.Network
             if (EnsureSize(1))
                 return Empty;
 
-            StringBuilder sb = new StringBuilder();
-            char c;
-            while ((c = (char) ReadByte()) != '\0') sb.Append(c);
+            int start = Position;
+            int end = 0;
+            while (Position < Length)
+            {
+                if (_data[Position++] == 0)
+                    break;
+                end++;
+            }
+            return end <= 0 ? Empty : StringHelper.AsciiEncoding.GetString(_data, start, end);
 
-            return sb.ToString();
+            //StringBuilder sb = new StringBuilder();
+            //char c;
+            //while ((c = (char) ReadByte()) != '\0') sb.Append(c);
+
+            //return sb.ToString();
         }
 
         public string ReadASCII(int length, bool exitIfNull = false)
@@ -137,18 +147,26 @@ namespace ClassicUO.Network
             if (EnsureSize(length))
                 return Empty;
 
-            StringBuilder sb = new StringBuilder(length);
-
-            for (int i = 0; i < length; i++)
+            if (Position + length >= Length)
             {
-                char c = (char) ReadByte();
-
-                if (c != '\0')
-                    sb.Append(c);
-                else if (exitIfNull) break;
+                length = Length - Position - 1;
             }
+            int start = Position;
+            Position += length;
+            return length <= 0 ? string.Empty : StringHelper.AsciiEncoding.GetString(_data, start, length).TrimEnd('\0');
 
-            return sb.ToString();
+            //StringBuilder sb = new StringBuilder(length);
+
+            //for (int i = 0; i < length; i++)
+            //{
+            //    char c = (char) ReadByte();
+
+            //    if (c != '\0')
+            //        sb.Append(c);
+            //    else if (exitIfNull) break;
+            //}
+
+            //return sb.ToString();
         }
 
         public string ReadUTF8StringSafe()

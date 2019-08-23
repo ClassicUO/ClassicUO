@@ -89,7 +89,7 @@ namespace ClassicUO.IO.Resources
         {
             return Task.Run(() =>
             {
-                UOFileMul fonts = new UOFileMul(Path.Combine(FileManager.UoFolderPath, "fonts.mul"), false);
+                UOFileMul fonts = new UOFileMul(Path.Combine(FileManager.UoFolderPath, "fonts.mul"));
                 UOFileMul[] uniFonts = new UOFileMul[20];
 
                 for (int i = 0; i < 20; i++)
@@ -98,7 +98,7 @@ namespace ClassicUO.IO.Resources
 
                     if (File.Exists(path))
                     {
-                        uniFonts[i] = new UOFileMul(path, false);
+                        uniFonts[i] = new UOFileMul(path);
                         _unicodeFontAddress[i] = uniFonts[i].StartAddress;
                         _unicodeFontSize[i] = uniFonts[i].Length;
                     }
@@ -187,7 +187,7 @@ namespace ClassicUO.IO.Resources
             });
         }
 
-        protected override void CleanResources()
+        public override void CleanResources()
         {
             // do nothing
         }
@@ -302,6 +302,9 @@ namespace ClassicUO.IO.Resources
         {
             isPartial = false;
 
+            if (string.IsNullOrEmpty(str))
+                return;
+
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0 || (flags & UOFONT_CROPTEXTURE) != 0)
             {
                 if (width == 0 || string.IsNullOrEmpty(str))
@@ -342,22 +345,21 @@ namespace ClassicUO.IO.Resources
 
             StringBuilder sb = new StringBuilder();
 
-            //if (IsUsingHTML)
-            //{
-            //    int strLen = str.Length;
-            //    GetHTMLData(font, str, ref strLen, align, flags);
-            //    sb.Append(str.Substring(0, str.Length - strLen));
-            //    str = str.Substring(str.Length - strLen, strLen);
+            if (IsUsingHTML)
+            {
+                int strLen = str.Length;
 
+                GetHTMLData(font, str, ref strLen, align, flags);
+                int size = str.Length - strLen;
+                if (size > 0)
+                {
+                    sb.Append(str.Substring(0, size));
+                    str = str.Substring(str.Length - strLen, strLen);
 
-            //    int newWidth = GetWidthExASCII(font, str, width, align, flags);
-
-            //    if (newWidth <= width)
-            //    {
-            //        sb.Append(str);
-            //        return sb.ToString();
-            //    }
-            //}
+                    if (GetWidthASCII(font, str) < width)
+                        isCropped = false;
+                }
+            }
 
             if (isCropped)
                 width -= fd.Chars[_fontIndex[(byte) '.']].Width * 3;
@@ -733,6 +735,9 @@ namespace ClassicUO.IO.Resources
 
         public void GenerateUnicode(ref FontTexture texture, byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags, bool saveHitmap, int height)
         {
+            if (string.IsNullOrEmpty(str))
+                return;
+
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0 || (flags & UOFONT_CROPTEXTURE) != 0)
             {
                 if (width == 0 || string.IsNullOrEmpty(str))
@@ -773,22 +778,21 @@ namespace ClassicUO.IO.Resources
 
             StringBuilder sb = new StringBuilder();
 
-            //if (IsUsingHTML)
-            //{
-            //    int strLen = str.Length;
+            if (IsUsingHTML)
+            {
+                int strLen = str.Length;
 
-            //    GetHTMLData(font, str, ref strLen, align, flags);
-            //    sb.Append(str.Substring(0, str.Length - strLen));
-            //    str = str.Substring(str.Length - strLen, strLen);
+                GetHTMLData(font, str, ref strLen, align, flags);
+                int size = str.Length - strLen;
+                if (size > 0)
+                {
+                    sb.Append(str.Substring(0, size));
+                    str = str.Substring(str.Length - strLen, strLen);
 
-            //    int newWidth = GetWidthExUnicode(font, str, width, align, flags);
-
-            //    if (newWidth <= width)
-            //    {
-            //        sb.Append(str);
-            //        return sb.ToString();
-            //    }
-            //}
+                    if (GetWidthUnicode(font, str) < width)
+                        isCropped = false;
+                }
+            }
 
             if (isCropped)
             {
@@ -2022,7 +2026,7 @@ namespace ClassicUO.IO.Resources
                 string cmd = str.Substring(j, cmdLen).ToLower();
                 j = i;
 
-                while (str[i] != '>' && i < len)
+                while (i < len && str[i] != '>')
                     i++;
 
                 switch (cmd)

@@ -40,8 +40,6 @@ namespace ClassicUO.Game.UI.Controls
 
     internal class Button : Control
     {
-        public override bool CanUseAlpha => false;
-
         private const int NORMAL = 0;
         private const int PRESSED = 1;
         private const int OVER = 2;
@@ -189,8 +187,7 @@ namespace ClassicUO.Game.UI.Controls
 
             ResetHueVector();
 
-            if (IsTransparent)
-                _hueVector.Z = Alpha;
+            _hueVector.Z = Alpha;
 
             batcher.Draw2D(texture, x, y, Width, Height, ref _hueVector);
 

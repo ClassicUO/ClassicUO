@@ -48,6 +48,11 @@ namespace ClassicUO.Utility
             _compressor.Decompress(dest, ref length, source, source.Length - offset);
         }
 
+        public static void Decompress(IntPtr source, int sourceLength, int offset, IntPtr dest, int length)
+        {
+            _compressor.Decompress(dest, ref length, source, sourceLength - offset);
+        }
+
         private enum ZLibQuality
         {
             Default = -1,
@@ -82,6 +87,8 @@ namespace ClassicUO.Utility
             ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality);
 
             ZLibError Decompress(byte[] dest, ref int destLength, byte[] source, int sourceLength);
+            ZLibError Decompress(IntPtr dest, ref int destLength, IntPtr source, int sourceLength);
+
         }
 
 
@@ -105,7 +112,12 @@ namespace ClassicUO.Utility
                 return SafeNativeMethods.uncompress(dest, ref destLength, source, sourceLength);
             }
 
-            internal class SafeNativeMethods
+            public ZLibError Decompress(IntPtr dest, ref int destLength, IntPtr source, int sourceLength)
+            {
+                return SafeNativeMethods.uncompress(dest, ref destLength, source, sourceLength);
+            }
+
+            class SafeNativeMethods
             {
                 [DllImport("zlib")]
                 internal static extern string zlibVersion();
@@ -119,6 +131,9 @@ namespace ClassicUO.Utility
 
                 [DllImport("zlib")]
                 internal static extern ZLibError uncompress(byte[] dest, ref int destLen, byte[] source, int sourceLen);
+
+                [DllImport("zlib")]
+                internal static extern ZLibError uncompress(IntPtr dest, ref int destLen, IntPtr source, int sourceLen);
             }
         }
 
@@ -152,8 +167,12 @@ namespace ClassicUO.Utility
 
                 return z;
             }
+            public ZLibError Decompress(IntPtr dest, ref int destLength, IntPtr source, int sourceLength)
+            {
+                return SafeNativeMethods.uncompress(dest, ref destLength, source, sourceLength);
+            }
 
-            private class SafeNativeMethods
+            class SafeNativeMethods
             {
                 [DllImport("libz")]
                 internal static extern string zlibVersion();
@@ -166,6 +185,9 @@ namespace ClassicUO.Utility
 
                 [DllImport("libz")]
                 internal static extern ZLibError uncompress(byte[] dest, ref long destLen, byte[] source, long sourceLen);
+
+                [DllImport("libz")]
+                internal static extern ZLibError uncompress(IntPtr dest, ref int destLen, IntPtr source, int sourceLen);
             }
         }
     }

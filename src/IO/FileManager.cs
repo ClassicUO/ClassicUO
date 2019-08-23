@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 using ClassicUO.Game;
@@ -47,12 +48,35 @@ namespace ClassicUO.IO
                 _uofolderpath = value;
 
                 string[] vers = Engine.GlobalSettings.ClientVersion.ToLower().Split('.');
-
+                bool automatically = false;
                 if (vers.Length < 3)
                 {
-                    Log.Message(LogTypes.Error, "Invalid UO version.");
+                    Log.Message(LogTypes.Warning, "Client version not found");
 
-                    throw new InvalidDataException("Invalid UO version");
+                    DirectoryInfo dirInfo = new DirectoryInfo(Engine.GlobalSettings.UltimaOnlineDirectory);
+                    bool ok = false;
+                    if (dirInfo.Exists)
+                    {
+                        var clientInfo = dirInfo.GetFiles("client.exe", SearchOption.TopDirectoryOnly).FirstOrDefault();
+
+                        if (clientInfo != null)
+                        {
+                            var versInfo = FileVersionInfo.GetVersionInfo(clientInfo.FullName);
+
+                            Engine.GlobalSettings.ClientVersion = versInfo.FileVersion.Replace(',', '.').Replace(" ", "");
+                            vers = Engine.GlobalSettings.ClientVersion.ToLower().Split('.');
+
+                            automatically = true;
+                            ok = true;
+                        }
+                    }
+
+                    if (!ok)
+                    {
+                        Log.Message(LogTypes.Error, "Invalid UO version.");
+
+                        throw new InvalidDataException("Invalid UO version");
+                    }
                 }
 
                 int major = int.Parse(vers[0]);
@@ -106,7 +130,7 @@ namespace ClassicUO.IO
                 ClientBufferVersion[3] = (byte) extra;
 
                 ClientVersion = (ClientVersions) (((major & 0xFF) << 24) | ((minor & 0xFF) << 16) | ((build & 0xFF) << 8) | (extra & 0xFF));
-                Log.Message(LogTypes.Trace, $"Client version: {Engine.GlobalSettings.ClientVersion} - {ClientVersion}");
+                Log.Message(LogTypes.Trace, $"Client version: {Engine.GlobalSettings.ClientVersion} - {ClientVersion} {(automatically ? "[automatically found]" : "")}");
 
                 ClientFlags = ClientFlags.CF_T2A;
 
@@ -122,6 +146,9 @@ namespace ClassicUO.IO
                     ClientFlags |= ClientFlags.CF_SE;
                 if (ClientVersion >= ClientVersions.CV_60144)
                     ClientFlags |= ClientFlags.CF_SA;
+
+                Log.Message(LogTypes.Trace, "Client flags by version: " + ClientFlags);
+                Log.Message(LogTypes.Trace, "UOP? " + (IsUOPInstallation ? "yes" : "no"));
             }
         }
 

@@ -36,9 +36,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
-using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -120,11 +118,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButton.Left)
             {
-                if (!_freeView)
-                {
-                    _isScrolling = false;
-                    CanMove = true;
-                }
+                _isScrolling = false;
+                CanMove = true;
             }
 
             Engine.UI.GameCursor.IsDraggingCursorForced = false;
@@ -134,14 +129,17 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
-            if ((button == MouseButton.Left && Keyboard.Alt) || _freeView)
+            if (button == MouseButton.Left && (Keyboard.Alt || _freeView))
             {
-                _lastScroll.X = x;
-                _lastScroll.Y = y;
-                _isScrolling = true;
-                CanMove = false;
+                if (x > 4 && x < Width - 8 && y > 4 && y < Height - 8)
+                {
+                    _lastScroll.X = x;
+                    _lastScroll.Y = y;
+                    _isScrolling = true;
+                    CanMove = false;
 
-                Engine.UI.GameCursor.IsDraggingCursorForced = true;
+                    Engine.UI.GameCursor.IsDraggingCursorForced = true;
+                }
             }
 
             base.OnMouseDown(x, y, button);
@@ -220,7 +218,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     for (int by = 0; by < fixedHeight; by++)
                     {
-                        ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
+                        ref readonly IndexMap indexMap = ref World.Map.GetIndex(bx, by);
 
                         if (indexMap.MapAddress == 0)
                             continue;
@@ -278,6 +276,7 @@ namespace ClassicUO.Game.UI.Gumps
                             for (int x = 0; x < 8; x++)
                             {
                                 ref readonly var c = ref infoCells[pos];
+
                                 ushort color = (ushort)(0x8000 | FileManager.Hues.GetRadarColorData(c.TileID));
                                 Color cc;
 
