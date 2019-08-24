@@ -34,8 +34,8 @@ The code itself has been written using the following projects as a reference:
 * [UltimaXNA](https://github.com/ZaneDubya/UltimaXNA)
 * [ServUO](https://github.com/servuo/servuo)
 
-# Building  
-Currently, only Windows is supported for building. The binary produced will work on all supported platforms.
+# Building (Windows)
+The binary produced will work on all supported platforms.
 
 You'll need [Visual Studio 2017](https://www.visualstudio.com/downloads/). The free community edition should be fine. Once that
 is installed:
@@ -43,6 +43,42 @@ is installed:
 - Open ClassicUO.sln in the root of the repository.
 - Select "Debug" or "Release" at the top.
 - Hit F5 to build. The output will be in the "bin/Release" or "bin/Debug" directory.
+
+# Building (macOS)
+All the commands should be executed in terminal. All global package installs should be done only if not yet installed.
+
+1. Install Homebrew, a package manager for macOS (if not yet installed): Follow instructions on https://brew.sh/
+
+2. Install Mono (https://www.mono-project.com/):
+`brew install mono`
+
+3. Install .NET Core SDK (https://dotnet.microsoft.com/download):
+`brew install dotnet-sdk`
+
+4. Install Paket, a dependency manager for .NET and mono projects (https://fsprojects.github.io/Paket/):
+`brew install paket`
+
+5. Navigate to ClassicUO root folder:
+`cd /your/path/to/ClassicUO`
+
+6. Initialize Paket environment:
+`paket init`
+
+7. Install required/missing dependencies:
+`paket add Newtonsoft.Json --version 12.0.2`
+
+8. Build:
+  - Debug version: `msbuild /t:Rebuild`
+  - Release version: `msbuild /t:Rebuild /p:Configuration=Release`
+
+9. Start ClassicUO via Mono (to properly set up all required constants use provided bash script):
+  - Debug version: `./bin/Debug/ClassicUO-mono.sh`
+  - Release version: `./bin/Release/ClassicUO-mono.sh`
+
+Other useful commands:
+- `msbuild /t:Clean`
+- `msbuild /t:Clean /p:Configuration=Release`
+- `msbuild /t:RestorePackages`
 
 # Running
 Follow the [Wiki](https://github.com/andreakarasho/ClassicUO/wiki) to setup correctly ClassicUO
