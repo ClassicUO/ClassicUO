@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -262,7 +263,11 @@ namespace ClassicUO.Game.Managers
                         {
                             _keyboardFocusControl = c.GetFirstControlAcceptKeyboardInput();
 
-                            if (_keyboardFocusControl != null) break;
+                            if (_keyboardFocusControl != null)
+                            {
+                                _keyboardFocusControl.OnFocusEnter();
+                                break;
+                            }
                         }
                     }
                 }
@@ -277,6 +282,36 @@ namespace ClassicUO.Game.Managers
                     _keyboardFocusControl = value;
                     value.OnFocusEnter();
                 }
+            }
+        }
+
+        public bool IsKeyboardFocusAllowHotkeys
+        {
+            get
+            {
+                // TODO: `ActivateChatIgnoreHotkeysPlugins` should be refactored into something like `[Smart]IgnoreHotkeysOnTextInput`
+                //   that will not depend on `ActivateChatAfterEnter`
+
+                // We are not at the game scene or no player character present
+                if (World.Player == null || !(Engine.SceneManager.CurrentScene is GameScene gs))
+                    return false;
+
+                // System Chat is NOT focused (items stack amount field or macros text fields is probably focused),
+                // it means that some other text input is focused and we're going to enter some text there
+                // thus we don't expect to execute any game macro or trigger any plugin hotkeys
+                if (Engine.UI.SystemChat?.IsFocused == false)
+                    return false;
+
+                // "Press 'Enter' to activate chat" is enabled and System Chat is active,
+                // it means that we want to enter some text into the chat,
+                // thus we don't expect to execute any game macro or trigger any plugin hotkeys
+                if (Engine.Profile.Current.ActivateChatAfterEnter &&
+                    Engine.Profile.Current.ActivateChatIgnoreHotkeys && // NOTE: Let's keep this for now, but refactor later
+                    Engine.UI.SystemChat?.IsActive == true)
+                    return false;
+
+                // In all other cases hotkeys for macros and plugins are allowed
+                return true;
             }
         }
 
