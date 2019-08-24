@@ -282,7 +282,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 color += 0x4000;
                             int tableSize = 2;
                             if(island && color > 0x4000)
-                                color = FileManager.Hues.GetColor16(28672, (ushort)(color - 0x3FFF));//28672 is an arbitrary position in hues.mul, is the 14 position in the range
+                                color = FileManager.Hues.GetColor16(28672, (ushort)(color - 0x4000));//28672 is an arbitrary position in hues.mul, is the 14 position in the range
                             else
                                 color = FileManager.Hues.GetRadarColorData(color);
                             CreatePixels(data, 0x8000 | color, gx, gy, Width, Height, table, tableSize);
