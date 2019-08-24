@@ -99,6 +99,9 @@ namespace ClassicUO.Game.Data
                 0x92E, new ContainerData(0x092E, 0x0000, 0x0000, 1, 13, 260, 199)
             },
             {
+                0x103, new ContainerData(0x0103, 0x0048, 0x0058, 29, 34, 137, 128)
+            },
+            {
                 0x104, new ContainerData(0x0104, 0x002F, 0x002E, 0, 20, 168, 115)
             },
             {
@@ -154,6 +157,9 @@ namespace ClassicUO.Game.Data
             },
             {
                 0x484, new ContainerData(0x0484, 0x064F, 0x0000, 5, 43, 160, 100)
+            },
+            {
+                0x2A63, new ContainerData(0x2A63, 0x0187, 0x01c9, 29, 34, 137, 128)//for this particular gump area is bugged also in original client, as it is similar to the bag, probably this is an unfinished one
             }
         };
 
@@ -163,11 +169,12 @@ namespace ClassicUO.Game.Data
         public static int X { get; private set; } = 40;
         public static int Y { get; private set; } = 40;
 
-        private static readonly ContainerData _DefaultData = new ContainerData(0x003C, 0x0048, 0x0058, 44, 65, 186, 159);
-
         public static ContainerData Get(Graphic graphic)
         {
-            return !_data.TryGetValue(graphic, out ContainerData value) ? _DefaultData : value;
+            //if the server requests for a non present gump in container data dictionary, create it, but without any particular sound.
+            if (!_data.TryGetValue(graphic, out ContainerData value))
+                _data[graphic] = value = new ContainerData(graphic, 0, 0, 44, 65, 186, 159);
+            return value;
         }
 
 
