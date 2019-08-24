@@ -298,6 +298,16 @@ namespace ClassicUO.Game.UI.Gumps
             RIGHT_HORIZONTAL
         }
 
+        public static void Toggle()
+        {
+            BuffGump buff = Engine.UI.GetGump<BuffGump>();
+
+            if (buff != null)
+                buff.Dispose();
+            else
+                Engine.UI.Add(new BuffGump(100, 100));
+        }
+
         private class BuffControlEntry : GumpPic
         {
             private readonly uint _timer;

@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
             // maximized view
             Add(new ResizePic(9200)
             {
-                X = 0, Y = 0, Width = 610 + 63, Height = 27
+                X = 0, Y = 0, Width = 738, Height = 27
             }, 1);
 
             Add(new Button(0, 5540, 5542, 5541)
@@ -91,6 +91,11 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 607,
                 Y = 3,
                 FontCenter = true
+            }, 1);
+
+            Add(new Button((int)Buttons.Buffs, 2443, 2443, 0, "Buffs", 1, true, 0, 0x36)
+            {
+                ButtonAction = ButtonAction.Activate, X = 671, Y = 3, FontCenter = true
             }, 1);
 
             //minimized view
@@ -272,6 +277,10 @@ namespace ClassicUO.Game.UI.Gumps
                         worldMap.SetInScreen();
                     }
                     break;
+                case Buttons.Buffs:
+                    BuffGump.Toggle();
+
+                    break;
             }
         }
 
@@ -285,6 +294,7 @@ namespace ClassicUO.Game.UI.Gumps
             Help,
             Debug,
             WorldMap,
+            Buffs,
         }
     }
 }

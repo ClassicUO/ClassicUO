@@ -956,12 +956,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.ToggleBuffIconGump:
-                    BuffGump buff = Engine.UI.GetGump<BuffGump>();
-
-                    if (buff != null)
-                        buff.Dispose();
-                    else
-                        Engine.UI.Add(new BuffGump(100, 100));
+                    BuffGump.Toggle();
 
                     break;
 
