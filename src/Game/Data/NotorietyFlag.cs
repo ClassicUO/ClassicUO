@@ -34,35 +34,37 @@ namespace ClassicUO.Game.Data
         Criminal = 0x04,
         Enemy = 0x05,
         Murderer = 0x06,
-        Invulnerable = 0x07
+        Invulnerable = 0x07,
     }
 
     internal static class Notoriety
     {
-        public static Hue GetHue(NotorietyFlag flag)
+            
+    public static Hue GetHue(NotorietyFlag flag)
         {
+
             switch (flag)
             {
                 case NotorietyFlag.Innocent:
-
+                    
                     return Engine.Profile.Current.InnocentHue;
 
                 case NotorietyFlag.Ally:
-
-                    return Engine.Profile.Current.FriendHue;
+                    
+                        return Engine.Profile.Current.FriendHue;
 
                 case NotorietyFlag.Criminal:
                 case NotorietyFlag.Gray:
-
-                    return Engine.Profile.Current.CriminalHue;
+                   
+                        return Engine.Profile.Current.CriminalHue;
 
                 case NotorietyFlag.Enemy:
-
-                    return Engine.Profile.Current.EnemyHue;
+                   
+                        return Engine.Profile.Current.EnemyHue;
 
                 case NotorietyFlag.Murderer:
-
-                    return Engine.Profile.Current.MurdererHue;
+                    
+                        return Engine.Profile.Current.MurdererHue;
 
                 case NotorietyFlag.Invulnerable:
 

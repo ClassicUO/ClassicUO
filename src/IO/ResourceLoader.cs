@@ -24,17 +24,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.IO
 {
-    internal abstract class ResourceLoader<T> where T : SpriteTexture, IDisposable
+    internal abstract class ResourceLoader : IDisposable
     {
         private readonly string[] _paths;
 
-        protected ResourceLoader(string path) : this(new[] {path})
+        protected ResourceLoader(string path) : this(new[] { path })
         {
         }
 
@@ -48,16 +49,43 @@ namespace ClassicUO.IO
         {
         }
 
-        protected Dictionary<uint, T> ResourceDictionary { get; } = new Dictionary<uint, T>();
+        public UOFileIndex[] Entries;
 
         public bool IsDisposed { get; private set; }
 
+        public abstract Task Load();
 
-        public abstract void Load();
+        public ref readonly UOFileIndex GetValidRefEntry(int index)
+        {
+            if (index < 0 || Entries == null || index >= Entries.Length)
+                return ref UOFileIndex.Invalid;
 
-        public abstract T GetTexture(uint id);
+            ref readonly UOFileIndex entry = ref Entries[index];
+
+            if (entry.Offset < 0 || entry.Length <= 0)
+                return ref UOFileIndex.Invalid;
+
+            return ref entry;
+        }
 
         public abstract void CleanResources();
+
+        public void Dispose()
+        {
+            if (IsDisposed)
+                return;
+
+            IsDisposed = true;
+
+            CleanResources();
+        }
+    }
+
+    internal abstract class ResourceLoader<T> : ResourceLoader where T : UOTexture
+    {
+        protected Dictionary<uint, T> ResourceDictionary { get; } = new Dictionary<uint, T>();
+        public abstract T GetTexture(uint id);
+
 
         public virtual void CleaUnusedResources()
         {
@@ -80,51 +108,5 @@ namespace ClassicUO.IO
 
             return false;
         }
-
-        public void Dispose()
-        {
-            if (IsDisposed)
-                return;
-
-            IsDisposed = true;
-
-            CleanResources();
-        }
-    }
-
-    internal abstract class ResourceLoader : IDisposable
-    {
-        private readonly string[] _paths;
-
-        protected ResourceLoader(string path) : this(new[] {path})
-        {
-        }
-
-        protected ResourceLoader(string[] paths)
-        {
-            _paths = paths;
-        }
-
-
-        protected ResourceLoader()
-        {
-        }
-
-        public bool IsDisposed { get; private set; }
-
-
-        public void Dispose()
-        {
-            if (IsDisposed)
-                return;
-
-            IsDisposed = true;
-
-            CleanResources();
-        }
-
-        public abstract void Load();
-
-        protected abstract void CleanResources();
     }
 }

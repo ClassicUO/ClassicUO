@@ -29,14 +29,14 @@ namespace ClassicUO.Interfaces
     {
         bool AllowedToDraw { get; set; }
 
-        SpriteTexture Texture { get; set; }
+        UOTexture Texture { get; set; }
 
         bool Draw(UltimaBatcher2D batcher, int posX, int posY);
     }
 
     internal interface IDrawableUI
     {
-        SpriteTexture Texture { get; set; }
+        UOTexture Texture { get; set; }
 
         bool Draw(UltimaBatcher2D batcher, int x, int y);
     }

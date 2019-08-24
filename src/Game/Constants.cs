@@ -39,6 +39,10 @@ namespace ClassicUO.Game
 
         public const string WIKI_LINK = "https://github.com/andreakarasho/ClassicUO/wiki";
 
+        public const int MIN_FPS = 15;
+        public const int MAX_FPS = 250;
+        public const int LOGIN_SCREEN_FPS = 60;
+
         public const int CHARACTER_ANIMATION_DELAY = 80;
         public const int ITEM_EFFECT_ANIMATION_DELAY = 50;
 
@@ -95,7 +99,7 @@ namespace ClassicUO.Game
         public const ushort FIELD_REPLACE_GRAPHIC = 0x1826;
         public const ushort TREE_REPLACE_GRAPHIC = 0x0E59;
 
-        public const int MIN_CIRCLE_OF_TRANSPARENCY_RADIUS = 2;
+        public const int MIN_CIRCLE_OF_TRANSPARENCY_RADIUS = 1;
         public const int MAX_CIRCLE_OF_TRANSPARENCY_RADIUS = 8;
 
         public const int MAX_ABILITIES_COUNT = 32;
@@ -113,5 +117,9 @@ namespace ClassicUO.Game
         public const int DEATH_SCREEN_TIMER = 1500;
 
         public const float SOUND_DELTA = 1000f;
+
+        public const uint JOURNAL_LOCALSERIAL = 0xFFFFFFE1;
+        public const uint SKILLSTD_LOCALSERIAL = 0xFFFFFFE2;
+        public const uint PROFILE_LOCALSERIAL = 0xFFFFFFE3;
     }
 }

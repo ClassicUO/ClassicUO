@@ -87,6 +87,15 @@ namespace ClassicUO.Game.Data
                 case 0x12BC:
                 case 0x12BD:
 
+                case 0x3131:
+                case 0x3134:
+                case 0x3137:
+                case 0x313A:
+                case 0x0C95:
+                case 0x0C96:
+                case 0x0C99:
+                case 0x0A06:
+
                     return true;
             }
 
@@ -287,6 +296,26 @@ namespace ClassicUO.Game.Data
         public static bool IsCave(ushort g)
         {
             return g >= 0x053B && g <= 0x0554 && g != 0x0550;
+        }
+
+        [MethodImpl(256)]
+        public static bool IsRock(ushort g)
+        {
+            switch (g)
+            {
+                case 4945:
+                case 4948:
+                case 4950:
+                case 4953:
+                case 4955:
+                case 4958:
+                case 4959:
+                case 4960:
+                case 4962:
+                    return true;
+                default:
+                    return g >= 6001 && g <= 6012;
+            }
         }
 
         [MethodImpl(256)]

@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 using ClassicUO.Game.UI.Gumps.CharCreation;
 using ClassicUO.Utility;
@@ -39,58 +40,62 @@ namespace ClassicUO.IO.Resources
         };
         public Dictionary<ProfessionInfo, List<ProfessionInfo>> Professions = new Dictionary<ProfessionInfo, List<ProfessionInfo>>();
 
-        public override void Load()
+        public override Task Load()
         {
-            bool result = false;
-
-            FileInfo file = new FileInfo(Path.Combine(FileManager.UoFolderPath, "Prof.txt"));
-
-            if (file.Exists)
+            return Task.Run(() =>
             {
-                if (file.Length > 0x100000) //1megabyte limit of string file
-                    throw new InternalBufferOverflowException($"{file.FullName} exceeds the maximum 1Megabyte allowed size for a string text file, please, check that the file is correct and not corrupted -> {file.Length} file size");
+                bool result = false;
 
-                //what if file doesn't exist? we skip section completely...directly into advanced selection
-                TextFileParser read = new TextFileParser(File.ReadAllText(file.FullName), new[] {' ', '\t', ','}, new[] {'#', ';'}, new[] {'"', '"'});
+                FileInfo file = new FileInfo(Path.Combine(FileManager.UoFolderPath, "Prof.txt"));
 
-                while (!read.IsEOF())
+                if (file.Exists)
                 {
-                    List<string> strings = read.ReadTokens();
+                    if (file.Length > 0x100000) //1megabyte limit of string file
+                        throw new InternalBufferOverflowException($"{file.FullName} exceeds the maximum 1Megabyte allowed size for a string text file, please, check that the file is correct and not corrupted -> {file.Length} file size");
 
-                    if (strings.Count > 0)
+                    //what if file doesn't exist? we skip section completely...directly into advanced selection
+                    TextFileParser read = new TextFileParser(File.ReadAllText(file.FullName), new[] {' ', '\t', ','}, new[] {'#', ';'}, new[] {'"', '"'});
+
+                    while (!read.IsEOF())
                     {
-                        if (strings[0].ToLower() == "begin")
-                        {
-                            result = ParseFilePart(read);
+                        List<string> strings = read.ReadTokens();
 
-                            if (!result) break;
+                        if (strings.Count > 0)
+                        {
+                            if (strings[0].ToLower() == "begin")
+                            {
+                                result = ParseFilePart(read);
+
+                                if (!result) break;
+                            }
                         }
                     }
                 }
-            }
 
-            Professions[new ProfessionInfo
-            {
-                Name = "Advanced",
-                Localization = 1061176,
-                Description = 1061226,
-                Graphic = 5545,
-                TopLevel = true,
-                Type = PROF_TYPE.PROFESSION,
-                DescriptionIndex = -1,
-                TrueName = "advanced"
-            }] = null;
-
-            foreach (KeyValuePair<ProfessionInfo, List<ProfessionInfo>> kvp in Professions)
-            {
-                kvp.Key.Childrens = null;
-
-                if (kvp.Value != null)
+                Professions[new ProfessionInfo
                 {
-                    foreach (ProfessionInfo info in kvp.Value)
-                        info.Childrens = null;
+                    Name = "Advanced",
+                    Localization = 1061176,
+                    Description = 1061226,
+                    Graphic = 5545,
+                    TopLevel = true,
+                    Type = PROF_TYPE.PROFESSION,
+                    DescriptionIndex = -1,
+                    TrueName = "advanced"
+                }] = null;
+
+                foreach (KeyValuePair<ProfessionInfo, List<ProfessionInfo>> kvp in Professions)
+                {
+                    kvp.Key.Childrens = null;
+
+                    if (kvp.Value != null)
+                    {
+                        foreach (ProfessionInfo info in kvp.Value)
+                            info.Childrens = null;
+                    }
                 }
-            }
+
+            });
         }
 
         private int GetKeyCode(string key)
@@ -326,9 +331,8 @@ namespace ClassicUO.IO.Resources
             return result;
         }
 
-        protected override void CleanResources()
+        public override void CleanResources()
         {
-            throw new NotImplementedException();
         }
 
         internal enum PROF_TYPE

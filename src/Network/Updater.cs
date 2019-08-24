@@ -26,6 +26,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 
@@ -110,11 +111,11 @@ namespace ClassicUO.Network
         }
 
 
-        public void Check()
+        public bool Check()
         {
             try
             {
-                Download();
+                return Download();
             }
             catch (Exception e)
             {
@@ -122,12 +123,14 @@ namespace ClassicUO.Network
 
                 _client.DownloadProgressChanged -= ClientOnDownloadProgressChanged;
             }
+
+            return false;
         }
 
-        private async void Download()
+        private bool Download()
         {
             if (IsDownloading)
-                return;
+                return false;
 
             Interlocked.Increment(ref _countDownload);
 
@@ -135,9 +138,14 @@ namespace ClassicUO.Network
 
             Reset();
 
-            string json = await _client.DownloadStringTaskAsync(string.Format(API_RELEASES_LINK, REPO_USER, REPO_NAME));
+            string json = _client.DownloadString(string.Format(API_RELEASES_LINK, REPO_USER, REPO_NAME));
 
             JArray data = JsonConvert.DeserializeObject<JArray>(json);
+
+#if DEV_BUILD
+            FileInfo fileLastCommit = new FileInfo(Path.Combine(Engine.ExePath, "version.txt"));
+#endif
+            
 
             foreach (JToken releaseToken in data.Children())
             {
@@ -145,10 +153,30 @@ namespace ClassicUO.Network
 
                 Log.Message(LogTypes.Trace, "Fetching: " + tagName);
 
+#if DEV_BUILD
+                if (tagName == "ClassicUO-dev-preview")
+                {
+                    bool ok = false;
+
+                    string commitID = releaseToken["target_commitish"].ToString();
+
+                    if (fileLastCommit.Exists)
+                    {
+                        string lastCommit = File.ReadAllText(fileLastCommit.FullName);
+                        ok = lastCommit != commitID;
+                    }
+
+                    File.WriteAllText(fileLastCommit.FullName, commitID);
+                    if (!ok)
+                    {
+                        break;
+                    }
+#else
                 if (Version.TryParse(tagName, out Version version) && version > Engine.Version)
                 {
                     Log.Message(LogTypes.Trace, "Found new version available: " + version);
 
+#endif
                     string name = releaseToken["name"].ToString();
                     string body = releaseToken["body"].ToString();
 
@@ -176,7 +204,7 @@ namespace ClassicUO.Network
 
                     _client.DownloadProgressChanged += ClientOnDownloadProgressChanged;
 
-                    await _client.DownloadFileTaskAsync(downloadUrl, zipFile);
+                    _client.DownloadFile(downloadUrl, zipFile);
 
                     Log.Message(LogTypes.Trace, assetName + "..... done");
 
@@ -188,18 +216,29 @@ namespace ClassicUO.Network
 
                     File.Delete(zipFile);
 
-                    Process currentProcess = Process.GetCurrentProcess();
-
                     string prefix = Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? "mono " : string.Empty;
 
-                    Process.Start(prefix + Path.Combine(Path.Combine(Engine.ExePath, "update-temp"), "ClassicUO.exe"), $"--source {Engine.ExePath} --pid {currentProcess.Id} --action update");
-                    currentProcess.Kill();
 
-                    break;
+                    new Process
+                    {
+                        StartInfo =
+                        {
+                            WorkingDirectory = tempPath,
+                            FileName = prefix + Path.Combine(tempPath, "ClassicUO.exe"),
+                            UseShellExecute = false,
+                            Arguments =
+                                $"--source \"{Engine.ExePath}\" --pid {Process.GetCurrentProcess().Id} --action update"
+                        }
+                    }.Start();
+
+
+                    return true;
                 }
             }
 
             Interlocked.Decrement(ref _countDownload);
+
+            return false;
         }
 
         private void Reset()

@@ -35,6 +35,7 @@ namespace ClassicUO.Game.GameObjects
         private bool _isFoliage;
 
         public bool CharacterIsBehindFoliage { get; set; }
+        public bool IsFromTarget { get; set; }
 
         public override bool TransparentTest(int z)
         {
@@ -103,6 +104,8 @@ namespace ClassicUO.Game.GameObjects
 
             Engine.DebugInfo.MultiRendered++;
 
+            if (IsFromTarget)
+                HueVector.Z = 0.5f;
             //SpriteRenderer.DrawStaticArt(Graphic, Hue, (int) position.X, (int) position.Y);
             base.Draw(batcher, posX, posY);
 
@@ -117,7 +120,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
-            if (SelectedObject.Object == this)
+            if (SelectedObject.Object == this || IsFromTarget || CharacterIsBehindFoliage)
                 return;
 
             if (DrawTransparent)

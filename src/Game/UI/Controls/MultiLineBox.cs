@@ -152,7 +152,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (TxEntry != null)
             {
-                int oldidx = TxEntry.CaretIndex;
+                //int oldidx = TxEntry.CaretIndex;
 
                 if (Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v) //paste
                 {

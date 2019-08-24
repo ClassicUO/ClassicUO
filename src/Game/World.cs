@@ -40,6 +40,8 @@ namespace ClassicUO.Game
 
         public static Point RangeSize;
 
+        public static ObjectPropertiesListManager OPL { get; } = new ObjectPropertiesListManager();
+
         public static CorpseManager CorpseManager { get; } = new CorpseManager();
 
         public static PartyManager Party { get; } = new PartyManager();
@@ -63,6 +65,9 @@ namespace ClassicUO.Game
 
         public static int OldMusicIndex { get; set; }
 
+        public static WorldTextManager WorldTextManager { get; } = new WorldTextManager();
+
+        public static JournalManager Journal { get; } = new JournalManager();
 
         public static int MapIndex
         {
@@ -123,7 +128,7 @@ namespace ClassicUO.Game
 
         public static LockedFeatures ClientLockedFeatures { get; } = new LockedFeatures();
 
-        public static ClientFeatures ClientFlags { get; } = new ClientFeatures();
+        public static ClientFeatures ClientFeatures { get; } = new ClientFeatures();
 
         public static string ServerName { get; set; }
 
@@ -208,6 +213,8 @@ namespace ClassicUO.Game
                 }
 
                 _effectManager.Update(totalMS, frameMS);
+
+                WorldTextManager.Update(totalMS, frameMS);
             }
         }
 
@@ -274,17 +281,6 @@ namespace ClassicUO.Game
             foreach (Item i in item.Items)
                 RemoveItem(i);
 
-            if (item.Container.IsValid)
-            {
-                var cont = Get(item.Container);
-
-                if (cont != null)
-                {
-                    cont.Items.Remove(cont);
-                    cont.Items.ProcessDelta();
-                }
-                item.Container = Serial.INVALID;
-            }
 
             item.Items.Clear();
             item.Destroy();
@@ -300,12 +296,7 @@ namespace ClassicUO.Game
                 return false;
 
             foreach (Item i in mobile.Items)
-            {
                 RemoveItem(i);
-
-                Items.Remove(i);
-            }
-            Items.ProcessDelta();
 
             mobile.Items.Clear();
             mobile.Destroy();
@@ -334,7 +325,7 @@ namespace ClassicUO.Game
             Map = null;
             Light.Overall = Light.RealOverall = 0;
             Light.Personal = Light.RealPersonal = 0;
-            ClientFlags.SetFlags(0);
+            ClientFeatures.SetFlags(0);
             ClientLockedFeatures.SetFlags(0);
             HouseManager.Clear();
             Party.Clear();
@@ -344,9 +335,13 @@ namespace ClassicUO.Game
             _effectManager.Clear();
             _toRemove.Clear();
             CorpseManager.Clear();
+            OPL.Clear();
 
             Season = Seasons.Summer;
             OldSeason = Seasons.Summer;
+
+            Journal.Clear();
+            WorldTextManager.Clear();
         }
 
         private static void InternalMapChangeClear(bool noplayer)

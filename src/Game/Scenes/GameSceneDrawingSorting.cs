@@ -174,16 +174,28 @@ namespace ClassicUO.Game.Scenes
 
         private static readonly StaticTiles _emptyStaticTiles = default;
 
-
-        private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ)
+        private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ/*, GameObject entity*/)
         {
+            /*sbyte HeightChecks = 0;
+            if(entity != null)
+            {
+                if(entity.X < worldX && entity.Y > worldY)
+                {
+                    HeightChecks = 1;
+                }
+                else if (entity.Y < worldY && entity.X > worldX)
+                {
+                    HeightChecks = -1;
+                }
+            }*/
+
             for (; obj != null; obj = obj.Right)
             {
                 if (obj.CurrentRenderIndex == _renderIndex || !obj.AllowedToDraw)
                     continue;
 
                 if (UpdateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
-                    obj.UpdateRealScreenPosition(ref _offset);
+                    obj.UpdateRealScreenPosition(_offset.X, _offset.Y);
 
                 obj.UseInRender = 0xFF;
 
@@ -200,7 +212,7 @@ namespace ClassicUO.Game.Scenes
 
                 bool changinAlpha = false;
                 bool island = false;
-                bool iscorpse =false;
+                bool iscorpse = false;
                 bool ismobile = false;
 
                 switch (obj)
@@ -213,7 +225,7 @@ namespace ClassicUO.Game.Scenes
 
                     case Land _:
                         island = true;
-                        break;
+                        goto SKIP_HANDLES_CHECK;
 
                     case Item it when it.IsCorpse:
                         iscorpse = true;
@@ -223,7 +235,6 @@ namespace ClassicUO.Game.Scenes
 
                         if (GameObjectHelper.TryGetStaticData(obj, out itemData))
                         {
-
                             if (itemData.IsFoliage && World.Season >= Seasons.Winter)
                             {
                                 continue;
@@ -233,7 +244,7 @@ namespace ClassicUO.Game.Scenes
                             {
                                 if (StaticFilters.IsTree(st.OriginalGraphic))
                                 {
-                                    if (Engine.Profile.Current.TreeToStumps && st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
+                                    if (Engine.Profile.Current.TreeToStumps && st.ItemData.IsImpassable && st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
                                         st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC);
                                     else if (st.OriginalGraphic != st.Graphic && !Engine.Profile.Current.TreeToStumps)
                                         st.RestoreOriginalGraphic();
@@ -247,7 +258,6 @@ namespace ClassicUO.Game.Scenes
                                 else
                                     changinAlpha = obj.AlphaHue != 0;
 
-
                                 if (!changinAlpha)
                                     continue;
                             }
@@ -255,7 +265,10 @@ namespace ClassicUO.Game.Scenes
                             if (Engine.Profile.Current.TreeToStumps && itemData.IsFoliage || Engine.Profile.Current.HideVegetation && StaticFilters.IsVegetation(obj.Graphic))
                                 continue;
 
-                            maxObjectZ += itemData.Height;
+                            //if (HeightChecks <= 0 && (!itemData.IsBridge || ((itemData.Flags & TileFlag.StairBack | TileFlag.StairRight) != 0) || itemData.IsWall))
+                            {
+                                maxObjectZ += itemData.Height;
+                            }
                         }
 
                         break;
@@ -268,7 +281,8 @@ namespace ClassicUO.Game.Scenes
                                             iscorpse ||
                                             obj is Item it && (!it.IsLocked || it.IsLocked && itemData.IsContainer) && !it.IsMulti) &&
                                            !obj.ClosedObjectHandles && _objectHandlesCount <= 400;
-                    _objectHandlesCount++;
+                    if (obj.UseObjectHandles)
+                        _objectHandlesCount++;
                 }
                 else if (obj.ClosedObjectHandles)
                 {
@@ -281,14 +295,25 @@ namespace ClassicUO.Game.Scenes
                     obj.UseObjectHandles = false;
                 }
 
+
+                SKIP_HANDLES_CHECK:
+
                 if (maxObjectZ > maxZ)
+                {
                     break;
+                }
 
                 obj.CurrentRenderIndex = _renderIndex;
 
+                if (!island)
+                    obj.UpdateTextCoords();
+                else
+                    goto SKIP_INTERNAL_CHECK;
 
                 if (!ismobile && !iscorpse && !island && itemData.IsInternal)
                     continue;
+
+                SKIP_INTERNAL_CHECK:
 
                 int z = obj.Z;
 
@@ -302,12 +327,21 @@ namespace ClassicUO.Game.Scenes
                             changinAlpha = obj.AlphaHue != 0;
 
                         if (!changinAlpha)
+                        {
+                            obj.UseInRender = (byte)_renderIndex;
                             continue;
+                        }
                     }
                 }
 
-                int testMinZ = drawY + (z << 2);
                 int testMaxZ = drawY;
+
+                if (testMaxZ > _maxPixel.Y)
+                {
+                    continue;
+                }
+
+                int testMinZ = drawY + (z << 2);
 
                 if (island)
                 {
@@ -321,8 +355,10 @@ namespace ClassicUO.Game.Scenes
                 else
                     testMinZ = testMaxZ;
 
-                if (testMinZ < _minPixel.Y || testMaxZ > _maxPixel.Y)
+                if (testMinZ < _minPixel.Y)
+                {
                     continue;
+                }
 
                 if (ismobile || iscorpse)
                     AddOffsetCharacterTileToRenderList(obj, useObjectHandles);
@@ -367,7 +403,7 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
 
-                if (_alphaChanged && !changinAlpha)
+                if (!island && _alphaChanged && !changinAlpha)
                 {
                     if (itemData.IsTranslucent)
                         obj.ProcessAlpha(178);
@@ -381,129 +417,164 @@ namespace ClassicUO.Game.Scenes
                     Array.Resize(ref _renderList, newsize);
                 }
 
-
-               
-
-                _renderList[_renderListCount] = obj;
-                obj.UseInRender = (byte) _renderIndex;
-                _renderListCount++;
+                _renderList[_renderListCount++] = obj;
+                obj.UseInRender = (byte)_renderIndex;
             }
         }
-
-
 
         private void AddOffsetCharacterTileToRenderList(GameObject entity, bool useObjectHandles)
         {
             int charX = entity.X;
             int charY = entity.Y;
             int maxZ = entity.PriorityZ;
-            byte dir = byte.MaxValue;
 
-            if (entity is Mobile mob)
+            int dropMaxZIndex = -1;
+
+            if (entity is Mobile mob && mob.IsMoving && (mob.Steps.Back().Direction & 7) == 2)
             {
-                if (mob.IsMoving)
-                {
-                    dir = mob.Steps.Back().Direction;
-                    if (dir > 0 && dir < 6)
-                        maxZ += 20;
-                }
-            }
-
-            for(int i = 0, max = (dir == 3 ? 4 : 3); i < max; i++)
-            {
-                int x, y;
-                switch (i)
-                {
-                    case 0:
-                        x = charX + 1;
-                        y = charY - 1;
-                        break;
-                    case 1:
-                        x = charX;
-                        y = charY + 1;
-                        break;
-                    case 2:
-                        x = charX + 1;
-                        y = charY;
-                        break;
-                    case 3:
-                        x = charX + 1;
-                        y = charY + 1;
-                        break;
-                    default:
-                        continue;
-                }
-                if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
-                    continue;
-
-                Tile tile = World.Map.GetTile(x, y);
-
-                AddTileToRenderList(tile.FirstNode, x, y, useObjectHandles, maxZ);
-            }
-
-            /*int dropMaxZIndex = -1;
-
-            if (entity is Mobile mob && mob.IsMoving && mob.Steps.Back().Direction == 2)
                 dropMaxZIndex = 0;
-
-            int maxZ = entity.PriorityZ;
+            }
 
 
             for (int i = 0; i < 8; i++)
             {
-                int x, y;
+                int x = charX;
+                int y = charY;
 
                 switch (i)
                 {
                     case 0:
-                        x = charX + 1;
-                        y = charY - 1;
+                        x++;
+                        y--;
                         break;
                     case 1:
-                        x = charX + 1;
-                        y = charY - 2;
+                        x++;
+                        y -= 2;
                         break;
                     case 2:
-                        x = charX + 2;
-                        y = charY - 2;
+                        x += 2;
+                        y -= 2;
                         break;
                     case 3:
-                        x = charX - 1;
-                        y = charY + 2;
+                        x--;
+                        y += 2;
                         break;
                     case 4:
-                        x = charX;
-                        y = charY + 1;
+                        y++;
                         break;
                     case 5:
-                        x = charX + 1;
-                        y = charY;
+                        x++;
                         break;
                     case 6:
-                        x = charX + 2;
-                        y = charY - 1;
+                        x += 2;
+                        y--;
                         break;
                     case 7:
-                        x = charX + 1;
-                        y = charY + 1;
+                        x++;
+                        y++;
                         break;
-                    default:
-                        continue;
                 }
 
-             
-                if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
+                if (x < _minTile.X || x > _maxTile.X)
                     continue;
 
-                Tile tile = World.Map.GetTile(x, y);
+                if (y < _minTile.Y || y > _maxTile.Y)
+                    continue;
 
                 int currentMaxZ = maxZ;
 
                 if (i == dropMaxZIndex)
                     currentMaxZ += 20;
 
-                AddTileToRenderList(tile.FirstNode, x, y, useObjectHandles, currentMaxZ);
-            }*/
+                var tile = World.Map.GetTile(x, y);
+
+                if (tile != null)
+                    AddTileToRenderList(tile.FirstNode, x, y, useObjectHandles, currentMaxZ);
+            }
+
+            /*int area = 2;
+
+            if (entity is Mobile mob)
+            {
+                byte dir;
+                if (mob.IsMoving)
+                {
+                    Mobile.Step s = mob.Steps.Back();
+                    dir = s.Direction;
+                    if (dir > 0 && dir < 6)
+                    {
+                        if (s.Z > entity.Z)
+                            maxZ += s.Z + 5 - entity.Z;
+                    }
+                }
+                else
+                    dir = (byte)mob.Direction;
+
+                if (mob.Texture != null)
+                {
+                    Rectangle r = mob.Texture.Bounds;
+                    //this is a raw optimization, since every object is at least 44*44, we consider the minimum 4096 (optimized to avoid division and use bit shift operands)
+                    //so we can calculate an approximated area occupied by the animation in tiles, and use an area of 2 for priority drawing at minimum
+                    
+                    //area = Math.Max(4096, r.Width * r.Height) >> 11;
+                    //area >>= 2;
+
+                    //if (area > 5)
+                    //    area = 5;
+                    //else if (area < 2)
+                    //    area = 2;
+
+                    
+                    area = Math.Max(r.Width, r.Height);
+
+                    if (area < 32)
+                        area = 44;
+
+                    area >>= 5;
+
+                    if (area > 2)
+                        area >>= 1;
+                    else if (area < 1)
+                        area = 1;
+
+                    //if (area > 3)
+                    //    area = 3;
+                    //if (area >= 2)
+                    //{
+                    //    if (dir % 2 != 0)
+                    //        area--;
+                    //}
+                }
+                else
+                    area = 0;
+            }
+            if (area == 0)
+                return;
+
+            int minX = charX - area;
+            int minY = charY + area;
+            int maxX = charX + area;
+            int maxY = charY - area;
+
+            for (int leadx = minX; leadx <= maxX; leadx++)
+            {
+                int x = leadx, y = minY;
+                while (x <= maxX && y >= maxY)
+                {
+                    if (x != charX || y != charY)
+                    {
+                        Tile tile = World.Map.GetTile(x, y);
+
+                        if (tile != null)
+                        {
+                            AddTileToRenderList(tile.FirstNode, x, y, useObjectHandles, maxZ, entity);
+                        }
+                    }
+                    x++;
+                    y--;
+                }
+            }
+            */
         }
 
         private void GetViewPort()
@@ -515,21 +586,40 @@ namespace ClassicUO.Game.Scenes
             int winGameWidth = Engine.Profile.Current.GameWindowSize.X;
             int winGameHeight = Engine.Profile.Current.GameWindowSize.Y;
             int winGameCenterX = winGamePosX + (winGameWidth >> 1);
-            int winGameCenterY = winGamePosY + (winGameHeight >> 1) + World.Player.Z * 4;
+            int winGameCenterY = winGamePosY + (winGameHeight >> 1) + (World.Player.Z << 2);
             winGameCenterX -= (int) World.Player.Offset.X;
             winGameCenterY -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
             int winDrawOffsetX = (World.Player.X - World.Player.Y) * 22 - winGameCenterX;
             int winDrawOffsetY = (World.Player.X + World.Player.Y) * 22 - winGameCenterY;
-            float left = winGamePosX;
-            float right = winGameWidth + left;
-            float top = winGamePosY;
-            float bottom = winGameHeight + top;
-            float newRight = right * Scale;
-            float newBottom = bottom * Scale;
-            int winGameScaledOffsetX = (int) (left * Scale - (newRight - right));
-            int winGameScaledOffsetY = (int) (top * Scale - (newBottom - bottom));
-            int winGameScaledWidth = (int) (newRight - winGameScaledOffsetX);
-            int winGameScaledHeight = (int) (newBottom - winGameScaledOffsetY);
+
+            int winGameScaledOffsetX;
+            int winGameScaledOffsetY;
+            int winGameScaledWidth;
+            int winGameScaledHeight;
+
+            if (Engine.Profile.Current != null && Engine.Profile.Current.EnableScaleZoom)
+            {
+                float left = winGamePosX;
+                float right = winGameWidth + left;
+                float top = winGamePosY;
+                float bottom = winGameHeight + top;
+                float newRight = right * Scale;
+                float newBottom = bottom * Scale;
+
+                winGameScaledOffsetX = (int)(left * Scale - (newRight - right));
+                winGameScaledOffsetY = (int)(top * Scale - (newBottom - bottom));
+                winGameScaledWidth = (int)(newRight - winGameScaledOffsetX);
+                winGameScaledHeight = (int)(newBottom - winGameScaledOffsetY);
+            }
+            else
+            {
+                winGameScaledOffsetX = 0;
+                winGameScaledOffsetY = 0;
+                winGameScaledWidth = 0;
+                winGameScaledHeight = 0;
+            }
+
+
             int width = (int) ((winGameWidth / 44 + 1) * Scale);
             int height = (int) ((winGameHeight / 44 + 1) * Scale);
 
@@ -545,6 +635,9 @@ namespace ClassicUO.Game.Scenes
                 height = MAX;
 
             int size = Math.Max(width, height);
+
+            if (size < World.ClientViewRange)
+                size = World.ClientViewRange;
 
             int realMinRangeX = World.Player.X - size;
 
@@ -578,17 +671,19 @@ namespace ClassicUO.Game.Scenes
 
             if (maxBlockY >= FileManager.Map.MapsDefaultSize[World.Map.Index, 1])
                 maxBlockY = FileManager.Map.MapsDefaultSize[World.Map.Index, 1] - 1;
+
             int drawOffset = (int) (Scale * 40.0);
             float maxX = winGamePosX + winGameWidth + drawOffset;
             float maxY = winGamePosY + winGameHeight + drawOffset;
             float newMaxX = maxX * Scale;
             float newMaxY = maxY * Scale;
-            int minPixelsX = (int) ((winGamePosX - drawOffset) * Scale - (newMaxX + maxX));
+            int minPixelsX = (int) ((winGamePosX - drawOffset) * Scale - MAX /*- (newMaxX + maxX)*/);
             int maxPixelsX = (int) newMaxX;
-            int minPixelsY = (int) ((winGamePosY - drawOffset) * Scale - (newMaxY + maxY));
+            int minPixelsY = (int) ((winGamePosY - drawOffset) * Scale - MAX /*- (newMaxY + maxY)*/);
             int maxPixlesY = (int) newMaxY;
 
-            if (UpdateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY) UpdateDrawPosition = true;
+            if (UpdateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY)
+                UpdateDrawPosition = true;
 
             _minTile.X = realMinRangeX;
             _minTile.Y = realMinRangeY;

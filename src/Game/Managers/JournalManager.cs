@@ -52,7 +52,7 @@ namespace ClassicUO.Game.Managers
             JournalEntry entry = new JournalEntry(text, font, hue, name, isunicode);
             Entries.AddToBack(entry);
             EntryAdded.Raise(entry);
-            _fileWriter?.WriteLine($"{name}: {text}");
+            _fileWriter?.WriteLine($"[{DateTime.Now:g}]  {name}: {text}");
         }
 
         public void CreateWriter(bool create)
@@ -61,7 +61,7 @@ namespace ClassicUO.Game.Managers
             {
                 try
                 {
-                    FileInfo info = new FileInfo($"{Engine.CurrDateTime.ToString("yyyy_MM_dd_HH_mm_ss")}_journal.txt");
+                    FileInfo info = new FileInfo($"{Engine.CurrDateTime:yyyy_MM_dd_HH_mm_ss}_journal.txt");
                     _fileWriter = info.CreateText();
                     _fileWriter.AutoFlush = true;
                 }

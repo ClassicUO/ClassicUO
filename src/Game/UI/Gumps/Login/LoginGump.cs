@@ -50,6 +50,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 // Full background
                 Add(new GumpPic(0, 0, 0x2329, 0));
 
+            // UO Flag
+            Add(new GumpPic(0, 4, 0x15A0, 0) { AcceptKeyboardInput = false });
+
             //// Quit Button
             Add(new Button((int) Buttons.Quit, 0x1589, 0x158B, 0x158A)
             {
@@ -122,7 +125,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 X = 183,
                 Y = 345
             });
-
+          
             Add(new Label("Password", false, 0x0386, font: 2)
             {
                 X = 183,
@@ -199,16 +202,16 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 if (_textboxPassword.Hue != 0x0021)
                     _textboxPassword.Hue = 0x0021;
             }
-            else if (_textboxPassword.Hue != 0x034F)
-                _textboxPassword.Hue = 0x034F;
+            else if (_textboxPassword.Hue != 0)
+                _textboxPassword.Hue = 0;
 
             if (_textboxAccount.HasKeyboardFocus)
             {
                 if (_textboxAccount.Hue != 0x0021)
                     _textboxAccount.Hue = 0x0021;
             }
-            else if (_textboxAccount.Hue != 0x034F)
-                _textboxAccount.Hue = 0x034F;
+            else if (_textboxAccount.Hue != 0)
+                _textboxAccount.Hue = 0;
         }
 
         public override void OnButtonClick(int buttonID)
@@ -217,7 +220,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 case Buttons.NextArrow:
                     SaveCheckboxStatus();
-                    Engine.SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
+                    if (!_textboxAccount.IsDisposed)
+                        Engine.SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
 
                     break;
 

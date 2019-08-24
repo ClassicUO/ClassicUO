@@ -114,7 +114,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            if (LocalSerial != 0)
+            if (LocalSerial != 0 && !LocalSerial.IsValidLocalGumpSerial)
             {
                 List<Serial> switches = new List<Serial>();
                 List<Tuple<ushort, string>> entries = new List<Tuple<ushort, string>>();
@@ -157,5 +157,116 @@ namespace ClassicUO.Game.UI.Gumps
             // For a gump, Page is the page that is drawing.
             ActivePage = pageIndex;
         }
+    }
+
+    internal abstract class MinimizableGump : TextContainerGump
+    {
+        internal bool IsMinimized
+        {
+            get => Iconized != null && IconizerArea != null && _MinimizedSave.TryGetValue(LocalSerial, out bool minimized) && minimized;
+            private set
+            {
+                if (Iconized != null && IconizerArea != null && Iconized.IsVisible != value)
+                {
+                    _MinimizedSave[LocalSerial] = Iconized.IsVisible = value;
+                }
+            }
+        }
+
+        internal MinimizableGump(Serial local, Serial server) : base(local, server)
+        {
+        }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+            if(!_IsUpdated)
+            {
+                _IsUpdated = true;
+                AfterCreationCall();
+            }
+        }
+
+        private void Iconized_MouseDoubleClick(object sender, Input.MouseDoubleClickEventArgs e)
+        {
+            if(e.Button == Input.MouseButton.Left)
+            {
+                IsMinimized = false;
+            }
+        }
+
+        private void IconizerButton_MouseUp(object sender, Input.MouseEventArgs e)
+        {
+            if(e.Button == Input.MouseButton.Left)
+            {
+                IsMinimized = true;
+            }
+        }
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            if (IsMinimized && Iconized != null)
+                return Iconized.Draw(batcher, x + Iconized.X, y + Iconized.Y);
+            else
+                return base.Draw(batcher, x, y);
+        }
+
+        public override bool Contains(int x, int y)
+        {
+            return IsMinimized && Iconized != null ? Iconized.Contains(x, y) : base.Contains(x, y);
+        }
+
+        internal abstract GumpPic Iconized { get; }
+        internal abstract HitBox IconizerArea { get; }
+
+        public override void Save(BinaryWriter writer)
+        {
+            base.Save(writer);
+            writer.Write(LocalSerial);
+            writer.Write(IsMinimized);
+        }
+
+        public override void Restore(BinaryReader reader)
+        {
+            base.Restore(reader);
+            if(Configuration.Profile.GumpsVersion > 1)
+            {
+                _MinimizedSave[reader.ReadUInt32()] = reader.ReadBoolean();
+            }
+        }
+
+        //some gumps generate properties after it's main generation, this is here only to delay the generation of main properties AFTER the principal gump itself.
+        private void AfterCreationCall()
+        {
+            if (IconizerArea != null && Iconized != null)
+            {
+                Iconized.Initialize();
+                Iconized.IsVisible = false;
+                Iconized.AcceptMouseInput = true;
+                Iconized.CanMove = true;
+                Add(Iconized);
+
+                Add(IconizerArea);
+                IconizerArea.MouseUp += IconizerButton_MouseUp;
+                IconizerArea.Alpha = 0.95f;
+                Iconized.MouseDoubleClick += Iconized_MouseDoubleClick;
+                if (LocalSerial != Serial.INVALID)
+                {
+                    if (_MinimizedSave.TryGetValue(LocalSerial, out bool minimized))
+                        _MinimizedSave[LocalSerial] = IsMinimized = minimized;
+                    else
+                        _MinimizedSave[LocalSerial] = IsMinimized;
+                }
+            }
+        }
+
+        protected override void CloseWithRightClick()
+        {
+            _MinimizedSave.Remove(LocalSerial);
+            base.CloseWithRightClick();
+        }
+
+        private static readonly Dictionary<Serial, bool> _MinimizedSave = new Dictionary<Serial, bool>();
+        private bool _IsUpdated = false;
     }
 }

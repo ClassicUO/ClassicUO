@@ -152,28 +152,11 @@ namespace ClassicUO.Game.UI.Controls
                 _hours.RemoveFromFront().Destroy();
             }
 
-            var h = new RenderedText()
-            {
-                IsUnicode = true,
-                Align = TEXT_ALIGN_TYPE.TS_LEFT,
-                FontStyle = FontStyle.BlackBorder,
-                Hue = 1150,
-                Font = 1,
-                Text = $"{Engine.CurrDateTime:t} "
-            };
+            RenderedText h = RenderedText.Create($"{Engine.CurrDateTime:t} ", 1150, 1, true, FontStyle.BlackBorder);
 
             _hours.AddToBack(h);
 
-            _entries.AddToBack(new RenderedText
-            {
-                MaxWidth = Width - (18 + h.Width),
-                IsUnicode = isUnicode,
-                Align = TEXT_ALIGN_TYPE.TS_LEFT,
-                FontStyle = FontStyle.Indention | FontStyle.BlackBorder,
-                Hue = hue,
-                Font = (byte) font,
-                Text = text
-            });
+            _entries.AddToBack(RenderedText.Create(text, hue, (byte) font, isUnicode, FontStyle.Indention | FontStyle.BlackBorder, maxWidth: Width - (18 + h.Width)));
 
             _scrollBar.MaxValue += _entries[_entries.Count - 1].Height;
             if (maxScroll) _scrollBar.Value = _scrollBar.MaxValue;

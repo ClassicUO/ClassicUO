@@ -24,6 +24,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 using ClassicUO.Utility;
 
@@ -33,13 +34,20 @@ namespace ClassicUO.IO.Resources
     {
         private UOFileMul _file;
 
-        public override void Load()
+        public override Task Load()
         {
-            string path = Path.Combine(FileManager.UoFolderPath, "animdata.mul");
-            if (File.Exists(path)) _file = new UOFileMul(path, false);
+            return Task.Run(() => 
+            {
+                string path = Path.Combine(FileManager.UoFolderPath, "animdata.mul");
+
+                if (File.Exists(path))
+                {
+                    _file = new UOFileMul(path);
+                }
+            });
         }
 
-        protected override void CleanResources()
+        public override void CleanResources()
         {
             //
         }

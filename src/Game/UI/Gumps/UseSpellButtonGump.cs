@@ -27,6 +27,7 @@ using System.IO;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
@@ -57,11 +58,44 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPic(0, 0, (ushort) _spell.GumpIconSmallID, 0) {AcceptMouseInput = false});
 
+            (int cliloc, int spl) = GetSpellTooltip(_spell.ID);
+
+            if (cliloc != 0 || spl != 0)
+            {
+                SetTooltip(FileManager.Cliloc.GetString(cliloc - spl + _spell.ID));
+            }
+
             WantUpdateSize = true;
             AcceptMouseInput = true;
             AnchorGroupName = "spell";
             GroupMatrixWidth = 44;
             GroupMatrixHeight = 44;
+        }
+
+        private static (int, int) GetSpellTooltip(int id)
+        {
+            if (id >= 1 && id < 64) // Magery
+                return (3002010, 0);
+            
+            if (id >= 101 && id <= 117) // necro
+                return (1060508, 64);
+
+            if (id >= 201 && id <= 210)
+                return (1060584, 81);
+
+            if (id >= 401 && id <= 406)
+                return (1060594, 91);
+
+            if (id >= 501 && id <= 508)
+                return (1060609, 97);
+
+            if (id >= 601 && id <= 616)
+                return (1071025, 15);
+
+            if (id >= 678 && id <= 693)
+                return (0, 0);
+
+            return (0, 0);
         }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)

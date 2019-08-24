@@ -23,7 +23,9 @@
 
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 using ClassicUO.Utility;
 
@@ -39,36 +41,39 @@ namespace ClassicUO.IO.Resources
 
         public ushort[] RadarCol { get; private set; }
 
-        public override void Load()
+        public override Task Load()
         {
-            string path = Path.Combine(FileManager.UoFolderPath, "hues.mul");
+            return Task.Run(() =>
+            {
+                string path = Path.Combine(FileManager.UoFolderPath, "hues.mul");
 
-            if (!File.Exists(path))
-                throw new FileNotFoundException();
+                if (!File.Exists(path))
+                    throw new FileNotFoundException();
 
-            UOFileMul file = new UOFileMul(path, false);
-            int groupSize = Marshal.SizeOf<HuesGroup>();
-            int entrycount = (int) file.Length / groupSize;
-            HuesCount = entrycount * 8;
-            HuesRange = new HuesGroup[entrycount];
-            ulong addr = (ulong) file.StartAddress;
+                UOFileMul file = new UOFileMul(path);
+                int groupSize = Marshal.SizeOf<HuesGroup>();
+                int entrycount = (int) file.Length / groupSize;
+                HuesCount = entrycount * 8;
+                HuesRange = new HuesGroup[entrycount];
+                ulong addr = (ulong) file.StartAddress;
 
-            for (int i = 0; i < entrycount; i++)
-                HuesRange[i] = Marshal.PtrToStructure<HuesGroup>((IntPtr) (addr + (ulong) (i * groupSize)));
+                for (int i = 0; i < entrycount; i++)
+                    HuesRange[i] = Marshal.PtrToStructure<HuesGroup>((IntPtr) (addr + (ulong) (i * groupSize)));
 
-            path = Path.Combine(FileManager.UoFolderPath, "radarcol.mul");
+                path = Path.Combine(FileManager.UoFolderPath, "radarcol.mul");
 
-            if (!File.Exists(path))
-                throw new FileNotFoundException();
+                if (!File.Exists(path))
+                    throw new FileNotFoundException();
 
-            UOFileMul radarcol = new UOFileMul(path, false);
-            RadarCol = radarcol.ReadArray<ushort>((int) radarcol.Length >> 1);
-            file.Dispose();
-            radarcol.Dispose();
+                UOFileMul radarcol = new UOFileMul(path);
+                RadarCol = radarcol.ReadArray<ushort>((int) radarcol.Length >> 1);
+                file.Dispose();
+                radarcol.Dispose();
+            });
         }
 
 
-        protected override void CleanResources()
+        public override void CleanResources()
         {
             // nothing to clear
         }
@@ -238,10 +243,8 @@ namespace ClassicUO.IO.Resources
             return HuesHelper.Color16To32(c);
         }
 
-        public ushort GetRadarColorData(int c)
-        {
-            return c < RadarCol.Length ? RadarCol[c] : (ushort) 0;
-        }
+        [MethodImpl(256)]
+        public ushort GetRadarColorData(int c) => c >= 0 && c < RadarCol.Length ? RadarCol[c] : (ushort) 0;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

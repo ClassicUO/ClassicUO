@@ -60,14 +60,15 @@ namespace ClassicUO.Game.Managers
 
     internal class MultiTargetInfo
     {
-        public ushort XOff, YOff, ZOff, Model;
+        public ushort XOff, YOff, ZOff, Model, Hue;
 
-        public MultiTargetInfo(ushort model, ushort x, ushort y, ushort z)
+        public MultiTargetInfo(ushort model, ushort x, ushort y, ushort z, ushort hue)
         {
             Model = model;
             XOff = x;
             YOff = y;
             ZOff = z;
+            Hue = hue;
 
             Offset = new Position(XOff, YOff, (sbyte)ZOff);
         }
@@ -142,10 +143,10 @@ namespace ClassicUO.Game.Managers
             IsTargeting = false;
         }
 
-        public static void SetTargetingMulti(Serial deedSerial, ushort model, ushort x, ushort y, ushort z)
+        public static void SetTargetingMulti(Serial deedSerial, ushort model, ushort x, ushort y, ushort z, ushort hue)
         {
             SetTargeting(CursorTarget.MultiPlacement, deedSerial, TargetType.Neutral);
-            MultiTargetInfo = new MultiTargetInfo(model, x, y, z);
+            MultiTargetInfo = new MultiTargetInfo(model, x, y, z, hue);
         }
 
         private static void TargetXYZ(GameObject selectedEntity)
@@ -170,8 +171,8 @@ namespace ClassicUO.Game.Managers
 
             if (selectedEntity is GameEffect effect && effect.Source != null)
                 selectedEntity = effect.Source;
-            else if (selectedEntity is MessageInfo overhead && overhead.Parent.Parent != null)
-                selectedEntity = overhead.Parent.Parent;
+            else if (selectedEntity is MessageInfo overhead && overhead.Owner != null)
+                selectedEntity = overhead.Owner;
 
             if (TargetingState == CursorTarget.SetGrabBag)
             {
@@ -239,7 +240,7 @@ namespace ClassicUO.Game.Managers
 
                 Mouse.CancelDoubleClick = true;
             }
-            else if (selectedEntity is GameObject gobj)
+            else if (TargeringType == TargetType.Neutral && selectedEntity is GameObject gobj)
             {
                 Graphic modelNumber = 0;
                 short z = gobj.Z;

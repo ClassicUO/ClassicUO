@@ -33,7 +33,7 @@ using ClassicUO.IO;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class SpellbookGump : Gump
+    internal class SpellbookGump : MinimizableGump
     {
         private readonly Item _spellBook;
         private readonly bool[] _spells = new bool[64];
@@ -105,6 +105,7 @@ namespace ClassicUO.Game.UI.Gumps
             Clear();
             _pageCornerLeft = _pageCornerRight = null;
             GetBookInfo(_spellBookType, out Graphic bookGraphic, out Graphic minimizedGraphic, out Graphic iconStartGraphic, out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount);
+            _Iconized = new GumpPic(0, 0, minimizedGraphic, 0);
             Add(new GumpPic(0, 0, bookGraphic, 0));
             Add(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
             _pageCornerLeft.LocalSerial = 0;
@@ -372,10 +373,10 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (e.Button == MouseButton.Left)
                     {
-                        SpellDefinition? def = GetSpellDefinition(sender as Control);
+                        SpellDefinition def = GetSpellDefinition(sender as Control);
 
                         if (def != null)
-                            GameActions.CastSpell(def.Value.ID);
+                            GameActions.CastSpell(def.ID);
                     }
                 };
 
@@ -384,12 +385,12 @@ namespace ClassicUO.Game.UI.Gumps
                     if (Engine.UI.IsDragging)
                         return;
 
-                    SpellDefinition? def = GetSpellDefinition(sender as Control);
+                    SpellDefinition def = GetSpellDefinition(sender as Control);
 
-                    if (!def.HasValue)
+                    if (def == null)
                         return;
 
-                    UseSpellButtonGump gump = new UseSpellButtonGump(def.Value)
+                    UseSpellButtonGump gump = new UseSpellButtonGump(def)
                     {
                         X = Mouse.Position.X - 22, Y = Mouse.Position.Y - 22
                     };
@@ -432,16 +433,16 @@ namespace ClassicUO.Game.UI.Gumps
             SetActivePage(1);
         }
 
-        private SpellDefinition? GetSpellDefinition(Control ctrl)
+        private SpellDefinition GetSpellDefinition(Control ctrl)
         {
             int idx = (int) (ctrl.LocalSerial > 1000 ? ctrl.LocalSerial - 1000 : ctrl.LocalSerial >= 100 ? ctrl.LocalSerial - 100 : ctrl.LocalSerial.Value) + 1;
 
             return GetSpellDefinition(idx);
         }
 
-        private SpellDefinition? GetSpellDefinition(int idx)
+        private SpellDefinition GetSpellDefinition(int idx)
         {
-            SpellDefinition? def = null;
+            SpellDefinition def = null;
 
             switch (_spellBookType)
             {
@@ -829,7 +830,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _clickTiming = -Mouse.MOUSE_DELAY_DOUBLE_CLICK;
                 var def = GetSpellDefinition((int) _lastPressed.Tag);
 
-                if (def.HasValue) GameActions.CastSpell(def.Value.ID);
+                if (def != null) GameActions.CastSpell(def.ID);
 
                 _lastPressed = null;
             }
@@ -898,6 +899,10 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
             }
         }
+
+        internal override HitBox IconizerArea { get; } = new HitBox(0, 98, 27, 23);
+        private GumpPic _Iconized;
+        internal override GumpPic Iconized => _Iconized;
 
         private enum ButtonCircle
         {

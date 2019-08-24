@@ -27,6 +27,7 @@ using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
@@ -58,8 +59,6 @@ namespace ClassicUO.Game.GameObjects
 
     internal partial class Mobile : Entity
     {
-        private ushort _hits;
-        private ushort _hitsMax;
         private bool _isDead;
         private bool _isRenamable;
         private bool _isSA_Poisoned;
@@ -115,33 +114,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
         }
-
-        public ushort Hits
-        {
-            get => _hits;
-            set
-            {
-                if (_hits != value)
-                {
-                    _hits = value;
-                    _delta |= Delta.Hits;
-                }
-            }
-        }
-
-        public ushort HitsMax
-        {
-            get => _hitsMax;
-            set
-            {
-                if (_hitsMax != value)
-                {
-                    _hitsMax = value;
-                    _delta |= Delta.Hits;
-                }
-            }
-        }
-
+       
         public ushort Mana
         {
             get => _mana;
@@ -669,11 +642,13 @@ namespace ClassicUO.Game.GameObjects
                     FileManager.Animations.AnimGroup = animGroup;
                     FileManager.Animations.Direction = dir;
 
+
+
                     if (direction.FrameCount == 0 || direction.Frames == null)
                         FileManager.Animations.LoadDirectionGroup(ref direction);
 
 
-                    if (direction.Address != 0 && direction.Size != 0 || direction.IsUOP)
+                    if (direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1 || direction.IsUOP)
                     {
                         direction.LastAccessTime = Engine.Ticks;
                         int fc = direction.FrameCount;
@@ -841,7 +816,7 @@ namespace ClassicUO.Game.GameObjects
                             if (Z - step.Z >= 22)
                             {
                                 // oUCH!!!!
-                                AddOverhead(MessageType.Label, "Ouch!");
+                                AddMessage(MessageType.Label, "Ouch!");
                             }
 
 #if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
@@ -868,6 +843,17 @@ namespace ClassicUO.Game.GameObjects
                         }
 
                         Position = new Position((ushort) step.X, (ushort) step.Y, step.Z);
+
+                        if (World.InGame && Serial == World.Player)
+                        {
+                            foreach (var s in Engine.UI.Gumps.OfType<ContainerGump>())
+                            {
+                                var item = World.Items.Get(s.LocalSerial);
+                                if (item == null || item.IsDestroyed || item.OnGround && item.Distance > 3)
+                                    s.Dispose();
+                            }
+                        }
+
                         Direction = (Direction) step.Direction;
                         IsRunning = step.Run;
                         Offset.X = 0;
@@ -912,7 +898,7 @@ namespace ClassicUO.Game.GameObjects
 
                     while (start != null && result == 0)
                     {
-                        if ((start is Item || start is Static) && Math.Abs(Z - start.Z) <= 1)
+                        if ((start is Item || start is Static || start is Multi) && Math.Abs(Z - start.Z) <= 1)
                         {
                             ushort graphic = start.Graphic;
 

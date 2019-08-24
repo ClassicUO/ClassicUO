@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ClassicUO.IO.Resources
 {
@@ -32,33 +33,36 @@ namespace ClassicUO.IO.Resources
     {
         private SpeechEntry[] _speech;
 
-        public override unsafe void Load()
+        public override unsafe Task Load()
         {
-            string path = Path.Combine(FileManager.UoFolderPath, "speech.mul");
-
-            if (!File.Exists(path))
-                throw new FileNotFoundException();
-
-            UOFileMul file = new UOFileMul(path, false);
-            List<SpeechEntry> entries = new List<SpeechEntry>();
-
-            while (file.Position < file.Length)
+            return Task.Run(() =>
             {
-                int id = (file.ReadByte() << 8) | file.ReadByte();
-                int length = (file.ReadByte() << 8) | file.ReadByte();
+                string path = Path.Combine(FileManager.UoFolderPath, "speech.mul");
 
-                if (length > 0)
+                if (!File.Exists(path))
+                    throw new FileNotFoundException();
+
+                UOFileMul file = new UOFileMul(path);
+                List<SpeechEntry> entries = new List<SpeechEntry>();
+
+                while (file.Position < file.Length)
                 {
-                    entries.Add(new SpeechEntry(id, string.Intern(Encoding.UTF8.GetString((byte*) file.PositionAddress, length))));
-                    file.Skip(length);
-                }
-            }
+                    int id = file.ReadUShortReversed();
+                    int length = file.ReadUShortReversed();
 
-            _speech = entries.ToArray();
-            file.Dispose();
+                    if (length > 0)
+                    {
+                        entries.Add(new SpeechEntry(id, string.Intern(Encoding.UTF8.GetString((byte*) file.PositionAddress, length))));
+                        file.Skip(length);
+                    }
+                }
+
+                _speech = entries.ToArray();
+                file.Dispose();
+            });
         }
 
-        protected override void CleanResources()
+        public override void CleanResources()
         {
         }
 

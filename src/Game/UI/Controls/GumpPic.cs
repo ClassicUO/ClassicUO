@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Controls
         {
         }
 
-        public GumpPic(int x, int y, SpriteTexture texture, Hue hue)
+        public GumpPic(int x, int y, UOTexture texture, Hue hue)
         {
             X = x;
             Y = y;

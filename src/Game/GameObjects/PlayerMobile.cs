@@ -105,7 +105,9 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool InWarMode { get; set; }
 
+#if MOVEMENT2
         public Deque<Step> RequestedSteps { get; } = new Deque<Step>();
+#endif
 
         public IReadOnlyDictionary<Graphic, BuffIcon> BuffIcons => _buffIcons;
 
@@ -754,6 +756,41 @@ namespace ClassicUO.Game.GameObjects
                 item = backpack.FindItem(0x0E21);
 
             return item;
+        }
+
+        public Item FindItemByGraphic(ushort graphic)
+        {
+            Item backpack = Equipment[(int)Layer.Backpack];
+
+            if (backpack != null)
+            {
+                return FindItemInContainerRecursive(backpack, graphic);
+            }
+
+            return null;
+        }
+
+        private Item FindItemInContainerRecursive(Item container, ushort graphic)
+        {
+            Item found = null;
+            if (container != null)
+            {
+                foreach (var item in container.Items)
+                {
+                    if (item.Graphic == graphic)
+                        return item;
+
+                    if (item.Items.Count != 0)
+                    {
+                        found = FindItemInContainerRecursive(item, graphic);
+
+                        if (found != null && found.Graphic == graphic)
+                            return found;
+                    }
+                }
+            }
+
+            return found;
         }
 
         public void AddBuff(Graphic graphic, uint time, string text)
@@ -1830,7 +1867,7 @@ namespace ClassicUO.Game.GameObjects
 
         private void TryOpenDoors()
         {
-            if (Engine.Profile.Current.AutoOpenDoors)
+            if (!World.Player.IsDead && Engine.Profile.Current.AutoOpenDoors)
             {
                 int x = X, y = Y, z = Z;
                 Pathfinder.GetNewXY((byte) Direction, ref x, ref y);
@@ -1892,7 +1929,14 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
-            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Engine.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT)
+            if (Walker.StepsCount >= Constants.MAX_STEP_COUNT)
+            {
+                Log.Message(LogTypes.Panic, ">> STEP LIMIT REACHED!!! << ");
+                return false;
+            }
+
+            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Engine.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || 
+                (FileManager.ClientVersion >= ClientVersions.CV_60142 && IsParalyzed))
                 return false;
 
             if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead)

@@ -39,7 +39,8 @@ namespace ClassicUO.Game.GameObjects
         private Flags _flags;
         private Hue _hue;
         private string _name;
-
+        private ushort _hits;
+        private ushort _hitsMax;
         protected long LastAnimationChangeTime { get; set; }
 
         public EntityCollection<Item> Items { get; protected set; }
@@ -55,7 +56,6 @@ namespace ClassicUO.Game.GameObjects
         public Serial Serial { get; set; }
         public bool IsClicked { get; set; }
 
-        public ConcurrentDictionary<int, Property> Properties { get; } = new ConcurrentDictionary<int, Property>();
 
         public override Graphic Graphic
         {
@@ -93,6 +93,33 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
         }
+
+        public ushort Hits
+        {
+            get => _hits;
+            set
+            {
+                if (_hits != value)
+                {
+                    _hits = value;
+                    _delta |= Delta.Hits;
+                }
+            }
+        }
+
+        public ushort HitsMax
+        {
+            get => _hitsMax;
+            set
+            {
+                if (_hitsMax != value)
+                {
+                    _hitsMax = value;
+                    _delta |= Delta.Hits;
+                }
+            }
+        }
+
 
         public string Name
         {
@@ -138,7 +165,6 @@ namespace ClassicUO.Game.GameObjects
 
         public virtual bool Exists => World.Contains(Serial);
 
-        public uint PropertiesHash { get; set; }
 
         protected Entity(Serial serial)
         {
@@ -147,23 +173,16 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged, PropertiesChanged;
+        public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged;
 
-        public void UpdateProperties(IEnumerable<Property> props)
-        {
-            Properties.Clear();
-            int temp = 0;
-            foreach (Property p in props) Properties.TryAdd(temp++, p);
-            _delta |= Delta.Properties;
-        }
 
         protected virtual void OnProcessDelta(Delta d)
         {
             if (d.HasFlag(Delta.Appearance)) AppearanceChanged.Raise(this);
             if (d.HasFlag(Delta.Position)) PositionChanged.Raise(this);
             if (d.HasFlag(Delta.Attributes)) AttributesChanged.Raise(this);
-            if (d.HasFlag(Delta.Properties)) PropertiesChanged.Raise(this);
         }
+
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -199,7 +218,6 @@ namespace ClassicUO.Game.GameObjects
         public override void Destroy()
         {
             _equipment = null;
-            Properties.Clear();
             base.Destroy();
         }
 

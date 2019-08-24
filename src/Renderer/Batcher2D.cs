@@ -136,6 +136,7 @@ namespace ClassicUO.Renderer
             }
         }
 
+        [MethodImpl(256)]
         public bool DrawSprite(Texture2D texture, int x, int y, int w, int h, int destX, int destY, ref Vector3 hue)
         {
             EnsureSize();
@@ -200,6 +201,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
+        [MethodImpl(256)]
         public bool DrawSpriteFlipped(Texture2D texture, int x, int y, int w, int h, int destX, int destY, ref Vector3 hue)
         {
             EnsureSize();
@@ -264,6 +266,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
+        [MethodImpl(256)]
         public bool DrawSpriteLand(Texture2D texture, int x, int y, ref Rectangle rect, ref Vector3[] normals, ref Vector3 hue)
         {
             EnsureSize();
@@ -322,6 +325,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
+        [MethodImpl(256)]
         public bool DrawSpriteRotated(Texture2D texture, int x, int y, int w, int h, int destX, int destY, ref Vector3 hue, float angle)
         {
             EnsureSize();
@@ -408,6 +412,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
+        [MethodImpl(256)]
         public bool DrawSpriteShadow(Texture2D texture, int x, int y, bool flip)
         {
             EnsureSize();
@@ -528,6 +533,7 @@ namespace ClassicUO.Renderer
             return false;
         }
 
+        [MethodImpl(256)]
         public bool DrawCharacterSitted(Texture2D texture, int x, int y, bool mirror, float h3mod, float h6mod, float h9mod, ref Vector3 hue)
         {
             EnsureSize();
@@ -631,8 +637,11 @@ namespace ClassicUO.Renderer
                     //    vertex4.Hue = vertex5.Hue = hue;
                     //}
 
-                    if (idx + count + 2 >= MAX_SPRITES)
+                    if (NumSprites + 4 >= MAX_SPRITES)
+                    {
+                        idx = 0;
                         Flush();
+                    }
 
                     ref var vertex4_s = ref VertexInfo[idx + count++];
                     ref var vertex5_s = ref VertexInfo[idx + count++];
@@ -746,8 +755,11 @@ namespace ClassicUO.Renderer
                     //    vertex6.Hue = vertex7.Hue = hue;
                     //}
 
-                    if (idx + count + 2 >= MAX_SPRITES)
+                    if (NumSprites + 4 >= MAX_SPRITES)
+                    {
+                        idx = 0;
                         Flush();
+                    }
 
                     ref var vertex6_s = ref VertexInfo[idx + count++];
                     ref var vertex7_s = ref VertexInfo[idx + count++];
@@ -787,7 +799,7 @@ namespace ClassicUO.Renderer
                     vertex6_s.Normal.X = 0;
                     vertex6_s.Normal.Y = 0;
                     vertex6_s.Normal.Z = 1;
-                    vertex6_s.Normal.X = 0;
+                    vertex7_s.Normal.X = 0;
                     vertex7_s.Normal.Y = 0;
                     vertex7_s.Normal.Z = 1;
                     vertex8_s.Normal.X = 0;
@@ -823,6 +835,12 @@ namespace ClassicUO.Renderer
             {
                 if (h3mod != 0.0f)
                 {
+                    if (NumSprites + 4 >= MAX_SPRITES)
+                    {
+                        idx = 0;
+                        Flush();
+                    }
+
                     ref var vertex0 = ref VertexInfo[idx + count++];
                     ref var vertex1 = ref VertexInfo[idx + count++];
                     ref var vertex2 = ref VertexInfo[idx + count++];
@@ -882,8 +900,11 @@ namespace ClassicUO.Renderer
 
                     }
 
-                    if (idx + count + 2 >= MAX_SPRITES)
+                    if (NumSprites + 4 >= MAX_SPRITES)
+                    {
+                        idx = 0;
                         Flush();
+                    }
 
                     ref var vertex4_s = ref VertexInfo[idx + count++];
                     ref var vertex5_s = ref VertexInfo[idx + count++];
@@ -943,8 +964,12 @@ namespace ClassicUO.Renderer
                     }
 
 
-                    if (idx + count + 2 >= MAX_SPRITES)
+                    if (NumSprites + 4 >= MAX_SPRITES)
+                    {
+                        idx = 0;
                         Flush();
+                    }
+
 
                     ref var vertex6_s = ref VertexInfo[idx + count++];
                     ref var vertex7_s = ref VertexInfo[idx + count++];
@@ -984,7 +1009,7 @@ namespace ClassicUO.Renderer
                     vertex6_s.Normal.X = 0;
                     vertex6_s.Normal.Y = 0;
                     vertex6_s.Normal.Z = 1;
-                    vertex6_s.Normal.X = 0;
+                    vertex7_s.Normal.X = 0;
                     vertex7_s.Normal.Y = 0;
                     vertex7_s.Normal.Z = 1;
                     vertex8_s.Normal.X = 0;
@@ -1011,6 +1036,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
+        [MethodImpl(256)]
         public bool Draw2D(Texture2D texture, int x, int y, ref Vector3 hue)
         {
             EnsureSize();
@@ -1072,7 +1098,8 @@ namespace ClassicUO.Renderer
             return false;
         }
 
-        public bool Draw2D(Texture2D texture, int x, int y, int sx, int sy, int swidth, int sheight, ref Vector3 hue)
+        [MethodImpl(256)]
+        public bool Draw2D(Texture2D texture, int x, int y, int sx, int sy, float swidth, float sheight, ref Vector3 hue)
         {
             EnsureSize();
 
@@ -1135,8 +1162,9 @@ namespace ClassicUO.Renderer
 
             return false;
         }
-
-        public bool Draw2D(Texture2D texture, int dx, int dy, int dwidth, int dheight, int sx, int sy, int swidth, int sheight, ref Vector3 hue)
+        
+        [MethodImpl(256)]
+        public bool Draw2D(Texture2D texture, float dx, float dy, float dwidth, float dheight, int sx, int sy, float swidth, float sheight, ref Vector3 hue, float angle = 0.0f)
         {
             EnsureSize();
 
@@ -1149,8 +1177,93 @@ namespace ClassicUO.Renderer
             ref var vertex2 = ref VertexInfo[idx + 2];
             ref var vertex3 = ref VertexInfo[idx + 3];
 
-            vertex0.Position.X = dx;
-            vertex0.Position.Y = dy;
+
+            float x = dx;
+            float y = dy;
+            float w = dx + dwidth;
+            float h = dy + dheight;
+
+            if (angle != 0.0f)
+            {
+                //angle = (float)(angle * 57.295780);
+                angle = (float)(angle * Math.PI) / 180.0f;
+
+                float ww = dwidth / 2f;
+                float hh = dheight / 2f;
+
+                float sin = (float)Math.Sin(angle);
+                float cos = (float)Math.Cos(angle);
+
+                //float sinx = sin * ww;
+                //float cosx = cos * ww;
+                //float siny = sin * hh;
+                //float cosy = cos * hh;
+
+
+
+                float tempX = -ww;
+                float tempY = -hh;
+                float rotX = tempX * cos - tempY * sin;
+                float rotY = tempX * sin + tempY * cos;
+                rotX += dx + ww;
+                rotY += dy + hh;
+
+                vertex0.Position.X = rotX;
+                vertex0.Position.Y = rotY;
+
+
+
+
+                tempX = dwidth - ww;
+                tempY = -hh;
+                rotX = tempX * cos - tempY * sin;
+                rotY = tempX * sin + tempY * cos;
+                rotX += dx + ww;
+                rotY += dy + hh;
+
+                vertex1.Position.X = rotX;
+                vertex1.Position.Y = rotY;
+
+
+
+
+                tempX = -ww;
+                tempY = dheight - hh;
+                rotX = tempX * cos - tempY * sin;
+                rotY = tempX * sin + tempY * cos;
+                rotX += dx + ww;
+                rotY += dy + hh;
+
+                vertex2.Position.X = rotX;
+                vertex2.Position.Y = rotY;
+
+
+                tempX = dwidth - ww;
+                tempY = dheight - hh;
+                rotX = tempX * cos - tempY * sin;
+                rotY = tempX * sin + tempY * cos;
+                rotX += dx + ww;
+                rotY += dy + hh;
+
+                vertex3.Position.X = rotX;
+                vertex3.Position.Y = rotY;
+
+            }
+            else
+            {
+                vertex0.Position.X = x;
+                vertex0.Position.Y = y;
+
+                vertex1.Position.X = w;
+                vertex1.Position.Y = y;
+
+                vertex2.Position.X = x;
+                vertex2.Position.Y = h;
+
+                vertex3.Position.X = w;
+                vertex3.Position.Y = h;
+            }
+
             vertex0.Position.Z = 0;
             vertex0.Normal.X = 0;
             vertex0.Normal.Y = 0;
@@ -1158,8 +1271,6 @@ namespace ClassicUO.Renderer
             vertex0.TextureCoordinate.X = minX;
             vertex0.TextureCoordinate.Y = minY;
             vertex0.TextureCoordinate.Z = 0;
-            vertex1.Position.X = dx + dwidth;
-            vertex1.Position.Y = dy;
             vertex1.Position.Z = 0;
             vertex1.Normal.X = 0;
             vertex1.Normal.Y = 0;
@@ -1167,8 +1278,6 @@ namespace ClassicUO.Renderer
             vertex1.TextureCoordinate.X = maxX;
             vertex1.TextureCoordinate.Y = minY;
             vertex1.TextureCoordinate.Z = 0;
-            vertex2.Position.X = dx;
-            vertex2.Position.Y = dy + dheight;
             vertex2.Position.Z = 0;
             vertex2.Normal.X = 0;
             vertex2.Normal.Y = 0;
@@ -1176,8 +1285,6 @@ namespace ClassicUO.Renderer
             vertex2.TextureCoordinate.X = minX;
             vertex2.TextureCoordinate.Y = maxY;
             vertex2.TextureCoordinate.Z = 0;
-            vertex3.Position.X = dx + dwidth;
-            vertex3.Position.Y = dy + dheight;
             vertex3.Position.Z = 0;
             vertex3.Normal.X = 0;
             vertex3.Normal.Y = 0;
@@ -1187,7 +1294,9 @@ namespace ClassicUO.Renderer
             vertex3.TextureCoordinate.Z = 0;
             vertex0.Hue = vertex1.Hue = vertex2.Hue = vertex3.Hue = hue;
 
-            if (CheckInScreen(idx))
+
+
+            //if (CheckInScreen(idx))
             {
                 PushSprite(texture);
 
@@ -1197,7 +1306,8 @@ namespace ClassicUO.Renderer
             return false;
         }
 
-        public bool Draw2D(Texture2D texture, int x, int y, int width, int height, ref Vector3 hue)
+        [MethodImpl(256)]
+        public bool Draw2D(Texture2D texture, int x, int y, float width, float height, ref Vector3 hue)
         {
             EnsureSize();
 
@@ -1255,15 +1365,16 @@ namespace ClassicUO.Renderer
             return false;
         }
 
-        public bool Draw2DTiled(Texture2D texture, int dx, int dy, int dwidth, int dheight, ref Vector3 hue)
+        [MethodImpl(256)]
+        public bool Draw2DTiled(Texture2D texture, int dx, int dy, float dwidth, float dheight, ref Vector3 hue)
         {
             int y = dy;
-            int h = dheight;
+            int h = (int) dheight;
 
             while (h > 0)
             {
                 int x = dx;
-                int w = dwidth;
+                int w = (int) dwidth;
 
                 int rw = texture.Width;
                 int rh = h < texture.Height ? h : texture.Height;
@@ -1284,6 +1395,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
+        [MethodImpl(256)]
         public bool DrawRectangle(Texture2D texture, int x, int y, int width, int height, ref Vector3 hue)
         {
             Draw2D(texture, x, y, width, 1, ref hue);
@@ -1294,7 +1406,7 @@ namespace ClassicUO.Renderer
             return true;
         }
 
-
+        [MethodImpl(256)]
         public bool Draw2DRotated(Texture2D texture, int startX, int startY, int endX, int endY, int originX, int originY)
         {
             EnsureSize();
@@ -1319,12 +1431,6 @@ namespace ClassicUO.Renderer
             float ww = r.Width / 2f;
             float hh = r.Height / 2f;
 
-            Vector3 center = new Vector3
-            {
-                X = originX,
-                Y = originY
-            };
-
 
             float rotSin = (float) Math.Sin(angle);
             float rotCos = (float) Math.Cos(angle);
@@ -1336,7 +1442,8 @@ namespace ClassicUO.Renderer
             float cosy = rotCos * hh;
 
 
-            vertex0.Position = center;
+            vertex0.Position.X = originX;
+            vertex0.Position.Y = originY;
             vertex0.Position.X += cosx - -siny;
             vertex0.Position.Y -= sinx + -cosy;
             vertex0.Normal.X = 0;
@@ -1346,7 +1453,8 @@ namespace ClassicUO.Renderer
             vertex0.TextureCoordinate.Y = 0;
             vertex0.TextureCoordinate.Z = 0;
 
-            vertex1.Position = center;
+            vertex1.Position.X = originX;
+            vertex1.Position.Y = originY;
             vertex1.Position.X += cosx - siny;
             vertex1.Position.Y += -sinx + -cosy;
             vertex1.Normal.X = 0;
@@ -1356,7 +1464,8 @@ namespace ClassicUO.Renderer
             vertex1.TextureCoordinate.Y = 1;
             vertex1.TextureCoordinate.Z = 0;
 
-            vertex2.Position = center;
+            vertex2.Position.X = originX;
+            vertex2.Position.Y = originY;
             vertex2.Position.X += -cosx - -siny;
             vertex2.Position.Y += sinx + cosy;
             vertex2.Normal.X = 0;
@@ -1366,7 +1475,8 @@ namespace ClassicUO.Renderer
             vertex2.TextureCoordinate.Y = 0;
             vertex2.TextureCoordinate.Z = 0;
 
-            vertex3.Position = center;
+            vertex3.Position.X = originX;
+            vertex3.Position.Y = originY;
             vertex3.Position.X += -cosx - siny;
             vertex3.Position.Y += sinx + -cosy;
             vertex3.Normal.X = 0;
@@ -1396,7 +1506,8 @@ namespace ClassicUO.Renderer
         {
             for (byte i = 0; i < 4; i++)
             {
-                if (DrawingArea.Contains(VertexInfo[index + i].Position) == ContainmentType.Contains)
+                DrawingArea.Contains(ref VertexInfo[index + i].Position, out ContainmentType res);
+                if (res == ContainmentType.Contains)
                     return true;
             }
 
@@ -1595,7 +1706,6 @@ namespace ClassicUO.Renderer
 
         private readonly MatrixEffect _defaultEffect;
         private readonly IndexBuffer _indexBuffer;
-        private readonly Vector3 _minVector3 = new Vector3(0, 0, -150);
         private readonly RasterizerState _rasterizerState;
         private readonly VertexBuffer _vertexBuffer;
         protected readonly Texture2D[] TextureInfo;
@@ -1635,6 +1745,9 @@ namespace ClassicUO.Renderer
             _stencil = Stencil;
 
             _defaultEffect = defaultEffect;
+
+            GraphicsDevice.Indices = _indexBuffer;
+
         }
 
         public MatrixEffect DefaultEffect => _defaultEffect;
@@ -1672,7 +1785,9 @@ namespace ClassicUO.Renderer
             EnsureNotStarted();
             _started = true;
 
-            DrawingArea.Min = _minVector3;
+            DrawingArea.Min.X = 0;
+            DrawingArea.Min.Y = 0;
+            DrawingArea.Min.Z = -150;
             DrawingArea.Max.X = GraphicsDevice.Viewport.Width;
             DrawingArea.Max.Y = GraphicsDevice.Viewport.Height;
             DrawingArea.Max.Z = 150;
@@ -1739,8 +1854,6 @@ namespace ClassicUO.Renderer
 
 
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
-            GraphicsDevice.Indices = _indexBuffer;
-
 
             _defaultEffect.ApplyStates();
         }
@@ -1789,16 +1902,16 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public void EnableScissorTest(bool enable)
+        public bool EnableScissorTest(bool enable)
         {
             if (enable == _useScissor)
-                return;
+                return false;
 
             Flush();
 
-            //_rasterizerState?.Dispose();
-
             _useScissor = enable;
+
+            return true;
         }
 
         [MethodImpl(256)]

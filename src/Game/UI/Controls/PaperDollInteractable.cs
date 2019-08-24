@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -90,6 +91,11 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (item != null && item.Layer >= 0 && (int) item.Layer < _pgumps.Length)
                 {
+                    if (Mobile == World.Player && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded))
+                    {
+                        World.Player.UpdateAbilities();
+                    }
+
                     ref var gump = ref _pgumps[(int)item.Layer];
                     gump?.Dispose();
                     gump = null;
@@ -108,6 +114,21 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (item == _fakeItem.Serial)
                     {
+                        Item i = World.Items.Get(item);
+
+                        if (i != null && i.Layer >= 0 && (int)i.Layer < _pgumps.Length)
+                        {
+                            if (Mobile == World.Player && (i.Layer == Layer.OneHanded || i.Layer == Layer.TwoHanded))
+                            {
+                                World.Player.UpdateAbilities();
+                            }
+
+                            ref var gump = ref _pgumps[(int) i.Layer];
+                            gump?.Dispose();
+                            gump = null;
+
+                        }
+
                         _fakeItem = null;
 
                         break;
@@ -252,7 +273,12 @@ namespace ClassicUO.Game.UI.Controls
 
                         Item item = _mobile.Equipment[layerIndex];
                         bool isfake = false;
-                        bool canPickUp = isGM || World.Player == Mobile;
+                        bool canPickUp = World.InGame && (World.Player.Graphic == 0x03DB || 
+                                                          World.Player == Mobile || 
+                                                          (World.Player.Flags & Flags.IgnoreMobiles) != 0 || 
+                                                          (Mobile.NotorietyFlag == NotorietyFlag.Invulnerable && (Mobile.Flags & Flags.IgnoreMobiles) == 0)) && 
+                                         layerIndex != (int) Layer.Hair && 
+                                         layerIndex != (int) Layer.Beard;
                         ref var itemGump = ref _pgumps[layerIndex];
 
                         if (_fakeItem != null && _fakeItem.ItemData.Layer == layerIndex)

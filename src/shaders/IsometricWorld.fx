@@ -1,6 +1,8 @@
 #define NOCOLOR 0
 #define COLOR 1
 #define PARTIAL_COLOR 2
+#define HUE_TEXT_NO_BLACK 3
+#define HUE_TEXT 4
 #define LAND 6
 #define LAND_COLOR 7
 #define SPECTRAL 10
@@ -54,7 +56,7 @@ float3 get_rgb(float red, float hue, bool swap)
 {
 	if (hue < HUES_DELTA)
 	{
-		if(swap)
+		if (swap)
 			hue += HUES_DELTA;
 		return tex2D(HueSampler0, float2(red, hue / 6000.0f)).rgb;
 	}
@@ -73,25 +75,16 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	float4 color = tex2D(DrawSampler, IN.TexCoord);
 	
 	int mode = int(IN.Hue.y);
+	
+	if (color.a == 0.0f)
+		discard;
+
 	bool swap = false;
-	if(mode >= COLOR_SWAP)
+	if (mode >= COLOR_SWAP)
 	{
 		mode -= COLOR_SWAP;
 		swap = true;
 	}
-
-	if (mode == LIGHTS)
-	{
-		if (color.a != 0.0f && IN.Hue.x != 0.0f)
-		{
-			color.rgb *= get_rgb(color.r, IN.Hue.x, swap);
-		}
-		return color;
-	}
-
-	if (color.a == 0.0f)
-		discard;
-
 
 	float alpha = 1 - IN.Hue.z;
 
@@ -99,23 +92,57 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	{
 		color.rgb = get_rgb(color.r, IN.Hue.x, swap);
 	}
-	else if (mode == LAND)
+	else if (mode > 5)
 	{
-		color.rgb *= get_light(IN.Normal);
+		if (mode > 9)
+		{
+			float red = color.r;
+			
+			if (mode > 10)
+			{
+				if (mode > 11)
+				{
+					if (mode > 12)
+					{
+						if (IN.Hue.x != 0.0f)
+						{
+							color.rgb *= get_rgb(color.r, IN.Hue.x, swap);
+						}
+						return color;
+					}
+
+					red = 0.6f;
+				}
+				else
+				{
+					red *= 0.5f;
+				}
+			}
+			else
+			{
+				red *= 1.5f;
+			}
+
+			alpha = 1 - red;
+			color.rgb = VEC3_ZERO;
+		}
+		else
+		{
+			float3 norm = get_light(IN.Normal);
+
+			if (mode > 6)
+			{
+				color.rgb = get_rgb(color.r, IN.Hue.x, swap) * norm;
+			}
+			else
+			{
+				color.rgb *= norm;
+			}
+		}
 	}
-	else if (mode == LAND_COLOR)
+	else if (mode == 4 || (mode == 3 && (color.r > 0.08 || color.g > 0.08 || color.b > 0.08)) || (mode == 5 && color.r > 0.08 )  )
 	{
-		color.rgb = get_rgb(color.r, IN.Hue.x, swap) * get_light(IN.Normal);
-	}
-	else if (mode == SPECTRAL)
-	{
-		alpha = 1 - (color.r * 1.5f);
-		color.rgb = VEC3_ZERO;
-	}
-	else if (mode == SHADOW)
-	{
-		alpha = 0.5f;
-		color.rgb = VEC3_ZERO;
+		color.rgb = get_rgb(color.r + 90, IN.Hue.x, swap);
 	}
 
 	return color * alpha;

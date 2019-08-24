@@ -63,50 +63,50 @@ namespace ClassicUO.Game.GameObjects
 
         public static Item Create(Serial serial)
         {
-            if (_pool.Count != 0)
-            {
-                var i = _pool.Dequeue();
-                i.IsDestroyed = false;
-                i.Graphic = 0;
-                i.Serial = serial;
-                i._amount = 0;
-                i._animDataFrame = default;
-                i._animSpeed = 0;
-                i._container = Serial.INVALID;
-                i._isMulti = false;
-                i._layer = 0;
-                i._price = 0;
-                i._spellsBitFiled = 0;
-                i.UsedLayer = false;
-                i._originalGraphic = 0;
-                i._displayedGraphic = null;
+            //if (_pool.Count != 0)
+            //{
+            //    var i = _pool.Dequeue();
+            //    i.IsDestroyed = false;
+            //    i.Graphic = 0;
+            //    i.Serial = serial;
+            //    i._amount = 0;
+            //    i._animDataFrame = default;
+            //    i._animSpeed = 0;
+            //    i._container = 0;
+            //    i._isMulti = false;
+            //    i._layer = 0;
+            //    i._price = 0;
+            //    i._spellsBitFiled = 0;
+            //    i.UsedLayer = false;
+            //    i._originalGraphic = 0;
+            //    i._displayedGraphic = null;
 
-                i.LightID = 0;
-                i.MultiDistanceBonus = 0;
-                i.BookType = SpellBookType.Unknown;
-                i.Flags = 0;
-                i.WantUpdateMulti = true;
-                i._force = false;
-                i.MultiInfo = null;
-                i.MultiGraphic = 0;
-                i.CharacterIsBehindFoliage = false;
+            //    i.LightID = 0;
+            //    i.MultiDistanceBonus = 0;
+            //    i.BookType = SpellBookType.Unknown;
+            //    i.Flags = 0;
+            //    i.WantUpdateMulti = true;
+            //    i._force = false;
+            //    i.MultiInfo = null;
+            //    i.MultiGraphic = 0;
+            //    i.CharacterIsBehindFoliage = false;
 
-                i.AlphaHue = 0;
-                i.Name = null;
-                i.Direction = 0;
-                i.Equipment = null;
-                i.LastAnimationChangeTime = 0;
-                i.Items = new EntityCollection<Item>();
-                i.IsClicked = false;
-                i.Properties.Clear();
-                i._delta = 0;
-                i.PropertiesHash = 0;
+            //    i.AlphaHue = 0;
+            //    i.Name = null;
+            //    i.Direction = 0;
+            //    i.Equipment = null;
+            //    i.LastAnimationChangeTime = 0;
+            //    i.Items = new EntityCollection<Item>();
+            //    i.IsClicked = false;
+            //    i.Properties.Clear();
+            //    i._delta = 0;
+            //    i.PropertiesHash = 0;
 
-                i._itemData = null;
+            //    i._itemData = null;
                 
 
-                return i;
-            }
+            //    return i;
+            //}
 
             return new Item(serial);
         }
@@ -116,11 +116,8 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return;
 
-            _container = Serial.INVALID;
-            _delta = 0;
-
             base.Destroy();
-            _pool.Enqueue(this);
+            //_pool.Enqueue(this);
         }
 
         public uint Price
@@ -218,6 +215,8 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
         }
+
+        public bool IsDamageable { get; set; }
 
         public byte LightID { get; set; }
 
@@ -357,6 +356,7 @@ namespace ClassicUO.Game.GameObjects
                     m.MultiOffsetY = y;
                     m.MultiOffsetZ = z;
                     m.Hue = Hue;
+                    m.AlphaHue = 255;
 
                     house.Components.Add(m);
                 }
@@ -398,6 +398,7 @@ namespace ClassicUO.Game.GameObjects
                     if (OnGround && ItemData.IsAnimated)
                     {
                         _animDataFrame = FileManager.AnimData.CalculateCurrentGraphic(Graphic);
+
                         AnimIndex = animIndex;
                         _animSpeed = _animDataFrame.FrameInterval != 0 ? _animDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
                         LastAnimationChangeTime = Engine.Ticks;
@@ -931,6 +932,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (OnGround && _animDataFrame.FrameCount != 0 && LastAnimationChangeTime < Engine.Ticks)
             {
+
                 unsafe
                 {
                     _originalGraphic = (Graphic) (DisplayedGraphic + _animDataFrame.FrameData[AnimIndex++]);

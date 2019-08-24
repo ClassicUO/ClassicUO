@@ -22,277 +22,541 @@
 #endregion
 
 using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.UI.Controls;
+using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
-using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class WorldMapGump : Gump
+    internal class WorldMapGump : ResizableGump
     {
-        private SpriteTexture _mapTexture;
+        private UOTexture _mapTexture;
 
-        public WorldMapGump() : base(0, 0)
+        private bool _isTopMost;
+        private readonly float[] _zooms = new float[10] { 0.125f, 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f, 4f, 6f, 8f };
+        private int _zoomIndex = 4;
+        private Point _center, _lastScroll;
+        private bool _isScrolling;
+        private bool _flipMap = true;
+        private bool _freeView;
+        private int _mapIndex;
+        private bool _showPartyMembers;
+
+        public WorldMapGump() : base(400, 400, 100, 100, 0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
-            Width = 400;
-            Height = 400;
+            CanCloseWithRightClick = false;
 
-            //using (FileStream stream = File.OpenRead(@"D:\Progetti\UO\map\Maps\2Dmap0.png"))
-            //    _mapTexture = Texture2D.FromStream(Service.GetByLocalSerial<SpriteBatch3D>().GraphicsDevice, stream);
-
+            GameActions.Print("WorldMap loading...", 0x35);
             Load();
+            OnResize();
+
+
+            ContextMenuControl contextMenu = new ContextMenuControl();
+            contextMenu.Add("Flip map", () => _flipMap = !_flipMap, true, _flipMap);
+            contextMenu.Add("Top Most", () => TopMost = !TopMost, true, _isTopMost);
+            contextMenu.Add("Free view", () =>
+            {
+                _freeView = !_freeView;
+
+                if (!_freeView)
+                {
+                    _isScrolling = false;
+                    CanMove = true;
+                }
+            }, true, _freeView);
+            contextMenu.Add("Show party members", () => { _showPartyMembers = !_showPartyMembers; }, true, _showPartyMembers);
+            contextMenu.Add("", null);
+            contextMenu.Add("Close", Dispose);
+
+
+            Add(contextMenu);
         }
 
-        private unsafe void Load()
+
+        public float Zoom => _zooms[_zoomIndex];
+
+
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            int size = FileManager.Map.MapsDefaultSize[World.MapIndex, 0] * FileManager.Map.MapsDefaultSize[World.MapIndex, 1];
-            ushort[] buffer = new ushort[size];
-            int maxBlock = size - 1;
+            if (button != MouseButton.Left || _isScrolling || Keyboard.Alt)
+                return base.OnMouseDoubleClick(x, y, button);
 
-            for (int bx = 0; bx < FileManager.Map.MapBlocksSize[World.MapIndex, 0]; bx++)
+            TopMost = !TopMost;
+          
+            return true;
+        }
+
+        public bool TopMost
+        {
+            get => _isTopMost;
+            set
             {
-                int mapX = bx << 3;
+                _isTopMost = value;
 
-                for (int by = 0; by < FileManager.Map.MapBlocksSize[World.MapIndex, 1]; by++)
+                ShowBorder = !_isTopMost;
+
+                ControlInfo.Layer = _isTopMost ? UILayer.Over : UILayer.Default;
+
+            }
+        }
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
+        {
+            if (button == MouseButton.Left)
+            {
+                _isScrolling = false;
+                CanMove = true;
+            }
+
+            Engine.UI.GameCursor.IsDraggingCursorForced = false;
+
+            base.OnMouseUp(x, y, button);
+        }
+
+        protected override void OnMouseDown(int x, int y, MouseButton button)
+        {
+            if (button == MouseButton.Left && (Keyboard.Alt || _freeView))
+            {
+                if (x > 4 && x < Width - 8 && y > 4 && y < Height - 8)
                 {
-                    IndexMap indexMap = World.Map.GetIndex(bx, by);
+                    _lastScroll.X = x;
+                    _lastScroll.Y = y;
+                    _isScrolling = true;
+                    CanMove = false;
 
-                    if (indexMap.MapAddress == 0)
-                        continue;
-
-                    int mapY = by << 3;
-                    MapBlock info = new MapBlock();
-                    MapCells* infoCells = (MapCells*) &info.Cells;
-                    MapBlock* mapBlock = (MapBlock*) indexMap.MapAddress;
-                    MapCells* cells = (MapCells*) &mapBlock->Cells;
-                    int pos = 0;
-
-                    for (int y = 0; y < 8; y++)
-                    {
-                        for (int x = 0; x < 8; x++)
-                        {
-                            ref MapCells cell = ref cells[pos];
-                            ref MapCells infoCell = ref infoCells[pos];
-                            infoCell.TileID = cell.TileID;
-                            infoCell.Z = cell.Z;
-                            pos++;
-                        }
-                    }
-
-                    StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
-
-                    if (sb != null)
-                    {
-                        int count = (int) indexMap.StaticCount;
-
-                        for (int c = 0; c < count; c++)
-                        {
-                            ref readonly StaticsBlock staticBlock = ref sb[c];
-
-                            if (staticBlock.Color != 0 && staticBlock.Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(staticBlock.Color))
-                            {
-                                pos = (staticBlock.Y << 3) + staticBlock.X;
-                                ref MapCells cell = ref infoCells[pos];
-
-                                if (cell.Z <= staticBlock.Z)
-                                {
-                                    cell.TileID = (ushort) (staticBlock.Color + 0x4000);
-                                    cell.Z = staticBlock.Z;
-                                }
-                            }
-                        }
-                    }
-
-                    pos = 0;
-
-                    for (int y = 0; y < 8; y++)
-                    {
-                        int block = (mapY + y) * FileManager.Map.MapsDefaultSize[World.MapIndex, 0] + mapX;
-
-                        for (int x = 0; x < 8; x++)
-                        {
-                            ushort color = (ushort) (0x8000 | FileManager.Hues.GetRadarColorData(infoCells[pos].TileID));
-
-                            buffer[block] = color;
-
-                            if (y < 7 && x < 7 && block < maxBlock)
-                                buffer[block + 1] = color;
-                            block++;
-                            pos++;
-                        }
-                    }
+                    Engine.UI.GameCursor.IsDraggingCursorForced = true;
                 }
             }
 
-            _mapTexture = new SpriteTexture(FileManager.Map.MapsDefaultSize[World.MapIndex, 0], FileManager.Map.MapsDefaultSize[World.MapIndex, 1], false);
-            _mapTexture.SetData(buffer);
+            base.OnMouseDown(x, y, button);
         }
 
-        public Texture2D Load2()
+        protected override void OnMouseOver(int x, int y)
         {
-            int lastX = World.Player.Position.X;
-            int lastY = World.Player.Position.Y;
-            int blockOffsetX = Width >> 2;
-            int blockOffsetY = Height >> 2;
-            int gumpCenterX = Width >> 1;
-            int gumpCenterY = Height >> 1;
+            Point offset = Mouse.LDroppedOffset;
 
-            //0xFF080808 - pixel32
-            //0x8421 - pixel16
-            int minBlockX = ((lastX - blockOffsetX) >> 3) - 1;
-            int minBlockY = ((lastY - blockOffsetY) >> 3) - 1;
-            int maxBlockX = ((lastX + blockOffsetX) >> 3) + 1;
-            int maxBlockY = ((lastY + blockOffsetY) >> 3) + 1;
-
-            if (minBlockX < 0)
-                minBlockX = 0;
-
-            if (minBlockY < 0)
-                minBlockY = 0;
-            int maxBlockIndex = World.Map.MapBlockIndex;
-            int mapBlockHeight = FileManager.Map.MapBlocksSize[World.MapIndex, 1];
-            ushort[] data = new ushort[Width * Height];
-
-            for (int i = minBlockX; i <= maxBlockX; i++)
+            if (_isScrolling && offset != Point.Zero)
             {
-                int blockIndexOffset = i * mapBlockHeight;
+                int scrollX = _lastScroll.X - x;
+                int scrollY = _lastScroll.Y - y;
 
-                for (int j = minBlockY; j <= maxBlockY; j++)
+                (scrollX, scrollY) = RotatePoint(scrollX, scrollY, 1f, -1, _flipMap ? 45f : 0f);
+
+                _center.X += (int) (scrollX / Zoom);
+                _center.Y += (int) (scrollY / Zoom);
+
+                if (_center.X < 0)
+                    _center.X = 0;
+
+                if (_center.Y < 0)
+                    _center.Y = 0;
+
+                if (_center.X > FileManager.Map.MapsDefaultSize[World.MapIndex, 0])
+                    _center.X = FileManager.Map.MapsDefaultSize[World.MapIndex, 0];
+
+                if (_center.Y > FileManager.Map.MapsDefaultSize[World.MapIndex, 1])
+                    _center.Y = FileManager.Map.MapsDefaultSize[World.MapIndex, 1];
+
+                _lastScroll.X = x;
+                _lastScroll.Y = y;
+            }
+            else
+            {
+                base.OnMouseOver(x, y);
+            }
+        }
+
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (_mapIndex != World.MapIndex)
+            {
+                Load();
+            }
+        }
+
+        private unsafe Task Load()
+        {
+            _mapIndex = World.MapIndex;
+            _mapTexture?.Dispose();
+            _mapTexture = null;
+
+            return Task.Run(() =>
+            {
+                const int OFFSET_PIX = 2;
+                const int OFFSET_PIX_HALF = OFFSET_PIX / 2;
+
+                int realWidth = FileManager.Map.MapsDefaultSize[World.MapIndex, 0];
+                int realHeight = FileManager.Map.MapsDefaultSize[World.MapIndex, 1];
+
+                int fixedWidth = FileManager.Map.MapBlocksSize[World.MapIndex, 0];
+                int fixedHeight = FileManager.Map.MapBlocksSize[World.MapIndex, 1];
+
+                int size = (realWidth + OFFSET_PIX) * (realHeight + OFFSET_PIX);
+                uint[] buffer = new uint[size];
+                int maxBlock = size - 1;
+
+                for (int bx = 0; bx < fixedWidth; bx++)
                 {
-                    int blockIndex = blockIndexOffset + j;
+                    int mapX = bx << 3;
 
-                    if (blockIndex >= maxBlockIndex)
-                        break;
-
-                    RadarMapBlock? mbbv = FileManager.Map.GetRadarMapBlock(World.MapIndex, i, j);
-
-                    if (!mbbv.HasValue)
-                        break;
-
-                    RadarMapBlock mb = mbbv.Value;
-                    Chunk block = World.Map.Chunks[blockIndex];
-                    int realBlockX = i * 8;
-                    int realBlockY = j * 8;
-
-                    for (int x = 0; x < 8; x++)
+                    for (int by = 0; by < fixedHeight; by++)
                     {
-                        int px = realBlockX + x - lastX + gumpCenterX;
+                        ref readonly IndexMap indexMap = ref World.Map.GetIndex(bx, by);
+
+                        if (indexMap.MapAddress == 0)
+                            continue;
+
+                        int mapY = by << 3;
+                        MapBlock info = new MapBlock();
+                        MapCells* infoCells = (MapCells*) &info.Cells;
+                        MapBlock* mapBlock = (MapBlock*) indexMap.MapAddress;
+                        MapCells* cells = (MapCells*) &mapBlock->Cells;
+                        int pos = 0;
 
                         for (int y = 0; y < 8; y++)
                         {
-                            int py = realBlockY + y - lastY;
-                            int gx = px - py;
-                            int gy = px + py;
-                            uint color = mb.Cells[x, y].Graphic;
-                            bool island = mb.Cells[x, y].IsLand;
-
-                            //if (block != null)
-                            //{
-                            //    ushort multicolor = block.get
-                            //}
-
-                            if (!island)
-                                color += 0x4000;
-                            int tableSize = 2;
-                            color = (uint) (0x8000 | FileManager.Hues.GetRadarColorData((int) color));
-
-                            Point[] table = new Point[2]
+                            for (int x = 0; x < 8; x++)
                             {
-                                new Point(0, 0), new Point(0, 1)
-                            };
-                            CreatePixels(data, (int) color, gx, gy, Width, Height, table, tableSize);
+                                ref MapCells cell = ref cells[pos];
+                                ref MapCells infoCell = ref infoCells[pos];
+                                infoCell.TileID = cell.TileID;
+                                infoCell.Z = cell.Z;
+                                pos++;
+                            }
+                        }
+
+                        StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
+
+                        if (sb != null)
+                        {
+                            int count = (int) indexMap.StaticCount;
+
+                            for (int c = 0; c < count; c++)
+                            {
+                                ref readonly StaticsBlock staticBlock = ref sb[c];
+
+                                if (staticBlock.Color != 0 && staticBlock.Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(staticBlock.Color))
+                                {
+                                    pos = (staticBlock.Y << 3) + staticBlock.X;
+                                    ref MapCells cell = ref infoCells[pos];
+
+                                    if (cell.Z <= staticBlock.Z)
+                                    {
+                                        cell.TileID = (ushort) (staticBlock.Color + 0x4000);
+                                        cell.Z = staticBlock.Z;
+                                    }
+                                }
+                            }
+                        }
+
+                        pos = 0;
+
+
+                        for (int y = 0; y < 8; y++)
+                        {
+                            int block = (mapY + y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
+
+                            for (int x = 0; x < 8; x++)
+                            {
+                                ref readonly var c = ref infoCells[pos];
+
+                                ushort color = (ushort)(0x8000 | FileManager.Hues.GetRadarColorData(c.TileID));
+                                Color cc;
+
+                                if (x > 0)
+                                {
+                                    int index = (y << 3) + (x - 1);
+
+                                    if (c.Z < infoCells[index].Z)
+                                    {
+                                        cc = new Color((((color >> 10) & 31) / 31f) * 80 / 100,
+                                                       (((color >> 5) & 31) / 31f) * 80 / 100,
+                                                       ((color & 31) / 31f) * 80 / 100);
+
+                                    }
+                                    else if (c.Z > infoCells[index].Z)
+                                    {
+                                        cc = new Color((((color >> 10) & 31) / 31f) * 100 / 80,
+                                                       (((color >> 5) & 31) / 31f) * 100 / 80,
+                                                       ((color & 31) / 31f) * 100 / 80);
+                                    }
+                                    else
+                                        cc = new Color((((color >> 10) & 31) / 31f),
+                                                       (((color >> 5) & 31) / 31f),
+                                                       ((color & 31) / 31f));
+                                }
+                                else
+                                {
+                                    cc = new Color((((color >> 10) & 31) / 31f),
+                                                   (((color >> 5) & 31) / 31f),
+                                                   ((color & 31) / 31f));
+                                }
+
+                                buffer[block] = cc.PackedValue;
+
+                                if (y < 7 && x < 7 && block < maxBlock)
+                                    buffer[block + 1] = cc.PackedValue;
+
+                                block++;
+                                pos++;
+                            }
                         }
                     }
                 }
-            }
 
-            _mapTexture = new SpriteTexture(Width, Height, false);
-            _mapTexture.SetData(data);
+                if (OFFSET_PIX > 0)
+                {
+                    realWidth += OFFSET_PIX;
+                    realHeight += OFFSET_PIX;
 
-            return _mapTexture;
+                    for (int i = 0; i < realWidth; i++)
+                    {
+                        buffer[i] = 0xFF000000;
+                        buffer[(realHeight - 1) * realWidth + i] = 0xFF000000;
+                    }
+
+                    for (int i = 0; i < realHeight; i++)
+                    {
+                        buffer[i * realWidth] = 0xFF000000;
+                        buffer[i * realWidth + realWidth - 1] = 0xFF000000;
+                    }
+                }
+
+                _mapTexture = new UOTexture32(realWidth, realHeight);
+                _mapTexture.SetData(buffer);
+
+                GameActions.Print("WorldMap loaded!", 0x48);
+            });
         }
 
-        private void CreatePixels(ushort[] data, int color, int x, int y, int w, int h, Point[] table, int count)
+        protected override void OnMouseWheel(MouseEvent delta)
         {
-            int px = x;
-            int py = y;
-
-            for (int i = 0; i < count; i++)
+            if (delta == MouseEvent.WheelScrollUp)
             {
-                px += table[i].X;
-                py += table[i].Y;
-                int gx = px;
+                _zoomIndex++;
 
-                if (gx < 0 || gx >= w)
-                    continue;
-
-                int gy = py;
-
-                if (gy < 0 || gy >= h)
-                    break;
-
-                int block = gy * w + gx;
-
-                if (data[block] == 0x8421)
-                    data[block] = (ushort) color;
+                if (_zoomIndex >= _zooms.Length)
+                    _zoomIndex = _zooms.Length - 1;
             }
-        }
-        
-        public static Vector2 RotateVector2(Vector2 point, float radians, Vector2 pivot)
-        {
-            float cosRadians = (float) Math.Cos(radians);
-            float sinRadians = (float) Math.Sin(radians);
-
-            Vector2 translatedPoint = new Vector2
+            else
             {
-                X = point.X - pivot.X, Y = point.Y - pivot.Y
-            };
+                _zoomIndex--;
 
-            Vector2 rotatedPoint = new Vector2
-            {
-                X = translatedPoint.X * cosRadians - translatedPoint.Y * sinRadians + pivot.X, Y = translatedPoint.X * sinRadians + translatedPoint.Y * cosRadians + pivot.Y
-            };
+                if (_zoomIndex < 0)
+                    _zoomIndex = 0;
+            }
 
-            return rotatedPoint;
+
+            base.OnMouseWheel(delta);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            int sx = World.Player.X;
-            int sy = World.Player.Y;
-            int sw = Width >> 1;
-            int sh = Height >> 1;
+            if (!_isScrolling && !_freeView)
+            {
+                _center.X = World.Player.X;
+                _center.Y = World.Player.Y;
+            }
+
+
+            int gX = x + 4;
+            int gY = y + 4;
+            int gWidth = Width - 8;
+            int gHeight = Height - 8;
+
+            int sx = _center.X + 1;
+            int sy = _center.Y + 1;
+
+            int size = (int) Math.Max(gWidth * 1.75f, gHeight * 1.75f);
+            
+            int size_zoom = (int) (size / Zoom);
+            int size_zoom_half = size_zoom >> 1;
+
+            int halfWidth = gWidth >> 1;
+            int halfHeight = gHeight >> 1;
 
             ResetHueVector();
 
-            //var v = RotateVector2(new Vector2(x + (sx - (sw >> 1)), y + (sy - (sh >> 1))),
-            //                      45,
-            //                      new Vector2(x + (sx - (sw >> 1)), y + (sy - (sh >> 1)) / 2));
 
-            //batcher.Draw2DRotated(_mapTexture, 
-            //                      x + (sx - (sw >> 1)),
-            //                      y + (sy - (sh >> 1)), 
-            //                      x + sw,
-            //                      y + sh, 
-            //                      x + (sx - (sw >> 1)),
-            //                      y + (sy - (sh >> 1)));
+            batcher.Draw2D(Textures.GetTexture(Color.Black), gX, gY, gWidth, gHeight, ref _hueVector);
 
-            batcher.Draw2D(_mapTexture, x, y, Width, Height, sx - (sw >> 1), sy - (sh >> 1), sw, sh, ref _hueVector);
+            if (_mapTexture != null)
+            {
+                var rect = ScissorStack.CalculateScissors(Matrix.Identity, gX, gY, gWidth, gHeight);
+
+                if (ScissorStack.PushScissors(rect))
+                {
+                    batcher.EnableScissorTest(true);
+
+                    int offset = size >> 1;
+
+                    batcher.Draw2D(_mapTexture, (gX - offset) + halfWidth, (gY - offset) + halfHeight,
+                                   size, size,
+
+                                   sx - size_zoom_half,
+                                   sy - size_zoom_half,
+
+                                   size_zoom,
+                                   size_zoom,
+
+                                   ref _hueVector, _flipMap ? 45 : 0);
+
+                    batcher.EnableScissorTest(false);
+
+                    ScissorStack.PopScissors();
+                }
+
+            }
+
+            //foreach (House house in World.HouseManager.Houses)
+            //{
+            //    foreach (Multi multi in house.Components)
+            //    {
+            //        batcher.Draw2D(Textures.GetTexture())
+            //    }
+            //}
+
+            foreach (Mobile mobile in World.Mobiles)
+            {
+                if (mobile != World.Player)
+                    DrawMobile(batcher, mobile, gX, gY, halfWidth, halfHeight, Zoom, Color.Red);
+            }
+
+            if (_showPartyMembers)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    var partyMember = World.Party.Members[i];
+
+                    if (partyMember != null && partyMember.Serial.IsValid)
+                    {
+                        var mob = World.Mobiles.Get(partyMember.Serial);
+
+                        if (mob != null)
+                            DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Yellow);
+                    }
+                }
+            }
+
+            DrawMobile(batcher, World.Player, gX, gY, halfWidth, halfHeight, Zoom, Color.White);
+
+
             return base.Draw(batcher, x, y);
+        }
+
+        private void DrawMobile(UltimaBatcher2D batcher, Mobile mobile, int x, int y, int width, int height, float zoom, Color color)
+        {
+            int sx = mobile.X - _center.X;
+            int sy = mobile.Y - _center.Y;
+
+            (int rotX, int rotY) = RotatePoint(sx, sy, zoom, 1, _flipMap ? 45f : 0f);
+            AdjustPosition(rotX, rotY, width - 4, height - 4, out rotX, out rotY);
+
+            rotX += x + width;
+            rotY += y + height;
+
+            const int DOT_SIZE = 4;
+            const int DOT_SIZE_HALF = DOT_SIZE >> 1;
+
+            if (rotX < x)
+                rotX = x;
+
+            if (rotX > x + Width - 8 - DOT_SIZE)
+                rotX = x + Width - 8 - DOT_SIZE;
+
+            if (rotY < y)
+                rotY = y;
+
+            if (rotY > y + Height - 8 - DOT_SIZE)
+                rotY = y + Height - 8 - DOT_SIZE;
+
+            batcher.Draw2D(Textures.GetTexture(color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE, DOT_SIZE, ref _hueVector);
+        }
+
+        private (int, int) RotatePoint(int x, int y, float zoom, int dist, float angle = 45f)
+        {
+            x = (int)(x * zoom);
+            y = (int)(y * zoom);
+
+            if (angle == 0.0f)
+                return (x, y);
+
+            return ((int)Math.Round(Math.Cos(dist * Math.PI / 4.0) * x - Math.Sin(dist * Math.PI / 4.0) * y), (int)Math.Round(Math.Sin(dist * Math.PI / 4.0) * x + Math.Cos(dist * Math.PI / 4.0) * y));
+        }
+
+        private void AdjustPosition(int x, int y, int centerX, int centerY, out int newX, out int newY)
+        {
+            var offset = GetOffset(x, y, centerX, centerY);
+            var currX = x;
+            var currY = y;
+
+            while (offset != 0)
+            {
+                if ((offset & 1) != 0)
+                {
+                    currY = centerY;
+                    currX = x * currY / y;
+                }
+                else if ((offset & 2) != 0)
+                {
+                    currY = -centerY;
+                    currX = x * currY / y;
+                }
+                else if ((offset & 4) != 0)
+                {
+                    currX = centerX;
+                    currY = y * currX / x;
+                }
+                else if ((offset & 8) != 0)
+                {
+                    currX = -centerX;
+                    currY = y * currX / x;
+                }
+
+                x = currX;
+                y = currY;
+                offset = GetOffset(x, y, centerX, centerY);
+            }
+
+            newX = x;
+            newY = y;
+        }
+
+        private int GetOffset(int x, int y, int centerX, int centerY)
+        {
+            const int offset = 0;
+            if (y > centerY)
+                return 1;
+            if (y < -centerY)
+                return 2;
+            if (x > centerX)
+                return offset + 4;
+            if (x >= -centerX)
+                return offset;
+            return offset + 8;
         }
 
         public override void Dispose()
         {
+            Engine.UI.GameCursor.IsDraggingCursorForced = false;
+
             _mapTexture?.Dispose();
             base.Dispose();
         }

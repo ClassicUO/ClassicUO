@@ -32,6 +32,7 @@ using System.Text;
 using System.Threading;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
@@ -69,9 +70,6 @@ namespace ClassicUO
 
     internal class Engine : Microsoft.Xna.Framework.Game
     {
-        private const int MIN_FPS = 15;
-        private const int MAX_FPS = 250;
-        private const int LOGIN_SCREEN_FPS = 60;
         private const int INACTIVE_FPS_DELAY = 217; // 5 fps
 
         private static GameWindow _window;
@@ -79,7 +77,6 @@ namespace ClassicUO
         private static Engine _engine;
 
         public static bool DebugFocus = false;
-        public static string SettingsFile = "settings.json";
         private readonly GraphicsDeviceManager _graphicDeviceManager;
         private readonly bool _isHighDPI;
         private readonly Settings _settings;
@@ -102,7 +99,7 @@ namespace ClassicUO
             Instance = this;
 
             // By default try to load settings from main settings file
-            _settings = ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, SettingsFile));
+            _settings = ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, Settings.SETTINGS_FILENAME));
 
             // Try to apply any settings passed from the command-line/shortcut to what we loaded from file
             // NOTE: If nothing was loaded from settings file (file doesn't exist), then it will create
@@ -113,8 +110,8 @@ namespace ClassicUO
             //   then show an error, generate default settings file and exit
             if (_settings == null)
             {
-                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION, "No `" + SettingsFile + "`", "A `" + SettingsFile + "` has been created into ClassicUO main folder.\nPlease fill it!", SDL.SDL_GL_GetCurrentWindow());
-                Log.Message(LogTypes.Trace, SettingsFile + " file not found");
+                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION, $"No `{Settings.SETTINGS_FILENAME}`", "A `" + Settings.SETTINGS_FILENAME + "` has been created into ClassicUO main folder.\nPlease fill it!", SDL.SDL_GL_GetCurrentWindow());
+                Log.Message(LogTypes.Trace, Settings.SETTINGS_FILENAME + " file not found");
                 _settings = new Settings();
                 _settings.Save();
                 IsQuitted = true;
@@ -139,7 +136,7 @@ namespace ClassicUO
             }
 
 
-            TargetElapsedTime = TimeSpan.FromSeconds(1.0f / MAX_FPS);
+            TargetElapsedTime = TimeSpan.FromSeconds(1.0f / Constants.MAX_FPS);
             IsFixedTimeStep = _settings.FixedTimeStep;
 
             _graphicDeviceManager = new GraphicsDeviceManager(this);
@@ -185,6 +182,9 @@ namespace ClassicUO
             IsMouseVisible = _settings.RunMouseInASeparateThread;
 
             Window.Title = $"ClassicUO - {Version}";
+
+            if (Bootstrap.StartMinimized)
+                SDL.SDL_MinimizeWindow(Window.Handle);
         }
 
         public bool IsQuitted { get; private set; }
@@ -202,10 +202,10 @@ namespace ClassicUO
                 {
                     _fpsLimit = value;
 
-                    if (_fpsLimit < MIN_FPS)
-                        _fpsLimit = MIN_FPS;
-                    else if (_fpsLimit > MAX_FPS)
-                        _fpsLimit = MAX_FPS;
+                    if (_fpsLimit < Constants.MIN_FPS)
+                        _fpsLimit = Constants.MIN_FPS;
+                    else if (_fpsLimit > Constants.MAX_FPS)
+                        _fpsLimit = Constants.MAX_FPS;
                     FrameDelay[0] = FrameDelay[1] = (uint) (1000 / _fpsLimit);
                     FrameDelay[1] = FrameDelay[1] >> 1;
 
@@ -474,7 +474,7 @@ namespace ClassicUO
             IsQuitted = true;
             base.OnExiting(sender, args);
         }
-
+         
 
         internal static void Configure()
         {
@@ -482,7 +482,7 @@ namespace ClassicUO
             ThreadID = Thread.CurrentThread.ManagedThreadId;
 
             Log.Start(LogTypes.All);
-            ExePath = Environment.CurrentDirectory;
+            ExePath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName); // Environment.CurrentDirectory;
 
 #if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
@@ -549,7 +549,7 @@ namespace ClassicUO
             _sceneManager = new SceneManager();
             _debugInfo = new DebugInfo();
 
-            FpsLimit = LOGIN_SCREEN_FPS;
+            FpsLimit = Constants.LOGIN_SCREEN_FPS;
 
 
             Log.Message(LogTypes.Trace, "Loading UI Fonts...");

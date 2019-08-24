@@ -33,41 +33,18 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class CheckerTrans : Control
     {
-        private static SpriteTexture _transparentTexture /*, _transparentTexture2*/;
-
-        //public static SpriteTexture TransparentTexture2
-        //{
-        //    get
-        //    {
-        //        if (_transparentTexture2 == null || _transparentTexture2.IsDisposed)
-        //        {
-        //            _transparentTexture2 = new SpriteTexture(1, 1);
-
-        //            _transparentTexture2.SetData(new Color[1]
-        //            {
-        //                Color.Transparent
-        //            });
-        //        }
-
-        //        _transparentTexture2.Ticks = Engine.Ticks;
-
-        //        return _transparentTexture2;
-        //    }
-        //}
-
         private static readonly Lazy<DepthStencilState> _checkerStencil = new Lazy<DepthStencilState>(() =>
         {
             DepthStencilState state = new DepthStencilState
             {
                 DepthBufferEnable = false,
-                StencilEnable = false,
+                StencilEnable = true,
                 StencilFunction = CompareFunction.Always,
                 ReferenceStencil = 1,
                 StencilMask = 1,
                 StencilFail = StencilOperation.Keep,
                 StencilDepthBufferFail = StencilOperation.Keep,
                 StencilPass = StencilOperation.Replace,
-                TwoSidedStencilMode = false
             };
 
 
@@ -115,8 +92,10 @@ namespace ClassicUO.Game.UI.Controls
 
             ResetHueVector();
             _hueVector.Z = 0.5f;
-
-            return batcher.Draw2D(Textures.GetTexture(Color.Black), x, y, Width, Height, ref _hueVector);
+            //batcher.SetStencil(_checkerStencil.Value);
+            batcher.Draw2D(Textures.GetTexture(Color.Black), x, y, Width, Height, ref _hueVector);
+            //batcher.SetStencil(null);
+            return true;
         }
     }
 }

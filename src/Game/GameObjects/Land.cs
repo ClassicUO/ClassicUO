@@ -61,6 +61,8 @@ namespace ClassicUO.Game.GameObjects
                 l.Normals = null;
                 l.Rectangle = Rectangle.Empty;
                 l.MinZ = l.AverageZ = 0;
+                l.Texture = null;
+                l.Bounds = Rectangle.Empty;
                 return l;
             }
             return new Land(graphic);

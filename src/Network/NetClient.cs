@@ -22,7 +22,7 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -37,11 +37,10 @@ namespace ClassicUO.Network
     {
         private const int BUFF_SIZE = 0x80000;
         private readonly object _sendLock = new object();
-        private readonly object _sync = new object();
         private CircularBuffer _circularBuffer;
         private int _incompletePacketLength;
         private bool _isCompressionEnabled, _sending;
-        private Queue<Packet> _queue = new Queue<Packet>(), _workingQueue = new Queue<Packet>();
+        private ConcurrentQueue<Packet> _recvQueue = new ConcurrentQueue<Packet>();
         private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer;
         private SocketAsyncEventArgs _sendEventArgs, _recvEventArgs;
         private SendQueue _sendQueue;
@@ -92,19 +91,13 @@ namespace ClassicUO.Network
         {
             if (LoginSocket.IsDisposed && Socket.IsConnected)
             {
-                lock (Socket._sync)
-                {
-                    Socket._workingQueue.Enqueue(new Packet(data, length) {Filter = true});
-                    Socket.Statistics.TotalPacketsReceived++;
-                }
+                Socket._recvQueue.Enqueue(new Packet(data, length) { Filter = true });
+                Socket.Statistics.TotalPacketsReceived++;
             }
             else if (Socket.IsDisposed && LoginSocket.IsConnected)
             {
-                lock (LoginSocket._sync)
-                {
-                    LoginSocket._workingQueue.Enqueue(new Packet(data, length) {Filter = true});
-                    LoginSocket.Statistics.TotalPacketsReceived++;
-                }
+                Socket._recvQueue.Enqueue(new Packet(data, length) { Filter = true });
+                LoginSocket.Statistics.TotalPacketsReceived++;
             }
             else
                 Log.Message(LogTypes.Error, "Attempt to write into a dead socket");
@@ -145,8 +138,7 @@ namespace ClassicUO.Network
             _recvEventArgs = new SocketAsyncEventArgs();
             _recvEventArgs.Completed += IO_Socket;
             _recvEventArgs.SetBuffer(_recvBuffer, 0, _recvBuffer.Length);
-            _queue.Clear();
-            _workingQueue.Clear();
+            _recvQueue = new ConcurrentQueue<Packet>();
             Statistics.Reset();
             SocketAsyncEventArgs connectEventArgs = new SocketAsyncEventArgs();
 
@@ -233,21 +225,15 @@ namespace ClassicUO.Network
 
         public void Update()
         {
-            lock (_sync)
+            while (_recvQueue.TryDequeue(out Packet p))
             {
-                var temp = _workingQueue;
-                _workingQueue = _queue;
-                _queue = temp;
-            }
-
-            while (_queue.Count != 0)
-            {
-                var p = _queue.Dequeue();
-
                 ref byte[] data = ref p.ToArray();
                 int length = p.Length;
 
-                if (p.Filter || Plugin.ProcessRecvPacket(ref data, ref length)) PacketReceived.Raise(p);
+                if (p.Filter || Plugin.ProcessRecvPacket(ref data, ref length))
+                {
+                    PacketReceived.Raise(p);
+                }
             }
 
             Flush();
@@ -280,15 +266,11 @@ namespace ClassicUO.Network
                     byte[] data = new byte[packetlength];
                     packetlength = _circularBuffer.Dequeue(data, 0, packetlength);
 
-                    lock (_sync)
-                    {
 #if !DEBUG
-                        //LogPacket(data, false);
+                    //LogPacket(data, false);
 #endif
-
-                        _workingQueue.Enqueue(new Packet(data, packetlength));
-                        Statistics.TotalPacketsReceived++;
-                    }
+                    _recvQueue.Enqueue(new Packet(data, packetlength));
+                    Statistics.TotalPacketsReceived++;
 
                     length = _circularBuffer.Length;
                 }
@@ -518,17 +500,31 @@ namespace ClassicUO.Network
             }
         }
 
+        private static int _count = 0;
         private void ProcessRecv(SocketAsyncEventArgs e)
         {
             int bytesLen = e.BytesTransferred;
 
             if (bytesLen > 0 && e.SocketError == SocketError.Success && _circularBuffer != null)
             {
-                Statistics.TotalBytesReceived += (uint) bytesLen;
+                _count++;
+                if (_count > 1)
+                    Log.Message(LogTypes.Panic, "Double-Access to buffer! Report this error in #BUGS-HUB in CUO Channel!");
+                Statistics.TotalBytesReceived += (uint)bytesLen;
                 byte[] buffer = _recvBuffer;
-                if (_isCompressionEnabled) DecompressBuffer(ref buffer, ref bytesLen);
+
+                if (_isCompressionEnabled)
+                {
+                    //int outSize = 65536;
+                    //Huffman2.Decompress(buffer, _recvBuffer, ref outSize, ref bytesLen);
+                    //bytesLen = outSize;
+
+                    DecompressBuffer(ref buffer, ref bytesLen);
+                }
+
                 lock (_circularBuffer) _circularBuffer.Enqueue(buffer, 0, bytesLen);
                 ExtractPackets();
+                _count--;
             }
             else
                 Disconnect();

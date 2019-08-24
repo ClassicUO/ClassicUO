@@ -86,7 +86,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_sendClickIfNotDClick && totalMS >= _sClickTime)
             {
-                if (!World.ClientFlags.TooltipsEnabled) GameActions.SingleClick(Item);
+                if (!World.ClientFeatures.TooltipsEnabled) GameActions.SingleClick(Item);
                 GameActions.OpenPopupMenu(Item);
                 _sendClickIfNotDClick = false;
             }

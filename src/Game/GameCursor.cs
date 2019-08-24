@@ -29,6 +29,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
@@ -60,7 +61,7 @@ namespace ClassicUO.Game
         private Vector3 _auraVector = new Vector3(0, 13, 0);
 
         private IntPtr _cursor, _surface;
-        private SpriteTexture _draggedItemTexture;
+        private UOTexture _draggedItemTexture;
         private Graphic _graphic = 0x2073;
 
         private ItemHold _itemHold;
@@ -242,6 +243,8 @@ namespace ClassicUO.Game
         }
 
         public bool IsLoading { get; set; }
+        public bool IsDraggingCursorForced { get; set; }
+
 
         public void SetDraggedItem(ItemHold hold)
         {
@@ -374,14 +377,14 @@ namespace ClassicUO.Game
         {
             if (Engine.SceneManager.CurrentScene is GameScene gs)
             {
-                if (!World.ClientFlags.TooltipsEnabled || gs.IsHoldingItem)
+                if (!World.ClientFeatures.TooltipsEnabled || gs.IsHoldingItem)
                 {
                     if (!_tooltip.IsEmpty)
                         _tooltip.Clear();
                 }
                 else
                 {
-                    if (gs.IsMouseOverViewport && SelectedObject.Object is Entity item && item.Properties.Count > 0)
+                    if (gs.IsMouseOverViewport && SelectedObject.Object is Entity item && World.OPL.Contains(item))
                     {
                         if (_tooltip.IsEmpty || item != _tooltip.Object)
                             _tooltip.SetGameObject(item);
@@ -392,7 +395,7 @@ namespace ClassicUO.Game
 
                     if (Engine.UI.IsMouseOverAControl)
                     {
-                        Item it = null;
+                        Entity it = null;
 
                         switch (Engine.UI.MouseOverControl)
                         {
@@ -410,9 +413,13 @@ namespace ClassicUO.Game
                                 it = i;
 
                                 break;
+
+                            case NameOverheadGump overhead:
+                                it = overhead.Entity;
+                                break;
                         }
 
-                        if (it != null && it.Properties.Count != 0)
+                        if (it != null && World.OPL.Contains(it))
                         {
                             if (_tooltip.IsEmpty || it != _tooltip.Object)
                                 _tooltip.SetGameObject(it);
@@ -452,7 +459,7 @@ namespace ClassicUO.Game
                     return _cursorData[war, 12];
             }
 
-            if (Engine.UI.IsDragging)
+            if (Engine.UI.IsDragging || IsDraggingCursorForced)
                 return _cursorData[war, 8];
 
             if (IsLoading)

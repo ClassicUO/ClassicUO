@@ -26,6 +26,7 @@ using System.Text;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -54,9 +55,9 @@ namespace ClassicUO.Game.UI
 
         public bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (_gameObject != null && _hash != _gameObject.PropertiesHash)
+            if (_gameObject != null && World.OPL.TryGetRevision(_gameObject, out uint revision) && _hash != revision)
             {
-                _hash = _gameObject.PropertiesHash;
+                _hash = revision;
                 Text = ReadProperties(_gameObject, out _textHTML);
             }
 
@@ -68,16 +69,7 @@ namespace ClassicUO.Game.UI
 
             if (_renderedText == null)
             {
-                _renderedText = new RenderedText
-                {
-                    Align = TEXT_ALIGN_TYPE.TS_CENTER,
-                    Font = 1,
-                    IsUnicode = true,
-                    IsHTML = true,
-                    RecalculateWidthByInfo = true,
-                    Cell = 5,
-                    FontStyle = FontStyle.BlackBorder
-                };
+                _renderedText = RenderedText.Create(string.Empty,font: 1, isunicode: true, style: FontStyle.BlackBorder, cell: 5, isHTML: true, align: TEXT_ALIGN_TYPE.TS_CENTER, recalculateWidthByInfo: true);
             }
             else if (_renderedText.Text != Text)
             {
@@ -135,13 +127,17 @@ namespace ClassicUO.Game.UI
 
         public void SetGameObject(Entity obj)
         {
-            if (_gameObject == null || obj != _gameObject || obj.PropertiesHash != _gameObject.PropertiesHash)
+            if (_gameObject == null || obj != _gameObject)
             {
-                _maxWidth = 0;
-                _gameObject = obj;
-                _hash = obj.PropertiesHash;
-                Text = ReadProperties(obj, out _textHTML);
-                _lastHoverTime = Engine.Ticks + 250;
+                uint revision2 = 0;
+                if (_gameObject == null || (World.OPL.TryGetRevision(_gameObject, out uint revision) && World.OPL.TryGetRevision(obj, out revision2) && revision != revision2))
+                {
+                    _maxWidth = 0;
+                    _gameObject = obj;
+                    _hash = revision2;
+                    Text = ReadProperties(obj, out _textHTML);
+                    _lastHoverTime = Engine.Ticks + 250;
+                }
             }
         }
 
@@ -153,45 +149,81 @@ namespace ClassicUO.Game.UI
 
             bool hasStartColor = false;
 
-            for (int i = 0; i < obj.Properties.Count; i++)
+
+            if (obj != null && World.OPL.TryGetNameAndData(obj, out string name, out string data))
             {
-                Property property = obj.Properties[i];
-
-                if (property.Cliloc <= 0)
-                    continue;
-
-                if (i == 0 /*&& !string.IsNullOrEmpty(obj.Name)*/)
+                if (!string.IsNullOrEmpty(name))
                 {
-                    if (obj is Mobile mobile)
+                    if (obj.Serial.IsItem)
                     {
-                        //ushort hue = Notoriety.GetHue(mobile.NotorietyFlag);
-                        _sbHTML.Append(Notoriety.GetHTMLHue(mobile.NotorietyFlag));
-                    }
-                    else
                         _sbHTML.Append("<basefont color=\"yellow\">");
+                        hasStartColor = true;
+                    }
+                    else if (obj.Serial.IsMobile)
+                    {
+                        _sbHTML.Append(Notoriety.GetHTMLHue(((Mobile) obj).NotorietyFlag));
+                        hasStartColor = true;
+                    }
 
-                    hasStartColor = true;
+                    _sb.Append(name);
+                    _sbHTML.Append(name);
+
+                    if (hasStartColor)
+                    {
+                        _sbHTML.Append("<basefont color=\"#FFFFFFFF\">");
+                    }
                 }
 
-                string text = FormatTitle(FileManager.Cliloc.Translate((int) property.Cliloc, property.Args, true));
 
-                if (string.IsNullOrEmpty(text)) continue;
-
-                _sb.Append(text);
-                _sbHTML.Append(text);
-
-                if (hasStartColor)
+                if (!string.IsNullOrEmpty(data))
                 {
-                    _sbHTML.Append("<basefont color=\"#FFFFFFFF\">");
-                    hasStartColor = false;
-                }
-
-                if (i < obj.Properties.Count - 1)
-                {
-                    _sb.Append("\n");
-                    _sbHTML.Append("\n");
+                    string s = $"\n{data}";
+                    _sb.Append(s);
+                    _sbHTML.Append(s);
                 }
             }
+
+
+
+            //for (int i = 0; i < obj.Properties.Count; i++)
+            //{
+            //    Property property = obj.Properties[i];
+
+            //    if (property.Cliloc <= 0)
+            //        continue;
+
+            //    if (i == 0 /*&& !string.IsNullOrEmpty(obj.Name)*/)
+            //    {
+            //        if (obj is Mobile mobile)
+            //        {
+            //            //ushort hue = Notoriety.GetHue(mobile.NotorietyFlag);
+            //            _sbHTML.Append(Notoriety.GetHTMLHue(mobile.NotorietyFlag));
+            //        }
+            //        else
+            //            _sbHTML.Append("<basefont color=\"yellow\">");
+
+            //        hasStartColor = true;
+            //    }
+
+            //    string text = FormatTitle(FileManager.Cliloc.Translate((int) property.Cliloc, property.Args, true));
+
+            //    if (string.IsNullOrEmpty(text)) continue;
+
+            //    _sb.Append(text);
+            //    _sbHTML.Append(text);
+
+            //    if (hasStartColor)
+            //    {
+            //        _sbHTML.Append("<basefont color=\"#FFFFFFFF\">");
+            //        hasStartColor = false;
+            //    }
+
+            //    if (i < obj.Properties.Count - 1)
+            //    {
+            //        _sb.Append("\n");
+            //        _sbHTML.Append("\n");
+            //    }
+            //}
 
             htmltext = _sbHTML.ToString();
             string result = _sb.ToString();

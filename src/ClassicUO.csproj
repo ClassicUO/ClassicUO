@@ -94,7 +94,7 @@
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -142,9 +142,11 @@
     <Compile Include="Game\Managers\CorpseManager.cs" />
     <Compile Include="Game\Managers\HealthLinesManager.cs" />
     <Compile Include="Game\Managers\HotkeysManager.cs" />
+    <Compile Include="Game\Managers\InfoBarManager.cs" />
     <Compile Include="Game\Managers\MacroManager.cs" />
     <Compile Include="Game\Managers\AudioManager.cs" />
     <Compile Include="Game\Managers\NameOverHeadManager.cs" />
+    <Compile Include="Game\Managers\ObjectPropertiesListManager.cs" />
     <Compile Include="Game\Managers\PoolsManager.cs" />
     <Compile Include="Game\Managers\SkillsGroupManager.cs" />
     <Compile Include="Game\SelectedObject.cs" />
@@ -152,6 +154,9 @@
     <Compile Include="Game\UI\Controls\AbstractTextBox.cs" />
     <Compile Include="Game\UI\Controls\AlphaBlendControl.cs" />
     <Compile Include="Game\UI\Controls\ArrowNumbersTextBox.cs" />
+    <Compile Include="Game\UI\Controls\ClickableColorBox.cs" />
+    <Compile Include="Game\UI\Controls\ContextMenuControl.cs" />
+    <Compile Include="Game\UI\Controls\InfoBarBuilderControl.cs" />
     <Compile Include="Game\UI\Controls\ColorBox.cs" />
     <Compile Include="Game\UI\Controls\EditableLabel.cs" />
     <Compile Include="Game\UI\Controls\GumpPicWithWidth.cs" />
@@ -164,10 +169,12 @@
     <Compile Include="Game\UI\Controls\NiceButton.cs" />
     <Compile Include="Game\UI\Controls\TextureControl.cs" />
     <Compile Include="Game\UI\Gumps\GridLootGump.cs" />
+    <Compile Include="Game\UI\Gumps\InfoBarGump.cs" />
     <Compile Include="Game\UI\Gumps\NameOverHeadHandlerGump.cs" />
+    <Compile Include="Game\UI\Gumps\ResizableGump.cs" />
     <Compile Include="Game\UI\Gumps\StandardSkillsGump.cs" />
+    <Compile Include="Game\UI\Gumps\TextContainerGump.cs" />
     <Compile Include="Game\UI\Gumps\TipNoticeGump.cs" />
-    <Compile Include="Game\UI\TextContainer.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Renderer\Launcher\LauncherView.cs" />
     <Compile Include="Renderer\MatrixEffect.cs" />
@@ -273,7 +280,6 @@
     <Compile Include="IO\Resources\SpeechesLoader.cs" />
     <Compile Include="IO\Resources\TexmapsLoader.cs" />
     <Compile Include="IO\Resources\TileDataLoader.cs" />
-    <Compile Include="IO\UOFileUopNoFormat.cs" />
     <Compile Include="Network\BufferPool.cs" />
     <Compile Include="Network\Plugin.cs" />
     <Compile Include="Network\Updater.cs" />
@@ -318,7 +324,6 @@
     <Compile Include="Game\UI\Gumps\CharCreation\CreateCharAppearanceGump.cs" />
     <Compile Include="Game\UI\Gumps\Login\LoadingGump.cs" />
     <Compile Include="Game\UI\Gumps\Login\LoginGump.cs" />
-    <Compile Include="Game\UI\Gumps\Login\MainLoginGump.cs" />
     <Compile Include="Game\UI\Gumps\Login\ServerSelectionGump.cs" />
     <Compile Include="Game\UI\Gumps\QuestionGump.cs" />
     <Compile Include="Game\UI\Gumps\HealthBarGump.cs" />
@@ -475,7 +480,7 @@
     <Compile Include="Renderer\RenderedText.cs" />
     <Compile Include="Renderer\ShaderHuesTraslator.cs" />
     <Compile Include="Renderer\ScissorStack.cs" />
-    <Compile Include="Renderer\SpriteTexture.cs" />
+    <Compile Include="Renderer\UOTexture.cs" />
     <Compile Include="Utility\Collections\Bag.cs" />
     <Compile Include="Utility\Collections\Deque.cs" />
     <Compile Include="Utility\Exstentions.cs" />
@@ -505,6 +510,7 @@
     <None Include="libs\osx\libFAudio.0.dylib">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="packages.config" />
     <None Include="shaders\compile_shaders.bat" />
     <None Include="shaders\IsometricWorld.fx" />
     <EmbeddedResource Include="shaders\IsometricWorld.fxc" />
@@ -532,7 +538,6 @@
     <None Include="libs\osx\libtheorafile.dylib">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="packages.config" />
     <None Include="README.md" />
     <EmbeddedResource Include="shaders\xBR.fxc" />
   </ItemGroup>
@@ -573,12 +578,6 @@
     <Content Include="libs\x64\zlib.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\packages\ErrorProne.NET.CoreAnalyzers.0.1.2\analyzers\dotnet\cs\ErrorProne.Net.CoreAnalyzers.dll" />
-    <Analyzer Include="..\packages\ErrorProne.NET.Structs.0.1.2\analyzers\dotnet\cs\ErrorProne.NET.Core.dll" />
-    <Analyzer Include="..\packages\ErrorProne.NET.Structs.0.1.2\analyzers\dotnet\cs\ErrorProne.Net.StructAnalyzers.dll" />
-    <Analyzer Include="..\packages\ErrorProne.NET.Structs.0.1.2\analyzers\dotnet\cs\RuntimeContracts.dll" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Renderer\UI\Layouts\" />

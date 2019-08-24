@@ -54,10 +54,11 @@ namespace ClassicUO.Game.GameObjects
             SetTarget(xTarg, yTarg, zTarg);
         }
 
-        public MovingEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, Graphic graphic, Hue hue) : this(graphic, hue)
+        public MovingEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, Graphic graphic, Hue hue, bool fixedDir) : this(graphic, hue)
         {
             sbyte zSourceB = (sbyte) zSource;
             sbyte zTargB = (sbyte) zTarget;
+            FixedDir = fixedDir;
 
             if (src.IsValid)
             {
@@ -112,15 +113,17 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Explode { get; set; }
 
+        public bool FixedDir { get; private set; }
+
         public byte MovingDelay { get; set; } = 20;
 
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_lastMoveTime > totalMS)
+            if (_lastMoveTime > Engine.Ticks)
                 return;
 
-            _lastMoveTime = (uint) (totalMS + MovingDelay);
+            _lastMoveTime = Engine.Ticks + MovingDelay;
             base.Update(totalMS, frameMS);
             (int sx, int sy, int sz) = GetSource();
             (int tx, int ty, int tz) = GetTarget();
@@ -211,7 +214,7 @@ namespace ClassicUO.Game.GameObjects
             int newX = playerX + newCoordX;
             int newY = playerY + newCoordY;
 
-            if (newX == tx && newY == ty && sz == tz)
+            if ( (newX == tx && newY == ty && sz == tz) || (Target != null && Target.IsDestroyed))
             {
                 if (Explode)
                 {
@@ -246,9 +249,9 @@ namespace ClassicUO.Game.GameObjects
                     bool incZ = sz < tz;
 
                     if (incZ)
-                        totalOffsetZ = (tz - sz) * 4;
+                        totalOffsetZ = (tz - sz) << 2;
                     else
-                        totalOffsetZ = (sz - tz) * 4;
+                        totalOffsetZ = (sz - tz) << 2;
                     totalOffsetZ /= stepsCountX;
 
                     if (totalOffsetZ == 0)
@@ -272,9 +275,12 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                countY -= (int) Offset.Z + (tz - sz) * 4;
-                float angle = (float) (Math.Atan2(countY, countX) * 57.295780);
-                AngleToTarget = -(float) (angle * Math.PI) / 180.0f;
+                countY -= (int) Offset.Z + ((tz - sz) << 2);
+                if (!FixedDir)
+                {
+                    float angle = (float)(Math.Atan2(countY, countX) * 57.295780);
+                    AngleToTarget = -(float)(angle * Math.PI) / 180.0f;
+                }
 
                 if (sx != newX || sy != newY)
                 {

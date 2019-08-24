@@ -80,10 +80,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public HtmlControl()
         {
-            _gameText = new RenderedText
-            {
-                IsUnicode = true, Align = TEXT_ALIGN_TYPE.TS_LEFT, Font = 1
-            };
+            _gameText = RenderedText.Create(string.Empty, isunicode: true, font: 1);
+
             CanMove = true;
         }
 

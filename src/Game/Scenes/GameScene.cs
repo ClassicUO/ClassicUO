@@ -90,13 +90,12 @@ namespace ClassicUO.Game.Scenes
 
         public MacroManager Macros { get; private set; }
 
+        public InfoBarManager InfoBars { get; private set; }
+
         public Texture2D ViewportTexture => _renderTarget;
 
         public Texture2D Darkness => _darkness;
         
-        public JournalManager Journal { get; private set; }
-
-        public WorldTextManager Overheads { get; private set; }
 
         public bool UseLights => Engine.Profile.Current != null && Engine.Profile.Current.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
 
@@ -131,10 +130,9 @@ namespace ClassicUO.Game.Scenes
             }
 
             HeldItem = new ItemHold();
-            Journal = new JournalManager();
-            Overheads = new WorldTextManager();
             Hotkeys = new HotkeysManager();
             Macros = new MacroManager(Engine.Profile.Current.Macros);
+            InfoBars = new InfoBarManager();
             _healthLinesManager = new HealthLinesManager();
 
             WorldViewportGump viewport = new WorldViewportGump(this);
@@ -245,7 +243,7 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
 
-            Journal.Add(text, hue, name, e.IsUnicode);
+            World.Journal.Add(text, hue, name, e.IsUnicode);
         }
 
         public override void Unload()
@@ -276,11 +274,7 @@ namespace ClassicUO.Game.Scenes
             Engine.UI?.Clear();
             World.Clear();
 
-            Overheads?.Clear();
-            Overheads = null;
-            Journal?.Clear();
-            Journal = null;
-            Overheads = null;
+          
             _useItemQueue?.Clear();
             _useItemQueue = null;
             Hotkeys = null;
@@ -373,7 +367,7 @@ namespace ClassicUO.Game.Scenes
                 if (light.ID >= Constants.MAX_LIGHTS_DATA_INDEX_COUNT)
                     return;
 
-                light.Color = LightColors.GetHue(graphic);
+                light.Color = Engine.Profile.Current.UseColoredLights ? LightColors.GetHue(graphic) : (ushort) 0;
 
                 light.DrawX = x;
                 light.DrawY = y;
@@ -441,7 +435,7 @@ namespace ClassicUO.Game.Scenes
                         Tile tile = World.Map.GetTile(x, y);
 
                         if (tile != null)
-                            AddTileToRenderList(tile.FirstNode, x, y, _useObjectHandles, 150);
+                            AddTileToRenderList(tile.FirstNode, x, y, _useObjectHandles, 150/*, null*/);
                         x++;
                         y--;
                     }
@@ -453,12 +447,6 @@ namespace ClassicUO.Game.Scenes
             if (_renderIndex >= 100)
                 _renderIndex = 1;
             UpdateDrawPosition = false;
-
-            //if (_renderList.Length - _renderListCount != 0)
-            //{
-            //    if (_renderList[_renderListCount] != null)
-            //        Array.Clear(_renderList, _renderListCount, _renderList.Length - _renderListCount);
-            //}
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -490,7 +478,6 @@ namespace ClassicUO.Game.Scenes
             }
 
             World.Update(totalMS, frameMS);
-            Overheads.Update(totalMS, frameMS);
             Pathfinder.ProcessAutoWalk();
 
 
@@ -560,6 +547,60 @@ namespace ClassicUO.Game.Scenes
                 }
                 else
                     SelectedObject.TranslatedMousePositionByViewport = Point.Zero;
+            }
+
+            if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+            {
+                if (_multi == null)
+                    _multi = new Item(Serial.INVALID)
+                    {
+                        Graphic = TargetManager.MultiTargetInfo.Model,
+                        Hue = TargetManager.MultiTargetInfo.Hue,
+                        IsMulti = true,
+                    };
+
+                if (SelectedObject.Object is GameObject gobj)
+                {
+                    Position pos = TargetManager.MultiTargetInfo.Offset;
+                    Position pos2 = gobj.Tile?.FirstNode?.Position ?? gobj.Position;
+
+                    World.Map.GetMapZ(pos2.X, pos2.Y, out sbyte groundZ, out sbyte staticZ);
+
+                    if (gobj is Static st && st.ItemData.IsWet)
+                        groundZ = gobj.Z;
+
+
+                    pos = new Position((ushort)(pos2.X - pos.X), (ushort)(pos2.Y - pos.Y), groundZ);
+
+                    _multi.Position = pos;
+                    _multi.CheckGraphicChange();
+                    _multi.AddToTile();
+
+                    World.HouseManager.TryGetHouse(_multi.Serial, out var house);
+
+                    foreach (Multi s in house.Components)
+                    {
+                        s.IsFromTarget = true;
+                        s.Position = new Position((ushort)(_multi.X + s.MultiOffsetX), (ushort)(_multi.Y + s.MultiOffsetY), (sbyte)(_multi.Z + s.MultiOffsetZ));
+                        s.AddToTile();
+                    }
+                }
+            }
+            else if (_multi != null)
+            {
+                World.HouseManager.RemoveMultiTargetHouse();
+                _multi.Destroy();
+                _multi = null;
+            }
+
+
+            if (_isMouseLeftDown && !IsHoldingItem && Engine.Ticks - _holdMouse2secOverItemTime >= 1000)
+            {
+                if (PickupItemBegin(SelectedObject.LastObject as Item, 0, 0))
+                {
+                    _isMouseLeftDown = false;
+                    _holdMouse2secOverItemTime = 0;
+                }
             }
 
             FillGameObjectList();
@@ -638,46 +679,20 @@ namespace ClassicUO.Game.Scenes
 
                 for (int i = 0; i < _renderListCount; i++)
                 {
-                    //if (!_renderList[i].TryGetTarget(out var obj))
-                    //    continue;
-
                     GameObject obj = _renderList[i];
 
                     if (obj.Z <= _maxGroundZ)
                     {
                         obj.DrawTransparent = usecircle && obj.TransparentTest(z);
 
-                        if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y)) RenderedObjectsCount++;
+                        if (obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y))
+                            RenderedObjectsCount++;
                     }
                 }
 
-                if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
-                {
-                    Item multiTarget = new Item(Serial.INVALID)
-                    {
-                        Graphic = TargetManager.MultiTargetInfo.Model,
-                        IsMulti = true
-                    };
 
-                    if (Game.SelectedObject.Object != null && Game.SelectedObject.Object is GameObject gobj /*&& (gobj is Land || gobj is Static)*/)
-                    {
-                        Position pos = TargetManager.MultiTargetInfo.Offset;
-                        Position pos2 = gobj.Tile?.FirstNode.Position ?? gobj.Position;
-
-                        World.Map.GetMapZ(pos2.X, pos2.Y, out sbyte groundZ, out sbyte staticZ);
-
-                        if (gobj is Static st && st.ItemData.IsWet)
-                            groundZ = gobj.Z;
-
-
-                        pos = new Position((ushort) (pos2.X - pos.X), (ushort) (pos2.Y - pos.Y), groundZ);
-
-                        multiTarget.Position = pos;
-                        multiTarget.CheckGraphicChange();
-                    }
-
-                    multiTarget.Draw(batcher, multiTarget.RealScreenPosition.X, multiTarget.RealScreenPosition.Y);
-                }
+                if (_multi != null && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+                    _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y);
             }
 
             //batcher.SetStencil(null);
@@ -690,13 +705,19 @@ namespace ClassicUO.Game.Scenes
             batcher.GraphicsDevice.SetRenderTarget(null);
         }
 
+        private Item _multi;
 
         private void DrawLights(UltimaBatcher2D batcher)
         {
             batcher.GraphicsDevice.SetRenderTarget(null);
             batcher.GraphicsDevice.SetRenderTarget(_darkness);
 
-            _vectorClear.X = _vectorClear.Y = _vectorClear.Z = World.Light.IsometricLevel;
+            var lightColor = World.Light.IsometricLevel;
+
+            if (Engine.Profile.Current.UseDarkNights)
+                lightColor -= 0.02f;
+
+            _vectorClear.X = _vectorClear.Y = _vectorClear.Z = lightColor;
 
             batcher.GraphicsDevice.Clear(Color.Black);
             batcher.GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer | ClearOptions.Stencil, _vectorClear, 0, 0);
@@ -711,9 +732,9 @@ namespace ClassicUO.Game.Scenes
 
             for (int i = 0; i < _lightCount; i++)
             {
-                ref var l = ref _lights[i];
+                ref readonly var l = ref _lights[i];
 
-                SpriteTexture texture = FileManager.Lights.GetTexture(l.ID);
+                UOTexture texture = FileManager.Lights.GetTexture(l.ID);
 
                 hue.X = l.Color;
                 hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
@@ -732,20 +753,17 @@ namespace ClassicUO.Game.Scenes
         {
             _healthLinesManager.Draw(batcher, Scale);
 
-            //batcher.SetBlendState(_blendText);
-
             int renderIndex = _renderIndex - 1;
 
             if (renderIndex < 1)
                 renderIndex = 99;
 
-            Overheads.ProcessWorldText(true);
-            Overheads.Draw(batcher, x, y, renderIndex);
-            SelectedObject.LastObject = SelectedObject.Object;
 
-            // batcher.SetBlendState(null);
-            // workaround to set overheads clickable
-            //_mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
+            World.WorldTextManager.ProcessWorldText(true);
+            World.WorldTextManager.Draw(batcher, x, y, renderIndex);
+
+
+            SelectedObject.LastObject = SelectedObject.Object;
         }
 
         private Vector3 _selectionLines = Vector3.Zero;

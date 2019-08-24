@@ -24,27 +24,21 @@
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
     internal class HitBox : Control
     {
-        public override bool CanUseAlpha => false;
-
-        protected readonly SpriteTexture _texture;
+        protected readonly Texture2D _texture;
 
         public HitBox(int x, int y, int w, int h)
         {
             CanMove = false;
             AcceptMouseInput = true;
             Alpha = 0.75f;
-            IsTransparent = true;
-            _texture = new SpriteTexture(1, 1);
+            _texture = Textures.GetTexture(Color.White);
 
-            _texture.SetData(new uint[1]
-            {
-                0xFFFF_FFFF
-            });
             X = x;
             Y = y;
             Width = w;
@@ -55,14 +49,6 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override ClickPriority Priority { get; } = ClickPriority.High;
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            if (IsDisposed)
-                return;
-
-            base.Update(totalMS, frameMS);
-            _texture.Ticks = (long) totalMS;
-        }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -72,18 +58,12 @@ namespace ClassicUO.Game.UI.Controls
             if (MouseIsOver)
             {
                 ResetHueVector();
-                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, IsTransparent ? Alpha : 0, true);
+                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
 
                 batcher.Draw2D(_texture, x, y, 0, 0, Width, Height, ref _hueVector);
             }
 
             return base.Draw(batcher, x, y);
-        }
-
-        public override void Dispose()
-        {
-            base.Dispose();
-            _texture?.Dispose();
         }
     }
 }

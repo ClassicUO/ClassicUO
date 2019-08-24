@@ -27,12 +27,13 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
     internal class Line : Control
     {
-        private readonly SpriteTexture _texture;
+        private readonly Texture2D _texture;
 
         public Line(int x, int y, int w, int h, uint color)
         {
@@ -40,12 +41,7 @@ namespace ClassicUO.Game.UI.Controls
             Y = y;
             Width = w;
             Height = h;
-            _texture = new SpriteTexture(1, 1);
-
-            _texture.SetData(new uint[1]
-            {
-                color
-            });
+            _texture = Textures.GetTexture(new Color() { PackedValue = color });
         }
 
         internal static int CreateRectangleArea(Gump g, int startx, int starty, int width, int height, int topage = 0, uint linecolor = 0xAFAFAF, int linewidth = 1, string toplabel = null, ushort textcolor = 999, byte textfont = 0xFF)
@@ -77,21 +73,14 @@ namespace ClassicUO.Game.UI.Controls
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
-            _texture.Ticks = (long) totalMS;
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, IsTransparent ? Alpha : 0);
+            ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha);
 
             return batcher.Draw2D(_texture, x, y, Width, Height, ref _hueVector);
-        }
-
-        public override void Dispose()
-        {
-            _texture?.Dispose();
-            base.Dispose();
         }
     }
 }

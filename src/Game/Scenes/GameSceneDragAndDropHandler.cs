@@ -60,7 +60,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool PickupItemBegin(Item item, int x, int y, int? amount = null)
         {
-            if (World.Player.IsDead || item == null || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
+            if (World.Player.IsDead || item == null || item.IsDestroyed || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
                 return false;
 
             if (!_isShiftDown && !amount.HasValue && item.Amount > 1 && item.ItemData.IsStackable)
@@ -84,7 +84,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool PickupItemDirectly(Item item, int x, int y, int amount)
         {
-            if (World.Player.IsDead || HeldItem.Enabled /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/) return false;
+            if (World.Player.IsDead || HeldItem.Enabled || item == null || item.IsDestroyed /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/) return false;
 
             HeldItem.Clear();
             HeldItem.Set(item, amount <= 0 ? item.Amount : (ushort) amount);
@@ -101,9 +101,9 @@ namespace ClassicUO.Game.Scenes
             }
             else
             {
-                item.EntityTextContainerContainer?.Clear();
                 item.RemoveFromTile();
             }
+            item.TextContainer?.Clear();
 
             World.Items.Remove(item);
             World.Items.ProcessDelta();

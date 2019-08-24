@@ -32,6 +32,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 using SDL2;
@@ -97,13 +98,8 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public Rectangle Bounds
-        {
-            get => _bounds;
-            set => _bounds = value;
-        }
-
-
+        public ref Rectangle Bounds => ref _bounds;
+        
         public bool IsDisposed { get; private set; }
 
         public bool IsVisible { get; set; } = true;
@@ -124,12 +120,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsEditable { get; set; }
 
-        public bool IsTransparent { get; set; }
-
         public float Alpha { get; set; }
 
         public List<Control> Children { get; }
-        public virtual bool CanUseAlpha => true;
 
         public object Tag { get; set; }
 
@@ -301,7 +294,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public int TooltipMaxLength { get; private set; }
 
-        public SpriteTexture Texture { get; set; }
+        public UOTexture Texture { get; set; }
 
         public virtual bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -317,7 +310,6 @@ namespace ClassicUO.Game.UI.Controls
                     if (c.IsVisible && c.IsInitialized)
                     {
                         c.Draw(batcher, c.X + x, c.Y + y);
-
                         //DrawDebug(batcher, position);
                     }
                 }
@@ -717,6 +709,8 @@ namespace ClassicUO.Game.UI.Controls
                     _attempToDrag = true;
                 }
             }
+            else 
+                Parent?.OnMouseOver(X + x, Y + y);
         }
 
         protected virtual void OnMouseEnter(int x, int y)
@@ -865,9 +859,9 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Control c = Children[i];
                 c.Dispose();
-
-                Children.RemoveAt(i--);
             }
+
+            Children.Clear();
 
             IsDisposed = true;
 

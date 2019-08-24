@@ -1041,6 +1041,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (rect.Contains(p))
                     {
+                        Engine.UI.GetGump<HealthBarGump>(World.Player)?.Dispose();
                         Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
                         Dispose();
                     }

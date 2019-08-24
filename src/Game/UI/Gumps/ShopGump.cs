@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class ShopGump : Gump
     {
-        private static SpriteTexture[] _shopGumpParts;
+        private static UOTexture[] _shopGumpParts;
         private readonly GumpPicTiled _middleGumpLeft, _middleGumpRight;
         private readonly Dictionary<Item, ShopItem> _shopItems;
         private readonly ScrollArea _shopScrollArea, _transactionScrollArea;
@@ -176,9 +176,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void GenerateVirtualTextures()
         {
-            _shopGumpParts = new SpriteTexture[12];
-            SpriteTexture t = FileManager.Gumps.GetTexture(0x0870);
-            SpriteTexture[][] splits = new SpriteTexture[4][];
+            _shopGumpParts = new UOTexture[12];
+            UOTexture t = FileManager.Gumps.GetTexture(0x0870);
+            UOTexture[][] splits = new UOTexture[4][];
 
             splits[0] = GraphicHelper.SplitTexture16(t,
                                                      new int[3, 4]
@@ -487,7 +487,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 string subname = $"{itemName} at {item.Price}gp";
 
-                Add(_name = new Label(subname, true, 0x021F, 110, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, true)
+                Add(_name = new Label(subname, true, 0x021F, 110, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_LEFT, true)
                 {
                     Y = 0,
                     X = 55
@@ -495,7 +495,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int height = Math.Max(_name.Height, control.Height) + 10;
 
-                Add(_amountLabel = new Label(item.Amount.ToString(), true, 0x021F, 35, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_RIGHT)
+                Add(_amountLabel = new Label(item.Amount.ToString(), true, 0x021F, 35, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_RIGHT)
                 {
                     X = 168,
                     Y = height >> 2
@@ -507,7 +507,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = height;
                 WantUpdateSize = false;
 
-                if (World.ClientFlags.TooltipsEnabled) SetTooltip(item);
+                if (World.ClientFeatures.TooltipsEnabled) SetTooltip(item);
             }
 
             internal string ShopItemName => _name.Text;
@@ -590,13 +590,13 @@ namespace ClassicUO.Game.UI.Gumps
                 Item = item;
                 Label l;
 
-                Add(l = new Label(realname, true, 0x021F, 140, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, true)
+                Add(l = new Label(realname, true, 0x021F, 140, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_LEFT, true)
                 {
                     X = 50,
                     Y = 0
                 });
 
-                Add(_amountLabel = new Label(amount.ToString(), true, 0x021F, 35, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_RIGHT)
+                Add(_amountLabel = new Label(amount.ToString(), true, 0x021F, 35, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_RIGHT)
                 {
                     X = 10,
                     Y = 0
@@ -738,7 +738,7 @@ namespace ClassicUO.Game.UI.Gumps
         private class ResizePicLine : Control
         {
             private readonly Graphic _graphic;
-            private readonly SpriteTexture[] _gumpTexture = new SpriteTexture[3];
+            private readonly UOTexture[] _gumpTexture = new UOTexture[3];
 
             public ResizePicLine(Graphic graphic)
             {
@@ -757,7 +757,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override void Update(double totalMS, double frameMS)
             {
-                foreach (SpriteTexture t in _gumpTexture)
+                foreach (UOTexture t in _gumpTexture)
                 {
                     if (t != null)
                         t.Ticks = (long) totalMS;
@@ -770,8 +770,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ResetHueVector();
 
-                if (IsTransparent)
-                    ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
+                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
 
                 int middleWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
                 batcher.Draw2D(_gumpTexture[0], x, y, ref _hueVector);

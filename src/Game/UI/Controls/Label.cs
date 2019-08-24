@@ -34,17 +34,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, byte font = 0xFF, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT, bool ishtml = false)
         {
-            _gText = new RenderedText
-            {
-                IsHTML = ishtml,
-                IsUnicode = isunicode,
-                Font = font,
-                FontStyle = style,
-                Hue = hue,
-                Align = align,
-                MaxWidth = maxwidth,
-                Text = text
-            };
+            _gText = RenderedText.Create(text, hue, font, isunicode, style, align, maxwidth, isHTML: ishtml);
+
             AcceptMouseInput = false;
             Width = _gText.Width;
             Height = _gText.Height;
@@ -67,6 +58,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+
         public Hue Hue
         {
             get => _gText.Hue;
@@ -79,6 +71,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
         }
+   
 
         public byte Font => _gText.Font;
 

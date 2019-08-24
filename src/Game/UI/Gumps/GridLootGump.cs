@@ -249,7 +249,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _texture.Height = SIZE;
                 _texture.CanMove = false;
 
-                if (World.ClientFlags.TooltipsEnabled) _texture.SetTooltip(item);
+                if (World.ClientFeatures.TooltipsEnabled) _texture.SetTooltip(item);
 
                 Add(_texture);
 

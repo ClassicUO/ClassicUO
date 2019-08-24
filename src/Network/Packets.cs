@@ -143,7 +143,7 @@ namespace ClassicUO.Network
             WriteASCII(character.Name, 30);
             WriteUShort(0x00);
             uint clientflag = 0;
-            ushort flags = (ushort) World.ClientFlags.Flags;
+            uint flags = (uint) FileManager.ClientFlags;
 
             for (ushort i = 0; i < flags; i++)
                 clientflag |= (uint) (1 << i);
@@ -232,9 +232,10 @@ namespace ClassicUO.Network
             Skip(2);
             uint clientFlag = 0;
 
-            for (int i = 0; i < (int) World.ClientFlags.Flags; i++) clientFlag |= (uint) (1 << i);
+            for (int i = 0; i < (uint) FileManager.ClientFlags; i++)
+                clientFlag |= (uint) (1 << i);
 
-            WriteUInt(clientFlag);
+            WriteUInt((uint) FileManager.ClientFlags);
             Skip(24);
             WriteUInt(index);
             WriteUInt(ipclient);
@@ -300,7 +301,7 @@ namespace ClassicUO.Network
             WriteBool(state);
             WriteByte(0x32);
             WriteByte(0);
-            WriteByte(0);
+            //WriteByte(0);
         }
     }
 
@@ -394,25 +395,21 @@ namespace ClassicUO.Network
     {
         public PUnicodeSpeechRequest(string text, MessageType type, byte font, Hue hue, string lang) : base(0xAD)
         {
-            int len = text.Length;
-            int size = 12;
-
             var entries = FileManager.Speeches.GetKeywords(text);
 
             bool encoded = entries != null && entries.Count != 0;
+            if(encoded)
+                type |= MessageType.Encoded;
 
-            List<byte> codeBytes = new List<byte>();
-            string utf8 = string.Empty;
+            WriteByte((byte)type);
+            WriteUShort(hue);
+            WriteUShort(font);
+            WriteASCII(lang, 4);
 
             if (encoded)
             {
-                type |= MessageType.Encoded;
-
-                utf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetBytes(text));
-
-                len = utf8.Length;
-                len++;
-
+                List<byte> codeBytes = new List<byte>();
+                byte[] utf8 = Encoding.UTF8.GetBytes(text);
                 int length = entries.Count;
                 codeBytes.Add((byte) (length >> 4));
                 int num3 = length & 15;
@@ -440,28 +437,16 @@ namespace ClassicUO.Network
 
                 if (!flag) codeBytes.Add((byte) (num3 << 4));
 
-                size += codeBytes.Count;
-            }
-            else
-            {
-                size += len * 2;
-                size += 2;
-            }
-
-            WriteByte((byte) type);
-            WriteUShort(hue);
-            WriteUShort(font);
-            WriteASCII(lang, 4);
-
-            if (encoded)
-            {
                 for (int i = 0; i < codeBytes.Count; i++)
                     WriteByte(codeBytes[i]);
 
-                WriteASCII(utf8, len);
+                WriteBytes(utf8, 0, utf8.Length);
+                WriteByte(0);
             }
             else
-                WriteUnicode(text, size);
+            {
+                WriteUnicode(text, 14 + text.Length * 2);
+            }
         }
     }
 
@@ -938,7 +923,7 @@ namespace ClassicUO.Network
             WriteByte(0x0A);
             uint clientFlag = 0;
 
-            for (int i = 0; i < (int) World.ClientFlags.Flags; i++)
+            for (int i = 0; i < (uint) FileManager.ClientFlags; i++)
                 clientFlag |= (uint) (1 << i);
 
             WriteUInt(clientFlag);
