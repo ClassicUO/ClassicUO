@@ -52,7 +52,7 @@ namespace ClassicUO.Game.Managers
             JournalEntry entry = new JournalEntry(text, font, hue, name, isunicode);
             Entries.AddToBack(entry);
             EntryAdded.Raise(entry);
-            _fileWriter?.WriteLine($"[{DateTime.Now:g}]  {name}: {text}");
+            _fileWriter?.WriteLine($"[{Engine.CurrDateTime:g}]  {name}: {text}");
         }
 
         public void CreateWriter(bool create)
