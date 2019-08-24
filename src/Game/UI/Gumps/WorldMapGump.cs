@@ -211,6 +211,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int size = (realWidth + OFFSET_PIX) * (realHeight + OFFSET_PIX);
                 uint[] buffer = new uint[size];
                 int maxBlock = size - 1;
+                bool[] colored = new bool[64];
 
                 for (int bx = 0; bx < fixedWidth; bx++)
                 {
@@ -238,12 +239,12 @@ namespace ClassicUO.Game.UI.Gumps
                                 ref MapCells infoCell = ref infoCells[pos];
                                 infoCell.TileID = cell.TileID;
                                 infoCell.Z = cell.Z;
+                                colored[pos] = false;
                                 pos++;
                             }
                         }
 
                         StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
-
                         if (sb != null)
                         {
                             int count = (int) indexMap.StaticCount;
@@ -259,7 +260,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                                     if (cell.Z <= staticBlock.Z)
                                     {
-                                        cell.TileID = (ushort) (staticBlock.Color + 0x4000);
+                                        colored[pos] = staticBlock.Hue > 0;
+                                        cell.TileID = (ushort) (colored[pos] ? staticBlock.Hue : staticBlock.Color + 0x4000);
                                         cell.Z = staticBlock.Z;
                                     }
                                 }
@@ -267,8 +269,6 @@ namespace ClassicUO.Game.UI.Gumps
                         }
 
                         pos = 0;
-
-
                         for (int y = 0; y < 8; y++)
                         {
                             int block = (mapY + y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
@@ -277,7 +277,7 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 ref readonly var c = ref infoCells[pos];
 
-                                ushort color = (ushort)(0x8000 | FileManager.Hues.GetRadarColorData(c.TileID));
+                                ushort color = (ushort)(0x8000 | (colored[pos] ? FileManager.Hues.GetColor16(28672, c.TileID) : FileManager.Hues.GetRadarColorData(c.TileID)));
                                 Color cc;
 
                                 if (x > 0)
