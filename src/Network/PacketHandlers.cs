@@ -91,6 +91,8 @@ namespace ClassicUO.Network
             }
         }
 
+        private List<Serial> _clilocRequests = new List<Serial>();
+
         public static void Load()
         {
             ToClient.Add(0x1B, EnterWorld);
@@ -199,6 +201,38 @@ namespace ClassicUO.Network
             ToClient.Add(0xF5, DisplayMap);
             ToClient.Add(0xF6, BoatMoving);
             ToClient.Add(0xF7, PacketList);
+        }
+
+        public static void SendMegaClilocRequests()
+        {
+            if (World.ClientFeatures.TooltipsEnabled && ToClient._clilocRequests.Count != 0)
+            {
+                if (FileManager.ClientVersion >= ClientVersions.CV_500A)
+                {
+                    while (ToClient._clilocRequests.Count != 0)
+                        NetClient.Socket.Send(new PMegaClilocRequest(ref ToClient._clilocRequests));
+                }
+                else
+                {
+                    foreach (Serial serial in ToClient._clilocRequests)
+                    {
+                        NetClient.Socket.Send(new PMegaClilocRequestOld(serial));
+                    }
+
+                    ToClient._clilocRequests.Clear();
+                }
+            }
+        }
+
+        private static void AddMegaClilocRequest(Serial serial)
+        {
+            foreach (Serial s in ToClient._clilocRequests)
+            {
+                if (s == serial)
+                    return;
+            }
+
+            ToClient._clilocRequests.Add(serial);
         }
 
         private static void TargetCursor(Packet p)
@@ -1898,7 +1932,7 @@ namespace ClassicUO.Network
                         it.Name = FileManager.Cliloc.GetString(cliloc);
                         fromcliloc = true;
                     }
-                    else
+                    else if (string.IsNullOrEmpty(it.Name))
                         it.Name = name;
 
                     gump.SetIfNameIsFromCliloc(it, fromcliloc);
@@ -2027,8 +2061,8 @@ namespace ClassicUO.Network
                 mobile.Items.Add(item);
                 mobile.Equipment[(int) item.Layer] = item;
 
-                if (World.OPL.Contains(serial))
-                    NetClient.Socket.Send(new PMegaClilocRequest(item));
+                //if (World.OPL.Contains(serial))
+                //    NetClient.Socket.Send(new PMegaClilocRequest(item));
                 item.CheckGraphicChange();
                 item.ProcessDelta();
                 World.Items.Add(item);
@@ -2408,7 +2442,8 @@ namespace ClassicUO.Network
                     fromcliloc = true;
                 }
 
-                item.Name = name;
+                if (!fromcliloc && string.IsNullOrEmpty(item.Name))
+                    item.Name = name;
 
                 gump.AddItem(item, fromcliloc);
             }
@@ -3527,10 +3562,9 @@ namespace ClassicUO.Network
             {
                 Serial serial = p.ReadUInt();
                 uint revision = p.ReadUInt();
-                Entity entity = World.Get(serial);
 
-                if (entity == null || !World.OPL.IsRevisionEqual(serial, revision))
-                    NetClient.Socket.Send(new PMegaClilocRequest(serial));
+                if (!World.OPL.IsRevisionEqual(serial, revision))
+                    AddMegaClilocRequest(serial);
             }
         }
 
