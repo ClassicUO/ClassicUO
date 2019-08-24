@@ -42,5 +42,16 @@ namespace ClassicUO.Utility
         {
             return (ushort) (((c & 0x1F) * 299 + ((c >> 5) & 0x1F) * 587 + ((c >> 10) & 0x1F) * 114) / 1000);
         }
+
+        public static ushort Convert32To555(uint rgb32)
+        {
+            uint result = 0;
+
+            result |= ((rgb32 << 7) & 0x0000FC00);  //R
+            result |= ((rgb32 >> 6) & 0x000003E0);  //G
+            result |= ((rgb32 >> 19) & 0x0000001F); //B
+
+            return (ushort)(result & 0x0000FFFF);
+        }
     }
 }
