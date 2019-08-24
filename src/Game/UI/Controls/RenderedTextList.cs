@@ -146,7 +146,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             bool maxScroll = _scrollBar.Value == _scrollBar.MaxValue;
 
-            while (_entries.Count > 99)
+            while (_entries.Count > 199)
             {
                 _entries.RemoveFromFront().Destroy();
                 _hours.RemoveFromFront().Destroy();
