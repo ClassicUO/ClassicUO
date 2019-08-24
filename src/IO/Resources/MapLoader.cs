@@ -461,9 +461,9 @@ namespace ClassicUO.IO.Resources
 
                         if (outcell.Z <= sb->Z)
                         {
-                            outcell.Graphic = sb->Color;
+                            outcell.Graphic = sb->Hue > 0 ? (ushort)(sb->Hue + 0x4000) : sb->Color;
                             outcell.Z = sb->Z;
-                            outcell.IsLand = false;
+                            outcell.IsLand = sb->Hue > 0;
                         }
                     }
 
