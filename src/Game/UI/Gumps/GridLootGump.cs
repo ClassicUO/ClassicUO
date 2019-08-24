@@ -119,7 +119,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (Item item in _corpse.Items)
             {
-                if (item == null || item.ItemData.Layer == (int) Layer.Hair || item.ItemData.Layer == (int) Layer.Beard || item.ItemData.Layer == (int) Layer.Face)
+                if (item == null || 
+                    item.ItemData.Layer == (int) Layer.Hair || 
+                    item.ItemData.Layer == (int) Layer.Beard || 
+                    item.ItemData.Layer == (int) Layer.Face ||
+                    // Skip non-lootable items on Outlands (server always sends their position as 0,0,0)
+                    (Engine.GlobalSettings.ShardType == 2 && item.X == 0 && item.Y == 0 && item.Z == 0)
+                )
                     continue;
 
                 GridLootItem gridItem = new GridLootItem(item);

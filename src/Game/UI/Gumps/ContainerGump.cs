@@ -63,10 +63,21 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (var c in Children.OfType<ItemGump>())
                 c.Dispose();
 
-            foreach (Item i in _item.Items.Where(s => s.ItemData.Layer != (int) Layer.Hair && s.ItemData.Layer != (int) Layer.Beard && s.ItemData.Layer != (int) Layer.Face))
+            foreach (Item i in _item.Items)
+            {
+                if (i == null || 
+                    i.ItemData.Layer == (int) Layer.Hair || 
+                    i.ItemData.Layer == (int) Layer.Beard || 
+                    i.ItemData.Layer == (int) Layer.Face ||
+                    // Skip non-lootable items on Outlands (server always sends their position as 0,0,0)
+                    (Engine.GlobalSettings.ShardType == 2 && i.X == 0 && i.Y == 0 && i.Z == 0)
+                )
+                    continue;
+
                 //FIXME: this should be disabled. Server sends the right position
                 //CheckItemPosition(i);
                 Add(new ItemGump(i));
+            }
         }
 
         public Graphic Graphic { get; }
