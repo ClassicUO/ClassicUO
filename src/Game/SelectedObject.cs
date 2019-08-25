@@ -249,7 +249,9 @@ namespace ClassicUO.Game
         [MethodImpl(256)]
         public static bool IsPointInLand(UOTexture texture, int x, int y)
         {
-            return texture != null && texture.Contains(TranslatedMousePositionByViewport.X - x, TranslatedMousePositionByViewport.Y - y);
+            x = TranslatedMousePositionByViewport.X - x;
+            y = TranslatedMousePositionByViewport.Y - y;
+            return texture != null && x >= 0 && x < 44 && y >= 0 && y < 44 && _InternalArea[x, y];
         }
 
         public static bool IsPointInStretchedLand(ref Rectangle rect, int x, int y)
@@ -269,6 +271,52 @@ namespace ClassicUO.Game
             return testY >= testX * (y1 - y0) / -22 + y + y0 &&
                    testY >= testX * (y3 - y0) / 22 + y + y0 && testY <= testX * (y3 - y2) / 22 + y + y2 &&
                    testY <= testX * (y1 - y2) / -22 + y + y2;
+        }
+
+        private static readonly bool[,] _InternalArea = new bool[44, 44];
+        static SelectedObject()
+        {
+            Point[] poly = new Point[3] { new Point(-1, 22), new Point(22, -1), new Point(22, 22) };
+            Point p1, p2, p;
+            bool inside;
+            var oldPoint = new Point(poly[poly.Length - 1].X, poly[poly.Length - 1].Y);
+
+            for (int x = 0; x < 22; x++)
+            {
+                for (int y = 0; y < 22; y++)
+                {
+                    p.X = x; p.Y = y;
+                    inside = false;
+                    for (int i = 0; i < poly.Length; i++)
+                    {
+                        var newPoint = new Point(poly[i].X, poly[i].Y);
+
+                        if (newPoint.X > oldPoint.X)
+                        {
+                            p1 = oldPoint;
+                            p2 = newPoint;
+                        }
+                        else
+                        {
+                            p1 = newPoint;
+                            p2 = oldPoint;
+                        }
+
+                        if ((newPoint.X < p.X) == (p.X <= oldPoint.X)
+                            && (p.Y - p1.Y) * (p2.X - p1.X)
+                            < (p2.Y - p1.Y) * (p.X - p1.X))
+                        {
+                            inside = !inside;
+                        }
+
+                        oldPoint = newPoint;
+                    }
+                    _InternalArea[x, y] = inside;
+                    _InternalArea[43 - x, 43 - y] = inside;
+                    _InternalArea[43 - x, y] = inside;
+                    _InternalArea[x, 43 - y] = inside;
+                }
+            }
         }
     }
 }
