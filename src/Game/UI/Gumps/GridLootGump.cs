@@ -124,6 +124,7 @@ namespace ClassicUO.Game.UI.Gumps
                     item.ItemData.Layer == (int) Layer.Beard || 
                     item.ItemData.Layer == (int) Layer.Face ||
                     // Skip non-lootable items on Outlands (server always sends their position as 0,0,0)
+                    // FIXME: Remove this check when the issue with non-lootable items will be resolved on the server side
                     (Engine.GlobalSettings.ShardType == 2 && item.X == 0 && item.Y == 0 && item.Z == 0)
                 )
                     continue;
