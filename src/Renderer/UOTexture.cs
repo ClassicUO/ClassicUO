@@ -55,9 +55,25 @@ namespace ClassicUO.Renderer
                     return true;
 
                 int pos = y * Width + x;
-
                 if (pos < _data.Length)
-                    return _data[pos] != 0;
+                {
+                    pixelCheck = _data[pos] != 0;
+                    for (int iy = -1; iy < 2 && !pixelCheck; iy += 2)
+                    {
+                        pos = (y + iy) * Width + x;
+
+                        if (pos >= 0 && pos < _data.Length)
+                            pixelCheck = _data[pos] != 0;
+                    }
+                    for (int ix = -1; ix < 2 && !pixelCheck; ix += 2)
+                    {
+                        pos = y * Width + x + ix;
+
+                        if (pos >= 0 && pos < _data.Length)
+                            pixelCheck = _data[pos] != 0;
+                    }
+                    return pixelCheck;
+                }
             }
 
             return false;
