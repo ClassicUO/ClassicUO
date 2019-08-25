@@ -47,31 +47,29 @@ is installed:
 # Building (macOS)
 All the commands should be executed in terminal. All global package installs should be done only if not yet installed.
 
-1. Install Homebrew, a package manager for macOS (if not yet installed): Follow instructions on https://brew.sh/
+1. Install Homebrew, a package manager for macOS (if not yet installed):
+Follow instructions on https://brew.sh/
 
 2. Install Mono (https://www.mono-project.com/):
 `brew install mono`
 
-3. Install .NET Core SDK (https://dotnet.microsoft.com/download):
-`brew install dotnet-sdk`
-
-4. Install Paket, a dependency manager for .NET and mono projects (https://fsprojects.github.io/Paket/):
+3. Install Paket, a dependency manager for .NET and mono projects (https://fsprojects.github.io/Paket/):
 `brew install paket`
 
-5. Navigate to ClassicUO root folder:
+4. Navigate to ClassicUO root folder:
 `cd /your/path/to/ClassicUO`
 
-6. Initialize Paket environment:
+5. Initialize Paket environment:
 `paket init`
 
-7. Install required/missing dependencies:
+6. Install required/missing dependencies:
 `paket add Newtonsoft.Json --version 12.0.2`
 
-8. Build:
+7. Build:
   - Debug version: `msbuild /t:Rebuild`
   - Release version: `msbuild /t:Rebuild /p:Configuration=Release`
 
-9. Start ClassicUO via Mono (to properly set up all required constants use provided bash script):
+8. Start ClassicUO via Mono (to properly set up all required constants use provided bash script):
   - Debug version: `./bin/Debug/ClassicUO-mono.sh`
   - Release version: `./bin/Release/ClassicUO-mono.sh`
 
