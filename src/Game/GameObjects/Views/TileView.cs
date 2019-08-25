@@ -103,14 +103,14 @@ namespace ClassicUO.Game.GameObjects
             if (SelectedObject.Object == this)
                 return;
 
-            if (IsStretched)
+            if (IsStretched || !(Right is Static))
             {
                 if (SelectedObject.IsPointInStretchedLand(Rectangle, x, y + Z * 4))
                     SelectedObject.Object = this;
             }
             else
             {
-                if (SelectedObject.IsPointInLand(Texture, Graphic, x - Bounds.X, y - Bounds.Y))
+                if (SelectedObject.IsPointInLand(Texture, x - Bounds.X, y - Bounds.Y))
                     SelectedObject.Object = this;
             }
         }
