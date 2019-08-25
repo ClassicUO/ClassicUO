@@ -487,7 +487,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 string subname = $"{itemName} at {item.Price}gp";
 
-                Add(_name = new Label(subname, true, 0x021F, 110, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_LEFT, true)
+                Add(_name = new Label(subname, true, 0x219, 110, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_LEFT, true)
                 {
                     Y = 0,
                     X = 55
@@ -495,7 +495,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int height = Math.Max(_name.Height, control.Height) + 10;
 
-                Add(_amountLabel = new Label(item.Amount.ToString(), true, 0x021F, 35, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_RIGHT)
+                Add(_amountLabel = new Label(item.Amount.ToString(), true, 0x0219, 35, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_RIGHT)
                 {
                     X = 168,
                     Y = height >> 2
@@ -526,7 +526,7 @@ namespace ClassicUO.Game.UI.Gumps
                 set
                 {
                     foreach (var label in Children.OfType<Label>())
-                        label.Hue = (Hue) (value ? 0x0021 : 0x021F);
+                        label.Hue = (Hue) (value ? 0x0021 : 0x0219);
                 }
             }
 
