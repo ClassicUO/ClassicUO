@@ -29,6 +29,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Utility.Logging;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Utility
@@ -63,20 +65,21 @@ namespace ClassicUO.Utility
             {
                 t.Exception?.Handle(e =>
                 {
-                    try
-                    {
-                        using (StreamWriter txt = new StreamWriter("crash.log", true))
-                        {
-                            txt.AutoFlush = true;
-                            txt.WriteLine("Exception @ {0}", Engine.CurrDateTime.ToString("MM-dd-yy HH:mm:ss.ffff"));
-                            txt.WriteLine(e.ToString());
-                            txt.WriteLine("");
-                            txt.WriteLine("");
-                        }
-                    }
-                    catch
-                    {
-                    }
+                    Log.Message(LogTypes.Panic, e.ToString());
+                    //try
+                    //{
+                    //    using (StreamWriter txt = new StreamWriter("crash.log", true))
+                    //    {
+                    //        txt.AutoFlush = true;
+                    //        txt.WriteLine("Exception @ {0}", Engine.CurrDateTime.ToString("MM-dd-yy HH:mm:ss.ffff"));
+                    //        txt.WriteLine(e.ToString());
+                    //        txt.WriteLine("");
+                    //        txt.WriteLine("");
+                    //    }
+                    //}
+                    //catch
+                    //{
+                    //}
 
                     return true;
                 });

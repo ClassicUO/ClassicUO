@@ -199,7 +199,7 @@ namespace ClassicUO.Game.UI.Gumps
             int blockOffsetX = Width >> 2;
             int blockOffsetY = Height >> 2;
             int gumpCenterX = Width >> 1;
-            int gumpCenterY = Height >> 1;
+            //int gumpCenterY = Height >> 1;
 
             //0xFF080808 - pixel32
             //0x8421 - pixel16
@@ -252,7 +252,7 @@ namespace ClassicUO.Game.UI.Gumps
                             int py = realBlockY + y - lastY;
                             int gx = px - py;
                             int gy = px + py;
-                            uint color = mb.Cells[x, y].Graphic;
+                            int color = mb.Cells[x, y].Graphic;
                             bool island = mb.Cells[x, y].IsLand;
 
                             if (block != null)
@@ -266,9 +266,13 @@ namespace ClassicUO.Game.UI.Gumps
                                 {
                                     if (obj is Multi)
                                     {
-                                        color = obj.Graphic;
-                                        island = false;
-
+                                        if (obj.Hue == 0)
+                                        {
+                                            color = obj.Graphic;
+                                            island = false;
+                                        }
+                                        else
+                                            color = obj.Hue + 0x4000;
                                         break;
                                     }
                                 }
@@ -277,8 +281,11 @@ namespace ClassicUO.Game.UI.Gumps
                             if (!island)
                                 color += 0x4000;
                             int tableSize = 2;
-                            color = (uint) (0x8000 | FileManager.Hues.GetRadarColorData((int) color));
-                            CreatePixels(data, (int) color, gx, gy, Width, Height, table, tableSize);
+                            if(island && color > 0x4000)
+                                color = FileManager.Hues.GetColor16(28672, (ushort)(color - 0x4000));//28672 is an arbitrary position in hues.mul, is the 14 position in the range
+                            else
+                                color = FileManager.Hues.GetRadarColorData(color);
+                            CreatePixels(data, 0x8000 | color, gx, gy, Width, Height, table, tableSize);
                         }
                     }
                 }

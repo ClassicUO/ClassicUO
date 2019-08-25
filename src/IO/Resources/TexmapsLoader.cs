@@ -49,6 +49,7 @@ namespace ClassicUO.IO.Resources
                     throw new FileNotFoundException();
 
                 _file = new UOFileMul(path, pathidx, Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT, 10);
+                _file.FillEntries(ref Entries);
                 string pathdef = Path.Combine(FileManager.UoFolderPath, "TexTerr.def");
 
                 if (!File.Exists(pathdef))
@@ -72,7 +73,7 @@ namespace ClassicUO.IO.Resources
                             if (checkindex < 0 || checkindex >= Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT)
                                 continue;
 
-                            _file.Entries[index] = _file.Entries[checkindex];
+                            Entries[index] = Entries[checkindex];
                         }
                     }
                 }
@@ -182,9 +183,9 @@ namespace ClassicUO.IO.Resources
 
         private ushort[] GetTextmapTexture(ushort index, out int size)
         {
-            (int length, int extra, bool patched) = _file.SeekByEntryIndex(index);
+            ref readonly var entry = ref GetValidRefEntry(index);
 
-            if (length <= 0)
+            if (entry.Length <= 0)
             {
                 size = 0;
 
@@ -193,7 +194,7 @@ namespace ClassicUO.IO.Resources
 
             ushort[] pixels;
 
-            if (extra == 0)
+            if (entry.Extra == 0)
             {
                 size = 64;
                 pixels = _textmapPixels64;
@@ -203,6 +204,8 @@ namespace ClassicUO.IO.Resources
                 size = 128;
                 pixels = _textmapPixels128;
             }
+
+            _file.Seek(entry.Offset);
 
             for (int i = 0; i < size; i++)
             {

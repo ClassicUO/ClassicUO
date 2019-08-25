@@ -61,7 +61,7 @@ namespace ClassicUO.IO.Resources
             }
             else
             {
-                File = new UOFileMul(path, false);
+                File = new UOFileMul(path);
 
                 // the scope of this try/catch is to avoid unexpected crashes if servers redestribuite wrong verdata
                 try

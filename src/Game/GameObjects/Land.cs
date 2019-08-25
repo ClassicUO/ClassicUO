@@ -110,10 +110,10 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsStretched)
             {
-                int x = currentZ * 4 + 1;
-                int y = zTop * 4;
-                int w = zRight * 4 - x;
-                int h = zBottom * 4 + 1 - y;
+                int x = (currentZ << 2) + 1;
+                int y = (zTop << 2);
+                int w = (zRight << 2) - x;
+                int h = (zBottom << 2) + 1 - y;
 
                 Rectangle.X = x;
                 Rectangle.Y = y;

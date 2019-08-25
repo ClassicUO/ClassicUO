@@ -33,6 +33,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 using SDL2;
@@ -120,12 +121,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsEditable { get; set; }
 
-        public bool IsTransparent { get; set; }
-
         public float Alpha { get; set; }
 
         public List<Control> Children { get; }
-        public virtual bool CanUseAlpha => true;
 
         public object Tag { get; set; }
 
@@ -313,7 +311,6 @@ namespace ClassicUO.Game.UI.Controls
                     if (c.IsVisible && c.IsInitialized)
                     {
                         c.Draw(batcher, c.X + x, c.Y + y);
-
                         //DrawDebug(batcher, position);
                     }
                 }

@@ -482,7 +482,12 @@ namespace ClassicUO
             ThreadID = Thread.CurrentThread.ManagedThreadId;
 
             Log.Start(LogTypes.All);
-            ExePath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName); // Environment.CurrentDirectory;
+
+            // NOTE: This is very important to get correct path of the assembly to properly run in the mono environment
+            // @see: https://stackoverflow.com/questions/39601742/mono-executes-program-with-wrong-current-directory
+            // @see: https://stackoverflow.com/questions/1658518/getting-the-absolute-path-of-the-executable-using-c/17836681
+            ExePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location); // Environment.CurrentDirectory;
+            Console.WriteLine("ExePath: {0}", ExePath);
 
 #if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>

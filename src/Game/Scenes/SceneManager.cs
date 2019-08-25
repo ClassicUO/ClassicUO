@@ -57,16 +57,19 @@ namespace ClassicUO.Game.Scenes
 
                     if (!Bootstrap.StartInLittleWindow)
                     {
-                        Engine.SetPreferredBackBufferSize(Engine.Profile.Current.WindowClientBounds.X, Engine.Profile.Current.WindowClientBounds.Y);
+                        if (Engine.Profile.Current != null)
+                        {
+                            Engine.SetPreferredBackBufferSize(Engine.Profile.Current.WindowClientBounds.X, Engine.Profile.Current.WindowClientBounds.Y);
 
-                        if (!Engine.Profile.Current.RestoreLastGameSize)
-                        {
-                            Engine.IsMaximized = true;
-                        }
-                        else
-                        {
-                            Engine.WindowWidth = Engine.Profile.Current.WindowClientBounds.X;
-                            Engine.WindowHeight = Engine.Profile.Current.WindowClientBounds.Y;
+                            if (!Engine.Profile.Current.RestoreLastGameSize)
+                            {
+                                Engine.IsMaximized = true;
+                            }
+                            else
+                            {
+                                Engine.WindowWidth = Engine.Profile.Current.WindowClientBounds.X;
+                                Engine.WindowHeight = Engine.Profile.Current.WindowClientBounds.Y;
+                            }
                         }
                     }
 

@@ -23,6 +23,7 @@
 
 using System.Text;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Utility
 {
@@ -30,7 +31,16 @@ namespace ClassicUO.Utility
     {
         private static readonly char[] _dots = {'.', ',', ';', '!'};
         private static readonly StringBuilder _sb = new StringBuilder();
+        internal static Encoding AsciiEncoding { get; private set; }
         //public static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
+
+        static StringHelper()
+        {
+#if NETCOREAPP || NETSTANDARD
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+#endif
+            AsciiEncoding = Encoding.GetEncoding(1252);
+        }
 
         public static string CapitalizeFirstCharacter(string str)
         {
@@ -107,6 +117,7 @@ namespace ClassicUO.Utility
             return Encoding.UTF8.GetString(data, (int) (ptr - data));
         }
 
+        [MethodImpl(256)]
         public static bool IsSafeChar(int c)
         {
             return c >= 0x20 && c < 0xFFFE;

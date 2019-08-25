@@ -454,6 +454,8 @@ namespace ClassicUO.Game.Scenes
         {
             base.Update(totalMS, frameMS);
 
+            PacketHandlers.SendMegaClilocRequests();
+
             if (_forceStopScene)
             {
                 Engine.SceneManager.ChangeScene(ScenesType.Login);

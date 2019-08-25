@@ -47,9 +47,8 @@ namespace ClassicUO.IO
 
         public string FilePath { get; private protected set; }
 
-        public UOFileIndex3D[] Entries { get; protected set; }
 
-        protected virtual void Load(bool loadentries = true)
+        protected virtual void Load()
         {
             Log.Message(LogTypes.Trace, $"Loading file:\t\t{FilePath}");
 
@@ -87,26 +86,27 @@ namespace ClassicUO.IO
                 Log.Message(LogTypes.Error, $"{FilePath}  size must be > 0");
         }
 
+        public virtual void FillEntries(ref UOFileIndex[] entries)
+        {
+
+        }
+
         public virtual void Dispose()
         {
             _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
             _accessor.Dispose();
             _file.Dispose();
-            UnloadEntries();
             Log.Message(LogTypes.Trace, $"Unloaded:\t\t{FilePath}");
         }
 
-        public void UnloadEntries()
-        {
-            if (Entries != null) Entries = null;
-        }
 
         [MethodImpl(256)]
         internal void Fill(ref byte[] buffer, int count)
         {
+            byte* ptr = (byte*) PositionAddress;
             for (int i = 0; i < count; i++)
             {
-                buffer[i] = ((byte*)PositionAddress)[i];
+                buffer[i] = ptr[i];
             }
             //fixed (byte* ptr = buffer) Buffer.MemoryCopy((byte*) PositionAddress, ptr, count, count);
 
@@ -139,31 +139,31 @@ namespace ClassicUO.IO
             return s;
         }
 
-        [MethodImpl(256)]
-        internal (int, int, bool) SeekByEntryIndex(int entryidx)
-        {
-            if (entryidx < 0 || Entries == null || entryidx >= Entries.Length)
-                return (0, 0, false);
+        //[MethodImpl(256)]
+        //internal (int, int, bool) SeekByEntryIndex(int entryidx)
+        //{
+        //    if (entryidx < 0 || Entries == null || entryidx >= Entries.Length)
+        //        return (0, 0, false);
 
-            ref readonly UOFileIndex3D e = ref Entries[entryidx];
+        //    ref readonly UOFileIndex3D e = ref Entries[entryidx];
 
-            if (e.Offset < 0) return (0, 0, false);
+        //    if (e.Offset < 0) return (0, 0, false);
 
-            int length = e.Length & 0x7FFFFFFF;
-            int extra = e.Extra;
+        //    int length = e.Length & 0x7FFFFFFF;
+        //    int extra = e.Extra;
 
-            if ((e.Length & (1 << 31)) != 0)
-            {
-                Verdata.File.Seek(e.Offset);
+        //    if ((e.Length & (1 << 31)) != 0)
+        //    {
+        //        Verdata.File.Seek(e.Offset);
 
-                return (length, extra, true);
-            }
+        //        return (length, extra, true);
+        //    }
 
-            if (e.Length < 0) return (0, 0, false);
+        //    if (e.Length < 0) return (0, 0, false);
 
-            Seek(e.Offset);
+        //    Seek(e.Offset);
 
-            return (length, extra, false);
-        }
+        //    return (length, extra, false);
+        //}
     }
 }

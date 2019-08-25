@@ -244,7 +244,7 @@ namespace ClassicUO.Game.Scenes
                             {
                                 if (StaticFilters.IsTree(st.OriginalGraphic))
                                 {
-                                    if (Engine.Profile.Current.TreeToStumps && st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
+                                    if (Engine.Profile.Current.TreeToStumps && st.ItemData.IsImpassable && st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
                                         st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC);
                                     else if (st.OriginalGraphic != st.Graphic && !Engine.Profile.Current.TreeToStumps)
                                         st.RestoreOriginalGraphic();

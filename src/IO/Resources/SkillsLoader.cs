@@ -52,14 +52,15 @@ namespace ClassicUO.IO.Resources
                     throw new FileNotFoundException();
 
                 _file = new UOFileMul(path, pathidx, 0, 16);
+                _file.FillEntries(ref Entries);
 
-                for (int i = 0; i < _file.Entries.Length; i++) GetSkill(i);
+                for (int i = 0; i < Entries.Length; i++) GetSkill(i);
 
                 SkillNames = _skills.Select(o => o.Value.Name).ToArray();
             });
         }
 
-        protected override void CleanResources()
+        public override void CleanResources()
         {
             //
         }
@@ -68,13 +69,15 @@ namespace ClassicUO.IO.Resources
         {
             if (!_skills.TryGetValue(index, out SkillEntry value))
             {
-                (int length, int extra, bool patched) = _file.SeekByEntryIndex(index);
 
-                if (length == 0)
+                ref readonly var entry = ref GetValidRefEntry(index);
+
+                if (entry.Length == 0)
                     return default;
 
+                _file.Seek(entry.Offset);
                 var hasAction = _file.ReadBool();
-                var name = Encoding.UTF8.GetString(_file.ReadArray<byte>(length - 1)).TrimEnd('\0');
+                var name = Encoding.UTF8.GetString(_file.ReadArray<byte>(entry.Length - 1)).TrimEnd('\0');
                 _skills[index] = new SkillEntry(index, name, hasAction);
             }
 

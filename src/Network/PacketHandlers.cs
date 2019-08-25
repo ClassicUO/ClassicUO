@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -89,6 +90,8 @@ namespace ClassicUO.Network
                 handler(p);
             }
         }
+
+        private List<Serial> _clilocRequests = new List<Serial>();
 
         public static void Load()
         {
@@ -198,6 +201,38 @@ namespace ClassicUO.Network
             ToClient.Add(0xF5, DisplayMap);
             ToClient.Add(0xF6, BoatMoving);
             ToClient.Add(0xF7, PacketList);
+        }
+
+        public static void SendMegaClilocRequests()
+        {
+            if (World.ClientFeatures.TooltipsEnabled && ToClient._clilocRequests.Count != 0)
+            {
+                if (FileManager.ClientVersion >= ClientVersions.CV_500A)
+                {
+                    while (ToClient._clilocRequests.Count != 0)
+                        NetClient.Socket.Send(new PMegaClilocRequest(ref ToClient._clilocRequests));
+                }
+                else
+                {
+                    foreach (Serial serial in ToClient._clilocRequests)
+                    {
+                        NetClient.Socket.Send(new PMegaClilocRequestOld(serial));
+                    }
+
+                    ToClient._clilocRequests.Clear();
+                }
+            }
+        }
+
+        private static void AddMegaClilocRequest(Serial serial)
+        {
+            foreach (Serial s in ToClient._clilocRequests)
+            {
+                if (s == serial)
+                    return;
+            }
+
+            ToClient._clilocRequests.Add(serial);
         }
 
         private static void TargetCursor(Packet p)
@@ -1897,7 +1932,7 @@ namespace ClassicUO.Network
                         it.Name = FileManager.Cliloc.GetString(cliloc);
                         fromcliloc = true;
                     }
-                    else
+                    else if (string.IsNullOrEmpty(it.Name))
                         it.Name = name;
 
                     gump.SetIfNameIsFromCliloc(it, fromcliloc);
@@ -2026,8 +2061,8 @@ namespace ClassicUO.Network
                 mobile.Items.Add(item);
                 mobile.Equipment[(int) item.Layer] = item;
 
-                if (World.OPL.Contains(serial))
-                    NetClient.Socket.Send(new PMegaClilocRequest(item));
+                //if (World.OPL.Contains(serial))
+                //    NetClient.Socket.Send(new PMegaClilocRequest(item));
                 item.CheckGraphicChange();
                 item.ProcessDelta();
                 World.Items.Add(item);
@@ -2407,7 +2442,8 @@ namespace ClassicUO.Network
                     fromcliloc = true;
                 }
 
-                item.Name = name;
+                if (!fromcliloc && string.IsNullOrEmpty(item.Name))
+                    item.Name = name;
 
                 gump.AddItem(item, fromcliloc);
             }
@@ -2417,7 +2453,6 @@ namespace ClassicUO.Network
 
         private static void UpdateHitpoints(Packet p)
         {
-            // TODO: shards uses item with HP... it's weird but can happen :D
             Entity entity = World.Get(p.ReadUInt());
 
             if (entity == null)
@@ -2467,8 +2502,9 @@ namespace ClassicUO.Network
                 {
                     Process.Start(url);
                 }
-                catch
+                catch (Exception)
                 {
+                    Log.Message(LogTypes.Warning, "Failed to open url: " + url);
                 }
             }
         }
@@ -2658,15 +2694,13 @@ namespace ClassicUO.Network
 
             string[] lines = new string[textLinesCount];
 
-            byte[] decData = p.ReadArray(p.Length - p.Position);
+            ref var buffer = ref p.ToArray();
 
-            for (int i = 0, index = 0; i < textLinesCount; i++)
+            for (int i = 0, index = p.Position; i < textLinesCount; i++)
             {
-                int length = (decData[index++] << 8) | decData[index++];
-                byte[] text = new byte[length * 2];
-                Buffer.BlockCopy(decData, index, text, 0, text.Length);
-                index += text.Length;
-                lines[i] = Encoding.BigEndianUnicode.GetString(text);
+                int length = ((buffer[index++] << 8) | buffer[index++]) << 1;
+                lines[i] = Encoding.BigEndianUnicode.GetString(buffer, index, length);
+                index += length;
             }
 
             Engine.UI.Create(sender, gumpID, x, y, cmd, lines);
@@ -3003,7 +3037,6 @@ namespace ClassicUO.Network
                                 byte updategump = p.ReadByte();
                                 byte state = p.ReadByte();
 
-                                //TODO: drawstatlockers = true
                                 World.Player.StrLock = (Lock) ((state >> 4) & 3);
                                 World.Player.DexLock = (Lock) ((state >> 2) & 3);
                                 World.Player.IntLock = (Lock) (state & 3);
@@ -3354,7 +3387,7 @@ namespace ClassicUO.Network
         {
         }
 
-        private static void CustomHouse(Packet p)
+        private static unsafe void CustomHouse(Packet p)
         {
             bool compressed = p.ReadByte() == 0x03;
             bool enableReponse = p.ReadBool();
@@ -3389,6 +3422,9 @@ namespace ClassicUO.Network
             short maxY = multi.MaxY;
             byte planes = p.ReadByte();
 
+            DataReader stream = new DataReader();
+            ref byte[] buffer = ref p.ToArray();
+
             for (int plane = 0; plane < planes; plane++)
             {
                 uint header = p.ReadUInt();
@@ -3399,15 +3435,12 @@ namespace ClassicUO.Network
 
                 if (clen <= 0) continue;
 
-                byte[] compressedBytes = new byte[clen];
-                Buffer.BlockCopy(p.ToArray(), p.Position, compressedBytes, 0, clen);
                 byte[] decompressedBytes = new byte[dlen];
-                ZLib.Decompress(compressedBytes, 0, decompressedBytes, dlen);
 
-                //ZLib.Unpack(decompressedBytes, ref dlen, compressedBytes, clen);
-                Packet stream = new Packet(decompressedBytes, dlen);
+                fixed (byte* srcPtr = &buffer[p.Position], destPtr = decompressedBytes)
+                    ZLib.Decompress((IntPtr)srcPtr, clen, 0, (IntPtr)destPtr, dlen);
 
-                // using (BinaryReader stream = new BinaryReader(new MemoryStream(decompressedBytes)))
+                stream.SetData(decompressedBytes, dlen);
                 {
                     p.Skip(clen);
                     ushort id = 0;
@@ -3416,10 +3449,10 @@ namespace ClassicUO.Network
                     switch (planeMode)
                     {
                         case 0:
-
-                            for (uint i = 0; i < decompressedBytes.Length / 5; i++)
+                            int c = dlen / 5;
+                            for (uint i = 0; i < c; i++)
                             {
-                                id = stream.ReadUShort();
+                                id = stream.ReadUShortReversed();
                                 x = stream.ReadSByte();
                                 y = stream.ReadSByte();
                                 z = stream.ReadSByte();
@@ -3442,9 +3475,10 @@ namespace ClassicUO.Network
                             else
                                 z = 0;
 
-                            for (uint i = 0; i < decompressedBytes.Length >> 2; i++)
+                            c = dlen >> 2;
+                            for (uint i = 0; i < c; i++)
                             {
-                                id = stream.ReadUShort();
+                                id = stream.ReadUShortReversed();
                                 x = stream.ReadSByte();
                                 y = stream.ReadSByte();
 
@@ -3487,9 +3521,10 @@ namespace ClassicUO.Network
                                 multiHeight = (short) (maxY - minY + 1);
                             }
 
-                            for (uint i = 0; i < decompressedBytes.Length >> 1; i++)
+                            c = dlen >> 1;
+                            for (uint i = 0; i < c; i++)
                             {
-                                id = stream.ReadUShort();
+                                id = stream.ReadUShortReversed();
                                 x = (sbyte) (i / multiHeight + offX);
                                 y = (sbyte) (i % multiHeight + offY);
 
@@ -3511,7 +3546,10 @@ namespace ClassicUO.Network
                     if (World.HouseManager.EntityIntoHouse(serial, World.Player))
                         Engine.SceneManager.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
                 }
+                stream.ReleaseData();
+
             }
+            stream.ReleaseData();
         }
 
         private static void CharacterTransferLog(Packet p)
@@ -3524,10 +3562,9 @@ namespace ClassicUO.Network
             {
                 Serial serial = p.ReadUInt();
                 uint revision = p.ReadUInt();
-                Entity entity = World.Get(serial);
 
-                if (entity == null || !World.OPL.IsRevisionEqual(serial, revision))
-                    NetClient.Socket.Send(new PMegaClilocRequest(serial));
+                if (!World.OPL.IsRevisionEqual(serial, revision))
+                    AddMegaClilocRequest(serial);
             }
         }
 
@@ -3539,16 +3576,22 @@ namespace ClassicUO.Network
             uint y = p.ReadUInt();
             uint clen = p.ReadUInt() - 4;
             int dlen = (int) p.ReadUInt();
-            byte[] data = p.ReadArray((int) clen);
             byte[] decData = new byte[dlen];
-            ZLib.Decompress(data, 0, decData, dlen);
-            StringBuilder sb = new StringBuilder(decData.Length - 1);
-            for (int i = 0; i < decData.Length; i++)
+            string layout;
+
+            unsafe
             {
-                if (decData[i] == 0)
-                    break;
-                sb.Append((char)decData[i]);
+                ref var buffer = ref p.ToArray();
+
+                fixed (byte* srcPtr = &buffer[p.Position], destPtr = decData)
+                {
+                    ZLib.Decompress((IntPtr) srcPtr, (int) clen, 0, (IntPtr) destPtr, dlen);
+                    layout = Encoding.UTF8.GetString(destPtr, dlen);
+                }
             }
+
+            p.Skip((int)clen);
+
             uint linesNum = p.ReadUInt();
             string[] lines = new string[0];
 
@@ -3556,23 +3599,29 @@ namespace ClassicUO.Network
             {
                 clen = p.ReadUInt() - 4;
                 dlen = (int) p.ReadUInt();
-                data = p.ReadArray((int) clen);
-
                 decData = new byte[dlen];
-                ZLib.Decompress(data, 0, decData, dlen);
+
+                unsafe
+                {
+                    ref var buffer = ref p.ToArray();
+                    fixed (byte* srcPtr = &buffer[p.Position], destPtr = decData)
+                        ZLib.Decompress((IntPtr)srcPtr, (int)clen, 0, (IntPtr)destPtr, dlen);
+                }
+
+                p.Skip((int) clen);
+
                 lines = new string[linesNum];
 
                 for (int i = 0, index = 0; i < linesNum; i++)
                 {
-                    int length = (decData[index++] << 8) | decData[index++];
-                    byte[] text = new byte[length * 2];
-                    Buffer.BlockCopy(decData, index, text, 0, text.Length);
-                    index += text.Length;
-                    lines[i] = Encoding.BigEndianUnicode.GetString(text);
+                    int length = ((decData[index++] << 8) | decData[index++]) << 1;
+                    lines[i] = Encoding.BigEndianUnicode.GetString(decData, index, length);
+                    index += length;
+
                 }
             }
 
-            Engine.UI.Create(sender, gumpID, (int) x, (int) y, sb.ToString(), lines);
+            Engine.UI.Create(sender, gumpID, (int) x, (int) y, layout, lines);
         }
 
         private static void UpdateMobileStatus(Packet p)

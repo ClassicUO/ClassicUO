@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResizePic pic = new ResizePic(0x0A3C)
             {
-                IsTransparent = true, Alpha = 0.25f
+                Alpha = 0.25f
             };
             Add(pic);
             int offsetY = 10;
@@ -76,7 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 HitBox box = new HitBox(10, offsetY, label.Width, label.Height)
                 {
-                    IsTransparent = true, Tag = item.Index
+                    Tag = item.Index
                 };
 
                 box.MouseUp += (sender, e) =>

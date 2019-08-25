@@ -276,8 +276,8 @@ namespace ClassicUO.Game.GameObjects
 
                 //    }
                 //}
+                // 
             }
-
 
             FrameInfo.X = Math.Abs(FrameInfo.X);
             FrameInfo.Y = Math.Abs(FrameInfo.Y);
