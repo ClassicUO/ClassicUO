@@ -103,9 +103,9 @@ namespace ClassicUO.Game.GameObjects
             if (SelectedObject.Object == this)
                 return;
 
-            if (IsStretched || !(Right is Static))
+            if (IsStretched)
             {
-                if (SelectedObject.IsPointInStretchedLand(Rectangle, x, y + Z * 4))
+                if (SelectedObject.IsPointInStretchedLand(Rectangle, x, y + (Z << 2)))
                     SelectedObject.Object = this;
             }
             else
@@ -164,7 +164,7 @@ namespace ClassicUO.Game.GameObjects
                             ref var v0 = ref vec[curI, curJ, 0];
                             v0.X = -22;
                             v0.Y = 22;
-                            v0.Z = (currentZ - rightZ) * 4;
+                            v0.Z = (currentZ - rightZ) << 2;
                             Merge(ref vec[curI, curJ, 0], -22.0f, -22.0f, (leftZ - currentZ) * 4);
                             vec[curI, curJ, 0].Normalize();
 
@@ -172,21 +172,21 @@ namespace ClassicUO.Game.GameObjects
                             ref var v1 = ref vec[curI, curJ, 1];
                             v1.X = 22;
                             v1.Y = 22;
-                            v1.Z = (rightZ - bottomZ) * 4;
+                            v1.Z = (rightZ - bottomZ) << 2;
                             Merge(ref vec[curI, curJ, 1], -22.0f, 22.0f, (currentZ - rightZ) * 4);
                             vec[curI, curJ, 1].Normalize();
 
                             ref var v2 = ref vec[curI, curJ, 2];
                             v2.X = 22;
                             v2.Y = -22;
-                            v2.Z = (bottomZ - leftZ) * 4;
+                            v2.Z = (bottomZ - leftZ) << 2;
                             Merge(ref vec[curI, curJ, 2], 22.0f, 22.0f, (rightZ - bottomZ) * 4);
                             vec[curI, curJ, 2].Normalize();
 
                             ref var v3 = ref vec[curI, curJ, 3];
                             v3.X = -22;
                             v3.Y = -22;
-                            v3.Z = (leftZ - currentZ) * 4;
+                            v3.Z = (leftZ - currentZ) << 2;
                             Merge(ref vec[curI, curJ, 3], 22.0f, -22.0f, (bottomZ - leftZ) * 4);
                             vec[curI, curJ, 3].Normalize();
                         }
