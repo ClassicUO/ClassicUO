@@ -289,9 +289,6 @@ namespace ClassicUO.Game.Managers
         {
             get
             {
-                // TODO: `ActivateChatIgnoreHotkeysPlugins` should be refactored into something like `[Smart]IgnoreHotkeysOnTextInput`
-                //   that will not depend on `ActivateChatAfterEnter`
-
                 // We are not at the game scene or no player character present
                 if (World.Player == null || !(Engine.SceneManager.CurrentScene is GameScene gs))
                     return false;
@@ -306,7 +303,6 @@ namespace ClassicUO.Game.Managers
                 // it means that we want to enter some text into the chat,
                 // thus we don't expect to execute any game macro or trigger any plugin hotkeys
                 if (Engine.Profile.Current.ActivateChatAfterEnter &&
-                    Engine.Profile.Current.ActivateChatIgnoreHotkeys && // NOTE: Let's keep this for now, but refactor later
                     Engine.UI.SystemChat?.IsActive == true)
                     return false;
 

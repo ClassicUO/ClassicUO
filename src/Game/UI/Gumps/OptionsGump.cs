@@ -84,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
         // GameWindowSize
         private TextBox _gameWindowWidth;
         private Combobox _gridLoot;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatIgnodeHotkeysCheckbox, _chatIgnodeHotkeysPluginsCheckbox, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
         private Combobox _hpComboBox, _healtbarType, _fieldsType, _hpComboBoxShowWhen;
 
         // combat & spells
@@ -886,18 +886,17 @@ namespace ClassicUO.Game.UI.Gumps
 
             // [BLOCK] activate chat
             {
-                _chatAfterEnter = new Checkbox(0x00D2, 0x00D3, "Activate chat after `Enter` pressing", FONT, HUE_FONT)
+                _chatAfterEnter = new Checkbox(0x00D2, 0x00D3, "Press `Enter` to activate chat", FONT, HUE_FONT)
                 {
                     Y = 0,
                     IsChecked = Engine.Profile.Current.ActivateChatAfterEnter
                 };
                 _chatAfterEnter.ValueChanged += (sender, e) => { _activeChatArea.IsVisible = _chatAfterEnter.IsChecked; };
-
                 rightArea.Add(_chatAfterEnter);
 
                 _activeChatArea = new ScrollAreaItem();
 
-                _chatAdditionalButtonsCheckbox = new Checkbox(0x00D2, 0x00D3, "Additional buttons activate chat: ! ; : / \\ , . [ | -", FONT, HUE_FONT)
+                _chatAdditionalButtonsCheckbox = new Checkbox(0x00D2, 0x00D3, "Use additional buttons to activate chat: ! ; : / \\ , . [ | -", FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 15,
@@ -905,7 +904,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _activeChatArea.Add(_chatAdditionalButtonsCheckbox);
 
-                _chatShiftEnterCheckbox = new Checkbox(0x00D2, 0x00D3, "Shift+Enter send message without closing chat", FONT, HUE_FONT)
+                _chatShiftEnterCheckbox = new Checkbox(0x00D2, 0x00D3, "Use `Shift+Enter` to send message without closing chat", FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 35,
@@ -913,33 +912,9 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _activeChatArea.Add(_chatShiftEnterCheckbox);
 
-                var text = new Label("If chat active - ignores hotkeys from:", true, HUE_FONT)
-                {
-                    X = 20,
-                    Y = 60
-                };
-
-                _activeChatArea.Add(text);
-
-                _chatIgnodeHotkeysCheckbox = new Checkbox(0x00D2, 0x00D3, "Client (macro system)", FONT, HUE_FONT)
-                {
-                    X = 40,
-                    Y = 85,
-                    IsChecked = Engine.Profile.Current.ActivateChatIgnoreHotkeys
-                };
-                _activeChatArea.Add(_chatIgnodeHotkeysCheckbox);
-
-                _chatIgnodeHotkeysPluginsCheckbox = new Checkbox(0x00D2, 0x00D3, "Plugins (Razor)", FONT, HUE_FONT)
-                {
-                    X = 40,
-                    Y = 105,
-                    IsChecked = Engine.Profile.Current.ActivateChatIgnoreHotkeysPlugins
-                };
-                _activeChatArea.Add(_chatIgnodeHotkeysPluginsCheckbox);
-
-                rightArea.Add(_activeChatArea);
-
                 _activeChatArea.IsVisible = _chatAfterEnter.IsChecked;
+                
+                rightArea.Add(_activeChatArea);
             }
 
             _speechColorPickerBox = CreateClickableColorBox(rightArea, 0, 20, Engine.Profile.Current.SpeechHue, "Speech Color", 20, 20);
@@ -1395,8 +1370,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _allyMessageColorPickerBox.SetColor(0x0057, FileManager.Hues.GetPolygoneColor(12, 0x0057));
                     _chatAfterEnter.IsChecked = false;
                     Engine.UI.SystemChat.IsActive = !_chatAfterEnter.IsChecked;
-                    _chatIgnodeHotkeysCheckbox.IsChecked = true;
-                    _chatIgnodeHotkeysPluginsCheckbox.IsChecked = true;
                     _chatAdditionalButtonsCheckbox.IsChecked = true;
                     _chatShiftEnterCheckbox.IsChecked = true;
                     _activeChatArea.IsVisible = _chatAfterEnter.IsChecked;
@@ -1579,8 +1552,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.Profile.Current.ActivateChatAfterEnter = _chatAfterEnter.IsChecked;
             }
 
-            Engine.Profile.Current.ActivateChatIgnoreHotkeys = _chatIgnodeHotkeysCheckbox.IsChecked;
-            Engine.Profile.Current.ActivateChatIgnoreHotkeysPlugins = _chatIgnodeHotkeysPluginsCheckbox.IsChecked;
             Engine.Profile.Current.ActivateChatAdditionalButtons = _chatAdditionalButtonsCheckbox.IsChecked;
             Engine.Profile.Current.ActivateChatShiftEnterSupport = _chatShiftEnterCheckbox.IsChecked;
             Engine.Profile.Current.SaveJournalToFile = _saveJournalCheckBox.IsChecked;
