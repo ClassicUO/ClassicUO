@@ -4,7 +4,7 @@ pull_requests:
 branches:
   only:
   - dev
-image: Visual Studio 2017
+image: Visual Studio 2019
 configuration: Release
 platform: x64
 clone_folder: c:\projects\classicuo
@@ -19,12 +19,8 @@ environment:
 build_script:
 - cmd: >-
     nuget restore
-
-
-    msbuild "c:\projects\classicuo\ClassicUO.sln" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:Configuration=Release /p:Platform=x64 /p:DefineConstants="DEV_BUILD"
-
-
-    7z a ClassicUO-dev-preview-release.zip "c:\projects\classicuo\bin\Release\*"
+        msbuild "c:\projects\classicuo\ClassicUO.sln" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:Configuration=Release /p:Platform=x64 /p:DefineConstants="DEV_BUILD"
+        7z a ClassicUO-dev-preview-release.zip "c:\projects\classicuo\bin\Release\*"
 artifacts:
 - path: ClassicUO-dev-preview-release.zip
   name: ClassicUO
@@ -32,11 +28,9 @@ deploy:
 - provider: GitHub
   tag: ClassicUO-dev-preview
   release: ClassicUO-dev-preview
-  description: 'Appveyor autodeploy.\nThis build may not be safe: use it at your own risk.\nIt does not contain Razor.'
+  description: "'Appveyor autodeploy.\\nThis build may not be safe: use it at your own risk.\\nIt does not contain Razor.'"
   auth_token:
-    secure: e27b4e8553aa15c4b40fc20022a66c91d4d4bd9e
-  artifact: ClassicUO-dev-preview-release.zip
-  draft: false
+    secure: 2W3cXQxdvKo2GwXuUYDyjH8eBemp9L8YuT/T2i3U0WS8vi/MFWpBwWivYjHotXYz
   prerelease: true
   force_update: true
   on:
