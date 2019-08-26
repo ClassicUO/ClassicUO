@@ -34,7 +34,7 @@ deploy:
   release: ClassicUO-dev-preview
   description: 'Appveyor autodeploy.\nThis build may not be safe: use it at your own risk.\nIt does not contain Razor.'
   auth_token:
-    secure: sFMPr0POE5r5CFP5XbTD0e5pZVRO/12A3LgkqKVDD2uB2Webo6gstCTm63KzcbaW
+    secure: 2W3cXQxdvKo2GwXuUYDyjH8eBemp9L8YuT/T2i3U0WS8vi/MFWpBwWivYjHotXYz
   artifact: ClassicUO-dev-preview-release.zip
   draft: false
   prerelease: true
