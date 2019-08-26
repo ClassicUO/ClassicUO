@@ -1021,9 +1021,13 @@ namespace ClassicUO.Network
 
     internal sealed class PMegaClilocRequest : PacketWriter
     {
-        public PMegaClilocRequest(List<Serial> list) : base(0xD6)
+        public PMegaClilocRequest(ref List<Serial> list) : base(0xD6)
         {
-            for (int i = 0; i < list.Count && i < 50; i++) WriteUInt(list[i]);
+            for (int i = 0; i < list.Count && i < 50; i++)
+            {
+                WriteUInt(list[i]);
+                list.RemoveAt(i--);
+            }
         }
 
         public PMegaClilocRequest(Serial serial) : base(0xD6)

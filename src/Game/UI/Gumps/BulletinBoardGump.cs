@@ -61,7 +61,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             HitBox hitbox = new HitBox(15, 170, 80, 80)
             {
-                IsTransparent = true,
                 Alpha = 1
             };
 

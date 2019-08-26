@@ -1867,7 +1867,7 @@ namespace ClassicUO.Game.GameObjects
 
         private void TryOpenDoors()
         {
-            if (Engine.Profile.Current.AutoOpenDoors)
+            if (!World.Player.IsDead && Engine.Profile.Current.AutoOpenDoors)
             {
                 int x = X, y = Y, z = Z;
                 Pathfinder.GetNewXY((byte) Direction, ref x, ref y);

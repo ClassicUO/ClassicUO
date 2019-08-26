@@ -330,6 +330,11 @@ namespace ClassicUO.Game.Scenes
         {
             PopupMessage = null;
 
+            if (Characters != null && CurrentLoginStep != LoginStep.CharCreation)
+            {
+                CurrentLoginStep = LoginStep.LoginInToServer;
+            }
+
             switch (CurrentLoginStep)
             {
                 case LoginStep.Connecting:

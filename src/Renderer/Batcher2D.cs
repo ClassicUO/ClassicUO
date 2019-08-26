@@ -1099,7 +1099,7 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool Draw2D(Texture2D texture, int x, int y, int sx, int sy, int swidth, int sheight, ref Vector3 hue)
+        public bool Draw2D(Texture2D texture, int x, int y, int sx, int sy, float swidth, float sheight, ref Vector3 hue)
         {
             EnsureSize();
 
@@ -1164,7 +1164,7 @@ namespace ClassicUO.Renderer
         }
         
         [MethodImpl(256)]
-        public bool Draw2D(Texture2D texture, float dx, float dy, int dwidth, int dheight, int sx, int sy, int swidth, int sheight, ref Vector3 hue, float angle = 0.0f)
+        public bool Draw2D(Texture2D texture, float dx, float dy, float dwidth, float dheight, int sx, int sy, float swidth, float sheight, ref Vector3 hue, float angle = 0.0f)
         {
             EnsureSize();
 
@@ -1307,7 +1307,7 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool Draw2D(Texture2D texture, int x, int y, int width, int height, ref Vector3 hue)
+        public bool Draw2D(Texture2D texture, int x, int y, float width, float height, ref Vector3 hue)
         {
             EnsureSize();
 
@@ -1366,15 +1366,15 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool Draw2DTiled(Texture2D texture, int dx, int dy, int dwidth, int dheight, ref Vector3 hue)
+        public bool Draw2DTiled(Texture2D texture, int dx, int dy, float dwidth, float dheight, ref Vector3 hue)
         {
             int y = dy;
-            int h = dheight;
+            int h = (int) dheight;
 
             while (h > 0)
             {
                 int x = dx;
-                int w = dwidth;
+                int w = (int) dwidth;
 
                 int rw = texture.Width;
                 int rh = h < texture.Height ? h : texture.Height;

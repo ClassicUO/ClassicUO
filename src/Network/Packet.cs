@@ -33,7 +33,6 @@ namespace ClassicUO.Network
 {
     internal sealed class Packet : PacketBase
     {
-        private static readonly byte[] _emtpyBytes = { };
         private byte[] _data;
 
         public Packet(byte[] data, int length)
@@ -125,11 +124,15 @@ namespace ClassicUO.Network
             if (EnsureSize(1))
                 return Empty;
 
-            StringBuilder sb = new StringBuilder();
-            char c;
-            while ((c = (char) ReadByte()) != '\0') sb.Append(c);
-
-            return sb.ToString();
+            int start = Position;
+            int end = 0;
+            while (Position < Length)
+            {
+                if (_data[Position++] == 0)
+                    break;
+                end++;
+            }
+            return end == 0 ? Empty : StringHelper.AsciiEncoding.GetString(_data, start, end);
         }
 
         public string ReadASCII(int length, bool exitIfNull = false)
@@ -137,18 +140,13 @@ namespace ClassicUO.Network
             if (EnsureSize(length))
                 return Empty;
 
-            StringBuilder sb = new StringBuilder(length);
-
-            for (int i = 0; i < length; i++)
+            if (Position + length >= Length)
             {
-                char c = (char) ReadByte();
-
-                if (c != '\0')
-                    sb.Append(c);
-                else if (exitIfNull) break;
+                length = Length - Position - 1;
             }
-
-            return sb.ToString();
+            int start = Position;
+            Position += length;
+            return length <= 0 ? string.Empty : StringHelper.AsciiEncoding.GetString(_data, start, length).TrimEnd('\0');
         }
 
         public string ReadUTF8StringSafe()
@@ -189,11 +187,16 @@ namespace ClassicUO.Network
             if (EnsureSize(2))
                 return Empty;
 
-            StringBuilder sb = new StringBuilder();
-            char c;
-            while ((c = (char) ReadUShort()) != '\0') sb.Append(c);
+            int start = Position;
+            int end = 0;
+            while (Position < Length)
+            {
+                if (ReadUShort() == 0)
+                    break;
+                end += 2;
+            }
 
-            return sb.ToString();
+            return end == 0 ? Empty : Encoding.BigEndianUnicode.GetString(_data, start, end);
         }
 
         public string ReadUnicode(int length)
@@ -201,21 +204,20 @@ namespace ClassicUO.Network
             if (EnsureSize(length))
                 return Empty;
 
-            StringBuilder sb = new StringBuilder(length);
-
-            for (int i = 0; i < length; i++)
+            if (Position + length >= Length)
             {
-                char c = (char) ReadUShort();
-                if (c != '\0') sb.Append(c);
+                length = Length - Position - 2;
             }
+            int start = Position;
+            Position += length;
 
-            return sb.ToString();
+            return length <= 0 ? Empty : Encoding.BigEndianUnicode.GetString(_data, start, length);
         }
 
         public byte[] ReadArray(int count)
         {
             if (EnsureSize(count))
-                return _emtpyBytes;
+                return null;
 
             byte[] array = new byte[count];
             Buffer.BlockCopy(_data, Position, array, 0, count);
@@ -229,16 +231,14 @@ namespace ClassicUO.Network
             if (EnsureSize(length))
                 return Empty;
 
-            length /= 2;
-            StringBuilder sb = new StringBuilder(length);
-
-            for (int i = 0; i < length; i++)
+            if (Position + length >= Length)
             {
-                char c = (char) ReadUShortReversed();
-                if (c != '\0') sb.Append(c);
+                length = Length - Position - 2;
             }
+            int start = Position;
+            Position += length;
 
-            return sb.ToString();
+            return length <= 0 ? Empty : Encoding.Unicode.GetString(_data, start, length);
         }
 
         public string ReadUnicodeReversed()
@@ -246,11 +246,16 @@ namespace ClassicUO.Network
             if (EnsureSize(2))
                 return Empty;
 
-            StringBuilder sb = new StringBuilder();
-            char c;
-            while ((c = (char) ReadUShortReversed()) != '\0') sb.Append(c);
+            int start = Position;
+            int end = 0;
+            while (Position < Length)
+            {
+                if (ReadUShortReversed() == 0)
+                    break;
+                end += 2;
+            }
 
-            return sb.ToString();
+            return end == 0 ? Empty : Encoding.Unicode.GetString(_data, start, end);
         }
 
         public ushort ReadUShortReversed()

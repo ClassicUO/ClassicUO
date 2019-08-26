@@ -36,13 +36,18 @@ namespace ClassicUO.IO.Resources
 
         public override Task Load()
         {
-            return Task.Run(() => {
+            return Task.Run(() => 
+            {
                 string path = Path.Combine(FileManager.UoFolderPath, "animdata.mul");
-                if (File.Exists(path)) _file = new UOFileMul(path, false);
+
+                if (File.Exists(path))
+                {
+                    _file = new UOFileMul(path);
+                }
             });
         }
 
-        protected override void CleanResources()
+        public override void CleanResources()
         {
             //
         }

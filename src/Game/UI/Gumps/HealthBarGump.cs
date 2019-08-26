@@ -410,7 +410,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Add(_background = new GumpPic(0, 0, BACKGROUND_NORMAL, 0)
                 {
-                    IsTransparent = true,
                     Alpha = 1
                 });
                 Width = 115;

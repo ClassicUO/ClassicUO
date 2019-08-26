@@ -42,9 +42,6 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             AcceptMouseInput = true;
             CanBeSaved = true;
-            AnchorGroupName = "spell";
-            GroupMatrixWidth = 44;
-            GroupMatrixHeight = 44;
         }
 
         public UseAbilityButtonGump(AbilityDefinition def, bool primary) : this()
@@ -61,29 +58,30 @@ namespace ClassicUO.Game.UI.Gumps
 
             _button = new GumpPic(0, 0, _definition.Icon, 0)
             {
-                AcceptMouseInput = true
+                AcceptMouseInput = false
             };
-            _button.MouseDoubleClick += ButtonOnMouseDoubleClick;
             Add(_button);
 
             WantUpdateSize = true;
+            AcceptMouseInput = true;
+            AnchorGroupName = "spell";
+            GroupMatrixWidth = 44;
+            GroupMatrixHeight = 44;
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            return true;
-        }
-
-        private void ButtonOnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
-        {
-            if (e.Button == MouseButton.Left)
+            if (button == MouseButton.Left)
             {
                 if (_isPrimary)
                     GameActions.UsePrimaryAbility();
                 else
                     GameActions.UseSecondaryAbility();
             }
+
+            return true;
         }
+
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -142,12 +140,6 @@ namespace ClassicUO.Game.UI.Gumps
             _isPrimary = reader.ReadBoolean();
 
             BuildGump();
-        }
-
-        public override void Dispose()
-        {
-            _button.MouseDoubleClick -= ButtonOnMouseDoubleClick;
-            base.Dispose();
         }
     }
 }

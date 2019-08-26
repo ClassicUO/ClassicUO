@@ -109,10 +109,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _renderedText.MaxWidth = width;
 
+                    _renderedText.Text = t;
+
                     FileManager.Fonts.RecalculateWidthByInfo = false;
                     FileManager.Fonts.SetUseHTML(false);
-
-                    _renderedText.Text = t;
 
                     Width = _background.Width = _renderedText.Width + 4;
                     Height = _background.Height = _renderedText.Height + 4;
