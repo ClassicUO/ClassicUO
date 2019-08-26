@@ -775,6 +775,7 @@ namespace ClassicUO.Game.UI.Controls
 
         internal virtual void OnFocusEnter()
         {
+            Parent?.OnFocusEnter();
         }
 
         internal virtual void OnFocusLeft()

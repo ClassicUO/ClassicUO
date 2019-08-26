@@ -66,6 +66,7 @@ namespace ClassicUO.Game.UI.Gumps
         public readonly TextBox textBox;
 
         private bool _isActive;
+        private bool _isFocused = false;
         private int _messageHistoryIndex = -1;
         private ChatMode _mode = ChatMode.Default;
 
@@ -126,7 +127,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_isActive)
                 {
-                    Engine.Profile.Current.ActivateChatStatus = _trans.IsVisible = true;
+                    _trans.IsVisible = true;
                     _trans.Y = textBox.Y;
                     textBox.Width = _trans.Width;
                     textBox.SetText(string.Empty);
@@ -135,11 +136,15 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                 {
                     int height = FileManager.Fonts.GetHeightUnicode(Engine.Profile.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
-                    Engine.Profile.Current.ActivateChatStatus = false;
                     textBox.Width = 1;
                     _trans.Y = textBox.Y + height + 3;
                 }
             }
+        }
+
+        public bool IsFocused
+        {
+            get => _isFocused;
         }
 
         private ChatMode Mode
@@ -215,6 +220,16 @@ namespace ClassicUO.Game.UI.Gumps
             textBox.IsEditable = true;
             textBox.SetKeyboardFocus();
             textBox.IsEditable = _isActive;
+        }
+
+        internal override void OnFocusEnter()
+        {
+            _isFocused = true;
+        }
+
+        internal override void OnFocusLeft()
+        {
+            _isFocused = false;
         }
 
         public void ToggleChatVisibility()
