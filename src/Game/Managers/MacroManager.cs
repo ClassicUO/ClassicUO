@@ -33,7 +33,6 @@ using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
-using ClassicUO.Game.UI.Controls;
 
 using Newtonsoft.Json;
 
