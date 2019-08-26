@@ -1068,9 +1068,6 @@ namespace ClassicUO.Game.Managers
 
                     var a = Engine.UI.AnchorManager;
 
-                    
-                    //var b = Engine.UI.GetGump<HealthBarGump>(null);
-
                     var healthBarGumps = Engine.UI.Gumps.OfType<HealthBarGump>();
 
                     foreach (var healthbar in healthBarGumps)
