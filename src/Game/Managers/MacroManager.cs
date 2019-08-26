@@ -33,6 +33,7 @@ using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
+using ClassicUO.Game.UI.Controls;
 
 using Newtonsoft.Json;
 
@@ -1062,6 +1063,29 @@ namespace ClassicUO.Game.Managers
                         GameActions.DoubleClick(potion);
 
                     break;
+                    
+                 case MacroType.CloseAllHealthBars:
+
+                    var a = Engine.UI.AnchorManager;
+
+                    
+                    //var b = Engine.UI.GetGump<HealthBarGump>(null);
+
+                    var healthBarGumps = Engine.UI.Gumps.OfType<HealthBarGump>();
+
+                    foreach (var healthbar in healthBarGumps)
+                    {
+                        if (Engine.UI.AnchorManager[healthbar] == null && (healthbar.LocalSerial != World.Player))
+                        {
+                            healthbar.Dispose();
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+
+                    break;
             }
 
 
@@ -1371,9 +1395,8 @@ namespace ClassicUO.Game.Managers
         SetGrabBag,
         NamesOnOff,
         UseItemInHand,
-
-       
         UsePotion,
+        CloseAllHealthBars,
 
     }
 
