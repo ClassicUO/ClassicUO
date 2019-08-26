@@ -1065,8 +1065,6 @@ namespace ClassicUO.Game.Managers
                     
                  case MacroType.CloseAllHealthBars:
 
-                    var a = Engine.UI.AnchorManager;
-
                     var healthBarGumps = Engine.UI.Gumps.OfType<HealthBarGump>();
 
                     foreach (var healthbar in healthBarGumps)
@@ -1075,12 +1073,7 @@ namespace ClassicUO.Game.Managers
                         {
                             healthbar.Dispose();
                         }
-                        else
-                        {
-                            continue;
-                        }
                     }
-
                     break;
             }
 
