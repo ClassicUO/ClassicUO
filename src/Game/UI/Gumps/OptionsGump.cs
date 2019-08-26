@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         //experimental
         private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors;
-        private Combobox _overrideContainerLocationSetting;
+        private Combobox _overrideContainerLocationSetting, _language;
 
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
@@ -147,18 +147,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(tc);
 
-            Add(new NiceButton(10, 10, 140, 25, ButtonAction.SwitchPage, "General") {IsSelected = true, ButtonParameter = 1});
-            Add(new NiceButton(10, 10 + 30 * 1, 140, 25, ButtonAction.SwitchPage, "Sounds") {ButtonParameter = 2});
-            Add(new NiceButton(10, 10 + 30 * 2, 140, 25, ButtonAction.SwitchPage, "Video") {ButtonParameter = 3});
-            Add(new NiceButton(10, 10 + 30 * 3, 140, 25, ButtonAction.SwitchPage, "Macro") {ButtonParameter = 4});
+            Add(new NiceButton(10, 10, 140, 25, ButtonAction.SwitchPage, FileManager.Language.Dict["UI_Options_MainBtn_General"]) {IsSelected = true, ButtonParameter = 1});
+            Add(new NiceButton(10, 10 + 30 * 1, 140, 25, ButtonAction.SwitchPage, FileManager.Language.Dict["UI_Options_MainBtn_Sounds"]) {ButtonParameter = 2});
+            Add(new NiceButton(10, 10 + 30 * 2, 140, 25, ButtonAction.SwitchPage, FileManager.Language.Dict["UI_Options_MainBtn_Video"]) {ButtonParameter = 3});
+            Add(new NiceButton(10, 10 + 30 * 3, 140, 25, ButtonAction.SwitchPage, FileManager.Language.Dict["UI_Options_MainBtn_Macro"]) {ButtonParameter = 4});
             //Add(new NiceButton(10, 10 + 30 * 4, 140, 25, ButtonAction.SwitchPage, "Tooltip") {ButtonParameter = 5});
-            Add(new NiceButton(10, 10 + 30 * 4, 140, 25, ButtonAction.SwitchPage, "Fonts") {ButtonParameter = 6});
-            Add(new NiceButton(10, 10 + 30 * 5, 140, 25, ButtonAction.SwitchPage, "Speech") {ButtonParameter = 7});
-            Add(new NiceButton(10, 10 + 30 * 6, 140, 25, ButtonAction.SwitchPage, "Combat / Spells") {ButtonParameter = 8});
-            Add(new NiceButton(10, 10 + 30 * 7, 140, 25, ButtonAction.SwitchPage, "Counters") {ButtonParameter = 9});
-            Add(new NiceButton(10, 10 + 30 * 8, 140, 25, ButtonAction.SwitchPage, "Experimental") {ButtonParameter = 10});
-            Add(new NiceButton(10, 10 + 30 * 9, 140, 25, ButtonAction.SwitchPage, "Network") {ButtonParameter = 11});
-            Add(new NiceButton(10, 10 + 30 * 10, 140, 25, ButtonAction.SwitchPage, "Info Bar") { ButtonParameter = 12 });
+            Add(new NiceButton(10, 10 + 30 * 4, 140, 25, ButtonAction.SwitchPage, FileManager.Language.Dict["UI_Options_MainBtn_Fonts"]) {ButtonParameter = 6});
+            Add(new NiceButton(10, 10 + 30 * 5, 140, 25, ButtonAction.SwitchPage, FileManager.Language.Dict["UI_Options_MainBtn_Speech"]) {ButtonParameter = 7});
+            Add(new NiceButton(10, 10 + 30 * 6, 140, 25, ButtonAction.SwitchPage, FileManager.Language.Dict["UI_Options_MainBtn_Combat/Spells"]) {ButtonParameter = 8});
+            Add(new NiceButton(10, 10 + 30 * 7, 140, 25, ButtonAction.SwitchPage, FileManager.Language.Dict["UI_Options_MainBtn_Counters"]) {ButtonParameter = 9});
+            Add(new NiceButton(10, 10 + 30 * 8, 140, 25, ButtonAction.SwitchPage, FileManager.Language.Dict["UI_Options_MainBtn_Experimental"]) {ButtonParameter = 10});
+            Add(new NiceButton(10, 10 + 30 * 9, 140, 25, ButtonAction.SwitchPage, FileManager.Language.Dict["UI_Options_MainBtn_Network"]) {ButtonParameter = 11});
+            Add(new NiceButton(10, 10 + 30 * 10, 140, 25, ButtonAction.SwitchPage, FileManager.Language.Dict["UI_Options_MainBtn_InfoBar"]) { ButtonParameter = 12 });
 
 
             Add(new Line(160, 5, 1, HEIGHT - 10, Color.Gray.PackedValue));
@@ -230,46 +230,46 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
             ScrollAreaItem fpsItem = new ScrollAreaItem();
-            Label text = new Label("- FPS:", true, HUE_FONT);
+            Label text = new Label(FileManager.Language.Dict["UI_Options_General_FPS"], true, HUE_FONT);
             fpsItem.Add(text);
             _sliderFPS = new HSliderBar(text.X + 90, 5, 250, Constants.MIN_FPS, Constants.MAX_FPS, Engine.Profile.Current.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             fpsItem.Add(_sliderFPS);
             rightArea.Add(fpsItem);
 
             fpsItem = new ScrollAreaItem();
-            text = new Label("- Login FPS:", true, HUE_FONT);
+            text = new Label(FileManager.Language.Dict["UI_Options_General_FPSLogin"], true, HUE_FONT);
             fpsItem.Add(text);
             _sliderFPSLogin = new HSliderBar(text.X + 90, 5, 250, Constants.MIN_FPS, Constants.MAX_FPS, Engine.GlobalSettings.MaxLoginFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             fpsItem.Add(_sliderFPSLogin);
             rightArea.Add(fpsItem);
 
 
-            _reduceFPSWhenInactive = CreateCheckBox(rightArea, "Reduce FPS when game is inactive", Engine.Profile.Current.ReduceFPSWhenInactive, 0, 5);
+            _reduceFPSWhenInactive = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_ReduceFPSWhenInactive"], Engine.Profile.Current.ReduceFPSWhenInactive, 0, 5);
 
-            _highlightObjects = CreateCheckBox(rightArea, "Highlight game objects", Engine.Profile.Current.HighlightGameObjects, 0, 20);
-            _enablePathfind = CreateCheckBox(rightArea, "Enable pathfinding", Engine.Profile.Current.EnablePathfind, 0, 0);
-            _alwaysRun = CreateCheckBox(rightArea, "Always run", Engine.Profile.Current.AlwaysRun, 0, 0);
-            _enableTopbar = CreateCheckBox(rightArea, "Disable the Menu Bar", Engine.Profile.Current.TopbarGumpIsDisabled, 0, 0);
-            _holdDownKeyTab = CreateCheckBox(rightArea, "Hold TAB key for combat", Engine.Profile.Current.HoldDownKeyTab, 0, 0);
-            _holdDownKeyAlt = CreateCheckBox(rightArea, "Hold ALT key + right click to close Anchored gumps", Engine.Profile.Current.HoldDownKeyAltToCloseAnchored, 0, 0);
-            _holdShiftForContext = CreateCheckBox(rightArea, "Hold Shift for Context Menus", Engine.Profile.Current.HoldShiftForContext, 0, 0);
-            _highlightByState = CreateCheckBox(rightArea, "Highlight by state (poisoned, yellow hits, paralyzed)", Engine.Profile.Current.HighlightMobilesByFlags, 0, 0);
-            _poisonColorPickerBox = CreateClickableColorBox(rightArea, 20, 5, Engine.Profile.Current.PoisonHue, "Poisoned Color", 40, 5);
-            _paralyzedColorPickerBox = CreateClickableColorBox(rightArea, 20, 0, Engine.Profile.Current.ParalyzedHue, "Paralyzed Color", 40, 0);
-            _invulnerableColorPickerBox = CreateClickableColorBox(rightArea, 20, 0, Engine.Profile.Current.InvulnerableHue, "Invulnerable Color", 40, 0);
-            _noColorOutOfRangeObjects = CreateCheckBox(rightArea, "No color for object out of range", Engine.Profile.Current.NoColorObjectsOutOfRange, 0, 5);
-            _useStandardSkillsGump = CreateCheckBox(rightArea, "Use standard skills gump", Engine.Profile.Current.StandardSkillsGump, 0, 0);
-            _showMobileNameIncoming = CreateCheckBox(rightArea, "Show incoming new mobiles", Engine.Profile.Current.ShowNewMobileNameIncoming, 0, 0);
-            _showCorpseNameIncoming = CreateCheckBox(rightArea, "Show incoming new corpses", Engine.Profile.Current.ShowNewCorpseNameIncoming, 0, 0);
-            _sallosEasyGrab = CreateCheckBox(rightArea, "Sallos easy grab", Engine.Profile.Current.SallosEasyGrab, 0, 0);
+            _highlightObjects = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_HighlightGameObjects"], Engine.Profile.Current.HighlightGameObjects, 0, 20);
+            _enablePathfind = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_EnablePathfind"], Engine.Profile.Current.EnablePathfind, 0, 0);
+            _alwaysRun = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_AlwaysRun"], Engine.Profile.Current.AlwaysRun, 0, 0);
+            _enableTopbar = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_TopbarGumpIsDisabled"], Engine.Profile.Current.TopbarGumpIsDisabled, 0, 0);
+            _holdDownKeyTab = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_HoldDownKeyTab"], Engine.Profile.Current.HoldDownKeyTab, 0, 0);
+            _holdDownKeyAlt = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_HoldDownKeyAltToCloseAnchored"], Engine.Profile.Current.HoldDownKeyAltToCloseAnchored, 0, 0);
+            _holdShiftForContext = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_HoldShiftForContext"], Engine.Profile.Current.HoldShiftForContext, 0, 0);
+            _highlightByState = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_HighlightMobilesByFlags"], Engine.Profile.Current.HighlightMobilesByFlags, 0, 0);
+            _poisonColorPickerBox = CreateClickableColorBox(rightArea, 20, 5, Engine.Profile.Current.PoisonHue, FileManager.Language.Dict["UI_Options_General_PoisonHue"], 40, 5);
+            _paralyzedColorPickerBox = CreateClickableColorBox(rightArea, 20, 0, Engine.Profile.Current.ParalyzedHue, FileManager.Language.Dict["UI_Options_General_ParalyzedHue"], 40, 0);
+            _invulnerableColorPickerBox = CreateClickableColorBox(rightArea, 20, 0, Engine.Profile.Current.InvulnerableHue, FileManager.Language.Dict["UI_Options_General_InvulnerableHue"], 40, 0);
+            _noColorOutOfRangeObjects = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_NoColorObjectsOutOfRange"], Engine.Profile.Current.NoColorObjectsOutOfRange, 0, 5);
+            _useStandardSkillsGump = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_StandardSkillsGump"], Engine.Profile.Current.StandardSkillsGump, 0, 0);
+            _showMobileNameIncoming = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_ShowNewMobileNameIncoming"], Engine.Profile.Current.ShowNewMobileNameIncoming, 0, 0);
+            _showCorpseNameIncoming = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_ShowNewCorpseNameIncoming"], Engine.Profile.Current.ShowNewCorpseNameIncoming, 0, 0);
+            _sallosEasyGrab = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_SallosEasyGrab"], Engine.Profile.Current.SallosEasyGrab, 0, 0);
 
             fpsItem = new ScrollAreaItem();
 
-            text = new Label("Grid Loot", true, HUE_FONT)
+            text = new Label(FileManager.Language.Dict["UI_Options_General_GridLoot"], true, HUE_FONT)
             {
                 Y = _showCorpseNameIncoming.Bounds.Bottom + 10
             };
-            _gridLoot = new Combobox(text.X + text.Width + 10, text.Y, 200, new[] {"None", "Grid loot only", "Both"}, Engine.Profile.Current.GridLootType);
+            _gridLoot = new Combobox(text.X + text.Width + 10, text.Y, 200, new[] { FileManager.Language.Dict["UI_Options_General_GridLoot_None"], FileManager.Language.Dict["UI_Options_General_GridLoot_GridLootOnly"], FileManager.Language.Dict["UI_Options_General_GridLoot_Both"] }, Engine.Profile.Current.GridLootType);
 
             fpsItem.Add(text);
             fpsItem.Add(_gridLoot);
@@ -278,7 +278,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollAreaItem item = new ScrollAreaItem();
 
-            _useCircleOfTransparency = new Checkbox(0x00D2, 0x00D3, "Enable circle of transparency", FONT, HUE_FONT)
+            _useCircleOfTransparency = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_General_UseCircleOfTransparency"], FONT, HUE_FONT)
             {
                 Y = 20,
                 IsChecked = Engine.Profile.Current.UseCircleOfTransparency
@@ -290,15 +290,15 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(item);
 
 
-            _drawRoofs = CreateCheckBox(rightArea, "Hide roof tiles", !Engine.Profile.Current.DrawRoofs, 0, 15);
-            _treeToStumps = CreateCheckBox(rightArea, "Tree to stumps", Engine.Profile.Current.TreeToStumps, 0, 0);
-            _hideVegetation = CreateCheckBox(rightArea, "Hide vegetation", Engine.Profile.Current.HideVegetation, 0, 0);
-            _enableCaveBorder = CreateCheckBox(rightArea, "Mark cave tiles", Engine.Profile.Current.EnableCaveBorder, 0, 0);
+            _drawRoofs = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_DrawRoofs"], !Engine.Profile.Current.DrawRoofs, 0, 15);
+            _treeToStumps = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_TreeToStumps"], Engine.Profile.Current.TreeToStumps, 0, 0);
+            _hideVegetation = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_HideVegetation"], Engine.Profile.Current.HideVegetation, 0, 0);
+            _enableCaveBorder = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_EnableCaveBorder"], Engine.Profile.Current.EnableCaveBorder, 0, 0);
 
 
             ScrollAreaItem hpAreaItem = new ScrollAreaItem();
 
-            _showHpMobile = new Checkbox(0x00D2, 0x00D3, "Show HP", FONT, HUE_FONT)
+            _showHpMobile = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_General_ShowMobilesHP"], FONT, HUE_FONT)
             {
                 X = 0, Y = 20, IsChecked = Engine.Profile.Current.ShowMobilesHP
             };
@@ -312,11 +312,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             _hpComboBox = new Combobox(_showHpMobile.Bounds.Right + 10, 20, 150, new[]
             {
-                "Percentage", "Line", "Both"
+                 FileManager.Language.Dict["UI_Options_General_ShowMobilesHP_Percentage"], FileManager.Language.Dict["UI_Options_General_ShowMobilesHP_Line"], FileManager.Language.Dict["UI_Options_General_ShowMobilesHP_Both"]
             }, mode);
             hpAreaItem.Add(_hpComboBox);
 
-            text = new Label("mode:", true, HUE_FONT)
+            text = new Label(FileManager.Language.Dict["UI_Options_General_ShowMobilesHP_MobileHPShowWhen"], true, HUE_FONT)
             {
                 X = _showHpMobile.Bounds.Right + 170,
                 Y = 20
@@ -330,7 +330,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _hpComboBoxShowWhen = new Combobox(text.Bounds.Right + 10, 20, 150, new[]
             {
-                "Always", "Less than 100%", "Smart"
+                FileManager.Language.Dict["UI_Options_General_ShowMobilesHP_MobileHPShowWhen_Always"], FileManager.Language.Dict["UI_Options_General_ShowMobilesHP_MobileHPShowWhen_LessThan100%"], FileManager.Language.Dict["UI_Options_General_ShowMobilesHP_MobileHPShowWhen_Smart"]
             }, mode);
             hpAreaItem.Add(_hpComboBoxShowWhen);
 
@@ -339,7 +339,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (mode < 0 || mode > 2)
                 mode = 0;
 
-            text = new Label("Close healthbar gump when:", true, HUE_FONT)
+            text = new Label(FileManager.Language.Dict["UI_Options_General_CloseHealthbarGumpWhen"], true, HUE_FONT)
             {
                 Y = _hpComboBox.Bounds.Bottom + 10
             };
@@ -347,11 +347,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             _healtbarType = new Combobox(text.Bounds.Right + 10, _hpComboBox.Bounds.Bottom + 10, 150, new[]
             {
-                "None", "Mobile Out of Range", "Mobile is Dead"
+                FileManager.Language.Dict["UI_Options_General_CloseHealthbarGumpWhen_None"], FileManager.Language.Dict["UI_Options_General_CloseHealthbarGumpWhen_MobileOutOfRange"], FileManager.Language.Dict["UI_Options_General_CloseHealthbarGumpWhen_MobileIsDead"]
             }, mode);
             hpAreaItem.Add(_healtbarType);
 
-            text = new Label("Fields: ", true, HUE_FONT)
+            text = new Label(FileManager.Language.Dict["UI_Options_General_FieldsType"], true, HUE_FONT)
             {
                 Y = _hpComboBox.Bounds.Bottom + 45
             };
@@ -364,7 +364,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _fieldsType = new Combobox(text.Bounds.Right + 10, _hpComboBox.Bounds.Bottom + 45, 150, new[]
             {
-                "Normal fields", "Static fields", "Tile fields"
+                FileManager.Language.Dict["UI_Options_General_FieldsType_NormalFields"], FileManager.Language.Dict["UI_Options_General_FieldsType_StaticFields"], FileManager.Language.Dict["UI_Options_General_FieldsType_TileFields"]
             }, mode);
 
             hpAreaItem.Add(_fieldsType);
@@ -373,7 +373,7 @@ namespace ClassicUO.Game.UI.Gumps
             _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked;
 
             hpAreaItem = new ScrollAreaItem();
-            Control c = new Label("Shop Gump Size (multiple of 60): ", true, HUE_FONT) {Y = 10};
+            Control c = new Label(FileManager.Language.Dict["UI_Options_General_ShopGumpSize"], true, HUE_FONT) {Y = 10};
             hpAreaItem.Add(c);
             hpAreaItem.Add(_vendorGumpSize = new ArrowNumbersTextBox(c.Width + 5, 10, 60, 60, 60, 240, FONT, hue: 1) {Text = Engine.Profile.Current.VendorGumpHeight.ToString(), Tag = Engine.Profile.Current.VendorGumpHeight});
             rightArea.Add(hpAreaItem);
@@ -390,7 +390,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollAreaItem item = new ScrollAreaItem();
 
-            _enableSounds = new Checkbox(0x00D2, 0x00D3, "Sounds", FONT, HUE_FONT)
+            _enableSounds = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Sounds_Sounds"], FONT, HUE_FONT)
             {
                 IsChecked = Engine.Profile.Current.EnableSound
             };
@@ -403,7 +403,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             item = new ScrollAreaItem();
 
-            _enableMusic = new Checkbox(0x00D2, 0x00D3, "Music", FONT, HUE_FONT)
+            _enableMusic = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Sounds_Music"], FONT, HUE_FONT)
             {
                 IsChecked = Engine.Profile.Current.EnableMusic
             };
@@ -416,7 +416,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             item = new ScrollAreaItem();
 
-            _loginMusic = new Checkbox(0x00D2, 0x00D3, "Login music", FONT, HUE_FONT)
+            _loginMusic = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Sounds_LoginMusic"], FONT, HUE_FONT)
             {
                 IsChecked = Engine.GlobalSettings.LoginMusic
             };
@@ -427,9 +427,9 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(item);
 
 
-            _footStepsSound = CreateCheckBox(rightArea, "Play Footsteps", Engine.Profile.Current.EnableFootstepsSound, 0, 15);
-            _combatMusic = CreateCheckBox(rightArea, "Combat music", Engine.Profile.Current.EnableCombatMusic, 0, 0);
-            _musicInBackground = CreateCheckBox(rightArea, "Reproduce music when ClassicUO is not focused", Engine.Profile.Current.ReproduceSoundsInBackground, 0, 0);
+            _footStepsSound = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Sounds_Footsteps"], Engine.Profile.Current.EnableFootstepsSound, 0, 15);
+            _combatMusic = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Sounds_CombatMusic"], Engine.Profile.Current.EnableCombatMusic, 0, 0);
+            _musicInBackground = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Sounds_ReproduceSoundsInBackground"], Engine.Profile.Current.ReproduceSoundsInBackground, 0, 0);
 
 
             _loginMusicVolume.IsVisible = _loginMusic.IsChecked;
@@ -446,11 +446,11 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
             Label text;
 
-            _debugControls = CreateCheckBox(rightArea, "Debugging mode", Engine.GlobalSettings.Debug, 0, 0);
+            _debugControls = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Video_Debug"], Engine.GlobalSettings.Debug, 0, 0);
 
             // [BLOCK] game size
             {
-                _gameWindowFullsize = new Checkbox(0x00D2, 0x00D3, "Always use fullsize game window", FONT, HUE_FONT)
+                _gameWindowFullsize = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Video_GameWindowFullSize"], FONT, HUE_FONT)
                 {
                     IsChecked = Engine.Profile.Current.GameWindowFullSize
                 };
@@ -460,7 +460,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _windowSizeArea = new ScrollAreaItem();
 
-                _gameWindowLock = new Checkbox(0x00D2, 0x00D3, "Lock game window moving/resizing", FONT, HUE_FONT)
+                _gameWindowLock = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Video_GameWindowLock"], FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 15,
@@ -469,7 +469,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _windowSizeArea.Add(_gameWindowLock);
 
-                text = new Label("Game Play Window Size: ", true, HUE_FONT)
+                text = new Label(FileManager.Language.Dict["UI_Options_Video_GameWindowSize"], true, HUE_FONT)
                 {
                     X = 20,
                     Y = 40
@@ -496,7 +496,7 @@ namespace ClassicUO.Game.UI.Gumps
                     UNumericOnly = true
                 });
 
-                text = new Label("Game Play Window Position: ", true, HUE_FONT)
+                text = new Label(FileManager.Language.Dict["UI_Options_Video_GameWindowPosition"], true, HUE_FONT)
                 {
                     X = 205,
                     Y = 40
@@ -529,7 +529,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             // [BLOCK] scale
             {
-                _zoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Enable in game zoom scaling (Ctrl + Scroll)", FONT, HUE_FONT)
+                _zoomCheckbox = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Video_EnableScaleZoom"], FONT, HUE_FONT)
                 {
                     IsChecked = Engine.Profile.Current.EnableScaleZoom
                 };
@@ -539,7 +539,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _zoomSizeArea = new ScrollAreaItem();
 
-                _savezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Save scale after exit", FONT, HUE_FONT)
+                _savezoomCheckbox = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Video_SaveScaleAfterClose"], FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 15,
@@ -547,7 +547,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _zoomSizeArea.Add(_savezoomCheckbox);
 
-                _restorezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Releasing Ctrl Restores Scale", FONT, HUE_FONT)
+                _restorezoomCheckbox = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Video_RestoreScaleAfterUnpressCtrl"], FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 35,
@@ -559,19 +559,19 @@ namespace ClassicUO.Game.UI.Gumps
                 _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked;
             }
 
-            _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", Engine.Profile.Current.EnableDeathScreen, 0, 10);
-            _enableBlackWhiteEffect = CreateCheckBox(rightArea, "Black & White mode for dead player", Engine.Profile.Current.EnableBlackWhiteEffect, 0, 0);
+            _enableDeathScreen = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Video_EnableDeathScreen"], Engine.Profile.Current.EnableDeathScreen, 0, 10);
+            _enableBlackWhiteEffect = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Video_EnableBlackWhiteEffect"], Engine.Profile.Current.EnableBlackWhiteEffect, 0, 0);
 
             ScrollAreaItem item = new ScrollAreaItem();
 
-            text = new Label("- Status gump type:", true, HUE_FONT)
+            text = new Label(FileManager.Language.Dict["UI_Options_Video_ShardType"], true, HUE_FONT)
             {
                 Y = 30
             };
 
             item.Add(text);
 
-            _shardType = new Combobox(text.Width + 20, text.Y, 100, new[] {"Modern", "Old", "Outlands"})
+            _shardType = new Combobox(text.Width + 20, text.Y, 100, new[] { FileManager.Language.Dict["UI_Options_Video_ShardType_Modern"], FileManager.Language.Dict["UI_Options_Video_ShardType_Old"], FileManager.Language.Dict["UI_Options_Video_ShardType_Outlands"] })
             {
                 SelectedIndex = Engine.GlobalSettings.ShardType
             };
@@ -580,7 +580,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             item = new ScrollAreaItem();
             item.Y = 30;
-            text = new Label("- Brighlight:", true, HUE_FONT)
+            text = new Label(FileManager.Language.Dict["UI_Options_Video_Brighlight"], true, HUE_FONT)
             {
                 Y = 30,
                 IsVisible = false,
@@ -592,7 +592,7 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(item);
 
             item = new ScrollAreaItem();
-            _enableLight = new Checkbox(0x00D2, 0x00D3, "Light level", FONT, HUE_FONT)
+            _enableLight = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Video_LightLevel"], FONT, HUE_FONT)
             {
                 IsChecked = Engine.Profile.Current.UseCustomLightLevel
             };
@@ -602,10 +602,10 @@ namespace ClassicUO.Game.UI.Gumps
             item.Add(_lightBar);
             rightArea.Add(item);
 
-            _useColoredLights = CreateCheckBox(rightArea, "Use colored lights", Engine.Profile.Current.UseColoredLights, 0, 0);
-            _darkNights = CreateCheckBox(rightArea, "Dark nights", Engine.Profile.Current.UseDarkNights, 0, 0);
+            _useColoredLights = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Video_UseColoredLights"], Engine.Profile.Current.UseColoredLights, 0, 0);
+            _darkNights = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Video_UseDarkNights"], Engine.Profile.Current.UseDarkNights, 0, 0);
 
-            _enableShadows = new Checkbox(0x00D2, 0x00D3, "Shadows", FONT, HUE_FONT)
+            _enableShadows = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Video_ShadowsEnabled"], FONT, HUE_FONT)
             {
                 IsChecked = Engine.Profile.Current.ShadowsEnabled
             };
@@ -614,24 +614,24 @@ namespace ClassicUO.Game.UI.Gumps
 
             item = new ScrollAreaItem();
 
-            text = new Label("- Aura under feet:", true, HUE_FONT)
+            text = new Label(FileManager.Language.Dict["UI_Options_Video_AuraUnderFeet"], true, HUE_FONT)
             {
                 Y = 10
             };
             item.Add(text);
 
-            _auraType = new Combobox(text.Width + 20, text.Y, 100, new[] {"None", "Warmode", "Ctrl+Shift", "Always"})
+            _auraType = new Combobox(text.Width + 20, text.Y, 100, new[] { FileManager.Language.Dict["UI_Options_Video_AuraUnderFeet_None"], FileManager.Language.Dict["UI_Options_Video_AuraUnderFeet_Warmode"], FileManager.Language.Dict["UI_Options_Video_AuraUnderFeet_Ctrl+Shift"], FileManager.Language.Dict["UI_Options_Video_AuraUnderFeet_Always"] })
             {
                 SelectedIndex = Engine.Profile.Current.AuraUnderFeetType
             };
             item.Add(_auraType);
             rightArea.Add(item);
 
-            _partyAura = CreateCheckBox(rightArea, "Custom color aura for party members", Engine.Profile.Current.PartyAura, 0, 0);
-            _partyAuraColorPickerBox = CreateClickableColorBox(rightArea, 20, 5, Engine.Profile.Current.PartyAuraHue, "Party Aura Color", 40, 5);
-            _runMouseInSeparateThread = CreateCheckBox(rightArea, "Run mouse in a separate thread", Engine.GlobalSettings.RunMouseInASeparateThread, 0, 5);
-            _auraMouse = CreateCheckBox(rightArea, "Aura on mouse target", Engine.Profile.Current.AuraOnMouse, 0, 0);
-            _xBR = CreateCheckBox(rightArea, "Use xBR effect [BETA]", Engine.Profile.Current.UseXBR, 0, 0);
+            _partyAura = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Video_PartyAura"], Engine.Profile.Current.PartyAura, 0, 0);
+            _partyAuraColorPickerBox = CreateClickableColorBox(rightArea, 20, 5, Engine.Profile.Current.PartyAuraHue, FileManager.Language.Dict["UI_Options_Video_PartyAuraHue"], 40, 5);
+            _runMouseInSeparateThread = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Video_RunMouseInASeparateThread"], Engine.GlobalSettings.RunMouseInASeparateThread, 0, 5);
+            _auraMouse = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Video_AuraOnMouse"], Engine.Profile.Current.AuraOnMouse, 0, 0);
+            _xBR = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Video_UseXBR"], Engine.Profile.Current.UseXBR, 0, 0);
 
             Add(rightArea, PAGE);
         }
@@ -642,19 +642,19 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            _showInfoBar = CreateCheckBox(rightArea, "Show Info Bar", Engine.Profile.Current.ShowInfoBar, 0, 0);
+            _showInfoBar = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_InfoBar_ShowInfoBar"], Engine.Profile.Current.ShowInfoBar, 0, 0);
 
 
             ScrollAreaItem _infoBarHighlightScrollArea = new ScrollAreaItem();
 
-            _infoBarHighlightScrollArea.Add(new Label("Data highlight type:", true, 999));
-            _infoBarHighlightType = new Combobox(130, 0, 150, new[] { "Text color", "Colored bars" }, Engine.Profile.Current.InfoBarHighlightType);
+            _infoBarHighlightScrollArea.Add(new Label(FileManager.Language.Dict["UI_Options_InfoBar_InfoBarHighlightType"], true, 999));
+            _infoBarHighlightType = new Combobox(130, 0, 150, new[] { FileManager.Language.Dict["UI_Options_InfoBar_InfoBarHighlightType_TextColor"], FileManager.Language.Dict["UI_Options_InfoBar_InfoBarHighlightType_ColoredBars"] }, Engine.Profile.Current.InfoBarHighlightType);
             _infoBarHighlightScrollArea.Add(_infoBarHighlightType);
 
             rightArea.Add(_infoBarHighlightScrollArea);
 
 
-            NiceButton nb = new NiceButton(0, 10, 90, 20, ButtonAction.Activate, "+ Add item", 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT) { ButtonParameter = 999 };
+            NiceButton nb = new NiceButton(0, 10, 90, 20, ButtonAction.Activate, FileManager.Language.Dict["UI_Options_InfoBar_AddItem"], 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT) { ButtonParameter = 999 };
             nb.MouseUp += (sender, e) =>
             {
                 InfoBarBuilderControl ibbc = new InfoBarBuilderControl(new InfoBarItem("", InfoBarVars.HP, 0x3B9));
@@ -666,9 +666,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollAreaItem _infobarBuilderLabels = new ScrollAreaItem();
 
-            _infobarBuilderLabels.Add(new Label("Label", true, 999) { Y = 15 } );
-            _infobarBuilderLabels.Add(new Label("Color", true, 999) { X = 150, Y = 15 });
-            _infobarBuilderLabels.Add(new Label("Data", true, 999) { X = 200, Y = 15 });
+            _infobarBuilderLabels.Add(new Label(FileManager.Language.Dict["UI_Options_InfoBar_Label"], true, 999) { Y = 15 } );
+            _infobarBuilderLabels.Add(new Label(FileManager.Language.Dict["UI_Options_InfoBar_Color"], true, 999) { X = 150, Y = 15 });
+            _infobarBuilderLabels.Add(new Label(FileManager.Language.Dict["UI_Options_InfoBar_Data"], true, 999) { X = 200, Y = 15 });
 
             rightArea.Add(_infobarBuilderLabels);
             rightArea.Add(new Line(0, 0, rightArea.Width, 1, Color.Gray.PackedValue));
@@ -697,11 +697,11 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 4;
 
             ScrollArea rightArea = new ScrollArea(190, 52 + 25 + 4, 150, 360, true);
-            NiceButton addButton = new NiceButton(190, 20, 130, 20, ButtonAction.Activate, "New macro") {IsSelectable = false, ButtonParameter = (int) Buttons.NewMacro};
+            NiceButton addButton = new NiceButton(190, 20, 130, 20, ButtonAction.Activate, FileManager.Language.Dict["UI_Options_Macro_NewMacro"]) {IsSelectable = false, ButtonParameter = (int) Buttons.NewMacro};
 
             addButton.MouseUp += (sender, e) =>
             {
-                EntryDialog dialog = new EntryDialog(250, 150, "Macro name:", name =>
+                EntryDialog dialog = new EntryDialog(250, 150, FileManager.Language.Dict["UI_Options_Macro_MacroName"], name =>
                 {
                     if (string.IsNullOrWhiteSpace(name))
                         return;
@@ -751,7 +751,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(addButton, PAGE);
 
-            NiceButton delButton = new NiceButton(190, 52, 130, 20, ButtonAction.Activate, "Delete macro") {IsSelectable = false, ButtonParameter = (int) Buttons.DeleteMacro};
+            NiceButton delButton = new NiceButton(190, 52, 130, 20, ButtonAction.Activate, FileManager.Language.Dict["UI_Options_Macro_DeleteMacro"]) {IsSelectable = false, ButtonParameter = (int) Buttons.DeleteMacro};
 
             delButton.MouseUp += (ss, ee) =>
             {
@@ -761,7 +761,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (nb != null)
                 {
-                    QuestionGump dialog = new QuestionGump("Do you want\ndelete it?", b =>
+                    QuestionGump dialog = new QuestionGump(FileManager.Language.Dict["UI_Options_Macro_QuestionText"], b =>
                     {
                         if (!b)
                             return;
@@ -830,14 +830,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollAreaItem item = new ScrollAreaItem();
 
-            _overrideAllFonts = new Checkbox(0x00D2, 0x00D3, "Override game font", FONT, HUE_FONT)
+            _overrideAllFonts = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Fonts_OverrideAllFonts"], FONT, HUE_FONT)
             {
                 IsChecked = Engine.Profile.Current.OverrideAllFonts
             };
 
             _overrideAllFontsIsUnicodeCheckbox = new Combobox(_overrideAllFonts.Width + 5, _overrideAllFonts.Y, 100, new[]
             {
-                "ASCII", "Unicode"
+                FileManager.Language.Dict["UI_Options_Fonts_Encoded_ASCII"], FileManager.Language.Dict["UI_Options_Fonts_Encoded_Unicode"]
             }, Engine.Profile.Current.OverrideAllFontsIsUnicode ? 1 : 0)
             {
                 IsVisible = _overrideAllFonts.IsChecked
@@ -850,7 +850,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-            Label text = new Label("Speech font:", true, HUE_FONT)
+            Label text = new Label(FileManager.Language.Dict["UI_Options_Fonts_SpeechFont"], true, HUE_FONT)
             {
                 Y = 20,
             };
@@ -870,7 +870,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollAreaItem item = new ScrollAreaItem();
 
-            _scaleSpeechDelay = new Checkbox(0x00D2, 0x00D3, "Scale speech delay", FONT, HUE_FONT)
+            _scaleSpeechDelay = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Speech_ScaleSpeechDelay"], FONT, HUE_FONT)
             {
                 IsChecked = Engine.Profile.Current.ScaleSpeechDelay
             };
@@ -880,13 +880,13 @@ namespace ClassicUO.Game.UI.Gumps
             item.Add(_sliderSpeechDelay);
             rightArea.Add(item);
 
-            _saveJournalCheckBox = CreateCheckBox(rightArea, "Save Journal to file in game folder", false, 0, 0);
+            _saveJournalCheckBox = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Speech_SaveJournalToFile"], false, 0, 0);
             _saveJournalCheckBox.ValueChanged += (o, e) => { World.Journal.CreateWriter(_saveJournalCheckBox.IsChecked); };
             _saveJournalCheckBox.IsChecked = Engine.Profile.Current.SaveJournalToFile;
 
             // [BLOCK] activate chat
             {
-                _chatAfterEnter = new Checkbox(0x00D2, 0x00D3, "Activate chat after `Enter` pressing", FONT, HUE_FONT)
+                _chatAfterEnter = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Speech_ActivateChatAfterEnter"], FONT, HUE_FONT)
                 {
                     Y = 0,
                     IsChecked = Engine.Profile.Current.ActivateChatAfterEnter
@@ -897,7 +897,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _activeChatArea = new ScrollAreaItem();
 
-                _chatAdditionalButtonsCheckbox = new Checkbox(0x00D2, 0x00D3, "Additional buttons activate chat: ! ; : / \\ , . [ | -", FONT, HUE_FONT)
+                _chatAdditionalButtonsCheckbox = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Speech_ActivateChatAdditionalButtons"], FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 15,
@@ -905,7 +905,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _activeChatArea.Add(_chatAdditionalButtonsCheckbox);
 
-                _chatShiftEnterCheckbox = new Checkbox(0x00D2, 0x00D3, "Shift+Enter send message without closing chat", FONT, HUE_FONT)
+                _chatShiftEnterCheckbox = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Speech_ActivateChatShiftEnterSupport"], FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 35,
@@ -913,7 +913,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _activeChatArea.Add(_chatShiftEnterCheckbox);
 
-                var text = new Label("If chat active - ignores hotkeys from:", true, HUE_FONT)
+                var text = new Label(FileManager.Language.Dict["UI_Options_Speech_ActivateChatIgnoreHotkeys"], true, HUE_FONT)
                 {
                     X = 20,
                     Y = 60
@@ -921,7 +921,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _activeChatArea.Add(text);
 
-                _chatIgnodeHotkeysCheckbox = new Checkbox(0x00D2, 0x00D3, "Client (macro system)", FONT, HUE_FONT)
+                _chatIgnodeHotkeysCheckbox = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Speech_ActivateChatIgnoreHotkeys_Client"], FONT, HUE_FONT)
                 {
                     X = 40,
                     Y = 85,
@@ -929,7 +929,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _activeChatArea.Add(_chatIgnodeHotkeysCheckbox);
 
-                _chatIgnodeHotkeysPluginsCheckbox = new Checkbox(0x00D2, 0x00D3, "Plugins (Razor)", FONT, HUE_FONT)
+                _chatIgnodeHotkeysPluginsCheckbox = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Speech_ActivateChatIgnoreHotkeys_Plugins"], FONT, HUE_FONT)
                 {
                     X = 40,
                     Y = 105,
@@ -942,13 +942,13 @@ namespace ClassicUO.Game.UI.Gumps
                 _activeChatArea.IsVisible = _chatAfterEnter.IsChecked;
             }
 
-            _speechColorPickerBox = CreateClickableColorBox(rightArea, 0, 20, Engine.Profile.Current.SpeechHue, "Speech Color", 20, 20);
-            _emoteColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.EmoteHue, "Emote Color", 20, 0);
-            _yellColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.YellHue, "Yell Color", 20, 0);
-            _whisperColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.WhisperHue, "Whisper Color", 20, 0);
-            _partyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.PartyMessageHue, "Party Message Color", 20, 0);
-            _guildMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.GuildMessageHue, "Guild Message Color", 20, 0);
-            _allyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.AllyMessageHue, "Alliance Message Color", 20, 0);
+            _speechColorPickerBox = CreateClickableColorBox(rightArea, 0, 20, Engine.Profile.Current.SpeechHue, FileManager.Language.Dict["UI_Options_Speech_SpeechHue"], 20, 20);
+            _emoteColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.EmoteHue, FileManager.Language.Dict["UI_Options_Speech_EmoteHue"], 20, 0);
+            _yellColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.YellHue, FileManager.Language.Dict["UI_Options_Speech_YellHue"], 20, 0);
+            _whisperColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.WhisperHue, FileManager.Language.Dict["UI_Options_Speech_WhisperHue"], 20, 0);
+            _partyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.PartyMessageHue, FileManager.Language.Dict["UI_Options_Speech_PartyMessageHue"], 20, 0);
+            _guildMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.GuildMessageHue, FileManager.Language.Dict["UI_Options_Speech_GuildMessageHue"], 20, 0);
+            _allyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.AllyMessageHue, FileManager.Language.Dict["UI_Options_Speech_AllyMessageHue"], 20, 0);
 
             _sliderSpeechDelay.IsVisible = _scaleSpeechDelay.IsChecked;
 
@@ -961,21 +961,21 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            _queryBeforAttackCheckbox = CreateCheckBox(rightArea, "Query before attack", Engine.Profile.Current.EnabledCriminalActionQuery, 0, 0);
-            _spellFormatCheckbox = CreateCheckBox(rightArea, "Enable Overhead Spell Format", Engine.Profile.Current.EnabledSpellFormat, 0, 0);
-            _spellColoringCheckbox = CreateCheckBox(rightArea, "Enable Overhead Spell Hue", Engine.Profile.Current.EnabledSpellHue, 0, 0);
-            _castSpellsByOneClick = CreateCheckBox(rightArea, "Cast spells by one click", Engine.Profile.Current.CastSpellsByOneClick, 0, 0);
+            _queryBeforAttackCheckbox = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Combat_EnabledCriminalActionQuery"], Engine.Profile.Current.EnabledCriminalActionQuery, 0, 0);
+            _spellFormatCheckbox = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Combat_EnabledSpellFormat"], Engine.Profile.Current.EnabledSpellFormat, 0, 0);
+            _spellColoringCheckbox = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Combat_EnabledSpellHue"], Engine.Profile.Current.EnabledSpellHue, 0, 0);
+            _castSpellsByOneClick = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Combat_CastSpellsByOneClick"], Engine.Profile.Current.CastSpellsByOneClick, 0, 0);
 
-            _innocentColorPickerBox = CreateClickableColorBox(rightArea, 0, 20, Engine.Profile.Current.InnocentHue, "Innocent Color", 20, 20);
-            _friendColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.FriendHue, "Friend Color", 20, 0);
-            _crimialColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.CriminalHue, "Criminal Color", 20, 0);
-            _genericColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.AnimalHue, "Animal Color", 20, 0);
-            _murdererColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.MurdererHue, "Murderer Color", 20, 0);
-            _enemyColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.EnemyHue, "Enemy Color", 20, 0);
+            _innocentColorPickerBox = CreateClickableColorBox(rightArea, 0, 20, Engine.Profile.Current.InnocentHue, FileManager.Language.Dict["UI_Options_Combat_InnocentHue"], 20, 20);
+            _friendColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.FriendHue, FileManager.Language.Dict["UI_Options_Combat_FriendHue"], 20, 0);
+            _crimialColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.CriminalHue, FileManager.Language.Dict["UI_Options_Combat_CriminalHue"], 20, 0);
+            _genericColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.AnimalHue, FileManager.Language.Dict["UI_Options_Combat_AnimalHue"], 20, 0);
+            _murdererColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.MurdererHue, FileManager.Language.Dict["UI_Options_Combat_MurdererHue"], 20, 0);
+            _enemyColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.EnemyHue, FileManager.Language.Dict["UI_Options_Combat_EnemyHue"], 20, 0);
 
-            _beneficColorPickerBox = CreateClickableColorBox(rightArea, 0, 20, Engine.Profile.Current.BeneficHue, "Benefic Spell Hue", 20, 20);
-            _harmfulColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.HarmfulHue, "Harmful Spell Hue", 20, 0);
-            _neutralColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.NeutralHue, "Neutral Spell Hue", 20, 0);
+            _beneficColorPickerBox = CreateClickableColorBox(rightArea, 0, 20, Engine.Profile.Current.BeneficHue, FileManager.Language.Dict["UI_Options_Combat_BeneficHue"], 20, 20);
+            _harmfulColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.HarmfulHue, FileManager.Language.Dict["UI_Options_Combat_HarmfulHue"], 20, 0);
+            _neutralColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.NeutralHue, FileManager.Language.Dict["UI_Options_Combat_NeutralHue"], 20, 0);
 
             ScrollAreaItem it = new ScrollAreaItem();
 
@@ -986,7 +986,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 20,
                 Width = 200,
                 Height = 30
-            }, " Spell Overhead format: ({power} for powerword - {spell} for spell name)", rightArea.Width - 20);
+            }, FileManager.Language.Dict["UI_Options_Combat_SpellDisplayFormat"], rightArea.Width - 20);
 
             rightArea.Add(it);
 
@@ -998,9 +998,9 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 9;
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            _enableCounters = CreateCheckBox(rightArea, "Enable Counters", Engine.Profile.Current.CounterBarEnabled, 0, 0);
-            _highlightOnUse = CreateCheckBox(rightArea, "Highlight On Use", Engine.Profile.Current.CounterBarHighlightOnUse, 0, 0);
-            _enableAbbreviatedAmount = CreateCheckBox(rightArea, "Enable abbreviated amount values when amount is or exceeds", Engine.Profile.Current.CounterBarDisplayAbbreviatedAmount, 0, 0);
+            _enableCounters = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Counters_CounterBarEnabled"], Engine.Profile.Current.CounterBarEnabled, 0, 0);
+            _highlightOnUse = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Counters_CounterBarHighlightOnUse"], Engine.Profile.Current.CounterBarHighlightOnUse, 0, 0);
+            _enableAbbreviatedAmount = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Counters_CounterBarDisplayAbbreviatedAmount"], Engine.Profile.Current.CounterBarDisplayAbbreviatedAmount, 0, 0);
 
             ScrollAreaItem item = new ScrollAreaItem();
 
@@ -1016,7 +1016,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(item);
 
-            _highlightOnAmount = CreateCheckBox(rightArea, "Highlight red when amount is below", Engine.Profile.Current.CounterBarHighlightOnAmount, 0, 0);
+            _highlightOnAmount = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Counters_CounterBarHighlightOnAmount"], Engine.Profile.Current.CounterBarHighlightOnAmount, 0, 0);
 
             item = new ScrollAreaItem();
 
@@ -1034,7 +1034,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             item = new ScrollAreaItem();
 
-            Label text = new Label("Counter Layout:", true, HUE_FONT)
+            Label text = new Label(FileManager.Language.Dict["UI_Options_Counters_CounterLayout"], true, HUE_FONT)
             {
                 Y = _highlightOnUse.Bounds.Bottom + 5
             };
@@ -1046,7 +1046,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             item = new ScrollAreaItem();
 
-            text = new Label("Cell size:", true, HUE_FONT)
+            text = new Label(FileManager.Language.Dict["UI_Options_Counters_CellSize"], true, HUE_FONT)
             {
                 X = 10,
                 Y = 10
@@ -1067,7 +1067,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 30,
                 NumericOnly = true,
                 Text = Engine.Profile.Current.CounterBarRows.ToString()
-            }, "Rows:");
+            }, FileManager.Language.Dict["UI_Options_Counters_Rows"]);
 
             _columns = CreateInputField(item, new TextBox(FONT, 5, 80, 80)
             {
@@ -1077,7 +1077,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 30,
                 NumericOnly = true,
                 Text = Engine.Profile.Current.CounterBarColumns.ToString()
-            }, "Columns:");
+            }, FileManager.Language.Dict["UI_Options_Counters_Columns"]);
 
             rightArea.Add(item);
 
@@ -1089,17 +1089,17 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 10;
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            _enableSelectionArea = CreateCheckBox(rightArea, "Enable Text Selection Area", Engine.Profile.Current.EnableSelectionArea, 0, 0);
+            _enableSelectionArea = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Network_ShowNetworkStats"], Engine.Profile.Current.EnableSelectionArea, 0, 0);
 
-            _debugGumpIsDisabled = CreateCheckBox(rightArea, "Disable Debug Gump", Engine.Profile.Current.DebugGumpIsDisabled, 0, 0);
-            _restoreLastGameSize = CreateCheckBox(rightArea, "Disable automatic maximize. Restore windows size after re-login", Engine.Profile.Current.RestoreLastGameSize, 0, 0);
+            _debugGumpIsDisabled = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Experimental_DebugGumpIsDisabled"], Engine.Profile.Current.DebugGumpIsDisabled, 0, 0);
+            _restoreLastGameSize = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Experimental_RestoreLastGameSize"], Engine.Profile.Current.RestoreLastGameSize, 0, 0);
 
-            _autoOpenDoors = CreateCheckBox(rightArea, "Auto Open Doors", Engine.Profile.Current.AutoOpenDoors, 0, 0);
-            _smoothDoors = CreateCheckBox(rightArea, "Smooth doors", Engine.Profile.Current.SmoothDoors, 20, 5);
+            _autoOpenDoors = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Experimental_AutoOpenDoors"], Engine.Profile.Current.AutoOpenDoors, 0, 0);
+            _smoothDoors = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Experimental_SmoothDoors"], Engine.Profile.Current.SmoothDoors, 20, 5);
 
             _autoOpenCorpseArea = new ScrollAreaItem();
 
-            _autoOpenCorpse = CreateCheckBox(rightArea, "Auto Open Corpses", Engine.Profile.Current.AutoOpenCorpses, 0, 5);
+            _autoOpenCorpse = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Experimental_AutoOpenCorpses"], Engine.Profile.Current.AutoOpenCorpses, 0, 5);
             _autoOpenCorpse.ValueChanged += (sender, e) => { _autoOpenCorpseArea.IsVisible = _autoOpenCorpse.IsChecked; };
 
             _autoOpenCorpseRange = CreateInputField(_autoOpenCorpseArea, new TextBox(FONT, 2, 80, 80)
@@ -1110,7 +1110,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 30,
                 NumericOnly = true,
                 Text = Engine.Profile.Current.AutoOpenCorpseRange.ToString()
-            }, "Corpse Open Range:");
+            }, FileManager.Language.Dict["UI_Options_Experimental_AutoOpenCorpseRange"]);
 
             /* text = new Label("- Aura under feet:", true, HUE_FONT, 0, FONT)
             {
@@ -1122,7 +1122,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 SelectedIndex = Engine.Profile.Current.AuraUnderFeetType
             };*/
-            var text = new Label("Corpse Open Options:", true, HUE_FONT)
+            var text = new Label(FileManager.Language.Dict["UI_Options_Experimental_CorpseOpenOptions"], true, HUE_FONT)
             {
                 Y = _autoOpenCorpseRange.Y + 30,
                 X = 10
@@ -1131,7 +1131,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _autoOpenCorpseOptions = new Combobox(text.Width + 20, text.Y, 150, new[]
             {
-                "None", "Not Targeting", "Not Hiding", "Both"
+                FileManager.Language.Dict["UI_Options_Experimental_CorpseOpenOptions_None"], FileManager.Language.Dict["UI_Options_Experimental_CorpseOpenOptions_NotTargeting"], FileManager.Language.Dict["UI_Options_Experimental_CorpseOpenOptions_NotHiding"], FileManager.Language.Dict["UI_Options_Experimental_CorpseOpenOptions_Both"]
             })
             {
                 SelectedIndex = Engine.Profile.Current.CorpseOpenOptions
@@ -1142,7 +1142,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             // [BLOCK] disable hotkeys
             {
-                _disableDefaultHotkeys = new Checkbox(0x00D2, 0x00D3, "Disable default UO hotkeys", FONT, HUE_FONT)
+                _disableDefaultHotkeys = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Experimental_DisableDefaultHotkeys"], FONT, HUE_FONT)
                 {
                     Y = 0,
                     IsChecked = Engine.Profile.Current.DisableDefaultHotkeys
@@ -1153,7 +1153,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _defaultHotkeysArea = new ScrollAreaItem();
 
-                _disableArrowBtn = new Checkbox(0x00D2, 0x00D3, "Disable arrows & numlock arrows (player moving)", FONT, HUE_FONT)
+                _disableArrowBtn = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Experimental_DisableArrowBtn"], FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 5,
@@ -1161,7 +1161,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _defaultHotkeysArea.Add(_disableArrowBtn);
 
-                _disableTabBtn = new Checkbox(0x00D2, 0x00D3, "Disable TAB (toggle warmode)", FONT, HUE_FONT)
+                _disableTabBtn = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Experimental_DisableTabBtn"], FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 25,
@@ -1169,7 +1169,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _defaultHotkeysArea.Add(_disableTabBtn);
 
-                _disableCtrlQWBtn = new Checkbox(0x00D2, 0x00D3, "Disable Ctrl + Q/W (messageHistory)", FONT, HUE_FONT)
+                _disableCtrlQWBtn = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Experimental_DisableCtrlQWBtn"], FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 45,
@@ -1182,23 +1182,23 @@ namespace ClassicUO.Game.UI.Gumps
                 _defaultHotkeysArea.IsVisible = _disableDefaultHotkeys.IsChecked;
             }
 
-            _enableDragSelect = CreateCheckBox(rightArea, "Enable drag-select to open health bars", Engine.Profile.Current.EnableDragSelect, 0, 0);
+            _enableDragSelect = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Experimental_EnableDragSelect"], Engine.Profile.Current.EnableDragSelect, 0, 0);
 
             _dragSelectArea = new ScrollAreaItem();
 
-            text = new Label("Drag-select modifier key", true, HUE_FONT)
+            text = new Label(FileManager.Language.Dict["UI_Options_Experimental_EnableDragSelect_Key"], true, HUE_FONT)
             {
                 X = 20
             };
             _dragSelectArea.Add(text);
 
-            _dragSelectModifierKey = new Combobox(text.Width + 80, text.Y, 100, new[] {"None", "Ctrl", "Shift"})
+            _dragSelectModifierKey = new Combobox(text.Width + 80, text.Y, 100, new[] { FileManager.Language.Dict["UI_Options_Experimental_EnableDragSelect_Key_None"], FileManager.Language.Dict["UI_Options_Experimental_EnableDragSelect_Key_Ctrl"], FileManager.Language.Dict["UI_Options_Experimental_EnableDragSelect_Key_Shift"] })
             {
                 SelectedIndex = Engine.Profile.Current.DragSelectModifierKey
             };
             _dragSelectArea.Add(_dragSelectModifierKey);
 
-            _dragSelectHumanoidsOnly = new Checkbox(0x00D2, 0x00D3, "Select humanoids only", FONT, HUE_FONT, true)
+            _dragSelectHumanoidsOnly = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Experimental_EnableDragSelect_DragSelectHumanoidsOnly"], FONT, HUE_FONT, true)
             {
                 IsChecked = Engine.Profile.Current.DragSelectHumanoidsOnly,
                 X = 20,
@@ -1213,18 +1213,27 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollAreaItem _containerGumpLocation = new ScrollAreaItem();
 
-            _overrideContainerLocation = new Checkbox(0x00D2, 0x00D3, "Override container gump location", FONT, HUE_FONT, true)
+            _overrideContainerLocation = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Experimental_OverrideContainerLocation"], FONT, HUE_FONT, true)
             {
                 IsChecked = Engine.Profile.Current.OverrideContainerLocation,
             };
 
-            _overrideContainerLocationSetting = new Combobox(_overrideContainerLocation.Width + 20, 0, 200, new[] { "Near container position", "Top right", "Last dragged position" }, Engine.Profile.Current.OverrideContainerLocationSetting);
+            _overrideContainerLocationSetting = new Combobox(_overrideContainerLocation.Width + 20, 0, 200, new[] { FileManager.Language.Dict["UI_Options_Experimental_OverrideContainerLocation_NearContainerPosition"], FileManager.Language.Dict["UI_Options_Experimental_OverrideContainerLocation_TopRight"], FileManager.Language.Dict["UI_Options_Experimental_OverrideContainerLocation_LastDraggedPosition"] }, Engine.Profile.Current.OverrideContainerLocationSetting);
 
             _containerGumpLocation.Add(_overrideContainerLocation);
             _containerGumpLocation.Add(_overrideContainerLocationSetting);
 
             rightArea.Add(_containerGumpLocation);
 
+            ScrollAreaItem langItem = new ScrollAreaItem();
+            Label langText = new Label(FileManager.Language.Dict["UI_Options_General_Language"], true, HUE_FONT)
+            {
+                Y = 20
+            };
+            langItem.Add(langText);
+            _language = new Combobox(langText.X + langText.Width + 10, langText.Y - 2, 200, FileManager.Language.Language.ToArray(), FileManager.Language.Language.FindIndex(l => l.Equals(Engine.GlobalSettings.Language.ToUpper())));
+            langItem.Add(_language);
+            rightArea.Add(langItem);
 
             Add(rightArea, PAGE);
 
@@ -1238,7 +1247,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            _showNetStats = CreateCheckBox(rightArea, "Show network stats", Engine.Profile.Current.ShowNetworkStats, 0, 0);
+            _showNetStats = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Network_ShowNetworkStats"], Engine.Profile.Current.ShowNetworkStats, 0, 0);
 
             Add(rightArea, PAGE);
         }
@@ -1837,6 +1846,9 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.OverrideContainerLocation = _overrideContainerLocation.IsChecked;
             Engine.Profile.Current.OverrideContainerLocationSetting = _overrideContainerLocationSetting.SelectedIndex;
 
+            Engine.GlobalSettings.Language = _language.GetSelectedItem;
+            FileManager.Language.Load(Engine.GlobalSettings.Language);
+            Engine.GlobalSettings.Save();
             // network
             Engine.Profile.Current.ShowNetworkStats = _showNetStats.IsChecked;
 

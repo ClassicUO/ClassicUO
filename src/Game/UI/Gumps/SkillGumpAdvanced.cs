@@ -84,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             Add(_scrollArea);
 
-            Add(new NiceButton(10, 10, 180, 25, ButtonAction.Activate, "Name")
+            Add(new NiceButton(10, 10, 180, 25, ButtonAction.Activate, FileManager.Language.Dict["UI_Skill_Name"])
             {
                 ButtonParameter = (int) Buttons.SortName,
                 IsSelected = true,
@@ -92,21 +92,21 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 25
             });
 
-            Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, "Real")
+            Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, FileManager.Language.Dict["UI_Skill_Real"])
             {
                 ButtonParameter = (int) Buttons.SortReal,
                 X = 220,
                 Y = 25
             });
 
-            Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, "Base")
+            Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, FileManager.Language.Dict["UI_Skill_Base"])
             {
                 ButtonParameter = (int) Buttons.SortBase,
                 X = 300,
                 Y = 25
             });
 
-            Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, "Cap")
+            Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, FileManager.Language.Dict["UI_Skill_Cap"])
             {
                 ButtonParameter = (int) Buttons.SortCap,
                 X = 380,
@@ -171,7 +171,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _totalReal += skill.Base;
                 _totalValue += skill.Value;
 
-                Label skillName = new Label(skill.Name, true, 1153, font: 3);
+                Label skillName = new Label(FileManager.Language.Dict["UI_SkillName_" + skill.Name], true, 1153, font: 3);
                 Label skillValueBase = new Label(skill.Base.ToString(), true, 1153, font: 3);
                 Label skillValue = new Label(skill.Value.ToString(), true, 1153, font: 3);
                 Label skillCap = new Label(skill.Cap.ToString(), true, 1153, font: 3);
@@ -182,7 +182,7 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (SkillListEntry t in _skillListEntries)
                 _scrollArea.Add(t);
 
-            Add(new Label("Total: ", true, 1153) {X = 40, Y = 320});
+            Add(new Label(FileManager.Language.Dict["UI_Skill_Total"], true, 1153) {X = 40, Y = 320});
             Add(new Label(_totalReal.ToString(), true, 1153) {X = 220, Y = 320});
             Add(new Label(_totalValue.ToString(), true, 1153) {X = 300, Y = 320});
         }

@@ -43,9 +43,9 @@ namespace ClassicUO.Game.UI.Gumps
             Height = t.Height;
 
 
-            Add(new Label(message, false, 0x0386, 165)
+            Add(new Label(message, true, 0x7E3, 165)
             {
-                X = 33, Y = 30
+                X = 30, Y = 30
             });
 
             Add(new Button((int) Buttons.Cancel, 0x817, 0x818, 0x0819)

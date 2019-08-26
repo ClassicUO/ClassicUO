@@ -169,6 +169,7 @@ namespace ClassicUO.IO
         public static ArtLoader Art { get; private set; }
         public static MapLoader Map { get; private set; }
         public static ClilocLoader Cliloc { get; private set; }
+        public static LanguageLoader Language { get; private set; }
         public static GumpsLoader Gumps { get; private set; }
         public static FontsLoader Fonts { get; private set; }
         public static HuesLoader Hues { get; private set; }
@@ -201,7 +202,9 @@ namespace ClassicUO.IO
             tasks.Add(Map.Load());
 
             Cliloc = new ClilocLoader();
-            tasks.Add(Cliloc.Load(Engine.GlobalSettings.ClilocFile));
+            Language = new LanguageLoader();
+            tasks.Add(Language.Load(Engine.GlobalSettings.Language));//tasks.Add(Cliloc.Load(Engine.GlobalSettings.ClilocFile)); //Calling the loading of ClilocLoader in Language Loader
+
 
             Gumps = new GumpsLoader();
             tasks.Add(Gumps.Load());

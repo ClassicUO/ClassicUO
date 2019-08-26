@@ -60,15 +60,15 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             CanCloseWithRightClick = false;
 
-            GameActions.Print("WorldMap loading...", 0x35);
+            GameActions.Print(FileManager.Language.Dict["UI_WorldMap_Load"], 0x35);
             Load();
             OnResize();
 
 
             ContextMenuControl contextMenu = new ContextMenuControl();
-            contextMenu.Add("Flip map", () => _flipMap = !_flipMap, true, _flipMap);
-            contextMenu.Add("Top Most", () => TopMost = !TopMost, true, _isTopMost);
-            contextMenu.Add("Free view", () =>
+            contextMenu.Add(FileManager.Language.Dict["UI_WorldMap_Flip"], () => _flipMap = !_flipMap, true, _flipMap);
+            contextMenu.Add(FileManager.Language.Dict["UI_WorldMap_TopMost"], () => TopMost = !TopMost, true, _isTopMost);
+            contextMenu.Add(FileManager.Language.Dict["UI_WorldMap_FreeView"], () =>
             {
                 _freeView = !_freeView;
 
@@ -78,9 +78,9 @@ namespace ClassicUO.Game.UI.Gumps
                     CanMove = true;
                 }
             }, true, _freeView);
-            contextMenu.Add("Show party members", () => { _showPartyMembers = !_showPartyMembers; }, true, _showPartyMembers);
+            contextMenu.Add(FileManager.Language.Dict["UI_WorldMap_ShowPartyMembers"], () => { _showPartyMembers = !_showPartyMembers; }, true, _showPartyMembers);
             contextMenu.Add("", null);
-            contextMenu.Add("Close", Dispose);
+            contextMenu.Add(FileManager.Language.Dict["UI_WorldMap_Close"], Dispose);
 
 
             Add(contextMenu);
@@ -342,7 +342,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _mapTexture = new UOTexture32(realWidth, realHeight);
                 _mapTexture.SetData(buffer);
 
-                GameActions.Print("WorldMap loaded!", 0x48);
+                GameActions.Print(FileManager.Language.Dict["UI_WorldMap_Loaded"], 0x48);
             });
         }
 

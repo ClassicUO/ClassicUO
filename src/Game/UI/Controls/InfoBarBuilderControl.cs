@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Controls
 
             labelColor = new ClickableColorBox(150, 0, 13, 14, item.hue, color);
 
-            NiceButton deleteButton = new NiceButton(390, 0, 60, 25, ButtonAction.Activate, "Delete") { ButtonParameter = 999 };
+            NiceButton deleteButton = new NiceButton(390, 0, 60, 25, ButtonAction.Activate, FileManager.Language.Dict["UI_InfoBarCtrl_Delete"]) { ButtonParameter = 999 };
             deleteButton.MouseUp += (sender, e) =>
             {
                 Dispose();

@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = w, Height = h
             });
 
-            Add(new Label(message, false, 0x0386, Width - 90, 1)
+            Add(new Label(message, true, 0x7E3, Width - 90, 1)
             {
                 X = 40,
                 Y = 45

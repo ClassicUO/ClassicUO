@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Controls
         private string[] _items;
         private int _selectedIndex;
 
-        public Combobox(int x, int y, int width, string[] items, int selected = -1, int maxHeight = 0, bool showArrow = true, string emptyString = "", byte font = 9)
+        public Combobox(int x, int y, int width, string[] items, int selected = -1, int maxHeight = 0, bool showArrow = true, string emptyString = "", byte font = 0)
         {
             X = x;
             Y = y;
@@ -56,7 +56,7 @@ namespace ClassicUO.Game.UI.Controls
             });
             string initialText = selected > -1 ? items[selected] : emptyString;
 
-            Add(_label = new Label(initialText, false, 0x0453, font: _font)
+            Add(_label = new Label(initialText, true, 0x7E3, font: _font)
             {
                 X = 2, Y = 5
             });
@@ -141,7 +141,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 foreach (var item in items)
                 {
-                    var label = new HoveredLabel(item, false, 0x0453, 0x0453, font: _box._font)
+                    var label = new HoveredLabel(item, true, 0x7E3, 0x0453, font: _box._font)
                     {
                         X = 2,
                         Y = index * 15,

@@ -299,7 +299,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(button);
                 }
 
-                Label label = new Label(skill.Name, false, 0x0288, maxWidth, 9)
+                Label label = new Label(FileManager.Language.Dict["UI_SkillName_" + skill.Name], true, 0, maxWidth, 0)
                 {
                     X = 12
                 };
