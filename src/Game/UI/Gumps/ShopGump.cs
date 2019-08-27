@@ -613,7 +613,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }); // Plus
 
                 int status = 0;
-                const int increm = 50;
+                const int increm = 45;
 
                 float t0 = Engine.Ticks;
                 bool pressedAdd = false;
@@ -628,8 +628,8 @@ namespace ClassicUO.Game.UI.Gumps
                             OnButtonClick(0);
                             _StepsDone++;
 
-                            if (_StepChanger < 40 && _StepsDone % 3 == 0)
-                                _StepChanger++;
+                            if (_StepChanger < increm && _StepsDone % 3 == 0)
+                                _StepChanger+=2;
                         }
                     }
                 };
@@ -663,21 +663,21 @@ namespace ClassicUO.Game.UI.Gumps
                     ContainsByBounds = true
                 }); // Minus
 
-                float t1 = Engine.Ticks;
+                //float t1 = Engine.Ticks;
                 bool pressedRemove = false;
 
                 buttonRemove.MouseOver += (sender, e) =>
                 {
                     if (status == 2)
                     {
-                        if (pressedRemove && Engine.Ticks > t1)
+                        if (pressedRemove && Engine.Ticks > t0)
                         {
-                            t1 = Engine.Ticks + (increm - _StepChanger);
+                            t0 = Engine.Ticks + (increm - _StepChanger);
                             OnButtonClick(1);
                             _StepsDone++;
 
-                            if (_StepChanger < 40 && _StepsDone % 3 == 0)
-                                _StepChanger++;
+                            if (_StepChanger < increm && _StepsDone % 3 == 0)
+                                _StepChanger+=2;
                         }
                     }
                 };
@@ -690,7 +690,7 @@ namespace ClassicUO.Game.UI.Gumps
                     pressedRemove = true;
                     _StepChanger = 0;
                     status = 2;
-                    t1 = Engine.Ticks + 500;
+                    t0 = Engine.Ticks + 500;
                 };
 
                 buttonRemove.MouseUp += (sender, e) =>
