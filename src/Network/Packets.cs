@@ -179,8 +179,16 @@ namespace ClassicUO.Network
             }
 
             WriteUShort(character.Hue);
-            WriteUShort(character.Equipment[(int) Layer.Hair].Graphic);
-            WriteUShort(character.Equipment[(int) Layer.Hair].Hue);
+            if (character.Equipment[(int)Layer.Hair] != null)
+            {
+                WriteUShort(character.Equipment[(int)Layer.Hair].Graphic);
+                WriteUShort(character.Equipment[(int)Layer.Hair].Hue);
+            }
+            else
+            {
+                WriteUShort(0x00);
+                WriteUShort(0x00);
+            }
 
             if (character.Equipment[(int) Layer.Beard] != null)
             {
