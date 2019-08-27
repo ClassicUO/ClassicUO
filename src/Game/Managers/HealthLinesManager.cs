@@ -38,7 +38,7 @@ namespace ClassicUO.Game.Managers
         private Vector3 _vectorHue = Vector3.Zero;
 
 
-        private static readonly Texture2D _edge, _back; 
+        private static readonly Texture2D _edge, _back;
         static HealthLinesManager()
         {
             _edge = Textures.GetTexture(Color.Black);
@@ -61,7 +61,7 @@ namespace ClassicUO.Game.Managers
             int screenW = Engine.Profile.Current.GameWindowSize.X;
             int screenH = Engine.Profile.Current.GameWindowSize.Y;
 
-            
+
 
             Color color;
 
@@ -86,17 +86,17 @@ namespace ClassicUO.Game.Managers
                 int x = screenX + mobile.RealScreenPosition.X;
                 int y = screenY + mobile.RealScreenPosition.Y;
 
-                x += (int) mobile.Offset.X + 22;
-                y += (int) (mobile.Offset.Y - mobile.Offset.Z) + 22 + 5;
+                x += (int)mobile.Offset.X + 22;
+                y += (int)(mobile.Offset.Y - mobile.Offset.Z) + 22 + 5;
 
                 x += 5;
 
-               
 
-                x = (int) (x / scale);
-                y = (int) (y / scale);
-                x -= (int) (screenX / scale);
-                y -= (int) (screenY / scale);
+
+                x = (int)(x / scale);
+                y = (int)(y / scale);
+                x -= (int)(screenX / scale);
+                y -= (int)(screenY / scale);
                 x += screenX;
                 y += screenY;
 
@@ -111,7 +111,7 @@ namespace ClassicUO.Game.Managers
                         int yy = y;
 
                         if (!mobile.IsMounted)
-                            yy += (int) (22 / scale);
+                            yy += (int)(22 / scale);
 
 
                         FileManager.Animations.GetAnimationDimensions(mobile.AnimIndex,
@@ -125,8 +125,8 @@ namespace ClassicUO.Game.Managers
                                                                       out int width,
                                                                       out int height);
 
-                       
-                        yy -= (int) ((height + centerY + 28) / scale);
+
+                        yy -= (int)((height + centerY + 28) / scale);
 
 
                         int ww = mobile.HitsMax;
@@ -140,7 +140,7 @@ namespace ClassicUO.Game.Managers
                             else if (ww < 1)
                                 ww = 0;
 
-                            mobile.UpdateHits((byte) ww);
+                            mobile.UpdateHits((byte)ww);
                         }
 
                         if (mobile.HitsPercentage != 0)
@@ -149,7 +149,7 @@ namespace ClassicUO.Game.Managers
                             xx += 22;
                             yy -= mobile.HitsTexture.Height / 1;
 
-                         
+
                             if (!(xx < screenX || xx > screenX + screenW - mobile.HitsTexture.Width || yy < screenY || yy > screenY + screenH))
                                 mobile.HitsTexture.Draw(batcher, xx, yy);
                         }
@@ -162,7 +162,9 @@ namespace ClassicUO.Game.Managers
                 if (y < screenY || y > screenY + screenH - BAR_HEIGHT)
                     continue;
 
-                if (mode >= 1)
+                //if (mode >= 1) <-- Default
+                //To remove bar under self 
+                if (mode >= 1 && mobile != World.Player)
                 {
                     if (max > 0)
                     {
@@ -190,7 +192,7 @@ namespace ClassicUO.Game.Managers
                     batcher.Draw2D(Textures.GetTexture(color), x, y, max, BAR_HEIGHT, ref _vectorHue);
                 }
 
-               
+
             }
         }
     }
