@@ -105,6 +105,7 @@ namespace ClassicUO.Game.UI.Controls
 
             ToPage = parts.Count >= 7 ? int.Parse(parts[6]) : 0;
             WantUpdateSize = false;
+            ContainsByBounds = true;
         }
 
         public bool IsClicked { get; private set; }
