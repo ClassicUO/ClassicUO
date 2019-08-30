@@ -219,22 +219,24 @@ namespace ClassicUO.Game.UI.Controls
             if (button == MouseButton.Left)
             {
                 IsClicked = false;
-
-                switch (ButtonAction)
+                if (_entered)
                 {
-                    case ButtonAction.SwitchPage:
-                        ChangePage(ToPage);
+                    switch (ButtonAction)
+                    {
+                        case ButtonAction.SwitchPage:
+                            ChangePage(ToPage);
 
-                        break;
+                            break;
 
-                    case ButtonAction.Activate:
-                        OnButtonClick(ButtonID);
+                        case ButtonAction.Activate:
+                            OnButtonClick(ButtonID);
 
-                        break;
+                            break;
+                    }
+
+                    Mouse.LastLeftButtonClickTime = 0;
+                    Mouse.CancelDoubleClick = true;
                 }
-
-                Mouse.LastLeftButtonClickTime = 0;
-                Mouse.CancelDoubleClick = true;
             }
         }
 
