@@ -416,7 +416,7 @@ namespace ClassicUO.IO.Resources
                                 continue;
                         }
 
-                        dict.Add(graphic, new EquipConvData(newGraphic, (ushort)gump, color));
+                        dict[graphic] = new EquipConvData(newGraphic, (ushort) gump, color);
                     }
                 }
 
