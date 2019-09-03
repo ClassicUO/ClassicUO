@@ -219,15 +219,13 @@ namespace ClassicUO.Game.Data
         internal class ComboContent
         {
             private readonly int[] _ids;
-            private readonly int[] _labels;
-
             public ComboContent(int[] labels, int[] ids)
             {
-                _labels = labels;
                 _ids = ids;
+                Labels = labels.Select(o => FileManager.Cliloc.GetString(o)).ToArray();
             }
 
-            public string[] Labels => _labels.Select(o => FileManager.Cliloc.GetString(o)).ToArray();
+            public string[] Labels { get; }
 
             public int GetGraphic(int index)
             {

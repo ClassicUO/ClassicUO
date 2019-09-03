@@ -92,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int index = ((byte) World.Player.Abilities[_isPrimary ? 0 : 1] & 0x7F) - 1;
 
-            AbilityDefinition def = AbilityData.Abilities[index];
+            ref readonly AbilityDefinition def = ref AbilityData.Abilities[index];
 
             if (_definition.Index != def.Index)
             {

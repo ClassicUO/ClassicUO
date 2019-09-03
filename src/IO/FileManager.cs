@@ -124,10 +124,6 @@ namespace ClassicUO.IO
                 if (vers.Length > 3)
                     extra = int.Parse(vers[3]);
 
-                ClientBufferVersion[0] = (byte) major;
-                ClientBufferVersion[1] = (byte) minor;
-                ClientBufferVersion[2] = (byte) build;
-                ClientBufferVersion[3] = (byte) extra;
 
                 ClientVersion = (ClientVersions) (((major & 0xFF) << 24) | ((minor & 0xFF) << 16) | ((build & 0xFF) << 8) | (extra & 0xFF));
                 Log.Message(LogTypes.Trace, $"Client version: {Engine.GlobalSettings.ClientVersion} - {ClientVersion} {(automatically ? "[automatically found]" : "")}");
@@ -151,8 +147,6 @@ namespace ClassicUO.IO
                 Log.Message(LogTypes.Trace, "UOP? " + (IsUOPInstallation ? "yes" : "no"));
             }
         }
-
-        public static byte[] ClientBufferVersion { get; } = new byte[4];
 
         public static ClientVersions ClientVersion { get; private set; }
 

@@ -39,32 +39,30 @@ namespace ClassicUO.Game.Data
 
     internal static class Notoriety
     {
-            
-    public static Hue GetHue(NotorietyFlag flag)
+        public static Hue GetHue(NotorietyFlag flag)
         {
-
             switch (flag)
             {
                 case NotorietyFlag.Innocent:
-                    
+
                     return Engine.Profile.Current.InnocentHue;
 
                 case NotorietyFlag.Ally:
-                    
-                        return Engine.Profile.Current.FriendHue;
+
+                    return Engine.Profile.Current.FriendHue;
 
                 case NotorietyFlag.Criminal:
                 case NotorietyFlag.Gray:
-                   
-                        return Engine.Profile.Current.CriminalHue;
+
+                    return Engine.Profile.Current.CriminalHue;
 
                 case NotorietyFlag.Enemy:
-                   
-                        return Engine.Profile.Current.EnemyHue;
+
+                    return Engine.Profile.Current.EnemyHue;
 
                 case NotorietyFlag.Murderer:
-                    
-                        return Engine.Profile.Current.MurdererHue;
+
+                    return Engine.Profile.Current.MurdererHue;
 
                 case NotorietyFlag.Invulnerable:
 

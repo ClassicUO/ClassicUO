@@ -120,7 +120,7 @@ namespace ClassicUO.IO.Resources
                         while ((line = reader.ReadLine()) != null)
                         {
                             if (TryParseConfigLine(line, out Tuple<int, string, bool> songData))
-                                _mMusicData.Add(songData.Item1, new Tuple<string, bool>(songData.Item2, songData.Item3));
+                                _mMusicData[songData.Item1] = new Tuple<string, bool>(songData.Item2, songData.Item3);
                         }
                     }
                 }
