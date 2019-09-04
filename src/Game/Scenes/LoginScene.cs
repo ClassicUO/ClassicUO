@@ -410,7 +410,7 @@ namespace ClassicUO.Game.Scenes
         {
             Log.Message(LogTypes.Warning, "Disconnected (login socket)!");
 
-            if (e != SocketError.Success)
+            if (e > 0)
             {
                 Characters = null;
                 Servers = null;
