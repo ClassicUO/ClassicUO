@@ -921,11 +921,6 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public Control[] GetMouseOverControls(Point position)
-        {
-            return Gumps.Where(o => o.HitTest(position) != null).ToArray();
-        }
-
         private Control GetMouseOverControl(Point position)
         {
             if (_isDraggingControl)
