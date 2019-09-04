@@ -283,11 +283,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 if (button == MouseButton.Left) OnButtonClick((int)Buttons.Server + _buttonId);
             }
-
-            public override void Dispose()
-            {
-                base.Dispose();
-            }
         }
     }
 }

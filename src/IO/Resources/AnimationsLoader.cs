@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -232,7 +233,7 @@ namespace ClassicUO.IO.Resources
                 {
                     string[] typeNames = new string[5]
                     {
-                    "monster", "sea_monster", "animal", "human", "equipment"
+                        "monster", "sea_monster", "animal", "human", "equipment"
                     };
 
                     using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "mobtypes.txt"))))
@@ -248,8 +249,8 @@ namespace ClassicUO.IO.Resources
 
                             string[] parts = line.Split(new[]
                             {
-                            '\t', ' '
-                        }, StringSplitOptions.RemoveEmptyEntries);
+                                '\t', ' '
+                            }, StringSplitOptions.RemoveEmptyEntries);
 
                             if (parts.Length < 3)
                                 continue;
@@ -744,7 +745,8 @@ namespace ClassicUO.IO.Resources
                     uint frameCount = reader.ReadUInt();
                     int newGroup = reader.ReadInt();
 
-                    if (frameCount == 0 && DataIndex[animID] != null) DataIndex[animID].ReplaceUopGroup((byte)oldGroup, (byte)newGroup);
+                    if (frameCount == 0 && DataIndex[animID] != null)
+                        DataIndex[animID].ReplaceUopGroup((byte)oldGroup, (byte)newGroup);
 
                     reader.Skip(60);
                 }
@@ -896,6 +898,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
+        [MethodImpl(256)]
         public void GetAnimDirection(ref byte dir, ref bool mirror)
         {
             switch (dir)
@@ -933,7 +936,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-
+        [MethodImpl(256)]
         public void GetSittingAnimDirection(ref byte dir, ref bool mirror, ref int x, ref int y)
         {
             switch (dir)
@@ -964,10 +967,10 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-
+        [MethodImpl(256)]
         public void FixSittingDirection(ref byte layerDirection, ref bool mirror, ref int x, ref int y)
         {
-            ref var data = ref SittingInfos[SittingValue - 1];
+            ref readonly var data = ref SittingInfos[SittingValue - 1];
 
             switch (Direction)
             {
@@ -1071,7 +1074,7 @@ namespace ClassicUO.IO.Resources
         }
 
 
-
+        [MethodImpl(256)]
         public ANIMATION_GROUPS GetGroupIndex(ushort graphic, bool isequip = false)
         {
             if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
@@ -1097,6 +1100,7 @@ namespace ClassicUO.IO.Resources
             return ANIMATION_GROUPS.AG_HIGHT;
         }
 
+        [MethodImpl(256)]
         public byte GetDieGroupIndex(ushort id, bool second, bool isRunning = false)
         {
             ANIMATION_FLAGS flags = (ANIMATION_FLAGS)DataIndex[id].Flags;
@@ -1132,6 +1136,7 @@ namespace ClassicUO.IO.Resources
             return 0;
         }
 
+        [MethodImpl(256)]
         public bool AnimationExists(ushort graphic, byte group, bool isCorpse = false)
         {
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
@@ -1146,6 +1151,7 @@ namespace ClassicUO.IO.Resources
 
             return false;
         }
+
 
         public bool LoadDirectionGroup(ref AnimationDirection animDir)
         {
