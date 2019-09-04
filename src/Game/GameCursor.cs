@@ -344,9 +344,7 @@ namespace ClassicUO.Game
 
                     if (gs != null && gs.IsMouseOverViewport)
                     {
-                        GameObject obj = SelectedObject.Object as GameObject;
-
-                        if (obj != null)
+                        if (SelectedObject.Object is GameObject obj)
                         {
                             _targetDistanceText.Text = obj.Distance.ToString();
 
