@@ -258,7 +258,7 @@ namespace ClassicUO.Game
             return mob;
         }
 
-        public static bool RemoveItem(Serial serial)
+        public static bool RemoveItem(Serial serial, bool forceRemove = false)
         {
             Item item = Items.Get(serial);
 
@@ -279,16 +279,19 @@ namespace ClassicUO.Game
             }
 
             foreach (Item i in item.Items)
-                RemoveItem(i);
+                RemoveItem(i, forceRemove);
 
 
             item.Items.Clear();
             item.Destroy();
 
+            if (forceRemove)
+                Items.Remove(serial);
+
             return true;
         }
 
-        public static bool RemoveMobile(Serial serial)
+        public static bool RemoveMobile(Serial serial, bool forceRemove = false)
         {
             Mobile mobile = Mobiles.Get(serial);
 
@@ -296,10 +299,13 @@ namespace ClassicUO.Game
                 return false;
 
             foreach (Item i in mobile.Items)
-                RemoveItem(i);
+                RemoveItem(i, forceRemove);
 
             mobile.Items.Clear();
             mobile.Destroy();
+
+            if (forceRemove)
+                Mobiles.Remove(serial);
 
             return true;
         }
