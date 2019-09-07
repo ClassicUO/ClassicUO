@@ -171,7 +171,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _eyeGumpPic.Graphic = (Graphic) (0x0045 + _eyeCorspeOffset);
                 _eyeGumpPic.Texture = FileManager.Gumps.GetTexture(_eyeGumpPic.Graphic);
             }
-            if(Iconized != null) Iconized.Hue = _item.Hue;
         }
 
         public override void Save(BinaryWriter writer)
