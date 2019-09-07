@@ -835,7 +835,7 @@ namespace ClassicUO.Game.GameObjects
                         break;
                     }
 
-                    default: //lightbrown/horse2
+                    default:
 
                     {
                         if (ItemData.AnimID != 0)

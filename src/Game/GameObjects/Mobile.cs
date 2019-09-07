@@ -227,7 +227,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool Exists => World.Contains(Serial);
 
-        public bool IsMounted => HasEquipment && Equipment[0x19] != null && !IsDrivingBoat;
+        public bool IsMounted => HasEquipment && Equipment[0x19] != null && !IsDrivingBoat && Equipment[0x19].GetGraphicForAnimation() != 0xFFFF;
 
         public bool IsDrivingBoat
         {
