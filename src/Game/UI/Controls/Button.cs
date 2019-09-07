@@ -23,6 +23,7 @@
 
 using System.Collections.Generic;
 
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
@@ -219,7 +220,7 @@ namespace ClassicUO.Game.UI.Controls
             if (button == MouseButton.Left)
             {
                 IsClicked = false;
-                if (_entered)
+                if (_entered || Engine.SceneManager.CurrentScene is GameScene)
                 {
                     switch (ButtonAction)
                     {
@@ -242,7 +243,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private UOTexture GetTextureByState()
         {
-            if (_entered)
+            if (_entered || IsClicked)
             {
                 if (IsClicked && _textures[PRESSED] != null)
                     return _textures[PRESSED];

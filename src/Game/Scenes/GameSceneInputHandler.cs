@@ -332,6 +332,10 @@ namespace ClassicUO.Game.Scenes
 
             if (!IsMouseOverViewport)
             {
+                if (IsHoldingItem)
+                {
+                    Engine.UI.MouseOverControl?.InvokeMouseUp(Mouse.Position, MouseButton.Left);
+                }
                 return;
             }
 

@@ -76,9 +76,6 @@ namespace ClassicUO.Game.Managers
 
             Engine.Input.LeftMouseButtonDown += (sender, e) =>
             {
-                //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
-                //    return;
-
                 HandleMouseInput();
 
                 if (MouseOverControl != null)
@@ -106,31 +103,20 @@ namespace ClassicUO.Game.Managers
                 }
             };
 
-            Control lastLeftUp = null, lastRightUp = null;
-
             Engine.Input.LeftMouseButtonUp += (sender, e) =>
             {
-                //if (!IsModalControlOpen && ObjectsBlockingInputExists)
-                //    return;
-
-                //if (MouseOverControl == null)
-                //    return;
+                HandleMouseInput();
 
                 const int btn = (int) MouseButton.Left;
                 EndDragControl(Mouse.Position);
 
                 if (MouseOverControl != null)
                 {
-                    //if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
-                    //    MouseOverControl.InvokeMouseClick(Mouse.Position, MouseButton.Left);
-
-                    //if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
+                    if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
                         MouseOverControl.InvokeMouseUp(Mouse.Position, MouseButton.Left);
 
                     if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
                         _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButton.Left);
-
-                    lastLeftUp = MouseOverControl;
                 }
                 else
                     _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButton.Left);
@@ -141,14 +127,15 @@ namespace ClassicUO.Game.Managers
 
             Engine.Input.LeftMouseDoubleClick += (sender, e) =>
             {
-                if (MouseOverControl != null && IsMouseOverAControl && MouseOverControl == lastLeftUp)
+                HandleMouseInput();
+
+                if (MouseOverControl != null && IsMouseOverAControl)
                     e.Result = MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Left);
             };
 
             Engine.Input.RightMouseButtonDown += (sender, e) =>
             {
-                //if (!IsModalControlOpen && ObjectsBlockingInputExists)
-                //    return;
+                HandleMouseInput();
 
                 if (MouseOverControl != null)
                 {
@@ -179,11 +166,8 @@ namespace ClassicUO.Game.Managers
 
             Engine.Input.RightMouseButtonUp += (sender, e) =>
             {
-                //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
-                //    return;
+                HandleMouseInput();
 
-                //if (MouseOverControl == null)
-                //    return;
                 const int btn = (int) MouseButton.Right;
                 EndDragControl(Mouse.Position);
 
@@ -191,7 +175,6 @@ namespace ClassicUO.Game.Managers
                 {
                     if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
                     {
-                        //MouseOverControl.InvokeMouseClick(Mouse.Position, MouseButton.Right);
                         MouseOverControl.InvokeMouseCloseGumpWithRClick();
                     }
 
@@ -202,9 +185,6 @@ namespace ClassicUO.Game.Managers
                         _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButton.Right);
                         _mouseDownControls[btn].InvokeMouseCloseGumpWithRClick();
                     }
-
-
-                    lastRightUp = MouseOverControl;
                 }
                 else if (_mouseDownControls[btn] != null)
                 {
@@ -218,14 +198,12 @@ namespace ClassicUO.Game.Managers
 
             Engine.Input.RightMouseDoubleClick += (sender, e) =>
             {
-                if (MouseOverControl != null && IsMouseOverAControl && MouseOverControl == lastRightUp) e.Result = MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Right);
+                if (MouseOverControl != null && IsMouseOverAControl)
+                    e.Result = MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Right);
             };
 
             Engine.Input.MouseWheel += (sender, isup) =>
             {
-                //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
-                //    return;
-
                 if (MouseOverControl != null && MouseOverControl.AcceptMouseInput)
                     MouseOverControl.InvokeMouseWheel(isup ? MouseEvent.WheelScrollUp : MouseEvent.WheelScrollDown);
             };
