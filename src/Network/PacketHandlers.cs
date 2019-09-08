@@ -3699,6 +3699,8 @@ namespace ClassicUO.Network
                             ushort y = p.ReadUShort();
                             byte map = p.ReadByte();
                             byte hits = p.ReadByte();
+
+                            Log.Message(LogTypes.Info, $"Received custom {(isparty ? "party" : "guild")} member info: X: {x}, Y: {y}, Map: {map}, Hits: {hits}");
                         }
                     }
 
