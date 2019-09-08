@@ -912,29 +912,29 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _activeChatArea.Add(_chatShiftEnterCheckbox);
 
-                var text = new Label(FileManager.Language.Dict["UI_Options_Speech_ActivateChatIgnoreHotkeys"], true, HUE_FONT)
-                {
-                    X = 20,
-                    Y = 60
-                };
+                //var text = new Label(FileManager.Language.Dict["UI_Options_Speech_ActivateChatIgnoreHotkeys"], true, HUE_FONT)
+                //{
+                //    X = 20,
+                //    Y = 60
+                //};
 
-                _activeChatArea.Add(text);
+                //_activeChatArea.Add(text);
 
-                _chatIgnodeHotkeysCheckbox = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Speech_ActivateChatIgnoreHotkeys_Client"], FONT, HUE_FONT)
-                {
-                    X = 40,
-                    Y = 85,
-                    IsChecked = Engine.Profile.Current.ActivateChatIgnoreHotkeys
-                };
-                _activeChatArea.Add(_chatIgnodeHotkeysCheckbox);
+                //_chatIgnodeHotkeysCheckbox = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Speech_ActivateChatIgnoreHotkeys_Client"], FONT, HUE_FONT)
+                //{
+                //    X = 40,
+                //    Y = 85,
+                //    IsChecked = Engine.Profile.Current.ActivateChatIgnoreHotkeys
+                //};
+                //_activeChatArea.Add(_chatIgnodeHotkeysCheckbox);
 
-                _chatIgnodeHotkeysPluginsCheckbox = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Speech_ActivateChatIgnoreHotkeys_Plugins"], FONT, HUE_FONT)
-                {
-                    X = 40,
-                    Y = 105,
-                    IsChecked = Engine.Profile.Current.ActivateChatIgnoreHotkeysPlugins
-                };
-                _activeChatArea.Add(_chatIgnodeHotkeysPluginsCheckbox);
+                //_chatIgnodeHotkeysPluginsCheckbox = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Speech_ActivateChatIgnoreHotkeys_Plugins"], FONT, HUE_FONT)
+                //{
+                //    X = 40,
+                //    Y = 105,
+                //    IsChecked = Engine.Profile.Current.ActivateChatIgnoreHotkeysPlugins
+                //};
+                //_activeChatArea.Add(_chatIgnodeHotkeysPluginsCheckbox);
 
                 rightArea.Add(_activeChatArea);
             }
@@ -1222,6 +1222,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(_containerGumpLocation);
 
+            _showTargetRangeIndicator = new Checkbox(0x00D2, 0x00D3, "Show target range indicator", FONT, HUE_FONT, true)
+            {
+                IsChecked = Engine.Profile.Current.ShowTargetRangeIndicator,
+            };
+
+            rightArea.Add(_showTargetRangeIndicator);
+
             ScrollAreaItem langItem = new ScrollAreaItem();
             Label langText = new Label(FileManager.Language.Dict["UI_Options_General_Language"], true, HUE_FONT)
             {
@@ -1230,9 +1237,8 @@ namespace ClassicUO.Game.UI.Gumps
             langItem.Add(langText);
             _language = new Combobox(langText.X + langText.Width + 10, langText.Y - 2, 200, FileManager.Language.Language.ToArray(), FileManager.Language.Language.FindIndex(l => l.Equals(Engine.GlobalSettings.Language.ToUpper())));
             langItem.Add(_language);
-            rightArea.Add(langItem);
 
-            rightArea.Add(_showTargetRangeIndicator);
+            rightArea.Add(langItem);
 
             Add(rightArea, PAGE);
 
@@ -1841,6 +1847,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Engine.Profile.Current.OverrideContainerLocation = _overrideContainerLocation.IsChecked;
             Engine.Profile.Current.OverrideContainerLocationSetting = _overrideContainerLocationSetting.SelectedIndex;
+            Engine.Profile.Current.ShowTargetRangeIndicator = _showTargetRangeIndicator.IsChecked;
 
             Engine.GlobalSettings.Language = _language.GetSelectedItem;
             FileManager.Language.Load(Engine.GlobalSettings.Language);
