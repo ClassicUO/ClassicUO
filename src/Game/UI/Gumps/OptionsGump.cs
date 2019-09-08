@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator;
         private Combobox _overrideContainerLocationSetting, _language;
 
         // sounds
@@ -84,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
         // GameWindowSize
         private TextBox _gameWindowWidth;
         private Combobox _gridLoot;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatIgnodeHotkeysCheckbox, _chatIgnodeHotkeysPluginsCheckbox, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
         private Combobox _hpComboBox, _healtbarType, _fieldsType, _hpComboBoxShowWhen;
 
         // combat & spells
@@ -892,7 +892,6 @@ namespace ClassicUO.Game.UI.Gumps
                     IsChecked = Engine.Profile.Current.ActivateChatAfterEnter
                 };
                 _chatAfterEnter.ValueChanged += (sender, e) => { _activeChatArea.IsVisible = _chatAfterEnter.IsChecked; };
-
                 rightArea.Add(_chatAfterEnter);
 
                 _activeChatArea = new ScrollAreaItem();
@@ -938,8 +937,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _activeChatArea.Add(_chatIgnodeHotkeysPluginsCheckbox);
 
                 rightArea.Add(_activeChatArea);
-
-                _activeChatArea.IsVisible = _chatAfterEnter.IsChecked;
             }
 
             _speechColorPickerBox = CreateClickableColorBox(rightArea, 0, 20, Engine.Profile.Current.SpeechHue, FileManager.Language.Dict["UI_Options_Speech_SpeechHue"], 20, 20);
@@ -1235,6 +1232,8 @@ namespace ClassicUO.Game.UI.Gumps
             langItem.Add(_language);
             rightArea.Add(langItem);
 
+            rightArea.Add(_showTargetRangeIndicator);
+
             Add(rightArea, PAGE);
 
             _autoOpenCorpseArea.IsVisible = _autoOpenCorpse.IsChecked;
@@ -1404,8 +1403,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _allyMessageColorPickerBox.SetColor(0x0057, FileManager.Hues.GetPolygoneColor(12, 0x0057));
                     _chatAfterEnter.IsChecked = false;
                     Engine.UI.SystemChat.IsActive = !_chatAfterEnter.IsChecked;
-                    _chatIgnodeHotkeysCheckbox.IsChecked = true;
-                    _chatIgnodeHotkeysPluginsCheckbox.IsChecked = true;
                     _chatAdditionalButtonsCheckbox.IsChecked = true;
                     _chatShiftEnterCheckbox.IsChecked = true;
                     _activeChatArea.IsVisible = _chatAfterEnter.IsChecked;
@@ -1456,6 +1453,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _overrideContainerLocation.IsChecked = false;
                     _overrideContainerLocationSetting.SelectedIndex = 0;
                     _dragSelectHumanoidsOnly.IsChecked = false;
+                    _showTargetRangeIndicator.IsChecked = false;
 
                     break;
 
@@ -1588,8 +1586,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.Profile.Current.ActivateChatAfterEnter = _chatAfterEnter.IsChecked;
             }
 
-            Engine.Profile.Current.ActivateChatIgnoreHotkeys = _chatIgnodeHotkeysCheckbox.IsChecked;
-            Engine.Profile.Current.ActivateChatIgnoreHotkeysPlugins = _chatIgnodeHotkeysPluginsCheckbox.IsChecked;
             Engine.Profile.Current.ActivateChatAdditionalButtons = _chatAdditionalButtonsCheckbox.IsChecked;
             Engine.Profile.Current.ActivateChatShiftEnterSupport = _chatShiftEnterCheckbox.IsChecked;
             Engine.Profile.Current.SaveJournalToFile = _saveJournalCheckBox.IsChecked;

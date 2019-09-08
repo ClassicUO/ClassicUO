@@ -277,7 +277,7 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 ref readonly var c = ref infoCells[pos];
 
-                                ushort color = (ushort)(0x8000 | (colored[pos] ? FileManager.Hues.GetColor16(28672, c.TileID) : FileManager.Hues.GetRadarColorData(c.TileID)));
+                                ushort color = (ushort)(0x8000 | (colored[pos] ? FileManager.Hues.GetColor16(16384, c.TileID) : FileManager.Hues.GetRadarColorData(c.TileID)));
                                 Color cc;
 
                                 if (x > 0)

@@ -332,6 +332,10 @@ namespace ClassicUO.Game.Scenes
 
             if (!IsMouseOverViewport)
             {
+                if (IsHoldingItem)
+                {
+                    Engine.UI.MouseOverControl?.InvokeMouseUp(Mouse.Position, MouseButton.Left);
+                }
                 return;
             }
 
@@ -692,7 +696,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_isUpDown || _isDownDown || _isLeftDown || _isRightDown)
             {
-                if (!Engine.Profile.Current.ActivateChatStatus || Engine.UI.SystemChat?.textBox.Text.Length == 0)
+                if (Engine.UI.SystemChat?.IsActive == false || Engine.UI.SystemChat?.textBox.Text.Length == 0)
                     _arrowKeyPressed = true;
             }
 
@@ -702,11 +706,8 @@ namespace ClassicUO.Game.Scenes
             if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
                 TargetManager.CancelTarget();
 
-            if (Engine.Profile.Current.ActivateChatAfterEnter)
-            {
-                if (Engine.Profile.Current.ActivateChatIgnoreHotkeys && Engine.Profile.Current.ActivateChatStatus)
-                    return;
-            }
+            if (!Engine.UI.IsKeyboardFocusAllowHotkeys)
+                return;
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB /*&& !Engine.Profile.Current.DisableTabBtn*/)
             {

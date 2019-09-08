@@ -743,9 +743,11 @@ namespace ClassicUO.Network
                 }
                // else
                 {
-                    World.RemoveMobile(serial);
+
+
+
+                    World.RemoveMobile(serial, true);
                     m.Items.ProcessDelta();
-                    World.Mobiles.Remove(m);
                     World.Items.ProcessDelta();
                     World.Mobiles.ProcessDelta();
                 }
@@ -757,7 +759,7 @@ namespace ClassicUO.Network
                 if (it.IsMulti)
                     World.HouseManager.Remove(it);
 
-                World.RemoveItem(it);
+                World.RemoveItem(it, true);
                 Entity cont = World.Get(it.Container);
 
                 if (cont != null)
@@ -773,47 +775,11 @@ namespace ClassicUO.Network
                     }
                 }
 
-                
-                World.Items.Remove(it);
                 World.Items.ProcessDelta();
 
                 if (updateAbilities)
                     World.Player.UpdateAbilities();
             }
-
-            //GameScene scene = Engine.SceneManager.GetScene<GameScene>();
-
-            //if (scene.HeldItem.Serial == serial)
-            //    scene.HeldItem.Enabled = false;
-
-            //if (World.CorpseManager.Exists(0, serial))
-            //    return;
-
-            //if (serial.IsItem)
-            //{
-            //    Item item = World.Items.Get(serial);
-
-            //    if (!item.OnGround && item.Container.IsValid)
-            //    {
-            //        if (item.Container == World.Player && item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded) World.Player.UpdateAbilities();
-
-            //        Entity cont = World.Get(item.Container);
-
-            //        if (cont != null)
-            //        {
-            //            cont.Items.Remove(item);
-            //            cont.Items.ProcessDelta();
-            //        }
-            //    }
-
-            //    if (World.RemoveItem(serial))
-            //        World.Items.ProcessDelta();
-            //}
-            //else if (serial.IsMobile && World.RemoveMobile(serial))
-            //{
-            //    World.Items.ProcessDelta();
-            //    World.Mobiles.ProcessDelta();
-            //}
         }
 
         private static void UpdatePlayer(Packet p)
@@ -3420,6 +3386,13 @@ namespace ClassicUO.Network
             short minX = multi.MinX;
             short minY = multi.MinY;
             short maxY = multi.MaxY;
+
+            if (multi.MinX <= 0 && multi.MinY <= 0 && multi.MaxX <= 0 && multi.MaxY <= 0)
+            {
+                Log.Message(LogTypes.Warning, "[CustomHouse (0xD8) - Invalid multi dimentions. Maybe missing some installation required files");
+                return;
+            }
+
             byte planes = p.ReadByte();
 
             DataReader stream = new DataReader();
@@ -3726,6 +3699,8 @@ namespace ClassicUO.Network
                             ushort y = p.ReadUShort();
                             byte map = p.ReadByte();
                             byte hits = p.ReadByte();
+
+                            Log.Message(LogTypes.Info, $"Received custom {(isparty ? "party" : "guild")} member info: X: {x}, Y: {y}, Map: {map}, Hits: {hits}");
                         }
                     }
 

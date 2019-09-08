@@ -196,11 +196,13 @@ namespace ClassicUO.Input
                 case SDL_EventType.SDL_MOUSEBUTTONDOWN:
                     Mouse.Update();
                     bool isDown = e.type == SDL_EventType.SDL_MOUSEBUTTONDOWN;
+                    bool resetTime = false;
 
                     if (_dragStarted && !isDown)
                     {
                         DragEnd.Raise();
                         _dragStarted = false;
+                        resetTime = true;
                     }
 
                     SDL_MouseButtonEvent mouse = e.button;
@@ -244,6 +246,9 @@ namespace ClassicUO.Input
                             }
                             else
                             {
+                                if (resetTime)
+                                    Mouse.LastLeftButtonClickTime = 0;
+
                                 if (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF)
                                 {
                                     Engine.SceneManager.CurrentScene.OnLeftMouseUp();
@@ -338,6 +343,9 @@ namespace ClassicUO.Input
                             }
                             else
                             {
+                                if (resetTime)
+                                    Mouse.LastRightButtonClickTime = 0;
+
                                 if (Mouse.LastRightButtonClickTime != 0xFFFF_FFFF)
                                 {
                                     Engine.SceneManager.CurrentScene.OnRightMouseUp();

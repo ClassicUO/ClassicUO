@@ -94,6 +94,7 @@
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json\lib\net45\Newtonsoft.Json.dll</HintPath>
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -115,7 +116,6 @@
     <Compile Include="Game\Data\EntityFlags.cs" />
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
-    <Compile Include="Game\Data\HealthPercentageHues.cs" />
     <Compile Include="Game\Data\Layers.cs" />
     <Compile Include="Game\Data\LightColors.cs" />
     <Compile Include="Game\Data\MapMessageType.cs" />
@@ -360,7 +360,6 @@
     <Compile Include="Game\Data\LockedFeatures.cs" />
     <Compile Include="Game\Data\FeaturesFlags.cs" />
     <Compile Include="Game\Data\MovementSpeed.cs" />
-    <Compile Include="Game\Data\Property.cs" />
     <Compile Include="Game\Data\Reagents.cs" />
     <Compile Include="Game\Data\Skill.cs" />
     <Compile Include="Game\Data\SpellbookData.cs" />
@@ -512,6 +511,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+    <None Include="README.md" />
     <None Include="shaders\compile_shaders.bat" />
     <None Include="shaders\IsometricWorld.fx" />
     <EmbeddedResource Include="shaders\IsometricWorld.fxc" />
@@ -539,7 +539,9 @@
     <None Include="libs\osx\libtheorafile.dylib">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="README.md" />
+    <None Include="ClassicUO-mono.sh">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <EmbeddedResource Include="shaders\xBR.fxc" />
   </ItemGroup>
   <ItemGroup>

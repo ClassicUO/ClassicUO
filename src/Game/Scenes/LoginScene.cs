@@ -375,10 +375,21 @@ namespace ClassicUO.Game.Scenes
         {
             Log.Message(LogTypes.Info, "Connected!");
             CurrentLoginStep = LoginStep.VerifyingAccount;
+
             if (FileManager.ClientVersion > ClientVersions.CV_6040)
-                NetClient.LoginSocket.Send(new PSeed(NetClient.LoginSocket.ClientAddress, FileManager.ClientBufferVersion));
+            {
+                uint clientVersion = (uint) FileManager.ClientVersion;
+
+                byte major = (byte) (clientVersion >> 24);
+                byte minor = (byte) (clientVersion >> 16);
+                byte build = (byte) (clientVersion >> 8);
+                byte extra = (byte) clientVersion;
+
+                NetClient.LoginSocket.Send(new PSeed(NetClient.LoginSocket.ClientAddress, major, minor, build, extra));
+            }
             else
                 NetClient.LoginSocket.Send(BitConverter.GetBytes(NetClient.LoginSocket.ClientAddress));
+
             NetClient.LoginSocket.Send(new PFirstLogin(Account, Password));
         }
 
@@ -403,13 +414,14 @@ namespace ClassicUO.Game.Scenes
             {
                 Characters = null;
                 Servers = null;
-                PopupMessage = $"Connection lost:\n`{e}`";
 
                 if (Engine.GlobalSettings.Reconnect)
                 {
                     Reconnect = true;
                     PopupMessage = $"Reconnect, please wait...`{_reconnectTryCounter}`\n`{e}`";
                 }
+                else
+                    PopupMessage = $"Connection lost:\n`{e}`";
 
                 CurrentLoginStep = LoginStep.PopUpMessage;
             }
@@ -432,7 +444,11 @@ namespace ClassicUO.Game.Scenes
                         {
                             int index = Engine.GlobalSettings.LastServerNum;
 
-                            if (index <= 0 || index > Servers.Length) index = 1;
+                            if (index <= 0 || index > Servers.Length)
+                            {
+                                Log.Message(LogTypes.Warning, $"Wrong server index: {index}");
+                                index = 1;
+                            }
 
                             SelectServer((byte) Servers[index - 1].Index);
                         }

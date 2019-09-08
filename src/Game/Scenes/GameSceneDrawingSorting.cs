@@ -244,8 +244,12 @@ namespace ClassicUO.Game.Scenes
                             {
                                 if (StaticFilters.IsTree(st.OriginalGraphic))
                                 {
-                                    if (Engine.Profile.Current.TreeToStumps && st.ItemData.IsImpassable && st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
+                                    if (Engine.Profile.Current.TreeToStumps && st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
+                                    {
+                                        if (!itemData.IsImpassable)
+                                            continue;
                                         st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC);
+                                    }
                                     else if (st.OriginalGraphic != st.Graphic && !Engine.Profile.Current.TreeToStumps)
                                         st.RestoreOriginalGraphic();
                                 }
@@ -262,7 +266,8 @@ namespace ClassicUO.Game.Scenes
                                     continue;
                             }
 
-                            if (Engine.Profile.Current.TreeToStumps && itemData.IsFoliage || Engine.Profile.Current.HideVegetation && StaticFilters.IsVegetation(obj.Graphic))
+                            //we avoid to hide impassable foliage or bushes, if present...
+                            if ((Engine.Profile.Current.TreeToStumps && itemData.IsFoliage) || (Engine.Profile.Current.HideVegetation && !itemData.IsImpassable && StaticFilters.IsVegetation(obj.Graphic)))
                                 continue;
 
                             //if (HeightChecks <= 0 && (!itemData.IsBridge || ((itemData.Flags & TileFlag.StairBack | TileFlag.StairRight) != 0) || itemData.IsWall))

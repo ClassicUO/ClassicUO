@@ -200,7 +200,8 @@ namespace ClassicUO.IO.Resources
 
                         if (val != 0)
                             val = (ushort) (0x8000 | val);
-                        pixels[pos++] = val;
+                        //avoid single zero pixel
+                        pixels[pos++] = val == 0 && run == 1 ? (ushort)1 : val;
                     }
 
                     x += run;

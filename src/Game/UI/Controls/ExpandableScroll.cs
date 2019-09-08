@@ -154,21 +154,22 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            Point position = new Point(x + ScreenCoordinateX, y + ScreenCoordinateY);
+            x += ScreenCoordinateX;
+            y += ScreenCoordinateY;
 
-            if (_gumpTop.HitTest(position) != null)
+            if (_gumpTop.HitTest(x, y) != null)
                 return true;
 
-            if (_gumpMiddle.HitTest(position) != null)
+            if (_gumpMiddle.HitTest(x, y) != null)
                 return true;
 
-            if (_gumpRight.HitTest(position) != null)
+            if (_gumpRight.HitTest(x, y) != null)
                 return true;
 
-            if (_gumpBottom.HitTest(position) != null)
+            if (_gumpBottom.HitTest(x, y) != null)
                 return true;
 
-            if (_isResizable && _gumpExpander.HitTest(position) != null)
+            if (_isResizable && _gumpExpander.HitTest(x, y) != null)
                 return true;
 
             return false;

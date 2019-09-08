@@ -49,7 +49,7 @@ namespace ClassicUO.Configuration
         public string UltimaOnlineDirectory { get; set; } = "path/to/uo/";
 
         [JsonProperty(PropertyName = "clientversion")]
-        public string ClientVersion { get; set; } = "0.0.0.0";
+        public string ClientVersion { get; set; } = string.Empty;
 
         [JsonProperty(PropertyName = "lastcharactername")]
         public string LastCharacterName { get; set; } = string.Empty;
