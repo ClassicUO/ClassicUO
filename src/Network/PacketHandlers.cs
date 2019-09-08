@@ -3386,6 +3386,13 @@ namespace ClassicUO.Network
             short minX = multi.MinX;
             short minY = multi.MinY;
             short maxY = multi.MaxY;
+
+            if (multi.MinX <= 0 && multi.MinY <= 0 && multi.MaxX <= 0 && multi.MaxY <= 0)
+            {
+                Log.Message(LogTypes.Warning, "[CustomHouse (0xD8) - Invalid multi dimentions. Maybe missing some installation required files");
+                return;
+            }
+
             byte planes = p.ReadByte();
 
             DataReader stream = new DataReader();
