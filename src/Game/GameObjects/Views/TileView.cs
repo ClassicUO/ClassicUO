@@ -79,9 +79,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
 
-            if (IsStretched ? Draw3DStretched(batcher, posX, posY) : base.Draw(batcher, posX, posY)) return true;
-
-            return false;
+            return IsStretched ? Draw3DStretched(batcher, posX, posY) : base.Draw(batcher, posX, posY);
         }
 
 
