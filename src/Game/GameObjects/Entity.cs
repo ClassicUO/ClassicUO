@@ -33,14 +33,20 @@ namespace ClassicUO.Game.GameObjects
 {
     internal abstract class Entity : GameObject
     {
-        protected Delta _delta;
         private Direction _direction;
         private Item[] _equipment;
-        private Flags _flags;
         private Hue _hue;
-        private string _name;
-        private ushort _hits;
-        private ushort _hitsMax;
+
+
+        protected Entity(Serial serial)
+        {
+            Serial = serial;
+            Items = new EntityCollection<Item>();
+        }
+
+
+
+
         protected long LastAnimationChangeTime { get; set; }
 
         public EntityCollection<Item> Items { get; protected set; }
@@ -56,83 +62,11 @@ namespace ClassicUO.Game.GameObjects
         public Serial Serial { get; set; }
         public bool IsClicked { get; set; }
 
+        public ushort Hits { get; set; }
 
-        public override Graphic Graphic
-        {
-            get => base.Graphic;
-            set
-            {
-                if (base.Graphic != value)
-                {
-                    base.Graphic = value;
-                    _delta |= Delta.Appearance;
-                }
-            }
-        }
+        public ushort HitsMax { get; set; }
 
-        public override Hue Hue
-        {
-            get => _hue;
-            set
-            {
-                ushort fixedColor = (ushort) (value & 0x3FFF);
-
-                if (fixedColor != 0)
-                {
-                    if (fixedColor >= 0x0BB8)
-                        fixedColor = 1;
-                    fixedColor |= (ushort) (value & 0xC000);
-                }
-                else
-                    fixedColor = (ushort) (value & 0x8000);
-
-                if (_hue != fixedColor)
-                {
-                    _hue = fixedColor;
-                    _delta |= Delta.Appearance;
-                }
-            }
-        }
-
-        public ushort Hits
-        {
-            get => _hits;
-            set
-            {
-                if (_hits != value)
-                {
-                    _hits = value;
-                    _delta |= Delta.Hits;
-                }
-            }
-        }
-
-        public ushort HitsMax
-        {
-            get => _hitsMax;
-            set
-            {
-                if (_hitsMax != value)
-                {
-                    _hitsMax = value;
-                    _delta |= Delta.Hits;
-                }
-            }
-        }
-
-
-        public string Name
-        {
-            get => _name;
-            set
-            {
-                if (_name != value)
-                {
-                    _name = value;
-                    _delta |= Delta.Appearance;
-                }
-            }
-        }
+        public string Name { get; set; }
 
         public bool IsHidden => (Flags & Flags.Hidden) != 0;
 
@@ -144,46 +78,32 @@ namespace ClassicUO.Game.GameObjects
                 if (_direction != value)
                 {
                     _direction = value;
-                    _delta |= Delta.Position;
                     OnDirectionChanged();
                 }
             }
         }
 
-        public Flags Flags
+        public Flags Flags { get; set; }
+
+        public bool Exists => World.Contains(Serial);
+
+
+        public void FixHue(Hue hue)
         {
-            get => _flags;
-            set
+            ushort fixedColor = (ushort)(hue & 0x3FFF);
+
+            if (fixedColor != 0)
             {
-                if (_flags != value)
-                {
-                    _flags = value;
-                    _delta |= Delta.Attributes;
-                }
+                if (fixedColor >= 0x0BB8)
+                    fixedColor = 1;
+                fixedColor |= (ushort)(hue & 0xC000);
             }
+            else
+                fixedColor = (ushort)(hue & 0x8000);
+
+            Hue = fixedColor;
         }
-
-        public virtual bool Exists => World.Contains(Serial);
-
-
-        protected Entity(Serial serial)
-        {
-            Serial = serial;
-            Items = new EntityCollection<Item>();
-        }
-
-
-        public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged;
-
-
-        protected virtual void OnProcessDelta(Delta d)
-        {
-            if (d.HasFlag(Delta.Appearance)) AppearanceChanged.Raise(this);
-            if (d.HasFlag(Delta.Position)) PositionChanged.Raise(this);
-            if (d.HasFlag(Delta.Attributes)) AttributesChanged.Raise(this);
-        }
-
-
+      
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
@@ -200,19 +120,9 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        protected override void OnPositionChanged()
-        {
-            base.OnPositionChanged();
-
-            _delta |= Delta.Position;
-        }
-
         public void ProcessDelta()
         {
-            Delta d = _delta;
-            OnProcessDelta(d);
             Items.ProcessDelta();
-            _delta = Delta.None;
         }
 
         public override void Destroy()
@@ -240,22 +150,5 @@ namespace ClassicUO.Game.GameObjects
         public abstract void ProcessAnimation(out byte dir, bool evalutate = false);
 
         public abstract Graphic GetGraphicForAnimation();
-
-        [Flags]
-        protected enum Delta
-        {
-            None = 0,
-            Appearance = 1 << 0,
-            Position = 1 << 1,
-            Attributes = 1 << 2,
-            Ownership = 1 << 3,
-            Hits = 1 << 4,
-            Mana = 1 << 5,
-            Stamina = 1 << 6,
-            Stats = 1 << 7,
-            Skills = 1 << 8,
-            Properties = 1 << 9,
-            ItemsUpdate = 1 << 10
-        }
     }
 }

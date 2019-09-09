@@ -154,14 +154,14 @@ namespace ClassicUO.Game.UI
             {
                 if (!string.IsNullOrEmpty(name))
                 {
-                    if (obj.Serial.IsItem)
+                    if (obj is Item)
                     {
                         _sbHTML.Append("<basefont color=\"yellow\">");
                         hasStartColor = true;
                     }
-                    else if (obj.Serial.IsMobile)
+                    else if (obj is Mobile mob)
                     {
-                        _sbHTML.Append(Notoriety.GetHTMLHue(((Mobile) obj).NotorietyFlag));
+                        _sbHTML.Append(Notoriety.GetHTMLHue(mob.NotorietyFlag));
                         hasStartColor = true;
                     }
 

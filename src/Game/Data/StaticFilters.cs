@@ -196,6 +196,7 @@ namespace ClassicUO.Game.Data
                 case 0x0CF6:
                 case 0x0CF7:
                 case 0x0D04:
+                case 0x0D05:
                 case 0x0D06:
                 case 0x0D07:
                 case 0x0D08:
@@ -285,7 +286,7 @@ namespace ClassicUO.Game.Data
                 case 0x0D3F:
                 case 0x0D40:
                 case 0x0CE9:
-
+                case 0x0CEA:
                     return true;
             }
 

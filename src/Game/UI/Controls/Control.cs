@@ -460,8 +460,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-
-        public Control[] HitTest(Point position)
+        public Control[] HitTest(int x, int y)
         {
             if (!IsVisible)
                 return null;
@@ -471,9 +470,9 @@ namespace ClassicUO.Game.UI.Controls
             int parentX = ParentX;
             int parentY = ParentY;
 
-            if (Bounds.Contains(position.X - parentX, position.Y - parentY))
+            if (Bounds.Contains(x - parentX, y - parentY))
             {
-                if (Contains(position.X - X - parentX, position.Y - Y - parentY))
+                if (Contains(x - X - parentX, y - Y - parentY))
                 {
                     if (AcceptMouseInput)
                         results.Push(this);
@@ -482,7 +481,7 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         if (c.Page == 0 || c.Page == ActivePage)
                         {
-                            var cl = c.HitTest(position);
+                            var cl = c.HitTest(x, y);
 
                             if (cl != null)
                             {
@@ -503,6 +502,11 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             return null;
+        }
+
+        public Control[] HitTest(Point position)
+        {
+            return HitTest(position.X, position.Y);
         }
 
         public Control GetFirstControlAcceptKeyboardInput()

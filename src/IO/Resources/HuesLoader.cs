@@ -171,6 +171,7 @@ namespace ClassicUO.IO.Resources
         {
             if (color != 0 && color < HuesCount)
             {
+                color -= 1;
                 int g = color >> 3;
                 int e = color % 8;
 

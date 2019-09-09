@@ -32,6 +32,11 @@ namespace ClassicUO.Game.Managers
         private readonly Deque<Serial> _actions = new Deque<Serial>();
         private long _timer;
 
+        public UseItemQueue()
+        {
+            _timer = Engine.Ticks + 2000;
+        }
+
         public void Update(double totalMS, double frameMS)
         {
             if (_timer <= totalMS)

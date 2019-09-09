@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <img width="300" height="320" src="https://i.imgur.com/CgpwyIQ.png">
 </p>
 
@@ -26,9 +26,6 @@ ClassicUO is natively cross platform and supports:
 * Windows
 * Linux
 * MacOS
-
-# Running
-Follow the [Wiki](https://github.com/andreakarasho/ClassicUO/wiki) to setup correctly ClassicUO
 
 # Building (Windows)
 The binary produced will work on all supported platforms.
@@ -86,6 +83,9 @@ Other useful commands:
 - `msbuild /t:Clean`
 - `msbuild /t:Clean /p:Configuration=Release`
 - `msbuild /t:RestorePackages`
+
+# Running
+Follow the [Wiki](https://github.com/andreakarasho/ClassicUO/wiki) to setup correctly ClassicUO
 
 # Contribute
 Everyone is welcome to contribute! The GitHub issues and project tracker are kept up to date with tasks that need work.

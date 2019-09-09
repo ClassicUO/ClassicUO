@@ -23,6 +23,7 @@
 
 using System.Collections.Generic;
 
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
@@ -105,6 +106,7 @@ namespace ClassicUO.Game.UI.Controls
 
             ToPage = parts.Count >= 7 ? int.Parse(parts[6]) : 0;
             WantUpdateSize = false;
+            ContainsByBounds = true;
         }
 
         public bool IsClicked { get; private set; }
@@ -218,28 +220,30 @@ namespace ClassicUO.Game.UI.Controls
             if (button == MouseButton.Left)
             {
                 IsClicked = false;
-
-                switch (ButtonAction)
+                if (_entered || Engine.SceneManager.CurrentScene is GameScene)
                 {
-                    case ButtonAction.SwitchPage:
-                        ChangePage(ToPage);
+                    switch (ButtonAction)
+                    {
+                        case ButtonAction.SwitchPage:
+                            ChangePage(ToPage);
 
-                        break;
+                            break;
 
-                    case ButtonAction.Activate:
-                        OnButtonClick(ButtonID);
+                        case ButtonAction.Activate:
+                            OnButtonClick(ButtonID);
 
-                        break;
+                            break;
+                    }
+
+                    Mouse.LastLeftButtonClickTime = 0;
+                    Mouse.CancelDoubleClick = true;
                 }
-
-                Mouse.LastLeftButtonClickTime = 0;
-                Mouse.CancelDoubleClick = true;
             }
         }
 
         private UOTexture GetTextureByState()
         {
-            if (_entered)
+            if (_entered || IsClicked)
             {
                 if (IsClicked && _textures[PRESSED] != null)
                     return _textures[PRESSED];

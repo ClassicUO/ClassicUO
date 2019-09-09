@@ -29,7 +29,7 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
+using ClassicUO.Utility.Logging;
 using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps.Login
@@ -191,7 +191,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
                         {
                             int index = Engine.GlobalSettings.LastServerNum;
 
-                            if (index <= 0 || index > loginScene.Servers.Length) index = 1;
+                            if (index <= 0 || index > loginScene.Servers.Length)
+                            {
+                                Log.Message(LogTypes.Warning, $"Wrong server index: {index}");
+
+                                index = 1;
+                            }
 
                             loginScene.SelectServer((byte) loginScene.Servers[index - 1].Index);
                         }
@@ -216,7 +221,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 {
                     int index = Engine.GlobalSettings.LastServerNum;
 
-                    if (index <= 0 || index > loginScene.Servers.Length) index = 1;
+                    if (index <= 0 || index > loginScene.Servers.Length)
+                    {
+                        Log.Message(LogTypes.Warning, $"Wrong server index: {index}");
+
+                        index = 1;
+                    }
 
                     loginScene.SelectServer((byte) loginScene.Servers[index - 1].Index);
                 }
@@ -272,11 +282,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
             protected override void OnMouseUp(int x, int y, MouseButton button)
             {
                 if (button == MouseButton.Left) OnButtonClick((int)Buttons.Server + _buttonId);
-            }
-
-            public override void Dispose()
-            {
-                base.Dispose();
             }
         }
     }
