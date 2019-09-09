@@ -40,7 +40,6 @@ namespace ClassicUO.Renderer
         private const int MAX_INDICES = MAX_SPRITES * 6;
 
 
-        private readonly MatrixEffect _defaultEffect;
         private readonly IndexBuffer _indexBuffer;
         private readonly RasterizerState _rasterizerState;
         private readonly VertexBuffer _vertexBuffer;
@@ -51,8 +50,6 @@ namespace ClassicUO.Renderer
         private bool _started;
         private DepthStencilState _stencil;
         private bool _useScissor;
-
-
         private BoundingBox _drawingArea;
         private int _numSprites;
 
@@ -79,13 +76,13 @@ namespace ClassicUO.Renderer
 
             _stencil = Stencil;
 
-            _defaultEffect = new IsometricEffect(device);
+            DefaultEffect = new IsometricEffect(device);
 
             GraphicsDevice.Indices = _indexBuffer;
         }
 
 
-        public MatrixEffect DefaultEffect => _defaultEffect;
+        public MatrixEffect DefaultEffect { get; }
 
         public DepthStencilState Stencil { get; } = new DepthStencilState
         {
@@ -1663,7 +1660,7 @@ namespace ClassicUO.Renderer
 
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
 
-            _defaultEffect.ApplyStates();
+            DefaultEffect.ApplyStates();
         }
 
         private void Flush()
