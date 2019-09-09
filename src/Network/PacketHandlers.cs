@@ -572,7 +572,7 @@ namespace ClassicUO.Network
             item.Graphic = graphic;
             item.Amount = count;
             item.Position = new Position(x, y, z);
-            item.Hue = hue;
+            item.FixHue(hue);
             item.Flags = (Flags) flags;
             item.Direction = (Direction) direction;
 
@@ -791,7 +791,7 @@ namespace ClassicUO.Network
             ushort oldGraphic = World.Player.Graphic;
 
             World.Player.Graphic = (ushort) (p.ReadUShort() + p.ReadSByte());
-            World.Player.Hue = p.ReadUShort();
+            World.Player.FixHue(p.ReadUShort());
             World.Player.Flags = (Flags) p.ReadByte();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
@@ -1091,7 +1091,7 @@ namespace ClassicUO.Network
                     {
                         item = World.GetOrCreateItem(hold.Serial);
                         item.Graphic = hold.Graphic;
-                        item.Hue = hold.Hue;
+                        item.FixHue(hold.Hue);
                         item.Amount = hold.Amount;
                         item.Flags = hold.Flags;
                         item.Layer = hold.Layer;
@@ -1113,7 +1113,7 @@ namespace ClassicUO.Network
                     //if (item != null)
                     {
                         item.Graphic = hold.Graphic;
-                        item.Hue = hold.Hue;
+                        item.FixHue(hold.Hue);
                         item.Amount = hold.Amount;
                         item.Flags = hold.Flags;
                         item.Layer = hold.Layer;
@@ -1264,7 +1264,7 @@ namespace ClassicUO.Network
             item.Graphic = (ushort) (p.ReadUShort() + p.ReadSByte());
             item.Layer = (Layer) p.ReadByte();
             item.Container = p.ReadUInt();
-            item.Hue = p.ReadUShort();
+            item.FixHue(p.ReadUShort());
             item.Amount = 1;
             Mobile mobile = World.Mobiles.Get(item.Container);
 
@@ -1944,7 +1944,7 @@ namespace ClassicUO.Network
                 //}
 
                 mobile.Graphic = graphic;
-                mobile.Hue = hue;
+                mobile.FixHue(hue);
 
                 Direction dir = direction & Direction.Up;
                 bool isrun = (direction & Direction.Running) != 0;
@@ -1993,7 +1993,7 @@ namespace ClassicUO.Network
                 GameActions.RequestMobileStatus(serial);
 
             mobile.Graphic = graphic;
-            mobile.Hue = hue;
+            mobile.FixHue(hue);
             mobile.Flags = flags;
             mobile.NotorietyFlag = notoriety;
 
@@ -2012,11 +2012,11 @@ namespace ClassicUO.Network
                 item.Layer = (Layer) p.ReadByte();
 
                 if (FileManager.ClientVersion >= ClientVersions.CV_70331)
-                    item.Hue = p.ReadUShort();
+                    item.FixHue(p.ReadUShort());
                 else if ((itemGraphic & 0x8000) != 0)
                 {
                     itemGraphic &= 0x7FFF;
-                    item.Hue = p.ReadUShort();
+                    item.FixHue(p.ReadUShort());
                 }
                 //else
                 //    itemGraphic &= 0x3FFF;
@@ -2395,7 +2395,7 @@ namespace ClassicUO.Network
             {
                 Item item = World.GetOrCreateItem(p.ReadUInt());
                 item.Graphic = p.ReadUShort();
-                item.Hue = p.ReadUShort();
+                item.FixHue(p.ReadUShort());
                 item.Amount = p.ReadUShort();
                 item.Price = p.ReadUShort();
 
@@ -3747,7 +3747,7 @@ namespace ClassicUO.Network
                     Position position = new Position(x, y, z);
                     item.Direction = dir;
                     item.LightID = (byte) dir;
-                    item.Hue = hue;
+                    item.FixHue(hue);
                     item.Flags = flags;
                     item.Container = Serial.INVALID;
 
@@ -3786,7 +3786,7 @@ namespace ClassicUO.Network
                         return;
 
                     mobile.Graphic = (ushort) (graphic + graphicInc);
-                    mobile.Hue = hue;
+                    mobile.FixHue(hue);
                     mobile.Flags = flags;
                     mobile.ProcessDelta();
 
@@ -3828,7 +3828,7 @@ namespace ClassicUO.Network
                 World.RangeSize.Y = y;
                 World.Player.Graphic = graphic;
                 World.Player.Direction = dir;
-                World.Player.Hue = hue;
+                World.Player.FixHue(hue);
                 World.Player.Flags = flags;
 
 
@@ -4004,7 +4004,7 @@ namespace ClassicUO.Network
             item = World.GetOrCreateItem(serial);
             item.Graphic = graphic;
             item.Amount = amount;
-            item.Hue = hue;
+            item.FixHue(hue);
             item.Position = new Position(x, y);
             item.Container = containerSerial;
 

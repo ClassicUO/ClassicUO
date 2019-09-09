@@ -90,9 +90,9 @@ namespace ClassicUO.Game.GameObjects
             set => Position = new Position(Position.X, Position.Y, value);
         }
 
-        public virtual Hue Hue { get; set; }
+        public Hue Hue { get; set; }
 
-        public virtual Graphic Graphic { get; set; }
+        public Graphic Graphic { get; set; }
 
         public sbyte AnimIndex { get; set; }
 
