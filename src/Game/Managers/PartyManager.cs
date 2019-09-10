@@ -22,9 +22,6 @@
 #endregion
 
 using System;
-
-using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 
@@ -132,9 +129,8 @@ namespace ClassicUO.Game.Managers
                 case 7:
                     Inviter = p.ReadUInt();
                     // if (!Engine.Profile.Current.PartyInviteGump)
-                    var partyInvite = new PartyInviteGump();
-                    partyInvite.PartyInviteGumpRequest(Inviter);
-
+                    Engine.UI.Add(new PartyInviteGump(Inviter));
+                   
                     break;
             }
         }
