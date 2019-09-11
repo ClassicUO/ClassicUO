@@ -1971,7 +1971,6 @@ namespace ClassicUO.Game.UI.Gumps
             SpeechColor,
             EmoteColor,
             PartyMessageColor,
-            MessageColor,
             GuildMessageColor,
             AllyMessageColor,
             InnocentColor,
