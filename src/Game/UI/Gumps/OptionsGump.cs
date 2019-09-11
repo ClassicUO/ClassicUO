@@ -115,7 +115,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ColorBox _poisonColorPickerBox, _paralyzedColorPickerBox, _invulnerableColorPickerBox;
         private TextBox _spellFormatBox;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
-        private Checkbox _holdShiftForContext, _reduceFPSWhenInactive, _sallosEasyGrab;
+        private Checkbox _holdShiftForContext, _reduceFPSWhenInactive, _sallosEasyGrab, _partyInviteGump;
 
         //VendorGump Size Option
         private ArrowNumbersTextBox _vendorGumpSize;
@@ -262,6 +262,7 @@ namespace ClassicUO.Game.UI.Gumps
             _showMobileNameIncoming = CreateCheckBox(rightArea, "Show incoming new mobiles", Engine.Profile.Current.ShowNewMobileNameIncoming, 0, 0);
             _showCorpseNameIncoming = CreateCheckBox(rightArea, "Show incoming new corpses", Engine.Profile.Current.ShowNewCorpseNameIncoming, 0, 0);
             _sallosEasyGrab = CreateCheckBox(rightArea, "Sallos easy grab", Engine.Profile.Current.SallosEasyGrab, 0, 0);
+            _partyInviteGump = CreateCheckBox(rightArea, "Show gump for party invites", Engine.Profile.Current.PartyInviteGump, 0, 0);
 
             fpsItem = new ScrollAreaItem();
 
@@ -1300,6 +1301,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _showMobileNameIncoming.IsChecked = true;
                     _gridLoot.SelectedIndex = 0;
                     _sallosEasyGrab.IsChecked = false;
+                    _partyInviteGump.IsChecked = false;
 
                     break;
 
@@ -1524,6 +1526,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.ShowNewCorpseNameIncoming = _showCorpseNameIncoming.IsChecked;
             Engine.Profile.Current.GridLootType = _gridLoot.SelectedIndex;
             Engine.Profile.Current.SallosEasyGrab = _sallosEasyGrab.IsChecked;
+            Engine.Profile.Current.PartyInviteGump = _partyInviteGump.IsChecked;
 
 
             // sounds
@@ -1968,6 +1971,7 @@ namespace ClassicUO.Game.UI.Gumps
             SpeechColor,
             EmoteColor,
             PartyMessageColor,
+            MessageColor,
             GuildMessageColor,
             AllyMessageColor,
             InnocentColor,
