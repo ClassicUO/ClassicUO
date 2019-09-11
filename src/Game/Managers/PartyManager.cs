@@ -128,13 +128,14 @@ namespace ClassicUO.Game.Managers
 
                 case 7:
                     Inviter = p.ReadUInt();
-                    // if (!Engine.Profile.Current.PartyInviteGump)
-                    Engine.UI.Add(new PartyInviteGump(Inviter));
-                   
+
+                    if (Engine.Profile.Current.PartyInviteGump)
+                    {
+                        Engine.UI.Add(new PartyInviteGump(Inviter));
+                    }
                     break;
             }
         }
-
         public bool Contains(Serial serial)
         {
             for (int i = 0; i < PARTY_SIZE; i++)
