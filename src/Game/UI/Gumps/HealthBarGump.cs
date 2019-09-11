@@ -48,6 +48,7 @@ using SDL2;
 
 //Cursor position for renaming pets is a present issue, you CAN rename your pet but the alignment on the X axis needs to be fixed.
 
+//Big thanks to Roxya, Stalli, and Gaechti for dealing with my many questions and countless frustrations :)
 
 namespace ClassicUO.Game.UI.Gumps
 {
