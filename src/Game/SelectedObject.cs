@@ -100,7 +100,11 @@ namespace ClassicUO.Game
                 FileManager.Animations.AnimGroup = animGroup;
                 FileManager.Animations.Direction = dir;
 
-                if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
+                AnimationFrameTexture[] frames = null;
+                if ((direction.FrameCount == 0 || !direction.GetFrames(out frames) || frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
+                    continue;
+
+                if (frames == null)
                     continue;
 
                 int fc = direction.FrameCount;
@@ -110,7 +114,7 @@ namespace ClassicUO.Game
 
                 if (animIndex < direction.FrameCount)
                 {
-                    AnimationFrameTexture frame = direction.Frames[animIndex];
+                    AnimationFrameTexture frame = frames[animIndex];
 
                     if (frame == null || frame.IsDisposed)
                         continue;
@@ -201,9 +205,12 @@ namespace ClassicUO.Game
                 ref var direction = ref gr.Direction[FileManager.Animations.Direction];
 
 
-                if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
+                AnimationFrameTexture[] frames = null;
+                if ((direction.FrameCount == 0 || !direction.GetFrames(out frames) || frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                     continue;
 
+                if (frames == null)
+                    continue;
 
                 int fc = direction.FrameCount;
 
@@ -212,7 +219,7 @@ namespace ClassicUO.Game
 
                 if (animIndex < direction.FrameCount)
                 {
-                    AnimationFrameTexture frame = direction.Frames[animIndex]; // FileManager.Animations.GetTexture(direction.FramesHashes[animIndex]);
+                    AnimationFrameTexture frame = frames[animIndex]; // FileManager.Animations.GetTexture(direction.FramesHashes[animIndex]);
 
                     if (frame == null || frame.IsDisposed)
                         continue;

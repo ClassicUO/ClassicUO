@@ -3165,6 +3165,14 @@ namespace ClassicUO.Network
             string affix = p.ID == 0xCC ? p.ReadASCII() : string.Empty;
 
             string arguments = null;
+            
+            if (cliloc == 1008092) // value for "You notify you don't want to join the party"
+            {
+                foreach (var PartyInviteGump in Engine.UI.Gumps.OfType<PartyInviteGump>())
+                {
+                    PartyInviteGump.Dispose();
+                }
+            }
 
             if (p.Position < p.Length)
                 arguments = p.ReadUnicodeReversed(p.Length - p.Position);
