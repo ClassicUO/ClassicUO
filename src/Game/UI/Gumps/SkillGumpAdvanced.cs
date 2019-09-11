@@ -118,8 +118,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_sortOrderIndicator = new GumpPic(0, 0, 0x985, 0));
             OnButtonClick((int) Buttons.SortName);
-
-            World.Player.SkillsChanged += OnSkillChanged;
         }
 
         public override void OnButtonClick(int buttonID)
@@ -212,16 +210,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override void Dispose()
-        {
-            World.Player.SkillsChanged -= OnSkillChanged;
-            base.Dispose();
-        }
-
-        private void OnSkillChanged(object sender, EventArgs args)
-        {
-            _updateSkillsNeeded = true;
-        }
+        public void ForceUpdate() => _updateSkillsNeeded = true;
 
         private enum Buttons
         {

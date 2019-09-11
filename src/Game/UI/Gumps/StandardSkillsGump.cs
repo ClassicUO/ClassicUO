@@ -224,7 +224,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        public void Update(int skillIndex)
+        public void ForceUpdate(int skillIndex)
         {
             if (skillIndex < _allSkillControls.Length)
                 _allSkillControls[skillIndex]?.UpdateSkillValue(Engine.UI.GetGump<StandardSkillsGump>());

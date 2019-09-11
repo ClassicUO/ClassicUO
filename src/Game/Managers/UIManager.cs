@@ -575,7 +575,8 @@ namespace ClassicUO.Game.Managers
                         break;
 
                     case "text":
-                        gump.Add(new Label(gparams, lines), page);
+                        if (gparams.Count >= 5)
+                            gump.Add(new Label(gparams, lines), page);
 
                         break;
 

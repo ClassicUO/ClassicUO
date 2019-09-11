@@ -99,7 +99,14 @@ namespace ClassicUO.Game
 
         public static Hue Parse(string str)
         {
-            return str.StartsWith("0x") ? ushort.Parse(str.Remove(0, 2), NumberStyles.HexNumber) : ushort.Parse(str);
+            if (str.StartsWith("0x"))
+                return ushort.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
+
+            if (str.Length > 1 && str[0] == '-')
+                return (ushort)short.Parse(str);
+
+
+            return (ushort)uint.Parse(str); // some server send 0xFFFF_FFFF in decimal form. C# doesn't like it. It needs a specific conversion
         }
     }
 }
