@@ -1221,7 +1221,7 @@ namespace ClassicUO.IO.Resources
 
                 for (int i = 0; i < frameCount; i++)
                 {
-                    IntPtr start = reader.PositionAddress;
+                    uint start = (uint) reader.Position;
                     ushort group = reader.ReadUShort();
                     short frameID = reader.ReadShort();
                     reader.Skip(8);
@@ -1263,6 +1263,7 @@ namespace ClassicUO.IO.Resources
                     _frames[animDirection] = frames;
                 }
 
+
                 //if (animDirection.Frames != null && animDirection.Frames.Length != 0)
                 //    Log.Message(LogTypes.Panic, "MEMORY LEAK UOP ANIM");
 
@@ -1275,10 +1276,10 @@ namespace ClassicUO.IO.Resources
 
                     ref readonly UOPFrameData frameData = ref pixelDataOffsets[i + dirFrameStartIdx];
 
-                    if (frameData.DataStart == IntPtr.Zero)
+                    if (frameData.DataStart == 0)
                         continue;
 
-                    reader.Seek((int)(frameData.DataStart.ToInt64() + frameData.PixelDataOffset));
+                    reader.Seek((int)(frameData.DataStart + frameData.PixelDataOffset));
                     ushort* palette = (ushort*)reader.PositionAddress;
                     reader.Skip(512);
                     short imageCenterX = reader.ReadShort();
@@ -1657,7 +1658,7 @@ namespace ClassicUO.IO.Resources
 
         private struct UOPFrameData
         {
-            public IntPtr DataStart;
+            public uint DataStart;
             public uint PixelDataOffset;
         }
 
