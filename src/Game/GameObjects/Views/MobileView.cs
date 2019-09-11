@@ -301,7 +301,11 @@ namespace ClassicUO.Game.GameObjects
             if (direction == null || direction.Address == -1 || direction.FileIndex == -1)
                 return 0;
 
-            if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
+            AnimationFrameTexture[] frames = null;
+            if ((direction.FrameCount == 0 || !direction.GetFrames(out frames) || frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
+                return 0;
+
+            if (frames == null)
                 return 0;
 
             direction.LastAccessTime = Engine.Ticks;
@@ -312,7 +316,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (frameIndex < direction.FrameCount)
             {
-                var frame = direction.Frames[frameIndex];
+                var frame = frames[frameIndex];
 
                 if (frame == null || frame.IsDisposed)
                     return 0;

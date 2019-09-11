@@ -446,9 +446,11 @@ namespace ClassicUO.Game.UI.Gumps
                     if (direction.FrameCount == 0)
                         FileManager.Animations.LoadDirectionGroup(ref direction);
 
+                    direction.GetFrames(out var frames);
+
                     Add(control = new TextureControl
                     {
-                        Texture = direction.Frames[0], //FileManager.Animations.GetTexture(direction.FramesHashes[0]),
+                        Texture = frames[0],
                         X = 5,
                         Y = 5,
                         AcceptMouseInput = false,
