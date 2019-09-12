@@ -511,6 +511,43 @@ namespace ClassicUO.Game.Managers
                         {
                             pic.ContainsByBounds = true;
                             pic.IsVirtue = true;
+
+                            string s;
+
+                            switch (pic.Graphic)
+                            {
+                                case 0x69:
+                                    s = FileManager.Cliloc.GetString(1051000 + 2);
+                                    break;
+                                case 0x6A:
+                                    s = FileManager.Cliloc.GetString(1051000 + 7);
+                                    break;
+                                case 0x6B:
+                                    s = FileManager.Cliloc.GetString(1051000 + 5);
+                                    break;
+                                case 0x6D:
+                                    s = FileManager.Cliloc.GetString(1051000 + 6);
+                                    break;
+                                case 0x6E:
+                                    s = FileManager.Cliloc.GetString(1051000 + 1);
+                                    break;
+                                case 0x6F:
+                                    s = FileManager.Cliloc.GetString(1051000 + 3);
+                                    break;
+                                case 0x70:
+                                    s = FileManager.Cliloc.GetString(1051000 + 4);
+                                    break;
+
+                                case 0x6C:
+                                default:
+                                    s = FileManager.Cliloc.GetString(1051000 + 2);
+                                    break;
+                            }
+
+                            if (string.IsNullOrEmpty(s))
+                                s = "Unknown virtue";
+
+                            pic.SetTooltip(s, 100);
                         }
 
                         gump.Add(pic, page);
