@@ -59,13 +59,6 @@ namespace ClassicUO.IO.Resources
         private readonly UOFileUop[] _filesUop = new UOFileUop[4];
         //private readonly List<ToRemoveInfo> _usedTextures = new List<ToRemoveInfo>(), _usedUopTextures = new List<ToRemoveInfo>();
 
-        private readonly Dictionary<AnimationDirection, AnimationFrameTexture[]> _frames = new Dictionary<AnimationDirection, AnimationFrameTexture[]>();
-
-        public bool GetFrames(AnimationDirection dir, out AnimationFrameTexture[] frames)
-        {
-            return _frames.TryGetValue(dir, out frames);
-        }
-
         private readonly List<AnimationDirection> _usedTextures = new List<AnimationDirection>();
 
 
@@ -1257,21 +1250,15 @@ namespace ClassicUO.IO.Resources
                 animDirection.FrameCount = (byte)(pixelDataOffsets.Length / 5);
                 int dirFrameStartIdx = animDirection.FrameCount * Direction;
 
-                if (!_frames.TryGetValue(animDirection, out var frames))
-                {
-                    frames = new AnimationFrameTexture[animDirection.FrameCount];
-                    _frames[animDirection] = frames;
-                }
 
+                if (animDirection.Frames != null && animDirection.Frames.Length != 0)
+                    Log.Message(LogTypes.Panic, "MEMORY LEAK UOP ANIM");
 
-                //if (animDirection.Frames != null && animDirection.Frames.Length != 0)
-                //    Log.Message(LogTypes.Panic, "MEMORY LEAK UOP ANIM");
-
-                //animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
+                animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
 
                 for (int i = 0; i < animDirection.FrameCount; i++)
                 {
-                    if (frames[i] != null)
+                    if (animDirection.Frames[i] != null)
                         continue;
 
                     ref readonly UOPFrameData frameData = ref pixelDataOffsets[i + dirFrameStartIdx];
@@ -1328,7 +1315,7 @@ namespace ClassicUO.IO.Resources
                     };
 
                     f.PushData(data);
-                    frames[i] = f;
+                    animDirection.Frames[i] = f;
                 }
 
                 _usedTextures.Add(animDirection);
@@ -1352,22 +1339,16 @@ namespace ClassicUO.IO.Resources
             animDir.FrameCount = (byte)frameCount;
             uint* frameOffset = (uint*)reader.PositionAddress;
 
-           
-            if (!_frames.TryGetValue(animDir, out var frames))
-            {
-                frames = new AnimationFrameTexture[frameCount];
-                _frames[animDir] = frames;
-            }
 
-            //if (animDir.Frames != null && animDir.Frames.Length != 0)
-            //    Log.Message(LogTypes.Panic, "MEMORY LEAK MUL ANIM");
+            if (animDir.Frames != null && animDir.Frames.Length != 0)
+                Log.Message(LogTypes.Panic, "MEMORY LEAK MUL ANIM");
 
 
-            //animDir.Frames = new AnimationFrameTexture[frameCount];
+            animDir.Frames = new AnimationFrameTexture[frameCount];
 
             for (int i = 0; i < frameCount; i++)
             {
-                if (frames[i] != null)
+                if (animDir.Frames[i] != null)
                     continue;
 
                 reader.Seek(dataStart + frameOffset[i]);
@@ -1417,7 +1398,7 @@ namespace ClassicUO.IO.Resources
 
                 f.PushData(data);
 
-                frames[i] = f;
+                animDir.Frames[i] = f;
             }
 
             _usedTextures.Add(animDir);
@@ -1460,9 +1441,9 @@ namespace ClassicUO.IO.Resources
                     {
                         if (frameIndex >= fc) frameIndex = 0;
 
-                        if (_frames.TryGetValue(direction, out var frames) && frames != null)
+                        if (direction.Frames != null)
                         {
-                            AnimationFrameTexture animationFrameTexture = frames[frameIndex]; // GetTexture(direction.FramesHashes[frameIndex]);
+                            AnimationFrameTexture animationFrameTexture = direction.Frames[frameIndex]; // GetTexture(direction.FramesHashes[frameIndex]);
                             x = animationFrameTexture.CenterX;
                             y = animationFrameTexture.CenterY;
                             w = animationFrameTexture.Width;
@@ -1566,24 +1547,19 @@ namespace ClassicUO.IO.Resources
                     _usedTextures.RemoveAt(i--);
                 else if (t.LastAccessTime != 0 && t.LastAccessTime < ticks)
                 {
-                    if (_frames.TryGetValue(t, out var frames))
+                    for (int j = 0; j < t.FrameCount; j++)
                     {
-                        for (int j = 0; j < t.FrameCount; j++)
+                        ref var texture = ref t.Frames[j];
+
+                        if (texture != null)
                         {
-                            ref var texture = ref frames[j];
-
-                            if (texture != null)
-                            {
-                                texture.Dispose();
-                                texture = null;
-                            }
+                            texture.Dispose();
+                            texture = null;
                         }
-
-                        _frames.Remove(t);
                     }
 
                     t.FrameCount = 0;
-                    //t.Frames = null;
+                    t.Frames = null;
                     t.LastAccessTime = 0;
 
                     _usedTextures.RemoveAt(i--);
@@ -1605,25 +1581,19 @@ namespace ClassicUO.IO.Resources
                 }
                 else if (t.LastAccessTime != 0)
                 {
-                    if (_frames.TryGetValue(t, out var frames))
+                    for (int j = 0; j < t.FrameCount; j++)
                     {
-                        for (int j = 0; j < t.FrameCount; j++)
+                        ref var texture = ref t.Frames[j];
+
+                        if (texture != null)
                         {
-                            ref var texture = ref frames[j];
-
-                            if (texture != null)
-                            {
-                                texture.Dispose();
-                                texture = null;
-                            }
+                            texture.Dispose();
+                            texture = null;
                         }
-
-                        _frames.Remove(t);
                     }
 
                     t.FrameCount = 0;
-                    
-                    //t.Frames = null;
+                    t.Frames = null;
                     t.LastAccessTime = 0;
                 }
             }
@@ -1945,14 +1915,11 @@ namespace ClassicUO.IO.Resources
         public long Address;
         public int FileIndex;
         public byte FrameCount;
-        //public AnimationFrameTexture[] Frames;
+        public AnimationFrameTexture[] Frames;
         public bool IsUOP;
         public bool IsVerdata;
         public long LastAccessTime;
         public uint Size;
-
-        public bool GetFrames(out AnimationFrameTexture[] t)
-            => FileManager.Animations.GetFrames(this, out t);
     }
 
     internal readonly struct EquipConvData
