@@ -250,11 +250,6 @@ namespace ClassicUO.Game.UI.Controls
             int offsetLeft = Math.Max(_gumpTexture[0].Width, _gumpTexture[5].Width) - _gumpTexture[3].Width;
             int offsetRight = Math.Max(_gumpTexture[2].Width, _gumpTexture[7].Width) - _gumpTexture[4].Width;
 
-            if (Graphic == 0x9c44)
-            {
-
-            }
-
             for (int i = 0; i < 9; i++)
             {
                 UOTexture t = _gumpTexture[i];
@@ -327,13 +322,10 @@ namespace ClassicUO.Game.UI.Controls
                         drawWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
                         drawHeight = Height - _gumpTexture[2].Height - _gumpTexture[7].Height;
 
-                        //if (!OnlyCenterTransparent)
-                        Vector3 c = color;
-
                         if (OnlyCenterTransparent)
-                            c.Z = 1;
+                            color.Z = 1;
 
-                        batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, ref c);
+                        batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, ref color);
 
                         break;
                 }
