@@ -223,13 +223,19 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
 
             ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
-            DrawInternal(batcher, x, y, _hueVector);
+            DrawInternal(batcher, x, y, ref _hueVector);
 
             return base.Draw(batcher, x, y);
         }
 
-        private void DrawInternal(UltimaBatcher2D batcher, int x, int y, Vector3 color)
+        private void DrawInternal(UltimaBatcher2D batcher, int x, int y, ref Vector3 color)
         {
+            int offsetTop = Math.Max(_gumpTexture[0].Height, _gumpTexture[2].Height) - _gumpTexture[1].Height;
+            int offsetBottom = Math.Max(_gumpTexture[5].Height, _gumpTexture[7].Height) - _gumpTexture[6].Height;
+            int offsetLeft = Math.Max(_gumpTexture[0].Width, _gumpTexture[5].Width) - _gumpTexture[3].Width;
+            int offsetRight = Math.Max(_gumpTexture[2].Width, _gumpTexture[7].Width) - _gumpTexture[4].Width;
+
+
             for (int i = 0; i < 9; i++)
             {
                 UOTexture t = _gumpTexture[i];
@@ -242,7 +248,6 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     case 0:
                         batcher.Draw2D(t, drawX, drawY, drawWidth, drawHeight, ref color);
-
                         break;
 
                     case 1:
@@ -254,11 +259,13 @@ namespace ClassicUO.Game.UI.Controls
 
                     case 2:
                         drawX += Width - drawWidth;
+                        drawY += offsetTop;
                         batcher.Draw2D(t, drawX, drawY, drawWidth, drawHeight, ref color);
 
                         break;
 
                     case 3:
+                        drawX += offsetLeft;
                         drawY += _gumpTexture[0].Height;
                         drawHeight = Height - _gumpTexture[0].Height - _gumpTexture[5].Height;
                         batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, ref color);
@@ -266,7 +273,7 @@ namespace ClassicUO.Game.UI.Controls
                         break;
 
                     case 4:
-                        drawX += Width - drawWidth /*- offsetRight*/;
+                        drawX += Width - drawWidth - offsetRight;
                         drawY += _gumpTexture[2].Height;
                         drawHeight = Height - _gumpTexture[2].Height - _gumpTexture[7].Height;
                         batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, ref color);
@@ -281,7 +288,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     case 6:
                         drawX += _gumpTexture[5].Width;
-                        drawY += Height - drawHeight /*- offsetBottom*/;
+                        drawY += Height - drawHeight - offsetBottom;
                         drawWidth = Width - _gumpTexture[5].Width - _gumpTexture[7].Width;
                         batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, ref color);
 
