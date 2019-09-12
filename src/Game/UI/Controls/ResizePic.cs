@@ -57,7 +57,8 @@ namespace ClassicUO.Game.UI.Controls
                     _gumpTexture[8] = t;
                 else if (i > 4)
                     _gumpTexture[i - 1] = t;
-                else _gumpTexture[i] = t;
+                else
+                    _gumpTexture[i] = t;
             }
 
             Graphic = graphic;
@@ -222,10 +223,24 @@ namespace ClassicUO.Game.UI.Controls
         {
             ResetHueVector();
 
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
-            DrawInternal(batcher, x, y, ref _hueVector);
+            var rect = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
 
-            return base.Draw(batcher, x, y);
+            if (ScissorStack.PushScissors(rect))
+            {
+                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
+
+                batcher.EnableScissorTest(true);
+
+                DrawInternal(batcher, x, y, ref _hueVector);
+                base.Draw(batcher, x, y);
+
+                batcher.EnableScissorTest(false);
+                ScissorStack.PopScissors();
+
+                return true;
+            }
+
+            return false;
         }
 
         private void DrawInternal(UltimaBatcher2D batcher, int x, int y, ref Vector3 color)
@@ -235,6 +250,10 @@ namespace ClassicUO.Game.UI.Controls
             int offsetLeft = Math.Max(_gumpTexture[0].Width, _gumpTexture[5].Width) - _gumpTexture[3].Width;
             int offsetRight = Math.Max(_gumpTexture[2].Width, _gumpTexture[7].Width) - _gumpTexture[4].Width;
 
+            if (Graphic == 0x9c44)
+            {
+
+            }
 
             for (int i = 0; i < 9; i++)
             {
@@ -247,6 +266,7 @@ namespace ClassicUO.Game.UI.Controls
                 switch (i)
                 {
                     case 0:
+
                         batcher.Draw2D(t, drawX, drawY, drawWidth, drawHeight, ref color);
                         break;
 
