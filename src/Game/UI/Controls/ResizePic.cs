@@ -223,24 +223,26 @@ namespace ClassicUO.Game.UI.Controls
         {
             ResetHueVector();
 
-            var rect = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
+            //var rect = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
 
-            if (ScissorStack.PushScissors(rect))
+            //if (ScissorStack.PushScissors(rect))
             {
                 ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha, true);
 
-                batcher.EnableScissorTest(true);
+                //bool ok = batcher.EnableScissorTest(true);
 
                 DrawInternal(batcher, x, y, ref _hueVector);
                 base.Draw(batcher, x, y);
 
-                batcher.EnableScissorTest(false);
-                ScissorStack.PopScissors();
+                //if (ok)
+                 //   batcher.EnableScissorTest(false);
+
+                //ScissorStack.PopScissors();
 
                 return true;
             }
 
-            return false;
+            //return false;
         }
 
         private void DrawInternal(UltimaBatcher2D batcher, int x, int y, ref Vector3 color)

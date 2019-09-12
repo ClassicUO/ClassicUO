@@ -109,7 +109,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (ScissorStack.PushScissors(scissor))
                 {
-                    batcher.EnableScissorTest(true);
+                    bool ok = batcher.EnableScissorTest(true);
 
                     TxEntry.RenderText.Draw(batcher, x + TxEntry.Offset, y);
 

@@ -403,7 +403,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (ScissorStack.PushScissors(rect))
                 {
-                    batcher.EnableScissorTest(true);
+                    bool ok = batcher.EnableScissorTest(true);
 
                     int offset = size >> 1;
 
@@ -419,7 +419,6 @@ namespace ClassicUO.Game.UI.Gumps
                                    ref _hueVector, _flipMap ? 45 : 0);
 
                     batcher.EnableScissorTest(false);
-
                     ScissorStack.PopScissors();
                 }
 
