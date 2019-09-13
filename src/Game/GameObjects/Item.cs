@@ -230,56 +230,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public Item FindItem(ushort graphic, ushort hue = 0xFFFF)
-        {
-            Item item = null;
-
-            if (hue == 0xFFFF)
-            {
-                var minColor = 0xFFFF;
-
-                foreach (Item i in Items)
-                {
-                    if (i.Graphic == graphic)
-                    {
-                        if (i.Hue < minColor)
-                        {
-                            item = i;
-                            minColor = i.Hue;
-                        }
-                    }
-
-                    if (i.Container.IsValid)
-                    {
-                        Item found = i.FindItem(graphic, hue);
-
-                        if (found != null && found.Hue < minColor)
-                        {
-                            item = found;
-                            minColor = found.Hue;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                foreach (Item i in Items)
-                {
-                    if (i.Graphic == graphic && i.Hue == hue)
-                        item = i;
-
-                    if (i.Container.IsValid)
-                    {
-                        Item found = i.FindItem(graphic, hue);
-
-                        if (found != null)
-                            item = found;
-                    }
-                }
-            }
-
-            return item;
-        }
 
         private void LoadMulti()
         {
