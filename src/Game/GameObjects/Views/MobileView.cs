@@ -206,7 +206,7 @@ namespace ClassicUO.Game.GameObjects
                     else
                         FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
 
-                    drawY += DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, false, mountGraphic, isHuman);
+                    drawY += DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, false, mountGraphic, isHuman, isMount: true);
                 }
             }
             else
@@ -299,7 +299,7 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo.Height = FrameInfo.Y + FrameInfo.Height;
         }
 
-        private static sbyte DrawInternal(UltimaBatcher2D batcher, Mobile owner, Item entity, int x, int y, bool mirror, sbyte frameIndex, bool hasShadow, ushort id, bool isHuman, bool isParent = true)
+        private static sbyte DrawInternal(UltimaBatcher2D batcher, Mobile owner, Item entity, int x, int y, bool mirror, sbyte frameIndex, bool hasShadow, ushort id, bool isHuman, bool isParent = true, bool isMount = false)
         {
             if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 return 0;
@@ -350,7 +350,7 @@ namespace ClassicUO.Game.GameObjects
                     if (hue == 0)
                     {
                         hue = entity?.Hue ?? owner.Hue;
-                        partialHue = entity != null && entity.ItemData.IsPartialHue;
+                        partialHue = !isMount && entity != null && entity.ItemData.IsPartialHue;
 
                         if ((hue & 0x8000) != 0)
                         {
