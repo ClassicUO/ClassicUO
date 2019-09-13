@@ -1707,16 +1707,17 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool EnableScissorTest(bool enable)
+        public void EnableScissorTest(bool enable)
         {
             if (enable == _useScissor)
-                return false;
+                return;
+
+            if (!enable && _useScissor && ScissorStack.HasScissors)
+                return;
 
             Flush();
 
             _useScissor = enable;
-
-            return true;
         }
 
         [MethodImpl(256)]

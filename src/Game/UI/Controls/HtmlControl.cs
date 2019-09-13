@@ -216,7 +216,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (ScissorStack.PushScissors(scissor))
             {
-                bool ok = batcher.EnableScissorTest(true);
+                batcher.EnableScissorTest(true);
                 base.Draw(batcher, x, y);
                 _gameText.Draw(batcher, x + (HasBackground ? 4 : 0), y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0), ScrollX, ScrollY);
 

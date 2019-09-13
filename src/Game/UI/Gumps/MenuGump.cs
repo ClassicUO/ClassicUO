@@ -180,7 +180,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (ScissorStack.PushScissors(scissor))
                 {
-                    bool ok = batcher.EnableScissorTest(true);
+                    batcher.EnableScissorTest(true);
 
                     int width = 0;
                     int maxWidth = Value + Width;

@@ -114,7 +114,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (ScissorStack.PushScissors(scissor))
             {
-                bool ok = batcher.EnableScissorTest(true);
+                batcher.EnableScissorTest(true);
                 int height = 0;
                 int maxheight = _scrollBar.Value + Height;
                 bool drawOnly1 = true;

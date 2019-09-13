@@ -403,7 +403,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (ScissorStack.PushScissors(rect))
                 {
-                    bool ok = batcher.EnableScissorTest(true);
+                    batcher.EnableScissorTest(true);
 
                     int offset = size >> 1;
 
