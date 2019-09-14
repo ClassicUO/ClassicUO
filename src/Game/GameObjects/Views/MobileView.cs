@@ -98,15 +98,8 @@ namespace ClassicUO.Game.GameObjects
             bool hasShadow = !IsDead && !IsHidden && Engine.Profile.Current.ShadowsEnabled;
 
             if (Engine.AuraManager.IsEnabled)
-            { 
-                if (Engine.Profile.Current.PartyAura && World.Party.Contains(this))
-                {
-                    Engine.AuraManager.Draw(batcher, drawX + 22, drawY + 22, Engine.Profile.Current.PartyAuraHue);
-                }
-                else 
-                {
-                    Engine.AuraManager.Draw(batcher, drawX + 22, drawY + 22, Notoriety.GetHue(NotorietyFlag));
-                }
+            {
+                Engine.AuraManager.Draw(batcher, drawX + 22, drawY + 22, Engine.Profile.Current.PartyAura && World.Party.Contains(this) ? Engine.Profile.Current.PartyAuraHue : (ushort)Notoriety.GetHue(NotorietyFlag));
             }
 
             bool isHuman = IsHuman;
@@ -316,7 +309,12 @@ namespace ClassicUO.Game.GameObjects
                 return 0;
 
             if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
+            {
+                if (!hasShadow && entity != null && entity.ItemData.IsLight)
+                    Engine.SceneManager.GetScene<GameScene>().AddLight(owner, entity, x, y);
+
                 return 0;
+            }
 
             direction.LastAccessTime = Engine.Ticks;
 
