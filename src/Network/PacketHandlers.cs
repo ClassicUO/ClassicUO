@@ -3168,7 +3168,7 @@ namespace ClassicUO.Network
 
             string arguments = null;
             
-            if (cliloc == 1008092) // value for "You notify you don't want to join the party"
+            if (cliloc == 1008092 || World.Party.Leader != 0) // value for "You notify you don't want to join the party"
             {
                 foreach (var PartyInviteGump in Engine.UI.Gumps.OfType<PartyInviteGump>())
                 {
