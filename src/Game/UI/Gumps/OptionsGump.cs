@@ -1671,7 +1671,10 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.LightLevel = (byte) (_lightBar.MaxValue - _lightBar.Value);
 
             if (_enableLight.IsChecked)
-                World.Light.Overall = Engine.Profile.Current.LightLevel;
+            {
+               World.Light.Overall = Engine.Profile.Current.LightLevel;
+               World.Light.Personal = 0;
+            }
             else
             {
                 World.Light.Overall = World.Light.RealOverall;

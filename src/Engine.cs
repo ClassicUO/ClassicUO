@@ -55,12 +55,12 @@ namespace ClassicUO
 {
     internal class DebugInfo
     {
-        public int MobilesRendered { get; set; }
-        public int ItemsRendered { get; set; }
-        public int StaticsRendered { get; set; }
-        public int MultiRendered { get; set; }
-        public int LandsRendered { get; set; }
-        public int EffectsRendered { get; set; }
+        public int MobilesRendered;
+        public int ItemsRendered;
+        public int StaticsRendered;
+        public int MultiRendered;
+        public int LandsRendered;
+        public int EffectsRendered;
 
         public void Reset()
         {
