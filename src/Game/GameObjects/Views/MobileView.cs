@@ -261,6 +261,11 @@ namespace ClassicUO.Game.GameObjects
 
                             DrawInternal(batcher, this, item, drawX, drawY, mirror, animIndex, false, graphic, isHuman, false);
                         }
+                        else
+                        {
+                            if (item.ItemData.IsLight)
+                                Engine.SceneManager.GetScene<GameScene>().AddLight(this, this, drawX + 22, drawY + 22);
+                        }
 
                         _equipConvData = null;
                     }
@@ -310,9 +315,6 @@ namespace ClassicUO.Game.GameObjects
 
             if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
             {
-                if (!hasShadow && entity != null && entity.ItemData.IsLight)
-                    Engine.SceneManager.GetScene<GameScene>().AddLight(owner, entity, x, y);
-
                 return 0;
             }
 
