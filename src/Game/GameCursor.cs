@@ -418,10 +418,10 @@ namespace ClassicUO.Game
 
                         switch (Engine.UI.MouseOverControl)
                         {
-                            case EquipmentSlot equipmentSlot:
-                                it = equipmentSlot.Item;
+                            //case EquipmentSlot equipmentSlot:
+                            //    it = equipmentSlot.Item;
 
-                                break;
+                            //    break;
 
                             case ItemGump gumpling:
                                 it = gumpling.Item;

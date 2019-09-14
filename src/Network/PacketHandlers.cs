@@ -2198,13 +2198,15 @@ namespace ClassicUO.Network
             if (paperdoll == null)
             {
                 if (!Engine.UI.GetGumpCachePosition(mobile, out Point location)) location = new Point(100, 100);
-                Engine.UI.Add(new PaperDollGump(mobile, text) {Location = location});
+                Engine.UI.Add(paperdoll = new PaperDollGump(mobile, text) {Location = location});
             }
             else
             {
                 paperdoll.SetInScreen();
                 paperdoll.BringOnTop();
             }
+
+            paperdoll.CanLift = (flags & 0x02) != 0;
         }
 
         private static void CorpseEquipment(Packet p)

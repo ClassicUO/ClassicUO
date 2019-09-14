@@ -385,7 +385,6 @@
     <Compile Include="Game\UI\Controls\CheckerTrans.cs" />
     <Compile Include="Game\UI\Controls\ColorPickerBox.cs" />
     <Compile Include="Game\UI\Controls\CroppedText.cs" />
-    <Compile Include="Game\UI\Controls\EquipmentSlot.cs" />
     <Compile Include="Game\UI\Controls\ExpandableScroll.cs" />
     <Compile Include="Game\UI\Controls\Control.cs" />
     <Compile Include="Game\UI\Controls\GumpControlInfo.cs" />
