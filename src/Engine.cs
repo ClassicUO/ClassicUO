@@ -748,8 +748,9 @@ namespace ClassicUO
 
             _totalFrames++;
 
-            if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDestroyed)
-                _sceneManager.CurrentScene.Draw(_batcher);
+            var scene = _sceneManager.CurrentScene;
+            if (scene != null && scene.IsLoaded && !scene.IsDestroyed)
+                scene.Draw(_batcher);
 
             _uiManager.Draw(_batcher);
 
