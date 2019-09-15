@@ -28,12 +28,14 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+using ClassicUO.Utility;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    internal sealed class UltimaBatcher2D
+    internal sealed class UltimaBatcher2D : IDisposable
     {
         private const int MAX_SPRITES = 0x800;
         private const int MAX_VERTICES = MAX_SPRITES * 4;
@@ -52,6 +54,8 @@ namespace ClassicUO.Renderer
         private bool _useScissor;
         private BoundingBox _drawingArea;
         private int _numSprites;
+        //private readonly IntPtr _ptrVertexBufferArray;
+        private GCHandle _handle;
 
         public UltimaBatcher2D(GraphicsDevice device)
         {
@@ -79,6 +83,9 @@ namespace ClassicUO.Renderer
             DefaultEffect = new IsometricEffect(device);
 
             GraphicsDevice.Indices = _indexBuffer;
+            GraphicsDevice.SetVertexBuffer(_vertexBuffer);
+
+            _handle = GCHandle.Alloc(_vertexInfo, GCHandleType.Pinned);
         }
 
 
@@ -1658,19 +1665,18 @@ namespace ClassicUO.Renderer
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
 
 
-            GraphicsDevice.SetVertexBuffer(_vertexBuffer);
 
             DefaultEffect.ApplyStates();
         }
 
-        private void Flush()
+        private unsafe void Flush()
         {
             ApplyStates();
 
             if (_numSprites == 0)
                 return;
 
-            _vertexBuffer.SetData(_vertexInfo, 0, _numSprites << 2);
+            _vertexBuffer.SetDataPointerEXT(0, _handle.AddrOfPinnedObject(), PositionNormalTextureColor.SizeInBytes * _numSprites, SetDataOptions.None);
 
             Texture2D current = _textureInfo[0];
             int offset = 0;
@@ -1789,6 +1795,13 @@ namespace ClassicUO.Renderer
 
                 base.ApplyStates();
             }
+        }
+
+        public void Dispose()
+        {
+            _vertexBuffer.Dispose();
+            _indexBuffer.Dispose();
+            _handle.Free();
         }
     }
 
