@@ -1669,7 +1669,7 @@ namespace ClassicUO.Renderer
             DefaultEffect.ApplyStates();
         }
 
-        private unsafe void Flush()
+        private void Flush()
         {
             ApplyStates();
 
