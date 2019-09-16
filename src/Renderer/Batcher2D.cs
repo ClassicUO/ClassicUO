@@ -1676,7 +1676,7 @@ namespace ClassicUO.Renderer
             if (_numSprites == 0)
                 return;
 
-            _vertexBuffer.SetDataPointerEXT(0, _handle.AddrOfPinnedObject(), PositionNormalTextureColor.SizeInBytes * _numSprites, SetDataOptions.None);
+            _vertexBuffer.SetDataPointerEXT(0, _handle.AddrOfPinnedObject(), PositionNormalTextureColor.SIZE_IN_BYTES * (_numSprites << 2), SetDataOptions.None);
 
             Texture2D current = _textureInfo[0];
             int offset = 0;
@@ -1864,7 +1864,7 @@ namespace ClassicUO.Renderer
                                                                                            new VertexElement(sizeof(float) * 9, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 1) // hue
                                                                                           );
 
-        public const int SizeInBytes = sizeof(float) * 12 * 4;
+        public const int SIZE_IN_BYTES = sizeof(float) * 12;
 
 #if DEBUG
         public override string ToString()
