@@ -512,7 +512,49 @@ namespace ClassicUO.Game.Managers
                             pic.ContainsByBounds = true;
                             pic.IsVirtue = true;
 
-                            string s;
+                            string s, lvl;
+
+                            switch (pic.Hue)
+                            {
+                                case 2403:
+                                    lvl = "";
+                                    break;
+                                case 1154:
+                                case 1547:
+                                case 2213:
+                                case 235:
+                                case 18:
+                                case 2210:
+                                case 1348:
+                                    lvl = "Seeker of ";
+                                    break;
+                                case 2404:
+                                case 1552:
+                                case 2216:
+                                case 2302:
+                                case 2118:
+                                case 618:
+                                case 2212:
+                                case 1352:
+                                    lvl = "Follower of ";
+                                    break;
+                                case 43:
+                                case 53:
+                                case 1153:
+                                case 33:
+                                case 318:
+                                case 67:
+                                case 98:
+                                    lvl = "Knight of ";
+                                    break;
+                                case 2406:
+                                    if (pic.Graphic == 0x6F) lvl = "Seeker of ";
+                                    else lvl = "Knight of ";
+                                    break;
+                                default:
+                                    lvl = "";
+                                    break;
+                            }
 
                             switch (pic.Graphic)
                             {
@@ -540,14 +582,14 @@ namespace ClassicUO.Game.Managers
 
                                 case 0x6C:
                                 default:
-                                    s = FileManager.Cliloc.GetString(1051000 + 2);
+                                    s = FileManager.Cliloc.GetString(1051000);
                                     break;
                             }
 
                             if (string.IsNullOrEmpty(s))
                                 s = "Unknown virtue";
 
-                            pic.SetTooltip(s, 100);
+                            pic.SetTooltip(lvl + s, 100);
                         }
 
                         gump.Add(pic, page);
