@@ -101,6 +101,8 @@ namespace ClassicUO.Game.Managers
                         }
                     }
                 }
+                _dragOriginX = Mouse.Position.X;
+                _dragOriginY = Mouse.Position.Y;
             };
 
             Engine.Input.LeftMouseButtonUp += (sender, e) =>
