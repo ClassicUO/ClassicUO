@@ -63,7 +63,7 @@ namespace ClassicUO.Game.Managers
 
             Engine.Input.MouseDragging += (sender, e) =>
             {
-                HandleMouseInput();
+                //HandleMouseInput();  //Unnecessary as _dragOriginX and dragOriginY have been set already.
 
                 if (_mouseDownControls[0] == MouseOverControl && MouseOverControl != null)
                     AttemptDragControl(MouseOverControl, Mouse.Position, true);
@@ -101,6 +101,8 @@ namespace ClassicUO.Game.Managers
                         }
                     }
                 }
+                _dragOriginX = Mouse.Position.X;
+                _dragOriginY = Mouse.Position.Y;
             };
 
             Engine.Input.LeftMouseButtonUp += (sender, e) =>
@@ -1127,8 +1129,11 @@ namespace ClassicUO.Game.Managers
                 if (attemptAlwaysSuccessful)
                 {
                     DraggingControl = dragTarget;
-                    _dragOriginX = mousePosition.X;
-                    _dragOriginY = mousePosition.Y;
+                    if (IsMouseOverWorld)                   //only for health bars
+                    {
+                        _dragOriginX = mousePosition.X;
+                        _dragOriginY = mousePosition.Y;
+                    }
                 }
 
                 if (DraggingControl == dragTarget)
