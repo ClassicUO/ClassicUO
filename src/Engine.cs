@@ -567,10 +567,6 @@ namespace ClassicUO
             Log.PushIndent();
 
 
-            //_uiSystem = new UISystemManager(this);
-            //Components.Add(_uiSystem);
-
-
             try
             {
                 FileManager.UoFolderPath = GlobalSettings.UltimaOnlineDirectory;
@@ -712,7 +708,6 @@ namespace ClassicUO
                 _totalElapsed -= fpsTime;
                 _isRunningSlowly = _totalElapsed > fpsTime;
 
-
                 if (_isRunningSlowly && _totalElapsed > fpsTime * 2)
                 {
                     _totalElapsed %= fpsTime;
@@ -723,15 +718,11 @@ namespace ClassicUO
             {
                 uint sleep = SDL.SDL_GetTicks() - Ticks;
 
-                if (sleep < fpsTime)
+                if (fpsTime - sleep >= FrameDelay[1])
                 {
-                    Thread.Sleep(fpsTime - sleep >= FrameDelay[1] ? 1 : 0);
+                    Thread.Sleep(1);
                 }
-                else
-                    Thread.Yield();
             }
-            else
-                Thread.Yield();
         }
 
 

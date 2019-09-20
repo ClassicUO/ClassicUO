@@ -33,22 +33,6 @@ namespace ClassicUO.IO
 {
     internal abstract class ResourceLoader : IDisposable
     {
-        private readonly string[] _paths;
-
-        protected ResourceLoader(string path) : this(new[] { path })
-        {
-        }
-
-        protected ResourceLoader(string[] paths)
-        {
-            _paths = paths;
-        }
-
-
-        protected ResourceLoader()
-        {
-        }
-
         public UOFileIndex[] Entries;
 
         public bool IsDisposed { get; private set; }
@@ -83,23 +67,42 @@ namespace ClassicUO.IO
 
     internal abstract class ResourceLoader<T> : ResourceLoader where T : UOTexture
     {
+        private readonly List<uint> _texturesToClear = new List<uint>();
+
+
         protected Dictionary<uint, T> ResourceDictionary { get; } = new Dictionary<uint, T>();
         public abstract T GetTexture(uint id);
 
 
         public virtual void CleaUnusedResources()
         {
+            ClearUnusedResources(ResourceDictionary, Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
+        }
+
+        public void ClearUnusedResources<T1>(Dictionary<uint, T1> dict, int maxCount) where T1 : UOTexture
+        {
             long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
-            ResourceDictionary
-               .Where(s => s.Value.Ticks < ticks)
-               .Take(Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
-               .ToList()
-               .ForEach(s =>
+            int count = 0;
+            foreach (var p in dict)
+            {
+                if (p.Value.Ticks < ticks)
                 {
-                    s.Value.Dispose();
-                    ResourceDictionary.Remove(s.Key);
-                });
+                    if (count++ >= maxCount)
+                        break;
+
+                    _texturesToClear.Add(p.Key);
+                }
+            }
+
+            foreach (uint key in _texturesToClear)
+            {
+                dict[key].Dispose();
+                dict.Remove(key);
+            }
+
+            if (_texturesToClear.Count != 0)
+                _texturesToClear.Clear();
         }
 
         public virtual bool TryGetEntryInfo(int entry, out long address, out long size, out long compressedsize)
