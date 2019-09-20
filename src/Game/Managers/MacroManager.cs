@@ -807,6 +807,11 @@ namespace ClassicUO.Game.Managers
 
                     break;
 
+                case MacroType.HighlightTileAtRange:
+                    Engine.Profile.Current.HighlightTileAtRange = !Engine.Profile.Current.HighlightTileAtRange;
+
+                    break;
+
                 case MacroType.AttackSelectedTarget:
 
                     // TODO:
@@ -1363,6 +1368,7 @@ namespace ClassicUO.Game.Managers
         EnableRangeColor,
         DisableRangeColor,
         ToggleRangeColor,
+        HighlightTileAtRange,
         InvokeVirtue,
         SelectNext,
         SelectPrevious,

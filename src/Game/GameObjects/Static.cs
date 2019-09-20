@@ -94,6 +94,8 @@ namespace ClassicUO.Game.GameObjects
 
         public Graphic OriginalGraphic { get; private set; }
 
+        public Hue OriginalHue { get; private set; }
+
         public StaticTiles ItemData
         {
             [MethodImpl(256)]
@@ -116,6 +118,12 @@ namespace ClassicUO.Game.GameObjects
         {
             Graphic = OriginalGraphic;
             _itemData = FileManager.TileData.StaticData[Graphic];
+        }
+
+        public void RestoreOriginalHue()
+        {
+            Hue = OriginalHue;
+            _itemData = FileManager.TileData.StaticData[Hue];
         }
 
         public override void UpdateGraphicBySeason()

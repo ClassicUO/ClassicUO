@@ -241,17 +241,86 @@ namespace ClassicUO.Game.Scenes
                             {
                                 if (StaticFilters.IsTree(st.OriginalGraphic))
                                 {
-                                    if (Engine.Profile.Current.TreeToStumps && st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
+
+                                    if (Engine.Profile.Current.TreeType == 0)
                                     {
-                                        if (!itemData.IsImpassable)
-                                            continue;
-                                        st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC);
+                                        if (st.OriginalGraphic != st.Graphic)
+                                            st.RestoreOriginalGraphic();
+                                            st.RestoreOriginalHue();
                                     }
-                                    else if (st.OriginalGraphic != st.Graphic && !Engine.Profile.Current.TreeToStumps)
-                                        st.RestoreOriginalGraphic();
+                                    else if (Engine.Profile.Current.TreeType == 1)
+                                    {
+                                        if (st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
+                                            st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC);
+                                            st.RestoreOriginalHue();
+                                    }
+                                    else if (Engine.Profile.Current.TreeType == 2)
+                                    {
+                                        if (st.Graphic != Constants.TREE_REPLACE_GRAPHIC_TILE)
+                                            st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC_TILE);
+                                        if (Engine.Profile.Current.ColorTreeTile)
+                                            st.Hue = Engine.Profile.Current.TreeTileHue;
+                                        else
+                                            st.RestoreOriginalHue();
+                                    }
+                                }
+
+                                if (StaticFilters.IsBlockerTreeArt(st.OriginalGraphic))
+                                {
+
+                                    if (Engine.Profile.Current.BlockerType == 0) // off
+                                    {
+                                        if (st.OriginalGraphic != st.Graphic)
+                                            st.RestoreOriginalGraphic();
+                                            st.RestoreOriginalHue();
+                                    }
+                                    else if (Engine.Profile.Current.BlockerType == 1)
+                                    {
+                                        if (st.Graphic != Constants.BLOCKER_REPLACE_GRAPHIC_STUMP)
+                                            st.SetGraphic(Constants.BLOCKER_REPLACE_GRAPHIC_STUMP);
+                                            st.RestoreOriginalHue();
+                                    }
+                                    else if (Engine.Profile.Current.BlockerType == 2)
+                                    {
+                                        if (st.Graphic != Constants.BLOCKER_REPLACE_GRAPHIC_TILE)
+                                            st.SetGraphic(Constants.BLOCKER_REPLACE_GRAPHIC_TILE);
+                                        if (Engine.Profile.Current.ColorBlockerTile)
+                                            st.Hue = Engine.Profile.Current.BlockerTileHue;
+                                        else
+                                            st.RestoreOriginalHue();
+                                    }
+
+
+                                }
+
+                                if (StaticFilters.IsBlockerStoneArt(st.OriginalGraphic))
+                                {
+
+                                    if (Engine.Profile.Current.BlockerType == 0) // off
+                                    {
+                                        if (st.OriginalGraphic != st.Graphic)
+                                            st.RestoreOriginalGraphic();
+                                            st.RestoreOriginalHue();
+                                    }
+                                    else if (Engine.Profile.Current.BlockerType == 1)
+                                    {
+                                        if (st.Graphic != Constants.BLOCKER_REPLACE_GRAPHIC_ROCK)
+                                            st.SetGraphic(Constants.BLOCKER_REPLACE_GRAPHIC_ROCK);
+                                            st.RestoreOriginalHue();
+                                    }
+                                    else if (Engine.Profile.Current.BlockerType == 2)
+                                    {
+                                        if (st.Graphic != Constants.BLOCKER_REPLACE_GRAPHIC_TILE)
+                                            st.SetGraphic(Constants.BLOCKER_REPLACE_GRAPHIC_TILE);
+                                        if (Engine.Profile.Current.ColorBlockerTile)
+                                            st.Hue = Engine.Profile.Current.BlockerTileHue;
+                                        else
+                                            st.RestoreOriginalHue();
+                                    }
+
+
                                 }
                             }
-
                             if (_noDrawRoofs && itemData.IsRoof)
                             {
                                 if (_alphaChanged)
@@ -264,7 +333,7 @@ namespace ClassicUO.Game.Scenes
                             }
 
                             //we avoid to hide impassable foliage or bushes, if present...
-                            if ((Engine.Profile.Current.TreeToStumps && itemData.IsFoliage) || (Engine.Profile.Current.HideVegetation && !itemData.IsImpassable && StaticFilters.IsVegetation(obj.Graphic)))
+                            if ((Engine.Profile.Current.TreeType != 0 && itemData.IsFoliage) || (Engine.Profile.Current.HideVegetation && !itemData.IsImpassable && StaticFilters.IsVegetation(obj.Graphic)))
                                 continue;
 
                             //if (HeightChecks <= 0 && (!itemData.IsBridge || ((itemData.Flags & TileFlag.StairBack | TileFlag.StairRight) != 0) || itemData.IsWall))

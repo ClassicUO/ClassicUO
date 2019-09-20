@@ -84,11 +84,14 @@ namespace ClassicUO.Game.UI.Gumps
         // GameWindowSize
         private TextBox _gameWindowWidth;
         private Combobox _gridLoot;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
-        private Combobox _hpComboBox, _healtbarType, _fieldsType, _hpComboBoxShowWhen;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _showHpMobile, _highlightByState, _drawRoofs, _colorTreeTile, _colorBlockerTile, _highlightTileRange, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
+        private ColorBox _treeTileColorPickerBox, _blockerTileColorPickerBox;
+        private Combobox _hpComboBox, _healtbarType, _fieldsType, _hpComboBoxShowWhen, _treeType, _blockerType, _energyBoltNeonType;
+        private HSliderBar _highlightTileRangeRange;
 
         // combat & spells
-        private ColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _genericColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox;
+        private ColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _genericColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox, _neutralColorPickerBox, _beneficColorPickerBox, _harmfulColorPickerBox, _energyBoltColorPickerBox;
+        private Checkbox _colorEnergyBolt;
         private HSliderBar _lightBar;
 
         // macro
@@ -290,12 +293,90 @@ namespace ClassicUO.Game.UI.Gumps
             item.Add(_circleOfTranspRadius);
             rightArea.Add(item);
 
+            ScrollAreaItem modsAreaItem = new ScrollAreaItem();
+            uint color = 0xFF7F7F7F;
+
+            text = new Label("Tree Type:", true, HUE_FONT)
+            {
+                Y = 10
+            };
+            modsAreaItem.Add(text);
+
+            int mode = Engine.Profile.Current.TreeType;
+            if (mode < 0 || mode > 2)
+                mode = 0;
+
+            _treeType = new Combobox(text.Width + 36, text.Y, 100, new[]
+            {
+                "Off", "Stump", "Tile"
+            }, mode);
+            modsAreaItem.Add(_treeType);
+            
+            _colorTreeTile = new Checkbox(0x00D2, 0x00D3, "Color Tile", FONT, HUE_FONT)
+            {
+                X = _treeType.Bounds.Right + 30, Y = 10, IsChecked = Engine.Profile.Current.ColorTreeTile
+            };
+            modsAreaItem.Add(_colorTreeTile);
+
+            if (Engine.Profile.Current.TreeTileHue != 0xFFFF)
+                color = FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.TreeTileHue);
+            _treeTileColorPickerBox = new ClickableColorBox(_colorTreeTile.Bounds.Right + 30, 10, 13, 14, Engine.Profile.Current.TreeTileHue, color);
+            modsAreaItem.Add(_treeTileColorPickerBox);
+            text = new Label("Tile Color", true, HUE_FONT)
+            {
+                X = _treeTileColorPickerBox.Bounds.Right + 10, Y = 10
+            };
+            modsAreaItem.Add(text);
+
+            text = new Label("Blocker Type:", true, HUE_FONT)
+            {
+                Y = _treeType.Bounds.Bottom + 10
+            };
+            modsAreaItem.Add(text);
+
+            mode = Engine.Profile.Current.BlockerType;
+            if (mode < 0 || mode > 2)
+                mode = 0;
+
+            _blockerType = new Combobox(text.Width + 20, text.Y, 100, new[]
+            {
+                "Off", "Stump", "Tile"
+            }, mode);
+            modsAreaItem.Add(_blockerType);
+
+            _colorBlockerTile = new Checkbox(0x00D2, 0x00D3, "Color Tile", FONT, HUE_FONT)
+            {
+                X = _blockerType.Bounds.Right + 30, Y = _treeType.Bounds.Bottom + 10, IsChecked = Engine.Profile.Current.ColorBlockerTile
+            };
+            modsAreaItem.Add(_colorBlockerTile);
+
+            if (Engine.Profile.Current.BlockerTileHue != 0xFFFF)
+                color = FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.BlockerTileHue);
+            _blockerTileColorPickerBox = new ClickableColorBox(_colorBlockerTile.Bounds.Right + 30, _treeType.Bounds.Bottom + 10, 13, 14, Engine.Profile.Current.BlockerTileHue, color);
+            modsAreaItem.Add(_blockerTileColorPickerBox);
+            text = new Label("Tile Color", true, HUE_FONT)
+            {
+                X = _blockerTileColorPickerBox.Bounds.Right + 10, Y = _treeType.Bounds.Bottom + 10
+            };
+            modsAreaItem.Add(text);
+            
+            rightArea.Add(modsAreaItem);
 
             _drawRoofs = CreateCheckBox(rightArea, "Hide roof tiles", !Engine.Profile.Current.DrawRoofs, 0, 15);
-            _treeToStumps = CreateCheckBox(rightArea, "Tree to stumps", Engine.Profile.Current.TreeToStumps, 0, 0);
             _hideVegetation = CreateCheckBox(rightArea, "Hide vegetation", Engine.Profile.Current.HideVegetation, 0, 0);
             _enableCaveBorder = CreateCheckBox(rightArea, "Mark cave tiles", Engine.Profile.Current.EnableCaveBorder, 0, 0);
 
+            _highlightTileRange = CreateCheckBox(rightArea, "Highlight tiles on range", !Engine.Profile.Current.HighlightTileAtRange, 0, 15);
+            
+            text = new Label("@ range: ", true, HUE_FONT)
+            {
+                X = 20,
+                Y = 0
+            };
+            rightArea.Add(text);
+
+            _highlightTileRangeRange = new HSliderBar(20, 0, 180, 1, 20, Engine.Profile.Current.HighlightTileAtRangeRange, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+            rightArea.Add(_highlightTileRangeRange);
 
             ScrollAreaItem hpAreaItem = new ScrollAreaItem();
 
@@ -306,7 +387,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             hpAreaItem.Add(_showHpMobile);
 
-            int mode = Engine.Profile.Current.MobileHPType;
+            mode = Engine.Profile.Current.MobileHPType;
 
             if (mode < 0 || mode > 2)
                 mode = 0;
@@ -966,6 +1047,42 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(it);
 
+            ScrollAreaItem ebAreaItem = new ScrollAreaItem();
+            uint color = 0xFF7F7F7F;
+
+            _colorEnergyBolt = new Checkbox(0x00D2, 0x00D3, "Color EnergyBolt", FONT, HUE_FONT)
+            {
+                X = 0, Y = 20, IsChecked = Engine.Profile.Current.ColorEnergyBolt
+            };
+            ebAreaItem.Add(_colorEnergyBolt);
+
+            if (Engine.Profile.Current.EnergyBoltHue != 0xFFFF)
+                color = FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.EnergyBoltHue);
+            _energyBoltColorPickerBox = new ClickableColorBox(_colorEnergyBolt.Bounds.Right + 20, 20, 13, 14, Engine.Profile.Current.EnergyBoltHue, color);
+            ebAreaItem.Add(_energyBoltColorPickerBox);
+            Label text = new Label("EB Color", true, HUE_FONT)
+            {
+                X = _energyBoltColorPickerBox.Bounds.Right + 10, Y = 20
+            };
+            ebAreaItem.Add(text);
+
+            text = new Label("or Neon:", true, HUE_FONT)
+            {
+                 X = _energyBoltColorPickerBox.Bounds.Right + 100, Y = 20
+            };
+            ebAreaItem.Add(text);
+
+            int mode = Engine.Profile.Current.EnergyBoltNeonType;
+            if (mode < 0 || mode > 4)
+                mode = 0;
+            _energyBoltNeonType = new Combobox(text.Bounds.Right + 18, text.Y, 100, new[]
+            {
+                "Off", "White", "Pink", "Ice", "Fire"
+            }, mode);
+            ebAreaItem.Add(_energyBoltNeonType);
+
+            rightArea.Add(ebAreaItem);
+
             Add(rightArea, PAGE);
         }
 
@@ -1288,7 +1405,17 @@ namespace ClassicUO.Game.UI.Gumps
                     _invulnerableColorPickerBox.SetColor(0x0030, FileManager.Hues.GetPolygoneColor(12, 0x0030));
                     _drawRoofs.IsChecked = true;
                     _enableCaveBorder.IsChecked = false;
-                    _treeToStumps.IsChecked = false;
+                    _treeType.SelectedIndex = 0;
+                    _colorTreeTile.IsChecked = false;
+                    _treeTileColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
+                    _blockerType.SelectedIndex = 0;
+                    _colorBlockerTile.IsChecked = false;
+                    _blockerTileColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
+                    _highlightTileRange.IsChecked = false;
+                    _highlightTileRangeRange.Value = 12;
+                    _colorEnergyBolt.IsChecked = false;
+                    _energyBoltColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
+                    _energyBoltNeonType.SelectedIndex = 0;
                     _hideVegetation.IsChecked = false;
                     _noColorOutOfRangeObjects.IsChecked = false;
                     _circleOfTranspRadius.Value = 5;
@@ -1489,7 +1616,17 @@ namespace ClassicUO.Game.UI.Gumps
                 FileManager.Art.ClearCaveTextures();
             }
 
-            Engine.Profile.Current.TreeToStumps = _treeToStumps.IsChecked;
+            Engine.Profile.Current.ColorTreeTile = _colorTreeTile.IsChecked;
+            Engine.Profile.Current.TreeTileHue = _treeTileColorPickerBox.Hue;
+            Engine.Profile.Current.TreeType = _treeType.SelectedIndex;
+            Engine.Profile.Current.ColorBlockerTile = _colorBlockerTile.IsChecked;
+            Engine.Profile.Current.BlockerTileHue = _blockerTileColorPickerBox.Hue;
+            Engine.Profile.Current.BlockerType = _blockerType.SelectedIndex;
+            Engine.Profile.Current.ColorEnergyBolt = _colorEnergyBolt.IsChecked;
+            Engine.Profile.Current.EnergyBoltHue = _energyBoltColorPickerBox.Hue;
+            Engine.Profile.Current.EnergyBoltNeonType = _energyBoltNeonType.SelectedIndex;
+            Engine.Profile.Current.HighlightTileAtRange = _highlightTileRange.IsChecked;
+            Engine.Profile.Current.HighlightTileAtRangeRange = _highlightTileRangeRange.Value;
             Engine.Profile.Current.FieldsType = _fieldsType.SelectedIndex;
             Engine.Profile.Current.HideVegetation = _hideVegetation.IsChecked;
             Engine.Profile.Current.NoColorObjectsOutOfRange = _noColorOutOfRangeObjects.IsChecked;
