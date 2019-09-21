@@ -1244,7 +1244,7 @@ namespace ClassicUO.Game.UI.Gumps
             Label text = new Label("- Container scale:",true, HUE_FONT, font: FONT);
             item.Add(text);
 
-            _containersScale = new HSliderBar(text.X + text.Width + 10, text.Y + 5, 100, Constants.MIN_CONTAINER_SIZE_PERC, Constants.MAX_CONTAINER_SIZE_PERC, Engine.Profile.Current.ContainersScale, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+            _containersScale = new HSliderBar(text.X + text.Width + 10, text.Y + 5, 200, Constants.MIN_CONTAINER_SIZE_PERC, Constants.MAX_CONTAINER_SIZE_PERC, Engine.Profile.Current.ContainersScale, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             item.Add(_containersScale);
 
             rightArea.Add(item);
