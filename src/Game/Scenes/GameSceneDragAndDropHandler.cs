@@ -162,17 +162,36 @@ namespace ClassicUO.Game.Scenes
                 {
                     Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
                     ArtTexture texture = FileManager.Art.GetTexture(HeldItem.DisplayedGraphic);
+                    float scale = Engine.UI.ContainerScale;
+
+                    bounds.X = (int)(bounds.X * scale);
+                    bounds.Y = (int)(bounds.Y * scale);
+                    bounds.Width = (int) (bounds.Width * scale);
+                    bounds.Height = (int)(bounds.Height * scale);
 
                     if (texture != null && !texture.IsDisposed)
                     {
-                        x -= texture.Width >> 1;
-                        y -= texture.Height >> 1;
+                        int textureW, textureH;
 
-                        if (x + texture.Width > bounds.Width)
-                            x = bounds.Width - texture.Width;
+                        if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
+                        {
+                            textureW = (int)(texture.Width * scale);
+                            textureH = (int)(texture.Height * scale);
+                        }
+                        else
+                        {
+                            textureW = texture.Width;
+                            textureH = texture.Height;
+                        }
 
-                        if (y + texture.Height > bounds.Height)
-                            y = bounds.Height - texture.Height;
+                        x -= textureW >> 1;
+                        y -= textureH >> 1;
+
+                        if (x + textureW > bounds.Width)
+                            x = bounds.Width - textureW;
+
+                        if (y + textureH > bounds.Height)
+                            y = bounds.Height - textureH;
                     }
 
                     if (x < bounds.X)
@@ -180,6 +199,9 @@ namespace ClassicUO.Game.Scenes
 
                     if (y < bounds.Y)
                         y = bounds.Y;
+
+                    x = (int)(x / scale);
+                    y = (int)(y / scale);
                 }
                 else
                 {

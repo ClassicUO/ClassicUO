@@ -293,6 +293,10 @@ namespace ClassicUO.Configuration
 
         [JsonProperty] public bool JournalDarkMode { get; set; }
 
+        [JsonProperty] public byte ContainersScale { get; set; } = 100;
+
+        [JsonProperty] public bool ScaleItemsInsideContainers { get; set; }
+
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(Engine.ExePath, "Data");
