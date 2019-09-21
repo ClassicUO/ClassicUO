@@ -162,7 +162,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
                     ArtTexture texture = FileManager.Art.GetTexture(HeldItem.DisplayedGraphic);
-                    float scale = Engine.UI.Scale;
+                    float scale = Engine.UI.ContainerScale;
 
                     bounds.X = (int)(bounds.X * scale);
                     bounds.Y = (int)(bounds.Y * scale);
@@ -171,8 +171,18 @@ namespace ClassicUO.Game.Scenes
 
                     if (texture != null && !texture.IsDisposed)
                     {
-                        int textureW = (int)(texture.Width * scale);
-                        int textureH = (int)(texture.Height * scale);
+                        int textureW, textureH;
+
+                        if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
+                        {
+                            textureW = (int)(texture.Width * scale);
+                            textureH = (int)(texture.Height * scale);
+                        }
+                        else
+                        {
+                            textureW = texture.Width;
+                            textureH = texture.Height;
+                        }
 
                         x -= textureW >> 1;
                         y -= textureH >> 1;

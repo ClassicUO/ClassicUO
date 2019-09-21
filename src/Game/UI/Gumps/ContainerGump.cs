@@ -49,8 +49,6 @@ namespace ClassicUO.Game.UI.Gumps
         private GumpPic _eyeGumpPic;
         private bool _isCorspeContainer;
 
-        private float _lastScale;
-
         public ContainerGump() : base(0, 0)
         {
         }
@@ -82,11 +80,13 @@ namespace ClassicUO.Game.UI.Gumps
             LocalSerial = _item.Serial;
             WantUpdateSize = false;
             _isCorspeContainer = Graphic == 0x0009;
+
+            _item.Items.Added -= ItemsOnAdded;
+            _item.Items.Removed -= ItemsOnRemoved;
             _item.Items.Added += ItemsOnAdded;
             _item.Items.Removed += ItemsOnRemoved;
 
-            float scale = Engine.UI.Scale;
-            _lastScale = scale;
+            float scale = Engine.UI.ContainerScale;
 
             _data = ContainerManager.Get(Graphic);
             if(_data.MinimizerArea != Rectangle.Empty && _data.IconizedGraphic != 0)
@@ -186,12 +186,19 @@ namespace ClassicUO.Game.UI.Gumps
                 _eyeGumpPic.Texture = FileManager.Gumps.GetTexture(_eyeGumpPic.Graphic);
             }
             if(Iconized != null) Iconized.Hue = _item.Hue;
+        }
 
-            if (_lastScale != Engine.UI.Scale)
-            {
-                Dispose();
-                GameActions.DoubleClick(LocalSerial);
-            }
+        public void ForceUpdate()
+        {
+            Children[0].Dispose();
+            _IconizerArea?.Dispose();
+            _Iconized?.Dispose();
+            LocalSerial = 0;
+
+            var itemsControl = GetControls<ItemGump>();
+            BuildGump();
+
+            ItemsOnAdded(null, new CollectionChangedEventArgs<Serial>(itemsControl.Select(s => s.LocalSerial)));
         }
 
         public override void Save(BinaryWriter writer)
@@ -233,10 +240,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 CheckItemPosition(item);
                 var itemControl = new ItemGump(item);
-                float scale = Engine.UI.Scale;
 
-                itemControl.Width = (int) (itemControl.Width * scale);
-                itemControl.Height = (int)(itemControl.Height * scale);
+                if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
+                {
+                    float scale = Engine.UI.ContainerScale;
+
+                    itemControl.Width = (int)(itemControl.Width * scale);
+                    itemControl.Height = (int)(itemControl.Height * scale);
+                }
 
                 Add(itemControl);
             }
@@ -245,7 +256,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void CheckItemPosition(Item item)
         {
-            float scale = Engine.UI.Scale;
+            float scale = Engine.UI.ContainerScale;
 
             int x = (int) (item.X * scale);
             int y = (int) (item.Y * scale);
@@ -260,8 +271,18 @@ namespace ClassicUO.Game.UI.Gumps
                 int boundW = (int)(_data.Bounds.Width * scale);
                 int boundH = (int)(_data.Bounds.Height * scale);
 
-                int textureW = (int)(texture.Width * scale);
-                int textureH = (int)(texture.Height * scale);
+                int textureW, textureH;
+
+                if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
+                {
+                    textureW = (int)(texture.Width * scale);
+                    textureH = (int)(texture.Height * scale);
+                }
+                else
+                {
+                    textureW = texture.Width;
+                    textureH = texture.Height;
+                }
 
                 if (x < boundX)
                     x = boundX;

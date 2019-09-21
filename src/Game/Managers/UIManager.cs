@@ -214,7 +214,7 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public float Scale { get; set; } = 1f;
+        public float ContainerScale { get; set; } = 1f;
 
         public AnchorManager AnchorManager { get; }
 

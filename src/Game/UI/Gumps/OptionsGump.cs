@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -126,6 +127,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // containers
         private HSliderBar _containersScale;
+        private Checkbox _containerScaleItems;
 
         public OptionsGump() : base(0, 0)
         {
@@ -1242,10 +1244,12 @@ namespace ClassicUO.Game.UI.Gumps
             Label text = new Label("- Container scale:",true, HUE_FONT, font: FONT);
             item.Add(text);
 
-            _containersScale = new HSliderBar(text.X + text.Width + 10, text.Y + 5, 100, 50, 150, Engine.Profile.Current.ContainersScale, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+            _containersScale = new HSliderBar(text.X + text.Width + 10, text.Y + 5, 100, Constants.MIN_CONTAINER_SIZE_PERC, Constants.MAX_CONTAINER_SIZE_PERC, Engine.Profile.Current.ContainersScale, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             item.Add(_containersScale);
 
             rightArea.Add(item);
+
+            _containerScaleItems = CreateCheckBox(rightArea, "Scale items inside containers", Engine.Profile.Current.ScaleItemsInsideContainers, 0, 20);
 
             Add(rightArea, PAGE);
         }
@@ -1469,6 +1473,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case 13:
                     _containersScale.Value = 100;
+                    _containerScaleItems.IsChecked = false;
                     break;
             }
         }
@@ -1898,9 +1903,23 @@ namespace ClassicUO.Game.UI.Gumps
 
             
             // containers
-            int containerScale = Engine.Profile.Current.ContainersScale = (byte) _containersScale.Value;
+            int containerScale = Engine.Profile.Current.ContainersScale;
 
-            Engine.UI.Scale = containerScale / 100f;
+            if ((byte) _containersScale.Value != containerScale || Engine.Profile.Current.ScaleItemsInsideContainers != _containerScaleItems.IsChecked)
+            {
+                containerScale = Engine.Profile.Current.ContainersScale = (byte)_containersScale.Value;
+                Engine.UI.ContainerScale = containerScale / 100f;
+                Engine.Profile.Current.ScaleItemsInsideContainers = _containerScaleItems.IsChecked;
+
+                var resizableGumps = Engine.UI.Gumps.OfType<ContainerGump>();
+
+                foreach (ContainerGump resizableGump in resizableGumps)
+                {
+                    resizableGump.ForceUpdate();
+                }
+
+            }
+
 
             Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
         }
