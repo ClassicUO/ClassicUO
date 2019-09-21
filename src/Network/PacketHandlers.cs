@@ -2198,13 +2198,15 @@ namespace ClassicUO.Network
             if (paperdoll == null)
             {
                 if (!Engine.UI.GetGumpCachePosition(mobile, out Point location)) location = new Point(100, 100);
-                Engine.UI.Add(new PaperDollGump(mobile, text) {Location = location});
+                Engine.UI.Add(paperdoll = new PaperDollGump(mobile, text) {Location = location});
             }
             else
             {
                 paperdoll.SetInScreen();
                 paperdoll.BringOnTop();
             }
+
+            paperdoll.CanLift = (flags & 0x02) != 0;
         }
 
         private static void CorpseEquipment(Packet p)
@@ -3165,6 +3167,14 @@ namespace ClassicUO.Network
             string affix = p.ID == 0xCC ? p.ReadASCII() : string.Empty;
 
             string arguments = null;
+            
+            if (cliloc == 1008092) // value for "You notify them you don't want to join the party"
+            {
+                foreach (var PartyInviteGump in Engine.UI.Gumps.OfType<PartyInviteGump>())
+                {
+                    PartyInviteGump.Dispose();
+                }
+            }
 
             if (p.Position < p.Length)
                 arguments = p.ReadUnicodeReversed(p.Length - p.Position);
@@ -3967,7 +3977,7 @@ namespace ClassicUO.Network
         {
             GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
-            if (gs != null && gs.HeldItem.Serial == serial && (gs.HeldItem.Dropped || gs.HeldItem.Enabled))
+            if (gs != null && gs.HeldItem.Serial == serial && gs.HeldItem.Dropped)
                 gs.HeldItem.Clear();
 
             Entity container = World.Get(containerSerial);

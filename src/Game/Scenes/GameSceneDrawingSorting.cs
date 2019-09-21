@@ -51,7 +51,7 @@ namespace ClassicUO.Game.Scenes
 
         private int _renderIndex = 1;
 
-        private GameObject[] _renderList = new GameObject[2000];
+        private GameObject[] _renderList = new GameObject[10000];
         private int _renderListCount;
 
         public void UpdateMaxDrawZ(bool force = false)
@@ -172,8 +172,6 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private static readonly StaticTiles _emptyStaticTiles = default;
-
         private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ/*, GameObject entity*/)
         {
             /*sbyte HeightChecks = 0;
@@ -207,8 +205,7 @@ namespace ClassicUO.Game.Scenes
 
                 int maxObjectZ = obj.PriorityZ;
 
-
-                StaticTiles itemData = _emptyStaticTiles;
+                StaticTiles itemData = default;
 
                 bool changinAlpha = false;
                 bool island = false;

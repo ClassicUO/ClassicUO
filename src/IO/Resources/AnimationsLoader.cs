@@ -1214,7 +1214,7 @@ namespace ClassicUO.IO.Resources
 
                 for (int i = 0; i < frameCount; i++)
                 {
-                    long start = reader.Position;
+                    uint start = (uint) reader.Position;
                     ushort group = reader.ReadUShort();
                     short frameID = reader.ReadShort();
                     reader.Skip(8);
@@ -1249,6 +1249,7 @@ namespace ClassicUO.IO.Resources
 
                 animDirection.FrameCount = (byte)(pixelDataOffsets.Length / 5);
                 int dirFrameStartIdx = animDirection.FrameCount * Direction;
+
 
                 if (animDirection.Frames != null && animDirection.Frames.Length != 0)
                     Log.Message(LogTypes.Panic, "MEMORY LEAK UOP ANIM");
@@ -1297,7 +1298,6 @@ namespace ClassicUO.IO.Resources
                             ushort* cur = ptrData + y * imageWidth + x;
                             ushort* end = cur + (header & 0xFFF);
                             int filecounter = 0;
-                            //byte[] filedata = reader.ReadArray(header & 0xFFF);
 
                             byte* filedata = (byte*)reader.PositionAddress;
                             reader.Skip(header & 0xFFF);
@@ -1308,8 +1308,6 @@ namespace ClassicUO.IO.Resources
                         }
                     }
 
-                    //uint uniqueAnimationIndex = (uint)(((AnimID & 0xfff) << 32) + ((AnimGroup & 0x3f) << 20) + ((Direction & 0x0f) << 12) + ((i & 0xFF) << 8) + (1 ));
-
                     AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
                     {
                         CenterX = imageCenterX,
@@ -1317,11 +1315,8 @@ namespace ClassicUO.IO.Resources
                     };
 
                     f.PushData(data);
-                    animDirection.Frames[i] = f; //uniqueAnimationIndex;
-                    //ResourceDictionary.Add(uniqueAnimationIndex, f);
+                    animDirection.Frames[i] = f;
                 }
-
-                //_usedUopTextures.Add(new ToRemoveInfo(AnimID, AnimGroup, Direction));
 
                 _usedTextures.Add(animDirection);
 
@@ -1344,8 +1339,10 @@ namespace ClassicUO.IO.Resources
             animDir.FrameCount = (byte)frameCount;
             uint* frameOffset = (uint*)reader.PositionAddress;
 
+
             if (animDir.Frames != null && animDir.Frames.Length != 0)
                 Log.Message(LogTypes.Panic, "MEMORY LEAK MUL ANIM");
+
 
             animDir.Frames = new AnimationFrameTexture[frameCount];
 
@@ -1380,17 +1377,18 @@ namespace ClassicUO.IO.Resources
                         int x = ((header >> 22) & 0x3FF) + imageCenterX - 0x200;
                         int y = ((header >> 12) & 0x3FF) + imageCenterY + imageHeight - 0x200;
 
-                        ushort* cur = dataRef + y * imageWidth + x;
+                        ushort* cur = ptrData + y * imageWidth + x;
                         ushort* end = cur + (header & 0xFFF);
                         int filecounter = 0;
-                        byte[] filedata = reader.ReadArray(header & 0xFFF);
 
+                        byte* filedata = (byte*)reader.PositionAddress;
+                        reader.Skip(header & 0xFFF);
                         while (cur < end)
+                        {
                             *cur++ = (ushort)(0x8000 | palette[filedata[filecounter++]]);
+                        }
                     }
                 }
-
-                //uint uniqueAnimationIndex = (uint)(((AnimID & 0xfff) << 20) + ((AnimGroup & 0x3f) << 12) + ((Direction & 0x0f) << 8) + (i & 0xFF));
 
                 AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
                 {
@@ -1401,11 +1399,9 @@ namespace ClassicUO.IO.Resources
                 f.PushData(data);
 
                 animDir.Frames[i] = f;
-                //ResourceDictionary.Add(uniqueAnimationIndex, f);
             }
 
             _usedTextures.Add(animDir);
-            //_usedTextures.Add(new ToRemoveInfo(AnimID, AnimGroup, Direction));
         }
 
         public void GetAnimationDimensions(sbyte animIndex, ushort graphic, byte dir, byte animGroup, bool ismounted, byte frameIndex, out int centerX, out int centerY, out int width, out int height)
@@ -1632,7 +1628,7 @@ namespace ClassicUO.IO.Resources
 
         private struct UOPFrameData
         {
-            public long DataStart;
+            public uint DataStart;
             public uint PixelDataOffset;
         }
 

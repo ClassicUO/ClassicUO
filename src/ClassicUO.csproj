@@ -171,6 +171,7 @@
     <Compile Include="Game\UI\Gumps\GridLootGump.cs" />
     <Compile Include="Game\UI\Gumps\InfoBarGump.cs" />
     <Compile Include="Game\UI\Gumps\NameOverHeadHandlerGump.cs" />
+    <Compile Include="Game\UI\Gumps\PartyInviteGump.cs" />
     <Compile Include="Game\UI\Gumps\ResizableGump.cs" />
     <Compile Include="Game\UI\Gumps\StandardSkillsGump.cs" />
     <Compile Include="Game\UI\Gumps\TextContainerGump.cs" />
@@ -384,7 +385,6 @@
     <Compile Include="Game\UI\Controls\CheckerTrans.cs" />
     <Compile Include="Game\UI\Controls\ColorPickerBox.cs" />
     <Compile Include="Game\UI\Controls\CroppedText.cs" />
-    <Compile Include="Game\UI\Controls\EquipmentSlot.cs" />
     <Compile Include="Game\UI\Controls\ExpandableScroll.cs" />
     <Compile Include="Game\UI\Controls\Control.cs" />
     <Compile Include="Game\UI\Controls\GumpControlInfo.cs" />

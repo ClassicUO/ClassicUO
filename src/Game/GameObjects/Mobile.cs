@@ -536,10 +536,8 @@ namespace ClassicUO.Game.GameObjects
                     FileManager.Animations.Direction = dir;
 
 
-
                     if (direction.FrameCount == 0 || direction.Frames == null)
                         FileManager.Animations.LoadDirectionGroup(ref direction);
-
 
                     if (direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1 || direction.IsUOP)
                     {

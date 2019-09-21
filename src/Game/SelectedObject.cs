@@ -200,10 +200,8 @@ namespace ClassicUO.Game
 
                 ref var direction = ref gr.Direction[FileManager.Animations.Direction];
 
-
                 if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                     continue;
-
 
                 int fc = direction.FrameCount;
 

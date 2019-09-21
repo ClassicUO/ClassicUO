@@ -2010,7 +2010,7 @@ namespace ClassicUO.IO.Resources
                 i++;
             }
 
-            while (str[i] == ' ' && i < len)
+            while (i < len && str[i] == ' ')
                 i++;
             int j = i;
 

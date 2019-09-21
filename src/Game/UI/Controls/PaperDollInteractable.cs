@@ -43,11 +43,13 @@ namespace ClassicUO.Game.UI.Controls
         private GumpPic _body, _unk;
 
         private readonly ItemGumpPaperdoll[] _pgumps = new ItemGumpPaperdoll[(int) Layer.Mount]; // _backpackGump;
+        private readonly PaperDollGump _paperDollGump;
 
-        public PaperDollInteractable(int x, int y, Mobile mobile)
+        public PaperDollInteractable(int x, int y, Mobile mobile, PaperDollGump paperDollGump)
         {
             X = x;
             Y = y;
+            _paperDollGump = paperDollGump;
             Mobile = mobile;
             AcceptMouseInput = false;
             mobile.Items.Added += ItemsOnAdded;
@@ -273,12 +275,12 @@ namespace ClassicUO.Game.UI.Controls
 
                         Item item = _mobile.Equipment[layerIndex];
                         bool isfake = false;
-                        bool canPickUp = World.InGame && (World.Player.Graphic == 0x03DB || 
-                                                          World.Player == Mobile || 
-                                                          (World.Player.Flags & Flags.IgnoreMobiles) != 0 || 
-                                                          (Mobile.NotorietyFlag == NotorietyFlag.Invulnerable && (Mobile.Flags & Flags.IgnoreMobiles) == 0)) && 
+                        bool canPickUp = World.InGame && 
+                                         !World.Player.IsDead && 
+                                         (_mobile == World.Player || (_paperDollGump != null && _paperDollGump.CanLift)) &&
                                          layerIndex != (int) Layer.Hair && 
                                          layerIndex != (int) Layer.Beard;
+
                         ref var itemGump = ref _pgumps[layerIndex];
 
                         if (_fakeItem != null && _fakeItem.ItemData.Layer == layerIndex)

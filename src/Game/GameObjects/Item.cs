@@ -38,8 +38,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal partial class Item : Entity
     {
-        private ushort _amount;
-
         private AnimDataFrame2 _animDataFrame;
         private int _animSpeed;
         private Graphic? _displayedGraphic;
@@ -119,17 +117,7 @@ namespace ClassicUO.Game.GameObjects
 
         public uint Price { get; set; }
 
-        public ushort Amount
-        {
-            get => _amount;
-            set
-            {
-                if (_amount != value)
-                {
-                    _amount = value;
-                }
-            }
-        }
+        public ushort Amount { get; set; }
 
         public Serial Container { get; set; }
 
@@ -138,7 +126,6 @@ namespace ClassicUO.Game.GameObjects
         public bool UsedLayer { get; set; }
 
         public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
-
 
         public Graphic DisplayedGraphic
         {
@@ -230,56 +217,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public Item FindItem(ushort graphic, ushort hue = 0xFFFF)
-        {
-            Item item = null;
-
-            if (hue == 0xFFFF)
-            {
-                var minColor = 0xFFFF;
-
-                foreach (Item i in Items)
-                {
-                    if (i.Graphic == graphic)
-                    {
-                        if (i.Hue < minColor)
-                        {
-                            item = i;
-                            minColor = i.Hue;
-                        }
-                    }
-
-                    if (i.Container.IsValid)
-                    {
-                        Item found = i.FindItem(graphic, hue);
-
-                        if (found != null && found.Hue < minColor)
-                        {
-                            item = found;
-                            minColor = found.Hue;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                foreach (Item i in Items)
-                {
-                    if (i.Graphic == graphic && i.Hue == hue)
-                        item = i;
-
-                    if (i.Container.IsValid)
-                    {
-                        Item found = i.FindItem(graphic, hue);
-
-                        if (found != null)
-                            item = found;
-                    }
-                }
-            }
-
-            return item;
-        }
 
         private void LoadMulti()
         {

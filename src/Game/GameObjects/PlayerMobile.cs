@@ -264,10 +264,14 @@ namespace ClassicUO.Game.GameObjects
                 skill.Lock = @lock;
                 skill.CapFixed = cap;
 
-                if (Engine.Profile.Current.StandardSkillsGump)
-                    Engine.UI.GetGump<StandardSkillsGump>()?.ForceUpdate(id);
-                else 
-                    Engine.UI.GetGump<SkillGumpAdvanced>()?.ForceUpdate();
+                // check needed to avoid crash when you create a char
+                if (Engine.Profile != null && Engine.Profile.Current != null)
+                {
+                    if (Engine.Profile.Current.StandardSkillsGump)
+                        Engine.UI.GetGump<StandardSkillsGump>()?.ForceUpdate(id);
+                    else
+                        Engine.UI.GetGump<SkillGumpAdvanced>()?.ForceUpdate();
+                }
             }
         }
 

@@ -22,8 +22,6 @@
 #endregion
 
 using System;
-
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 
@@ -42,7 +40,6 @@ namespace ClassicUO.Game.Managers
 
         public long PartyHealTimer { get; set; }
         public Serial PartyHealTarget { get; set; }
-
 
         public void ParsePacket(Packet p)
         {
@@ -132,10 +129,13 @@ namespace ClassicUO.Game.Managers
                 case 7:
                     Inviter = p.ReadUInt();
 
+                    if (Engine.Profile.Current.PartyInviteGump)
+                    {
+                        Engine.UI.Add(new PartyInviteGump(Inviter));
+                    }
                     break;
             }
         }
-
         public bool Contains(Serial serial)
         {
             for (int i = 0; i < PARTY_SIZE; i++)
