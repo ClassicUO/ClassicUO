@@ -302,6 +302,9 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
+            if (button != MouseButton.Left)
+                return false;
+
             GameActions.DoubleClick(Item);
             _sendClickIfNotDClick = false;
             _lastClickPosition = Point.Zero;
