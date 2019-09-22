@@ -135,7 +135,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            if (IsVirtue)
+            if (IsVirtue && button == MouseButton.Left)
             {
                 NetClient.Socket.Send(new PVirtueGumpReponse(World.Player, Graphic.Value));
 
