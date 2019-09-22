@@ -1911,15 +1911,11 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.UI.ContainerScale = containerScale / 100f;
                 Engine.Profile.Current.ScaleItemsInsideContainers = _containerScaleItems.IsChecked;
 
-                var resizableGumps = Engine.UI.Gumps.OfType<ContainerGump>();
-
-                foreach (ContainerGump resizableGump in resizableGumps)
+                foreach (ContainerGump resizableGump in Engine.UI.Gumps.OfType<ContainerGump>())
                 {
                     resizableGump.ForceUpdate();
                 }
-
             }
-
 
             Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
         }
