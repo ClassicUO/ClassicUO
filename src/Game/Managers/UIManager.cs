@@ -800,6 +800,8 @@ namespace ClassicUO.Game.Managers
 
             Add(gump);
 
+            gump.SetInScreen();
+
             return gump;
         }
 
