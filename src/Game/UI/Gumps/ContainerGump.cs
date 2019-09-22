@@ -38,10 +38,10 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class ContainerGump : MinimizableGump
     {
-        private GumpPic _Iconized;
-        internal override GumpPic Iconized => _Iconized;
-        private HitBox _IconizerArea;
-        internal override HitBox IconizerArea => _IconizerArea;
+        private GumpPic _iconized;
+        internal override GumpPic Iconized => _iconized;
+        private HitBox _iconizerArea;
+        internal override HitBox IconizerArea => _iconizerArea;
         private readonly Item _item;
         private long _corpseEyeTicks;
         private ContainerData _data;
@@ -91,11 +91,11 @@ namespace ClassicUO.Game.UI.Gumps
             _data = ContainerManager.Get(Graphic);
             if(_data.MinimizerArea != Rectangle.Empty && _data.IconizedGraphic != 0)
             {
-                _IconizerArea = new HitBox((int) (_data.MinimizerArea.X* scale), 
+                _iconizerArea = new HitBox((int) (_data.MinimizerArea.X* scale), 
                                            (int) (_data.MinimizerArea.Y * scale),
                                            (int) (_data.MinimizerArea.Width * scale),
                                            (int) (_data.MinimizerArea.Height * scale));
-                _Iconized = new GumpPic(0, 0, _data.IconizedGraphic, 0);
+                _iconized = new GumpPic(0, 0, _data.IconizedGraphic, 0);
             }
             Graphic g = _data.Graphic;
 
@@ -104,6 +104,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_isCorspeContainer)
             {
+                _eyeGumpPic?.Dispose();
                 Add(_eyeGumpPic = new GumpPic((int) (45 * scale), (int) (30 * scale), 0x0045, 0));
 
                 _eyeGumpPic.Width = (int)(_eyeGumpPic.Width * scale);
@@ -191,14 +192,12 @@ namespace ClassicUO.Game.UI.Gumps
         public void ForceUpdate()
         {
             Children[0].Dispose();
-            _IconizerArea?.Dispose();
-            _Iconized?.Dispose();
+            _iconizerArea?.Dispose();
+            _iconized?.Dispose();
             LocalSerial = 0;
 
-            var itemsControl = GetControls<ItemGump>();
             BuildGump();
-
-            ItemsOnAdded(null, new CollectionChangedEventArgs<Serial>(itemsControl.Select(s => s.LocalSerial)));
+            ItemsOnAdded(null, new CollectionChangedEventArgs<Serial>(FindControls<ItemGump>().Select(s => s.LocalSerial)));
         }
 
         public override void Save(BinaryWriter writer)
@@ -214,7 +213,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             LocalSerial = reader.ReadUInt32();
-            Engine.SceneManager.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
+            Engine.SceneManager.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
             reader.ReadUInt16();
 
             Dispose();
@@ -238,8 +237,9 @@ namespace ClassicUO.Game.UI.Gumps
                 if (item == null || item.ItemData.Layer == (int) Layer.Hair || item.ItemData.Layer == (int) Layer.Beard || item.ItemData.Layer == (int) Layer.Face)
                     continue;
 
-                CheckItemPosition(item);
+
                 var itemControl = new ItemGump(item);
+                CheckItemControlPosition(itemControl);
 
                 if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
                 {
@@ -254,14 +254,14 @@ namespace ClassicUO.Game.UI.Gumps
         }
     
 
-        private void CheckItemPosition(Item item)
+        private void CheckItemControlPosition(ItemGump item)
         {
             float scale = Engine.UI.ContainerScale;
 
             int x = (int) (item.X * scale);
             int y = (int) (item.Y * scale);
           
-            ArtTexture texture = FileManager.Art.GetTexture(item.DisplayedGraphic);
+            ArtTexture texture = FileManager.Art.GetTexture(item.Item.DisplayedGraphic);
 
             int boundX = (int)(_data.Bounds.X * scale);
             int boundY = (int)(_data.Bounds.Y * scale);
@@ -310,7 +310,11 @@ namespace ClassicUO.Game.UI.Gumps
                 y = 0;
 
 
-            if (x != item.X || y != item.Y) item.Position = new Position((ushort) x, (ushort) y);
+            if (x != item.X || y != item.Y)
+            {
+                item.X = x;
+                item.Y = y;
+            }
         }
 
         private void SetPositionNearGameObject(Graphic g)
@@ -366,11 +370,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             X = Engine.Profile.Current.OverrideContainerLocationPosition.X - (Width >> 1);
             Y = Engine.Profile.Current.OverrideContainerLocationPosition.Y - (Height >> 1);
-        }
-
-        protected override void OnMouseUp(int x, int y, MouseButton button)
-        {
-            base.OnMouseUp(x, y, button);
         }
 
         public override void Dispose()
