@@ -245,19 +245,29 @@ namespace ClassicUO.Game.Scenes
                                     if (Engine.Profile.Current.TreeType == 0)
                                     {
                                         if (st.OriginalGraphic != st.Graphic)
-                                            st.RestoreOriginalGraphic();
-                                            st.RestoreOriginalHue();
+                                            {
+                                                st.RestoreOriginalGraphic();
+                                                st.RestoreOriginalHue();
+                                            }
                                     }
                                     else if (Engine.Profile.Current.TreeType == 1)
                                     {
                                         if (st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
-                                            st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC);
-                                            st.RestoreOriginalHue();
+                                            {
+                                                if (!itemData.IsImpassable)
+                                                    continue;
+                                                st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC);
+                                                st.RestoreOriginalHue();
+                                            }
                                     }
                                     else if (Engine.Profile.Current.TreeType == 2)
                                     {
                                         if (st.Graphic != Constants.TREE_REPLACE_GRAPHIC_TILE)
-                                            st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC_TILE);
+                                            {
+                                                if (!itemData.IsImpassable)
+                                                    continue;
+                                                st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC_TILE);
+                                            }
                                         if (Engine.Profile.Current.ColorTreeTile)
                                             st.Hue = Engine.Profile.Current.TreeTileHue;
                                         else
@@ -268,22 +278,32 @@ namespace ClassicUO.Game.Scenes
                                 if (StaticFilters.IsBlockerTreeArt(st.OriginalGraphic))
                                 {
 
-                                    if (Engine.Profile.Current.BlockerType == 0) // off
+                                    if (Engine.Profile.Current.BlockerType == 0)
                                     {
                                         if (st.OriginalGraphic != st.Graphic)
-                                            st.RestoreOriginalGraphic();
-                                            st.RestoreOriginalHue();
+                                            {
+                                                st.RestoreOriginalGraphic();
+                                                st.RestoreOriginalHue();
+                                            }
                                     }
                                     else if (Engine.Profile.Current.BlockerType == 1)
                                     {
                                         if (st.Graphic != Constants.BLOCKER_REPLACE_GRAPHIC_STUMP)
-                                            st.SetGraphic(Constants.BLOCKER_REPLACE_GRAPHIC_STUMP);
-                                            st.RestoreOriginalHue();
+                                            {
+                                                if (!itemData.IsImpassable)
+                                                    continue;
+                                                st.SetGraphic(Constants.BLOCKER_REPLACE_GRAPHIC_STUMP);
+                                                st.RestoreOriginalHue();
+                                            }
                                     }
                                     else if (Engine.Profile.Current.BlockerType == 2)
                                     {
                                         if (st.Graphic != Constants.BLOCKER_REPLACE_GRAPHIC_TILE)
-                                            st.SetGraphic(Constants.BLOCKER_REPLACE_GRAPHIC_TILE);
+                                            {
+                                                if (!itemData.IsImpassable)
+                                                        continue;
+                                                st.SetGraphic(Constants.BLOCKER_REPLACE_GRAPHIC_TILE);
+                                            }
                                         if (Engine.Profile.Current.ColorBlockerTile)
                                             st.Hue = Engine.Profile.Current.BlockerTileHue;
                                         else
@@ -296,22 +316,32 @@ namespace ClassicUO.Game.Scenes
                                 if (StaticFilters.IsBlockerStoneArt(st.OriginalGraphic))
                                 {
 
-                                    if (Engine.Profile.Current.BlockerType == 0) // off
+                                    if (Engine.Profile.Current.BlockerType == 0)
                                     {
                                         if (st.OriginalGraphic != st.Graphic)
-                                            st.RestoreOriginalGraphic();
-                                            st.RestoreOriginalHue();
+                                            {
+                                                st.RestoreOriginalGraphic();
+                                                st.RestoreOriginalHue();
+                                            }
                                     }
                                     else if (Engine.Profile.Current.BlockerType == 1)
                                     {
                                         if (st.Graphic != Constants.BLOCKER_REPLACE_GRAPHIC_ROCK)
-                                            st.SetGraphic(Constants.BLOCKER_REPLACE_GRAPHIC_ROCK);
-                                            st.RestoreOriginalHue();
+                                            {
+                                                if (!itemData.IsImpassable)
+                                                        continue;
+                                                st.SetGraphic(Constants.BLOCKER_REPLACE_GRAPHIC_ROCK);
+                                                st.RestoreOriginalHue();
+                                            }
                                     }
                                     else if (Engine.Profile.Current.BlockerType == 2)
                                     {
                                         if (st.Graphic != Constants.BLOCKER_REPLACE_GRAPHIC_TILE)
-                                            st.SetGraphic(Constants.BLOCKER_REPLACE_GRAPHIC_TILE);
+                                            {
+                                                if (!itemData.IsImpassable)
+                                                        continue;
+                                                st.SetGraphic(Constants.BLOCKER_REPLACE_GRAPHIC_TILE);
+                                            }
                                         if (Engine.Profile.Current.ColorBlockerTile)
                                             st.Hue = Engine.Profile.Current.BlockerTileHue;
                                         else
