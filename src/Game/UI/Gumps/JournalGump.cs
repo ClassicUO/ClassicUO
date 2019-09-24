@@ -91,18 +91,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseWheel(MouseEvent delta)
         {
-            switch (delta)
-            {
-                case MouseEvent.WheelScrollUp:
-                    _scrollBar.Value -= 5;
-
-                    break;
-
-                case MouseEvent.WheelScrollDown:
-                    _scrollBar.Value += 5;
-
-                    break;
-            }
+            _scrollBar.InvokeMouseWheel(delta);
         }
 
         protected override void OnInitialize()
