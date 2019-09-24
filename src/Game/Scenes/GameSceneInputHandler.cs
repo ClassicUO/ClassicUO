@@ -145,7 +145,6 @@ namespace ClassicUO.Game.Scenes
 
         private void SetDragSelectionStartEnd(ref (int, int) start, ref (int, int) end)
         {
-
             if (start.Item1 > Mouse.Position.X)
             {
                 end.Item1 = start.Item1;
@@ -153,7 +152,7 @@ namespace ClassicUO.Game.Scenes
             }
             else
                 end.Item1 = Mouse.Position.X;
-                                 
+
             if (start.Item2 > Mouse.Position.Y)
             {
                 _selectionEnd.Item2 = start.Item2;
@@ -162,7 +161,6 @@ namespace ClassicUO.Game.Scenes
             else
                 end.Item2 = Mouse.Position.Y;
         }
-            
 
         private bool DragSelectModifierActive()
         {
@@ -180,216 +178,107 @@ namespace ClassicUO.Game.Scenes
 
         private void DoDragSelect()
         {
-            if (Engine.Profile.Current.CustomBarsToggled == true)
+            SetDragSelectionStartEnd(ref _selectionStart, ref _selectionEnd);
+
+            _rectangleObj.X = _selectionStart.Item1;
+            _rectangleObj.Y = _selectionStart.Item2;
+            _rectangleObj.Width = _selectionEnd.Item1 - _selectionStart.Item1;
+            _rectangleObj.Height = _selectionEnd.Item2 - _selectionStart.Item2;
+
+            int finalX = 100;
+            int finalY = 100;
+
+            foreach (Mobile mobile in World.Mobiles)
             {
-                SetDragSelectionStartEnd(ref _selectionStart, ref _selectionEnd);
+                if (Engine.Profile.Current.DragSelectHumanoidsOnly && !mobile.IsHuman)
+                    continue;
 
-                _rectangleObj.X = _selectionStart.Item1;
-                _rectangleObj.Y = _selectionStart.Item2;
-                _rectangleObj.Width = _selectionEnd.Item1 - _selectionStart.Item1;
-                _rectangleObj.Height = _selectionEnd.Item2 - _selectionStart.Item2;
+                int x = Engine.Profile.Current.GameWindowPosition.X + mobile.RealScreenPosition.X + (int)mobile.Offset.X + 22 + 5;
+                int y = Engine.Profile.Current.GameWindowPosition.Y + (mobile.RealScreenPosition.Y - (int)mobile.Offset.Z) + 22 + 5;
 
-                int finalX = 100;
-                int finalY = 100;
+                x -= mobile.FrameInfo.X;
+                y -= mobile.FrameInfo.Y;
+                int w = mobile.FrameInfo.Width;
+                int h = mobile.FrameInfo.Height;
 
-                foreach (Mobile mobile in World.Mobiles)
+                x = (int)(x * (1 / Scale));
+                y = (int)(y * (1 / Scale));
+
+                _rectanglePlayer.X = x;
+                _rectanglePlayer.Y = y;
+                _rectanglePlayer.Width = w;
+                _rectanglePlayer.Height = h;
+
+
+
+                if (_rectangleObj.Intersects(_rectanglePlayer))
                 {
-                    if (Engine.Profile.Current.DragSelectHumanoidsOnly && !mobile.IsHuman)
-                        continue;
+                    Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
 
-                    int x = Engine.Profile.Current.GameWindowPosition.X + mobile.RealScreenPosition.X + (int)mobile.Offset.X + 22 + 5;
-                    int y = Engine.Profile.Current.GameWindowPosition.Y + (mobile.RealScreenPosition.Y - (int)mobile.Offset.Z) + 22 + 5;
-
-                    x -= mobile.FrameInfo.X;
-                    y -= mobile.FrameInfo.Y;
-                    int w = mobile.FrameInfo.Width;
-                    int h = mobile.FrameInfo.Height;
-
-                    x = (int)(x * (1 / Scale));
-                    y = (int)(y * (1 / Scale));
-
-                    _rectanglePlayer.X = x;
-                    _rectanglePlayer.Y = y;
-                    _rectanglePlayer.Width = w;
-                    _rectanglePlayer.Height = h;
-
-
-
-                    if (_rectangleObj.Intersects(_rectanglePlayer))
+                    if (mobile != World.Player)
                     {
-                        Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-
-                        if (mobile != World.Player)
+                        //Instead of destroying existing HP bar, continue if already opened.
+                        if (Engine.UI.GetGump<HealthBarGump>(mobile)?.IsInitialized ?? false)
                         {
-                            //Instead of destroying existing HP bar, continue if already opened.
-                            if (Engine.UI.GetGump<HealthBarGumpCustom>(mobile)?.IsInitialized ?? false)
-                            {
-                                continue;
-                            }
-                            GameActions.RequestMobileStatus(mobile);
-                            HealthBarGumpCustom hbgc = new HealthBarGumpCustom(mobile);
-                            // Need to initialize before setting X Y otherwise AnchorableGump.OnMove() is not called
-                            // if OnMove() is not called, _prevX _prevY are not set, anchoring is unpredictable
-                            // maybe should be fixed elsewhere
-                            hbgc.Initialize();
-
-
-                            if (finalY >= Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - 100)
-                            {
-                                finalY = 100;
-                                finalX += rect.Width + 2;
-                            }
-
-                            if (finalX >= Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X - 100)
-                            {
-                                finalX = 100;
-                            }
-
-                            hbgc.X = finalX;
-                            hbgc.Y = finalY;
-
-                            foreach (var cbar in Engine.UI.Gumps
-                                                      .OfType<HealthBarGumpCustom>()
-                                                      .OrderBy(s => mobile.NotorietyFlag)
-                                                      //.OrderBy(s => s.ScreenCoordinateX) ///testing placement SYRUPZ SYRUPZ SYRUPZ
-                                                      .ThenBy(s => s.ScreenCoordinateX)
-                                                      .ThenBy(s => s.ScreenCoordinateY))
-                            {
-                                if (cbar.Bounds.Intersects(hbgc.Bounds))
-                                {
-                                    finalY = cbar.Bounds.Bottom + 2;
-
-                                    if (finalY >= Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - 100)
-                                    {
-                                        finalY = 100;
-                                        finalX = cbar.Bounds.Right + 2;
-                                    }
-
-                                    if (finalX >= Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X - 100)
-                                    {
-                                        finalX = 100;
-                                    }
-
-                                    hbgc.X = finalX;
-                                    hbgc.Y = finalY;
-                                }
-                            }
-
-                            finalY += rect.Height + 2;
-
-                            Engine.UI.Add(hbgc);
-
-                            hbgc.SetInScreen();
-
+                            continue;
                         }
-                    }
-                }
-
-                _isSelectionActive = false;
-            }
-            else
-            {
-                SetDragSelectionStartEnd(ref _selectionStart, ref _selectionEnd);
-
-                _rectangleObj.X = _selectionStart.Item1;
-                _rectangleObj.Y = _selectionStart.Item2;
-                _rectangleObj.Width = _selectionEnd.Item1 - _selectionStart.Item1;
-                _rectangleObj.Height = _selectionEnd.Item2 - _selectionStart.Item2;
-
-                int finalX = 100;
-                int finalY = 100;
-
-                foreach (Mobile mobile in World.Mobiles)
-                {
-                    if (Engine.Profile.Current.DragSelectHumanoidsOnly && !mobile.IsHuman)
-                        continue;
-
-                    int x = Engine.Profile.Current.GameWindowPosition.X + mobile.RealScreenPosition.X + (int)mobile.Offset.X + 22 + 5;
-                    int y = Engine.Profile.Current.GameWindowPosition.Y + (mobile.RealScreenPosition.Y - (int)mobile.Offset.Z) + 22 + 5;
-
-                    x -= mobile.FrameInfo.X;
-                    y -= mobile.FrameInfo.Y;
-                    int w = mobile.FrameInfo.Width;
-                    int h = mobile.FrameInfo.Height;
-
-                    x = (int)(x * (1 / Scale));
-                    y = (int)(y * (1 / Scale));
-
-                    _rectanglePlayer.X = x;
-                    _rectanglePlayer.Y = y;
-                    _rectanglePlayer.Width = w;
-                    _rectanglePlayer.Height = h;
+                        GameActions.RequestMobileStatus(mobile);
+                        HealthBarGump hbg = new HealthBarGump(mobile);
+                        // Need to initialize before setting X Y otherwise AnchorableGump.OnMove() is not called
+                        // if OnMove() is not called, _prevX _prevY are not set, anchoring is unpredictable
+                        // maybe should be fixed elsewhere
+                        hbg.Initialize();
 
 
-
-                    if (_rectangleObj.Intersects(_rectanglePlayer))
-                    {
-                        Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-
-                        if (mobile != World.Player)
+                        if (finalY >= Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - 100)
                         {
-                            //Instead of destroying existing HP bar, continue if already opened.
-                            if (Engine.UI.GetGump<HealthBarGump>(mobile)?.IsInitialized ?? false)
-                            {
-                                continue;
-                            }
-                            GameActions.RequestMobileStatus(mobile);
-                            HealthBarGump hbg = new HealthBarGump(mobile);
-                            // Need to initialize before setting X Y otherwise AnchorableGump.OnMove() is not called
-                            // if OnMove() is not called, _prevX _prevY are not set, anchoring is unpredictable
-                            // maybe should be fixed elsewhere
-                            hbg.Initialize();
-
-
-                            if (finalY >= Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - 100)
-                            {
-                                finalY = 100;
-                                finalX += rect.Width + 2;
-                            }
-
-                            if (finalX >= Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X - 100)
-                            {
-                                finalX = 100;
-                            }
-
-                            hbg.X = finalX;
-                            hbg.Y = finalY;
-
-                            foreach (var bar in Engine.UI.Gumps
-                                                      .OfType<HealthBarGump>()
-                                                      .OrderBy(s => s.ScreenCoordinateX)
-                                                      .ThenBy(s => s.ScreenCoordinateY))
-                            {
-                                if (bar.Bounds.Intersects(hbg.Bounds))
-                                {
-                                    finalY = bar.Bounds.Bottom + 2;
-
-                                    if (finalY >= Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - 100)
-                                    {
-                                        finalY = 100;
-                                        finalX = bar.Bounds.Right + 2;
-                                    }
-
-                                    if (finalX >= Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X - 100)
-                                    {
-                                        finalX = 100;
-                                    }
-
-                                    hbg.X = finalX;
-                                    hbg.Y = finalY;
-                                }
-                            }
-
-
-                            finalY += rect.Height + 2;
-
-
-                            //hbg.X = x - (rect.Width >> 1);
-                            //hbg.Y = y - (rect.Height >> 1) - 100;
-                            Engine.UI.Add(hbg);
-
-                            hbg.SetInScreen();
+                            finalY = 100;
+                            finalX += rect.Width + 2;
                         }
+
+                        if (finalX >= Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X - 100)
+                        {
+                            finalX = 100;
+                        }
+
+                        hbg.X = finalX;
+                        hbg.Y = finalY;
+
+                        foreach (var bar in Engine.UI.Gumps
+                                                  .OfType<HealthBarGump>()
+                                                  .OrderBy(s => s.ScreenCoordinateX)
+                                                  .ThenBy(s => s.ScreenCoordinateY))
+                        {
+                            if (bar.Bounds.Intersects(hbg.Bounds))
+                            {
+                                finalY = bar.Bounds.Bottom + 2;
+
+                                if (finalY >= Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - 100)
+                                {
+                                    finalY = 100;
+                                    finalX = bar.Bounds.Right + 2;
+                                }
+
+                                if (finalX >= Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X - 100)
+                                {
+                                    finalX = 100;
+                                }
+
+                                hbg.X = finalX;
+                                hbg.Y = finalY;
+                            }
+                        }
+
+
+                        finalY += rect.Height + 2;
+
+
+                        //hbg.X = x - (rect.Width >> 1);
+                        //hbg.Y = y - (rect.Height >> 1) - 100;
+                        Engine.UI.Add(hbg);
+
+                        hbg.SetInScreen();
+
 
                     }
                 }
@@ -443,6 +332,10 @@ namespace ClassicUO.Game.Scenes
 
             if (!IsMouseOverViewport)
             {
+                if (IsHoldingItem)
+                {
+                    Engine.UI.MouseOverControl?.InvokeMouseUp(Mouse.Position, MouseButton.Left);
+                }
                 return;
             }
 
@@ -561,7 +454,7 @@ namespace ClassicUO.Game.Scenes
                         string name = st.Name;
                         if (string.IsNullOrEmpty(name))
                             name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
-                        obj.AddMessage(MessageType.Label, name, 3, 0, false);
+                        obj.AddMessage(MessageType.Label, name, 3, 1001, false);
 
 
                         if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
@@ -573,7 +466,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (string.IsNullOrEmpty(name))
                             name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
-                        obj.AddMessage(MessageType.Label, name, 3, 0, false);
+                        obj.AddMessage(MessageType.Label, name, 3, 1001, false);
 
                         if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
                             obj.TextContainer.MaxSize = 1;
@@ -583,7 +476,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (Keyboard.Alt && ent is Mobile)
                         {
-                            World.Player.AddMessage(MessageType.Regular, "Now following.", 3, 0, false);
+                            World.Player.AddMessage(MessageType.Regular, "Now following.", 3, 1001, false);
                             _followingMode = true;
                             _followingTarget = ent;
                         }
@@ -666,7 +559,7 @@ namespace ClassicUO.Game.Scenes
                 _followingMode = false;
                 _followingTarget = Serial.INVALID;
                 Pathfinder.StopAutoWalk();
-                World.Player.AddMessage(MessageType.Regular, "Stopped following.", 3, 0, false);
+                World.Player.AddMessage(MessageType.Regular, "Stopped following.", 3, 1001, false);
             }
         }
 
@@ -695,7 +588,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (SelectedObject.Object is GameObject obj && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                     {
-                        World.Player.AddMessage(MessageType.Label, "Pathfinding!", 3, 0, false);
+                        World.Player.AddMessage(MessageType.Label, "Pathfinding!", 3, 1001, false);
 
                         return true;
                     }
@@ -737,6 +630,7 @@ namespace ClassicUO.Game.Scenes
                 if (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                 {
                     GameObject obj = Engine.Profile.Current.SallosEasyGrab && SelectedObject.LastObject is GameObject o ? o : _dragginObject;
+
 
                     switch (obj)
                     {
@@ -780,9 +674,13 @@ namespace ClassicUO.Game.Scenes
                                 Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
                             }
 
-                            break;
+                            break;	
 
                         case Item item /*when !item.IsCorpse*/:
+
+                            if (item.IsDamageable)
+                                goto mobile;
+
                             PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
 
                             break;
@@ -815,7 +713,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_isUpDown || _isDownDown || _isLeftDown || _isRightDown)
             {
-                if (!Engine.Profile.Current.ActivateChatStatus || Engine.UI.SystemChat?.textBox.Text.Length == 0)
+                if (Engine.UI.SystemChat?.IsActive == false || Engine.UI.SystemChat?.textBox.Text.Length == 0)
                     _arrowKeyPressed = true;
             }
 
@@ -825,11 +723,8 @@ namespace ClassicUO.Game.Scenes
             if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
                 TargetManager.CancelTarget();
 
-            if (Engine.Profile.Current.ActivateChatAfterEnter)
-            {
-                if (Engine.Profile.Current.ActivateChatIgnoreHotkeys && Engine.Profile.Current.ActivateChatStatus)
-                    return;
-            }
+            if (!Engine.UI.IsKeyboardFocusAllowHotkeys)
+                return;
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB /*&& !Engine.Profile.Current.DisableTabBtn*/)
             {
