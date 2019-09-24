@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
@@ -1063,9 +1063,10 @@ namespace ClassicUO.Game.Managers
 
                     break;
                     
-                 case MacroType.CloseAllHealthBars:
+                case MacroType.CloseAllHealthBars:
 
                     var healthBarGumps = Engine.UI.Gumps.OfType<HealthBarGump>();
+                    var customBarGumps = Engine.UI.Gumps.OfType<HealthBarGumpCustom>();
 
                     foreach (var healthbar in healthBarGumps)
                     {
@@ -1074,6 +1075,14 @@ namespace ClassicUO.Game.Managers
                             healthbar.Dispose();
                         }
                     }
+                    foreach (var healthbar in customBarGumps)
+                    {
+                        if (Engine.UI.AnchorManager[healthbar] == null && (healthbar.LocalSerial != World.Player))
+                        {
+                            healthbar.Dispose();
+                        }
+                    }
+
                     break;
             }
 
