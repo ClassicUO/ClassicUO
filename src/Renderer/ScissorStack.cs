@@ -33,6 +33,8 @@ namespace ClassicUO.Renderer
     {
         private static readonly Stack<Rectangle> _scissors = new Stack<Rectangle>();
 
+        public static bool HasScissors => _scissors.Count - 1 > 0;
+
         public static bool PushScissors(Rectangle scissor)
         {
             if (_scissors.Count > 0)
@@ -78,7 +80,7 @@ namespace ClassicUO.Renderer
         public static Rectangle CalculateScissors(Matrix batchTransform, int sx, int sy, int sw, int sh)
         {
             Vector2 tmp = new Vector2(sx, sy);
-            tmp = Vector2.Transform(tmp, batchTransform);
+            Vector2.Transform(ref tmp, ref batchTransform, out tmp);
 
             Rectangle newScissor = new Rectangle
             {
@@ -86,7 +88,7 @@ namespace ClassicUO.Renderer
             };
             tmp.X = sx + sw;
             tmp.Y = sy + sh;
-            tmp = Vector2.Transform(tmp, batchTransform);
+            Vector2.Transform(ref tmp, ref batchTransform, out tmp);
             newScissor.Width = (int) tmp.X - newScissor.X;
             newScissor.Height = (int) tmp.Y - newScissor.Y;
 

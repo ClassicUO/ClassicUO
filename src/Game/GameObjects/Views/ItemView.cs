@@ -24,6 +24,7 @@
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -90,7 +91,6 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-
             if (_originalGraphic != DisplayedGraphic || _force || Texture == null || Texture.IsDisposed)
             {
                 if (_originalGraphic == 0)
@@ -141,7 +141,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (SelectedObject.LastObject == this && !IsLocked)
                 {
-                    isPartial = false;
+                    isPartial = ItemData.Weight == 255;
                     hue = 0x0035;
                 }
                 else if (IsHidden)
@@ -164,6 +164,9 @@ namespace ClassicUO.Game.GameObjects
 
             // SpriteRenderer.DrawStaticArt(DisplayedGraphic, Hue, (int)position.X, (int)position.Y);
             // return true;
+
+            if (!Serial.IsValid && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+                HueVector.Z = 0.5f;
 
             return base.Draw(batcher, posX, posY);
         }
@@ -314,7 +317,10 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
-            if (SelectedObject.Object == this)
+            if (!Serial.IsValid && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+                return;
+
+            if (SelectedObject.Object == this || CharacterIsBehindFoliage)
                 return;
 
             if (IsCorpse)
@@ -324,7 +330,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if (SelectedObject.IsPointInStatic(Texture, _originalGraphic, x - Bounds.X, y - Bounds.Y))
+                if (SelectedObject.IsPointInStatic(Texture, x - Bounds.X, y - Bounds.Y))
                     SelectedObject.Object = this;
             }
         }

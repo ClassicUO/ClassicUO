@@ -24,62 +24,35 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.IO
 {
-    internal abstract class ResourceLoader<T> where T : SpriteTexture, IDisposable
+    internal abstract class ResourceLoader : IDisposable
     {
-        private readonly string[] _paths;
-
-        protected ResourceLoader(string path) : this(new[] {path})
-        {
-        }
-
-        protected ResourceLoader(string[] paths)
-        {
-            _paths = paths;
-        }
-
-
-        protected ResourceLoader()
-        {
-        }
-
-        protected Dictionary<uint, T> ResourceDictionary { get; } = new Dictionary<uint, T>();
+        public UOFileIndex[] Entries;
 
         public bool IsDisposed { get; private set; }
 
+        public abstract Task Load();
 
-        public abstract void Load();
+        public ref readonly UOFileIndex GetValidRefEntry(int index)
+        {
+            if (index < 0 || Entries == null || index >= Entries.Length)
+                return ref UOFileIndex.Invalid;
 
-        public abstract T GetTexture(uint id);
+            ref readonly UOFileIndex entry = ref Entries[index];
+
+            if (entry.Offset < 0 || entry.Length <= 0)
+                return ref UOFileIndex.Invalid;
+
+            return ref entry;
+        }
 
         public abstract void CleanResources();
-
-        public virtual void CleaUnusedResources()
-        {
-            long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
-
-            ResourceDictionary
-               .Where(s => s.Value.Ticks < ticks)
-               .Take(Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
-               .ToList()
-               .ForEach(s =>
-                {
-                    s.Value.Dispose();
-                    ResourceDictionary.Remove(s.Key);
-                });
-        }
-
-        public virtual bool TryGetEntryInfo(int entry, out long address, out long size, out long compressedsize)
-        {
-            address = size = compressedsize = 0;
-
-            return false;
-        }
 
         public void Dispose()
         {
@@ -92,39 +65,51 @@ namespace ClassicUO.IO
         }
     }
 
-    internal abstract class ResourceLoader : IDisposable
+    internal abstract class ResourceLoader<T> : ResourceLoader where T : UOTexture
     {
-        private readonly string[] _paths;
+        private readonly List<uint> _texturesToClear = new List<uint>();
 
-        protected ResourceLoader(string path) : this(new[] {path})
+
+        protected Dictionary<uint, T> ResourceDictionary { get; } = new Dictionary<uint, T>();
+        public abstract T GetTexture(uint id);
+
+
+        public virtual void CleaUnusedResources()
         {
+            ClearUnusedResources(ResourceDictionary, Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
         }
 
-        protected ResourceLoader(string[] paths)
+        public void ClearUnusedResources<T1>(Dictionary<uint, T1> dict, int maxCount) where T1 : UOTexture
         {
-            _paths = paths;
+            long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
+
+            int count = 0;
+            foreach (var p in dict)
+            {
+                if (p.Value.Ticks < ticks)
+                {
+                    if (count++ >= maxCount)
+                        break;
+
+                    _texturesToClear.Add(p.Key);
+                }
+            }
+
+            foreach (uint key in _texturesToClear)
+            {
+                dict[key].Dispose();
+                dict.Remove(key);
+            }
+
+            if (_texturesToClear.Count != 0)
+                _texturesToClear.Clear();
         }
 
-
-        protected ResourceLoader()
+        public virtual bool TryGetEntryInfo(int entry, out long address, out long size, out long compressedsize)
         {
+            address = size = compressedsize = 0;
+
+            return false;
         }
-
-        public bool IsDisposed { get; private set; }
-
-
-        public void Dispose()
-        {
-            if (IsDisposed)
-                return;
-
-            IsDisposed = true;
-
-            CleanResources();
-        }
-
-        public abstract void Load();
-
-        protected abstract void CleanResources();
     }
 }

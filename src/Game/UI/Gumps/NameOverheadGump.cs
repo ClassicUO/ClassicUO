@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Hue hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (Hue) 0x0481;
 
-            _renderedText = RenderedText.Create(String.Empty, hue, 0xFF, true, FontStyle.BlackBorder | FontStyle.Cropped, TEXT_ALIGN_TYPE.TS_CENTER, 100, 30, true);
+            _renderedText = RenderedText.Create(String.Empty, hue, 0xFF, true, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, 100, 30, true);
 
             Add(_background = new AlphaBlendControl(.3f)
             {
@@ -76,14 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (Entity is Item item)
                 {
-                    string t;
-
-                    if (item.Properties.Any())
-                    {
-                        Property prop = item.Properties.FirstOrDefault();
-                        t = FileManager.Cliloc.Translate((int) prop.Cliloc, prop.Args, true);
-                    }
-                    else
+                    if (!World.OPL.TryGetNameAndData(item, out string t, out _))
                     {
                         t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
 
@@ -97,22 +90,29 @@ namespace ClassicUO.Game.UI.Gumps
                     FileManager.Fonts.SetUseHTML(true);
                     FileManager.Fonts.RecalculateWidthByInfo = true;
 
+
                     int width = FileManager.Fonts.GetWidthUnicode(_renderedText.Font, t);
 
                     if (width > 100)
+                    {
+                        t = FileManager.Fonts.GetTextByWidthUnicode(_renderedText.Font, t, 100, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
                         width = 100;
+                    }
 
-                    width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, t, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) (FontStyle.BlackBorder | FontStyle.Cropped));
+                    //if (width > 100)
+                    //    width = 100;
 
-                    if (width > 100)
-                        width = 100;
+                    //width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, t, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) (FontStyle.BlackBorder /*| FontStyle.Cropped*/));
+
+                    //if (width > 100)
+                    //    width = 100;
 
                     _renderedText.MaxWidth = width;
 
+                    _renderedText.Text = t;
+
                     FileManager.Fonts.RecalculateWidthByInfo = false;
                     FileManager.Fonts.SetUseHTML(false);
-
-                    _renderedText.Text = t;
 
                     Width = _background.Width = _renderedText.Width + 4;
                     Height = _background.Height = _renderedText.Height + 4;
@@ -125,19 +125,29 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!string.IsNullOrEmpty(Entity.Name))
                 {
-                    int width = FileManager.Fonts.GetWidthUnicode(_renderedText.Font, Entity.Name);
+                    string t = Entity.Name;
 
-                    if (width > 200)
-                        width = 200;
+                    int width = FileManager.Fonts.GetWidthUnicode(_renderedText.Font, t);
 
-                    width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, Entity.Name, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)(FontStyle.BlackBorder | FontStyle.Cropped));
+                    if (width > 100)
+                    {
+                        t = FileManager.Fonts.GetTextByWidthUnicode(_renderedText.Font, t, 100, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
+                        width = 100;
+                    }
 
-                    if (width > 200)
-                        width = 200;
+                    //int width = FileManager.Fonts.GetWidthUnicode(_renderedText.Font, Entity.Name);
+
+                    //if (width > 200)
+                    //    width = 200;
+
+                    //width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, Entity.Name, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)(FontStyle.BlackBorder));
+
+                    //if (width > 200)
+                    //    width = 200;
 
                     _renderedText.MaxWidth = width;
 
-                    _renderedText.Text = Entity.Name;
+                    _renderedText.Text = t;
 
                     Width = _background.Width = Math.Max(_renderedText.Width + 4, MIN_WIDTH);                    
                     Height = _background.Height = _renderedText.Height + 4;
@@ -162,21 +172,21 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragBegin(int x, int y)
         {
-            if (Entity is Mobile mob)
+            if (Entity is Mobile || Entity is Item it && it.IsDamageable)
             {
                 if (Engine.UI.IsDragging)
                     return;
 
-                GameActions.RequestMobileStatus(mob);
+                GameActions.RequestMobileStatus(Entity);
 
-                Engine.UI.GetGump<HealthBarGump>(mob)?.Dispose();
+                Engine.UI.GetGump<HealthBarGump>(Entity)?.Dispose();
 
-                if (mob == World.Player)
+                if (Entity == World.Player)
                     StatusGumpBase.GetStatusGump()?.Dispose();
 
                 Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
                 HealthBarGump currentHealthBarGump;
-                Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mob) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
+                Engine.UI.Add(currentHealthBarGump = new HealthBarGump(Entity) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
                 Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
             }
             else
@@ -328,7 +338,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _clickTiming = 0;
                     _isPressed = false;
 
-                    if (!World.ClientFlags.TooltipsEnabled)
+                    if (!World.ClientFeatures.TooltipsEnabled)
                         GameActions.SingleClick(Entity);
                     GameActions.OpenPopupMenu(Entity);
                 }

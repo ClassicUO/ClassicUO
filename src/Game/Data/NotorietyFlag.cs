@@ -34,7 +34,7 @@ namespace ClassicUO.Game.Data
         Criminal = 0x04,
         Enemy = 0x05,
         Murderer = 0x06,
-        Invulnerable = 0x07
+        Invulnerable = 0x07,
     }
 
     internal static class Notoriety

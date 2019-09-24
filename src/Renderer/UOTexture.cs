@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.IO.Resources;
 
@@ -31,78 +32,82 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    internal class SpriteTexture : Texture2D
+    internal class UOTexture16 : UOTexture
     {
-        private readonly bool _is32Bit;
-        private bool[] _hitMap;
+        private ushort[] _data;
 
-        public SpriteTexture(int width, int height, bool is32bit = true) : base(Engine.Batcher.GraphicsDevice, width, height, false, is32bit ? SurfaceFormat.Color : SurfaceFormat.Bgra5551)
+        public UOTexture16(int width, int height) : base(width, height, SurfaceFormat.Bgra5551)
         {
-            Ticks = Engine.Ticks + 3000;
-            _is32Bit = is32bit;
+
         }
 
-        public long Ticks { get; set; }
-
-
-        public void SetDataHitMap16(ushort[] data)
+        public void PushData(ushort[] data)
         {
-            int size = Width * Height;
-            _hitMap = new bool[size];
-
-            for (int i = size - 1; i >= 0; --i)
-                _hitMap[i] = data[i] != 0;
-
+            _data = data;
             SetData(data);
         }
 
-        public unsafe void SetDataHitMap16(ushort* data)
+        public override bool Contains(int x, int y, bool pixelCheck = true)
         {
-            int size = Width * Height;
-            _hitMap = new bool[size];
-
-            for (int i = size - 1; i >= 0; --i)
-                _hitMap[i] = data[i] != 0;
-
-            SetDataPointerEXT(0, new Rectangle(0, 0, Width, Height), (IntPtr) data, size);
-        }
-
-        public void SetDataHitMap32(uint[] data)
-        {
-            int size = Width * Height;
-            _hitMap = new bool[size];
-
-            for (int i = size - 1; i >= 0; --i)
-                _hitMap[i] = data[i] != 0;
-
-            SetData(data);
-        }
-
-        public bool Contains(int x, int y, bool pixelCheck = true)
-        {
-            if (_hitMap != null && x >= 0 && y >= 0 && x < Width && y < Height)
+            if (_data != null && x >= 0 && y >= 0 && x < Width && y < Height)
             {
                 if (!pixelCheck)
                     return true;
 
                 int pos = y * Width + x;
 
-                if (pos < _hitMap.Length)
-                    return _hitMap[pos];
+                if (pos < _data.Length)
+                    return _data[pos] != 0;
             }
 
             return false;
         }
+    }
 
-        protected override void Dispose(bool disposing)
+    internal class UOTexture32 : UOTexture
+    {
+        private uint[] _data;
+
+        public UOTexture32(int width, int height) : base(width, height, SurfaceFormat.Color)
         {
-            base.Dispose(disposing);
 
-            _hitMap = null;
+        }
+
+        public void PushData(uint[] data)
+        {
+            _data = data;
+            SetData(data);
+        }
+
+        public override bool Contains(int x, int y, bool pixelCheck = true)
+        {
+            if (_data != null && x >= 0 && y >= 0 && x < Width && y < Height)
+            {
+                if (!pixelCheck)
+                    return true;
+
+                int pos = y * Width + x;
+
+                if (pos < _data.Length)
+                    return _data[pos] != 0;
+            }
+
+            return false;
         }
     }
 
-    internal class FontTexture : SpriteTexture
+    internal abstract class UOTexture : Texture2D
+    {
+        protected UOTexture(int width, int height, SurfaceFormat format) : base(Engine.Batcher.GraphicsDevice, width, height, false, format)
+        {
+            Ticks = Engine.Ticks + 3000;
+        }
+        public long Ticks { get; set; }
+
+        public abstract bool Contains(int x, int y, bool pixelCheck = true);
+    }
+
+    internal class FontTexture : UOTexture32
     {
         public FontTexture(int width, int height, int linescount, List<WebLinkRect> links) : base(width, height)
         {
@@ -115,9 +120,9 @@ namespace ClassicUO.Renderer
         public List<WebLinkRect> Links { get; }
     }
 
-    internal class AnimationFrameTexture : SpriteTexture
+    internal class AnimationFrameTexture : UOTexture16
     {
-        public AnimationFrameTexture(int width, int height) : base(width, height, false)
+        public AnimationFrameTexture(int width, int height) : base(width, height)
         {
         }
 
@@ -126,18 +131,18 @@ namespace ClassicUO.Renderer
         public short CenterY { get; set; }
     }
 
-    internal class ArtTexture : SpriteTexture
+    internal class ArtTexture : UOTexture16
     {
-        public ArtTexture(int offsetX, int offsetY, int offsetW, int offsetH, int width, int height) : base(width, height, false)
+        public ArtTexture(int offsetX, int offsetY, int offsetW, int offsetH, int width, int height) : base(width, height)
         {
             ImageRectangle = new Rectangle(offsetX, offsetY, offsetW, offsetH);
         }
 
-        public ArtTexture(Rectangle rect, int width, int height) : base(width, height, false)
+        public ArtTexture(Rectangle rect, int width, int height) : base(width, height)
         {
             ImageRectangle = rect;
         }
 
-        public Rectangle ImageRectangle { get; }
+        public readonly Rectangle ImageRectangle;
     }
 }

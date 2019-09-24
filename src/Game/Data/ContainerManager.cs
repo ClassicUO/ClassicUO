@@ -25,6 +25,7 @@ using System.Collections.Generic;
 
 using ClassicUO.IO;
 using ClassicUO.Renderer;
+using ClassicUO.Game.UI.Controls;
 
 using Microsoft.Xna.Framework;
 
@@ -38,7 +39,7 @@ namespace ClassicUO.Game.Data
                 0x9, new ContainerData(0x0009, 0x0000, 0x0000, 20, 85, 124, 196)
             },
             {
-                0x3C, new ContainerData(0x003C, 0x0048, 0x0058, 44, 65, 186, 159)
+                0x3C, new ContainerData(0x003C, 0x0048, 0x0058, 44, 65, 186, 159, 0x50, 105, 162)
             },
             {
                 0x3D, new ContainerData(0x003D, 0x0048, 0x0058, 29, 34, 137, 128)
@@ -98,6 +99,9 @@ namespace ClassicUO.Game.Data
                 0x92E, new ContainerData(0x092E, 0x0000, 0x0000, 1, 13, 260, 199)
             },
             {
+                0x103, new ContainerData(0x0103, 0x0048, 0x0058, 29, 34, 137, 128)
+            },
+            {
                 0x104, new ContainerData(0x0104, 0x002F, 0x002E, 0, 20, 168, 115)
             },
             {
@@ -153,6 +157,9 @@ namespace ClassicUO.Game.Data
             },
             {
                 0x484, new ContainerData(0x0484, 0x064F, 0x0000, 5, 43, 160, 100)
+            },
+            {
+                0x2A63, new ContainerData(0x2A63, 0x0187, 0x01c9, 29, 34, 137, 128)//for this particular gump area is bugged also in original client, as it is similar to the bag, probably this is an unfinished one
             }
         };
 
@@ -162,16 +169,18 @@ namespace ClassicUO.Game.Data
         public static int X { get; private set; } = 40;
         public static int Y { get; private set; } = 40;
 
-
         public static ContainerData Get(Graphic graphic)
         {
-            return !_data.TryGetValue(graphic, out ContainerData value) ? _data[0x3C] : value;
+            //if the server requests for a non present gump in container data dictionary, create it, but without any particular sound.
+            if (!_data.TryGetValue(graphic, out ContainerData value))
+                _data[graphic] = value = new ContainerData(graphic, 0, 0, 44, 65, 186, 159);
+            return value;
         }
 
 
         public static void CalculateContainerPosition(Graphic g)
         {
-            SpriteTexture texture = FileManager.Gumps.GetTexture(g);
+            UOTexture texture = FileManager.Gumps.GetTexture(g);
 
             int passed = 0;
 
@@ -210,32 +219,25 @@ namespace ClassicUO.Game.Data
                 Y += Constants.CONTAINER_RECT_STEP;
             }
         }
-
-        public static void DoStepBack()
-        {
-            if (X == DefaultX || Y == DefaultY)
-
-                X = X;
-                Y = Y;
-        }
     }
 
     internal readonly struct ContainerData
     {
-        public ContainerData(Graphic graphic, ushort sound, ushort closed, int x, int y, int w, int h)
+        public ContainerData(Graphic graphic, ushort sound, ushort closed, int x, int y, int w, int h, ushort iconizedgraphic = 0, int minimizerX = 0, int minimizerY = 0)
         {
             Graphic = graphic;
             Bounds = new Rectangle(x, y, w, h);
             OpenSound = sound;
             ClosedSound = closed;
+            MinimizerArea = (minimizerX == 0 && minimizerY == 0 ? Rectangle.Empty : new Rectangle(minimizerX, minimizerY, 16, 16));
+            IconizedGraphic = iconizedgraphic;
         }
 
-        public Graphic Graphic { get; }
-
-        public Rectangle Bounds { get; }
-
-        public ushort OpenSound { get; }
-
-        public ushort ClosedSound { get; }
+        public readonly Graphic Graphic;
+        public readonly Rectangle Bounds;
+        public readonly ushort OpenSound;
+        public readonly ushort ClosedSound;
+        public readonly Rectangle MinimizerArea;
+        public readonly ushort IconizedGraphic;
     }
 }

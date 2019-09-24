@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ClassicUO.IO.Resources
 {
@@ -37,25 +38,29 @@ namespace ClassicUO.IO.Resources
 
         public string[] SkillNames { get; private set; }
 
-        public override void Load()
+        public override Task Load()
         {
-            if (SkillsCount > 0)
-                return;
+            return Task.Run(() =>
+            {
+                if (SkillsCount > 0)
+                    return;
 
-            string path = Path.Combine(FileManager.UoFolderPath, "skills.mul");
-            string pathidx = Path.Combine(FileManager.UoFolderPath, "Skills.idx");
+                string path = Path.Combine(FileManager.UoFolderPath, "skills.mul");
+                string pathidx = Path.Combine(FileManager.UoFolderPath, "Skills.idx");
 
-            if (!File.Exists(path) || !File.Exists(pathidx))
-                throw new FileNotFoundException();
+                if (!File.Exists(path) || !File.Exists(pathidx))
+                    throw new FileNotFoundException();
 
-            _file = new UOFileMul(path, pathidx, 0, 16);
+                _file = new UOFileMul(path, pathidx, 0, 16);
+                _file.FillEntries(ref Entries);
 
-            for (int i = 0; i < _file.Entries.Length; i++) GetSkill(i);
+                for (int i = 0; i < Entries.Length; i++) GetSkill(i);
 
-            SkillNames = _skills.Select(o => o.Value.Name).ToArray();
+                SkillNames = _skills.Select(o => o.Value.Name).ToArray();
+            });
         }
 
-        protected override void CleanResources()
+        public override void CleanResources()
         {
             //
         }
@@ -64,13 +69,15 @@ namespace ClassicUO.IO.Resources
         {
             if (!_skills.TryGetValue(index, out SkillEntry value))
             {
-                (int length, int extra, bool patched) = _file.SeekByEntryIndex(index);
 
-                if (length == 0)
+                ref readonly var entry = ref GetValidRefEntry(index);
+
+                if (entry.Length == 0)
                     return default;
 
+                _file.Seek(entry.Offset);
                 var hasAction = _file.ReadBool();
-                var name = Encoding.UTF8.GetString(_file.ReadArray<byte>(length - 1)).TrimEnd('\0');
+                var name = Encoding.UTF8.GetString(_file.ReadArray<byte>(entry.Length - 1)).TrimEnd('\0');
                 _skills[index] = new SkillEntry(index, name, hasAction);
             }
 

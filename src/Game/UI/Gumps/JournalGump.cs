@@ -28,31 +28,65 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.IO;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class JournalGump : Gump
+    internal class JournalGump : MinimizableGump
     {
         private readonly ExpandableScroll _background;
         private readonly RenderedTextList _journalEntries;
         private readonly ScrollFlag _scrollBar;
+        private const int _diffY = 22;
 
-        public JournalGump() : base(0, 0)
+        public JournalGump() : base(Constants.JOURNAL_LOCALSERIAL, 0)
         {
             Height = 300;
             CanMove = true;
             CanBeSaved = true;
 
-            Add(_background = new ExpandableScroll(0, 0, Height, 0x1F40)
+            Add(new GumpPic(160, 0, 0x82D, 0));
+            Add(_background = new ExpandableScroll(0, _diffY, Height - _diffY, 0x1F40)
             {
                 TitleGumpID = 0x82A
             });
 
-            _scrollBar = new ScrollFlag(-25, 36, Height, true);
+            const ushort DARK_MODE_JOURNAL_HUE = 903;
 
-            Add(_journalEntries = new RenderedTextList(25, 36, _background.Width - (_scrollBar.Width >> 1) - 5, 200, _scrollBar));
+            string str = "Dark mode";
+            int width = FileManager.Fonts.GetWidthASCII(6, str);
+
+            Checkbox darkMode;
+            Add(darkMode = new Checkbox(0x00D2, 0x00D3, str, 6, 0x0288, false)
+            {
+                X = _background.Width - width -2, 
+                Y = _diffY + 7,
+                IsChecked = Engine.Profile.Current.JournalDarkMode
+            });
+
+            Hue = (ushort)(Engine.Profile.Current.JournalDarkMode ? DARK_MODE_JOURNAL_HUE : 0);
+            darkMode.ValueChanged += (sender, e) =>
+            {
+                var ok = Engine.Profile.Current.JournalDarkMode = !Engine.Profile.Current.JournalDarkMode;
+                Hue = (ushort) (ok ? DARK_MODE_JOURNAL_HUE : 0);
+            };
+
+            _scrollBar = new ScrollFlag(-25, _diffY + 36, Height - _diffY, true);
+
+            Add(_journalEntries = new RenderedTextList(25, _diffY + 36, _background.Width - (_scrollBar.Width >> 1) - 5, 200, _scrollBar));
 
             Add(_scrollBar);
+        }
+
+        internal override GumpPic Iconized { get; } = new GumpPic(0, 0, 0x830, 0);
+        internal override HitBox IconizerArea { get; } = new HitBox(160, 0, 23, 24);
+
+
+
+        public Hue Hue
+        {
+            get => _background.Hue;
+            set => _background.Hue = value;
         }
 
         protected override void OnMouseWheel(MouseEvent delta)
@@ -86,7 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Update(double totalMS, double frameMS)
         {
             WantUpdateSize = true;
-            _journalEntries.Height = Height - 98;
+            _journalEntries.Height = Height - (98 + _diffY);
             base.Update(totalMS, frameMS);
         }
 

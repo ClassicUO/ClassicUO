@@ -129,10 +129,11 @@ namespace ClassicUO.Game.Managers
 
         public AnchorableGump GetAnchorableControlOver(Control draggedControl, int x, int y)
         {
-            return Engine.UI.GetMouseOverControls(new Point(draggedControl.ScreenCoordinateX + x, draggedControl.ScreenCoordinateY + y))
-                         .Where(o => o != draggedControl)
+            return Engine.UI.Gumps
                          .OfType<AnchorableGump>()
-                         .FirstOrDefault();
+                         .FirstOrDefault(s => s != draggedControl && 
+                                              s.HitTest(draggedControl.ScreenCoordinateX + x,
+                                                        draggedControl.ScreenCoordinateY + y) != null);
         }
 
         public void DetachControl(AnchorableGump control)

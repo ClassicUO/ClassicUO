@@ -41,9 +41,17 @@ namespace ClassicUO.Game.Managers
     internal static class NameOverHeadManager
     {
         private static NameOverHeadHandlerGump _gump;
-        public static NameOverheadTypeAllowed TypeAllowed { get; set; }
+        public static NameOverheadTypeAllowed TypeAllowed
+        {
+            get { return Engine.Profile.Current.NameOverheadTypeAllowed; }
+            set { Engine.Profile.Current.NameOverheadTypeAllowed = value; }
+        }
 
-        public static bool IsToggled = false;
+        public static bool IsToggled
+        {
+            get { return Engine.Profile.Current.NameOverheadToggled; }
+            set { Engine.Profile.Current.NameOverheadToggled = value; }
+        }
 
         public static bool IsAllowed(Entity serial)
         {

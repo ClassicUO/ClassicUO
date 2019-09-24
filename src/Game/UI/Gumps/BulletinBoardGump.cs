@@ -61,7 +61,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             HitBox hitbox = new HitBox(15, 170, 80, 80)
             {
-                IsTransparent = true,
                 Alpha = 1
             };
 
@@ -357,6 +356,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
+            if (button != MouseButton.Left)
+                return false;
+
             NetClient.Socket.Send(new PBulletinBoardRequestMessage(LocalSerial, Item));
 
             return true;

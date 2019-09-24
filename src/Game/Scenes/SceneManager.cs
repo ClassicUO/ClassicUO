@@ -21,6 +21,8 @@
 
 #endregion
 
+using System.Runtime.CompilerServices;
+
 namespace ClassicUO.Game.Scenes
 {
     public enum ScenesType
@@ -55,16 +57,19 @@ namespace ClassicUO.Game.Scenes
 
                     if (!Bootstrap.StartInLittleWindow)
                     {
-                        Engine.SetPreferredBackBufferSize(Engine.Profile.Current.WindowClientBounds.X, Engine.Profile.Current.WindowClientBounds.Y);
+                        if (Engine.Profile.Current != null)
+                        {
+                            Engine.SetPreferredBackBufferSize(Engine.Profile.Current.WindowClientBounds.X, Engine.Profile.Current.WindowClientBounds.Y);
 
-                        if (!Engine.Profile.Current.RestoreLastGameSize)
-                        {
-                            Engine.IsMaximized = true;
-                        }
-                        else
-                        {
-                            Engine.WindowWidth = Engine.Profile.Current.WindowClientBounds.X;
-                            Engine.WindowHeight = Engine.Profile.Current.WindowClientBounds.Y;
+                            if (!Engine.Profile.Current.RestoreLastGameSize)
+                            {
+                                Engine.IsMaximized = true;
+                            }
+                            else
+                            {
+                                Engine.WindowWidth = Engine.Profile.Current.WindowClientBounds.X;
+                                Engine.WindowHeight = Engine.Profile.Current.WindowClientBounds.Y;
+                            }
                         }
                     }
 
@@ -76,9 +81,13 @@ namespace ClassicUO.Game.Scenes
             CurrentScene?.Load();
         }
 
+        [MethodImpl(256)]
         public T GetScene<T>() where T : Scene
         {
-            return CurrentScene?.GetType() == typeof(T) ? (T) CurrentScene : null;
+            if (CurrentScene is T s)
+                return s;
+
+            return null;
         }
     }
 }

@@ -37,8 +37,13 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class PaperDollGump : TextContainerGump
+    internal class PaperDollGump : MinimizableGump
     {
+        private readonly GumpPic _Iconized;
+        internal override GumpPic Iconized => _Iconized;
+        private readonly HitBox _IconizerArea;
+        internal override HitBox IconizerArea => _IconizerArea;
+
         private static readonly ushort[] PeaceModeBtnGumps =
         {
             0x07e5, 0x07e6, 0x07e7
@@ -68,6 +73,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Mobile = mobile;
                 Title = mobileTitle;
+                if(mobile == World.Player)
+                {
+                    _Iconized = new GumpPic(0, 0, 0x7EE, 0);
+                    _IconizerArea = new HitBox(228, 260, 16, 16);
+                }
                 BuildGump();
             }
             else
@@ -77,6 +87,8 @@ namespace ClassicUO.Game.UI.Gumps
         public string Title { get; }
 
         public Mobile Mobile { get; set; }
+
+        public bool CanLift { get; set; }
 
         public override void Dispose()
         {
@@ -171,7 +183,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int profileX = 25;
                 const int SCROLLS_STEP = 14;
 
-                if (World.ClientFlags.PaperdollBooks)
+                if (World.ClientFeatures.PaperdollBooks)
                 {
                     Add(_combatBook = new GumpPic(156, 200, 0x2B34, 0));
                     _combatBook.MouseDoubleClick += (sender, e) => { GameActions.OpenAbilitiesBook(); };
@@ -212,19 +224,19 @@ namespace ClassicUO.Game.UI.Gumps
             });
 
             // Virtue menu
-            Add(_virtueMenuPic = new GumpPic(79, 4, 0x0071, 0));
+            Add(_virtueMenuPic = new GumpPic(80, 4, 0x0071, 0));
             _virtueMenuPic.MouseDoubleClick += VirtueMenu_MouseDoubleClickEvent;
 
             // Equipment slots for hat/earrings/neck/ring/bracelet
-            Add(new EquipmentSlot(2, 76, Mobile, Layer.Helmet));
-            Add(new EquipmentSlot(2, 76 + 22, Mobile, Layer.Earrings));
-            Add(new EquipmentSlot(2, 76 + 22 * 2, Mobile, Layer.Necklace));
-            Add(new EquipmentSlot(2, 76 + 22 * 3, Mobile, Layer.Ring));
-            Add(new EquipmentSlot(2, 76 + 22 * 4, Mobile, Layer.Bracelet));
-            Add(new EquipmentSlot(2, 76 + 22 * 5, Mobile, Layer.Tunic));
+            Add(new EquipmentSlot(2, 75, Mobile, Layer.Helmet, this));
+            Add(new EquipmentSlot(2, 75 + 21, Mobile, Layer.Earrings, this));
+            Add(new EquipmentSlot(2, 75 + 21 * 2, Mobile, Layer.Necklace, this));
+            Add(new EquipmentSlot(2, 75 + 21 * 3, Mobile, Layer.Ring, this));
+            Add(new EquipmentSlot(2, 75 + 21 * 4, Mobile, Layer.Bracelet, this));
+            Add(new EquipmentSlot(2, 75 + 21 * 5, Mobile, Layer.Tunic, this));
 
             // Paperdoll control!
-            _paperDollInteractable = new PaperDollInteractable(8, 21, Mobile);
+            _paperDollInteractable = new PaperDollInteractable(8, 19, Mobile, this);
             //_paperDollInteractable.MouseOver += (sender, e) =>
             //{
             //    OnMouseOver(e.X, e.Y);
@@ -454,6 +466,129 @@ namespace ClassicUO.Game.UI.Gumps
             Guild,
             PeaceWarToggle,
             Status
+        }
+
+
+
+        private class EquipmentSlot : Control
+        {
+            private readonly Layer _layer;
+            private readonly Mobile _mobile;
+            private ItemGumpFixed _itemGump;
+            private readonly PaperDollGump _paperDollGump;
+            private Item _item;
+
+            public EquipmentSlot(int x, int y, Mobile mobile, Layer layer, PaperDollGump paperDollGump)
+            {
+                X = x;
+                Y = y;
+                Width = 19;
+                Height = 20;
+                _paperDollGump = paperDollGump;
+                _mobile = mobile;
+                _layer = layer;
+
+                Add(new GumpPicTiled(0, 0, 19, 20, 0x243A)
+                {
+                    AcceptMouseInput = false
+                });
+
+                Add(new GumpPic(0, 0, 0x2344, 0)
+                {
+                    AcceptMouseInput = false
+                });
+                AcceptMouseInput = true;
+
+                WantUpdateSize = false;
+            }
+
+            public override void Update(double totalMS, double frameMS)
+            {
+                if (_item != null && _item.IsDestroyed)
+                {
+                    _item = null;
+                    _itemGump.Dispose();
+                    _itemGump = null;
+                }
+
+                if (_item != _mobile.Equipment[(int)_layer])
+                {
+                    if (_itemGump != null)
+                    {
+                        _itemGump.Dispose();
+                        _itemGump = null;
+                    }
+
+                    _item = _mobile.Equipment[(int)_layer];
+
+                    if (_item != null)
+                    {
+                        Add(_itemGump = new ItemGumpFixed(_item, 18, 18)
+                        {
+                            X = 0,
+                            Y = 0,
+                            Width = 18,
+                            Height = 18,
+                            HighlightOnMouseOver = false,
+                            CanPickUp = World.InGame && (World.Player == _mobile || _paperDollGump.CanLift),
+                            
+                        });
+                    }
+                }
+
+
+                base.Update(totalMS, frameMS);
+            }
+
+            private class ItemGumpFixed : ItemGump
+            {
+                private readonly Point _originalSize;
+                private readonly Point _point;
+                private readonly Rectangle _rect;
+
+                public ItemGumpFixed(Item item, int w, int h) : base(item)
+                {
+                    Width = w;
+                    Height = h;
+                    WantUpdateSize = false;
+
+                    ArtTexture texture = (ArtTexture)Texture;
+
+                    _originalSize.X = Width;
+                    _originalSize.Y = Height;
+                    _rect = texture.ImageRectangle;
+
+                    if (_rect.Width < Width)
+                    {
+                        _originalSize.X = _rect.Width;
+                        _point.X = (Width >> 1) - (_originalSize.X >> 1);
+                    }
+
+                    if (_rect.Height < Height)
+                    {
+                        _originalSize.Y = _rect.Height;
+                        _point.Y = (Height >> 1) - (_originalSize.Y >> 1);
+                    }
+                }
+
+
+                public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+                {
+                    ResetHueVector();
+                    ShaderHuesTraslator.GetHueVector(ref _hueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, true);
+
+                    return batcher.Draw2D(Texture, x + _point.X, y + _point.Y,
+                                          _originalSize.X, _originalSize.Y,
+                                          _rect.X, _rect.Y, 
+                                          _rect.Width, _rect.Height,
+                                          ref _hueVector);
+                }
+
+                public override bool Contains(int x, int y)
+                {
+                    return true;
+                }
+            }
         }
     }
 }

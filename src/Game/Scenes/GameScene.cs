@@ -158,6 +158,7 @@ namespace ClassicUO.Game.Scenes
                 Scale = Engine.Profile.Current.ScaleZoom;
 
             Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom = Scale;
+            Engine.UI.ContainerScale = Engine.Profile.Current.ContainersScale / 100f;
 
             Plugin.OnConnected();
         }
@@ -435,7 +436,7 @@ namespace ClassicUO.Game.Scenes
                         Tile tile = World.Map.GetTile(x, y);
 
                         if (tile != null)
-                            AddTileToRenderList(tile.FirstNode, x, y, _useObjectHandles, 150, null);
+                            AddTileToRenderList(tile.FirstNode, x, y, _useObjectHandles, 150/*, null*/);
                         x++;
                         y--;
                     }
@@ -452,6 +453,8 @@ namespace ClassicUO.Game.Scenes
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
+
+            PacketHandlers.SendMegaClilocRequests();
 
             if (_forceStopScene)
             {
@@ -555,13 +558,14 @@ namespace ClassicUO.Game.Scenes
                     _multi = new Item(Serial.INVALID)
                     {
                         Graphic = TargetManager.MultiTargetInfo.Model,
+                        Hue = TargetManager.MultiTargetInfo.Hue,
                         IsMulti = true,
                     };
 
-                if (Game.SelectedObject.Object != null && Game.SelectedObject.Object is GameObject gobj)
+                if (SelectedObject.Object is GameObject gobj)
                 {
                     Position pos = TargetManager.MultiTargetInfo.Offset;
-                    Position pos2 = gobj.Tile?.FirstNode.Position ?? gobj.Position;
+                    Position pos2 = gobj.Tile?.FirstNode?.Position ?? gobj.Position;
 
                     World.Map.GetMapZ(pos2.X, pos2.Y, out sbyte groundZ, out sbyte staticZ);
 
@@ -713,8 +717,8 @@ namespace ClassicUO.Game.Scenes
 
             var lightColor = World.Light.IsometricLevel;
 
-            if (!Engine.Profile.Current.UseDarkNights)
-                lightColor += 0.2f;
+            if (Engine.Profile.Current.UseDarkNights)
+                lightColor -= 0.02f;
 
             _vectorClear.X = _vectorClear.Y = _vectorClear.Z = lightColor;
 
@@ -733,7 +737,7 @@ namespace ClassicUO.Game.Scenes
             {
                 ref readonly var l = ref _lights[i];
 
-                SpriteTexture texture = FileManager.Lights.GetTexture(l.ID);
+                UOTexture texture = FileManager.Lights.GetTexture(l.ID);
 
                 hue.X = l.Color;
                 hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
@@ -758,8 +762,6 @@ namespace ClassicUO.Game.Scenes
                 renderIndex = 99;
 
 
-            //World.WorldTextManager.Select(renderIndex);
-            World.WorldTextManager.MoveToTopIfSelected();
             World.WorldTextManager.ProcessWorldText(true);
             World.WorldTextManager.Draw(batcher, x, y, renderIndex);
 

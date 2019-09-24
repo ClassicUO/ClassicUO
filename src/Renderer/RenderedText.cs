@@ -223,7 +223,9 @@ namespace ClassicUO.Renderer
             if (hue != 0)
             {
                 if (IsUnicode)
-                    _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE_NO_BALCK;
+                    _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE_NO_BLACK;
+                else if (Font == 3)
+                    _hueVector.Y = 5;
                 else if (Font != 5 && Font != 8)
                     _hueVector.Y = ShaderHuesTraslator.SHADER_PARTIAL_HUED;
                 else

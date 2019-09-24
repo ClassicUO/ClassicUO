@@ -23,6 +23,7 @@
 
 using System.Collections.Generic;
 
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
@@ -40,15 +41,13 @@ namespace ClassicUO.Game.UI.Controls
 
     internal class Button : Control
     {
-        public override bool CanUseAlpha => false;
-
         private const int NORMAL = 0;
         private const int PRESSED = 1;
         private const int OVER = 2;
         private readonly string _caption;
         private readonly RenderedText[] _fontTexture = new RenderedText[2];
         private readonly Graphic[] _gumpGraphics = new Graphic[3];
-        private readonly SpriteTexture[] _textures = new SpriteTexture[3];
+        private readonly UOTexture[] _textures = new UOTexture[3];
 
         private bool _entered;
 
@@ -61,7 +60,7 @@ namespace ClassicUO.Game.UI.Controls
             _textures[NORMAL] = FileManager.Gumps.GetTexture(normal);
             _textures[PRESSED] = FileManager.Gumps.GetTexture(pressed);
             if (over > 0) _textures[OVER] = FileManager.Gumps.GetTexture(over);
-            SpriteTexture t = _textures[NORMAL];
+            UOTexture t = _textures[NORMAL];
 
             if (t == null)
             {
@@ -107,6 +106,7 @@ namespace ClassicUO.Game.UI.Controls
 
             ToPage = parts.Count >= 7 ? int.Parse(parts[6]) : 0;
             WantUpdateSize = false;
+            ContainsByBounds = true;
         }
 
         public bool IsClicked { get; private set; }
@@ -166,7 +166,7 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 0; i < _textures.Length; i++)
             {
-                SpriteTexture t = _textures[i];
+                UOTexture t = _textures[i];
 
                 if (t != null)
                     t.Ticks = Engine.Ticks;
@@ -185,12 +185,11 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            SpriteTexture texture = GetTextureByState();
+            UOTexture texture = GetTextureByState();
 
             ResetHueVector();
 
-            if (IsTransparent)
-                _hueVector.Z = Alpha;
+            _hueVector.Z = Alpha;
 
             batcher.Draw2D(texture, x, y, Width, Height, ref _hueVector);
 
@@ -221,28 +220,30 @@ namespace ClassicUO.Game.UI.Controls
             if (button == MouseButton.Left)
             {
                 IsClicked = false;
-
-                switch (ButtonAction)
+                if (_entered || Engine.SceneManager.CurrentScene is GameScene)
                 {
-                    case ButtonAction.SwitchPage:
-                        ChangePage(ToPage);
+                    switch (ButtonAction)
+                    {
+                        case ButtonAction.SwitchPage:
+                            ChangePage(ToPage);
 
-                        break;
+                            break;
 
-                    case ButtonAction.Activate:
-                        OnButtonClick(ButtonID);
+                        case ButtonAction.Activate:
+                            OnButtonClick(ButtonID);
 
-                        break;
+                            break;
+                    }
+
+                    Mouse.LastLeftButtonClickTime = 0;
+                    Mouse.CancelDoubleClick = true;
                 }
-
-                Mouse.LastLeftButtonClickTime = 0;
-                Mouse.CancelDoubleClick = true;
             }
         }
 
-        private SpriteTexture GetTextureByState()
+        private UOTexture GetTextureByState()
         {
-            if (_entered)
+            if (_entered || IsClicked)
             {
                 if (IsClicked && _textures[PRESSED] != null)
                     return _textures[PRESSED];

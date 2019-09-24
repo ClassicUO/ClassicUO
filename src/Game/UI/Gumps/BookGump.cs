@@ -468,10 +468,7 @@ namespace ClassicUO.Game.UI.Gumps
             var linech = entry.GetLinesCharsCount(entry.Text);
             int caretpos = entry.CaretIndex;
             (int, int) selection = entry.GetSelectionArea();
-            bool multilinesel = false;
-
-            if (selection.Item1 != -1)
-                multilinesel = true;
+            bool multilinesel = selection.Item1 != -1;
 
             if (!multilinesel)
             {

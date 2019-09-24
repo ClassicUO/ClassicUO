@@ -33,7 +33,7 @@ namespace ClassicUO.Game.UI.Controls
     {
         private const int CELL = 12;
 
-        private readonly SpriteTexture _background;
+        private readonly UOTexture _background;
 
         public ClickableColorBox(int x, int y, int w, int h, ushort hue, uint color) : base(w, h, hue, color)
         {

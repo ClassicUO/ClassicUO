@@ -27,6 +27,7 @@ using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
@@ -65,7 +66,7 @@ namespace ClassicUO.IO
 
         internal static void Enable()
         {
-            Log.Message(LogTypes.Trace, "Setup packet for Ultima live");
+            Log.Message(LogTypes.Trace, "Setup packet for UltimaLive");
             PacketHandlers.ToClient.Add(0x3F, OnUltimaLivePacket);
             PacketHandlers.ToClient.Add(0x40, OnUpdateTerrainPacket);
         }
@@ -289,8 +290,9 @@ namespace ClassicUO.IO
                     if (oldlen == 0 || maps > oldlen)
                     {
                         ULMapLoader loader = new ULMapLoader(maps);
-                        for (int i = 0; i < maps; i++) ULMapLoader.CheckForShardMapFile(i);
-                        loader.Load();
+                        for (int i = 0; i < maps; i++)
+                            loader.CheckForShardMapFile(i);
+                        loader.Load().Wait();
                         _UL._ULMap = loader;
                         _UL._filesMap = new ULFileMul[maps];
                         _UL._filesIdxStatics = new ULFileMul[maps];
@@ -311,7 +313,6 @@ namespace ClassicUO.IO
                 }
 
                 case 0x02: //Live login confirmation
-
                 {
                     if (p.Length < 43) //fixed size
                         return;
@@ -493,13 +494,13 @@ namespace ClassicUO.IO
 
         internal class ULFileMul : UOFileMul
         {
-            public ULFileMul(string file, bool isstaticmul) : base(file, isstaticmul)
+            public ULFileMul(string file, bool isstaticmul) : base(file)
             {
+                LoadFile(isstaticmul);
             }
 
-            protected override void Load(bool loadentries = false) //loadentries here is for staticmul particular memory preloading
+            protected override void Load() //loadentries here is for staticmul particular memory preloading
             {
-                LoadFile(loadentries);
             }
 
             private unsafe void LoadFile(bool isstaticmul)
@@ -565,17 +566,20 @@ namespace ClassicUO.IO
 
         internal class ULMapLoader : MapLoader
         {
-            private readonly Thread _twriter;
+            private protected readonly CancellationTokenSource feedCancel;
+            private readonly Task _twriter;
             private FileStream[] _filesStaticsStream;
-            internal AsyncWriterThread _writer;
+            internal AsyncWriterTasked _writer;
 
             public ULMapLoader(uint maps)
             {
+                feedCancel = new CancellationTokenSource();
                 NumMaps = maps;
                 int[,] old = MapsDefaultSize;
                 MapsDefaultSize = new int[NumMaps, 2];
                 MapBlocksSize = new int[NumMaps, 2];
                 BlockData = new IndexMap[NumMaps][];
+                Entries = new UOFileIndex[NumMaps][];
 
                 for (int i = 0; i < NumMaps; i++)
                 {
@@ -583,89 +587,97 @@ namespace ClassicUO.IO
                         MapsDefaultSize[i, x] = i < old.Length ? old[i, x] : old[0, x];
                 }
 
-                _writer = new AsyncWriterThread(this);
-                _twriter = new Thread(_writer.Loop) {Name = "UL_File_Writer", IsBackground = true};
-                _twriter.Start();
+                _writer = new AsyncWriterTasked(this, feedCancel);
+                _twriter = Task.Run(_writer.Loop);// new Thread(_writer.Loop) {Name = "UL_File_Writer", IsBackground = true};
             }
 
             internal (UOFile[], UOFileMul[], UOFileMul[]) GetFilesReference => (_filesMap, _filesIdxStatics, _filesStatics);
             internal uint NumMaps { get; }
 
-            protected override void CleanResources()
+            internal new UOFileIndex[][] Entries;
+
+            public override void CleanResources()
             {
+                try
+                {
+                    feedCancel?.Cancel();
+                    _twriter?.Wait();
+
+                    feedCancel?.Dispose();
+                    _twriter?.Dispose();
+                }
+                catch
+                {
+                }
                 if (_filesStaticsStream != null)
                 {
                     for (int i = _filesStaticsStream.Length - 1; i >= 0; --i) _filesStaticsStream[i]?.Dispose();
                     _filesStaticsStream = null;
                 }
-
-                try
-                {
-                    _twriter?.Abort();
-                }
-                catch
-                {
-                }
             }
 
-            public override void Load()
+            public override Task Load()
             {
-                if (FileManager.Map is ULMapLoader)
-                    return;
-
-                FileManager.MapLoaderReLoad(this);
-                _UL._EOF = new uint[NumMaps];
-                _filesStaticsStream = new FileStream[NumMaps];
-                bool foundedOneMap = false;
-
-                for (int i = 0; i < NumMaps; i++)
+                return Task.Run(() =>
                 {
-                    string path = Path.Combine(_UL.ShardName, $"map{i}.mul");
+                    if (FileManager.Map is ULMapLoader)
+                        return;
 
-                    if (File.Exists(path))
+                    FileManager.MapLoaderReLoad(this);
+                    _UL._EOF = new uint[NumMaps];
+                    _filesStaticsStream = new FileStream[NumMaps];
+                    bool foundedOneMap = false;
+
+                    for (int i = 0; i < NumMaps; i++)
                     {
-                        _filesMap[i] = new ULFileMul(path, false);
-                        foundedOneMap = true;
+                        string path = Path.Combine(_UL.ShardName, $"map{i}.mul");
+
+                        if (File.Exists(path))
+                        {
+                            _filesMap[i] = new ULFileMul(path, false);
+                            
+                            foundedOneMap = true;
+                        }
+
+                        path = Path.Combine(_UL.ShardName, $"statics{i}.mul");
+
+                        if (!File.Exists(path))
+                        {
+                            foundedOneMap = false;
+
+                            break;
+                        }
+
+                        _filesStatics[i] = new ULFileMul(path, true);
+                        _filesStaticsStream[i] = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+                        _UL._EOF[i] = (uint) new FileInfo(path).Length;
+
+                        path = Path.Combine(_UL.ShardName, $"staidx{i}.mul");
+
+                        if (!File.Exists(path))
+                        {
+                            foundedOneMap = false;
+
+                            break;
+                        }
+
+                        _filesIdxStatics[i] = new ULFileMul(path, false);
                     }
 
-                    path = Path.Combine(_UL.ShardName, $"statics{i}.mul");
+                    if (!foundedOneMap)
+                        throw new FileNotFoundException($"No maps, staidx or statics found on {_UL.ShardName}.");
 
-                    if (!File.Exists(path))
+                    for (int i = 0; i < NumMaps; i++)
                     {
-                        foundedOneMap = false;
-
-                        break;
+                        MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
+                        MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
+                        //on ultimalive map always preload
+                        LoadMap(i);
                     }
-
-                    _filesStatics[i] = new ULFileMul(path, true);
-                    _filesStaticsStream[i] = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
-                    _UL._EOF[i] = (uint) new FileInfo(path).Length;
-
-                    path = Path.Combine(_UL.ShardName, $"staidx{i}.mul");
-
-                    if (!File.Exists(path))
-                    {
-                        foundedOneMap = false;
-
-                        break;
-                    }
-
-                    _filesIdxStatics[i] = new ULFileMul(path, false);
-                }
-
-                if (!foundedOneMap)
-                    throw new FileNotFoundException($"No maps, staidx or statics found on {_UL.ShardName}.");
-
-                for (int i = 0; i < NumMaps; i++)
-                {
-                    MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
-                    MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
-                    //on ultimalive map always preload
-                    LoadMap(i);
-                }
+                });
             }
 
-            internal static void CheckForShardMapFile(int mapID)
+            internal void CheckForShardMapFile(int mapID)
             {
                 string oldmap = Path.Combine(FileManager.UoFolderPath, $"map{mapID}.mul");
                 string oldstaidx = Path.Combine(FileManager.UoFolderPath, $"staidx{mapID}.mul");
@@ -685,14 +697,17 @@ namespace ClassicUO.IO
                     {
                         if (mapfile is UOFileUop uop)
                         {
+                            Entries[mapID] = new UOFileIndex[uop.TotalEntriesCount];
+                            uop.FillEntries(ref Entries[mapID]);
+
                             Log.Message(LogTypes.Trace, $"UltimaLive -> converting file:\t{mapPath} from {uop.FilePath}");
 
                             using (FileStream stream = File.Create(mapPath))
                             {
-                                for (int x = 0; x < uop.Entries.Length; x++)
+                                for (int x = 0; x < Entries[mapID].Length; x++)
                                 {
-                                    uop.Seek(uop.Entries[x].Offset);
-                                    stream.Write(uop.ReadArray(uop.Entries[x].Length), 0, uop.Entries[x].Length);
+                                    uop.Seek(Entries[mapID][x].Offset);
+                                    stream.Write(uop.ReadArray(Entries[mapID][x].Length), 0, Entries[mapID][x].Length);
                                 }
 
                                 stream.Flush();
@@ -795,8 +810,8 @@ namespace ClassicUO.IO
                     {
                         fileNumber = shifted;
 
-                        if (shifted < file.Entries.Length)
-                            uopoffset = (ulong) file.Entries[shifted].Offset;
+                        if (shifted < Entries.Length)
+                            uopoffset = (ulong)Entries[map][shifted].Offset;
                     }
                 }
 
@@ -830,24 +845,26 @@ namespace ClassicUO.IO
                 data.OriginalStaticCount = realstaticcount;
             }
 
-            internal class AsyncWriterThread
+            internal class AsyncWriterTasked
             {
                 private readonly ULMapLoader _Map;
                 private readonly AutoResetEvent m_Signal = new AutoResetEvent(false);
                 internal ConcurrentQueue<(int, long, byte[])> _toWrite = new ConcurrentQueue<(int, long, byte[])>();
+                private readonly CancellationTokenSource _token;
 
-                public AsyncWriterThread(ULMapLoader map)
+                public AsyncWriterTasked(ULMapLoader map, CancellationTokenSource token)
                 {
                     _Map = map;
+                    _token = token;
                 }
 
                 public void Loop()
                 {
-                    while (_UL != null && !_Map.IsDisposed)
+                    while (_UL != null && !_Map.IsDisposed && !_token.IsCancellationRequested)
                     {
                         while (_toWrite.TryDequeue(out (int, long, byte[]) deq))
                             WriteArray(deq.Item1, deq.Item2, deq.Item3);
-                        m_Signal.WaitOne(25, false);
+                        m_Signal.WaitOne(10, false);
                     }
                 }
 

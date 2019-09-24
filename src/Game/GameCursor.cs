@@ -29,6 +29,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
@@ -58,9 +59,10 @@ namespace ClassicUO.Game
         private readonly CursorInfo[,] _cursorPixels = new CursorInfo[2, 16];
         private readonly Tooltip _tooltip;
         private Vector3 _auraVector = new Vector3(0, 13, 0);
+        private RenderedText _targetDistanceText = RenderedText.Create(String.Empty, 0x0481, style: FontStyle.BlackBorder);
 
         private IntPtr _cursor, _surface;
-        private SpriteTexture _draggedItemTexture;
+        private UOTexture _draggedItemTexture;
         private Graphic _graphic = 0x2073;
 
         private ItemHold _itemHold;
@@ -242,6 +244,8 @@ namespace ClassicUO.Game
         }
 
         public bool IsLoading { get; set; }
+        public bool IsDraggingCursorForced { get; set; }
+
 
         public void SetDraggedItem(ItemHold hold)
         {
@@ -299,37 +303,55 @@ namespace ClassicUO.Game
         private static Vector3 _vec = Vector3.Zero;
         public void Draw(UltimaBatcher2D sb)
         {
-            if (TargetManager.IsTargeting && Engine.Profile.Current != null && Engine.Profile.Current.AuraOnMouse)
+            if (TargetManager.IsTargeting && Engine.Profile.Current != null)
             {
-                ushort id = Graphic;
-
-                if (id < 0x206A)
-                    id -= 0x2053;
-                else
-                    id -= 0x206A;
-
-                int hotX = _cursorOffset[0, id];
-                int hotY = _cursorOffset[1, id];
-
-                switch (TargetManager.TargeringType)
+                if (Engine.Profile.Current.AuraOnMouse)
                 {
-                    case TargetType.Neutral:
-                        _auraVector.X = 0x03B2;
+                    ushort id = Graphic;
 
-                        break;
+                    if (id < 0x206A)
+                        id -= 0x2053;
+                    else
+                        id -= 0x206A;
 
-                    case TargetType.Harmful:
-                        _auraVector.X = 0x0023;
+                    int hotX = _cursorOffset[0, id];
+                    int hotY = _cursorOffset[1, id];
 
-                        break;
+                    switch (TargetManager.TargeringType)
+                    {
+                        case TargetType.Neutral:
+                            _auraVector.X = 0x03B2;
 
-                    case TargetType.Beneficial:
-                        _auraVector.X = 0x005A;
+                            break;
 
-                        break;
+                        case TargetType.Harmful:
+                            _auraVector.X = 0x0023;
+
+                            break;
+
+                        case TargetType.Beneficial:
+                            _auraVector.X = 0x005A;
+
+                            break;
+                    }
+
+                    sb.Draw2D(_aura, Mouse.Position.X + hotX - (25 >> 1), Mouse.Position.Y + hotY - (25 >> 1), ref _auraVector);
                 }
 
-                sb.Draw2D(_aura, Mouse.Position.X + hotX - (25 >> 1), Mouse.Position.Y + hotY - (25 >> 1), ref _auraVector);
+                if (Engine.Profile.Current.ShowTargetRangeIndicator)
+                {
+                    GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+
+                    if (gs != null && gs.IsMouseOverViewport)
+                    {
+                        if (SelectedObject.Object is GameObject obj)
+                        {
+                            _targetDistanceText.Text = obj.Distance.ToString();
+
+                            _targetDistanceText.Draw(sb, Mouse.Position.X - 25, Mouse.Position.Y - 20, 0);
+                        }
+                    }
+                }
             }
 
            
@@ -374,14 +396,14 @@ namespace ClassicUO.Game
         {
             if (Engine.SceneManager.CurrentScene is GameScene gs)
             {
-                if (!World.ClientFlags.TooltipsEnabled || gs.IsHoldingItem)
+                if (!World.ClientFeatures.TooltipsEnabled || gs.IsHoldingItem)
                 {
                     if (!_tooltip.IsEmpty)
                         _tooltip.Clear();
                 }
                 else
                 {
-                    if (gs.IsMouseOverViewport && SelectedObject.Object is Entity item && item.Properties.Count > 0)
+                    if (gs.IsMouseOverViewport && SelectedObject.Object is Entity item && World.OPL.Contains(item))
                     {
                         if (_tooltip.IsEmpty || item != _tooltip.Object)
                             _tooltip.SetGameObject(item);
@@ -392,14 +414,14 @@ namespace ClassicUO.Game
 
                     if (Engine.UI.IsMouseOverAControl)
                     {
-                        Item it = null;
+                        Entity it = null;
 
                         switch (Engine.UI.MouseOverControl)
                         {
-                            case EquipmentSlot equipmentSlot:
-                                it = equipmentSlot.Item;
+                            //case EquipmentSlot equipmentSlot:
+                            //    it = equipmentSlot.Item;
 
-                                break;
+                            //    break;
 
                             case ItemGump gumpling:
                                 it = gumpling.Item;
@@ -410,9 +432,13 @@ namespace ClassicUO.Game
                                 it = i;
 
                                 break;
+
+                            case NameOverheadGump overhead:
+                                it = overhead.Entity;
+                                break;
                         }
 
-                        if (it != null && it.Properties.Count != 0)
+                        if (it != null && World.OPL.Contains(it))
                         {
                             if (_tooltip.IsEmpty || it != _tooltip.Object)
                                 _tooltip.SetGameObject(it);
@@ -452,7 +478,7 @@ namespace ClassicUO.Game
                     return _cursorData[war, 12];
             }
 
-            if (Engine.UI.IsDragging)
+            if (Engine.UI.IsDragging || IsDraggingCursorForced)
                 return _cursorData[war, 8];
 
             if (IsLoading)

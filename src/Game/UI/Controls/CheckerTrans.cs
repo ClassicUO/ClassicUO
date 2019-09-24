@@ -38,14 +38,13 @@ namespace ClassicUO.Game.UI.Controls
             DepthStencilState state = new DepthStencilState
             {
                 DepthBufferEnable = false,
-                StencilEnable = false,
+                StencilEnable = true,
                 StencilFunction = CompareFunction.Always,
                 ReferenceStencil = 1,
                 StencilMask = 1,
                 StencilFail = StencilOperation.Keep,
                 StencilDepthBufferFail = StencilOperation.Keep,
                 StencilPass = StencilOperation.Replace,
-                TwoSidedStencilMode = false
             };
 
 
@@ -93,8 +92,10 @@ namespace ClassicUO.Game.UI.Controls
 
             ResetHueVector();
             _hueVector.Z = 0.5f;
-
-            return batcher.Draw2D(Textures.GetTexture(Color.Black), x, y, Width, Height, ref _hueVector);
+            //batcher.SetStencil(_checkerStencil.Value);
+            batcher.Draw2D(Textures.GetTexture(Color.Black), x, y, Width, Height, ref _hueVector);
+            //batcher.SetStencil(null);
+            return true;
         }
     }
 }

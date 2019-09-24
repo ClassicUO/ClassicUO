@@ -101,15 +101,13 @@ namespace ClassicUO.Game.UI.Controls
 
             if (ScissorStack.PushScissors(scissor))
             {
-                bool ok = batcher.EnableScissorTest(true);
+                batcher.EnableScissorTest(true);
                 base.Draw(batcher, x, y);
-
-                if (ok)
-                    batcher.EnableScissorTest(false);
+                batcher.EnableScissorTest(false);
                 ScissorStack.PopScissors();
             }
 
-            return true;
+            return true; 
         }
 
 

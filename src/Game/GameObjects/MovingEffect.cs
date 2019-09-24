@@ -54,10 +54,11 @@ namespace ClassicUO.Game.GameObjects
             SetTarget(xTarg, yTarg, zTarg);
         }
 
-        public MovingEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, Graphic graphic, Hue hue) : this(graphic, hue)
+        public MovingEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, Graphic graphic, Hue hue, bool fixedDir) : this(graphic, hue)
         {
             sbyte zSourceB = (sbyte) zSource;
             sbyte zTargB = (sbyte) zTarget;
+            FixedDir = fixedDir;
 
             if (src.IsValid)
             {
@@ -111,6 +112,8 @@ namespace ClassicUO.Game.GameObjects
         public float AngleToTarget { get; set; }
 
         public bool Explode { get; set; }
+
+        public bool FixedDir { get; private set; }
 
         public byte MovingDelay { get; set; } = 20;
 
@@ -211,7 +214,7 @@ namespace ClassicUO.Game.GameObjects
             int newX = playerX + newCoordX;
             int newY = playerY + newCoordY;
 
-            if (newX == tx && newY == ty && sz == tz)
+            if ( (newX == tx && newY == ty && sz == tz) || (Target != null && Target.IsDestroyed))
             {
                 if (Explode)
                 {
@@ -273,7 +276,7 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 countY -= (int) Offset.Z + ((tz - sz) << 2);
-                if (AnimDataFrame.FrameCount > 0)
+                if (!FixedDir)
                 {
                     float angle = (float)(Math.Atan2(countY, countX) * 57.295780);
                     AngleToTarget = -(float)(angle * Math.PI) / 180.0f;

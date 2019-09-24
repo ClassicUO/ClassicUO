@@ -40,6 +40,8 @@ namespace ClassicUO.Game
 
         public static Point RangeSize;
 
+        public static ObjectPropertiesListManager OPL { get; } = new ObjectPropertiesListManager();
+
         public static CorpseManager CorpseManager { get; } = new CorpseManager();
 
         public static PartyManager Party { get; } = new PartyManager();
@@ -126,7 +128,7 @@ namespace ClassicUO.Game
 
         public static LockedFeatures ClientLockedFeatures { get; } = new LockedFeatures();
 
-        public static ClientFeatures ClientFlags { get; } = new ClientFeatures();
+        public static ClientFeatures ClientFeatures { get; } = new ClientFeatures();
 
         public static string ServerName { get; set; }
 
@@ -256,7 +258,7 @@ namespace ClassicUO.Game
             return mob;
         }
 
-        public static bool RemoveItem(Serial serial)
+        public static bool RemoveItem(Serial serial, bool forceRemove = false)
         {
             Item item = Items.Get(serial);
 
@@ -277,16 +279,19 @@ namespace ClassicUO.Game
             }
 
             foreach (Item i in item.Items)
-                RemoveItem(i);
+                RemoveItem(i, forceRemove);
 
 
             item.Items.Clear();
             item.Destroy();
 
+            if (forceRemove)
+                Items.Remove(serial);
+
             return true;
         }
 
-        public static bool RemoveMobile(Serial serial)
+        public static bool RemoveMobile(Serial serial, bool forceRemove = false)
         {
             Mobile mobile = Mobiles.Get(serial);
 
@@ -294,10 +299,13 @@ namespace ClassicUO.Game
                 return false;
 
             foreach (Item i in mobile.Items)
-                RemoveItem(i);
+                RemoveItem(i, forceRemove);
 
             mobile.Items.Clear();
             mobile.Destroy();
+
+            if (forceRemove)
+                Mobiles.Remove(serial);
 
             return true;
         }
@@ -323,7 +331,7 @@ namespace ClassicUO.Game
             Map = null;
             Light.Overall = Light.RealOverall = 0;
             Light.Personal = Light.RealPersonal = 0;
-            ClientFlags.SetFlags(0);
+            ClientFeatures.SetFlags(0);
             ClientLockedFeatures.SetFlags(0);
             HouseManager.Clear();
             Party.Clear();
@@ -333,6 +341,7 @@ namespace ClassicUO.Game
             _effectManager.Clear();
             _toRemove.Clear();
             CorpseManager.Clear();
+            OPL.Clear();
 
             Season = Seasons.Summer;
             OldSeason = Seasons.Summer;

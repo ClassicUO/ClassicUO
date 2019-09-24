@@ -72,7 +72,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public virtual void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex)
+        public virtual void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex, bool isGump = false)
         {
             ProcessWorldText(false);
 
@@ -83,7 +83,7 @@ namespace ClassicUO.Game.Managers
 
             for (var o = _drawPointer; o != null; o = o.Left)
             {
-                if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < Engine.Ticks)
+                if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < Engine.Ticks || (o.Owner.UseInRender != renderIndex && !isGump))
                     continue;
 
                 ushort hue = 0;
@@ -102,7 +102,7 @@ namespace ClassicUO.Game.Managers
                     last = o;
                 }
 
-                if (SelectedObject.LastObject == o)
+                if (!isGump && SelectedObject.LastObject == o)
                 {
                     hue = 0x35;
                 }
@@ -129,29 +129,6 @@ namespace ClassicUO.Game.Managers
                 if (next != null)
                     next.Left = last;
             }
-        }
-
-        public void MoveToTopIfSelected()
-        {
-            //if (_firstNode != null && SelectedObject.LastObject is MessageInfo msg)
-            //{
-            //    if (msg.Right != null)
-            //        msg.Right.Left = msg.Left;
-
-            //    if (msg.Left != null)
-            //        msg.Left.Right = msg.Right;
-
-            //    msg.Left = msg.Right = null;
-
-
-            //    var next = _firstNode.Right;
-            //    _firstNode.Right = msg;
-            //    msg.Left = _firstNode;
-            //    msg.Right = next;
-
-            //    if (next != null)
-            //        next.Left = msg;
-            //}
         }
 
         public void ProcessWorldText(bool doit)
@@ -295,11 +272,11 @@ namespace ClassicUO.Game.Managers
 
 
 
-        public override void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex)
+        public override void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex, bool isGump = false)
         {
             float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
 
-            base.Draw(batcher, 0, 0, renderIndex);
+            base.Draw(batcher, 0, 0, renderIndex, isGump);
 
             foreach (KeyValuePair<Serial, OverheadDamage> overheadDamage in _damages)
             {

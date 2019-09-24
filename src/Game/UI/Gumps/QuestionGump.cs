@@ -37,7 +37,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             Add(new GumpPic(0, 0, 0x0816, 0));
 
-            SpriteTexture t = FileManager.Gumps.GetTexture(0x0816);
+            UOTexture t = FileManager.Gumps.GetTexture(0x0816);
 
             Width = t.Width;
             Height = t.Height;

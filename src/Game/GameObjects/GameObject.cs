@@ -90,9 +90,9 @@ namespace ClassicUO.Game.GameObjects
             set => Position = new Position(Position.X, Position.Y, value);
         }
 
-        public virtual Hue Hue { get; set; }
+        public Hue Hue { get; set; }
 
-        public virtual Graphic Graphic { get; set; }
+        public Graphic Graphic { get; set; }
 
         public sbyte AnimIndex { get; set; }
 
@@ -334,8 +334,9 @@ namespace ClassicUO.Game.GameObjects
             int offsetY = 0;
 
             int minX = Engine.Profile.Current.GameWindowPosition.X + 6;
-            int maxX = minX + Engine.Profile.Current.GameWindowSize.X - 6;
+            int maxX = minX + Engine.Profile.Current.GameWindowSize.X;
             int minY = Engine.Profile.Current.GameWindowPosition.Y;
+            //int maxY = minY + Engine.Profile.Current.GameWindowSize.Y - 6;
 
             for (var item = TextContainer.Items; item != null; item = item.ListRight)
             {
@@ -355,6 +356,12 @@ namespace ClassicUO.Game.GameObjects
 
                 if (startY < minY && offsetY == 0)
                     offsetY = minY - startY;
+
+                //int endY = startY + item.RenderedText.Height;
+
+                //if (endY > maxY)
+                //    UseInRender = 0xFF;
+                //    //item.RealScreenPosition.Y -= endY - maxY;
 
                 if (offsetY != 0)
                     item.RealScreenPosition.Y += offsetY;
