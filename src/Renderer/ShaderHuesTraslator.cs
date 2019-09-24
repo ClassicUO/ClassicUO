@@ -32,7 +32,7 @@ namespace ClassicUO.Renderer
         public const byte SHADER_NONE = 0;
         public const byte SHADER_HUED = 1;
         public const byte SHADER_PARTIAL_HUED = 2;
-        public const byte SHADER_TEXT_HUE_NO_BALCK = 3;
+        public const byte SHADER_TEXT_HUE_NO_BLACK = 3;
         public const byte SHADER_TEXT_HUE = 4;
         public const byte SHADER_LAND = 6;
         public const byte SHADER_LAND_HUED = 7;

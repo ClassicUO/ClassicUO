@@ -102,10 +102,6 @@ namespace ClassicUO.Game.GameObjects
             {
                 _displayedGraphic = AnimationGraphic;
                 Texture = FileManager.Art.GetTexture(AnimationGraphic);
-
-                if (Source != null)
-                    Source.Texture = Texture;
-
                 Bounds.Width = Texture.Width;
                 Bounds.Height = Texture.Height;
             }
@@ -209,7 +205,7 @@ namespace ClassicUO.Game.GameObjects
             if (SelectedObject.Object == this)
                 return;
 
-            if (SelectedObject.IsPointInStatic(Texture, Graphic, x - Bounds.X, y - Bounds.Y))
+            if (SelectedObject.IsPointInStatic(Texture, x - Bounds.X, y - Bounds.Y))
                 SelectedObject.Object = this;
         }
     }

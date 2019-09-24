@@ -58,13 +58,15 @@ namespace ClassicUO.Game.GameObjects
                 {
                     Mobile mob = (Mobile) source;
 
-                    if (mob != World.Player && !mob.IsMoving && (sourceX != 0 || sourceY != 0 || sourceZ != 0)) mob.Position = new Position((ushort) sourceX, (ushort) sourceY, zSrc);
+                    //if (mob != World.Player && !mob.IsMoving && (sourceX != 0 || sourceY != 0 || sourceZ != 0))
+                    //    mob.Position = new Position((ushort) sourceX, (ushort) sourceY, zSrc);
                     SetSource(mob);
                 }
                 else if (sourceSerial.IsItem)
                 {
                     Item item = (Item) source;
-                    if (sourceX != 0 || sourceY != 0 || sourceZ != 0) item.Position = new Position((ushort) sourceX, (ushort) sourceY, zSrc);
+                    //if (sourceX != 0 || sourceY != 0 || sourceZ != 0)
+                    //    item.Position = new Position((ushort) sourceX, (ushort) sourceY, zSrc);
 
                     SetSource(item);
                 }

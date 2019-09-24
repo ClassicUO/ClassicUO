@@ -47,17 +47,24 @@ namespace ClassicUO.IO.Resources
                 string path = Path.Combine(FileManager.UoFolderPath, "soundLegacyMUL.uop");
 
                 if (File.Exists(path))
-                    _file = new UOFileUop(path, ".dat", Constants.MAX_SOUND_DATA_INDEX_COUNT);
+                {
+                    _file = new UOFileUop(path, "build/soundlegacymul/{0:D8}.dat");
+                    Entries = new UOFileIndex[Constants.MAX_SOUND_DATA_INDEX_COUNT];
+                }
                 else
                 {
                     path = Path.Combine(FileManager.UoFolderPath, "sound.mul");
                     string idxpath = Path.Combine(FileManager.UoFolderPath, "soundidx.mul");
 
                     if (File.Exists(path) && File.Exists(idxpath))
+                    {
                         _file = new UOFileMul(path, idxpath, Constants.MAX_SOUND_DATA_INDEX_COUNT);
+                    }
                     else
                         throw new FileNotFoundException("no sounds found");
                 }
+
+                _file.FillEntries(ref Entries);
 
                 string def = Path.Combine(FileManager.UoFolderPath, "Sound.def");
 
@@ -69,7 +76,7 @@ namespace ClassicUO.IO.Resources
                         {
                             int index = reader.ReadInt();
 
-                            if (index < 0 || index >= Constants.MAX_SOUND_DATA_INDEX_COUNT || index >= _file.Length || _file.Entries[index].Length != 0)
+                            if (index < 0 || index >= Constants.MAX_SOUND_DATA_INDEX_COUNT || index >= _file.Length || Entries[index].Length != 0)
                                 continue;
 
                             int[] group = reader.ReadGroup();
@@ -84,18 +91,18 @@ namespace ClassicUO.IO.Resources
                                 if (checkIndex < -1 || checkIndex >= Constants.MAX_SOUND_DATA_INDEX_COUNT)
                                     continue;
 
-                                ref UOFileIndex3D ind = ref _file.Entries[index];
+                                ref UOFileIndex ind = ref Entries[index];
 
                                 if (checkIndex == -1)
                                     ind = default;
                                 else
                                 {
-                                    ref readonly UOFileIndex3D outInd = ref _file.Entries[checkIndex];
+                                    ref readonly UOFileIndex outInd = ref Entries[checkIndex];
 
                                     if (outInd.Length == 0)
                                         continue;
 
-                                    _file.Entries[index] = _file.Entries[checkIndex];
+                                    Entries[index] = Entries[checkIndex];
                                 }
                             }
                         }
@@ -113,7 +120,7 @@ namespace ClassicUO.IO.Resources
                         while ((line = reader.ReadLine()) != null)
                         {
                             if (TryParseConfigLine(line, out Tuple<int, string, bool> songData))
-                                _mMusicData.Add(songData.Item1, new Tuple<string, bool>(songData.Item2, songData.Item3));
+                                _mMusicData[songData.Item1] = new Tuple<string, bool>(songData.Item2, songData.Item3);
                         }
                     }
                 }
@@ -199,16 +206,19 @@ namespace ClassicUO.IO.Resources
             if (sound < 0)
                 return false;
 
-            (int length, int extra, bool patcher) = _file.SeekByEntryIndex(sound);
+
+            ref readonly var entry = ref GetValidRefEntry(sound);
+
+            _file.Seek(entry.Offset);
 
             long offset = _file.Position;
 
-            if (offset < 0 || length <= 0) return false;
+            if (offset < 0 || entry.Length <= 0) return false;
 
             _file.Seek(offset);
 
             byte[] stringBuffer = _file.ReadArray<byte>(40);
-            data = _file.ReadArray<byte>(length - 40);
+            data = _file.ReadArray<byte>(entry.Length - 40);
 
             name = Encoding.UTF8.GetString(stringBuffer);
             int end = name.IndexOf('\0');
@@ -278,7 +288,7 @@ namespace ClassicUO.IO.Resources
             return music;
         }
 
-        protected override void CleanResources()
+        public override void CleanResources()
         {
         }
     }

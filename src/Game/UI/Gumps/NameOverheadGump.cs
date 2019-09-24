@@ -76,14 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (Entity is Item item)
                 {
-                    string t;
-
-                    if (item.Properties.Any())
-                    {
-                        Property prop = item.Properties.FirstOrDefault();
-                        t = FileManager.Cliloc.Translate((int) prop.Cliloc, prop.Args, true);
-                    }
-                    else
+                    if (!World.OPL.TryGetNameAndData(item, out string t, out _))
                     {
                         t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
 
@@ -116,10 +109,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _renderedText.MaxWidth = width;
 
+                    _renderedText.Text = t;
+
                     FileManager.Fonts.RecalculateWidthByInfo = false;
                     FileManager.Fonts.SetUseHTML(false);
-
-                    _renderedText.Text = t;
 
                     Width = _background.Width = _renderedText.Width + 4;
                     Height = _background.Height = _renderedText.Height + 4;
@@ -179,21 +172,21 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragBegin(int x, int y)
         {
-            if (Entity is Mobile mob)
+            if (Entity is Mobile || Entity is Item it && it.IsDamageable)
             {
                 if (Engine.UI.IsDragging)
                     return;
 
-                GameActions.RequestMobileStatus(mob);
+                GameActions.RequestMobileStatus(Entity);
 
-                Engine.UI.GetGump<HealthBarGump>(mob)?.Dispose();
+                Engine.UI.GetGump<HealthBarGump>(Entity)?.Dispose();
 
-                if (mob == World.Player)
+                if (Entity == World.Player)
                     StatusGumpBase.GetStatusGump()?.Dispose();
 
                 Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
                 HealthBarGump currentHealthBarGump;
-                Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mob) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
+                Engine.UI.Add(currentHealthBarGump = new HealthBarGump(Entity) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
                 Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
             }
             else

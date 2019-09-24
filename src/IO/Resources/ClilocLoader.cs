@@ -80,7 +80,7 @@ namespace ClassicUO.IO.Resources
           
         }
 
-        protected override void CleanResources()
+        public override void CleanResources()
         {
         }
 

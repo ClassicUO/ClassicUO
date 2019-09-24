@@ -42,53 +42,6 @@ namespace ClassicUO.Game.GameObjects
     internal class PlayerMobile : Mobile
     {
         private readonly Dictionary<Graphic, BuffIcon> _buffIcons = new Dictionary<Graphic, BuffIcon>();
-        private ushort _damageIncrease;
-        private ushort _damageMax;
-        private ushort _damageMin;
-        private ushort _defenseChanceIncrease;
-        private ushort _dexterity;
-        private ushort _dexterityIncrease;
-        private ushort _enhancePotions;
-        private ushort _fasterCasting;
-        private ushort _fasterCastRecovery;
-        private byte _followers;
-        private byte _followersMax;
-        private uint _gold;
-        private ushort _hitChanceIncrease;
-        private ushort _hitPointsIncrease;
-        private ushort _hitPointsRegeneration;
-        private ushort _intelligence;
-        private ushort _intelligenceIncrease;
-        private ushort _lowerManaCost;
-        private ushort _lowerReagentCost;
-        private ushort _luck;
-        private ushort _manaIncrease;
-        private ushort _manaRegeneration;
-        private ushort _maxColdcResistence;
-        private ushort _maxDefenseChanceIncrease;
-        private ushort _maxEnergResistence;
-        private ushort _maxFireResistence;
-        private ushort _maxHitPointsIncrease;
-        private ushort _maxManaIncrease;
-        private ushort _maxStaminaIncrease;
-        private ushort _maxPhysicResistence;
-        private ushort _maxPoisResistenceUshort;
-        private ushort _reflectPhysicalDamage;
-        private ushort _coldResistance;
-        private ushort _energyResistance;
-        private ushort _fireResistance;
-        private ushort _physicalResistence;
-        private ushort _poisonResistance;
-        private ushort _spellDamageIncrease;
-        private ushort _staminaIncrease;
-        private ushort _staminaRegeneration;
-        private ushort _statscap;
-        private ushort _strength;
-        private ushort _strengthIncrease;
-        private ushort _swingSpeedIncrease;
-        private uint _tithingPoints;
-        private ushort _weight;
-        private ushort _weightMax;
 
         public PlayerMobile(Serial serial) : base(serial)
         {
@@ -111,616 +64,99 @@ namespace ClassicUO.Game.GameObjects
 
         public IReadOnlyDictionary<Graphic, BuffIcon> BuffIcons => _buffIcons;
 
-        public ushort Strength
-        {
-            get => _strength;
-            set
-            {
-                if (_strength != value)
-                {
-                    _strength = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort Strength { get; set; }
 
-        public ushort Intelligence
-        {
-            get => _intelligence;
-            set
-            {
-                if (_intelligence != value)
-                {
-                    _intelligence = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort Intelligence { get; set; }
 
-        public ushort Dexterity
-        {
-            get => _dexterity;
-            set
-            {
-                if (_dexterity != value)
-                {
-                    _dexterity = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort Dexterity { get; set; }
 
-        public ushort Weight
-        {
-            get => _weight;
-            set
-            {
-                if (_weight != value)
-                {
-                    _weight = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort Weight { get; set; }
 
-        public ushort WeightMax
-        {
-            get => _weightMax;
-            set
-            {
-                if (_weightMax != value)
-                {
-                    _weightMax = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort WeightMax { get; set; }
 
-        public uint Gold
-        {
-            get => _gold;
-            set
-            {
-                if (_gold != value)
-                {
-                    _gold = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public uint Gold { get; set; }
 
-        public ushort PhysicalResistence
-        {
-            get => _physicalResistence;
-            set
-            {
-                if (_physicalResistence != value)
-                {
-                    _physicalResistence = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort PhysicalResistence { get; set; }
 
-        public ushort FireResistance
-        {
-            get => _fireResistance;
-            set
-            {
-                if (_fireResistance != value)
-                {
-                    _fireResistance = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort FireResistance { get; set; }
 
-        public ushort ColdResistance
-        {
-            get => _coldResistance;
-            set
-            {
-                if (_coldResistance != value)
-                {
-                    _coldResistance = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort ColdResistance { get; set; }
 
-        public ushort PoisonResistance
-        {
-            get => _poisonResistance;
-            set
-            {
-                if (_poisonResistance != value)
-                {
-                    _poisonResistance = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort PoisonResistance { get; set; }
 
-        public ushort EnergyResistance
-        {
-            get => _energyResistance;
-            set
-            {
-                if (_energyResistance != value)
-                {
-                    _energyResistance = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort EnergyResistance { get; set; }
 
-        public byte Followers
-        {
-            get => _followers;
-            set
-            {
-                if (_followers != value)
-                {
-                    _followers = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public byte Followers { get; set; }
 
-        public byte FollowersMax
-        {
-            get => _followersMax;
-            set
-            {
-                if (_followersMax != value)
-                {
-                    _followersMax = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public byte FollowersMax { get; set; }
 
-        public ushort Luck
-        {
-            get => _luck;
-            set
-            {
-                if (_luck != value)
-                {
-                    _luck = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort Luck { get; set; }
 
-        public uint TithingPoints
-        {
-            get => _tithingPoints;
-            set
-            {
-                if (_tithingPoints != value)
-                {
-                    _tithingPoints = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public uint TithingPoints { get; set; }
 
-        public ushort DamageMin
-        {
-            get => _damageMin;
-            set
-            {
-                if (_damageMin != value)
-                {
-                    _damageMin = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort DamageMin { get; set; }
 
-        public ushort DamageMax
-        {
-            get => _damageMax;
-            set
-            {
-                if (_damageMax != value)
-                {
-                    _damageMax = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort DamageMax { get; set; }
 
-        public ushort StatsCap
-        {
-            get => _statscap;
-            set
-            {
-                if (_statscap != value)
-                {
-                    _statscap = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort StatsCap { get; set; }
 
-        public ushort HitChanceIncrease
-        {
-            get => _hitChanceIncrease;
-            set
-            {
-                if (_hitChanceIncrease != value)
-                {
-                    _hitChanceIncrease = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort HitChanceIncrease { get; set; }
 
-        public ushort SwingSpeedIncrease
-        {
-            get => _swingSpeedIncrease;
-            set
-            {
-                if (_swingSpeedIncrease != value)
-                {
-                    _swingSpeedIncrease = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort SwingSpeedIncrease { get; set; }
 
-        public ushort DamageIncrease
-        {
-            get => _damageIncrease;
-            set
-            {
-                if (_damageIncrease != value)
-                {
-                    _damageIncrease = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort DamageIncrease { get; set; }
 
-        public ushort LowerReagentCost
-        {
-            get => _lowerReagentCost;
-            set
-            {
-                if (_lowerReagentCost != value)
-                {
-                    _lowerReagentCost = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort LowerReagentCost { get; set; }
 
-        public ushort HitPointsRegeneration
-        {
-            get => _hitPointsRegeneration;
-            set
-            {
-                if (_hitPointsRegeneration != value)
-                {
-                    _hitPointsRegeneration = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort HitPointsRegeneration { get; set; }
 
-        public ushort StaminaRegeneration
-        {
-            get => _staminaRegeneration;
-            set
-            {
-                if (_staminaRegeneration != value)
-                {
-                    _staminaRegeneration = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort StaminaRegeneration { get; set; }
 
-        public ushort ManaRegeneration
-        {
-            get => _manaRegeneration;
-            set
-            {
-                if (_manaRegeneration != value)
-                {
-                    _manaRegeneration = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort ManaRegeneration { get; set; }
 
-        public ushort MaxPhysicResistence
-        {
-            get => _maxPhysicResistence;
-            set
-            {
-                if (_maxPhysicResistence != value)
-                {
-                    _maxPhysicResistence = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort MaxPhysicResistence { get; set; }
 
-        public ushort MaxFireResistence
-        {
-            get => _maxFireResistence;
-            set
-            {
-                if (_maxFireResistence != value)
-                {
-                    _maxFireResistence = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort MaxFireResistence { get; set; }
 
-        public ushort MaxColdResistence
-        {
-            get => _maxColdcResistence;
-            set
-            {
-                if (_maxColdcResistence != value)
-                {
-                    _maxColdcResistence = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort MaxColdResistence { get; set; }
 
-        public ushort MaxPoisonResistence
-        {
-            get => _maxPoisResistenceUshort;
-            set
-            {
-                if (_maxPoisResistenceUshort != value)
-                {
-                    _maxPoisResistenceUshort = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort MaxPoisonResistence { get; set; }
 
-        public ushort MaxEnergyResistence
-        {
-            get => _maxEnergResistence;
-            set
-            {
-                if (_maxEnergResistence != value)
-                {
-                    _maxEnergResistence = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort MaxEnergyResistence { get; set; }
 
-        public ushort MaxDefenseChanceIncrease
-        {
-            get => _maxDefenseChanceIncrease;
-            set
-            {
-                if (_maxDefenseChanceIncrease != value)
-                {
-                    _maxDefenseChanceIncrease = value;
-                    _delta |= Delta.Attributes;
-                }
-            }
-        }
+        public ushort MaxDefenseChanceIncrease { get; set; }
 
-        public ushort ReflectPhysicalDamage
-        {
-            get => _reflectPhysicalDamage;
-            set
-            {
-                if (_reflectPhysicalDamage != value)
-                {
-                    _reflectPhysicalDamage = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort ReflectPhysicalDamage { get; set; }
 
-        public ushort EnhancePotions
-        {
-            get => _enhancePotions;
-            set
-            {
-                if (_enhancePotions != value)
-                {
-                    _enhancePotions = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort EnhancePotions { get; set; }
 
-        public ushort DefenseChanceIncrease
-        {
-            get => _defenseChanceIncrease;
-            set
-            {
-                if (_defenseChanceIncrease != value)
-                {
-                    _defenseChanceIncrease = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort DefenseChanceIncrease { get; set; }
 
-        public ushort SpellDamageIncrease
-        {
-            get => _spellDamageIncrease;
-            set
-            {
-                if (_spellDamageIncrease != value)
-                {
-                    _spellDamageIncrease = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort SpellDamageIncrease { get; set; }
 
-        public ushort FasterCastRecovery
-        {
-            get => _fasterCastRecovery;
-            set
-            {
-                if (_fasterCastRecovery != value)
-                {
-                    _fasterCastRecovery = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort FasterCastRecovery { get; set; }
 
-        public ushort FasterCasting
-        {
-            get => _fasterCasting;
-            set
-            {
-                if (_fasterCasting != value)
-                {
-                    _fasterCasting = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort FasterCasting { get; set; }
 
-        public ushort LowerManaCost
-        {
-            get => _lowerManaCost;
-            set
-            {
-                if (_lowerManaCost != value)
-                {
-                    _lowerManaCost = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort LowerManaCost { get; set; }
 
-        public ushort StrengthIncrease
-        {
-            get => _strengthIncrease;
-            set
-            {
-                if (_strengthIncrease != value)
-                {
-                    _strengthIncrease = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort StrengthIncrease { get; set; }
 
-        public ushort DexterityIncrease
-        {
-            get => _dexterityIncrease;
-            set
-            {
-                if (_dexterityIncrease != value)
-                {
-                    _dexterityIncrease = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort DexterityIncrease { get; set; }
 
-        public ushort IntelligenceIncrease
-        {
-            get => _intelligenceIncrease;
-            set
-            {
-                if (_intelligenceIncrease != value)
-                {
-                    _intelligenceIncrease = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort IntelligenceIncrease { get; set; }
 
-        public ushort HitPointsIncrease
-        {
-            get => _hitPointsIncrease;
-            set
-            {
-                if (_hitPointsIncrease != value)
-                {
-                    _hitPointsIncrease = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort HitPointsIncrease { get; set; }
 
-        public ushort StaminaIncrease
-        {
-            get => _staminaIncrease;
-            set
-            {
-                if (_staminaIncrease != value)
-                {
-                    _staminaIncrease = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort StaminaIncrease { get; set; }
 
-        public ushort ManaIncrease
-        {
-            get => _manaIncrease;
-            set
-            {
-                if (_manaIncrease != value)
-                {
-                    _manaIncrease = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort ManaIncrease { get; set; }
 
-        public ushort MaxHitPointsIncrease
-        {
-            get => _maxHitPointsIncrease;
-            set
-            {
-                if (_maxHitPointsIncrease != value)
-                {
-                    _maxHitPointsIncrease = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort MaxHitPointsIncrease { get; set; }
 
-        public ushort MaxStaminaIncrease
-        {
-            get => _maxStaminaIncrease;
-            set
-            {
-                if (_maxStaminaIncrease != value)
-                {
-                    _maxStaminaIncrease = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort MaxStaminaIncrease { get; set; }
 
-        public ushort MaxManaIncrease
-        {
-            get => _maxManaIncrease;
-            set
-            {
-                if (_maxManaIncrease != value)
-                {
-                    _maxManaIncrease = value;
-                    _delta |= Delta.Stats;
-                }
-            }
-        }
+        public ushort MaxManaIncrease { get; set; }
 
         public Ability PrimaryAbility
         {
@@ -809,8 +245,6 @@ namespace ClassicUO.Game.GameObjects
             _buffIcons.Remove(graphic);
         }
 
-        public event EventHandler StatsChanged, SkillsChanged;
-
         public void UpdateSkill(int id, ushort realValue, ushort baseValue, Lock @lock, ushort cap, bool displayMessage = false)
         {
             if (id < Skills.Length)
@@ -829,21 +263,15 @@ namespace ClassicUO.Game.GameObjects
                 skill.BaseFixed = baseValue;
                 skill.Lock = @lock;
                 skill.CapFixed = cap;
-                _delta |= Delta.Skills;
 
-                Engine.UI.GetGump<StandardSkillsGump>()?.Update(id);
-            }
-        }
-
-        public void UpdateSkillLock(int id, Lock @lock)
-        {
-            if (id < Skills.Length)
-            {
-                Skill skill = Skills[id];
-                skill.Lock = @lock;
-                _delta |= Delta.Skills;
-
-                Engine.UI.GetGump<StandardSkillsGump>()?.Update(id);
+                // check needed to avoid crash when you create a char
+                if (Engine.Profile != null && Engine.Profile.Current != null)
+                {
+                    if (Engine.Profile.Current.StandardSkillsGump)
+                        Engine.UI.GetGump<StandardSkillsGump>()?.ForceUpdate(id);
+                    else
+                        Engine.UI.GetGump<SkillGumpAdvanced>()?.ForceUpdate();
+                }
             }
         }
 
@@ -1820,13 +1248,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        protected override void OnProcessDelta(Delta d)
-        {
-            base.OnProcessDelta(d);
-            if (d.HasFlag(Delta.Stats)) StatsChanged.Raise(this);
-            if (d.HasFlag(Delta.Skills)) SkillsChanged.Raise(this);
-        }
-
         protected override void OnPositionChanged()
         {
             base.OnPositionChanged();
@@ -1867,7 +1288,7 @@ namespace ClassicUO.Game.GameObjects
 
         private void TryOpenDoors()
         {
-            if (Engine.Profile.Current.AutoOpenDoors)
+            if (!World.Player.IsDead && Engine.Profile.Current.AutoOpenDoors)
             {
                 int x = X, y = Y, z = Z;
                 Pathfinder.GetNewXY((byte) Direction, ref x, ref y);

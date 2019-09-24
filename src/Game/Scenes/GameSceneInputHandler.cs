@@ -332,6 +332,10 @@ namespace ClassicUO.Game.Scenes
 
             if (!IsMouseOverViewport)
             {
+                if (IsHoldingItem)
+                {
+                    Engine.UI.MouseOverControl?.InvokeMouseUp(Mouse.Position, MouseButton.Left);
+                }
                 return;
             }
 
@@ -450,7 +454,7 @@ namespace ClassicUO.Game.Scenes
                         string name = st.Name;
                         if (string.IsNullOrEmpty(name))
                             name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
-                        obj.AddMessage(MessageType.Label, name, 3, 0, false);
+                        obj.AddMessage(MessageType.Label, name, 3, 1001, false);
 
 
                         if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
@@ -462,7 +466,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (string.IsNullOrEmpty(name))
                             name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
-                        obj.AddMessage(MessageType.Label, name, 3, 0, false);
+                        obj.AddMessage(MessageType.Label, name, 3, 1001, false);
 
                         if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
                             obj.TextContainer.MaxSize = 1;
@@ -472,7 +476,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (Keyboard.Alt && ent is Mobile)
                         {
-                            World.Player.AddMessage(MessageType.Regular, "Now following.", 3, 0, false);
+                            World.Player.AddMessage(MessageType.Regular, "Now following.", 3, 1001, false);
                             _followingMode = true;
                             _followingTarget = ent;
                         }
@@ -555,7 +559,7 @@ namespace ClassicUO.Game.Scenes
                 _followingMode = false;
                 _followingTarget = Serial.INVALID;
                 Pathfinder.StopAutoWalk();
-                World.Player.AddMessage(MessageType.Regular, "Stopped following.", 3, 0, false);
+                World.Player.AddMessage(MessageType.Regular, "Stopped following.", 3, 1001, false);
             }
         }
 
@@ -584,7 +588,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (SelectedObject.Object is GameObject obj && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                     {
-                        World.Player.AddMessage(MessageType.Label, "Pathfinding!", 3, 0, false);
+                        World.Player.AddMessage(MessageType.Label, "Pathfinding!", 3, 1001, false);
 
                         return true;
                     }
@@ -627,11 +631,17 @@ namespace ClassicUO.Game.Scenes
                 {
                     GameObject obj = Engine.Profile.Current.SallosEasyGrab && SelectedObject.LastObject is GameObject o? o : _dragginObject;
 
+
                     switch (obj)
                     {
-                        case Mobile mobile:
-                            GameActions.RequestMobileStatus(mobile);
-                            var gump = Engine.UI.GetGump<HealthBarGump>(mobile);
+                        case Mobile _:
+                            mobile:
+                            Entity entity = obj as Entity;
+                            if (entity == null)
+                                break;
+
+                            GameActions.RequestMobileStatus(entity);
+                            var gump = Engine.UI.GetGump<HealthBarGump>(entity);
                             if(gump != null)
                             {
                                 if (!gump.IsInitialized)
@@ -639,17 +649,21 @@ namespace ClassicUO.Game.Scenes
                                 gump.Dispose();
                             }
 
-                            if (mobile == World.Player)
+                            if (entity == World.Player)
                                 StatusGumpBase.GetStatusGump()?.Dispose();
 
                             Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
                             HealthBarGump currentHealthBarGump;
-                            Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                            Engine.UI.Add(currentHealthBarGump = new HealthBarGump(entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                             Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
 
                             break;
 
                         case Item item /*when !item.IsCorpse*/:
+
+                            if (item.IsDamageable)
+                                goto mobile;
+
                             PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
 
                             break;
@@ -682,7 +696,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_isUpDown || _isDownDown || _isLeftDown || _isRightDown)
             {
-                if (!Engine.Profile.Current.ActivateChatStatus || Engine.UI.SystemChat?.textBox.Text.Length == 0)
+                if (Engine.UI.SystemChat?.IsActive == false || Engine.UI.SystemChat?.textBox.Text.Length == 0)
                     _arrowKeyPressed = true;
             }
 
@@ -692,11 +706,8 @@ namespace ClassicUO.Game.Scenes
             if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
                 TargetManager.CancelTarget();
 
-            if (Engine.Profile.Current.ActivateChatAfterEnter)
-            {
-                if (Engine.Profile.Current.ActivateChatIgnoreHotkeys && Engine.Profile.Current.ActivateChatStatus)
-                    return;
-            }
+            if (!Engine.UI.IsKeyboardFocusAllowHotkeys)
+                return;
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB /*&& !Engine.Profile.Current.DisableTabBtn*/)
             {

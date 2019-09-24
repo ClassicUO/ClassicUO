@@ -22,6 +22,9 @@ namespace ClassicUO.Game.UI.Gumps
         private int _currentPage = 1;
         private int _pagesCount;
 
+        private static int _lastX = Engine.Profile.Current.GridLootType == 2 ? 200 : 100;
+        private static int _lastY = 100;
+
         public GridLootGump(Serial local) : base(local, 0)
         {
             _corpse = World.Items.Get(local);
@@ -33,8 +36,8 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            X = Engine.Profile.Current.GridLootType == 2 ? 200 : 100;
-            Y = 100;
+            X = _lastX;
+            Y = _lastY;
 
             CanMove = true;
             AcceptMouseInput = true;
@@ -160,6 +163,8 @@ namespace ClassicUO.Game.UI.Gumps
                     SelectedObject.CorpseObject = null;
             }
 
+            _lastX = X;
+            _lastY = Y;
 
             base.Dispose();
         }

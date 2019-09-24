@@ -88,10 +88,14 @@ namespace ClassicUO.Network
             for (int i = 0; i < 4; i++) WriteUInt(version[i]);
         }
 
-        public PSeed(uint v, byte[] version) : base(0xEF)
+        public PSeed(uint v, byte major, byte minor, byte build, byte extra) : base(0xEF)
         {
             WriteUInt(v);
-            for (int i = 0; i < version.Length && version.Length == 4; i++) WriteUInt(version[i]);
+
+            WriteUInt(major);
+            WriteUInt(minor);
+            WriteUInt(build);
+            WriteUInt(extra);
         }
     }
 
@@ -179,8 +183,16 @@ namespace ClassicUO.Network
             }
 
             WriteUShort(character.Hue);
-            WriteUShort(character.Equipment[(int) Layer.Hair].Graphic);
-            WriteUShort(character.Equipment[(int) Layer.Hair].Hue);
+            if (character.Equipment[(int)Layer.Hair] != null)
+            {
+                WriteUShort(character.Equipment[(int)Layer.Hair].Graphic);
+                WriteUShort(character.Equipment[(int)Layer.Hair].Hue);
+            }
+            else
+            {
+                WriteUShort(0x00);
+                WriteUShort(0x00);
+            }
 
             if (character.Equipment[(int) Layer.Beard] != null)
             {
@@ -1021,9 +1033,13 @@ namespace ClassicUO.Network
 
     internal sealed class PMegaClilocRequest : PacketWriter
     {
-        public PMegaClilocRequest(List<Serial> list) : base(0xD6)
+        public PMegaClilocRequest(ref List<Serial> list) : base(0xD6)
         {
-            for (int i = 0; i < list.Count && i < 50; i++) WriteUInt(list[i]);
+            for (int i = 0; i < list.Count && i < 50; i++)
+            {
+                WriteUInt(list[i]);
+                list.RemoveAt(i--);
+            }
         }
 
         public PMegaClilocRequest(Serial serial) : base(0xD6)

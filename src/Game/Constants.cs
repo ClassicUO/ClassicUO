@@ -117,5 +117,12 @@ namespace ClassicUO.Game
         public const int DEATH_SCREEN_TIMER = 1500;
 
         public const float SOUND_DELTA = 1000f;
+
+        public const uint JOURNAL_LOCALSERIAL = 0xFFFFFFE1;
+        public const uint SKILLSTD_LOCALSERIAL = 0xFFFFFFE2;
+        public const uint PROFILE_LOCALSERIAL = 0xFFFFFFE3;
+
+        public const byte MIN_CONTAINER_SIZE_PERC = 50;
+        public const byte MAX_CONTAINER_SIZE_PERC = 200;
     }
 }

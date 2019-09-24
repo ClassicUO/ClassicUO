@@ -131,29 +131,6 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void MoveToTopIfSelected()
-        {
-            //if (_firstNode != null && SelectedObject.LastObject is MessageInfo msg)
-            //{
-            //    if (msg.Right != null)
-            //        msg.Right.Left = msg.Left;
-
-            //    if (msg.Left != null)
-            //        msg.Left.Right = msg.Right;
-
-            //    msg.Left = msg.Right = null;
-
-
-            //    var next = _firstNode.Right;
-            //    _firstNode.Right = msg;
-            //    msg.Left = _firstNode;
-            //    msg.Right = next;
-
-            //    if (next != null)
-            //        next.Left = msg;
-            //}
-        }
-
         public void ProcessWorldText(bool doit)
         {
             if (doit)

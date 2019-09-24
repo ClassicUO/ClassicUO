@@ -60,7 +60,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool PickupItemBegin(Item item, int x, int y, int? amount = null)
         {
-            if (World.Player.IsDead || item == null || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
+            if (World.Player.IsDead || item == null || item.IsDestroyed || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
                 return false;
 
             if (!_isShiftDown && !amount.HasValue && item.Amount > 1 && item.ItemData.IsStackable)
@@ -84,7 +84,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool PickupItemDirectly(Item item, int x, int y, int amount)
         {
-            if (World.Player.IsDead || HeldItem.Enabled /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/) return false;
+            if (World.Player.IsDead || HeldItem.Enabled || item == null || item.IsDestroyed /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/) return false;
 
             HeldItem.Clear();
             HeldItem.Set(item, amount <= 0 ? item.Amount : (ushort) amount);
@@ -162,17 +162,36 @@ namespace ClassicUO.Game.Scenes
                 {
                     Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
                     ArtTexture texture = FileManager.Art.GetTexture(HeldItem.DisplayedGraphic);
+                    float scale = Engine.UI.ContainerScale;
+
+                    bounds.X = (int)(bounds.X * scale);
+                    bounds.Y = (int)(bounds.Y * scale);
+                    bounds.Width = (int) (bounds.Width * scale);
+                    bounds.Height = (int)(bounds.Height * scale);
 
                     if (texture != null && !texture.IsDisposed)
                     {
-                        x -= texture.Width >> 1;
-                        y -= texture.Height >> 1;
+                        int textureW, textureH;
 
-                        if (x + texture.Width > bounds.Width)
-                            x = bounds.Width - texture.Width;
+                        if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
+                        {
+                            textureW = (int)(texture.Width * scale);
+                            textureH = (int)(texture.Height * scale);
+                        }
+                        else
+                        {
+                            textureW = texture.Width;
+                            textureH = texture.Height;
+                        }
 
-                        if (y + texture.Height > bounds.Height)
-                            y = bounds.Height - texture.Height;
+                        x -= textureW >> 1;
+                        y -= textureH >> 1;
+
+                        if (x + textureW > bounds.Width)
+                            x = bounds.Width - textureW;
+
+                        if (y + textureH > bounds.Height)
+                            y = bounds.Height - textureH;
                     }
 
                     if (x < bounds.X)
@@ -180,6 +199,9 @@ namespace ClassicUO.Game.Scenes
 
                     if (y < bounds.Y)
                         y = bounds.Y;
+
+                    x = (int)(x / scale);
+                    y = (int)(y / scale);
                 }
                 else
                 {

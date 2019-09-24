@@ -33,6 +33,8 @@ namespace ClassicUO.Renderer
     {
         private static readonly Stack<Rectangle> _scissors = new Stack<Rectangle>();
 
+        public static bool HasScissors => _scissors.Count - 1 > 0;
+
         public static bool PushScissors(Rectangle scissor)
         {
             if (_scissors.Count > 0)

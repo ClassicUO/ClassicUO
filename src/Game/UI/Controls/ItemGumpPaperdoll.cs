@@ -87,13 +87,15 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            return Texture.Contains(x, y);
+            return Texture != null ? Texture.Contains(x, y) : false;
         }
-
 
         public void Update(Item item, bool transparent = false)
         {
             Alpha = transparent ? 0.5f : 0;
+            Item.Graphic = item.Graphic;
+            Item.Hue = item.Hue;
+            Item.CheckGraphicChange();
 
             _isPartialHue = item.ItemData.IsPartialHue;
 

@@ -42,13 +42,13 @@ namespace ClassicUO.IO.Resources
                 if (!File.Exists(path))
                     throw new FileNotFoundException();
 
-                UOFileMul file = new UOFileMul(path, false);
+                UOFileMul file = new UOFileMul(path);
                 List<SpeechEntry> entries = new List<SpeechEntry>();
 
                 while (file.Position < file.Length)
                 {
-                    int id = (file.ReadByte() << 8) | file.ReadByte();
-                    int length = (file.ReadByte() << 8) | file.ReadByte();
+                    int id = file.ReadUShortReversed();
+                    int length = file.ReadUShortReversed();
 
                     if (length > 0)
                     {
@@ -62,7 +62,7 @@ namespace ClassicUO.IO.Resources
             });
         }
 
-        protected override void CleanResources()
+        public override void CleanResources()
         {
         }
 

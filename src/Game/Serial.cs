@@ -42,6 +42,8 @@ namespace ClassicUO.Game
 
         public bool IsValid => Value > 0 && Value < 0x80000000;
 
+        public bool IsValidLocalGumpSerial => Value >= Constants.JOURNAL_LOCALSERIAL && Value < MINUS_ONE;
+
         public uint Value { get; }
 
         public static implicit operator Serial(uint value)
