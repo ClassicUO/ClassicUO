@@ -95,10 +95,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (Engine.Profile.Current.CustomBarsToggled == false)
             {
-                Engine.UI.GetGump<HealthBarGump>(entity.Serial);
+                //Engine.UI.GetGump<HealthBarGump>(entity.Serial);
+                Engine.UI.GetGump<HealthBarGump>(entity.Serial)?.Dispose();
             }
-
-            Engine.UI.GetGump<HealthBarGump>(entity.Serial)?.Dispose();
+            
 
             if (entity == null)
             {
