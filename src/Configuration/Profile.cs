@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
@@ -49,8 +49,8 @@ namespace ClassicUO.Configuration
         }
 
         [JsonIgnore] public string Username { get; set; }
-        [JsonIgnore] public string ServerName { get; set;  }
-        [JsonIgnore] public string CharacterName { get; set;  }
+        [JsonIgnore] public string ServerName { get; set; }
+        [JsonIgnore] public string CharacterName { get; set; }
 
         // sounds
         [JsonProperty] public bool EnableSound { get; set; } = true;
@@ -180,7 +180,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool NameOverheadToggled { get; set; } = false;
         [JsonProperty] public bool ShowTargetRangeIndicator { get; set; }
         [JsonProperty] public bool PartyInviteGump { get; set; }
-
+        [JsonProperty] public bool CustomBarsToggled { get; set; } = false;// false = Classic , true = Custom
         [JsonProperty] public bool ShowInfoBar { get; set; }
         [JsonProperty] public int InfoBarHighlightType { get; set; } // 0 = text colour changes, 1 = underline
         [JsonProperty]
@@ -415,7 +415,7 @@ namespace ClassicUO.Configuration
                             int y = reader.ReadInt32();
 
                             Type type = Type.GetType(typeName, true);
-                            Gump gump = (Gump) Activator.CreateInstance(type);
+                            Gump gump = (Gump)Activator.CreateInstance(type);
                             gump.Initialize();
                             gump.Restore(reader);
                             gump.X = x;
