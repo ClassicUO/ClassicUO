@@ -23,14 +23,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Net.Sockets;
+
 using ClassicUO.Game;
-using ClassicUO.Game.UI.Controls;
-using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
-using ClassicUO.Network;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer
@@ -61,10 +59,11 @@ namespace ClassicUO.Renderer
 
         private RenderedText()
         {
+
         }
 
-        public static RenderedText Create(string text, ushort hue = 0xFFFF, byte font = 0xFF, bool isunicode = true, FontStyle style = 0, TEXT_ALIGN_TYPE align = 0,
-                                          int maxWidth = 0, byte cell = 30, bool isHTML = false,
+        public static RenderedText Create(string text, ushort hue = 0xFFFF, byte font = 0xFF, bool isunicode = true, FontStyle style = 0, TEXT_ALIGN_TYPE align = 0, 
+                                          int maxWidth = 0, byte cell = 30, bool isHTML = false, 
                                           bool recalculateWidthByInfo = false, bool saveHitmap = false, bool editable = false)
         {
             RenderedText r;
@@ -97,12 +96,11 @@ namespace ClassicUO.Renderer
             r.IsEditable = editable;
 
             if (r.Text != text)
-                r.Text = text;
-            else
+                r.Text = text; // here makes the texture
+            else 
                 r.CreateTexture();
             return r;
         }
-
 
         public bool IsUnicode { get; set; }
 
@@ -112,7 +110,7 @@ namespace ClassicUO.Renderer
             set
             {
                 if (value == 0xFF)
-                    value = (byte)(FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
+                    value = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
                 _font = value;
             }
         }
@@ -138,7 +136,7 @@ namespace ClassicUO.Renderer
         public uint HTMLColor { get; set; } = 0xFFFFFFFF;
 
         public bool HasBackgroundColor { get; set; }
-
+        
         public bool IsEditable { get; set; }
 
         public string Text
@@ -155,7 +153,7 @@ namespace ClassicUO.Renderer
                         Width = 0;
                         Height = 0;
                         IsPartialHue = false;
-                        
+
                         if (IsHTML)
                             FileManager.Fonts.SetUseHTML(false);
                         Links.Clear();
@@ -228,7 +226,7 @@ namespace ClassicUO.Renderer
             if (hue != 0)
             {
                 if (IsUnicode)
-                    _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE_NO_BALCK;
+                    _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE_NO_BLACK;
                 else if (Font == 3)
                     _hueVector.Y = 5;
                 else if (Font != 5 && Font != 8)
@@ -290,15 +288,5 @@ namespace ClassicUO.Renderer
 
             _pool.Enqueue(this);
         }
-        internal Action<object, MouseEventArgs> ToString(object mouseUp)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal Action<object, MouseEventArgs> ToString(TextBox MouseUp)
-        {
-            throw new NotImplementedException();
-        }
     }
-
-}  
+}
