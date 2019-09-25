@@ -296,6 +296,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public byte ContainersScale { get; set; } = 100;
 
         [JsonProperty] public bool ScaleItemsInsideContainers { get; set; }
+        
+        [JsonProperty] public bool CustomBarsToggled { get; set; } = false;
 
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
