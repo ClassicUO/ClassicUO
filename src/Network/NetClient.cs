@@ -126,7 +126,7 @@ namespace ClassicUO.Network
 
         private void Connect(IPEndPoint endpoint)
         {
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) { ReceiveBufferSize = BUFF_SIZE };
             _socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, 1);
             _recvBuffer = new byte[BUFF_SIZE];
             _incompletePacketBuffer = new byte[BUFF_SIZE];
@@ -566,7 +566,8 @@ namespace ClassicUO.Network
 
         private void StartSend()
         {
-            if (!_socket.SendAsync(_sendEventArgs)) IO_Socket(null, _sendEventArgs);
+            if (!_socket.SendAsync(_sendEventArgs))
+                IO_Socket(null, _sendEventArgs);
         }
 
         private void ProcessSend(SocketAsyncEventArgs e)

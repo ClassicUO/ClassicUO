@@ -200,10 +200,8 @@ namespace ClassicUO.Game
 
                 ref var direction = ref gr.Direction[FileManager.Animations.Direction];
 
-
                 if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                     continue;
-
 
                 int fc = direction.FrameCount;
 
@@ -241,18 +239,20 @@ namespace ClassicUO.Game
 
 
         [MethodImpl(256)]
-        public static bool IsPointInStatic(UOTexture texture, ushort graphic, int x, int y)
+        public static bool IsPointInStatic(UOTexture texture, int x, int y)
         {
             return texture != null && texture.Contains(TranslatedMousePositionByViewport.X - x, TranslatedMousePositionByViewport.Y - y);
         }
 
         [MethodImpl(256)]
-        public static bool IsPointInLand(UOTexture texture, ushort graphic, int x, int y)
+        public static bool IsPointInLand(UOTexture texture, int x, int y)
         {
-            return texture != null && texture.Contains(TranslatedMousePositionByViewport.X - x, TranslatedMousePositionByViewport.Y - y);
+            x = TranslatedMousePositionByViewport.X - x;
+            y = TranslatedMousePositionByViewport.Y - y;
+            return texture != null && x >= 0 && x < 44 && y >= 0 && y < 44 && _InternalArea[x, y];
         }
 
-        public static bool IsPointInStretchedLand(Rectangle rect, int x, int y)
+        public static bool IsPointInStretchedLand(ref Rectangle rect, int x, int y)
         {
             //y -= 22;
             x += 22;
@@ -269,6 +269,20 @@ namespace ClassicUO.Game
             return testY >= testX * (y1 - y0) / -22 + y + y0 &&
                    testY >= testX * (y3 - y0) / 22 + y + y0 && testY <= testX * (y3 - y2) / 22 + y + y2 &&
                    testY <= testX * (y1 - y2) / -22 + y + y2;
+        }
+
+        private static readonly bool[,] _InternalArea = new bool[44, 44];
+        static SelectedObject()
+        {
+            for (int y = 21, i = 0; y >= 0; --y, i++)
+            {
+                for (int x = 0; x < 22; x++)
+                {
+                    if (x < i)
+                        continue;
+                    _InternalArea[x, y] = _InternalArea[43 - x, 43 - y] = _InternalArea[43 - x, y] = _InternalArea[x, 43 - y] = true;
+                }
+            }
         }
     }
 }

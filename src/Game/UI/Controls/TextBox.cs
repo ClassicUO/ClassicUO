@@ -274,12 +274,5 @@ namespace ClassicUO.Game.UI.Controls
 
             base.OnKeyDown(key, mod);
         }
-
-        public override void Dispose()
-        {
-            base.Dispose();
-            TxEntry?.Destroy();
-            TxEntry = null;
-        }
     }
 }

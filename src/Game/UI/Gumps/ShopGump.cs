@@ -70,20 +70,24 @@ namespace ClassicUO.Game.UI.Gumps
             _transactionItems = new Dictionary<Item, TransactionItem>();
             _shopItems = new Dictionary<Item, ShopItem>();
             _updateTotal = false;
-            int add = isBuyGump ? 0 : 6;
-            GumpPic pic = new GumpPic(0, 0, _shopGumpParts[0 + add], 0);
-            pic.Add(_middleGumpLeft = new GumpPicTiled(0, 64, pic.Width, height, _shopGumpParts[1 + add]));
-            pic.Add(new GumpPic(0, _middleGumpLeft.Height + _middleGumpLeft.Y, _shopGumpParts[2 + add], 0));
-            Add(pic);
-            _shopScrollArea = new ScrollArea(30, 60, 225, _middleGumpLeft.Height + _middleGumpLeft.Y + 50, false, _middleGumpLeft.Height + _middleGumpLeft.Y);
 
+            int add = isBuyGump ? 0 : 6;
+
+            GumpPic pic = new GumpPic(0, 0, _shopGumpParts[0 + add], 0);
+            Add(pic);
+            pic = new GumpPic(250, 144, _shopGumpParts[3 + add], 0);
+            Add(pic);
+
+            Add(_middleGumpLeft = new GumpPicTiled(0, 64, pic.Width, height, _shopGumpParts[1 + add]));
+            Add(new GumpPic(0, _middleGumpLeft.Height + _middleGumpLeft.Y, _shopGumpParts[2 + add], 0));
+            
+            _shopScrollArea = new ScrollArea(30, 60, 225, _middleGumpLeft.Height + _middleGumpLeft.Y + 50, false, _middleGumpLeft.Height + _middleGumpLeft.Y);
             Add(_shopScrollArea);
 
-            pic = new GumpPic(250, 144, _shopGumpParts[3 + add], 0);
-            pic.Add(_middleGumpRight = new GumpPicTiled(0, 64, pic.Width, _middleGumpLeft.Height >> 1, _shopGumpParts[4 + add]));
-            pic.Add(new GumpPic(0, _middleGumpRight.Height + _middleGumpRight.Y, _shopGumpParts[5 + add], 0));
-            Add(pic);
-            //Add(isBuyGump ? new GumpPic(250, 214, 0x0871, 0) : new GumpPic(250, 214, 0x0873, 0));
+           
+            Add(_middleGumpRight = new GumpPicTiled(250, 144 + 64, pic.Width, _middleGumpLeft.Height >> 1, _shopGumpParts[4 + add]));
+            Add(new GumpPic(250, _middleGumpRight.Height + _middleGumpRight.Y, _shopGumpParts[5 + add], 0));
+
 
             HitBox boxAccept = new HitBox(280, 306 + _middleGumpRight.Height, 34, 30)
             {
@@ -448,7 +452,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Add(control = new TextureControl
                     {
-                        Texture = direction.Frames[0], //FileManager.Animations.GetTexture(direction.FramesHashes[0]),
+                        Texture = direction.Frames[0],
                         X = 5,
                         Y = 5,
                         AcceptMouseInput = false,
@@ -487,7 +491,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 string subname = $"{itemName} at {item.Price}gp";
 
-                Add(_name = new Label(subname, true, 0x021F, 110, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_LEFT, true)
+                Add(_name = new Label(subname, true, 0x219, 110, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_LEFT, true)
                 {
                     Y = 0,
                     X = 55
@@ -495,7 +499,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int height = Math.Max(_name.Height, control.Height) + 10;
 
-                Add(_amountLabel = new Label(item.Amount.ToString(), true, 0x021F, 35, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_RIGHT)
+                Add(_amountLabel = new Label(item.Amount.ToString(), true, 0x0219, 35, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_RIGHT)
                 {
                     X = 168,
                     Y = height >> 2
@@ -526,7 +530,7 @@ namespace ClassicUO.Game.UI.Gumps
                 set
                 {
                     foreach (var label in Children.OfType<Label>())
-                        label.Hue = (Hue) (value ? 0x0021 : 0x021F);
+                        label.Hue = (Hue) (value ? 0x0021 : 0x0219);
                 }
             }
 
@@ -613,7 +617,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }); // Plus
 
                 int status = 0;
-                const int increm = 50;
+                const int increm = 45;
 
                 float t0 = Engine.Ticks;
                 bool pressedAdd = false;
@@ -628,8 +632,8 @@ namespace ClassicUO.Game.UI.Gumps
                             OnButtonClick(0);
                             _StepsDone++;
 
-                            if (_StepChanger < 40 && _StepsDone % 3 == 0)
-                                _StepChanger++;
+                            if (_StepChanger < increm && _StepsDone % 3 == 0)
+                                _StepChanger+=2;
                         }
                     }
                 };
@@ -663,21 +667,21 @@ namespace ClassicUO.Game.UI.Gumps
                     ContainsByBounds = true
                 }); // Minus
 
-                float t1 = Engine.Ticks;
+                //float t1 = Engine.Ticks;
                 bool pressedRemove = false;
 
                 buttonRemove.MouseOver += (sender, e) =>
                 {
                     if (status == 2)
                     {
-                        if (pressedRemove && Engine.Ticks > t1)
+                        if (pressedRemove && Engine.Ticks > t0)
                         {
-                            t1 = Engine.Ticks + (increm - _StepChanger);
+                            t0 = Engine.Ticks + (increm - _StepChanger);
                             OnButtonClick(1);
                             _StepsDone++;
 
-                            if (_StepChanger < 40 && _StepsDone % 3 == 0)
-                                _StepChanger++;
+                            if (_StepChanger < increm && _StepsDone % 3 == 0)
+                                _StepChanger+=2;
                         }
                     }
                 };
@@ -690,7 +694,7 @@ namespace ClassicUO.Game.UI.Gumps
                     pressedRemove = true;
                     _StepChanger = 0;
                     status = 2;
-                    t1 = Engine.Ticks + 500;
+                    t0 = Engine.Ticks + 500;
                 };
 
                 buttonRemove.MouseUp += (sender, e) =>

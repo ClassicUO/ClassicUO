@@ -84,7 +84,6 @@ namespace ClassicUO.Game.GameObjects
 
         private void DrawCharacter(UltimaBatcher2D batcher, int posX, int posY)
         {
-
             _equipConvData = null;
             _transform = false;
             FileManager.Animations.SittingValue = 0;
@@ -99,17 +98,13 @@ namespace ClassicUO.Game.GameObjects
             bool hasShadow = !IsDead && !IsHidden && Engine.Profile.Current.ShadowsEnabled;
 
             if (Engine.AuraManager.IsEnabled)
-            { 
-                if (Engine.Profile.Current.PartyAura && World.Party.Contains(this))
-                {
-                    Engine.AuraManager.Draw(batcher, drawX + 22, drawY + 22, Engine.Profile.Current.PartyAuraHue);
-                }
-                else 
-                {
-                    Engine.AuraManager.Draw(batcher, drawX + 22, drawY + 22, Notoriety.GetHue(NotorietyFlag));
-                }
+            {
+                Engine.AuraManager.Draw(batcher, drawX + 22, drawY + 22, Engine.Profile.Current.PartyAura && World.Party.Contains(this) ? Engine.Profile.Current.PartyAuraHue : (ushort)Notoriety.GetHue(NotorietyFlag));
             }
-            
+
+            bool isHuman = IsHuman;
+
+
             if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 _viewHue = 0x0023;
@@ -135,7 +130,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (IsDead)
                 {
-                    if (!IsHuman)
+                    if (!isHuman)
                         _viewHue = 0x0386;
                 }
                 else if (Engine.Profile.Current.HighlightMobilesByFlags)
@@ -187,7 +182,7 @@ namespace ClassicUO.Game.GameObjects
 
             Item mount = HasEquipment ? Equipment[(int) Layer.Mount] : null;
 
-            if (IsHuman && mount != null)
+            if (isHuman && mount != null)
             {
                 FileManager.Animations.SittingValue = 0;
 
@@ -197,14 +192,14 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (hasShadow)
                     {
-                        DrawInternal(batcher, this, null, drawX, drawY + 10, mirror, animIndex, true, graphic);
+                        DrawInternal(batcher, this, null, drawX, drawY + 10, mirror, animIndex, true, graphic, isHuman);
                         FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
-                        DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, true, mountGraphic);
+                        DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, true, mountGraphic, isHuman);
                     }
                     else
                         FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
 
-                    drawY += DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, false, mountGraphic);
+                    drawY += DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, false, mountGraphic, isHuman, isMount: true);
                 }
             }
             else
@@ -223,20 +218,22 @@ namespace ClassicUO.Game.GameObjects
                     else
                         _transform = true;
                 }
-                else if (hasShadow) DrawInternal(batcher, this, null, drawX, drawY, mirror, animIndex, true, graphic);
+                else if (hasShadow)
+                    DrawInternal(batcher, this, null, drawX, drawY, mirror, animIndex, true, graphic, isHuman);
             }
 
             FileManager.Animations.AnimGroup = animGroup;
 
-            DrawInternal(batcher, this, null, drawX, drawY, mirror, animIndex, false, graphic);
+            DrawInternal(batcher, this, null, drawX, drawY, mirror, animIndex, false, graphic, isHuman);
 
-            if (IsHuman && HasEquipment)
+            if (HasEquipment)
             {
+                var equip = Equipment;
                 for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
                 {
                     Layer layer = LayerOrder.UsedLayers[dir, i];
 
-                    Item item = Equipment[(int) layer];
+                    Item item = equip[(int)layer];
 
                     if (item == null)
                         continue;
@@ -244,40 +241,55 @@ namespace ClassicUO.Game.GameObjects
                     if (IsDead && (layer == Layer.Hair || layer == Layer.Beard))
                         continue;
 
-                    if (IsCovered(this, layer))
-                        continue;
-
-                    if (item.ItemData.AnimID != 0)
+                    if (isHuman)
                     {
-                        graphic = item.ItemData.AnimID;
+                        if (IsCovered(this, layer))
+                            continue;
 
-                        if (FileManager.Animations.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
+                        if (item.ItemData.AnimID != 0)
                         {
-                            if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
+                            graphic = item.ItemData.AnimID;
+
+                            if (FileManager.Animations.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
                             {
-                                _equipConvData = data;
-                                graphic = data.Graphic;
+                                if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
+                                {
+                                    _equipConvData = data;
+                                    graphic = data.Graphic;
+                                }
                             }
+
+                            DrawInternal(batcher, this, item, drawX, drawY, mirror, animIndex, false, graphic, isHuman, false);
+                        }
+                        else
+                        {
+                            if (item.ItemData.IsLight)
+                                Engine.SceneManager.GetScene<GameScene>().AddLight(this, this, drawX + 22, drawY + 22);
                         }
 
-                        DrawInternal(batcher, this, item, drawX, drawY, mirror, animIndex, false, graphic, false);
+                        _equipConvData = null;
                     }
-
-                    _equipConvData = null;
+                    else
+                    {
+                        if (item.ItemData.IsLight)
+                        {
+                            Engine.SceneManager.GetScene<GameScene>().AddLight(this, this, drawX + 22, drawY + 22);
+                            break;
+                        }
+                    }
                 }
-
-                //if (FileManager.Animations.SittingValue != 0)
-                //{
-                //    ref var sittingData = ref FileManager.Animations.SittingInfos[FileManager.Animations.SittingValue - 1];
-
-                //    if (FileManager.Animations.Direction == 3 && sittingData.DrawBack &&
-                //        HasEquipment && Equipment[(int) Layer.Cloak] == null)
-                //    {
-
-                //    }
-                //}
-                // 
             }
+            //if (FileManager.Animations.SittingValue != 0)
+            //{
+            //    ref var sittingData = ref FileManager.Animations.SittingInfos[FileManager.Animations.SittingValue - 1];
+
+            //    if (FileManager.Animations.Direction == 3 && sittingData.DrawBack &&
+            //        HasEquipment && Equipment[(int) Layer.Cloak] == null)
+            //    {
+
+            //    }
+            //}
+            // 
 
             FrameInfo.X = Math.Abs(FrameInfo.X);
             FrameInfo.Y = Math.Abs(FrameInfo.Y);
@@ -285,7 +297,7 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo.Height = FrameInfo.Y + FrameInfo.Height;
         }
 
-        private static sbyte DrawInternal(UltimaBatcher2D batcher, Mobile owner, Item entity, int x, int y, bool mirror, sbyte frameIndex, bool hasShadow, ushort id, bool isParent = true)
+        private static sbyte DrawInternal(UltimaBatcher2D batcher, Mobile owner, Item entity, int x, int y, bool mirror, sbyte frameIndex, bool hasShadow, ushort id, bool isHuman, bool isParent = true, bool isMount = false)
         {
             if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 return 0;
@@ -302,7 +314,9 @@ namespace ClassicUO.Game.GameObjects
                 return 0;
 
             if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
+            {
                 return 0;
+            }
 
             direction.LastAccessTime = Engine.Ticks;
 
@@ -336,7 +350,7 @@ namespace ClassicUO.Game.GameObjects
                     if (hue == 0)
                     {
                         hue = entity?.Hue ?? owner.Hue;
-                        partialHue = entity != null && entity.ItemData.IsPartialHue;
+                        partialHue = !isMount && entity != null && entity.ItemData.IsPartialHue;
 
                         if ((hue & 0x8000) != 0)
                         {
@@ -363,8 +377,7 @@ namespace ClassicUO.Game.GameObjects
                         const float MID_BODY_RATIO = 0.60f;
                         const float LOWER_BODY_RATIO = 0.94f;
 
-
-                        if (entity == null && owner.IsHuman)
+                        if (entity == null && isHuman)
                         {
                             int frameHeight = frame.Height;
                             _characterFrameStartY = y;
@@ -464,7 +477,8 @@ namespace ClassicUO.Game.GameObjects
                     owner.Texture = frame;
                     owner.Select(mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y);
 
-                    if (entity != null && entity.ItemData.IsLight) Engine.SceneManager.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x, y);
+                    if (entity != null && entity.ItemData.IsLight)
+                        Engine.SceneManager.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x, y);
                 }
 
                 return FileManager.Animations.DataIndex[id].MountedHeightOffset;

@@ -130,18 +130,7 @@ namespace ClassicUO.IO.Resources
         public override void CleaUnusedResources()
         {
             base.CleaUnusedResources();
-
-            long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
-
-            _landDictionary
-               .Where(s => s.Value.Ticks < ticks)
-               .Take(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
-               .ToList()
-               .ForEach(s =>
-                {
-                    s.Value.Dispose();
-                    _landDictionary.Remove(s.Key);
-                });
+            ClearUnusedResources(_landDictionary, Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
         }
 
         public unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height, out Rectangle imageRectangle)
@@ -200,7 +189,8 @@ namespace ClassicUO.IO.Resources
 
                         if (val != 0)
                             val = (ushort) (0x8000 | val);
-                        pixels[pos++] = val;
+                        //avoid single zero pixel
+                        pixels[pos++] = val == 0 && run == 1 ? (ushort)1 : val;
                     }
 
                     x += run;

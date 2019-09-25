@@ -157,13 +157,13 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Draw(batcher, x, y);
 
-            Vector3 dataHue = Vector3.Zero;
+            ResetHueVector();
 
             if (_var != InfoBarVars.NameNotoriety && Engine.Profile.Current.InfoBarHighlightType == 1 && _warningLinesHue != 0x0481)
             {
-                ShaderHuesTraslator.GetHueVector(ref dataHue, _warningLinesHue);
-                batcher.Draw2D(Textures.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY, _data.Width, 2, ref dataHue);
-                batcher.Draw2D(Textures.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY + Parent.Height - 2, _data.Width, 2, ref dataHue);
+                ShaderHuesTraslator.GetHueVector(ref _hueVector, _warningLinesHue);
+                batcher.Draw2D(Textures.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY, _data.Width, 2, ref _hueVector);
+                batcher.Draw2D(Textures.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY + Parent.Height - 2, _data.Width, 2, ref _hueVector);
             }
 
             return true;

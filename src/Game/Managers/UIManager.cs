@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -64,8 +65,9 @@ namespace ClassicUO.Game.Managers
             {
                 HandleMouseInput();
 
-                if (_mouseDownControls[0] == MouseOverControl && MouseOverControl != null)
-                    AttemptDragControl(MouseOverControl, Mouse.Position, true);
+                //if (_mouseDownControls[0] == MouseOverControl && MouseOverControl != null)
+                if (_mouseDownControls[0] != null)
+                    AttemptDragControl(_mouseDownControls[0], Mouse.Position, true);
 
                 if (_isDraggingControl)
                 {
@@ -75,9 +77,6 @@ namespace ClassicUO.Game.Managers
 
             Engine.Input.LeftMouseButtonDown += (sender, e) =>
             {
-                //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
-                //    return;
-
                 HandleMouseInput();
 
                 if (MouseOverControl != null)
@@ -105,31 +104,20 @@ namespace ClassicUO.Game.Managers
                 }
             };
 
-            Control lastLeftUp = null, lastRightUp = null;
-
             Engine.Input.LeftMouseButtonUp += (sender, e) =>
             {
-                //if (!IsModalControlOpen && ObjectsBlockingInputExists)
-                //    return;
-
-                //if (MouseOverControl == null)
-                //    return;
+                HandleMouseInput();
 
                 const int btn = (int) MouseButton.Left;
                 EndDragControl(Mouse.Position);
 
                 if (MouseOverControl != null)
                 {
-                    //if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
-                    //    MouseOverControl.InvokeMouseClick(Mouse.Position, MouseButton.Left);
-
-                    //if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
+                    if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
                         MouseOverControl.InvokeMouseUp(Mouse.Position, MouseButton.Left);
 
                     if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
                         _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButton.Left);
-
-                    lastLeftUp = MouseOverControl;
                 }
                 else
                     _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButton.Left);
@@ -140,14 +128,15 @@ namespace ClassicUO.Game.Managers
 
             Engine.Input.LeftMouseDoubleClick += (sender, e) =>
             {
-                if (MouseOverControl != null && IsMouseOverAControl && MouseOverControl == lastLeftUp)
+                HandleMouseInput();
+
+                if (MouseOverControl != null && IsMouseOverAControl)
                     e.Result = MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Left);
             };
 
             Engine.Input.RightMouseButtonDown += (sender, e) =>
             {
-                //if (!IsModalControlOpen && ObjectsBlockingInputExists)
-                //    return;
+                HandleMouseInput();
 
                 if (MouseOverControl != null)
                 {
@@ -178,11 +167,8 @@ namespace ClassicUO.Game.Managers
 
             Engine.Input.RightMouseButtonUp += (sender, e) =>
             {
-                //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
-                //    return;
+                HandleMouseInput();
 
-                //if (MouseOverControl == null)
-                //    return;
                 const int btn = (int) MouseButton.Right;
                 EndDragControl(Mouse.Position);
 
@@ -190,7 +176,6 @@ namespace ClassicUO.Game.Managers
                 {
                     if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
                     {
-                        //MouseOverControl.InvokeMouseClick(Mouse.Position, MouseButton.Right);
                         MouseOverControl.InvokeMouseCloseGumpWithRClick();
                     }
 
@@ -201,9 +186,6 @@ namespace ClassicUO.Game.Managers
                         _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButton.Right);
                         _mouseDownControls[btn].InvokeMouseCloseGumpWithRClick();
                     }
-
-
-                    lastRightUp = MouseOverControl;
                 }
                 else if (_mouseDownControls[btn] != null)
                 {
@@ -217,14 +199,12 @@ namespace ClassicUO.Game.Managers
 
             Engine.Input.RightMouseDoubleClick += (sender, e) =>
             {
-                if (MouseOverControl != null && IsMouseOverAControl && MouseOverControl == lastRightUp) e.Result = MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Right);
+                if (MouseOverControl != null && IsMouseOverAControl)
+                    e.Result = MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Right);
             };
 
             Engine.Input.MouseWheel += (sender, isup) =>
             {
-                //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
-                //    return;
-
                 if (MouseOverControl != null && MouseOverControl.AcceptMouseInput)
                     MouseOverControl.InvokeMouseWheel(isup ? MouseEvent.WheelScrollUp : MouseEvent.WheelScrollDown);
             };
@@ -233,6 +213,8 @@ namespace ClassicUO.Game.Managers
             Engine.Input.TextInput += (sender, e) => { _keyboardFocusControl?.InvokeTextInput(e); };
         }
 
+
+        public float ContainerScale { get; set; } = 1f;
 
         public AnchorManager AnchorManager { get; }
 
@@ -262,7 +244,11 @@ namespace ClassicUO.Game.Managers
                         {
                             _keyboardFocusControl = c.GetFirstControlAcceptKeyboardInput();
 
-                            if (_keyboardFocusControl != null) break;
+                            if (_keyboardFocusControl != null)
+                            {
+                                _keyboardFocusControl.OnFocusEnter();
+                                break;
+                            }
                         }
                     }
                 }
@@ -277,6 +263,32 @@ namespace ClassicUO.Game.Managers
                     _keyboardFocusControl = value;
                     value.OnFocusEnter();
                 }
+            }
+        }
+
+        public bool IsKeyboardFocusAllowHotkeys
+        {
+            get
+            {
+                // We are not at the game scene or no player character present
+                if (World.Player == null || !(Engine.SceneManager.CurrentScene is GameScene gs))
+                    return false;
+
+                // System Chat is NOT focused (items stack amount field or macros text fields is probably focused),
+                // it means that some other text input is focused and we're going to enter some text there
+                // thus we don't expect to execute any game macro or trigger any plugin hotkeys
+                if (Engine.UI.SystemChat?.IsFocused == false)
+                    return false;
+
+                // "Press 'Enter' to activate chat" is enabled and System Chat is active,
+                // it means that we want to enter some text into the chat,
+                // thus we don't expect to execute any game macro or trigger any plugin hotkeys
+                if (Engine.Profile.Current.ActivateChatAfterEnter &&
+                    Engine.UI.SystemChat?.IsActive == true)
+                    return false;
+
+                // In all other cases hotkeys for macros and plugins are allowed
+                return true;
             }
         }
 
@@ -502,6 +514,85 @@ namespace ClassicUO.Game.Managers
                         {
                             pic.ContainsByBounds = true;
                             pic.IsVirtue = true;
+
+                            string s, lvl;
+
+                            switch (pic.Hue)
+                            {
+                                case 2403:
+                                    lvl = "";
+                                    break;
+                                case 1154:
+                                case 1547:
+                                case 2213:
+                                case 235:
+                                case 18:
+                                case 2210:
+                                case 1348:
+                                    lvl = "Seeker of ";
+                                    break;
+                                case 2404:
+                                case 1552:
+                                case 2216:
+                                case 2302:
+                                case 2118:
+                                case 618:
+                                case 2212:
+                                case 1352:
+                                    lvl = "Follower of ";
+                                    break;
+                                case 43:
+                                case 53:
+                                case 1153:
+                                case 33:
+                                case 318:
+                                case 67:
+                                case 98:
+                                    lvl = "Knight of ";
+                                    break;
+                                case 2406:
+                                    if (pic.Graphic == 0x6F) lvl = "Seeker of ";
+                                    else lvl = "Knight of ";
+                                    break;
+                                default:
+                                    lvl = "";
+                                    break;
+                            }
+
+                            switch (pic.Graphic)
+                            {
+                                case 0x69:
+                                    s = FileManager.Cliloc.GetString(1051000 + 2);
+                                    break;
+                                case 0x6A:
+                                    s = FileManager.Cliloc.GetString(1051000 + 7);
+                                    break;
+                                case 0x6B:
+                                    s = FileManager.Cliloc.GetString(1051000 + 5);
+                                    break;
+                                case 0x6D:
+                                    s = FileManager.Cliloc.GetString(1051000 + 6);
+                                    break;
+                                case 0x6E:
+                                    s = FileManager.Cliloc.GetString(1051000 + 1);
+                                    break;
+                                case 0x6F:
+                                    s = FileManager.Cliloc.GetString(1051000 + 3);
+                                    break;
+                                case 0x70:
+                                    s = FileManager.Cliloc.GetString(1051000 + 4);
+                                    break;
+
+                                case 0x6C:
+                                default:
+                                    s = FileManager.Cliloc.GetString(1051000);
+                                    break;
+                            }
+
+                            if (string.IsNullOrEmpty(s))
+                                s = "Unknown virtue";
+
+                            pic.SetTooltip(lvl + s, 100);
                         }
 
                         gump.Add(pic, page);
@@ -566,7 +657,8 @@ namespace ClassicUO.Game.Managers
                         break;
 
                     case "text":
-                        gump.Add(new Label(gparams, lines), page);
+                        if (gparams.Count >= 5)
+                            gump.Add(new Label(gparams, lines), page);
 
                         break;
 
@@ -707,6 +799,8 @@ namespace ClassicUO.Game.Managers
             }
 
             Add(gump);
+
+            gump.SetInScreen();
 
             return gump;
         }
@@ -890,11 +984,6 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public Control[] GetMouseOverControls(Point position)
-        {
-            return Gumps.Where(o => o.HitTest(position) != null).ToArray();
-        }
-
         private Control GetMouseOverControl(Point position)
         {
             if (_isDraggingControl)
@@ -1043,8 +1132,11 @@ namespace ClassicUO.Game.Managers
                 if (attemptAlwaysSuccessful)
                 {
                     DraggingControl = dragTarget;
-                    _dragOriginX = mousePosition.X;
-                    _dragOriginY = mousePosition.Y;
+                    if (control == dragTarget && _needSort)
+                    {
+                        _dragOriginX = mousePosition.X;
+                        _dragOriginY = mousePosition.Y;
+                    }
                 }
 
                 if (DraggingControl == dragTarget)

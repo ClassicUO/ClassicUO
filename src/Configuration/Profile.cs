@@ -151,9 +151,6 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool UseDarkNights { get; set; }
         [JsonProperty] public int CloseHealthBarType { get; set; } // 0 = none, 1 == not exists, 2 == is dead
         [JsonProperty] public bool ActivateChatAfterEnter { get; set; }
-        [JsonProperty] public bool ActivateChatStatus { get; set; } = true;
-        [JsonProperty] public bool ActivateChatIgnoreHotkeys { get; set; } = true;
-        [JsonProperty] public bool ActivateChatIgnoreHotkeysPlugins { get; set; } = true;
         [JsonProperty] public bool ActivateChatAdditionalButtons { get; set; } = true;
         [JsonProperty] public bool ActivateChatShiftEnterSupport { get; set; } = true;
 
@@ -181,6 +178,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool DragSelectHumanoidsOnly { get; set; }
         [JsonProperty] public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
         [JsonProperty] public bool NameOverheadToggled { get; set; } = false;
+        [JsonProperty] public bool ShowTargetRangeIndicator { get; set; }
+        [JsonProperty] public bool PartyInviteGump { get; set; }
 
         [JsonProperty] public bool ShowInfoBar { get; set; }
         [JsonProperty] public int InfoBarHighlightType { get; set; } // 0 = text colour changes, 1 = underline
@@ -293,6 +292,10 @@ namespace ClassicUO.Configuration
         [JsonProperty] public float Brighlight { get; set; }
 
         [JsonProperty] public bool JournalDarkMode { get; set; }
+
+        [JsonProperty] public byte ContainersScale { get; set; } = 100;
+
+        [JsonProperty] public bool ScaleItemsInsideContainers { get; set; }
 
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");

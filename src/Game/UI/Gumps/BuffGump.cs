@@ -153,16 +153,15 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void UpdateElements()
         {
-            BuffControlEntry[] list = GetControls<BuffControlEntry>();
+            var list = FindControls<BuffControlEntry>();
             int offset = 0;
 
             int maxWidth = 0;
             int maxHeight = 0;
 
-            for (int i = 0; i < list.Length; i++)
+            int i = 0;
+            foreach (var e in list)
             {
-                BuffControlEntry e = list[i];
-
                 maxWidth += e.Width;
                 maxHeight += e.Height;
 
@@ -199,8 +198,14 @@ namespace ClassicUO.Game.UI.Gumps
                             _background.Y -= e.Y;
                             _button.Y -= e.Y;
 
-                            for (int j = 0; j < i; j++)
-                                list[j].Y -= e.Y;
+                            int j = 0;
+                            foreach (var ee in list)
+                            {
+                                if (j >= i)
+                                    break;
+                                ee.Y -= e.Y;
+                                j++;
+                            }
 
                             e.Y = Height - 48 - offset;
                         }
@@ -220,8 +225,14 @@ namespace ClassicUO.Game.UI.Gumps
                             _background.X -= e.X;
                             _button.X -= e.X;
 
-                            for (int j = 0; j < i; j++)
-                                list[j].X -= e.X;
+                            int j = 0;
+                            foreach (var ee in list)
+                            {
+                                if (j >= i)
+                                    break;
+                                ee.X -= e.X;
+                                j++;
+                            }
 
                             e.X = Width - 48 - offset;
                         }
@@ -230,6 +241,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                         break;
                 }
+
+                i++;
             }
         }
 

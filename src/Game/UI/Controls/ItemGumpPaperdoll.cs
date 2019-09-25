@@ -87,9 +87,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            return Texture.Contains(x, y);
+            return Texture != null ? Texture.Contains(x, y) : false;
         }
-
 
         public void Update(Item item, bool transparent = false)
         {

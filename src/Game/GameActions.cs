@@ -159,6 +159,7 @@ namespace ClassicUO.Game
         public static void RequestPartyAccept(Serial serial)
         {
             Socket.Send(new PPartyAccept(serial));
+            Engine.UI.Gumps.OfType<PartyInviteGump>().FirstOrDefault()?.Dispose();
         }
 
         public static void RequestPartyRemoveMember(Serial serial)

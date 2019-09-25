@@ -158,7 +158,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     case Land land:
 
-                        return $"Static ({land.Graphic})  flags: {land.TileData.Flags}";
+                        return $"Land ({land.Graphic})  flags: {land.TileData.Flags}";
                 }
             }
 

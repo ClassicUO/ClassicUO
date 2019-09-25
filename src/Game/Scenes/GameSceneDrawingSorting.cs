@@ -51,7 +51,7 @@ namespace ClassicUO.Game.Scenes
 
         private int _renderIndex = 1;
 
-        private GameObject[] _renderList = new GameObject[2000];
+        private GameObject[] _renderList = new GameObject[10000];
         private int _renderListCount;
 
         public void UpdateMaxDrawZ(bool force = false)
@@ -172,8 +172,6 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private static readonly StaticTiles _emptyStaticTiles = default;
-
         private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ/*, GameObject entity*/)
         {
             /*sbyte HeightChecks = 0;
@@ -207,8 +205,7 @@ namespace ClassicUO.Game.Scenes
 
                 int maxObjectZ = obj.PriorityZ;
 
-
-                StaticTiles itemData = _emptyStaticTiles;
+                StaticTiles itemData = default;
 
                 bool changinAlpha = false;
                 bool island = false;
@@ -244,8 +241,12 @@ namespace ClassicUO.Game.Scenes
                             {
                                 if (StaticFilters.IsTree(st.OriginalGraphic))
                                 {
-                                    if (Engine.Profile.Current.TreeToStumps && st.ItemData.IsImpassable && st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
+                                    if (Engine.Profile.Current.TreeToStumps && st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
+                                    {
+                                        if (!itemData.IsImpassable)
+                                            continue;
                                         st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC);
+                                    }
                                     else if (st.OriginalGraphic != st.Graphic && !Engine.Profile.Current.TreeToStumps)
                                         st.RestoreOriginalGraphic();
                                 }
@@ -262,7 +263,8 @@ namespace ClassicUO.Game.Scenes
                                     continue;
                             }
 
-                            if (Engine.Profile.Current.TreeToStumps && itemData.IsFoliage || Engine.Profile.Current.HideVegetation && StaticFilters.IsVegetation(obj.Graphic))
+                            //we avoid to hide impassable foliage or bushes, if present...
+                            if ((Engine.Profile.Current.TreeToStumps && itemData.IsFoliage) || (Engine.Profile.Current.HideVegetation && !itemData.IsImpassable && StaticFilters.IsVegetation(obj.Graphic)))
                                 continue;
 
                             //if (HeightChecks <= 0 && (!itemData.IsBridge || ((itemData.Flags & TileFlag.StairBack | TileFlag.StairRight) != 0) || itemData.IsWall))

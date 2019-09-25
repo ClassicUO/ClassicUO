@@ -325,7 +325,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             _character = CreateCharacter(isFemale, race);
             UpdateEquipments();
 
-            Add(_paperDoll = new PaperDollInteractable(262, 135, _character)
+            Add(_paperDoll = new PaperDollInteractable(262, 135, _character, null)
             {
                 AcceptMouseInput = false
             }, 1);

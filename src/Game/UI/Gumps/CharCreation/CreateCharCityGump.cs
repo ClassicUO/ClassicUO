@@ -237,7 +237,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             foreach (var map in _maps.Values)
             {
-                foreach (var selector in map.GetControls<CitySelector>())
+                foreach (var selector in map.FindControls<CitySelector>())
                     yield return selector;
             }
         }

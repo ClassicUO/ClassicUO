@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -64,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator;
         private Combobox _overrideContainerLocationSetting;
 
         // sounds
@@ -84,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
         // GameWindowSize
         private TextBox _gameWindowWidth;
         private Combobox _gridLoot;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatIgnodeHotkeysCheckbox, _chatIgnodeHotkeysPluginsCheckbox, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
         private Combobox _hpComboBox, _healtbarType, _fieldsType, _hpComboBoxShowWhen;
 
         // combat & spells
@@ -115,13 +116,18 @@ namespace ClassicUO.Game.UI.Gumps
         private ColorBox _poisonColorPickerBox, _paralyzedColorPickerBox, _invulnerableColorPickerBox;
         private TextBox _spellFormatBox;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
-        private Checkbox _holdShiftForContext, _reduceFPSWhenInactive, _sallosEasyGrab;
+        private Checkbox _holdShiftForContext, _reduceFPSWhenInactive, _sallosEasyGrab, _partyInviteGump;
 
         //VendorGump Size Option
         private ArrowNumbersTextBox _vendorGumpSize;
 
         private ScrollAreaItem _windowSizeArea;
         private ScrollAreaItem _zoomSizeArea;
+
+
+        // containers
+        private HSliderBar _containersScale;
+        private Checkbox _containerScaleItems;
 
         public OptionsGump() : base(0, 0)
         {
@@ -159,6 +165,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new NiceButton(10, 10 + 30 * 8, 140, 25, ButtonAction.SwitchPage, "Experimental") {ButtonParameter = 10});
             Add(new NiceButton(10, 10 + 30 * 9, 140, 25, ButtonAction.SwitchPage, "Network") {ButtonParameter = 11});
             Add(new NiceButton(10, 10 + 30 * 10, 140, 25, ButtonAction.SwitchPage, "Info Bar") { ButtonParameter = 12 });
+            Add(new NiceButton(10, 10 + 30 * 11, 140, 25, ButtonAction.SwitchPage, "Containers") { ButtonParameter = 13 });
 
 
             Add(new Line(160, 5, 1, HEIGHT - 10, Color.Gray.PackedValue));
@@ -203,6 +210,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildExperimental();
             BuildNetwork();
             BuildInfoBar();
+            BuildContainers();
 
             ChangePage(1);
         }
@@ -262,6 +270,7 @@ namespace ClassicUO.Game.UI.Gumps
             _showMobileNameIncoming = CreateCheckBox(rightArea, "Show incoming new mobiles", Engine.Profile.Current.ShowNewMobileNameIncoming, 0, 0);
             _showCorpseNameIncoming = CreateCheckBox(rightArea, "Show incoming new corpses", Engine.Profile.Current.ShowNewCorpseNameIncoming, 0, 0);
             _sallosEasyGrab = CreateCheckBox(rightArea, "Sallos easy grab", Engine.Profile.Current.SallosEasyGrab, 0, 0);
+            _partyInviteGump = CreateCheckBox(rightArea, "Show gump for party invites", Engine.Profile.Current.PartyInviteGump, 0, 0);
 
             fpsItem = new ScrollAreaItem();
 
@@ -636,61 +645,6 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
-        private void BuildInfoBar()
-        {
-            const int PAGE = 12;
-
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
-
-            _showInfoBar = CreateCheckBox(rightArea, "Show Info Bar", Engine.Profile.Current.ShowInfoBar, 0, 0);
-
-
-            ScrollAreaItem _infoBarHighlightScrollArea = new ScrollAreaItem();
-
-            _infoBarHighlightScrollArea.Add(new Label("Data highlight type:", true, 999));
-            _infoBarHighlightType = new Combobox(130, 0, 150, new[] { "Text color", "Colored bars" }, Engine.Profile.Current.InfoBarHighlightType);
-            _infoBarHighlightScrollArea.Add(_infoBarHighlightType);
-
-            rightArea.Add(_infoBarHighlightScrollArea);
-
-
-            NiceButton nb = new NiceButton(0, 10, 90, 20, ButtonAction.Activate, "+ Add item", 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT) { ButtonParameter = 999 };
-            nb.MouseUp += (sender, e) =>
-            {
-                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(new InfoBarItem("", InfoBarVars.HP, 0x3B9));
-                _infoBarBuilderControls.Add(ibbc);
-                rightArea.Add(ibbc);
-            };
-            rightArea.Add(nb);
-
-
-            ScrollAreaItem _infobarBuilderLabels = new ScrollAreaItem();
-
-            _infobarBuilderLabels.Add(new Label("Label", true, 999) { Y = 15 } );
-            _infobarBuilderLabels.Add(new Label("Color", true, 999) { X = 150, Y = 15 });
-            _infobarBuilderLabels.Add(new Label("Data", true, 999) { X = 200, Y = 15 });
-
-            rightArea.Add(_infobarBuilderLabels);
-            rightArea.Add(new Line(0, 0, rightArea.Width, 1, Color.Gray.PackedValue));
-            rightArea.Add(new Line(0, 0, rightArea.Width, 5, Color.Black.PackedValue));
-
-
-            InfoBarManager ibmanager = Engine.SceneManager.GetScene<GameScene>().InfoBars;
-
-            List<InfoBarItem> _infoBarItems = ibmanager.GetInfoBars();
-
-            _infoBarBuilderControls = new List<InfoBarBuilderControl>();
-
-            for (int i = 0; i < _infoBarItems.Count; i++)
-            {
-                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(_infoBarItems[i]);
-                _infoBarBuilderControls.Add(ibbc);
-                rightArea.Add(ibbc);
-            }
-
-            Add(rightArea, PAGE);
-
-        }
 
         private void BuildCommands()
         {
@@ -886,18 +840,17 @@ namespace ClassicUO.Game.UI.Gumps
 
             // [BLOCK] activate chat
             {
-                _chatAfterEnter = new Checkbox(0x00D2, 0x00D3, "Activate chat after `Enter` pressing", FONT, HUE_FONT)
+                _chatAfterEnter = new Checkbox(0x00D2, 0x00D3, "Press `Enter` to activate chat", FONT, HUE_FONT)
                 {
                     Y = 0,
                     IsChecked = Engine.Profile.Current.ActivateChatAfterEnter
                 };
                 _chatAfterEnter.ValueChanged += (sender, e) => { _activeChatArea.IsVisible = _chatAfterEnter.IsChecked; };
-
                 rightArea.Add(_chatAfterEnter);
 
                 _activeChatArea = new ScrollAreaItem();
 
-                _chatAdditionalButtonsCheckbox = new Checkbox(0x00D2, 0x00D3, "Additional buttons activate chat: ! ; : / \\ , . [ | -", FONT, HUE_FONT)
+                _chatAdditionalButtonsCheckbox = new Checkbox(0x00D2, 0x00D3, "Use additional buttons to activate chat: ! ; : / \\ , . [ | -", FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 15,
@@ -905,7 +858,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _activeChatArea.Add(_chatAdditionalButtonsCheckbox);
 
-                _chatShiftEnterCheckbox = new Checkbox(0x00D2, 0x00D3, "Shift+Enter send message without closing chat", FONT, HUE_FONT)
+                _chatShiftEnterCheckbox = new Checkbox(0x00D2, 0x00D3, "Use `Shift+Enter` to send message without closing chat", FONT, HUE_FONT)
                 {
                     X = 20,
                     Y = 35,
@@ -913,33 +866,9 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _activeChatArea.Add(_chatShiftEnterCheckbox);
 
-                var text = new Label("If chat active - ignores hotkeys from:", true, HUE_FONT)
-                {
-                    X = 20,
-                    Y = 60
-                };
-
-                _activeChatArea.Add(text);
-
-                _chatIgnodeHotkeysCheckbox = new Checkbox(0x00D2, 0x00D3, "Client (macro system)", FONT, HUE_FONT)
-                {
-                    X = 40,
-                    Y = 85,
-                    IsChecked = Engine.Profile.Current.ActivateChatIgnoreHotkeys
-                };
-                _activeChatArea.Add(_chatIgnodeHotkeysCheckbox);
-
-                _chatIgnodeHotkeysPluginsCheckbox = new Checkbox(0x00D2, 0x00D3, "Plugins (Razor)", FONT, HUE_FONT)
-                {
-                    X = 40,
-                    Y = 105,
-                    IsChecked = Engine.Profile.Current.ActivateChatIgnoreHotkeysPlugins
-                };
-                _activeChatArea.Add(_chatIgnodeHotkeysPluginsCheckbox);
-
-                rightArea.Add(_activeChatArea);
-
                 _activeChatArea.IsVisible = _chatAfterEnter.IsChecked;
+                
+                rightArea.Add(_activeChatArea);
             }
 
             _speechColorPickerBox = CreateClickableColorBox(rightArea, 0, 20, Engine.Profile.Current.SpeechHue, "Speech Color", 20, 20);
@@ -1225,6 +1154,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(_containerGumpLocation);
 
+            _showTargetRangeIndicator = new Checkbox(0x00D2, 0x00D3, "Show target range indicator", FONT, HUE_FONT, true)
+            {
+                IsChecked = Engine.Profile.Current.ShowTargetRangeIndicator,
+            };
+
+            rightArea.Add(_showTargetRangeIndicator);
 
             Add(rightArea, PAGE);
 
@@ -1242,6 +1177,83 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(rightArea, PAGE);
         }
+
+        private void BuildInfoBar()
+        {
+            const int PAGE = 12;
+
+            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
+
+            _showInfoBar = CreateCheckBox(rightArea, "Show Info Bar", Engine.Profile.Current.ShowInfoBar, 0, 0);
+
+
+            ScrollAreaItem _infoBarHighlightScrollArea = new ScrollAreaItem();
+
+            _infoBarHighlightScrollArea.Add(new Label("Data highlight type:", true, 999));
+            _infoBarHighlightType = new Combobox(130, 0, 150, new[] { "Text color", "Colored bars" }, Engine.Profile.Current.InfoBarHighlightType);
+            _infoBarHighlightScrollArea.Add(_infoBarHighlightType);
+
+            rightArea.Add(_infoBarHighlightScrollArea);
+
+
+            NiceButton nb = new NiceButton(0, 10, 90, 20, ButtonAction.Activate, "+ Add item", 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT) { ButtonParameter = 999 };
+            nb.MouseUp += (sender, e) =>
+            {
+                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(new InfoBarItem("", InfoBarVars.HP, 0x3B9));
+                _infoBarBuilderControls.Add(ibbc);
+                rightArea.Add(ibbc);
+            };
+            rightArea.Add(nb);
+
+
+            ScrollAreaItem _infobarBuilderLabels = new ScrollAreaItem();
+
+            _infobarBuilderLabels.Add(new Label("Label", true, 999) { Y = 15 });
+            _infobarBuilderLabels.Add(new Label("Color", true, 999) { X = 150, Y = 15 });
+            _infobarBuilderLabels.Add(new Label("Data", true, 999) { X = 200, Y = 15 });
+
+            rightArea.Add(_infobarBuilderLabels);
+            rightArea.Add(new Line(0, 0, rightArea.Width, 1, Color.Gray.PackedValue));
+            rightArea.Add(new Line(0, 0, rightArea.Width, 5, Color.Black.PackedValue));
+
+
+            InfoBarManager ibmanager = Engine.SceneManager.GetScene<GameScene>().InfoBars;
+
+            List<InfoBarItem> _infoBarItems = ibmanager.GetInfoBars();
+
+            _infoBarBuilderControls = new List<InfoBarBuilderControl>();
+
+            for (int i = 0; i < _infoBarItems.Count; i++)
+            {
+                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(_infoBarItems[i]);
+                _infoBarBuilderControls.Add(ibbc);
+                rightArea.Add(ibbc);
+            }
+
+            Add(rightArea, PAGE);
+        }
+
+        private void BuildContainers()
+        {
+            const int PAGE = 13;
+
+            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
+
+            ScrollAreaItem item = new ScrollAreaItem();
+
+            Label text = new Label("- Container scale:",true, HUE_FONT, font: FONT);
+            item.Add(text);
+
+            _containersScale = new HSliderBar(text.X + text.Width + 10, text.Y + 5, 200, Constants.MIN_CONTAINER_SIZE_PERC, Constants.MAX_CONTAINER_SIZE_PERC, Engine.Profile.Current.ContainersScale, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+            item.Add(_containersScale);
+
+            rightArea.Add(item);
+
+            _containerScaleItems = CreateCheckBox(rightArea, "Scale items inside containers", Engine.Profile.Current.ScaleItemsInsideContainers, 0, 20);
+
+            Add(rightArea, PAGE);
+        }
+
 
         public override void OnButtonClick(int buttonID)
         {
@@ -1319,6 +1331,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _showMobileNameIncoming.IsChecked = true;
                     _gridLoot.SelectedIndex = 0;
                     _sallosEasyGrab.IsChecked = false;
+                    _partyInviteGump.IsChecked = false;
 
                     break;
 
@@ -1395,8 +1408,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _allyMessageColorPickerBox.SetColor(0x0057, FileManager.Hues.GetPolygoneColor(12, 0x0057));
                     _chatAfterEnter.IsChecked = false;
                     Engine.UI.SystemChat.IsActive = !_chatAfterEnter.IsChecked;
-                    _chatIgnodeHotkeysCheckbox.IsChecked = true;
-                    _chatIgnodeHotkeysPluginsCheckbox.IsChecked = true;
                     _chatAdditionalButtonsCheckbox.IsChecked = true;
                     _chatShiftEnterCheckbox.IsChecked = true;
                     _activeChatArea.IsVisible = _chatAfterEnter.IsChecked;
@@ -1447,6 +1458,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _overrideContainerLocation.IsChecked = false;
                     _overrideContainerLocationSetting.SelectedIndex = 0;
                     _dragSelectHumanoidsOnly.IsChecked = false;
+                    _showTargetRangeIndicator.IsChecked = false;
 
                     break;
 
@@ -1457,6 +1469,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case 12:
 
+                    break;
+
+                case 13:
+                    _containersScale.Value = 100;
+                    _containerScaleItems.IsChecked = false;
                     break;
             }
         }
@@ -1544,6 +1561,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.ShowNewCorpseNameIncoming = _showCorpseNameIncoming.IsChecked;
             Engine.Profile.Current.GridLootType = _gridLoot.SelectedIndex;
             Engine.Profile.Current.SallosEasyGrab = _sallosEasyGrab.IsChecked;
+            Engine.Profile.Current.PartyInviteGump = _partyInviteGump.IsChecked;
 
 
             // sounds
@@ -1579,8 +1597,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.Profile.Current.ActivateChatAfterEnter = _chatAfterEnter.IsChecked;
             }
 
-            Engine.Profile.Current.ActivateChatIgnoreHotkeys = _chatIgnodeHotkeysCheckbox.IsChecked;
-            Engine.Profile.Current.ActivateChatIgnoreHotkeysPlugins = _chatIgnodeHotkeysPluginsCheckbox.IsChecked;
             Engine.Profile.Current.ActivateChatAdditionalButtons = _chatAdditionalButtonsCheckbox.IsChecked;
             Engine.Profile.Current.ActivateChatShiftEnterSupport = _chatShiftEnterCheckbox.IsChecked;
             Engine.Profile.Current.SaveJournalToFile = _saveJournalCheckBox.IsChecked;
@@ -1690,7 +1706,10 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.LightLevel = (byte) (_lightBar.MaxValue - _lightBar.Value);
 
             if (_enableLight.IsChecked)
-                World.Light.Overall = Engine.Profile.Current.LightLevel;
+            {
+               World.Light.Overall = Engine.Profile.Current.LightLevel;
+               World.Light.Personal = 0;
+            }
             else
             {
                 World.Light.Overall = World.Light.RealOverall;
@@ -1837,6 +1856,8 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.OverrideContainerLocation = _overrideContainerLocation.IsChecked;
             Engine.Profile.Current.OverrideContainerLocationSetting = _overrideContainerLocationSetting.SelectedIndex;
 
+            Engine.Profile.Current.ShowTargetRangeIndicator = _showTargetRangeIndicator.IsChecked;
+
             // network
             Engine.Profile.Current.ShowNetworkStats = _showNetStats.IsChecked;
 
@@ -1881,8 +1902,20 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             
+            // containers
+            int containerScale = Engine.Profile.Current.ContainersScale;
 
+            if ((byte) _containersScale.Value != containerScale || Engine.Profile.Current.ScaleItemsInsideContainers != _containerScaleItems.IsChecked)
+            {
+                containerScale = Engine.Profile.Current.ContainersScale = (byte)_containersScale.Value;
+                Engine.UI.ContainerScale = containerScale / 100f;
+                Engine.Profile.Current.ScaleItemsInsideContainers = _containerScaleItems.IsChecked;
 
+                foreach (ContainerGump resizableGump in Engine.UI.Gumps.OfType<ContainerGump>())
+                {
+                    resizableGump.ForceUpdate();
+                }
+            }
 
             Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
         }

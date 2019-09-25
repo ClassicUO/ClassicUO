@@ -55,5 +55,12 @@ namespace ClassicUO.Game.UI.Controls
 
             return base.Draw(batcher, x, y);
         }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            IsEditable = false;
+            EntryValue?.Destroy();
+        }
     }
 }

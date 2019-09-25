@@ -417,7 +417,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (CanBeSaved)
                 {
-                    Add(_textBox = new TextBox(3, width: 120, isunicode: false, style: FontStyle.Fixed, hue: 0x0386)
+                    Add(_textBox = new TextBox(3, width: 120, isunicode: false, style: FontStyle.Fixed, hue: Notoriety.GetHue(World.Player.NotorietyFlag))
                     {
                         X = 0,
                         Y = -2,
@@ -575,15 +575,19 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
+            if (button != MouseButton.Left)
+                return false;
+
             var entity = World.Get(LocalSerial);
 
             if (entity != null)
             {
                 if (entity != World.Player)
                 {
-                    if (World.Player.InWarMode && World.Player != entity)
+                    if (World.Player.InWarMode)
                         GameActions.Attack(entity);
-                    else if (button == MouseButton.Left) GameActions.DoubleClick(entity);
+                    else
+                        GameActions.DoubleClick(entity);
                 }
                 else
                 {
