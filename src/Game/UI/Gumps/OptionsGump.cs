@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _CustomBars;
         private Combobox _overrideContainerLocationSetting;
 
         // sounds
@@ -1160,6 +1160,8 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             rightArea.Add(_showTargetRangeIndicator);
+            
+            _CustomBars = CreateCheckBox(rightArea, "Use Custom Health Bars", Engine.Profile.Current.CustomBarsToggled, 0, 0);
 
             Add(rightArea, PAGE);
 
@@ -1459,6 +1461,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _overrideContainerLocationSetting.SelectedIndex = 0;
                     _dragSelectHumanoidsOnly.IsChecked = false;
                     _showTargetRangeIndicator.IsChecked = false;
+                    _CustomBars.IsChecked = false;
 
                     break;
 
@@ -1501,6 +1504,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.HoldDownKeyAltToCloseAnchored = _holdDownKeyAlt.IsChecked;
             Engine.Profile.Current.HoldShiftForContext = _holdShiftForContext.IsChecked;
             Engine.Profile.Current.CloseHealthBarType = _healtbarType.SelectedIndex;
+            Engine.Profile.Current.CustomBarsToggled = _CustomBars.IsChecked;
 
             if (Engine.Profile.Current.DrawRoofs == _drawRoofs.IsChecked)
             {
