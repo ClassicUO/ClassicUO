@@ -2837,7 +2837,15 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 0x0C: // close statusbar gump
-                    Engine.UI.Remove<HealthBarGump>(p.ReadUInt());
+                    
+                    if (Engine.Profile.Current.CustomBarsToggled == true)
+                    {
+                        Engine.UI.Remove<HealthBarGumpCustom>(p.ReadUInt());
+                    }
+                    else
+                    {
+                        Engine.UI.Remove<HealthBarGump>(p.ReadUInt());
+                    }
 
                     break;
 
@@ -2949,7 +2957,15 @@ namespace ClassicUO.Network
                             break;
 
                         case 2: //statusbar
-                            Engine.UI.Remove<HealthBarGump>(serial);
+                            
+                            if (Engine.Profile.Current.CustomBarsToggled == true)
+                            {
+                                Engine.UI.Remove<HealthBarGumpCustom>(serial);
+                            }
+                            else
+                            {
+                                Engine.UI.Remove<HealthBarGump>(serial);
+                            }
 
                             break;
 
