@@ -1159,7 +1159,7 @@ namespace ClassicUO.Network
 
             byte code = p.ReadByte();
 
-            if (code < 5) Chat.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 0, MessageType.System, 3);
+            if (code < 5) Chat.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 1001, MessageType.System, 3);
         }
 
         private static void EndDraggingItem(Packet p)
