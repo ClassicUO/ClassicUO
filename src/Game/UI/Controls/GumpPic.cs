@@ -72,9 +72,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            //x = Mouse.Position.X - ScreenCoordinateX;
-            //y = Mouse.Position.Y - ScreenCoordinateY;
-
             if (Texture.Contains(x, y))
                 return true;
 
@@ -127,6 +124,8 @@ namespace ClassicUO.Game.UI.Controls
             Texture = texture;
             Width = Texture.Width;
             Height = Texture.Height;
+
+            WantUpdateSize = false;
         }
 
         public bool IsPartialHue { get; set; }

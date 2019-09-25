@@ -87,11 +87,11 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void DropControl(AnchorableGump draggedControl, AnchorableGump host, int x, int y)
+        public void DropControl(AnchorableGump draggedControl, AnchorableGump host)
         {
             if (host.AnchorGroupName == draggedControl.AnchorGroupName && this[draggedControl] == null)
             {
-                Point? relativePosition = GetAnchorDirection(draggedControl, host, x, y);
+                Point? relativePosition = GetAnchorDirection(draggedControl, host);
 
                 if (relativePosition.HasValue)
                 {
@@ -107,11 +107,11 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public Point GetCandidateDropLocation(AnchorableGump draggedControl, AnchorableGump host, int x, int y)
+        public Point GetCandidateDropLocation(AnchorableGump draggedControl, AnchorableGump host)
         {
             if (host.AnchorGroupName == draggedControl.AnchorGroupName && this[draggedControl] == null)
             {
-                Point? relativePosition = GetAnchorDirection(draggedControl, host, x, y);
+                Point? relativePosition = GetAnchorDirection(draggedControl, host);
 
                 if (relativePosition.HasValue)
                 {
@@ -127,13 +127,9 @@ namespace ClassicUO.Game.Managers
             return draggedControl.Location;
         }
 
-        public AnchorableGump GetAnchorableControlOver(Control draggedControl, int x, int y)
+        public AnchorableGump GetAnchorableControlUnder(AnchorableGump draggedControl)
         {
-            return Engine.UI.Gumps
-                         .OfType<AnchorableGump>()
-                         .FirstOrDefault(s => s != draggedControl && 
-                                              s.HitTest(draggedControl.ScreenCoordinateX + x,
-                                                        draggedControl.ScreenCoordinateY + y) != null);
+            return ClosestOverlappingControl(draggedControl);
         }
 
         public void DetachControl(AnchorableGump control)
@@ -198,44 +194,25 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        private Point? GetAnchorDirection(AnchorableGump draggedControl, AnchorableGump host, int x, int y)
+        private Point? GetAnchorDirection(AnchorableGump draggedControl, AnchorableGump host)
         {
-            for (int xMult = 0; xMult < host.WidthMultiplier; xMult++)
+            int xdistancescale = Math.Abs(draggedControl.X - host.X)*100 / host.Width;
+            int ydistancescale = Math.Abs(draggedControl.Y - host.Y)*100 / host.Height;
+
+            if (xdistancescale > ydistancescale)
             {
-                for (int yMult = 0; yMult < host.HeightMultiplier; yMult++)
-                {
-                    var snapX = x - host.GroupMatrixWidth * xMult;
-                    var snapY = y - host.GroupMatrixHeight * yMult;
-
-                    var anchorPoint = new Vector2((float) snapX / host.GroupMatrixWidth, (float) snapY / host.GroupMatrixHeight);
-
-                    if (xMult == 0)
-                    {
-                        if (IsPointInPolygon(_anchorTriangles[(int) AnchorDirection.Left], anchorPoint))
-                            return new Point(-draggedControl.WidthMultiplier, yMult);
-                    }
-
-                    if (yMult == 0)
-                    {
-                        if (IsPointInPolygon(_anchorTriangles[(int) AnchorDirection.Top], anchorPoint))
-                            return new Point(xMult, -draggedControl.HeightMultiplier);
-                    }
-
-                    if (xMult == host.WidthMultiplier - 1)
-                    {
-                        if (IsPointInPolygon(_anchorTriangles[(int) AnchorDirection.Right], anchorPoint))
-                            return new Point(1 + xMult, yMult);
-                    }
-
-                    if (yMult == host.HeightMultiplier - 1)
-                    {
-                        if (IsPointInPolygon(_anchorTriangles[(int) AnchorDirection.Bottom], anchorPoint))
-                            return new Point(xMult, 1 + yMult);
-                    }
-                }
+                if (draggedControl.X > host.X)
+                    return new Point(host.WidthMultiplier, 0);
+                else
+                    return new Point(-draggedControl.WidthMultiplier, 0);
             }
-
-            return null;
+            else
+            {
+                if (draggedControl.Y > host.Y)
+                    return new Point(0, host.HeightMultiplier);
+                else
+                    return new Point(0, -draggedControl.HeightMultiplier);
+            }
         }
 
         private bool IsPointInPolygon(Vector2[] polygon, Vector2 point)
@@ -250,6 +227,42 @@ namespace ClassicUO.Game.Managers
             }
 
             return isInside;
+        }
+
+        public AnchorableGump ClosestOverlappingControl(AnchorableGump control)
+        {
+            AnchorableGump closestControl = null;
+            int closestDistance = 99999;
+
+            var hosts = Engine.UI.Gumps.OfType<AnchorableGump>().Where(s => s.AnchorGroupName == control.AnchorGroupName);
+            foreach (AnchorableGump host in hosts)
+            {
+                if (IsOverlapping(control, host))
+                {
+                    int dirtyDistance = Math.Abs(control.X - host.X) + Math.Abs(control.Y - host.Y);
+                    if (dirtyDistance < closestDistance)
+                    {
+                        closestDistance = dirtyDistance;
+                        closestControl = host;
+                    }
+                }
+            }
+
+            return closestControl;
+        }
+
+        private bool IsOverlapping(AnchorableGump control, AnchorableGump host)
+        {
+            if (control == host)
+                return false;
+
+            if (control.Bounds.Top > host.Bounds.Bottom || control.Bounds.Bottom < host.Bounds.Top)
+                return false;
+
+            if (control.Bounds.Right < host.Bounds.Left || control.Bounds.Left > host.Bounds.Right)
+                return false;
+
+            return true;
         }
 
         public class AnchorGroup

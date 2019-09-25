@@ -1053,8 +1053,7 @@ namespace ClassicUO.Network
             if (containerSerial.IsMobile)
             {
                 Mobile m = World.Mobiles.Get(containerSerial);
-                Item secureBox = m.GetSecureTradeBox();
-
+                Item secureBox = m?.GetSecureTradeBox();
                 if (secureBox != null)
                 {
                     var gump = Engine.UI.Gumps.OfType<TradingGump>().SingleOrDefault(s => s.LocalSerial == secureBox || s.ID1 == secureBox || s.ID2 == secureBox);
@@ -1159,7 +1158,7 @@ namespace ClassicUO.Network
 
             byte code = p.ReadByte();
 
-            if (code < 5) Chat.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 0, MessageType.System, 3);
+            if (code < 5) Chat.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 1001, MessageType.System, 3);
         }
 
         private static void EndDraggingItem(Packet p)

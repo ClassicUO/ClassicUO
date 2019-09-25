@@ -15,7 +15,7 @@ namespace ClassicUO.Utility
             switch (obj)
             {
                 case Static st:
-                    itemdata = st.OriginalGraphic != st.Graphic ? FileManager.TileData.StaticData[st.OriginalGraphic] : st.ItemData;
+                    itemdata = /*st.OriginalGraphic != st.Graphic ? FileManager.TileData.StaticData[st.OriginalGraphic] :*/ st.ItemData;
 
                     return true;
 
