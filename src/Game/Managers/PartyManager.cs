@@ -102,6 +102,10 @@ namespace ClassicUO.Game.Managers
                                 }
                             }
                         }
+
+                        Engine.UI.GetGump<PartyGumpAdvanced>()?.Update();
+
+                        break;
                     }
                     else
                     {
@@ -156,11 +160,11 @@ namespace ClassicUO.Game.Managers
                                 }
                             }
                         }
+
+                        Engine.UI.GetGump<PartyGumpAdvanced>()?.Update();
+
+                        break;
                     }
-
-                    Engine.UI.GetGump<PartyGumpAdvanced>()?.Update();
-
-                    break;
 
                 case 3:
                 case 4:
