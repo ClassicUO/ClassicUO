@@ -1053,13 +1053,15 @@ namespace ClassicUO.Network
             if (containerSerial.IsMobile)
             {
                 Mobile m = World.Mobiles.Get(containerSerial);
-                Item secureBox = m.GetSecureTradeBox();
-
-                if (secureBox != null)
+                if (m != null)
                 {
-                    var gump = Engine.UI.Gumps.OfType<TradingGump>().SingleOrDefault(s => s.LocalSerial == secureBox || s.ID1 == secureBox || s.ID2 == secureBox);
+                    Item secureBox = m.GetSecureTradeBox();
+                    if (secureBox != null)
+                    {
+                        var gump = Engine.UI.Gumps.OfType<TradingGump>().SingleOrDefault(s => s.LocalSerial == secureBox || s.ID1 == secureBox || s.ID2 == secureBox);
 
-                    if (gump != null) gump.UpdateContent();
+                        if (gump != null) gump.UpdateContent();
+                    }
                 }
             }
             else if (containerSerial.IsItem)
