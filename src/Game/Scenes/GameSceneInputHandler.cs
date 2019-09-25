@@ -248,9 +248,7 @@ namespace ClassicUO.Game.Scenes
 
 							foreach (var bar in Engine.UI.Gumps
 													  .OfType<HealthBarGumpCustom>()
-													  .OrderBy(s => mobile.NotorietyFlag)
-                                                      //.OrderBy(s => s.ScreenCoordinateX) ///testing placement SYRUPZ SYRUPZ SYRUPZ
-                                                      .ThenBy(s => s.ScreenCoordinateX)
+													  .OrderBy(s => s.ScreenCoordinateX)                                                       
 													  .ThenBy(s => s.ScreenCoordinateY))
 							{
 								if (bar.Bounds.Intersects(hbgc.Bounds))
