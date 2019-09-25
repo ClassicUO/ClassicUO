@@ -64,7 +64,7 @@ namespace ClassicUO.Renderer
 
         public static RenderedText Create(string text, ushort hue = 0xFFFF, byte font = 0xFF, bool isunicode = true, FontStyle style = 0, TEXT_ALIGN_TYPE align = 0, 
                                           int maxWidth = 0, byte cell = 30, bool isHTML = false, 
-                                          bool recalculateWidthByInfo = false, bool saveHitmap = false)
+                                          bool recalculateWidthByInfo = false, bool saveHitmap = false, bool editable = false)
         {
             RenderedText r;
             if (_pool.Count != 0)
@@ -93,6 +93,7 @@ namespace ClassicUO.Renderer
             r.HTMLColor = 0xFFFF_FFFF;
             r.HasBackgroundColor = false;
             r.IsPartialHue = false;
+            r.IsEditable = editable;
 
             if (r.Text != text)
                 r.Text = text; // here makes the texture
@@ -123,6 +124,8 @@ namespace ClassicUO.Renderer
         public FontStyle FontStyle { get; set; }
 
         public byte Cell { get; set; }
+        
+        public bool IsEditable { get; set; }
 
         public bool IsHTML { get; set; }
 
