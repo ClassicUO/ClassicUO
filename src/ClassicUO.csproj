@@ -328,6 +328,7 @@
     <Compile Include="Game\UI\Gumps\Login\ServerSelectionGump.cs" />
     <Compile Include="Game\UI\Gumps\QuestionGump.cs" />
     <Compile Include="Game\UI\Gumps\HealthBarGump.cs" />
+    <Compile Include="Game\UI\Gumps\HealthBarGumpCustom.cs" />
     <Compile Include="Game\UI\Gumps\OptionsGump.cs" />
     <Compile Include="Game\UI\Gumps\PartyGumpAdvanced.cs" />
     <Compile Include="Game\UI\Gumps\PopupMenuGump.cs" />
