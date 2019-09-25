@@ -90,18 +90,38 @@ namespace ClassicUO.Game.Managers
                             Leader = serial;
 
 
-                        HealthBarGump gump = Engine.UI.GetGump<HealthBarGump>(serial);
+                        if (Engine.Profile.Current.CustomBarsToggled == true)
+                        {
+                            HealthBarGumpCustom gump = Engine.UI.GetGump<HealthBarGumpCustom>(serial);
 
-                        if (gump != null)
-                        {
-                            GameActions.RequestMobileStatus(serial);
-                            gump.Update();
-                        }
-                        else
-                        {
-                            if (serial == World.Player)
+                            if (gump != null)
                             {
+                                GameActions.RequestMobileStatus(serial);
+                                gump.Update();
                             }
+                            else
+                            {
+                                if (serial == World.Player)
+                                {
+                                }
+                            }
+                        }
+                        else 
+                        {
+                            HealthBarGump gump = Engine.UI.GetGump<HealthBarGump>(serial);
+
+                            if (gump != null)
+                            {
+                                GameActions.RequestMobileStatus(serial);
+                                gump.Update();
+                            }
+                            else
+                            {
+                                if (serial == World.Player)
+                                {
+                                }
+                            }
+
                         }
                     }
 
