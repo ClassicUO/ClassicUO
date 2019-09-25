@@ -427,7 +427,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (Mobile == World.Player)
                     {
-                        Engine.UI.GetGump<HealthBarGump>(Mobile)?.Dispose();
+                        if (Engine.Profile.Current.CustomBarsToggled == true)
+                        {
+                            Engine.UI.GetGump<HealthBarGumpCustom>(Mobile)?.Dispose();
+                        }
+                        else
+                        {
+                            Engine.UI.GetGump<HealthBarGump>(Mobile)?.Dispose();
+                        }
 
                         StatusGumpBase status = StatusGumpBase.GetStatusGump();
 
@@ -438,18 +445,35 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        if (Engine.UI.GetGump<HealthBarGump>(Mobile) != null)
-                            break;
-
-                        GameActions.RequestMobileStatus(Mobile);
-
-                        Rectangle bounds = FileManager.Gumps.GetTexture(0x0804).Bounds;
-
-                        Engine.UI.Add(new HealthBarGump(Mobile)
+                        if (Engine.Profile.Current.CustomBarsToggled == true)
                         {
-                            X = Mouse.Position.X - (bounds.Width >> 1),
-                            Y = Mouse.Position.Y - 5
-                        });
+                            if (Engine.UI.GetGump<HealthBarGumpCustom>(Mobile) != null)
+                                break;
+
+                            GameActions.RequestMobileStatus(Mobile);
+
+                            Rectangle bounds = FileManager.Gumps.GetTexture(0x0804).Bounds;
+
+                            Engine.UI.Add(new HealthBarGumpCustom(Mobile)
+                            {
+                                X = Mouse.Position.X - (bounds.Width >> 1),
+                                Y = Mouse.Position.Y - 5
+                            });
+                        }
+                        else
+                        {
+                            if (Engine.UI.GetGump<HealthBarGump>(Mobile) != null)
+                                break;
+
+                            GameActions.RequestMobileStatus(Mobile);
+
+                            Rectangle bounds = FileManager.Gumps.GetTexture(0x0804).Bounds;
+
+                            Engine.UI.Add(new HealthBarGump(Mobile)
+                            {
+                                X = Mouse.Position.X - (bounds.Width >> 1),
+                                Y = Mouse.Position.Y - 5
+                            });
                     }
 
                     break;
