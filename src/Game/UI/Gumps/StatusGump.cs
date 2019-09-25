@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
@@ -49,6 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             // sanity check
             Engine.UI.GetGump<HealthBarGump>(World.Player)?.Dispose();
+            Engine.UI.GetGump<HealthBarGumpCustom>(World.Player)?.Dispose();
 
             CanMove = true;
             CanBeSaved = true;
@@ -90,8 +91,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
                     {
-                        Engine.UI.GetGump<HealthBarGump>(World.Player)?.Dispose();
-                        Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                        if (Engine.Profile.Current.CustomBarsToggled == true)
+                        {
+                            Engine.UI.GetGump<HealthBarGumpCustom>(World.Player)?.Dispose();
+                            Engine.UI.Add(new HealthBarGumpCustom(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                        }
+                        else
+                        {
+                            Engine.UI.GetGump<HealthBarGump>(World.Player)?.Dispose();
+                            Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                        }
                         Dispose();
                     }
                    
@@ -1041,8 +1050,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (rect.Contains(p))
                     {
-                        Engine.UI.GetGump<HealthBarGump>(World.Player)?.Dispose();
-                        Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                        if (Engine.Profile.Current.CustomBarsToggled == true)
+                        {
+                            Engine.UI.GetGump<HealthBarGumpCustom>(World.Player)?.Dispose();
+                            Engine.UI.Add(new HealthBarGumpCustom(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                        }
+                        else
+                        {
+                            Engine.UI.GetGump<HealthBarGump>(World.Player)?.Dispose();
+                            Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                        }
                         Dispose();
                     }
                 }
