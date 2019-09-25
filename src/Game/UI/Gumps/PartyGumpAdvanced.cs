@@ -406,14 +406,28 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case Buttons.GetBar:
 
-                    Engine.UI.GetGump<HealthBarGump>(member.Serial)?.Dispose();
+                    if (Engine.Profile.Current.CustomBarsToggled == true)
+                    {
+                        Engine.UI.GetGump<HealthBarGumpCustom>(member.Serial)?.Dispose();
 
-                    if (member.Serial == World.Player)
-                        StatusGumpBase.GetStatusGump()?.Dispose();
+                        if (member.Serial == World.Player)
+                            StatusGumpBase.GetStatusGump()?.Dispose();
 
-                    Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-                    Engine.UI.Add(new HealthBarGump(member.Serial) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
+                        Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
+                        Engine.UI.Add(new HealthBarGumpCustom(member.Serial) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                    }
+                    else
+                    {
+                        Engine.UI.GetGump<HealthBarGump>(member.Serial)?.Dispose();
 
+                        if (member.Serial == World.Player)
+                            StatusGumpBase.GetStatusGump()?.Dispose();
+
+                        Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
+                        Engine.UI.Add(new HealthBarGump(member.Serial) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+
+                    }
+                    
                     break;
             }
         }
