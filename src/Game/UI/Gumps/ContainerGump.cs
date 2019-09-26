@@ -184,7 +184,9 @@ namespace ClassicUO.Game.UI.Gumps
                 _eyeCorspeOffset = _eyeCorspeOffset == 0 ? 1 : 0;
                 _corpseEyeTicks = (long) totalMS + 750;
                 _eyeGumpPic.Graphic = (Graphic) (0x0045 + _eyeCorspeOffset);
-                _eyeGumpPic.Texture = FileManager.Gumps.GetTexture(_eyeGumpPic.Graphic);
+                float scale = Engine.UI.ContainerScale;
+                _eyeGumpPic.Width = (int)(_eyeGumpPic.Texture.Width * scale);
+                _eyeGumpPic.Height = (int)(_eyeGumpPic.Texture.Height * scale);
             }
             if(Iconized != null) Iconized.Hue = _item.Hue;
         }
