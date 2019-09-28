@@ -960,10 +960,31 @@ namespace ClassicUO.Game.GameObjects
                         if (!isWalking)
                         {
                             if (result == 0xFF)
-                                result = 2;
+                            {
+                                if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                                {
+                                    if (mobile.InWarMode)
+                                        result = 1;
+                                    else
+                                        result = 25;
+                                }
+                                else
+                                    result = 2;
+                            }
                         }
                         else if (isRun)
-                            result = FileManager.Animations.AnimationExists(graphic, 1) ? (byte) 1 : (byte) 2;
+                        {
+                            if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                            {
+                                result = 24;
+                            }
+                            else
+                                result = FileManager.Animations.AnimationExists(graphic, 1) ? (byte) 1 : (byte) 2;
+                        }
+                        else if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0 && !mobile.InWarMode)
+                        {
+                            result = 22;
+                        }
                         else
                             result = 0;
                     }
@@ -1048,7 +1069,12 @@ namespace ClassicUO.Game.GameObjects
                     //}
                     else if (isRun || !mobile.InWarMode || mobile.IsDead)
                     {
-                        result = (byte) (isRun ? 2 : 0);
+                        if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0 && isRun)
+                        {
+                            result = 24;
+                        }
+                        else
+                            result = (byte) (isRun ? 2 : 0);
 
                         if (hand2 != null)
                         {
@@ -1068,61 +1094,7 @@ namespace ClassicUO.Game.GameObjects
                     break;
                 }
             }
-
-            //if (!isequip)
-            //    CorretAnimationByAnimSequence(groupIndex, graphic, ref result);
-
             return result;
-        }
-
-        private static void CorretAnimationByAnimSequence(ANIMATION_GROUPS type, ushort graphic, ref byte result)
-        {
-            if (FileManager.Animations.IsReplacedByAnimationSequence(graphic, out byte t))
-            {
-                switch (type)
-                {
-                    case ANIMATION_GROUPS.AG_LOW:
-
-
-                        break;
-
-                    case ANIMATION_GROUPS.AG_HIGHT:
-
-                        if (result == 1)
-                        {
-                            result = 25;
-
-                            return;
-                        }
-
-                        break;
-
-                    case ANIMATION_GROUPS.AG_PEOPLE:
-
-                        if (result == 1)
-                        {
-                            result = result;
-
-                            return;
-                        }
-
-                        break;
-                }
-
-
-                if (result == 4) // people stand
-                    result = 25;
-                else if (
-                    result == 0 || // people walk un armed / high walk
-                    result == 1 || // walk armed / high stand
-                    result == 15) // walk warmode
-                    result = 22; // 22
-                else if (
-                    result == 2 || // people run unarmed
-                    result == 3 || // people run armed
-                    result == 19) // high fly
-                    result = 24;
-            }
         }
 
         public static bool IsReplacedObjectAnimation(byte anim, ushort v13)
@@ -1306,7 +1278,9 @@ namespace ClassicUO.Game.GameObjects
                     {
                         default:
 
-                            return 31;
+                            if (FileManager.Animations.AnimationExists(mobile.Graphic, 31))
+                                return 31;
+                            break;
 
                         case 1:
 

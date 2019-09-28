@@ -412,7 +412,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
                 {
-                    if (animGroup == ANIMATION_GROUPS.AG_HIGHT)
+                    if (animGroup != ANIMATION_GROUPS.AG_PEOPLE)
                     {
                         if (InWarMode)
                             AnimationGroup = 28;
@@ -423,7 +423,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                AnimationGroup = _animationIdle[(byte) animGroup - 1, RandomHelper.GetValue(0, 2)];
+                AnimationGroup = _animationIdle[(byte)animGroup - 1, RandomHelper.GetValue(0, 2)];
 
                 if (isLowExtended && AnimationGroup == 18)
                     AnimationGroup = 1;
