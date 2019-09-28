@@ -105,7 +105,7 @@ namespace ClassicUO.Game.GameObjects
                             result = 8;
                         else
                         {
-                            if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                            if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0 && !mobile.InWarMode)
                             {
                                 result = 25;
                             }
@@ -128,7 +128,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                    if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0 && !mobile.InWarMode)
                     {
                         result = 22;
                     }
@@ -584,10 +584,15 @@ namespace ClassicUO.Game.GameObjects
                     if (IsReplacedObjectAnimation(2, v13))
                         originalType = ANIMATION_GROUPS_TYPE.UNKNOWN;
 
+
                     if (!FileManager.Animations.AnimationExists(graphic, (byte) v13))
                         v13 = 1;
 
-                    if (v13 > 21)
+                    if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                    {
+                        // do nothing?
+                    }
+                    else if (v13 > 21)
                         v13 = 1;
                 }
 

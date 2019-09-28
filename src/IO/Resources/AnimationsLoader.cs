@@ -1125,6 +1125,9 @@ namespace ClassicUO.IO.Resources
 
                 case ANIMATION_GROUPS_TYPE.MONSTER:
 
+                    if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                        return (byte) (second ? 3 : 2);
+
                     return (byte)(second ? HIGHT_ANIMATION_GROUP.HAG_DIE_2 : HIGHT_ANIMATION_GROUP.HAG_DIE_1);
 
                 case ANIMATION_GROUPS_TYPE.HUMAN:
