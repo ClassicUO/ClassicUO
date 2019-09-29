@@ -259,6 +259,11 @@ namespace ClassicUO.Network
             {
                 Serial id1 = p.ReadUInt();
                 Serial id2 = p.ReadUInt();
+
+                // standard client doesn't allow the trading system if one of the traders is invisible (=not sent by server)
+                if (World.Get(id1) == null || World.Get(id2) == null)
+                    return;
+
                 bool hasName = p.ReadBool();
                 string name = string.Empty;
 
