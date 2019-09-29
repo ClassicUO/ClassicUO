@@ -137,7 +137,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                bool isPartial = ItemData.IsPartialHue;
+                bool isPartial = ItemData.IsPartialHue || ItemData.Weight == 255;
 
                 if (SelectedObject.LastObject == this && !IsLocked && !IsMulti)
                 {
@@ -152,7 +152,6 @@ namespace ClassicUO.Game.GameObjects
 
             if (Amount > 1 && ItemData.IsStackable && DisplayedGraphic == Graphic && _originalGraphic == Graphic)
             {
-                //SpriteRenderer.DrawStaticArt(DisplayedGraphic, Hue, (int) offsetDrawPosition.X, (int) offsetDrawPosition.Y);
                 base.Draw(batcher, posX - 5, posY - 5);
             }
 
@@ -161,9 +160,6 @@ namespace ClassicUO.Game.GameObjects
                 Engine.SceneManager.GetScene<GameScene>()
                       .AddLight(this, this, posX + 22, posY + 22);
             }
-
-            // SpriteRenderer.DrawStaticArt(DisplayedGraphic, Hue, (int)position.X, (int)position.Y);
-            // return true;
 
             if (!Serial.IsValid && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 HueVector.Z = 0.5f;
