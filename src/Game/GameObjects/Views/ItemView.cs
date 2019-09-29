@@ -141,7 +141,9 @@ namespace ClassicUO.Game.GameObjects
 
                 if (IsMulti)
                 {
-                    isPartial = ItemData.Weight == 255;
+                    if (!isPartial)
+                        isPartial = ItemData.Weight == 255;
+                    //isPartial = FileManager.TileData.StaticData[MultiGraphic].IsPartialHue || FileManager.TileData.StaticData[MultiGraphic].Weight == 255;
                 }
                 else if (SelectedObject.LastObject == this && !IsLocked)
                 {
@@ -154,7 +156,7 @@ namespace ClassicUO.Game.GameObjects
                 ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, ItemData.IsTranslucent ? .5f : 0);
             }
 
-            if (Amount > 1 && ItemData.IsStackable && DisplayedGraphic == Graphic && _originalGraphic == Graphic)
+            if (!IsCorpse && Amount > 1 && ItemData.IsStackable && DisplayedGraphic == Graphic && _originalGraphic == Graphic)
             {
                 base.Draw(batcher, posX - 5, posY - 5);
             }
