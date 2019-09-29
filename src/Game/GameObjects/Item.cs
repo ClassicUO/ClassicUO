@@ -211,7 +211,7 @@ namespace ClassicUO.Game.GameObjects
             get
             {
                 if (!_itemData.HasValue)
-                    _itemData = FileManager.TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
+                    _itemData = FileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
 
                 return _itemData.Value;
             }
@@ -259,7 +259,10 @@ namespace ClassicUO.Game.GameObjects
                     house.Components.Add(m);
                 }
                 else if (i == 0)
+                {
                     MultiGraphic = graphic;
+                    _itemData = null;
+                }
             }
 
             FileManager.Multi.ReleaseLastMultiDataRead();

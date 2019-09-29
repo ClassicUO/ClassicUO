@@ -119,7 +119,6 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-
             if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 HueVector.X = 0x0023;
@@ -139,21 +138,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 bool isPartial = ItemData.IsPartialHue;
 
-                if (IsMulti)
-                {
-                    if (!isPartial)
-                    {
-                        //isPartial = ItemData.Weight == 255;
-
-                        //if (!isPartial)
-                        {
-                            ref readonly var xx = ref FileManager.TileData.StaticData[MultiGraphic];
-                            isPartial = xx.IsPartialHue /*|| xx.Weight == 255*/;
-                        }
-                    }
-                    
-                }
-                else if (SelectedObject.LastObject == this && !IsLocked)
+                if (SelectedObject.LastObject == this && !IsLocked && !IsMulti)
                 {
                     isPartial = ItemData.Weight == 255;
                     hue = 0x0035;
@@ -164,12 +149,12 @@ namespace ClassicUO.Game.GameObjects
                 ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, ItemData.IsTranslucent ? .5f : 0);
             }
 
-            if (!IsCorpse && Amount > 1 && ItemData.IsStackable && DisplayedGraphic == Graphic && _originalGraphic == Graphic)
+            if (!IsCorpse && !IsMulti && Amount > 1 && ItemData.IsStackable && DisplayedGraphic == Graphic && _originalGraphic == Graphic)
             {
                 base.Draw(batcher, posX - 5, posY - 5);
             }
 
-            if (ItemData.IsLight)
+            if (ItemData.IsTranslucent)
             {
                 Engine.SceneManager.GetScene<GameScene>()
                       .AddLight(this, this, posX + 22, posY + 22);
