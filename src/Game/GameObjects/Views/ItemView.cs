@@ -143,10 +143,13 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (!isPartial)
                     {
-                        isPartial = ItemData.Weight == 255;
+                        //isPartial = ItemData.Weight == 255;
 
-                        if (!isPartial)
-                            isPartial = FileManager.TileData.StaticData[MultiGraphic].IsPartialHue || FileManager.TileData.StaticData[MultiGraphic].Weight == 255;
+                        //if (!isPartial)
+                        {
+                            ref readonly var xx = ref FileManager.TileData.StaticData[MultiGraphic];
+                            isPartial = xx.IsPartialHue /*|| xx.Weight == 255*/;
+                        }
                     }
                     
                 }
