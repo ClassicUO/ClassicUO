@@ -142,8 +142,13 @@ namespace ClassicUO.Game.GameObjects
                 if (IsMulti)
                 {
                     if (!isPartial)
+                    {
                         isPartial = ItemData.Weight == 255;
-                    //isPartial = FileManager.TileData.StaticData[MultiGraphic].IsPartialHue || FileManager.TileData.StaticData[MultiGraphic].Weight == 255;
+
+                        if (!isPartial)
+                            isPartial = FileManager.TileData.StaticData[MultiGraphic].IsPartialHue || FileManager.TileData.StaticData[MultiGraphic].Weight == 255;
+                    }
+                    
                 }
                 else if (SelectedObject.LastObject == this && !IsLocked)
                 {
