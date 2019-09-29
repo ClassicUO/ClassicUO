@@ -154,7 +154,7 @@ namespace ClassicUO.Game.GameObjects
                 base.Draw(batcher, posX - 5, posY - 5);
             }
 
-            if (ItemData.IsTranslucent)
+            if (ItemData.IsLight)
             {
                 Engine.SceneManager.GetScene<GameScene>()
                       .AddLight(this, this, posX + 22, posY + 22);
