@@ -3999,14 +3999,14 @@ namespace ClassicUO.Network
                 return;
             }
 
-
             Item item = World.Items.Get(serial);
-
 
             if (serial.IsMobile) Log.Message(LogTypes.Warning, "AddItemToContainer function adds mobile as Item");
 
             if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
             {
+                item.Destroy();
+
                 Entity initcontainer = World.Get(item.Container);
 
                 if (initcontainer != null)
@@ -4015,7 +4015,8 @@ namespace ClassicUO.Network
                     initcontainer.Items.Remove(item);
                     initcontainer.ProcessDelta();
                 }
-                else if (item.Container.IsValid) Log.Message(LogTypes.Warning, $"This item ({item.Serial}) has a container ({item.Container}), but cannot be found. :|");
+                else if (item.Container.IsValid) 
+                    Log.Message(LogTypes.Warning, $"This item ({item.Serial}) has a container ({item.Container}), but cannot be found. :|");
 
                 World.Items.Remove(item);
                 World.Items.ProcessDelta();

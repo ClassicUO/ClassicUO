@@ -1360,8 +1360,8 @@ namespace ClassicUO.Game.GameObjects
                         {
                             if (ent.Serial.IsItem)
                             {
-                                var top = World.Get(((Item)ent).RootContainer);
-
+                                var top = World.Get(((Item) ent).RootContainer);
+                                
                                 if (top != null)
                                     distance = top.Distance;
                             }
