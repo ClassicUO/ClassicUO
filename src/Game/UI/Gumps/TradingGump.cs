@@ -257,7 +257,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (FileManager.ClientVersion < ClientVersions.CV_500A)
             {
-                // TODO: implement
+                Add(new ColorBox(110, 60, 0, 0xFF000001)
+                {
+                    X = 45, Y = 90
+                });
+                Add(new ColorBox(110, 60, 0, 0xFF000001)
+                {
+                    X = 192, Y = 70
+                });
             }
 
 
