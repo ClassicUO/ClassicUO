@@ -3780,12 +3780,12 @@ namespace ClassicUO.Network
                     }
 
                     item.Position = position;
-                    item.CheckGraphicChange(item.AnimIndex);
                     item.ProcessDelta();
 
                     if (World.Items.Add(item))
                         World.Items.ProcessDelta();
 
+                    item.CheckGraphicChange(item.AnimIndex);
                     item.AddToTile();
                 }
                 else
