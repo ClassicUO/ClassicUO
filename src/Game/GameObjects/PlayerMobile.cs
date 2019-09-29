@@ -1314,6 +1314,66 @@ namespace ClassicUO.Game.GameObjects
             {
                 Engine.UI.GetGump<ContainerGump>(bank)?.Dispose();
             }
+        }
+
+        public void CloseRangedGumps()
+        {
+            foreach (var gump in Engine.UI.Gumps)
+            {
+                switch (gump)
+                {
+                    case PaperDollGump _:
+                    case MapGump _:
+                    case SpellbookGump _:
+
+                        if (World.Get(gump.LocalSerial) == null)
+                            gump.Dispose();
+
+                        break;
+                    case TradingGump _:
+                    case ShopGump _:
+
+                        Entity ent = World.Get(gump.LocalSerial);
+                        int distance = int.MaxValue;
+                        if (ent != null)
+                        {
+                            if (ent.Serial.IsItem)
+                            {
+                                var top = World.Get(((Item)ent).RootContainer);
+
+                                if (top != null)
+                                    distance = top.Distance;
+                            }
+                            else
+                                distance = ent.Distance;
+                        }
+
+                        if (distance > 18)
+                            gump.Dispose();
+
+                        break;
+                    case ContainerGump _:
+
+                        ent = World.Get(gump.LocalSerial);
+                        distance = int.MaxValue;
+                        if (ent != null)
+                        {
+                            if (ent.Serial.IsItem)
+                            {
+                                var top = World.Get(((Item)ent).RootContainer);
+
+                                if (top != null)
+                                    distance = top.Distance;
+                            }
+                            else
+                                distance = ent.Distance;
+                        }
+
+                        if (distance > 3)
+                            gump.Dispose();
+                        break;
+                }
+            }
 
         }
 

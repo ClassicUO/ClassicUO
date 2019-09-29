@@ -825,6 +825,7 @@ namespace ClassicUO.Network
             }
 #else
             World.Player.CloseBank();
+
             World.Player.Walker.WalkingFailed = false;
             World.Player.Position = new Position(x, y, z);
             World.RangeSize.X = x;
@@ -857,6 +858,9 @@ namespace ClassicUO.Network
 
             if (scene != null)
                 scene.UpdateDrawPosition = true;
+
+
+            World.Player.CloseRangedGumps();
         }
 
         private static void DenyWalk(Packet p)
@@ -3898,6 +3902,8 @@ namespace ClassicUO.Network
 
                 if (scene != null)
                     scene.UpdateDrawPosition = true;
+
+                World.Player.CloseRangedGumps();
             }
         }
 

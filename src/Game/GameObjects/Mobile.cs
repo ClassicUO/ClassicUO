@@ -750,12 +750,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (World.InGame && Serial == World.Player)
                         {
-                            foreach (var s in Engine.UI.Gumps.OfType<ContainerGump>())
-                            {
-                                var item = World.Items.Get(s.LocalSerial);
-                                if (item == null || item.IsDestroyed || item.OnGround && item.Distance > 3)
-                                    s.Dispose();
-                            }
+                            World.Player.CloseRangedGumps();
                         }
 
                         Direction = (Direction) step.Direction;
