@@ -137,7 +137,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                bool isPartial = ItemData.IsPartialHue || ItemData.Weight == 255;
+                bool isPartial = ItemData.IsPartialHue;
 
                 if (SelectedObject.LastObject == this && !IsLocked && !IsMulti)
                 {
