@@ -1797,21 +1797,19 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.EnableSelectionArea = _enableSelectionArea.IsChecked;
             Engine.Profile.Current.RestoreLastGameSize = _restoreLastGameSize.IsChecked;
 
+            // Reset nested checkboxes if parent checkbox is unchecked
+            if (!_disableDefaultHotkeys.IsChecked)
+            {
+                _disableArrowBtn.IsChecked = false;
+                _disableTabBtn.IsChecked = false;
+                _disableCtrlQWBtn.IsChecked = false;
+            }
+
+            // NOTE: Keep these assignments AFTER the code above that resets nested checkboxes if parent checkbox is unchecked
+            Engine.Profile.Current.DisableDefaultHotkeys = _disableDefaultHotkeys.IsChecked;
             Engine.Profile.Current.DisableArrowBtn = _disableArrowBtn.IsChecked;
             Engine.Profile.Current.DisableTabBtn = _disableTabBtn.IsChecked;
             Engine.Profile.Current.DisableCtrlQWBtn = _disableCtrlQWBtn.IsChecked;
-
-            if (Engine.Profile.Current.DisableDefaultHotkeys != _disableDefaultHotkeys.IsChecked)
-            {
-                if (!_debugGumpIsDisabled.IsChecked)
-                {
-                    Engine.Profile.Current.DisableArrowBtn = false;
-                    Engine.Profile.Current.DisableTabBtn = false;
-                    Engine.Profile.Current.DisableCtrlQWBtn = false;
-                }
-
-                Engine.Profile.Current.DisableDefaultHotkeys = _disableDefaultHotkeys.IsChecked;
-            }
 
             if (Engine.Profile.Current.DebugGumpIsDisabled != _debugGumpIsDisabled.IsChecked)
             {
