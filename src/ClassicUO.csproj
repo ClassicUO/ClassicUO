@@ -177,10 +177,7 @@
     <Compile Include="Game\UI\Gumps\TextContainerGump.cs" />
     <Compile Include="Game\UI\Gumps\TipNoticeGump.cs" />
     <Compile Include="Main.cs" />
-    <Compile Include="Renderer\Launcher\LauncherView.cs" />
     <Compile Include="Renderer\MatrixEffect.cs" />
-    <Compile Include="Renderer\UI\UIControl.cs" />
-    <Compile Include="Renderer\UI\UISystemManager.cs" />
     <Compile Include="Utility\Collections\RawList.cs" />
     <Compile Include="Utility\Collections\ReadOnlyArrayView.cs" />
     <Compile Include="Utility\GraphicHelper.cs" />
@@ -284,17 +281,12 @@
     <Compile Include="Network\BufferPool.cs" />
     <Compile Include="Network\Plugin.cs" />
     <Compile Include="Network\Updater.cs" />
-    <Compile Include="Renderer\SpriteRenderer.cs" />
-    <Compile Include="Renderer\UI\Label.cs" />
-    <Compile Include="Renderer\UI\UpdaterMenu.cs" />
     <Compile Include="Utility\Platforms\PlatformHelper.cs" />
     <Compile Include="Utility\Platforms\UoAssist.cs" />
     <Compile Include="Renderer\Batcher2D.cs" />
     <Compile Include="Renderer\Fonts.cs" />
     <Compile Include="Renderer\SpriteFont.cs" />
     <Compile Include="Renderer\Textures.cs" />
-    <Compile Include="Renderer\UI\Button.cs" />
-    <Compile Include="Renderer\UI\Panel.cs" />
     <Compile Include="Utility\Collections\CollectionHelper.cs" />
     <Compile Include="Utility\Coroutines\Coroutine.cs" />
     <Compile Include="Utility\Coroutines\CoroutineManager.cs" />
@@ -581,8 +573,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Renderer\UI\Layouts\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

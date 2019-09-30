@@ -259,6 +259,11 @@ namespace ClassicUO.Network
             {
                 Serial id1 = p.ReadUInt();
                 Serial id2 = p.ReadUInt();
+
+                // standard client doesn't allow the trading system if one of the traders is invisible (=not sent by server)
+                if (World.Get(id1) == null || World.Get(id2) == null)
+                    return;
+
                 bool hasName = p.ReadBool();
                 string name = string.Empty;
 
@@ -820,6 +825,7 @@ namespace ClassicUO.Network
             }
 #else
             World.Player.CloseBank();
+
             World.Player.Walker.WalkingFailed = false;
             World.Player.Position = new Position(x, y, z);
             World.RangeSize.X = x;
@@ -852,6 +858,9 @@ namespace ClassicUO.Network
 
             if (scene != null)
                 scene.UpdateDrawPosition = true;
+
+
+            World.Player.CloseRangedGumps();
         }
 
         private static void DenyWalk(Packet p)
@@ -3780,12 +3789,12 @@ namespace ClassicUO.Network
                     }
 
                     item.Position = position;
-                    item.CheckGraphicChange(item.AnimIndex);
                     item.ProcessDelta();
 
                     if (World.Items.Add(item))
                         World.Items.ProcessDelta();
 
+                    item.CheckGraphicChange(item.AnimIndex);
                     item.AddToTile();
                 }
                 else
@@ -3893,6 +3902,8 @@ namespace ClassicUO.Network
 
                 if (scene != null)
                     scene.UpdateDrawPosition = true;
+
+                World.Player.CloseRangedGumps();
             }
         }
 
@@ -3988,14 +3999,14 @@ namespace ClassicUO.Network
                 return;
             }
 
-
             Item item = World.Items.Get(serial);
-
 
             if (serial.IsMobile) Log.Message(LogTypes.Warning, "AddItemToContainer function adds mobile as Item");
 
             if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
             {
+                item.Destroy();
+
                 Entity initcontainer = World.Get(item.Container);
 
                 if (initcontainer != null)
@@ -4004,7 +4015,8 @@ namespace ClassicUO.Network
                     initcontainer.Items.Remove(item);
                     initcontainer.ProcessDelta();
                 }
-                else if (item.Container.IsValid) Log.Message(LogTypes.Warning, $"This item ({item.Serial}) has a container ({item.Container}), but cannot be found. :|");
+                else if (item.Container.IsValid) 
+                    Log.Message(LogTypes.Warning, $"This item ({item.Serial}) has a container ({item.Container}), but cannot be found. :|");
 
                 World.Items.Remove(item);
                 World.Items.ProcessDelta();

@@ -211,7 +211,7 @@ namespace ClassicUO.Game.GameObjects
             get
             {
                 if (!_itemData.HasValue)
-                    _itemData = FileManager.TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
+                    _itemData = FileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
 
                 return _itemData.Value;
             }
@@ -259,7 +259,10 @@ namespace ClassicUO.Game.GameObjects
                     house.Components.Add(m);
                 }
                 else if (i == 0)
+                {
                     MultiGraphic = graphic;
+                    _itemData = null;
+                }
             }
 
             FileManager.Multi.ReleaseLastMultiDataRead();
@@ -785,9 +788,12 @@ namespace ClassicUO.Game.GameObjects
                     sbyte frameIndex = (sbyte) (AnimIndex + 1);
                     ushort id = GetGraphicForAnimation();
 
-                    ushort corpseGraphic = FileManager.Animations.DataIndex[id].CorpseGraphic;
+                    //FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue);
 
-                    if (corpseGraphic != id && corpseGraphic != 0) id = corpseGraphic;
+                    //ushort corpseGraphic = FileManager.Animations.DataIndex[id].CorpseGraphic;
+
+                    //if (corpseGraphic != id && corpseGraphic != 0) 
+                    //    id = corpseGraphic;
 
                     bool mirror = false;
                     FileManager.Animations.GetAnimDirection(ref dir, ref mirror);

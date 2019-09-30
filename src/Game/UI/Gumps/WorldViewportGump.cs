@@ -84,6 +84,11 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _worldWidth + BORDER_WIDTH * 2;
             Height = _worldHeight + BORDER_HEIGHT * 2;
             _border = new GameBorder(0, 0, Width, Height, 4);
+            _border.DragEnd += (sender, e) => 
+            {
+                OptionsGump options = Engine.UI.GetGump<OptionsGump>();
+                options?.UpdateVideo();
+            };
             _viewport = new WorldViewport(scene, BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
 
             Engine.UI.SystemChat = _systemChatControl = new SystemChatControl(BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
@@ -102,34 +107,44 @@ namespace ClassicUO.Game.UI.Gumps
             if (IsDisposed)
                 return;
 
-            Point offset = Mouse.LDroppedOffset;
-
-            _lastSize = _savedSize;
-
-            if (_clicked && offset != Point.Zero)
+            if (Mouse.IsDragging)
             {
-                int w = _lastSize.X + offset.X;
-                int h = _lastSize.Y + offset.Y;
+                Point offset = Mouse.LDroppedOffset;
 
-                if (w < 640)
-                    w = 640;
+                _lastSize = _savedSize;
 
-                if (h < 480)
-                    h = 480;
+                if (_clicked && offset != Point.Zero)
+                {
+                    int w = _lastSize.X + offset.X;
+                    int h = _lastSize.Y + offset.Y;
 
-                _lastSize.X = w;
-                _lastSize.Y = h;
+                    if (w < 640)
+                        w = 640;
+
+                    if (h < 480)
+                        h = 480;
+
+                    if (w > Engine.WindowWidth - BORDER_WIDTH)
+                        w = Engine.WindowWidth - BORDER_WIDTH;
+
+                    if (h > Engine.WindowHeight - BORDER_HEIGHT)
+                        h = Engine.WindowHeight - BORDER_HEIGHT;
+
+                    _lastSize.X = w;
+                    _lastSize.Y = h;
+                }
+
+                if (_worldWidth != _lastSize.X || _worldHeight != _lastSize.Y)
+                {
+                    _worldWidth = _lastSize.X;
+                    _worldHeight = _lastSize.Y;
+                    Width = _worldWidth + BORDER_WIDTH * 2;
+                    Height = _worldHeight + BORDER_HEIGHT * 2;
+                    Engine.Profile.Current.GameWindowSize = _lastSize;
+                    Resize();
+                }
             }
-
-            if (_worldWidth != _lastSize.X || _worldHeight != _lastSize.Y)
-            {
-                _worldWidth = _lastSize.X;
-                _worldHeight = _lastSize.Y;
-                Width = _worldWidth + BORDER_WIDTH * 2;
-                Height = _worldHeight + BORDER_HEIGHT * 2;
-                Engine.Profile.Current.GameWindowSize = _lastSize;
-                Resize();
-            }
+           
 
             base.Update(totalMS, frameMS);
         }
@@ -155,11 +170,6 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.GameWindowPosition = position;
         }
 
-        protected override void OnDragEnd(int x, int y)
-        {
-            OptionsGump options = Engine.UI.GetGump<OptionsGump>();
-            options?.UpdateVideo();
-        }
 
         private void Resize()
         {
@@ -186,8 +196,18 @@ namespace ClassicUO.Game.UI.Gumps
                 newSize.Y = 480;
 
             //Resize();
-            _savedSize = Engine.Profile.Current.GameWindowSize = newSize;
+            _lastSize = _savedSize = Engine.Profile.Current.GameWindowSize = newSize;
+            if (_worldWidth != _lastSize.X || _worldHeight != _lastSize.Y)
+            {
+                _worldWidth = _lastSize.X;
+                _worldHeight = _lastSize.Y;
+                Width = _worldWidth + BORDER_WIDTH * 2;
+                Height = _worldHeight + BORDER_HEIGHT * 2;
+                Engine.Profile.Current.GameWindowSize = _lastSize;
+                Resize();
 
+                Engine.SceneManager.GetScene<GameScene>().UpdateDrawPosition = true;
+            }
             return newSize;
         }
 

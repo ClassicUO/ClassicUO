@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal abstract class GumpPicBase : Control
     {
-        protected ushort _lastGump = 0xFFFF;
+        private ushort _graphic;
 
         protected GumpPicBase()
         {
@@ -42,27 +42,26 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = true;
         }
 
-        public Graphic Graphic { get; set; }
+        public Graphic Graphic
+        {
+            get => _graphic;
+            set
+            {
+                _graphic = value;
+                Texture = FileManager.Gumps.GetTexture(_graphic);
+            }
+        }
 
         public Hue Hue { get; set; }
 
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (Texture == null || Texture.IsDisposed || Graphic != _lastGump)
+            if (Texture == null)
             {
-                _lastGump = Graphic;
-                Texture = FileManager.Gumps.GetTexture(Graphic);
+                Dispose();
 
-                if (Texture == null)
-                {
-                    Dispose();
-
-                    return;
-                }
-
-                Width = Texture.Width;
-                Height = Texture.Height;
+                return;
             }
 
             Texture.Ticks = (long) totalMS;
@@ -94,11 +93,7 @@ namespace ClassicUO.Game.UI.Controls
             X = x;
             Y = y;
             Graphic = graphic;
-            _lastGump = graphic;
-
             Hue = hue;
-
-            Texture = FileManager.Gumps.GetTexture(Graphic);
 
             if (Texture == null)
                 Dispose();
@@ -122,9 +117,14 @@ namespace ClassicUO.Game.UI.Controls
             Hue = hue;
 
             Texture = texture;
-            Width = Texture.Width;
-            Height = Texture.Height;
 
+            if (Texture == null)
+                Dispose();
+            else
+            {
+                Width = Texture.Width;
+                Height = Texture.Height;
+            }
             WantUpdateSize = false;
         }
 

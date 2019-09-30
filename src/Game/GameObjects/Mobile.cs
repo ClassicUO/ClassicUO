@@ -410,7 +410,20 @@ namespace ClassicUO.Game.GameObjects
                 if (animGroup == 0)
                     return;
 
-                AnimationGroup = _animationIdle[(byte) animGroup - 1, RandomHelper.GetValue(0, 2)];
+                if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                {
+                    if (animGroup != ANIMATION_GROUPS.AG_PEOPLE)
+                    {
+                        if (InWarMode)
+                            AnimationGroup = 28;
+                        else
+                            AnimationGroup = 26;
+
+                        return;
+                    }
+                }
+
+                AnimationGroup = _animationIdle[(byte)animGroup - 1, RandomHelper.GetValue(0, 2)];
 
                 if (isLowExtended && AnimationGroup == 18)
                     AnimationGroup = 1;
@@ -737,12 +750,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (World.InGame && Serial == World.Player)
                         {
-                            foreach (var s in Engine.UI.Gumps.OfType<ContainerGump>())
-                            {
-                                var item = World.Items.Get(s.LocalSerial);
-                                if (item == null || item.IsDestroyed || item.OnGround && item.Distance > 3)
-                                    s.Dispose();
-                            }
+                            World.Player.CloseRangedGumps();
                         }
 
                         Direction = (Direction) step.Direction;
