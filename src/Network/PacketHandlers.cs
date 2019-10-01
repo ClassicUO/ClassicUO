@@ -4005,6 +4005,8 @@ namespace ClassicUO.Network
 
             if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
             {
+                Engine.UI.GetGump(item.Serial)?.Dispose();
+
                 item.Destroy();
 
                 Entity initcontainer = World.Get(item.Container);

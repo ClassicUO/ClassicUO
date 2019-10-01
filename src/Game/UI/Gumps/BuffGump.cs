@@ -294,9 +294,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             _background.Graphic = _graphic;
-            _background.Texture = FileManager.Gumps.GetTexture(_graphic);
             _background.X = 0;
             _background.Y = 0;
+
             Width = _background.Texture.Width;
             Height = _background.Texture.Height;
 

@@ -48,7 +48,17 @@ namespace ClassicUO.Game.UI.Controls
             set
             {
                 _graphic = value;
+
                 Texture = FileManager.Gumps.GetTexture(_graphic);
+
+                if (Texture == null)
+                {
+                    Dispose();
+                    return;
+                }
+
+                Width = Texture.Width;
+                Height = Texture.Height;
             }
         }
 
@@ -112,7 +122,6 @@ namespace ClassicUO.Game.UI.Controls
         {
             X = x;
             Y = y;
-            Graphic = Graphic.INVALID;
 
             Hue = hue;
 

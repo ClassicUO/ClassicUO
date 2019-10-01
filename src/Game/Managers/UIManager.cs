@@ -869,6 +869,19 @@ namespace ClassicUO.Game.Managers
             return null;
         }
 
+        public Gump GetGump(Serial serial)
+        {
+            foreach (Control c in Gumps)
+            {
+                if (!c.IsDisposed && c.LocalSerial == serial)
+                {
+                    return c as Gump;
+                }
+            }
+
+            return null;
+        }
+
 
         public void Update(double totalMS, double frameMS)
         {

@@ -63,20 +63,23 @@ namespace ClassicUO.Game.Scenes
             if (World.Player.IsDead || item == null || item.IsDestroyed || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
                 return false;
 
-            if (!_isShiftDown && !amount.HasValue && item.Amount > 1 && item.ItemData.IsStackable)
+            if (!amount.HasValue && item.Amount > 1 && item.ItemData.IsStackable)
             {
-                if (Engine.UI.GetGump<SplitMenuGump>(item) != null)
-                    return false;
-
-                SplitMenuGump gump = new SplitMenuGump(item, new Point(x, y))
+                if (Engine.Profile.Current.HoldShiftToSplitStack == _isShiftDown)
                 {
-                    X = Mouse.Position.X - 80,
-                    Y = Mouse.Position.Y - 40
-                };
-                Engine.UI.Add(gump);
-                Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
+                    if (Engine.UI.GetGump<SplitMenuGump>(item) != null)
+                        return false;
 
-                return true;
+                    SplitMenuGump gump = new SplitMenuGump(item, new Point(x, y))
+                    {
+                        X = Mouse.Position.X - 80,
+                        Y = Mouse.Position.Y - 40
+                    };
+                    Engine.UI.Add(gump);
+                    Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
+
+                    return true;
+                }
             }
 
             return PickupItemDirectly(item, x, y, amount ?? item.Amount);
