@@ -49,7 +49,7 @@ namespace ClassicUO.Game.Managers
                 isunicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
             }
 
-            JournalEntry entry = new JournalEntry(text, font, hue, name, isunicode);
+            JournalEntry entry = new JournalEntry(text, font, hue, name, isunicode, Engine.CurrDateTime);
             Entries.AddToBack(entry);
             EntryAdded.Raise(entry);
             _fileWriter?.WriteLine($"[{Engine.CurrDateTime:g}]  {name}: {text}");
@@ -93,14 +93,16 @@ namespace ClassicUO.Game.Managers
         public readonly bool IsUnicode;
         public readonly string Name;
         public readonly string Text;
+        public readonly DateTime Time;
 
-        public JournalEntry(string text, byte font, Hue hue, string name, bool isunicode)
+        public JournalEntry(string text, byte font, Hue hue, string name, bool isunicode, DateTime time)
         {
             IsUnicode = isunicode;
             Font = font;
             Hue = hue;
             Name = name;
             Text = text;
+            Time = time;
         }
     }
 }
