@@ -65,7 +65,7 @@ namespace ClassicUO.Game.Scenes
 
             if (!amount.HasValue && item.Amount > 1 && item.ItemData.IsStackable)
             {
-                if (Engine.Profile.Current.HoldShiftForQuantity == _isShiftDown)
+                if (Engine.Profile.Current.HoldShiftToSplitStack == _isShiftDown)
                 {
                     if (Engine.UI.GetGump<SplitMenuGump>(item) != null)
                         return false;
