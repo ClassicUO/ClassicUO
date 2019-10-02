@@ -392,7 +392,6 @@
     <Compile Include="Game\UI\Controls\Panel.cs" />
     <Compile Include="Game\UI\Controls\PaperDollInteractable.cs" />
     <Compile Include="Game\UI\Controls\RadioButton.cs" />
-    <Compile Include="Game\UI\Controls\RenderedTextList.cs" />
     <Compile Include="Game\UI\Controls\ResizePic.cs" />
     <Compile Include="Game\UI\Controls\ScrollArea.cs" />
     <Compile Include="Game\UI\Controls\ScrollBar.cs" />
