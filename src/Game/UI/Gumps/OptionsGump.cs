@@ -116,7 +116,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ColorBox _poisonColorPickerBox, _paralyzedColorPickerBox, _invulnerableColorPickerBox;
         private TextBox _spellFormatBox;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
-        private Checkbox _holdShiftForContext, _holdShiftForQuantity, _reduceFPSWhenInactive, _sallosEasyGrab, _partyInviteGump;
+        private Checkbox _holdShiftForContext, _holdShiftToSplitStack, _reduceFPSWhenInactive, _sallosEasyGrab, _partyInviteGump;
 
         //VendorGump Size Option
         private ArrowNumbersTextBox _vendorGumpSize;
@@ -261,7 +261,7 @@ namespace ClassicUO.Game.UI.Gumps
             _holdDownKeyTab = CreateCheckBox(rightArea, "Hold TAB key for combat", Engine.Profile.Current.HoldDownKeyTab, 0, 0);
             _holdDownKeyAlt = CreateCheckBox(rightArea, "Hold ALT key + right click to close Anchored gumps", Engine.Profile.Current.HoldDownKeyAltToCloseAnchored, 0, 0);
             _holdShiftForContext = CreateCheckBox(rightArea, "Hold Shift for Context Menus", Engine.Profile.Current.HoldShiftForContext, 0, 0);
-            _holdShiftForQuantity = CreateCheckBox(rightArea, "Hold Shift for item quantity", Engine.Profile.Current.HoldShiftForQuantity, 0, 0);
+            _holdShiftToSplitStack = CreateCheckBox(rightArea, "Hold Shift to split stack of items", Engine.Profile.Current.HoldShiftToSplitStack, 0, 0);
             _highlightByState = CreateCheckBox(rightArea, "Highlight by state (poisoned, yellow hits, paralyzed)", Engine.Profile.Current.HighlightMobilesByFlags, 0, 0);
             _poisonColorPickerBox = CreateClickableColorBox(rightArea, 20, 5, Engine.Profile.Current.PoisonHue, "Poisoned Color", 40, 5);
             _paralyzedColorPickerBox = CreateClickableColorBox(rightArea, 20, 0, Engine.Profile.Current.ParalyzedHue, "Paralyzed Color", 40, 0);
@@ -1308,7 +1308,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _holdDownKeyTab.IsChecked = true;
                     _holdDownKeyAlt.IsChecked = true;
                     _holdShiftForContext.IsChecked = false;
-                    _holdShiftForQuantity.IsChecked = false;
+                    _holdShiftToSplitStack.IsChecked = false;
                     _enablePathfind.IsChecked = false;
                     _alwaysRun.IsChecked = false;
                     _showHpMobile.IsChecked = false;
@@ -1502,7 +1502,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.HoldDownKeyTab = _holdDownKeyTab.IsChecked;
             Engine.Profile.Current.HoldDownKeyAltToCloseAnchored = _holdDownKeyAlt.IsChecked;
             Engine.Profile.Current.HoldShiftForContext = _holdShiftForContext.IsChecked;
-            Engine.Profile.Current.HoldShiftForQuantity = _holdShiftForQuantity.IsChecked;
+            Engine.Profile.Current.HoldShiftToSplitStack = _holdShiftToSplitStack.IsChecked;
             Engine.Profile.Current.CloseHealthBarType = _healtbarType.SelectedIndex;
 
             if (Engine.Profile.Current.DrawRoofs == _drawRoofs.IsChecked)

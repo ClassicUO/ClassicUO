@@ -134,7 +134,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool HoldDownKeyTab { get; set; } = true;
         [JsonProperty] public bool HoldDownKeyAltToCloseAnchored { get; set; } = true;
         [JsonProperty] public bool HoldShiftForContext { get; set; } = false;
-        [JsonProperty] public bool HoldShiftForQuantity { get; set; } = false;
+        [JsonProperty] public bool HoldShiftToSplitStack { get; set; } = false;
 
         // general
         [JsonProperty] public Point WindowClientBounds { get; set; } = new Point(600, 480);
