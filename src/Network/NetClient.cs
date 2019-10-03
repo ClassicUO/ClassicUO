@@ -140,24 +140,42 @@ namespace ClassicUO.Network
             _recvEventArgs.SetBuffer(_recvBuffer, 0, _recvBuffer.Length);
             _recvQueue = new ConcurrentQueue<Packet>();
             Statistics.Reset();
-            SocketAsyncEventArgs connectEventArgs = new SocketAsyncEventArgs();
 
-            connectEventArgs.Completed += (sender, e) =>
+
+            _socket.Connect(endpoint);
+
+            if (!IsConnected)
             {
-                if (e.SocketError == SocketError.Success)
-                {
-                    Connected.Raise();
-                    Statistics.ConnectedFrom = Engine.CurrDateTime;
-                    StartRecv();
-                }
-                else
-                {
-                    Log.Message(LogTypes.Error, e.SocketError.ToString());
-                    Disconnect(e.SocketError);
-                }
-            };
-            connectEventArgs.RemoteEndPoint = endpoint;
-            _socket.ConnectAsync(connectEventArgs);
+                Log.Message(LogTypes.Error, "Unable to connect");
+                Disconnect();
+            }
+            else
+            {
+                Statistics.ConnectedFrom = Engine.CurrDateTime;
+                Connected.Raise();
+                StartRecv();
+            }
+
+            //SocketAsyncEventArgs connectEventArgs = new SocketAsyncEventArgs();
+
+            //connectEventArgs.Completed += (sender, e) =>
+            //{
+            //    if (e.SocketError == SocketError.Success)
+            //    {
+            //        Connected.Raise();
+            //        Statistics.ConnectedFrom = Engine.CurrDateTime;
+            //        StartRecv();
+            //    }
+            //    else
+            //    {
+            //        Log.Message(LogTypes.Error, e.SocketError.ToString());
+            //        Disconnect(e.SocketError);
+            //    }
+
+            //    connectEventArgs.Dispose();
+            //};
+            //connectEventArgs.RemoteEndPoint = endpoint;
+            //_socket.ConnectAsync(connectEventArgs);
         }
 
         public void Disconnect()
