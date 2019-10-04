@@ -120,8 +120,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void UpdateGraphicBySeason()
         {
-            Graphic = Season.GetSeasonGraphic(World.Season, OriginalGraphic);
-
+            SetGraphic(Season.GetSeasonGraphic(World.Season, OriginalGraphic));
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
         }
      

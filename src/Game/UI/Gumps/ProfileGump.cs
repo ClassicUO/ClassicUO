@@ -30,20 +30,25 @@ using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class ProfileGump : Gump
+    internal class ProfileGump : MinimizableGump
     {
+        internal override GumpPic Iconized { get; } = new GumpPic(0, 0, 0x9D4, 0);
+        internal override HitBox IconizerArea { get; } = new HitBox(143, 0, 23, 24);
         private readonly string _originalText;
         private readonly ScrollArea _scrollArea;
         private readonly ExpandableScroll _scrollExp;
         private readonly MultiLineBox _textBox;
+        private const int _diffY = 22;
 
-        public ProfileGump(Serial serial, string header, string footer, string body, bool canEdit) : base(serial, serial)
+        public ProfileGump(Serial serial, string header, string footer, string body, bool canEdit) : base(serial == World.Player.Serial ? serial = Constants.PROFILE_LOCALSERIAL : serial, serial)
         {
-            Height = 300;
+            Height = 300 + _diffY;
             CanMove = true;
             AcceptKeyboardInput = true;
-            Add(_scrollExp = new ExpandableScroll(0, 0, Height, 0x0820));
-            _scrollArea = new ScrollArea(0, 32, 272, Height - 96, false);
+
+            Add(new GumpPic(143, 0, 0x82D, 0));
+            Add(_scrollExp = new ExpandableScroll(0, _diffY, Height - _diffY, 0x0820));
+            _scrollArea = new ScrollArea(0, 32 + _diffY, 272, Height - (96 + _diffY), false);
 
             Control c = new Label(header, true, 0, font: 1, maxwidth: 140)
             {
@@ -56,6 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
             _textBox = new MultiLineBox(new MultiLineEntry(1, -1, 0, 220, true, hue: 0), canEdit)
             {
                 Height = FileManager.Fonts.GetHeightUnicode(1, body, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0),
+                Width = 220,
                 X = 35,
                 Y = 0,
                 Text = _originalText = body
@@ -70,22 +76,6 @@ namespace ClassicUO.Game.UI.Gumps
             });
             Add(_scrollArea);
         }
-
-        /*protected override void OnMouseWheel(MouseEvent delta)
-        {
-            switch (delta)
-            {
-                case MouseEvent.WheelScrollUp:
-                    _scrollBar.Value -= 5;
-
-                    break;
-                case MouseEvent.WheelScrollDown:
-                    _scrollBar.Value += 5;
-
-                    break;
-            }
-        }*/
-
 
         public override void OnButtonClick(int buttonID)
         {
@@ -123,18 +113,27 @@ namespace ClassicUO.Game.UI.Gumps
             var startBounds = FileManager.Gumps.GetTexture(start);
             var middleBounds = FileManager.Gumps.GetTexture((Graphic) (start + 1));
             var endBounds = FileManager.Gumps.GetTexture((Graphic) (start + 2));
-            int y = -startBounds.Height;
-            Control c;
-            c = new GumpPic(x, (y >> 1) - 6, start, 0);
-            c.Add(new GumpPicWithWidth(startBounds.Width, (startBounds.Height - middleBounds.Height) >> 1, (Graphic) (start + 1), 0, width - startBounds.Width - endBounds.Width));
-            c.Add(new GumpPic(width - endBounds.Width, 0, (Graphic) (start + 2), 0));
-            area.Add(c);
+
+            PrivateContainer container = new PrivateContainer();
+
+            Control c = new GumpPic(x, 0, start, 0);
+            
+            container.Add(c);
+            container.Add(new GumpPicWithWidth(x + startBounds.Width, (startBounds.Height - middleBounds.Height) >> 1, (Graphic) (start + 1), 0, width - startBounds.Width - endBounds.Width));
+            container.Add(new GumpPic(x + width - endBounds.Width, 0, (Graphic) (start + 2), 0));
+
+            area.Add(container);
+        }
+
+        class PrivateContainer : Control
+        {
+
         }
 
         public override void OnPageChanged()
         {
-            Height = _scrollExp.SpecialHeight;
-            _scrollArea.Height = _scrollExp.SpecialHeight - 96;
+            Height = _scrollExp.SpecialHeight + _diffY;
+            _scrollArea.Height = _scrollExp.SpecialHeight - (96 + _diffY);
 
             foreach (Control c in _scrollArea.Children)
             {

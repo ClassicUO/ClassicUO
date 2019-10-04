@@ -41,8 +41,10 @@ using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class StandardSkillsGump : Gump
+    internal class StandardSkillsGump : MinimizableGump
     {
+        internal override GumpPic Iconized { get; } = new GumpPic(0, 0, 0x839, 0);
+        internal override HitBox IconizerArea { get; } = new HitBox(160, 0, 23, 24);
         private readonly SkillControl[] _allSkillControls;
         private readonly GumpPic _bottomComment;
         private readonly GumpPic _bottomLine;
@@ -54,15 +56,17 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly ExpandableScroll _scrollArea;
         private readonly Label _skillsLabelSum;
         internal Checkbox _checkReal, _checkCaps;
+        private const int _diffY = 22;
 
-        public StandardSkillsGump() : base(0, 0)
+        public StandardSkillsGump() : base(Constants.SKILLSTD_LOCALSERIAL, 0)
         {
             CanBeSaved = true;
             AcceptMouseInput = false;
             CanMove = true;
-            Height = 200;
+            Height = 200 + _diffY;
 
-            _scrollArea = new ExpandableScroll(0, 0, Height, 0x1F40)
+            Add(new GumpPic(160, 0, 0x82D, 0));
+            _scrollArea = new ExpandableScroll(0, _diffY, Height, 0x1F40)
             {
                 TitleGumpID = 0x0834,
                 AcceptMouseInput = true
@@ -70,12 +74,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_scrollArea);
 
-            Add(new GumpPic(50, 35, 0x082B, 0));
+            Add(new GumpPic(50, 35 + _diffY, 0x082B, 0));
             Add(_bottomLine = new GumpPic(50, Height - 98, 0x082B, 0));
             Add(_bottomComment = new GumpPic(25, Height - 85, 0x0836, 0));
 
-            _container = new ScrollArea(22, 45 + _bottomLine.Height - 10, _scrollArea.Width - 14,
-                                        _scrollArea.Height - 83, false) {AcceptMouseInput = true, CanMove = true};
+            _container = new ScrollArea(22, 45 + _diffY + _bottomLine.Height - 10, _scrollArea.Width - 14,
+                                        _scrollArea.Height - (83 + _diffY), false) {AcceptMouseInput = true, CanMove = true};
             Add(_container);
             Add(_skillsLabelSum = new Label(World.Player.Skills.Sum(s => s.Value).ToString("F1"), false, 600, 0, 3) {X = _bottomComment.X + _bottomComment.Width + 5, Y = _bottomComment.Y - 5});
 
@@ -142,8 +146,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (var skill in skills)
             {
-                var c = new SkillControl(skill, box.Width - 15, group, box);
-                c.Width = box.Width - 15;
+                var c = new SkillControl(skill, box.Width - 15, group, box)
+                {
+                    Width = box.Width - 15
+                };
                 controls[idx++] = c;
                 _allSkillControls[skill] = c;
             }
@@ -207,7 +213,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _bottomLine.Y = Height - 98;
             _bottomComment.Y = Height - 85;
-            _container.Height = Height - 150;
+            _container.Height = Height - (150 + _diffY);
             _newGroupButton.Y = Height - 52;
             _skillsLabelSum.Y = _bottomComment.Y + 2;
             _checkReal.Y = _newGroupButton.Y - 6;
@@ -218,7 +224,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        public void Update(int skillIndex)
+        public void ForceUpdate(int skillIndex)
         {
             if (skillIndex < _allSkillControls.Length)
                 _allSkillControls[skillIndex]?.UpdateSkillValue(Engine.UI.GetGump<StandardSkillsGump>());

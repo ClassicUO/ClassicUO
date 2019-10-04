@@ -62,6 +62,12 @@ namespace ClassicUO.Network
         {
             EnsureSize(length);
 
+            if (buffer == null)
+            {
+                this[Position++] = 0;
+                return;
+            }
+
             for (int i = offset; i < length; i++)
                 this[Position++] = buffer[i];
         }

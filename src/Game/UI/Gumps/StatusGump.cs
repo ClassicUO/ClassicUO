@@ -793,6 +793,17 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new GumpPic(34, 25, 0x0805, 0)); // Mana bar
             Add(new GumpPic(34, 38, 0x0805, 0)); // Stamina bar
 
+            if (FileManager.ClientVersion >= ClientVersions.CV_5020)
+            {
+                Add(new Button((int) ButtonType.BuffIcon, 0x837, 0x838, 0x838)
+                {
+                    X = 159,
+                    Y = 40,
+                    ButtonAction = ButtonAction.Activate
+                });
+                Add(new Label("Buffs", false, 0x0386, 60, 1) { X = 174, Y = 40 });
+            }
+
             Graphic gumpIdHp = 0x0806;
 
             if (World.Player.IsPoisoned)

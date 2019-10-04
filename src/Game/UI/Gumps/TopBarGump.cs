@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
             // maximized view
             Add(new ResizePic(9200)
             {
-                X = 0, Y = 0, Width = 610, Height = 27
+                X = 0, Y = 0, Width = 610 + 63, Height = 27
             }, 1);
 
             Add(new Button(0, 5540, 5542, 5541)
@@ -83,6 +83,14 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new Button((int) Buttons.Debug, 2443, 2443, 0, "Debug", 1, true, 0, 0x36)
             {
                 ButtonAction = ButtonAction.Activate, X = 543, Y = 3, FontCenter = true
+            }, 1);
+
+            Add(new Button((int)Buttons.WorldMap, 2443, 2443, 0, "WorldMap", 1, true, 0, 0x36)
+            {
+                ButtonAction = ButtonAction.Activate,
+                X = 607,
+                Y = 3,
+                FontCenter = true
             }, 1);
 
             //minimized view
@@ -160,7 +168,6 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((Buttons) buttonID)
             {
                 case Buttons.Map:
-
                     MiniMapGump miniMapGump = Engine.UI.GetGump<MiniMapGump>();
 
                     if (miniMapGump == null)
@@ -250,6 +257,21 @@ namespace ClassicUO.Game.UI.Gumps
                     Engine.DropFpsMinMaxValues();
 
                     break;
+                case Buttons.WorldMap:
+
+                    WorldMapGump worldMap = Engine.UI.GetGump<WorldMapGump>();
+
+                    if (worldMap == null || worldMap.IsDisposed)
+                    {
+                        worldMap = new WorldMapGump();
+                        Engine.UI.Add(worldMap);
+                    }
+                    else
+                    {
+                        worldMap.BringOnTop();
+                        worldMap.SetInScreen();
+                    }
+                    break;
             }
         }
 
@@ -261,7 +283,8 @@ namespace ClassicUO.Game.UI.Gumps
             Journal,
             Chat,
             Help,
-            Debug
+            Debug,
+            WorldMap,
         }
     }
 }

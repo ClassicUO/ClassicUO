@@ -76,6 +76,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public ushort GuildMessageHue { get; set; } = 0x0044;
         [JsonProperty] public ushort AllyMessageHue { get; set; } = 0x0057;
         [JsonProperty] public ushort InnocentHue { get; set; } = 0x005A;
+        [JsonProperty] public ushort PartyAuraHue { get; set; } = 0x0044;
         [JsonProperty] public ushort FriendHue { get; set; } = 0x0044;
         [JsonProperty] public ushort CriminalHue { get; set; } = 0x03B2;
         [JsonProperty] public ushort AnimalHue { get; set; } = 0x03B2;
@@ -133,6 +134,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool HoldDownKeyTab { get; set; } = true;
         [JsonProperty] public bool HoldDownKeyAltToCloseAnchored { get; set; } = true;
         [JsonProperty] public bool HoldShiftForContext { get; set; } = false;
+        [JsonProperty] public bool HoldShiftToSplitStack { get; set; } = false;
 
         // general
         [JsonProperty] public Point WindowClientBounds { get; set; } = new Point(600, 480);
@@ -150,9 +152,6 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool UseDarkNights { get; set; }
         [JsonProperty] public int CloseHealthBarType { get; set; } // 0 = none, 1 == not exists, 2 == is dead
         [JsonProperty] public bool ActivateChatAfterEnter { get; set; }
-        [JsonProperty] public bool ActivateChatStatus { get; set; } = true;
-        [JsonProperty] public bool ActivateChatIgnoreHotkeys { get; set; } = true;
-        [JsonProperty] public bool ActivateChatIgnoreHotkeysPlugins { get; set; } = true;
         [JsonProperty] public bool ActivateChatAdditionalButtons { get; set; } = true;
         [JsonProperty] public bool ActivateChatShiftEnterSupport { get; set; } = true;
 
@@ -164,6 +163,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool RestoreLastGameSize { get; set; }
         [JsonProperty] public bool CastSpellsByOneClick { get; set; }
         [JsonProperty] public bool AutoOpenDoors { get; set; }
+        [JsonProperty] public bool SmoothDoors { get; set; }
         [JsonProperty] public bool AutoOpenCorpses { get; set; }
         [JsonProperty] public int AutoOpenCorpseRange { get; set; } = 2;
         [JsonProperty] public int CorpseOpenOptions { get; set; } = 3;
@@ -179,6 +179,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool DragSelectHumanoidsOnly { get; set; }
         [JsonProperty] public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
         [JsonProperty] public bool NameOverheadToggled { get; set; } = false;
+        [JsonProperty] public bool ShowTargetRangeIndicator { get; set; }
+        [JsonProperty] public bool PartyInviteGump { get; set; }
 
         [JsonProperty] public bool ShowInfoBar { get; set; }
         [JsonProperty] public int InfoBarHighlightType { get; set; } // 0 = text colour changes, 1 = underline
@@ -257,6 +259,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool CounterBarEnabled { get; set; }
         [JsonProperty] public bool CounterBarHighlightOnUse { get; set; }
         [JsonProperty] public bool CounterBarHighlightOnAmount { get; set; }
+        [JsonProperty] public bool CounterBarDisplayAbbreviatedAmount { get; set; }
+        [JsonProperty] public int CounterBarAbbreviatedAmount { get; set; } = 1000;
         [JsonProperty] public int CounterBarHighlightAmount { get; set; } = 5;
         [JsonProperty] public int CounterBarCellSize { get; set; } = 40;
         [JsonProperty] public int CounterBarRows { get; set; } = 1;
@@ -267,6 +271,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public int AuraUnderFeetType { get; set; } // 0 = NO, 1 = in warmode, 2 = ctrl+shift, 3 = always
         [JsonProperty] public bool AuraOnMouse { get; set; } = true;
         [JsonProperty] public bool ShowNetworkStats { get; set; }
+        [JsonProperty] public bool PartyAura { get; set; }
 
         [JsonProperty] public bool UseXBR { get; set; } = true;
         [JsonProperty] public bool StandardSkillsGump { get; set; } = true;
@@ -288,6 +293,10 @@ namespace ClassicUO.Configuration
         [JsonProperty] public float Brighlight { get; set; }
 
         [JsonProperty] public bool JournalDarkMode { get; set; }
+
+        [JsonProperty] public byte ContainersScale { get; set; } = 100;
+
+        [JsonProperty] public bool ScaleItemsInsideContainers { get; set; }
 
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
@@ -325,7 +334,7 @@ namespace ClassicUO.Configuration
         {
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "gumps.bin"))))
             {
-                const uint VERSION = 1;
+                const uint VERSION = 2;
 
                 writer.Write(VERSION);
                 writer.Write(0);
@@ -359,6 +368,7 @@ namespace ClassicUO.Configuration
                 SkillsGroupManager.Save(writer);
         }
 
+        public static uint GumpsVersion { get; private set; }
         public List<Gump> ReadGumps()
         {
             string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username, ServerName, CharacterName);
@@ -391,7 +401,7 @@ namespace ClassicUO.Configuration
             {
                 if (reader.BaseStream.Position + 12 < reader.BaseStream.Length)
                 {
-                    uint version = reader.ReadUInt32();
+                    GumpsVersion = reader.ReadUInt32();
                     uint empty = reader.ReadUInt32();
 
                     int count = reader.ReadInt32();

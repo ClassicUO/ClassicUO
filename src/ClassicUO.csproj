@@ -94,6 +94,7 @@
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json\lib\net45\Newtonsoft.Json.dll</HintPath>
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -115,7 +116,6 @@
     <Compile Include="Game\Data\EntityFlags.cs" />
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
-    <Compile Include="Game\Data\HealthPercentageHues.cs" />
     <Compile Include="Game\Data\Layers.cs" />
     <Compile Include="Game\Data\LightColors.cs" />
     <Compile Include="Game\Data\MapMessageType.cs" />
@@ -146,6 +146,7 @@
     <Compile Include="Game\Managers\MacroManager.cs" />
     <Compile Include="Game\Managers\AudioManager.cs" />
     <Compile Include="Game\Managers\NameOverHeadManager.cs" />
+    <Compile Include="Game\Managers\ObjectPropertiesListManager.cs" />
     <Compile Include="Game\Managers\PoolsManager.cs" />
     <Compile Include="Game\Managers\SkillsGroupManager.cs" />
     <Compile Include="Game\SelectedObject.cs" />
@@ -154,6 +155,7 @@
     <Compile Include="Game\UI\Controls\AlphaBlendControl.cs" />
     <Compile Include="Game\UI\Controls\ArrowNumbersTextBox.cs" />
     <Compile Include="Game\UI\Controls\ClickableColorBox.cs" />
+    <Compile Include="Game\UI\Controls\ContextMenuControl.cs" />
     <Compile Include="Game\UI\Controls\InfoBarBuilderControl.cs" />
     <Compile Include="Game\UI\Controls\ColorBox.cs" />
     <Compile Include="Game\UI\Controls\EditableLabel.cs" />
@@ -169,14 +171,13 @@
     <Compile Include="Game\UI\Gumps\GridLootGump.cs" />
     <Compile Include="Game\UI\Gumps\InfoBarGump.cs" />
     <Compile Include="Game\UI\Gumps\NameOverHeadHandlerGump.cs" />
+    <Compile Include="Game\UI\Gumps\PartyInviteGump.cs" />
+    <Compile Include="Game\UI\Gumps\ResizableGump.cs" />
     <Compile Include="Game\UI\Gumps\StandardSkillsGump.cs" />
     <Compile Include="Game\UI\Gumps\TextContainerGump.cs" />
     <Compile Include="Game\UI\Gumps\TipNoticeGump.cs" />
     <Compile Include="Main.cs" />
-    <Compile Include="Renderer\Launcher\LauncherView.cs" />
     <Compile Include="Renderer\MatrixEffect.cs" />
-    <Compile Include="Renderer\UI\UIControl.cs" />
-    <Compile Include="Renderer\UI\UISystemManager.cs" />
     <Compile Include="Utility\Collections\RawList.cs" />
     <Compile Include="Utility\Collections\ReadOnlyArrayView.cs" />
     <Compile Include="Utility\GraphicHelper.cs" />
@@ -277,21 +278,15 @@
     <Compile Include="IO\Resources\SpeechesLoader.cs" />
     <Compile Include="IO\Resources\TexmapsLoader.cs" />
     <Compile Include="IO\Resources\TileDataLoader.cs" />
-    <Compile Include="IO\UOFileUopNoFormat.cs" />
     <Compile Include="Network\BufferPool.cs" />
     <Compile Include="Network\Plugin.cs" />
     <Compile Include="Network\Updater.cs" />
-    <Compile Include="Renderer\SpriteRenderer.cs" />
-    <Compile Include="Renderer\UI\Label.cs" />
-    <Compile Include="Renderer\UI\UpdaterMenu.cs" />
     <Compile Include="Utility\Platforms\PlatformHelper.cs" />
     <Compile Include="Utility\Platforms\UoAssist.cs" />
     <Compile Include="Renderer\Batcher2D.cs" />
     <Compile Include="Renderer\Fonts.cs" />
     <Compile Include="Renderer\SpriteFont.cs" />
     <Compile Include="Renderer\Textures.cs" />
-    <Compile Include="Renderer\UI\Button.cs" />
-    <Compile Include="Renderer\UI\Panel.cs" />
     <Compile Include="Utility\Collections\CollectionHelper.cs" />
     <Compile Include="Utility\Coroutines\Coroutine.cs" />
     <Compile Include="Utility\Coroutines\CoroutineManager.cs" />
@@ -357,7 +352,6 @@
     <Compile Include="Game\Data\LockedFeatures.cs" />
     <Compile Include="Game\Data\FeaturesFlags.cs" />
     <Compile Include="Game\Data\MovementSpeed.cs" />
-    <Compile Include="Game\Data\Property.cs" />
     <Compile Include="Game\Data\Reagents.cs" />
     <Compile Include="Game\Data\Skill.cs" />
     <Compile Include="Game\Data\SpellbookData.cs" />
@@ -383,7 +377,6 @@
     <Compile Include="Game\UI\Controls\CheckerTrans.cs" />
     <Compile Include="Game\UI\Controls\ColorPickerBox.cs" />
     <Compile Include="Game\UI\Controls\CroppedText.cs" />
-    <Compile Include="Game\UI\Controls\EquipmentSlot.cs" />
     <Compile Include="Game\UI\Controls\ExpandableScroll.cs" />
     <Compile Include="Game\UI\Controls\Control.cs" />
     <Compile Include="Game\UI\Controls\GumpControlInfo.cs" />
@@ -399,7 +392,6 @@
     <Compile Include="Game\UI\Controls\Panel.cs" />
     <Compile Include="Game\UI\Controls\PaperDollInteractable.cs" />
     <Compile Include="Game\UI\Controls\RadioButton.cs" />
-    <Compile Include="Game\UI\Controls\RenderedTextList.cs" />
     <Compile Include="Game\UI\Controls\ResizePic.cs" />
     <Compile Include="Game\UI\Controls\ScrollArea.cs" />
     <Compile Include="Game\UI\Controls\ScrollBar.cs" />
@@ -509,6 +501,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+    <None Include="README.md" />
     <None Include="shaders\compile_shaders.bat" />
     <None Include="shaders\IsometricWorld.fx" />
     <EmbeddedResource Include="shaders\IsometricWorld.fxc" />
@@ -536,7 +529,9 @@
     <None Include="libs\osx\libtheorafile.dylib">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="README.md" />
+    <None Include="ClassicUO-mono.sh">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <EmbeddedResource Include="shaders\xBR.fxc" />
   </ItemGroup>
   <ItemGroup>
@@ -577,8 +572,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Renderer\UI\Layouts\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

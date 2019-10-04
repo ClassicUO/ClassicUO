@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal abstract class GumpPicBase : Control
     {
-        private ushort _lastGump = 0xFFFF;
+        private ushort _graphic;
 
         protected GumpPicBase()
         {
@@ -42,28 +42,36 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = true;
         }
 
-        public Graphic Graphic { get; set; }
-
-        public Hue Hue { get; set; }
-
-        //public bool IsPaperdoll { get; set; }
-
-        public override void Update(double totalMS, double frameMS)
+        public Graphic Graphic
         {
-            if (Texture == null || Texture.IsDisposed || Graphic != _lastGump)
+            get => _graphic;
+            set
             {
-                _lastGump = Graphic;
-                Texture = FileManager.Gumps.GetTexture(Graphic);
+                _graphic = value;
+
+                Texture = FileManager.Gumps.GetTexture(_graphic);
 
                 if (Texture == null)
                 {
                     Dispose();
-
                     return;
                 }
 
                 Width = Texture.Width;
                 Height = Texture.Height;
+            }
+        }
+
+        public Hue Hue { get; set; }
+
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            if (Texture == null)
+            {
+                Dispose();
+
+                return;
             }
 
             Texture.Ticks = (long) totalMS;
@@ -73,13 +81,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-           
-            x = Mouse.Position.X - ScreenCoordinateX;
-            y = Mouse.Position.Y - ScreenCoordinateY;
-
             if (Texture.Contains(x, y))
                 return true;
-
 
             for (int i = 0; i < Children.Count; i++)
             {
@@ -100,10 +103,7 @@ namespace ClassicUO.Game.UI.Controls
             X = x;
             Y = y;
             Graphic = graphic;
-
             Hue = hue;
-
-            Texture = FileManager.Gumps.GetTexture(Graphic);
 
             if (Texture == null)
                 Dispose();
@@ -122,13 +122,19 @@ namespace ClassicUO.Game.UI.Controls
         {
             X = x;
             Y = y;
-            Graphic = Graphic.INVALID;
 
             Hue = hue;
 
             Texture = texture;
-            Width = Texture.Width;
-            Height = Texture.Height;
+
+            if (Texture == null)
+                Dispose();
+            else
+            {
+                Width = Texture.Width;
+                Height = Texture.Height;
+            }
+            WantUpdateSize = false;
         }
 
         public bool IsPartialHue { get; set; }
@@ -137,7 +143,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            if (IsVirtue)
+            if (IsVirtue && button == MouseButton.Left)
             {
                 NetClient.Socket.Send(new PVirtueGumpReponse(World.Player, Graphic.Value));
 
@@ -170,7 +176,7 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
             ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, Alpha, true);
 
-            batcher.Draw2D(Texture, x, y, ref _hueVector);
+            batcher.Draw2D(Texture, x, y, Width, Height, ref _hueVector);
 
             return base.Draw(batcher, x, y);
         }

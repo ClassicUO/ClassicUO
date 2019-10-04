@@ -106,9 +106,16 @@ namespace ClassicUO.Game
 
         public static void DoubleClick(Serial serial)
         {
-            if (serial.IsItem)
-                LastObject = serial;
-            Socket.Send(new PDoubleClickRequest(serial));
+            if (serial.IsMobile && World.Player.InWarMode)
+            {
+                Attack(serial);
+            }
+            else
+            {
+                Socket.Send(new PDoubleClickRequest(serial));
+                if (serial.IsItem)
+                    LastObject = serial;
+            }
         }
 
         public static void SingleClick(Serial serial)
@@ -152,6 +159,7 @@ namespace ClassicUO.Game
         public static void RequestPartyAccept(Serial serial)
         {
             Socket.Send(new PPartyAccept(serial));
+            Engine.UI.Gumps.OfType<PartyInviteGump>().FirstOrDefault()?.Dispose();
         }
 
         public static void RequestPartyRemoveMember(Serial serial)

@@ -30,6 +30,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -84,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _rectSize * _columns + 1;
             Height = _rectSize * _rows + 1;
 
-            Add(_background = new AlphaBlendControl(0.3f) {Width = Width, Height = Height});
+            Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height });
 
             for (int row = 0; row < _rows; row++)
             {
@@ -170,13 +171,7 @@ namespace ClassicUO.Game.UI.Gumps
                         c.Width = _rectSize - 4;
                         c.Height = _rectSize - 4;
 
-                        TextureControl textControl = c.Children.OfType<TextureControl>().FirstOrDefault();
-
-                        if (textControl != null)
-                        {
-                            textControl.Width = c.Width;
-                            textControl.Height = c.Height;
-                        }
+                        c.SetGraphic(c.Graphic, c.Hue);
 
                         indices[index] = -1;
                     }
@@ -203,7 +198,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Save(writer);
 
-            writer.Write((byte) 2);
+            writer.Write((byte)2);
             writer.Write(_rows);
             writer.Write(_columns);
             writer.Write(_rectSize);
@@ -235,7 +230,7 @@ namespace ClassicUO.Game.UI.Gumps
             CounterItem[] items = GetControls<CounterItem>();
 
             for (int i = 0; i < count; i++)
-                items[i].SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort) 0);
+                items[i].SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort)0);
 
             IsEnabled = IsVisible = Engine.Profile.Current.CounterBarEnabled;
         }
@@ -245,11 +240,11 @@ namespace ClassicUO.Game.UI.Gumps
         private class CounterItem : Control
         {
             private int _amount;
-            private TextureControl _controlPic;
             private Graphic _graphic;
             private Hue _hue;
             private uint _time;
 
+            private ImageWithText _image;
 
             public CounterItem(int x, int y, int w, int h)
             {
@@ -261,6 +256,9 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = y;
                 Width = w;
                 Height = h;
+
+                _image = new ImageWithText();
+                Add(_image);
             }
 
             public ushort Graphic => _graphic;
@@ -268,26 +266,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void SetGraphic(ushort graphic, ushort hue)
             {
+                _image.ChangeGraphic(graphic, hue);
+
                 if (graphic == 0)
                     return;
 
                 _graphic = graphic;
                 _hue = hue;
-
-                _controlPic?.Dispose();
-
-                _controlPic = new TextureControl
-                {
-                    ScaleTexture = true,
-                    Texture = FileManager.Art.GetTexture(_graphic),
-                    Hue = hue,
-                    //Hue = gs.HeldItem.Hue,
-                    //IsPartial = gs.HeldItem.IsPartialHue,
-                    Width = Width,
-                    Height = Height,
-                    AcceptMouseInput = false
-                };
-                Add(_controlPic);
             }
 
             protected override void OnMouseUp(int x, int y, MouseButton button)
@@ -310,7 +295,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (button == MouseButton.Right && Keyboard.Alt && _graphic != 0)
                 {
-                    _controlPic?.Dispose();
+                    _image.ChangeGraphic(0, 0);
                     _amount = 0;
                     _graphic = 0;
                 }
@@ -320,7 +305,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (button == MouseButton.Left)
                 {
-                    Item backpack = World.Player.Equipment[(int) Layer.Backpack];
+                    Item backpack = World.Player.Equipment[(int)Layer.Backpack];
                     Item item = backpack.FindItem(_graphic, _hue);
 
                     if (item != null)
@@ -334,13 +319,29 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.Update(totalMS, frameMS);
 
-
                 if (_time < Engine.Ticks)
                 {
                     _time = Engine.Ticks + 100;
 
-                    _amount = 0;
-                    GetAmount(World.Player.Equipment[(int) Layer.Backpack], _graphic, _hue, ref _amount);
+                    if (_graphic == 0)
+                    {
+                        _image.SetAmount(string.Empty);
+                    }
+                    else
+                    {
+                        _amount = 0;
+                        GetAmount(World.Player.Equipment[(int)Layer.Backpack], _graphic, _hue, ref _amount);
+
+                        if (Engine.Profile.Current.CounterBarDisplayAbbreviatedAmount)
+                        {
+                            if (_amount >= Engine.Profile.Current.CounterBarAbbreviatedAmount)
+                            {
+                                _image.SetAmount(Utility.StringHelper.IntToAbbreviatedString(_amount));
+                                return;
+                            }
+                        }
+                        _image.SetAmount(_amount.ToString());
+                    }
                 }
             }
 
@@ -362,41 +363,62 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.Draw(batcher, x, y);
 
-                string text = _amount.ToString();
 
-                if (_amount >= 1000)
-                {
-                    if (text.Length > 4)
-                    {
-                        if (text.Length > 5) // >= 100.000
-                            text = $"{text.Substring(0, 3)}K+";
-                        else // <= 10.000
-                            text = $"{text.Substring(0, 2)}K+";
-                    }
-                    else // 1.000
-                        text = $"{text[0]}K+";
-                }
-
-                Texture2D color = Textures.GetTexture(Color.Gray);
-
-                if (Engine.Profile.Current.CounterBarHighlightOnAmount &&
-                    _amount < Engine.Profile.Current.CounterBarHighlightAmount && _graphic != 0)
-                    color = Textures.GetTexture(Color.Red);
-
+                Texture2D color = Textures.GetTexture(Engine.Profile.Current.CounterBarHighlightOnAmount &&
+                                                      _amount < Engine.Profile.Current.CounterBarHighlightAmount && _graphic != 0 ? Color.Red : Color.Gray);
                 ResetHueVector();
                 batcher.DrawRectangle(color, x, y, Width, Height, ref _hueVector);
 
-                if (_graphic != 0)
-                {
-                    _hueVector.X = 59;
-                    _hueVector.Y = 1;
-                    _hueVector.Z = 0;
+                return true;
+            }
 
-                    batcher.DrawString(Fonts.Bold, text, x + 2, y + Height - 15, ref _hueVector);
+
+            private class ImageWithText : Control
+            {
+                private readonly TextureControl _textureControl;
+                private readonly Label _label;
+
+                public ImageWithText()
+                {
+                    CanMove = true;
+                    WantUpdateSize = true;
+
+                    _textureControl = new TextureControl()
+                    {
+                        ScaleTexture = true,
+                        AcceptMouseInput = false
+                    };
+                    Add(_textureControl);
+
+
+                    _label = new Label("", true, 0x35, 0, 1, FontStyle.BlackBorder)
+                    {
+                        X = 2,
+                        Y = Height - 15,
+                    };
+                    Add(_label);
                 }
 
 
-                return true;
+                public void ChangeGraphic(ushort graphic, ushort hue)
+                {
+                    if (graphic != 0)
+                    {
+                        _textureControl.Texture = FileManager.Art.GetTexture(graphic);
+                        _textureControl.Hue = hue;
+                        _textureControl.Width = Parent.Width;
+                        _textureControl.Height = Parent.Height;
+                        _label.Y = Parent.Height - 15;
+                    }
+                    else
+                        _textureControl.Texture = null;
+                }
+
+
+
+                public void SetAmount(string amount)
+                    => _label.Text = amount;
+
             }
         }
     }

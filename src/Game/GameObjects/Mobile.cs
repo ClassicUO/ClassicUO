@@ -59,17 +59,8 @@ namespace ClassicUO.Game.GameObjects
 
     internal partial class Mobile : Entity
     {
-        private ushort _hits;
-        private ushort _hitsMax;
         private bool _isDead;
-        private bool _isRenamable;
         private bool _isSA_Poisoned;
-        private ushort _mana;
-        private ushort _manaMax;
-        private NotorietyFlag _notorietyFlag;
-        private RaceType _race;
-        private ushort _stamina;
-        private ushort _staminaMax;
         private long _lastAnimationIdleDelay;
 
         public Mobile(Serial serial) : base(serial)
@@ -89,14 +80,7 @@ namespace ClassicUO.Game.GameObjects
         public bool IsMale
         {
             get => _isMale || (Flags & Flags.Female) == 0 || IsOtherMale || IsElfMale || (Graphic < 900 && Graphic % 2 == 0 && !IsOtherFemale && !IsElfFemale);
-            set
-            {
-                if (_isMale != value)
-                {
-                    _isMale = value;
-                    _delta |= Delta.Appearance;
-                }
-            }
+            set => _isMale = value;
         }
 
         public bool IsOtherMale => Graphic == 183 || Graphic == 185;
@@ -104,122 +88,19 @@ namespace ClassicUO.Game.GameObjects
         public bool IsOtherFemale => Graphic == 184 || Graphic == 186;
         public bool IsElfFemale => Graphic == 606 || Graphic == 608;
 
-        public RaceType Race
-        {
-            get => _race;
-            set
-            {
-                if (_race != value)
-                {
-                    _race = value;
-                    _delta |= Delta.Appearance;
-                }
-            }
-        }
+        public RaceType Race { get; set; }
 
-        public ushort Hits
-        {
-            get => _hits;
-            set
-            {
-                if (_hits != value)
-                {
-                    _hits = value;
-                    _delta |= Delta.Hits;
-                }
-            }
-        }
+        public ushort Mana { get; set; }
 
-        public ushort HitsMax
-        {
-            get => _hitsMax;
-            set
-            {
-                if (_hitsMax != value)
-                {
-                    _hitsMax = value;
-                    _delta |= Delta.Hits;
-                }
-            }
-        }
+        public ushort ManaMax { get; set; }
 
-        public ushort Mana
-        {
-            get => _mana;
-            set
-            {
-                if (_mana != value)
-                {
-                    _mana = value;
-                    _delta |= Delta.Mana;
-                }
-            }
-        }
+        public ushort Stamina { get; set; }
 
-        public ushort ManaMax
-        {
-            get => _manaMax;
-            set
-            {
-                if (_manaMax != value)
-                {
-                    _manaMax = value;
-                    _delta |= Delta.Mana;
-                }
-            }
-        }
+        public ushort StaminaMax { get; set; }
 
-        public ushort Stamina
-        {
-            get => _stamina;
-            set
-            {
-                if (_stamina != value)
-                {
-                    _stamina = value;
-                    _delta |= Delta.Stamina;
-                }
-            }
-        }
+        public NotorietyFlag NotorietyFlag { get; set; }
 
-        public ushort StaminaMax
-        {
-            get => _staminaMax;
-            set
-            {
-                if (_staminaMax != value)
-                {
-                    _staminaMax = value;
-                    _delta |= Delta.Stamina;
-                }
-            }
-        }
-
-        public NotorietyFlag NotorietyFlag
-        {
-            get => _notorietyFlag;
-            set
-            {
-                if (_notorietyFlag != value)
-                {
-                    _notorietyFlag = value;
-                    _delta |= Delta.Attributes;
-                }
-            }
-        }
-
-        public bool IsRenamable
-        {
-            get => _isRenamable;
-            set
-            {
-                if (_isRenamable != value)
-                {
-                    _isRenamable = value;
-                    _delta |= Delta.Attributes;
-                }
-            }
-        }
+        public bool IsRenamable { get; set; }
 
         public bool IsParalyzed => ((byte) Flags & 0x01) != 0;
 
@@ -253,9 +134,7 @@ namespace ClassicUO.Game.GameObjects
                                Graphic == 0x02B6 || Graphic == 0x02B7 ||
                                Graphic == 0x03DB || Graphic == 0x03DF || Graphic == 0x03E2 || Graphic == 0x02E8 || Graphic == 0x02E9; // Vampiric
 
-        public override bool Exists => World.Contains(Serial);
-
-        public bool IsMounted => HasEquipment && Equipment[0x19] != null && !IsDrivingBoat;
+        public bool IsMounted => HasEquipment && Equipment[0x19] != null && !IsDrivingBoat && Equipment[0x19].GetGraphicForAnimation() != 0xFFFF;
 
         public bool IsDrivingBoat
         {
@@ -297,12 +176,6 @@ namespace ClassicUO.Game.GameObjects
 
         internal bool IsMoving => Steps.Count != 0;
 
-        public event EventHandler HitsChanged;
-
-        public event EventHandler ManaChanged;
-
-        public event EventHandler StaminaChanged;
-
         public Item GetSecureTradeBox()
         {
             return Items.FirstOrDefault(s => s.Graphic == 0x1E5E && s.Layer == Layer.Invalid);
@@ -331,15 +204,7 @@ namespace ClassicUO.Game.GameObjects
 
             ProcessAnimation(out _, true);
         }
-
-        protected override void OnProcessDelta(Delta d)
-        {
-            base.OnProcessDelta(d);
-            if (d.HasFlag(Delta.Hits)) HitsChanged.Raise(this);
-            if (d.HasFlag(Delta.Mana)) ManaChanged.Raise(this);
-            if (d.HasFlag(Delta.Stamina)) StaminaChanged.Raise(this);
-        }
-
+        
         public void ClearSteps()
         {
             Steps.Clear();
@@ -545,7 +410,20 @@ namespace ClassicUO.Game.GameObjects
                 if (animGroup == 0)
                     return;
 
-                AnimationGroup = _animationIdle[(byte) animGroup - 1, RandomHelper.GetValue(0, 2)];
+                if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                {
+                    if (animGroup != ANIMATION_GROUPS.AG_PEOPLE)
+                    {
+                        if (InWarMode)
+                            AnimationGroup = 28;
+                        else
+                            AnimationGroup = 26;
+
+                        return;
+                    }
+                }
+
+                AnimationGroup = _animationIdle[(byte)animGroup - 1, RandomHelper.GetValue(0, 2)];
 
                 if (isLowExtended && AnimationGroup == 18)
                     AnimationGroup = 1;
@@ -670,11 +548,11 @@ namespace ClassicUO.Game.GameObjects
                     FileManager.Animations.AnimGroup = animGroup;
                     FileManager.Animations.Direction = dir;
 
+
                     if (direction.FrameCount == 0 || direction.Frames == null)
                         FileManager.Animations.LoadDirectionGroup(ref direction);
 
-
-                    if (direction.Address != 0 && direction.Size != 0 || direction.IsUOP)
+                    if (direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1 || direction.IsUOP)
                     {
                         direction.LastAccessTime = Engine.Ticks;
                         int fc = direction.FrameCount;
@@ -872,12 +750,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (World.InGame && Serial == World.Player)
                         {
-                            foreach (var s in Engine.UI.Gumps.OfType<ContainerGump>())
-                            {
-                                var item = World.Items.Get(s.LocalSerial);
-                                if (item == null || item.IsDestroyed || item.OnGround && item.Distance > 3)
-                                    s.Dispose();
-                            }
+                            World.Player.CloseRangedGumps();
                         }
 
                         Direction = (Direction) step.Direction;

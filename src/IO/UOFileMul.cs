@@ -28,48 +28,30 @@ namespace ClassicUO.IO
         private readonly int _count, _patch;
         private readonly UOFileIdxMul _idxFile;
 
-        public UOFileMul(string file, string idxfile, int count, int patch = -1, bool load = true) : base(file)
+        public UOFileMul(string file, string idxfile, int count, int patch = -1) : this(file)
         {
             _idxFile = new UOFileIdxMul(idxfile);
             _count = count;
             _patch = patch;
-            Load(load);
         }
 
-        public UOFileMul(string file, bool load = true) : base(file)
+        public UOFileMul(string file) : base(file)
         {
-            Load(load);
+            Load();
         }
 
         public UOFile IdxFile => _idxFile;
 
-        protected override void Load(bool loadentries = true)
+
+        public override void FillEntries(ref UOFileIndex[] entries)
         {
-            base.Load(loadentries);
+            UOFile file = _idxFile ?? (UOFile)this;
 
-            if (loadentries)
-            {
-                UOFile file = _idxFile ?? (UOFile) this;
+            int count = (int)file.Length / 12;
+            entries = new UOFileIndex[count];
 
-                int count = (int) file.Length / 12;
-                Entries = new UOFileIndex3D[count];
-
-                for (int i = 0; i < count; i++)
-                    Entries[i] = new UOFileIndex3D(file.ReadInt(), file.ReadInt(), 0, file.ReadInt());
-
-                //UOFileIndex5D[] patches = Verdata.Patches;
-
-                //for (int i = 0; i < patches.Length; i++)
-                //{
-                //    UOFileIndex5D patch = patches[i];
-
-                //    if (patch.FileID == _patch && patch.BlockID >= 0 && patch.BlockID < Entries.Length)
-                //    {
-                //        ref UOFileIndex3D entry = ref Entries[patch.BlockID];
-                //        entry = new UOFileIndex3D(patch.Position, patch.Length | (1 << 31), 0, patch.GumpData);
-                //    }
-                //}
-            }
+            for (int i = 0; i < count; i++)
+                entries[i] = new UOFileIndex(file.ReadInt(), file.ReadInt(), 0, file.ReadInt());
         }
 
         public override void Dispose()
@@ -83,6 +65,10 @@ namespace ClassicUO.IO
             public UOFileIdxMul(string idxpath) : base(idxpath)
             {
                 Load();
+            }
+
+            public override void FillEntries(ref UOFileIndex[] entries)
+            {
             }
         }
     }

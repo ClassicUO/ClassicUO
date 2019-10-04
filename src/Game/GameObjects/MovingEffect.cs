@@ -31,6 +31,7 @@ namespace ClassicUO.Game.GameObjects
 
         public MovingEffect(Graphic graphic, Hue hue)
         {
+            AlphaHue = 255;
             Hue = hue;
             Graphic = graphic;
             Load();

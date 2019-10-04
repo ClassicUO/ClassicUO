@@ -43,11 +43,13 @@ namespace ClassicUO.Game.UI.Controls
         private GumpPic _body, _unk;
 
         private readonly ItemGumpPaperdoll[] _pgumps = new ItemGumpPaperdoll[(int) Layer.Mount]; // _backpackGump;
+        private readonly PaperDollGump _paperDollGump;
 
-        public PaperDollInteractable(int x, int y, Mobile mobile)
+        public PaperDollInteractable(int x, int y, Mobile mobile, PaperDollGump paperDollGump)
         {
             X = x;
             Y = y;
+            _paperDollGump = paperDollGump;
             Mobile = mobile;
             AcceptMouseInput = false;
             mobile.Items.Added += ItemsOnAdded;
@@ -91,6 +93,11 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (item != null && item.Layer >= 0 && (int) item.Layer < _pgumps.Length)
                 {
+                    if (Mobile == World.Player && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded))
+                    {
+                        World.Player.UpdateAbilities();
+                    }
+
                     ref var gump = ref _pgumps[(int)item.Layer];
                     gump?.Dispose();
                     gump = null;
@@ -113,6 +120,11 @@ namespace ClassicUO.Game.UI.Controls
 
                         if (i != null && i.Layer >= 0 && (int)i.Layer < _pgumps.Length)
                         {
+                            if (Mobile == World.Player && (i.Layer == Layer.OneHanded || i.Layer == Layer.TwoHanded))
+                            {
+                                World.Player.UpdateAbilities();
+                            }
+
                             ref var gump = ref _pgumps[(int) i.Layer];
                             gump?.Dispose();
                             gump = null;
@@ -263,8 +275,12 @@ namespace ClassicUO.Game.UI.Controls
 
                         Item item = _mobile.Equipment[layerIndex];
                         bool isfake = false;
-                        bool canPickUp = World.InGame && (World.Player.Graphic == 0x03DB || World.Player == Mobile || (World.Player.Flags & Flags.IgnoreMobiles) != 0 || 
-                            (Mobile.NotorietyFlag == NotorietyFlag.Invulnerable && (Mobile.Flags & Flags.IgnoreMobiles) == 0));
+                        bool canPickUp = World.InGame && 
+                                         !World.Player.IsDead && 
+                                         (_mobile == World.Player || (_paperDollGump != null && _paperDollGump.CanLift)) &&
+                                         layerIndex != (int) Layer.Hair && 
+                                         layerIndex != (int) Layer.Beard;
+
                         ref var itemGump = ref _pgumps[layerIndex];
 
                         if (_fakeItem != null && _fakeItem.ItemData.Layer == layerIndex)

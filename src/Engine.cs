@@ -55,12 +55,12 @@ namespace ClassicUO
 {
     internal class DebugInfo
     {
-        public int MobilesRendered { get; set; }
-        public int ItemsRendered { get; set; }
-        public int StaticsRendered { get; set; }
-        public int MultiRendered { get; set; }
-        public int LandsRendered { get; set; }
-        public int EffectsRendered { get; set; }
+        public int MobilesRendered;
+        public int ItemsRendered;
+        public int StaticsRendered;
+        public int MultiRendered;
+        public int LandsRendered;
+        public int EffectsRendered;
 
         public void Reset()
         {
@@ -482,7 +482,12 @@ namespace ClassicUO
             ThreadID = Thread.CurrentThread.ManagedThreadId;
 
             Log.Start(LogTypes.All);
-            ExePath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName); // Environment.CurrentDirectory;
+
+            // NOTE: This is very important to get correct path of the assembly to properly run in the mono environment
+            // @see: https://stackoverflow.com/questions/39601742/mono-executes-program-with-wrong-current-directory
+            // @see: https://stackoverflow.com/questions/1658518/getting-the-absolute-path-of-the-executable-using-c/17836681
+            ExePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location); // Environment.CurrentDirectory;
+            Console.WriteLine("ExePath: {0}", ExePath);
 
 #if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
@@ -560,10 +565,6 @@ namespace ClassicUO
 
             Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...");
             Log.PushIndent();
-
-
-            //_uiSystem = new UISystemManager(this);
-            //Components.Add(_uiSystem);
 
 
             try
@@ -707,7 +708,6 @@ namespace ClassicUO
                 _totalElapsed -= fpsTime;
                 _isRunningSlowly = _totalElapsed > fpsTime;
 
-
                 if (_isRunningSlowly && _totalElapsed > fpsTime * 2)
                 {
                     _totalElapsed %= fpsTime;
@@ -718,15 +718,11 @@ namespace ClassicUO
             {
                 uint sleep = SDL.SDL_GetTicks() - Ticks;
 
-                if (sleep < fpsTime)
+                if (fpsTime - sleep >= FrameDelay[1])
                 {
-                    Thread.Sleep(fpsTime - sleep >= FrameDelay[1] ? 1 : 0);
+                    Thread.Sleep(1);
                 }
-                else
-                    Thread.Yield();
             }
-            else
-                Thread.Yield();
         }
 
 
@@ -743,8 +739,9 @@ namespace ClassicUO
 
             _totalFrames++;
 
-            if (_sceneManager.CurrentScene != null && _sceneManager.CurrentScene.IsLoaded && !_sceneManager.CurrentScene.IsDestroyed)
-                _sceneManager.CurrentScene.Draw(_batcher);
+            var scene = _sceneManager.CurrentScene;
+            if (scene != null && scene.IsLoaded && !scene.IsDestroyed)
+                scene.Draw(_batcher);
 
             _uiManager.Draw(_batcher);
 

@@ -26,12 +26,14 @@ using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 using SDL2;
@@ -97,13 +99,8 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public Rectangle Bounds
-        {
-            get => _bounds;
-            set => _bounds = value;
-        }
-
-
+        public ref Rectangle Bounds => ref _bounds;
+        
         public bool IsDisposed { get; private set; }
 
         public bool IsVisible { get; set; } = true;
@@ -124,12 +121,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsEditable { get; set; }
 
-        public bool IsTransparent { get; set; }
-
         public float Alpha { get; set; }
 
         public List<Control> Children { get; }
-        public virtual bool CanUseAlpha => true;
 
         public object Tag { get; set; }
 
@@ -317,7 +311,6 @@ namespace ClassicUO.Game.UI.Controls
                     if (c.IsVisible && c.IsInitialized)
                     {
                         c.Draw(batcher, c.X + x, c.Y + y);
-
                         //DrawDebug(batcher, position);
                     }
                 }
@@ -467,8 +460,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-
-        public Control[] HitTest(Point position)
+        public Control[] HitTest(int x, int y)
         {
             if (!IsVisible)
                 return null;
@@ -478,9 +470,9 @@ namespace ClassicUO.Game.UI.Controls
             int parentX = ParentX;
             int parentY = ParentY;
 
-            if (Bounds.Contains(position.X - parentX, position.Y - parentY))
+            if (Bounds.Contains(x - parentX, y - parentY))
             {
-                if (Contains(position.X - X - parentX, position.Y - Y - parentY))
+                if (Contains(x - X - parentX, y - Y - parentY))
                 {
                     if (AcceptMouseInput)
                         results.Push(this);
@@ -489,7 +481,7 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         if (c.Page == 0 || c.Page == ActivePage)
                         {
-                            var cl = c.HitTest(position);
+                            var cl = c.HitTest(x, y);
 
                             if (cl != null)
                             {
@@ -510,6 +502,11 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             return null;
+        }
+
+        public Control[] HitTest(Point position)
+        {
+            return HitTest(position.X, position.Y);
         }
 
         public Control GetFirstControlAcceptKeyboardInput()
@@ -717,6 +714,8 @@ namespace ClassicUO.Game.UI.Controls
                     _attempToDrag = true;
                 }
             }
+            else 
+                Parent?.OnMouseOver(X + x, Y + y);
         }
 
         protected virtual void OnMouseEnter(int x, int y)
@@ -780,6 +779,7 @@ namespace ClassicUO.Game.UI.Controls
 
         internal virtual void OnFocusEnter()
         {
+            Parent?.OnFocusEnter();
         }
 
         internal virtual void OnFocusLeft()
@@ -865,9 +865,9 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Control c = Children[i];
                 c.Dispose();
-
-                Children.RemoveAt(i--);
             }
+
+            Children.Clear();
 
             IsDisposed = true;
 

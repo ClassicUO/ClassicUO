@@ -38,19 +38,14 @@ namespace ClassicUO.Game.GameObjects
 {
     internal partial class Item : Entity
     {
-        private ushort _amount;
-
         private AnimDataFrame2 _animDataFrame;
         private int _animSpeed;
-        private Serial _container;
         private Graphic? _displayedGraphic;
         private bool _isMulti;
 
 
         private StaticTiles? _itemData;
 
-        private Layer _layer;
-        private uint _price;
         private ulong _spellsBitFiled;
 
 
@@ -120,62 +115,17 @@ namespace ClassicUO.Game.GameObjects
             //_pool.Enqueue(this);
         }
 
-        public uint Price
-        {
-            get => _price;
-            set
-            {
-                if (_price != value)
-                {
-                    _price = value;
-                    _delta |= Delta.Attributes;
-                }
-            }
-        }
+        public uint Price { get; set; }
 
-        public ushort Amount
-        {
-            get => _amount;
-            set
-            {
-                if (_amount != value)
-                {
-                    _amount = value;
-                    _delta |= Delta.Attributes;
-                }
-            }
-        }
+        public ushort Amount { get; set; }
 
-        public Serial Container
-        {
-            get => _container;
-            set
-            {
-                if (_container != value)
-                {
-                    _container = value;
-                    _delta |= Delta.Ownership;
-                }
-            }
-        }
+        public Serial Container { get; set; }
 
-        public Layer Layer
-        {
-            get => _layer;
-            set
-            {
-                if (_layer != value)
-                {
-                    _layer = value;
-                    _delta |= Delta.Ownership;
-                }
-            }
-        }
+        public Layer Layer { get; set; }
 
         public bool UsedLayer { get; set; }
 
         public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
-
 
         public Graphic DisplayedGraphic
         {
@@ -216,6 +166,8 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        public bool IsDamageable { get; set; }
+
         public byte LightID { get; set; }
 
         public bool WantUpdateMulti { get; set; } = true;
@@ -227,8 +179,6 @@ namespace ClassicUO.Game.GameObjects
         public bool IsCorpse => /*MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) ||*/ Graphic == 0x2006;
 
         public bool IsSpellBook => Graphic == 0x0E38 || Graphic == 0x0EFA || Graphic == 0x2252 || Graphic == 0x2253 || Graphic == 0x238C || Graphic == 0x23A0 || Graphic == 0x2D50 || Graphic == 0x2D9D; // mysticism
-
-        public override bool Exists => World.Contains(Serial);
 
         public bool OnGround => !Container.IsValid;
 
@@ -261,62 +211,12 @@ namespace ClassicUO.Game.GameObjects
             get
             {
                 if (!_itemData.HasValue)
-                    _itemData = FileManager.TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
+                    _itemData = FileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
 
                 return _itemData.Value;
             }
         }
 
-        public Item FindItem(ushort graphic, ushort hue = 0xFFFF)
-        {
-            Item item = null;
-
-            if (hue == 0xFFFF)
-            {
-                var minColor = 0xFFFF;
-
-                foreach (Item i in Items)
-                {
-                    if (i.Graphic == graphic)
-                    {
-                        if (i.Hue < minColor)
-                        {
-                            item = i;
-                            minColor = i.Hue;
-                        }
-                    }
-
-                    if (i.Container.IsValid)
-                    {
-                        Item found = i.FindItem(graphic, hue);
-
-                        if (found != null && found.Hue < minColor)
-                        {
-                            item = found;
-                            minColor = found.Hue;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                foreach (Item i in Items)
-                {
-                    if (i.Graphic == graphic && i.Hue == hue)
-                        item = i;
-
-                    if (i.Container.IsValid)
-                    {
-                        Item found = i.FindItem(graphic, hue);
-
-                        if (found != null)
-                            item = found;
-                    }
-                }
-            }
-
-            return item;
-        }
 
         private void LoadMulti()
         {
@@ -359,7 +259,10 @@ namespace ClassicUO.Game.GameObjects
                     house.Components.Add(m);
                 }
                 else if (i == 0)
+                {
                     MultiGraphic = graphic;
+                    _itemData = null;
+                }
             }
 
             FileManager.Multi.ReleaseLastMultiDataRead();
@@ -396,6 +299,7 @@ namespace ClassicUO.Game.GameObjects
                     if (OnGround && ItemData.IsAnimated)
                     {
                         _animDataFrame = FileManager.AnimData.CalculateCurrentGraphic(Graphic);
+
                         AnimIndex = animIndex;
                         _animSpeed = _animDataFrame.FrameInterval != 0 ? _animDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
                         LastAnimationChangeTime = Engine.Ticks;
@@ -436,8 +340,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public event EventHandler OwnerChanged;
-
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDestroyed)
@@ -447,13 +349,6 @@ namespace ClassicUO.Game.GameObjects
 
             ProcessAnimation(out _);
         }
-
-        protected override void OnProcessDelta(Delta d)
-        {
-            base.OnProcessDelta(d);
-            if (d.HasFlag(Delta.Ownership)) OwnerChanged.Raise(this);
-        }
-
         public override Graphic GetGraphicForAnimation()
         {
             Graphic graphic = Graphic;
@@ -832,7 +727,7 @@ namespace ClassicUO.Game.GameObjects
                         break;
                     }
 
-                    default: //lightbrown/horse2
+                    default:
 
                     {
                         if (ItemData.AnimID != 0)
@@ -893,9 +788,12 @@ namespace ClassicUO.Game.GameObjects
                     sbyte frameIndex = (sbyte) (AnimIndex + 1);
                     ushort id = GetGraphicForAnimation();
 
-                    ushort corpseGraphic = FileManager.Animations.DataIndex[id].CorpseGraphic;
+                    //FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue);
 
-                    if (corpseGraphic != id && corpseGraphic != 0) id = corpseGraphic;
+                    //ushort corpseGraphic = FileManager.Animations.DataIndex[id].CorpseGraphic;
+
+                    //if (corpseGraphic != id && corpseGraphic != 0) 
+                    //    id = corpseGraphic;
 
                     bool mirror = false;
                     FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
@@ -929,6 +827,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (OnGround && _animDataFrame.FrameCount != 0 && LastAnimationChangeTime < Engine.Ticks)
             {
+
                 unsafe
                 {
                     _originalGraphic = (Graphic) (DisplayedGraphic + _animDataFrame.FrameData[AnimIndex++]);

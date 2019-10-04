@@ -1062,6 +1062,19 @@ namespace ClassicUO.Game.Managers
                         GameActions.DoubleClick(potion);
 
                     break;
+                    
+                 case MacroType.CloseAllHealthBars:
+
+                    var healthBarGumps = Engine.UI.Gumps.OfType<HealthBarGump>();
+
+                    foreach (var healthbar in healthBarGumps)
+                    {
+                        if (Engine.UI.AnchorManager[healthbar] == null && (healthbar.LocalSerial != World.Player))
+                        {
+                            healthbar.Dispose();
+                        }
+                    }
+                    break;
             }
 
 
@@ -1371,9 +1384,8 @@ namespace ClassicUO.Game.Managers
         SetGrabBag,
         NamesOnOff,
         UseItemInHand,
-
-       
         UsePotion,
+        CloseAllHealthBars,
 
     }
 

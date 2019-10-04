@@ -100,13 +100,13 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Y = 1;
             }
             else
-                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
+                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, ItemData.IsPartialHue, 0);
 
             Engine.DebugInfo.MultiRendered++;
 
             if (IsFromTarget)
                 HueVector.Z = 0.5f;
-            //SpriteRenderer.DrawStaticArt(Graphic, Hue, (int) position.X, (int) position.Y);
+
             base.Draw(batcher, posX, posY);
 
             if (ItemData.IsLight)
@@ -120,7 +120,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
-            if (SelectedObject.Object == this || IsFromTarget)
+            if (SelectedObject.Object == this || IsFromTarget || CharacterIsBehindFoliage)
                 return;
 
             if (DrawTransparent)
@@ -132,7 +132,7 @@ namespace ClassicUO.Game.GameObjects
                     return;
             }
 
-            if (SelectedObject.IsPointInStatic(Texture, Graphic, x - Bounds.X, y - Bounds.Y))
+            if (SelectedObject.IsPointInStatic(Texture, x - Bounds.X, y - Bounds.Y))
                 SelectedObject.Object = this;
         }
     }

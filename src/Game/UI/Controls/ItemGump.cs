@@ -54,6 +54,7 @@ namespace ClassicUO.Game.UI.Controls
             CanPickUp = true;
             ArtTexture texture = FileManager.Art.GetTexture(item.DisplayedGraphic);
             Texture = texture;
+
             Width = texture.Width;
             Height = texture.Height;
             LocalSerial = Item.Serial;
@@ -99,16 +100,24 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
             ShaderHuesTraslator.GetHueVector(ref _hueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, true);
 
-            batcher.Draw2D(Texture, x, y, ref _hueVector);
+            batcher.Draw2D(Texture, x, y, Width, Height, ref _hueVector);
 
             if (Item.Amount > 1 && Item.ItemData.IsStackable && Item.DisplayedGraphic == Item.Graphic)
-                batcher.Draw2D(Texture, x + 5, y + 5, ref _hueVector);
+                batcher.Draw2D(Texture, x + 5, y + 5, Width, Height, ref _hueVector);
 
             return base.Draw(batcher, x, y);
         }
 
         public override bool Contains(int x, int y)
         {
+            if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
+            {
+                float scale = Engine.UI.ContainerScale;
+
+                x = (int)(x / scale);
+                y = (int)(y / scale);
+            }
+
             if (Texture.Contains(x, y))
                 return true;
 
@@ -139,36 +148,6 @@ namespace ClassicUO.Game.UI.Controls
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             base.OnMouseUp(x, y, button);
-
-
-            //if (button != MouseButton.Left)
-            //    return;
-
-            //var gs = Engine.SceneManager.GetScene<GameScene>();
-
-            //if (gs == null || gs.IsHoldingItem)
-            //    return;
-
-            //if (TargetManager.IsTargeting)
-            //{
-            //    if (TargetManager.TargetingState == CursorTarget.Position || TargetManager.TargetingState == CursorTarget.Object || TargetManager.TargetingState == CursorTarget.Grab || TargetManager.TargetingState == CursorTarget.SetGrabBag)
-            //    {
-            //        TargetManager.TargetGameObject(Item);
-            //        Mouse.LastLeftButtonClickTime = 0;
-            //    }
-            //}
-            //else
-            //{
-            //    if (_clickedCanDrag)
-            //    {
-            //        _clickedCanDrag = false;
-            //        _sendClickIfNotDClick = true;
-            //        float totalMS = Engine.Ticks;
-            //        _sClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-            //        _lastClickPosition.X = Mouse.Position.X;
-            //        _lastClickPosition.Y = Mouse.Position.Y;
-            //    }
-            //}
 
             if (button == MouseButton.Left)
             {
@@ -293,6 +272,9 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
+            if (button != MouseButton.Left)
+                return false;
+
             GameActions.DoubleClick(Item);
             _sendClickIfNotDClick = false;
             _lastClickPosition = Point.Zero;

@@ -61,7 +61,10 @@ namespace ClassicUO.Game.UI.Controls
             LocalSerial = Serial.Parse(parts[6]);
             TxEntry.SetHeight(Height);
 
-            SetText(lines[int.Parse(parts[7])]);
+            int index = int.Parse(parts[7]);
+
+            if (index >= 0 && index < lines.Length)
+                SetText(lines[index]);
         }
 
         public TextEntry TxEntry { get; private set; }
@@ -273,13 +276,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             base.OnKeyDown(key, mod);
-        }
-
-        public override void Dispose()
-        {
-            base.Dispose();
-            TxEntry?.Destroy();
-            TxEntry = null;
         }
     }
 }

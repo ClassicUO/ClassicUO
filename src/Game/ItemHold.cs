@@ -44,7 +44,6 @@ namespace ClassicUO.Game
         public bool HasAlpha { get; private set; }
         public Layer Layer { get; private set; }
         public Flags Flags { get; private set; }
-        public List<Property> Properties { get; private set; }
 
         public bool Enabled { get; set; }
         public bool Dropped { get; set; }
@@ -67,7 +66,6 @@ namespace ClassicUO.Game
             IsWearable = item.ItemData.IsWearable;
             Layer = item.Layer;
             Flags = item.Flags;
-            Properties = item.Properties;
 
             Engine.UI.GameCursor.SetDraggedItem(this);
         }
@@ -84,7 +82,6 @@ namespace ClassicUO.Game
             IsWearable = IsStackable = IsPartialHue = HasAlpha = false;
             Layer = Layer.Invalid;
             Flags = Flags.None;
-            Properties?.Clear();
 
             Dropped = false;
             Enabled = false;

@@ -244,8 +244,11 @@ FakesAssemblies/
 _Pvt_Extensions
 
 # Paket dependency manager
+.paket/
 .paket/paket.exe
 paket-files/
+paket.dependencies
+paket.lock
 
 # FAKE - F# Make
 .fake/

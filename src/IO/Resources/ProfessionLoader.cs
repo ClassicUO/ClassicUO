@@ -331,9 +331,8 @@ namespace ClassicUO.IO.Resources
             return result;
         }
 
-        protected override void CleanResources()
+        public override void CleanResources()
         {
-            throw new NotImplementedException();
         }
 
         internal enum PROF_TYPE

@@ -52,7 +52,9 @@ namespace ClassicUO.Game.UI.Controls
             UseFlagScrollbar = HasScrollbar && parts[7] == "2";
             _gameText.IsHTML = true;
             _gameText.MaxWidth = Width - (HasScrollbar ? 15 : 0) - (HasBackground ? 8 : 0);
-            InternalBuild(lines[textIndex], 0);
+
+            if (textIndex >= 0 && textIndex < lines.Length)
+                InternalBuild(lines[textIndex], 0);
         }
 
         public HtmlControl(int x, int y, int w, int h, bool hasbackground, bool hasscrollbar, bool useflagscrollbar = false, string text = "", int hue = 0, bool ishtml = false, byte font = 1, bool isunicode = true, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : this()
@@ -219,6 +221,7 @@ namespace ClassicUO.Game.UI.Controls
                 batcher.EnableScissorTest(true);
                 base.Draw(batcher, x, y);
                 _gameText.Draw(batcher, x + (HasBackground ? 4 : 0), y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0), ScrollX, ScrollY);
+
                 batcher.EnableScissorTest(false);
                 ScissorStack.PopScissors();
             }

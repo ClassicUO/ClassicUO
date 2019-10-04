@@ -118,7 +118,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _primAbility.DragBegin += (sender, e) =>
                         {
-                            AbilityDefinition def = AbilityData.Abilities[((byte) World.Player.PrimaryAbility & 0x7F) - 1];
+                            if (Engine.UI.IsDragging)
+                                return;
+
+                            ref readonly AbilityDefinition def = ref AbilityData.Abilities[((byte) World.Player.PrimaryAbility & 0x7F) - 1];
 
                             UseAbilityButtonGump gump = new UseAbilityButtonGump(def, true)
                             {
@@ -135,7 +138,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _secAbility.DragBegin += (sender, e) =>
                         {
-                            AbilityDefinition def = AbilityData.Abilities[((byte) World.Player.SecondaryAbility & 0x7F) - 1];
+                            if (Engine.UI.IsDragging)
+                                return;
+
+                            ref readonly AbilityDefinition def = ref AbilityData.Abilities[((byte) World.Player.SecondaryAbility & 0x7F) - 1];
 
                             UseAbilityButtonGump gump = new UseAbilityButtonGump(def, false)
                             {
@@ -161,7 +167,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 int index = ((byte) (i == 0 ? World.Player.PrimaryAbility : World.Player.SecondaryAbility) & 0x7F) - 1;
 
-                AbilityDefinition def = AbilityData.Abilities[index];
+                ref readonly AbilityDefinition def = ref AbilityData.Abilities[index];
 
                 if (i == 0)
                 {

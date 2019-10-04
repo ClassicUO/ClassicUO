@@ -43,6 +43,8 @@ namespace ClassicUO.IO.Resources
                     throw new FileNotFoundException();
 
                 _file = new UOFileMul(path, pathidx, Constants.MAX_LIGHTS_DATA_INDEX_COUNT);
+                _file.FillEntries(ref Entries);
+
             });
         }
 
@@ -68,10 +70,13 @@ namespace ClassicUO.IO.Resources
 
         private ushort[] GetLight(uint idx, out int width, out int height)
         {
-            (int length, int extra, bool patched) = _file.SeekByEntryIndex((int) idx);
-            width = extra & 0xFFFF;
-            height = (extra >> 16) & 0xFFFF;
+            ref readonly var entry = ref GetValidRefEntry((int) idx);
+
+            width = entry.Extra & 0xFFFF;
+            height = (entry.Extra >> 16) & 0xFFFF;
             ushort[] pixels = new ushort[width * height];
+
+            _file.Seek(entry.Offset);
 
             for (int i = 0; i < height; i++)
             {

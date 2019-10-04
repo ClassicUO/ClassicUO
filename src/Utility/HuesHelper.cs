@@ -1,5 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Utility
 {
     internal static class HuesHelper
@@ -34,13 +36,38 @@ namespace ClassicUO.Utility
         [MethodImpl(256)]
         public static ushort Color32To16(uint c)
         {
-            return (ushort) ((((c & 0xFF) * 32) >> 8) | (((((c >> 16) & 0xFF) * 32) >> 8) << 10) | (((((c >> 8) & 0xFF) * 32) >> 8) << 5));
+            return (ushort) ((((c & 0xFF) << 5) >> 8) | (((((c >> 16) & 0xFF) << 5) >> 8) << 10) | (((((c >> 8) & 0xFF) << 5) >> 8) << 5));
         }
 
         [MethodImpl(256)]
         public static ushort ConvertToGray(ushort c)
         {
             return (ushort) (((c & 0x1F) * 299 + ((c >> 5) & 0x1F) * 587 + ((c >> 10) & 0x1F) * 114) / 1000);
+        }
+
+        [MethodImpl(256)]
+        public static ushort ColorToHue(Color c)
+        {
+            ushort origred = c.R;
+            ushort origgreen = c.G;
+            ushort origblue = c.B;
+            const double scale = 31.0 / 255;
+            ushort newred = (ushort)(origred * scale);
+
+            if (newred == 0 && origred != 0)
+                newred = 1;
+            ushort newgreen = (ushort)(origgreen * scale);
+
+            if (newgreen == 0 && origgreen != 0)
+                newgreen = 1;
+            ushort newblue = (ushort)(origblue * scale);
+
+            if (newblue == 0 && origblue != 0)
+                newblue = 1;
+
+            ushort v = (ushort)((newred << 10) | (newgreen << 5) | (newblue));
+
+            return v;
         }
     }
 }
