@@ -24,6 +24,7 @@
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game.UI.Gumps.Login
@@ -143,6 +144,21 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 X = 286,
                 Y = 465
             });
+
+            int htmlX = 130;
+            int htmlY = 442;
+
+            Add(new HtmlControl(htmlX, htmlY, 300, 100,
+                                false, false,
+                                false, 
+                                text: "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.paypal.me/muskara\">> Instant donation",
+                                0x32, true, isunicode: true, style: FontStyle.BlackBorder));
+            Add(new HtmlControl(htmlX, htmlY + 20, 300, 100,
+                                false, false,
+                                false,
+                                text: "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.patreon.com/user?u=21694183\">> Become a Patreon!",
+                                0x32, true, isunicode: true, style: FontStyle.BlackBorder));
+            
 
             // Text Inputs
             Add(_textboxAccount = new TextBox(5, 16, 190, 190, false)

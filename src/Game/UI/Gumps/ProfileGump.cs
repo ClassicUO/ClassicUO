@@ -77,22 +77,6 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_scrollArea);
         }
 
-        /*protected override void OnMouseWheel(MouseEvent delta)
-        {
-            switch (delta)
-            {
-                case MouseEvent.WheelScrollUp:
-                    _scrollBar.Value -= 5;
-
-                    break;
-                case MouseEvent.WheelScrollDown:
-                    _scrollBar.Value += 5;
-
-                    break;
-            }
-        }*/
-
-
         public override void OnButtonClick(int buttonID)
         {
             // necessary to avoid closing
@@ -129,12 +113,21 @@ namespace ClassicUO.Game.UI.Gumps
             var startBounds = FileManager.Gumps.GetTexture(start);
             var middleBounds = FileManager.Gumps.GetTexture((Graphic) (start + 1));
             var endBounds = FileManager.Gumps.GetTexture((Graphic) (start + 2));
-            int y = -startBounds.Height;
-            Control c;
-            c = new GumpPic(x, (y >> 1) - 6, start, 0);
-            c.Add(new GumpPicWithWidth(startBounds.Width, (startBounds.Height - middleBounds.Height) >> 1, (Graphic) (start + 1), 0, width - startBounds.Width - endBounds.Width));
-            c.Add(new GumpPic(width - endBounds.Width, 0, (Graphic) (start + 2), 0));
-            area.Add(c);
+
+            PrivateContainer container = new PrivateContainer();
+
+            Control c = new GumpPic(x, 0, start, 0);
+            
+            container.Add(c);
+            container.Add(new GumpPicWithWidth(x + startBounds.Width, (startBounds.Height - middleBounds.Height) >> 1, (Graphic) (start + 1), 0, width - startBounds.Width - endBounds.Width));
+            container.Add(new GumpPic(x + width - endBounds.Width, 0, (Graphic) (start + 2), 0));
+
+            area.Add(container);
+        }
+
+        class PrivateContainer : Control
+        {
+
         }
 
         public override void OnPageChanged()

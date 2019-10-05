@@ -133,6 +133,10 @@ namespace ClassicUO.Game.Scenes
                 World.Map?.ClearUnusedBlocks();
 
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
+
+                FileManager.Lights.CleaUnusedResources();
+
+                yield return new WaitTime(TimeSpan.FromMilliseconds(500));
             }
 
             Log.Message(LogTypes.Trace, "Cleaning routine finished");

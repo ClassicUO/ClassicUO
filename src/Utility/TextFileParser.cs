@@ -143,7 +143,7 @@ namespace ClassicUO.Utility
         {
             bool exit = false;
             string result = "";
-
+            
             for (int i = 0; i < _quotes.Length; i += 2)
             {
                 if (_string[_pos] == _quotes[i])
@@ -151,17 +151,27 @@ namespace ClassicUO.Utility
                     char endQuote = _quotes[i + 1];
                     exit = true;
 
-                    _pos++;
-                    int pos = _pos;
+                    int pos = _pos + 1;
+                    int start = pos;
 
                     while (pos < _eol && _string[pos] != '\n' && _string[pos] != endQuote)
-                        pos++;
+                    {
+                        if (_string[pos] == _quotes[i]) // another {
+                        {
+                            _pos = pos;
+                            ObtainQuotedData(); // skip
+                            pos = _pos;
+                        }
 
-                    int size = pos - _pos;
+                        pos++;
+                    }
+
+                    _pos++;
+                    int size = pos - start;
 
                     if (size > 0)
                     {
-                        result = _string.Substring(_pos, size).TrimEnd('\r', '\n');
+                        result = _string.Substring(start, size).TrimEnd('\r', '\n');
                         _pos = pos;
 
                         if (_pos < _eol && _string[_pos] == endQuote)

@@ -38,8 +38,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal partial class Item : Entity
     {
-        private ushort _amount;
-
         private AnimDataFrame2 _animDataFrame;
         private int _animSpeed;
         private Graphic? _displayedGraphic;
@@ -119,17 +117,7 @@ namespace ClassicUO.Game.GameObjects
 
         public uint Price { get; set; }
 
-        public ushort Amount
-        {
-            get => _amount;
-            set
-            {
-                if (_amount != value)
-                {
-                    _amount = value;
-                }
-            }
-        }
+        public ushort Amount { get; set; }
 
         public Serial Container { get; set; }
 
@@ -138,7 +126,6 @@ namespace ClassicUO.Game.GameObjects
         public bool UsedLayer { get; set; }
 
         public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
-
 
         public Graphic DisplayedGraphic
         {
@@ -224,62 +211,12 @@ namespace ClassicUO.Game.GameObjects
             get
             {
                 if (!_itemData.HasValue)
-                    _itemData = FileManager.TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
+                    _itemData = FileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
 
                 return _itemData.Value;
             }
         }
 
-        public Item FindItem(ushort graphic, ushort hue = 0xFFFF)
-        {
-            Item item = null;
-
-            if (hue == 0xFFFF)
-            {
-                var minColor = 0xFFFF;
-
-                foreach (Item i in Items)
-                {
-                    if (i.Graphic == graphic)
-                    {
-                        if (i.Hue < minColor)
-                        {
-                            item = i;
-                            minColor = i.Hue;
-                        }
-                    }
-
-                    if (i.Container.IsValid)
-                    {
-                        Item found = i.FindItem(graphic, hue);
-
-                        if (found != null && found.Hue < minColor)
-                        {
-                            item = found;
-                            minColor = found.Hue;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                foreach (Item i in Items)
-                {
-                    if (i.Graphic == graphic && i.Hue == hue)
-                        item = i;
-
-                    if (i.Container.IsValid)
-                    {
-                        Item found = i.FindItem(graphic, hue);
-
-                        if (found != null)
-                            item = found;
-                    }
-                }
-            }
-
-            return item;
-        }
 
         private void LoadMulti()
         {
@@ -322,7 +259,10 @@ namespace ClassicUO.Game.GameObjects
                     house.Components.Add(m);
                 }
                 else if (i == 0)
+                {
                     MultiGraphic = graphic;
+                    _itemData = null;
+                }
             }
 
             FileManager.Multi.ReleaseLastMultiDataRead();
@@ -848,9 +788,12 @@ namespace ClassicUO.Game.GameObjects
                     sbyte frameIndex = (sbyte) (AnimIndex + 1);
                     ushort id = GetGraphicForAnimation();
 
-                    ushort corpseGraphic = FileManager.Animations.DataIndex[id].CorpseGraphic;
+                    //FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue);
 
-                    if (corpseGraphic != id && corpseGraphic != 0) id = corpseGraphic;
+                    //ushort corpseGraphic = FileManager.Animations.DataIndex[id].CorpseGraphic;
+
+                    //if (corpseGraphic != id && corpseGraphic != 0) 
+                    //    id = corpseGraphic;
 
                     bool mirror = false;
                     FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
@@ -865,7 +808,7 @@ namespace ClassicUO.Game.GameObjects
                         FileManager.Animations.AnimGroup = animGroup;
                         FileManager.Animations.Direction = dir;
 
-                        if (direction.FrameCount == 0 || !direction.GetFrames(out _))
+                        if (direction.FrameCount == 0 || direction.Frames == null)
                             FileManager.Animations.LoadDirectionGroup(ref direction);
 
                         if (direction.Address != 0 && direction.Size != 0 || direction.IsUOP)

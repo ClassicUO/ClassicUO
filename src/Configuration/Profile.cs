@@ -134,6 +134,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool HoldDownKeyTab { get; set; } = true;
         [JsonProperty] public bool HoldDownKeyAltToCloseAnchored { get; set; } = true;
         [JsonProperty] public bool HoldShiftForContext { get; set; } = false;
+        [JsonProperty] public bool HoldShiftToSplitStack { get; set; } = false;
 
         // general
         [JsonProperty] public Point WindowClientBounds { get; set; } = new Point(600, 480);
@@ -292,6 +293,10 @@ namespace ClassicUO.Configuration
         [JsonProperty] public float Brighlight { get; set; }
 
         [JsonProperty] public bool JournalDarkMode { get; set; }
+
+        [JsonProperty] public byte ContainersScale { get; set; } = 100;
+
+        [JsonProperty] public bool ScaleItemsInsideContainers { get; set; }
 
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");

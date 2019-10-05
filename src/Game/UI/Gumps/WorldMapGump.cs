@@ -419,7 +419,6 @@ namespace ClassicUO.Game.UI.Gumps
                                    ref _hueVector, _flipMap ? 45 : 0);
 
                     batcher.EnableScissorTest(false);
-
                     ScissorStack.PopScissors();
                 }
 

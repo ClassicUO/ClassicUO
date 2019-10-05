@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -115,13 +116,18 @@ namespace ClassicUO.Game.UI.Gumps
         private ColorBox _poisonColorPickerBox, _paralyzedColorPickerBox, _invulnerableColorPickerBox;
         private TextBox _spellFormatBox;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
-        private Checkbox _holdShiftForContext, _reduceFPSWhenInactive, _sallosEasyGrab, _partyInviteGump;
+        private Checkbox _holdShiftForContext, _holdShiftToSplitStack, _reduceFPSWhenInactive, _sallosEasyGrab, _partyInviteGump;
 
         //VendorGump Size Option
         private ArrowNumbersTextBox _vendorGumpSize;
 
         private ScrollAreaItem _windowSizeArea;
         private ScrollAreaItem _zoomSizeArea;
+
+
+        // containers
+        private HSliderBar _containersScale;
+        private Checkbox _containerScaleItems;
 
         public OptionsGump() : base(0, 0)
         {
@@ -159,6 +165,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new NiceButton(10, 10 + 30 * 8, 140, 25, ButtonAction.SwitchPage, FileManager.Language.Dict["UI_Options_MainBtn_Experimental"]) {ButtonParameter = 10});
             Add(new NiceButton(10, 10 + 30 * 9, 140, 25, ButtonAction.SwitchPage, FileManager.Language.Dict["UI_Options_MainBtn_Network"]) {ButtonParameter = 11});
             Add(new NiceButton(10, 10 + 30 * 10, 140, 25, ButtonAction.SwitchPage, FileManager.Language.Dict["UI_Options_MainBtn_InfoBar"]) { ButtonParameter = 12 });
+            Add(new NiceButton(10, 10 + 30 * 11, 140, 25, ButtonAction.SwitchPage, "Containers") { ButtonParameter = 13 });
 
 
             Add(new Line(160, 5, 1, HEIGHT - 10, Color.Gray.PackedValue));
@@ -203,6 +210,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildExperimental();
             BuildNetwork();
             BuildInfoBar();
+            BuildContainers();
 
             ChangePage(1);
         }
@@ -637,9 +645,6 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
-        private void BuildInfoBar()
-        {
-            const int PAGE = 12;
 
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
@@ -1258,6 +1263,83 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
         }
 
+        private void BuildInfoBar()
+        {
+            const int PAGE = 12;
+
+            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
+
+            _showInfoBar = CreateCheckBox(rightArea, "Show Info Bar", Engine.Profile.Current.ShowInfoBar, 0, 0);
+
+
+            ScrollAreaItem _infoBarHighlightScrollArea = new ScrollAreaItem();
+
+            _infoBarHighlightScrollArea.Add(new Label("Data highlight type:", true, 999));
+            _infoBarHighlightType = new Combobox(130, 0, 150, new[] { "Text color", "Colored bars" }, Engine.Profile.Current.InfoBarHighlightType);
+            _infoBarHighlightScrollArea.Add(_infoBarHighlightType);
+
+            rightArea.Add(_infoBarHighlightScrollArea);
+
+
+            NiceButton nb = new NiceButton(0, 10, 90, 20, ButtonAction.Activate, "+ Add item", 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT) { ButtonParameter = 999 };
+            nb.MouseUp += (sender, e) =>
+            {
+                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(new InfoBarItem("", InfoBarVars.HP, 0x3B9));
+                _infoBarBuilderControls.Add(ibbc);
+                rightArea.Add(ibbc);
+            };
+            rightArea.Add(nb);
+
+
+            ScrollAreaItem _infobarBuilderLabels = new ScrollAreaItem();
+
+            _infobarBuilderLabels.Add(new Label("Label", true, 999) { Y = 15 });
+            _infobarBuilderLabels.Add(new Label("Color", true, 999) { X = 150, Y = 15 });
+            _infobarBuilderLabels.Add(new Label("Data", true, 999) { X = 200, Y = 15 });
+
+            rightArea.Add(_infobarBuilderLabels);
+            rightArea.Add(new Line(0, 0, rightArea.Width, 1, Color.Gray.PackedValue));
+            rightArea.Add(new Line(0, 0, rightArea.Width, 5, Color.Black.PackedValue));
+
+
+            InfoBarManager ibmanager = Engine.SceneManager.GetScene<GameScene>().InfoBars;
+
+            List<InfoBarItem> _infoBarItems = ibmanager.GetInfoBars();
+
+            _infoBarBuilderControls = new List<InfoBarBuilderControl>();
+
+            for (int i = 0; i < _infoBarItems.Count; i++)
+            {
+                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(_infoBarItems[i]);
+                _infoBarBuilderControls.Add(ibbc);
+                rightArea.Add(ibbc);
+            }
+
+            Add(rightArea, PAGE);
+        }
+
+        private void BuildContainers()
+        {
+            const int PAGE = 13;
+
+            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
+
+            ScrollAreaItem item = new ScrollAreaItem();
+
+            Label text = new Label("- Container scale:",true, HUE_FONT, font: FONT);
+            item.Add(text);
+
+            _containersScale = new HSliderBar(text.X + text.Width + 10, text.Y + 5, 200, Constants.MIN_CONTAINER_SIZE_PERC, Constants.MAX_CONTAINER_SIZE_PERC, Engine.Profile.Current.ContainersScale, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+            item.Add(_containersScale);
+
+            rightArea.Add(item);
+
+            _containerScaleItems = CreateCheckBox(rightArea, "Scale items inside containers", Engine.Profile.Current.ScaleItemsInsideContainers, 0, 20);
+
+            Add(rightArea, PAGE);
+        }
+
+
         public override void OnButtonClick(int buttonID)
         {
             if (buttonID == (int) Buttons.Last + 1)
@@ -1310,6 +1392,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _holdDownKeyTab.IsChecked = true;
                     _holdDownKeyAlt.IsChecked = true;
                     _holdShiftForContext.IsChecked = false;
+                    _holdShiftToSplitStack.IsChecked = false;
                     _enablePathfind.IsChecked = false;
                     _alwaysRun.IsChecked = false;
                     _showHpMobile.IsChecked = false;
@@ -1473,6 +1556,11 @@ namespace ClassicUO.Game.UI.Gumps
                 case 12:
 
                     break;
+
+                case 13:
+                    _containersScale.Value = 100;
+                    _containerScaleItems.IsChecked = false;
+                    break;
             }
         }
 
@@ -1498,6 +1586,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.HoldDownKeyTab = _holdDownKeyTab.IsChecked;
             Engine.Profile.Current.HoldDownKeyAltToCloseAnchored = _holdDownKeyAlt.IsChecked;
             Engine.Profile.Current.HoldShiftForContext = _holdShiftForContext.IsChecked;
+            Engine.Profile.Current.HoldShiftToSplitStack = _holdShiftToSplitStack.IsChecked;
             Engine.Profile.Current.CloseHealthBarType = _healtbarType.SelectedIndex;
 
             if (Engine.Profile.Current.DrawRoofs == _drawRoofs.IsChecked)
@@ -1704,7 +1793,10 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.LightLevel = (byte) (_lightBar.MaxValue - _lightBar.Value);
 
             if (_enableLight.IsChecked)
-                World.Light.Overall = Engine.Profile.Current.LightLevel;
+            {
+               World.Light.Overall = Engine.Profile.Current.LightLevel;
+               World.Light.Personal = 0;
+            }
             else
             {
                 World.Light.Overall = World.Light.RealOverall;
@@ -1792,21 +1884,19 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.EnableSelectionArea = _enableSelectionArea.IsChecked;
             Engine.Profile.Current.RestoreLastGameSize = _restoreLastGameSize.IsChecked;
 
+            // Reset nested checkboxes if parent checkbox is unchecked
+            if (!_disableDefaultHotkeys.IsChecked)
+            {
+                _disableArrowBtn.IsChecked = false;
+                _disableTabBtn.IsChecked = false;
+                _disableCtrlQWBtn.IsChecked = false;
+            }
+
+            // NOTE: Keep these assignments AFTER the code above that resets nested checkboxes if parent checkbox is unchecked
+            Engine.Profile.Current.DisableDefaultHotkeys = _disableDefaultHotkeys.IsChecked;
             Engine.Profile.Current.DisableArrowBtn = _disableArrowBtn.IsChecked;
             Engine.Profile.Current.DisableTabBtn = _disableTabBtn.IsChecked;
             Engine.Profile.Current.DisableCtrlQWBtn = _disableCtrlQWBtn.IsChecked;
-
-            if (Engine.Profile.Current.DisableDefaultHotkeys != _disableDefaultHotkeys.IsChecked)
-            {
-                if (!_debugGumpIsDisabled.IsChecked)
-                {
-                    Engine.Profile.Current.DisableArrowBtn = false;
-                    Engine.Profile.Current.DisableTabBtn = false;
-                    Engine.Profile.Current.DisableCtrlQWBtn = false;
-                }
-
-                Engine.Profile.Current.DisableDefaultHotkeys = _disableDefaultHotkeys.IsChecked;
-            }
 
             if (Engine.Profile.Current.DebugGumpIsDisabled != _debugGumpIsDisabled.IsChecked)
             {
@@ -1899,8 +1989,20 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             
+            // containers
+            int containerScale = Engine.Profile.Current.ContainersScale;
 
+            if ((byte) _containersScale.Value != containerScale || Engine.Profile.Current.ScaleItemsInsideContainers != _containerScaleItems.IsChecked)
+            {
+                containerScale = Engine.Profile.Current.ContainersScale = (byte)_containersScale.Value;
+                Engine.UI.ContainerScale = containerScale / 100f;
+                Engine.Profile.Current.ScaleItemsInsideContainers = _containerScaleItems.IsChecked;
 
+                foreach (ContainerGump resizableGump in Engine.UI.Gumps.OfType<ContainerGump>())
+                {
+                    resizableGump.ForceUpdate();
+                }
+            }
 
             Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
         }

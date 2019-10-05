@@ -105,8 +105,9 @@ namespace ClassicUO.Game
             if (str.Length > 1 && str[0] == '-')
                 return (ushort)short.Parse(str);
 
-
-            return (ushort)uint.Parse(str); // some server send 0xFFFF_FFFF in decimal form. C# doesn't like it. It needs a specific conversion
+            if (uint.TryParse(str, out var h)) // some server send 0xFFFF_FFFF in decimal form. C# doesn't like it. It needs a specific conversion)
+                return (ushort) h;
+            return 0;
         }
     }
 }

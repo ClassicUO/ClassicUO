@@ -119,7 +119,6 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-
             if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 HueVector.X = 0x0023;
@@ -139,7 +138,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 bool isPartial = ItemData.IsPartialHue;
 
-                if (SelectedObject.LastObject == this && !IsLocked)
+                if (SelectedObject.LastObject == this && !IsLocked && !IsMulti)
                 {
                     isPartial = ItemData.Weight == 255;
                     hue = 0x0035;
@@ -150,9 +149,8 @@ namespace ClassicUO.Game.GameObjects
                 ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, ItemData.IsTranslucent ? .5f : 0);
             }
 
-            if (Amount > 1 && ItemData.IsStackable && DisplayedGraphic == Graphic && _originalGraphic == Graphic)
+            if (!IsCorpse && !IsMulti && Amount > 1 && ItemData.IsStackable && DisplayedGraphic == Graphic && _originalGraphic == Graphic)
             {
-                //SpriteRenderer.DrawStaticArt(DisplayedGraphic, Hue, (int) offsetDrawPosition.X, (int) offsetDrawPosition.Y);
                 base.Draw(batcher, posX - 5, posY - 5);
             }
 
@@ -161,9 +159,6 @@ namespace ClassicUO.Game.GameObjects
                 Engine.SceneManager.GetScene<GameScene>()
                       .AddLight(this, this, posX + 22, posY + 22);
             }
-
-            // SpriteRenderer.DrawStaticArt(DisplayedGraphic, Hue, (int)position.X, (int)position.Y);
-            // return true;
 
             if (!Serial.IsValid && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 HueVector.Z = 0.5f;
@@ -250,11 +245,7 @@ namespace ClassicUO.Game.GameObjects
             if (direction == null)
                 return;
 
-            AnimationFrameTexture[] frames = null;
-            if ((direction.FrameCount == 0 || !direction.GetFrames(out frames) || frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
-                return;
-
-            if (frames == null)
+            if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return;
 
             direction.LastAccessTime = Engine.Ticks;
@@ -265,7 +256,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (animIndex < direction.FrameCount)
             {
-                AnimationFrameTexture frame = frames[animIndex];
+                AnimationFrameTexture frame = direction.Frames[animIndex];
 
                 if (frame == null || frame.IsDisposed)
                     return;

@@ -264,10 +264,14 @@ namespace ClassicUO.Game.GameObjects
                 skill.Lock = @lock;
                 skill.CapFixed = cap;
 
-                if (Engine.Profile.Current.StandardSkillsGump)
-                    Engine.UI.GetGump<StandardSkillsGump>()?.ForceUpdate(id);
-                else 
-                    Engine.UI.GetGump<SkillGumpAdvanced>()?.ForceUpdate();
+                // check needed to avoid crash when you create a char
+                if (Engine.Profile != null && Engine.Profile.Current != null)
+                {
+                    if (Engine.Profile.Current.StandardSkillsGump)
+                        Engine.UI.GetGump<StandardSkillsGump>()?.ForceUpdate(id);
+                    else
+                        Engine.UI.GetGump<SkillGumpAdvanced>()?.ForceUpdate();
+                }
             }
         }
 
@@ -1309,6 +1313,66 @@ namespace ClassicUO.Game.GameObjects
             if (bank != null)
             {
                 Engine.UI.GetGump<ContainerGump>(bank)?.Dispose();
+            }
+        }
+
+        public void CloseRangedGumps()
+        {
+            foreach (var gump in Engine.UI.Gumps)
+            {
+                switch (gump)
+                {
+                    case PaperDollGump _:
+                    case MapGump _:
+                    case SpellbookGump _:
+
+                        if (World.Get(gump.LocalSerial) == null)
+                            gump.Dispose();
+
+                        break;
+                    case TradingGump _:
+                    case ShopGump _:
+
+                        Entity ent = World.Get(gump.LocalSerial);
+                        int distance = int.MaxValue;
+                        if (ent != null)
+                        {
+                            if (ent.Serial.IsItem)
+                            {
+                                var top = World.Get(((Item)ent).RootContainer);
+
+                                if (top != null)
+                                    distance = top.Distance;
+                            }
+                            else
+                                distance = ent.Distance;
+                        }
+
+                        if (distance > 18)
+                            gump.Dispose();
+
+                        break;
+                    case ContainerGump _:
+
+                        ent = World.Get(gump.LocalSerial);
+                        distance = int.MaxValue;
+                        if (ent != null)
+                        {
+                            if (ent.Serial.IsItem)
+                            {
+                                var top = World.Get(((Item) ent).RootContainer);
+                                
+                                if (top != null)
+                                    distance = top.Distance;
+                            }
+                            else
+                                distance = ent.Distance;
+                        }
+
+                        if (distance > 3)
+                            gump.Dispose();
+                        break;
+                }
             }
 
         }

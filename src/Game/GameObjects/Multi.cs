@@ -111,6 +111,7 @@ namespace ClassicUO.Game.GameObjects
         public override void UpdateGraphicBySeason()
         {
             Graphic = Season.GetSeasonGraphic(World.Season, _originalGraphic);
+            _itemData = FileManager.TileData.StaticData[Graphic];
         }
 
         public override void Destroy()

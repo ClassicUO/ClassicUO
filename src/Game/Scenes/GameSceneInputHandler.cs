@@ -454,7 +454,7 @@ namespace ClassicUO.Game.Scenes
                         string name = st.Name;
                         if (string.IsNullOrEmpty(name))
                             name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
-                        obj.AddMessage(MessageType.Label, name, 3, 0, false);
+                        obj.AddMessage(MessageType.Label, name, 3, 1001, false);
 
 
                         if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
@@ -466,7 +466,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (string.IsNullOrEmpty(name))
                             name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
-                        obj.AddMessage(MessageType.Label, name, 3, 0, false);
+                        obj.AddMessage(MessageType.Label, name, 3, 1001, false);
 
                         if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
                             obj.TextContainer.MaxSize = 1;
@@ -476,7 +476,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (Keyboard.Alt && ent is Mobile)
                         {
-                            World.Player.AddMessage(MessageType.Regular, "Now following.", 3, 0, false);
+                            World.Player.AddMessage(MessageType.Regular, "Now following.", 3, 1001, false);
                             _followingMode = true;
                             _followingTarget = ent;
                         }
@@ -559,7 +559,7 @@ namespace ClassicUO.Game.Scenes
                 _followingMode = false;
                 _followingTarget = Serial.INVALID;
                 Pathfinder.StopAutoWalk();
-                World.Player.AddMessage(MessageType.Regular, "Stopped following.", 3, 0, false);
+                World.Player.AddMessage(MessageType.Regular, "Stopped following.", 3, 1001, false);
             }
         }
 
@@ -588,7 +588,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (SelectedObject.Object is GameObject obj && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                     {
-                        World.Player.AddMessage(MessageType.Label, "Pathfinding!", 3, 0, false);
+                        World.Player.AddMessage(MessageType.Label, "Pathfinding!", 3, 1001, false);
 
                         return true;
                     }
@@ -709,14 +709,13 @@ namespace ClassicUO.Game.Scenes
             if (!Engine.UI.IsKeyboardFocusAllowHotkeys)
                 return;
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB /*&& !Engine.Profile.Current.DisableTabBtn*/)
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !Engine.Profile.Current.DisableTabBtn)
             {
                 if (Engine.Profile.Current.HoldDownKeyTab)
                 {
                     if (!_requestedWarMode)
                     {
                         _requestedWarMode = true;
-                        //GameActions.ChangeWarMode(1);
                         if (!World.Player.InWarMode)
                             NetClient.Socket.Send(new PChangeWarMode(true));
                     }
@@ -824,13 +823,12 @@ namespace ClassicUO.Game.Scenes
 
             _useObjectHandles = isctrl && isshift;
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB /*&& !Engine.Profile.Current.DisableTabBtn*/)
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !Engine.Profile.Current.DisableTabBtn)
             {
                 if (Engine.Profile.Current.HoldDownKeyTab)
                 {
                     if (_requestedWarMode)
                     {
-                        //GameActions.ChangeWarMode(0);
                         NetClient.Socket.Send(new PChangeWarMode(false));
                         _requestedWarMode = false;
                     }

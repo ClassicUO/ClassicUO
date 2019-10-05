@@ -23,6 +23,9 @@
 
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -30,6 +33,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private GumpPic _lockGumpPic;
         private int _prevX, _prevY;
+        private AnchorableGump _anchorCandidate;
 
         public AnchorableGump(Serial local, Serial server) : base(local, server)
         {
@@ -43,7 +47,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMove()
         {
-            Engine.UI.AnchorManager[this]?.UpdateLocation(this, X - _prevX, Y - _prevY);
+            if (Keyboard.Alt)
+            {
+                Engine.UI.AnchorManager.DetachControl(this);
+            }
+            else
+            {
+                Engine.UI.AnchorManager[this]?.UpdateLocation(this, X - _prevX, Y - _prevY);
+            }
             _prevX = X;
             _prevY = Y;
 
@@ -62,34 +73,20 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseOver(int x, int y)
         {
-            if (Engine.UI.IsDragging)
-            {
-                AnchorableGump ctrl = Engine.UI.AnchorManager.GetAnchorableControlOver(this, x, y);
 
-                if (ctrl != null)
-                {
-                    Location = Engine.UI.AnchorManager.GetCandidateDropLocation(
-                                                                                this,
-                                                                                ctrl,
-                                                                                ScreenCoordinateX + x - ctrl.ScreenCoordinateX,
-                                                                                ScreenCoordinateY + y - ctrl.ScreenCoordinateY);
-                }
-            }
+            if (Engine.UI.IsDragging && Engine.UI.DraggingControl == this)
+                _anchorCandidate = Engine.UI.AnchorManager.GetAnchorableControlUnder(this);
 
             base.OnMouseOver(x, y);
         }
 
         protected override void OnDragEnd(int x, int y)
         {
-            AnchorableGump ctrl = Engine.UI.AnchorManager.GetAnchorableControlOver(this, x, y);
-
-            if (ctrl != null)
+            if (_anchorCandidate != null)
             {
-                Engine.UI.AnchorManager.DropControl(
-                                                    this,
-                                                    ctrl,
-                                                    ScreenCoordinateX + x - ctrl.ScreenCoordinateX,
-                                                    ScreenCoordinateY + y - ctrl.ScreenCoordinateY);
+                Location = Engine.UI.AnchorManager.GetCandidateDropLocation(this, _anchorCandidate);
+                Engine.UI.AnchorManager.DropControl(this, _anchorCandidate);
+                _anchorCandidate = null;
             }
 
             base.OnDragEnd(x, y);
@@ -99,16 +96,25 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            if (Keyboard.Alt && Engine.UI.AnchorManager[this] != null && _lockGumpPic == null)
+            if (Keyboard.Alt && Engine.UI.AnchorManager[this] != null)
             {
-                _lockGumpPic = new GumpPic(0, 0, 0x082C, 0);
-                _lockGumpPic.Update(totalMS, frameMS);
-                _lockGumpPic.AcceptMouseInput = true;
-                _lockGumpPic.X = Width - _lockGumpPic.Width;
-                _lockGumpPic.Y = 0;
-                _lockGumpPic.MouseUp += _lockGumpPic_MouseClick;
+                if (_lockGumpPic == null)
+                {
+                    _lockGumpPic = new GumpPic(0, 0, 0x082C, 0);
+                    _lockGumpPic.Update(totalMS, frameMS);
+                    _lockGumpPic.AcceptMouseInput = true;
+                    _lockGumpPic.X = Width - _lockGumpPic.Width;
+                    _lockGumpPic.Y = 0;
+                    _lockGumpPic.MouseUp += _lockGumpPic_MouseClick;
 
-                Add(_lockGumpPic);
+                    Add(_lockGumpPic);
+                }
+
+                if (Engine.UI.MouseOverControl != null && (Engine.UI.MouseOverControl == this || Engine.UI.MouseOverControl.RootParent == this))
+                    _lockGumpPic.Hue = 34;
+                else
+                    _lockGumpPic.Hue = 0;
+
             }
             else if ((!Keyboard.Alt || Engine.UI.AnchorManager[this] == null) && _lockGumpPic != null)
             {
@@ -116,6 +122,31 @@ namespace ClassicUO.Game.UI.Gumps
                 _lockGumpPic.Dispose();
                 _lockGumpPic = null;
             }
+        }
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            base.Draw(batcher, x, y);
+
+            if (_anchorCandidate != null)
+            {
+                Point drawLoc = Engine.UI.AnchorManager.GetCandidateDropLocation(this, _anchorCandidate);
+
+                if (drawLoc != Location)
+                {
+                    Texture2D previewColor = Textures.GetTexture(Color.Silver);
+                    ResetHueVector();
+                    _hueVector.Z = 0.5f;
+                    batcher.Draw2D(previewColor, drawLoc.X, drawLoc.Y, Width, Height, ref _hueVector);
+
+                    _hueVector.Z = 0;
+                    // double rectangle for thicker "stroke"
+                    batcher.DrawRectangle(previewColor, drawLoc.X, drawLoc.Y, Width, Height, ref _hueVector);
+                    batcher.DrawRectangle(previewColor, drawLoc.X + 1, drawLoc.Y + 1, Width - 2, Height - 2, ref _hueVector);
+                }
+            }
+
+            return true;
         }
 
         protected override void CloseWithRightClick()
