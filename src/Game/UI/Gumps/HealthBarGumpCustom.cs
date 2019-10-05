@@ -135,6 +135,10 @@ namespace ClassicUO.Game.UI.Gumps
             get => Height;
             protected set { }
         }
+        //protected override void CloseWithRightClick()
+        //{
+        //   CanCloseWithRightClick = false;            
+        //}
 
         public void Update()
         {
@@ -647,6 +651,16 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             base.OnMouseOver(x, y);
+        }
+        protected override void OnMouseExit(int x, int y)
+        {
+            var entity = World.Get(LocalSerial);
+
+            if (entity != null && SelectedObject.HealthbarObject == entity)
+            {
+                SelectedObject.HealthbarObject = null;
+                SelectedObject.Object = null;
+            }
         }
     }
 }
