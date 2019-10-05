@@ -644,60 +644,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(rightArea, PAGE);
         }
-
-
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
-
-            _showInfoBar = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_InfoBar_ShowInfoBar"], Engine.Profile.Current.ShowInfoBar, 0, 0);
-
-
-            ScrollAreaItem _infoBarHighlightScrollArea = new ScrollAreaItem();
-
-            _infoBarHighlightScrollArea.Add(new Label(FileManager.Language.Dict["UI_Options_InfoBar_InfoBarHighlightType"], true, 999));
-            _infoBarHighlightType = new Combobox(130, 0, 150, new[] { FileManager.Language.Dict["UI_Options_InfoBar_InfoBarHighlightType_TextColor"], FileManager.Language.Dict["UI_Options_InfoBar_InfoBarHighlightType_ColoredBars"] }, Engine.Profile.Current.InfoBarHighlightType);
-            _infoBarHighlightScrollArea.Add(_infoBarHighlightType);
-
-            rightArea.Add(_infoBarHighlightScrollArea);
-
-
-            NiceButton nb = new NiceButton(0, 10, 90, 20, ButtonAction.Activate, FileManager.Language.Dict["UI_Options_InfoBar_AddItem"], 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT) { ButtonParameter = 999 };
-            nb.MouseUp += (sender, e) =>
-            {
-                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(new InfoBarItem("", InfoBarVars.HP, 0x3B9));
-                _infoBarBuilderControls.Add(ibbc);
-                rightArea.Add(ibbc);
-            };
-            rightArea.Add(nb);
-
-
-            ScrollAreaItem _infobarBuilderLabels = new ScrollAreaItem();
-
-            _infobarBuilderLabels.Add(new Label(FileManager.Language.Dict["UI_Options_InfoBar_Label"], true, 999) { Y = 15 } );
-            _infobarBuilderLabels.Add(new Label(FileManager.Language.Dict["UI_Options_InfoBar_Color"], true, 999) { X = 150, Y = 15 });
-            _infobarBuilderLabels.Add(new Label(FileManager.Language.Dict["UI_Options_InfoBar_Data"], true, 999) { X = 200, Y = 15 });
-
-            rightArea.Add(_infobarBuilderLabels);
-            rightArea.Add(new Line(0, 0, rightArea.Width, 1, Color.Gray.PackedValue));
-            rightArea.Add(new Line(0, 0, rightArea.Width, 5, Color.Black.PackedValue));
-
-
-            InfoBarManager ibmanager = Engine.SceneManager.GetScene<GameScene>().InfoBars;
-
-            List<InfoBarItem> _infoBarItems = ibmanager.GetInfoBars();
-
-            _infoBarBuilderControls = new List<InfoBarBuilderControl>();
-
-            for (int i = 0; i < _infoBarItems.Count; i++)
-            {
-                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(_infoBarItems[i]);
-                _infoBarBuilderControls.Add(ibbc);
-                rightArea.Add(ibbc);
-            }
-
-            Add(rightArea, PAGE);
-
-        }
-
+        
         private void BuildCommands()
         {
             const int PAGE = 4;
