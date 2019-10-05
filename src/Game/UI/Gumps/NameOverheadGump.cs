@@ -179,15 +179,30 @@ namespace ClassicUO.Game.UI.Gumps
 
                 GameActions.RequestMobileStatus(Entity);
 
-                Engine.UI.GetGump<HealthBarGump>(Entity)?.Dispose();
+                if (Engine.Profile.Current.CustomBarsToggled == true)
+                {
+                    Engine.UI.GetGump<HealthBarGumpCustom>(Entity)?.Dispose();
 
-                if (Entity == World.Player)
-                    StatusGumpBase.GetStatusGump()?.Dispose();
+                    if (Entity == World.Player)
+                        StatusGumpBase.GetStatusGump()?.Dispose();
 
-                Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-                HealthBarGump currentHealthBarGump;
-                Engine.UI.Add(currentHealthBarGump = new HealthBarGump(Entity) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
-                Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
+                    Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
+                    HealthBarGumpCustom currentHealthBarGump;
+                    Engine.UI.Add(currentHealthBarGump = new HealthBarGumpCustom(Entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                    Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
+                }
+                else
+                {
+                    Engine.UI.GetGump<HealthBarGump>(Entity)?.Dispose();
+
+                    if (Entity == World.Player)
+                        StatusGumpBase.GetStatusGump()?.Dispose();
+
+                    Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
+                    HealthBarGump currentHealthBarGump;
+                    Engine.UI.Add(currentHealthBarGump = new HealthBarGump(Entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                    Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
+                }
             }
             else
                 GameActions.PickUp(Entity);

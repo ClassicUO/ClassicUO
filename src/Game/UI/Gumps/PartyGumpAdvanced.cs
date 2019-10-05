@@ -347,12 +347,25 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_status = new GumpPic(240, 0, 0x29F6, (Hue) (mobile != null && mobile.IsDead ? 0 : 0x43)));
 
             //======================================================
-            Button pmButton = new Button((int) Buttons.GetBar, 0xFAE, 0xFAF, 0xFB0)
+            if (Engine.Profile.Current.CustomBarsToggled == true)
             {
-                X = 10, ButtonAction = ButtonAction.Activate
-            };
-            Add(pmButton);
+                Button cpmButton = new Button((int)Buttons.GetBar, 0xFAE, 0xFAF, 0xFB0)
+                {
+                    X = 10,
+                    ButtonAction = ButtonAction.Activate
+                };
+                Add(cpmButton);
+            }
+            else
+            {
+                Button pmButton = new Button((int)Buttons.GetBar, 0xFAE, 0xFAF, 0xFB0)
+                {
+                    X = 10,
+                    ButtonAction = ButtonAction.Activate
+                };
+                Add(pmButton);
 
+            }
             //======================================================
             Button kickButton = new Button((int) Buttons.Kick, 0xFB1, 0xFB2, 0xFB3)
             {
@@ -415,13 +428,26 @@ namespace ClassicUO.Game.UI.Gumps
                     Engine.UI.Add(new HealthBarGump(member.Serial) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
 
                     break;
+
+                case Buttons.GetCustomBar:
+
+
+                    Engine.UI.GetGump<HealthBarGumpCustom>(member.Serial)?.Dispose();
+
+                    if (member.Serial == World.Player)
+                        StatusGumpBase.GetStatusGump()?.Dispose();
+
+
+                    Engine.UI.Add(new HealthBarGumpCustom(member.Serial) { X = World.Player.X, Y = World.Player.Y });
+                    break;
             }
         }
 
         private enum Buttons
         {
             Kick = 1,
-            GetBar
+            GetBar,
+            GetCustomBar
         }
     }
 }

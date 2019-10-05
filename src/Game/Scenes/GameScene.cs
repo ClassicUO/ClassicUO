@@ -142,6 +142,10 @@ namespace ClassicUO.Game.Scenes
             if (!Engine.Profile.Current.TopbarGumpIsDisabled)
                 TopBarGump.Create();
 
+            if (Engine.Profile.Current.CustomBarsToggled)
+            {
+                Engine.UI.Add(new HealthBarGumpCustom(World.Player) { X = Engine.Profile.Current.GameWindowSize.X / 2, Y = Engine.Profile.Current.GameWindowSize.X / 2 });
+            }
             _viewPortGump = viewport.FindControls<WorldViewport>().SingleOrDefault();
 
             GameActions.Initialize(PickupItemBegin);

@@ -155,7 +155,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool ActivateChatAdditionalButtons { get; set; } = true;
         [JsonProperty] public bool ActivateChatShiftEnterSupport { get; set; } = true;
 
-        // Experimental
+        // Experimental        
         [JsonProperty] public bool EnableSelectionArea { get; set; }
         [JsonProperty] public bool DebugGumpIsDisabled { get; set; }
         [JsonProperty] public Point DebugGumpPosition { get; set; } = new Point(25, 25);
@@ -181,7 +181,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool NameOverheadToggled { get; set; } = false;
         [JsonProperty] public bool ShowTargetRangeIndicator { get; set; }
         [JsonProperty] public bool PartyInviteGump { get; set; }
-
+        [JsonProperty] public bool CustomBarsToggled { get; set; }
         [JsonProperty] public bool ShowInfoBar { get; set; }
         [JsonProperty] public int InfoBarHighlightType { get; set; } // 0 = text colour changes, 1 = underline
         [JsonProperty]

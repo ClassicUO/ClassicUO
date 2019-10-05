@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _CustomBars;
         private Combobox _overrideContainerLocationSetting;
 
         // sounds
@@ -1162,6 +1162,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(_showTargetRangeIndicator);
 
+            _CustomBars = CreateCheckBox(rightArea, "Use Custom Health Bars", Engine.Profile.Current.CustomBarsToggled, 0, 5);
+
             Add(rightArea, PAGE);
 
             _autoOpenCorpseArea.IsVisible = _autoOpenCorpse.IsChecked;
@@ -1461,6 +1463,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _overrideContainerLocationSetting.SelectedIndex = 0;
                     _dragSelectHumanoidsOnly.IsChecked = false;
                     _showTargetRangeIndicator.IsChecked = false;
+                    _CustomBars.IsChecked = false;
 
                     break;
 
@@ -1504,6 +1507,26 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.HoldShiftForContext = _holdShiftForContext.IsChecked;
             Engine.Profile.Current.HoldShiftToSplitStack = _holdShiftToSplitStack.IsChecked;
             Engine.Profile.Current.CloseHealthBarType = _healtbarType.SelectedIndex;
+            Engine.Profile.Current.CustomBarsToggled = _CustomBars.IsChecked;
+            var hbgstandard = Engine.UI.Gumps.OfType<HealthBarGump>().ToList();
+            var hbgcustom = Engine.UI.Gumps.OfType<HealthBarGumpCustom>().ToList();
+            if (_CustomBars.IsChecked)
+            {                                
+                foreach (var healthbar in hbgstandard)
+                {
+                    Engine.UI.Add(new HealthBarGumpCustom(healthbar.LocalSerial) { X = healthbar.X, Y = healthbar.Y });
+                    healthbar.Dispose();
+                }
+            }
+            else if (!_CustomBars.IsChecked)
+            {                 
+                foreach (var customhealthbar in hbgcustom)
+                {
+                    Engine.UI.Add(new HealthBarGump(customhealthbar.LocalSerial) { X = customhealthbar.X, Y = customhealthbar.Y });
+                    customhealthbar.Dispose();
+                }
+
+            }
 
             if (Engine.Profile.Current.DrawRoofs == _drawRoofs.IsChecked)
             {
