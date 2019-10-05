@@ -1065,17 +1065,8 @@ namespace ClassicUO.Game.Managers
                     
                  case MacroType.CloseAllHealthBars:
 
-                    var healthBarGumps = Engine.UI.Gumps.OfType<HealthBarGump>();
-                    var customBarGumps = Engine.UI.Gumps.OfType<HealthBarGumpCustom>();
-
+                    var healthBarGumps = Engine.UI.Gumps.OfType<AnchorableGump>().Where(g => g is HealthBarGump || g is HealthBarGumpCustom);
                     foreach (var healthbar in healthBarGumps)
-                    {
-                        if (Engine.UI.AnchorManager[healthbar] == null && (healthbar.LocalSerial != World.Player))
-                        {
-                            healthbar.Dispose();
-                        }
-                    }
-                    foreach (var healthbar in customBarGumps)
                     {
                         if (Engine.UI.AnchorManager[healthbar] == null && (healthbar.LocalSerial != World.Player))
                         {
