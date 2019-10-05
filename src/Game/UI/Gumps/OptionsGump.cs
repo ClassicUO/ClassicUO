@@ -261,6 +261,7 @@ namespace ClassicUO.Game.UI.Gumps
             _holdDownKeyTab = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_HoldDownKeyTab"], Engine.Profile.Current.HoldDownKeyTab, 0, 0);
             _holdDownKeyAlt = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_HoldDownKeyAltToCloseAnchored"], Engine.Profile.Current.HoldDownKeyAltToCloseAnchored, 0, 0);
             _holdShiftForContext = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_HoldShiftForContext"], Engine.Profile.Current.HoldShiftForContext, 0, 0);
+            _holdShiftToSplitStack = CreateCheckBox(rightArea, "Hold Shift to split stack of items", Engine.Profile.Current.HoldShiftToSplitStack, 0, 0);
             _highlightByState = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_HighlightMobilesByFlags"], Engine.Profile.Current.HighlightMobilesByFlags, 0, 0);
             _poisonColorPickerBox = CreateClickableColorBox(rightArea, 20, 5, Engine.Profile.Current.PoisonHue, FileManager.Language.Dict["UI_Options_General_PoisonHue"], 40, 5);
             _paralyzedColorPickerBox = CreateClickableColorBox(rightArea, 20, 0, Engine.Profile.Current.ParalyzedHue, FileManager.Language.Dict["UI_Options_General_ParalyzedHue"], 40, 0);
@@ -1039,7 +1040,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 10;
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
-            _enableSelectionArea = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Network_ShowNetworkStats"], Engine.Profile.Current.EnableSelectionArea, 0, 0);
+            _enableSelectionArea = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Experimental_EnableSelectionArea"], Engine.Profile.Current.EnableSelectionArea, 0, 0);
 
             _debugGumpIsDisabled = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Experimental_DebugGumpIsDisabled"], Engine.Profile.Current.DebugGumpIsDisabled, 0, 0);
             _restoreLastGameSize = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Experimental_RestoreLastGameSize"], Engine.Profile.Current.RestoreLastGameSize, 0, 0);
