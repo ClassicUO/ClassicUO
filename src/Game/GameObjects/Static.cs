@@ -150,8 +150,9 @@ namespace ClassicUO.Game.GameObjects
 
             x += 22;
             y += 44;
-            
-            y -= Texture is ArtTexture t ? (t.ImageRectangle.Height >> 1) : (Texture.Height >> 1);
+
+            if (Texture != null)
+                y -= Texture is ArtTexture t ? (t.ImageRectangle.Height >> 1) : (Texture.Height >> 1);
 
             for (; last != null; last = last.ListLeft)
             {

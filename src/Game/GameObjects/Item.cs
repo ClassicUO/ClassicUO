@@ -802,7 +802,9 @@ namespace ClassicUO.Game.GameObjects
             {
                 var scene = Engine.SceneManager.GetScene<GameScene>();
                 float scale = scene?.Scale ?? 1;
-                y -= Texture is ArtTexture t ? (t.ImageRectangle.Height >> 1) : (Texture.Height >> 1);
+
+                if (Texture != null)
+                    y -= Texture is ArtTexture t ? (t.ImageRectangle.Height >> 1) : (Texture.Height >> 1);
                 x += 22;
                 for (; last != null; last = last.ListLeft)
                 {
