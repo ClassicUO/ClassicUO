@@ -141,41 +141,26 @@ namespace ClassicUO.Network
             _recvQueue = new ConcurrentQueue<Packet>();
             Statistics.Reset();
 
+            SocketAsyncEventArgs connectEventArgs = new SocketAsyncEventArgs();
 
-            _socket.Connect(endpoint);
-
-            if (!IsConnected)
+            connectEventArgs.Completed += (sender, e) =>
             {
-                Log.Message(LogTypes.Error, "Unable to connect");
-                Disconnect();
-            }
-            else
-            {
-                Statistics.ConnectedFrom = Engine.CurrDateTime;
-                Connected.Raise();
-                StartRecv();
-            }
+                if (e.SocketError == SocketError.Success)
+                {
+                    Connected.Raise();
+                    Statistics.ConnectedFrom = Engine.CurrDateTime;
+                    StartRecv();
+                }
+                else
+                {
+                    Log.Message(LogTypes.Error, e.SocketError.ToString());
+                    Disconnect(e.SocketError);
+                }
 
-            //SocketAsyncEventArgs connectEventArgs = new SocketAsyncEventArgs();
-
-            //connectEventArgs.Completed += (sender, e) =>
-            //{
-            //    if (e.SocketError == SocketError.Success)
-            //    {
-            //        Connected.Raise();
-            //        Statistics.ConnectedFrom = Engine.CurrDateTime;
-            //        StartRecv();
-            //    }
-            //    else
-            //    {
-            //        Log.Message(LogTypes.Error, e.SocketError.ToString());
-            //        Disconnect(e.SocketError);
-            //    }
-
-            //    connectEventArgs.Dispose();
-            //};
-            //connectEventArgs.RemoteEndPoint = endpoint;
-            //_socket.ConnectAsync(connectEventArgs);
+                connectEventArgs.Dispose();
+            };
+            connectEventArgs.RemoteEndPoint = endpoint;
+            _socket.ConnectAsync(connectEventArgs);
         }
 
         public void Disconnect()
