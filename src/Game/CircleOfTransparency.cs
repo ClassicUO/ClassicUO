@@ -25,6 +25,7 @@ using System;
 
 using ClassicUO.Renderer;
 
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game
@@ -113,6 +114,8 @@ namespace ClassicUO.Game
             return pixels;
         }
 
+        private static Vector3 _hueVector;
+
         public void Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (_texture != null)
@@ -124,8 +127,12 @@ namespace ClassicUO.Game
                 batcher.SetStencil(_stencil.Value);
                 //batcher.SetBlendState(_checkerBlend.Value);
 
+                _hueVector.X = 23;
+                _hueVector.Y = 1;
+                _hueVector.Z = 0;
+
                 BlendState.AlphaBlend.ColorWriteChannels = ColorWriteChannels.Alpha;
-                //batcher.Draw2D(_texture, X, Y, new Vector3(20, 1, 0.6f));
+                batcher.Draw2D(_texture, X, Y, ref _hueVector);
                 BlendState.AlphaBlend.ColorWriteChannels = ColorWriteChannels.All;
 
 

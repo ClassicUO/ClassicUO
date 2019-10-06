@@ -488,15 +488,7 @@ namespace ClassicUO.Game.Scenes
             if (!World.InGame)
                 return;
 
-            if (_renderTarget == null || _renderTarget.Width != (int) (Engine.Profile.Current.GameWindowSize.X * Scale) || _renderTarget.Height != (int) (Engine.Profile.Current.GameWindowSize.Y * Scale))
-            {
-                _renderTarget?.Dispose();
-                _darkness?.Dispose();
-
-                _renderTarget = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int) (Engine.Profile.Current.GameWindowSize.X * Scale), (int) (Engine.Profile.Current.GameWindowSize.Y * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
-                _darkness = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int) (Engine.Profile.Current.GameWindowSize.X * Scale), (int) (Engine.Profile.Current.GameWindowSize.Y * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
-            }
-
+            
             World.Update(totalMS, frameMS);
             Pathfinder.ProcessAutoWalk();
 
@@ -680,9 +672,11 @@ namespace ClassicUO.Game.Scenes
 
             //if (CircleOfTransparency.Circle == null)
             //    CircleOfTransparency.Create(200);
-            //CircleOfTransparency.Circle.Draw(batcher, Engine.WindowWidth >> 1, Engine.WindowHeight >> 1);
+            //CircleOfTransparency.Circle.Draw(batcher,
+            //                                 Engine.Profile.Current.GameWindowPosition.X + (int) World.Player.Offset.X,
+            //                                 Engine.Profile.Current.GameWindowPosition.Y + (int) (World.Player.Offset.Y) - (int)(World.Player.Z * 4 + World.Player.Offset.Z));
 
-            //batcher.GraphicsDevice.Clear(ClearOptions.Stencil, new Vector4(0, 0, 0, 1), 0, 0);
+            //batcher.GraphicsDevice.Clear(ClearOptions.Stencil | ClearOptions.Target | ClearOptions.DepthBuffer, new Vector4(0, 0, 0, 1), 0, 0);
 
             batcher.SetBrightlight(Engine.Profile.Current.Brighlight);
 
@@ -716,9 +710,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             //batcher.SetStencil(null);
-
             batcher.End();
-
 
             DrawLights(batcher);
 
@@ -729,6 +721,9 @@ namespace ClassicUO.Game.Scenes
 
         private void DrawLights(UltimaBatcher2D batcher)
         {
+            if (_deathScreenActive || !UseLights)
+                return;
+
             batcher.GraphicsDevice.SetRenderTarget(_darkness);
 
             var lightColor = World.Light.IsometricLevel;
@@ -738,10 +733,8 @@ namespace ClassicUO.Game.Scenes
 
             _vectorClear.X = _vectorClear.Y = _vectorClear.Z = lightColor;
 
+            batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
             batcher.GraphicsDevice.Clear(ClearOptions.Target, _vectorClear, 0, 0);
-
-            if (_deathScreenActive || !UseLights)
-                return;
 
             batcher.Begin();
             batcher.SetBlendState(BlendState.Additive);
