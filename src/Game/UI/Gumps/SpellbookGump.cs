@@ -35,7 +35,6 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class SpellbookGump : MinimizableGump
     {
-        private readonly Item _spellBook;
         private readonly bool[] _spells = new bool[64];
         private float _clickTiming;
         private Control _lastPressed;
@@ -43,9 +42,9 @@ namespace ClassicUO.Game.UI.Gumps
         private GumpPic _pageCornerLeft, _pageCornerRight;
         private SpellBookType _spellBookType;
 
-        public SpellbookGump(Item item) : this()
+        public SpellbookGump(Serial item) : this()
         {
-            _spellBook = item;
+            LocalSerial = item;
             BuildGump();
         }
 
@@ -59,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);
-            writer.Write(_spellBook.Serial);
+            writer.Write(LocalSerial);
         }
 
         public override void Restore(BinaryReader reader)
@@ -71,19 +70,32 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            LocalSerial = _spellBook.Serial;
-            _spellBook.Items.Added += ItemsOnAdded;
-            _spellBook.Items.Removed += ItemsOnRemoved;
+            Item item = World.Items.Get(LocalSerial);
 
-            OnEntityUpdate(_spellBook);
+            if (item == null)
+            {
+                Dispose();
+                return;
+            }
+
+         
+            item.Items.Added += ItemsOnAdded;
+            item.Items.Removed += ItemsOnRemoved;
+
+            Update();
 
             Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
         }
 
         public override void Dispose()
         {
-            _spellBook.Items.Added -= ItemsOnAdded;
-            _spellBook.Items.Removed -= ItemsOnRemoved;
+            Item item = World.Items.Get(LocalSerial);
+
+            if (item != null)
+            {
+                item.Items.Added -= ItemsOnAdded;
+                item.Items.Removed -= ItemsOnRemoved;
+            }
 
             Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
             Engine.UI.SavePosition(LocalSerial, Location);
@@ -92,12 +104,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Serial> e)
         {
-            OnEntityUpdate(_spellBook);
+            Update();
         }
 
         private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Serial> e)
         {
-            OnEntityUpdate(_spellBook);
+            Update();
         }
 
         private void CreateBook()
@@ -119,11 +131,19 @@ namespace ClassicUO.Game.UI.Gumps
             _pageCornerRight.MouseDoubleClick += PageCornerOnMouseDoubleClick;
             int totalSpells = 0;
 
+            Item item = World.Items.Get(LocalSerial);
+
+            if (item == null)
+            {
+                Dispose();
+                return;
+            }
+
             for (int circle = 0; circle < 8; circle++)
             {
                 for (int i = 1; i <= 8; i++)
                 {
-                    if (_spellBook.HasSpell(circle, i))
+                    if (item.HasSpell(circle, i))
                     {
                         _spells[circle * 8 + i - 1] = true;
                         totalSpells++;
@@ -759,12 +779,72 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
         }
 
-        private void OnEntityUpdate(Entity entity)
+
+
+        private void OnClicked(object sender, MouseEventArgs e)
         {
-            if (entity == null)
+            if (sender is HoveredLabel l && e.Button == MouseButton.Left)
+            {
+                _clickTiming += Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+
+                if (_clickTiming > 0)
+                    _lastPressed = l;
+            }
+        }
+
+        private void OnDoubleClicked(object sender, MouseDoubleClickEventArgs e)
+        {
+            if (_lastPressed != null && e.Button == MouseButton.Left)
+            {
+                _clickTiming = -Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+                var def = GetSpellDefinition((int) _lastPressed.Tag);
+
+                if (def != null) GameActions.CastSpell(def.ID);
+
+                _lastPressed = null;
+            }
+        }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            Item item = World.Items.Get(LocalSerial);
+
+            if (item == null)
+            {
+                Dispose();
+                return;
+            }
+
+
+            if (IsDisposed)
                 return;
 
-            switch (entity.Graphic)
+            if (_lastPressed != null)
+            {
+                _clickTiming -= (float) frameMS;
+
+                if (_clickTiming <= 0)
+                {
+                    _clickTiming = 0;
+                    SetActivePage((int) _lastPressed.LocalSerial.Value);
+                    _lastPressed = null;
+                }
+            }
+        }
+
+        public void Update()
+        {
+            Item item = World.Items.Get(LocalSerial);
+
+            if (item == null)
+            {
+                Dispose();
+                return;
+            }
+
+            switch (item.Graphic)
             {
                 default:
                 case 0x0EFA:
@@ -810,58 +890,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             CreateBook();
-        }
-
-        private void OnClicked(object sender, MouseEventArgs e)
-        {
-            if (sender is HoveredLabel l && e.Button == MouseButton.Left)
-            {
-                _clickTiming += Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-
-                if (_clickTiming > 0)
-                    _lastPressed = l;
-            }
-        }
-
-        private void OnDoubleClicked(object sender, MouseDoubleClickEventArgs e)
-        {
-            if (_lastPressed != null && e.Button == MouseButton.Left)
-            {
-                _clickTiming = -Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                var def = GetSpellDefinition((int) _lastPressed.Tag);
-
-                if (def != null) GameActions.CastSpell(def.ID);
-
-                _lastPressed = null;
-            }
-        }
-
-        public override void Update(double totalMS, double frameMS)
-        {
-            base.Update(totalMS, frameMS);
-
-            if (_spellBook == null || _spellBook.IsDestroyed)
-                Dispose();
-
-            if (IsDisposed)
-                return;
-
-            if (_lastPressed != null)
-            {
-                _clickTiming -= (float) frameMS;
-
-                if (_clickTiming <= 0)
-                {
-                    _clickTiming = 0;
-                    SetActivePage((int) _lastPressed.LocalSerial.Value);
-                    _lastPressed = null;
-                }
-            }
-        }
-
-        public void Update()
-        {
-            OnEntityUpdate(_spellBook);
         }
 
         private void PageCornerOnMouseClick(object sender, MouseEventArgs e)
