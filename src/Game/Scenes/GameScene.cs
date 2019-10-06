@@ -729,7 +729,6 @@ namespace ClassicUO.Game.Scenes
 
         private void DrawLights(UltimaBatcher2D batcher)
         {
-            batcher.GraphicsDevice.SetRenderTarget(null);
             batcher.GraphicsDevice.SetRenderTarget(_darkness);
 
             var lightColor = World.Light.IsometricLevel;
@@ -739,8 +738,7 @@ namespace ClassicUO.Game.Scenes
 
             _vectorClear.X = _vectorClear.Y = _vectorClear.Z = lightColor;
 
-            batcher.GraphicsDevice.Clear(Color.Black);
-            batcher.GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer | ClearOptions.Stencil, _vectorClear, 0, 0);
+            batcher.GraphicsDevice.Clear(ClearOptions.Target, _vectorClear, 0, 0);
 
             if (_deathScreenActive || !UseLights)
                 return;
