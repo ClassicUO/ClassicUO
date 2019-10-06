@@ -309,7 +309,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (!island)
                 {
-                    //obj.UpdateTextCoords();
+                    obj.UpdateTextCoordsV();
                 }
                 else
                     goto SKIP_INTERNAL_CHECK;

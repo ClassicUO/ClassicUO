@@ -461,7 +461,7 @@ namespace ClassicUO.Game.Scenes
             {
                 if (e.UseInRender != _renderIndex && e.TextContainer != null)
                 {
-                    e.UpdateTextCoordsV();
+                    e.UpdateRealScreenPosition(_offset.X, _offset.Y);
                     e.UseInRender = (byte)_renderIndex;
                 }
             }

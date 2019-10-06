@@ -168,6 +168,10 @@ namespace ClassicUO.Game.UI.Gumps
             Location = position;
 
             Engine.Profile.Current.GameWindowPosition = position;
+
+            var scene = Engine.SceneManager.GetScene<GameScene>();
+            if (scene != null)
+                scene.UpdateDrawPosition = true;
         }
 
 
