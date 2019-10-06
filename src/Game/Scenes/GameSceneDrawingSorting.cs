@@ -308,7 +308,9 @@ namespace ClassicUO.Game.Scenes
                 obj.CurrentRenderIndex = _renderIndex;
 
                 if (!island)
-                    obj.UpdateTextCoords();
+                {
+                    //obj.UpdateTextCoords();
+                }
                 else
                     goto SKIP_INTERNAL_CHECK;
 

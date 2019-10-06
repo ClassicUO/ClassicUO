@@ -21,6 +21,7 @@
 
 #endregion
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 
@@ -443,11 +444,27 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
+
+            UpdateTextServerEntities(World.Mobiles);
+            UpdateTextServerEntities(World.Items);
+
             _renderIndex++;
 
             if (_renderIndex >= 100)
                 _renderIndex = 1;
             UpdateDrawPosition = false;
+        }
+
+        private void UpdateTextServerEntities(IEnumerable<Entity> entities)
+        {
+            foreach (Entity e in entities)
+            {
+                if (e.UseInRender != _renderIndex && e.TextContainer != null)
+                {
+                    e.UpdateTextCoordsV();
+                    e.UseInRender = (byte)_renderIndex;
+                }
+            }
         }
 
         public override void Update(double totalMS, double frameMS)
