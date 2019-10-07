@@ -1296,14 +1296,7 @@ namespace ClassicUO.Game.GameObjects
                 if (World.Items.Any(s =>
                                         IsDoor(s.Graphic) && s.X == x && s.Y == y && s.Z - 15 <= z &&
                                         s.Position.Z + 15 >= z))
-                    GameActions.OpenDoor();                
-                if (Engine.Profile.Current.AutoOpenSecretDoors)
-                {
-                    if (World.Items.Any(s =>
-                                        IsSecretDoor(s.Graphic) && s.X == x && s.Y == y && s.Z - 15 <= z &&
-                                        s.Position.Z + 15 >= z))
-                        GameActions.OpenDoor();
-                }                
+                    GameActions.OpenDoor();
             }
         }
 
@@ -1871,35 +1864,6 @@ namespace ClassicUO.Game.GameObjects
                    || type >= 0x50C8 && type <= 0x50D7
                    || type >= 0x9AD7 && type <= 0x9AE6
                    || type >= 0x9B3C && type <= 0x9B4B;
-        }
-        
-        private bool IsSecretDoor(ushort type)
-        {
-            return type >= 0x00E9 && type <= 0x00EB
-                   || type >= 0x00ED && type <= 0x00EF
-                   || type >= 0x00F1 && type <= 0x00F3
-                   || type >= 0x00F5 && type <= 0x00F7
-                   || type >= 0x0315 && type <= 0x0317
-                   || type >= 0x0319 && type <= 0x031B
-                   || type >= 0x031D && type <= 0x031F
-                   || type >= 0x0321 && type <= 0x0323
-                   || type >= 0x0325 && type <= 0x0327
-                   || type >= 0x0329 && type <= 0x032B
-                   || type >= 0x032D && type <= 0x032F
-                   || type >= 0x0331 && type <= 0x0333
-                   || type >= 0x0335 && type <= 0x0337
-                   || type >= 0x0339 && type <= 0x033B
-                   || type >= 0x033D && type <= 0x033F
-                   || type >= 0x0341 && type <= 0x0343
-                   || type >= 0x0345 && type <= 0x0347
-                   || type >= 0x0349 && type <= 0x034B
-                   || type >= 0x034D && type <= 0x034F
-                   || type >= 0x0351 && type <= 0x0353
-                   || type >= 0x0355 && type <= 0x0357
-                   || type >= 0x0359 && type <= 0x035B
-                   || type >= 0x035D && type <= 0x035F
-                   || type >= 0x0361 && type <= 0x0363;
-
         }
         
 
