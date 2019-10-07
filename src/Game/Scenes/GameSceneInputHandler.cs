@@ -840,7 +840,7 @@ namespace ClassicUO.Game.Scenes
             if (!Engine.UI.IsKeyboardFocusAllowHotkeys)
                 return;
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB /*&& !Engine.Profile.Current.DisableTabBtn*/)
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !Engine.Profile.Current.DisableTabBtn)
             {
                 if (Engine.Profile.Current.HoldDownKeyTab)
                 {
@@ -957,7 +957,7 @@ namespace ClassicUO.Game.Scenes
 
             _useObjectHandles = isctrl && isshift;
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB /*&& !Engine.Profile.Current.DisableTabBtn*/)
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !Engine.Profile.Current.DisableTabBtn)
             {
                 if (Engine.Profile.Current.HoldDownKeyTab)
                 {
