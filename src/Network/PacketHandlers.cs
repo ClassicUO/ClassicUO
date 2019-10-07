@@ -2823,7 +2823,17 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 case 4: // close generic gump 
                     Serial ser = p.ReadUInt();
-                    Engine.UI.Gumps.OfType<Gump>().FirstOrDefault(s => !s.IsDisposed && s.ServerSerial == ser)?.OnButtonClick((int) p.ReadUInt());
+                    int button = (int) p.ReadUInt();
+
+                    var gumpToClose = Engine.UI.Gumps.OfType<Gump>()
+                                     .FirstOrDefault(s => !s.IsDisposed && s.ServerSerial == ser);
+
+                    if (gumpToClose != null)
+                    {
+                        if (button != 0)
+                            gumpToClose.OnButtonClick(button);
+                        gumpToClose.Dispose();
+                    }
 
                     break;
 
