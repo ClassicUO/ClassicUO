@@ -153,10 +153,6 @@ namespace ClassicUO.Game
                                 {
                                     dropFlags = true;
                                 }
-                                else if (Engine.Profile.Current.AutoOpenSecretDoors && (item2.ItemData.IsDoor || item2.ItemData.IsSecretDoor))
-                                {
-                                    dropFlags = true;
-                                }
                                 else
                                 { 
                                     dropFlags = graphic >= 0x3946 && graphic <= 0x3964 || graphic == 0x0082;
