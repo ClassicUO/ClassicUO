@@ -114,7 +114,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            if (LocalSerial != 0 && !LocalSerial.IsValidLocalGumpSerial)
+            if (!IsDisposed && LocalSerial != 0 && !LocalSerial.IsValidLocalGumpSerial)
             {
                 List<Serial> switches = new List<Serial>();
                 List<Tuple<ushort, string>> entries = new List<Tuple<ushort, string>>();

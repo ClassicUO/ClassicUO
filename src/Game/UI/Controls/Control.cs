@@ -861,9 +861,8 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return;
 
-            for (int i = 0; i < Children.Count; i++)
+            foreach (Control c in Children)
             {
-                Control c = Children[i];
                 c.Dispose();
             }
 
