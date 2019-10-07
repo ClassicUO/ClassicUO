@@ -357,8 +357,7 @@ namespace ClassicUO.IO.Resources
             IsStackable = (Flags & TileFlag.Generic) != 0;
             IsTransparent = (Flags & TileFlag.Transparent) != 0;
             IsContainer = (Flags & TileFlag.Container) != 0;
-            IsDoor = (Flags & TileFlag.Door) != 0;            
-            IsSecretDoor = (Flags & TileFlag.Door) != 0;            
+            IsDoor = (Flags & TileFlag.Door) != 0;           
             IsWall = (Flags & TileFlag.Wall) != 0;
             IsLight = (Flags & TileFlag.LightSource) != 0;
             IsNoShoot = (Flags & TileFlag.NoShoot) != 0;
@@ -390,8 +389,7 @@ namespace ClassicUO.IO.Resources
         public readonly bool IsStackable;
         public readonly bool IsTransparent;
         public readonly bool IsContainer;
-        public readonly bool IsDoor;
-        public readonly bool IsSecretDoor;        
+        public readonly bool IsDoor;        
         public readonly bool IsWall;
         public readonly bool IsLight;
         public readonly bool IsNoShoot;
