@@ -1410,12 +1410,6 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
-            if (Walker.StepsCount >= Constants.MAX_STEP_COUNT)
-            {
-                Log.Message(LogTypes.Panic, ">> STEP LIMIT REACHED!!! << ");
-                return false;
-            }
-
             if (Walker.WalkingFailed || Walker.LastStepRequestTime > Engine.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || 
                 (FileManager.ClientVersion >= ClientVersions.CV_60142 && IsParalyzed))
                 return false;
