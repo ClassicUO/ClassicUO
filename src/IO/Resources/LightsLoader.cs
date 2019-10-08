@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
@@ -39,8 +40,8 @@ namespace ClassicUO.IO.Resources
                 string path = Path.Combine(FileManager.UoFolderPath, "light.mul");
                 string pathidx = Path.Combine(FileManager.UoFolderPath, "lightidx.mul");
 
-                if (!File.Exists(path) || !File.Exists(pathidx))
-                    throw new FileNotFoundException();
+                FileSystemHelper.EnsureFileExists(path);
+                FileSystemHelper.EnsureFileExists(pathidx);
 
                 _file = new UOFileMul(path, pathidx, Constants.MAX_LIGHTS_DATA_INDEX_COUNT);
                 _file.FillEntries(ref Entries);
