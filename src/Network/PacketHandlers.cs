@@ -1546,7 +1546,7 @@ namespace ClassicUO.Network
 
         private static void LoginComplete(Packet p)
         {
-            if (World.Player != null)
+            if (World.Player != null && Engine.SceneManager.CurrentScene is LoginScene)
             {
                 Engine.SceneManager.ChangeScene(ScenesType.Game);
 
