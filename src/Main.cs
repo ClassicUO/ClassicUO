@@ -26,7 +26,7 @@ namespace ClassicUO
             if (updater.Check())
                 return;
 #endif
-            ParseAdditionalArgs(args);
+            ParseMainArgs(args);
 
             if (!SkipUpdate)
                 if (CheckUpdate(args))
@@ -39,21 +39,40 @@ namespace ClassicUO
         public static bool StartInLittleWindow { get; set; }
         public static bool SkipUpdate { get; set; }
 
-        private static void ParseAdditionalArgs(string[] args)
+        private static void ParseMainArgs(string[] args)
         {
-            int count = args.Length - 1;
-
-            for (int i = 0; i <= count; i++)
+            for (int i = 0; i <= args.Length - 1; i++)
             {
-                switch (args[i])
+                string cmd = args[i].ToLower();
+
+                // NOTE: Command-line option name should start with "-" character
+                if (cmd.Length == 0 || cmd[0] != '-')
+                    continue;
+
+                cmd = cmd.Remove(0, 1);
+                string value = (i < args.Length - 1) ? args[i + 1] : null;
+
+                Log.Message(LogTypes.Trace, $"ARG: {cmd}, VALUE: {value}");
+
+                switch (cmd)
                 {
-                    case "-minimized":
+                    // Here we have it! Using `-settings` option we can now set the filepath that will be used 
+                    // to load and save ClassicUO main settings instead of default `./settings.json`
+                    // NOTE: All individual settings like `username`, `password`, etc passed in command-line options
+                    // will override and overwrite those in the settings file because they have higher priority
+                    case "settings":
+                        Settings.CustomSettingsFilepath = value;
+                        break;
+
+                    case "minimized":
                         StartMinimized = true;
                         break;
-                    case "-littlewindow":
+
+                    case "littlewindow":
                         StartInLittleWindow = true;
                         break;
-                    case "-skipupdate":
+
+                    case "skipupdate":
                         SkipUpdate = true;
                         break;
                 }
@@ -78,8 +97,11 @@ namespace ClassicUO
                     pid = int.Parse(args[i + 1]);
             }
 
-            Console.WriteLine("CURRENT PATH: {0}", currentPath);
-            Console.WriteLine("Args: \tpath={0}\taction={1}\tpid={2}", path, action, pid);
+            if (action != string.Empty)
+            {
+                Console.WriteLine("[CheckUpdate] CURRENT PATH: {0}", currentPath);
+                Console.WriteLine("[CheckUpdate] Args: \tpath={0}\taction={1}\tpid={2}", path, action, pid);
+            }
 
             if (action == "update")
             {
@@ -141,11 +163,11 @@ namespace ClassicUO
                 {
                     Directory.Delete(path, true);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                 }
 
-                Log.Message(LogTypes.Trace, "ClassicUO updated successful!", ConsoleColor.Green);
+                Log.Message(LogTypes.Trace, "ClassicUO updated successfully!", ConsoleColor.Green);
             }
 
             return false;

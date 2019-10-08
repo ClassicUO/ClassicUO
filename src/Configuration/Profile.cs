@@ -317,14 +317,14 @@ namespace ClassicUO.Configuration
 
             Log.Message(LogTypes.Trace, $"Saving path:\t\t{path}");
 
-            // save settings.json
+            // Save profile settings
             ConfigurationResolver.Save(this, Path.Combine(path, "profile.json"), new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.All,
                 MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
             });
 
-            // save gumps.bin
+            // Save opened gumps
             SaveGumps(path, gumps);
 
             Log.Message(LogTypes.Trace, "Saving done!");
