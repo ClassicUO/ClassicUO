@@ -151,18 +151,16 @@ namespace ClassicUO.Game.GameObjects
             bool isUnderMouse = SelectedObject.LastObject == this && TargetManager.IsTargeting;
             //bool needHpLine = false;
 
-            if (this != World.Player && (isAttack || isUnderMouse || TargetManager.LastTarget == Serial))
+            if (this != World.Player)
             {
-                Hue targetColor = Notoriety.GetHue(NotorietyFlag);
+                if (isAttack || isUnderMouse)
+                    _viewHue = Notoriety.GetHue(NotorietyFlag);
 
-                if (isAttack || this == TargetManager.LastTarget)
+                if (this == TargetManager.LastTarget)
                 {
                     Engine.UI.SetTargetLineGump(this);
                     //needHpLine = true;
                 }
-
-                if (isAttack || isUnderMouse)
-                    _viewHue = targetColor;
             }
 
 
