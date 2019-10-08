@@ -1511,6 +1511,9 @@ namespace ClassicUO.Network
 
         private static void PlaySoundEffect(Packet p)
         {
+            if (World.Player == null)
+                return;
+
             p.Skip(1);
 
             ushort index = p.ReadUShort();
@@ -1518,7 +1521,6 @@ namespace ClassicUO.Network
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
             ushort z = p.ReadUShort();
-
 
             int distX = Math.Abs(x - World.Player.X);
             int distY = Math.Abs(y - World.Player.Y);
