@@ -254,6 +254,16 @@ namespace ClassicUO.Game.UI.Controls
                     var torso = Mobile.Equipment[(int) Layer.Torso];
                     var quiver = Mobile.Equipment[(int) Layer.Cloak];
 
+                    if (torso == null && _fakeItem != null && _fakeItem.ItemData.Layer == (int)Layer.Torso)
+                    {
+                        torso = _fakeItem;
+                    }
+
+                    if (quiver == null && _fakeItem != null && _fakeItem.ItemData.Layer == (int)Layer.Cloak)
+                    {
+                        quiver = _fakeItem;
+                    }
+
                     if (torso != null && (torso.Graphic == 0x13BF || torso.Graphic == 0x13C4)) // chainmail tunic
                     {
                         invertTunicWithArms = true;
@@ -296,8 +306,8 @@ namespace ClassicUO.Game.UI.Controls
                                 isQuiver = false;
                             }
                         }
-                       
-                        
+
+
 
                         Item item = _mobile.Equipment[(int) layerIndex];
                         bool isfake = false;
@@ -344,6 +354,7 @@ namespace ClassicUO.Game.UI.Controls
                         }
 
                         g = _pgumps[(int) layerIndex];
+
 
                         switch ((Layer) layerIndex)
                         {
@@ -469,8 +480,6 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
         }
-
-
 
         internal bool IsOverBackpack
         {
