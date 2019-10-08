@@ -284,8 +284,13 @@ namespace ClassicUO.Game.Managers
             ClearTargetingWithoutTargetCancelPacket();
         }
 
-        public static bool IsMobileSelectableAsTarget(Mobile mobile, int type)
+        public static bool IsMobileSelectableAsTarget(Serial serial, int type)
         {
+            Mobile mobile = World.Mobiles.Get(serial);
+
+            if (mobile == null)
+                return false;
+
             if (mobile == World.Player)
                 return false;
 
@@ -327,8 +332,13 @@ namespace ClassicUO.Game.Managers
             return true;
         }
 
-        public static void SetLastTarget(Mobile target)
+        public static void SetLastTarget(Serial serial)
         {
+            Mobile target = World.Mobiles.Get(serial);
+
+            if (target == null)
+                return;
+
             GameActions.MessageOverhead($"Target: {target.Name}", Notoriety.GetHue(target.NotorietyFlag), World.Player);
             Engine.UI.RemoveTargetLineGump(TargetManager.LastTarget);
             Engine.UI.RemoveTargetLineGump(TargetManager.LastAttack);
@@ -344,7 +354,10 @@ namespace ClassicUO.Game.Managers
 
             foreach (Mobile mobile in World.Mobiles)
             {
-                if (!IsMobileSelectableAsTarget(mobile, type))
+                if (mobile == null)
+                    continue;
+
+                if (!IsMobileSelectableAsTarget(mobile.Serial, type))
                     continue;
 
                 if (TargetManager.LastTarget != null && TargetManager.LastTarget == mobile.Serial)
@@ -367,7 +380,7 @@ namespace ClassicUO.Game.Managers
                 target = firstMobile;
 
             if (target != null)
-                SetLastTarget(target);
+                SetLastTarget(target.Serial);
             else
                 GameActions.Print("No new target found");
         }
@@ -380,7 +393,10 @@ namespace ClassicUO.Game.Managers
 
             foreach (Mobile mobile in World.Mobiles)
             {
-                if (!IsMobileSelectableAsTarget(mobile, type))
+                if (mobile == null)
+                    continue;
+
+                if (!IsMobileSelectableAsTarget(mobile.Serial, type))
                     continue;
 
                 if (!currentTargetFound && lastMobile != null)
@@ -399,7 +415,7 @@ namespace ClassicUO.Game.Managers
                 target = lastMobile;
 
             if (target != null)
-                SetLastTarget(target);
+                SetLastTarget(target.Serial);
             else
                 GameActions.Print("No new target found");
         }
@@ -415,7 +431,10 @@ namespace ClassicUO.Game.Managers
             // that we will use to rotate our nearest group of mobiles
             foreach (Mobile mobile in World.Mobiles)
             {
-                if (!IsMobileSelectableAsTarget(mobile, type))
+                if (mobile == null)
+                    continue;
+
+                if (!IsMobileSelectableAsTarget(mobile.Serial, type))
                     continue;
 
                 if (mobile.Distance < closestDist)
@@ -424,7 +443,10 @@ namespace ClassicUO.Game.Managers
 
             foreach (Mobile mobile in World.Mobiles)
             {
-                if (!IsMobileSelectableAsTarget(mobile, type))
+                if (mobile == null)
+                    continue;
+
+                if (!IsMobileSelectableAsTarget(mobile.Serial, type))
                     continue;
 
                 if (mobile.Distance > closestDist)
@@ -450,7 +472,7 @@ namespace ClassicUO.Game.Managers
                 target = firstMobile;
 
             if (target != null)
-                SetLastTarget(target);
+                SetLastTarget(target.Serial);
             else
                 GameActions.Print("No new target found");
         }
