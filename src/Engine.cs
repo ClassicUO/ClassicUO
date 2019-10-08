@@ -98,38 +98,51 @@ namespace ClassicUO
         {
             Instance = this;
 
-            // By default try to load settings from main settings file
-            _settings = ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, Settings.SETTINGS_FILENAME));
+            string settingsFilepath = Settings.GetSettingsFilepath();
 
-            // Try to apply any settings passed from the command-line/shortcut to what we loaded from file
-            // NOTE: If nothing was loaded from settings file (file doesn't exist), then it will create
-            //   a new settings object and populate it with the passed settings
-            ArgsParser(args, _settings);
+            Console.WriteLine($"SETTINGS FILE: {settingsFilepath}");
 
-            // If no still no settings after loading a file and parsing command-line settings,
-            //   then show an error, generate default settings file and exit
-            if (_settings == null)
+            // Check settings file for existence
+            if (!Directory.Exists(Path.GetDirectoryName(settingsFilepath)) || !File.Exists(settingsFilepath))
             {
-                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION, $"No `{Settings.SETTINGS_FILENAME}`", "A `" + Settings.SETTINGS_FILENAME + "` has been created into ClassicUO main folder.\nPlease fill it!", SDL.SDL_GL_GetCurrentWindow());
-                Log.Message(LogTypes.Trace, Settings.SETTINGS_FILENAME + " file not found");
+                Log.Message(LogTypes.Trace, "Settings file not found");
+                Directory.CreateDirectory(Path.GetDirectoryName(settingsFilepath)); // Make sure we have full path in place
                 _settings = new Settings();
                 _settings.Save();
+                SDL.SDL_ShowSimpleMessageBox(
+                    SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
+                    "No settings",
+                    $"A new settings file has been created: {settingsFilepath}\n\n" +
+                        "Please, open it with a text editor and at least set `ultimaonlinedirectory` and `clientversion` options.",
+                    SDL.SDL_GL_GetCurrentWindow()
+                );
                 IsQuitted = true;
 
                 return;
             }
 
-       
-            // If settings are invalid, then show an error and exit
-            if (!_settings.IsValid())
+            // Firstly, try to load settings from either main or custom settings file
+            // TODO: Wrap it in the `try..catch` block to catch potential JSON parsing errors
+            _settings = ConfigurationResolver.Load<Settings>(settingsFilepath);
+
+            // Secondly, Try to apply any settings passed from the command-line/shortcut options over those
+            // we loaded from the settings file
+            // NOTE: If nothing was loaded from settings file (file doesn't exist), then it will create
+            //   a new settings object and populate it with the passed settings
+            ArgsParser(args, _settings);
+
+            // If no settings loaded from file, no settings parsed from command-line options,
+            //   or if settings are invalid, then show an error and exit
+            if (_settings == null || !_settings.IsValid())
             {
-                SDL.SDL_ShowSimpleMessageBox(
-                                             SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
-                                             "Invalid settings",
-                                             "Please, check your settings.\nYou should at least set `ultimaonlinedirectory` and `clientversion`.",
-                                             SDL.SDL_GL_GetCurrentWindow()
-                                            );
                 Log.Message(LogTypes.Trace, "Invalid settings");
+                SDL.SDL_ShowSimpleMessageBox(
+                    SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
+                    "Invalid settings",
+                    "Please, check your settings.\n\n" +
+                        "You should at least set `ultimaonlinedirectory` and `clientversion`.",
+                    SDL.SDL_GL_GetCurrentWindow()
+                );
                 IsQuitted = true;
 
                 return;
@@ -331,22 +344,28 @@ namespace ClassicUO
 
         private static void ArgsParser(string[] args, Settings settings = null)
         {
+            // NOTE: If no command-line options given, this method will NOT create a new setting object
+            if (args.Length == 0)
+                return;
+
             if (args.Length > 1)
             {
                 if (settings == null)
                     settings = new Settings();
 
-                for (int i = 0; i < args.Length - 1; i += 2)
+                for (int i = 0; i < args.Length - 1; i++)
                 {
                     string cmd = args[i].ToLower();
 
-                    if (cmd.Length <= 1 && cmd[0] != '-')
+                    // NOTE: Command-line option name should start with "-" character
+                    if (cmd.Length == 0 || cmd[0] != '-')
                         continue;
 
                     cmd = cmd.Remove(0, 1);
-                    string value = args[i + 1];
+                    string value = (i < args.Length - 1) ? args[i + 1] : null;
 
-                    Log.Message(LogTypes.Trace, $"ARG: {cmd}, VALUE: {value}");
+                    // NOTE: This is duplicated output
+                    //Log.Message(LogTypes.Trace, $"ARG: {cmd}, VALUE: {value}");
 
                     switch (cmd)
                     {
@@ -455,15 +474,6 @@ namespace ClassicUO
                             settings.FixedTimeStep = bool.Parse(value);
 
                             break;
-
-                        // FIXME: This is bad idea since the filename stored in `Engine.SettingsFile` is
-                        //   used not only for main settings file, but for character profile settings file
-                        //   as well. The "-settings" option should also have lower priority than other 
-                        //   and should be processed before we overwrite options one-by-one from 
-                        //   command-line arguments or from a shortcut.
-                        //case "settings":
-                        //    Engine.SettingsFile = value;
-                        //    break;
                     }
                 }
             }
@@ -487,7 +497,7 @@ namespace ClassicUO
             // @see: https://stackoverflow.com/questions/39601742/mono-executes-program-with-wrong-current-directory
             // @see: https://stackoverflow.com/questions/1658518/getting-the-absolute-path-of-the-executable-using-c/17836681
             ExePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location); // Environment.CurrentDirectory;
-            Console.WriteLine("ExePath: {0}", ExePath);
+            Console.WriteLine("EXE PATH: {0}", ExePath);
 
 #if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
