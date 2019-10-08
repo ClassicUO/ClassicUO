@@ -146,7 +146,15 @@ namespace ClassicUO.Network
             }
             int start = Position;
             Position += length;
-            return length <= 0 ? string.Empty : StringHelper.AsciiEncoding.GetString(_data, start, length).TrimEnd('\0');
+
+            if (length <= 0)
+                return string.Empty;
+
+            var str = StringHelper.AsciiEncoding.GetString(_data, start, length);
+            var nulIndex = str.IndexOf('\0');
+            if (nulIndex <= 0) return string.Empty;
+
+            return str.Substring(0, nulIndex);
         }
 
         public string ReadUTF8StringSafe()
