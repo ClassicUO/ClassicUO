@@ -249,41 +249,67 @@ namespace ClassicUO.Game.UI.Controls
 
 
                     bool invertTunicWithArms = false;
+                    bool isQuiver = false;
 
                     var torso = Mobile.Equipment[(int) Layer.Torso];
+                    var quiver = Mobile.Equipment[(int) Layer.Cloak];
 
                     if (torso != null && (torso.Graphic == 0x13BF || torso.Graphic == 0x13C4)) // chainmail tunic
                     {
                         invertTunicWithArms = true;
                     }
 
+                    if (quiver != null && (quiver.Graphic == 0x2FB7 // elven
+                                           || quiver.Graphic == 0x2B02 // infinity
+                                           ))
+                    {
+                        isQuiver = true;
+                    }
+
                     for (int i = 0; i < _layerOrder.Length; i++)
                     {
-                        int layerIndex = (int) _layerOrder[i];
+                        Layer layerIndex = _layerOrder[i];
 
                         if (invertTunicWithArms)
                         {
-                            if (layerIndex == (int)Layer.Arms)
-                                layerIndex = (int) Layer.Torso;
-                            else if (layerIndex == (int) Layer.Torso)
+                            if (layerIndex == Layer.Arms)
+                                layerIndex = Layer.Torso;
+                            else if (layerIndex == Layer.Torso)
                             {
-                                layerIndex = (int) Layer.Arms;
+                                layerIndex = Layer.Arms;
                                 invertTunicWithArms = false;
                             }
                         }
+
+                        if (isQuiver)
+                        {
+                            if (layerIndex == Layer.Cloak)
+                            {
+                                // skip
+                                continue;
+                            }
+
+                            if (layerIndex == Layer.Torso) // insert here the quiver if needed
+                            {
+                                layerIndex = Layer.Cloak;
+                                i--;
+                                isQuiver = false;
+                            }
+                        }
+                       
                         
 
-                        Item item = _mobile.Equipment[layerIndex];
+                        Item item = _mobile.Equipment[(int) layerIndex];
                         bool isfake = false;
                         bool canPickUp = World.InGame && 
                                          !World.Player.IsDead && 
                                          (_mobile == World.Player || (_paperDollGump != null && _paperDollGump.CanLift)) &&
-                                         layerIndex != (int) Layer.Hair && 
-                                         layerIndex != (int) Layer.Beard;
+                                         layerIndex != Layer.Hair && 
+                                         layerIndex != Layer.Beard;
 
-                        ref var itemGump = ref _pgumps[layerIndex];
+                        ref var itemGump = ref _pgumps[(int)layerIndex];
 
-                        if (_fakeItem != null && _fakeItem.ItemData.Layer == layerIndex)
+                        if (_fakeItem != null && _fakeItem.ItemData.Layer == (int) layerIndex)
                         {
                             item = _fakeItem;
                             isfake = true;
@@ -317,9 +343,9 @@ namespace ClassicUO.Game.UI.Controls
                             continue;
                         }
 
-                        g = _pgumps[layerIndex];
+                        g = _pgumps[(int) layerIndex];
 
-                        switch (_layerOrder[i])
+                        switch ((Layer) layerIndex)
                         {
                             case Layer.Hair:
                             case Layer.Beard:
