@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -652,16 +653,6 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-        //DepthStencilState s2 = new DepthStencilState
-        //{
-        //    StencilEnable = true,
-        //    StencilFunction = CompareFunction.NotEqual,
-        //    StencilPass = StencilOperation.Keep,
-        //    StencilFail = StencilOperation.Keep,
-        //    StencilDepthBufferFail = StencilOperation.Keep,
-        //    ReferenceStencil = 0,
-        //    DepthBufferEnable = false,
-        //};
 
         private void DrawWorld(UltimaBatcher2D batcher)
         {
@@ -670,13 +661,14 @@ namespace ClassicUO.Game.Scenes
             batcher.GraphicsDevice.Clear(Color.Black);
             batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
 
-            //if (CircleOfTransparency.Circle == null)
-            //    CircleOfTransparency.Create(200);
-            //CircleOfTransparency.Circle.Draw(batcher,
-            //                                 Engine.Profile.Current.GameWindowPosition.X + (int) World.Player.Offset.X,
-            //                                 Engine.Profile.Current.GameWindowPosition.Y + (int) (World.Player.Offset.Y) - (int)(World.Player.Z * 4 + World.Player.Offset.Z));
+            if (CircleOfTransparency.Circle == null)
+                CircleOfTransparency.Create(200);
+            CircleOfTransparency.Circle.Draw(batcher,
+                                             ((Engine.Profile.Current.GameWindowSize.X / 2) ),
+                                             ((Engine.Profile.Current.GameWindowSize.Y / 2) ));
 
-            //batcher.GraphicsDevice.Clear(ClearOptions.Stencil | ClearOptions.Target | ClearOptions.DepthBuffer, new Vector4(0, 0, 0, 1), 0, 0);
+            //batcher.GraphicsDevice.Clear(ClearOptions.Stencil | ClearOptions.Target | ClearOptions.DepthBuffer, Color.Black, 0, 0);
+
 
             batcher.SetBrightlight(Engine.Profile.Current.Brighlight);
 
@@ -703,7 +695,6 @@ namespace ClassicUO.Game.Scenes
                             RenderedObjectsCount++;
                     }
                 }
-
 
                 if (_multi != null && TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
                     _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y);
