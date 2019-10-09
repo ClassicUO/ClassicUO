@@ -64,6 +64,7 @@ namespace ClassicUO.Game.Scenes
         private UseItemQueue _useItemQueue = new UseItemQueue();
         private Vector4 _vectorClear = new Vector4(Vector3.Zero, 1);
         private WorldViewport _viewPortGump;
+        private Weather _weather;
 
         public bool UpdateDrawPosition { get; set; }
 
@@ -96,7 +97,8 @@ namespace ClassicUO.Game.Scenes
         public Texture2D ViewportTexture => _renderTarget;
 
         public Texture2D Darkness => _darkness;
-        
+
+        public Weather Weather => _weather;
 
         public bool UseLights => Engine.Profile.Current != null && Engine.Profile.Current.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
 
@@ -135,6 +137,7 @@ namespace ClassicUO.Game.Scenes
             Macros = new MacroManager(Engine.Profile.Current.Macros);
             InfoBars = new InfoBarManager();
             _healthLinesManager = new HealthLinesManager();
+            _weather = new Weather();
 
             WorldViewportGump viewport = new WorldViewportGump(this);
 
@@ -272,6 +275,7 @@ namespace ClassicUO.Game.Scenes
             _renderTarget?.Dispose();
             _darkness?.Dispose();
             CommandManager.UnRegisterAll();
+            _weather.Reset();
 
             Engine.UI?.Clear();
             World.Clear();
@@ -713,6 +717,12 @@ namespace ClassicUO.Game.Scenes
             batcher.End();
 
             DrawLights(batcher);
+
+
+            // draw weather
+            batcher.Begin();
+            _weather.Draw(batcher, Engine.Profile.Current.GameWindowPosition.X, Engine.Profile.Current.GameWindowPosition.Y);
+            batcher.End();
 
             batcher.GraphicsDevice.SetRenderTarget(null);
         }
