@@ -12,9 +12,10 @@ namespace ClassicUO.Game
 {
     class WeatherEffect
     {
-        public float SpeedX, SpeedY, X, Y, ScaleRation, SpeedAngle, SpeedMagnitude;
+        public float SpeedX, SpeedY, X, Y, ScaleRatio, SpeedAngle, SpeedMagnitude;
         public uint ID;
     }
+
     class Weather
     {
         enum WEATHER_TYPE
@@ -56,8 +57,8 @@ namespace ClassicUO.Game
             if (Type == 0xFF || Type == 0xFE)
                 return;
 
-            int drawX = Engine.Profile.Current.GameWindowPosition.X;
-            int drawY = Engine.Profile.Current.GameWindowPosition.Y;
+            //int drawX = Engine.Profile.Current.GameWindowPosition.X;
+            //int drawY = Engine.Profile.Current.GameWindowPosition.Y;
 
             if (Count > 70)
                 Count = 70;
@@ -68,8 +69,8 @@ namespace ClassicUO.Game
             {
                 WeatherEffect effect = new WeatherEffect()
                 {
-                    X = (float) (drawX + RandomHelper.GetValue( 0, Engine.Profile.Current.GameWindowSize.X)),
-                    Y = (float)(drawY + RandomHelper.GetValue(0, Engine.Profile.Current.GameWindowSize.Y))
+                    X = RandomHelper.GetValue( 0, Engine.Profile.Current.GameWindowSize.X),
+                    Y = RandomHelper.GetValue(0, Engine.Profile.Current.GameWindowSize.Y)
                 };
 
                 Effects.Add(effect);
@@ -96,7 +97,7 @@ namespace ClassicUO.Game
 
             uint passed = Engine.Ticks - LastTick;
 
-            if (passed > 700)
+            if (passed > 7000)
             {
                 LastTick = Engine.Ticks;
                 passed = 25;
@@ -131,154 +132,153 @@ namespace ClassicUO.Game
                 {
                     windChanged = true;
                 }
+            }
 
+            //switch ((WEATHER_TYPE) Type)
+            //{
+            //    case WEATHER_TYPE.WT_RAIN:
+            //    case WEATHER_TYPE.WT_FIERCE_STORM:
+            //        // TODO: set color
+            //        break;
+            //    case WEATHER_TYPE.WT_SNOW:
+            //    case WEATHER_TYPE.WT_STORM:
+            //        // TODO: set color
+            //        break;
+            //    default:
+            //        break;
+            //}
 
-                //switch ((WEATHER_TYPE) Type)
-                //{
-                //    case WEATHER_TYPE.WT_RAIN:
-                //    case WEATHER_TYPE.WT_FIERCE_STORM:
-                //        // TODO: set color
-                //        break;
-                //    case WEATHER_TYPE.WT_SNOW:
-                //    case WEATHER_TYPE.WT_STORM:
-                //        // TODO: set color
-                //        break;
-                //    default:
-                //        break;
-                //}
+            Point winpos = Engine.Profile.Current.GameWindowPosition;
+            Point winsize = Engine.Profile.Current.GameWindowSize;
 
-                Point winpos = Engine.Profile.Current.GameWindowPosition;
-                Point winsize = Engine.Profile.Current.GameWindowSize;
+            for (int i = 0; i < Effects.Count; i++)
+            {
+                var effect = Effects[i];
 
-                for (int i = 0; i < Effects.Count; i++)
+                if (effect.X < x || effect.X > x + winsize.X ||
+                    effect.Y < y || effect.Y > y + winsize.Y)
                 {
-                    var effect = Effects[i];
-
-                    if (effect.X < x || effect.X > x + winsize.X ||
-                        effect.Y < y || effect.Y > y + winsize.Y)
+                    if (removeEffects)
                     {
-                        if (removeEffects)
-                        {
-                            Effects.RemoveAt(i--);
+                        Effects.RemoveAt(i--);
 
-                            if (CurrentCount > 0)
-                                CurrentCount--;
-                            else
-                                CurrentCount = 0;
+                        if (CurrentCount > 0)
+                            CurrentCount--;
+                        else
+                            CurrentCount = 0;
 
-                            continue;
-                        }
-
-                        effect.X = x + RandomHelper.GetValue(0, winsize.X);
-                        effect.Y = y + RandomHelper.GetValue(0, winsize.Y);
+                        continue;
                     }
 
-
-                    switch ((WEATHER_TYPE) Type)
-                    {
-                        case WEATHER_TYPE.WT_RAIN:
-                            float scaleRation = effect.ScaleRation;
-                            effect.SpeedX = -4.5f - scaleRation;
-                            effect.SpeedY = 5.0f + scaleRation;
-                            break;
-                        case WEATHER_TYPE.WT_FIERCE_STORM:
-                            effect.SpeedX = Wind;
-                            effect.SpeedY = 6.0f;
-                            break;
-                        case WEATHER_TYPE.WT_SNOW:
-                        case WEATHER_TYPE.WT_STORM:
-
-                            if (Type == (byte) WEATHER_TYPE.WT_SNOW)
-                            {
-                                effect.SpeedX = Wind;
-                                effect.SpeedY = 1.0f;
-                            }
-                            else
-                            {
-                                effect.SpeedX = Wind * 1.5f;
-                                effect.SpeedY = 1.5f;
-                            }
-
-                            if (windChanged)
-                            {
-                                effect.SpeedAngle = MathHelper.ToDegrees((float) Math.Atan2(effect.SpeedX, effect.SpeedY));
-                                effect.SpeedMagnitude =
-                                    (float) Math.Sqrt(Math.Pow(effect.SpeedX, 2) + Math.Pow(effect.SpeedY, 2));
-                            }
-
-                            float speed_angle = effect.SpeedAngle;
-                            float speed_magnitude = effect.SpeedMagnitude;
-
-                            speed_magnitude += effect.ScaleRation;
-
-                            speed_angle += SinOscillate(0.4f, 20, Engine.Ticks + effect.ID);
-
-                            var rad = MathHelper.ToRadians(speed_angle);
-                            effect.SpeedX = speed_magnitude * (float) Math.Sin(rad);
-                            effect.SpeedY = speed_magnitude * (float) Math.Cos(rad);
-
-                            break;
-                        default:
-                            break;
-                    }
-
-                    float speedOffset = passed / SimulationRation;
-
-                    switch ((WEATHER_TYPE) Type)
-                    {
-                        case WEATHER_TYPE.WT_RAIN:
-                        case WEATHER_TYPE.WT_FIERCE_STORM:
-
-                            int oldX = (int) effect.X;
-                            int oldY = (int) effect.Y;
-
-                            float ofsx = effect.SpeedX * speedOffset;
-                            float ofsy = effect.SpeedY * speedOffset;
-
-                            effect.X += ofsx;
-                            effect.Y += ofsy;
-
-                            const float MAX_OFFSET_XY = 5.0f;
-
-                            if (ofsx >= MAX_OFFSET_XY)
-                            {
-                                oldX = (int) (effect.X - MAX_OFFSET_XY);
-                            }
-                            else if (ofsx <= -MAX_OFFSET_XY)
-                            {
-                                oldX = (int) (effect.X + MAX_OFFSET_XY);
-                            }
-
-                            if (ofsy >= MAX_OFFSET_XY)
-                            {
-                                oldY = (int) (effect.Y - MAX_OFFSET_XY);
-                            }
-                            else if (oldY <= -MAX_OFFSET_XY)
-                            {
-                                oldY = (int)(effect.Y + MAX_OFFSET_XY);
-                            }
-
-                            batcher.DrawLine(Textures.GetTexture(Color.Gray), x + oldX, y + oldY,
-                                x + (int) effect.X, y + (int) effect.Y, 0, 0);
-                            break;
-                        case WEATHER_TYPE.WT_SNOW:
-                        case WEATHER_TYPE.WT_STORM:
-
-                            effect.X += effect.SpeedX * speedOffset;
-                            effect.Y += effect.SpeedY * speedOffset;
-
-                            batcher.DrawRectangle(Textures.GetTexture(Color.White),
-                                x + (int) effect.X, y + (int) effect.Y, 2, 2, ref _hueVector);
-                            
-                            break;
-                        default:
-                            break;
-                    }
-
+                    effect.X = x + RandomHelper.GetValue(0, winsize.X);
+                    effect.Y = y + RandomHelper.GetValue(0, winsize.Y);
                 }
 
-                LastTick = Engine.Ticks;
+
+                switch ((WEATHER_TYPE)Type)
+                {
+                    case WEATHER_TYPE.WT_RAIN:
+                        float scaleRation = effect.ScaleRatio;
+                        effect.SpeedX = -4.5f - scaleRation;
+                        effect.SpeedY = 5.0f + scaleRation;
+                        break;
+                    case WEATHER_TYPE.WT_FIERCE_STORM:
+                        effect.SpeedX = Wind;
+                        effect.SpeedY = 6.0f;
+                        break;
+                    case WEATHER_TYPE.WT_SNOW:
+                    case WEATHER_TYPE.WT_STORM:
+
+                        if (Type == (byte)WEATHER_TYPE.WT_SNOW)
+                        {
+                            effect.SpeedX = Wind;
+                            effect.SpeedY = 1.0f;
+                        }
+                        else
+                        {
+                            effect.SpeedX = Wind * 1.5f;
+                            effect.SpeedY = 1.5f;
+                        }
+
+                        if (windChanged)
+                        {
+                            effect.SpeedAngle = MathHelper.ToDegrees((float)Math.Atan2(effect.SpeedX, effect.SpeedY));
+                            effect.SpeedMagnitude =
+                                (float)Math.Sqrt(Math.Pow(effect.SpeedX, 2) + Math.Pow(effect.SpeedY, 2));
+                        }
+
+                        float speed_angle = effect.SpeedAngle;
+                        float speed_magnitude = effect.SpeedMagnitude;
+
+                        speed_magnitude += effect.ScaleRatio;
+
+                        speed_angle += SinOscillate(0.4f, 20, Engine.Ticks + effect.ID);
+
+                        var rad = MathHelper.ToRadians(speed_angle);
+                        effect.SpeedX = speed_magnitude * (float)Math.Sin(rad);
+                        effect.SpeedY = speed_magnitude * (float)Math.Cos(rad);
+
+                        break;
+                    default:
+                        break;
+                }
+
+                float speedOffset = passed / SimulationRation;
+
+                switch ((WEATHER_TYPE)Type)
+                {
+                    case WEATHER_TYPE.WT_RAIN:
+                    case WEATHER_TYPE.WT_FIERCE_STORM:
+
+                        int oldX = (int)effect.X;
+                        int oldY = (int)effect.Y;
+
+                        float ofsx = effect.SpeedX * speedOffset;
+                        float ofsy = effect.SpeedY * speedOffset;
+
+                        effect.X += ofsx;
+                        effect.Y += ofsy;
+
+                        const float MAX_OFFSET_XY = 5.0f;
+
+                        if (ofsx >= MAX_OFFSET_XY)
+                        {
+                            oldX = (int)(effect.X - MAX_OFFSET_XY);
+                        }
+                        else if (ofsx <= -MAX_OFFSET_XY)
+                        {
+                            oldX = (int)(effect.X + MAX_OFFSET_XY);
+                        }
+
+                        if (ofsy >= MAX_OFFSET_XY)
+                        {
+                            oldY = (int)(effect.Y - MAX_OFFSET_XY);
+                        }
+                        else if (oldY <= -MAX_OFFSET_XY)
+                        {
+                            oldY = (int)(effect.Y + MAX_OFFSET_XY);
+                        }
+
+                        batcher.DrawLine(Textures.GetTexture(Color.Gray), x + oldX, y + oldY,
+                            x + (int)effect.X, y + (int)effect.Y, 0, 0);
+                        break;
+                    case WEATHER_TYPE.WT_SNOW:
+                    case WEATHER_TYPE.WT_STORM:
+
+                        effect.X += effect.SpeedX * speedOffset;
+                        effect.Y += effect.SpeedY * speedOffset;
+
+                        batcher.Draw2D(Textures.GetTexture(Color.White),
+                            x + (int)effect.X, y + (int)effect.Y, 2, 2, ref _hueVector);
+
+                        break;
+                    default:
+                        break;
+                }
+
             }
+
+            LastTick = Engine.Ticks;
         }
     }
 }
