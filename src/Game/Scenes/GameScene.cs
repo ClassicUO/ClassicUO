@@ -665,11 +665,11 @@ namespace ClassicUO.Game.Scenes
             batcher.GraphicsDevice.Clear(Color.Black);
             batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
 
-            if (CircleOfTransparency.Circle == null)
-                CircleOfTransparency.Create(200);
-            CircleOfTransparency.Circle.Draw(batcher,
-                                             ((Engine.Profile.Current.GameWindowSize.X / 2) ),
-                                             ((Engine.Profile.Current.GameWindowSize.Y / 2) ));
+            //if (CircleOfTransparency.Circle == null)
+            //    CircleOfTransparency.Create(200);
+            //CircleOfTransparency.Circle.Draw(batcher,
+            //                                 ((Engine.Profile.Current.GameWindowSize.X / 2) ),
+            //                                 ((Engine.Profile.Current.GameWindowSize.Y / 2) ));
 
             //batcher.GraphicsDevice.Clear(ClearOptions.Stencil | ClearOptions.Target | ClearOptions.DepthBuffer, Color.Black, 0, 0);
 
@@ -712,7 +712,7 @@ namespace ClassicUO.Game.Scenes
 
             // draw weather
             batcher.Begin();
-            _weather.Draw(batcher, Engine.Profile.Current.GameWindowPosition.X, Engine.Profile.Current.GameWindowPosition.Y);
+            _weather.Draw(batcher, 0, 0 /*Engine.Profile.Current.GameWindowPosition.X, Engine.Profile.Current.GameWindowPosition.Y*/);
             batcher.End();
 
             batcher.GraphicsDevice.SetRenderTarget(null);
