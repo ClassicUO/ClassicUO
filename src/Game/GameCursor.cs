@@ -424,7 +424,7 @@ namespace ClassicUO.Game
                             //    break;
 
                             case ItemGump gumpling:
-                                it = gumpling.Item;
+                                it = World.Items.Get(gumpling.LocalSerial);
 
                                 break;
 

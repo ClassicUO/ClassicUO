@@ -47,14 +47,6 @@ namespace ClassicUO.Game
             return state;
         });
 
-        private static readonly Lazy<BlendState> _checkerBlend = new Lazy<BlendState>(() =>
-        {
-            BlendState blend = BlendState.AlphaBlend;
-            blend.ColorWriteChannels = ColorWriteChannels.Alpha;
-
-            return blend;
-        });
-
 
         private Texture2D _texture;
         private short _width, _height;
@@ -151,12 +143,13 @@ namespace ClassicUO.Game
 
                 if (pixel != 0)
                 {
-                    ushort value = (ushort)(pixel << 3);
+                    pixel = Color.Black.PackedValue;
+                    //ushort value = (ushort)(pixel << 3);
 
-                    if (value > 0xFF)
-                        value = 0xFF;
+                    //if (value > 0xFF)
+                    //    value = 0xFF;
 
-                    pixel = (uint)((value << 24) | (value << 16) | (value << 8) | value);
+                    //pixel = (uint)((value << 24) | (value << 16) | (value << 8) | value);
                 }
             }
 
