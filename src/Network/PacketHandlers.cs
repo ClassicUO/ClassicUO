@@ -923,7 +923,8 @@ namespace ClassicUO.Network
             else if (graphic == 0x0EEA)
                 graphic = 0x0EEC;
             else if (graphic == 0x0EF0) graphic = 0x0EF2;
-            Entity entity = World.Get(source);
+
+            Mobile entity = World.Mobiles.Get(source);
 
             if (entity == null)
                 source = 0;
@@ -934,7 +935,7 @@ namespace ClassicUO.Network
                 sourceZ = entity.Position.Z;
             }
 
-            Entity destEntity = World.Get(dest);
+            Mobile destEntity = World.Mobiles.Get(dest);
 
             if (destEntity == null)
                 dest = 0;
@@ -945,8 +946,37 @@ namespace ClassicUO.Network
                 destZ = destEntity.Position.Z;
             }
 
-            Log.Message(LogTypes.Warning, "DragAnimation [0x23] not implemented yet");
-            // effect moving. To do
+            GameEffect effect;
+
+
+            if (!source.IsValid || !dest.IsValid)
+            {
+                effect = new MovingEffect(source, dest, sourceX, sourceY, sourceZ,
+                                          destX, destY, destZ, graphic, hue, true)
+                {
+                    Duration = Engine.Ticks + 5000,
+                    MovingDelay = 5
+                };
+            }
+            else
+            {
+                effect = new DragEffect(source, dest, sourceX, sourceY, sourceZ,
+                                        destX, destY, destZ, graphic, hue)
+                {
+                    Duration = Engine.Ticks + 5000
+                };
+            }
+
+            if (effect.AnimDataFrame.FrameCount != 0)
+            {
+                effect.Speed = effect.AnimDataFrame.FrameInterval * 45;
+            }
+            else
+            {
+                effect.Speed = 13;
+            }
+
+            World.AddEffect(effect);
         }
 
         private static void OpenContainer(Packet p)
