@@ -718,7 +718,7 @@ namespace ClassicUO.Game.Managers
                             _itemsInHand[handIndex] = item.Serial;
 
                             GameActions.PickUp(item, 1);
-                            GameActions.DropItem(item, Position.INVALID, backpack);
+                            gs.MergeHeldItem(backpack);
                         }
                     }
 

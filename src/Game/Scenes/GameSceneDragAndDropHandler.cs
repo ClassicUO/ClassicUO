@@ -44,14 +44,14 @@ namespace ClassicUO.Game.Scenes
         public bool IsHoldingItem => HeldItem != null && HeldItem.Enabled;
 
 
-        public void MergeHeldItem(Entity entity)
+        public void MergeHeldItem(Entity container)
         {
-            if (HeldItem.Enabled && HeldItem.Serial != entity)
+            if (HeldItem.Enabled && HeldItem.Serial != container)
             {
-                if (entity.Serial.IsMobile)
-                    GameActions.DropItem(HeldItem.Serial, 0xFFFF, 0xFFFF, 0, entity.Serial);
-                else if (entity.Serial.IsItem)
-                    GameActions.DropItem(HeldItem.Serial, entity.Position.X, entity.Position.Y, entity.Position.Z, entity.Serial);
+                if (container.Serial.IsMobile)
+                    GameActions.DropItem(HeldItem.Serial, 0xFFFF, 0xFFFF, 0, container.Serial);
+                else if (container.Serial.IsItem)
+                    GameActions.DropItem(HeldItem.Serial, container.Position.X, container.Position.Y, container.Position.Z, container.Serial);
 
                 HeldItem.Enabled = false;
                 HeldItem.Dropped = true;
