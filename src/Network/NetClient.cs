@@ -23,7 +23,6 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -37,11 +36,11 @@ namespace ClassicUO.Network
     internal sealed class NetClient
     {
         private const int BUFF_SIZE = 0x80000;
-        private readonly object _sendLock = new object(), _sync = new object();
+        private readonly object _sendLock = new object();
         private CircularBuffer _circularBuffer;
         private int _incompletePacketLength;
         private bool _isCompressionEnabled, _sending;
-        private Queue<Packet> _queue = new Queue<Packet>(), _workingQueue = new Queue<Packet>();
+        private ConcurrentQueue<Packet> _recvQueue = new ConcurrentQueue<Packet>();
         private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer;
         private SocketAsyncEventArgs _sendEventArgs, _recvEventArgs;
         private SendQueue _sendQueue;
@@ -72,7 +71,7 @@ namespace ClassicUO.Network
                 if (localEntry.AddressList.Length > 0)
                 {
 #pragma warning disable 618
-                    address = (uint) localEntry.AddressList.FirstOrDefault(s => s.AddressFamily == AddressFamily.InterNetwork).Address;
+                    address = (uint)localEntry.AddressList.FirstOrDefault(s => s.AddressFamily == AddressFamily.InterNetwork).Address;
 #pragma warning restore 618
                 }
                 else
@@ -92,12 +91,12 @@ namespace ClassicUO.Network
         {
             if (LoginSocket.IsDisposed && Socket.IsConnected)
             {
-                Socket._workingQueue.Enqueue(new Packet(data, length) { Filter = true });
+                Socket._recvQueue.Enqueue(new Packet(data, length) { Filter = true });
                 Socket.Statistics.TotalPacketsReceived++;
             }
             else if (Socket.IsDisposed && LoginSocket.IsConnected)
             {
-                Socket._workingQueue.Enqueue(new Packet(data, length) { Filter = true });
+                Socket._recvQueue.Enqueue(new Packet(data, length) { Filter = true });
                 LoginSocket.Statistics.TotalPacketsReceived++;
             }
             else
@@ -139,10 +138,8 @@ namespace ClassicUO.Network
             _recvEventArgs = new SocketAsyncEventArgs();
             _recvEventArgs.Completed += IO_Socket;
             _recvEventArgs.SetBuffer(_recvBuffer, 0, _recvBuffer.Length);
-            _queue.Clear();
-            _workingQueue.Clear();
+            _recvQueue = new ConcurrentQueue<Packet>();
             Statistics.Reset();
-
             SocketAsyncEventArgs connectEventArgs = new SocketAsyncEventArgs();
 
             connectEventArgs.Completed += (sender, e) =>
@@ -158,8 +155,6 @@ namespace ClassicUO.Network
                     Log.Message(LogTypes.Error, e.SocketError.ToString());
                     Disconnect(e.SocketError);
                 }
-
-                connectEventArgs.Dispose();
             };
             connectEventArgs.RemoteEndPoint = endpoint;
             _socket.ConnectAsync(connectEventArgs);
@@ -230,17 +225,8 @@ namespace ClassicUO.Network
 
         public void Update()
         {
-            lock (_sync)
+            while (_recvQueue.TryDequeue(out Packet p))
             {
-                var temp = _workingQueue;
-                _workingQueue = _queue;
-                _queue = temp;
-            }
-
-            while (_workingQueue.Count != 0)
-            {
-                var p = _workingQueue.Dequeue();
-
                 ref byte[] data = ref p.ToArray();
                 int length = p.Length;
 
@@ -283,7 +269,7 @@ namespace ClassicUO.Network
 #if !DEBUG
                     //LogPacket(data, false);
 #endif
-                    _queue.Enqueue(new Packet(data, packetlength));
+                    _recvQueue.Enqueue(new Packet(data, packetlength));
                     Statistics.TotalPacketsReceived++;
 
                     length = _circularBuffer.Length;
@@ -588,7 +574,7 @@ namespace ClassicUO.Network
         {
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
             {
-                Statistics.TotalBytesSended += (uint) e.BytesTransferred;
+                Statistics.TotalBytesSended += (uint)e.BytesTransferred;
                 Statistics.TotalPacketsSended++;
             }
             else
