@@ -357,7 +357,11 @@ namespace ClassicUO.Game
            
             if (_itemHold != null && _itemHold.Enabled && !_itemHold.Dropped)
             {
-                float scale = Engine.UI.ContainerScale;
+                float scale = 1;
+
+                if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
+                    scale = Engine.UI.ContainerScale;
+
                 int x = Mouse.Position.X - (int) (_offset.X * scale);
                 int y = Mouse.Position.Y - (int) (_offset.Y * scale);
 
