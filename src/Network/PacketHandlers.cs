@@ -80,17 +80,6 @@ namespace ClassicUO.Network
             }
         }
 
-        public void OnPacket(Packet p)
-        {
-            var handler = _handlers[p.ID];
-
-            if (handler != null)
-            {
-                p.MoveToData();
-                handler(p);
-            }
-        }
-
         private List<Serial> _clilocRequests = new List<Serial>();
 
         public static void Load()
@@ -2430,7 +2419,9 @@ namespace ClassicUO.Network
 
         private static void MultiPlacement(Packet p)
         {
-            Log.Message(LogTypes.Warning, $"Packet 0x{p.ID:X2} `MultiPlacement` not implemented yet.");
+            if (World.Player == null)
+                return;
+
             var allowGround = p.ReadBool();
             var targID = p.ReadUInt();
             var flags = p.ReadByte();
