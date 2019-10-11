@@ -712,7 +712,7 @@ namespace ClassicUO.Network
 
                 if (it.Container.IsValid)
                 {
-                    Entity top = it.Items.FirstOrDefault();
+                    Entity top = World.Get(it.RootContainer);
 
                     if (top != null)
                     {
@@ -728,10 +728,6 @@ namespace ClassicUO.Network
 
                     if (cont == World.Player && it.Layer == Layer.Invalid)
                         scene.HeldItem.Enabled = false;
-
-
-                    if (it.Layer != Layer.Invalid)
-                        Engine.UI.GetGump<PaperDollGump>(cont)?.Update();
                 }
             }
 
@@ -748,9 +744,6 @@ namespace ClassicUO.Network
                 }
                // else
                 {
-
-
-
                     World.RemoveMobile(serial, true);
                     m.Items.ProcessDelta();
                     World.Items.ProcessDelta();
@@ -781,6 +774,9 @@ namespace ClassicUO.Network
 
                 World.RemoveItem(it, true);
                 World.Items.ProcessDelta();
+
+                if (it.Layer != Layer.Invalid)
+                    Engine.UI.GetGump<PaperDollGump>(cont)?.Update();
 
                 if (updateAbilities)
                     World.Player.UpdateAbilities();
