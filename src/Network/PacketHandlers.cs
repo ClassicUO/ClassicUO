@@ -737,9 +737,6 @@ namespace ClassicUO.Network
                 }
                 // else
                 {
-
-
-
                     World.RemoveMobile(serial, true);
                     m.Items.ProcessDelta();
                     World.Items.ProcessDelta();
@@ -759,6 +756,11 @@ namespace ClassicUO.Network
                 {
                     cont.Items.Remove(it);
                     cont.Items.ProcessDelta();
+
+                    if (it.Layer != Layer.Invalid)
+                    {
+                        Engine.UI.GetGump<PaperDollGump>(cont)?.Update();
+                    }
 
                     if (Engine.Profile.Current.GridLootType > 0)
                     {

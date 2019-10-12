@@ -98,6 +98,10 @@ namespace ClassicUO.Game.UI.Controls
                         World.Player.UpdateAbilities();
                     }
 
+                    // this fix is necessary to clean paperdoll
+                    if (Mobile.HasEquipment && item.Layer >= 0 && (int)item.Layer < Mobile.Equipment.Length)
+                        Mobile.Equipment[(int)item.Layer] = null;
+
                     ref var gump = ref _pgumps[(int)item.Layer];
                     gump?.Dispose();
                     gump = null;
