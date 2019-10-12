@@ -101,10 +101,6 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsStretched { get; set; }
         
-        public void Calculate(int x, int y, sbyte z)
-        {
-            UpdateStreched(x, y, z);
-        }
 
         public void UpdateZ(int zTop, int zRight, int zBottom, sbyte currentZ)
         {
