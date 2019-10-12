@@ -696,12 +696,12 @@ namespace ClassicUO.Network
 
             if (serial.IsItem)
             {
-                Item it = (Item) entity;
+                Item it = (Item)entity;
                 uint cont = it.Container & 0x7FFFFFFF;
 
                 if (it.Container.IsValid)
                 {
-                    Entity top = World.Get(it.RootContainer);
+                    Entity top = it.Items.FirstOrDefault();
 
                     if (top != null)
                     {
@@ -717,6 +717,10 @@ namespace ClassicUO.Network
 
                     if (cont == World.Player && it.Layer == Layer.Invalid)
                         scene.HeldItem.Enabled = false;
+
+
+                    if (it.Layer != Layer.Invalid)
+                        Engine.UI.GetGump<PaperDollGump>(cont)?.Update();
                 }
             }
 
@@ -729,10 +733,13 @@ namespace ClassicUO.Network
 
                 if (World.Party.Contains(serial))
                 {
-                   // m.RemoveFromTile();
+                    // m.RemoveFromTile();
                 }
-               // else
+                // else
                 {
+
+
+
                     World.RemoveMobile(serial, true);
                     m.Items.ProcessDelta();
                     World.Items.ProcessDelta();
@@ -741,7 +748,7 @@ namespace ClassicUO.Network
             }
             else if (serial.IsItem)
             {
-                Item it = (Item) entity;
+                Item it = (Item)entity;
 
                 if (it.IsMulti)
                     World.HouseManager.Remove(it);
@@ -763,9 +770,6 @@ namespace ClassicUO.Network
 
                 World.RemoveItem(it, true);
                 World.Items.ProcessDelta();
-
-                if (it.Layer != Layer.Invalid)
-                    Engine.UI.GetGump<PaperDollGump>(cont)?.Update();
 
                 if (updateAbilities)
                     World.Player.UpdateAbilities();
