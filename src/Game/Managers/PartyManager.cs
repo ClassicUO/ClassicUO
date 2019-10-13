@@ -45,9 +45,13 @@ namespace ClassicUO.Game.Managers
         {
             byte code = p.ReadByte();
 
+            bool add = false;
+
             switch (code)
             {
                 case 1:
+                    add = true;
+                    goto case 2;
                 case 2:
                     byte count = p.ReadByte();
 
@@ -81,6 +85,11 @@ namespace ClassicUO.Game.Managers
 
                     Clear();
 
+                    if (!add)
+                    {
+                        Engine.UI.GetGump<HealthBarGump>(p.ReadUInt())?.Update();
+                    }
+
                     for (int i = 0; i < count; i++)
                     {
                         Serial serial = p.ReadUInt();
@@ -88,7 +97,6 @@ namespace ClassicUO.Game.Managers
 
                         if (i == 0)
                             Leader = serial;
-
 
                         HealthBarGump gump = Engine.UI.GetGump<HealthBarGump>(serial);
 
