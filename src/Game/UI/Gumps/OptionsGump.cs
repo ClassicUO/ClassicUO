@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
         // GameWindowSize
         private TextBox _gameWindowWidth;
         private Combobox _gridLoot;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _useShiftPathfind, _alwaysRun, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
         private Combobox _hpComboBox, _healtbarType, _fieldsType, _hpComboBoxShowWhen;
 
         // combat & spells
@@ -256,6 +256,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _highlightObjects = CreateCheckBox(rightArea, "Highlight game objects", Engine.Profile.Current.HighlightGameObjects, 0, 20);
             _enablePathfind = CreateCheckBox(rightArea, "Enable pathfinding", Engine.Profile.Current.EnablePathfind, 0, 0);
+            _useShiftPathfind = CreateCheckBox(rightArea, "Use SHIFT for pathfinding", Engine.Profile.Current.UseShiftToPathfind, 0, 0);
             _alwaysRun = CreateCheckBox(rightArea, "Always run", Engine.Profile.Current.AlwaysRun, 0, 0);
             _enableTopbar = CreateCheckBox(rightArea, "Disable the Menu Bar", Engine.Profile.Current.TopbarGumpIsDisabled, 0, 0);
             _holdDownKeyTab = CreateCheckBox(rightArea, "Hold TAB key for combat", Engine.Profile.Current.HoldDownKeyTab, 0, 0);
@@ -1310,6 +1311,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _holdShiftForContext.IsChecked = false;
                     _holdShiftToSplitStack.IsChecked = false;
                     _enablePathfind.IsChecked = false;
+                    _useShiftPathfind.IsChecked = false;
                     _alwaysRun.IsChecked = false;
                     _showHpMobile.IsChecked = false;
                     _hpComboBox.SelectedIndex = 0;
@@ -1491,6 +1493,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.ReduceFPSWhenInactive = _reduceFPSWhenInactive.IsChecked;
             //Engine.Profile.Current.SmoothMovements = _smoothMovements.IsChecked;
             Engine.Profile.Current.EnablePathfind = _enablePathfind.IsChecked;
+            Engine.Profile.Current.UseShiftToPathfind = _useShiftPathfind.IsChecked;
             Engine.Profile.Current.AlwaysRun = _alwaysRun.IsChecked;
             Engine.Profile.Current.ShowMobilesHP = _showHpMobile.IsChecked;
             Engine.Profile.Current.HighlightMobilesByFlags = _highlightByState.IsChecked;

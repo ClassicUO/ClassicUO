@@ -129,6 +129,7 @@ namespace ClassicUO.Configuration
 
         // movements
         [JsonProperty] public bool EnablePathfind { get; set; }
+        [JsonProperty] public bool UseShiftToPathfind { get; set; }
         [JsonProperty] public bool AlwaysRun { get; set; }
         [JsonProperty] public bool SmoothMovements { get; set; } = true;
         [JsonProperty] public bool HoldDownKeyTab { get; set; } = true;
