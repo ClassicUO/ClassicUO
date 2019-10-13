@@ -127,7 +127,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // containers
         private HSliderBar _containersScale;
-        private Checkbox _containerScaleItems;
+        private Checkbox _containerScaleItems, _containerDoubleClickToLoot;
 
         public OptionsGump() : base(0, 0)
         {
@@ -1305,7 +1305,8 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(item);
 
             _containerScaleItems = CreateCheckBox(rightArea, "Scale items inside containers", Engine.Profile.Current.ScaleItemsInsideContainers, 0, 20);
-
+            _containerDoubleClickToLoot = CreateCheckBox(rightArea, "Double click to loot items inside containers", Engine.Profile.Current.DoubleClickToLootInsideContainers, 0, 0);
+            
             Add(rightArea, PAGE);
         }
 
@@ -1532,6 +1533,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case 13:
                     _containersScale.Value = 100;
                     _containerScaleItems.IsChecked = false;
+                    _containerDoubleClickToLoot.IsChecked = false;
                     break;
             }
         }
@@ -1976,6 +1978,8 @@ namespace ClassicUO.Game.UI.Gumps
                     resizableGump.ForceUpdate();
                 }
             }
+
+            Engine.Profile.Current.DoubleClickToLootInsideContainers = _containerDoubleClickToLoot.IsChecked;
 
             Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
         }
