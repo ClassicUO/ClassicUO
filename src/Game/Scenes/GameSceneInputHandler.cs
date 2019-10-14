@@ -584,6 +584,9 @@ namespace ClassicUO.Game.Scenes
 
             if (Engine.Profile.Current.EnablePathfind && !Pathfinder.AutoWalking)
             {
+                if (Engine.Profile.Current.UseShiftToPathfind && !_isShiftDown)
+                    return false;
+
                 if (SelectedObject.Object is Land || GameObjectHelper.TryGetStaticData(SelectedObject.Object as GameObject, out var itemdata) && itemdata.IsSurface)
                 {
                     if (SelectedObject.Object is GameObject obj && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
