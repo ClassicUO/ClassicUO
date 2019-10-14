@@ -824,7 +824,7 @@ namespace ClassicUO
         private static int _previousHour = -1;
         private static int _Differential;
 
-        public static int Differential //to use in all cases where you rectify normal clocks obtained with utctimer!
+        private static int Differential //to use in all cases where you rectify normal clocks obtained with utctimer!
         {
             get
             {
