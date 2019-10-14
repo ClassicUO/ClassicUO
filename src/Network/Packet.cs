@@ -152,9 +152,7 @@ namespace ClassicUO.Network
 
             var str = StringHelper.AsciiEncoding.GetString(_data, start, length);
             var nulIndex = str.IndexOf('\0');
-            if (nulIndex <= 0) return string.Empty;
-
-            return str.Substring(0, nulIndex);
+            return nulIndex <= 0 ? str : str.Substring(0, nulIndex);
         }
 
         public string ReadUTF8StringSafe()
