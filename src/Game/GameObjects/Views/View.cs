@@ -110,7 +110,7 @@ namespace ClassicUO.Game.GameObjects
 
                 //    if (dist <= maxDist)
                 //    {
-                //        HueVector.Z = MathHelper.Lerp(1f, 1f - dist / (float)maxDist, 0.5f);
+                //        HueVector.Z = 0.75f; // MathHelper.Lerp(1f, 1f - dist / (float)maxDist, 0.5f);
                 //        //HueVector.Z = 1f - (dist / (float)maxDist);
                 //    }
                 //    else
