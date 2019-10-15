@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
@@ -633,16 +633,13 @@ namespace ClassicUO.Game.Managers
                 case MacroType.UseItemInHand:
                     Item itemInLeftHand = World.Player.Equipment[(int)Layer.OneHanded];
                     if (itemInLeftHand != null)
-                    {
                         GameActions.DoubleClick(itemInLeftHand.Serial);
-                    } else
+                    else
                     {
                         Item itemInRightHand = World.Player.Equipment[(int)Layer.TwoHanded];
                         if (itemInRightHand != null)
-                        {
                             GameActions.DoubleClick(itemInRightHand.Serial);
                         }
-                    }
 
                     break;
 
@@ -664,7 +661,8 @@ namespace ClassicUO.Game.Managers
                     }
                     else if (WaitForTargetTimer < Engine.Ticks)
                         WaitForTargetTimer = 0;
-                    else result = 1;
+                    else
+                        result = 1;
 
                     break;
 
@@ -932,26 +930,37 @@ namespace ClassicUO.Game.Managers
                 case MacroType.SelectNext:
                 case MacroType.SelectPrevious:
                 case MacroType.SelectNearest:
-                    // TODO:
-                    int scantype = macro.SubCode - MacroSubType.Hostile;
+                    // scanRange:
+                    // 0 - SelectNext
+                    // 1 - SelectPrevious
+                    // 2 - SelectNearest
                     int scanRange = macro.Code - MacroType.SelectNext;
 
+                    // scantype:
+                    // 0 - Hostile (only hostile mobiles: gray, criminal, enemy, murderer)
+                    // 1 - Party (only party members)
+                    // 2 - Follower (only your followers)
+                    // 3 - Object (???)
+                    // 4 - Mobile (any mobiles)
+                    int scantype = macro.SubCode - MacroSubType.Hostile;
 
                     switch (scanRange)
                     {
                         case 0:
-
+                            //GameActions.MessageOverhead($"SelectNext ({scantype})", World.Player);
+                            TargetManager.SelectNextMobile(scantype);
                             break;
 
                         case 1:
-
+                            //GameActions.MessageOverhead($"SelectPrevious ({scantype})", World.Player);
+                            TargetManager.SelectPreviousMobile(scantype);
                             break;
 
                         case 2:
-
+                            //GameActions.MessageOverhead($"SelectNearest ({scantype})", World.Player);
+                            TargetManager.SelectNearestMobile(scantype);
                             break;
                     }
-
 
                     break;
 
