@@ -736,7 +736,7 @@ namespace ClassicUO.Game.Scenes
 
             _useObjectHandles = isshift && isctrl;
 
-            if (macro != null)
+            if (macro != null && e.keysym.sym != SDL.SDL_Keycode.SDLK_UNKNOWN)
             {
                 Macros.SetMacroToExecute(macro.FirstNode);
                 Macros.WaitForTargetTimer = 0;

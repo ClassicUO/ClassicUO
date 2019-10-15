@@ -154,6 +154,20 @@ namespace ClassicUO.Game.Managers
 
             return obj;
         }
+        public Macro FindMacro(string name)
+        {
+            Macro obj = _firstNode;
+
+            while (obj != null)
+            {
+                if (obj.Name == name)
+                    break;
+
+                obj = obj.Right;
+            }
+
+            return obj;
+        }
 
         public void SetMacroToExecute(MacroObject macro)
         {
@@ -210,6 +224,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.Emote:
                 case MacroType.Whisper:
                 case MacroType.Yell:
+                case MacroType.RazorMacro:
 
                     MacroObjectString mos = (MacroObjectString) macro;
 
@@ -217,6 +232,7 @@ namespace ClassicUO.Game.Managers
                     {
                         MessageType type = MessageType.Regular;
                         ushort hue = Engine.Profile.Current.SpeechHue;
+                        string prefix = null;
 
                         switch (macro.Code)
                         {
@@ -236,9 +252,14 @@ namespace ClassicUO.Game.Managers
                                 type = MessageType.Yell;
 
                                 break;
+
+                            case MacroType.RazorMacro:
+                                prefix = ">macro ";
+
+                                break;
                         }
 
-                        GameActions.Say(mos.Text, hue, type);
+                        GameActions.Say(prefix + mos.Text, hue, type);
                     }
 
                     break;
@@ -1118,7 +1139,7 @@ namespace ClassicUO.Game.Managers
             if (other == null)
                 return false;
 
-            return Key == other.Key && Alt == other.Alt && Ctrl == other.Ctrl && Shift == other.Shift;
+            return Key == other.Key && Alt == other.Alt && Ctrl == other.Ctrl && Shift == other.Shift && Name == other.Name;
         }
 
         [JsonIgnore] public Macro Left { get; set; }
@@ -1137,6 +1158,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.Delay:
                 case MacroType.SetUpdateRange:
                 case MacroType.ModifyUpdateRange:
+                case MacroType.RazorMacro:
                     obj = new MacroObjectString(code, MacroSubType.MSC_NONE);
 
                     break;
@@ -1282,6 +1304,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.Delay:
                 case MacroType.SetUpdateRange:
                 case MacroType.ModifyUpdateRange:
+                case MacroType.RazorMacro:
                     HasSubMenu = 2;
 
                     break;
@@ -1395,6 +1418,7 @@ namespace ClassicUO.Game.Managers
         UseItemInHand,
         UsePotion,
         CloseAllHealthBars,
+        RazorMacro,
 
     }
 
