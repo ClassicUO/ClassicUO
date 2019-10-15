@@ -171,6 +171,7 @@
     <Compile Include="Game\UI\Controls\TextureControl.cs" />
     <Compile Include="Game\UI\Gumps\GridLootGump.cs" />
     <Compile Include="Game\UI\Gumps\InfoBarGump.cs" />
+    <Compile Include="Game\UI\Gumps\MacroButtonGump.cs" />
     <Compile Include="Game\UI\Gumps\NameOverHeadHandlerGump.cs" />
     <Compile Include="Game\UI\Gumps\PartyInviteGump.cs" />
     <Compile Include="Game\UI\Gumps\ResizableGump.cs" />
