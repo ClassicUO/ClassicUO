@@ -43,6 +43,8 @@ namespace ClassicUO.Game.UI.Gumps
         private HitBox _iconizerArea;
         internal override HitBox IconizerArea => _iconizerArea;
         private long _corpseEyeTicks;
+        private bool _hadItems;
+        private bool _closeIfEmpty;
         private ContainerData _data;
         private int _eyeCorspeOffset;
         private GumpPic _eyeGumpPic;
@@ -118,6 +120,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_isCorspeContainer)
             {
+                if (World.Player.ManualOpenedCorpses.Contains(this.LocalSerial))
+                {
+                    World.Player.ManualOpenedCorpses.Remove(this.LocalSerial);
+                } else if (World.Player.AutoOpenedCorpses.Contains(this.LocalSerial))
+                    _closeIfEmpty = true;
+
                 _eyeGumpPic?.Dispose();
                 Add(_eyeGumpPic = new GumpPic((int) (45 * scale), (int) (30 * scale), 0x0045, 0));
 
@@ -189,6 +197,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (item == null || item.IsDestroyed)
             {
+                Dispose();
+                return;
+            }
+
+            if (item.Items.Count() > 0)
+                _hadItems = true;
+
+            if (_closeIfEmpty && !_hadItems && item.Items.Count() == 0){
                 Dispose();
                 return;
             }
