@@ -1049,7 +1049,13 @@ namespace ClassicUO.Network
                     }
 
                     Engine.UI.GetGump<ContainerGump>(serial)?.Dispose();
-                    Engine.UI.Add(new ContainerGump(item, graphic));
+
+                    if (item.IsCorpse){
+                        Engine.UI.Add(new ContainerGump(item, graphic, !World.Player.ManualOpenedCorpses.Contains(serial)));
+                        World.Player.ManualOpenedCorpses.Remove(serial);
+                    }else{
+                        Engine.UI.Add(new ContainerGump(item, graphic, false));
+                    }
                 }
                 else 
                     Log.Message(LogTypes.Error, "[OpenContainer]: item not found");

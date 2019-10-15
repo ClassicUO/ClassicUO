@@ -43,6 +43,8 @@ namespace ClassicUO.Game.UI.Gumps
         private HitBox _iconizerArea;
         internal override HitBox IconizerArea => _iconizerArea;
         private long _corpseEyeTicks;
+        private bool _hadItems;
+        private bool _closeEmptyCorpse;
         private ContainerData _data;
         private int _eyeCorspeOffset;
         private GumpPic _eyeGumpPic;
@@ -52,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
         }
 
-        public ContainerGump(Serial serial, Graphic gumpid) : this()
+        public ContainerGump(Serial serial, Graphic gumpid, bool closeEmptyCorpse = false) : this()
         {
             LocalSerial = serial;
             Item item = World.Items.Get(serial);
@@ -64,6 +66,8 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             Graphic = gumpid;
+            
+            _closeEmptyCorpse = closeEmptyCorpse;
 
             BuildGump();
 
@@ -195,14 +199,25 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (IsDisposed) return;
 
-            if (_isCorspeContainer && _corpseEyeTicks < totalMS)
+            if (item.Items.Count() > 0)
+                _hadItems = true;
+
+            if (_isCorspeContainer)
             {
-                _eyeCorspeOffset = _eyeCorspeOffset == 0 ? 1 : 0;
-                _corpseEyeTicks = (long) totalMS + 750;
-                _eyeGumpPic.Graphic = (Graphic) (0x0045 + _eyeCorspeOffset);
-                float scale = Engine.UI.ContainerScale;
-                _eyeGumpPic.Width = (int)(_eyeGumpPic.Texture.Width * scale);
-                _eyeGumpPic.Height = (int)(_eyeGumpPic.Texture.Height * scale);
+                if (_closeEmptyCorpse && !_hadItems && item.Items.Count() == 0){
+                    Dispose();
+                    return;
+                }
+
+                if (_corpseEyeTicks < totalMS)
+                {
+                    _eyeCorspeOffset = _eyeCorspeOffset == 0 ? 1 : 0;
+                    _corpseEyeTicks = (long) totalMS + 750;
+                    _eyeGumpPic.Graphic = (Graphic) (0x0045 + _eyeCorspeOffset);
+                    float scale = Engine.UI.ContainerScale;
+                    _eyeGumpPic.Width = (int)(_eyeGumpPic.Texture.Width * scale);
+                    _eyeGumpPic.Height = (int)(_eyeGumpPic.Texture.Height * scale);
+                }
             }
             if(Iconized != null) Iconized.Hue = item.Hue;
         }
