@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
         }
 
-        public ContainerGump(Serial serial, Graphic gumpid, bool closeEmpty = false) : this()
+        public ContainerGump(Serial serial, Graphic gumpid, bool closeEmptyCorpse = false) : this()
         {
             LocalSerial = serial;
             Item item = World.Items.Get(serial);
@@ -67,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Graphic = gumpid;
             
-            _closeEmptyCorpse = closeEmpty;
+            _closeEmptyCorpse = closeEmptyCorpse;
 
             BuildGump();
 
