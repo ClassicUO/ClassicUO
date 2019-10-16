@@ -147,6 +147,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
         [JsonProperty] public bool TopbarGumpIsMinimized { get; set; }
         [JsonProperty] public bool TopbarGumpIsDisabled { get; set; }
+        [JsonProperty] public bool UseAlternativeLights { get; set; }
         [JsonProperty] public bool UseCustomLightLevel { get; set; }
         [JsonProperty] public byte LightLevel { get; set; }
         [JsonProperty] public bool UseColoredLights { get; set; } = true;

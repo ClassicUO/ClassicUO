@@ -57,7 +57,7 @@ namespace ClassicUO.Game.Scenes
         private HealthLinesManager _healthLinesManager;
         private int _lightCount;
         private Rectangle _rectangleObj = Rectangle.Empty, _rectanglePlayer;
-        private RenderTarget2D _renderTarget, _darkness;
+        private RenderTarget2D _renderTarget, _darkness, _altLights;
         private int _scale = 5; // 1.0
 
 
@@ -98,11 +98,13 @@ namespace ClassicUO.Game.Scenes
         public Texture2D ViewportTexture => _renderTarget;
 
         public Texture2D Darkness => _darkness;
+        public Texture2D AltLights => _altLights;
 
         public Weather Weather => _weather;
 
         public bool UseLights => Engine.Profile.Current != null && Engine.Profile.Current.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
-
+        public bool UseAltLights => Engine.Profile.Current != null && Engine.Profile.Current.UseAlternativeLights;
+       
         public void DoubleClickDelayed(Serial serial)
         {
             _useItemQueue.Add(serial);
@@ -275,6 +277,8 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Disconnect();
             _renderTarget?.Dispose();
             _darkness?.Dispose();
+            _altLights?.Dispose();
+            
             CommandManager.UnRegisterAll();
             _weather.Reset();
 
@@ -316,7 +320,7 @@ namespace ClassicUO.Game.Scenes
 
         public void AddLight(GameObject obj, GameObject lightObject, int x, int y)
         {
-            if (_lightCount >= Constants.MAX_LIGHTS_DATA_INDEX_COUNT || !UseLights)
+            if (_lightCount >= Constants.MAX_LIGHTS_DATA_INDEX_COUNT || (!UseLights && !UseAltLights))
                 return;
 
             bool canBeAdded = true;
@@ -707,8 +711,10 @@ namespace ClassicUO.Game.Scenes
             //batcher.SetStencil(null);
             batcher.End();
 
-            DrawLights(batcher);
-
+            if (UseAltLights)
+                DrawAltLights(batcher);
+            else
+                DrawLights(batcher);
 
             // draw weather
             batcher.Begin();
@@ -751,6 +757,40 @@ namespace ClassicUO.Game.Scenes
                 hue.X = l.Color;
                 hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
                 hue.Z = 0;
+
+                batcher.DrawSprite(texture, l.DrawX, l.DrawY, texture.Width, texture.Height, texture.Width >> 1, texture.Height >> 1, ref hue);
+            }
+
+            _lightCount = 0;
+
+            batcher.SetBlendState(null);
+            batcher.End();
+        }
+
+        private void DrawAltLights(UltimaBatcher2D batcher)
+        {
+            if (_deathScreenActive || !UseAltLights)
+                return;
+
+            batcher.GraphicsDevice.SetRenderTarget(_altLights);
+
+            var lightColor = World.Light.IsometricLevel;
+            batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
+
+            batcher.Begin();
+            batcher.SetBlendState(BlendState.Additive);
+
+            Vector3 hue = Vector3.Zero;
+
+            for (int i = 0; i < _lightCount; i++)
+            {
+                ref readonly var l = ref _lights[i];
+
+                UOTexture texture = FileManager.Lights.GetTexture(l.ID);
+
+                hue.X = l.Color;
+                hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
+                hue.Z = 0.25f;
 
                 batcher.DrawSprite(texture, l.DrawX, l.DrawY, texture.Width, texture.Height, texture.Width >> 1, texture.Height >> 1, ref hue);
             }

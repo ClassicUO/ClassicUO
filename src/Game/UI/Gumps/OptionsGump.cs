@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _cellSize;
 
         // video
-        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura;
+        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura;
         private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
         private Combobox _dragSelectModifierKey;
         private HSliderBar _brighlight;
@@ -603,19 +603,37 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(item);
 
             item = new ScrollAreaItem();
+            ScrollAreaItem _normalLightsArea = new ScrollAreaItem();
+            
+            _altLights = CreateCheckBox(rightArea, "Alternative lights", Engine.Profile.Current.UseAlternativeLights, 0, 0);
+            _altLights.ValueChanged += (sender, e) =>
+            {
+                _normalLightsArea.IsVisible = !_altLights.IsChecked;
+            };
+            _normalLightsArea.IsVisible = !_altLights.IsChecked;
+            _altLights.SetTooltip( "Sets light level to max but still renders lights" );
+
             _enableLight = new Checkbox(0x00D2, 0x00D3, "Light level", FONT, HUE_FONT)
             {
                 IsChecked = Engine.Profile.Current.UseCustomLightLevel
             };
+            
             _lightBar = new HSliderBar(_enableLight.Width + 10, _enableLight.Y + 5, 250, 0, 0x1E, 0x1E - Engine.Profile.Current.LightLevel, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
 
-            item.Add(_enableLight);
-            item.Add(_lightBar);
+            _darkNights = new Checkbox(0x00D2, 0x00D3, "Dark nights", FONT, HUE_FONT)
+            {
+                Y = _enableLight.Height,
+                IsChecked = Engine.Profile.Current.UseDarkNights
+            };
+
+            _normalLightsArea.Add(_enableLight);
+            _normalLightsArea.Add(_lightBar);
+            _normalLightsArea.Add(_darkNights);
+            rightArea.Add(_normalLightsArea);
             rightArea.Add(item);
 
             _useColoredLights = CreateCheckBox(rightArea, "Use colored lights", Engine.Profile.Current.UseColoredLights, 0, 0);
-            _darkNights = CreateCheckBox(rightArea, "Dark nights", Engine.Profile.Current.UseDarkNights, 0, 0);
-
+            
             _enableShadows = new Checkbox(0x00D2, 0x00D3, "Shadows", FONT, HUE_FONT)
             {
                 IsChecked = Engine.Profile.Current.ShadowsEnabled
@@ -1708,6 +1726,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.Profile.Current.GameWindowFullSize = _gameWindowFullsize.IsChecked;
             }
 
+            Engine.Profile.Current.UseAlternativeLights = _altLights.IsChecked;
             Engine.Profile.Current.UseCustomLightLevel = _enableLight.IsChecked;
             Engine.Profile.Current.LightLevel = (byte) (_lightBar.MaxValue - _lightBar.Value);
 

@@ -33,11 +33,20 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class WorldViewport : Control
     {
-        private readonly BlendState _blend = new BlendState
+        private readonly BlendState _darknessBlend = new BlendState
         {
             ColorSourceBlend = Blend.Zero,
             ColorDestinationBlend = Blend.SourceColor,
 
+            ColorBlendFunction = BlendFunction.Add
+        };
+
+        private readonly BlendState _altLightsBlend = new BlendState
+        {
+            ColorSourceBlend = Blend.DestinationColor,
+            AlphaSourceBlend = Blend.One,
+            ColorDestinationBlend = Blend.One,
+            AlphaDestinationBlend = Blend.One,
             ColorBlendFunction = BlendFunction.Add
         };
 
@@ -85,12 +94,16 @@ namespace ClassicUO.Game.UI.Controls
 
 
                 // draw lights
-                if (_scene.UseLights)
+                if (_scene.UseAltLights)
                 {
-                    batcher.SetBlendState(_blend);
+                    batcher.SetBlendState(_altLightsBlend);
+                    batcher.Draw2D(_scene.AltLights, x, y, Width, Height, ref _hueVector);
+                } else if (_scene.UseLights)
+                {
+                    batcher.SetBlendState(_darknessBlend);
                     batcher.Draw2D(_scene.Darkness, x, y, Width, Height, ref _hueVector);
-                    batcher.SetBlendState(null);
                 }
+                batcher.SetBlendState(null);
 
                 // draw overheads
                 _scene.DrawSelection(batcher, x, y);
@@ -109,7 +122,8 @@ namespace ClassicUO.Game.UI.Controls
         public override void Dispose()
         {
             _xBR?.Dispose();
-            _blend?.Dispose();
+            _darknessBlend?.Dispose();
+            _altLightsBlend?.Dispose();
             base.Dispose();
         }
 
