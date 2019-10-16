@@ -108,7 +108,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 						{
 							color.rgb *= get_rgb(color.r, IN.Hue.x, swap);
 						}
-						return color;
+						return color * alpha;
 					}
 
 					red = 0.6f;
