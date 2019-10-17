@@ -321,7 +321,7 @@ namespace ClassicUO.Game.UI.Controls
                                          layerIndex != Layer.Hair && 
                                          layerIndex != Layer.Beard;
 
-                        ref var itemGump = ref _pgumps[(int)layerIndex];
+                        var itemGump = _pgumps[(int)layerIndex];
 
                         if (_fakeItem != null && _fakeItem.ItemData.Layer == (int) layerIndex)
                         {
@@ -332,7 +332,7 @@ namespace ClassicUO.Game.UI.Controls
                         else if (item == null || item.IsDestroyed)
                         {
                             itemGump?.Dispose();
-                            itemGump = null;
+                            _pgumps[(int)layerIndex] = null;
                             continue;
                         }
 
@@ -351,7 +351,7 @@ namespace ClassicUO.Game.UI.Controls
                             isNew = true;
                         }
 
-                        if (Mobile.IsCovered(_mobile, (Layer) layerIndex))
+                        if (Mobile.IsCovered(_mobile, layerIndex))
                         {
                             itemGump.IsVisible = false;
                             continue;
@@ -360,7 +360,7 @@ namespace ClassicUO.Game.UI.Controls
                         g = _pgumps[(int) layerIndex];
 
 
-                        switch ((Layer) layerIndex)
+                        switch (layerIndex)
                         {
                             case Layer.Hair:
                             case Layer.Beard:

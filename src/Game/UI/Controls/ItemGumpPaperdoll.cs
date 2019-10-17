@@ -97,6 +97,11 @@ namespace ClassicUO.Game.UI.Controls
             return Texture != null ? Texture.Contains(x, y) : false;
         }
 
+        public override void Dispose()
+        {
+            base.Dispose();
+        }
+
         public void Update(Item item, bool transparent = false)
         {
             Alpha = transparent ? 0.5f : 0;

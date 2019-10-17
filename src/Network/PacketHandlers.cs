@@ -1178,6 +1178,9 @@ namespace ClassicUO.Network
                         World.Items.Add(item);
                         item.ProcessDelta();
                         World.Items.ProcessDelta();
+
+                        if (item.Layer != 0)
+                            Engine.UI.GetGump<PaperDollGump>(item.Container)?.Update();
                     }
                 }
 
