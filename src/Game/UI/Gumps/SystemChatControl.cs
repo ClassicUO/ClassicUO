@@ -455,6 +455,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
+                case SDL.SDL_Keycode.SDLK_ESCAPE when Chat.PromptData.Prompt == ConsolePrompt.None && IsActive:
+                    textBox.SetText(string.Empty);
+                    ToggleChatVisibility();
+                    break;
+
                 case SDL.SDL_Keycode.SDLK_1 when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT): // !
                 case SDL.SDL_Keycode.SDLK_BACKSLASH when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT): // \
 
