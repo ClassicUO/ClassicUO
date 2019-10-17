@@ -789,7 +789,7 @@ namespace ClassicUO.Game.Scenes
 
                 hue.X = l.Color;
                 hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
-                hue.Z = 0.25f;
+                hue.Z = 0;
 
                 batcher.DrawSprite(texture, l.DrawX, l.DrawY, texture.Width, texture.Height, texture.Width >> 1, texture.Height >> 1, ref hue);
             }
