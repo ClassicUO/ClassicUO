@@ -44,9 +44,8 @@ namespace ClassicUO.Game.UI.Controls
         private readonly BlendState _altLightsBlend = new BlendState
         {
             ColorSourceBlend = Blend.DestinationColor,
-            AlphaSourceBlend = Blend.One,
             ColorDestinationBlend = Blend.One,
-            AlphaDestinationBlend = Blend.One,
+
             ColorBlendFunction = BlendFunction.Add
         };
 
@@ -97,7 +96,9 @@ namespace ClassicUO.Game.UI.Controls
                 if (_scene.UseAltLights)
                 {
                     batcher.SetBlendState(_altLightsBlend);
+                    _hueVector.Z = 0.5f;
                     batcher.Draw2D(_scene.LightRenderTarget, x, y, Width, Height, ref _hueVector);
+                    _hueVector.Z = 0;
                     batcher.SetBlendState(null);
                 } 
                 else if (_scene.UseLights)
