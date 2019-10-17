@@ -59,6 +59,7 @@ namespace ClassicUO.Game.Scenes
         private Rectangle _rectangleObj = Rectangle.Empty, _rectanglePlayer;
         private RenderTarget2D _viewportRenderTarget, _lightRenderTarget;
         private int _scale = 5; // 1.0
+        private bool _useObjectHandles;
 
 
         private long _timePing;
@@ -396,7 +397,7 @@ namespace ClassicUO.Game.Scenes
             _renderListCount = 0;
             _objectHandlesCount = 0;
 
-            _useObjectHandles = NameOverHeadManager.IsToggled || _useObjectHandles;
+            _useObjectHandles = NameOverHeadManager.IsToggled || _ctrlAndShiftPressed;
 
             if (_useObjectHandles)
                 NameOverHeadManager.Open();
