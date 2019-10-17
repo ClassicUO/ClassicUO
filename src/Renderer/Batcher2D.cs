@@ -82,8 +82,6 @@ namespace ClassicUO.Renderer
 
             DefaultEffect = new IsometricEffect(device);
 
-            GraphicsDevice.Indices = _indexBuffer;
-            GraphicsDevice.SetVertexBuffer(_vertexBuffer);
 
             _handle = GCHandle.Alloc(_vertexInfo, GCHandleType.Pinned);
         }
@@ -1664,7 +1662,8 @@ namespace ClassicUO.Renderer
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
 
-
+            GraphicsDevice.Indices = _indexBuffer;
+            GraphicsDevice.SetVertexBuffer(_vertexBuffer);
 
             DefaultEffect.ApplyStates();
         }
