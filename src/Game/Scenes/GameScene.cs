@@ -57,7 +57,7 @@ namespace ClassicUO.Game.Scenes
         private HealthLinesManager _healthLinesManager;
         private int _lightCount;
         private Rectangle _rectangleObj = Rectangle.Empty, _rectanglePlayer;
-        private RenderTarget2D _renderTarget, _darkness, _altLights;
+        private RenderTarget2D _viewportRenderTarget, _lightRenderTarget;
         private int _scale = 5; // 1.0
 
 
@@ -95,10 +95,9 @@ namespace ClassicUO.Game.Scenes
 
         public InfoBarManager InfoBars { get; private set; }
 
-        public Texture2D ViewportTexture => _renderTarget;
+        public Texture2D ViewportTexture => _viewportRenderTarget;
 
-        public Texture2D Darkness => _darkness;
-        public Texture2D AltLights => _altLights;
+        public Texture2D LightRenderTarget => _lightRenderTarget;
 
         public Weather Weather => _weather;
 
@@ -275,9 +274,8 @@ namespace ClassicUO.Game.Scenes
 
             NetClient.Socket.Disconnected -= SocketOnDisconnected;
             NetClient.Socket.Disconnect();
-            _renderTarget?.Dispose();
-            _darkness?.Dispose();
-            _altLights?.Dispose();
+            _viewportRenderTarget?.Dispose();
+            _lightRenderTarget?.Dispose();
             
             CommandManager.UnRegisterAll();
             _weather.Reset();
@@ -667,7 +665,7 @@ namespace ClassicUO.Game.Scenes
             SelectedObject.Object = null;
 
             batcher.GraphicsDevice.Clear(Color.Black);
-            batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
+            batcher.GraphicsDevice.SetRenderTarget(_viewportRenderTarget);
 
             //if (CircleOfTransparency.Circle == null)
             //    CircleOfTransparency.Create(200);
@@ -731,7 +729,7 @@ namespace ClassicUO.Game.Scenes
             if (_deathScreenActive || !UseLights)
                 return;
 
-            batcher.GraphicsDevice.SetRenderTarget(_darkness);
+            batcher.GraphicsDevice.SetRenderTarget(_lightRenderTarget);
 
             var lightColor = World.Light.IsometricLevel;
 
@@ -772,7 +770,7 @@ namespace ClassicUO.Game.Scenes
             if (_deathScreenActive || !UseAltLights)
                 return;
 
-            batcher.GraphicsDevice.SetRenderTarget(_altLights);
+            batcher.GraphicsDevice.SetRenderTarget(_lightRenderTarget);
 
             var lightColor = World.Light.IsometricLevel;
             batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);

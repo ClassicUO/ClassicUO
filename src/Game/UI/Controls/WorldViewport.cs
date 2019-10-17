@@ -97,13 +97,15 @@ namespace ClassicUO.Game.UI.Controls
                 if (_scene.UseAltLights)
                 {
                     batcher.SetBlendState(_altLightsBlend);
-                    batcher.Draw2D(_scene.AltLights, x, y, Width, Height, ref _hueVector);
-                } else if (_scene.UseLights)
+                    batcher.Draw2D(_scene.LightRenderTarget, x, y, Width, Height, ref _hueVector);
+                    batcher.SetBlendState(null);
+                } 
+                else if (_scene.UseLights)
                 {
                     batcher.SetBlendState(_darknessBlend);
-                    batcher.Draw2D(_scene.Darkness, x, y, Width, Height, ref _hueVector);
+                    batcher.Draw2D(_scene.LightRenderTarget, x, y, Width, Height, ref _hueVector);
+                    batcher.SetBlendState(null);
                 }
-                batcher.SetBlendState(null);
 
                 // draw overheads
                 _scene.DrawSelection(batcher, x, y);

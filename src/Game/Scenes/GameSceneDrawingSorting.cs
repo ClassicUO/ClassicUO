@@ -691,15 +691,13 @@ namespace ClassicUO.Game.Scenes
             {
                 UpdateDrawPosition = true;
 
-                if (_renderTarget == null || _renderTarget.Width != (int)(winGameWidth * Scale) || _renderTarget.Height != (int)(winGameHeight * Scale))
+                if (_viewportRenderTarget == null || _viewportRenderTarget.Width != (int)(winGameWidth * Scale) || _viewportRenderTarget.Height != (int)(winGameHeight * Scale))
                 {
-                    _renderTarget?.Dispose();
-                    _darkness?.Dispose();
-                    _altLights?.Dispose();
+                    _viewportRenderTarget?.Dispose();
+                    _lightRenderTarget?.Dispose();
 
-                    _renderTarget = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int)(winGameWidth * Scale), (int)(winGameHeight * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
-                    _darkness = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int)(winGameWidth * Scale), (int)(winGameHeight * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
-                    _altLights = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int)(winGameWidth * Scale), (int)(winGameHeight * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
+                    _viewportRenderTarget = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int)(winGameWidth * Scale), (int)(winGameHeight * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
+                    _lightRenderTarget = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int)(winGameWidth * Scale), (int)(winGameHeight * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
                 }
             }
 
