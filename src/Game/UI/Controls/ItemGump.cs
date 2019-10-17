@@ -195,9 +195,11 @@ namespace ClassicUO.Game.UI.Controls
                 if (IsDisposed)
                     return;
 
+                _clickedCanDrag = false;
+
                 if (TargetManager.IsTargeting)
                 {
-                    if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
+                    if (Mouse.IsDragging && CanPickup())
                     {
                         if (!gs.IsHoldingItem || !gs.IsMouseOverUI) return;
 
@@ -288,7 +290,6 @@ namespace ClassicUO.Game.UI.Controls
                     
                 }
 
-                _clickedCanDrag = false;
 
             }
         }
@@ -297,16 +298,22 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (_clickedCanDrag)
             {
-                Point offset = Mouse.LDroppedOffset;
-                var split = Engine.UI.GetGump<SplitMenuGump>(LocalSerial);
-
-                if (split != null || Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+                if (CanPickup())
                 {
-                    split?.Dispose();
                     _clickedCanDrag = false;
                     AttempPickUp();
                 }
             }
+        }
+
+        private bool CanPickup()
+        {
+            Point offset = Mouse.LDroppedOffset;
+            var split = Engine.UI.GetGump<SplitMenuGump>(LocalSerial);
+
+            split?.Dispose();
+
+            return (split != null || (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS));
         }
 
 
