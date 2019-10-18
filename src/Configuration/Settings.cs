@@ -101,6 +101,20 @@ namespace ClassicUO.Configuration
 
 
         public const string SETTINGS_FILENAME = "settings.json";
+        public static string CustomSettingsFilepath = null;
+
+        public static string GetSettingsFilepath()
+        {
+            if (CustomSettingsFilepath != null)
+            {
+                if (Path.IsPathRooted(CustomSettingsFilepath))
+                    return CustomSettingsFilepath;
+                else
+                    return Path.Combine(Engine.ExePath, CustomSettingsFilepath);
+            }
+
+            return Path.Combine(Engine.ExePath, SETTINGS_FILENAME);
+        }
 
         public void Save()
         {
@@ -117,7 +131,7 @@ namespace ClassicUO.Configuration
 
             // NOTE: We can do any other settings clean-ups here before we save them
 
-            ConfigurationResolver.Save(settingsToSave, Path.Combine(Engine.ExePath, SETTINGS_FILENAME));
+            ConfigurationResolver.Save(settingsToSave, GetSettingsFilepath());
         }
 
         public bool IsValid()

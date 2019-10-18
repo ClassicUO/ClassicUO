@@ -203,6 +203,8 @@ namespace ClassicUO.Game.GameObjects
             RealScreenPosition.X = _screenPosition.X - offsetX - 22;
             RealScreenPosition.Y = _screenPosition.Y - offsetY - 22;
             IsPositionChanged = false;
+
+            UpdateTextCoordsV();
         }
 
         public int DistanceTo(GameObject entity)
@@ -215,121 +217,15 @@ namespace ClassicUO.Game.GameObjects
             AddMessage(type, message, Engine.Profile.Current.ChatFont, Engine.Profile.Current.SpeechHue, true);
         }
 
-        public void UpdateTextCoords()
+        public virtual void UpdateTextCoordsV()
         {
-            if (TextContainer == null)
-                return;
 
-            var last = TextContainer.Items;
-
-            while (last?.ListRight != null)
-                last = last.ListRight;
-
-            if (last == null)
-                return;
-
-            int offY = 0;
-
-            bool health = Engine.Profile.Current.ShowMobilesHP;
-            int alwaysHP = Engine.Profile.Current.MobileHPShowWhen;
-            int mode = Engine.Profile.Current.MobileHPType;
-
-            int startX = Engine.Profile.Current.GameWindowPosition.X + 6;
-            int startY = Engine.Profile.Current.GameWindowPosition.Y + 6;
-            var scene = Engine.SceneManager.GetScene<GameScene>();
-            float scale = scene?.Scale ?? 1;
-
-            for (; last != null; last = last.ListLeft)
-            {
-                if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
-                {
-                    if (offY == 0 && last.Time < Engine.Ticks)
-                        continue;
-
-                    int x = RealScreenPosition.X;
-                    int y = RealScreenPosition.Y;
-
-                    if (this is Mobile m)
-                    {
-                        if (health && mode != 1 && ((alwaysHP >= 1 && m.Hits != m.HitsMax) || alwaysHP == 0))
-                        {
-                            y -= 22;
-                        }
-
-                        if (!m.IsMounted)
-                            y += 22;
-
-                        FileManager.Animations.GetAnimationDimensions(m.AnimIndex,
-                                                                      m.GetGraphicForAnimation(),
-                                                                      /*(byte) m.GetDirectionForAnimation()*/ 0,
-                                                                      /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
-                                                                      m.IsMounted,
-                                                                      /*(byte) m.AnimIndex*/ 0,
-                                                                      out _,
-                                                                      out int centerY,
-                                                                      out _,
-                                                                      out int height);
-                        x += (int)m.Offset.X;
-                        x += 22;
-                        y += (int)(m.Offset.Y - m.Offset.Z - (height + centerY + 8));
-                    }
-                    else if (this is Item it && it.Container.IsValid)
-                    {
-                        x = last.X - startX;
-                        y = last.Y - startY;
-                        scale = 1;
-                    }
-                    else if (Texture != null)
-                    {
-                        switch (this)
-                        {
-                            case Item _:
-
-                                if (Texture is ArtTexture t)
-                                    y -= t.ImageRectangle.Height >> 1;
-                                else
-                                    y -= Texture.Height >> 1;
-
-                                break;
-
-                            case Static _:
-                            case Multi _:
-                                y += 44;
-
-                                if (Texture is ArtTexture t1)
-                                    y -= t1.ImageRectangle.Height >> 1;
-                                else
-                                    y -= Texture.Height >> 1;
-
-                                break;
-
-                            default:
-                                y -= Texture.Height >> 1;
-                                break;
-                        }
-
-                        x += 22;
-                    }
-
-
-                   
-
-                    last.OffsetY = offY;
-                    offY += last.RenderedText.Height;
-
-                    last.RealScreenPosition.X = startX + (int) ((x - (last.RenderedText.Width >> 1)) / scale);
-                    last.RealScreenPosition.Y = startY + (int) ((y - offY) / scale);
-                }
-            }
-
-            FixTextCoordinatesInScreen();
         }
 
-        private void FixTextCoordinatesInScreen()
+        protected void FixTextCoordinatesInScreen()
         {
             if (this is Item it && it.Container.IsValid)
                 return;
-
 
             int offsetY = 0;
 
@@ -366,7 +262,6 @@ namespace ClassicUO.Game.GameObjects
                 if (offsetY != 0)
                     item.RealScreenPosition.Y += offsetY;
             }
-
         }
 
         public void AddMessage(MessageType type, string text, byte font, Hue hue, bool isunicode)
@@ -388,7 +283,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (this is Item it && it.Container.IsValid)
             {
-                UpdateTextCoords();
+                UpdateTextCoordsV();
             }
             else
             {

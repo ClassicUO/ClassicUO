@@ -51,7 +51,7 @@ namespace ClassicUO.Game.Managers
             if (!IsEnabled)
                 return;
 
-            const int BAR_WIDTH = 27;
+            const int BAR_WIDTH = 28;
             const int BAR_HEIGHT = 3;
             const int BAR_WIDTH_HALF = BAR_WIDTH >> 1;
             const int BAR_HEIGHT_HALF = BAR_HEIGHT >> 1;
@@ -86,12 +86,8 @@ namespace ClassicUO.Game.Managers
                 int x = screenX + mobile.RealScreenPosition.X;
                 int y = screenY + mobile.RealScreenPosition.Y;
 
-                x += (int) mobile.Offset.X + 22;
-                y += (int) (mobile.Offset.Y - mobile.Offset.Z) + 22 + 5;
-
-                x += 5;
-
-               
+                x += (int) mobile.Offset.X + 22 ;
+                y += (int) (mobile.Offset.Y - mobile.Offset.Z) + 22;
 
                 x = (int) (x / scale);
                 y = (int) (y / scale);
@@ -99,6 +95,9 @@ namespace ClassicUO.Game.Managers
                 y -= (int) (screenY / scale);
                 x += screenX;
                 y += screenY;
+
+                x += 5;
+                y += 5;
 
                 x -= BAR_WIDTH_HALF;
                 y -= BAR_HEIGHT_HALF;
@@ -162,7 +161,7 @@ namespace ClassicUO.Game.Managers
                 if (y < screenY || y > screenY + screenH - BAR_HEIGHT)
                     continue;
 
-                if (mode >= 1)
+                if (mode >= 1 && TargetManager.LastTarget != mobile)
                 {
                     if (max > 0)
                     {

@@ -33,10 +33,18 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class WorldViewport : Control
     {
-        private readonly BlendState _blend = new BlendState
+        private readonly BlendState _darknessBlend = new BlendState
         {
             ColorSourceBlend = Blend.Zero,
             ColorDestinationBlend = Blend.SourceColor,
+
+            ColorBlendFunction = BlendFunction.Add
+        };
+
+        private readonly BlendState _altLightsBlend = new BlendState
+        {
+            ColorSourceBlend = Blend.DestinationColor,
+            ColorDestinationBlend = Blend.One,
 
             ColorBlendFunction = BlendFunction.Add
         };
@@ -59,45 +67,66 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            ResetHueVector();
+            Rectangle rectangle = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
 
-            if (Engine.Profile.Current != null && Engine.Profile.Current.UseXBR)
+            if (ScissorStack.PushScissors(rectangle))
             {
-                // draw regular world
-                _xBR.SetSize(_scene.ViewportTexture.Width, _scene.ViewportTexture.Height);
+                batcher.EnableScissorTest(true);
 
-                batcher.End();
+                ResetHueVector();
 
-                batcher.Begin(_xBR);
-                batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _hueVector);
-                batcher.End();
+                if (Engine.Profile.Current != null && Engine.Profile.Current.UseXBR)
+                {
+                    // draw regular world
+                    _xBR.SetSize(_scene.ViewportTexture.Width, _scene.ViewportTexture.Height);
 
-                batcher.Begin();
+                    batcher.End();
+
+                    batcher.Begin(_xBR);
+                    batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _hueVector);
+                    batcher.End();
+
+                    batcher.Begin();
+                }
+                else
+                    batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _hueVector);
+
+
+                // draw lights
+                if (_scene.UseAltLights)
+                {
+                    batcher.SetBlendState(_altLightsBlend);
+                    _hueVector.Z = 0.5f;
+                    batcher.Draw2D(_scene.LightRenderTarget, x, y, Width, Height, ref _hueVector);
+                    _hueVector.Z = 0;
+                    batcher.SetBlendState(null);
+                } 
+                else if (_scene.UseLights)
+                {
+                    batcher.SetBlendState(_darknessBlend);
+                    batcher.Draw2D(_scene.LightRenderTarget, x, y, Width, Height, ref _hueVector);
+                    batcher.SetBlendState(null);
+                }
+
+                // draw overheads
+                _scene.DrawSelection(batcher, x, y);
+                _scene.DrawOverheads(batcher, x, y);
+
+                base.Draw(batcher, x, y);
+
+                batcher.EnableScissorTest(false);
+                ScissorStack.PopScissors();
             }
-            else
-                batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _hueVector);
 
-
-            // draw lights
-            if (_scene.UseLights)
-            {
-                batcher.SetBlendState(_blend);
-                batcher.Draw2D(_scene.Darkness, x, y, Width, Height, ref _hueVector);
-                batcher.SetBlendState(null);
-            }
-
-            // draw overheads
-            _scene.DrawSelection(batcher, x, y);
-            _scene.DrawOverheads(batcher, x, y);
-
-            return base.Draw(batcher, x, y);
+            return true;
         }
 
 
         public override void Dispose()
         {
             _xBR?.Dispose();
-            _blend?.Dispose();
+            _darknessBlend?.Dispose();
+            _altLightsBlend?.Dispose();
             base.Dispose();
         }
 

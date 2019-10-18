@@ -134,6 +134,7 @@
     <Compile Include="Game\Data\SpellsNinjitsu.cs" />
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
     <Compile Include="Game\Data\StaticFilters.cs" />
+    <Compile Include="Game\GameObjects\DragEffect.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
     <Compile Include="Game\GameObjects\EntityTextContainer.cs" />
     <Compile Include="Game\ItemHold.cs" />
@@ -170,6 +171,7 @@
     <Compile Include="Game\UI\Controls\TextureControl.cs" />
     <Compile Include="Game\UI\Gumps\GridLootGump.cs" />
     <Compile Include="Game\UI\Gumps\InfoBarGump.cs" />
+    <Compile Include="Game\UI\Gumps\MacroButtonGump.cs" />
     <Compile Include="Game\UI\Gumps\NameOverHeadHandlerGump.cs" />
     <Compile Include="Game\UI\Gumps\PartyInviteGump.cs" />
     <Compile Include="Game\UI\Gumps\ResizableGump.cs" />
@@ -177,6 +179,7 @@
     <Compile Include="Game\UI\Gumps\TextContainerGump.cs" />
     <Compile Include="Game\UI\Gumps\TipNoticeGump.cs" />
     <Compile Include="IO\Resources\LanguageLoader.cs" />
+    <Compile Include="Game\Weather.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Renderer\MatrixEffect.cs" />
     <Compile Include="Utility\Collections\RawList.cs" />

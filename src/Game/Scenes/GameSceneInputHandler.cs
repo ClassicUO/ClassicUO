@@ -82,7 +82,7 @@ namespace ClassicUO.Game.Scenes
         private bool _wasShiftDown;
 
         private bool _requestedWarMode;
-        private bool _rightMousePressed, _continueRunning, _useObjectHandles, _arrowKeyPressed, _numPadKeyPressed;
+        private bool _rightMousePressed, _continueRunning, _ctrlAndShiftPressed, _arrowKeyPressed, _numPadKeyPressed;
         private (int, int) _selectionStart, _selectionEnd;
         private uint _holdMouse2secOverItemTime;
         private bool _isMouseLeftDown;
@@ -584,6 +584,9 @@ namespace ClassicUO.Game.Scenes
 
             if (Engine.Profile.Current.EnablePathfind && !Pathfinder.AutoWalking)
             {
+                if (Engine.Profile.Current.UseShiftToPathfind && !_isShiftDown)
+                    return false;
+
                 if (SelectedObject.Object is Land || GameObjectHelper.TryGetStaticData(SelectedObject.Object as GameObject, out var itemdata) && itemdata.IsSurface)
                 {
                     if (SelectedObject.Object is GameObject obj && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
@@ -731,9 +734,9 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            _useObjectHandles = isshift && isctrl;
+            _ctrlAndShiftPressed = isshift && isctrl;
 
-            if (macro != null)
+            if (macro != null && e.keysym.sym != SDL.SDL_Keycode.SDLK_UNKNOWN)
             {
                 Macros.SetMacroToExecute(macro.FirstNode);
                 Macros.WaitForTargetTimer = 0;
@@ -821,7 +824,7 @@ namespace ClassicUO.Game.Scenes
 
             if ((e.keysym.mod & SDL.SDL_Keymod.KMOD_NUM) != SDL.SDL_Keymod.KMOD_NUM) _numPadKeyPressed = false;
 
-            _useObjectHandles = isctrl && isshift;
+            _ctrlAndShiftPressed = isctrl && isshift;
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !Engine.Profile.Current.DisableTabBtn)
             {

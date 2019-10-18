@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _cellSize;
 
         // video
-        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura;
+        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura;
         private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
         private Combobox _dragSelectModifierKey;
         private HSliderBar _brighlight;
@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
         // GameWindowSize
         private TextBox _gameWindowWidth;
         private Combobox _gridLoot;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _alwaysRun, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _useShiftPathfind, _alwaysRun, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
         private Combobox _hpComboBox, _healtbarType, _fieldsType, _hpComboBoxShowWhen;
 
         // combat & spells
@@ -256,12 +256,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             _highlightObjects = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_HighlightGameObjects"], Engine.Profile.Current.HighlightGameObjects, 0, 20);
             _enablePathfind = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_EnablePathfind"], Engine.Profile.Current.EnablePathfind, 0, 0);
+            _useShiftPathfind = CreateCheckBox(rightArea, "Use SHIFT for pathfinding", Engine.Profile.Current.UseShiftToPathfind, 0, 0);
             _alwaysRun = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_AlwaysRun"], Engine.Profile.Current.AlwaysRun, 0, 0);
             _enableTopbar = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_TopbarGumpIsDisabled"], Engine.Profile.Current.TopbarGumpIsDisabled, 0, 0);
             _holdDownKeyTab = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_HoldDownKeyTab"], Engine.Profile.Current.HoldDownKeyTab, 0, 0);
             _holdDownKeyAlt = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_HoldDownKeyAltToCloseAnchored"], Engine.Profile.Current.HoldDownKeyAltToCloseAnchored, 0, 0);
-            _holdShiftForContext = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_HoldShiftForContext"], Engine.Profile.Current.HoldShiftForContext, 0, 0);
-            _holdShiftToSplitStack = CreateCheckBox(rightArea, "Hold Shift to split stack of items", Engine.Profile.Current.HoldShiftToSplitStack, 0, 0);
+            _holdShiftForContext = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_HoldShiftForContext"], Engine.Profile.Current.HoldShiftForContext, 0, 0);            _holdShiftToSplitStack = CreateCheckBox(rightArea, "Hold Shift to split stack of items", Engine.Profile.Current.HoldShiftToSplitStack, 0, 0);
             _highlightByState = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_General_HighlightMobilesByFlags"], Engine.Profile.Current.HighlightMobilesByFlags, 0, 0);
             _poisonColorPickerBox = CreateClickableColorBox(rightArea, 20, 5, Engine.Profile.Current.PoisonHue, FileManager.Language.Dict["UI_Options_General_PoisonHue"], 40, 5);
             _paralyzedColorPickerBox = CreateClickableColorBox(rightArea, 20, 0, Engine.Profile.Current.ParalyzedHue, FileManager.Language.Dict["UI_Options_General_ParalyzedHue"], 40, 0);
@@ -602,19 +602,36 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(item);
 
             item = new ScrollAreaItem();
-            _enableLight = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Video_LightLevel"], FONT, HUE_FONT)
+            ScrollAreaItem _normalLightsArea = new ScrollAreaItem();
+            
+            _altLights = CreateCheckBox(rightArea, "Alternative lights", Engine.Profile.Current.UseAlternativeLights, 0, 0);
+            _altLights.ValueChanged += (sender, e) =>
             {
+                _normalLightsArea.IsVisible = !_altLights.IsChecked;
+            };
+            _normalLightsArea.IsVisible = !_altLights.IsChecked;
+            _altLights.SetTooltip( "Sets light level to max but still renders lights" );
+
+            _enableLight = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Video_LightLevel"], FONT, HUE_FONT)            {
                 IsChecked = Engine.Profile.Current.UseCustomLightLevel
             };
+            
             _lightBar = new HSliderBar(_enableLight.Width + 10, _enableLight.Y + 5, 250, 0, 0x1E, 0x1E - Engine.Profile.Current.LightLevel, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
 
-            item.Add(_enableLight);
-            item.Add(_lightBar);
+            _darkNights = new Checkbox(0x00D2, 0x00D3, "Dark nights", FONT, HUE_FONT)
+            {
+                Y = _enableLight.Height,
+                IsChecked = Engine.Profile.Current.UseDarkNights
+            };
+
+            _normalLightsArea.Add(_enableLight);
+            _normalLightsArea.Add(_lightBar);
+            _normalLightsArea.Add(_darkNights);
+            rightArea.Add(_normalLightsArea);
             rightArea.Add(item);
 
             _useColoredLights = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Video_UseColoredLights"], Engine.Profile.Current.UseColoredLights, 0, 0);
-            _darkNights = CreateCheckBox(rightArea, FileManager.Language.Dict["UI_Options_Video_UseDarkNights"], Engine.Profile.Current.UseDarkNights, 0, 0);
-
+            
             _enableShadows = new Checkbox(0x00D2, 0x00D3, FileManager.Language.Dict["UI_Options_Video_ShadowsEnabled"], FONT, HUE_FONT)
             {
                 IsChecked = Engine.Profile.Current.ShadowsEnabled
@@ -685,6 +702,25 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Add(_macroControl, PAGE);
 
+                    nb.DragBegin += (sss, eee) =>
+                    {
+                        if (Engine.UI.IsDragging
+                            || nb.ScreenCoordinateX > Mouse.LDropPosition.X || nb.ScreenCoordinateX < Mouse.LDropPosition.X - nb.Width
+                            || nb.ScreenCoordinateY > Mouse.LDropPosition.Y || nb.ScreenCoordinateY + nb.Height < Mouse.LDropPosition.Y)
+                            return;
+
+                        MacroCollectionControl control = _macroControl.FindControls<MacroCollectionControl>().SingleOrDefault();
+
+                        if (control == null)
+                            return;
+
+                        Engine.UI.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == control.Macro)?.Dispose();
+
+                        MacroButtonGump macroButtonGump = new MacroButtonGump(control.Macro, Mouse.Position.X, Mouse.Position.Y);
+                        Engine.UI.Add(macroButtonGump);
+                        Engine.UI.AttemptDragControl(macroButtonGump, new Point(Mouse.Position.X + (macroButtonGump.Width >> 1), Mouse.Position.Y + (macroButtonGump.Height >> 1)), true);
+                    };
+
                     nb.MouseUp += (sss, eee) =>
                     {
                         _macroControl?.Dispose();
@@ -729,6 +765,7 @@ namespace ClassicUO.Game.UI.Gumps
                             if (control == null)
                                 return;
 
+                            Engine.UI.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == control.Macro)?.Dispose();
                             Engine.SceneManager.GetScene<GameScene>().Macros.RemoveMacro(control.Macro);
                         }
 
@@ -753,6 +790,20 @@ namespace ClassicUO.Game.UI.Gumps
                 });
 
                 nb.IsSelected = true;
+
+                nb.DragBegin += (sss, eee) =>
+                {
+                    if (Engine.UI.IsDragging
+                        || nb.ScreenCoordinateX > Mouse.LDropPosition.X || nb.ScreenCoordinateX < Mouse.LDropPosition.X - nb.Width
+                        || nb.ScreenCoordinateY > Mouse.LDropPosition.Y || nb.ScreenCoordinateY + nb.Height < Mouse.LDropPosition.Y)
+                            return;
+
+                    Engine.UI.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == macro)?.Dispose();
+
+                    MacroButtonGump macroButtonGump = new MacroButtonGump(macro, Mouse.Position.X, Mouse.Position.Y);
+                    Engine.UI.Add(macroButtonGump);
+                    Engine.UI.AttemptDragControl(macroButtonGump, new Point(Mouse.Position.X + (macroButtonGump.Width >> 1), Mouse.Position.Y + (macroButtonGump.Height >> 1)), true);
+                };
 
                 nb.MouseUp += (sss, eee) =>
                 {
@@ -1342,6 +1393,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _holdShiftForContext.IsChecked = false;
                     _holdShiftToSplitStack.IsChecked = false;
                     _enablePathfind.IsChecked = false;
+                    _useShiftPathfind.IsChecked = false;
                     _alwaysRun.IsChecked = false;
                     _showHpMobile.IsChecked = false;
                     _hpComboBox.SelectedIndex = 0;
@@ -1523,6 +1575,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.ReduceFPSWhenInactive = _reduceFPSWhenInactive.IsChecked;
             //Engine.Profile.Current.SmoothMovements = _smoothMovements.IsChecked;
             Engine.Profile.Current.EnablePathfind = _enablePathfind.IsChecked;
+            Engine.Profile.Current.UseShiftToPathfind = _useShiftPathfind.IsChecked;
             Engine.Profile.Current.AlwaysRun = _alwaysRun.IsChecked;
             Engine.Profile.Current.ShowMobilesHP = _showHpMobile.IsChecked;
             Engine.Profile.Current.HighlightMobilesByFlags = _highlightByState.IsChecked;
@@ -1737,6 +1790,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.Profile.Current.GameWindowFullSize = _gameWindowFullsize.IsChecked;
             }
 
+            Engine.Profile.Current.UseAlternativeLights = _altLights.IsChecked;
             Engine.Profile.Current.UseCustomLightLevel = _enableLight.IsChecked;
             Engine.Profile.Current.LightLevel = (byte) (_lightBar.MaxValue - _lightBar.Value);
 

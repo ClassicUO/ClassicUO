@@ -574,8 +574,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                 public override bool Draw(UltimaBatcher2D batcher, int x, int y)
                 {
+                    Item item = World.Items.Get(LocalSerial);
+
+                    if (item == null)
+                    {
+                        Dispose();
+                    }
+
+                    if (IsDisposed)
+                        return false;
+
                     ResetHueVector();
-                    ShaderHuesTraslator.GetHueVector(ref _hueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, true);
+                    ShaderHuesTraslator.GetHueVector(ref _hueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : item.Hue, item.ItemData.IsPartialHue, 0, true);
 
                     return batcher.Draw2D(Texture, x + _point.X, y + _point.Y,
                                           _originalSize.X, _originalSize.Y,

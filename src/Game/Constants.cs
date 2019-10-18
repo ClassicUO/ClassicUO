@@ -124,5 +124,7 @@ namespace ClassicUO.Game
 
         public const byte MIN_CONTAINER_SIZE_PERC = 50;
         public const byte MAX_CONTAINER_SIZE_PERC = 200;
+
+        public const int WEATHER_TIMER = 6 * 60 * 1000;
     }
 }
