@@ -1726,19 +1726,17 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public void SetBlendState(BlendState blend, bool noflush = false)
+        public void SetBlendState(BlendState blend)
         {
-            if (!noflush)
-                Flush();
+            Flush();
 
             _blendState = blend ?? BlendState.AlphaBlend;
         }
 
         [MethodImpl(256)]
-        public void SetStencil(DepthStencilState stencil, bool noflush = false)
+        public void SetStencil(DepthStencilState stencil)
         {
-            if (!noflush)
-                Flush();
+            Flush();
 
             _stencil = stencil ?? Stencil;
         }
