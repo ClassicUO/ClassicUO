@@ -195,13 +195,14 @@ namespace ClassicUO.Game.UI.Controls
                 if (IsDisposed)
                     return;
 
-                _clickedCanDrag = false;
-
                 if (TargetManager.IsTargeting)
                 {
+                    _clickedCanDrag = false;
+
                     if (Mouse.IsDragging && CanPickup())
                     {
-                        if (!gs.IsHoldingItem || !gs.IsMouseOverUI) return;
+                        if (!gs.IsHoldingItem || !gs.IsMouseOverUI) 
+                            return;
 
                         SelectedObject.Object = item;
 
@@ -290,7 +291,7 @@ namespace ClassicUO.Game.UI.Controls
                     
                 }
 
-
+                _clickedCanDrag = false;
             }
         }
 
