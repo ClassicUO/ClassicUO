@@ -320,12 +320,11 @@ namespace ClassicUO.Game.UI.Controls
             if (
                 Engine.Profile.Current.DoubleClickToLootInsideContainers &&
                 (item = World.Items.Get(LocalSerial)) != null &&
+                item.ItemData.IsContainer == false &&
                 (container = World.Items.Get(item.RootContainer)) != null &&
                 container.IsCorpse
             ){
                 GameActions.GrabItem(item, item.Amount);
-                if (container.Items.Count == 1)
-                    Engine.UI.GetGump(container).Dispose();
             } else
                 GameActions.DoubleClick(LocalSerial);
  
