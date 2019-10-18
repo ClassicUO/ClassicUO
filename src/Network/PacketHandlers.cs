@@ -701,7 +701,7 @@ namespace ClassicUO.Network
 
                 if (it.Container.IsValid)
                 {
-                    Entity top = it.Items.FirstOrDefault();
+                    Entity top = World.Get(it.RootContainer);
 
                     if (top != null)
                     {

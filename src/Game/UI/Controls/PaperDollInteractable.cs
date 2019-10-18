@@ -102,9 +102,8 @@ namespace ClassicUO.Game.UI.Controls
                     if (Mobile.HasEquipment && item.Layer >= 0 && (int)item.Layer < Mobile.Equipment.Length)
                         Mobile.Equipment[(int)item.Layer] = null;
 
-                    ref var gump = ref _pgumps[(int)item.Layer];
-                    gump?.Dispose();
-                    gump = null;
+                    _pgumps[(int )item.Layer]?.Dispose();
+                    _pgumps[(int) item.Layer] = null;
                 }
             }
 
@@ -129,9 +128,8 @@ namespace ClassicUO.Game.UI.Controls
                                 World.Player.UpdateAbilities();
                             }
 
-                            ref var gump = ref _pgumps[(int) i.Layer];
-                            gump?.Dispose();
-                            gump = null;
+                            _pgumps[(int) i.Layer]?.Dispose();
+                            _pgumps[(int) i.Layer] = null;
 
                         }
 
@@ -348,6 +346,7 @@ namespace ClassicUO.Game.UI.Controls
                                 CanPickUp = canPickUp
                             });
                             itemGump.Initialize();
+                            _pgumps[(int) layerIndex] = itemGump;
                             isNew = true;
                         }
 
