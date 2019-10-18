@@ -80,7 +80,7 @@ namespace ClassicUO.Game.Managers
                 int current = mobile.Hits;
                 int max = mobile.HitsMax;
 
-                if (showWhen == 1 && current == max || TargetManager.LastTarget == mobile)
+                if (showWhen == 1 && current == max)
                     continue;
 
                 int x = screenX + mobile.RealScreenPosition.X;
@@ -161,7 +161,7 @@ namespace ClassicUO.Game.Managers
                 if (y < screenY || y > screenY + screenH - BAR_HEIGHT)
                     continue;
 
-                if (mode >= 1)
+                if (mode >= 1 && TargetManager.LastTarget != mobile)
                 {
                     if (max > 0)
                     {
