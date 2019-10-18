@@ -328,7 +328,7 @@ namespace ClassicUO.Game.UI.Controls
             if (
                 Engine.Profile.Current.DoubleClickToLootInsideContainers &&
                 (item = World.Items.Get(LocalSerial)) != null &&
-                item.ItemData.IsContainer == false &&
+                !item.ItemData.IsContainer && item.Items.Count == 0 &&
                 (container = World.Items.Get(item.RootContainer)) != null &&
                 container.IsCorpse
             ){
