@@ -589,6 +589,12 @@ namespace ClassicUO.Network
             }
 
             item.LightID = direction;
+            if (item.Container.IsValid)
+            {
+                var cont = World.Get(item.Container);
+                cont.Items.Remove(item.Serial);
+                cont.ProcessDelta();
+            }
             item.Container = Serial.INVALID;
             item.CheckGraphicChange();
             item.ProcessDelta();
