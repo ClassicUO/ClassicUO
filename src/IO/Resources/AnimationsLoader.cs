@@ -514,6 +514,7 @@ namespace ClassicUO.IO.Resources
 
                                 if (addressOffset < currentIdxFile.Length)
                                 {
+                                    DataIndex[index].Type = CalculateTypeByGraphic(realAnimID);
                                     DataIndex[index].MountedHeightOffset = mountedHeightOffset;
                                     DataIndex[index].GraphicConversion = (ushort)(realAnimID | 0x8000);
                                     DataIndex[index].FileIndex = (byte)animFile;
@@ -836,7 +837,7 @@ namespace ClassicUO.IO.Resources
             return (uint)(((graphic - 200) * 65 + 22000) * UnsafeMemoryManager.SizeOf<AnimIdxBlock>());
         }
 
-        private ANIMATION_GROUPS_TYPE CalculateTypeByGraphic(ushort graphic)
+        internal static ANIMATION_GROUPS_TYPE CalculateTypeByGraphic(ushort graphic)
         {
             return graphic < 200 ? ANIMATION_GROUPS_TYPE.MONSTER : graphic < 400 ? ANIMATION_GROUPS_TYPE.ANIMAL : ANIMATION_GROUPS_TYPE.HUMAN;
         }
@@ -1921,7 +1922,7 @@ namespace ClassicUO.IO.Resources
 
             ANIMATION_GROUPS group = ANIMATION_GROUPS.AG_NONE;
 
-            switch (Type)
+            switch (AnimationsLoader.CalculateTypeByGraphic(graphic))
             {
                 case ANIMATION_GROUPS_TYPE.MONSTER:
 
