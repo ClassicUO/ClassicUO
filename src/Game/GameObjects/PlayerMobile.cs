@@ -42,12 +42,13 @@ namespace ClassicUO.Game.GameObjects
     internal class PlayerMobile : Mobile
     {
         private readonly Dictionary<Graphic, BuffIcon> _buffIcons = new Dictionary<Graphic, BuffIcon>();
+        public BandageGump BandageTimer;
 
         public PlayerMobile(Serial serial) : base(serial)
         {
             Skills = new Skill[FileManager.Skills.SkillsCount];
 
-            Engine.UI.Add(new BandageGump(this));
+            Engine.UI.Add(BandageTimer = new BandageGump());
 
             for (int i = 0; i < Skills.Length; i++)
             {

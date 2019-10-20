@@ -251,6 +251,8 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
 
+            World.Player?.BandageTimer.OnMessage(text, hue, name, e.IsUnicode);
+            
             World.Journal.Add(text, hue, name, e.IsUnicode);
         }
 
