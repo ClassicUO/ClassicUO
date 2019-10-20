@@ -1,29 +1,124 @@
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
 using ClassicUO.IO;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     class BandageGump : Gump
     {
         const byte _iconSize = 16, _spaceSize = 2, _borderSize = 2;
+        private bool _useTime;
+        private static uint _startTime;
         private AlphaBlendControl _background;
         private Label _text;
         private TextureControl _icon;
-        private PlayerMobile Mobile;
+        private static int[] _startAtClilocs = new int[]
+        {
+            500956,
+            500957,
+            500958,
+            500959,
+            500960
+        };
+        private static int[] _stopAtClilocs = new int[]
+        {
+            500955,
+            500962,
+            500963,
+            500964,
+            500965,
+            500966,
+            500967,
+            500968,
+            500969,
+            503252,
+            503253,
+            503254,
+            503255,
+            503256,
+            503257,
+            503258,
+            503259,
+            503260,
+            503261,
+            1010058,
+            1010648,
+            1010650,
+            1060088,
+            1060167
+        };
 
-        public BandageGump(PlayerMobile mobile) : base(mobile.Serial, 0)
+        public BandageGump() : base(0, 0)
         {
             CanMove = false;
             AcceptMouseInput = false;
             CanCloseWithEsc = false;
             CanCloseWithRightClick = false;
-
-            Mobile = mobile;
             
             BuildGump();
+        }
+
+        public void Start()
+        {
+            _useTime = true;
+            _startTime = Engine.Ticks;
+        }
+
+        public void Stop()
+        {
+            _useTime = false;
+        }
+        
+        public void OnMessage(string text, Hue hue, string name, bool isunicode = true)
+        {
+            // attempt to pick up on things that OnCliloc missed
+            if (name != "System" && text.Length <= 0)
+                return;
+
+            // stop the timer
+            for (int i=0;i<_stopAtClilocs.Length;i++)
+            {
+                if (FileManager.Cliloc.GetString(_stopAtClilocs[i]) == text )
+                {
+                    Stop();
+                    return;
+                }
+            }
+
+            // start the timer
+            for (int i=0;i<_stopAtClilocs.Length;i++)
+            {
+                if (FileManager.Cliloc.GetString(_stopAtClilocs[i]) == text )
+                {
+                    Stop();
+                    return;
+                }
+            }
+        }
+
+        public void OnCliloc(uint cliloc)
+        {
+            // stop the timer
+            for (int i=0;i<_stopAtClilocs.Length;i++)
+            {
+                if (_stopAtClilocs[i] == cliloc)
+                {
+                    Stop();
+                    return;
+                }
+            }
+
+            // start the timer
+            for (int i=0;i<_startAtClilocs.Length;i++)
+            {
+                if (_startAtClilocs[i] == cliloc)
+                {
+                    Start();
+                    return;
+                }
+            }
         }
         
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -31,13 +126,23 @@ namespace ClassicUO.Game.UI.Gumps
             if (Engine.Profile == null ||
                 Engine.Profile.Current == null ||
                 !Engine.Profile.Current.BandageGump ||
-                Mobile == null ||
-                Mobile.IsDestroyed ||
-                Mobile.EnergyResistance == 0)
+                World.Player == null ||
+                World.Player.IsDestroyed)
                 return false;
 
-            _text.Text = $"{Mobile.EnergyResistance}";
-            
+            switch (Engine.GlobalSettings.ShardType)
+            {
+                case 2: // outlands
+                    if (World.Player.EnergyResistance == 0) return false;
+                    _text.Text = $"{World.Player.EnergyResistance}";
+                    break;
+
+                default:
+                    if (!_useTime) return false;
+                    _text.Text = ((Engine.Ticks - _startTime) / 1000).ToString();
+                    break;
+            }
+
             Width = _borderSize * 2 + _iconSize + _spaceSize + _text.Width;
             Height = _borderSize * 2 + _iconSize;
 
@@ -51,11 +156,11 @@ namespace ClassicUO.Game.UI.Gumps
             int w = Engine.Profile.Current.GameWindowSize.X;
             int h = Engine.Profile.Current.GameWindowSize.Y;
 
-            x = gx + Mobile.RealScreenPosition.X;
-            y = gy + Mobile.RealScreenPosition.Y;
+            x = gx + World.Player.RealScreenPosition.X;
+            y = gy + World.Player.RealScreenPosition.Y;
 
-            x += (int) Mobile.Offset.X + 22;
-            y += (int) (Mobile.Offset.Y - Mobile.Offset.Z) + 22;
+            x += (int) World.Player.Offset.X + 22;
+            y += (int) (World.Player.Offset.Y - World.Player.Offset.Z) + 22;
 
             x = (int) (x / scale);
             y = (int) (y / scale);
@@ -84,7 +189,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (IsDisposed)
                 return;
 
-            if (Mobile == null || Mobile.IsDestroyed)
+            if (World.Player == null || World.Player.IsDestroyed)
             {
                 Dispose();
 
