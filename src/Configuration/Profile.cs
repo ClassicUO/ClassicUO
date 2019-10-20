@@ -144,6 +144,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool GameWindowLock { get; set; }
         [JsonProperty] public bool GameWindowFullSize { get; set; }
         [JsonProperty] public Point GameWindowSize { get; set; } = new Point(600, 480);
+        [JsonProperty] public Point BandageGumpOffset { get; set; } = new Point(0, 0);
         [JsonProperty] public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
         [JsonProperty] public bool TopbarGumpIsMinimized { get; set; }
         [JsonProperty] public bool TopbarGumpIsDisabled { get; set; }
@@ -182,6 +183,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
         [JsonProperty] public bool NameOverheadToggled { get; set; } = false;
         [JsonProperty] public bool ShowTargetRangeIndicator { get; set; }
+        [JsonProperty] public bool BandageGump { get; set; }
         [JsonProperty] public bool PartyInviteGump { get; set; }
 
         [JsonProperty] public bool ShowInfoBar { get; set; }
