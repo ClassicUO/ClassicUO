@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             Entity = entity;
 
-            Hue hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (Hue) 0x0481;
+            Hue hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (Hue)0x0481;
 
             _renderedText = RenderedText.Create(String.Empty, hue, 0xFF, true, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, 100, 30, true);
 
@@ -81,12 +81,12 @@ namespace ClassicUO.Game.UI.Gumps
                         t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
 
                         if (string.IsNullOrEmpty(t))
-                            t = FileManager.Cliloc.Translate(1020000 + item.Graphic, capitalize:true);
+                            t = FileManager.Cliloc.Translate(1020000 + item.Graphic, capitalize: true);
                     }
 
                     if (string.IsNullOrEmpty(t))
                         return false;
-                    
+
                     FileManager.Fonts.SetUseHTML(true);
                     FileManager.Fonts.RecalculateWidthByInfo = true;
 
@@ -149,7 +149,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _renderedText.Text = t;
 
-                    Width = _background.Width = Math.Max(_renderedText.Width + 4, MIN_WIDTH);                    
+                    Width = _background.Width = Math.Max(_renderedText.Width + 4, MIN_WIDTH);
                     Height = _background.Height = _renderedText.Height + 4;
 
                     WantUpdateSize = false;
@@ -162,7 +162,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             return true;
         }
-        
+
 
         protected override void CloseWithRightClick()
         {
@@ -179,15 +179,30 @@ namespace ClassicUO.Game.UI.Gumps
 
                 GameActions.RequestMobileStatus(Entity);
 
-                Engine.UI.GetGump<HealthBarGump>(Entity)?.Dispose();
+                if (Engine.Profile.Current.CustomBarsToggled == true)
+                {
+                    Engine.UI.GetGump<HealthBarGumpCustom>(Entity)?.Dispose();
 
-                if (Entity == World.Player)
-                    StatusGumpBase.GetStatusGump()?.Dispose();
+                    if (Entity == World.Player)
+                        StatusGumpBase.GetStatusGump()?.Dispose();
 
-                Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-                HealthBarGump currentHealthBarGump;
-                Engine.UI.Add(currentHealthBarGump = new HealthBarGump(Entity) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
-                Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
+                    Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
+                    HealthBarGumpCustom currentHealthBarGump;
+                    Engine.UI.Add(currentHealthBarGump = new HealthBarGumpCustom(Entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                    Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
+                }
+                else
+                {
+                    Engine.UI.GetGump<HealthBarGump>(Entity)?.Dispose();
+
+                    if (Entity == World.Player)
+                        StatusGumpBase.GetStatusGump()?.Dispose();
+
+                    Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
+                    HealthBarGump currentHealthBarGump;
+                    Engine.UI.Add(currentHealthBarGump = new HealthBarGump(Entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                    Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
+                }
             }
             else
                 GameActions.PickUp(Entity);
@@ -301,8 +316,8 @@ namespace ClassicUO.Game.UI.Gumps
                                                               out int width,
                                                               out int height);
 
-                _lockedPosition.X = (int) ((Entity.RealScreenPosition.X + m.Offset.X + 22) / scale);
-                _lockedPosition.Y = (int) ((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (!m.IsMounted ? 22 : 0)) / scale);
+                _lockedPosition.X = (int)((Entity.RealScreenPosition.X + m.Offset.X + 22) / scale);
+                _lockedPosition.Y = (int)((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (!m.IsMounted ? 22 : 0)) / scale);
             }
 
             base.OnMouseOver(x, y);
@@ -331,7 +346,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                _clickTiming -= (float) frameMS;
+                _clickTiming -= (float)frameMS;
 
                 if (_clickTiming <= 0)
                 {
@@ -378,8 +393,8 @@ namespace ClassicUO.Game.UI.Gumps
                                                                   out int width,
                                                                   out int height);
 
-                    x = (int) ((Entity.RealScreenPosition.X + m.Offset.X + 22) / scale);
-                    y = (int) ((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (!m.IsMounted ? 22 : 0)) / scale);
+                    x = (int)((Entity.RealScreenPosition.X + m.Offset.X + 22) / scale);
+                    y = (int)((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (!m.IsMounted ? 22 : 0)) / scale);
                 }
             }
             else if (Entity.Texture != null)
@@ -398,8 +413,8 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                x = (int) ((Entity.RealScreenPosition.X + 22) / scale);
-                y = (int) ((Entity.RealScreenPosition.Y + 22) / scale);
+                x = (int)((Entity.RealScreenPosition.X + 22) / scale);
+                y = (int)((Entity.RealScreenPosition.Y + 22) / scale);
             }
 
             x -= Width >> 1;
