@@ -43,8 +43,6 @@ namespace ClassicUO.Game.GameObjects
     {
         private readonly Dictionary<Graphic, BuffIcon> _buffIcons = new Dictionary<Graphic, BuffIcon>();
 
-        private BandageGump BandageTimer;
-
         public PlayerMobile(Serial serial) : base(serial)
         {
             Skills = new Skill[FileManager.Skills.SkillsCount];
