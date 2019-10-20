@@ -156,6 +156,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool ActivateChatAfterEnter { get; set; }
         [JsonProperty] public bool ActivateChatAdditionalButtons { get; set; } = true;
         [JsonProperty] public bool ActivateChatShiftEnterSupport { get; set; } = true;
+        [JsonProperty] public bool UseObjectsFading { get; set; } = true;
 
         // Experimental
         [JsonProperty] public bool EnableSelectionArea { get; set; }

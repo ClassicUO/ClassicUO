@@ -167,6 +167,13 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         public bool ProcessAlpha(int max)
         {
+            if (Engine.Profile.Current != null && !Engine.Profile.Current.UseObjectsFading)
+            {
+                AlphaHue = (byte) max;
+
+                return max != 0;
+            }
+
             bool result = false;
 
             int alpha = AlphaHue;
