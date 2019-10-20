@@ -3259,6 +3259,10 @@ namespace ClassicUO.Network
 
             string arguments = null;
             
+            // bandage timer gump
+            World.Player?.BandageTimer.OnCliloc(cliloc);
+
+            // party invite gump
             if (cliloc == 1008092) // value for "You notify them you don't want to join the party"
             {
                 foreach (var PartyInviteGump in Engine.UI.Gumps.OfType<PartyInviteGump>())
