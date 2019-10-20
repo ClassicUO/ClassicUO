@@ -728,6 +728,14 @@ namespace ClassicUO.Game.GameObjects
                         break;
                     }
 
+                    case 0x3ECA: // tarantula
+
+                    {
+                        graphic = 0x0579;
+
+                        break;
+                    }
+
                     default:
 
                     {
