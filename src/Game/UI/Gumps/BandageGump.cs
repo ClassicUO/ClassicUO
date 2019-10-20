@@ -92,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (FileManager.Cliloc.GetString(_stopAtClilocs[i]) == text )
                 {
-                    Stop();
+                    Start();
                     return;
                 }
             }
