@@ -8,13 +8,13 @@ namespace ClassicUO.Game.UI.Gumps
 {
     class BandageGump : Gump
     {
+        const byte _iconSize = 16, _spaceSize = 2, _borderSize = 2;
         private AlphaBlendControl _background;
         private Label _text;
-        const byte _iconSize = 16, _spaceSize = 2, _borderSize = 2;
         private TextureControl _icon;
-        private Mobile Mobile;
+        private PlayerMobile Mobile;
 
-        public BandageGump(Mobile mobile) : base(mobile.Serial, 0)
+        public BandageGump(PlayerMobile mobile) : base(mobile.Serial, 0)
         {
             CanMove = false;
             AcceptMouseInput = false;
@@ -22,16 +22,21 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = false;
 
             Mobile = mobile;
+            
             BuildGump();
         }
         
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-
-            if (Engine.Profile == null || Engine.Profile.Current == null || Mobile == null || Mobile.IsDestroyed || World.Player.EnergyResistance == 0)
+            if (Engine.Profile == null ||
+                Engine.Profile.Current == null ||
+                !Engine.Profile.Current.BandageGump ||
+                Mobile == null ||
+                Mobile.IsDestroyed ||
+                Mobile.EnergyResistance == 0)
                 return false;
 
-            _text.Text = $"{World.Player.EnergyResistance}";
+            _text.Text = $"{Mobile.EnergyResistance}";
             
             Width = _borderSize * 2 + _iconSize + _spaceSize + _text.Width;
             Height = _borderSize * 2 + _iconSize;
@@ -62,6 +67,9 @@ namespace ClassicUO.Game.UI.Gumps
             x -= Width >> 1;
             x += 5;
             y += 10;
+
+            x += Engine.Profile.Current.BandageGumpOffset.X;
+            y += Engine.Profile.Current.BandageGumpOffset.Y;
 
             Y = y;
             X = x;

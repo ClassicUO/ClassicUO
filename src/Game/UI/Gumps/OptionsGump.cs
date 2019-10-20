@@ -118,6 +118,12 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
         private Checkbox _holdShiftForContext, _holdShiftToSplitStack, _reduceFPSWhenInactive, _sallosEasyGrab, _partyInviteGump, _objectsFading;
 
+        // Bandage Gump
+        private Checkbox _bandageGump;
+        private ScrollAreaItem _bandageGumpArea;
+        private TextBox _bandageGumpOffsetX;
+        private TextBox _bandageGumpOffsetY;
+
         //VendorGump Size Option
         private ArrowNumbersTextBox _vendorGumpSize;
 
@@ -274,6 +280,40 @@ namespace ClassicUO.Game.UI.Gumps
             _showCorpseNameIncoming = CreateCheckBox(rightArea, "Show incoming new corpses", Engine.Profile.Current.ShowNewCorpseNameIncoming, 0, 0);
             _sallosEasyGrab = CreateCheckBox(rightArea, "Sallos easy grab", Engine.Profile.Current.SallosEasyGrab, 0, 0);
             _partyInviteGump = CreateCheckBox(rightArea, "Show gump for party invites", Engine.Profile.Current.PartyInviteGump, 0, 0);
+
+            _bandageGumpArea = new ScrollAreaItem();
+            _bandageGump = CreateCheckBox(rightArea, "Show gump when using bandages", Engine.Profile.Current.BandageGump, 0, 0);
+            _bandageGump.ValueChanged += (sender, e) => { _bandageGumpArea.IsVisible = _bandageGump.IsChecked; };
+            
+            text = new Label("Bandage Timer Offset: ", true, HUE_FONT)
+            {
+                X = 20,
+                Y = 5
+            };
+            _bandageGumpArea.Add(text);
+
+            _bandageGumpOffsetX = CreateInputField(_bandageGumpArea, new TextBox(FONT, 5, 80, 80)
+            {
+                Text = Engine.Profile.Current.BandageGumpOffset.X.ToString(),
+                X = 30,
+                Y = text.Y + 30,
+                Width = 50,
+                Height = 30,
+                NumericOnly = true
+            });
+
+            _bandageGumpOffsetY = CreateInputField(_bandageGumpArea, new TextBox(FONT, 5, 80, 80)
+            {
+                Text = Engine.Profile.Current.BandageGumpOffset.Y.ToString(),
+                X = 100,
+                Y = text.Y + 30,
+                Width = 50,
+                Height = 30,
+                NumericOnly = true
+            });
+
+            _bandageGumpArea.IsVisible = _bandageGump.IsChecked;
+            rightArea.Add(_bandageGumpArea);
 
             fpsItem = new ScrollAreaItem();
 
@@ -1388,6 +1428,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _showMobileNameIncoming.IsChecked = true;
                     _gridLoot.SelectedIndex = 0;
                     _sallosEasyGrab.IsChecked = false;
+                    _bandageGump.IsChecked = false;
+                    _bandageGumpOffsetX.Text = "0";
+                    _bandageGumpOffsetY.Text = "0";
                     _partyInviteGump.IsChecked = false;
                     _objectsFading.IsChecked = true;
 
@@ -1622,8 +1665,13 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.GridLootType = _gridLoot.SelectedIndex;
             Engine.Profile.Current.SallosEasyGrab = _sallosEasyGrab.IsChecked;
             Engine.Profile.Current.PartyInviteGump = _partyInviteGump.IsChecked;
-            Engine.Profile.Current.UseObjectsFading = _objectsFading.IsChecked;
+			Engine.Profile.Current.UseObjectsFading = _objectsFading.IsChecked;
+            Engine.Profile.Current.BandageGump = _bandageGump.IsChecked;
 
+            int.TryParse(_bandageGumpOffsetX.Text, out int bandageGumpOffsetX);
+            int.TryParse(_bandageGumpOffsetY.Text, out int bandageGumpOffsetY);
+
+            Engine.Profile.Current.BandageGumpOffset = new Point (bandageGumpOffsetX, bandageGumpOffsetY);
 
             // sounds
             Engine.Profile.Current.EnableSound = _enableSounds.IsChecked;
