@@ -121,8 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
         // Bandage Gump
         private Checkbox _bandageGump;
         private ScrollAreaItem _bandageGumpArea;
-        private TextBox _bandageGumpOffsetX;
-        private TextBox _bandageGumpOffsetY;
+        private TextBox _bandageGumpOffsetX, _bandageGumpOffsetY;
 
         //VendorGump Size Option
         private ArrowNumbersTextBox _vendorGumpSize;
@@ -1665,13 +1664,12 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.GridLootType = _gridLoot.SelectedIndex;
             Engine.Profile.Current.SallosEasyGrab = _sallosEasyGrab.IsChecked;
             Engine.Profile.Current.PartyInviteGump = _partyInviteGump.IsChecked;
+            Engine.Profile.Current.UseObjectsFading = _objectsFading.IsChecked;
             Engine.Profile.Current.BandageGump = _bandageGump.IsChecked;
 
             int.TryParse(_bandageGumpOffsetX.Text, out int bandageGumpOffsetX);
             int.TryParse(_bandageGumpOffsetY.Text, out int bandageGumpOffsetY);
             Engine.Profile.Current.BandageGumpOffset = new Point (bandageGumpOffsetX, bandageGumpOffsetY);
-
-            Engine.Profile.Current.UseObjectsFading = _objectsFading.IsChecked;
 
             // sounds
             Engine.Profile.Current.EnableSound = _enableSounds.IsChecked;
