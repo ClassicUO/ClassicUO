@@ -963,7 +963,7 @@ namespace ClassicUO.Game.GameObjects
                             {
                                 if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
                                 {
-                                    if (mobile.InWarMode)
+                                    if (mobile.InWarMode && FileManager.Animations.AnimationExists(graphic, 1))
                                         result = 1;
                                     else
                                         result = 25;
@@ -981,7 +981,7 @@ namespace ClassicUO.Game.GameObjects
                             else
                                 result = FileManager.Animations.AnimationExists(graphic, 1) ? (byte) 1 : (byte) 2;
                         }
-                        else if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0 && !mobile.InWarMode)
+                        else if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0 && (!mobile.InWarMode || !FileManager.Animations.AnimationExists(graphic, 0)))
                         {
                             result = 22;
                         }
