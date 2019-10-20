@@ -116,7 +116,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ColorBox _poisonColorPickerBox, _paralyzedColorPickerBox, _invulnerableColorPickerBox;
         private TextBox _spellFormatBox;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
-        private Checkbox _holdShiftForContext, _holdShiftToSplitStack, _reduceFPSWhenInactive, _sallosEasyGrab, _partyInviteGump;
+        private Checkbox _holdShiftForContext, _holdShiftToSplitStack, _reduceFPSWhenInactive, _sallosEasyGrab, _partyInviteGump, _objectsFading;
 
         // Bandage Gump
         private Checkbox _bandageGump;
@@ -274,6 +274,7 @@ namespace ClassicUO.Game.UI.Gumps
             _paralyzedColorPickerBox = CreateClickableColorBox(rightArea, 20, 0, Engine.Profile.Current.ParalyzedHue, "Paralyzed Color", 40, 0);
             _invulnerableColorPickerBox = CreateClickableColorBox(rightArea, 20, 0, Engine.Profile.Current.InvulnerableHue, "Invulnerable Color", 40, 0);
             _noColorOutOfRangeObjects = CreateCheckBox(rightArea, "No color for object out of range", Engine.Profile.Current.NoColorObjectsOutOfRange, 0, 5);
+            _objectsFading = CreateCheckBox(rightArea, "Objects fading", Engine.Profile.Current.UseObjectsFading, 0, 0);
             _useStandardSkillsGump = CreateCheckBox(rightArea, "Use standard skills gump", Engine.Profile.Current.StandardSkillsGump, 0, 0);
             _showMobileNameIncoming = CreateCheckBox(rightArea, "Show incoming new mobiles", Engine.Profile.Current.ShowNewMobileNameIncoming, 0, 0);
             _showCorpseNameIncoming = CreateCheckBox(rightArea, "Show incoming new corpses", Engine.Profile.Current.ShowNewCorpseNameIncoming, 0, 0);
@@ -1431,6 +1432,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _bandageGumpOffsetX.Text = "0";
                     _bandageGumpOffsetY.Text = "0";
                     _partyInviteGump.IsChecked = false;
+                    _objectsFading.IsChecked = true;
 
                     break;
 
@@ -1667,8 +1669,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             int.TryParse(_bandageGumpOffsetX.Text, out int bandageGumpOffsetX);
             int.TryParse(_bandageGumpOffsetY.Text, out int bandageGumpOffsetY);
-
             Engine.Profile.Current.BandageGumpOffset = new Point (bandageGumpOffsetX, bandageGumpOffsetY);
+
+            Engine.Profile.Current.UseObjectsFading = _objectsFading.IsChecked;
 
             // sounds
             Engine.Profile.Current.EnableSound = _enableSounds.IsChecked;
