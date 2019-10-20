@@ -121,8 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
         // Bandage Gump
         private Checkbox _bandageGump;
         private ScrollAreaItem _bandageGumpArea;
-        private TextBox _bandageGumpOffsetX;
-        private TextBox _bandageGumpOffsetY;
+        private TextBox _bandageGumpOffsetX, _bandageGumpOffsetY;
 
         //VendorGump Size Option
         private ArrowNumbersTextBox _vendorGumpSize;
