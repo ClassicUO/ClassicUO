@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _CustomBars, _CustomBarsBBG;
         private Combobox _overrideContainerLocationSetting;
 
         // sounds
@@ -1216,6 +1216,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(_showTargetRangeIndicator);
 
+            _CustomBars = CreateCheckBox(rightArea, "Use Custom Health Bars", Engine.Profile.Current.CustomBarsToggled, 0, 5);
+            _CustomBarsBBG = CreateCheckBox(rightArea, "Use All Black Backgrounds", Engine.Profile.Current.CBBlackBGToggled, 20, 5);
+
             Add(rightArea, PAGE);
 
             _autoOpenCorpseArea.IsVisible = _autoOpenCorpse.IsChecked;
@@ -1518,6 +1521,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _overrideContainerLocationSetting.SelectedIndex = 0;
                     _dragSelectHumanoidsOnly.IsChecked = false;
                     _showTargetRangeIndicator.IsChecked = false;
+                    _CustomBars.IsChecked = false;
+                    _CustomBarsBBG.IsChecked = false;
 
                     break;
 
@@ -1919,6 +1924,9 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.OverrideContainerLocationSetting = _overrideContainerLocationSetting.SelectedIndex;
 
             Engine.Profile.Current.ShowTargetRangeIndicator = _showTargetRangeIndicator.IsChecked;
+
+            Engine.Profile.Current.CustomBarsToggled = _CustomBars.IsChecked;
+            Engine.Profile.Current.CBBlackBGToggled = _CustomBarsBBG.IsChecked;
 
             // network
             Engine.Profile.Current.ShowNetworkStats = _showNetStats.IsChecked;
