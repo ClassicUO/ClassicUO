@@ -201,7 +201,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (item.Items.Count() > 0)
+            if (item.Items.Count > 0)
                 _hadItems = true;
 
             if (_closeIfEmpty && !_hadItems && item.Items.Count() == 0){
