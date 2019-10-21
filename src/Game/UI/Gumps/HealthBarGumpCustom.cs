@@ -694,17 +694,21 @@ namespace ClassicUO.Game.UI.Gumps
                         });
 
                     }
-                    else if (_canChangeName) //## currently not fixed ##//
+                    else if (_canChangeName) //## Rename works - Does not align properly? ##//
                     {
-                        Add(new EditableLabel(_name, 0, hue: Notoriety.GetHue((entity as Mobile).NotorietyFlag), true, 100, style: FontStyle.Cropped)
-                        //Add(new MultiSelectionShrinkbox(0, 0, 100, _name, hue: Notoriety.GetHue((entity as Mobile).NotorietyFlag), 1, true, userArrow2: false)
+                        Add(_textBox = new TextBoxCHB(1, maxWidth: 120, width: 100, isunicode: true, hue: Notoriety.GetHue(mobile.NotorietyFlag), style: FontStyle.BlackBorder)
                         {
-                            Y = 0, //SINGLE BAR
-                            X = _name.Length,
+                            X = 10,
+                            Y = 0,
+                            Width = 120,                            
+                            Height = 15,
+                            IsEditable = false,
+                            AcceptMouseInput = _canChangeName,
+                            AcceptKeyboardInput = _canChangeName,
+                            SafeCharactersOnly = true,
+                            WantUpdateSize = false,
                             CanMove = true,
-                            IsEditable = true,
-                            WantUpdateSize = true,
-                            //Alpha = 100,
+                            Text = _name
                         });
                         if (_canChangeName) _textBox.MouseUp += TextBoxOnMouseUp;
                     }
