@@ -73,8 +73,6 @@ namespace ClassicUO.Game.GameObjects
             //if (IsDestroyed)
             //    return false;
 
-            ResetHueVector();
-
             DrawCharacter(batcher, posX, posY);
 
             Engine.DebugInfo.MobilesRendered++;
@@ -366,7 +364,7 @@ namespace ClassicUO.Game.GameObjects
                             partialHue = false;
                         }
                     }
-
+                    ResetHueVector();
                     ShaderHuesTraslator.GetHueVector(ref HueVector, hue, partialHue, 0);
 
                     if (_transform)
