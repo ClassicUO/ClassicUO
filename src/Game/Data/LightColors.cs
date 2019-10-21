@@ -94,7 +94,7 @@ namespace ClassicUO.Game.Data
                                                 {
                                                     if (id >= 0x1ECD && id <= 0x1ECF ||
                                                         id >= 0x1ED0 && id <= 0x1ED2)
-                                                        color = 1;
+                                                        color = 60;
                                                 }
                                                 else
                                                     color = 60;
