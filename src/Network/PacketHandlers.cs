@@ -2911,6 +2911,8 @@ namespace ClassicUO.Network
                     {
                         if (button != 0)
                             gumpToClose.OnButtonClick(button);
+                        else
+                            Engine.UI.SavePosition(ser, gumpToClose.Location);
                         gumpToClose.Dispose();
                     }
 
