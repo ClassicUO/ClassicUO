@@ -51,10 +51,10 @@ namespace ClassicUO.Game.UI.Controls
 
             Add(box);
 
-            Add(new NiceButton(0, box.Height + 3, 50, 25, ButtonAction.Activate, "Add") {IsSelectable = false});
-            Add(new NiceButton(52, box.Height + 3, 50, 25, ButtonAction.Activate, "Remove") {ButtonParameter = 1, IsSelectable = false});
+            Add(new NiceButton(0, box.Height + 3, 170, 25, ButtonAction.Activate, "+ Create macro button", 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT) { ButtonParameter = 2, IsSelectable = false });
 
-            Add(new NiceButton(0, box.Height + 30, 170, 25, ButtonAction.Activate, "+ Create macro button", 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT) { ButtonParameter = 2, IsSelectable = false });
+            Add(new NiceButton(0, box.Height + 30, 50, 25, ButtonAction.Activate, "Add") {IsSelectable = false});
+            Add(new NiceButton(52, box.Height + 30, 50, 25, ButtonAction.Activate, "Remove") {ButtonParameter = 1, IsSelectable = false});
 
 
             Add(_collection = new MacroCollectionControl(name, 280, 280)
