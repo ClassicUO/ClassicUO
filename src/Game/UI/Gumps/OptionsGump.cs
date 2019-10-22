@@ -1921,6 +1921,25 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.ShowTargetRangeIndicator = _showTargetRangeIndicator.IsChecked;
 
             Engine.Profile.Current.CustomBarsToggled = _CustomBars.IsChecked;
+            var hbgstandard = Engine.UI.Gumps.OfType<HealthBarGump>().ToList();
+            var hbgcustom = Engine.UI.Gumps.OfType<HealthBarGumpCustom>().ToList();
+            if (_CustomBars.IsChecked)
+            {               
+                foreach (var healthbar in hbgstandard)
+                {
+                    Engine.UI.Add(new HealthBarGumpCustom(healthbar.LocalSerial) { X = healthbar.X, Y = healthbar.Y });
+                    healthbar.Dispose();
+                }
+            }
+            else if (!_CustomBars.IsChecked)
+            {                 
+                foreach (var customhealthbar in hbgcustom)
+                {
+                    Engine.UI.Add(new HealthBarGump(customhealthbar.LocalSerial) { X = customhealthbar.X, Y = customhealthbar.Y });
+                    customhealthbar.Dispose();
+                }
+
+            }
             Engine.Profile.Current.CBBlackBGToggled = _CustomBarsBBG.IsChecked;
 
             // network
