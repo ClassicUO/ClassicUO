@@ -116,7 +116,7 @@ namespace ClassicUO.Game
 
         public const int DEATH_SCREEN_TIMER = 1500;
 
-        public const float SOUND_DELTA = 1000f;
+        public const float SOUND_DELTA = 250;
 
         public const uint JOURNAL_LOCALSERIAL = 0xFFFFFFE1;
         public const uint SKILLSTD_LOCALSERIAL = 0xFFFFFFE2;
