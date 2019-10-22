@@ -481,6 +481,9 @@ namespace ClassicUO.IO.Resources
                             {
                                 animFile = 2;
                                 realAnimID = (ushort)anim[1];
+
+                                if (index == 0x0579)
+                                    mountedHeightOffset = 9;
                             }
                             else if (anim[2] != -1 && maxAddress4.HasValue && maxAddress4 != 0)
                             {
@@ -495,8 +498,14 @@ namespace ClassicUO.IO.Resources
 
                                 if (index == 0x0115 || index == 0x00C0)
                                     mountedHeightOffset = 0;
+
+                                if (index == 0x042D)
+                                {
+                                    mountedHeightOffset = 3;
+                                }
                             }
 
+                         
 
                             if (realAnimID != 0xFFFF && animFile != 0)
                             {
@@ -773,7 +782,34 @@ namespace ClassicUO.IO.Resources
                     int newGroup = reader.ReadInt();
 
                     if (frameCount == 0 && DataIndex[animID] != null)
+                    {
+                        if (animID == 0x04E7)
+                        {
+                            DataIndex[animID].MountedHeightOffset = 18;
+                        }
+
+                        if (animID == 0x04E6)
+                        {
+                            DataIndex[animID].MountedHeightOffset = 18;
+                        }
+
+                        if (animID == 0x01B0)
+                        {
+                            DataIndex[animID].MountedHeightOffset = 9;
+                        }
+
+                        if (animID == 0x042D)
+                        {
+                            DataIndex[animID].MountedHeightOffset = 18;
+                        }
+
+                        if (animID == 0x0579)
+                        {
+                            DataIndex[animID].MountedHeightOffset = 9;
+                        }
+
                         DataIndex[animID].ReplaceUopGroup((byte)oldGroup, (byte)newGroup);
+                    }
 
                     reader.Skip(60);
                 }
