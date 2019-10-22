@@ -411,6 +411,12 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                     return batcher.Draw2D(Texture, x, y, ref _hueVector);
             }
+
+            public override void Dispose()
+            {
+                _gText?.Destroy();
+                base.Dispose();
+            }
         }
     }
 }
