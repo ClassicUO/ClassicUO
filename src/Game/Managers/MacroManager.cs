@@ -1093,10 +1093,11 @@ namespace ClassicUO.Game.Managers
                         GameActions.DoubleClick(potion);
 
                     break;
-                    
-                 case MacroType.CloseAllHealthBars:
 
-                    var healthBarGumps = Engine.UI.Gumps.OfType<HealthBarGump>();
+                case MacroType.CloseAllHealthBars:
+
+                    //Includes HealthBarGump/HealthBarGumpCustom
+                    var healthBarGumps = Engine.UI.Gumps.OfType<AnchorableGump>().Where(g => g is HealthBarGump || g is HealthBarGumpCustom);
 
                     foreach (var healthbar in healthBarGumps)
                     {
