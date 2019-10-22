@@ -166,7 +166,9 @@ namespace ClassicUO.Network
 
             for (int i = 0; i < length; i++)
             {
-                _sb.Append((char) ReadByte());
+                char c = (char) ReadByte();
+                if (c != '\0')
+                    _sb.Append(c);
             }
 
             return _sb.ToString();
