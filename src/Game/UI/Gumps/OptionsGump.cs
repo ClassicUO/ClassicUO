@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenSecretDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG;
         private Combobox _overrideContainerLocationSetting;
 
         // sounds
@@ -1080,6 +1080,7 @@ namespace ClassicUO.Game.UI.Gumps
             _restoreLastGameSize = CreateCheckBox(rightArea, "Disable automatic maximize. Restore windows size after re-login", Engine.Profile.Current.RestoreLastGameSize, 0, 0);
 
             _autoOpenDoors = CreateCheckBox(rightArea, "Auto Open Doors", Engine.Profile.Current.AutoOpenDoors, 0, 0);
+            _autoOpenSecretDoors = CreateCheckBox(rightArea, "Include Secret Doors", Engine.Profile.Current.AutoOpenSecretDoors, 20, 2);
             _smoothDoors = CreateCheckBox(rightArea, "Smooth doors", Engine.Profile.Current.SmoothDoors, 20, 5);
 
             _autoOpenCorpseArea = new ScrollAreaItem();
@@ -1914,7 +1915,8 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             Engine.Profile.Current.AutoOpenDoors = _autoOpenDoors.IsChecked;
-            Engine.Profile.Current.SmoothDoors = _smoothDoors.IsChecked;
+            Engine.Profile.Current.AutoOpenSecretDoors = _autoOpenSecretDoors.IsChecked;
+            Engine.Profile.Current.SmoothDoors = _smoothDoors.IsChecked;            
             Engine.Profile.Current.AutoOpenCorpses = _autoOpenCorpse.IsChecked;
             Engine.Profile.Current.AutoOpenCorpseRange = int.Parse(_autoOpenCorpseRange.Text);
             Engine.Profile.Current.CorpseOpenOptions = _autoOpenCorpseOptions.SelectedIndex;
