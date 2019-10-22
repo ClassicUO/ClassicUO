@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _CustomBars, _CustomBarsBBG;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG;
         private Combobox _overrideContainerLocationSetting;
 
         // sounds
@@ -1216,8 +1216,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(_showTargetRangeIndicator);
 
-            _CustomBars = CreateCheckBox(rightArea, "Use Custom Health Bars", Engine.Profile.Current.CustomBarsToggled, 0, 5);
-            _CustomBarsBBG = CreateCheckBox(rightArea, "Use All Black Backgrounds", Engine.Profile.Current.CBBlackBGToggled, 20, 5);
+            _customBars = CreateCheckBox(rightArea, "Use Custom Health Bars", Engine.Profile.Current.CustomBarsToggled, 0, 5);
+            _customBarsBBG = CreateCheckBox(rightArea, "Use All Black Backgrounds", Engine.Profile.Current.CBBlackBGToggled, 20, 5);
 
             Add(rightArea, PAGE);
 
@@ -1521,8 +1521,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _overrideContainerLocationSetting.SelectedIndex = 0;
                     _dragSelectHumanoidsOnly.IsChecked = false;
                     _showTargetRangeIndicator.IsChecked = false;
-                    _CustomBars.IsChecked = false;
-                    _CustomBarsBBG.IsChecked = false;
+                    _customBars.IsChecked = false;
+                    _customBarsBBG.IsChecked = false;
 
                     break;
 
@@ -1925,27 +1925,35 @@ namespace ClassicUO.Game.UI.Gumps
 
             Engine.Profile.Current.ShowTargetRangeIndicator = _showTargetRangeIndicator.IsChecked;
 
-            Engine.Profile.Current.CustomBarsToggled = _CustomBars.IsChecked;
-            var hbgstandard = Engine.UI.Gumps.OfType<HealthBarGump>().ToList();
-            var hbgcustom = Engine.UI.Gumps.OfType<HealthBarGumpCustom>().ToList();
-            if (_CustomBars.IsChecked)
-            {               
-                foreach (var healthbar in hbgstandard)
-                {
-                    Engine.UI.Add(new HealthBarGumpCustom(healthbar.LocalSerial) { X = healthbar.X, Y = healthbar.Y });
-                    healthbar.Dispose();
-                }
-            }
-            else if (!_CustomBars.IsChecked)
-            {                 
-                foreach (var customhealthbar in hbgcustom)
-                {
-                    Engine.UI.Add(new HealthBarGump(customhealthbar.LocalSerial) { X = customhealthbar.X, Y = customhealthbar.Y });
-                    customhealthbar.Dispose();
-                }
 
+            bool updateHealthBars = Engine.Profile.Current.CustomBarsToggled != _customBars.IsChecked;
+            Engine.Profile.Current.CustomBarsToggled = _customBars.IsChecked;
+
+            if (updateHealthBars)
+            {
+                if (Engine.Profile.Current.CustomBarsToggled)
+                {
+                    var hbgstandard = Engine.UI.Gumps.OfType<HealthBarGump>().ToList();
+
+                    foreach (var healthbar in hbgstandard)
+                    {
+                        Engine.UI.Add(new HealthBarGumpCustom(healthbar.LocalSerial) {X = healthbar.X, Y = healthbar.Y});
+                        healthbar.Dispose();
+                    }
+                }
+                else
+                {
+                    var hbgcustom = Engine.UI.Gumps.OfType<HealthBarGumpCustom>().ToList();
+
+                    foreach (var customhealthbar in hbgcustom)
+                    {
+                        Engine.UI.Add(new HealthBarGump(customhealthbar.LocalSerial) {X = customhealthbar.X, Y = customhealthbar.Y});
+                        customhealthbar.Dispose();
+                    }
+                }
             }
-            Engine.Profile.Current.CBBlackBGToggled = _CustomBarsBBG.IsChecked;
+
+            Engine.Profile.Current.CBBlackBGToggled = _customBarsBBG.IsChecked;
 
             // network
             Engine.Profile.Current.ShowNetworkStats = _showNetStats.IsChecked;
