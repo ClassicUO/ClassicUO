@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -34,6 +35,8 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
@@ -1350,7 +1353,7 @@ namespace ClassicUO.IO.Resources
                                 {
                                     for (int j = 0; j < 8; j++)
                                     {
-                                        int x = c * 8 + j;
+                                        int x = (c << 3) + j;
 
                                         if (x >= dw)
                                             break;
@@ -2270,6 +2273,13 @@ namespace ClassicUO.IO.Resources
                             else
                                 info.Font = 0;
                         }
+                        //else if (str == "face")
+                        //{
+                        //    byte face = byte.Parse(value);
+
+                        //    if (face == 1)
+                        //        info.Font = 0;
+                        //}
 
                         break;
 
@@ -2373,9 +2383,28 @@ namespace ClassicUO.IO.Resources
             {
                 if (str[0] == '#')
                 {
-                    color = str.Substring(1).StartsWith("0x") ? Convert.ToUInt32(str.Substring(3), 16) : Convert.ToUInt32(str.Substring(1), 16);
+                    int start = 1;
+                    if (str[1] == '0' && str[2] == 'x')
+                    {
+                        start = 3;
+                    }
+                    color = Convert.ToUInt32(str.Substring(start), 16);
+
                     byte* clrbuf = (byte*) &color;
                     color = (uint) ((clrbuf[0] << 24) | (clrbuf[1] << 16) | (clrbuf[2] << 8) | 0xFF);
+                }
+                else if (char.IsNumber(str[0]))
+                {
+                    color = Convert.ToUInt32(str, 16);
+                    //color = (HuesHelper.Color16To32((ushort)color) >> 8) | 0xFF;
+                    //byte* clrbuf = (byte*)&color;
+                    //color = (uint)((clrbuf[0] << 24) | (clrbuf[1] << 16) | (clrbuf[2] << 8) | 0xFF);
+
+                    ////(byte b, byte g, byte r, byte a) = HuesHelper.GetBGRA(color);
+                    //Color cc = new Color()
+                    //{
+                    //    PackedValue = HuesHelper.RgbaToArgb(color)
+                    //};
                 }
                 else
                 {
