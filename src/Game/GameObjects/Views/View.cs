@@ -76,8 +76,13 @@ namespace ClassicUO.Game.GameObjects
         {
             if (DrawTransparent)
             {
-                int dist = Distance;
-                int maxDist = Engine.Profile.Current.CircleOfTransparencyRadius + 1;
+                int x = RealScreenPosition.X;
+                int y = RealScreenPosition.Y;
+                int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
+                int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
+
+                int dist = Math.Max(Math.Abs(x - fx), Math.Abs(y - fy));
+                int maxDist = Engine.Profile.Current.CircleOfTransparencyRadius;
 
                 if (dist <= maxDist)
                 {

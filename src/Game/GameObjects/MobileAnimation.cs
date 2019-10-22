@@ -70,7 +70,13 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         public Direction GetDirectionForAnimation()
         {
-            return Steps.Count != 0 ? (Direction) Steps.Front().Direction : Direction;
+            if (Steps.Count != 0)
+            {
+                ref readonly Step step = ref Steps.Front();
+
+                return (Direction) step.Direction;
+            }
+            return Direction;
         }
 
 
@@ -946,7 +952,8 @@ namespace ClassicUO.Game.GameObjects
             if (mobile.Steps.Count != 0)
             {
                 isWalking = true;
-                isRun = mobile.Steps.Front().Run;
+                ref readonly Step step = ref mobile.Steps.Front();
+                isRun = step.Run;
             }
 
             switch (type)
@@ -1208,7 +1215,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (mob.IsMoving)
                     {
-                        var s = mob.Steps.Front();
+                        ref readonly var s = ref mob.Steps.Front();
 
                         if (s.X != mob.X || s.Y != mob.Y)
                             return true;
