@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
@@ -111,7 +112,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public int FieldsType { get; set; } // 0 = normal, 1 = static, 2 = tile
         [JsonProperty] public bool NoColorObjectsOutOfRange { get; set; }
         [JsonProperty] public bool UseCircleOfTransparency { get; set; }
-        [JsonProperty] public int CircleOfTransparencyRadius { get; set; } = 5;
+        [JsonProperty] public int CircleOfTransparencyRadius { get; set; } = Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS / 2;
         [JsonProperty] public int VendorGumpHeight { get; set; } = 60; //original vendor gump size
         [JsonProperty] public float ScaleZoom { get; set; } = 1.0f;
         [JsonProperty] public float RestoreScaleValue { get; set; } = 1.0f;
