@@ -115,7 +115,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             _name = entity.Name;
-            _isDead = entity.Serial.IsMobile && ((Mobile)entity).IsDead;
+            _isDead = entity.Serial.IsMobile && ((Mobile) entity).IsDead;
             LocalSerial = entity.Serial;
 
             BuildCustomGump();
@@ -192,6 +192,13 @@ namespace ClassicUO.Game.UI.Gumps
                     if (inparty)
                     {
                         textColor = 912;
+                        //Out of range from in range Name Color Change for ML Bar
+                        Add(new Label(_name, true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: 912, maxwidth: 100, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                        {
+                            X = 8,
+                            Y = 3
+                        });
+                        //
 
                         if (_textBox.Hue != textColor)
                             _textBox.Hue = textColor;
@@ -201,6 +208,13 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
+                        ////Out of range from in range Name Color Change for SL Bar
+                        Add(new Label(_name, true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: 912, maxwidth: 100, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                        {
+                            X = 8,
+                            Y = 0
+                        });
+                        //
                         if (_textBox.Hue != textColor)
                             _textBox.Hue = textColor;
 
@@ -227,7 +241,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity != null && !entity.IsDestroyed)
             {
-                Mobile mobile = entity.Serial.IsMobile ? (Mobile)entity : null;
+                Mobile mobile = entity.Serial.IsMobile ? (Mobile) entity : null;
 
                 if (!_isDead && entity != World.Player && (mobile != null && mobile.IsDead) && Engine.Profile.Current.CloseHealthBarType == 2) // is dead
                 {
@@ -253,7 +267,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 if (!(mobile != null && mobile.IsDead) && _isDead) _isDead = false;
-                
+
                 if (!string.IsNullOrEmpty(entity.Name) && _name != entity.Name)
                 {
                     _name = entity.Name;
@@ -272,12 +286,26 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (inparty && mobile != null)
                     {
+                        //In range from out of range Name Color Change for ML Bar
+                        Add(new Label(_name, true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile).NotorietyFlag), maxwidth: 100, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                        {
+                            X = 8,
+                            Y = 3
+                        });
+                        //
                         textColor = Notoriety.GetHue(mobile.NotorietyFlag);
                     }
                     else
                     {
+                        //In range from out of range Name Color Change for SL Bar
+                        Add(new Label(_name, true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile).NotorietyFlag), maxwidth: 100, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                        {
+                            X = 8,
+                            Y = 0
+                        });
+                        //
                         _canChangeName = mobile != null && mobile.IsRenamable;
-                        
+
                         if (_canChangeName)
                         {
                             textColor = 0x000E;
@@ -520,7 +548,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(new GameBorder(0, 0, HPB_WIDTH, HPB_HEIGHT_MULTILINE, 1 / 2));
                     Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height });
 
-                    Add(_textBox = new TextBoxCHB(3, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray),maxWidth: Width)
+                    Add(_textBox = new TextBoxCHB(3, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray), maxWidth: Width)
                     {
                         X = 0,
                         Y = 0,
@@ -558,7 +586,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Hue textColor = 0x0386;
                     Hue hitsColor = 0x0386;
 
-                    Mobile mobile = entity != null && entity.Serial.IsMobile ? (Mobile)entity : null;
+                    Mobile mobile = entity != null && entity.Serial.IsMobile ? (Mobile) entity : null;
 
                     if (entity != null)
                     {
@@ -569,7 +597,7 @@ namespace ClassicUO.Game.UI.Gumps
                             textColor = 0x000E;
                     }
 
-                    Hue barColor = entity == null || entity == World.Player || mobile == null || mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray ? (Hue)0 : Notoriety.GetHue(mobile.NotorietyFlag);
+                    Hue barColor = entity == null || entity == World.Player || mobile == null || mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray ? (Hue) 0 : Notoriety.GetHue(mobile.NotorietyFlag);
 
                     Height = HPB_HEIGHT_SINGLELINE;
                     Width = HPB_WIDTH;
@@ -616,7 +644,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             X = 10,
                             Y = 0,
-                            Width = 120,                            
+                            Width = 120,
                             Height = 15,
                             IsEditable = false,
                             AcceptMouseInput = _canChangeName,
