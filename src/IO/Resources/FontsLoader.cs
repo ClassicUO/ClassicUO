@@ -2731,23 +2731,49 @@ namespace ClassicUO.IO.Resources
 
         public unsafe (int, int) GetCaretPosUnicode(byte font, string str, int pos, int width, TEXT_ALIGN_TYPE align, ushort flags)
         {
+            int x = 0;
+            int y = 0;
+
+            switch (align)
+            {
+                case TEXT_ALIGN_TYPE.TS_CENTER:
+                    x = width >> 1;
+                    break;
+                case TEXT_ALIGN_TYPE.TS_RIGHT:
+                    x = width;
+                    break;
+            }
+
             if (pos < 1 || font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
-                return (0, 0);
+                return (x, y);
 
             if (width == 0)
                 width = GetWidthUnicode(font, str);
             MultilinesFontInfo info = GetInfoUnicode(font, str, str.Length, align, flags, width);
 
             if (info == null)
-                return (0, 0);
+                return (x, y);
 
             uint* table = (uint*) _unicodeFontAddress[font];
-            int x = 0;
-            int y = 0;
+          
 
             while (info != null)
             {
-                x = 0;
+                switch (info.Align)
+                {
+                    case TEXT_ALIGN_TYPE.TS_CENTER:
+                        x = (width - info.Width) >> 1;
+                        if (x < 0)
+                            x = 0;
+                        break;
+                    case TEXT_ALIGN_TYPE.TS_RIGHT:
+                        x = width;
+                        break;
+                    default:
+                        x = 0;
+                        break;
+                }
+
                 int len = info.CharCount;
 
                 if (info.CharStart == pos)
@@ -2851,8 +2877,21 @@ namespace ClassicUO.IO.Resources
 
         public (int, int) GetCaretPosASCII(byte font, string str, int pos, int width, TEXT_ALIGN_TYPE align, ushort flags)
         {
+            int x = 0;
+            int y = 0;
+
+            switch (align)
+            {
+                case TEXT_ALIGN_TYPE.TS_CENTER:
+                    x = width >> 1;
+                    break;
+                case TEXT_ALIGN_TYPE.TS_RIGHT:
+                    x = width;
+                    break;
+            }
+
             if (font >= FontCount || pos < 1 || string.IsNullOrEmpty(str))
-                return (0, 0);
+                return (x, y);
 
             FontData fd = _font[font];
 
@@ -2861,16 +2900,28 @@ namespace ClassicUO.IO.Resources
             MultilinesFontInfo info = GetInfoASCII(font, str, str.Length, align, flags, width);
 
             if (info == null)
-                return (0, 0);
+                return (x, y);
 
             //int height = 0;
             //MultilinesFontInfo ptr = info;
-            int x = 0;
-            int y = 0;
 
             while (info != null)
             {
-                x = 0;
+                switch (info.Align)
+                {
+                    case TEXT_ALIGN_TYPE.TS_CENTER:
+                        x = (width - info.Width) >> 1;
+                        if (x < 0)
+                            x = 0;
+                        break;
+                    case TEXT_ALIGN_TYPE.TS_RIGHT:
+                        x = width;
+                        break;
+                    default:
+                        x = 0;
+                        break;
+                }
+
                 int len = info.CharCount;
 
                 if (info.CharStart == pos)

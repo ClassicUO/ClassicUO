@@ -517,7 +517,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(new GameBorder(0, 0, HPB_WIDTH, HPB_HEIGHT_MULTILINE, 1 / 2));
                     Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height });
 
-                    Add(_textBox = new TextBoxCHB(3, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray))
+                    Add(_textBox = new TextBoxCHB(3, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray),maxWidth: Width)
                     {
                         X = 0,
                         Y = 0,
@@ -769,7 +769,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class TextBoxCHB : TextBox
         {
-            public TextBoxCHB(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0) : base(font, maxcharlength, maxWidth, width, isunicode, style, hue)
+            public TextBoxCHB(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0) : base(font, maxcharlength, maxWidth, width, isunicode, style, hue, TEXT_ALIGN_TYPE.TS_CENTER)
             {
             }
             public int RenderedTextOffset { get; set; }

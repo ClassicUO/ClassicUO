@@ -24,6 +24,7 @@
 using System;
 
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI
@@ -32,14 +33,14 @@ namespace ClassicUO.Game.UI
     {
         private string _plainText;
 
-        public TextEntry(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool unicode = true, FontStyle style = FontStyle.None, ushort hue = 0xFFFF) : base(maxcharlength, width, maxWidth)
+        public TextEntry(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool unicode = true, FontStyle style = FontStyle.None, ushort hue = 0xFFFF, TEXT_ALIGN_TYPE align = 0) : base(maxcharlength, width, maxWidth)
         {
-            RenderText = RenderedText.Create(String.Empty, hue, font, unicode, style, maxWidth: width);
+            RenderText = RenderedText.Create(String.Empty, hue, font, unicode, style, maxWidth: width, align: align);
 
             if (maxWidth > 0)
                 RenderText.FontStyle |= FontStyle.Cropped;
 
-            RenderCaret = RenderedText.Create("_", hue, font, unicode, (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None);
+            RenderCaret = RenderedText.Create("_", hue, font, unicode, (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None, align: align);
         }
 
         public bool IsPassword { get; set; }
@@ -183,7 +184,9 @@ namespace ClassicUO.Game.UI
 
             if (MaxWidth > 0)
             {
-                int width = RenderText.IsUnicode ? FileManager.Fonts.GetWidthUnicode(RenderText.Font, text) : FileManager.Fonts.GetWidthASCII(RenderText.Font, text);
+                int width = RenderText.IsUnicode ? 
+                    FileManager.Fonts.GetWidthUnicode(RenderText.Font, text) : 
+                    FileManager.Fonts.GetWidthASCII(RenderText.Font, text);
                 int len = text.Length;
 
                 while (MaxWidth < width && len > 0)
