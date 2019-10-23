@@ -120,7 +120,7 @@ namespace ClassicUO.Game.Managers
 
                         break;
                     }
-                    else if (Engine.Profile.Current.CustomBarsToggled == false)
+                    else
                     {
                         byte count = p.ReadByte();
 
