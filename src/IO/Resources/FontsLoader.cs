@@ -675,7 +675,7 @@ namespace ClassicUO.IO.Resources
                         if (ptr.MaxHeight == 0)
                             ptr.MaxHeight = 14;
 
-                        ptr.CharCount = charCount;
+                        //ptr.CharCount = charCount;
                         charCount = 0;
                         ptr.Data.Resize( (uint) ptr.CharCount);
 
@@ -1040,7 +1040,7 @@ namespace ClassicUO.IO.Resources
                         if (ptr.MaxHeight == 0)
                             ptr.MaxHeight = 14 + extraheight;
 
-                        ptr.CharCount = charCount;
+                        //ptr.CharCount = charCount;
                         charCount = 0;
                         ptr.Data.Resize((uint)ptr.CharCount);
 
