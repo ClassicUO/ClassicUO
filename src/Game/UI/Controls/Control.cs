@@ -422,8 +422,6 @@ namespace ClassicUO.Game.UI.Controls
             if (AcceptKeyboardInput && !HasKeyboardFocus) Engine.UI.KeyboardFocusControl = this;
         }
 
-        public event EventHandler Disposed;
-
         internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseOver, MouseEnter, MouseExit, DragBegin, DragEnd;
 
         internal event EventHandler<MouseWheelEventArgs> MouseWheel;
@@ -869,8 +867,6 @@ namespace ClassicUO.Game.UI.Controls
             Children.Clear();
 
             IsDisposed = true;
-
-            Disposed.Raise();
         }
     }
 }
