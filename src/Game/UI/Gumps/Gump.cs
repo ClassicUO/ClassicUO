@@ -76,11 +76,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetInScreen()
         {
-            if (!Engine.Instance.Window.ClientBounds.Intersects(Bounds))
-            {
-                X = 0;
-                Y = 0;
-            }
+            if (X > 0 || Y > 0)
+                return;
+            if (Width < Engine.WindowWidth || Height < Engine.WindowHeight)
+                return;
+
+            X = 0;
+            Y = 0;
         }
 
         public virtual void Restore(BinaryReader reader)
