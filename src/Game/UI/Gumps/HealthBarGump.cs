@@ -115,7 +115,6 @@ namespace ClassicUO.Game.UI.Gumps
             _background = _hpLineRed = _manaLineRed = _stamLineRed = null;
             _buttonHeal1 = _buttonHeal2 = null;
             
-            _textBox?.Dispose();
             _textBox = null;
 
             BuildGump();

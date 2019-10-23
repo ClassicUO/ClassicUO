@@ -151,7 +151,6 @@ namespace ClassicUO.Game.UI.Gumps
             _background = null;
             _hpLineRed = _manaLineRed = _stamLineRed = null;
 
-            _textBox?.Dispose();
             _textBox = null;
 
             BuildCustomGump();
