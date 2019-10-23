@@ -175,6 +175,15 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
+            if (IsDisposed)
+                return;
+
+            if (World.Player == null || World.Player.IsDestroyed)
+            {
+                Dispose();
+                return;
+            }
+
             if (_updateTime < totalMS)
             {
                 _updateTime = (float) totalMS + 125;
@@ -207,15 +216,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (IsVisible)
                     _text.Text = $"{Time}";
-            }
-
-            if (IsDisposed)
-                return;
-
-            if (World.Player == null || World.Player.IsDestroyed)
-            {
-                Dispose();
-                return;
             }
         }
 
