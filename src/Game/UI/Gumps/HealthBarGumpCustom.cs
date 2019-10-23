@@ -462,8 +462,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Add(_textBox = new TextBoxCHB(3, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Fixed | FontStyle.BlackBorder, hue: Notoriety.GetHue(World.Player.NotorietyFlag))
                     {
-                        X = 0,
-                        Y = 0,
+                        X = 8,
+                        Y = 3,
                         IsEditable = false,
                         CanMove = true,
                         Text = _name
@@ -473,8 +473,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Add(_textBox = new TextBoxCHB(3, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Fixed | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray))
                     {
-                        X = 0,
-                        Y = 0,
+                        X = 8,
+                        Y = 3,
                         IsEditable = false,
                         CanMove = true,
                         Text = _name
@@ -507,8 +507,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Add(_textBox = new TextBoxCHB(3, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Fixed | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray),maxWidth: Width)
                     {
-                        X = 0,
-                        Y = 0,
+                        X = 8,
+                        Y = 3,
                         IsEditable = false,
                         CanMove = true,
                         Text = _name
@@ -562,7 +562,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Add(_textBox = new TextBoxCHB(3, width: HPB_BAR_WIDTH, isunicode: true, hue: Notoriety.GetHue(mobile.NotorietyFlag), style: FontStyle.Fixed | FontStyle.BlackBorder)
                     {
-                        X = 0,
+                        X = 8,
                         Y = 0,
                         Width = HPB_WIDTH,
                         Height = 15,
