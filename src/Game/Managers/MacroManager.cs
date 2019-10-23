@@ -1107,6 +1107,11 @@ namespace ClassicUO.Game.Managers
                         }
                     }
                     break;
+
+                case MacroType.OpenCorpses:
+                    World.Player.OpenCorpses( 2 );
+
+                    break;
             }
 
 
@@ -1421,7 +1426,7 @@ namespace ClassicUO.Game.Managers
         UsePotion,
         CloseAllHealthBars,
         RazorMacro,
-
+        OpenCorpses
     }
 
     internal enum MacroSubType

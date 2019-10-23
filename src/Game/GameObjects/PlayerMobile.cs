@@ -1279,6 +1279,15 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        public void OpenCorpses(byte range)
+        {
+            foreach (var c in World.Items.Where(t => t.Graphic == 0x2006 && t.Distance <= range))
+            {
+                OpenedCorpses.Add(c.Serial);
+                GameActions.DoubleClickQueued(c.Serial);
+            }
+        }
+
 
         protected override void OnDirectionChanged()
         {
