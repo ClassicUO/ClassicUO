@@ -8,7 +8,7 @@ namespace ClassicUO.Game.UI.Gumps
     class BandageGump : Gump
     {
         const byte _iconSize = 16, _spaceSize = 2, _borderSize = 2;
-        public uint BandageTime { get; set; }
+        public uint Time { get; set; }
         private bool _useTime;
         private uint _startTime;
         private float _updateTime;
@@ -186,7 +186,7 @@ namespace ClassicUO.Game.UI.Gumps
                         if (World.Player.EnergyResistance > 0)
                         {
                             IsVisible = true;
-                            BandageTime = World.Player.EnergyResistance;
+                            Time = World.Player.EnergyResistance;
                         }
                         break;
 
@@ -194,8 +194,8 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_useTime)
                         {
                             IsVisible = true;
-                            BandageTime = (Engine.Ticks - _startTime) / 1000;
-                            if (BandageTime > 20) // fail-safe (this can never be reached)
+                            Time = (Engine.Ticks - _startTime) / 1000;
+                            if (Time > 20) // fail-safe (this can never be reached)
                             {
                                 Stop();
                                 IsVisible = false;
@@ -205,7 +205,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 if (IsVisible)
-                    _text.Text = $"{BandageTime}";
+                    _text.Text = $"{Time}";
             }
 
             if (IsDisposed)
@@ -225,7 +225,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Alpha = 0.6f
             };
 
-            _text = new Label($"{BandageTime}", true, 0x35, 0, 1, FontStyle.BlackBorder)
+            _text = new Label($"{Time}", true, 0x35, 0, 1, FontStyle.BlackBorder)
             {
                 X = _borderSize + _iconSize + _spaceSize + 3,
                 Y = _borderSize - 2
