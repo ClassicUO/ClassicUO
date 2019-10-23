@@ -114,7 +114,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             _name = entity.Name;
-            _isDead = entity.Serial.IsMobile && ((Mobile)entity).IsDead;
+            _isDead = entity.Serial.IsMobile && ((Mobile) entity).IsDead;
             LocalSerial = entity.Serial;
 
             BuildCustomGump();
@@ -231,7 +231,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity != null && !entity.IsDestroyed)
             {
-                Mobile mobile = entity.Serial.IsMobile ? (Mobile)entity : null;
+                Mobile mobile = entity.Serial.IsMobile ? (Mobile) entity : null;
 
                 if (!_isDead && entity != World.Player && (mobile != null && mobile.IsDead) && Engine.Profile.Current.CloseHealthBarType == 2) // is dead
                 {
@@ -257,7 +257,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 if (!(mobile != null && mobile.IsDead) && _isDead) _isDead = false;
-                
+
                 if (!string.IsNullOrEmpty(entity.Name) && _name != entity.Name)
                 {
                     _name = entity.Name;
@@ -281,7 +281,7 @@ namespace ClassicUO.Game.UI.Gumps
                     else
                     {
                         _canChangeName = mobile != null && mobile.IsRenamable;
-                        
+
                         if (_canChangeName)
                         {
                             textColor = 0x000E;
@@ -455,12 +455,12 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Height = HPB_HEIGHT_MULTILINE;
                 Width = HPB_WIDTH;
-                Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height, AcceptMouseInput = true, CanMove = true});
+                Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height, AcceptMouseInput = true, CanMove = true });
 
 
                 if (CanBeSaved)
                 {
-                    Add(_textBox = new TextBoxCHB(3, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Fixed | FontStyle.BlackBorder, hue: Notoriety.GetHue(World.Player.NotorietyFlag))
+                    Add(_textBox = new TextBoxCHB(1, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue(World.Player.NotorietyFlag))
                     {
                         X = 8,
                         Y = 3,
@@ -471,7 +471,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    Add(_textBox = new TextBoxCHB(3, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Fixed | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray))
+                    Add(_textBox = new TextBoxCHB(1, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray))
                     {
                         X = 8,
                         Y = 3,
@@ -505,7 +505,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Width = HPB_WIDTH;
                     Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height, AcceptMouseInput = true, CanMove = true });
 
-                    Add(_textBox = new TextBoxCHB(3, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Fixed | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray),maxWidth: Width)
+                    Add(_textBox = new TextBoxCHB(1, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray), maxWidth: Width)
                     {
                         X = 8,
                         Y = 3,
@@ -519,8 +519,8 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(new LineCHB(HPB_BAR_SPACELEFT, 36, HPB_BAR_WIDTH, HPB_BAR_HEIGHT, HPB_COLOR_DRAW_RED.PackedValue));
                     Add(new LineCHB(HPB_BAR_SPACELEFT, 45, HPB_BAR_WIDTH, HPB_BAR_HEIGHT, HPB_COLOR_DRAW_RED.PackedValue));
 
-                    Add(_bars[0] = new LineCHB(HPB_BAR_SPACELEFT, 27, HPB_BAR_WIDTH, HPB_BAR_HEIGHT, HPB_COLOR_DRAW_BLUE.PackedValue){ LineWidth = 0});
-                    Add(_bars[1] = new LineCHB(HPB_BAR_SPACELEFT, 36, HPB_BAR_WIDTH, HPB_BAR_HEIGHT, HPB_COLOR_DRAW_BLUE.PackedValue){ LineWidth = 0});
+                    Add(_bars[0] = new LineCHB(HPB_BAR_SPACELEFT, 27, HPB_BAR_WIDTH, HPB_BAR_HEIGHT, HPB_COLOR_DRAW_BLUE.PackedValue) { LineWidth = 0 });
+                    Add(_bars[1] = new LineCHB(HPB_BAR_SPACELEFT, 36, HPB_BAR_WIDTH, HPB_BAR_HEIGHT, HPB_COLOR_DRAW_BLUE.PackedValue) { LineWidth = 0 });
                     Add(_bars[2] = new LineCHB(HPB_BAR_SPACELEFT, 45, HPB_BAR_WIDTH, HPB_BAR_HEIGHT, HPB_COLOR_DRAW_BLUE.PackedValue) { LineWidth = 0 });
 
                     Add(_border[0] = new LineCHB(0, 0, HPB_WIDTH, HPB_BORDERSIZE, HPB_COLOR_DRAW_BLACK.PackedValue));
@@ -535,7 +535,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Hue textColor = 0x0386;
                     Hue hitsColor = 0x0386;
 
-                    Mobile mobile = entity != null && entity.Serial.IsMobile ? (Mobile)entity : null;
+                    Mobile mobile = entity != null && entity.Serial.IsMobile ? (Mobile) entity : null;
 
                     if (entity != null)
                     {
@@ -560,7 +560,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(_border[2] = new LineCHB(0, 0, HPB_BORDERSIZE, HPB_HEIGHT_SINGLELINE, HPB_COLOR_DRAW_BLACK.PackedValue));
                     Add(_border[3] = new LineCHB(HPB_WIDTH - HPB_BORDERSIZE, 0, HPB_BORDERSIZE, HPB_HEIGHT_SINGLELINE, HPB_COLOR_DRAW_BLACK.PackedValue));
 
-                    Add(_textBox = new TextBoxCHB(3, width: HPB_BAR_WIDTH, isunicode: true, hue: Notoriety.GetHue(mobile.NotorietyFlag), style: FontStyle.Fixed | FontStyle.BlackBorder)
+                    Add(_textBox = new TextBoxCHB(1, width: HPB_BAR_WIDTH, isunicode: true, hue: Notoriety.GetHue(mobile.NotorietyFlag), style: FontStyle.Cropped | FontStyle.BlackBorder)
                     {
                         X = 8,
                         Y = 0,
