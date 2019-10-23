@@ -177,6 +177,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (_canChangeName)
                             _textBox.MouseUp -= TextBoxOnMouseUp;
+                        _textBox.IsEditable = false;
                     }
 
                     if (_background.Hue != 0)
@@ -214,6 +215,8 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _textBox.MouseUp += TextBoxOnMouseUp;
                     }
+                    else
+                        _textBox.IsEditable = false;
                 }
 
                 if (!(mobile != null && mobile.IsDead) && _isDead) _isDead = false;

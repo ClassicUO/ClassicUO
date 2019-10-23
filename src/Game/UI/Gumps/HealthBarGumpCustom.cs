@@ -206,6 +206,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (_canChangeName)
                             _textBox.MouseUp -= TextBoxOnMouseUp;
+                        _textBox.IsEditable = false;
                     }
 
                     if (_background.Hue != 0)
@@ -247,6 +248,8 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _textBox.MouseUp += TextBoxOnMouseUp;
                     }
+                    else
+                        _textBox.IsEditable = false;
                 }
 
                 if (!(mobile != null && mobile.IsDead) && _isDead) _isDead = false;
@@ -526,8 +529,6 @@ namespace ClassicUO.Game.UI.Gumps
                         //Text = ""
 
                     });
-
-                    int nameOffset = Math.Max(0, HPB_WIDTH - _name.Length - 4) >> 1;
 
                     Add(new Label(_name, true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile).NotorietyFlag), maxwidth: 100, align: TEXT_ALIGN_TYPE.TS_CENTER)
 
