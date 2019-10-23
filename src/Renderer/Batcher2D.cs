@@ -82,8 +82,6 @@ namespace ClassicUO.Renderer
 
             DefaultEffect = new IsometricEffect(device);
 
-            GraphicsDevice.Indices = _indexBuffer;
-            GraphicsDevice.SetVertexBuffer(_vertexBuffer);
 
             _handle = GCHandle.Alloc(_vertexInfo, GCHandleType.Pinned);
         }
@@ -1474,7 +1472,7 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool Draw2DRotated(Texture2D texture, int startX, int startY, int endX, int endY, int originX, int originY)
+        public bool DrawLine(Texture2D texture, int startX, int startY, int endX, int endY, int originX, int originY)
         {
             EnsureSize();
 
@@ -1664,7 +1662,8 @@ namespace ClassicUO.Renderer
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
 
-
+            GraphicsDevice.Indices = _indexBuffer;
+            GraphicsDevice.SetVertexBuffer(_vertexBuffer);
 
             DefaultEffect.ApplyStates();
         }
@@ -1727,19 +1726,17 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public void SetBlendState(BlendState blend, bool noflush = false)
+        public void SetBlendState(BlendState blend)
         {
-            if (!noflush)
-                Flush();
+            Flush();
 
             _blendState = blend ?? BlendState.AlphaBlend;
         }
 
         [MethodImpl(256)]
-        public void SetStencil(DepthStencilState stencil, bool noflush = false)
+        public void SetStencil(DepthStencilState stencil)
         {
-            if (!noflush)
-                Flush();
+            Flush();
 
             _stencil = stencil ?? Stencil;
         }

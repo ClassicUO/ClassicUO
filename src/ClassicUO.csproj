@@ -94,7 +94,6 @@
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json\lib\net45\Newtonsoft.Json.dll</HintPath>
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -134,6 +133,7 @@
     <Compile Include="Game\Data\SpellsNinjitsu.cs" />
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
     <Compile Include="Game\Data\StaticFilters.cs" />
+    <Compile Include="Game\GameObjects\DragEffect.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
     <Compile Include="Game\GameObjects\EntityTextContainer.cs" />
     <Compile Include="Game\ItemHold.cs" />
@@ -170,12 +170,14 @@
     <Compile Include="Game\UI\Controls\TextureControl.cs" />
     <Compile Include="Game\UI\Gumps\GridLootGump.cs" />
     <Compile Include="Game\UI\Gumps\InfoBarGump.cs" />
+    <Compile Include="Game\UI\Gumps\MacroButtonGump.cs" />
     <Compile Include="Game\UI\Gumps\NameOverHeadHandlerGump.cs" />
     <Compile Include="Game\UI\Gumps\PartyInviteGump.cs" />
     <Compile Include="Game\UI\Gumps\ResizableGump.cs" />
     <Compile Include="Game\UI\Gumps\StandardSkillsGump.cs" />
     <Compile Include="Game\UI\Gumps\TextContainerGump.cs" />
     <Compile Include="Game\UI\Gumps\TipNoticeGump.cs" />
+    <Compile Include="Game\Weather.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Renderer\MatrixEffect.cs" />
     <Compile Include="Utility\Collections\RawList.cs" />
@@ -320,6 +322,7 @@
     <Compile Include="Game\UI\Gumps\Login\ServerSelectionGump.cs" />
     <Compile Include="Game\UI\Gumps\QuestionGump.cs" />
     <Compile Include="Game\UI\Gumps\HealthBarGump.cs" />
+    <Compile Include="Game\UI\Gumps\HealthBarGumpCustom.cs" />
     <Compile Include="Game\UI\Gumps\OptionsGump.cs" />
     <Compile Include="Game\UI\Gumps\PartyGumpAdvanced.cs" />
     <Compile Include="Game\UI\Gumps\PopupMenuGump.cs" />
@@ -392,7 +395,6 @@
     <Compile Include="Game\UI\Controls\Panel.cs" />
     <Compile Include="Game\UI\Controls\PaperDollInteractable.cs" />
     <Compile Include="Game\UI\Controls\RadioButton.cs" />
-    <Compile Include="Game\UI\Controls\RenderedTextList.cs" />
     <Compile Include="Game\UI\Controls\ResizePic.cs" />
     <Compile Include="Game\UI\Controls\ScrollArea.cs" />
     <Compile Include="Game\UI\Controls\ScrollBar.cs" />

@@ -71,7 +71,7 @@ namespace ClassicUO.Network
                 if (localEntry.AddressList.Length > 0)
                 {
 #pragma warning disable 618
-                    address = (uint) localEntry.AddressList.FirstOrDefault(s => s.AddressFamily == AddressFamily.InterNetwork).Address;
+                    address = (uint)localEntry.AddressList.FirstOrDefault(s => s.AddressFamily == AddressFamily.InterNetwork).Address;
 #pragma warning restore 618
                 }
                 else
@@ -574,7 +574,7 @@ namespace ClassicUO.Network
         {
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
             {
-                Statistics.TotalBytesSended += (uint) e.BytesTransferred;
+                Statistics.TotalBytesSended += (uint)e.BytesTransferred;
                 Statistics.TotalPacketsSended++;
             }
             else

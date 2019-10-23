@@ -50,8 +50,8 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Height = Texture.Height;
             }
 
-            Bounds.X = (int) -Offset.X;
-            Bounds.Y = (int) (Offset.Z - Offset.Y);
+            Bounds.X = (int) -Offset.X + 22;
+            Bounds.Y = (int) (Offset.Z - Offset.Y) + 22;
             Rotation = AngleToTarget;
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)

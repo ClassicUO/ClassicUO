@@ -125,6 +125,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 NetClient.Socket.Send(new PMenuResponse(LocalSerial, (Graphic) ServerSerial.Value, index, graphic, hue));
                 Dispose();
+                e.Result = true;
             };
             pic.SetTooltip(name);
 
@@ -137,7 +138,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class ContainerHorizontal : Control
         {
-            private bool _update = true;
             private int _value;
 
             public int Value
@@ -156,23 +156,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             public int MaxValue { get; private set; }
 
-            protected override void OnInitialize()
-            {
-                _update = true;
-                base.OnInitialize();
-            }
-
-            public override void Update(double totalMS, double frameMS)
-            {
-                base.Update(totalMS, frameMS);
-
-                //if (_update)
-                //{
-                //    _update = false;
-
-                //    CalculateWidth();
-                //}
-            }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
@@ -216,16 +199,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 return true; // base.Draw(batcher,position, hue);
-            }
-
-            protected override void OnChildAdded()
-            {
-                _update = true;
-            }
-
-            protected override void OnChildRemoved()
-            {
-                _update = true;
             }
 
             public void CalculateWidth()

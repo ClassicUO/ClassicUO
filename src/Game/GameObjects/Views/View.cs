@@ -21,11 +21,13 @@
 
 #endregion
 
+using System;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 using IDrawable = ClassicUO.Interfaces.IDrawable;
 
@@ -55,18 +57,36 @@ namespace ClassicUO.Game.GameObjects
 
         public UOTexture Texture { get; set; }
 
+        private static readonly Lazy<DepthStencilState> _stencil = new Lazy<DepthStencilState>(() =>
+        {
+            DepthStencilState state = new DepthStencilState
+            {
+                StencilEnable = true,
+                StencilFunction = CompareFunction.GreaterEqual,
+                StencilPass = StencilOperation.Keep,
+                ReferenceStencil = 0,
+                DepthBufferEnable = false,
+            };
 
+
+            return state;
+        });
 
         public virtual bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (DrawTransparent)
             {
-                int dist = Distance;
-                int maxDist = Engine.Profile.Current.CircleOfTransparencyRadius + 1;
+                int x = RealScreenPosition.X;
+                int y = RealScreenPosition.Y;
+                int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
+                int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
+
+                int dist = Math.Max(Math.Abs(x - fx), Math.Abs(y - fy));
+                int maxDist = Engine.Profile.Current.CircleOfTransparencyRadius;
 
                 if (dist <= maxDist)
                 {
-                    HueVector.Z = MathHelper.Lerp(1f, 1f - dist / (float) maxDist, 0.5f);
+                    HueVector.Z = MathHelper.Lerp(1f, 1f - dist / (float)maxDist, 0.5f);
                     //HueVector.Z = 1f - (dist / (float)maxDist);
                 }
                 else
@@ -74,7 +94,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (AlphaHue != 255)
                 HueVector.Z = 1f - AlphaHue / 255f;
-
+            
 
             if (Rotation != 0.0f)
             {
@@ -88,8 +108,32 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if (!batcher.DrawSprite(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector))
-                    return false;
+                //if (DrawTransparent)
+                //{
+                //    int dist = Distance;
+                //    int maxDist = Engine.Profile.Current.CircleOfTransparencyRadius + 1;
+
+                //    if (dist <= maxDist)
+                //    {
+                //        HueVector.Z = 0.75f; // MathHelper.Lerp(1f, 1f - dist / (float)maxDist, 0.5f);
+                //        //HueVector.Z = 1f - (dist / (float)maxDist);
+                //    }
+                //    else
+                //        HueVector.Z = 1f - AlphaHue / 255f;
+
+                //    batcher.DrawSprite(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector);
+
+                //    HueVector.Z = 0;
+
+                //    batcher.SetStencil(_stencil.Value);
+                //    batcher.DrawSprite(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector);
+                //    batcher.SetStencil(null);
+                //}
+                //else
+                {
+                    if (!batcher.DrawSprite(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector))
+                        return false;
+                }
             }
 
 
@@ -128,6 +172,13 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         public bool ProcessAlpha(int max)
         {
+            if (Engine.Profile.Current != null && !Engine.Profile.Current.UseObjectsFading)
+            {
+                AlphaHue = (byte) max;
+
+                return max != 0;
+            }
+
             bool result = false;
 
             int alpha = AlphaHue;

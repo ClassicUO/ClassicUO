@@ -41,7 +41,7 @@ namespace ClassicUO.Configuration
 
 
 
-            // this is a temporary patch to change the profile settings name safety
+            // FIXME: this is a temporary patch to change the profile settings name safety
             string fileToLoad = Path.Combine(path, "settings.json");
             string newPath = Path.Combine(path, "profile.json");
 
@@ -53,7 +53,7 @@ namespace ClassicUO.Configuration
                     {
                         File.Delete(fileToLoad);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         Log.Message(LogTypes.Warning, $"Failed to delete file: '{fileToLoad}'");
                     }

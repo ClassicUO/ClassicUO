@@ -250,13 +250,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Serial> e)
         {
-            foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => s.Item != null && e.Contains(s.Item)))
+            foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.LocalSerial)))
                 v.Dispose();
         }
 
         private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Serial> e)
         {
-            foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => s.Item != null && e.Contains(s.Item)))
+            foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.LocalSerial)))
                 v.Dispose();
 
             foreach (Serial s in e)
@@ -268,7 +268,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
                 var itemControl = new ItemGump(item);
-                CheckItemControlPosition(itemControl);
+                CheckItemControlPosition(itemControl, item);
 
                 if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
                 {
@@ -283,14 +283,14 @@ namespace ClassicUO.Game.UI.Gumps
         }
     
 
-        private void CheckItemControlPosition(ItemGump item)
+        private void CheckItemControlPosition(ItemGump itemGump, Item item)
         {
             float scale = Engine.UI.ContainerScale;
 
-            int x = (int) (item.X * scale);
-            int y = (int) (item.Y * scale);
+            int x = (int) (itemGump.X * scale);
+            int y = (int) (itemGump.Y * scale);
           
-            ArtTexture texture = FileManager.Art.GetTexture(item.Item.DisplayedGraphic);
+            ArtTexture texture = FileManager.Art.GetTexture(item.DisplayedGraphic);
 
             int boundX = (int)(_data.Bounds.X * scale);
             int boundY = (int)(_data.Bounds.Y * scale);
@@ -339,10 +339,10 @@ namespace ClassicUO.Game.UI.Gumps
                 y = 0;
 
 
-            if (x != item.X || y != item.Y)
+            if (x != itemGump.X || y != itemGump.Y)
             {
-                item.X = x;
-                item.Y = y;
+                itemGump.X = x;
+                itemGump.Y = y;
             }
         }
 

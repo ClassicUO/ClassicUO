@@ -800,6 +800,8 @@ namespace ClassicUO.Game.Managers
 
             Add(gump);
 
+            gump.Initialize();
+            gump.Update(Engine.Ticks, 0);
             gump.SetInScreen();
 
             return gump;
@@ -839,6 +841,10 @@ namespace ClassicUO.Game.Managers
 
         public void RemoveTargetLineGump(Serial serial)
         {
+            TargetLine?.Dispose();
+            Remove<TargetLineGump>();
+            TargetLine = null;
+
             //if (_targetLineGumps.TryGetValue(serial, out TargetLineGump gump))
             //{
             //    gump?.Dispose();
