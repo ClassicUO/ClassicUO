@@ -117,11 +117,8 @@ namespace ClassicUO.Game.UI.Gumps
             int count = 0;
             _pagesCount = 1;
 
-            foreach (Item item in _corpse.Items)
+            foreach (Item item in _corpse.Items.Where(s => s != null && s.IsLootable))
             {
-                if (item == null || item.ItemData.Layer == (int) Layer.Hair || item.ItemData.Layer == (int) Layer.Beard || item.ItemData.Layer == (int) Layer.Face)
-                    continue;
-
                 GridLootItem gridItem = new GridLootItem(item);
 
                 if (x >= _background.Width - 20)
