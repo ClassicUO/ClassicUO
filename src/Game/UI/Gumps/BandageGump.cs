@@ -8,8 +8,10 @@ namespace ClassicUO.Game.UI.Gumps
     class BandageGump : Gump
     {
         const byte _iconSize = 16, _spaceSize = 2, _borderSize = 2;
+        public uint BandageTime { get; set; }
         private bool _useTime;
-        private static uint _startTime;
+        private uint _startTime;
+        private float _updateTime;
         private AlphaBlendControl _background;
         private Label _text;
         private TextureControl _icon;
@@ -122,25 +124,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (Engine.Profile == null ||
+            if (!IsVisible ||
+                Engine.Profile == null ||
                 Engine.Profile.Current == null ||
                 !Engine.Profile.Current.BandageGump ||
                 World.Player == null ||
                 World.Player.IsDestroyed)
                 return false;
-
-            switch (Engine.GlobalSettings.ShardType)
-            {
-                case 2: // outlands
-                    if (World.Player.EnergyResistance == 0) return false;
-                    _text.Text = $"{World.Player.EnergyResistance}";
-                    break;
-
-                default:
-                    if (!_useTime) return false;
-                    _text.Text = ((Engine.Ticks - _startTime) / 1000).ToString();
-                    break;
-            }
 
             Width = _borderSize * 2 + _iconSize + _spaceSize + _text.Width;
             Height = _borderSize * 2 + _iconSize;
@@ -185,13 +175,45 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
+            if (_updateTime < totalMS)
+            {
+                _updateTime = (float) totalMS + 125;
+                IsVisible = false;
+
+                switch (Engine.GlobalSettings.ShardType)
+                {
+                    case 2: // outlands
+                        if (World.Player.EnergyResistance > 0)
+                        {
+                            IsVisible = true;
+                            BandageTime = World.Player.EnergyResistance;
+                        }
+                        break;
+
+                    default:
+                        if (_useTime)
+                        {
+                            IsVisible = true;
+                            BandageTime = (Engine.Ticks - _startTime) / 1000;
+                            if (BandageTime > 20) // fail-safe (this can never be reached)
+                            {
+                                Stop();
+                                IsVisible = false;
+                            }
+                        }
+                        break;
+                }
+
+                if (IsVisible)
+                    _text.Text = $"{BandageTime}";
+            }
+
             if (IsDisposed)
                 return;
 
             if (World.Player == null || World.Player.IsDestroyed)
             {
                 Dispose();
-
                 return;
             }
         }
@@ -203,7 +225,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Alpha = 0.6f
             };
 
-            _text = new Label("", true, 0x35, 0, 1, FontStyle.BlackBorder)
+            _text = new Label($"{BandageTime}", true, 0x35, 0, 1, FontStyle.BlackBorder)
             {
                 X = _borderSize + _iconSize + _spaceSize + 3,
                 Y = _borderSize - 2
