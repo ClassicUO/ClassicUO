@@ -136,16 +136,6 @@ namespace ClassicUO.Network
             }
 
             return _sb.ToString();
-
-            //int start = Position;
-            //int end = 0;
-            //while (Position < Length)
-            //{
-            //    if (_data[Position++] == 0)
-            //        break;
-            //    end++;
-            //}
-            //return end == 0 ? Empty : Encoding.ASCII.GetString(_data, start, end);
         }
 
         public string ReadASCII(int length, bool exitIfNull = false)
@@ -167,24 +157,15 @@ namespace ClassicUO.Network
             for (int i = 0; i < length; i++)
             {
                 char c = (char) ReadByte();
-                if (c != '\0')
-                    _sb.Append(c);
+                if (c == '\0')
+                {
+                    Skip(length - i - 1);
+                    break;
+                }
+                _sb.Append(c);
             }
 
             return _sb.ToString();
-
-            //int index = str.IndexOf('\0');
-
-
-            //int start = Position;
-            //Position += length;
-
-            //if (length <= 0)
-            //    return string.Empty;
-
-            //var str = Encoding.ASCII.GetString(_data, start, length);
-            //var nulIndex = str.IndexOf('\0');
-            //return nulIndex <= 0 ? str : str.Substring(0, nulIndex);
         }
 
         public string ReadUTF8StringSafe()
