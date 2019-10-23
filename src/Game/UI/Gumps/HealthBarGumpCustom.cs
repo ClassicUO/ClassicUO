@@ -62,45 +62,8 @@ using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class LineCHB : Line
-    {
-        public LineCHB(int x, int y, int w, int h, uint color) : base(x, y, w, h, color)
-        {
-            LineWidth = w;
-            LineColor = Textures.GetTexture(new Color() { PackedValue = color });
-
-            CanMove = true;
-        }
-        public int LineWidth { get; set; }
-        public Texture2D LineColor { get; set; }
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-        {
-            ResetHueVector();
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha);
-
-            return batcher.Draw2D(LineColor, x, y, LineWidth, Height, ref _hueVector);
-        }
-    }
-
-    internal class TextBoxCHB : TextBox
-    {
-        public TextBoxCHB(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0) : base(font, maxcharlength, maxWidth, width, isunicode, style, hue)
-        {
-        }
-        public int RenderedTextOffset { get; set; }
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-        {
-            TxEntry.RenderText.Draw(batcher, x + RenderedTextOffset + TxEntry.Offset, y);
-
-            if (IsEditable && HasKeyboardFocus)
-                TxEntry.RenderCaret.Draw(batcher, x + RenderedTextOffset + TxEntry.Offset + TxEntry.CaretPosition.X, y + TxEntry.CaretPosition.Y);
-
-            return base.Draw(batcher, x, y);
-        }
-    }
     internal class HealthBarGumpCustom : AnchorableGump
     {
-
         private readonly LineCHB[] _bars = new LineCHB[3];
         private readonly LineCHB[] _border = new LineCHB[4];
 
@@ -133,17 +96,16 @@ namespace ClassicUO.Game.UI.Gumps
         private Color HPB_COLOR_DRAW_BLUE = Color.DodgerBlue;
         private Color HPB_COLOR_DRAW_BLACK = Color.Black;
 
-        private Texture2D HPB_COLOR_BLUE = Textures.GetTexture(Color.DodgerBlue);
-        private Texture2D HPB_COLOR_GRAY = Textures.GetTexture(Color.Gray);
-        private Texture2D HPB_COLOR_RED = Textures.GetTexture(Color.Red);
-        private Texture2D HPB_COLOR_YELLOW = Textures.GetTexture(Color.Orange);
-        private Texture2D HPB_COLOR_POISON = Textures.GetTexture(Color.LimeGreen);
-        private Texture2D HPB_COLOR_BLACK = Textures.GetTexture(Color.Black);
+        private readonly Texture2D HPB_COLOR_BLUE = Textures.GetTexture(Color.DodgerBlue);
+        private readonly Texture2D HPB_COLOR_GRAY = Textures.GetTexture(Color.Gray);
+        private readonly Texture2D HPB_COLOR_RED = Textures.GetTexture(Color.Red);
+        private readonly Texture2D HPB_COLOR_YELLOW = Textures.GetTexture(Color.Orange);
+        private readonly Texture2D HPB_COLOR_POISON = Textures.GetTexture(Color.LimeGreen);
+        private readonly Texture2D HPB_COLOR_BLACK = Textures.GetTexture(Color.Black);
 
         public AlphaBlendControl _background;
         public HealthBarGumpCustom(Entity entity) : this()
         {
-
             if (entity == null)
             {
                 Dispose();
@@ -158,10 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             BuildCustomGump();
         }
-        private enum MobileName
-        {
-            Name
-        }
+
         public HealthBarGumpCustom(Serial mob) : this(World.Get(mob))
         {
         }
@@ -188,6 +147,7 @@ namespace ClassicUO.Game.UI.Gumps
             _background = null;
             _hpLineRed = _manaLineRed = _stamLineRed = null;
 
+            _textBox.Dispose();
             _textBox = null;
 
             BuildCustomGump();
@@ -209,7 +169,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity == null || entity.IsDestroyed)
             {
-
                 if (LocalSerial != World.Player && (Engine.Profile.Current.CloseHealthBarType == 1 ||
                                                     Engine.Profile.Current.CloseHealthBarType == 2 && World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
                 {
@@ -228,22 +187,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!_outOfRange)
                 {
-
                     _outOfRange = true;
 
                     if (inparty)
                     {
-
                         textColor = 912;
 
                         if (_textBox.Hue != textColor)
                             _textBox.Hue = textColor;
-
-                        Add(new Label(_name, true, style: FontStyle.Cropped, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray), maxwidth: 100, align: TEXT_ALIGN_TYPE.TS_CENTER)
-                        {
-                            X = 8,
-                            Y = 3
-                        });
 
                         _bars[1].IsVisible = false;
                         _bars[2].IsVisible = false;
@@ -252,12 +203,6 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (_textBox.Hue != textColor)
                             _textBox.Hue = textColor;
-
-                        Add(new Label(_name, true, style: FontStyle.Cropped, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray), maxwidth: 100, align: TEXT_ALIGN_TYPE.TS_CENTER)
-                        {
-                            X = 8,
-                            Y = 0
-                        });
 
                         if (_canChangeName)
                             _textBox.MouseUp -= TextBoxOnMouseUp;
@@ -270,7 +215,6 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _hpLineRed.LineColor = HPB_COLOR_GRAY;
                         _border[0].LineColor = _border[1].LineColor = _border[2].LineColor = _border[3].LineColor = HPB_COLOR_BLACK;
-
 
                         if (_manaLineRed != null && _stamLineRed != null)
                             _manaLineRed.LineColor = _stamLineRed.LineColor = HPB_COLOR_GRAY;
@@ -286,44 +230,33 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!_isDead && entity != World.Player && (mobile != null && mobile.IsDead) && Engine.Profile.Current.CloseHealthBarType == 2) // is dead
                 {
-
                     if (!inparty)
                     {
                         Dispose();
 
                         return;
                     }
+                }
 
+                if (entity is Mobile mm && _canChangeName != mm.IsRenamable)
+                {
+                    _canChangeName = mm.IsRenamable;
+                    _textBox.MouseUp -= TextBoxOnMouseUp;
+
+                    if (_canChangeName)
+                    {
+                        _textBox.MouseUp += TextBoxOnMouseUp;
+                    }
                 }
 
                 if (!(mobile != null && mobile.IsDead) && _isDead) _isDead = false;
-
-                if (mobile.IsDead)
-                    if (!string.IsNullOrEmpty(entity.Name) && _name != entity.Name)
-                    {
-
-                        string _newname = entity.Name;
-
-                        int width = FileManager.Fonts.GetWidthUnicode(_textBox.Font, _newname);
-
-                        if (width > 100)
-                        {
-                            _newname = FileManager.Fonts.GetTextByWidthUnicode(_textBox.Font, _newname, 100, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
-                            width = 100;
-                        }
-
-
-                        _textBox.Width = width;
-
-                        _textBox.Text = _newname;
-
-                        Width = _background.Width = Math.Max(_textBox.Width + 4, HPB_WIDTH);
-                        Height = _background.Height = _textBox.Height + 4;
-
-
-                        if (_textBox != null)
-                            _textBox.Text = _newname;
-                    }
+                
+                if (!string.IsNullOrEmpty(entity.Name) && _name != entity.Name)
+                {
+                    _name = entity.Name;
+                    if (_textBox != null)
+                        _textBox.Text = _name;
+                }
 
                 if (_outOfRange)
                 {
@@ -337,26 +270,11 @@ namespace ClassicUO.Game.UI.Gumps
                     if (inparty && mobile != null)
                     {
                         textColor = Notoriety.GetHue(mobile.NotorietyFlag);
-
-
-                        Add(new Label(_name, true, style: FontStyle.Cropped, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray), maxwidth: 100, align: TEXT_ALIGN_TYPE.TS_CENTER)
-                        {
-                            X = 8,
-                            Y = 3
-                        });
-
                     }
                     else
                     {
                         _canChangeName = mobile != null && mobile.IsRenamable;
-
-
-                        Add(new Label(_name, true, style: FontStyle.Cropped, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray), maxwidth: 100, align: TEXT_ALIGN_TYPE.TS_CENTER)
-                        {
-                            X = 8,
-                            Y = 0
-                        });
-
+                        
                         if (_canChangeName)
                         {
                             textColor = 0x000E;
@@ -402,11 +320,10 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _background.Hue = barColor;
                     }
-
                 }
+
                 if (_background.Hue != 912)
                 {
-
                     if (inparty && mobile.IsDead)
                     {
                         _background.Hue = 912;
@@ -423,7 +340,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (mobile != null && mobile.IsPoisoned && !_poisoned)
                 {
-
                     _bars[0].LineColor = HPB_COLOR_POISON;
 
                     _poisoned = true;
@@ -533,7 +449,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (World.Party.Contains(LocalSerial))
             {
-
                 Height = HPB_HEIGHT_MULTILINE;
                 Width = HPB_WIDTH;
                 Add(new GameBorder(0, 0, HPB_WIDTH, HPB_HEIGHT_MULTILINE, 1 / 2));
@@ -542,7 +457,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (CanBeSaved)
                 {
-                    Add(_textBox = new TextBoxCHB(3, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Cropped, hue: Notoriety.GetHue(World.Player.NotorietyFlag))
+                    Add(_textBox = new TextBoxCHB(3, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue(World.Player.NotorietyFlag))
                     {
                         X = 0,
                         Y = -2,
@@ -552,7 +467,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     });
 
-                    Add(new Label(_name, true, style: FontStyle.Cropped, hue: Notoriety.GetHue((entity as Mobile).NotorietyFlag), maxwidth: 100, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                    Add(new Label(_name, true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile).NotorietyFlag), maxwidth: 100, align: TEXT_ALIGN_TYPE.TS_CENTER)
                     {
                         X = 8,
                         Y = 3
@@ -569,7 +484,7 @@ namespace ClassicUO.Game.UI.Gumps
                         //Text = _name
                     });
 
-                    Add(new Label(_name, true, style: FontStyle.Cropped, hue: Notoriety.GetHue((entity as Mobile).NotorietyFlag), maxwidth: 100, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                    Add(new Label(_name, true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile).NotorietyFlag), maxwidth: 100, align: TEXT_ALIGN_TYPE.TS_CENTER)
                     {
                         X = 8,
                         Y = 3
@@ -614,7 +529,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     int nameOffset = Math.Max(0, HPB_WIDTH - _name.Length - 4) >> 1;
 
-                    Add(new Label(_name, true, style: FontStyle.Cropped, hue: Notoriety.GetHue((entity as Mobile).NotorietyFlag), maxwidth: 100, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                    Add(new Label(_name, true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile).NotorietyFlag), maxwidth: 100, align: TEXT_ALIGN_TYPE.TS_CENTER)
 
                     {
                         X = 8,
@@ -687,7 +602,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (!_canChangeName)
                     {
-                        Add(new Label(_name, true, style: FontStyle.Cropped, hue: Notoriety.GetHue((entity as Mobile).NotorietyFlag), maxwidth: 100, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                        Add(new Label(_name, true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile).NotorietyFlag), maxwidth: 100, align: TEXT_ALIGN_TYPE.TS_CENTER)
                         {
                             X = 8,
                             Y = 0
@@ -830,5 +745,44 @@ namespace ClassicUO.Game.UI.Gumps
                 SelectedObject.Object = null;
             }
         }
+
+
+        private class LineCHB : Line
+        {
+            public LineCHB(int x, int y, int w, int h, uint color) : base(x, y, w, h, color)
+            {
+                LineWidth = w;
+                LineColor = Textures.GetTexture(new Color() { PackedValue = color });
+
+                CanMove = true;
+            }
+            public int LineWidth { get; set; }
+            public Texture2D LineColor { get; set; }
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                ResetHueVector();
+                ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, Alpha);
+
+                return batcher.Draw2D(LineColor, x, y, LineWidth, Height, ref _hueVector);
+            }
+        }
+
+        private class TextBoxCHB : TextBox
+        {
+            public TextBoxCHB(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0) : base(font, maxcharlength, maxWidth, width, isunicode, style, hue)
+            {
+            }
+            public int RenderedTextOffset { get; set; }
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                TxEntry.RenderText.Draw(batcher, x + RenderedTextOffset + TxEntry.Offset, y);
+
+                if (IsEditable && HasKeyboardFocus)
+                    TxEntry.RenderCaret.Draw(batcher, x + RenderedTextOffset + TxEntry.Offset + TxEntry.CaretPosition.X, y + TxEntry.CaretPosition.Y);
+
+                return base.Draw(batcher, x, y);
+            }
+        }
+
     }
 }
