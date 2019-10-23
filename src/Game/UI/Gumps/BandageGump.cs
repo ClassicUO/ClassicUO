@@ -179,6 +179,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _updateTime = (float) totalMS + 125;
                 IsVisible = false;
+                Time = 0;
 
                 switch (Engine.GlobalSettings.ShardType)
                 {
