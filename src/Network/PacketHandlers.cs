@@ -1154,10 +1154,12 @@ namespace ClassicUO.Network
                         item.Layer = hold.Layer;
                         item.Container = hold.Container;
                         item.Position = hold.Position;
-                        
+
+
+                        Entity container = null;
                         if (!hold.OnGround)
                         {
-                            Entity container = World.Get(item.Container);
+                            container = World.Get(item.Container);
 
                             if (container != null)
                             {
@@ -1168,9 +1170,6 @@ namespace ClassicUO.Network
                                     mob.Items.Add(item);
 
                                     mob.Equipment[(int) hold.Layer] = item;
-
-                                    mob.Items.ProcessDelta();
-                                    mob.ProcessDelta();
                                 }
                                 else
                                     Log.Message(LogTypes.Warning, "SOMETHING WRONG WITH CONTAINER (should be a mobile)");
@@ -1183,6 +1182,8 @@ namespace ClassicUO.Network
 
                         World.Items.Add(item);
                         item.ProcessDelta();
+                        container?.Items.ProcessDelta();
+                        container?.ProcessDelta();
                         World.Items.ProcessDelta();
 
                         if (item.Layer != 0)
