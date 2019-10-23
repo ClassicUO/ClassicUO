@@ -72,7 +72,6 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _canChangeName;
         private bool _isDead;
         private string _name;
-        private int _oldHits, _oldStam, _oldMana;
 
         private bool _oldWarMode, _normalHits, _poisoned, _yellowHits;
         private bool _outOfRange;
@@ -375,10 +374,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int hits = CalculatePercents(entity.HitsMax, entity.Hits, barW);
 
-                if (hits != _oldHits)
+                if (hits != _bars[0].LineWidth)
                 {
                     _bars[0].LineWidth = hits;
-                    _oldHits = hits;
                 }
 
                 if ((inparty || CanBeSaved) && mobile != null && _bars != null)
@@ -386,16 +384,14 @@ namespace ClassicUO.Game.UI.Gumps
                     int mana = CalculatePercents(mobile.ManaMax, mobile.Mana, barW);
                     int stam = CalculatePercents(mobile.StaminaMax, mobile.Stamina, barW);
 
-                    if (mana != _oldMana)
+                    if (mana != _bars[1].LineWidth)
                     {
                         _bars[1].LineWidth = mana;
-                        _oldMana = mana;
                     }
 
-                    if (stam != _oldStam)
+                    if (stam != _bars[2].LineWidth)
                     {
                         _bars[2].LineWidth = stam;
-                        _oldStam = stam;
                     }
                 }
 
