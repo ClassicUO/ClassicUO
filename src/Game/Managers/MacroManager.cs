@@ -1107,6 +1107,12 @@ namespace ClassicUO.Game.Managers
                         }
                     }
                     break;
+
+                case MacroType.ObjectInfo:
+
+                    CommandManager.Execute("info");
+
+                    break;
             }
 
 
@@ -1421,6 +1427,7 @@ namespace ClassicUO.Game.Managers
         UsePotion,
         CloseAllHealthBars,
         RazorMacro,
+        ObjectInfo,
 
     }
 
