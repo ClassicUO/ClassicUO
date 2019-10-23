@@ -192,11 +192,11 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!_outOfRange)
                 {
                     _outOfRange = true;
+                    textColor = 912;
+
 
                     if (inparty)
                     {
-                        textColor = 912;
-
                         if (_textBox.Hue != textColor)
                             _textBox.Hue = textColor;
 
@@ -213,7 +213,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _textBox.IsEditable = false;
                     }
 
-                    if (_background.Hue != 0)
+                    if (_background.Hue != 912)
                         _background.Hue = 912;
 
                     if (_hpLineRed.LineColor != HPB_COLOR_GRAY)
@@ -314,12 +314,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_background.Hue != barColor)
                 {
-
-                    if (inparty && mobile.IsDead)
-                    {
-                        _background.Hue = 912;
-                    }
-                    else if (mobile.IsDead)
+                    if (mobile != null && mobile.IsDead)
                     {
                         _background.Hue = 912;
                     }
@@ -331,11 +326,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_background.Hue != 912)
                 {
-                    if (inparty && mobile.IsDead)
-                    {
-                        _background.Hue = 912;
-                    }
-                    else if (mobile.IsDead)
+                    if (mobile != null && mobile.IsDead)
                     {
                         _background.Hue = 912;
                     }
@@ -354,7 +345,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (mobile != null && mobile.IsYellowHits && !_yellowHits)
                 {
-
                     _bars[0].LineColor = HPB_COLOR_YELLOW;
 
                     _yellowHits = true;
@@ -362,7 +352,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (!_normalHits && (mobile != null && !mobile.IsPoisoned && !mobile.IsYellowHits) && (_poisoned || _yellowHits))
                 {
-
                     _bars[0].LineColor = HPB_COLOR_BLUE;
 
                     _poisoned = false;
@@ -370,9 +359,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _normalHits = true;
                 }
 
-                int barW = HPB_BAR_WIDTH;
 
-                int hits = CalculatePercents(entity.HitsMax, entity.Hits, barW);
+                int hits = CalculatePercents(entity.HitsMax, entity.Hits, HPB_BAR_WIDTH);
 
                 if (hits != _bars[0].LineWidth)
                 {
@@ -381,8 +369,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if ((inparty || CanBeSaved) && mobile != null && _bars != null)
                 {
-                    int mana = CalculatePercents(mobile.ManaMax, mobile.Mana, barW);
-                    int stam = CalculatePercents(mobile.StaminaMax, mobile.Stamina, barW);
+                    int mana = CalculatePercents(mobile.ManaMax, mobile.Mana, HPB_BAR_WIDTH);
+                    int stam = CalculatePercents(mobile.StaminaMax, mobile.Stamina, HPB_BAR_WIDTH);
 
                     if (mana != _bars[1].LineWidth)
                     {
@@ -532,18 +520,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    Hue textColor = 0x0386;
-                    Hue hitsColor = 0x0386;
-
                     Mobile mobile = entity != null && entity.Serial.IsMobile ? (Mobile) entity : null;
 
                     if (entity != null)
                     {
-                        hitsColor = 0;
                         _canChangeName = mobile != null && mobile.IsRenamable;
-
-                        if (_canChangeName)
-                            textColor = 0x000E;
                     }
 
                     Height = HPB_HEIGHT_SINGLELINE;
@@ -559,8 +540,9 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(_border[1] = new LineCHB(0, HPB_HEIGHT_SINGLELINE - HPB_BORDERSIZE, HPB_WIDTH, HPB_BORDERSIZE, HPB_COLOR_DRAW_BLACK.PackedValue));
                     Add(_border[2] = new LineCHB(0, 0, HPB_BORDERSIZE, HPB_HEIGHT_SINGLELINE, HPB_COLOR_DRAW_BLACK.PackedValue));
                     Add(_border[3] = new LineCHB(HPB_WIDTH - HPB_BORDERSIZE, 0, HPB_BORDERSIZE, HPB_HEIGHT_SINGLELINE, HPB_COLOR_DRAW_BLACK.PackedValue));
+                    
 
-                    Add(_textBox = new TextBoxCHB(1, width: HPB_BAR_WIDTH, isunicode: true, hue: Notoriety.GetHue(mobile.NotorietyFlag), style: FontStyle.Cropped | FontStyle.BlackBorder)
+                    Add(_textBox = new TextBoxCHB(1, width: HPB_BAR_WIDTH, isunicode: true, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray), style: FontStyle.Cropped | FontStyle.BlackBorder)
                     {
                         X = 8,
                         Y = 0,
@@ -574,8 +556,22 @@ namespace ClassicUO.Game.UI.Gumps
                         CanMove = true,
                         Text = _name
                     });
-
                     if (_canChangeName) _textBox.MouseUp += TextBoxOnMouseUp;
+                }
+            }
+
+
+            if (entity == null)
+            {
+                _textBox.Hue = _background.Hue = 912;
+
+                if (_hpLineRed.LineColor != HPB_COLOR_GRAY)
+                {
+                    _hpLineRed.LineColor = HPB_COLOR_GRAY;
+                    _border[0].LineColor = _border[1].LineColor = _border[2].LineColor = _border[3].LineColor = HPB_COLOR_BLACK;
+
+                    if (_manaLineRed != null && _stamLineRed != null)
+                        _manaLineRed.LineColor = _stamLineRed.LineColor = HPB_COLOR_GRAY;
                 }
             }
         }
