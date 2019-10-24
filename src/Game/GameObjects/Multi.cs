@@ -26,10 +26,8 @@ using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
-using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
@@ -113,54 +111,6 @@ namespace ClassicUO.Game.GameObjects
         public override void UpdateGraphicBySeason()
         {
             Graphic = Season.GetSeasonGraphic(World.Season, _originalGraphic);
-            _itemData = FileManager.TileData.StaticData[Graphic];
-        }
-
-        public override void UpdateTextCoordsV()
-        {
-            if (TextContainer == null)
-                return;
-
-            var last = TextContainer.Items;
-
-            while (last?.ListRight != null)
-                last = last.ListRight;
-
-            if (last == null)
-                return;
-
-            int offY = 0;
-
-            int startX = Engine.Profile.Current.GameWindowPosition.X + 6;
-            int startY = Engine.Profile.Current.GameWindowPosition.Y + 6;
-            var scene = Engine.SceneManager.GetScene<GameScene>();
-            float scale = scene?.Scale ?? 1;
-            int x = RealScreenPosition.X;
-            int y = RealScreenPosition.Y;
-
-            x += 22;
-            y += 44;
-
-            if (Texture != null)
-                y -= Texture is ArtTexture t ? (t.ImageRectangle.Height >> 1) : (Texture.Height >> 1);
-
-            for (; last != null; last = last.ListLeft)
-            {
-                if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
-                {
-                    if (offY == 0 && last.Time < Engine.Ticks)
-                        continue;
-
-
-                    last.OffsetY = offY;
-                    offY += last.RenderedText.Height;
-
-                    last.RealScreenPosition.X = startX + (int)((x - (last.RenderedText.Width >> 1)) / scale);
-                    last.RealScreenPosition.Y = startY + (int)((y - offY) / scale);
-                }
-            }
-
-            FixTextCoordinatesInScreen();
         }
 
         public override void Destroy()

@@ -1,4 +1,4 @@
-#region license
+﻿#region license
 
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
@@ -25,7 +25,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
@@ -122,7 +121,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public int FieldsType { get; set; } // 0 = normal, 1 = static, 2 = tile
         [JsonProperty] public bool NoColorObjectsOutOfRange { get; set; }
         [JsonProperty] public bool UseCircleOfTransparency { get; set; }
-        [JsonProperty] public int CircleOfTransparencyRadius { get; set; } = Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS / 2;
+        [JsonProperty] public int CircleOfTransparencyRadius { get; set; } = 5;
         [JsonProperty] public int VendorGumpHeight { get; set; } = 60; //original vendor gump size
         [JsonProperty] public float ScaleZoom { get; set; } = 1.0f;
         [JsonProperty] public float RestoreScaleValue { get; set; } = 1.0f;
@@ -140,13 +139,11 @@ namespace ClassicUO.Configuration
 
         // movements
         [JsonProperty] public bool EnablePathfind { get; set; }
-        [JsonProperty] public bool UseShiftToPathfind { get; set; }
         [JsonProperty] public bool AlwaysRun { get; set; }
         [JsonProperty] public bool SmoothMovements { get; set; } = true;
         [JsonProperty] public bool HoldDownKeyTab { get; set; } = true;
         [JsonProperty] public bool HoldDownKeyAltToCloseAnchored { get; set; } = true;
         [JsonProperty] public bool HoldShiftForContext { get; set; } = false;
-        [JsonProperty] public bool HoldShiftToSplitStack { get; set; } = false;
 
         // general
         [JsonProperty] public Point WindowClientBounds { get; set; } = new Point(600, 480);
@@ -158,7 +155,6 @@ namespace ClassicUO.Configuration
         [JsonProperty] public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
         [JsonProperty] public bool TopbarGumpIsMinimized { get; set; }
         [JsonProperty] public bool TopbarGumpIsDisabled { get; set; }
-        [JsonProperty] public bool UseAlternativeLights { get; set; }
         [JsonProperty] public bool UseCustomLightLevel { get; set; }
         [JsonProperty] public byte LightLevel { get; set; }
         [JsonProperty] public bool UseColoredLights { get; set; } = true;
@@ -167,7 +163,6 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool ActivateChatAfterEnter { get; set; }
         [JsonProperty] public bool ActivateChatAdditionalButtons { get; set; } = true;
         [JsonProperty] public bool ActivateChatShiftEnterSupport { get; set; } = true;
-        [JsonProperty] public bool UseObjectsFading { get; set; } = true;
 
         // Experimental
         [JsonProperty] public bool EnableSelectionArea { get; set; }
@@ -176,7 +171,6 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool DebugGumpIsMinimized { get; set; } = true;
         [JsonProperty] public bool RestoreLastGameSize { get; set; }
         [JsonProperty] public bool CastSpellsByOneClick { get; set; }
-        [JsonProperty] public bool BuffBarTime { get; set; }
         [JsonProperty] public bool AutoOpenDoors { get; set; }
         [JsonProperty] public bool SmoothDoors { get; set; }
         [JsonProperty] public bool AutoOpenCorpses { get; set; }
@@ -196,8 +190,6 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool NameOverheadToggled { get; set; } = false;
         [JsonProperty] public bool ShowTargetRangeIndicator { get; set; }
         [JsonProperty] public bool PartyInviteGump { get; set; }
-        [JsonProperty] public bool CustomBarsToggled { get; set; }
-        [JsonProperty] public bool CBBlackBGToggled { get; set; }
 
         [JsonProperty] public bool ShowInfoBar { get; set; }
         [JsonProperty] public int InfoBarHighlightType { get; set; } // 0 = text colour changes, 1 = underline
@@ -311,12 +303,6 @@ namespace ClassicUO.Configuration
 
         [JsonProperty] public bool JournalDarkMode { get; set; }
 
-        [JsonProperty] public byte ContainersScale { get; set; } = 100;
-
-        [JsonProperty] public bool ScaleItemsInsideContainers { get; set; }
-
-        [JsonProperty] public bool DoubleClickToLootInsideContainers { get; set; }
-
 
         internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(Engine.ExePath, "Data");
@@ -336,14 +322,14 @@ namespace ClassicUO.Configuration
 
             Log.Message(LogTypes.Trace, $"Saving path:\t\t{path}");
 
-            // Save profile settings
+            // save settings.json
             ConfigurationResolver.Save(this, Path.Combine(path, "profile.json"), new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.All,
                 MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
             });
 
-            // Save opened gumps
+            // save gumps.bin
             SaveGumps(path, gumps);
 
             Log.Message(LogTypes.Trace, "Saving done!");

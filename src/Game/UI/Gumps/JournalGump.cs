@@ -29,9 +29,6 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
-using ClassicUO.Renderer;
-using ClassicUO.Utility.Collections;
-using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -94,7 +91,18 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseWheel(MouseEvent delta)
         {
-            _scrollBar.InvokeMouseWheel(delta);
+            switch (delta)
+            {
+                case MouseEvent.WheelScrollUp:
+                    _scrollBar.Value -= 5;
+
+                    break;
+
+                case MouseEvent.WheelScrollDown:
+                    _scrollBar.Value += 5;
+
+                    break;
+            }
         }
 
         protected override void OnInitialize()
@@ -120,7 +128,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             string text = $"{(entry.Name != string.Empty ? $"{entry.Name}: " : string.Empty)}{entry.Text}";
             //TransformFont(ref font, ref asUnicode);
-            _journalEntries.AddEntry(text, entry.Font, entry.Hue, entry.IsUnicode, entry.Time);
+            _journalEntries.AddEntry(text, entry.Font, entry.Hue, entry.IsUnicode);
         }
 
         //private void TransformFont(ref byte font, ref bool asUnicode)
@@ -161,151 +169,5 @@ namespace ClassicUO.Game.UI.Gumps
 
             _scrollBar.MinValue = 0;
         }
-
-        private class RenderedTextList : Control
-        {
-            private readonly Deque<RenderedText> _entries, _hours;
-            private readonly IScrollBar _scrollBar;
-
-            public RenderedTextList(int x, int y, int width, int height, IScrollBar scrollBarControl)
-            {
-                _scrollBar = scrollBarControl;
-                _scrollBar.IsVisible = false;
-                AcceptMouseInput = true;
-                CanMove = true;
-                X = x;
-                Y = y;
-                Width = width;
-                Height = height;
-                _entries = new Deque<RenderedText>();
-                _hours = new Deque<RenderedText>();
-
-                WantUpdateSize = false;
-            }
-
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-            {
-                base.Draw(batcher, x, y);
-
-                int mx = x;
-                int my = y;
-
-                int height = 0;
-                int maxheight = _scrollBar.Value + _scrollBar.Height;
-
-                for (int i = 0; i < _entries.Count; i++)
-                {
-                    var t = _entries[i];
-                    var hour = _hours[i];
-
-                    if (height + t.Height <= _scrollBar.Value)
-                    {
-                        // this entry is above the renderable area.
-                        height += t.Height;
-                    }
-                    else if (height + t.Height <= maxheight)
-                    {
-                        int yy = height - _scrollBar.Value;
-
-                        if (yy < 0)
-                        {
-                            // this entry starts above the renderable area, but exists partially within it.
-                            hour.Draw(batcher, mx, y, t.Width, t.Height + yy, 0, -yy);
-                            t.Draw(batcher, mx + hour.Width, y, t.Width, t.Height + yy, 0, -yy);
-                            my += t.Height + yy;
-                        }
-                        else
-                        {
-                            // this entry is completely within the renderable area.
-                            hour.Draw(batcher, mx, my);
-                            t.Draw(batcher, mx + hour.Width, my);
-                            my += t.Height;
-                        }
-
-                        height += t.Height;
-                    }
-                    else
-                    {
-                        int yyy = maxheight - height;
-                        hour.Draw(batcher, mx, y + _scrollBar.Height - yyy, t.Width, yyy, 0, 0);
-                        t.Draw(batcher, mx + hour.Width, y + _scrollBar.Height - yyy, t.Width, yyy, 0, 0);
-
-                        // can't fit any more entries - so we break!
-                        break;
-                    }
-                }
-
-                return true;
-            }
-
-            public override void Update(double totalMS, double frameMS)
-            {
-                base.Update(totalMS, frameMS);
-                _scrollBar.X = X + Width - (_scrollBar.Width >> 1) + 5;
-                _scrollBar.Height = Height;
-                CalculateScrollBarMaxValue();
-                _scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
-            }
-
-            private void CalculateScrollBarMaxValue()
-            {
-                bool maxValue = _scrollBar.Value == _scrollBar.MaxValue;
-                int height = 0;
-
-                foreach (RenderedText t in _entries)
-                    height += t.Height;
-
-                height -= _scrollBar.Height;
-
-                if (height > 0)
-                {
-                    _scrollBar.MaxValue = height;
-
-                    if (maxValue)
-                        _scrollBar.Value = _scrollBar.MaxValue;
-                }
-                else
-                {
-                    _scrollBar.MaxValue = 0;
-                    _scrollBar.Value = 0;
-                }
-            }
-
-            public void AddEntry(string text, int font, Hue hue, bool isUnicode, DateTime time)
-            {
-                bool maxScroll = _scrollBar.Value == _scrollBar.MaxValue;
-
-                while (_entries.Count > 199)
-                {
-                    _entries.RemoveFromFront().Destroy();
-                    _hours.RemoveFromFront().Destroy();
-                }
-
-                RenderedText h = RenderedText.Create($"{time:t} ", 1150, 1, true, FontStyle.BlackBorder);
-
-                _hours.AddToBack(h);
-
-                _entries.AddToBack(RenderedText.Create(text, hue, (byte)font, isUnicode, FontStyle.Indention | FontStyle.BlackBorder, maxWidth: Width - (18 + h.Width)));
-
-                _scrollBar.MaxValue += _entries[_entries.Count - 1].Height;
-                if (maxScroll) _scrollBar.Value = _scrollBar.MaxValue;
-            }
-
-
-            public override void Dispose()
-            {
-                for (int i = 0; i < _entries.Count; i++)
-                {
-                    _entries[i].Destroy();
-                    _hours[i].Destroy();
-                }
-
-                _entries.Clear();
-                _hours.Clear();
-
-                base.Dispose();
-            }
-        }
-
     }
 }

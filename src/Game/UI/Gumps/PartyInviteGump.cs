@@ -1,12 +1,11 @@
-﻿using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.UI.Controls;
+﻿using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     class PartyInviteGump : Gump
     {
-        public PartyInviteGump(Serial inviter) : base(0, 0)
+        public PartyInviteGump(Serial Inviter) : base(0, 0)
         {
             var partyGumpBackground = new AlphaBlendControl()
             {
@@ -14,12 +13,10 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 80,
                 X = (Engine.Profile.Current.GameWindowSize.X / 2) - 125,
                 Y = 150,
-                Alpha = 0.2f
+                Alpha = 0.1f
             };
 
-            Mobile mobile = World.Mobiles.Get(inviter);
-
-            var text = new Label($"{ (mobile == null || string.IsNullOrEmpty(mobile.Name) ? "[no-name]" : mobile.Name) }\n has invited you to join a party.", true, 15)
+            var text = new Label($"{World.Mobiles.Get(Inviter).Name}\n has invited you to join a party.", true, 15)
             {
                 X = (Engine.Profile.Current.GameWindowSize.X / 2) - 115,
                 Y = 165,
@@ -48,6 +45,11 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Party.Inviter = 0;
                 base.Dispose();
             };
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
         }
     }
 }

@@ -163,9 +163,6 @@ namespace ClassicUO.Game.Scenes
 
         private Gump GetGumpForStep()
         {
-            World.Items.Clear();
-            World.Items.ProcessDelta();
-
             switch (CurrentLoginStep)
             {
                 case LoginStep.Main:
@@ -191,6 +188,7 @@ namespace ClassicUO.Game.Scenes
                     return new ServerSelectionGump();
 
                 case LoginStep.CharCreation:
+
                     return new CharCreationGump();
             }
 
@@ -563,7 +561,7 @@ namespace ClassicUO.Game.Scenes
 
             for (ushort i = 0; i < count; i++)
             {
-                Characters[i] = p.ReadASCII(30).TrimEnd('\0');
+                Characters[i] = p.ReadASCII(30);
                 p.Skip(30);
             }
         }

@@ -105,13 +105,13 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Y = 1;
                 }
             else
-                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, ItemData.IsPartialHue, 0);
+                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
 
             Engine.DebugInfo.MultiRendered++;
 
             if (IsFromTarget)
                 HueVector.Z = 0.5f;
-
+            //SpriteRenderer.DrawStaticArt(Graphic, Hue, (int) position.X, (int) position.Y);
             base.Draw(batcher, posX, posY);
 
             if (ItemData.IsLight)

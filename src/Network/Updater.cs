@@ -194,19 +194,7 @@ namespace ClassicUO.Network
                     string assetName = asset["name"].ToString();
                     string downloadUrl = asset["browser_download_url"].ToString();
 
-                    string temp;
-
-                    try
-                    {
-                        temp = Path.GetTempPath();
-                    }
-                    catch
-                    {
-                        Log.Message(LogTypes.Warning, "Impossible to retrive OS temp path. CUO will use current path");
-                        temp = Engine.ExePath;
-                    }
-
-                    string tempPath = Path.Combine(temp, "update-temp");
+                    string tempPath = Path.Combine(Engine.ExePath, "update-temp");
                     string zipFile = Path.Combine(tempPath, assetName);
 
                     if (!Directory.Exists(tempPath))

@@ -47,7 +47,8 @@ namespace ClassicUO.IO.Resources
             {
                 string path = Path.Combine(FileManager.UoFolderPath, "hues.mul");
 
-                FileSystemHelper.EnsureFileExists(path);
+                if (!File.Exists(path))
+                    throw new FileNotFoundException();
 
                 UOFileMul file = new UOFileMul(path);
                 int groupSize = Marshal.SizeOf<HuesGroup>();
@@ -61,7 +62,8 @@ namespace ClassicUO.IO.Resources
 
                 path = Path.Combine(FileManager.UoFolderPath, "radarcol.mul");
 
-                FileSystemHelper.EnsureFileExists(path);
+                if (!File.Exists(path))
+                    throw new FileNotFoundException();
 
                 UOFileMul radarcol = new UOFileMul(path);
                 RadarCol = radarcol.ReadArray<ushort>((int) radarcol.Length >> 1);

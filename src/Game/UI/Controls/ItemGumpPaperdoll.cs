@@ -74,19 +74,12 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Item item = World.Items.Get(LocalSerial);
-
-            if (item == null)
-            {
-                Dispose();
-            }
-
             if (IsDisposed)
                 return false;
 
             ResetHueVector();
 
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, item.Hue & 0x3FFF, _isPartialHue, Alpha, true);
+            ShaderHuesTraslator.GetHueVector(ref _hueVector, Item.Hue & 0x3FFF, _isPartialHue, Alpha, true);
 
             return batcher.Draw2D(Texture, x, y, ref _hueVector);
         }
@@ -97,30 +90,18 @@ namespace ClassicUO.Game.UI.Controls
             return Texture != null ? Texture.Contains(x, y) : false;
         }
 
-
         public void Update(Item item, bool transparent = false)
         {
             Alpha = transparent ? 0.5f : 0;
-
-            Item currentItem = World.Items.Get(LocalSerial);
-
-            if (item == null)
-            {
-                Dispose();
-            }
-
-            if (IsDisposed)
-                return;
-
-            currentItem.Graphic = item.Graphic;
-            currentItem.Hue = item.Hue;
-            currentItem.CheckGraphicChange();
+            Item.Graphic = item.Graphic;
+            Item.Hue = item.Hue;
+            Item.CheckGraphicChange();
 
             _isPartialHue = item.ItemData.IsPartialHue;
 
             int offset = !Mobile.IsMale ? FEMALE_OFFSET : MALE_OFFSET;
 
-            ushort id = currentItem.ItemData.AnimID;
+            ushort id = Item.ItemData.AnimID;
 
             if (FileManager.Animations.EquipConversions.TryGetValue(Mobile.Graphic, out var dict))
             {

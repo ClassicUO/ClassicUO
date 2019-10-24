@@ -68,7 +68,6 @@ namespace ClassicUO.Game.Scenes
             if (this is GameScene || this is LoginScene)
             {
                 Audio = new AudioManager();
-                Audio.Initialize();
                 Coroutine.Start(this, CleaningResources(), "cleaning resources");
             }
 

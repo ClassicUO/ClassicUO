@@ -279,6 +279,10 @@ namespace ClassicUO.IO.Resources
         private unsafe void ReadStaticArt(ref ArtTexture texture, ushort graphic)
         {
             Rectangle imageRectangle = new Rectangle();
+            imageRectangle.X = 0;
+            imageRectangle.Y = 0;
+            imageRectangle.Width = 0;
+            imageRectangle.Height = 0;
 
             ref readonly var entry = ref GetValidRefEntry(graphic + 0x4000);
 

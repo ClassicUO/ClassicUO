@@ -114,7 +114,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             _background = _hpLineRed = _manaLineRed = _stamLineRed = null;
             _buttonHeal1 = _buttonHeal2 = null;
-            
             _textBox = null;
 
             BuildGump();
@@ -176,7 +175,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (_canChangeName)
                             _textBox.MouseUp -= TextBoxOnMouseUp;
-                        _textBox.IsEditable = false;
                     }
 
                     if (_background.Hue != 0)
@@ -203,19 +201,6 @@ namespace ClassicUO.Game.UI.Gumps
                     Dispose();
 
                     return;
-                }
-
-                if (entity is Mobile mm && _canChangeName != mm.IsRenamable)
-                {
-                    _canChangeName = mm.IsRenamable;
-                    _textBox.MouseUp -= TextBoxOnMouseUp;
-
-                    if (_canChangeName)
-                    {
-                        _textBox.MouseUp += TextBoxOnMouseUp;
-                    }
-                    else
-                        _textBox.IsEditable = false;
                 }
 
                 if (!(mobile != null && mobile.IsDead) && _isDead) _isDead = false;
@@ -590,19 +575,15 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            if (button != MouseButton.Left)
-                return false;
-
             var entity = World.Get(LocalSerial);
 
             if (entity != null)
             {
                 if (entity != World.Player)
                 {
-                    if (World.Player.InWarMode)
+                    if (World.Player.InWarMode && World.Player != entity)
                         GameActions.Attack(entity);
-                    else
-                        GameActions.DoubleClick(entity);
+                    else if (button == MouseButton.Left) GameActions.DoubleClick(entity);
                 }
                 else
                 {

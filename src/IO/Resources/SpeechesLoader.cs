@@ -21,7 +21,6 @@
 
 #endregion
 
-using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -41,10 +40,7 @@ namespace ClassicUO.IO.Resources
                 string path = Path.Combine(FileManager.UoFolderPath, "speech.mul");
 
                 if (!File.Exists(path))
-                {
-                    _speech = Array.Empty<SpeechEntry>();
-                    return;
-                }
+                    throw new FileNotFoundException();
 
                 UOFileMul file = new UOFileMul(path);
                 List<SpeechEntry> entries = new List<SpeechEntry>();

@@ -63,11 +63,10 @@ namespace ClassicUO.Game.Managers
 
             Engine.Input.MouseDragging += (sender, e) =>
             {
-                HandleMouseInput();
+                //HandleMouseInput();  //Unnecessary as _dragOriginX and dragOriginY have been set already.
 
-                //if (_mouseDownControls[0] == MouseOverControl && MouseOverControl != null)
-                if (_mouseDownControls[0] != null)
-                    AttemptDragControl(_mouseDownControls[0], Mouse.Position, true);
+                if (_mouseDownControls[0] == MouseOverControl && MouseOverControl != null)
+                    AttemptDragControl(MouseOverControl, Mouse.Position, true);
 
                 if (_isDraggingControl)
                 {
@@ -102,6 +101,8 @@ namespace ClassicUO.Game.Managers
                         }
                     }
                 }
+                _dragOriginX = Mouse.Position.X;
+                _dragOriginY = Mouse.Position.Y;
             };
 
             Engine.Input.LeftMouseButtonUp += (sender, e) =>
@@ -213,8 +214,6 @@ namespace ClassicUO.Game.Managers
             Engine.Input.TextInput += (sender, e) => { _keyboardFocusControl?.InvokeTextInput(e); };
         }
 
-
-        public float ContainerScale { get; set; } = 1f;
 
         public AnchorManager AnchorManager { get; }
 
@@ -800,10 +799,6 @@ namespace ClassicUO.Game.Managers
 
             Add(gump);
 
-            gump.Initialize();
-            gump.Update(Engine.Ticks, 0);
-            gump.SetInScreen();
-
             return gump;
         }
 
@@ -841,10 +836,6 @@ namespace ClassicUO.Game.Managers
 
         public void RemoveTargetLineGump(Serial serial)
         {
-            TargetLine?.Dispose();
-            Remove<TargetLineGump>();
-            TargetLine = null;
-
             //if (_targetLineGumps.TryGetValue(serial, out TargetLineGump gump))
             //{
             //    gump?.Dispose();
@@ -869,19 +860,6 @@ namespace ClassicUO.Game.Managers
                 if (!c.IsDisposed && (!serial.HasValue || c.LocalSerial == serial) && c is T t)
                 {
                     return t;
-                }
-            }
-
-            return null;
-        }
-
-        public Gump GetGump(Serial serial)
-        {
-            foreach (Control c in Gumps)
-            {
-                if (!c.IsDisposed && c.LocalSerial == serial)
-                {
-                    return c as Gump;
                 }
             }
 
@@ -1151,7 +1129,7 @@ namespace ClassicUO.Game.Managers
                 if (attemptAlwaysSuccessful)
                 {
                     DraggingControl = dragTarget;
-                    if (control == dragTarget && _needSort)
+                    if (IsMouseOverWorld)                   //only for health bars
                     {
                         _dragOriginX = mousePosition.X;
                         _dragOriginY = mousePosition.Y;

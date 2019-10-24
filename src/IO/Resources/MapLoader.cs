@@ -133,7 +133,7 @@ namespace ClassicUO.IO.Resources
                 }
 
                 if (!foundOneMap)
-                    throw new FileNotFoundException("No maps found.");
+                    throw new FileNotFoundException("No maps founded.");
 
                 int mapblocksize = UnsafeMemoryManager.SizeOf<MapBlock>();
 

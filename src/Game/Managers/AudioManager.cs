@@ -24,36 +24,16 @@
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Audio;
-using ClassicUO.Utility.Logging;
-using Microsoft.Xna.Framework.Audio;
 
 namespace ClassicUO.Game.Managers
 {
     internal class AudioManager
     {
         private UOMusic _currentMusic;
-
-        private bool _canReproduceAudio = true;
-
-        public void Initialize()
-        {
-            try
-            {
-                new DynamicSoundEffectInstance(0, AudioChannels.Stereo)
-                    .Dispose();
-            }
-            catch (NoAudioHardwareException ex)
-            {
-                Log.Message(LogTypes.Warning, ex.ToString());
-                _canReproduceAudio = false;
-            }
-        }
+        private int _lastMusicVolume;
 
         public void PlaySound(int index, AudioEffects effect = AudioEffects.None, bool spamCheck = false)
         {
-            if (!_canReproduceAudio)
-                return;
-
             if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableSound)
                 return;
 
@@ -74,9 +54,6 @@ namespace ClassicUO.Game.Managers
 
         public void PlaySoundWithDistance(int index, float volume, bool spamCheck = false)
         {
-            if (!_canReproduceAudio)
-                return;
-
             if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableSound || !Engine.Instance.IsActive && !Engine.Profile.Current.ReproduceSoundsInBackground)
                 return;
 
@@ -90,9 +67,6 @@ namespace ClassicUO.Game.Managers
 
         public void PlayMusic(int music)
         {
-            if (!_canReproduceAudio)
-                return;
-
             if (music >= Constants.MAX_MUSIC_DATA_INDEX_COUNT)
                 return;
 
@@ -131,9 +105,6 @@ namespace ClassicUO.Game.Managers
 
         public void UpdateCurrentMusicVolume()
         {
-            if (!_canReproduceAudio)
-                return;
-
             if (_currentMusic != null)
             {
                 if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableMusic)
@@ -160,9 +131,6 @@ namespace ClassicUO.Game.Managers
 
         public void Update()
         {
-            if (!_canReproduceAudio)
-                return;
-
             if (_currentMusic != null && Engine.Profile.Current != null)
             {
                 if (Engine.Instance.IsActive)

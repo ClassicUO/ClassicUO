@@ -76,13 +76,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetInScreen()
         {
-            if (X > 0 || Y > 0)
-                return;
-            if (Width < Engine.WindowWidth || Height < Engine.WindowHeight)
-                return;
+            if (X >= Engine.Instance.Window.ClientBounds.Width || X < 0)
+                X = 0;
 
-            X = 0;
-            Y = 0;
+            if (Y >= Engine.Instance.Window.ClientBounds.Height || Y < 0)
+                Y = 0;
         }
 
         public virtual void Restore(BinaryReader reader)
@@ -92,8 +90,8 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnDragEnd(int x, int y)
         {
             Point position = Location;
-            int halfWidth = Width - (Width >> 2);
-            int halfHeight = Height - (Height >> 2);
+            int halfWidth = Width >> 1;
+            int halfHeight = Height >> 1;
 
             if (X < -halfWidth)
                 position.X = -halfWidth;
@@ -101,11 +99,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (Y < -halfHeight)
                 position.Y = -halfHeight;
 
-            if (X > Engine.Instance.Window.ClientBounds.Width - (Width - halfWidth))
-                position.X = Engine.Instance.Window.ClientBounds.Width - (Width - halfWidth);
+            if (X > Engine.Batcher.GraphicsDevice.Viewport.Width - halfWidth)
+                position.X = Engine.Batcher.GraphicsDevice.Viewport.Width - halfWidth;
 
-            if (Y > Engine.Instance.Window.ClientBounds.Height - (Height - halfHeight))
-                position.Y = Engine.Instance.Window.ClientBounds.Height - (Height - halfHeight);
+            if (Y > Engine.Batcher.GraphicsDevice.Viewport.Height - halfHeight)
+                position.Y = Engine.Batcher.GraphicsDevice.Viewport.Height - halfHeight;
             Location = position;
         }
 
@@ -116,7 +114,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            if (!IsDisposed && LocalSerial != 0 && !LocalSerial.IsValidLocalGumpSerial)
+            if (LocalSerial != 0 && !LocalSerial.IsValidLocalGumpSerial)
             {
                 List<Serial> switches = new List<Serial>();
                 List<Tuple<ushort, string>> entries = new List<Tuple<ushort, string>>();

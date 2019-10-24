@@ -98,12 +98,9 @@ namespace ClassicUO.Game.UI.Controls
                         World.Player.UpdateAbilities();
                     }
 
-                    // this fix is necessary to clean paperdoll
-                    if (Mobile.HasEquipment && item.Layer >= 0 && (int)item.Layer < Mobile.Equipment.Length)
-                        Mobile.Equipment[(int)item.Layer] = null;
-
-                    _pgumps[(int )item.Layer]?.Dispose();
-                    _pgumps[(int) item.Layer] = null;
+                    ref var gump = ref _pgumps[(int)item.Layer];
+                    gump?.Dispose();
+                    gump = null;
                 }
             }
 
@@ -128,8 +125,9 @@ namespace ClassicUO.Game.UI.Controls
                                 World.Player.UpdateAbilities();
                             }
 
-                            _pgumps[(int) i.Layer]?.Dispose();
-                            _pgumps[(int) i.Layer] = null;
+                            ref var gump = ref _pgumps[(int) i.Layer];
+                            gump?.Dispose();
+                            gump = null;
 
                         }
 
@@ -251,77 +249,41 @@ namespace ClassicUO.Game.UI.Controls
 
 
                     bool invertTunicWithArms = false;
-                    bool isQuiver = false;
 
                     var torso = Mobile.Equipment[(int) Layer.Torso];
-                    var quiver = Mobile.Equipment[(int) Layer.Cloak];
-
-                    if (torso == null && _fakeItem != null && _fakeItem.ItemData.Layer == (int)Layer.Torso)
-                    {
-                        torso = _fakeItem;
-                    }
-
-                    if (quiver == null && _fakeItem != null && _fakeItem.ItemData.Layer == (int)Layer.Cloak)
-                    {
-                        quiver = _fakeItem;
-                    }
 
                     if (torso != null && (torso.Graphic == 0x13BF || torso.Graphic == 0x13C4)) // chainmail tunic
                     {
                         invertTunicWithArms = true;
                     }
 
-                    if (quiver != null && (quiver.Graphic == 0x2FB7 // elven
-                                           || quiver.Graphic == 0x2B02 // infinity
-                                           ))
-                    {
-                        isQuiver = true;
-                    }
-
                     for (int i = 0; i < _layerOrder.Length; i++)
                     {
-                        Layer layerIndex = _layerOrder[i];
+                        int layerIndex = (int) _layerOrder[i];
 
                         if (invertTunicWithArms)
                         {
-                            if (layerIndex == Layer.Arms)
-                                layerIndex = Layer.Torso;
-                            else if (layerIndex == Layer.Torso)
+                            if (layerIndex == (int)Layer.Arms)
+                                layerIndex = (int) Layer.Torso;
+                            else if (layerIndex == (int) Layer.Torso)
                             {
-                                layerIndex = Layer.Arms;
+                                layerIndex = (int) Layer.Arms;
                                 invertTunicWithArms = false;
                             }
                         }
+                        
 
-                        if (isQuiver)
-                        {
-                            if (layerIndex == Layer.Cloak)
-                            {
-                                // skip
-                                continue;
-                            }
-
-                            if (layerIndex == Layer.Torso) // insert here the quiver if needed
-                            {
-                                layerIndex = Layer.Cloak;
-                                i--;
-                                isQuiver = false;
-                            }
-                        }
-
-
-
-                        Item item = _mobile.Equipment[(int) layerIndex];
+                        Item item = _mobile.Equipment[layerIndex];
                         bool isfake = false;
                         bool canPickUp = World.InGame && 
                                          !World.Player.IsDead && 
                                          (_mobile == World.Player || (_paperDollGump != null && _paperDollGump.CanLift)) &&
-                                         layerIndex != Layer.Hair && 
-                                         layerIndex != Layer.Beard;
+                                         layerIndex != (int) Layer.Hair && 
+                                         layerIndex != (int) Layer.Beard;
 
-                        var itemGump = _pgumps[(int)layerIndex];
+                        ref var itemGump = ref _pgumps[layerIndex];
 
-                        if (_fakeItem != null && _fakeItem.ItemData.Layer == (int) layerIndex)
+                        if (_fakeItem != null && _fakeItem.ItemData.Layer == layerIndex)
                         {
                             item = _fakeItem;
                             isfake = true;
@@ -330,7 +292,7 @@ namespace ClassicUO.Game.UI.Controls
                         else if (item == null || item.IsDestroyed)
                         {
                             itemGump?.Dispose();
-                            _pgumps[(int)layerIndex] = null;
+                            itemGump = null;
                             continue;
                         }
 
@@ -346,20 +308,18 @@ namespace ClassicUO.Game.UI.Controls
                                 CanPickUp = canPickUp
                             });
                             itemGump.Initialize();
-                            _pgumps[(int) layerIndex] = itemGump;
                             isNew = true;
                         }
 
-                        if (Mobile.IsCovered(_mobile, layerIndex))
+                        if (Mobile.IsCovered(_mobile, (Layer) layerIndex))
                         {
                             itemGump.IsVisible = false;
                             continue;
                         }
 
-                        g = _pgumps[(int) layerIndex];
+                        g = _pgumps[layerIndex];
 
-
-                        switch (layerIndex)
+                        switch (_layerOrder[i])
                         {
                             case Layer.Hair:
                             case Layer.Beard:
@@ -483,6 +443,8 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
         }
+
+
 
         internal bool IsOverBackpack
         {

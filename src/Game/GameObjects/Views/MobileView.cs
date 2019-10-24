@@ -73,6 +73,8 @@ namespace ClassicUO.Game.GameObjects
             //if (IsDestroyed)
             //    return false;
 
+            ResetHueVector();
+
             DrawCharacter(batcher, posX, posY);
 
             Engine.DebugInfo.MobilesRendered++;
@@ -149,16 +151,18 @@ namespace ClassicUO.Game.GameObjects
             bool isUnderMouse = SelectedObject.LastObject == this && TargetManager.IsTargeting;
             //bool needHpLine = false;
 
-            if (this != World.Player)
+            if (this != World.Player && (isAttack || isUnderMouse || TargetManager.LastTarget == Serial))
             {
-                if (isAttack || isUnderMouse)
-                    _viewHue = Notoriety.GetHue(NotorietyFlag);
+                Hue targetColor = Notoriety.GetHue(NotorietyFlag);
 
-                if (this == TargetManager.LastTarget)
+                if (isAttack || this == TargetManager.LastTarget)
                 {
                     Engine.UI.SetTargetLineGump(this);
                     //needHpLine = true;
                 }
+
+                if (isAttack || isUnderMouse)
+                    _viewHue = targetColor;
             }
 
 
@@ -364,7 +368,7 @@ namespace ClassicUO.Game.GameObjects
                             partialHue = false;
                         }
                     }
-                    ResetHueVector();
+
                     ShaderHuesTraslator.GetHueVector(ref HueVector, hue, partialHue, 0);
 
                     if (_transform)

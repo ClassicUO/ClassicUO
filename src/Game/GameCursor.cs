@@ -357,24 +357,19 @@ namespace ClassicUO.Game
            
             if (_itemHold != null && _itemHold.Enabled && !_itemHold.Dropped)
             {
-                float scale = 1;
-
-                if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
-                    scale = Engine.UI.ContainerScale;
-
-                int x = Mouse.Position.X - (int) (_offset.X * scale);
-                int y = Mouse.Position.Y - (int) (_offset.Y * scale);
+                int x = Mouse.Position.X - _offset.X;
+                int y = Mouse.Position.Y - _offset.Y;
 
                 Vector3 hue = Vector3.Zero;
                 ShaderHuesTraslator.GetHueVector(ref hue, _itemHold.Hue, _itemHold.IsPartialHue, _itemHold.HasAlpha ? .5f : 0);
 
-                sb.Draw2D(_draggedItemTexture, x, y, _rect.Width * scale, _rect.Height * scale, _rect.X, _rect.Y, _rect.Width, _rect.Height, ref hue);
+                sb.Draw2D(_draggedItemTexture, x, y, _rect.X, _rect.Y, _rect.Width, _rect.Height, ref hue);
 
                 if (_itemHold.Amount > 1 && _itemHold.DisplayedGraphic == _itemHold.Graphic && _itemHold.IsStackable)
                 {
                     x += 5;
                     y += 5;
-                    sb.Draw2D(_draggedItemTexture, x, y, _rect.Width * scale, _rect.Height * scale, _rect.X, _rect.Y, _rect.Width, _rect.Height, ref hue);
+                    sb.Draw2D(_draggedItemTexture, x, y, _rect.X, _rect.Y, _rect.Width, _rect.Height, ref hue);
                 }
             }
 
@@ -429,7 +424,7 @@ namespace ClassicUO.Game
                             //    break;
 
                             case ItemGump gumpling:
-                                it = World.Items.Get(gumpling.LocalSerial);
+                                it = gumpling.Item;
 
                                 break;
 

@@ -21,7 +21,6 @@
 
 #endregion
 
-using ClassicUO.Utility;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -49,8 +48,8 @@ namespace ClassicUO.IO.Resources
                 string path = Path.Combine(FileManager.UoFolderPath, "skills.mul");
                 string pathidx = Path.Combine(FileManager.UoFolderPath, "Skills.idx");
 
-                FileSystemHelper.EnsureFileExists(path);
-                FileSystemHelper.EnsureFileExists(pathidx);
+                if (!File.Exists(path) || !File.Exists(pathidx))
+                    throw new FileNotFoundException();
 
                 _file = new UOFileMul(path, pathidx, 0, 16);
                 _file.FillEntries(ref Entries);

@@ -51,7 +51,7 @@ namespace ClassicUO.IO.Audio
             m_MusicInstances = new List<Tuple<DynamicSoundEffectInstance, double>>();
         }
 
-        protected Sound(string name, int index)
+        public Sound(string name, int index)
         {
             Name = name;
             Index = index;

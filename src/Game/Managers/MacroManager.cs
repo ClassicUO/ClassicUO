@@ -1,4 +1,4 @@
-#region license
+﻿#region license
 
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
@@ -155,21 +155,6 @@ namespace ClassicUO.Game.Managers
             return obj;
         }
 
-        public Macro FindMacro(string name)
-        {
-            Macro obj = _firstNode;
-
-            while (obj != null)
-            {
-                if (obj.Name == name)
-                    break;
-
-                obj = obj.Right;
-            }
-
-            return obj;
-        }
-
         public void SetMacroToExecute(MacroObject macro)
         {
             _lastMacro = macro;
@@ -225,7 +210,6 @@ namespace ClassicUO.Game.Managers
                 case MacroType.Emote:
                 case MacroType.Whisper:
                 case MacroType.Yell:
-                case MacroType.RazorMacro:
 
                     MacroObjectString mos = (MacroObjectString) macro;
 
@@ -233,7 +217,6 @@ namespace ClassicUO.Game.Managers
                     {
                         MessageType type = MessageType.Regular;
                         ushort hue = Engine.Profile.Current.SpeechHue;
-                        string prefix = null;
 
                         switch (macro.Code)
                         {
@@ -253,14 +236,9 @@ namespace ClassicUO.Game.Managers
                                 type = MessageType.Yell;
 
                                 break;
-
-                            case MacroType.RazorMacro:
-                                prefix = ">macro ";
-
-                                break;
                         }
 
-                        GameActions.Say(prefix + mos.Text, hue, type);
+                        GameActions.Say(mos.Text, hue, type);
                     }
 
                     break;
@@ -655,13 +633,16 @@ namespace ClassicUO.Game.Managers
                 case MacroType.UseItemInHand:
                     Item itemInLeftHand = World.Player.Equipment[(int)Layer.OneHanded];
                     if (itemInLeftHand != null)
+                    {
                         GameActions.DoubleClick(itemInLeftHand.Serial);
-                    else
+                    } else
                     {
                         Item itemInRightHand = World.Player.Equipment[(int)Layer.TwoHanded];
                         if (itemInRightHand != null)
+                        {
                             GameActions.DoubleClick(itemInRightHand.Serial);
                         }
+                    }
 
                     break;
 
@@ -683,8 +664,7 @@ namespace ClassicUO.Game.Managers
                     }
                     else if (WaitForTargetTimer < Engine.Ticks)
                         WaitForTargetTimer = 0;
-                    else
-                        result = 1;
+                    else result = 1;
 
                     break;
 
@@ -738,7 +718,7 @@ namespace ClassicUO.Game.Managers
                             _itemsInHand[handIndex] = item.Serial;
 
                             GameActions.PickUp(item, 1);
-                            gs.MergeHeldItem(backpack);
+                            GameActions.DropItem(item, Position.INVALID, backpack);
                         }
                     }
 
@@ -957,37 +937,26 @@ namespace ClassicUO.Game.Managers
                 case MacroType.SelectNext:
                 case MacroType.SelectPrevious:
                 case MacroType.SelectNearest:
-                    // scanRange:
-                    // 0 - SelectNext
-                    // 1 - SelectPrevious
-                    // 2 - SelectNearest
+                    // TODO:
+                    int scantype = macro.SubCode - MacroSubType.Hostile;
                     int scanRange = macro.Code - MacroType.SelectNext;
 
-                    // scantype:
-                    // 0 - Hostile (only hostile mobiles: gray, criminal, enemy, murderer)
-                    // 1 - Party (only party members)
-                    // 2 - Follower (only your followers)
-                    // 3 - Object (???)
-                    // 4 - Mobile (any mobiles)
-                    int scantype = macro.SubCode - MacroSubType.Hostile;
 
                     switch (scanRange)
                     {
                         case 0:
-                            //GameActions.MessageOverhead($"SelectNext ({scantype})", World.Player);
-                            TargetManager.SelectNextMobile(scantype);
+
                             break;
 
                         case 1:
-                            //GameActions.MessageOverhead($"SelectPrevious ({scantype})", World.Player);
-                            TargetManager.SelectPreviousMobile(scantype);
+
                             break;
 
                         case 2:
-                            //GameActions.MessageOverhead($"SelectNearest ({scantype})", World.Player);
-                            TargetManager.SelectNearestMobile(scantype);
+
                             break;
                     }
+
 
                     break;
 
@@ -1098,11 +1067,10 @@ namespace ClassicUO.Game.Managers
                         GameActions.DoubleClick(potion);
 
                     break;
+                    
+                 case MacroType.CloseAllHealthBars:
 
-                case MacroType.CloseAllHealthBars:
-
-                    //Includes HealthBarGump/HealthBarGumpCustom
-                    var healthBarGumps = Engine.UI.Gumps.OfType<AnchorableGump>().Where(g => g is HealthBarGump || g is HealthBarGumpCustom);
+                    var healthBarGumps = Engine.UI.Gumps.OfType<HealthBarGump>();
 
                     foreach (var healthbar in healthBarGumps)
                     {
@@ -1146,7 +1114,7 @@ namespace ClassicUO.Game.Managers
             if (other == null)
                 return false;
 
-            return Key == other.Key && Alt == other.Alt && Ctrl == other.Ctrl && Shift == other.Shift && Name == other.Name;
+            return Key == other.Key && Alt == other.Alt && Ctrl == other.Ctrl && Shift == other.Shift;
         }
 
         [JsonIgnore] public Macro Left { get; set; }
@@ -1165,7 +1133,6 @@ namespace ClassicUO.Game.Managers
                 case MacroType.Delay:
                 case MacroType.SetUpdateRange:
                 case MacroType.ModifyUpdateRange:
-                case MacroType.RazorMacro:
                     obj = new MacroObjectString(code, MacroSubType.MSC_NONE);
 
                     break;
@@ -1311,7 +1278,6 @@ namespace ClassicUO.Game.Managers
                 case MacroType.Delay:
                 case MacroType.SetUpdateRange:
                 case MacroType.ModifyUpdateRange:
-                case MacroType.RazorMacro:
                     HasSubMenu = 2;
 
                     break;
@@ -1426,7 +1392,6 @@ namespace ClassicUO.Game.Managers
         UseItemInHand,
         UsePotion,
         CloseAllHealthBars,
-        RazorMacro,
 
     }
 

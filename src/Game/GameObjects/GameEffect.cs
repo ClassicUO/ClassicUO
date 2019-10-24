@@ -31,7 +31,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal abstract class GameEffect : GameObject
     {
-        public AnimDataFrame2 AnimDataFrame;
+        protected AnimDataFrame2 AnimDataFrame;
 
         protected GameEffect()
         {
@@ -72,7 +72,6 @@ namespace ClassicUO.Game.GameObjects
         public bool IsItemEffect => Source is Static;
 
         public long Duration { get; set; } = -1;
-
 
         public void Load()
         {

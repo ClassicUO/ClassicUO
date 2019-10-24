@@ -80,6 +80,17 @@ namespace ClassicUO.Network
             }
         }
 
+        public void OnPacket(Packet p)
+        {
+            var handler = _handlers[p.ID];
+
+            if (handler != null)
+            {
+                p.MoveToData();
+                handler(p);
+            }
+        }
+
         private List<Serial> _clilocRequests = new List<Serial>();
 
         public static void Load()
@@ -248,11 +259,6 @@ namespace ClassicUO.Network
             {
                 Serial id1 = p.ReadUInt();
                 Serial id2 = p.ReadUInt();
-
-                // standard client doesn't allow the trading system if one of the traders is invisible (=not sent by server)
-                if (World.Get(id1) == null || World.Get(id2) == null)
-                    return;
-
                 bool hasName = p.ReadBool();
                 string name = string.Empty;
 
@@ -589,12 +595,6 @@ namespace ClassicUO.Network
             }
 
             item.LightID = direction;
-            if (item.Container.IsValid)
-            {
-                var cont = World.Get(item.Container);
-                cont.Items.Remove(item.Serial);
-                cont.ProcessDelta();
-            }
             item.Container = Serial.INVALID;
             item.CheckGraphicChange();
             item.ProcessDelta();
@@ -702,12 +702,12 @@ namespace ClassicUO.Network
 
             if (serial.IsItem)
             {
-                Item it = (Item)entity;
+                Item it = (Item) entity;
                 uint cont = it.Container & 0x7FFFFFFF;
 
                 if (it.Container.IsValid)
                 {
-                    Entity top = World.Get(it.RootContainer);
+                    Entity top = it.Items.FirstOrDefault();
 
                     if (top != null)
                     {
@@ -739,10 +739,13 @@ namespace ClassicUO.Network
 
                 if (World.Party.Contains(serial))
                 {
-                    // m.RemoveFromTile();
+                   // m.RemoveFromTile();
                 }
-                // else
+               // else
                 {
+
+
+
                     World.RemoveMobile(serial, true);
                     m.Items.ProcessDelta();
                     World.Items.ProcessDelta();
@@ -751,22 +754,18 @@ namespace ClassicUO.Network
             }
             else if (serial.IsItem)
             {
-                Item it = (Item)entity;
+                Item it = (Item) entity;
 
                 if (it.IsMulti)
                     World.HouseManager.Remove(it);
 
+                World.RemoveItem(it, true);
                 Entity cont = World.Get(it.Container);
 
                 if (cont != null)
                 {
                     cont.Items.Remove(it);
                     cont.Items.ProcessDelta();
-
-                    if (it.Layer != Layer.Invalid)
-                    {
-                        Engine.UI.GetGump<PaperDollGump>(cont)?.Update();
-                    }
 
                     if (Engine.Profile.Current.GridLootType > 0)
                     {
@@ -776,7 +775,6 @@ namespace ClassicUO.Network
                     }
                 }
 
-                World.RemoveItem(it, true);
                 World.Items.ProcessDelta();
 
                 if (updateAbilities)
@@ -822,7 +820,6 @@ namespace ClassicUO.Network
             }
 #else
             World.Player.CloseBank();
-
             World.Player.Walker.WalkingFailed = false;
             World.Player.Position = new Position(x, y, z);
             World.RangeSize.X = x;
@@ -855,9 +852,6 @@ namespace ClassicUO.Network
 
             if (scene != null)
                 scene.UpdateDrawPosition = true;
-
-
-            World.Player.CloseRangedGumps();
         }
 
         private static void DenyWalk(Packet p)
@@ -920,8 +914,7 @@ namespace ClassicUO.Network
             else if (graphic == 0x0EEA)
                 graphic = 0x0EEC;
             else if (graphic == 0x0EF0) graphic = 0x0EF2;
-
-            Mobile entity = World.Mobiles.Get(source);
+            Entity entity = World.Get(source);
 
             if (entity == null)
                 source = 0;
@@ -932,7 +925,7 @@ namespace ClassicUO.Network
                 sourceZ = entity.Position.Z;
             }
 
-            Mobile destEntity = World.Mobiles.Get(dest);
+            Entity destEntity = World.Get(dest);
 
             if (destEntity == null)
                 dest = 0;
@@ -943,37 +936,8 @@ namespace ClassicUO.Network
                 destZ = destEntity.Position.Z;
             }
 
-            GameEffect effect;
-
-
-            if (!source.IsValid || !dest.IsValid)
-            {
-                effect = new MovingEffect(source, dest, sourceX, sourceY, sourceZ,
-                                          destX, destY, destZ, graphic, hue, true)
-                {
-                    Duration = Engine.Ticks + 5000,
-                    MovingDelay = 5
-                };
-            }
-            else
-            {
-                effect = new DragEffect(source, dest, sourceX, sourceY, sourceZ,
-                                        destX, destY, destZ, graphic, hue)
-                {
-                    Duration = Engine.Ticks + 5000
-                };
-            }
-
-            if (effect.AnimDataFrame.FrameCount != 0)
-            {
-                effect.Speed = effect.AnimDataFrame.FrameInterval * 45;
-            }
-            else
-            {
-                effect.Speed = 13;
-            }
-
-            World.AddEffect(effect);
+            Log.Message(LogTypes.Warning, "DragAnimation [0x23] not implemented yet");
+            // effect moving. To do
         }
 
         private static void OpenContainer(Packet p)
@@ -1089,7 +1053,8 @@ namespace ClassicUO.Network
             if (containerSerial.IsMobile)
             {
                 Mobile m = World.Mobiles.Get(containerSerial);
-                Item secureBox = m?.GetSecureTradeBox();
+                Item secureBox = m.GetSecureTradeBox();
+
                 if (secureBox != null)
                 {
                     var gump = Engine.UI.Gumps.OfType<TradingGump>().SingleOrDefault(s => s.LocalSerial == secureBox || s.ID1 == secureBox || s.ID2 == secureBox);
@@ -1154,12 +1119,10 @@ namespace ClassicUO.Network
                         item.Layer = hold.Layer;
                         item.Container = hold.Container;
                         item.Position = hold.Position;
-
-
-                        Entity container = null;
+                        
                         if (!hold.OnGround)
                         {
-                            container = World.Get(item.Container);
+                            Entity container = World.Get(item.Container);
 
                             if (container != null)
                             {
@@ -1170,6 +1133,9 @@ namespace ClassicUO.Network
                                     mob.Items.Add(item);
 
                                     mob.Equipment[(int) hold.Layer] = item;
+
+                                    mob.Items.ProcessDelta();
+                                    mob.ProcessDelta();
                                 }
                                 else
                                     Log.Message(LogTypes.Warning, "SOMETHING WRONG WITH CONTAINER (should be a mobile)");
@@ -1182,12 +1148,7 @@ namespace ClassicUO.Network
 
                         World.Items.Add(item);
                         item.ProcessDelta();
-                        container?.Items.ProcessDelta();
-                        container?.ProcessDelta();
                         World.Items.ProcessDelta();
-
-                        if (item.Layer != 0)
-                            Engine.UI.GetGump<PaperDollGump>(item.Container)?.Update();
                     }
                 }
 
@@ -1198,7 +1159,7 @@ namespace ClassicUO.Network
 
             byte code = p.ReadByte();
 
-            if (code < 5) Chat.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 1001, MessageType.System, 3);
+            if (code < 5) Chat.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 0, MessageType.System, 3);
         }
 
         private static void EndDraggingItem(Packet p)
@@ -1230,7 +1191,6 @@ namespace ClassicUO.Network
 
             if (action != 1)
             {
-                Engine.SceneManager.GetScene<GameScene>()?.Weather?.Reset();
                 Engine.SceneManager.CurrentScene.Audio.PlayMusic(42);
 
                 if (Engine.Profile.Current.EnableDeathScreen)
@@ -1543,9 +1503,6 @@ namespace ClassicUO.Network
 
         private static void PlaySoundEffect(Packet p)
         {
-            if (World.Player == null)
-                return;
-
             p.Skip(1);
 
             ushort index = p.ReadUShort();
@@ -1553,6 +1510,7 @@ namespace ClassicUO.Network
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
             ushort z = p.ReadUShort();
+
 
             int distX = Math.Abs(x - World.Player.X);
             int distY = Math.Abs(y - World.Player.Y);
@@ -1578,7 +1536,7 @@ namespace ClassicUO.Network
 
         private static void LoginComplete(Packet p)
         {
-            if (World.Player != null && Engine.SceneManager.CurrentScene is LoginScene)
+            if (World.Player != null)
             {
                 Engine.SceneManager.ChangeScene(ScenesType.Game);
 
@@ -1642,50 +1600,6 @@ namespace ClassicUO.Network
 
         private static void SetWeather(Packet p)
         {
-            var scene = Engine.SceneManager.GetScene<GameScene>();
-            if (scene == null)
-                return;
-
-            var weather = scene.Weather;
-
-            weather.Reset();
-
-            byte type = p.ReadByte();
-            weather.Type = type;
-            weather.Count = p.ReadByte();
-
-            bool showMessage = (weather.Count > 0);
-
-            if (weather.Count > 70)
-                weather.Count = 70;
-
-            weather.Temperature = p.ReadByte();
-            weather.Timer = Engine.Ticks + Constants.WEATHER_TIMER;
-            weather.Generate();
-
-            switch (type)
-            {
-                case 0:
-                    if (showMessage)
-                        GameActions.Print("It begins to rain.", 0, MessageType.System, 3, false );
-                    break;
-                case 1:
-                    if (showMessage)
-                        GameActions.Print("A fierce storm approaches.", 0, MessageType.System, 3, false);
-                    break;
-                case 2:
-                    if (showMessage)
-                        GameActions.Print("It begins to snow.", 0, MessageType.System, 3, false);
-                    break;
-                case 3:
-                    if (showMessage)
-                        GameActions.Print("A storm is brewing.", 0, MessageType.System, 3, false);
-                    break;
-                case 0xFE:
-                case 0xFF:
-                    weather.Timer = 0;
-                    break;
-            }
         }
 
         private static void BookData(Packet p)
@@ -2435,9 +2349,7 @@ namespace ClassicUO.Network
 
         private static void MultiPlacement(Packet p)
         {
-            if (World.Player == null)
-                return;
-
+            Log.Message(LogTypes.Warning, $"Packet 0x{p.ID:X2} `MultiPlacement` not implemented yet.");
             var allowGround = p.ReadBool();
             var targID = p.ReadUInt();
             var flags = p.ReadByte();
@@ -2903,19 +2815,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 case 4: // close generic gump 
                     Serial ser = p.ReadUInt();
-                    int button = (int) p.ReadUInt();
-
-                    var gumpToClose = Engine.UI.Gumps.OfType<Gump>()
-                                     .FirstOrDefault(s => !s.IsDisposed && s.ServerSerial == ser);
-
-                    if (gumpToClose != null)
-                    {
-                        if (button != 0)
-                            gumpToClose.OnButtonClick(button);
-                        else
-                            Engine.UI.SavePosition(ser, gumpToClose.Location);
-                        gumpToClose.Dispose();
-                    }
+                    Engine.UI.Gumps.OfType<Gump>().FirstOrDefault(s => !s.IsDisposed && s.ServerSerial == ser)?.OnButtonClick((int) p.ReadUInt());
 
                     break;
 
@@ -3881,12 +3781,12 @@ namespace ClassicUO.Network
                     }
 
                     item.Position = position;
+                    item.CheckGraphicChange(item.AnimIndex);
                     item.ProcessDelta();
 
                     if (World.Items.Add(item))
                         World.Items.ProcessDelta();
 
-                    item.CheckGraphicChange(item.AnimIndex);
                     item.AddToTile();
                 }
                 else
@@ -3994,8 +3894,6 @@ namespace ClassicUO.Network
 
                 if (scene != null)
                     scene.UpdateDrawPosition = true;
-
-                World.Player.CloseRangedGumps();
             }
         }
 
@@ -4091,16 +3989,14 @@ namespace ClassicUO.Network
                 return;
             }
 
+
             Item item = World.Items.Get(serial);
+
 
             if (serial.IsMobile) Log.Message(LogTypes.Warning, "AddItemToContainer function adds mobile as Item");
 
             if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
             {
-                Engine.UI.GetGump(item.Serial)?.Dispose();
-
-                item.Destroy();
-
                 Entity initcontainer = World.Get(item.Container);
 
                 if (initcontainer != null)
@@ -4109,8 +4005,7 @@ namespace ClassicUO.Network
                     initcontainer.Items.Remove(item);
                     initcontainer.ProcessDelta();
                 }
-                else if (item.Container.IsValid) 
-                    Log.Message(LogTypes.Warning, $"This item ({item.Serial}) has a container ({item.Container}), but cannot be found. :|");
+                else if (item.Container.IsValid) Log.Message(LogTypes.Warning, $"This item ({item.Serial}) has a container ({item.Container}), but cannot be found. :|");
 
                 World.Items.Remove(item);
                 World.Items.ProcessDelta();

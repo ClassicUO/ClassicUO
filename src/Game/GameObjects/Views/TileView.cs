@@ -119,7 +119,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void ApplyStrech(int x, int y, sbyte z)
+        private void UpdateStreched(int x, int y, sbyte z)
         {
             Map.Map map = World.Map;
 

@@ -116,7 +116,7 @@ namespace ClassicUO.Game.Map
                         ushort tileX = (ushort) (bx + x);
                         ushort tileY = (ushort) (by + y);
 
-                        land.ApplyStrech(tileX, tileY, z);
+                        land.Calculate(tileX, tileY, z);
                         land.Position = new Position(tileX, tileY, z);
 
                         land.AddToTile(Tiles[x, y]);
@@ -239,7 +239,7 @@ namespace ClassicUO.Game.Map
                         ushort tileX = (ushort) (bx + x);
                         ushort tileY = (ushort) (by + y);
 
-                        land.ApplyStrech(tileX, tileY, z);
+                        land.Calculate(tileX, tileY, z);
                         land.Position = new Position(tileX, tileY, z);
 
                         land.AddToTile(Tiles[x, y]);

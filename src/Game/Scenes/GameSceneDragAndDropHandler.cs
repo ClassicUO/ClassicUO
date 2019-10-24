@@ -44,14 +44,14 @@ namespace ClassicUO.Game.Scenes
         public bool IsHoldingItem => HeldItem != null && HeldItem.Enabled;
 
 
-        public void MergeHeldItem(Entity container)
+        public void MergeHeldItem(Entity entity)
         {
-            if (HeldItem.Enabled && HeldItem.Serial != container)
+            if (HeldItem.Enabled && HeldItem.Serial != entity)
             {
-                if (container.Serial.IsMobile)
-                    GameActions.DropItem(HeldItem.Serial, 0xFFFF, 0xFFFF, 0, container.Serial);
-                else if (container.Serial.IsItem)
-                    GameActions.DropItem(HeldItem.Serial, container.Position.X, container.Position.Y, container.Position.Z, container.Serial);
+                if (entity.Serial.IsMobile)
+                    GameActions.DropItem(HeldItem.Serial, 0xFFFF, 0xFFFF, 0, entity.Serial);
+                else if (entity.Serial.IsItem)
+                    GameActions.DropItem(HeldItem.Serial, entity.Position.X, entity.Position.Y, entity.Position.Z, entity.Serial);
 
                 HeldItem.Enabled = false;
                 HeldItem.Dropped = true;
@@ -63,23 +63,20 @@ namespace ClassicUO.Game.Scenes
             if (World.Player.IsDead || item == null || item.IsDestroyed || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
                 return false;
 
-            if (!amount.HasValue && item.Amount > 1 && item.ItemData.IsStackable)
+            if (!_isShiftDown && !amount.HasValue && item.Amount > 1 && item.ItemData.IsStackable)
             {
-                if (Engine.Profile.Current.HoldShiftToSplitStack == _isShiftDown)
+                if (Engine.UI.GetGump<SplitMenuGump>(item) != null)
+                    return false;
+
+                SplitMenuGump gump = new SplitMenuGump(item, new Point(x, y))
                 {
-                    if (Engine.UI.GetGump<SplitMenuGump>(item) != null)
-                        return false;
+                    X = Mouse.Position.X - 80,
+                    Y = Mouse.Position.Y - 40
+                };
+                Engine.UI.Add(gump);
+                Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
 
-                    SplitMenuGump gump = new SplitMenuGump(item, new Point(x, y))
-                    {
-                        X = Mouse.Position.X - 80,
-                        Y = Mouse.Position.Y - 40
-                    };
-                    Engine.UI.Add(gump);
-                    Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
-
-                    return true;
-                }
+                return true;
             }
 
             return PickupItemDirectly(item, x, y, amount ?? item.Amount);
@@ -165,36 +162,17 @@ namespace ClassicUO.Game.Scenes
                 {
                     Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
                     ArtTexture texture = FileManager.Art.GetTexture(HeldItem.DisplayedGraphic);
-                    float scale = Engine.UI.ContainerScale;
-
-                    bounds.X = (int)(bounds.X * scale);
-                    bounds.Y = (int)(bounds.Y * scale);
-                    bounds.Width = (int) (bounds.Width * scale);
-                    bounds.Height = (int)(bounds.Height * scale);
 
                     if (texture != null && !texture.IsDisposed)
                     {
-                        int textureW, textureH;
+                        x -= texture.Width >> 1;
+                        y -= texture.Height >> 1;
 
-                        if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
-                        {
-                            textureW = (int)(texture.Width * scale);
-                            textureH = (int)(texture.Height * scale);
-                        }
-                        else
-                        {
-                            textureW = texture.Width;
-                            textureH = texture.Height;
-                        }
+                        if (x + texture.Width > bounds.Width)
+                            x = bounds.Width - texture.Width;
 
-                        x -= textureW >> 1;
-                        y -= textureH >> 1;
-
-                        if (x + textureW > bounds.Width)
-                            x = bounds.Width - textureW;
-
-                        if (y + textureH > bounds.Height)
-                            y = bounds.Height - textureH;
+                        if (y + texture.Height > bounds.Height)
+                            y = bounds.Height - texture.Height;
                     }
 
                     if (x < bounds.X)
@@ -202,9 +180,6 @@ namespace ClassicUO.Game.Scenes
 
                     if (y < bounds.Y)
                         y = bounds.Y;
-
-                    x = (int)(x / scale);
-                    y = (int)(y / scale);
                 }
                 else
                 {

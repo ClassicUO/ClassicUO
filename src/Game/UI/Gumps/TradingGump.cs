@@ -22,7 +22,6 @@
 #endregion
 
 using System;
-using System.IO;
 using System.Linq;
 
 using ClassicUO.Game.GameObjects;
@@ -99,7 +98,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (container == null)
                 return;
 
-            foreach (ItemGump v in _myBox.Children.OfType<ItemGump>().Where(s => container.Items.Contains(s.LocalSerial)))
+            foreach (ItemGump v in _myBox.Children.OfType<ItemGump>().Where(s => s.Item != null && container.Items.Contains(s.Item)))
                 v.Dispose();
 
             foreach (Item item in container.Items)
@@ -137,7 +136,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (container == null)
                 return;
 
-            foreach (ItemGump v in _hisBox.Children.OfType<ItemGump>().Where(s => container.Items.Contains(s.LocalSerial)))
+            foreach (ItemGump v in _hisBox.Children.OfType<ItemGump>().Where(s => s.Item != null && container.Items.Contains(s.Item)))
                 v.Dispose();
 
             foreach (Item item in container.Items)
@@ -182,39 +181,20 @@ namespace ClassicUO.Game.UI.Gumps
             _myCheckbox?.Dispose();
             _hisPic?.Dispose();
 
-            int myX, myY, otherX, otherY;
-
-            if (FileManager.ClientVersion >= ClientVersions.CV_704565)
-            {
-                myX = 37;
-                myY = 29;
-
-                otherX = 258;
-                otherY = 240;
-            }
-            else
-            {
-                myX = 52;
-                myY = 29;
-
-                otherX = 266;
-                otherY = 160;
-            }
-
             if (ImAccepting)
             {
                 _myCheckbox = new Checkbox(0x0869, 0x086A)
                 {
-                    X = myX,
-                    Y = myY
+                    X = 52,
+                    Y = 29
                 };
             }
             else
             {
                 _myCheckbox = new Checkbox(0x0867, 0x0868)
                 {
-                    X = myX,
-                    Y = myY
+                    X = 52,
+                    Y = 29
                 };
             }
 
@@ -224,8 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_myCheckbox);
 
 
-            _hisPic = HeIsAccepting ? new GumpPic(otherX, otherY, 0x0869, 0) :
-                          new GumpPic(otherX, otherY, 0x0867, 0);
+            _hisPic = HeIsAccepting ? new GumpPic(266, 160, 0x0869, 0) : new GumpPic(266, 160, 0x0867, 0);
 
             Add(_hisPic);
         }
@@ -233,40 +212,22 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            if (FileManager.ClientVersion >= ClientVersions.CV_704565)
-            {
-                Add(new GumpPic(0, 0, 0x088A, 0));
-                Add(new Label(World.Player.Name, false, 0x0481, font: 3)
-                        { X = 73, Y = 32 });
-                int fontWidth = 250 - FileManager.Fonts.GetWidthASCII(3, _name);
+            //Clear();
 
-                Add(new Label(_name, false, 0x0481, font: 3)
-                        { X = fontWidth, Y = 244 });
-            }
-            else
-            {
-                Add(new GumpPic(0, 0, 0x0866, 0));
-                Add(new Label(World.Player.Name, false, 0x0386, font: 1)
-                        { X = 84, Y = 40 });
-                int fontWidth = 260 - FileManager.Fonts.GetWidthASCII(1, _name);
-
-                Add(new Label(_name, false, 0x0386, font: 1)
-                        { X = fontWidth, Y = 170 });
-            }
-
+            Add(new GumpPic(0, 0, 0x0866, 0));
 
             if (FileManager.ClientVersion < ClientVersions.CV_500A)
             {
-                Add(new ColorBox(110, 60, 0, 0xFF000001)
-                {
-                    X = 45, Y = 90
-                });
-                Add(new ColorBox(110, 60, 0, 0xFF000001)
-                {
-                    X = 192, Y = 70
-                });
+                // TODO: implement
             }
 
+            Add(new Label(World.Player.Name, false, 0x0386, font: 1)
+                    {X = 84, Y = 40});
+
+            int fontWidth = 260 - FileManager.Fonts.GetWidthASCII(1, _name);
+
+            Add(new Label(_name, false, 0x0386, font: 1)
+                    {X = fontWidth, Y = 170});
 
             Add(_myBox = new DataBox(45, 70, 110, 80)
             {

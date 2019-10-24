@@ -46,7 +46,8 @@ namespace ClassicUO.IO.Resources
             {
                 string path = Path.Combine(FileManager.UoFolderPath, "tiledata.mul");
 
-                FileSystemHelper.EnsureFileExists(path);
+                if (!File.Exists(path))
+                    throw new FileNotFoundException();
 
                 UOFileMul tiledata = new UOFileMul(path);
                 bool isold = FileManager.ClientVersion < ClientVersions.CV_7090;

@@ -26,7 +26,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.Renderer;
@@ -421,6 +420,8 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (AcceptKeyboardInput && !HasKeyboardFocus) Engine.UI.KeyboardFocusControl = this;
         }
+
+        public event EventHandler Disposed;
 
         internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseOver, MouseEnter, MouseExit, DragBegin, DragEnd;
 
@@ -859,14 +860,17 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return;
 
-            foreach (Control c in Children)
+            for (int i = 0; i < Children.Count; i++)
             {
+                Control c = Children[i];
                 c.Dispose();
             }
 
             Children.Clear();
 
             IsDisposed = true;
+
+            Disposed.Raise();
         }
     }
 }

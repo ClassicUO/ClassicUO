@@ -29,12 +29,6 @@ namespace ClassicUO.Utility
             return path;
         }
 
-        public static void EnsureFileExists(string path)
-        {
-            if (!File.Exists(path))
-                throw new FileNotFoundException(path);
-        }
-
 
         public static void CopyAllTo(this DirectoryInfo source, DirectoryInfo target)
         {

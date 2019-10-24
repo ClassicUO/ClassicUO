@@ -27,7 +27,6 @@ using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
@@ -46,8 +45,8 @@ namespace ClassicUO.IO.Resources
                 string path = Path.Combine(FileManager.UoFolderPath, "texmaps.mul");
                 string pathidx = Path.Combine(FileManager.UoFolderPath, "texidx.mul");
 
-                FileSystemHelper.EnsureFileExists(path);
-                FileSystemHelper.EnsureFileExists(pathidx);
+                if (!File.Exists(path) || !File.Exists(pathidx))
+                    throw new FileNotFoundException();
 
                 _file = new UOFileMul(path, pathidx, Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT, 10);
                 _file.FillEntries(ref Entries);

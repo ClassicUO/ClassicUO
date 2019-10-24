@@ -111,20 +111,11 @@ namespace ClassicUO.Game.UI.Gumps
             int w = Engine.Profile.Current.GameWindowSize.X;
             int h = Engine.Profile.Current.GameWindowSize.Y;
 
-            x = gx + Mobile.RealScreenPosition.X;
-            y = gy + Mobile.RealScreenPosition.Y;
+            x = (int) ((Mobile.RealScreenPosition.X + Mobile.Offset.X - (Width >> 1) + 22) / scale);
+            y = (int) ((Mobile.RealScreenPosition.Y + Mobile.Offset.Y - Mobile.Offset.Z + 22) / scale);
 
-            x += (int) Mobile.Offset.X + 22;
-            y += (int) (Mobile.Offset.Y - Mobile.Offset.Z) + 22;
-
-            x = (int) (x / scale);
-            y = (int) (y / scale);
-            x -= (int) (gx / scale);
-            y -= (int) (gy / scale);
-            x += gx;
+            x += gx + 6;
             y += gy;
-
-            x -= 12;
 
             X = x;
             Y = y;

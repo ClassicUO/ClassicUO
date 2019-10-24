@@ -55,15 +55,5 @@ namespace ClassicUO.Game.UI.Controls
             else
                 gs.Audio.PlaySound(0x0051);
         }
-
-        public override bool Contains(int x, int y)
-        {
-            float scale = Engine.UI.ContainerScale;
-
-            x = (int)(x / scale);
-            y = (int)(y / scale);
-
-            return base.Contains(x, y);
-        }
     }
 }

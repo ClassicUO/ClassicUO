@@ -70,24 +70,20 @@ namespace ClassicUO.Game.UI.Gumps
             _transactionItems = new Dictionary<Item, TransactionItem>();
             _shopItems = new Dictionary<Item, ShopItem>();
             _updateTotal = false;
-
             int add = isBuyGump ? 0 : 6;
-
             GumpPic pic = new GumpPic(0, 0, _shopGumpParts[0 + add], 0);
+            pic.Add(_middleGumpLeft = new GumpPicTiled(0, 64, pic.Width, height, _shopGumpParts[1 + add]));
+            pic.Add(new GumpPic(0, _middleGumpLeft.Height + _middleGumpLeft.Y, _shopGumpParts[2 + add], 0));
             Add(pic);
-            pic = new GumpPic(250, 144, _shopGumpParts[3 + add], 0);
-            Add(pic);
-
-            Add(_middleGumpLeft = new GumpPicTiled(0, 64, pic.Width, height, _shopGumpParts[1 + add]));
-            Add(new GumpPic(0, _middleGumpLeft.Height + _middleGumpLeft.Y, _shopGumpParts[2 + add], 0));
-            
             _shopScrollArea = new ScrollArea(30, 60, 225, _middleGumpLeft.Height + _middleGumpLeft.Y + 50, false, _middleGumpLeft.Height + _middleGumpLeft.Y);
+
             Add(_shopScrollArea);
 
-           
-            Add(_middleGumpRight = new GumpPicTiled(250, 144 + 64, pic.Width, _middleGumpLeft.Height >> 1, _shopGumpParts[4 + add]));
-            Add(new GumpPic(250, _middleGumpRight.Height + _middleGumpRight.Y, _shopGumpParts[5 + add], 0));
-
+            pic = new GumpPic(250, 144, _shopGumpParts[3 + add], 0);
+            pic.Add(_middleGumpRight = new GumpPicTiled(0, 64, pic.Width, _middleGumpLeft.Height >> 1, _shopGumpParts[4 + add]));
+            pic.Add(new GumpPic(0, _middleGumpRight.Height + _middleGumpRight.Y, _shopGumpParts[5 + add], 0));
+            Add(pic);
+            //Add(isBuyGump ? new GumpPic(250, 214, 0x0871, 0) : new GumpPic(250, 214, 0x0873, 0));
 
             HitBox boxAccept = new HitBox(280, 306 + _middleGumpRight.Height, 34, 30)
             {
