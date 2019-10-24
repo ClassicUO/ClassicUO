@@ -846,9 +846,7 @@ namespace ClassicUO.Game.Scenes
             {
                 Macro macro = Macros.FindMacro(e.keysym.sym, isalt, isctrl, isshift);
 
-                if (macro == null)
-                    _isMacroMoveDown = _arrowKeyPressed = false;
-                else
+                if (macro != null)
                 {
                     switch (macro.FirstNode.SubCode)
                     {
@@ -875,7 +873,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            if (!(_isUpDown || _isDownDown || _isLeftDown || _isRightDown)) _arrowKeyPressed = false;
+            if (!(_isUpDown || _isDownDown || _isLeftDown || _isRightDown)) _isMacroMoveDown = _arrowKeyPressed = false;
 
             if ((e.keysym.mod & SDL.SDL_Keymod.KMOD_NUM) != SDL.SDL_Keymod.KMOD_NUM) _numPadKeyPressed = false;
 
