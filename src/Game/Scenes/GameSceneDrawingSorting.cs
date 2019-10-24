@@ -33,6 +33,7 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -425,7 +426,9 @@ namespace ClassicUO.Game.Scenes
                 obj.CurrentRenderIndex = _renderIndex;
 
                 if (!island)
-                    obj.UpdateTextCoords();
+                {
+                    obj.UpdateTextCoordsV();
+                }
                 else
                     goto SKIP_INTERNAL_CHECK;
 
@@ -549,9 +552,12 @@ namespace ClassicUO.Game.Scenes
 
             int dropMaxZIndex = -1;
 
-            if (entity is Mobile mob && mob.IsMoving && (mob.Steps.Back().Direction & 7) == 2)
+            if (entity is Mobile mob && mob.IsMoving)
             {
-                dropMaxZIndex = 0;
+                ref readonly var step = ref mob.Steps.Back();
+
+                if ((step.Direction & 7) == 2)
+                    dropMaxZIndex = 0;
             }
 
 
@@ -802,7 +808,18 @@ namespace ClassicUO.Game.Scenes
             int maxPixlesY = (int) newMaxY;
 
             if (UpdateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY)
+            {
                 UpdateDrawPosition = true;
+
+                if (_viewportRenderTarget == null || _viewportRenderTarget.Width != (int)(winGameWidth * Scale) || _viewportRenderTarget.Height != (int)(winGameHeight * Scale))
+                {
+                    _viewportRenderTarget?.Dispose();
+                    _lightRenderTarget?.Dispose();
+
+                    _viewportRenderTarget = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int)(winGameWidth * Scale), (int)(winGameHeight * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
+                    _lightRenderTarget = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int)(winGameWidth * Scale), (int)(winGameHeight * Scale), false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
+                }
+            }
 
             _minTile.X = realMinRangeX;
             _minTile.Y = realMinRangeY;

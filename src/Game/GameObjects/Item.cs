@@ -31,6 +31,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Platforms;
 
@@ -211,7 +212,7 @@ namespace ClassicUO.Game.GameObjects
             get
             {
                 if (!_itemData.HasValue)
-                    _itemData = FileManager.TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
+                    _itemData = FileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
 
                 return _itemData.Value;
             }
@@ -259,7 +260,10 @@ namespace ClassicUO.Game.GameObjects
                     house.Components.Add(m);
                 }
                 else if (i == 0)
+                {
                     MultiGraphic = graphic;
+                    _itemData = null;
+                }
             }
 
             FileManager.Multi.ReleaseLastMultiDataRead();
@@ -724,6 +728,14 @@ namespace ClassicUO.Game.GameObjects
                         break;
                     }
 
+                    case 0x3ECA: // tarantula
+
+                    {
+                        graphic = 0x0579;
+
+                        break;
+                    }
+
                     default:
 
                     {
@@ -772,6 +784,77 @@ namespace ClassicUO.Game.GameObjects
             return needUpdate;
         }
 
+        public override void UpdateTextCoordsV()
+        {
+            if (TextContainer == null)
+                return;
+
+            var last = TextContainer.Items;
+
+            while (last?.ListRight != null)
+                last = last.ListRight;
+
+            if (last == null)
+                return;
+
+            int offY = 0;
+
+            int startX = Engine.Profile.Current.GameWindowPosition.X + 6;
+            int startY = Engine.Profile.Current.GameWindowPosition.Y + 6;
+
+            int x = RealScreenPosition.X;
+            int y = RealScreenPosition.Y;
+
+
+            if (OnGround)
+            {
+                var scene = Engine.SceneManager.GetScene<GameScene>();
+                float scale = scene?.Scale ?? 1;
+
+                if (Texture != null)
+                    y -= Texture is ArtTexture t ? (t.ImageRectangle.Height >> 1) : (Texture.Height >> 1);
+                x += 22;
+                for (; last != null; last = last.ListLeft)
+                {
+                    if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
+                    {
+                        if (offY == 0 && last.Time < Engine.Ticks)
+                            continue;
+
+
+                        last.OffsetY = offY;
+                        offY += last.RenderedText.Height;
+
+                        last.RealScreenPosition.X = startX + (int)((x - (last.RenderedText.Width >> 1)) / scale);
+                        last.RealScreenPosition.Y = startY + (int)((y - offY) / scale);
+                    }
+                }
+
+                FixTextCoordinatesInScreen();
+            }
+            else
+            {
+                for (; last != null; last = last.ListLeft)
+                {
+                    if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
+                    {
+                        if (offY == 0 && last.Time < Engine.Ticks)
+                            continue;
+
+                        x = last.X - startX;
+                        y = last.Y - startY;
+
+                        last.OffsetY = offY;
+                        offY += last.RenderedText.Height;
+
+                        last.RealScreenPosition.X = startX + ((x - (last.RenderedText.Width >> 1)));
+                        last.RealScreenPosition.Y = startY + ((y - offY));
+                    }
+                }
+            }
+        }
+
+
         public override void ProcessAnimation(out byte dir, bool evalutate = false)
         {
             dir = 0;
@@ -785,9 +868,12 @@ namespace ClassicUO.Game.GameObjects
                     sbyte frameIndex = (sbyte) (AnimIndex + 1);
                     ushort id = GetGraphicForAnimation();
 
-                    ushort corpseGraphic = FileManager.Animations.DataIndex[id].CorpseGraphic;
+                    //FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue);
 
-                    if (corpseGraphic != id && corpseGraphic != 0) id = corpseGraphic;
+                    //ushort corpseGraphic = FileManager.Animations.DataIndex[id].CorpseGraphic;
+
+                    //if (corpseGraphic != id && corpseGraphic != 0) 
+                    //    id = corpseGraphic;
 
                     bool mirror = false;
                     FileManager.Animations.GetAnimDirection(ref dir, ref mirror);

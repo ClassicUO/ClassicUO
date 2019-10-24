@@ -35,6 +35,8 @@ namespace ClassicUO.Network
     {
         private byte[] _data;
 
+        private static readonly StringBuilder _sb = new StringBuilder();
+
         public Packet(byte[] data, int length)
         {
             _data = data;
@@ -124,15 +126,16 @@ namespace ClassicUO.Network
             if (EnsureSize(1))
                 return Empty;
 
-            int start = Position;
-            int end = 0;
-            while (Position < Length)
+            _sb.Clear();
+
+            char c;
+
+            while ((c = (char) ReadByte()) != 0)
             {
-                if (_data[Position++] == 0)
-                    break;
-                end++;
+                _sb.Append(c);
             }
-            return end == 0 ? Empty : StringHelper.AsciiEncoding.GetString(_data, start, end);
+
+            return _sb.ToString();
         }
 
         public string ReadASCII(int length, bool exitIfNull = false)
@@ -144,9 +147,25 @@ namespace ClassicUO.Network
             {
                 length = Length - Position - 1;
             }
-            int start = Position;
-            Position += length;
-            return length <= 0 ? string.Empty : StringHelper.AsciiEncoding.GetString(_data, start, length).TrimEnd('\0');
+
+
+            _sb.Clear();
+
+            if (length <= 0)
+                return string.Empty;
+
+            for (int i = 0; i < length; i++)
+            {
+                char c = (char) ReadByte();
+                if (c == '\0')
+                {
+                    Skip(length - i - 1);
+                    break;
+                }
+                _sb.Append(c);
+            }
+
+            return _sb.ToString();
         }
 
         public string ReadUTF8StringSafe()

@@ -82,8 +82,6 @@ namespace ClassicUO.Renderer
 
             DefaultEffect = new IsometricEffect(device);
 
-            GraphicsDevice.Indices = _indexBuffer;
-            GraphicsDevice.SetVertexBuffer(_vertexBuffer);
 
             _handle = GCHandle.Alloc(_vertexInfo, GCHandleType.Pinned);
         }
@@ -1474,7 +1472,7 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool Draw2DRotated(Texture2D texture, int startX, int startY, int endX, int endY, int originX, int originY)
+        public bool DrawLine(Texture2D texture, int startX, int startY, int endX, int endY, int originX, int originY)
         {
             EnsureSize();
 
@@ -1664,19 +1662,26 @@ namespace ClassicUO.Renderer
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
 
-
+            GraphicsDevice.Indices = _indexBuffer;
+            GraphicsDevice.SetVertexBuffer(_vertexBuffer);
 
             DefaultEffect.ApplyStates();
         }
 
-        private unsafe void Flush()
+        private void Flush()
         {
             ApplyStates();
 
             if (_numSprites == 0)
                 return;
 
-            _vertexBuffer.SetDataPointerEXT(0, _handle.AddrOfPinnedObject(), PositionNormalTextureColor.SIZE_IN_BYTES * (_numSprites << 2), SetDataOptions.None);
+            //int start = UpdateVerteBuffer(_handle.AddrOfPinnedObject(), _numSprites);
+
+            int start = 0;
+            _vertexBuffer.SetDataPointerEXT(0,
+                                            _handle.AddrOfPinnedObject(),
+                                            PositionNormalTextureColor.SIZE_IN_BYTES * (_numSprites << 2),
+                                            SetDataOptions.None);
 
             Texture2D current = _textureInfo[0];
             int offset = 0;
@@ -1689,18 +1694,17 @@ namespace ClassicUO.Renderer
                     _customEffect.CurrentTechnique.Passes[0].Apply();
             }
 
-
             for (int i = 1; i < _numSprites; i++)
             {
                 if (_textureInfo[i] != current)
                 {
-                    InternalDraw(current, offset, i - offset);
+                    InternalDraw(current, start + offset, i - offset);
                     current = _textureInfo[i];
                     offset = i;
                 }
             }
 
-            InternalDraw(current, offset, _numSprites - offset);
+            InternalDraw(current, start + offset, _numSprites - offset);
 
             _numSprites = 0;
         }
@@ -1727,21 +1731,41 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public void SetBlendState(BlendState blend, bool noflush = false)
+        public void SetBlendState(BlendState blend)
         {
-            if (!noflush)
-                Flush();
+            Flush();
 
             _blendState = blend ?? BlendState.AlphaBlend;
         }
 
         [MethodImpl(256)]
-        public void SetStencil(DepthStencilState stencil, bool noflush = false)
+        public void SetStencil(DepthStencilState stencil)
         {
-            if (!noflush)
-                Flush();
+            Flush();
 
             _stencil = stencil ?? Stencil;
+        }
+
+        private int _currentBufferPosition;
+
+        private int UpdateVerteBuffer(IntPtr p, int len)
+        {
+            int pos = _currentBufferPosition;
+            SetDataOptions hint = SetDataOptions.NoOverwrite;
+
+            if (pos + len > MAX_SPRITES)
+            {
+                pos = 0;
+                hint = SetDataOptions.Discard;
+            }
+
+            _vertexBuffer.SetDataPointerEXT(
+                                            (pos << 2) * PositionNormalTextureColor.SIZE_IN_BYTES, 
+                                            p, 
+                                            (len << 2) * PositionNormalTextureColor.SIZE_IN_BYTES,
+                                            hint);
+            _currentBufferPosition = pos + len;
+            return pos;
         }
 
         private static short[] GenerateIndexArray()

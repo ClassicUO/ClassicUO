@@ -35,7 +35,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class InfoBarGump : Gump
     {
 
-        private AlphaBlendControl _background;
+        private readonly AlphaBlendControl _background;
         private long _refreshTime;
         private Label _name;
 
@@ -55,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void ResetItems()
         {
-            foreach (Control c in Children.OfType<InfoBarControl>())
+            foreach (InfoBarControl c in Children.OfType<InfoBarControl>())
             {
                 c.Dispose();
             }
@@ -79,7 +79,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int x = 5;
 
-                foreach (Control c in Children.OfType<InfoBarControl>())
+                foreach (InfoBarControl c in Children.OfType<InfoBarControl>())
                 {
                     c.X = x;
                     x += c.Width + 5;
@@ -157,13 +157,13 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Draw(batcher, x, y);
 
-            Vector3 dataHue = Vector3.Zero;
+            ResetHueVector();
 
             if (_var != InfoBarVars.NameNotoriety && Engine.Profile.Current.InfoBarHighlightType == 1 && _warningLinesHue != 0x0481)
             {
-                ShaderHuesTraslator.GetHueVector(ref dataHue, _warningLinesHue);
-                batcher.Draw2D(Textures.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY, _data.Width, 2, ref dataHue);
-                batcher.Draw2D(Textures.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY + Parent.Height - 2, _data.Width, 2, ref dataHue);
+                ShaderHuesTraslator.GetHueVector(ref _hueVector, _warningLinesHue);
+                batcher.Draw2D(Textures.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY, _data.Width, 2, ref _hueVector);
+                batcher.Draw2D(Textures.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY + Parent.Height - 2, _data.Width, 2, ref _hueVector);
             }
 
             return true;

@@ -25,6 +25,7 @@ using System;
 
 using ClassicUO.Renderer;
 
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game
@@ -35,39 +36,21 @@ namespace ClassicUO.Game
         {
             DepthStencilState state = new DepthStencilState
             {
-                DepthBufferEnable = false,
                 StencilEnable = true,
                 StencilFunction = CompareFunction.Always,
-                ReferenceStencil = 0,
-                StencilFail = StencilOperation.Keep,
-                StencilDepthBufferFail = StencilOperation.Keep,
-                StencilPass = StencilOperation.Replace
+                StencilPass = StencilOperation.Replace,
+                ReferenceStencil = 1,
+                DepthBufferEnable = false,
             };
 
 
             return state;
         });
 
-        private static readonly Lazy<BlendState> _checkerBlend = new Lazy<BlendState>(() =>
-        {
-            BlendState blend = BlendState.AlphaBlend;
-            blend.ColorWriteChannels = ColorWriteChannels.Alpha;
-
-            return blend;
-        });
-
 
         private Texture2D _texture;
         private short _width, _height;
 
-        private DepthStencilState s1 = new DepthStencilState
-        {
-            StencilEnable = true,
-            StencilFunction = CompareFunction.Always,
-            StencilPass = StencilOperation.Replace,
-            ReferenceStencil = 0,
-            DepthBufferEnable = true
-        };
 
         private CircleOfTransparency(int radius)
         {
@@ -113,6 +96,8 @@ namespace ClassicUO.Game
             return pixels;
         }
 
+        private static Vector3 _hueVector;
+
         public void Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (_texture != null)
@@ -124,8 +109,12 @@ namespace ClassicUO.Game
                 batcher.SetStencil(_stencil.Value);
                 //batcher.SetBlendState(_checkerBlend.Value);
 
+                //_hueVector.X = 23;
+                //_hueVector.Y = 1;
+                //_hueVector.Z = 0;
+
                 BlendState.AlphaBlend.ColorWriteChannels = ColorWriteChannels.Alpha;
-                //batcher.Draw2D(_texture, X, Y, new Vector3(20, 1, 0.6f));
+                batcher.Draw2D(_texture, X, Y, ref _hueVector);
                 BlendState.AlphaBlend.ColorWriteChannels = ColorWriteChannels.All;
 
 
@@ -148,20 +137,21 @@ namespace ClassicUO.Game
 
             uint[] pixels = CreateTexture(radius, ref Circle._width, ref Circle._height);
 
-            //for (int i = 0; i < pixels.Length; i++)
-            //{
-            //    ref uint pixel = ref pixels[i];
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                ref uint pixel = ref pixels[i];
 
-            //    if (pixel != 0)
-            //    {
-            //        ushort value = (ushort)(pixel << 3);
+                if (pixel != 0)
+                {
+                    pixel = Color.Black.PackedValue;
+                    //ushort value = (ushort)(pixel << 3);
 
-            //        if (value > 0xFF)
-            //            value = 0xFF;
+                    //if (value > 0xFF)
+                    //    value = 0xFF;
 
-            //        pixel = (uint)((value << 24) | (value << 16) | (value << 8) | value);
-            //    }
-            //}
+                    //pixel = (uint)((value << 24) | (value << 16) | (value << 8) | value);
+                }
+            }
 
 
             Circle.Radius = radius;

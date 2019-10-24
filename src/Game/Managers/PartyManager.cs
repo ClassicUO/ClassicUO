@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
@@ -45,68 +45,147 @@ namespace ClassicUO.Game.Managers
         {
             byte code = p.ReadByte();
 
+            bool add = false;
+
             switch (code)
             {
                 case 1:
+                    add = true;
+                    goto case 2;
                 case 2:
-                    byte count = p.ReadByte();
 
-                    if (count <= 1)
+                    if (Engine.Profile.Current.CustomBarsToggled)
                     {
-                        Leader = 0;
-                        Inviter = 0;
+                        byte count = p.ReadByte();
 
-                        for (int i = 0; i < PARTY_SIZE; i++)
+                        if (count <= 1)
                         {
-                            if (Members[i] == null || Members[i].Serial == 0)
-                                break;
+                            Leader = 0;
+                            Inviter = 0;
 
-                            HealthBarGump gump = Engine.UI.GetGump<HealthBarGump>(Members[i].Serial);
-
-
-                            if (gump != null)
+                            for (int i = 0; i < PARTY_SIZE; i++)
                             {
-                                if (code == 2)
-                                    Members[i].Serial = 0;
+                                if (Members[i] == null || Members[i].Serial == 0)
+                                    break;
 
-                                gump.Update();
+                                HealthBarGumpCustom gump = Engine.UI.GetGump<HealthBarGumpCustom>(Members[i].Serial);
+
+
+                                if (gump != null)
+                                {
+                                    if (code == 2)
+                                        Members[i].Serial = 0;
+
+                                    gump.Update();
+                                }
                             }
+
+                            Clear();
+                            Engine.UI.GetGump<PartyGumpAdvanced>()?.Update();
+
+                            break;
                         }
 
                         Clear();
+
+                        if (!add)
+                        {
+                            Engine.UI.GetGump<HealthBarGumpCustom>(p.ReadUInt())?.Update();
+                        }
+
+                        for (int i = 0; i < count; i++)
+                        {
+                            Serial serial = p.ReadUInt();
+                            Members[i] = new PartyMember(serial);
+
+                            if (i == 0)
+                                Leader = serial;
+
+                            HealthBarGumpCustom gump = Engine.UI.GetGump<HealthBarGumpCustom>(serial);
+
+                            if (gump != null)
+                            {
+                                GameActions.RequestMobileStatus(serial);
+                                gump.Update();
+                            }
+                            else
+                            {
+                                if (serial == World.Player)
+                                {
+                                }
+                            }
+                        }
+
                         Engine.UI.GetGump<PartyGumpAdvanced>()?.Update();
 
                         break;
                     }
-
-                    Clear();
-
-                    for (int i = 0; i < count; i++)
+                    else
                     {
-                        Serial serial = p.ReadUInt();
-                        Members[i] = new PartyMember(serial);
+                        byte count = p.ReadByte();
 
-                        if (i == 0)
-                            Leader = serial;
-
-
-                        HealthBarGump gump = Engine.UI.GetGump<HealthBarGump>(serial);
-
-                        if (gump != null)
+                        if (count <= 1)
                         {
-                            GameActions.RequestMobileStatus(serial);
-                            gump.Update();
-                        }
-                        else
-                        {
-                            if (serial == World.Player)
+                            Leader = 0;
+                            Inviter = 0;
+
+                            for (int i = 0; i < PARTY_SIZE; i++)
                             {
+                                if (Members[i] == null || Members[i].Serial == 0)
+                                    break;
+
+                                HealthBarGump gump = Engine.UI.GetGump<HealthBarGump>(Members[i].Serial);
+
+
+                                if (gump != null)
+                                {
+                                    if (code == 2)
+                                        Members[i].Serial = 0;
+
+                                    gump.Update();
+                                }
+                            }
+
+                            Clear();
+                            Engine.UI.GetGump<PartyGumpAdvanced>()?.Update();
+
+                            break;
+                        }
+
+                        Clear();
+
+                        if (!add)
+                        {
+                            Engine.UI.GetGump<HealthBarGump>(p.ReadUInt())?.Update();
+                        }
+
+                        for (int i = 0; i < count; i++)
+                        {
+                            Serial serial = p.ReadUInt();
+                            Members[i] = new PartyMember(serial);
+
+                            if (i == 0)
+                                Leader = serial;
+
+                            HealthBarGump gump = Engine.UI.GetGump<HealthBarGump>(serial);
+
+                            if (gump != null)
+                            {
+                                GameActions.RequestMobileStatus(serial);
+                                gump.Update();
+                            }
+                            else
+                            {
+                                if (serial == World.Player)
+                                {
+                                }
                             }
                         }
+
+                        Engine.UI.GetGump<PartyGumpAdvanced>()?.Update();
+
+                        break;
                     }
-
-                    Engine.UI.GetGump<PartyGumpAdvanced>()?.Update();
-
                     break;
 
                 case 3:
@@ -154,7 +233,7 @@ namespace ClassicUO.Game.Managers
                 Members[i] = null;
         }
     }
-    
+
     internal class PartyMember : IEquatable<PartyMember>
     {
         private string _name;

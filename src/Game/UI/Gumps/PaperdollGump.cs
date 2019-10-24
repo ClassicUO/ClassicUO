@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
@@ -73,7 +73,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Mobile = mobile;
                 Title = mobileTitle;
-                if(mobile == World.Player)
+                if (mobile == World.Player)
                 {
                     _Iconized = new GumpPic(0, 0, 0x7EE, 0);
                     _IconizerArea = new HitBox(228, 260, 16, 16);
@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (gs.IsHoldingItem)
             {
-                Item it = new Item(gs.HeldItem.Serial) {Graphic = gs.HeldItem.Graphic, Hue = gs.HeldItem.Hue};
+                Item it = new Item(gs.HeldItem.Serial) { Graphic = gs.HeldItem.Graphic, Hue = gs.HeldItem.Hue };
 
                 _paperDollInteractable.AddFakeDress(it);
             }
@@ -136,50 +136,64 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(new GumpPic(0, 0, 0x07d0, 0));
 
                 //HELP BUTTON
-                Add(new Button((int) Buttons.Help, 0x07ef, 0x07f0, 0x07f1)
+                Add(new Button((int)Buttons.Help, 0x07ef, 0x07f0, 0x07f1)
                 {
-                    X = 185, Y = 44 + 27 * 0, ButtonAction = ButtonAction.Activate
+                    X = 185,
+                    Y = 44 + 27 * 0,
+                    ButtonAction = ButtonAction.Activate
                 });
 
                 //OPTIONS BUTTON
-                Add(new Button((int) Buttons.Options, 0x07d6, 0x07d7, 0x07d8)
+                Add(new Button((int)Buttons.Options, 0x07d6, 0x07d7, 0x07d8)
                 {
-                    X = 185, Y = 44 + 27 * 1, ButtonAction = ButtonAction.Activate
+                    X = 185,
+                    Y = 44 + 27 * 1,
+                    ButtonAction = ButtonAction.Activate
                 });
 
                 // LOG OUT BUTTON
-                Add(new Button((int) Buttons.LogOut, 0x07d9, 0x07da, 0x07db)
+                Add(new Button((int)Buttons.LogOut, 0x07d9, 0x07da, 0x07db)
                 {
-                    X = 185, Y = 44 + 27 * 2, ButtonAction = ButtonAction.Activate
+                    X = 185,
+                    Y = 44 + 27 * 2,
+                    ButtonAction = ButtonAction.Activate
                 });
 
                 // QUESTS BUTTON
-                Add(new Button((int) Buttons.Quests, 0x57b5, 0x57b7, 0x57b6)
+                Add(new Button((int)Buttons.Quests, 0x57b5, 0x57b7, 0x57b6)
                 {
-                    X = 185, Y = 44 + 27 * 3, ButtonAction = ButtonAction.Activate
+                    X = 185,
+                    Y = 44 + 27 * 3,
+                    ButtonAction = ButtonAction.Activate
                 });
 
                 // SKILLS BUTTON
-                Add(new Button((int) Buttons.Skills, 0x07df, 0x07e0, 0x07e1)
+                Add(new Button((int)Buttons.Skills, 0x07df, 0x07e0, 0x07e1)
                 {
-                    X = 185, Y = 44 + 27 * 4, ButtonAction = ButtonAction.Activate
+                    X = 185,
+                    Y = 44 + 27 * 4,
+                    ButtonAction = ButtonAction.Activate
                 });
 
                 // GUILD BUTTON
-                Add(new Button((int) Buttons.Guild, 0x57b2, 0x57b4, 0x57b3)
+                Add(new Button((int)Buttons.Guild, 0x57b2, 0x57b4, 0x57b3)
                 {
-                    X = 185, Y = 44 + 27 * 5, ButtonAction = ButtonAction.Activate
+                    X = 185,
+                    Y = 44 + 27 * 5,
+                    ButtonAction = ButtonAction.Activate
                 });
                 // TOGGLE PEACE/WAR BUTTON
                 _isWarMode = Mobile.InWarMode;
                 ushort[] btngumps = _isWarMode ? WarModeBtnGumps : PeaceModeBtnGumps;
 
-                Add(_warModeBtn = new Button((int) Buttons.PeaceWarToggle, btngumps[0], btngumps[1], btngumps[2])
+                Add(_warModeBtn = new Button((int)Buttons.PeaceWarToggle, btngumps[0], btngumps[1], btngumps[2])
                 {
-                    X = 185, Y = 44 + 27 * 6, ButtonAction = ButtonAction.Activate
+                    X = 185,
+                    Y = 44 + 27 * 6,
+                    ButtonAction = ButtonAction.Activate
                 });
 
-                
+
                 int profileX = 25;
                 const int SCROLLS_STEP = 14;
 
@@ -246,7 +260,8 @@ namespace ClassicUO.Game.UI.Gumps
             // Name and title
             Label titleLabel = new Label(Title, false, 0x0386, 185)
             {
-                X = 39, Y = 262
+                X = 39,
+                Y = 262
             };
             Add(titleLabel);
         }
@@ -368,7 +383,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            switch ((Buttons) buttonID)
+            switch ((Buttons)buttonID)
             {
                 case Buttons.Help:
                     GameActions.RequestHelp();
@@ -427,7 +442,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (Mobile == World.Player)
                     {
-                        Engine.UI.GetGump<HealthBarGump>(Mobile)?.Dispose();
+                        if (Engine.Profile.Current.CustomBarsToggled)
+                        {
+                            Engine.UI.GetGump<HealthBarGumpCustom>(Mobile)?.Dispose();
+                        }
+                        else
+                        {
+                            Engine.UI.GetGump<HealthBarGump>(Mobile)?.Dispose();
+                        }
 
                         StatusGumpBase status = StatusGumpBase.GetStatusGump();
 
@@ -438,18 +460,36 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        if (Engine.UI.GetGump<HealthBarGump>(Mobile) != null)
-                            break;
-
-                        GameActions.RequestMobileStatus(Mobile);
-
-                        Rectangle bounds = FileManager.Gumps.GetTexture(0x0804).Bounds;
-
-                        Engine.UI.Add(new HealthBarGump(Mobile)
+                        if (Engine.Profile.Current.CustomBarsToggled)
                         {
-                            X = Mouse.Position.X - (bounds.Width >> 1),
-                            Y = Mouse.Position.Y - 5
-                        });
+                            if (Engine.UI.GetGump<HealthBarGumpCustom>(Mobile) != null)
+                                break;
+
+                            GameActions.RequestMobileStatus(Mobile);
+
+                            Rectangle bounds = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
+
+                            Engine.UI.Add(new HealthBarGumpCustom(Mobile)
+                            {
+                                X = Mouse.Position.X - (bounds.Width >> 1),
+                                Y = Mouse.Position.Y - 5
+                            });
+                        }
+                        else
+                        {
+                            if (Engine.UI.GetGump<HealthBarGump>(Mobile) != null)
+                                break;
+
+                            GameActions.RequestMobileStatus(Mobile);
+
+                            Rectangle bounds = FileManager.Gumps.GetTexture(0x0804).Bounds;
+
+                            Engine.UI.Add(new HealthBarGump(Mobile)
+                            {
+                                X = Mouse.Position.X - (bounds.Width >> 1),
+                                Y = Mouse.Position.Y - 5
+                            });
+                        }
                     }
 
                     break;
@@ -531,7 +571,7 @@ namespace ClassicUO.Game.UI.Gumps
                             Height = 18,
                             HighlightOnMouseOver = false,
                             CanPickUp = World.InGame && (World.Player == _mobile || _paperDollGump.CanLift),
-                            
+
                         });
                     }
                 }
@@ -574,12 +614,22 @@ namespace ClassicUO.Game.UI.Gumps
 
                 public override bool Draw(UltimaBatcher2D batcher, int x, int y)
                 {
+                    Item item = World.Items.Get(LocalSerial);
+
+                    if (item == null)
+                    {
+                        Dispose();
+                    }
+
+                    if (IsDisposed)
+                        return false;
+
                     ResetHueVector();
-                    ShaderHuesTraslator.GetHueVector(ref _hueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, true);
+                    ShaderHuesTraslator.GetHueVector(ref _hueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : item.Hue, item.ItemData.IsPartialHue, 0, true);
 
                     return batcher.Draw2D(Texture, x + _point.X, y + _point.Y,
                                           _originalSize.X, _originalSize.Y,
-                                          _rect.X, _rect.Y, 
+                                          _rect.X, _rect.Y,
                                           _rect.Width, _rect.Height,
                                           ref _hueVector);
                 }

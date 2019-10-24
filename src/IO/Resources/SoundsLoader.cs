@@ -206,7 +206,6 @@ namespace ClassicUO.IO.Resources
             if (sound < 0)
                 return false;
 
-
             ref readonly var entry = ref GetValidRefEntry(sound);
 
             _file.Seek(entry.Offset);
@@ -222,7 +221,8 @@ namespace ClassicUO.IO.Resources
 
             name = Encoding.UTF8.GetString(stringBuffer);
             int end = name.IndexOf('\0');
-            name = name.Substring(0, end);
+            if (end >= 0)
+                name = name.Substring(0, end);
 
             return true;
         }
@@ -233,7 +233,7 @@ namespace ClassicUO.IO.Resources
         /// <param name="line">A line from the file.</param>
         /// <param name="?">If successful, contains a tuple with these fields: int songIndex, string songName, bool doesLoop</param>
         /// <returns>true if line could be parsed, false otherwise.</returns>
-        private static bool TryParseConfigLine(string line, out Tuple<int, string, bool> songData)
+        private bool TryParseConfigLine(string line, out Tuple<int, string, bool> songData)
         {
             songData = null;
 
@@ -250,7 +250,7 @@ namespace ClassicUO.IO.Resources
             return true;
         }
 
-        public static bool TryGetMusicData(int index, out string name, out bool doesLoop)
+        private bool TryGetMusicData(int index, out string name, out bool doesLoop)
         {
             name = null;
             doesLoop = false;
@@ -265,6 +265,7 @@ namespace ClassicUO.IO.Resources
 
             return false;
         }
+
 
         public Sound GetSound(int index)
         {

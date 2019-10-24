@@ -120,7 +120,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public int ScrollStep { get; set; } = 5;
+        public int ScrollStep { get; set; } = 15;
 
         bool IScrollBar.Contains(int x, int y)
         {

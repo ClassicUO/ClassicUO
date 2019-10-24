@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 
 using ClassicUO.Input;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -42,9 +43,9 @@ namespace ClassicUO.Game.UI.Controls
             IsEditable = editable;
         }
 
-        public TextBox(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
+        public TextBox(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE alig = 0)
         {
-            TxEntry = new TextEntry(font, maxcharlength, maxWidth, width, isunicode, style, hue);
+            TxEntry = new TextEntry(font, maxcharlength, maxWidth, width, isunicode, style, hue, alig);
             base.AcceptKeyboardInput = true;
             base.AcceptMouseInput = true;
             IsEditable = true;
@@ -61,7 +62,10 @@ namespace ClassicUO.Game.UI.Controls
             LocalSerial = Serial.Parse(parts[6]);
             TxEntry.SetHeight(Height);
 
-            SetText(lines[int.Parse(parts[7])]);
+            int index = int.Parse(parts[7]);
+
+            if (index >= 0 && index < lines.Length)
+                SetText(lines[index]);
         }
 
         public TextEntry TxEntry { get; private set; }

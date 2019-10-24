@@ -49,30 +49,10 @@ namespace ClassicUO.Game.GameObjects
 
         public AnimatedItemEffect(Serial sourceSerial, int sourceX, int sourceY, int sourceZ, Graphic graphic, Hue hue, int duration) : this(graphic, hue, duration)
         {
-            sbyte zSrc = (sbyte) sourceZ;
             Entity source = World.Get(sourceSerial);
 
-            if (source != null)
-            {
-                if (sourceSerial.IsMobile)
-                {
-                    Mobile mob = (Mobile) source;
-
-                    //if (mob != World.Player && !mob.IsMoving && (sourceX != 0 || sourceY != 0 || sourceZ != 0))
-                    //    mob.Position = new Position((ushort) sourceX, (ushort) sourceY, zSrc);
-                    SetSource(mob);
-                }
-                else if (sourceSerial.IsItem)
-                {
-                    Item item = (Item) source;
-                    //if (sourceX != 0 || sourceY != 0 || sourceZ != 0)
-                    //    item.Position = new Position((ushort) sourceX, (ushort) sourceY, zSrc);
-
-                    SetSource(item);
-                }
-                else
-                    SetSource(sourceX, sourceY, sourceZ);
-            }
+            if (source != null && sourceSerial.IsValid)
+                SetSource(source);
             else
                 SetSource(sourceX, sourceY, sourceZ);
         }
@@ -87,7 +67,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (Source != null) Offset = Source.Offset;
 
-                if (Position.X != x || Position.Y != y || Position.Z != z)
+                if (X != x || Y != y || Z != z)
                 {
                     Position = new Position((ushort) x, (ushort) y, (sbyte) z);
                     AddToTile();

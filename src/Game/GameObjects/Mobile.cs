@@ -298,7 +298,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                Step step = Steps.Back();
+                ref readonly Step step = ref Steps.Back();
                 x = step.X;
                 y = step.Y;
                 z = step.Z;
@@ -410,7 +410,20 @@ namespace ClassicUO.Game.GameObjects
                 if (animGroup == 0)
                     return;
 
-                AnimationGroup = _animationIdle[(byte) animGroup - 1, RandomHelper.GetValue(0, 2)];
+                if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
+                {
+                    if (animGroup != ANIMATION_GROUPS.AG_PEOPLE)
+                    {
+                        if (InWarMode)
+                            AnimationGroup = 28;
+                        else
+                            AnimationGroup = 26;
+
+                        return;
+                    }
+                }
+
+                AnimationGroup = _animationIdle[(byte)animGroup - 1, RandomHelper.GetValue(0, 2)];
 
                 if (isLowExtended && AnimationGroup == 18)
                     AnimationGroup = 1;
@@ -449,7 +462,8 @@ namespace ClassicUO.Game.GameObjects
 
                     if (IsMounted)
                     {
-                        if (Steps.Back().Run)
+                        ref readonly Step step = ref Steps.Back();
+                        if (step.Run)
                         {
                             soundID = 0x0129;
                             delaySound = 150;
@@ -639,7 +653,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (Steps.Count != 0 && !IsDestroyed)
             {
-                Step step = Steps.Front();
+                ref readonly Step step = ref Steps.Front();
                 dir = step.Direction;
 
                 if (step.Run)
@@ -737,12 +751,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (World.InGame && Serial == World.Player)
                         {
-                            foreach (var s in Engine.UI.Gumps.OfType<ContainerGump>())
-                            {
-                                var item = World.Items.Get(s.LocalSerial);
-                                if (item == null || item.IsDestroyed || item.OnGround && item.Distance > 3)
-                                    s.Dispose();
-                            }
+                            World.Player.CloseRangedGumps();
                         }
 
                         Direction = (Direction) step.Direction;
@@ -917,6 +926,75 @@ namespace ClassicUO.Game.GameObjects
 
                 return result;
             }
+        }
+
+        public override void UpdateTextCoordsV()
+        {
+            if (TextContainer == null)
+                return;
+
+            var last = TextContainer.Items;
+
+            while (last?.ListRight != null)
+                last = last.ListRight;
+
+            if (last == null)
+                return;
+
+            int offY = 0;
+
+            bool health = Engine.Profile.Current.ShowMobilesHP;
+            int alwaysHP = Engine.Profile.Current.MobileHPShowWhen;
+            int mode = Engine.Profile.Current.MobileHPType;
+
+            int startX = Engine.Profile.Current.GameWindowPosition.X + 6;
+            int startY = Engine.Profile.Current.GameWindowPosition.Y + 6;
+            var scene = Engine.SceneManager.GetScene<GameScene>();
+            float scale = scene?.Scale ?? 1;
+
+            int x = RealScreenPosition.X;
+            int y = RealScreenPosition.Y;
+
+
+            if (health && mode != 1 && ((alwaysHP >= 1 && Hits != HitsMax) || alwaysHP == 0))
+            {
+                y -= 22;
+            }
+
+            if (!IsMounted)
+                y += 22;
+
+            FileManager.Animations.GetAnimationDimensions(AnimIndex,
+                                                          GetGraphicForAnimation(),
+                                                          /*(byte) m.GetDirectionForAnimation()*/ 0,
+                                                          /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
+                                                          IsMounted,
+                                                          /*(byte) m.AnimIndex*/ 0,
+                                                          out _,
+                                                          out int centerY,
+                                                          out _,
+                                                          out int height);
+            x += (int)Offset.X;
+            x += 22;
+            y += (int)(Offset.Y - Offset.Z - (height + centerY + 8));
+
+            for (; last != null; last = last.ListLeft)
+            {
+                if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
+                {
+                    if (offY == 0 && last.Time < Engine.Ticks)
+                        continue;
+
+
+                    last.OffsetY = offY;
+                    offY += last.RenderedText.Height;
+
+                    last.RealScreenPosition.X = startX + (int)((x - (last.RenderedText.Width >> 1)) / scale);
+                    last.RealScreenPosition.Y = startY + (int)((y - offY) / scale);
+                }
+            }
+
+            FixTextCoordinatesInScreen();
         }
 
         public override void Destroy()
