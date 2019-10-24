@@ -248,6 +248,27 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class HealthBarGumpCustom : BaseHealthBarGump
     {
+        #region Health Bar Gump Custom
+
+        // Health Bar Gump Custom v.1c by Syrupz(Alan)
+        //
+        // The goal of this was to simply modernize the Health Bar Gumps while still giving people
+        // an option to continue using the classic Health Bar Gumps. The option to overide bar types
+        // be it (straight line(custom) or graphic(classic) is directly included in this version
+        // with no need to change art files in UO directory.
+        //
+        // Please report any problems with this to Alan#0084 on Discord and I will promptly work on fixing said issues.
+        //
+        // Lastly, I want to give a special thanks to Gaechti for helping me stress test this
+        // and helping me work and organizing this in a timely fashion to get this released.
+        // I would like to also thank KaRaShO, Roxya, Stalli, and Link for their input, tips, 
+        // and advice to approach certain challenges that arose throughout development.
+        // in different manners to get these Health Bars to function per my own vision; gratitude.
+        //
+        // Health Bar Gump Custom v.1c by Syrupz(Alan)
+
+        #endregion
+
         private readonly LineCHB[] _bars = new LineCHB[3];
         private readonly LineCHB[] _border = new LineCHB[4];
 
@@ -463,7 +484,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _bars[0].IsVisible = true;
                 }
 
-                Hue barColor = entity == World.Player || mobile == null || mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray ? Notoriety.GetHue(mobile.NotorietyFlag) : Notoriety.GetHue(mobile.NotorietyFlag);
+                Hue barColor = mobile != null ? Notoriety.GetHue(mobile.NotorietyFlag) : (Hue) 912;
 
                 if (_background.Hue != barColor)
                 {
@@ -477,16 +498,10 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                if (_background.Hue != 912)
+                if ((mobile != null && mobile.IsDead) || Engine.Profile.Current.CBBlackBGToggled)
                 {
-                    if (mobile != null && mobile.IsDead)
-                    {
+                    if (_background.Hue != 912)
                         _background.Hue = 912;
-                    }
-                    else if (Engine.Profile.Current.CBBlackBGToggled)
-                    {
-                        _background.Hue = 912;
-                    }
                 }
 
                 if (mobile != null && mobile.IsPoisoned && !_poisoned)
