@@ -464,6 +464,11 @@ namespace ClassicUO.Game.Managers
 
                                     break;
 
+                                case MacroSubType.Help:
+                                    GameActions.RequestHelp();
+
+                                    break;
+
                                 case MacroSubType.PartyChat:
                                 case MacroSubType.CombatBook:
                                 case MacroSubType.RacialAbilitiesBook:
@@ -1456,6 +1461,7 @@ namespace ClassicUO.Game.Managers
         Guild,
         SpellWeavingSpellbook,
         QuestLog,
+        Help,
         MysticismSpellbook,
         RacialAbilitiesBook,
         BardSpellbook,
