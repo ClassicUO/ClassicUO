@@ -302,7 +302,7 @@ namespace ClassicUO.Game.GameObjects
                         _animDataFrame = FileManager.AnimData.CalculateCurrentGraphic(Graphic);
 
                         AnimIndex = animIndex;
-                        _animSpeed = _animDataFrame.FrameInterval != 0 ? _animDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
+                        _animSpeed = _animDataFrame.FrameInterval != 0 ? _animDataFrame.FrameInterval * 25 + Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
                         LastAnimationChangeTime = Engine.Ticks;
                     }
                     else
