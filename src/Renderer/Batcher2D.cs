@@ -46,7 +46,7 @@ namespace ClassicUO.Renderer
         private readonly RasterizerState _rasterizerState;
         private readonly VertexBuffer _vertexBuffer;
         private readonly Texture2D[] _textureInfo;
-        private readonly PositionNormalTextureColor4[] _vertexInfo;
+        private PositionNormalTextureColor4[] _vertexInfo;
         private BlendState _blendState;
         private Effect _customEffect;
         private bool _started;
@@ -56,6 +56,7 @@ namespace ClassicUO.Renderer
         private int _numSprites;
         //private readonly IntPtr _ptrVertexBufferArray;
         private GCHandle _handle;
+        private IntPtr _handlePtr;
 
         public UltimaBatcher2D(GraphicsDevice device)
         {
@@ -84,6 +85,7 @@ namespace ClassicUO.Renderer
 
 
             _handle = GCHandle.Alloc(_vertexInfo, GCHandleType.Pinned);
+            _handlePtr = _handle.AddrOfPinnedObject();
         }
 
 
@@ -1609,7 +1611,7 @@ namespace ClassicUO.Renderer
 
             int start = 0;
             _vertexBuffer.SetDataPointerEXT(0,
-                                            _handle.AddrOfPinnedObject(),
+                                            _handlePtr,
                                             PositionNormalTextureColor4.SIZE_IN_BYTES * _numSprites,
                                             SetDataOptions.None);
 
