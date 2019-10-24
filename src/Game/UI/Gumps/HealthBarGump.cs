@@ -371,20 +371,26 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (inparty)
                     {
-                        if (_textBox.Hue != textColor)
+                        if (_textBox != null && _textBox.Hue != textColor)
                             _textBox.Hue = textColor;
 
-                        _bars[1].IsVisible = false;
-                        _bars[2].IsVisible = false;
+                        if (_bars[1] != null)
+                        {
+                            _bars[1].IsVisible = false;
+                            _bars[2].IsVisible = false;
+                        }
                     }
                     else
                     {
-                        if (_textBox.Hue != textColor)
-                            _textBox.Hue = textColor;
+                        if (_textBox != null)
+                        {
+                            if (_textBox.Hue != textColor)
+                                _textBox.Hue = textColor;
 
-                        if (_canChangeName)
-                            _textBox.MouseUp -= TextBoxOnMouseUp;
-                        _textBox.IsEditable = false;
+                            if (_canChangeName)
+                                _textBox.MouseUp -= TextBoxOnMouseUp;
+                            _textBox.IsEditable = false;
+                        }
                     }
 
                     if (_background.Hue != 912)
@@ -420,14 +426,18 @@ namespace ClassicUO.Game.UI.Gumps
                 if (entity is Mobile mm && _canChangeName != mm.IsRenamable)
                 {
                     _canChangeName = mm.IsRenamable;
-                    _textBox.MouseUp -= TextBoxOnMouseUp;
 
-                    if (_canChangeName)
+                    if (_textBox != null)
                     {
-                        _textBox.MouseUp += TextBoxOnMouseUp;
+                        _textBox.MouseUp -= TextBoxOnMouseUp;
+
+                        if (_canChangeName)
+                        {
+                            _textBox.MouseUp += TextBoxOnMouseUp;
+                        }
+                        else
+                            _textBox.IsEditable = false;
                     }
-                    else
-                        _textBox.IsEditable = false;
                 }
 
                 if (!(mobile != null && mobile.IsDead) && _isDead) _isDead = false;
@@ -459,14 +469,15 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_canChangeName)
                         {
                             textColor = 0x000E;
-                            _textBox.MouseUp += TextBoxOnMouseUp;
+                            if (_textBox != null)
+                                _textBox.MouseUp += TextBoxOnMouseUp;
                         }
                     }
 
-                    if (_textBox.Hue != textColor)
+                    if (_textBox != null && _textBox.Hue != textColor)
                         _textBox.Hue = textColor;
 
-                    if (inparty)
+                    if (inparty && _bars[1] != null)
                     {
                         _bars[1].IsVisible = true;
                         _bars[2].IsVisible = true;
@@ -989,22 +1000,28 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         hitsColor = textColor = 912;
 
-                        if (_textBox.Hue != textColor)
+                        if (_textBox != null && _textBox.Hue != textColor)
                             _textBox.Hue = textColor;
 
                         _buttonHeal1.IsVisible = _buttonHeal2.IsVisible = false;
 
-                        _bars[1].IsVisible = false;
-                        _bars[2].IsVisible = false;
+                        if (_bars[1] != null)
+                        {
+                            _bars[1].IsVisible = false;
+                            _bars[2].IsVisible = false;
+                        }
                     }
                     else
                     {
-                        if (_textBox.Hue != textColor)
-                            _textBox.Hue = textColor;
+                        if (_textBox != null)
+                        {
+                            if (_textBox.Hue != textColor)
+                                _textBox.Hue = textColor;
 
-                        if (_canChangeName)
-                            _textBox.MouseUp -= TextBoxOnMouseUp;
-                        _textBox.IsEditable = false;
+                            if (_canChangeName)
+                                _textBox.MouseUp -= TextBoxOnMouseUp;
+                            _textBox.IsEditable = false;
+                        }
                     }
 
                     if (_background.Hue != 0)
@@ -1036,14 +1053,18 @@ namespace ClassicUO.Game.UI.Gumps
                 if (entity is Mobile mm && _canChangeName != mm.IsRenamable)
                 {
                     _canChangeName = mm.IsRenamable;
-                    _textBox.MouseUp -= TextBoxOnMouseUp;
 
-                    if (_canChangeName)
+                    if (_textBox != null)
                     {
-                        _textBox.MouseUp += TextBoxOnMouseUp;
+                        _textBox.MouseUp -= TextBoxOnMouseUp;
+
+                        if (_canChangeName)
+                        {
+                            _textBox.MouseUp += TextBoxOnMouseUp;
+                        }
+                        else
+                            _textBox.IsEditable = false;
                     }
-                    else
-                        _textBox.IsEditable = false;
                 }
 
                 if (!(mobile != null && mobile.IsDead) && _isDead) _isDead = false;
@@ -1073,19 +1094,23 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_canChangeName)
                         {
                             textColor = 0x000E;
-                            _textBox.MouseUp += TextBoxOnMouseUp;
+                            if (_textBox != null)
+                                _textBox.MouseUp += TextBoxOnMouseUp;
                         }
                     }
 
-                    if (_textBox.Hue != textColor)
+                    if (_textBox != null && _textBox.Hue != textColor)
                         _textBox.Hue = textColor;
 
                     if (inparty)
                     {
                         _buttonHeal1.IsVisible = _buttonHeal2.IsVisible = true;
 
-                        _bars[1].IsVisible = true;
-                        _bars[2].IsVisible = true;
+                        if (_bars[1] != null)
+                        {
+                            _bars[1].IsVisible = true;
+                            _bars[2].IsVisible = true;
+                        }
                     }
 
                     if (_hpLineRed.Hue != hitsColor)
