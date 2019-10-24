@@ -90,7 +90,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
                     {
-                        if (Engine.Profile.Current.CustomBarsToggled == true)
+                        if (Engine.Profile.Current.CustomBarsToggled)
                         {
                             Engine.UI.GetGump<HealthBarGumpCustom>(World.Player)?.Dispose();
                             Engine.UI.Add(new HealthBarGumpCustom(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
@@ -1061,7 +1061,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (rect.Contains(p))
                     {
                         //TCH whole if else
-                        if (Engine.Profile.Current.CustomBarsToggled == true)
+                        if (Engine.Profile.Current.CustomBarsToggled)
                         {
                             Engine.UI.GetGump<HealthBarGumpCustom>(World.Player)?.Dispose();
                             Engine.UI.Add(new HealthBarGumpCustom(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });

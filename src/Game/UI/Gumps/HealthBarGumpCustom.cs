@@ -80,16 +80,17 @@ namespace ClassicUO.Game.UI.Gumps
 
         private TextBoxCHB _textBox;
 
-        private const int HPB_WIDTH = 120;
-        private const int HPB_HEIGHT_MULTILINE = 60;
-        private const int HPB_HEIGHT_SINGLELINE = 36;
+        internal const int HPB_WIDTH = 120;
+        internal const int HPB_HEIGHT_MULTILINE = 60;
+        internal const int HPB_HEIGHT_SINGLELINE = 36;
         private const int HPB_BORDERSIZE = 1;
         private const int HPB_OUTLINESIZE = 1;
 
+
+        internal const int HPB_BAR_WIDTH = 100;
+        private const int HPB_BAR_HEIGHT = 8;
         private const int HPB_BAR_SPACELEFT = (HPB_WIDTH - HPB_BAR_WIDTH) / 2;
 
-        private const int HPB_BAR_WIDTH = 100;
-        private const int HPB_BAR_HEIGHT = 8;
 
         private static Color HPB_COLOR_DRAW_RED = Color.Red;
         private static Color HPB_COLOR_DRAW_BLUE = Color.DodgerBlue;

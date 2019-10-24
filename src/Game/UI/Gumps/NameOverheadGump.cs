@@ -179,14 +179,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 GameActions.RequestMobileStatus(Entity);
 
-                if (Engine.Profile.Current.CustomBarsToggled == true)
+                if (Engine.Profile.Current.CustomBarsToggled)
                 {
                     Engine.UI.GetGump<HealthBarGumpCustom>(Entity)?.Dispose();
 
                     if (Entity == World.Player)
                         StatusGumpBase.GetStatusGump()?.Dispose();
 
-                    Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
+                    Rectangle rect = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
                     HealthBarGumpCustom currentHealthBarGump;
                     Engine.UI.Add(currentHealthBarGump = new HealthBarGumpCustom(Entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                     Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);

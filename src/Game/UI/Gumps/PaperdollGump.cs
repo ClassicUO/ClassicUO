@@ -442,7 +442,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (Mobile == World.Player)
                     {
-                        if (Engine.Profile.Current.CustomBarsToggled == true)
+                        if (Engine.Profile.Current.CustomBarsToggled)
                         {
                             Engine.UI.GetGump<HealthBarGumpCustom>(Mobile)?.Dispose();
                         }
@@ -460,14 +460,14 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        if (Engine.Profile.Current.CustomBarsToggled == true)
+                        if (Engine.Profile.Current.CustomBarsToggled)
                         {
                             if (Engine.UI.GetGump<HealthBarGumpCustom>(Mobile) != null)
                                 break;
 
                             GameActions.RequestMobileStatus(Mobile);
 
-                            Rectangle bounds = FileManager.Gumps.GetTexture(0x0804).Bounds;
+                            Rectangle bounds = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
 
                             Engine.UI.Add(new HealthBarGumpCustom(Mobile)
                             {

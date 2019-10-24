@@ -54,7 +54,7 @@ namespace ClassicUO.Game.Managers
                     goto case 2;
                 case 2:
 
-                    if (Engine.Profile.Current.CustomBarsToggled == true)
+                    if (Engine.Profile.Current.CustomBarsToggled)
                     {
                         byte count = p.ReadByte();
 
