@@ -101,11 +101,6 @@ namespace ClassicUO.Game.GameObjects
                 if (!batcher.DrawSpriteRotated(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector, Rotation))
                     return false;
             }
-            else if (IsFlipped)
-            {
-                if (!batcher.DrawSpriteFlipped(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector))
-                    return false;
-            }
             else
             {
                 //if (DrawTransparent)
@@ -131,7 +126,7 @@ namespace ClassicUO.Game.GameObjects
                 //}
                 //else
                 {
-                    if (!batcher.DrawSprite(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector))
+                    if (!batcher.DrawSprite(Texture, posX - Bounds.X, posY - Bounds.Y, IsFlipped, ref HueVector))
                         return false;
                 }
             }

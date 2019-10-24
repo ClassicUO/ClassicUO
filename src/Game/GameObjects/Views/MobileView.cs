@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -446,10 +447,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        if (mirror)
-                            batcher.DrawSpriteFlipped(frame, x, y, frame.Width, frame.Height, frame.Width - 44, 0, ref HueVector);
-                        else
-                            batcher.DrawSprite(frame, x, y, frame.Width, frame.Height, 0, 0, ref HueVector);
+                        batcher.DrawSprite(frame, x, y, mirror, ref HueVector);
 
                         int yy = -(frame.Height + frame.CenterY + 3);
                         int xx = -frame.CenterX;

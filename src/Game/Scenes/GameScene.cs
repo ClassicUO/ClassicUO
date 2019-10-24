@@ -710,10 +710,7 @@ namespace ClassicUO.Game.Scenes
             //batcher.SetStencil(null);
             batcher.End();
 
-            if (UseAltLights)
-                DrawAltLights(batcher);
-            else
-                DrawLights(batcher);
+            DrawLights(batcher);
 
             // draw weather
             batcher.Begin();
@@ -727,55 +724,28 @@ namespace ClassicUO.Game.Scenes
 
         private void DrawLights(UltimaBatcher2D batcher)
         {
-            if (_deathScreenActive || !UseLights)
+            if (_deathScreenActive || (!UseLights && !UseAltLights))
                 return;
 
             batcher.GraphicsDevice.SetRenderTarget(_lightRenderTarget);
 
-            var lightColor = World.Light.IsometricLevel;
-
-            if (Engine.Profile.Current.UseDarkNights)
-                lightColor -= 0.02f;
-
-            _vectorClear.X = _vectorClear.Y = _vectorClear.Z = lightColor;
-
-            batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
-            batcher.GraphicsDevice.Clear(ClearOptions.Target, _vectorClear, 0, 0);
-
-            batcher.Begin();
-            batcher.SetBlendState(BlendState.Additive);
-
-            Vector3 hue = Vector3.Zero;
-
-            for (int i = 0; i < _lightCount; i++)
+            if (UseAltLights)
             {
-                ref readonly var l = ref _lights[i];
-
-                UOTexture texture = FileManager.Lights.GetTexture(l.ID);
-
-                hue.X = l.Color;
-                hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
-                hue.Z = 0;
-
-                batcher.DrawSprite(texture, l.DrawX, l.DrawY, texture.Width, texture.Height, texture.Width >> 1, texture.Height >> 1, ref hue);
+                batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
             }
+            else
+            {
+                var lightColor = World.Light.IsometricLevel;
 
-            _lightCount = 0;
+                if (Engine.Profile.Current.UseDarkNights)
+                    lightColor -= 0.02f;
 
-            batcher.SetBlendState(null);
-            batcher.End();
-        }
+                _vectorClear.X = _vectorClear.Y = _vectorClear.Z = lightColor;
 
-        private void DrawAltLights(UltimaBatcher2D batcher)
-        {
-            if (_deathScreenActive || !UseAltLights)
-                return;
-
-            batcher.GraphicsDevice.SetRenderTarget(_lightRenderTarget);
-
-            var lightColor = World.Light.IsometricLevel;
-            batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
-
+                batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
+                batcher.GraphicsDevice.Clear(ClearOptions.Target, _vectorClear, 0, 0);
+            }
+            
             batcher.Begin();
             batcher.SetBlendState(BlendState.Additive);
 
@@ -791,7 +761,7 @@ namespace ClassicUO.Game.Scenes
                 hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
                 hue.Z = 0;
 
-                batcher.DrawSprite(texture, l.DrawX, l.DrawY, texture.Width, texture.Height, texture.Width >> 1, texture.Height >> 1, ref hue);
+                batcher.DrawSprite(texture, l.DrawX - (texture.Width >> 1), l.DrawY - (texture.Height >> 1), false, ref hue);
             }
 
             _lightCount = 0;

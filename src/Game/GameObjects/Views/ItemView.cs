@@ -301,10 +301,7 @@ namespace ClassicUO.Game.GameObjects
 
         private void DrawInternal(UltimaBatcher2D batcher, int posX, int posY)
         {
-            if (IsFlipped)
-                batcher.DrawSpriteFlipped(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector);
-            else
-                batcher.DrawSprite(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector);
+            batcher.DrawSprite(Texture, posX, posY, IsFlipped, ref HueVector);
 
             Texture.Ticks = Engine.Ticks;
         }
