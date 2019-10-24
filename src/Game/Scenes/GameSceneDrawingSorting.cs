@@ -245,29 +245,34 @@ namespace ClassicUO.Game.Scenes
                                     if (Engine.Profile.Current.TreeType == 0)
                                     {
                                         if (st.OriginalGraphic != st.Graphic)
-                                            {
-                                                st.RestoreOriginalGraphic();
-                                                st.RestoreOriginalHue();
-                                            }
+                                        {
+                                            st.RestoreOriginalGraphic();
+                                            st.RestoreOriginalHue();
+                                        }
                                     }
                                     else if (Engine.Profile.Current.TreeType == 1)
                                     {
                                         if (st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
+                                        {
+                                            if (!itemData.IsImpassable)
                                             {
-                                                if (!itemData.IsImpassable)
-                                                    continue;
                                                 st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC);
-                                                st.RestoreOriginalHue();
+                                                continue;
                                             }
+                                            st.RestoreOriginalHue();
+                                        }
                                     }
                                     else if (Engine.Profile.Current.TreeType == 2)
                                     {
                                         if (st.Graphic != Constants.TREE_REPLACE_GRAPHIC_TILE)
+                                        {
+                                            if (!itemData.IsImpassable)
                                             {
-                                                if (!itemData.IsImpassable)
-                                                    continue;
                                                 st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC_TILE);
+                                                continue;
                                             }
+                                            st.RestoreOriginalHue();
+                                        }
                                         if (Engine.Profile.Current.ColorTreeTile)
                                             st.Hue = Engine.Profile.Current.TreeTileHue;
                                         else
@@ -277,80 +282,93 @@ namespace ClassicUO.Game.Scenes
 
                                 if (StaticFilters.IsBlockerTreeArt(st.OriginalGraphic))
                                 {
-
                                     if (Engine.Profile.Current.BlockerType == 0)
                                     {
                                         if (st.OriginalGraphic != st.Graphic)
-                                            {
-                                                st.RestoreOriginalGraphic();
-                                                st.RestoreOriginalHue();
-                                            }
+                                        {
+                                            st.RestoreOriginalGraphic();
+                                            st.RestoreOriginalHue();
+                                        }
                                     }
                                     else if (Engine.Profile.Current.BlockerType == 1)
                                     {
                                         if (st.Graphic != Constants.BLOCKER_REPLACE_GRAPHIC_STUMP)
+                                        {
+                                            if (!itemData.IsImpassable)
                                             {
-                                                if (!itemData.IsImpassable)
-                                                    continue;
                                                 st.SetGraphic(Constants.BLOCKER_REPLACE_GRAPHIC_STUMP);
-                                                st.RestoreOriginalHue();
+                                                continue;
                                             }
-                                    }
-                                    else if (Engine.Profile.Current.BlockerType == 2)
-                                    {
-                                        if (st.Graphic != Constants.BLOCKER_REPLACE_GRAPHIC_TILE)
-                                            {
-                                                if (!itemData.IsImpassable)
-                                                        continue;
-                                                st.SetGraphic(Constants.BLOCKER_REPLACE_GRAPHIC_TILE);
-                                            }
+                                            st.RestoreOriginalHue();
+                                        }
                                         if (Engine.Profile.Current.ColorBlockerTile)
                                             st.Hue = Engine.Profile.Current.BlockerTileHue;
                                         else
                                             st.RestoreOriginalHue();
                                     }
-
-
+                                    else if (Engine.Profile.Current.BlockerType == 2)
+                                    {
+                                        if (st.Graphic != Constants.BLOCKER_REPLACE_GRAPHIC_TILE)
+                                        {
+                                            if (!itemData.IsImpassable)
+                                            {
+                                                st.SetGraphic(Constants.BLOCKER_REPLACE_GRAPHIC_TILE);
+                                                continue;
+                                            }
+                                            st.RestoreOriginalHue();
+                                        }
+                                        if (Engine.Profile.Current.ColorBlockerTile)
+                                            st.Hue = Engine.Profile.Current.BlockerTileHue;
+                                        else
+                                            st.RestoreOriginalHue();
+                                    }
                                 }
 
                                 if (StaticFilters.IsBlockerStoneArt(st.OriginalGraphic))
                                 {
-
                                     if (Engine.Profile.Current.BlockerType == 0)
                                     {
                                         if (st.OriginalGraphic != st.Graphic)
-                                            {
-                                                st.RestoreOriginalGraphic();
-                                                st.RestoreOriginalHue();
-                                            }
+                                        {
+                                            st.RestoreOriginalGraphic();
+                                            st.RestoreOriginalHue();
+                                        }
                                     }
                                     else if (Engine.Profile.Current.BlockerType == 1)
                                     {
                                         if (st.Graphic != Constants.BLOCKER_REPLACE_GRAPHIC_ROCK)
+                                        {
+                                            if (!itemData.IsImpassable)
                                             {
-                                                if (!itemData.IsImpassable)
-                                                        continue;
                                                 st.SetGraphic(Constants.BLOCKER_REPLACE_GRAPHIC_ROCK);
-                                                st.RestoreOriginalHue();
+                                                continue;
                                             }
-                                    }
-                                    else if (Engine.Profile.Current.BlockerType == 2)
-                                    {
-                                        if (st.Graphic != Constants.BLOCKER_REPLACE_GRAPHIC_TILE)
-                                            {
-                                                if (!itemData.IsImpassable)
-                                                        continue;
-                                                st.SetGraphic(Constants.BLOCKER_REPLACE_GRAPHIC_TILE);
-                                            }
+                                            st.RestoreOriginalHue();
+                                        }
                                         if (Engine.Profile.Current.ColorBlockerTile)
                                             st.Hue = Engine.Profile.Current.BlockerTileHue;
                                         else
                                             st.RestoreOriginalHue();
                                     }
-
-
+                                    else if (Engine.Profile.Current.BlockerType == 2)
+                                    {
+                                        if (st.Graphic != Constants.BLOCKER_REPLACE_GRAPHIC_TILE)
+                                        {
+                                            if (!itemData.IsImpassable)
+                                            {
+                                                st.SetGraphic(Constants.BLOCKER_REPLACE_GRAPHIC_TILE);
+                                                continue;
+                                            }
+                                            st.RestoreOriginalHue();                                            
+                                        }
+                                        if (Engine.Profile.Current.ColorBlockerTile)
+                                            st.Hue = Engine.Profile.Current.BlockerTileHue;
+                                        else
+                                            st.RestoreOriginalHue();
+                                    }
                                 }
                             }
+
                             if (_noDrawRoofs && itemData.IsRoof)
                             {
                                 if (_alphaChanged)

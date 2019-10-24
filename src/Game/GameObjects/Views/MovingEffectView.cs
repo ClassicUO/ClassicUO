@@ -53,7 +53,7 @@ namespace ClassicUO.Game.GameObjects
             if (Graphic == 0x379F) //energy bolt
             {
                 if (Engine.Profile.Current.ColorEnergyBolt)
-                    Hue = Engine.Profile.Current.EnergyBoltHue;    
+                    Hue = Engine.Profile.Current.EnergyBoltHue;
                 if (Engine.Profile.Current.EnergyBoltNeonType == 1)
                     Hue = Constants.BRIGHT_WHITE_COLOR;
                 else if (Engine.Profile.Current.EnergyBoltNeonType == 2)
@@ -64,8 +64,8 @@ namespace ClassicUO.Game.GameObjects
                     Hue = Constants.BRIGHT_FIRE_COLOR;
             }
 
-            Bounds.X = (int) -Offset.X;
-            Bounds.Y = (int) (Offset.Z - Offset.Y);
+            Bounds.X = (int) -Offset.X + 22;
+            Bounds.Y = (int) (Offset.Z - Offset.Y) + 22;
             Rotation = AngleToTarget;
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
