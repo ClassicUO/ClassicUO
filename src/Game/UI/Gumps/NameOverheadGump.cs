@@ -178,31 +178,24 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
 
                 GameActions.RequestMobileStatus(Entity);
+                BaseHealthBarGump gump = Engine.UI.GetGump<BaseHealthBarGump>(Entity);
+                gump?.Dispose();
+
+                if (Entity == World.Player)
+                    StatusGumpBase.GetStatusGump()?.Dispose();
 
                 if (Engine.Profile.Current.CustomBarsToggled)
                 {
-                    Engine.UI.GetGump<HealthBarGumpCustom>(Entity)?.Dispose();
-
-                    if (Entity == World.Player)
-                        StatusGumpBase.GetStatusGump()?.Dispose();
-
                     Rectangle rect = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
-                    HealthBarGumpCustom currentHealthBarGump;
-                    Engine.UI.Add(currentHealthBarGump = new HealthBarGumpCustom(Entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
-                    Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
+                    Engine.UI.Add(gump = new HealthBarGumpCustom(Entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                 }
                 else
                 {
-                    Engine.UI.GetGump<HealthBarGump>(Entity)?.Dispose();
-
-                    if (Entity == World.Player)
-                        StatusGumpBase.GetStatusGump()?.Dispose();
-
                     Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-                    HealthBarGump currentHealthBarGump;
-                    Engine.UI.Add(currentHealthBarGump = new HealthBarGump(Entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
-                    Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
+                    Engine.UI.Add(gump = new HealthBarGump(Entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                 }
+
+                Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
             }
             else
                 GameActions.PickUp(Entity);

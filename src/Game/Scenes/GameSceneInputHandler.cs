@@ -218,25 +218,15 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (mobile != World.Player)
                     {
-                        if (useCHB)
+                        if (Engine.UI.GetGump<BaseHealthBarGump>(mobile)?.IsInitialized ?? false)
                         {
-                            if (Engine.UI.GetGump<HealthBarGumpCustom>(mobile)?.IsInitialized ?? false)
-                            {
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            if (Engine.UI.GetGump<HealthBarGump>(mobile)?.IsInitialized ?? false)
-                            {
-                                continue;
-                            }
+                            continue;
                         }
 
                         //Instead of destroying existing HP bar, continue if already opened.
                         GameActions.RequestMobileStatus(mobile);
 
-                        Gump hbgc;
+                        BaseHealthBarGump hbgc;
 
                         if (useCHB)
                         {
@@ -267,20 +257,9 @@ namespace ClassicUO.Game.Scenes
                         hbgc.X = finalX;
                         hbgc.Y = finalY;
 
-                        IEnumerable<Gump> gumps;
 
-                        if (useCHB)
-                        {
-                            gumps = Engine.UI.Gumps
-                                .OfType<HealthBarGumpCustom>();
-                        }
-                        else
-                        {
-                            gumps = Engine.UI.Gumps
-                                .OfType<HealthBarGump>();
-                        }
-
-                        foreach (var bar in gumps
+                        foreach (var bar in Engine.UI.Gumps
+                                                .OfType<BaseHealthBarGump>()
                                                   //.OrderBy(s => mobile.NotorietyFlag)
                                                   //.OrderBy(s => s.ScreenCoordinateX) ///testing placement SYRUPZ SYRUPZ SYRUPZ
                                                   .OrderBy(s => s.ScreenCoordinateX)
@@ -675,44 +654,29 @@ namespace ClassicUO.Game.Scenes
                             if (entity == null)
                                 break;
 
+                            GameActions.RequestMobileStatus(entity);
+                            var customgump = Engine.UI.GetGump<BaseHealthBarGump>(entity);
+                            if (customgump != null)
+                            {
+                                if (!customgump.IsInitialized)
+                                    break;
+                                customgump.Dispose();
+                            }
+
+                            if (entity == World.Player)
+                                StatusGumpBase.GetStatusGump()?.Dispose();
+
                             if (Engine.Profile.Current.CustomBarsToggled)
                             {
-                                GameActions.RequestMobileStatus(entity);
-                                var customgump = Engine.UI.GetGump<HealthBarGumpCustom>(entity);
-                                if (customgump != null)
-                                {
-                                    if (!customgump.IsInitialized)
-                                        break;
-                                    customgump.Dispose();
-                                }
-
-                                if (entity == World.Player)
-                                    StatusGumpBase.GetStatusGump()?.Dispose();
-
                                 Rectangle rect = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
-                                HealthBarGumpCustom currentCustomHealthBarGump;
-                                Engine.UI.Add(currentCustomHealthBarGump = new HealthBarGumpCustom(entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
-                                Engine.UI.AttemptDragControl(currentCustomHealthBarGump, Mouse.Position, true);
+                                Engine.UI.Add(customgump = new HealthBarGumpCustom(entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                             }
                             else
                             {
-                                GameActions.RequestMobileStatus(entity);
-                                var gump = Engine.UI.GetGump<HealthBarGump>(entity);
-                                if (gump != null)
-                                {
-                                    if (!gump.IsInitialized)
-                                        break;
-                                    gump.Dispose();
-                                }
-
-                                if (entity == World.Player)
-                                    StatusGumpBase.GetStatusGump()?.Dispose();
-
                                 Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-                                HealthBarGump currentHealthBarGump;
-                                Engine.UI.Add(currentHealthBarGump = new HealthBarGump(entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
-                                Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
+                                Engine.UI.Add(customgump = new HealthBarGump(entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                             }
+                            Engine.UI.AttemptDragControl(customgump, Mouse.Position, true);
 
                             break;
 
