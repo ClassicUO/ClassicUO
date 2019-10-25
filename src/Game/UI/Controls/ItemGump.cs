@@ -359,15 +359,15 @@ namespace ClassicUO.Game.UI.Controls
                 Rectangle bounds = FileManager.Art.GetTexture(item.DisplayedGraphic).Bounds;
                 Point offset = new Point(bounds.Width >> 1, bounds.Height >> 1);
 
-                if (Parent != null)
+                if (Parent != null && Parent is ContainerGump)
                 {
                     float scale = 1;
                     if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
                         scale = Engine.UI.ContainerScale;
-
-                    Point itemPos = new Point(ParentX + X, ParentY + Y);
-                    offset = new Point((int)((_lastClickPosition.X - itemPos.X) / scale),
-                        (int)((_lastClickPosition.Y - itemPos.Y) / scale));
+                    
+                    offset = new Point(
+                        (int)((_lastClickPosition.X - (ParentX + X)) / scale),
+                        (int)((_lastClickPosition.Y - (ParentY + Y)) / scale));
                 }
 
                 GameActions.PickUp(LocalSerial, offset);
