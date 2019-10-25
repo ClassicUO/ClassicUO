@@ -348,8 +348,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (CanPickUp)
             {
-                Rectangle bounds = this.Texture.Bounds;
-                Point offset = new Point(bounds.Width >> 1, bounds.Height >> 1);
+                // fetch texture for item
+                Rectangle bounds = Texture.Bounds;
+                Point offset = Point.Zero;
 
                 if (this is ItemGumpPaperdoll)
                 {
@@ -361,8 +362,8 @@ namespace ClassicUO.Game.UI.Controls
                     if (IsDisposed)
                         return;
 
+                    // fetch DisplayedGraphic for paperdoll item
                     bounds = FileManager.Art.GetTexture(item.DisplayedGraphic).Bounds;
-                    offset = new Point(bounds.Width >> 1, bounds.Height >> 1);
                 }
                 else if (Parent != null && Parent is ContainerGump)
                 {
@@ -370,10 +371,14 @@ namespace ClassicUO.Game.UI.Controls
                     if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
                         scale = Engine.UI.ContainerScale;
                     
+                    // drag with mouse offset from containers
                     offset = new Point(
                         (int)((_lastClickPosition.X - (ParentX + X)) / scale),
                         (int)((_lastClickPosition.Y - (ParentY + Y)) / scale));
                 }
+
+                if (offset == Point.Zero) // drag from center by default
+                    offset = new Point(bounds.Width >> 1, bounds.Height >> 1);
 
                 GameActions.PickUp(LocalSerial, offset);
             }
