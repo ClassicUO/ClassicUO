@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Utility.Collections
 {
-    public struct ReadOnlyArrayView<T> : IEnumerable<T>
+    public readonly struct ReadOnlyArrayView<T> : IEnumerable<T>
     {
         private readonly T[] _items;
         private readonly uint _start;

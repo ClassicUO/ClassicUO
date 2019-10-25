@@ -260,21 +260,21 @@ namespace ClassicUO.Game.Data
             sd = new SpellDefinition(name, fullidx, iconid, smalliconid, words, manacost, minskill, tithing, target, regs);
 
             if (fullidx < 100)
-                SpellsMagery.SetSpell(id, sd);
+                SpellsMagery.SetSpell(id, in sd);
             else if (fullidx < 200)
-                SpellsNecromancy.SetSpell(id, sd);
+                SpellsNecromancy.SetSpell(id, in sd);
             else if (fullidx < 300)
-                SpellsChivalry.SetSpell(id, sd);
+                SpellsChivalry.SetSpell(id, in sd);
             else if (fullidx < 500)
-                SpellsBushido.SetSpell(id, sd);
+                SpellsBushido.SetSpell(id, in sd);
             else if (fullidx < 600)
-                SpellsNinjitsu.SetSpell(id, sd);
+                SpellsNinjitsu.SetSpell(id, in sd);
             else if (fullidx < 678)
-                SpellsSpellweaving.SetSpell(id, sd);
+                SpellsSpellweaving.SetSpell(id, in sd);
             else if (fullidx < 700)
-                SpellsMysticism.SetSpell(id - 77, sd);
+                SpellsMysticism.SetSpell(id - 77, in sd);
             else
-                SpellsBardic.SetSpell(id, sd);
+                SpellsBardic.SetSpell(id, in sd);
         }
     }
 }
