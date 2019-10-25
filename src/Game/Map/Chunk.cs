@@ -92,7 +92,7 @@ namespace ClassicUO.Game.Map
         [MethodImpl(256)]
         public unsafe void Load(int map)
         {
-            ref readonly IndexMap im = ref GetIndex(map);
+            ref IndexMap im = ref GetIndex(map);
 
             if (im.MapAddress != 0)
             {
@@ -167,7 +167,7 @@ namespace ClassicUO.Game.Map
         [MethodImpl(256)]
         public unsafe void LoadStatics(int map)
         {
-            ref readonly IndexMap im = ref GetIndex(map);
+            ref IndexMap im = ref GetIndex(map);
 
             if (im.MapAddress != 0)
             {
@@ -215,7 +215,7 @@ namespace ClassicUO.Game.Map
         [MethodImpl(256)]
         public unsafe void LoadLand(int map)
         {
-            ref readonly IndexMap im = ref GetIndex(map);
+            ref IndexMap im = ref GetIndex(map);
 
             if (im.MapAddress != 0)
             {

@@ -298,7 +298,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                ref readonly Step step = ref Steps.Back();
+                ref Step step = ref Steps.Back();
                 x = step.X;
                 y = step.Y;
                 z = step.Z;
@@ -462,7 +462,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (IsMounted)
                     {
-                        ref readonly Step step = ref Steps.Back();
+                        ref Step step = ref Steps.Back();
                         if (step.Run)
                         {
                             soundID = 0x0129;
@@ -653,7 +653,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (Steps.Count != 0 && !IsDestroyed)
             {
-                ref readonly Step step = ref Steps.Front();
+                ref Step step = ref Steps.Front();
                 dir = step.Direction;
 
                 if (step.Run)

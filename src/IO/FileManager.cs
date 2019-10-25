@@ -245,7 +245,7 @@ namespace ClassicUO.IO
             {
                 for (int i = 0; i < Verdata.Patches.Length; i++)
                 {
-                    ref readonly UOFileIndex5D vh = ref Verdata.Patches[i];
+                    ref UOFileIndex5D vh = ref Verdata.Patches[i];
 
                     if (vh.FileID == 0)
                         Map.PatchMapBlock(vh.BlockID, vh.Position);

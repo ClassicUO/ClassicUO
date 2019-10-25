@@ -753,7 +753,7 @@ namespace ClassicUO.Game.Scenes
 
             for (int i = 0; i < _lightCount; i++)
             {
-                ref readonly var l = ref _lights[i];
+                ref var l = ref _lights[i];
 
                 UOTexture texture = FileManager.Lights.GetTexture(l.ID);
 

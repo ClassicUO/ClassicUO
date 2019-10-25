@@ -119,7 +119,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (this is Mobile m && m.IsMoving)
                 {
-                    ref readonly var step = ref m.Steps.Back();
+                    ref var step = ref m.Steps.Back();
                     x = step.X;
                     y = step.Y;
                 }

@@ -1428,7 +1428,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (!emptyStack)
             {
-                ref readonly  Step walkStep = ref Steps.Back();
+                ref Step walkStep = ref Steps.Back();
                 x = walkStep.X;
                 y = walkStep.Y;
                 z = walkStep.Z;
