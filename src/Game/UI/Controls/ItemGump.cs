@@ -348,18 +348,23 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (CanPickUp)
             {
-                Item item = World.Items.Get(LocalSerial);
-
-                if (item == null)
-                    Dispose();
-
-                if (IsDisposed)
-                    return;
-
-                Rectangle bounds = FileManager.Art.GetTexture(item.DisplayedGraphic).Bounds;
+                Rectangle bounds = this.Texture.Bounds;
                 Point offset = new Point(bounds.Width >> 1, bounds.Height >> 1);
 
-                if (Parent != null && Parent is ContainerGump)
+                if (this is ItemGumpPaperdoll)
+                {
+                    Item item = World.Items.Get(LocalSerial);
+
+                    if (item == null)
+                        Dispose();
+
+                    if (IsDisposed)
+                        return;
+
+                    bounds = FileManager.Art.GetTexture(item.DisplayedGraphic).Bounds;
+                    offset = new Point(bounds.Width >> 1, bounds.Height >> 1);
+                }
+                else if (Parent != null && Parent is ContainerGump)
                 {
                     float scale = 1;
                     if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
