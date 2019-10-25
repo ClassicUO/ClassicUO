@@ -59,6 +59,9 @@ namespace ClassicUO.Game.Managers
             if (hasparticles) Log.Message(LogTypes.Warning, "Unhandled particles in an effects packet.");
             GameEffect effect = null;
 
+            if (hue != 0)
+                hue++;
+
             switch (type)
             {
                 case GraphicEffectType.Moving:
