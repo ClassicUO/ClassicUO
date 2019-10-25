@@ -165,6 +165,9 @@ namespace ClassicUO.Game.UI.Controls
             if (button != MouseButton.Left)
                 return;
 
+            _lastClickPosition.X = Mouse.Position.X;
+            _lastClickPosition.Y = Mouse.Position.Y;
+
             if (TargetManager.IsTargeting)
             {
                 if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
@@ -270,8 +273,6 @@ namespace ClassicUO.Game.UI.Controls
                             _sendClickIfNotDClick = true;
                             float totalMS = Engine.Ticks;
                             _sClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                            _lastClickPosition.X = Mouse.Position.X;
-                            _lastClickPosition.Y = Mouse.Position.Y;
                         }
                     }
                     else
@@ -347,23 +348,29 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (CanPickUp)
             {
-                if (this is ItemGumpPaperdoll)
+                Item item = World.Items.Get(LocalSerial);
+
+                if (item == null)
+                    Dispose();
+
+                if (IsDisposed)
+                    return;
+
+                Rectangle bounds = FileManager.Art.GetTexture(item.DisplayedGraphic).Bounds;
+                Point offset = new Point(bounds.Width >> 1, bounds.Height >> 1);
+
+                if (Parent != null)
                 {
-                    Item item = World.Items.Get(LocalSerial);
+                    float scale = 1;
+                    if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
+                        scale = Engine.UI.ContainerScale;
 
-                    if (item == null)
-                    {
-                        Dispose();
-                    }
-
-                    if (IsDisposed)
-                        return;
-
-                    Rectangle bounds = FileManager.Art.GetTexture(item.DisplayedGraphic).Bounds;
-                    GameActions.PickUp(LocalSerial, bounds.Width >> 1, bounds.Height >> 1);
+                    Point itemPos = new Point(ParentX + X, ParentY + Y);
+                    offset = new Point((int)((_lastClickPosition.X - itemPos.X) / scale),
+                        (int)((_lastClickPosition.Y - itemPos.Y) / scale));
                 }
-                else
-                    GameActions.PickUp(LocalSerial, Point.Zero);
+
+                GameActions.PickUp(LocalSerial, offset);
             }
         }
     }
