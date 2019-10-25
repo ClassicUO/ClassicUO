@@ -1352,30 +1352,42 @@ namespace ClassicUO.IO.Resources
 
                     ushort[] data = new ushort[imageWidth * imageHeight];
 
-                    fixed (ushort* ptrData = data)
+                    uint header = reader.ReadUInt();
+
+                    long pos = reader.Position;
+                    long end = (long) reader.StartAddress + reader.Length;
+
+                    while (header != 0x7FFF7FFF && pos < end)
                     {
-                        int header;
+                        ushort runLength = (ushort) (header & 0x0FFF);
+                        int x = (int) ((header >> 22) & 0x03FF);
 
-                        const int DOUBLE_XOR = (0x200 << 22) | (0x200 << 12);
+                        if ((x & 0x0200) > 0)
+                            x |= unchecked((int) 0xFFFFFE00);
+                        int y = (int) ((header >> 12) & 0x3FF);
 
-                        while ((header = reader.ReadInt()) != 0x7FFF7FFF)
+                        if ((y & 0x0200) > 0)
+                            y |= unchecked((int) 0xFFFFFE00);
+
+                        x += imageCenterX;
+                        y += imageCenterY + imageHeight;
+
+                        int block = y * imageWidth + x;
+
+                        for (int k = 0; k < runLength; k++)
                         {
-                            header ^= DOUBLE_XOR;
-                            int x = ((header >> 22) & 0x3FF) + imageCenterX - 0x200;
-                            int y = ((header >> 12) & 0x3FF) + imageCenterY + imageHeight - 0x200;
+                            ushort val = palette[reader.ReadByte()];
 
-                            ushort* cur = ptrData + y * imageWidth + x;
-                            ushort* end = cur + (header & 0xFFF);
-                            int filecounter = 0;
-
-                            byte* filedata = (byte*)reader.PositionAddress;
-                            reader.Skip(header & 0xFFF);
-                            while (cur < end)
-                            {
-                                *cur++ = (ushort)(0x8000 | palette[filedata[filecounter++]]);
-                            }
+                            if (val != 0)
+                                data[block] = (ushort) (0x8000 | val);
+                            else
+                                data[block] = 0;
+                            block++;
                         }
+
+                        header = reader.ReadUInt();
                     }
+
 
                     AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
                     {
@@ -1432,32 +1444,42 @@ namespace ClassicUO.IO.Resources
 
                 ushort[] data = new ushort[imageWidth * imageHeight];
 
-                fixed (ushort* ptrData = data)
+                uint header = reader.ReadUInt();
+
+                long pos = reader.Position;
+                long end = (long) reader.StartAddress + reader.Length;
+
+                while (header != 0x7FFF7FFF && pos < end)
                 {
-                    ushort* dataRef = ptrData;
+                    ushort runLength = (ushort) (header & 0x0FFF);
+                    int x = (int) ((header >> 22) & 0x03FF);
 
-                    int header;
+                    if ((x & 0x0200) > 0)
+                        x |= unchecked((int) 0xFFFFFE00);
+                    int y = (int) ((header >> 12) & 0x3FF);
 
-                    const int DOUBLE_XOR = (0x200 << 22) | (0x200 << 12);
+                    if ((y & 0x0200) > 0)
+                        y |= unchecked((int) 0xFFFFFE00);
 
-                    while ((header = reader.ReadInt()) != 0x7FFF7FFF)
+                    x += imageCenterX;
+                    y += imageCenterY + imageHeight;
+
+                    int block = y * imageWidth + x;
+
+                    for (int k = 0; k < runLength; k++)
                     {
-                        header ^= DOUBLE_XOR;
-                        int x = ((header >> 22) & 0x3FF) + imageCenterX - 0x200;
-                        int y = ((header >> 12) & 0x3FF) + imageCenterY + imageHeight - 0x200;
+                        ushort val = palette[reader.ReadByte()];
 
-                        ushort* cur = ptrData + y * imageWidth + x;
-                        ushort* end = cur + (header & 0xFFF);
-                        int filecounter = 0;
-
-                        byte* filedata = (byte*)reader.PositionAddress;
-                        reader.Skip(header & 0xFFF);
-                        while (cur < end)
-                        {
-                            *cur++ = (ushort)(0x8000 | palette[filedata[filecounter++]]);
-                        }
+                        if (val != 0)
+                            data[block] = (ushort) (0x8000 | val);
+                        else
+                            data[block] = 0;
+                        block++;
                     }
+
+                    header = reader.ReadUInt();
                 }
+
 
                 AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
                 {
