@@ -1503,20 +1503,21 @@ namespace ClassicUO.Renderer
         [MethodImpl(256)]
         private bool CheckInScreen(int index)
         {
-            _drawingArea.Contains(ref _vertexInfo[index].Position0, out ContainmentType res);
-            if (res == ContainmentType.Contains)
-                return true;
-            _drawingArea.Contains(ref _vertexInfo[index].Position1, out res);
-            if (res == ContainmentType.Contains)
-                return true; 
-            _drawingArea.Contains(ref _vertexInfo[index].Position2, out res);
-            if (res == ContainmentType.Contains)
-                return true; 
-            _drawingArea.Contains(ref _vertexInfo[index].Position3, out res);
-            if (res == ContainmentType.Contains)
-                return true;
+            return true;
+            //_drawingArea.Contains(ref _vertexInfo[index].Position0, out ContainmentType res);
+            //if (res == ContainmentType.Contains)
+            //    return true;
+            //_drawingArea.Contains(ref _vertexInfo[index].Position1, out res);
+            //if (res == ContainmentType.Contains)
+            //    return true; 
+            //_drawingArea.Contains(ref _vertexInfo[index].Position2, out res);
+            //if (res == ContainmentType.Contains)
+            //    return true; 
+            //_drawingArea.Contains(ref _vertexInfo[index].Position3, out res);
+            //if (res == ContainmentType.Contains)
+            //    return true;
 
-            return false;
+            //return false;
         }
 
         [MethodImpl(256)]
