@@ -106,7 +106,18 @@ namespace ClassicUO.Configuration
         [JsonProperty] public int MobileHPType { get; set; } // 0 = %, 1 = line, 2 = both
         [JsonProperty] public int MobileHPShowWhen { get; set; } // 0 = Always, 1 - <100%
         [JsonProperty] public bool DrawRoofs { get; set; } = true;
-        [JsonProperty] public bool TreeToStumps { get; set; }
+        [JsonProperty] public int TreeType { get; set; } = 0; // 0 = off, 1 = stump, 2 = tile
+        [JsonProperty] public bool ColorTreeTile { get; set; }
+        [JsonProperty] public ushort TreeTileHue { get; set; } = 0x0044;
+        [JsonProperty] public int BlockerType { get; set; } = 0; // 0 = off, 1 = stump, 2 = tile
+        [JsonProperty] public bool ColorBlockerTile { get; set; }
+        [JsonProperty] public ushort BlockerTileHue { get; set; } = 0x0044;
+        [JsonProperty] public bool HighlightTileAtRange { get; set; }
+        [JsonProperty] public int HighlightTileAtRangeRange { get; set; }
+        [JsonProperty] public ushort HighlightTileAtRangeHue { get; set; } = 0x0044;
+        [JsonProperty] public bool ColorEnergyBolt { get; set; }
+        [JsonProperty] public ushort EnergyBoltHue { get; set; } = 0x0044;
+        [JsonProperty] public int EnergyBoltNeonType { get; set; } = 0; // 0 = off, 1 = white, 2 = pink, 3 = ice, 4 = fire
         [JsonProperty] public bool EnableCaveBorder { get; set; }
         [JsonProperty] public bool HideVegetation { get; set; }
         [JsonProperty] public int FieldsType { get; set; } // 0 = normal, 1 = static, 2 = tile

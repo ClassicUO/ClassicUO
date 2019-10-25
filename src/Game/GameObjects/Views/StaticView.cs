@@ -104,6 +104,11 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.X = Constants.DEAD_RANGE_COLOR;
                 HueVector.Y = 1;
             }
+            else if (Engine.Profile.Current.HighlightTileAtRange && Distance == Engine.Profile.Current.HighlightTileAtRangeRange)
+            {
+                HueVector.X = Engine.Profile.Current.HighlightTileAtRangeHue;
+                HueVector.Y = 1;
+            }
             else
                 ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, ItemData.IsPartialHue, 0);
 

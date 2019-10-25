@@ -98,6 +98,14 @@ namespace ClassicUO.Game
 
         public const ushort FIELD_REPLACE_GRAPHIC = 0x1826;
         public const ushort TREE_REPLACE_GRAPHIC = 0x0E59;
+        public const ushort TREE_REPLACE_GRAPHIC_TILE = 0x126B;
+        public const ushort BLOCKER_REPLACE_GRAPHIC_STUMP = 0x0E56;
+        public const ushort BLOCKER_REPLACE_GRAPHIC_ROCK = 0x1775;
+        public const ushort BLOCKER_REPLACE_GRAPHIC_TILE = 0x126B;
+        public const ushort BRIGHT_WHITE_COLOR = 0x080A;
+        public const ushort BRIGHT_PINK_COLOR = 0x0503;
+        public const ushort BRIGHT_ICE_COLOR = 0x0480;
+        public const ushort BRIGHT_FIRE_COLOR = 0x0496;
 
         public const int MIN_CIRCLE_OF_TRANSPARENCY_RADIUS = 20;
         public const int MAX_CIRCLE_OF_TRANSPARENCY_RADIUS = 200;

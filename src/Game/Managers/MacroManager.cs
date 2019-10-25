@@ -827,6 +827,11 @@ namespace ClassicUO.Game.Managers
 
                     break;
 
+                case MacroType.HighlightTileAtRange:
+                    Engine.Profile.Current.HighlightTileAtRange = !Engine.Profile.Current.HighlightTileAtRange;
+
+                    break;
+
                 case MacroType.AttackSelectedTarget:
 
                     // TODO:
@@ -1421,6 +1426,7 @@ namespace ClassicUO.Game.Managers
         UsePotion,
         CloseAllHealthBars,
         RazorMacro,
+        HighlightTileAtRange,
 
     }
 

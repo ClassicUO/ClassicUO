@@ -50,6 +50,20 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Height = Texture.Height;
             }
 
+            if (Graphic == 0x379F) //energy bolt
+            {
+                if (Engine.Profile.Current.ColorEnergyBolt)
+                    Hue = Engine.Profile.Current.EnergyBoltHue;
+                if (Engine.Profile.Current.EnergyBoltNeonType == 1)
+                    Hue = Constants.BRIGHT_WHITE_COLOR;
+                else if (Engine.Profile.Current.EnergyBoltNeonType == 2)
+                    Hue = Constants.BRIGHT_PINK_COLOR;
+                else if (Engine.Profile.Current.EnergyBoltNeonType == 3)
+                    Hue = Constants.BRIGHT_ICE_COLOR;
+                else if (Engine.Profile.Current.EnergyBoltNeonType == 4)
+                    Hue = Constants.BRIGHT_FIRE_COLOR;
+            }
+
             Bounds.X = (int) -Offset.X + 22;
             Bounds.Y = (int) (Offset.Z - Offset.Y) + 22;
             Rotation = AngleToTarget;

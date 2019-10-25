@@ -93,8 +93,51 @@ namespace ClassicUO.Game.Data
                 case 0x313A:
                 case 0x0C95:
                 case 0x0C96:
-                case 0x0C99:
                 case 0x0A06:
+
+                    return true;
+            }
+
+            return false;
+        }
+
+        [MethodImpl(256)]
+        public static bool IsBlockerTreeArt(ushort g)
+        {
+            switch (g)
+            {
+                case 0x1772:
+                case 0x177A:
+                case 0xC2D:
+                case 0xC99:
+                case 0xC9B:
+                case 0xC9C:
+                case 0xC9D:
+                case 0xCA6:
+                case 0xCC4:
+
+                    return true;
+            }
+
+            return false;
+        }
+
+        [MethodImpl(256)]
+        public static bool IsBlockerStoneArt(ushort g)
+        {
+            switch (g)
+            {
+                case 0x1363:
+                case 0x1364:
+                case 0x1365:
+                case 0x1366:
+                case 0x1367:
+                case 0x1368:
+                case 0x1369:
+                case 0x136A:
+                case 0x136B:
+                case 0x136C:
+                case 0x136D:
 
                     return true;
             }
