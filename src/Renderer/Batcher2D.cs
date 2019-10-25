@@ -336,8 +336,8 @@ namespace ClassicUO.Renderer
 
             vertex.Normal0 = normals[0];
             vertex.Normal1 = normals[1];
-            vertex.Normal2 = normals[2]; // right order!
-            vertex.Normal3 = normals[3];
+            vertex.Normal3 = normals[2]; // right order!
+            vertex.Normal2 = normals[3];
 
             vertex.Position0.X = x + 22;
             vertex.Position0.Y = y - rect.Left;
@@ -1503,15 +1503,11 @@ namespace ClassicUO.Renderer
         [MethodImpl(256)]
         private bool CheckInScreen(int index)
         {
-            return true;
-            //for (byte i = 0; i < 4; i++)
-            //{
-            //    _drawingArea.Contains(ref _vertexInfo[index + i].Position, out ContainmentType res);
-            //    if (res == ContainmentType.Contains)
-            //        return true;
-            //}
+            _drawingArea.Contains(ref _vertexInfo[index].Position0, out ContainmentType res);
+            if (res == ContainmentType.Contains)
+                return true;
 
-            //return false;
+            return false;
         }
 
         [MethodImpl(256)]
