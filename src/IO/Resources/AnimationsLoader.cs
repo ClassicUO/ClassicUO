@@ -306,7 +306,7 @@ namespace ClassicUO.IO.Resources
                     DataIndex[i].Graphic = i;
                     DataIndex[i].CorpseGraphic = i;
 
-                    long offsetToData = DataIndex[i].CalculateOffset(i, out int count);
+                    long offsetToData = DataIndex[i].CalculateOffset(i, DataIndex[i].Type, out int count);
 
                     if (offsetToData >= idxfile0.Length) continue;
 
@@ -510,11 +510,13 @@ namespace ClassicUO.IO.Resources
                             if (realAnimID != 0xFFFF && animFile != 0)
                             {
                                 UOFile currentIdxFile = _files[animFile].IdxFile;
-                                long addressOffset = DataIndex[index].CalculateOffset(realAnimID, out int count);
+                                var realType = FileManager.ClientVersion < ClientVersions.CV_500A 
+                                    ? CalculateTypeByGraphic(realAnimID) : DataIndex[index].Type;
+                                long addressOffset = DataIndex[index].CalculateOffset(realAnimID, realType, out int count);
 
                                 if (addressOffset < currentIdxFile.Length)
                                 {
-                                    DataIndex[index].Type = CalculateTypeByGraphic(realAnimID);
+                                    DataIndex[index].Type = realType;
                                     DataIndex[index].MountedHeightOffset = mountedHeightOffset;
                                     DataIndex[index].GraphicConversion = (ushort)(realAnimID | 0x8000);
                                     DataIndex[index].FileIndex = (byte)animFile;
@@ -837,7 +839,7 @@ namespace ClassicUO.IO.Resources
             return (uint)(((graphic - 200) * 65 + 22000) * UnsafeMemoryManager.SizeOf<AnimIdxBlock>());
         }
 
-        internal static ANIMATION_GROUPS_TYPE CalculateTypeByGraphic(ushort graphic)
+        private ANIMATION_GROUPS_TYPE CalculateTypeByGraphic(ushort graphic)
         {
             return graphic < 200 ? ANIMATION_GROUPS_TYPE.MONSTER : graphic < 400 ? ANIMATION_GROUPS_TYPE.ANIMAL : ANIMATION_GROUPS_TYPE.HUMAN;
         }
@@ -1915,14 +1917,14 @@ namespace ClassicUO.IO.Resources
             _uopReplaceGroupIndex[old] = newG;
         }
 
-        public long CalculateOffset(ushort graphic, out int groupCount)
+        public long CalculateOffset(ushort graphic, ANIMATION_GROUPS_TYPE type, out int groupCount)
         {
             long result = 0;
             groupCount = 0;
 
             ANIMATION_GROUPS group = ANIMATION_GROUPS.AG_NONE;
 
-            switch (AnimationsLoader.CalculateTypeByGraphic(graphic))
+            switch (type)
             {
                 case ANIMATION_GROUPS_TYPE.MONSTER:
 
