@@ -1227,14 +1227,14 @@ namespace ClassicUO.IO.Resources
             if (animDir.FileIndex == -1 && animDir.Address == -1)
                 return false;
 
-            if (animDir.IsUOP || animDir.Address == 0 && animDir.Size == 0)
+            if (animDir.IsUOP || (animDir.Address == 0 && animDir.Size == 0))
             {
                 var animData = DataIndex[AnimID].GetUopGroup(AnimGroup);
 
                 if (animData == null || animData.Offset == 0)
                     return false;
 
-                return TryReadUOPAnimDimension(ref animDir);
+                return ReadUOPAnimationFrame(ref animDir);
             }
 
             if (animDir.Address == 0 && animDir.Size == 0)
@@ -1242,12 +1242,12 @@ namespace ClassicUO.IO.Resources
 
             UOFileMul file = _files[animDir.FileIndex];
             file.Seek(animDir.Address);
-            ReadFramesPixelData(ref animDir, file);
+            ReadMULAnimationFrame(ref animDir, file);
 
             return true;
         }
 
-        private unsafe bool TryReadUOPAnimDimension(ref AnimationDirection animDirection)
+        private unsafe bool ReadUOPAnimationFrame(ref AnimationDirection animDirection)
         {
             var animData = DataIndex[AnimID].GetUopGroup(AnimGroup); //ref DataIndex[AnimID].Groups[AnimGroup];
 
@@ -1408,7 +1408,7 @@ namespace ClassicUO.IO.Resources
             return true;
         }
 
-        private unsafe void ReadFramesPixelData(ref AnimationDirection animDir, UOFile reader)
+        private unsafe void ReadMULAnimationFrame(ref AnimationDirection animDir, UOFile reader)
         {
             animDir.LastAccessTime = Engine.Ticks;
 
