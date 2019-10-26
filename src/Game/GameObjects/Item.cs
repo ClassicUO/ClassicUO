@@ -341,8 +341,6 @@ namespace ClassicUO.Game.GameObjects
 
             if (Layer == Layer.Mount)
             {
-                bool isUOP = false;
-
                 switch (graphic)
                 {
                     case 0x3E90: // 16016 Reptalon
@@ -687,7 +685,6 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x01B0;
-                        isUOP = true;
                         break;
                     }
 
@@ -695,7 +692,6 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x04E6;
-                        isUOP = true;
                         break;
                     }
 
@@ -703,7 +699,6 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x04E7;
-                        isUOP = true;
                         break;
                     }
 
@@ -711,7 +706,6 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x042D;
-                        isUOP = true;
                         break;
                     }
 
@@ -719,18 +713,14 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x0579;
-                        isUOP = true;
                         break;
                     }
                 }
 
-                if (!isUOP)
-                {
-                    if (ItemData.AnimID != 0)
-                        graphic = ItemData.AnimID;
-                    else
-                        graphic = 0xFFFF;
-                }
+                if (ItemData.AnimID != 0)
+                    graphic = ItemData.AnimID;
+                //else
+                //    graphic = 0xFFFF;
             }
             else if (IsCorpse)
                 return Amount;
