@@ -320,8 +320,6 @@ namespace ClassicUO.Game.GameObjects
 
             int fc = direction.FrameCount;
 
-            //frameIndex = (sbyte) (fc - 2);
-
             if ((fc > 0 && frameIndex >= fc) || frameIndex < 0) frameIndex = 0;
 
             if (frameIndex < direction.FrameCount)
