@@ -717,7 +717,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_isUpDown || _isDownDown || _isLeftDown || _isRightDown)
             {
-                if (Engine.UI.SystemChat?.IsActive == false || Engine.UI.SystemChat?.textBox.Text.Length == 0)
+                if (Engine.UI.SystemChat?.IsActive == false)// || Engine.UI.SystemChat?.textBox.Text.Length == 0)
                     _arrowKeyPressed = true;
             }
 
