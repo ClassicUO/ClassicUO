@@ -435,7 +435,7 @@ namespace ClassicUO.Game.Scenes
 
             int dropMaxZIndex = -1;
 
-            if (entity is Mobile mob && mob.IsMoving)
+            if (entity is Mobile mob && mob.Steps.Count != 0)
             {
                 ref var step = ref mob.Steps.Back();
 

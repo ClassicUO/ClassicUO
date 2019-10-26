@@ -1213,7 +1213,7 @@ namespace ClassicUO.Game.GameObjects
                 case PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED:
                 case PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED:
 
-                    if (mob.IsMoving)
+                    if (mob.Steps.Count != 0)
                     {
                         ref var s = ref mob.Steps.Front();
 

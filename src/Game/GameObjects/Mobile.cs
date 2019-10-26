@@ -174,7 +174,7 @@ namespace ClassicUO.Game.GameObjects
 
         public byte AnimationGroup { get; set; } = 0xFF;
 
-        internal bool IsMoving => Steps.Count != 0;
+        //internal bool IsMoving => AnimationGroup != 0xFF && Steps.Count != 0;
 
         public Item GetSecureTradeBox()
         {
@@ -220,7 +220,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (endX == x && endY == y && endZ == z && endDir == direction) return true;
 
-            if (!IsMoving)
+            if (Steps.Count == 0)
             {
                 if (!IsWalking)
                     SetAnimation(0xFF);
@@ -454,7 +454,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 long ticks = Engine.Ticks;
 
-                if (IsMoving && LastStepSoundTime < ticks)
+                if (Steps.Count != 0 && LastStepSoundTime < ticks)
                 {
                     int incID = StepSoundOffset;
                     int soundID = 0x012B;
@@ -553,7 +553,7 @@ namespace ClassicUO.Game.GameObjects
                     if (direction.FrameCount == 0 || direction.Frames == null)
                         FileManager.Animations.LoadDirectionGroup(ref direction);
 
-                    if (direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1 || direction.IsUOP)
+                    if ((direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1) || direction.IsUOP)
                     {
                         direction.LastAccessTime = Engine.Ticks;
                         int fc = direction.FrameCount;
@@ -784,7 +784,6 @@ namespace ClassicUO.Game.GameObjects
                 Offset.Z = 0;
             }
         }
-
 
         public int IsSitting()
         {
