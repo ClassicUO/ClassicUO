@@ -50,8 +50,12 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Height = Texture.Height;
             }
 
-            Bounds.X = (int) -Offset.X + 22;
-            Bounds.Y = (int) (Offset.Z - Offset.Y) + 22;
+            int x = posX + (int) Offset.X;
+            int y = posY + (int) (Offset.Y + Offset.Z);
+            x += 22;
+            y += 22;
+            //Bounds.X = (int) -Offset.X + 0;
+            //Bounds.Y = (int) (Offset.Z - Offset.Y) + 0;
             Rotation = AngleToTarget;
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
@@ -68,14 +72,14 @@ namespace ClassicUO.Game.GameObjects
                 ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
 
             Engine.DebugInfo.EffectsRendered++;
-            base.Draw(batcher, posX, posY);
+            base.Draw(batcher, x, y);
 
             ref readonly StaticTiles data = ref FileManager.TileData.StaticData[_displayedGraphic];
 
             if (data.IsLight && (Source is Item || Source is Static || Source is Multi))
             {
                 Engine.SceneManager.GetScene<GameScene>()
-                      .AddLight(Source, Source, posX + 22, posY + 22);
+                      .AddLight(Source, Source, x, y);
             }
 
             return true;
