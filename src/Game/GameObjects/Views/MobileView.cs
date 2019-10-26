@@ -91,8 +91,9 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo.Width = 0;
             FrameInfo.Height = 0;
 
+            posY -= 3;
             int drawX = posX + (int) Offset.X;
-            int drawY = (int) (posY + Offset.Y - Offset.Z - 3);
+            int drawY = posY + (int) (Offset.Y - Offset.Z);
 
             drawX += 22;
             drawY += 22;
@@ -188,20 +189,18 @@ namespace ClassicUO.Game.GameObjects
 
                 ushort mountGraphic = mount.GetGraphicForAnimation();
 
-                int offset = /*-(IsWalking ? 3 : 0)*/0;
-
                 if (mountGraphic != 0xFFFF) 
                 {
                     if (hasShadow)
                     {
                         DrawInternal(batcher, this, null, drawX, drawY + 10, mirror, ref animIndex, true, graphic, isHuman);
                         FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
-                        DrawInternal(batcher, this, mount, drawX, drawY + offset, mirror, ref animIndex, true, mountGraphic, isHuman);
+                        DrawInternal(batcher, this, mount, drawX, drawY, mirror, ref animIndex, true, mountGraphic, isHuman);
                     }
                     else
                         FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
 
-                    drawY += DrawInternal(batcher, this, mount, drawX, drawY + offset, mirror, ref animIndex, false, mountGraphic, isHuman, isMount: true);
+                    drawY += DrawInternal(batcher, this, mount, drawX, drawY, mirror, ref animIndex, false, mountGraphic, isHuman, isMount: true);
                 }
             }
             else
@@ -320,6 +319,8 @@ namespace ClassicUO.Game.GameObjects
             direction.LastAccessTime = Engine.Ticks;
 
             int fc = direction.FrameCount;
+
+            //frameIndex = (sbyte) (fc - 2);
 
             if ((fc > 0 && frameIndex >= fc) || frameIndex < 0) frameIndex = 0;
 
