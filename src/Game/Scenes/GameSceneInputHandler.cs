@@ -710,14 +710,24 @@ namespace ClassicUO.Game.Scenes
 
             _isMacroMoveDown = _isMacroMoveDown || macro != null && macro.FirstNode.Code == MacroType.MovePlayer;
             _isAuraActive = _isAuraActive || macro != null && macro.FirstNode.Code == MacroType.Aura;
-            _isUpDown = _isUpDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_UP || macro != null && macro.FirstNode.SubCode == MacroSubType.Top;
-            _isDownDown = _isDownDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_DOWN || macro != null && macro.FirstNode.SubCode == MacroSubType.Down;
-            _isLeftDown = _isLeftDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_LEFT || macro != null && macro.FirstNode.SubCode == MacroSubType.Left;
-            _isRightDown = _isRightDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_RIGHT || macro != null && macro.FirstNode.SubCode == MacroSubType.Right;
 
+            if (Engine.Profile.Current.UseWASDForMovement)
+            {
+                _isUpDown = _isUpDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_w || macro != null && macro.FirstNode.SubCode == MacroSubType.Top;
+                _isDownDown = _isDownDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_s || macro != null && macro.FirstNode.SubCode == MacroSubType.Down;
+                _isLeftDown = _isLeftDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_a || macro != null && macro.FirstNode.SubCode == MacroSubType.Left;
+                _isRightDown = _isRightDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_d || macro != null && macro.FirstNode.SubCode == MacroSubType.Right;
+            }
+            else
+            {
+                _isUpDown = _isUpDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_UP || macro != null && macro.FirstNode.SubCode == MacroSubType.Top;
+                _isDownDown = _isDownDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_DOWN || macro != null && macro.FirstNode.SubCode == MacroSubType.Down;
+                _isLeftDown = _isLeftDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_LEFT || macro != null && macro.FirstNode.SubCode == MacroSubType.Left;
+                _isRightDown = _isRightDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_RIGHT || macro != null && macro.FirstNode.SubCode == MacroSubType.Right;
+            }
             if (_isUpDown || _isDownDown || _isLeftDown || _isRightDown)
             {
-                if (Engine.UI.SystemChat?.IsActive == false || Engine.UI.SystemChat?.textBox.Text.Length == 0)
+                if (Engine.UI.SystemChat?.IsActive == false )//|| Engine.UI.SystemChat?.textBox.Text.Length == 0)
                     _arrowKeyPressed = true;
             }
 
@@ -798,6 +808,32 @@ namespace ClassicUO.Game.Scenes
                     _isRightDown = false;
 
                     break;
+            }
+
+            if (Engine.Profile.Current.UseWASDForMovement)
+            {
+                switch (e.keysym.sym)
+                {
+                    case SDL.SDL_Keycode.SDLK_w:
+                        _isUpDown = false;
+
+                        break;
+
+                    case SDL.SDL_Keycode.SDLK_s:
+                        _isDownDown = false;
+
+                        break;
+
+                    case SDL.SDL_Keycode.SDLK_a:
+                        _isLeftDown = false;
+
+                        break;
+
+                    case SDL.SDL_Keycode.SDLK_d:
+                        _isRightDown = false;
+
+                        break;
+                }
             }
 
             if (_isAuraActive)
