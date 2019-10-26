@@ -570,7 +570,9 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.CastSpell:
                     int spell = macro.SubCode - MacroSubType.Clumsy + 1;
-
+                    //int scode = (int) macro.SubCode;
+                    //Log.Message(LogTypes.Trace, "SpellOffset:" + spell.ToString());
+                    //Log.Message(LogTypes.Trace, "SpellSubCode:" + scode.ToString());
                     if (spell > 0 && spell <= 151)
                     {
                         int totalCount = 0;
@@ -586,11 +588,34 @@ namespace ClassicUO.Game.Managers
 
                         if (spellType < 7)
                         {
-                            spell += spellType * 100;
-
-                            if (spellType > 2)
-                                spell += 100;
-
+                            if (spellType == 1) //Necro
+                            {
+                                spell = macro.SubCode - MacroSubType.AnimateDead + 1 + 100;
+                            }else if (spellType == 2) //Chivalry
+                            {
+                                spell = macro.SubCode - MacroSubType.CleanceByFire + 1 + 200;
+                            }
+                            else if (spellType == 3) //Bushido
+                            {
+                                spell = macro.SubCode - MacroSubType.HonorableExecution + 1 + 400;
+                            }
+                            else if (spellType == 4) //Ninja
+                            {
+                                spell = macro.SubCode - MacroSubType.FocusAttack + 1 + 500;
+                            }
+                            else if (spellType == 5) //Spellweaving
+                            {
+                                spell = macro.SubCode - MacroSubType.ArcaneCircle + 1 + 600;
+                            }
+                            else if (spellType == 6) //Mysticism
+                            {
+                                spell = macro.SubCode - MacroSubType.NetherBolt + 1 + 700;
+                            }
+                            //spell += spellType * 100;
+                            //if (spellType > 2)
+                            //    spell += 100;
+                            //Log.Message(LogTypes.Trace, "SpellType:" + spellType.ToString());
+                            //Log.Message(LogTypes.Trace, "SpellIndexWithOffset:"+spell.ToString());
                             GameActions.CastSpell(spell);
                         }
                     }
@@ -599,7 +624,6 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.LastSpell:
                     GameActions.CastSpell(GameActions.LastSpellIndex);
-
                     break;
 
                 case MacroType.Bow:
