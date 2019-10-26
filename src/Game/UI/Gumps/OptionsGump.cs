@@ -66,7 +66,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _enableWASD,_restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG;
         private Combobox _overrideContainerLocationSetting;
 
         // sounds
@@ -1080,7 +1080,9 @@ namespace ClassicUO.Game.UI.Gumps
             _debugGumpIsDisabled = CreateCheckBox(rightArea, "Disable Debug Gump", Engine.Profile.Current.DebugGumpIsDisabled, 0, 0);
             _restoreLastGameSize = CreateCheckBox(rightArea, "Disable automatic maximize. Restore windows size after re-login", Engine.Profile.Current.RestoreLastGameSize, 0, 0);
 
-            _autoOpenDoors = CreateCheckBox(rightArea, "Auto Open Doors", Engine.Profile.Current.AutoOpenDoors, 0, 0);
+            _enableWASD = CreateCheckBox(rightArea, "Use WASD keys for movement", Engine.Profile.Current.UseWASDForMovement, 0, 0);
+
+           _autoOpenDoors = CreateCheckBox(rightArea, "Auto Open Doors", Engine.Profile.Current.AutoOpenDoors, 0, 0);
             _smoothDoors = CreateCheckBox(rightArea, "Smooth doors", Engine.Profile.Current.SmoothDoors, 20, 5);
 
             _autoOpenCorpseArea = new ScrollAreaItem();
@@ -1514,6 +1516,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case 10:
                     _enableSelectionArea.IsChecked = false;
                     _debugGumpIsDisabled.IsChecked = false;
+                    _enableWASD.IsChecked = false;
                     _restoreLastGameSize.IsChecked = false;
                     _disableDefaultHotkeys.IsChecked = false;
                     _disableArrowBtn.IsChecked = false;
@@ -1869,6 +1872,7 @@ namespace ClassicUO.Game.UI.Gumps
             // experimental
             Engine.Profile.Current.EnableSelectionArea = _enableSelectionArea.IsChecked;
             Engine.Profile.Current.RestoreLastGameSize = _restoreLastGameSize.IsChecked;
+            Engine.Profile.Current.UseWASDForMovement = _enableWASD.IsChecked;
 
             // Reset nested checkboxes if parent checkbox is unchecked
             if (!_disableDefaultHotkeys.IsChecked)
