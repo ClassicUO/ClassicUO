@@ -54,7 +54,6 @@ namespace ClassicUO.Game.GameObjects
                 var l = _pool.Dequeue();
                 l.Graphic = graphic;
                 l.IsDestroyed = false;
-                l._tileData = null;
                 l.AlphaHue = 255;
                 l.IsStretched = l.TileData.TexID == 0 && l.TileData.IsWet;
                 l.AllowedToDraw = l.Graphic > 2;
@@ -77,23 +76,10 @@ namespace ClassicUO.Game.GameObjects
             _pool.Enqueue(this);
         }
 
-        private LandTiles? _tileData;
-
         public Vector3[] Normals;
 
         public Rectangle Rectangle;
-
-        public LandTiles TileData
-        {
-            [MethodImpl(256)]
-            get
-            {
-                if (!_tileData.HasValue)
-                    _tileData = FileManager.TileData.LandData[Graphic];
-
-                return _tileData.Value;
-            }
-        }
+        public ref readonly LandTiles TileData => ref FileManager.TileData.LandData[Graphic];
 
         public sbyte MinZ { get; set; }
 

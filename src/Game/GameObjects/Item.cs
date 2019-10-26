@@ -45,8 +45,6 @@ namespace ClassicUO.Game.GameObjects
         private bool _isMulti;
 
 
-        private StaticTiles? _itemData;
-
         private ulong _spellsBitFiled;
 
 
@@ -206,17 +204,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool CharacterIsBehindFoliage { get; set; }
 
-        public StaticTiles ItemData
-        {
-            [MethodImpl(256)]
-            get
-            {
-                if (!_itemData.HasValue)
-                    _itemData = FileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
-
-                return _itemData.Value;
-            }
-        }
+        public ref readonly StaticTiles ItemData => ref FileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
 
 
         private void LoadMulti()
@@ -262,7 +250,6 @@ namespace ClassicUO.Game.GameObjects
                 else if (i == 0)
                 {
                     MultiGraphic = graphic;
-                    _itemData = null;
                 }
             }
 
@@ -289,8 +276,6 @@ namespace ClassicUO.Game.GameObjects
 
         public void CheckGraphicChange(sbyte animIndex = 0)
         {
-            _itemData = FileManager.TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
-
             if (!IsMulti)
             {
                 if (!IsCorpse)
