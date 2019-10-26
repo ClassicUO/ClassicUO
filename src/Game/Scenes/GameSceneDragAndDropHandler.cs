@@ -88,7 +88,7 @@ namespace ClassicUO.Game.Scenes
         private bool PickupItemDirectly(Item item, int x, int y, int amount)
         {
             if (World.Player.IsDead || HeldItem.Enabled || item == null || item.IsDestroyed /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/) return false;
-            
+
             HeldItem.Clear();
             HeldItem.Set(item, amount <= 0 ? item.Amount : (ushort) amount, new Point(x, y));
 

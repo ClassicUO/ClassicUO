@@ -370,7 +370,7 @@ namespace ClassicUO.Game.UI.Controls
                     float scale = 1;
                     if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
                         scale = Engine.UI.ContainerScale;
-                    
+
                     // drag with mouse offset from containers
                     offset = new Point(
                         (int)((_lastClickPosition.X - (ParentX + X)) / scale),
