@@ -162,6 +162,7 @@ namespace ClassicUO.Configuration
         // Experimental
         [JsonProperty] public bool EnableSelectionArea { get; set; }
         [JsonProperty] public bool DebugGumpIsDisabled { get; set; }
+        [JsonProperty] public bool UseWASDForMovement { get; set; }
         [JsonProperty] public Point DebugGumpPosition { get; set; } = new Point(25, 25);
         [JsonProperty] public bool DebugGumpIsMinimized { get; set; } = true;
         [JsonProperty] public bool RestoreLastGameSize { get; set; }
