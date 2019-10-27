@@ -39,7 +39,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal partial class Item : Entity
     {
-        private AnimDataFrame2 _animDataFrame;
         private int _animSpeed;
         private Graphic? _displayedGraphic;
         private bool _isMulti;
@@ -284,14 +283,25 @@ namespace ClassicUO.Game.GameObjects
 
                     if (OnGround && ItemData.IsAnimated)
                     {
-                        _animDataFrame = FileManager.AnimData.CalculateCurrentGraphic(Graphic);
-
                         AnimIndex = animIndex;
-                        _animSpeed = _animDataFrame.FrameInterval != 0 ? _animDataFrame.FrameInterval * 25 + Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
+
+                        IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
+
+                        if (ptr != IntPtr.Zero)
+                        {
+                            unsafe
+                            {
+                                AnimDataFrame2* animData = (AnimDataFrame2*) ptr;
+
+                                if (animData->FrameCount != 0)
+                                {
+                                    _animSpeed = animData->FrameInterval != 0 ? animData->FrameInterval * 25 + Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
+                                }
+                            }
+                        }
+
                         LastAnimationChangeTime = Engine.Ticks;
                     }
-                    else
-                        _animDataFrame = default;
 
                     _originalGraphic = DisplayedGraphic;
                     _force = true;
@@ -879,20 +889,29 @@ namespace ClassicUO.Game.GameObjects
                     LastAnimationChangeTime = Engine.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
                 }
             }
-            else if (OnGround && _animDataFrame.FrameCount != 0 && LastAnimationChangeTime < Engine.Ticks)
+            else if (OnGround && ItemData.IsAnimated && LastAnimationChangeTime < Engine.Ticks)
             {
+                IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
 
-                unsafe
+                if (ptr != IntPtr.Zero)
                 {
-                    _originalGraphic = (Graphic) (DisplayedGraphic + _animDataFrame.FrameData[AnimIndex++]);
+                    unsafe
+                    {
+                        AnimDataFrame2* animData = (AnimDataFrame2*) ptr;
+
+                        if (animData->FrameCount != 0)
+                        {
+                            _originalGraphic = (Graphic) (DisplayedGraphic + animData->FrameData[AnimIndex++]);
+
+                            if (AnimIndex >= animData->FrameCount)
+                                AnimIndex = 0;
+
+                            _force = _originalGraphic == DisplayedGraphic;
+
+                            LastAnimationChangeTime = Engine.Ticks + _animSpeed;
+                        }
+                    }
                 }
-
-                if (AnimIndex >= _animDataFrame.FrameCount)
-                    AnimIndex = 0;
-
-                _force = _originalGraphic == DisplayedGraphic;
-
-                LastAnimationChangeTime = Engine.Ticks + _animSpeed;
             }
         }
     }
