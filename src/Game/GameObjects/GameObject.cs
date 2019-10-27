@@ -374,7 +374,6 @@ namespace ClassicUO.Game.GameObjects
             _screenPosition = Point.Zero;
             _position = Position.INVALID;
             IsFlipped = false;
-            Rotation = 0;
             Graphic = 0;
             UseObjectHandles = ClosedObjectHandles = ObjectHandlesOpened = false;
             Bounds = Rectangle.Empty;
