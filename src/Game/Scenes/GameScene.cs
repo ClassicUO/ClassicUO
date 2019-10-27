@@ -42,6 +42,7 @@ using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SDL2;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -258,6 +259,11 @@ namespace ClassicUO.Game.Scenes
         {
             HeldItem?.Clear();
 
+            if (Engine.Profile.Current != null)
+            {
+                Engine.Profile.Current.WindowClientPosition = Engine.WindowPosition;
+            }
+            
             try
             {
                 Plugin.OnDisconnected();

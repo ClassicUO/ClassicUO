@@ -290,6 +290,17 @@ namespace ClassicUO
             }
         }
 
+        public static Point WindowPosition
+        {
+            get
+            {
+                SDL.SDL_GetWindowPosition(_window.Handle, out var x, out var y);
+                return new Point(x, y);
+            }
+
+            set => SDL.SDL_SetWindowPosition(_window.Handle, value.X, value.Y);
+        }
+
         public static UIManager UI => _engine._uiManager;
 
         public static InputManager Input => _engine._inputManager;
