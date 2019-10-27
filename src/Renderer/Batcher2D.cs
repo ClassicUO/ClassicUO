@@ -371,18 +371,18 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool DrawSpriteRotated(Texture2D texture, int x, int y, int w, int h, int destX, int destY, ref Vector3 hue, float angle)
+        public bool DrawSpriteRotated(Texture2D texture, int x, int y, ref Vector3 hue, float angle)
         {
             EnsureSize();
 
             ref var vertex = ref _vertexInfo[_numSprites];
 
-            float ww = w / 2f;
-            float hh = h / 2f;
+            float ww = texture.Width / 2f;
+            float hh = texture.Height / 2f;
 
 
-            float startX = x - (destX - 44 + ww);
-            float startY = y - (destY + hh);
+            float startX = x - ww;
+            float startY = y - hh;
 
             float sin = (float) Math.Sin(angle);
             float cos = (float) Math.Cos(angle);
