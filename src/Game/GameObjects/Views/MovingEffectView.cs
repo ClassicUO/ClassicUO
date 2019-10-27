@@ -50,13 +50,13 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Height = Texture.Height;
             }
 
+            ArtTexture texture = (ArtTexture) Texture;
+            //posX += texture.ImageRectangle.X;
+            //posY += texture.ImageRectangle.Y;
+
             posX += (int) Offset.X;
-            posY = (int) ( posY + Offset.Y + Offset.Z);
+            posY = (int) (posY + Offset.Y + Offset.Z);
 
-            //ArtTexture texture = (ArtTexture) Texture;
-
-            //posX += (texture.Width >> 1) - 22 - texture.ImageRectangle.X;
-            //posY += (texture.Height >> 0) - 44 - texture.ImageRectangle.Y;
 
             //posX += 22;
             //posY += 22;
@@ -83,11 +83,12 @@ namespace ClassicUO.Game.GameObjects
             if (FixedDir)
                 batcher.DrawSprite(Texture, posX, posY, false, ref HueVector);
             else
-                //batcher.Draw2D(Texture, posX, posY, Texture.Width, Texture.Height, 
-                //               posX + texture.ImageRectangle.X, posY + texture.ImageRectangle.Y, texture.ImageRectangle.Width, texture.ImageRectangle.Height,
+                //batcher.Draw2D(Texture, posX + texture.ImageRectangle.X, posY + texture.ImageRectangle.Y, texture.ImageRectangle.Width, texture.ImageRectangle.Height,
+                //               posX, posY, texture.Width, texture.Height,
                 //               ref HueVector,
                 //               AngleToTarget);
-                batcher.DrawSpriteRotated(Texture, posX, posY, ref HueVector, AngleToTarget);
+                batcher.DrawSpriteRotated(Texture, posX, posY,
+                                          ref HueVector, AngleToTarget);
 
             Select(posX, posY);
             Texture.Ticks = Engine.Ticks;
