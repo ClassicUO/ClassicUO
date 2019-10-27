@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 
@@ -164,8 +165,12 @@ namespace ClassicUO.Game
                         {
                             uint flags = 0;
 
-                            if (GameObjectHelper.TryGetStaticData(obj, out StaticTiles itemdata))
+                            if (!(obj is Mobile))
                             {
+                                ref readonly var itemdata = ref FileManager.TileData.StaticData[obj.Graphic];
+                                
+                            //if (GameObjectHelper.TryGetStaticData(obj, out StaticTiles itemdata))
+                            // {
                                 if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
                                 {
                                     if (itemdata.IsWet)

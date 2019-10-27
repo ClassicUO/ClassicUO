@@ -165,11 +165,16 @@ namespace ClassicUO.Game.Map
                     if (!(obj is Static) && !(obj is Multi))
                         continue;
 
-                    if (obj is Mobile)
+                    if (obj.Graphic >= FileManager.TileData.StaticData.Length)
                         continue;
 
-                    if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && (!itemdata.IsRoof || Math.Abs(z - obj.Z) > 6))
+                    ref readonly var itemdata = ref FileManager.TileData.StaticData[obj.Graphic];
+
+                    if (!itemdata.IsRoof || Math.Abs(z - obj.Z) > 6)
                         continue;
+
+                    //if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && (!itemdata.IsRoof || Math.Abs(z - obj.Z) > 6))
+                    //    continue;
 
                     break;
                 }
