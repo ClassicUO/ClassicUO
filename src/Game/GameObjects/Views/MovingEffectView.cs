@@ -50,7 +50,7 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Height = Texture.Height;
             }
 
-            ArtTexture texture = (ArtTexture) Texture;
+            //ArtTexture texture = (ArtTexture) Texture;
             //posX += texture.ImageRectangle.X;
             //posY += texture.ImageRectangle.Y;
 
@@ -90,12 +90,12 @@ namespace ClassicUO.Game.GameObjects
                 batcher.DrawSpriteRotated(Texture, posX, posY,
                                           ref HueVector, AngleToTarget);
 
-            Select(posX, posY);
+            //Select(posX, posY);
             Texture.Ticks = Engine.Ticks;
 
             ref readonly StaticTiles data = ref FileManager.TileData.StaticData[_displayedGraphic];
 
-            if (data.IsLight && (Source is Item || Source is Static || Source is Multi))
+            if (data.IsLight)
             {
                 Engine.SceneManager.GetScene<GameScene>()
                       .AddLight(Source, Source, posX + 22, posY + 22);
