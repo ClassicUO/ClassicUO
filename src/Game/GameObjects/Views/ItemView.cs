@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
@@ -57,7 +58,17 @@ namespace ClassicUO.Game.GameObjects
             {
                 unsafe
                 {
-                    _originalGraphic = (Graphic) (Graphic + _animDataFrame.FrameData[_animDataFrame.FrameCount >> 1]);
+                    IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
+
+                    if (ptr != IntPtr.Zero)
+                    {
+                        AnimDataFrame2* animData = (AnimDataFrame2*) ptr;
+
+                        if (animData->FrameCount != 0)
+                        {
+                            _originalGraphic = (Graphic) (Graphic + animData->FrameData[animData->FrameCount >> 1]);
+                        }
+                    }
                 }
 
                 _force = false;
