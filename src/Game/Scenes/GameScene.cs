@@ -365,12 +365,18 @@ namespace ClassicUO.Game.Scenes
                         light.ID = item.LightID;
                     else if (lightObject is Item it)
                         light.ID = (byte) it.ItemData.LightIndex;
-                    else if (GameObjectHelper.TryGetStaticData(lightObject, out StaticTiles data))
-                        light.ID = data.Layer;
                     else if (obj is Mobile _)
                         light.ID = 1;
                     else
-                        return;
+                    {
+                        ref readonly var data = ref FileManager.TileData.StaticData[obj.Graphic];
+                        light.ID = data.Layer;
+                    }
+                    //else if (GameObjectHelper.TryGetStaticData(lightObject, out StaticTiles data))
+                    //    light.ID = data.Layer;
+                   
+                    //else
+                    //    return;
                 }
 
 

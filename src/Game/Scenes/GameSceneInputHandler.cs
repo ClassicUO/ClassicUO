@@ -598,15 +598,32 @@ namespace ClassicUO.Game.Scenes
                 if (Engine.Profile.Current.UseShiftToPathfind && !_isShiftDown)
                     return false;
 
-                if (SelectedObject.Object is Land || GameObjectHelper.TryGetStaticData(SelectedObject.Object as GameObject, out var itemdata) && itemdata.IsSurface)
+                if (SelectedObject.Object is GameObject obj)
                 {
-                    if (SelectedObject.Object is GameObject obj && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
+                    if (obj is Static || obj is Multi || obj is Item)
+                    {
+                        ref readonly var itemdata = ref FileManager.TileData.StaticData[obj.Graphic];
+
+                        if (itemdata.IsSurface && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
+                        {
+                            World.Player.AddMessage(MessageType.Label, "Pathfinding!", 3, 1001, false);
+                            return true;
+                        }
+                    }
+                    else if (obj is Land && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                     {
                         World.Player.AddMessage(MessageType.Label, "Pathfinding!", 3, 1001, false);
-
                         return true;
                     }
                 }
+
+                //if (SelectedObject.Object is Land || GameObjectHelper.TryGetStaticData(SelectedObject.Object as GameObject, out var itemdata) && itemdata.IsSurface)
+                //{
+                //    if (SelectedObject.Object is GameObject obj && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
+                //    {
+                       
+                //    }
+                //}
             }
 
             return false;
