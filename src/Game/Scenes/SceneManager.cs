@@ -21,6 +21,7 @@
 
 #endregion
 
+using SDL2;
 using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Game.Scenes
@@ -69,6 +70,10 @@ namespace ClassicUO.Game.Scenes
                             {
                                 Engine.WindowWidth = Engine.Profile.Current.WindowClientBounds.X;
                                 Engine.WindowHeight = Engine.Profile.Current.WindowClientBounds.Y;
+                                if (Engine.Profile.Current.WindowClientPosition.HasValue)
+                                {
+                                    Engine.WindowPosition = Engine.Profile.Current.WindowClientPosition.Value;
+                                }
                             }
                         }
                     }
