@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -95,7 +96,7 @@ namespace ClassicUO.Game.GameObjects
 
             ref readonly StaticTiles data = ref FileManager.TileData.StaticData[_displayedGraphic];
 
-            if (data.IsLight)
+            if (data.IsLight && Source != null)
             {
                 Engine.SceneManager.GetScene<GameScene>()
                       .AddLight(Source, Source, posX + 22, posY + 22);
