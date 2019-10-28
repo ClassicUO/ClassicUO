@@ -21,8 +21,10 @@
 
 #endregion
 
+using System;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -32,7 +34,6 @@ namespace ClassicUO.Game.GameObjects
     internal partial class Multi
     {
         private int _canBeTransparent;
-        private bool _isFoliage;
 
         public bool CharacterIsBehindFoliage { get; set; }
         public bool IsFromTarget { get; set; }
@@ -54,22 +55,9 @@ namespace ClassicUO.Game.GameObjects
             if (!AllowedToDraw || IsDestroyed)
                 return false;
 
-            ResetHueVector();
+            ushort graphic = Graphic;
 
-            if (Texture == null || Texture.IsDisposed)
-            {
-                ArtTexture texture = FileManager.Art.GetTexture(Graphic);
-                Texture = texture;
-                Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
-
-                FrameInfo.Width = texture.ImageRectangle.Width;
-                FrameInfo.Height = texture.ImageRectangle.Height;
-
-                FrameInfo.X = (Texture.Width >> 1) - 22 - texture.ImageRectangle.X;
-                FrameInfo.Y = Texture.Height - 44 - texture.ImageRectangle.Y;
-            }
-
-            if (_isFoliage)
+            if (ItemData.IsFoliage)
             {
                 if (CharacterIsBehindFoliage)
                 {
@@ -82,7 +70,44 @@ namespace ClassicUO.Game.GameObjects
                         ProcessAlpha(0xFF);
                 }
             }
+            else if (ItemData.IsAnimated && _lastAnimationFrameTime < Engine.Ticks)
+            {
+                IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
 
+                if (ptr != IntPtr.Zero)
+                {
+                    unsafe
+                    {
+                        AnimDataFrame2* animData = (AnimDataFrame2*)ptr;
+
+                        if (animData->FrameCount != 0)
+                        {
+                            graphic = (Graphic)(Graphic + animData->FrameData[AnimIndex++]);
+
+                            if (AnimIndex >= animData->FrameCount)
+                                AnimIndex = 0;
+
+                            _lastAnimationFrameTime = Engine.Ticks + (uint)(animData->FrameInterval != 0 ?
+                                                          animData->FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY + 25 : Constants.ITEM_EFFECT_ANIMATION_DELAY);
+                        }
+                    }
+                }
+            }
+
+            ResetHueVector();
+
+            if (Texture == null || Texture.IsDisposed || Graphic != graphic)
+            {
+                ArtTexture texture = FileManager.Art.GetTexture(graphic);
+                Texture = texture;
+                Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
+
+                FrameInfo.Width = texture.ImageRectangle.Width;
+                FrameInfo.Height = texture.ImageRectangle.Height;
+
+                FrameInfo.X = (Texture.Width >> 1) - 22 - texture.ImageRectangle.X;
+                FrameInfo.Y = Texture.Height - 44 - texture.ImageRectangle.Y;
+            }
 
             if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
