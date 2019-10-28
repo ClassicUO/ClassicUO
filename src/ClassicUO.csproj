@@ -420,7 +420,6 @@
     <Compile Include="Game\Map\Map.cs" />
     <Compile Include="Game\Map\Chunk.cs" />
     <Compile Include="Game\Map\Tile.cs" />
-    <Compile Include="Game\Map\TileSorter.cs" />
     <Compile Include="Game\Pathfinder.cs" />
     <Compile Include="Game\Position.cs" />
     <Compile Include="Game\Scenes\GameScene.cs" />
