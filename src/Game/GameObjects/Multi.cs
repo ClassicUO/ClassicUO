@@ -37,6 +37,8 @@ namespace ClassicUO.Game.GameObjects
     internal sealed partial class Multi : GameObject
     {
         private ushort _originalGraphic;
+        private uint _lastAnimationFrameTime;
+
 
         private static readonly Queue<Multi> _pool = new Queue<Multi>();
 
@@ -44,7 +46,6 @@ namespace ClassicUO.Game.GameObjects
         {
             Graphic = _originalGraphic = graphic;
             UpdateGraphicBySeason();
-            _isFoliage = ItemData.IsFoliage;
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
 
             if (ItemData.Height > 5)
@@ -66,7 +67,6 @@ namespace ClassicUO.Game.GameObjects
                 m.Graphic = m._originalGraphic = graphic;
                 m.IsDestroyed = false;
                 m.UpdateGraphicBySeason();
-                m._isFoliage = m.ItemData.IsFoliage;
                 m.AllowedToDraw = !GameObjectHelper.IsNoDrawable(m.Graphic);
                 m.AlphaHue = 0;
                 m.IsFromTarget = false;
