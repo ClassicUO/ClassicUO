@@ -973,9 +973,10 @@ namespace ClassicUO.Game.GameObjects
                                                           out int centerY,
                                                           out _,
                                                           out int height);
-            x += (int)Offset.X;
-            x += 22;
+            x += (int)Offset.X + 22;
             y += (int)(Offset.Y - Offset.Z - (height + centerY + 8));
+            x = (int) (x / scale);
+            y = (int) (y / scale);
 
             for (; last != null; last = last.ListLeft)
             {
@@ -988,8 +989,8 @@ namespace ClassicUO.Game.GameObjects
                     last.OffsetY = offY;
                     offY += last.RenderedText.Height;
 
-                    last.RealScreenPosition.X = startX + (int)((x - (last.RenderedText.Width >> 1)) / scale);
-                    last.RealScreenPosition.Y = startY + (int)((y - offY) / scale);
+                    last.RealScreenPosition.X = startX + (x - (last.RenderedText.Width >> 1));
+                    last.RealScreenPosition.Y = startY + (y - offY);
                 }
             }
 
