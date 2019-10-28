@@ -1536,6 +1536,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _autoCloseCorpse.IsChecked = false;
                     _customBars.IsChecked = false;
                     _customBarsBBG.IsChecked = false;
+                    _autoOpenCorpse.IsChecked = false;
+                    _autoCloseCorpse.IsChecked = false;
 
                     break;
 
