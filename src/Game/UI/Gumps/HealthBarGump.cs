@@ -1245,6 +1245,271 @@ namespace ClassicUO.Game.UI.Gumps
             Mouse.LastLeftButtonClickTime = 0;
         }
 
+        public override void Save(BinaryWriter writer)
+        {
+            base.Save(writer);
+            writer.Write(LocalSerial);
+        }
+
+        public override void Restore(BinaryReader reader)
+        {
+            base.Restore(reader);
+            LocalSerial = reader.ReadUInt32();
+
+            if (LocalSerial == World.Player)
+            {
+                _name = World.Player.Name;
+                BuildGump();
+            }
+            else
+                Dispose();
+        }
+
+        private void BuildGump()
+        {
+            CanBeSaved = LocalSerial == World.Player;
+
+            WantUpdateSize = false;
+
+
+            var entity = World.Get(LocalSerial);
+
+            if (World.Party.Contains(LocalSerial))
+            {
+                Add(_background = new GumpPic(0, 0, BACKGROUND_NORMAL, 0)
+                {
+                    Alpha = 1
+                });
+                Width = 115;
+                Height = 55;
+
+                if (CanBeSaved)
+                {
+                    Add(_textBox = new TextBox(3, width: 120, isunicode: false, style: FontStyle.Fixed, hue: Notoriety.GetHue(World.Player.NotorietyFlag))
+                    {
+                        X = 0,
+                        Y = -2,
+                        IsEditable = false,
+                        CanMove = true,
+                        Text = "[* SELF *]"
+                    });
+                }
+                else
+                {
+                    Add(_textBox = new TextBox(3, width: 109, isunicode: false, style: FontStyle.Fixed | FontStyle.BlackBorder, hue: Notoriety.GetHue(  (entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray))
+                    {
+                        X = 0,
+                        Y = -2,
+                        IsEditable = false,
+                        CanMove = true,
+                        Text = _name
+                    });
+                }
+
+                Add(_buttonHeal1 = new Button((int) ButtonParty.Heal1, 0x0938, 0x093A, 0x0938) {ButtonAction = ButtonAction.Activate, X = 0, Y = 20});
+                Add(_buttonHeal2 = new Button((int) ButtonParty.Heal2, 0x0939, 0x093A, 0x0939) {ButtonAction = ButtonAction.Activate, X = 0, Y = 33});
+
+                Add(_hpLineRed = new GumpPic(18, 20, LINE_RED_PARTY, 0));
+                Add(_manaLineRed = new GumpPic(18, 33, LINE_RED_PARTY, 0));
+                Add(_stamLineRed = new GumpPic(18, 45, LINE_RED_PARTY, 0));
+
+                Add(_bars[0] = new GumpPicWithWidth(18, 20, LINE_BLUE_PARTY, 0, 96));
+                Add(_bars[1] = new GumpPicWithWidth(18, 33, LINE_BLUE_PARTY, 0, 96));
+                Add(_bars[2] = new GumpPicWithWidth(18, 45, LINE_BLUE_PARTY, 0, 96));
+            }
+            else
+            {
+                if (CanBeSaved)
+                {
+                    _oldWarMode = World.Player.InWarMode;
+                    Add(_background = new GumpPic(0, 0, _oldWarMode ? BACKGROUND_WAR : BACKGROUND_NORMAL, 0));
+
+                    Width = _background.Texture.Width;
+                    Height = _background.Texture.Height;
+
+                    // add backgrounds
+                    Add(_hpLineRed = new GumpPic(34, 12, LINE_RED, 0));
+                    Add(new GumpPic(34, 25, LINE_RED, 0));
+                    Add(new GumpPic(34, 38, LINE_RED, 0));
+
+                    // add over
+                    Add(_bars[0] = new GumpPicWithWidth(34, 12, LINE_BLUE, 0, 0));
+                    Add(_bars[1] = new GumpPicWithWidth(34, 25, LINE_BLUE, 0, 0));
+                    Add(_bars[2] = new GumpPicWithWidth(34, 38, LINE_BLUE, 0, 0));
+                }
+                else
+                {
+                    Hue textColor = 0x0386;
+                    Hue hitsColor = 0x0386;
+
+                    Mobile mobile = entity != null && entity.Serial.IsMobile ? (Mobile) entity : null;
+
+                    if (entity != null)
+                    {
+                        hitsColor = 0;
+                        _canChangeName = mobile != null && mobile.IsRenamable;
+
+                        if (_canChangeName)
+                            textColor = 0x000E;
+                    }
+
+                    Hue barColor = entity == null || entity == World.Player || mobile == null || mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray ? (Hue) 0 : Notoriety.GetHue(mobile.NotorietyFlag);
+
+                    Add(_background = new GumpPic(0, 0, 0x0804, barColor));
+                    Add(_hpLineRed = new GumpPic(34, 38, LINE_RED, hitsColor));
+                    Add(_bars[0] = new GumpPicWithWidth(34, 38, LINE_BLUE, 0, 0));
+
+                    Width = _background.Texture.Width;
+                    Height = _background.Texture.Height;
+
+                    Add(_textBox = new TextBox(1, width: 120, isunicode: false, hue: textColor, style: FontStyle.Fixed)
+                    {
+                        X = 16,
+                        Y = 14,
+                        Width = 120,
+                        Height = 15,
+                        IsEditable = false,
+                        AcceptMouseInput = _canChangeName,
+                        AcceptKeyboardInput = _canChangeName,
+                        SafeCharactersOnly = true,
+                        WantUpdateSize = false,
+                        CanMove = true,
+                        Text = _name
+                    });
+                    if (_canChangeName) _textBox.MouseUp += TextBoxOnMouseUp;
+                }
+            }
+        }
+
+        private void TextBoxOnMouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButton.Left)
+                return;
+
+            Point p = Mouse.LDroppedOffset;
+
+            if (Math.Max(Math.Abs(p.X), Math.Abs(p.Y)) >= 1) return;
+
+            if (TargetManager.IsTargeting)
+            {
+                TargetManager.TargetGameObject(World.Get(LocalSerial));
+                Mouse.LastLeftButtonClickTime = 0;
+            }
+            else if (_canChangeName && !_targetBroke)
+            {
+                _textBox.IsEditable = true;
+                _textBox.SetKeyboardFocus();
+            }
+
+            _targetBroke = false;
+        }
+
+
+        private static int CalculatePercents(int max, int current, int maxValue)
+        {
+            if (max > 0)
+            {
+                max = current * 100 / max;
+
+                if (max > 100)
+                    max = 100;
+
+                if (max > 1)
+                    max = maxValue * max / 100;
+            }
+
+            return max;
+        }
+
+
+
+        protected override void OnMouseDown(int x, int y, MouseButton button)
+        {
+            if (button != MouseButton.Left)
+                return;
+
+            if (TargetManager.IsTargeting)
+            {
+                _targetBroke = true;
+                TargetManager.TargetGameObject(World.Get(LocalSerial));
+                Mouse.LastLeftButtonClickTime = 0;
+            }
+            else if (_canChangeName)
+            {
+                _textBox.IsEditable = false;
+                Engine.UI.SystemChat.SetFocus();
+            }
+        }
+
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        {
+            if (button != MouseButton.Left)
+                return false;
+
+            var entity = World.Get(LocalSerial);
+
+            if (entity != null)
+            {
+                if (entity != World.Player)
+                {
+                    if (World.Player.InWarMode)
+                        GameActions.Attack(entity);
+                    else
+                    {
+                        if (World.Items.Get(LocalSerial).IsCorpse)
+                            World.Player.ManualOpenedCorpses.Add(LocalSerial);
+
+                        GameActions.DoubleClick(entity);
+                    }
+                }
+                else
+                {
+                    StatusGumpBase.AddStatusGump(ScreenCoordinateX, ScreenCoordinateY);
+                    Dispose();
+                }
+            }
+
+            return true;
+        }
+
+        protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+        {
+            var entity = World.Get(LocalSerial);
+
+            if (entity == null || entity.Serial.IsItem)
+                return;
+
+            if ((key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER) && _textBox.IsEditable)
+            {
+                GameActions.Rename(entity, _textBox.Text);
+                Engine.UI.SystemChat?.SetFocus();
+                _textBox.IsEditable = false;
+            }
+        }
+
+        protected override void OnMouseOver(int x, int y)
+        {
+            var entity = World.Get(LocalSerial);
+
+            if ( /*(TargetManager.IsTargeting || World.Player.InWarMode) && */entity != null)
+            {
+                SelectedObject.HealthbarObject = entity;
+                SelectedObject.Object = entity;
+            }
+
+            base.OnMouseOver(x, y);
+        }
+
+        protected override void OnMouseExit(int x, int y)
+        {
+            var entity = World.Get(LocalSerial);
+
+            if (entity != null && SelectedObject.HealthbarObject == entity)
+            {
+                SelectedObject.HealthbarObject = null;
+                SelectedObject.Object = null;
+            }
+        }
 
         private enum ButtonParty
         {

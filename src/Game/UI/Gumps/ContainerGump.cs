@@ -123,7 +123,8 @@ namespace ClassicUO.Game.UI.Gumps
                 if (World.Player.ManualOpenedCorpses.Contains(this.LocalSerial))
                 {
                     World.Player.ManualOpenedCorpses.Remove(this.LocalSerial);
-                } else if (World.Player.AutoOpenedCorpses.Contains(this.LocalSerial))
+                } else if (World.Player.AutoOpenedCorpses.Contains(this.LocalSerial) &&
+                    Engine.Profile.Current != null && Engine.Profile.Current.AutoCloseCorpses)
                     _closeIfEmpty = true;
 
                 _eyeGumpPic?.Dispose();
