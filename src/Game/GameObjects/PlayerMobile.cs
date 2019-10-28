@@ -1271,9 +1271,9 @@ namespace ClassicUO.Game.GameObjects
                 if ((Engine.Profile.Current.CorpseOpenOptions == 2 || Engine.Profile.Current.CorpseOpenOptions == 3) && IsHidden)
                     return;
 
-                foreach (var c in World.Items.Where(t => t.Graphic == 0x2006 && !OpenedCorpses.Contains(t.Serial) && t.Distance <= Engine.Profile.Current.AutoOpenCorpseRange))
+                foreach (var c in World.Items.Where(t => t.Graphic == 0x2006 && !AutoOpenedCorpses.Contains(t.Serial) && t.Distance <= Engine.Profile.Current.AutoOpenCorpseRange))
                 {
-                    OpenedCorpses.Add(c.Serial);
+                    AutoOpenedCorpses.Add(c.Serial);
                     GameActions.DoubleClickQueued(c.Serial);
                 }
             }
@@ -1860,7 +1860,8 @@ namespace ClassicUO.Game.GameObjects
                    || type >= 0x9B3C && type <= 0x9B4B;
         }
 
-        private readonly HashSet<Serial> OpenedCorpses = new HashSet<Serial>();
+        public readonly HashSet<Serial> AutoOpenedCorpses = new HashSet<Serial>();
+        public readonly HashSet<Serial> ManualOpenedCorpses = new HashSet<Serial>();
 #if JAEDAN_MOVEMENT_PATCH
         public override void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
         {

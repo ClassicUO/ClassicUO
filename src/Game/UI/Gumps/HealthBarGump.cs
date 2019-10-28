@@ -194,7 +194,13 @@ namespace ClassicUO.Game.UI.Gumps
                     if (World.Player.InWarMode)
                         GameActions.Attack(entity);
                     else
+                    {
+                        Item item;
+                        if ((item = World.Items.Get(LocalSerial)) != null && item.IsCorpse)
+                            World.Player.ManualOpenedCorpses.Add(entity.Serial);
+
                         GameActions.DoubleClick(entity);
+                    }
                 }
                 else
                 {
@@ -202,7 +208,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Dispose();
                 }
             }
-
+            
             return true;
         }
 
