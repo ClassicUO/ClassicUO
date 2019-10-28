@@ -25,29 +25,30 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class AnimatedItemEffect : GameEffect
     {
-        public AnimatedItemEffect(Graphic graphic, Hue hue, int duration)
+        public AnimatedItemEffect(Graphic graphic, Hue hue, int duration, int speed)
         {
             Graphic = graphic;
             Hue = hue;
             Duration = duration > 0 ? Engine.Ticks + duration : -1;
+            Speed = speed;
             Load();
         }
 
-        public AnimatedItemEffect(GameObject source, Graphic graphic, Hue hue, int duration) : this(graphic, hue, duration)
+        public AnimatedItemEffect(GameObject source, Graphic graphic, Hue hue, int duration, int speed) : this(graphic, hue, duration, speed)
         {
             SetSource(source);
         }
 
-        public AnimatedItemEffect(Serial source, Graphic graphic, Hue hue, int duration) : this(source, 0, 0, 0, graphic, hue, duration)
+        public AnimatedItemEffect(Serial source, Graphic graphic, Hue hue, int duration, int speed) : this(source, 0, 0, 0, graphic, hue, duration, speed)
         {
         }
 
-        public AnimatedItemEffect(int sourceX, int sourceY, int sourceZ, Graphic graphic, Hue hue, int duration) : this(graphic, hue, duration)
+        public AnimatedItemEffect(int sourceX, int sourceY, int sourceZ, Graphic graphic, Hue hue, int duration, int speed) : this(graphic, hue, duration, speed)
         {
             SetSource(sourceX, sourceY, sourceZ);
         }
 
-        public AnimatedItemEffect(Serial sourceSerial, int sourceX, int sourceY, int sourceZ, Graphic graphic, Hue hue, int duration) : this(graphic, hue, duration)
+        public AnimatedItemEffect(Serial sourceSerial, int sourceX, int sourceY, int sourceZ, Graphic graphic, Hue hue, int duration, int speed) : this(graphic, hue, duration, speed)
         {
             Entity source = World.Get(sourceSerial);
 
