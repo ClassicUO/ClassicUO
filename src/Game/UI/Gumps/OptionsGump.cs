@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _autoCloseCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator;
         private Combobox _overrideContainerLocationSetting;
 
         // sounds
@@ -1033,10 +1033,18 @@ namespace ClassicUO.Game.UI.Gumps
             _autoOpenCorpse = CreateCheckBox(rightArea, "Auto Open Corpses", Engine.Profile.Current.AutoOpenCorpses, 0, 5);
             _autoOpenCorpse.ValueChanged += (sender, e) => { _autoOpenCorpseArea.IsVisible = _autoOpenCorpse.IsChecked; };
 
-            _autoOpenCorpseRange = CreateInputField(_autoOpenCorpseArea, new TextBox(FONT, 2, 80, 80)
+            _autoCloseCorpse = new Checkbox(0x00D2, 0x00D3, "Skip empty corpses", FONT, HUE_FONT)
             {
                 X = 20,
-                Y = _cellSize.Y + _cellSize.Height - 15,
+                Y = 5,
+                IsChecked = Engine.Profile.Current.AutoCloseCorpses
+            };
+            _autoOpenCorpseArea.Add(_autoCloseCorpse);
+
+            _autoOpenCorpseRange = CreateInputField(_autoOpenCorpseArea, new TextBox(FONT, 2, 80, 80)
+            {
+                X = 25,
+                Y = _autoCloseCorpse.Y + _autoCloseCorpse.Height,
                 Width = 50,
                 Height = 30,
                 NumericOnly = true,
@@ -1055,8 +1063,8 @@ namespace ClassicUO.Game.UI.Gumps
             };*/
             var text = new Label("Corpse Open Options:", true, HUE_FONT)
             {
-                Y = _autoOpenCorpseRange.Y + 30,
-                X = 10
+                X = 20,
+                Y = _autoOpenCorpseRange.Y + 20
             };
             _autoOpenCorpseArea.Add(text);
 
@@ -1463,6 +1471,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _overrideContainerLocationSetting.SelectedIndex = 0;
                     _dragSelectHumanoidsOnly.IsChecked = false;
                     _showTargetRangeIndicator.IsChecked = false;
+                    _autoOpenCorpse.IsChecked = false;
+                    _autoCloseCorpse.IsChecked = false;
 
                     break;
 
@@ -1850,6 +1860,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.AutoOpenDoors = _autoOpenDoors.IsChecked;
             Engine.Profile.Current.SmoothDoors = _smoothDoors.IsChecked;
             Engine.Profile.Current.AutoOpenCorpses = _autoOpenCorpse.IsChecked;
+            Engine.Profile.Current.AutoCloseCorpses = _autoCloseCorpse.IsChecked;
             Engine.Profile.Current.AutoOpenCorpseRange = int.Parse(_autoOpenCorpseRange.Text);
             Engine.Profile.Current.CorpseOpenOptions = _autoOpenCorpseOptions.SelectedIndex;
 

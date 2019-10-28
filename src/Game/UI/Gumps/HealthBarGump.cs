@@ -587,7 +587,12 @@ namespace ClassicUO.Game.UI.Gumps
                     if (World.Player.InWarMode)
                         GameActions.Attack(entity);
                     else
+                    {
+                        if (World.Items.Get(LocalSerial).IsCorpse)
+                            World.Player.ManualOpenedCorpses.Add(LocalSerial);
+
                         GameActions.DoubleClick(entity);
+                    }
                 }
                 else
                 {
