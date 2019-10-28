@@ -528,7 +528,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (item.IsCorpse)
                         World.Player.ManualOpenedCorpses.Add(item.Serial);
-                    
+
                     GameActions.DoubleClick(item);
 
                     break;
