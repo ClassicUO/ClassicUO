@@ -151,7 +151,7 @@ namespace ClassicUO.Game.Map
                                 staticObject.Position = new Position(staticX, staticY, z);
 
                                 if (staticObject.ItemData.IsAnimated)
-                                    World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
+                                    World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1, 0));
                                 else
                                     staticObject.AddToTile(Tiles[x, y]);
                             }
@@ -202,7 +202,7 @@ namespace ClassicUO.Game.Map
                                 staticObject.Position = new Position(staticX, staticY, z);
 
                                 if (staticObject.ItemData.IsAnimated)
-                                    World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
+                                    World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1, 0));
                                 else
                                     staticObject.AddToTile(Tiles[x, y]);
                             }
