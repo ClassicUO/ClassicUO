@@ -191,7 +191,7 @@ namespace ClassicUO.Game.GameObjects
             Engine.DebugInfo.EffectsRendered++;
 
 
-            if (data.IsLight)
+            if (data.IsLight && Source != null)
             {
                 Engine.SceneManager.GetScene<GameScene>()
                       .AddLight(Source, Source, posX + 22, posY + 22);
