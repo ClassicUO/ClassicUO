@@ -92,7 +92,7 @@ namespace ClassicUO.Game.Map
         [MethodImpl(256)]
         public unsafe void Load(int map)
         {
-            ref readonly IndexMap im = ref GetIndex(map);
+            ref IndexMap im = ref GetIndex(map);
 
             if (im.MapAddress != 0)
             {
@@ -149,25 +149,18 @@ namespace ClassicUO.Game.Map
 
                                 Static staticObject = Static.Create(sb->Color, sb->Hue, pos);
                                 staticObject.Position = new Position(staticX, staticY, z);
-
-                                if (staticObject.ItemData.IsAnimated)
-                                    World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
-                                else
-                                    staticObject.AddToTile(Tiles[x, y]);
+                                staticObject.AddToTile(Tiles[x, y]);
                             }
                         }
                     }
                 }
-
-
-                //CreateLand();
             }
         }
 
         [MethodImpl(256)]
         public unsafe void LoadStatics(int map)
         {
-            ref readonly IndexMap im = ref GetIndex(map);
+            ref IndexMap im = ref GetIndex(map);
 
             if (im.MapAddress != 0)
             {
@@ -200,11 +193,7 @@ namespace ClassicUO.Game.Map
 
                                 Static staticObject = Static.Create(sb->Color, sb->Hue, pos);
                                 staticObject.Position = new Position(staticX, staticY, z);
-
-                                if (staticObject.ItemData.IsAnimated)
-                                    World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
-                                else
-                                    staticObject.AddToTile(Tiles[x, y]);
+                                staticObject.AddToTile(Tiles[x, y]);
                             }
                         }
                     }
@@ -215,7 +204,7 @@ namespace ClassicUO.Game.Map
         [MethodImpl(256)]
         public unsafe void LoadLand(int map)
         {
-            ref readonly IndexMap im = ref GetIndex(map);
+            ref IndexMap im = ref GetIndex(map);
 
             if (im.MapAddress != 0)
             {
@@ -247,42 +236,6 @@ namespace ClassicUO.Game.Map
                 }
             }
         }
-
-        //private void CreateLand()
-        //{
-        //    for (int x = 0; x < 8; x++)
-        //    {
-        //        for (int y = 0; y < 8; y++)
-        //        {
-        //            Land tile = null;
-        //            Tile t = Tiles[x, y];
-        //            GameObject obj = t.FirstNode;
-
-        //            while (obj != null)
-        //            {
-        //                if (obj is Land land)
-        //                {
-        //                    tile = land;
-        //                    break;
-        //                }
-
-        //                obj = obj.Right;
-        //            }
-
-        //            if (tile != null)
-        //            {
-        //                int tileX = tile.X;
-        //                int tileY = tile.Y;
-        //                sbyte tileZ = tile.Z;
-
-        //                tile.Calculate(tileX, tileY, tileZ);
-
-        //                t.AddGameObject(tile);
-        //            }
-
-        //        }
-        //    }
-        //}
 
         private ref IndexMap GetIndex(int map)
         {

@@ -14,7 +14,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 80,
                 X = (Engine.Profile.Current.GameWindowSize.X / 2) - 125,
                 Y = 150,
-                Alpha = 0.1f
+                Alpha = 0.2f
             };
 
             Mobile mobile = World.Mobiles.Get(inviter);

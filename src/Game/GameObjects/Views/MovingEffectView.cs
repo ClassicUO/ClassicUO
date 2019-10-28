@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -50,9 +51,19 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Height = Texture.Height;
             }
 
-            Bounds.X = (int) -Offset.X + 22;
-            Bounds.Y = (int) (Offset.Z - Offset.Y) + 22;
-            Rotation = AngleToTarget;
+            //ArtTexture texture = (ArtTexture) Texture;
+            //posX += texture.ImageRectangle.X;
+            //posY += texture.ImageRectangle.Y;
+
+            posX += (int) Offset.X;
+            posY = (int) (posY + Offset.Y + Offset.Z);
+
+
+            //posX += 22;
+            //posY += 22;
+            //Bounds.X = (int) -Offset.X + 22;
+            //Bounds.Y = (int) (Offset.Z - Offset.Y) + 22;
+            //Rotation = AngleToTarget;
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
@@ -68,11 +79,24 @@ namespace ClassicUO.Game.GameObjects
                 ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
 
             Engine.DebugInfo.EffectsRendered++;
-            base.Draw(batcher, posX, posY);
+
+            //base.Draw(batcher, posX, posY);
+            if (FixedDir)
+                batcher.DrawSprite(Texture, posX, posY, false, ref HueVector);
+            else
+                //batcher.Draw2D(Texture, posX + texture.ImageRectangle.X, posY + texture.ImageRectangle.Y, texture.ImageRectangle.Width, texture.ImageRectangle.Height,
+                //               posX, posY, texture.Width, texture.Height,
+                //               ref HueVector,
+                //               AngleToTarget);
+                batcher.DrawSpriteRotated(Texture, posX, posY,
+                                          ref HueVector, AngleToTarget);
+
+            //Select(posX, posY);
+            Texture.Ticks = Engine.Ticks;
 
             ref readonly StaticTiles data = ref FileManager.TileData.StaticData[_displayedGraphic];
 
-            if (data.IsLight && (Source is Item || Source is Static || Source is Multi))
+            if (data.IsLight && Source != null)
             {
                 Engine.SceneManager.GetScene<GameScene>()
                       .AddLight(Source, Source, posX + 22, posY + 22);

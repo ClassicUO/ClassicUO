@@ -197,9 +197,12 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (TargetManager.IsTargeting)
                 {
-                    if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
+                    _clickedCanDrag = false;
+
+                    if (Mouse.IsDragging && CanPickup())
                     {
-                        if (!gs.IsHoldingItem || !gs.IsMouseOverUI) return;
+                        if (!gs.IsHoldingItem || !gs.IsMouseOverUI) 
+                            return;
 
                         SelectedObject.Object = item;
 
@@ -289,7 +292,6 @@ namespace ClassicUO.Game.UI.Controls
                 }
 
                 _clickedCanDrag = false;
-
             }
         }
 
@@ -297,16 +299,22 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (_clickedCanDrag)
             {
-                Point offset = Mouse.LDroppedOffset;
-                var split = Engine.UI.GetGump<SplitMenuGump>(LocalSerial);
-
-                if (split != null || Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+                if (CanPickup())
                 {
-                    split?.Dispose();
                     _clickedCanDrag = false;
                     AttempPickUp();
                 }
             }
+        }
+
+        private bool CanPickup()
+        {
+            Point offset = Mouse.LDroppedOffset;
+            var split = Engine.UI.GetGump<SplitMenuGump>(LocalSerial);
+
+            split?.Dispose();
+
+            return (split != null || (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS));
         }
 
 
@@ -314,11 +322,23 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button != MouseButton.Left)
                 return false;
-
-            GameActions.DoubleClick(LocalSerial);
+ 
+            Item item, container;
+ 
+            if (
+                Engine.Profile.Current.DoubleClickToLootInsideContainers &&
+                (item = World.Items.Get(LocalSerial)) != null &&
+                !item.ItemData.IsContainer && item.Items.Count == 0 &&
+                (container = World.Items.Get(item.RootContainer)) != null &&
+                container.IsCorpse
+            ){
+                GameActions.GrabItem(item, item.Amount);
+            } else
+                GameActions.DoubleClick(LocalSerial);
+ 
             _sendClickIfNotDClick = false;
             _lastClickPosition = Point.Zero;
-
+ 
             return true;
         }
 

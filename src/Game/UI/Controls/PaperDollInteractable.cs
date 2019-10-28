@@ -102,9 +102,8 @@ namespace ClassicUO.Game.UI.Controls
                     if (Mobile.HasEquipment && item.Layer >= 0 && (int)item.Layer < Mobile.Equipment.Length)
                         Mobile.Equipment[(int)item.Layer] = null;
 
-                    ref var gump = ref _pgumps[(int)item.Layer];
-                    gump?.Dispose();
-                    gump = null;
+                    _pgumps[(int )item.Layer]?.Dispose();
+                    _pgumps[(int) item.Layer] = null;
                 }
             }
 
@@ -129,9 +128,8 @@ namespace ClassicUO.Game.UI.Controls
                                 World.Player.UpdateAbilities();
                             }
 
-                            ref var gump = ref _pgumps[(int) i.Layer];
-                            gump?.Dispose();
-                            gump = null;
+                            _pgumps[(int) i.Layer]?.Dispose();
+                            _pgumps[(int) i.Layer] = null;
 
                         }
 
@@ -321,7 +319,7 @@ namespace ClassicUO.Game.UI.Controls
                                          layerIndex != Layer.Hair && 
                                          layerIndex != Layer.Beard;
 
-                        ref var itemGump = ref _pgumps[(int)layerIndex];
+                        var itemGump = _pgumps[(int)layerIndex];
 
                         if (_fakeItem != null && _fakeItem.ItemData.Layer == (int) layerIndex)
                         {
@@ -332,7 +330,7 @@ namespace ClassicUO.Game.UI.Controls
                         else if (item == null || item.IsDestroyed)
                         {
                             itemGump?.Dispose();
-                            itemGump = null;
+                            _pgumps[(int)layerIndex] = null;
                             continue;
                         }
 
@@ -348,10 +346,11 @@ namespace ClassicUO.Game.UI.Controls
                                 CanPickUp = canPickUp
                             });
                             itemGump.Initialize();
+                            _pgumps[(int) layerIndex] = itemGump;
                             isNew = true;
                         }
 
-                        if (Mobile.IsCovered(_mobile, (Layer) layerIndex))
+                        if (Mobile.IsCovered(_mobile, layerIndex))
                         {
                             itemGump.IsVisible = false;
                             continue;
@@ -360,7 +359,7 @@ namespace ClassicUO.Game.UI.Controls
                         g = _pgumps[(int) layerIndex];
 
 
-                        switch ((Layer) layerIndex)
+                        switch (layerIndex)
                         {
                             case Layer.Hair:
                             case Layer.Beard:

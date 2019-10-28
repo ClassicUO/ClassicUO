@@ -9,37 +9,44 @@ namespace ClassicUO.Utility
 {
     internal static class GameObjectHelper
     {
-        [MethodImpl(256)]
-        public static bool TryGetStaticData(GameObject obj, out StaticTiles itemdata)
-        {
-            switch (obj)
-            {
-                case Static st:
-                    itemdata = /*st.OriginalGraphic != st.Graphic ? FileManager.TileData.StaticData[st.OriginalGraphic] :*/ st.ItemData;
+        //[MethodImpl(256)]
+        //public static bool TryGetStaticData(GameObject obj, out StaticTiles itemdata)
+        //{
+        //    if (obj is Mobile)
+        //    {
+        //        itemdata = default;
+        //        return false;
+        //    }
+        //    itemdata = 
+        //    return true;
+        //    switch (obj)
+        //    {
+        //        case Static st:
+        //            itemdata = /*st.OriginalGraphic != st.Graphic ? FileManager.TileData.StaticData[st.OriginalGraphic] :*/ st.ItemData;
 
-                    return true;
+        //            return true;
 
-                case Item item:
-                    itemdata = item.ItemData;
+        //        case Item item:
+        //            itemdata = item.ItemData;
 
-                    return true;
+        //            return true;
 
-                case Multi multi:
-                    itemdata = multi.ItemData;
+        //        case Multi multi:
+        //            itemdata = multi.ItemData;
 
-                    return true;
+        //            return true;
 
-                case AnimatedItemEffect ef when ef.Source is Static s:
-                    itemdata = s.ItemData;
+        //        case AnimatedItemEffect ef when ef.Source is Static s:
+        //            itemdata = s.ItemData;
 
-                    return true;
+        //            return true;
 
-                default:
-                    itemdata = default;
+        //        default:
+        //            itemdata = default;
 
-                    return false;
-            }
-        }
+        //            return false;
+        //    }
+        //}
 
         [MethodImpl(256)]
         public static bool IsNoDrawable(ushort g)

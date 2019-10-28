@@ -35,7 +35,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class InfoBarGump : Gump
     {
 
-        private AlphaBlendControl _background;
+        private readonly AlphaBlendControl _background;
         private long _refreshTime;
         private Label _name;
 
@@ -55,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void ResetItems()
         {
-            foreach (Control c in Children.OfType<InfoBarControl>())
+            foreach (InfoBarControl c in Children.OfType<InfoBarControl>())
             {
                 c.Dispose();
             }
@@ -79,7 +79,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int x = 5;
 
-                foreach (Control c in Children.OfType<InfoBarControl>())
+                foreach (InfoBarControl c in Children.OfType<InfoBarControl>())
                 {
                     c.X = x;
                     x += c.Width + 5;

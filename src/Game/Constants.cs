@@ -99,8 +99,8 @@ namespace ClassicUO.Game
         public const ushort FIELD_REPLACE_GRAPHIC = 0x1826;
         public const ushort TREE_REPLACE_GRAPHIC = 0x0E59;
 
-        public const int MIN_CIRCLE_OF_TRANSPARENCY_RADIUS = 1;
-        public const int MAX_CIRCLE_OF_TRANSPARENCY_RADIUS = 8;
+        public const int MIN_CIRCLE_OF_TRANSPARENCY_RADIUS = 20;
+        public const int MAX_CIRCLE_OF_TRANSPARENCY_RADIUS = 200;
 
         public const int MAX_ABILITIES_COUNT = 32;
 
@@ -116,7 +116,7 @@ namespace ClassicUO.Game
 
         public const int DEATH_SCREEN_TIMER = 1500;
 
-        public const float SOUND_DELTA = 1000f;
+        public const float SOUND_DELTA = 250;
 
         public const uint JOURNAL_LOCALSERIAL = 0xFFFFFFE1;
         public const uint SKILLSTD_LOCALSERIAL = 0xFFFFFFE2;

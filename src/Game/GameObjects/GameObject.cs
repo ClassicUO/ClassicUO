@@ -117,9 +117,9 @@ namespace ClassicUO.Game.GameObjects
 
                 int x, y;
 
-                if (this is Mobile m && m.IsMoving)
+                if (this is Mobile m && m.Steps.Count != 0)
                 {
-                    Mobile.Step step = m.Steps.Back();
+                    ref var step = ref m.Steps.Back();
                     x = step.X;
                     y = step.Y;
                 }
@@ -374,7 +374,6 @@ namespace ClassicUO.Game.GameObjects
             _screenPosition = Point.Zero;
             _position = Position.INVALID;
             IsFlipped = false;
-            Rotation = 0;
             Graphic = 0;
             UseObjectHandles = ClosedObjectHandles = ObjectHandlesOpened = false;
             Bounds = Rectangle.Empty;

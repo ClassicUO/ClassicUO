@@ -38,8 +38,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Static : GameObject
     {
-        private StaticTiles? _itemData;
-
         private static readonly Queue<Static> _pool = new Queue<Static>();
 
         public Static(Graphic graphic, Hue hue, int index)
@@ -69,9 +67,7 @@ namespace ClassicUO.Game.GameObjects
                 s.Hue = hue;
                 s.Index = index;
                 s.IsDestroyed = false;
-                s._itemData = null;
                 s.AlphaHue = 0;
-                s._oldGraphic = 0;
                 s.CharacterIsBehindFoliage = false;
                 s.UpdateGraphicBySeason();
 
@@ -96,28 +92,16 @@ namespace ClassicUO.Game.GameObjects
 
         public Graphic OriginalGraphic { get; private set; }
 
-        public StaticTiles ItemData
-        {
-            [MethodImpl(256)]
-            get
-            {
-                if (!_itemData.HasValue)
-                    _itemData = FileManager.TileData.StaticData[Graphic];
-
-                return _itemData.Value;
-            }
-        }
+        public ref readonly StaticTiles ItemData => ref FileManager.TileData.StaticData[Graphic];
 
         public void SetGraphic(Graphic g)
         {
             Graphic = g;
-            _itemData = FileManager.TileData.StaticData[Graphic];
         }
 
         public void RestoreOriginalGraphic()
         {
             Graphic = OriginalGraphic;
-            _itemData = FileManager.TileData.StaticData[Graphic];
         }
 
         public override void UpdateGraphicBySeason()

@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -73,8 +74,6 @@ namespace ClassicUO.Game.GameObjects
             //if (IsDestroyed)
             //    return false;
 
-            ResetHueVector();
-
             DrawCharacter(batcher, posX, posY);
 
             Engine.DebugInfo.MobilesRendered++;
@@ -92,14 +91,18 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo.Width = 0;
             FrameInfo.Height = 0;
 
+            posY -= 3;
             int drawX = posX + (int) Offset.X;
-            int drawY = (int) (posY + Offset.Y - Offset.Z - 3);
+            int drawY = posY + (int) (Offset.Y - Offset.Z);
+
+            drawX += 22;
+            drawY += 22;
 
             bool hasShadow = !IsDead && !IsHidden && Engine.Profile.Current.ShadowsEnabled;
 
             if (Engine.AuraManager.IsEnabled)
             {
-                Engine.AuraManager.Draw(batcher, drawX + 22, drawY + 22, Engine.Profile.Current.PartyAura && World.Party.Contains(this) ? Engine.Profile.Current.PartyAuraHue : (ushort)Notoriety.GetHue(NotorietyFlag));
+                Engine.AuraManager.Draw(batcher, drawX, drawY, Engine.Profile.Current.PartyAura && World.Party.Contains(this) ? Engine.Profile.Current.PartyAuraHue : (ushort)Notoriety.GetHue(NotorietyFlag));
             }
 
             bool isHuman = IsHuman;
@@ -190,14 +193,14 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (hasShadow)
                     {
-                        DrawInternal(batcher, this, null, drawX, drawY + 10, mirror, animIndex, true, graphic, isHuman);
+                        DrawInternal(batcher, this, null, drawX, drawY + 10, mirror, ref animIndex, true, graphic, isHuman);
                         FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
-                        DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, true, mountGraphic, isHuman);
+                        DrawInternal(batcher, this, mount, drawX, drawY, mirror, ref animIndex, true, mountGraphic, isHuman);
                     }
                     else
                         FileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
 
-                    drawY += DrawInternal(batcher, this, mount, drawX, drawY, mirror, animIndex, false, mountGraphic, isHuman, isMount: true);
+                    drawY += DrawInternal(batcher, this, mount, drawX, drawY, mirror, ref animIndex, false, mountGraphic, isHuman, isMount: true);
                 }
             }
             else
@@ -217,12 +220,12 @@ namespace ClassicUO.Game.GameObjects
                         _transform = true;
                 }
                 else if (hasShadow)
-                    DrawInternal(batcher, this, null, drawX, drawY, mirror, animIndex, true, graphic, isHuman);
+                    DrawInternal(batcher, this, null, drawX, drawY, mirror, ref animIndex, true, graphic, isHuman);
             }
 
             FileManager.Animations.AnimGroup = animGroup;
 
-            DrawInternal(batcher, this, null, drawX, drawY, mirror, animIndex, false, graphic, isHuman);
+            DrawInternal(batcher, this, null, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman);
 
             if (HasEquipment)
             {
@@ -257,12 +260,12 @@ namespace ClassicUO.Game.GameObjects
                                 }
                             }
 
-                            DrawInternal(batcher, this, item, drawX, drawY, mirror, animIndex, false, graphic, isHuman, false);
+                            DrawInternal(batcher, this, item, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman, false);
                         }
                         else
                         {
                             if (item.ItemData.IsLight)
-                                Engine.SceneManager.GetScene<GameScene>().AddLight(this, this, drawX + 22, drawY + 22);
+                                Engine.SceneManager.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
                         }
 
                         _equipConvData = null;
@@ -271,7 +274,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (item.ItemData.IsLight)
                         {
-                            Engine.SceneManager.GetScene<GameScene>().AddLight(this, this, drawX + 22, drawY + 22);
+                            Engine.SceneManager.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
                             break;
                         }
                     }
@@ -295,13 +298,10 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo.Height = FrameInfo.Y + FrameInfo.Height;
         }
 
-        private static sbyte DrawInternal(UltimaBatcher2D batcher, Mobile owner, Item entity, int x, int y, bool mirror, sbyte frameIndex, bool hasShadow, ushort id, bool isHuman, bool isParent = true, bool isMount = false)
+        private static sbyte DrawInternal(UltimaBatcher2D batcher, Mobile owner, Item entity, int x, int y, bool mirror, ref sbyte frameIndex, bool hasShadow, ushort id, bool isHuman, bool isParent = true, bool isMount = false)
         {
             if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 return 0;
-
-            x += 22;
-            y += 22;
 
             ushort hueFromFile = _viewHue;
             byte animGroup = FileManager.Animations.AnimGroup;
@@ -320,7 +320,7 @@ namespace ClassicUO.Game.GameObjects
 
             int fc = direction.FrameCount;
 
-            if (fc > 0 && frameIndex >= fc) frameIndex = 0;
+            if ((fc > 0 && frameIndex >= fc) || frameIndex < 0) frameIndex = 0;
 
             if (frameIndex < direction.FrameCount)
             {
@@ -366,7 +366,7 @@ namespace ClassicUO.Game.GameObjects
                             partialHue = false;
                         }
                     }
-
+                    ResetHueVector();
                     ShaderHuesTraslator.GetHueVector(ref HueVector, hue, partialHue, 0);
 
                     if (_transform)
@@ -448,10 +448,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        if (mirror)
-                            batcher.DrawSpriteFlipped(frame, x, y, frame.Width, frame.Height, frame.Width - 44, 0, ref HueVector);
-                        else
-                            batcher.DrawSprite(frame, x, y, frame.Width, frame.Height, 0, 0, ref HueVector);
+                        batcher.DrawSprite(frame, x, y, mirror, ref HueVector);
 
                         int yy = -(frame.Height + frame.CenterY + 3);
                         int xx = -frame.CenterX;
@@ -487,12 +484,8 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
-            if (SelectedObject.Object != this && Texture.Contains(x, y)) SelectedObject.Object = this;
-
-            //if (SelectedObject.IsPointInMobile(this, x, y))
-            //{
-            //    SelectedObject.Object = this;
-            //}
+            if (Texture.Contains(x, y)) 
+                SelectedObject.Object = this;
         }
 
         internal static bool IsCovered(Mobile mobile, Layer layer)

@@ -42,6 +42,7 @@ using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SDL2;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -57,8 +58,9 @@ namespace ClassicUO.Game.Scenes
         private HealthLinesManager _healthLinesManager;
         private int _lightCount;
         private Rectangle _rectangleObj = Rectangle.Empty, _rectanglePlayer;
-        private RenderTarget2D _renderTarget, _darkness;
+        private RenderTarget2D _viewportRenderTarget, _lightRenderTarget;
         private int _scale = 5; // 1.0
+        private bool _useObjectHandles;
 
 
         private long _timePing;
@@ -95,14 +97,15 @@ namespace ClassicUO.Game.Scenes
 
         public InfoBarManager InfoBars { get; private set; }
 
-        public Texture2D ViewportTexture => _renderTarget;
+        public Texture2D ViewportTexture => _viewportRenderTarget;
 
-        public Texture2D Darkness => _darkness;
+        public Texture2D LightRenderTarget => _lightRenderTarget;
 
         public Weather Weather => _weather;
 
         public bool UseLights => Engine.Profile.Current != null && Engine.Profile.Current.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
-
+        public bool UseAltLights => Engine.Profile.Current != null && Engine.Profile.Current.UseAlternativeLights;
+       
         public void DoubleClickDelayed(Serial serial)
         {
             _useItemQueue.Add(serial);
@@ -256,6 +259,11 @@ namespace ClassicUO.Game.Scenes
         {
             HeldItem?.Clear();
 
+            if (Engine.Profile.Current != null)
+            {
+                Engine.Profile.Current.WindowClientPosition = Engine.WindowPosition;
+            }
+            
             try
             {
                 Plugin.OnDisconnected();
@@ -273,8 +281,9 @@ namespace ClassicUO.Game.Scenes
 
             NetClient.Socket.Disconnected -= SocketOnDisconnected;
             NetClient.Socket.Disconnect();
-            _renderTarget?.Dispose();
-            _darkness?.Dispose();
+            _viewportRenderTarget?.Dispose();
+            _lightRenderTarget?.Dispose();
+            
             CommandManager.UnRegisterAll();
             _weather.Reset();
 
@@ -316,7 +325,7 @@ namespace ClassicUO.Game.Scenes
 
         public void AddLight(GameObject obj, GameObject lightObject, int x, int y)
         {
-            if (_lightCount >= Constants.MAX_LIGHTS_DATA_INDEX_COUNT || !UseLights)
+            if (_lightCount >= Constants.MAX_LIGHTS_DATA_INDEX_COUNT || (!UseLights && !UseAltLights))
                 return;
 
             bool canBeAdded = true;
@@ -362,12 +371,18 @@ namespace ClassicUO.Game.Scenes
                         light.ID = item.LightID;
                     else if (lightObject is Item it)
                         light.ID = (byte) it.ItemData.LightIndex;
-                    else if (GameObjectHelper.TryGetStaticData(lightObject, out StaticTiles data))
-                        light.ID = data.Layer;
                     else if (obj is Mobile _)
                         light.ID = 1;
                     else
-                        return;
+                    {
+                        ref readonly var data = ref FileManager.TileData.StaticData[obj.Graphic];
+                        light.ID = data.Layer;
+                    }
+                    //else if (GameObjectHelper.TryGetStaticData(lightObject, out StaticTiles data))
+                    //    light.ID = data.Layer;
+                   
+                    //else
+                    //    return;
                 }
 
 
@@ -394,7 +409,7 @@ namespace ClassicUO.Game.Scenes
             _renderListCount = 0;
             _objectHandlesCount = 0;
 
-            _useObjectHandles = NameOverHeadManager.IsToggled || _useObjectHandles;
+            _useObjectHandles = NameOverHeadManager.IsToggled || _ctrlAndShiftPressed;
 
             if (_useObjectHandles)
                 NameOverHeadManager.Open();
@@ -663,7 +678,7 @@ namespace ClassicUO.Game.Scenes
             SelectedObject.Object = null;
 
             batcher.GraphicsDevice.Clear(Color.Black);
-            batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
+            batcher.GraphicsDevice.SetRenderTarget(_viewportRenderTarget);
 
             //if (CircleOfTransparency.Circle == null)
             //    CircleOfTransparency.Create(200);
@@ -709,7 +724,6 @@ namespace ClassicUO.Game.Scenes
 
             DrawLights(batcher);
 
-
             // draw weather
             batcher.Begin();
             _weather.Draw(batcher, 0, 0 /*Engine.Profile.Current.GameWindowPosition.X, Engine.Profile.Current.GameWindowPosition.Y*/);
@@ -722,21 +736,28 @@ namespace ClassicUO.Game.Scenes
 
         private void DrawLights(UltimaBatcher2D batcher)
         {
-            if (_deathScreenActive || !UseLights)
+            if (_deathScreenActive || (!UseLights && !UseAltLights))
                 return;
 
-            batcher.GraphicsDevice.SetRenderTarget(_darkness);
+            batcher.GraphicsDevice.SetRenderTarget(_lightRenderTarget);
 
-            var lightColor = World.Light.IsometricLevel;
+            if (UseAltLights)
+            {
+                batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
+            }
+            else
+            {
+                var lightColor = World.Light.IsometricLevel;
 
-            if (Engine.Profile.Current.UseDarkNights)
-                lightColor -= 0.02f;
+                if (Engine.Profile.Current.UseDarkNights)
+                    lightColor -= 0.02f;
 
-            _vectorClear.X = _vectorClear.Y = _vectorClear.Z = lightColor;
+                _vectorClear.X = _vectorClear.Y = _vectorClear.Z = lightColor;
 
-            batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
-            batcher.GraphicsDevice.Clear(ClearOptions.Target, _vectorClear, 0, 0);
-
+                batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
+                batcher.GraphicsDevice.Clear(ClearOptions.Target, _vectorClear, 0, 0);
+            }
+            
             batcher.Begin();
             batcher.SetBlendState(BlendState.Additive);
 
@@ -744,7 +765,7 @@ namespace ClassicUO.Game.Scenes
 
             for (int i = 0; i < _lightCount; i++)
             {
-                ref readonly var l = ref _lights[i];
+                ref var l = ref _lights[i];
 
                 UOTexture texture = FileManager.Lights.GetTexture(l.ID);
 
@@ -752,7 +773,7 @@ namespace ClassicUO.Game.Scenes
                 hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
                 hue.Z = 0;
 
-                batcher.DrawSprite(texture, l.DrawX, l.DrawY, texture.Width, texture.Height, texture.Width >> 1, texture.Height >> 1, ref hue);
+                batcher.DrawSprite(texture, l.DrawX - (texture.Width >> 1), l.DrawY - (texture.Height >> 1), false, ref hue);
             }
 
             _lightCount = 0;

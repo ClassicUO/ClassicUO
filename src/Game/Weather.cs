@@ -148,7 +148,7 @@ namespace ClassicUO.Game
             //        break;
             //}
 
-            Point winpos = Engine.Profile.Current.GameWindowPosition;
+            //Point winpos = Engine.Profile.Current.GameWindowPosition;
             Point winsize = Engine.Profile.Current.GameWindowSize;
 
             for (int i = 0; i < Effects.Count; i++)
@@ -259,8 +259,12 @@ namespace ClassicUO.Game
                             oldY = (int)(effect.Y + MAX_OFFSET_XY);
                         }
 
-                        batcher.DrawLine(Textures.GetTexture(Color.Gray), x + oldX, y + oldY,
-                            x + (int)effect.X, y + (int)effect.Y, 0, 0);
+                        int startX = x + oldX;
+                        int startY = y + oldY;
+                        int endX = x + (int) effect.X;
+                        int endY = y + (int) effect.Y;
+
+                        batcher.DrawLine(Textures.GetTexture(Color.Gray), startX, startY, endX, endY, startX + (endX - startX) / 2, startY + (endY - startY) / 2);
                         break;
                     case WEATHER_TYPE.WT_SNOW:
                     case WEATHER_TYPE.WT_STORM:
