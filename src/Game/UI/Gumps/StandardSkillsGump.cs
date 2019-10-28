@@ -219,8 +219,6 @@ namespace ClassicUO.Game.UI.Gumps
             _checkReal.Y = _newGroupButton.Y - 6;
             _checkCaps.Y = _newGroupButton.Y + 7;
 
-            _container.ForceUpdate();
-
             base.Update(totalMS, frameMS);
         }
 
