@@ -68,7 +68,6 @@ namespace ClassicUO.Game.GameObjects
                 s.Index = index;
                 s.IsDestroyed = false;
                 s.AlphaHue = 0;
-                s._oldGraphic = 0;
                 s.CharacterIsBehindFoliage = false;
                 s.UpdateGraphicBySeason();
 
