@@ -539,7 +539,7 @@ namespace ClassicUO.Game.Scenes
 
                     break;
 
-                case MessageInfo msg when msg.Owner is Entity entity:
+                case TextOverhead msg when msg.Owner is Entity entity:
                     result = true;
                     GameActions.DoubleClick(entity);
 

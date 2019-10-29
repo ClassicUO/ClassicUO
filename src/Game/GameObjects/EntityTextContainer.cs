@@ -35,11 +35,11 @@ namespace ClassicUO.Game.GameObjects
 {
     class TextContainer
     {
-        public MessageInfo Items;
+        public TextOverhead Items;
 
         public int Size, MaxSize = 5;
 
-        public void Add(MessageInfo obj)
+        public void Add(TextOverhead obj)
         {
             if (obj != null)
             {
@@ -118,7 +118,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private const int DAMAGE_Y_MOVING_TIME = 25;
 
-        private readonly Deque<MessageInfo> _messages;
+        private readonly Deque<TextOverhead> _messages;
 
         private Rectangle _rectangle;
 
@@ -126,7 +126,7 @@ namespace ClassicUO.Game.GameObjects
         public OverheadDamage(GameObject parent)
         {
             Parent = parent;
-            _messages = new Deque<MessageInfo>();
+            _messages = new Deque<TextOverhead>();
         }
 
 
@@ -141,7 +141,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void Add(int damage)
         {
-            _messages.AddToFront(new MessageInfo
+            _messages.AddToFront(new TextOverhead
             {
                 RenderedText = RenderedText.Create(damage.ToString(), (Hue)(Parent == World.Player ? 0x0034 : 0x0021), 3, false),
                 Time = Engine.Ticks + 1500
@@ -296,22 +296,5 @@ namespace ClassicUO.Game.GameObjects
 
             _messages.Clear();
         }
-    }
-
-    internal class MessageInfo : BaseGameObject
-    {
-        public byte Alpha;
-        public ushort Hue;
-        public bool IsTransparent;
-
-        public RenderedText RenderedText;
-        public long Time, SecondTime;
-        public MessageType Type;
-        public int X, Y, OffsetY;
-        public GameObject Owner;
-
-        public MessageInfo Left, Right;
-
-        public MessageInfo ListLeft, ListRight;
     }
 }

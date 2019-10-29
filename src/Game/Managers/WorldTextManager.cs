@@ -40,7 +40,7 @@ namespace ClassicUO.Game.Managers
     internal class TextRenderer
     {
         private readonly List<Rectangle> _bounds = new List<Rectangle>();
-        protected MessageInfo _firstNode = new MessageInfo(), _drawPointer;
+        protected TextOverhead _firstNode = new TextOverhead(), _drawPointer;
 
         public virtual void Update(double totalMS, double frameMS)
         {
@@ -79,7 +79,7 @@ namespace ClassicUO.Game.Managers
             int mouseX = Mouse.Position.X;
             int mouseY = Mouse.Position.Y;
 
-            MessageInfo last = null;
+            TextOverhead last = null;
 
             for (var o = _drawPointer; o != null; o = o.Left)
             {
@@ -160,7 +160,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        private void CalculateAlpha(MessageInfo msg)
+        private void CalculateAlpha(TextOverhead msg)
         {
             int delta = (int)(msg.Time - Engine.Ticks);
 
@@ -184,7 +184,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        private bool Collides(MessageInfo msg)
+        private bool Collides(TextOverhead msg)
         {
             bool result = false;
 
@@ -209,7 +209,7 @@ namespace ClassicUO.Game.Managers
             return result;
         }
 
-        public void AddMessage(MessageInfo obj)
+        public void AddMessage(TextOverhead obj)
         {
             if (obj == null)
                 return;
@@ -239,7 +239,7 @@ namespace ClassicUO.Game.Managers
 
         public virtual void Clear()
         {
-            _firstNode = new MessageInfo();
+            _firstNode = new TextOverhead();
             _drawPointer = null;
         }
     }

@@ -75,19 +75,19 @@ namespace ClassicUO.Game.GameObjects
         public ushort X
         {
             get => Position.X;
-            set => Position = new Position(value, Position.Y, Position.Z);
+            //set => Position = new Position(value, Position.Y, Position.Z);
         }
 
         public ushort Y
         {
             get => Position.Y;
-            set => Position = new Position(Position.X, value, Position.Z);
+            //set => Position = new Position(Position.X, value, Position.Z);
         }
 
         public sbyte Z
         {
             get => Position.Z;
-            set => Position = new Position(Position.X, Position.Y, value);
+            //set => Position = new Position(Position.X, Position.Y, value);
         }
 
         public Hue Hue { get; set; }
@@ -273,7 +273,7 @@ namespace ClassicUO.Game.GameObjects
             AddMessage(msg);
         }
 
-        public void AddMessage(MessageInfo msg)
+        public void AddMessage(TextOverhead msg)
         {
             if (TextContainer == null)
                 TextContainer = new TextContainer();
@@ -291,7 +291,7 @@ namespace ClassicUO.Game.GameObjects
                 World.WorldTextManager.AddMessage(msg);
             }
         }
-        private static MessageInfo CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type)
+        private static TextOverhead CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type)
         {
             if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
             {
@@ -308,7 +308,7 @@ namespace ClassicUO.Game.GameObjects
 
             RenderedText rtext = RenderedText.Create(msg, hue, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, width, 30, false, false, true);
 
-            return new MessageInfo
+            return new TextOverhead
             {
                 Alpha = 255,
                 RenderedText = rtext,
