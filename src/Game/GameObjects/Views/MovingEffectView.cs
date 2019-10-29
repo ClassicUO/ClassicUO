@@ -53,8 +53,10 @@ namespace ClassicUO.Game.GameObjects
 
 
             posX += (int) Offset.X;
-            posY = (int) (posY + Offset.Y + Offset.Z);
+            posY += (int) (Offset.Y + Offset.Z);
 
+            //posX += 22;
+            //posY += 22;
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
