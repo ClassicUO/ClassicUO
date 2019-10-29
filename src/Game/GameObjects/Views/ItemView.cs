@@ -182,6 +182,9 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed || World.CorpseManager.Exists(Serial, 0))
                 return false;
 
+            posX += 22;
+            posY += 22;
+
             byte dir = (byte) ((byte) Layer & 0x7F & 7);
             bool mirror = false;
             FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
@@ -328,8 +331,9 @@ namespace ClassicUO.Game.GameObjects
                     ShaderHuesTraslator.GetHueVector(ref HueVector, color, ispartialhue, 0);
                 }
 
-                batcher.DrawSprite(frame, posX, posY, IsFlipped, ref HueVector);
                 Texture = frame;
+               
+                batcher.DrawSprite(frame, posX, posY, IsFlipped, ref HueVector);
                 Select(IsFlipped ? posX + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - posX, SelectedObject.TranslatedMousePositionByViewport.Y - posY);
             }
         }
