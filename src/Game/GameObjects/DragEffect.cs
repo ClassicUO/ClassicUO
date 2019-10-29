@@ -19,29 +19,18 @@ namespace ClassicUO.Game.GameObjects
 
         public DragEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, Graphic graphic, Hue hue)
         {
-            sbyte zSourceB = (sbyte)zSource;
-            sbyte zTargB = (sbyte)zTarget;
-
             if (src.IsValid)
             {
                 Entity source = World.Get(src);
 
-                if (source is Mobile mobile)
+                if (source != null)
                 {
-                    SetSource(mobile.Position.X, mobile.Position.Y, mobile.Position.Z);
-
-                    //if (mobile != World.Player && !mobile.IsMoving && (xSource | ySource | zSource) != 0)
-                    //    mobile.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
-                }
-                else if (source is Item)
-                {
-                    SetSource(source.Position.X, source.Position.Y, source.Position.Z);
-
-                    //if ((xSource | ySource | zSource) != 0)
-                    //    source.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
+                    SetSource(source.X, source.Y, source.Z);
                 }
                 else
-                    SetSource(xSource, ySource, zSourceB);
+                {
+                    SetSource(xSource, ySource, zSource);
+                }
             }
             else
                 SetSource(xSource, ySource, zSource);
@@ -50,26 +39,17 @@ namespace ClassicUO.Game.GameObjects
             {
                 Entity target = World.Get(trg);
 
-                if (target is Mobile mobile)
+                if (target != null)
                 {
-                    SetTarget(target);
-
-                    //if (mobile != World.Player && !mobile.IsMoving && (xTarget | yTarget | zTarget) != 0)
-                    //    mobile.Position = new Position((ushort) xTarget, (ushort) yTarget, zTargB);
-                }
-                else if (target is Item)
-                {
-                    SetTarget(target);
-
-                    //if ((xTarget | yTarget | zTarget) != 0)
-                    //    target.Position = new Position((ushort) xTarget, (ushort) yTarget, zTargB);
+                    SetTarget(target.X, target.Y, target.Z);
                 }
                 else
-                    SetTarget(xTarget, yTarget, zTargB);
+                {
+                    SetTarget(xTarget, yTarget, zTarget);
+                }
             }
             else
-                SetTarget(xTarget, yTarget, zTargB);
-
+                SetTarget(xTarget, yTarget, zTarget);
 
             AlphaHue = 255;
             Hue = hue;
@@ -128,7 +108,7 @@ namespace ClassicUO.Game.GameObjects
 
             ref readonly StaticTiles data = ref FileManager.TileData.StaticData[_displayedGraphic];
 
-            if (data.IsLight && (Source is Item || Source is Static || Source is Multi))
+            if (data.IsLight && Source != null)
             {
                 Engine.SceneManager.GetScene<GameScene>()
                       .AddLight(Source, Source, posX + 22, posY + 22);
