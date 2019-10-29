@@ -504,21 +504,21 @@ namespace ClassicUO.Game.GameObjects
                     AnimationGroup = animGroup;
                 }
 
-                Item mount = HasEquipment ? Equipment[(int) Layer.Mount] : null;
+                //Item mount = HasEquipment ? Equipment[(int) Layer.Mount] : null;
 
-                if (mount != null)
-                {
-                    switch (animGroup)
-                    {
-                        case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1:
-                        case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2:
-                        case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3:
-                            id = mount.GetGraphicForAnimation();
-                            animGroup = GetGroupForAnimation(this, id, true);
+                //if (mount != null)
+                //{
+                //    switch (animGroup)
+                //    {
+                //        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1:
+                //        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2:
+                //        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3:
+                //            id = mount.GetGraphicForAnimation();
+                //            animGroup = GetGroupForAnimation(this, id, true);
 
-                            break;
-                    }
-                }
+                //            break;
+                //    }
+                //}
 
                 bool mirror = false;
                 FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
