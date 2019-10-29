@@ -138,6 +138,9 @@ namespace ClassicUO.Game.GameObjects
             if (Texture != null)
                 y -= Texture is ArtTexture t ? (t.ImageRectangle.Height >> 1) : (Texture.Height >> 1);
 
+            x = (int)(x / scale);
+            y = (int)(y / scale);
+
             for (; last != null; last = last.ListLeft)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
@@ -145,12 +148,11 @@ namespace ClassicUO.Game.GameObjects
                     if (offY == 0 && last.Time < Engine.Ticks)
                         continue;
 
-
                     last.OffsetY = offY;
                     offY += last.RenderedText.Height;
 
-                    last.RealScreenPosition.X = startX + (int)((x - (last.RenderedText.Width >> 1)) / scale);
-                    last.RealScreenPosition.Y = startY + (int)((y - offY) / scale);
+                    last.RealScreenPosition.X = startX + (x - (last.RenderedText.Width >> 1));
+                    last.RealScreenPosition.Y = startY + (y - offY);
                 }
             }
 
