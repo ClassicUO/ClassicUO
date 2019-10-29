@@ -84,7 +84,7 @@ namespace ClassicUO.Game.Map
 
                     break;
 
-                case GameEffect effect when effect.Source == null:
+                case GameEffect _ /*when effect.Source == null*/:
                     priorityZ += 2;
 
                     break;
