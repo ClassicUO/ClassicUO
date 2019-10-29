@@ -40,23 +40,6 @@ using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public enum RaceType : byte
-    {
-        HUMAN = 1,
-        ELF,
-        GARGOYLE
-    }
-
-    public enum CharacterSpeedType
-    {
-        Normal,
-        FastUnmount,
-        CantRun,
-        FastUnmountAndCantRun
-    }
-
-
-
     internal partial class Mobile : Entity
     {
         private bool _isDead;
