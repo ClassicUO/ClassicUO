@@ -23,6 +23,8 @@
 
 using System;
 
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class MovingEffect : GameEffect
@@ -260,7 +262,6 @@ namespace ClassicUO.Game.GameObjects
                     if (totalOffsetZ == 0)
                         totalOffsetZ = 1;
                     Offset.Z += totalOffsetZ;
-
                     if (Offset.Z >= 4)
                     {
                         const int COUNT_Z = 1;
@@ -281,8 +282,7 @@ namespace ClassicUO.Game.GameObjects
                 countY -= (int) Offset.Z + ((tz - sz) << 2);
                 if (!FixedDir)
                 {
-                    float angle = (float) (Math.Atan2(countY, countX) * 57.295780);
-                    AngleToTarget = -(float) (angle * Math.PI) / 180.0f;
+                    AngleToTarget = -(float) Math.Atan2(countY, countX); 
                 }
 
                 if (sx != newX || sy != newY)
