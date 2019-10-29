@@ -325,7 +325,7 @@ namespace ClassicUO.Game.Scenes
 
         public void AddLight(GameObject obj, GameObject lightObject, int x, int y)
         {
-            if (_lightCount >= Constants.MAX_LIGHTS_DATA_INDEX_COUNT || (!UseLights && !UseAltLights))
+            if (_lightCount >= Constants.MAX_LIGHTS_DATA_INDEX_COUNT || (!UseLights && !UseAltLights) || obj == null)
                 return;
 
             bool canBeAdded = true;
