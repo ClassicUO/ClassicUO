@@ -10,14 +10,14 @@ using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO.Game
 {
-    class WeatherEffect
-    {
-        public float SpeedX, SpeedY, X, Y, ScaleRatio, SpeedAngle, SpeedMagnitude;
-        public uint ID;
-    }
-
     class Weather
     {
+        private class WeatherEffect
+        {
+            public float SpeedX, SpeedY, X, Y, ScaleRatio, SpeedAngle, SpeedMagnitude;
+            public uint ID;
+        }
+
         enum WEATHER_TYPE
         {
             WT_RAIN = 0,
@@ -32,7 +32,8 @@ namespace ClassicUO.Game
         public uint Timer, WindTimer, LastTick;
         public float SimulationRation = 37.0f;
 
-        public List<WeatherEffect> Effects = new List<WeatherEffect>();
+        private readonly List<WeatherEffect> _effects = new List<WeatherEffect>();
+        private Vector3 _hueVector;
 
 
         private float SinOscillate(float freq, int range, uint current_tick)
@@ -47,7 +48,7 @@ namespace ClassicUO.Game
             Wind = 0;
             WindTimer = Timer = 0;
 
-            Effects.Clear();
+            _effects.Clear();
         }
 
         public void Generate()
@@ -73,13 +74,11 @@ namespace ClassicUO.Game
                     Y = RandomHelper.GetValue(0, Engine.Profile.Current.GameWindowSize.Y)
                 };
 
-                Effects.Add(effect);
+                _effects.Add(effect);
 
                 CurrentCount++;
             }
         }
-
-        private Vector3 _hueVector;
 
         public void Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -151,16 +150,16 @@ namespace ClassicUO.Game
             //Point winpos = Engine.Profile.Current.GameWindowPosition;
             Point winsize = Engine.Profile.Current.GameWindowSize;
 
-            for (int i = 0; i < Effects.Count; i++)
+            for (int i = 0; i < _effects.Count; i++)
             {
-                var effect = Effects[i];
+                var effect = _effects[i];
 
                 if (effect.X < x || effect.X > x + winsize.X ||
                     effect.Y < y || effect.Y > y + winsize.Y)
                 {
                     if (removeEffects)
                     {
-                        Effects.RemoveAt(i--);
+                        _effects.RemoveAt(i--);
 
                         if (CurrentCount > 0)
                             CurrentCount--;
@@ -219,8 +218,6 @@ namespace ClassicUO.Game
                         effect.SpeedY = speed_magnitude * (float)Math.Cos(rad);
 
                         break;
-                    default:
-                        break;
                 }
 
                 float speedOffset = passed / SimulationRation;
@@ -275,8 +272,6 @@ namespace ClassicUO.Game
                         batcher.Draw2D(Textures.GetTexture(Color.White),
                             x + (int)effect.X, y + (int)effect.Y, 2, 2, ref _hueVector);
 
-                        break;
-                    default:
                         break;
                 }
 
