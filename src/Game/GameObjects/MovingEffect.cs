@@ -59,27 +59,18 @@ namespace ClassicUO.Game.GameObjects
         {
             FixedDir = fixedDir;
 
-            if (src.IsValid)
-            {
-                Entity source = World.Get(src);
+            Entity source = World.Get(src);
 
-                if (source != null)
-                    SetSource(source.X, source.Y, source.Z);
-                else 
-                    SetSource(xSource, ySource, zSource);
-            }
+            if (src.IsValid && source != null)
+                SetSource(source);
             else
                 SetSource(xSource, ySource, zSource);
 
-            if (trg.IsValid)
-            {
-                Entity target = World.Get(trg);
 
-                if (target != null)
-                    SetTarget(target);
-                else
-                    SetTarget(xTarget, yTarget, zTarget);
-            }
+            Entity target = World.Get(trg);
+
+            if (trg.IsValid && target != null)
+                SetTarget(target);
             else
                 SetTarget(xTarget, yTarget, zTarget);
         }
