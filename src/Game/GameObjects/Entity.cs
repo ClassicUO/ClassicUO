@@ -35,8 +35,6 @@ namespace ClassicUO.Game.GameObjects
     {
         private Direction _direction;
         private Item[] _equipment;
-        private Hue _hue;
-
 
         protected Entity(Serial serial)
         {
