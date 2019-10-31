@@ -60,6 +60,21 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (ActivePage == 0)
                 ActivePage = 1;
+
+            if (Engine.Profile.Current != null && Engine.Profile.Current.ForceGumpsOnScreen)
+            {
+                int widthLimit = Width / 5;
+                int heightLimit = Height / 5;
+                int screenWidth = Engine.Instance.Window.ClientBounds.Width;
+                int screenHeight = Engine.Instance.Window.ClientBounds.Height;
+
+                if (X + Width < widthLimit) X = widthLimit - Width;
+                if (X > screenWidth - widthLimit) X = screenWidth - widthLimit;
+
+                if (Y + Height < heightLimit) Y = heightLimit - Height;
+                if (Y > screenHeight - heightLimit) Y = screenHeight - heightLimit;
+            }
+            
             base.Update(totalMS, frameMS);
         }
 
@@ -76,13 +91,16 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetInScreen()
         {
-            Rectangle rect = new Rectangle(0, 0, Engine.WindowWidth, Engine.WindowHeight);
+            if (Engine.Profile.Current != null && !Engine.Profile.Current.ForceGumpsOnScreen)
+            {
+                Rectangle rect = new Rectangle(0, 0, Engine.WindowWidth, Engine.WindowHeight);
 
-            if (rect.Intersects(Bounds))
-                return;
+                if (rect.Intersects(Bounds))
+                    return;
 
-            X = 0;
-            Y = 0;
+                X = 0;
+                Y = 0;
+            }
         }
 
         public virtual void Restore(BinaryReader reader)
@@ -91,22 +109,25 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
-            Point position = Location;
-            int halfWidth = Width - (Width >> 2);
-            int halfHeight = Height - (Height >> 2);
+            if (Engine.Profile.Current != null && !Engine.Profile.Current.ForceGumpsOnScreen)
+            {
+                Point position = Location;
+                int halfWidth = Width - (Width >> 2);
+                int halfHeight = Height - (Height >> 2);
 
-            if (X < -halfWidth)
-                position.X = -halfWidth;
+                if (X < -halfWidth)
+                    position.X = -halfWidth;
 
-            if (Y < -halfHeight)
-                position.Y = -halfHeight;
+                if (Y < -halfHeight)
+                    position.Y = -halfHeight;
 
-            if (X > Engine.Instance.Window.ClientBounds.Width - (Width - halfWidth))
-                position.X = Engine.Instance.Window.ClientBounds.Width - (Width - halfWidth);
+                if (X > Engine.Instance.Window.ClientBounds.Width - (Width - halfWidth))
+                    position.X = Engine.Instance.Window.ClientBounds.Width - (Width - halfWidth);
 
-            if (Y > Engine.Instance.Window.ClientBounds.Height - (Height - halfHeight))
-                position.Y = Engine.Instance.Window.ClientBounds.Height - (Height - halfHeight);
-            Location = position;
+                if (Y > Engine.Instance.Window.ClientBounds.Height - (Height - halfHeight))
+                    position.Y = Engine.Instance.Window.ClientBounds.Height - (Height - halfHeight);
+                Location = position;
+            }
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

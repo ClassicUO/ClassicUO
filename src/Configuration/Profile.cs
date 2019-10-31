@@ -170,6 +170,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool BuffBarTime { get; set; }
         [JsonProperty] public bool AutoOpenDoors { get; set; }
         [JsonProperty] public bool SmoothDoors { get; set; }
+        [JsonProperty] public bool ForceGumpsOnScreen { get; set; }
         [JsonProperty] public bool AutoOpenCorpses { get; set; }
         [JsonProperty] public int AutoOpenCorpseRange { get; set; } = 2;
         [JsonProperty] public int CorpseOpenOptions { get; set; } = 3;

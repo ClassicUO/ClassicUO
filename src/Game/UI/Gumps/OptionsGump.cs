@@ -66,7 +66,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _forceGumpsOnScreen;
         private Combobox _overrideContainerLocationSetting;
 
         // sounds
@@ -1080,6 +1080,8 @@ namespace ClassicUO.Game.UI.Gumps
             _debugGumpIsDisabled = CreateCheckBox(rightArea, "Disable Debug Gump", Engine.Profile.Current.DebugGumpIsDisabled, 0, 0);
             _restoreLastGameSize = CreateCheckBox(rightArea, "Disable automatic maximize. Restore windows size after re-login", Engine.Profile.Current.RestoreLastGameSize, 0, 0);
 
+            _forceGumpsOnScreen = CreateCheckBox(rightArea, "Force Gumps on screen", Engine.Profile.Current.ForceGumpsOnScreen, 0, 0);
+
             _autoOpenDoors = CreateCheckBox(rightArea, "Auto Open Doors", Engine.Profile.Current.AutoOpenDoors, 0, 0);
             _smoothDoors = CreateCheckBox(rightArea, "Smooth doors", Engine.Profile.Current.SmoothDoors, 20, 5);
 
@@ -1526,6 +1528,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _showTargetRangeIndicator.IsChecked = false;
                     _customBars.IsChecked = false;
                     _customBarsBBG.IsChecked = false;
+                    _forceGumpsOnScreen.IsChecked = false;
 
                     break;
 
@@ -1916,6 +1919,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Engine.Profile.Current.AutoOpenDoors = _autoOpenDoors.IsChecked;
             Engine.Profile.Current.SmoothDoors = _smoothDoors.IsChecked;
+            Engine.Profile.Current.ForceGumpsOnScreen = _forceGumpsOnScreen.IsChecked;
             Engine.Profile.Current.AutoOpenCorpses = _autoOpenCorpse.IsChecked;
             Engine.Profile.Current.AutoOpenCorpseRange = int.Parse(_autoOpenCorpseRange.Text);
             Engine.Profile.Current.CorpseOpenOptions = _autoOpenCorpseOptions.SelectedIndex;
