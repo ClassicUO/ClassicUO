@@ -3,9 +3,9 @@
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+//	The goal of this is to develop a lightweight client considering
+//	new technologies.
+//
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -134,7 +134,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (numPadMovement) direction = _numPadDirection;
 
-                World.Player.Walk(direction, Engine.Profile.Current.AlwaysRun);
+                World.Player.Walk(direction, false);
             }
         }
 
@@ -621,7 +621,7 @@ namespace ClassicUO.Game.Scenes
                 //{
                 //    if (SelectedObject.Object is GameObject obj && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                 //    {
-                       
+
                 //    }
                 //}
             }
