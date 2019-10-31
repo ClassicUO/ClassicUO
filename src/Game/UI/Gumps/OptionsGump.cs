@@ -3,9 +3,9 @@
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+//	The goal of this is to develop a lightweight client considering
+//	new technologies.
+//
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -86,7 +86,7 @@ namespace ClassicUO.Game.UI.Gumps
         // GameWindowSize
         private TextBox _gameWindowWidth;
         private Combobox _gridLoot;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _useShiftPathfind, _alwaysRun, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _useShiftPathfind, _alwaysRun, _alwaysRunUnlessHidden, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
         private Combobox _hpComboBox, _healtbarType, _fieldsType, _hpComboBoxShowWhen;
 
         // combat & spells
@@ -258,7 +258,27 @@ namespace ClassicUO.Game.UI.Gumps
             _highlightObjects = CreateCheckBox(rightArea, "Highlight game objects", Engine.Profile.Current.HighlightGameObjects, 0, 20);
             _enablePathfind = CreateCheckBox(rightArea, "Enable pathfinding", Engine.Profile.Current.EnablePathfind, 0, 0);
             _useShiftPathfind = CreateCheckBox(rightArea, "Use SHIFT for pathfinding", Engine.Profile.Current.UseShiftToPathfind, 0, 0);
-            _alwaysRun = CreateCheckBox(rightArea, "Always run", Engine.Profile.Current.AlwaysRun, 0, 0);
+
+            ScrollAreaItem alwaysRunItem = new ScrollAreaItem();
+            _alwaysRun = new Checkbox(0x00D2, 0x00D3, "Always run", FONT, HUE_FONT)
+            {
+                IsChecked = Engine.Profile.Current.AlwaysRun
+            };
+            rightArea.Add(_alwaysRun);
+            _alwaysRun.ValueChanged += (sender, e) => { alwaysRunItem.IsVisible = _alwaysRun.IsChecked; };
+
+            _alwaysRunUnlessHidden = new Checkbox(0x00D2, 0x00D3, "Unless hidden", FONT, HUE_FONT)
+            {
+                X = 20,
+                Y = 5,
+                IsChecked = Engine.Profile.Current.AlwaysRunUnlessHidden
+            };
+            _alwaysRunUnlessHidden.Height += 5;
+            alwaysRunItem.Add(_alwaysRunUnlessHidden);
+            rightArea.Add(alwaysRunItem);
+
+            alwaysRunItem.IsVisible = _alwaysRun.IsChecked;
+
             _enableTopbar = CreateCheckBox(rightArea, "Disable the Menu Bar", Engine.Profile.Current.TopbarGumpIsDisabled, 0, 0);
             _holdDownKeyTab = CreateCheckBox(rightArea, "Hold TAB key for combat", Engine.Profile.Current.HoldDownKeyTab, 0, 0);
             _holdDownKeyAlt = CreateCheckBox(rightArea, "Hold ALT key + right click to close Anchored gumps", Engine.Profile.Current.HoldDownKeyAltToCloseAnchored, 0, 0);
@@ -606,7 +626,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             item = new ScrollAreaItem();
             ScrollAreaItem _normalLightsArea = new ScrollAreaItem();
-            
+
             _altLights = CreateCheckBox(rightArea, "Alternative lights", Engine.Profile.Current.UseAlternativeLights, 0, 0);
             _altLights.ValueChanged += (sender, e) =>
             {
@@ -619,7 +639,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 IsChecked = Engine.Profile.Current.UseCustomLightLevel
             };
-            
+
             _lightBar = new HSliderBar(_enableLight.Width + 10, _enableLight.Y + 5, 250, 0, 0x1E, 0x1E - Engine.Profile.Current.LightLevel, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
 
             _darkNights = new Checkbox(0x00D2, 0x00D3, "Dark nights", FONT, HUE_FONT)
@@ -635,7 +655,7 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(item);
 
             _useColoredLights = CreateCheckBox(rightArea, "Use colored lights", Engine.Profile.Current.UseColoredLights, 0, 0);
-            
+
             _enableShadows = new Checkbox(0x00D2, 0x00D3, "Shadows", FONT, HUE_FONT)
             {
                 IsChecked = Engine.Profile.Current.ShadowsEnabled
@@ -923,7 +943,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _activeChatArea.Add(_chatShiftEnterCheckbox);
 
                 _activeChatArea.IsVisible = _chatAfterEnter.IsChecked;
-                
+
                 rightArea.Add(_activeChatArea);
             }
 
@@ -1311,7 +1331,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _containerScaleItems = CreateCheckBox(rightArea, "Scale items inside containers", Engine.Profile.Current.ScaleItemsInsideContainers, 0, 20);
             _containerDoubleClickToLoot = CreateCheckBox(rightArea, "Double click to loot items inside containers", Engine.Profile.Current.DoubleClickToLootInsideContainers, 0, 0);
-            
+
             Add(rightArea, PAGE);
         }
 
@@ -1372,6 +1392,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _enablePathfind.IsChecked = false;
                     _useShiftPathfind.IsChecked = false;
                     _alwaysRun.IsChecked = false;
+                    _alwaysRunUnlessHidden.IsChecked = false;
                     _showHpMobile.IsChecked = false;
                     _hpComboBox.SelectedIndex = 0;
                     _hpComboBoxShowWhen.SelectedIndex = 0;
@@ -1559,6 +1580,7 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.Profile.Current.EnablePathfind = _enablePathfind.IsChecked;
             Engine.Profile.Current.UseShiftToPathfind = _useShiftPathfind.IsChecked;
             Engine.Profile.Current.AlwaysRun = _alwaysRun.IsChecked;
+            Engine.Profile.Current.AlwaysRunUnlessHidden = _alwaysRunUnlessHidden.IsChecked;
             Engine.Profile.Current.ShowMobilesHP = _showHpMobile.IsChecked;
             Engine.Profile.Current.HighlightMobilesByFlags = _highlightByState.IsChecked;
             Engine.Profile.Current.PoisonHue = _poisonColorPickerBox.Hue;
@@ -2002,7 +2024,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            
+
             // containers
             int containerScale = Engine.Profile.Current.ContainersScale;
 

@@ -3,9 +3,9 @@
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+//	The goal of this is to develop a lightweight client considering
+//	new technologies.
+//
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -1361,7 +1361,7 @@ namespace ClassicUO.Game.GameObjects
                             if (ent.Serial.IsItem)
                             {
                                 var top = World.Get(((Item) ent).RootContainer);
-                                
+
                                 if (top != null)
                                     distance = top.Distance;
                             }
@@ -1410,14 +1410,18 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
-            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Engine.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || 
+            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Engine.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT ||
                 (FileManager.ClientVersion >= ClientVersions.CV_60142 && IsParalyzed))
                 return false;
 
             if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead)
                 run = false;
             else if (!run)
-                run = Engine.Profile.Current.AlwaysRun;
+            {
+                if (!IsHidden ||
+                    IsHidden && !Engine.Profile.Current.AlwaysRunUnlessHidden)
+                    run = Engine.Profile.Current.AlwaysRun;
+            }
 
             int x = X;
             int y = Y;
@@ -1515,7 +1519,7 @@ namespace ClassicUO.Game.GameObjects
                 Run = run
             });
 
-           
+
             NetClient.Socket.Send(new PWalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue()));
 
 
@@ -1580,7 +1584,7 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
-       
+
 
             if (SpeedMode >= CharacterSpeedType.CantRun)
                 run = false;
@@ -1663,7 +1667,7 @@ namespace ClassicUO.Game.GameObjects
             ANIMATE_IMMEDIATELY = 0,
             ANIMATE_ON_CONFIRM,
         }
-        
+
         public bool Walk(Direction direction, bool run)
         {
             if (LastStepRequestedTime > Engine.Ticks)
@@ -1767,7 +1771,7 @@ namespace ClassicUO.Game.GameObjects
                         EnqueueStep(s.X, s.Y, s.Z, (Direction) s.Direction, s.Run);
                     }
                 }
-            
+
                 step1.Anim = true;
 
                 EnqueueStep(step1.X, step1.Y, step1.Z, (Direction) step1.Direction, step1.Run);
@@ -1915,7 +1919,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                
+
             }
         }
 
