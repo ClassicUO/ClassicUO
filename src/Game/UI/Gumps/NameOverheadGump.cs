@@ -198,7 +198,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
             }
             else
-                GameActions.PickUp(Entity);
+                GameActions.PickUp(Entity, Entity.Texture.Width >> 1, Entity.Texture.Height >> 1);
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
