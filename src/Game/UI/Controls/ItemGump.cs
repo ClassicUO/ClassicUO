@@ -30,6 +30,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
+using ClassicUO.Game.Data;
 
 using Microsoft.Xna.Framework;
 
@@ -324,13 +325,13 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
  
             Item item, container;
- 
-            if (
+
+            if ( !Input.Keyboard.Ctrl &&
                 Engine.Profile.Current.DoubleClickToLootInsideContainers &&
                 (item = World.Items.Get(LocalSerial)) != null &&
                 !item.ItemData.IsContainer && item.Items.Count == 0 &&
                 (container = World.Items.Get(item.RootContainer)) != null &&
-                container.IsCorpse
+                container != World.Player.Equipment[(int) Layer.Backpack]
             ){
                 GameActions.GrabItem(item, item.Amount);
             } else
