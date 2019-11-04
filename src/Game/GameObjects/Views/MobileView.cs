@@ -389,7 +389,7 @@ namespace ClassicUO.Game.GameObjects
                         if (entity == null && isHuman)
                         {
                             int frameHeight = frame?.Height ?? 61;
-                            _characterFrameStartY = y - (frameHeight -4);
+                            _characterFrameStartY = y - (frame != null ? 0 : (frameHeight -4));
                             _characterFrameHeight = frameHeight;
                             _startCharacterWaistY = (int) (frameHeight * UPPER_BODY_RATIO) + _characterFrameStartY;
                             _startCharacterKneesY = (int) (frameHeight * MID_BODY_RATIO) + _characterFrameStartY;
