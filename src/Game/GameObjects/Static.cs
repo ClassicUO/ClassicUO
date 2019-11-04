@@ -97,17 +97,21 @@ namespace ClassicUO.Game.GameObjects
         public void SetGraphic(Graphic g)
         {
             Graphic = g;
+            SetTextureByGraphic(g);
         }
 
         public void RestoreOriginalGraphic()
         {
             Graphic = OriginalGraphic;
+            SetTextureByGraphic(Graphic);
         }
 
         public override void UpdateGraphicBySeason()
         {
             SetGraphic(Season.GetSeasonGraphic(World.Season, OriginalGraphic));
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
+            SetTextureByGraphic(Graphic);
+
         }
 
         public override void UpdateTextCoordsV()
