@@ -309,11 +309,15 @@ namespace ClassicUO.Game.GameObjects
             FileManager.Animations.AnimID = id;
 
             if (direction == null || direction.Address == -1 || direction.FileIndex == -1)
-                return 0;
+            {
+                if (!(_transform && owner != null && entity == null && !hasShadow))
+                    return 0;
+            }
 
             if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
             {
-                return 0;
+                if (!(_transform && owner != null && entity == null && !hasShadow))
+                    return 0;
             }
 
             direction.LastAccessTime = Engine.Ticks;
@@ -327,7 +331,12 @@ namespace ClassicUO.Game.GameObjects
                 var frame = direction.Frames[frameIndex];
 
                 if (frame == null || frame.IsDisposed)
-                    return 0;
+                {
+                    if (!(_transform && owner != null && entity == null && !hasShadow))
+                        return 0;
+
+                    goto SKIP;
+                }
 
                 frame.Ticks = Engine.Ticks;
 
@@ -337,6 +346,8 @@ namespace ClassicUO.Game.GameObjects
                     x -= frame.CenterX;
 
                 y -= frame.Height + frame.CenterY;
+
+                SKIP:
 
                 if (hasShadow)
                     batcher.DrawSpriteShadow(frame, x, y, mirror);
@@ -377,12 +388,15 @@ namespace ClassicUO.Game.GameObjects
 
                         if (entity == null && isHuman)
                         {
-                            int frameHeight = frame.Height;
-                            _characterFrameStartY = y;
-                            _characterFrameHeight = frame.Height;
+                            int frameHeight = frame?.Height ?? 61;
+                            _characterFrameStartY = y - (frameHeight -4);
+                            _characterFrameHeight = frameHeight;
                             _startCharacterWaistY = (int) (frameHeight * UPPER_BODY_RATIO) + _characterFrameStartY;
                             _startCharacterKneesY = (int) (frameHeight * MID_BODY_RATIO) + _characterFrameStartY;
                             _startCharacterFeetY = (int) (frameHeight * LOWER_BODY_RATIO) + _characterFrameStartY;
+
+                            if (frame == null)
+                                return 0;
                         }
 
                         float h3mod = UPPER_BODY_RATIO;
