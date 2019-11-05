@@ -210,18 +210,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (World.Player.InWarMode && Entity is Mobile)
                     GameActions.Attack(Entity);
-                else
-                {
-                    if (LocalSerial.IsItem)
-                    {
-                        Item item = World.Items.Get(LocalSerial);
-                        if (item != null && item.IsCorpse)
-                            World.Player.ManualOpenedCorpses.Add(LocalSerial);
-                    }
-                    
-                    GameActions.DoubleClick(Entity);
-                }
-                    
+                else if (!GameActions.OpenCorpse(LocalSerial))
+                    GameActions.DoubleClick(LocalSerial);
             }
             
             return true;

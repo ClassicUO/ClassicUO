@@ -525,11 +525,8 @@ namespace ClassicUO.Game.Scenes
             {
                 case Item item:
                     result = true;
-
-                    if (item.IsCorpse)
-                        World.Player.ManualOpenedCorpses.Add(item.Serial);
-
-                    GameActions.DoubleClick(item);
+                    if (!GameActions.OpenCorpse(item))
+                        GameActions.DoubleClick(item);
 
                     break;
 

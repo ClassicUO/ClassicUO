@@ -74,6 +74,19 @@ namespace ClassicUO.Game
             DoubleClick(serial | 0x80000000);
         }
 
+        public static bool OpenCorpse(Serial serial)
+        {
+            if (!serial.IsItem) return false;
+
+            Item item = World.Items.Get(serial);
+            if (item == null || !item.IsCorpse) return false;
+
+            World.Player.ManualOpenedCorpses.Add(serial);
+            DoubleClick(serial);
+
+            return true;
+        }
+
         public static void Attack(Serial serial)
         {
             if (Engine.Profile.Current.EnabledCriminalActionQuery)
