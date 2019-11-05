@@ -702,7 +702,7 @@ namespace ClassicUO.Game.Scenes
                             if (item.IsDamageable)
                                 goto mobile;
 
-                            PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
+                            PickupItemBegin(item, item.Bounds.Width >> 1, item.Bounds.Height >> 1);
 
                             break;
                     }
