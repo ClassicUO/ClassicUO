@@ -95,12 +95,12 @@ namespace ClassicUO.Game.Scenes
             if (!item.OnGround)
             {
                 Entity entity = World.Get(item.Container);
-                item.Container = Serial.INVALID;
-                entity.Items.Remove(item);
+                //item.Container = Serial.INVALID;
+                //entity.Items.Remove(item);
 
                 if (entity.HasEquipment) entity.Equipment[(int) item.Layer] = null;
 
-                entity.Items.ProcessDelta();
+                //entity.Items.ProcessDelta();
             }
             else
             {
@@ -108,8 +108,8 @@ namespace ClassicUO.Game.Scenes
             }
             item.TextContainer?.Clear();
 
-            World.Items.Remove(item);
-            World.Items.ProcessDelta();
+            //World.Items.Remove(item);
+            //World.Items.ProcessDelta();
             CloseItemGumps(item);
 
             NetClient.Socket.Send(new PPickUpRequest(item, (ushort) amount));
