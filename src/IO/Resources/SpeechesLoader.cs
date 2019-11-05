@@ -110,7 +110,7 @@ namespace ClassicUO.IO.Resources
             {
                 SpeechEntry entry = _speech[i];
 
-                if (IsMatch(text, entry)) list.Add(entry);
+                if (IsMatch(text, in entry)) list.Add(entry);
             }
 
             list.Sort();

@@ -3,9 +3,9 @@
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+//	The goal of this is to develop a lightweight client considering
+//	new technologies.
+//
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -132,6 +132,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool EnablePathfind { get; set; }
         [JsonProperty] public bool UseShiftToPathfind { get; set; }
         [JsonProperty] public bool AlwaysRun { get; set; }
+        [JsonProperty] public bool AlwaysRunUnlessHidden { get; set; }
         [JsonProperty] public bool SmoothMovements { get; set; } = true;
         [JsonProperty] public bool HoldDownKeyTab { get; set; } = true;
         [JsonProperty] public bool HoldDownKeyAltToCloseAnchored { get; set; } = true;
@@ -140,6 +141,7 @@ namespace ClassicUO.Configuration
 
         // general
         [JsonProperty] public Point WindowClientBounds { get; set; } = new Point(600, 480);
+        [JsonProperty] public Point? WindowClientPosition { get; set; }
         [JsonProperty] public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
         [JsonProperty] public Point GameWindowPosition { get; set; } = new Point(10, 10);
         [JsonProperty] public bool GameWindowLock { get; set; }

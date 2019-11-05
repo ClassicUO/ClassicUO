@@ -3,9 +3,9 @@
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+//	The goal of this is to develop a lightweight client considering
+//	new technologies.
+//
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 
@@ -154,7 +155,7 @@ namespace ClassicUO.Game
                                     dropFlags = true;
                                 }
                                 else
-                                { 
+                                {
                                     dropFlags = graphic >= 0x3946 && graphic <= 0x3964 || graphic == 0x0082;
                                 }
                                 break;
@@ -164,8 +165,12 @@ namespace ClassicUO.Game
                         {
                             uint flags = 0;
 
-                            if (GameObjectHelper.TryGetStaticData(obj, out StaticTiles itemdata))
+                            if (!(obj is Mobile))
                             {
+                                ref readonly var itemdata = ref FileManager.TileData.StaticData[obj.Graphic];
+
+                            //if (GameObjectHelper.TryGetStaticData(obj, out StaticTiles itemdata))
+                            // {
                                 if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
                                 {
                                     if (itemdata.IsWet)
@@ -816,7 +821,7 @@ namespace ClassicUO.Game
                     if (dir == (Direction) p.Direction)
                         _pointIndex++;
 
-                    if (!World.Player.Walk((Direction) p.Direction, Engine.Profile.Current.AlwaysRun))
+                    if (!World.Player.Walk((Direction) p.Direction, false))
                         StopAutoWalk();
                 }
                 else

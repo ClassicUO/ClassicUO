@@ -371,14 +371,14 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool DrawSpriteRotated(Texture2D texture, int x, int y, int w, int h, int destX, int destY, ref Vector3 hue, float angle)
+        public bool DrawSpriteRotated(Texture2D texture, int x, int y, int destX, int destY, ref Vector3 hue, float angle)
         {
             EnsureSize();
 
             ref var vertex = ref _vertexInfo[_numSprites];
 
-            float ww = w / 2f;
-            float hh = h / 2f;
+            float ww = texture.Width * 0.5f;
+            float hh = texture.Height * 0.5f;
 
 
             float startX = x - (destX - 44 + ww);
@@ -461,7 +461,7 @@ namespace ClassicUO.Renderer
             ref var vertex = ref _vertexInfo[_numSprites];
 
             float width = texture.Width;
-            float height = texture.Height / 2f;
+            float height = texture.Height * 0.5f;
 
             float translatedY = y + height * 0.75f;
 
@@ -1189,8 +1189,8 @@ namespace ClassicUO.Renderer
                 //angle = (float)(angle * 57.295780);
                 angle = (float)(angle * Math.PI) / 180.0f;
 
-                float ww = dwidth / 2f;
-                float hh = dheight / 2f;
+                float ww = dwidth * 0.5f;
+                float hh = dheight * 0.5f;
 
                 float sin = (float)Math.Sin(angle);
                 float cos = (float)Math.Cos(angle);
@@ -1424,8 +1424,8 @@ namespace ClassicUO.Renderer
             angle = -(float)(angle * Math.PI) / 180.0f;
 
 
-            float ww = r.Width / 2f;
-            float hh = r.Height / 2f;
+            float ww = r.Width * 0.5f;
+            float hh = r.Height * 0.5f;
 
 
             float rotSin = (float) Math.Sin(angle);

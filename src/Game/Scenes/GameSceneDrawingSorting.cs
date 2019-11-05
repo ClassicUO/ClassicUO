@@ -113,7 +113,10 @@ namespace ClassicUO.Game.Scenes
 
                     if (tileZ > pz14 && _maxZ > tileZ)
                     {
-                        if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && ((ulong) itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
+                        ref readonly var itemdata = ref FileManager.TileData.StaticData[obj.Graphic];
+
+                        //if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && ((ulong) itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
+                        if (((ulong) itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
                         {
                             _maxZ = tileZ;
                             _noDrawRoofs = true;
@@ -148,13 +151,26 @@ namespace ClassicUO.Game.Scenes
 
                         if (tileZ > pz14 && _maxZ > tileZ)
                         {
-                            if (GameObjectHelper.TryGetStaticData(obj2, out var itemdata) && ((ulong) itemdata.Flags & 0x204) == 0 && itemdata.IsRoof)
+                            if (!(obj2 is Land))
                             {
-                                _maxZ = tileZ;
-                                World.Map.ClearBockAccess();
-                                _maxGroundZ = World.Map.CalculateNearZ(tileZ, playerX, playerY, tileZ);
-                                _noDrawRoofs = true;
+                                ref readonly var itemdata = ref FileManager.TileData.StaticData[obj2.Graphic];
+
+                                if (((ulong) itemdata.Flags & 0x204) == 0 && itemdata.IsRoof)
+                                {
+                                    _maxZ = tileZ;
+                                    World.Map.ClearBockAccess();
+                                    _maxGroundZ = World.Map.CalculateNearZ(tileZ, playerX, playerY, tileZ);
+                                    _noDrawRoofs = true;
+                                }
                             }
+
+                            //if (GameObjectHelper.TryGetStaticData(obj2, out var itemdata) && ((ulong) itemdata.Flags & 0x204) == 0 && itemdata.IsRoof)
+                            //{
+                            //    _maxZ = tileZ;
+                            //    World.Map.ClearBockAccess();
+                            //    _maxGroundZ = World.Map.CalculateNearZ(tileZ, playerX, playerY, tileZ);
+                            //    _noDrawRoofs = true;
+                            //}
                         }
                     }
 
@@ -172,6 +188,9 @@ namespace ClassicUO.Game.Scenes
                 _maxGroundZ = maxGroundZ;
             }
         }
+
+
+        private static StaticTiles _empty;
 
         private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ/*, GameObject entity*/)
         {
@@ -206,7 +225,7 @@ namespace ClassicUO.Game.Scenes
 
                 int maxObjectZ = obj.PriorityZ;
 
-                StaticTiles itemData = default;
+                ref readonly StaticTiles itemData = ref _empty;
 
                 bool changinAlpha = false;
                 bool island = false;
@@ -231,7 +250,9 @@ namespace ClassicUO.Game.Scenes
 
                     default:
 
-                        if (GameObjectHelper.TryGetStaticData(obj, out itemData))
+                        itemData = ref FileManager.TileData.StaticData[obj.Graphic];
+
+                        //if (GameObjectHelper.TryGetStaticData(obj, out itemData))
                         {
                             if (itemData.IsFoliage && World.Season >= Seasons.Winter)
                             {
@@ -435,9 +456,9 @@ namespace ClassicUO.Game.Scenes
 
             int dropMaxZIndex = -1;
 
-            if (entity is Mobile mob && mob.IsMoving)
+            if (entity is Mobile mob && mob.Steps.Count != 0)
             {
-                ref readonly var step = ref mob.Steps.Back();
+                ref var step = ref mob.Steps.Back();
 
                 if ((step.Direction & 7) == 2)
                     dropMaxZIndex = 0;

@@ -26,11 +26,11 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 
 using ClassicUO.Utility.Logging;
+using ClassicUO.Utility;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -224,12 +224,19 @@ namespace ClassicUO.Network
 
                     Reset();
 
-                    ZipFile.ExtractToDirectory(zipFile, tempPath);
+                    try
+                    {
+                        using (ZipArchive zip = new ZipArchive(File.OpenRead(zipFile)))
+                            zip.ExtractToDirectory(tempPath, true);
 
-                    File.Delete(zipFile);
-
+                        File.Delete(zipFile);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Message(LogTypes.Error, "[UPDATER ERROR]: impossible to update.\n" + ex);
+                    }
+                    
                     string prefix = Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? "mono " : string.Empty;
-
 
                     new Process
                     {

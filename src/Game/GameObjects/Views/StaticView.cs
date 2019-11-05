@@ -21,9 +21,11 @@
 
 #endregion
 
+using System;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework.Graphics;
@@ -33,7 +35,7 @@ namespace ClassicUO.Game.GameObjects
     internal sealed partial class Static
     {
         private int _canBeTransparent;
-        private Graphic _oldGraphic;
+        private uint _lastAnimationFrameTime;
 
         public bool CharacterIsBehindFoliage { get; set; }
 
@@ -49,30 +51,28 @@ namespace ClassicUO.Game.GameObjects
             return r;
         }
 
+        private void SetTextureByGraphic(ushort graphic)
+        {
+            ArtTexture texture = FileManager.Art.GetTexture(graphic);
+            Texture = texture;
+            Bounds.X = (Texture.Width >> 1) - 22;
+            Bounds.Y = Texture.Height - 44;
+            Bounds.Width = Texture.Width;
+            Bounds.Height = texture.Height;
+
+            FrameInfo.Width = texture.ImageRectangle.Width;
+            FrameInfo.Height = texture.ImageRectangle.Height;
+
+            FrameInfo.X = (Texture.Width >> 1) - 22 - texture.ImageRectangle.X;
+            FrameInfo.Y = Texture.Height - 44 - texture.ImageRectangle.Y;
+        }
+
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
                 return false;
 
-            ResetHueVector();
-
-            if (Texture == null || Texture.IsDisposed || _oldGraphic != Graphic)
-            {
-                _oldGraphic = Graphic;
-
-                ArtTexture texture = FileManager.Art.GetTexture(Graphic);
-                Texture = texture;
-                Bounds.X = (Texture.Width >> 1) - 22;
-                Bounds.Y = Texture.Height - 44;
-                Bounds.Width = Texture.Width;
-                Bounds.Height = texture.Height;
-
-                FrameInfo.Width = texture.ImageRectangle.Width;
-                FrameInfo.Height = texture.ImageRectangle.Height;
-
-                FrameInfo.X = (Texture.Width >> 1) - 22 - texture.ImageRectangle.X;
-                FrameInfo.Y = Texture.Height - 44 - texture.ImageRectangle.Y;
-            }
+            ushort graphic = Graphic;
 
             if (ItemData.IsFoliage)
             {
@@ -87,7 +87,38 @@ namespace ClassicUO.Game.GameObjects
                         ProcessAlpha(0xFF);
                 }
             }
+            else if (ItemData.IsAnimated && _lastAnimationFrameTime < Engine.Ticks)
+            {
+                IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
 
+                if (ptr != IntPtr.Zero)
+                {
+                    unsafe
+                    {
+                        AnimDataFrame2* animData = (AnimDataFrame2*)ptr;
+
+                        if (animData->FrameCount != 0)
+                        {
+                            graphic = (Graphic)(Graphic + animData->FrameData[AnimIndex++]);
+
+                            if (AnimIndex >= animData->FrameCount)
+                                AnimIndex = 0;
+
+                            _lastAnimationFrameTime = Engine.Ticks + (uint)(animData->FrameInterval !=  0 ?
+                                                          animData->FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY + 25 : Constants.ITEM_EFFECT_ANIMATION_DELAY);
+                        }
+                    }
+                }
+            }
+
+            ResetHueVector();
+
+            if (Texture == null || Texture.IsDisposed || Graphic != graphic)
+            {
+                SetTextureByGraphic(graphic);
+            }
+
+           
 
             if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
@@ -111,7 +142,7 @@ namespace ClassicUO.Game.GameObjects
 
             //if ((StaticFilters.IsTree(Graphic) || ItemData.IsFoliage || StaticFilters.IsRock(Graphic)))
             //{
-            //    batcher.DrawSpriteShadow(Texture, posX - Bounds.X , posY - Bounds.Y /*- 10*/, false);
+            //    batcher.DrawSpriteShadow(Texture, posX - Bounds.X, posY - Bounds.Y /*- 10*/, false);
             //}
 
             if (base.Draw(batcher, posX, posY))

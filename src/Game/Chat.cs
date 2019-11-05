@@ -139,7 +139,7 @@ namespace ClassicUO.Game
                     if (parent == null)
                         break;
 
-                    MessageInfo msg = CreateMessage(text, hue, font, unicode, type);
+                    TextOverhead msg = CreateMessage(text, hue, font, unicode, type);
                     msg.Owner = parent;
 
                     if (parent is Item it && !it.OnGround)
@@ -235,7 +235,7 @@ namespace ClassicUO.Game
         }
 
 
-        private static MessageInfo CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type)
+        private static TextOverhead CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type)
         {
             if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
             {
@@ -252,7 +252,7 @@ namespace ClassicUO.Game
 
             RenderedText rtext = RenderedText.Create(msg, hue, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, width, 30, false, false, true);
 
-            return new MessageInfo
+            return new TextOverhead
             {
                 Alpha = 255,
                 RenderedText = rtext,

@@ -3,9 +3,9 @@
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+//	The goal of this is to develop a lightweight client considering
+//	new technologies.
+//
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -134,7 +134,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (numPadMovement) direction = _numPadDirection;
 
-                World.Player.Walk(direction, Engine.Profile.Current.AlwaysRun);
+                World.Player.Walk(direction, false);
             }
         }
 
@@ -539,7 +539,7 @@ namespace ClassicUO.Game.Scenes
 
                     break;
 
-                case MessageInfo msg when msg.Owner is Entity entity:
+                case TextOverhead msg when msg.Owner is Entity entity:
                     result = true;
                     GameActions.DoubleClick(entity);
 
@@ -598,15 +598,32 @@ namespace ClassicUO.Game.Scenes
                 if (Engine.Profile.Current.UseShiftToPathfind && !_isShiftDown)
                     return false;
 
-                if (SelectedObject.Object is Land || GameObjectHelper.TryGetStaticData(SelectedObject.Object as GameObject, out var itemdata) && itemdata.IsSurface)
+                if (SelectedObject.Object is GameObject obj)
                 {
-                    if (SelectedObject.Object is GameObject obj && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
+                    if (obj is Static || obj is Multi || obj is Item)
+                    {
+                        ref readonly var itemdata = ref FileManager.TileData.StaticData[obj.Graphic];
+
+                        if (itemdata.IsSurface && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
+                        {
+                            World.Player.AddMessage(MessageType.Label, "Pathfinding!", 3, 1001, false);
+                            return true;
+                        }
+                    }
+                    else if (obj is Land && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                     {
                         World.Player.AddMessage(MessageType.Label, "Pathfinding!", 3, 1001, false);
-
                         return true;
                     }
                 }
+
+                //if (SelectedObject.Object is Land || GameObjectHelper.TryGetStaticData(SelectedObject.Object as GameObject, out var itemdata) && itemdata.IsSurface)
+                //{
+                //    if (SelectedObject.Object is GameObject obj && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
+                //    {
+
+                //    }
+                //}
             }
 
             return false;

@@ -152,7 +152,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         return "GameEffect";
 
-                    case MessageInfo overhead:
+                    case TextOverhead overhead:
 
                         return $"TextOverhead type: {overhead.Type}";
 

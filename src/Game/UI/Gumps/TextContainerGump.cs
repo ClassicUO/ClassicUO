@@ -27,7 +27,7 @@ namespace ClassicUO.Game.UI.Gumps
         public TextRenderer TextRenderer { get; } = new TextRenderer();
 
 
-        public void AddText(MessageInfo msg)
+        public void AddText(TextOverhead msg)
         {
             if (World.ClientFeatures.TooltipsEnabled || msg == null)
                 return;

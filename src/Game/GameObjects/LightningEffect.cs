@@ -48,7 +48,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Entity source = World.Get(src);
 
-            if (source != null)
+            if (src.IsValid && source != null)
                 SetSource(source);
             else
                 SetSource(x, y, z);

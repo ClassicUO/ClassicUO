@@ -171,7 +171,7 @@ namespace ClassicUO.Game.Managers
 
             if (selectedEntity is GameEffect effect && effect.Source != null)
                 selectedEntity = effect.Source;
-            else if (selectedEntity is MessageInfo overhead && overhead.Owner != null)
+            else if (selectedEntity is TextOverhead overhead && overhead.Owner != null)
                 selectedEntity = overhead.Owner;
 
             if (TargetingState == CursorTarget.SetGrabBag)

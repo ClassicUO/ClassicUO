@@ -219,7 +219,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     for (int by = 0; by < fixedHeight; by++)
                     {
-                        ref readonly IndexMap indexMap = ref World.Map.GetIndex(bx, by);
+                        ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
 
                         if (indexMap.MapAddress == 0)
                             continue;
@@ -275,7 +275,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             for (int x = 0; x < 8; x++)
                             {
-                                ref readonly var c = ref infoCells[pos];
+                                ref var c = ref infoCells[pos];
 
                                 ushort color = (ushort)(0x8000 | (colored[pos] ? FileManager.Hues.GetColor16(16384, c.TileID) : FileManager.Hues.GetRadarColorData(c.TileID)));
                                 Color cc;

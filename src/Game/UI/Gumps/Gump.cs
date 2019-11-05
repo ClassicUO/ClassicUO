@@ -76,9 +76,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetInScreen()
         {
-            if (X > 0 || Y > 0)
-                return;
-            if (Width < Engine.WindowWidth || Height < Engine.WindowHeight)
+            Rectangle rect = new Rectangle(0, 0, Engine.WindowWidth, Engine.WindowHeight);
+
+            if (rect.Intersects(Bounds))
                 return;
 
             X = 0;

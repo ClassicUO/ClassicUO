@@ -40,23 +40,6 @@ using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public enum RaceType : byte
-    {
-        HUMAN = 1,
-        ELF,
-        GARGOYLE
-    }
-
-    public enum CharacterSpeedType
-    {
-        Normal,
-        FastUnmount,
-        CantRun,
-        FastUnmountAndCantRun
-    }
-
-
-
     internal partial class Mobile : Entity
     {
         private bool _isDead;
@@ -174,7 +157,7 @@ namespace ClassicUO.Game.GameObjects
 
         public byte AnimationGroup { get; set; } = 0xFF;
 
-        internal bool IsMoving => Steps.Count != 0;
+        //internal bool IsMoving => AnimationGroup != 0xFF && Steps.Count != 0;
 
         public Item GetSecureTradeBox()
         {
@@ -220,7 +203,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (endX == x && endY == y && endZ == z && endDir == direction) return true;
 
-            if (!IsMoving)
+            if (Steps.Count == 0)
             {
                 if (!IsWalking)
                     SetAnimation(0xFF);
@@ -298,7 +281,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                ref readonly Step step = ref Steps.Back();
+                ref Step step = ref Steps.Back();
                 x = step.X;
                 y = step.Y;
                 z = step.Z;
@@ -454,7 +437,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 long ticks = Engine.Ticks;
 
-                if (IsMoving && LastStepSoundTime < ticks)
+                if (Steps.Count != 0 && LastStepSoundTime < ticks)
                 {
                     int incID = StepSoundOffset;
                     int soundID = 0x012B;
@@ -462,7 +445,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (IsMounted)
                     {
-                        ref readonly Step step = ref Steps.Back();
+                        ref Step step = ref Steps.Back();
                         if (step.Run)
                         {
                             soundID = 0x0129;
@@ -521,21 +504,21 @@ namespace ClassicUO.Game.GameObjects
                     AnimationGroup = animGroup;
                 }
 
-                Item mount = HasEquipment ? Equipment[(int) Layer.Mount] : null;
+                //Item mount = HasEquipment ? Equipment[(int) Layer.Mount] : null;
 
-                if (mount != null)
-                {
-                    switch (animGroup)
-                    {
-                        case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1:
-                        case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2:
-                        case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3:
-                            id = mount.GetGraphicForAnimation();
-                            animGroup = GetGroupForAnimation(this, id, true);
+                //if (mount != null)
+                //{
+                //    switch (animGroup)
+                //    {
+                //        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1:
+                //        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2:
+                //        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3:
+                //            id = mount.GetGraphicForAnimation();
+                //            animGroup = GetGroupForAnimation(this, id, true);
 
-                            break;
-                    }
-                }
+                //            break;
+                //    }
+                //}
 
                 bool mirror = false;
                 FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
@@ -553,7 +536,7 @@ namespace ClassicUO.Game.GameObjects
                     if (direction.FrameCount == 0 || direction.Frames == null)
                         FileManager.Animations.LoadDirectionGroup(ref direction);
 
-                    if (direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1 || direction.IsUOP)
+                    if ((direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1) || direction.IsUOP)
                     {
                         direction.LastAccessTime = Engine.Ticks;
                         int fc = direction.FrameCount;
@@ -653,7 +636,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (Steps.Count != 0 && !IsDestroyed)
             {
-                ref readonly Step step = ref Steps.Front();
+                ref Step step = ref Steps.Front();
                 dir = step.Direction;
 
                 if (step.Run)
@@ -784,7 +767,6 @@ namespace ClassicUO.Game.GameObjects
                 Offset.Z = 0;
             }
         }
-
 
         public int IsSitting()
         {
@@ -974,9 +956,10 @@ namespace ClassicUO.Game.GameObjects
                                                           out int centerY,
                                                           out _,
                                                           out int height);
-            x += (int)Offset.X;
-            x += 22;
+            x += (int)Offset.X + 22;
             y += (int)(Offset.Y - Offset.Z - (height + centerY + 8));
+            x = (int) (x / scale);
+            y = (int) (y / scale);
 
             for (; last != null; last = last.ListLeft)
             {
@@ -989,8 +972,8 @@ namespace ClassicUO.Game.GameObjects
                     last.OffsetY = offY;
                     offY += last.RenderedText.Height;
 
-                    last.RealScreenPosition.X = startX + (int)((x - (last.RenderedText.Width >> 1)) / scale);
-                    last.RealScreenPosition.Y = startY + (int)((y - offY) / scale);
+                    last.RealScreenPosition.X = startX + (x - (last.RenderedText.Width >> 1));
+                    last.RealScreenPosition.Y = startY + (y - offY);
                 }
             }
 

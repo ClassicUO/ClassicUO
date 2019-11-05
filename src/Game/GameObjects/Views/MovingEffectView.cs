@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -44,15 +45,18 @@ namespace ClassicUO.Game.GameObjects
             {
                 _displayedGraphic = AnimationGraphic;
                 Texture = FileManager.Art.GetTexture(AnimationGraphic);
-                Bounds.X = 0;
-                Bounds.Y = 0;
+                Bounds.X = -((Texture.Width >> 1) - 22);
+                Bounds.Y = -(Texture.Height - 44);
                 Bounds.Width = Texture.Width;
                 Bounds.Height = Texture.Height;
             }
 
-            Bounds.X = (int) -Offset.X + 22;
-            Bounds.Y = (int) (Offset.Z - Offset.Y) + 22;
-            Rotation = AngleToTarget;
+
+            posX += (int) Offset.X;
+            posY += (int) (Offset.Y + Offset.Z);
+
+            //posX += 22;
+            //posY += 22;
 
             if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
@@ -68,11 +72,18 @@ namespace ClassicUO.Game.GameObjects
                 ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
 
             Engine.DebugInfo.EffectsRendered++;
-            base.Draw(batcher, posX, posY);
+
+            if (FixedDir)
+                batcher.DrawSprite(Texture, posX, posY, false, ref HueVector);
+            else
+                batcher.DrawSpriteRotated(Texture, posX, posY, Bounds.X, Bounds.Y, ref HueVector, AngleToTarget);
+
+            //Select(posX, posY);
+            Texture.Ticks = Engine.Ticks;
 
             ref readonly StaticTiles data = ref FileManager.TileData.StaticData[_displayedGraphic];
 
-            if (data.IsLight && (Source is Item || Source is Static || Source is Multi))
+            if (data.IsLight && Source != null)
             {
                 Engine.SceneManager.GetScene<GameScene>()
                       .AddLight(Source, Source, posX + 22, posY + 22);

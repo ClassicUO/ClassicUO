@@ -1926,7 +1926,7 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < list.Count; i++)
             {
-                ref readonly HTMLDataInfo current = ref list[i];
+                ref HTMLDataInfo current = ref list[i];
 
                 switch (current.Tag)
                 {

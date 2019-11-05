@@ -36,9 +36,9 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Multi : GameObject
     {
-        private StaticTiles? _itemData;
-
         private ushort _originalGraphic;
+        private uint _lastAnimationFrameTime;
+
 
         private static readonly Queue<Multi> _pool = new Queue<Multi>();
 
@@ -46,7 +46,6 @@ namespace ClassicUO.Game.GameObjects
         {
             Graphic = _originalGraphic = graphic;
             UpdateGraphicBySeason();
-            _isFoliage = ItemData.IsFoliage;
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
 
             if (ItemData.Height > 5)
@@ -67,9 +66,7 @@ namespace ClassicUO.Game.GameObjects
 
                 m.Graphic = m._originalGraphic = graphic;
                 m.IsDestroyed = false;
-                m._itemData = null;
                 m.UpdateGraphicBySeason();
-                m._isFoliage = m.ItemData.IsFoliage;
                 m.AllowedToDraw = !GameObjectHelper.IsNoDrawable(m.Graphic);
                 m.AlphaHue = 0;
                 m.IsFromTarget = false;
@@ -97,23 +94,11 @@ namespace ClassicUO.Game.GameObjects
         public int MultiOffsetX { get; set; }
         public int MultiOffsetY { get; set; }
         public int MultiOffsetZ { get; set; }
-
-        public StaticTiles ItemData
-        {
-            [MethodImpl(256)]
-            get
-            {
-                if (!_itemData.HasValue)
-                    _itemData = FileManager.TileData.StaticData[Graphic];
-
-                return _itemData.Value;
-            }
-        }
+        public ref readonly StaticTiles ItemData => ref FileManager.TileData.StaticData[Graphic];
 
         public override void UpdateGraphicBySeason()
         {
             Graphic = Season.GetSeasonGraphic(World.Season, _originalGraphic);
-            _itemData = FileManager.TileData.StaticData[Graphic];
         }
 
         public override void UpdateTextCoordsV()
@@ -144,6 +129,9 @@ namespace ClassicUO.Game.GameObjects
             if (Texture != null)
                 y -= Texture is ArtTexture t ? (t.ImageRectangle.Height >> 1) : (Texture.Height >> 1);
 
+            x = (int)(x / scale);
+            y = (int)(y / scale);
+
             for (; last != null; last = last.ListLeft)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
@@ -155,8 +143,8 @@ namespace ClassicUO.Game.GameObjects
                     last.OffsetY = offY;
                     offY += last.RenderedText.Height;
 
-                    last.RealScreenPosition.X = startX + (int)((x - (last.RenderedText.Width >> 1)) / scale);
-                    last.RealScreenPosition.Y = startY + (int)((y - offY) / scale);
+                    last.RealScreenPosition.X = startX + (x - (last.RenderedText.Width >> 1));
+                    last.RealScreenPosition.Y = startY + (y - offY);
                 }
             }
 

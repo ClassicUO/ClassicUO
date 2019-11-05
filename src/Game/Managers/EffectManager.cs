@@ -72,14 +72,19 @@ namespace ClassicUO.Game.Managers
                     if (speed == 0)
                         speed++;
 
+                    int delay = 20 - speed;
+
+                    if (delay <= 0)
+                        delay = 20;
+
                     effect = new MovingEffect(source, target, srcPos.X, srcPos.Y, srcPos.Z, targPos.X, targPos.Y, targPos.Z, graphic, hue, fixedDir)
                     {
                         Blend = blendmode,
-                        MovingDelay = (byte) (speed)
+                        MovingDelay = (byte) delay
                     };
 
                     if (doesExplode)
-                        effect.AddChildEffect(new AnimatedItemEffect(target, targPos.X, targPos.Y, targPos.Z, 0x36Cb, hue, 9));
+                        effect.AddChildEffect(new AnimatedItemEffect(target, targPos.X, targPos.Y, targPos.Z, 0x36Cb, hue, 9, speed));
 
                     effect.Update(Engine.Ticks, 0);
                     break;
@@ -94,7 +99,7 @@ namespace ClassicUO.Game.Managers
                     if (graphic <= 0)
                         return;
 
-                    effect = new AnimatedItemEffect(srcPos.X, srcPos.Y, srcPos.Z, graphic, hue, duration)
+                    effect = new AnimatedItemEffect(srcPos.X, srcPos.Y, srcPos.Z, graphic, hue, duration, speed)
                     {
                         Blend = blendmode
                     };
@@ -106,9 +111,9 @@ namespace ClassicUO.Game.Managers
                     if (graphic <= 0)
                         return;
 
-                    effect = new AnimatedItemEffect(source, srcPos.X, srcPos.Y, srcPos.Z, graphic, hue, duration)
+                    effect = new AnimatedItemEffect(source, srcPos.X, srcPos.Y, srcPos.Z, graphic, hue, duration, speed)
                     {
-                        Blend = blendmode
+                        Blend = blendmode,
                     };
 
                     break;
