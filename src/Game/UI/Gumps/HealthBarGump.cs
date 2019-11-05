@@ -195,9 +195,12 @@ namespace ClassicUO.Game.UI.Gumps
                         GameActions.Attack(entity);
                     else
                     {
-                        Item item;
-                        if ((item = World.Items.Get(LocalSerial)) != null && item.IsCorpse)
-                            World.Player.ManualOpenedCorpses.Add(entity.Serial);
+                        if (LocalSerial.IsItem)
+                        {
+                            Item item = World.Items.Get(LocalSerial);
+                            if (item != null && item.IsCorpse)
+                                World.Player.ManualOpenedCorpses.Add(LocalSerial);
+                        }
 
                         GameActions.DoubleClick(entity);
                     }
