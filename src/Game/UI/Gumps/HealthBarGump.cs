@@ -193,8 +193,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (World.Player.InWarMode)
                         GameActions.Attack(entity);
-                    else if (!GameActions.OpenCorpse(LocalSerial))
-                        GameActions.DoubleClick(LocalSerial);
+                    else if (!GameActions.OpenCorpse(entity))
+                        GameActions.DoubleClick(entity);
                 }
                 else
                 {
