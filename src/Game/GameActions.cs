@@ -79,7 +79,7 @@ namespace ClassicUO.Game
             if (!serial.IsItem) return false;
 
             Item item = World.Items.Get(serial);
-            if (item == null || !item.IsCorpse) return false;
+            if (item == null || !item.IsCorpse || item.IsDestroyed) return false;
 
             World.Player.ManualOpenedCorpses.Add(serial);
             DoubleClick(serial);
