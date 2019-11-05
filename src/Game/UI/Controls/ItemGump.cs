@@ -161,6 +161,9 @@ namespace ClassicUO.Game.UI.Controls
             if (button != MouseButton.Left)
                 return;
 
+            _lastClickPosition.X = Mouse.Position.X;
+            _lastClickPosition.Y = Mouse.Position.Y;
+
             if (TargetManager.IsTargeting)
             {
                 if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
@@ -341,21 +344,37 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (CanPickUp)
             {
+                // fetch texture for item
+                Rectangle bounds = Texture.Bounds;
+                Point offset = Point.Zero;
+
                 if (this is ItemGumpPaperdoll)
                 {
                     if (Item == null || Item.IsDestroyed)
-                    {
                         Dispose();
-                    }
 
                     if (IsDisposed)
                         return;
 
-                    Rectangle bounds = FileManager.Art.GetTexture(Item.DisplayedGraphic).Bounds;
-                    GameActions.PickUp(LocalSerial, bounds.Width >> 1, bounds.Height >> 1);
+                    // fetch DisplayedGraphic for paperdoll item
+                    bounds = FileManager.Art.GetTexture(Item.DisplayedGraphic).Bounds;
                 }
-                else
-                    GameActions.PickUp(LocalSerial, Point.Zero);
+                else if (Parent != null && Parent is ContainerGump)
+                {
+                    float scale = 1;
+                    if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
+                        scale = Engine.UI.ContainerScale;
+
+                    // drag with mouse offset from containers
+                    offset = new Point(
+                        (int)((_lastClickPosition.X - (ParentX + X)) / scale),
+                        (int)((_lastClickPosition.Y - (ParentY + Y)) / scale));
+                }
+
+                if (offset == Point.Zero) // drag from center by default
+                    offset = new Point(bounds.Width >> 1, bounds.Height >> 1);
+
+                GameActions.PickUp(LocalSerial, offset);
             }
         }
     }

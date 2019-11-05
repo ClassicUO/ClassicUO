@@ -252,8 +252,7 @@ namespace ClassicUO.Game
         {
             _itemHold = hold;
             _draggedItemTexture = FileManager.Art.GetTexture(_itemHold.DisplayedGraphic);
-            _offset.X = _draggedItemTexture.Width >> 1;
-            _offset.Y = _draggedItemTexture.Height >> 1;
+            _offset = hold.Offset;
 
             _rect.Width = _draggedItemTexture.Width;
             _rect.Height = _draggedItemTexture.Height;

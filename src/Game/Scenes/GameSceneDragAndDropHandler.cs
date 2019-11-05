@@ -92,7 +92,7 @@ namespace ClassicUO.Game.Scenes
             if (World.Player.IsDead || HeldItem.Enabled || item == null || item.IsDestroyed /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/) return false;
 
             HeldItem.Clear();
-            HeldItem.Set(item, amount <= 0 ? item.Amount : (ushort) amount);
+            HeldItem.Set(item, amount <= 0 ? item.Amount : (ushort) amount, new Point(x, y));
 
             if (!item.OnGround)
             {
@@ -189,8 +189,8 @@ namespace ClassicUO.Game.Scenes
                             textureH = texture.Height;
                         }
 
-                        x -= textureW >> 1;
-                        y -= textureH >> 1;
+                        x -= (int)(HeldItem.Offset.X * scale);
+                        y -= (int)(HeldItem.Offset.Y * scale);
 
                         if (x + textureW > bounds.Width)
                             x = bounds.Width - textureW;
