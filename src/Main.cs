@@ -19,6 +19,13 @@ namespace ClassicUO
     {
         static void Main(string[] args)
         {
+            // - check for update
+            // - launcher & user setup
+            // - game setup 
+            // - game launch
+            // - enjoy
+
+
             Engine.Configure();
 
 #if DEV_BUILD

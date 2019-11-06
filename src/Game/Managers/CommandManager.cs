@@ -45,7 +45,6 @@ namespace ClassicUO.Game.Managers
                     TargetManager.CancelTarget();
             });
 
-            Register("focus", s => { Engine.DebugFocus = !Engine.DebugFocus; });
             Register("datetime", s =>
             {
                 if(World.Player != null)

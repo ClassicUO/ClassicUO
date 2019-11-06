@@ -378,13 +378,12 @@ namespace ClassicUO.Game.UI.Controls
 
         private void DrawDebug(UltimaBatcher2D batcher, int x, int y)
         {
-            if (IsVisible && (Engine.GlobalSettings.Debug || Engine.DebugFocus))
+            if (IsVisible && (Engine.GlobalSettings.Debug))
             {
                 ResetHueVector();
 
-                if (Engine.DebugFocus && HasKeyboardFocus)
-                    batcher.DrawRectangle(Textures.GetTexture(Color.Red), x, y, Width, Height, ref _hueVector);
-                else if (Engine.GlobalSettings.Debug) batcher.DrawRectangle(Textures.GetTexture(Color.Green), x, y, Width, Height, ref _hueVector);
+                if (Engine.GlobalSettings.Debug) 
+                    batcher.DrawRectangle(Textures.GetTexture(Color.Green), x, y, Width, Height, ref _hueVector);
             }
         }
 

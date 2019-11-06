@@ -76,7 +76,6 @@ namespace ClassicUO
         private static int _fpsLimit = 30;
         private static Engine _engine;
 
-        public static bool DebugFocus = false;
         private readonly GraphicsDeviceManager _graphicDeviceManager;
         private readonly bool _isHighDPI;
         private readonly Settings _settings;
@@ -566,7 +565,6 @@ namespace ClassicUO
 
             Log.NewLine();
             Log.NewLine();
-
 
             _batcher = new UltimaBatcher2D(GraphicsDevice);
             _inputManager = new InputManager();
