@@ -59,6 +59,21 @@ namespace ClassicUO.Utility.Logging
             _logger.Message(logType, text, highlightColor);
         }
 
+        public static void Trace(string text)
+        {
+            _logger.Message(LogTypes.Trace, text, ConsoleColor.Black);
+        }
+
+        public static void Warn(string text)
+        {
+            _logger.Message(LogTypes.Warning, text, ConsoleColor.Black);
+        }
+
+        public static void Error(string text)
+        {
+            _logger.Message(LogTypes.Error, text, ConsoleColor.Black);
+        }
+
         public static void NewLine()
         {
             _logger.NewLine();

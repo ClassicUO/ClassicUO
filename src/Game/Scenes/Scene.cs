@@ -37,6 +37,18 @@ namespace ClassicUO.Game.Scenes
 {
     internal abstract class Scene : IUpdateable
     {
+        protected Scene(int width, int height, bool canresize, bool maximized, bool loadaudio)
+        {
+            Width = width;
+            Height = height;
+            CanResize = canresize;
+            IsMaximized = maximized;
+            CanLoadAudio = loadaudio;
+        }
+
+        public readonly int Width, Height;
+        public readonly bool CanResize, IsMaximized, CanLoadAudio;
+
         public bool IsDestroyed { get; private set; }
 
         public bool IsLoaded { get; private set; }
@@ -65,7 +77,7 @@ namespace ClassicUO.Game.Scenes
 
         public virtual void Load()
         {
-            if (this is GameScene || this is LoginScene)
+            if (CanLoadAudio)
             {
                 Audio = new AudioManager();
                 Audio.Initialize();

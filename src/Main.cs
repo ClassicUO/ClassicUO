@@ -13,6 +13,8 @@ using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
+using SDL2;
+
 namespace ClassicUO
 {
     static class Bootstrap
@@ -24,6 +26,17 @@ namespace ClassicUO
             // - game setup 
             // - game launch
             // - enjoy
+
+
+            Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI",  CUOEnviroment.IsHighDPI ? "1" : "0");
+            Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
+            Environment.SetEnvironmentVariable("FNA_OPENGL_FORCE_COMPATIBILITY_PROFILE", "1");
+            Environment.SetEnvironmentVariable(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
+            Environment.SetEnvironmentVariable("PATH", Environment.GetEnvironmentVariable("PATH") + ";" + Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Plugins"));
+
+            CUOEnviroment.GameThread = Thread.CurrentThread;
+            CUOEnviroment.GameThread.Name = "CUO_MAIN_THREAD";
+
 
 
             Engine.Configure();

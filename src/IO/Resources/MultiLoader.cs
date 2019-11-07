@@ -32,7 +32,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class MultiLoader : ResourceLoader
+    internal class MultiLoader : UOFileLoader
     {
         private UOFile _file;
         private int _itemOffset;

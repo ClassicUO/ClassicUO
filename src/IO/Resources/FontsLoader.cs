@@ -40,7 +40,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class FontsLoader : ResourceLoader
+    internal class FontsLoader : UOFileLoader
     {
         private const int UOFONT_SOLID = 0x0001;
         private const int UOFONT_ITALIC = 0x0002;

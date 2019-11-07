@@ -31,7 +31,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class MultiMapLoader : ResourceLoader
+    internal class MultiMapLoader : UOFileLoader
     {
         private readonly UOFileMul[] _facets = new UOFileMul[6];
         private UOFile _file;

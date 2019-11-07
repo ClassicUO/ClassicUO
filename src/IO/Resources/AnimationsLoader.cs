@@ -39,7 +39,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class AnimationsLoader : ResourceLoader<AnimationFrameTexture>
+    internal class AnimationsLoader : UOFileLoader<AnimationFrameTexture>
     {
         private readonly Dictionary<ushort, byte> _animationSequenceReplacing = new Dictionary<ushort, byte>();
         private readonly Dictionary<Graphic, Rectangle> _animDimensionCache = new Dictionary<Graphic, Rectangle>();

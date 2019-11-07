@@ -31,7 +31,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class AnimDataLoader : ResourceLoader
+    internal class AnimDataLoader : UOFileLoader
     {
         private UOFileMul _file;
         private readonly Dictionary<ushort, IntPtr> _anims= new Dictionary<ushort, IntPtr>();

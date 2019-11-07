@@ -31,7 +31,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class TexmapsLoader : ResourceLoader<UOTexture>
+    internal class TexmapsLoader : UOFileLoader<UOTexture>
     {
         private readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
         private readonly ushort[] _textmapPixels64 = new ushort[64 * 64];

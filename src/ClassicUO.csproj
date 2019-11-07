@@ -186,6 +186,7 @@
     <Compile Include="Game\Weather.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Renderer\MatrixEffect.cs" />
+    <Compile Include="Time.cs" />
     <Compile Include="Utility\Collections\RawList.cs" />
     <Compile Include="Utility\Collections\ReadOnlyArrayView.cs" />
     <Compile Include="Utility\GraphicHelper.cs" />
@@ -268,7 +269,7 @@
     <Compile Include="IO\Audio\UOSound.cs" />
     <Compile Include="IO\Audio\VolumeState.cs" />
     <Compile Include="IO\DefReader.cs" />
-    <Compile Include="IO\ResourceLoader.cs" />
+    <Compile Include="IO\UoFileLoader.cs" />
     <Compile Include="IO\Resources\AnimationsLoader.cs" />
     <Compile Include="IO\Resources\AnimDataLoader.cs" />
     <Compile Include="IO\Resources\ArtLoader.cs" />

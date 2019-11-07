@@ -31,7 +31,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.IO
 {
-    internal abstract class ResourceLoader : IDisposable
+    internal abstract class UOFileLoader : IDisposable
     {
         public UOFileIndex[] Entries;
 
@@ -65,7 +65,7 @@ namespace ClassicUO.IO
         }
     }
 
-    internal abstract class ResourceLoader<T> : ResourceLoader where T : UOTexture
+    internal abstract class UOFileLoader<T> : UOFileLoader where T : UOTexture
     {
         private readonly List<uint> _texturesToClear = new List<uint>();
 

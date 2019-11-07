@@ -35,7 +35,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class ArtLoader : ResourceLoader<ArtTexture>
+    internal class ArtLoader : UOFileLoader<ArtTexture>
     {
         private static readonly ushort[] _empty = { };
 

@@ -31,7 +31,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class GumpsLoader : ResourceLoader<UOTexture16>
+    internal class GumpsLoader : UOFileLoader<UOTexture16>
     {
         private UOFile _file;
 
