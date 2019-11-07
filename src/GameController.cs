@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Network;
@@ -27,7 +29,7 @@ namespace ClassicUO
         private readonly GraphicsDeviceManager _graphicDeviceManager;
         private readonly UltimaBatcher2D _uoSpriteBatch;
 
-        public GameController(string[] args)
+        public GameController()
         {
             _graphicDeviceManager = new GraphicsDeviceManager(this);
             _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice);

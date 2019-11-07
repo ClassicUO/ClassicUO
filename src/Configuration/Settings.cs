@@ -30,6 +30,8 @@ namespace ClassicUO.Configuration
 {
     internal sealed class Settings
     {
+        public static readonly Settings GlobalSettings = new Settings();
+
         [JsonConstructor]
         public Settings()
         {
@@ -114,6 +116,11 @@ namespace ClassicUO.Configuration
             }
 
             return Path.Combine(Engine.ExePath, SETTINGS_FILENAME);
+        }
+
+        public void Load(string path)
+        {
+            //this = ConfigurationResolver.Load<Settings>(path);
         }
 
         public void Save()

@@ -39,6 +39,16 @@ namespace ClassicUO
 
 
 
+            string globalSettingsPath = Settings.GetSettingsFilepath();
+
+            if (!Directory.Exists(Path.GetDirectoryName(globalSettingsPath)) ||
+                !File.Exists(globalSettingsPath))
+            {
+                Settings.GlobalSettings.Save();
+                return;
+            }
+
+
             Engine.Configure();
 
 #if DEV_BUILD
