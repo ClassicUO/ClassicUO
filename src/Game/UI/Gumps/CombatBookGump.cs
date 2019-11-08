@@ -22,6 +22,7 @@
 #endregion
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -118,7 +119,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _primAbility.DragBegin += (sender, e) =>
                         {
-                            if (Engine.UI.IsDragging)
+                            if (UIManager.IsDragging)
                                 return;
 
                             ref readonly AbilityDefinition def = ref AbilityData.Abilities[((byte) World.Player.PrimaryAbility & 0x7F) - 1];
@@ -127,8 +128,8 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 X = Mouse.Position.X - 22, Y = Mouse.Position.Y - 22
                             };
-                            Engine.UI.Add(gump);
-                            Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
+                            UIManager.Add(gump);
+                            UIManager.AttemptDragControl(gump, Mouse.Position, true);
                         };
 
                         _secAbility = new GumpPic(215, 150, (ushort) (0x5200 + ((byte) World.Player.SecondaryAbility & 0x7F) - 1), 0);
@@ -138,7 +139,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _secAbility.DragBegin += (sender, e) =>
                         {
-                            if (Engine.UI.IsDragging)
+                            if (UIManager.IsDragging)
                                 return;
 
                             ref readonly AbilityDefinition def = ref AbilityData.Abilities[((byte) World.Player.SecondaryAbility & 0x7F) - 1];
@@ -148,8 +149,8 @@ namespace ClassicUO.Game.UI.Gumps
                                 X = Mouse.Position.X - 22,
                                 Y = Mouse.Position.Y - 22
                             };
-                            Engine.UI.Add(gump);
-                            Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
+                            UIManager.Add(gump);
+                            UIManager.AttemptDragControl(gump, Mouse.Position, true);
                         };
                     }
                 }

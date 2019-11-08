@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
@@ -150,7 +151,7 @@ namespace ClassicUO.Game
                                 if (stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM && (item2.ItemData.IsDoor || item2.ItemData.Weight <= 0x5A || isGM && !item2.IsLocked))
                                     dropFlags = true;
 
-                                else if (Engine.Profile.Current.SmoothDoors && item2.ItemData.IsDoor)
+                                else if (ProfileManager.Current.SmoothDoors && item2.ItemData.IsDoor)
                                 {
                                     dropFlags = true;
                                 }

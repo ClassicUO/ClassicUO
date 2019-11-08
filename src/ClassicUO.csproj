@@ -444,7 +444,6 @@
     <Compile Include="Input\EventArgs.cs" />
     <Compile Include="Input\InputEvent.cs" />
     <Compile Include="Input\InputKeyboardEvent.cs" />
-    <Compile Include="Input\InputManager.cs" />
     <Compile Include="Input\InputMouseEvent.cs" />
     <Compile Include="Input\KeyboardEvent.cs" />
     <Compile Include="Input\MouseButtons.cs" />

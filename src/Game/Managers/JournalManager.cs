@@ -24,6 +24,7 @@
 using System;
 using System.IO;
 
+using ClassicUO.Configuration;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 
@@ -43,10 +44,10 @@ namespace ClassicUO.Game.Managers
 
             byte font = (byte) (isunicode ? 0 : 9);
 
-            if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
+            if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
             {
-                font = Engine.Profile.Current.ChatFont;
-                isunicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
+                font = ProfileManager.Current.ChatFont;
+                isunicode = ProfileManager.Current.OverrideAllFontsIsUnicode;
             }
 
             JournalEntry entry = new JournalEntry(text, font, hue, name, isunicode, Engine.CurrDateTime);

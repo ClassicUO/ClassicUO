@@ -25,6 +25,7 @@ using System;
 using System.Linq;
 using System.Text;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -93,10 +94,10 @@ namespace ClassicUO.Game
 
         public static void HandleMessage(Entity parent, string text, string name, Hue hue, MessageType type, byte font, bool unicode = false, string lang = null)
         {
-            if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
+            if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
             {
-                font = Engine.Profile.Current.ChatFont;
-                unicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
+                font = ProfileManager.Current.ChatFont;
+                unicode = ProfileManager.Current.OverrideAllFontsIsUnicode;
             }
 
             switch (type)
@@ -107,23 +108,23 @@ namespace ClassicUO.Game
                     //server hue color per default
                     if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue(text, out SpellDefinition spell))
                     {
-                        if (Engine.Profile.Current != null && Engine.Profile.Current.EnabledSpellFormat && !string.IsNullOrWhiteSpace(Engine.Profile.Current.SpellDisplayFormat))
+                        if (ProfileManager.Current != null && ProfileManager.Current.EnabledSpellFormat && !string.IsNullOrWhiteSpace(ProfileManager.Current.SpellDisplayFormat))
                         {
-                            StringBuilder sb = new StringBuilder(Engine.Profile.Current.SpellDisplayFormat);
+                            StringBuilder sb = new StringBuilder(ProfileManager.Current.SpellDisplayFormat);
                             sb.Replace("{power}", spell.PowerWords);
                             sb.Replace("{spell}", spell.Name);
                             text = sb.ToString().Trim();
                         }
 
                         //server hue color per default if not enabled
-                        if (Engine.Profile.Current != null && Engine.Profile.Current.EnabledSpellHue)
+                        if (ProfileManager.Current != null && ProfileManager.Current.EnabledSpellHue)
                         {
                             if (spell.TargetType == TargetType.Beneficial)
-                                hue = Engine.Profile.Current.BeneficHue;
+                                hue = ProfileManager.Current.BeneficHue;
                             else if (spell.TargetType == TargetType.Harmful)
-                                hue = Engine.Profile.Current.HarmfulHue;
+                                hue = ProfileManager.Current.HarmfulHue;
                             else
-                                hue = Engine.Profile.Current.NeutralHue;
+                                hue = ProfileManager.Current.NeutralHue;
                         }
                     }
 
@@ -147,7 +148,7 @@ namespace ClassicUO.Game
                         msg.X = Mouse.LastClickPosition.X;
                         msg.Y = Mouse.LastClickPosition.Y;
 
-                        Gump gump = Engine.UI.GetGump<Gump>(it.Container);
+                        Gump gump = UIManager.GetGump<Gump>(it.Container);
 
                         if (gump is PaperDollGump paperDoll)
                         {
@@ -168,7 +169,7 @@ namespace ClassicUO.Game
                             if (ent == null || ent.IsDestroyed)
                                 break;
 
-                            var trade = Engine.UI.GetGump<TradingGump>(ent);
+                            var trade = UIManager.GetGump<TradingGump>(ent);
 
                             if (trade == null)
                             {
@@ -177,7 +178,7 @@ namespace ClassicUO.Game
                                 if (item == null)
                                     break;
 
-                                trade = Engine.UI.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == item || s.ID2 == item);
+                                trade = UIManager.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == item || s.ID2 == item);
                             }
 
                             if (trade != null)
@@ -237,10 +238,10 @@ namespace ClassicUO.Game
 
         private static TextOverhead CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type)
         {
-            if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
+            if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
             {
-                font = Engine.Profile.Current.ChatFont;
-                isunicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
+                font = ProfileManager.Current.ChatFont;
+                isunicode = ProfileManager.Current.OverrideAllFontsIsUnicode;
             }
 
             int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, msg) : FileManager.Fonts.GetWidthASCII(font, msg);
@@ -266,9 +267,9 @@ namespace ClassicUO.Game
         {
             long timeToLive;
 
-            if (Engine.Profile.Current.ScaleSpeechDelay)
+            if (ProfileManager.Current.ScaleSpeechDelay)
             {
-                int delay = Engine.Profile.Current.SpeechDelay;
+                int delay = ProfileManager.Current.SpeechDelay;
 
                 if (delay < 10)
                     delay = 10;
@@ -277,7 +278,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                long delay = (5497558140000 * Engine.Profile.Current.SpeechDelay) >> 32 >> 5;
+                long delay = (5497558140000 * ProfileManager.Current.SpeechDelay) >> 32 >> 5;
 
                 timeToLive = (delay >> 31) + delay;
             }

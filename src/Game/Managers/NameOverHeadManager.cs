@@ -23,6 +23,7 @@
 
 using System;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 
@@ -43,14 +44,14 @@ namespace ClassicUO.Game.Managers
         private static NameOverHeadHandlerGump _gump;
         public static NameOverheadTypeAllowed TypeAllowed
         {
-            get { return Engine.Profile.Current.NameOverheadTypeAllowed; }
-            set { Engine.Profile.Current.NameOverheadTypeAllowed = value; }
+            get { return ProfileManager.Current.NameOverheadTypeAllowed; }
+            set { ProfileManager.Current.NameOverheadTypeAllowed = value; }
         }
 
         public static bool IsToggled
         {
-            get { return Engine.Profile.Current.NameOverheadToggled; }
-            set { Engine.Profile.Current.NameOverheadToggled = value; }
+            get { return ProfileManager.Current.NameOverheadToggled; }
+            set { ProfileManager.Current.NameOverheadToggled = value; }
         }
 
         public static bool IsAllowed(Entity serial)
@@ -79,7 +80,7 @@ namespace ClassicUO.Game.Managers
                 return;
 
             _gump = new NameOverHeadHandlerGump();
-            Engine.UI.Add(_gump);
+            UIManager.Add(_gump);
         }
 
         public static void Close()

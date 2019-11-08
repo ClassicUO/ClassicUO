@@ -23,6 +23,7 @@
 
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -189,7 +190,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                         if (loginScene.Servers.Any())
                         {
-                            int index = Engine.GlobalSettings.LastServerNum;
+                            int index = Settings.GlobalSettings.LastServerNum;
 
                             if (index <= 0 || index > loginScene.Servers.Length)
                             {
@@ -219,7 +220,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 if (loginScene.Servers.Any())
                 {
-                    int index = Engine.GlobalSettings.LastServerNum;
+                    int index = Settings.GlobalSettings.LastServerNum;
 
                     if (index <= 0 || index > loginScene.Servers.Length)
                     {

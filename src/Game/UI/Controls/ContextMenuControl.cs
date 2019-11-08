@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Game.Managers;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -55,7 +56,7 @@ namespace ClassicUO.Game.UI.Controls
                 X = Mouse.Position.X,
                 Y = Mouse.Position.Y
             };
-            Engine.UI.Add(_menu);
+            UIManager.Add(_menu);
         }
 
         public void Add(string text, Action action, bool canBeSelected = false, bool defaultValue = false)

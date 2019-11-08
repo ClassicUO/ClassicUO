@@ -23,6 +23,7 @@
 
 using System.Collections.Generic;
 
+using ClassicUO.Configuration;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -192,10 +193,10 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed || _messages.Count == 0)
                 return;
 
-            int screenX = Engine.Profile.Current.GameWindowPosition.X;
-            int screenY = Engine.Profile.Current.GameWindowPosition.Y;
-            int screenW = Engine.Profile.Current.GameWindowSize.X;
-            int screenH = Engine.Profile.Current.GameWindowSize.Y;
+            int screenX = ProfileManager.Current.GameWindowPosition.X;
+            int screenY = ProfileManager.Current.GameWindowPosition.Y;
+            int screenW = ProfileManager.Current.GameWindowSize.X;
+            int screenH = ProfileManager.Current.GameWindowSize.Y;
 
             int offY = 0;
 
@@ -267,7 +268,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 ushort hue = 0;
 
-                //if (Engine.Profile.Current.HighlightGameObjects)
+                //if (ProfileManager.Current.HighlightGameObjects)
                 //{
                 //    if (SelectedObject.LastObject == item)
                 //        hue = 23;

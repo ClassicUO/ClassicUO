@@ -373,7 +373,7 @@ namespace ClassicUO.Configuration
             }
 
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin"))))
-                Engine.UI.AnchorManager.Save(writer);
+                UIManager.AnchorManager.Save(writer);
 
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "skillsgroups.bin"))))
                 SkillsGroupManager.Save(writer);
@@ -436,7 +436,7 @@ namespace ClassicUO.Configuration
                             //gump.SetInScreen();
 
                             if (gump.LocalSerial != 0)
-                                Engine.UI.SavePosition(gump.LocalSerial, new Point(x, y));
+                                UIManager.SavePosition(gump.LocalSerial, new Point(x, y));
 
                             if (!gump.IsDisposed) gumps.Add(gump);
                         }
@@ -456,7 +456,7 @@ namespace ClassicUO.Configuration
                 try
                 {
                     using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath)))
-                        Engine.UI.AnchorManager.Restore(reader, gumps);
+                        UIManager.AnchorManager.Restore(reader, gumps);
                 }
                 catch (Exception e)
                 {

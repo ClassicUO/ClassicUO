@@ -234,7 +234,7 @@ namespace ClassicUO.Game.Managers
             AnchorableGump closestControl = null;
             int closestDistance = 99999;
 
-            var hosts = Engine.UI.Gumps.OfType<AnchorableGump>().Where(s => s.AnchorGroupName == control.AnchorGroupName);
+            var hosts = UIManager.Gumps.OfType<AnchorableGump>().Where(s => s.AnchorGroupName == control.AnchorGroupName);
             foreach (AnchorableGump host in hosts)
             {
                 if (IsOverlapping(control, host))
@@ -313,7 +313,7 @@ namespace ClassicUO.Game.Managers
                     for (int y = 0; y < controlMatrix.GetLength(1); y++)
                     {
                         if (controlMatrix[x, y] != null)
-                            Engine.UI.MakeTopMostGump(controlMatrix[x, y]);
+                            UIManager.MakeTopMostGump(controlMatrix[x, y]);
                     }
                 }
             }

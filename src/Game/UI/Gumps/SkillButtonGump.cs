@@ -23,6 +23,7 @@
 
 using System.IO;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -88,13 +89,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            if (Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left && !Keyboard.Alt)
+            if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButton.Left && !Keyboard.Alt)
                 GameActions.UseSkill(_skill.Index);
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            if (!Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left && !Keyboard.Alt)
+            if (!ProfileManager.Current.CastSpellsByOneClick && button == MouseButton.Left && !Keyboard.Alt)
                 GameActions.UseSkill(_skill.Index);
 
             return true;

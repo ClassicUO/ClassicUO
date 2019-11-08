@@ -24,6 +24,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Interfaces;
@@ -214,7 +215,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void AddMessage(MessageType type, string message)
         {
-            AddMessage(type, message, Engine.Profile.Current.ChatFont, Engine.Profile.Current.SpeechHue, true);
+            AddMessage(type, message, ProfileManager.Current.ChatFont, ProfileManager.Current.SpeechHue, true);
         }
 
         public virtual void UpdateTextCoordsV()
@@ -229,10 +230,10 @@ namespace ClassicUO.Game.GameObjects
 
             int offsetY = 0;
 
-            int minX = Engine.Profile.Current.GameWindowPosition.X + 6;
-            int maxX = minX + Engine.Profile.Current.GameWindowSize.X;
-            int minY = Engine.Profile.Current.GameWindowPosition.Y;
-            //int maxY = minY + Engine.Profile.Current.GameWindowSize.Y - 6;
+            int minX = ProfileManager.Current.GameWindowPosition.X + 6;
+            int maxX = minX + ProfileManager.Current.GameWindowSize.X;
+            int minY = ProfileManager.Current.GameWindowPosition.Y;
+            //int maxY = minY + ProfileManager.Current.GameWindowSize.Y - 6;
 
             for (var item = TextContainer.Items; item != null; item = item.ListRight)
             {
@@ -293,10 +294,10 @@ namespace ClassicUO.Game.GameObjects
         }
         private static TextOverhead CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type)
         {
-            if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
+            if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
             {
-                font = Engine.Profile.Current.ChatFont;
-                isunicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
+                font = ProfileManager.Current.ChatFont;
+                isunicode = ProfileManager.Current.OverrideAllFontsIsUnicode;
             }
 
             int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, msg) : FileManager.Fonts.GetWidthASCII(font, msg);
@@ -322,9 +323,9 @@ namespace ClassicUO.Game.GameObjects
         {
             long timeToLive;
 
-            if (Engine.Profile.Current.ScaleSpeechDelay)
+            if (ProfileManager.Current.ScaleSpeechDelay)
             {
-                int delay = Engine.Profile.Current.SpeechDelay;
+                int delay = ProfileManager.Current.SpeechDelay;
 
                 if (delay < 10)
                     delay = 10;
@@ -333,7 +334,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                long delay = (5497558140000 * Engine.Profile.Current.SpeechDelay) >> 32 >> 5;
+                long delay = (5497558140000 * ProfileManager.Current.SpeechDelay) >> 32 >> 5;
 
                 timeToLive = (delay >> 31) + delay;
             }

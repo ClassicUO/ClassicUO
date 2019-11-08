@@ -25,6 +25,7 @@ using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 
 namespace ClassicUO.Game
 {
@@ -67,7 +68,7 @@ namespace ClassicUO.Game
             Layer = item.Layer;
             Flags = item.Flags;
 
-            Engine.UI.GameCursor.SetDraggedItem(this);
+            UIManager.GameCursor.SetDraggedItem(this);
         }
 
         public void Clear()

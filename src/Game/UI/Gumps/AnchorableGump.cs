@@ -21,6 +21,8 @@
 
 #endregion
 
+using ClassicUO.Configuration;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -49,11 +51,11 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (Keyboard.Alt)
             {
-                Engine.UI.AnchorManager.DetachControl(this);
+                UIManager.AnchorManager.DetachControl(this);
             }
             else
             {
-                Engine.UI.AnchorManager[this]?.UpdateLocation(this, X - _prevX, Y - _prevY);
+                UIManager.AnchorManager[this]?.UpdateLocation(this, X - _prevX, Y - _prevY);
             }
             _prevX = X;
             _prevY = Y;
@@ -63,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
-            Engine.UI.AnchorManager[this]?.MakeTopMost();
+            UIManager.AnchorManager[this]?.MakeTopMost();
 
             _prevX = X;
             _prevY = Y;
@@ -74,8 +76,8 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnMouseOver(int x, int y)
         {
 
-            if (Engine.UI.IsDragging && Engine.UI.DraggingControl == this)
-                _anchorCandidate = Engine.UI.AnchorManager.GetAnchorableControlUnder(this);
+            if (UIManager.IsDragging && UIManager.DraggingControl == this)
+                _anchorCandidate = UIManager.AnchorManager.GetAnchorableControlUnder(this);
 
             base.OnMouseOver(x, y);
         }
@@ -84,8 +86,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_anchorCandidate != null)
             {
-                Location = Engine.UI.AnchorManager.GetCandidateDropLocation(this, _anchorCandidate);
-                Engine.UI.AnchorManager.DropControl(this, _anchorCandidate);
+                Location = UIManager.AnchorManager.GetCandidateDropLocation(this, _anchorCandidate);
+                UIManager.AnchorManager.DropControl(this, _anchorCandidate);
                 _anchorCandidate = null;
             }
 
@@ -96,7 +98,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            if (Keyboard.Alt && Engine.UI.AnchorManager[this] != null)
+            if (Keyboard.Alt && UIManager.AnchorManager[this] != null)
             {
                 if (_lockGumpPic == null)
                 {
@@ -110,13 +112,13 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(_lockGumpPic);
                 }
 
-                if (Engine.UI.MouseOverControl != null && (Engine.UI.MouseOverControl == this || Engine.UI.MouseOverControl.RootParent == this))
+                if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
                     _lockGumpPic.Hue = 34;
                 else
                     _lockGumpPic.Hue = 0;
 
             }
-            else if ((!Keyboard.Alt || Engine.UI.AnchorManager[this] == null) && _lockGumpPic != null)
+            else if ((!Keyboard.Alt || UIManager.AnchorManager[this] == null) && _lockGumpPic != null)
             {
                 Remove(_lockGumpPic);
                 _lockGumpPic.Dispose();
@@ -130,7 +132,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_anchorCandidate != null)
             {
-                Point drawLoc = Engine.UI.AnchorManager.GetCandidateDropLocation(this, _anchorCandidate);
+                Point drawLoc = UIManager.AnchorManager.GetCandidateDropLocation(this, _anchorCandidate);
 
                 if (drawLoc != Location)
                 {
@@ -151,9 +153,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void CloseWithRightClick()
         {
-            if (Engine.UI.AnchorManager[this] == null || Keyboard.Alt || !Engine.Profile.Current.HoldDownKeyAltToCloseAnchored)
+            if (UIManager.AnchorManager[this] == null || Keyboard.Alt || !ProfileManager.Current.HoldDownKeyAltToCloseAnchored)
             {
-                Engine.UI.AnchorManager.DisposeAllControls(this);
+                UIManager.AnchorManager.DisposeAllControls(this);
                 base.CloseWithRightClick();
             }
         }
@@ -161,12 +163,12 @@ namespace ClassicUO.Game.UI.Gumps
         private void _lockGumpPic_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButton.Left)
-                Engine.UI.AnchorManager.DetachControl(this);
+                UIManager.AnchorManager.DetachControl(this);
         }
 
         public override void Dispose()
         {
-            Engine.UI.AnchorManager.DetachControl(this);
+            UIManager.AnchorManager.DetachControl(this);
 
             base.Dispose();
         }

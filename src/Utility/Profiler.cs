@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
+using ClassicUO.Configuration;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Utility
@@ -54,7 +55,7 @@ namespace ClassicUO.Utility
 
         public static void BeginFrame()
         {
-            if (!Engine.GlobalSettings.Profiler)
+            if (!Settings.GlobalSettings.Profiler)
                 return;
 
             if (m_ThisFrameData.Count > 0)
@@ -85,7 +86,7 @@ namespace ClassicUO.Utility
 
         public static void EndFrame()
         {
-            if (!Engine.GlobalSettings.Profiler)
+            if (!Settings.GlobalSettings.Profiler)
                 return;
 
             LastFrameTimeMS = (_timer.ElapsedTicks - m_BeginFrameTicks) * 1000d / Stopwatch.Frequency;
@@ -94,7 +95,7 @@ namespace ClassicUO.Utility
 
         public static void EnterContext(string context_name)
         {
-            if (!Engine.GlobalSettings.Profiler)
+            if (!Settings.GlobalSettings.Profiler)
                 return;
 
             m_Context.Add(new ContextAndTick(context_name, _timer.ElapsedTicks));
@@ -102,7 +103,7 @@ namespace ClassicUO.Utility
 
         public static void ExitContext(string context_name)
         {
-            if (!Engine.GlobalSettings.Profiler)
+            if (!Settings.GlobalSettings.Profiler)
                 return;
 
             if (m_Context[m_Context.Count - 1].Name != context_name)
@@ -118,7 +119,7 @@ namespace ClassicUO.Utility
 
         public static bool InContext(string context_name)
         {
-            if (!Engine.GlobalSettings.Profiler)
+            if (!Settings.GlobalSettings.Profiler)
                 return false;
 
             if (m_Context.Count == 0)
@@ -129,7 +130,7 @@ namespace ClassicUO.Utility
 
         public static ProfileData GetContext(string context_name)
         {
-            if (!Engine.GlobalSettings.Profiler)
+            if (!Settings.GlobalSettings.Profiler)
                 return ProfileData.Empty;
 
             for (int i = 0; i < m_AllFrameData.Count; i++)

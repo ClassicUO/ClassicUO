@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -22,7 +23,7 @@ namespace ClassicUO.Game.UI.Gumps
         private int _currentPage = 1;
         private int _pagesCount;
 
-        private static int _lastX = Engine.Profile.Current.GridLootType == 2 ? 200 : 100;
+        private static int _lastX = ProfileManager.Current.GridLootType == 2 ? 200 : 100;
         private static int _lastY = 100;
 
         public GridLootGump(Serial local) : base(local, 0)
@@ -194,7 +195,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (IsDisposed)
                 return;
 
-            if (_corpse != null && !_corpse.IsDestroyed && Engine.UI.MouseOverControl != null && (Engine.UI.MouseOverControl == this || Engine.UI.MouseOverControl.RootParent == this))
+            if (_corpse != null && !_corpse.IsDestroyed && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
             {
                 SelectedObject.Object = _corpse;
                 SelectedObject.LastObject = _corpse;

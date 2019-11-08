@@ -28,6 +28,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -47,13 +48,13 @@ namespace ClassicUO.IO
             {
                 _uofolderpath = value;
 
-                string[] vers = Engine.GlobalSettings.ClientVersion.ToLower().Split('.');
+                string[] vers = Settings.GlobalSettings.ClientVersion.ToLower().Split('.');
                 bool automatically = false;
                 if (vers.Length < 3)
                 {
                     Log.Message(LogTypes.Warning, "Client version not found");
 
-                    DirectoryInfo dirInfo = new DirectoryInfo(Engine.GlobalSettings.UltimaOnlineDirectory);
+                    DirectoryInfo dirInfo = new DirectoryInfo(Settings.GlobalSettings.UltimaOnlineDirectory);
                     bool ok = false;
                     if (dirInfo.Exists)
                     {
@@ -63,8 +64,8 @@ namespace ClassicUO.IO
                         {
                             var versInfo = FileVersionInfo.GetVersionInfo(clientInfo.FullName);
 
-                            Engine.GlobalSettings.ClientVersion = versInfo.FileVersion.Replace(',', '.').Replace(" ", "");
-                            vers = Engine.GlobalSettings.ClientVersion.ToLower().Split('.');
+                            Settings.GlobalSettings.ClientVersion = versInfo.FileVersion.Replace(',', '.').Replace(" ", "");
+                            vers = Settings.GlobalSettings.ClientVersion.ToLower().Split('.');
 
                             automatically = true;
                             ok = true;
@@ -126,7 +127,7 @@ namespace ClassicUO.IO
 
 
                 ClientVersion = (ClientVersions) (((major & 0xFF) << 24) | ((minor & 0xFF) << 16) | ((build & 0xFF) << 8) | (extra & 0xFF));
-                Log.Message(LogTypes.Trace, $"Client version: {Engine.GlobalSettings.ClientVersion} - {ClientVersion} {(automatically ? "[automatically found]" : "")}");
+                Log.Message(LogTypes.Trace, $"Client version: {Settings.GlobalSettings.ClientVersion} - {ClientVersion} {(automatically ? "[automatically found]" : "")}");
 
                 ClientFlags = ClientFlags.CF_T2A;
 
@@ -195,7 +196,7 @@ namespace ClassicUO.IO
             tasks.Add(Map.Load());
 
             Cliloc = new ClilocLoader();
-            tasks.Add(Cliloc.Load(Engine.GlobalSettings.ClilocFile));
+            tasks.Add(Cliloc.Load(Settings.GlobalSettings.ClilocFile));
 
             Gumps = new GumpsLoader();
             tasks.Add(Gumps.Load());

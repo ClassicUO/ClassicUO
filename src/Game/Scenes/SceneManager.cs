@@ -24,6 +24,8 @@
 using SDL2;
 using System.Runtime.CompilerServices;
 
+using ClassicUO.Configuration;
+
 namespace ClassicUO.Game.Scenes
 {
     public enum ScenesType
@@ -58,21 +60,21 @@ namespace ClassicUO.Game.Scenes
 
                     if (!Bootstrap.StartInLittleWindow)
                     {
-                        if (Engine.Profile.Current != null)
+                        if (ProfileManager.Current != null)
                         {
-                            Engine.SetPreferredBackBufferSize(Engine.Profile.Current.WindowClientBounds.X, Engine.Profile.Current.WindowClientBounds.Y);
+                            Engine.SetPreferredBackBufferSize(ProfileManager.Current.WindowClientBounds.X, ProfileManager.Current.WindowClientBounds.Y);
 
-                            if (!Engine.Profile.Current.RestoreLastGameSize)
+                            if (!ProfileManager.Current.RestoreLastGameSize)
                             {
                                 Engine.IsMaximized = true;
                             }
                             else
                             {
-                                Engine.WindowWidth = Engine.Profile.Current.WindowClientBounds.X;
-                                Engine.WindowHeight = Engine.Profile.Current.WindowClientBounds.Y;
-                                if (Engine.Profile.Current.WindowClientPosition.HasValue)
+                                Engine.WindowWidth = ProfileManager.Current.WindowClientBounds.X;
+                                Engine.WindowHeight = ProfileManager.Current.WindowClientBounds.Y;
+                                if (ProfileManager.Current.WindowClientPosition.HasValue)
                                 {
-                                    Engine.WindowPosition = Engine.Profile.Current.WindowClientPosition.Value;
+                                    Engine.WindowPosition = ProfileManager.Current.WindowClientPosition.Value;
                                 }
                             }
                         }

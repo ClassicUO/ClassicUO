@@ -23,6 +23,7 @@
 
 using System.Collections.Generic;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -155,7 +156,7 @@ namespace ClassicUO.Game
                 }
             }
 
-            if (Engine.Profile.Current.EnableCombatMusic)
+            if (ProfileManager.Current.EnableCombatMusic)
                 Engine.SceneManager.CurrentScene.Audio.PlayMusic(music);
         }
 

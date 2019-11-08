@@ -24,6 +24,7 @@
 using System.IO;
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
@@ -232,7 +233,7 @@ namespace ClassicUO.Game.UI.Gumps
             for (int i = 0; i < count; i++)
                 items[i].SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort)0);
 
-            IsEnabled = IsVisible = Engine.Profile.Current.CounterBarEnabled;
+            IsEnabled = IsVisible = ProfileManager.Current.CounterBarEnabled;
         }
 
 
@@ -332,9 +333,9 @@ namespace ClassicUO.Game.UI.Gumps
                         _amount = 0;
                         GetAmount(World.Player.Equipment[(int)Layer.Backpack], _graphic, _hue, ref _amount);
 
-                        if (Engine.Profile.Current.CounterBarDisplayAbbreviatedAmount)
+                        if (ProfileManager.Current.CounterBarDisplayAbbreviatedAmount)
                         {
-                            if (_amount >= Engine.Profile.Current.CounterBarAbbreviatedAmount)
+                            if (_amount >= ProfileManager.Current.CounterBarAbbreviatedAmount)
                             {
                                 _image.SetAmount(Utility.StringHelper.IntToAbbreviatedString(_amount));
                                 return;
@@ -364,8 +365,8 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Draw(batcher, x, y);
 
 
-                Texture2D color = Textures.GetTexture(Engine.Profile.Current.CounterBarHighlightOnAmount &&
-                                                      _amount < Engine.Profile.Current.CounterBarHighlightAmount && _graphic != 0 ? Color.Red : Color.Gray);
+                Texture2D color = Textures.GetTexture(ProfileManager.Current.CounterBarHighlightOnAmount &&
+                                                      _amount < ProfileManager.Current.CounterBarHighlightAmount && _graphic != 0 ? Color.Red : Color.Gray);
                 ResetHueVector();
                 batcher.DrawRectangle(color, x, y, Width, Height, ref _hueVector);
 

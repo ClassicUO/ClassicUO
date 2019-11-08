@@ -26,6 +26,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
 
@@ -108,11 +109,11 @@ namespace ClassicUO.Game.GameObjects
 
             if (UseObjectHandles && !ObjectHandlesOpened)
             {
-                //NameOverheadGump gump = Engine.UI.GetByLocalSerial<NameOverheadGump>(Serial);
+                //NameOverheadGump gump = UIManager.GetByLocalSerial<NameOverheadGump>(Serial);
 
                 //if (gump == null)
                 {
-                    Engine.UI.Add(new NameOverheadGump(this));
+                    UIManager.Add(new NameOverheadGump(this));
                     ObjectHandlesOpened = true;
                 }
             }

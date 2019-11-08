@@ -23,6 +23,7 @@
 
 using System.Text;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -53,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             AcceptKeyboardInput = false;
 
-            _fullDisplayMode = !Engine.Profile.Current.DebugGumpIsMinimized;
+            _fullDisplayMode = !ProfileManager.Current.DebugGumpIsMinimized;
 
             Width = 500;
             Height = 275;
@@ -79,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
             set
             {
                 _fullDisplayMode = value;
-                Engine.Profile.Current.DebugGumpIsMinimized = !_fullDisplayMode;
+                ProfileManager.Current.DebugGumpIsMinimized = !_fullDisplayMode;
             }
         }
 
@@ -168,7 +169,7 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnDragEnd(int x, int y)
         {
             base.OnDragEnd(x, y);
-            Engine.Profile.Current.DebugGumpPosition = Location;
+            ProfileManager.Current.DebugGumpPosition = Location;
         }
     }
 }

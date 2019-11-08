@@ -24,6 +24,7 @@
 using System;
 using System.Text;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -71,7 +72,7 @@ namespace ClassicUO.Game.Scenes
             sbyte maxGroundZ = 127;
             _maxGroundZ = 127;
             _maxZ = 127;
-            _noDrawRoofs = !Engine.Profile.Current.DrawRoofs;
+            _noDrawRoofs = !ProfileManager.Current.DrawRoofs;
             int bx = playerX;
             int by = playerY;
             Tile tile = World.Map.GetTile(bx, by, false);
@@ -263,13 +264,13 @@ namespace ClassicUO.Game.Scenes
                             {
                                 if (StaticFilters.IsTree(st.OriginalGraphic))
                                 {
-                                    if (Engine.Profile.Current.TreeToStumps && st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
+                                    if (ProfileManager.Current.TreeToStumps && st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
                                     {
                                         if (!itemData.IsImpassable)
                                             continue;
                                         st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC);
                                     }
-                                    else if (st.OriginalGraphic != st.Graphic && !Engine.Profile.Current.TreeToStumps)
+                                    else if (st.OriginalGraphic != st.Graphic && !ProfileManager.Current.TreeToStumps)
                                         st.RestoreOriginalGraphic();
                                 }
                             }
@@ -286,7 +287,7 @@ namespace ClassicUO.Game.Scenes
                             }
 
                             //we avoid to hide impassable foliage or bushes, if present...
-                            if ((Engine.Profile.Current.TreeToStumps && itemData.IsFoliage) || (Engine.Profile.Current.HideVegetation && !itemData.IsImpassable && StaticFilters.IsVegetation(obj.Graphic)))
+                            if ((ProfileManager.Current.TreeToStumps && itemData.IsFoliage) || (ProfileManager.Current.HideVegetation && !itemData.IsImpassable && StaticFilters.IsVegetation(obj.Graphic)))
                                 continue;
 
                             //if (HeightChecks <= 0 && (!itemData.IsBridge || ((itemData.Flags & TileFlag.StairBack | TileFlag.StairRight) != 0) || itemData.IsWall))
@@ -612,8 +613,8 @@ namespace ClassicUO.Game.Scenes
             int oldDrawOffsetY = _offset.Y;
             int winGamePosX = 0;
             int winGamePosY = 0;
-            int winGameWidth = Engine.Profile.Current.GameWindowSize.X;
-            int winGameHeight = Engine.Profile.Current.GameWindowSize.Y;
+            int winGameWidth = ProfileManager.Current.GameWindowSize.X;
+            int winGameHeight = ProfileManager.Current.GameWindowSize.Y;
             int winGameCenterX = winGamePosX + (winGameWidth >> 1);
             int winGameCenterY = winGamePosY + (winGameHeight >> 1) + (World.Player.Z << 2);
             winGameCenterX -= (int) World.Player.Offset.X;
@@ -626,7 +627,7 @@ namespace ClassicUO.Game.Scenes
             int winGameScaledWidth;
             int winGameScaledHeight;
 
-            if (Engine.Profile.Current != null && Engine.Profile.Current.EnableScaleZoom)
+            if (ProfileManager.Current != null && ProfileManager.Current.EnableScaleZoom)
             {
                 float left = winGamePosX;
                 float right = winGameWidth + left;

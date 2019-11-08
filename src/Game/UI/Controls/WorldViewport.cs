@@ -21,6 +21,8 @@
 
 #endregion
 
+using ClassicUO.Configuration;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
@@ -75,7 +77,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 ResetHueVector();
 
-                if (Engine.Profile.Current != null && Engine.Profile.Current.UseXBR)
+                if (ProfileManager.Current != null && ProfileManager.Current.UseXBR)
                 {
                     // draw regular world
                     _xBR.SetSize(_scene.ViewportTexture.Width, _scene.ViewportTexture.Height);
@@ -132,14 +134,14 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            if (!Engine.UI.IsMouseOverWorld && Engine.UI.MouseOverControl != null)
+            if (!UIManager.IsMouseOverWorld && UIManager.MouseOverControl != null)
             {
-                var p = Engine.UI.MouseOverControl.GetFirstControlAcceptKeyboardInput();
+                var p = UIManager.MouseOverControl.GetFirstControlAcceptKeyboardInput();
                 p?.SetKeyboardFocus();
             }
             else
             {
-                if (!(Engine.UI.KeyboardFocusControl is TextBox tb && tb.Parent is WorldViewportGump))
+                if (!(UIManager.KeyboardFocusControl is TextBox tb && tb.Parent is WorldViewportGump))
                     Parent.GetFirstControlAcceptKeyboardInput()?.SetKeyboardFocus();
             }
 

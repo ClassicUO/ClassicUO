@@ -21,6 +21,7 @@
 
 #endregion
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Audio;
@@ -54,16 +55,16 @@ namespace ClassicUO.Game.Managers
             if (!_canReproduceAudio)
                 return;
 
-            if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableSound)
+            if (ProfileManager.Current == null || !ProfileManager.Current.EnableSound)
                 return;
 
-            float volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
+            float volume = ProfileManager.Current.SoundVolume / Constants.SOUND_DELTA;
 
             if (Engine.Instance.IsActive)
             {
-                if (!Engine.Profile.Current.ReproduceSoundsInBackground) volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
+                if (!ProfileManager.Current.ReproduceSoundsInBackground) volume = ProfileManager.Current.SoundVolume / Constants.SOUND_DELTA;
             }
-            else if (!Engine.Profile.Current.ReproduceSoundsInBackground) volume = 0;
+            else if (!ProfileManager.Current.ReproduceSoundsInBackground) volume = 0;
 
 
             if (volume < -1 || volume > 1f)
@@ -77,10 +78,10 @@ namespace ClassicUO.Game.Managers
             if (!_canReproduceAudio)
                 return;
 
-            if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableSound || !Engine.Instance.IsActive && !Engine.Profile.Current.ReproduceSoundsInBackground)
+            if (ProfileManager.Current == null || !ProfileManager.Current.EnableSound || !Engine.Instance.IsActive && !ProfileManager.Current.ReproduceSoundsInBackground)
                 return;
 
-            if (!Engine.Instance.IsActive && !Engine.Profile.Current.ReproduceSoundsInBackground) volume = 0;
+            if (!Engine.Instance.IsActive && !ProfileManager.Current.ReproduceSoundsInBackground) volume = 0;
 
             if (volume < -1 || volume > 1f)
                 return;
@@ -100,17 +101,17 @@ namespace ClassicUO.Game.Managers
 
             if (Engine.SceneManager.CurrentScene is LoginScene)
             {
-                if (!Engine.GlobalSettings.LoginMusic)
+                if (!Settings.GlobalSettings.LoginMusic)
                     return;
 
-                volume = Engine.GlobalSettings.LoginMusicVolume / Constants.SOUND_DELTA;
+                volume = Settings.GlobalSettings.LoginMusicVolume / Constants.SOUND_DELTA;
             }
             else
             {
-                if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableMusic)
+                if (ProfileManager.Current == null || !ProfileManager.Current.EnableMusic)
                     return;
 
-                volume = Engine.Profile.Current.MusicVolume / Constants.SOUND_DELTA;
+                volume = ProfileManager.Current.MusicVolume / Constants.SOUND_DELTA;
             }
 
 
@@ -136,10 +137,10 @@ namespace ClassicUO.Game.Managers
 
             if (_currentMusic != null)
             {
-                if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableMusic)
+                if (ProfileManager.Current == null || !ProfileManager.Current.EnableMusic)
                     return;
 
-                float volume = Engine.Profile.Current.MusicVolume / Constants.SOUND_DELTA;
+                float volume = ProfileManager.Current.MusicVolume / Constants.SOUND_DELTA;
 
                 if (volume < -1 || volume > 1f)
                     return;
@@ -163,13 +164,13 @@ namespace ClassicUO.Game.Managers
             if (!_canReproduceAudio)
                 return;
 
-            if (_currentMusic != null && Engine.Profile.Current != null)
+            if (_currentMusic != null && ProfileManager.Current != null)
             {
                 if (Engine.Instance.IsActive)
                 {
-                    if (!Engine.Profile.Current.ReproduceSoundsInBackground) _currentMusic.Volume = Engine.Profile.Current.MusicVolume / Constants.SOUND_DELTA;
+                    if (!ProfileManager.Current.ReproduceSoundsInBackground) _currentMusic.Volume = ProfileManager.Current.MusicVolume / Constants.SOUND_DELTA;
                 }
-                else if (!Engine.Profile.Current.ReproduceSoundsInBackground && _currentMusic.Volume != 0) _currentMusic.Volume = 0;
+                else if (!ProfileManager.Current.ReproduceSoundsInBackground && _currentMusic.Volume != 0) _currentMusic.Volume = 0;
             }
 
             _currentMusic?.Update();

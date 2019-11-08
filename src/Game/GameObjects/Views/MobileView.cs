@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -98,27 +99,27 @@ namespace ClassicUO.Game.GameObjects
             drawX += 22;
             drawY += 22;
 
-            bool hasShadow = !IsDead && !IsHidden && Engine.Profile.Current.ShadowsEnabled;
+            bool hasShadow = !IsDead && !IsHidden && ProfileManager.Current.ShadowsEnabled;
 
-            if (Engine.AuraManager.IsEnabled)
+            if (AuraManager.IsEnabled)
             {
-                Engine.AuraManager.Draw(batcher, drawX, drawY, Engine.Profile.Current.PartyAura && World.Party.Contains(this) ? Engine.Profile.Current.PartyAuraHue : (ushort)Notoriety.GetHue(NotorietyFlag));
+                AuraManager.Draw(batcher, drawX, drawY, ProfileManager.Current.PartyAura && World.Party.Contains(this) ? ProfileManager.Current.PartyAuraHue : (ushort)Notoriety.GetHue(NotorietyFlag));
             }
 
             bool isHuman = IsHuman;
 
 
-            if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 _viewHue = 0x0023;
                 HueVector.Y = 1;
             }
-            else if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 _viewHue = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;
             }
-            else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
                 _viewHue = Constants.DEAD_RANGE_COLOR;
                 HueVector.Y = 1;
@@ -136,16 +137,16 @@ namespace ClassicUO.Game.GameObjects
                     if (!isHuman)
                         _viewHue = 0x0386;
                 }
-                else if (Engine.Profile.Current.HighlightMobilesByFlags)
+                else if (ProfileManager.Current.HighlightMobilesByFlags)
                 {
                     if (IsPoisoned)
-                        _viewHue = Engine.Profile.Current.PoisonHue;
+                        _viewHue = ProfileManager.Current.PoisonHue;
 
                     if (IsParalyzed)
-                        _viewHue = Engine.Profile.Current.ParalyzedHue;
+                        _viewHue = ProfileManager.Current.ParalyzedHue;
 
                     if (NotorietyFlag != NotorietyFlag.Invulnerable && IsYellowHits)
-                        _viewHue = Engine.Profile.Current.InvulnerableHue;
+                        _viewHue = ProfileManager.Current.InvulnerableHue;
                 }
             }
 
@@ -161,7 +162,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (this == TargetManager.LastTarget)
                 {
-                    Engine.UI.SetTargetLineGump(this);
+                    UIManager.SetTargetLineGump(this);
                     //needHpLine = true;
                 }
             }

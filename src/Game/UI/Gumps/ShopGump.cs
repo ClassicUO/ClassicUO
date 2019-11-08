@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -57,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public ShopGump(Serial serial, bool isBuyGump, int x, int y) : base(serial, 0) //60 is the base height, original size
         {
-            int height = Engine.Profile.Current.VendorGumpHeight;
+            int height = ProfileManager.Current.VendorGumpHeight;
             if (_shopGumpParts == null) GenerateVirtualTextures();
             X = x;
             Y = y;
@@ -171,9 +172,6 @@ namespace ClassicUO.Game.UI.Gumps
             downButtonT.MouseDown += (sender, e) => { _isDownDOWN_T = true; };
             downButtonT.MouseUp += (sender, e) => { _isDownDOWN_T = false; };
             Add(downButtonT);
-
-            Engine.Input.KeyDown += InputOnKeyDown;
-            Engine.Input.KeyUp += InputOnKeyUp;
         }
 
         public bool IsBuyGump { get; }
@@ -225,24 +223,29 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+        {
+            if (Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT))
+                _shiftPressed = true;
+        }
+
+        protected override void OnKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+        {
+            if (key == SDL.SDL_Keycode.SDLK_LSHIFT || key == SDL.SDL_Keycode.SDLK_RSHIFT)
+                _shiftPressed = false;
+        }
+
         private void InputOnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
         {
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_LSHIFT || e.keysym.sym == SDL.SDL_Keycode.SDLK_RSHIFT)
-                _shiftPressed = false;
+           
         }
 
         private void InputOnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
-            if (Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT))
-                _shiftPressed = true;
+           
         }
 
-        public override void Dispose()
-        {
-            Engine.Input.KeyDown -= InputOnKeyDown;
-            Engine.Input.KeyUp -= InputOnKeyUp;
-            base.Dispose();
-        }
+
 
         public void SetIfNameIsFromCliloc(Item it, bool fromcliloc)
         {

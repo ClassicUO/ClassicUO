@@ -23,6 +23,7 @@
 
 using System;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -266,7 +267,7 @@ namespace ClassicUO.Game
             {
                 _needGraphicUpdate = false;
 
-                if (Engine.GlobalSettings.RunMouseInASeparateThread)
+                if (Settings.GlobalSettings.RunMouseInASeparateThread)
                 {
                     if (_cursor != IntPtr.Zero)
                         SDL.SDL_FreeCursor(_cursor);
@@ -303,9 +304,9 @@ namespace ClassicUO.Game
         private static Vector3 _vec = Vector3.Zero;
         public void Draw(UltimaBatcher2D sb)
         {
-            if (TargetManager.IsTargeting && Engine.Profile.Current != null)
+            if (TargetManager.IsTargeting && ProfileManager.Current != null)
             {
-                if (Engine.Profile.Current.AuraOnMouse)
+                if (ProfileManager.Current.AuraOnMouse)
                 {
                     ushort id = Graphic;
 
@@ -338,7 +339,7 @@ namespace ClassicUO.Game
                     sb.Draw2D(_aura, Mouse.Position.X + hotX - (25 >> 1), Mouse.Position.Y + hotY - (25 >> 1), ref _auraVector);
                 }
 
-                if (Engine.Profile.Current.ShowTargetRangeIndicator)
+                if (ProfileManager.Current.ShowTargetRangeIndicator)
                 {
                     GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
@@ -359,8 +360,8 @@ namespace ClassicUO.Game
             {
                 float scale = 1;
 
-                if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
-                    scale = Engine.UI.ContainerScale;
+                if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
+                    scale = UIManager.ContainerScale;
 
                 int x = Mouse.Position.X - (int) (_offset.X * scale);
                 int y = Mouse.Position.Y - (int) (_offset.Y * scale);
@@ -380,7 +381,7 @@ namespace ClassicUO.Game
 
             DrawToolTip(sb, Mouse.Position);
 
-            if (!Engine.GlobalSettings.RunMouseInASeparateThread)
+            if (!Settings.GlobalSettings.RunMouseInASeparateThread)
             {
                 ushort graphic = Graphic;
 
@@ -417,11 +418,11 @@ namespace ClassicUO.Game
                         return;
                     }
 
-                    if (Engine.UI.IsMouseOverAControl)
+                    if (UIManager.IsMouseOverAControl)
                     {
                         Entity it = null;
 
-                        switch (Engine.UI.MouseOverControl)
+                        switch (UIManager.MouseOverControl)
                         {
                             //case EquipmentSlot equipmentSlot:
                             //    it = equipmentSlot.Item;
@@ -455,15 +456,15 @@ namespace ClassicUO.Game
                 }
             }
 
-            if (Engine.UI.IsMouseOverAControl && Engine.UI.MouseOverControl != null && Engine.UI.MouseOverControl.HasTooltip && !Mouse.IsDragging)
+            if (UIManager.IsMouseOverAControl && UIManager.MouseOverControl != null && UIManager.MouseOverControl.HasTooltip && !Mouse.IsDragging)
             {
-                if (Engine.UI.MouseOverControl.Tooltip is string text)
+                if (UIManager.MouseOverControl.Tooltip is string text)
                 {
                     if (_tooltip.Text != text)
                         _tooltip.Clear();
 
                     if (_tooltip.IsEmpty)
-                        _tooltip.SetText(text, Engine.UI.MouseOverControl.TooltipMaxLength);
+                        _tooltip.SetText(text, UIManager.MouseOverControl.TooltipMaxLength);
 
                     _tooltip.Draw(batcher, position.X, position.Y + 24);
                 }
@@ -483,25 +484,25 @@ namespace ClassicUO.Game
                     return _cursorData[war, 12];
             }
 
-            if (Engine.UI.IsDragging || IsDraggingCursorForced)
+            if (UIManager.IsDragging || IsDraggingCursorForced)
                 return _cursorData[war, 8];
 
             if (IsLoading)
                 return _cursorData[war, 13];
 
-            if (Engine.UI.MouseOverControl is AbstractTextBox t && t.IsEditable)
+            if (UIManager.MouseOverControl is AbstractTextBox t && t.IsEditable)
                 return _cursorData[war, 14];
 
             ushort result = _cursorData[war, 9];
 
-            if (!Engine.UI.IsMouseOverWorld)
+            if (!UIManager.IsMouseOverWorld)
                 return result;
 
-            if (Engine.Profile.Current == null)
+            if (ProfileManager.Current == null)
                 return result;
 
-            int windowCenterX = Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1);
-            int windowCenterY = Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1);
+            int windowCenterX = ProfileManager.Current.GameWindowPosition.X + (ProfileManager.Current.GameWindowSize.X >> 1);
+            int windowCenterY = ProfileManager.Current.GameWindowPosition.Y + (ProfileManager.Current.GameWindowSize.Y >> 1);
 
             return _cursorData[war, GetMouseDirection(windowCenterX, windowCenterY, Mouse.Position.X, Mouse.Position.Y, 1)];
         }

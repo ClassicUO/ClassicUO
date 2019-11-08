@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -87,8 +88,8 @@ namespace ClassicUO.Game.Scenes
         private uint _holdMouse2secOverItemTime;
         private bool _isMouseLeftDown;
 
-        public bool IsMouseOverUI => Engine.UI.IsMouseOverAControl && !(Engine.UI.MouseOverControl is WorldViewport);
-        public bool IsMouseOverViewport => Engine.UI.MouseOverControl is WorldViewport;
+        public bool IsMouseOverUI => UIManager.IsMouseOverAControl && !(UIManager.MouseOverControl is WorldViewport);
+        public bool IsMouseOverViewport => UIManager.MouseOverControl is WorldViewport;
 
         private Direction _lastBoatDirection;
         private bool _boatRun, _boatIsMoving;
@@ -97,8 +98,8 @@ namespace ClassicUO.Game.Scenes
         {
             if (World.InGame && !Pathfinder.AutoWalking)
             {
-                int x = Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1);
-                int y = Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1);
+                int x = ProfileManager.Current.GameWindowPosition.X + (ProfileManager.Current.GameWindowSize.X >> 1);
+                int y = ProfileManager.Current.GameWindowPosition.Y + (ProfileManager.Current.GameWindowSize.Y >> 1);
 
                 Direction direction = (Direction)GameCursor.GetMouseDirection(x, y, Mouse.Position.X, Mouse.Position.Y, 1);
                 double mouseRange = MathHelper.Hypotenuse(x - Mouse.Position.X, y - Mouse.Position.Y);
@@ -164,13 +165,13 @@ namespace ClassicUO.Game.Scenes
 
         private bool DragSelectModifierActive()
         {
-            if (Engine.Profile.Current.DragSelectModifierKey == 0)
+            if (ProfileManager.Current.DragSelectModifierKey == 0)
                 return true;
 
-            if (Engine.Profile.Current.DragSelectModifierKey == 1 && _isCtrlDown)
+            if (ProfileManager.Current.DragSelectModifierKey == 1 && _isCtrlDown)
                 return true;
 
-            if (Engine.Profile.Current.DragSelectModifierKey == 2 && _isShiftDown)
+            if (ProfileManager.Current.DragSelectModifierKey == 2 && _isShiftDown)
                 return true;
 
             return false;
@@ -189,17 +190,17 @@ namespace ClassicUO.Game.Scenes
             int finalX = 100;
             int finalY = 100;
 
-            bool useCHB = Engine.Profile.Current.CustomBarsToggled;
+            bool useCHB = ProfileManager.Current.CustomBarsToggled;
 
             Rectangle rect = useCHB ? new Rectangle(0,0,  HealthBarGumpCustom.HPB_BAR_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_MULTILINE) : FileManager.Gumps.GetTexture(0x0804).Bounds;
 
             foreach (Mobile mobile in World.Mobiles)
             {
-                if (Engine.Profile.Current.DragSelectHumanoidsOnly && !mobile.IsHuman)
+                if (ProfileManager.Current.DragSelectHumanoidsOnly && !mobile.IsHuman)
                     continue;
 
-                int x = Engine.Profile.Current.GameWindowPosition.X + mobile.RealScreenPosition.X + (int)mobile.Offset.X + 22 + 5;
-                int y = Engine.Profile.Current.GameWindowPosition.Y + (mobile.RealScreenPosition.Y - (int)mobile.Offset.Z) + 22 + 5;
+                int x = ProfileManager.Current.GameWindowPosition.X + mobile.RealScreenPosition.X + (int)mobile.Offset.X + 22 + 5;
+                int y = ProfileManager.Current.GameWindowPosition.Y + (mobile.RealScreenPosition.Y - (int)mobile.Offset.Z) + 22 + 5;
 
                 x -= mobile.FrameInfo.X;
                 y -= mobile.FrameInfo.Y;
@@ -218,7 +219,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (mobile != World.Player)
                     {
-                        if (Engine.UI.GetGump<BaseHealthBarGump>(mobile)?.IsInitialized ?? false)
+                        if (UIManager.GetGump<BaseHealthBarGump>(mobile)?.IsInitialized ?? false)
                         {
                             continue;
                         }
@@ -243,13 +244,13 @@ namespace ClassicUO.Game.Scenes
                         hbgc.Initialize();
 
 
-                        if (finalY >= Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - 100)
+                        if (finalY >= ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y - 100)
                         {
                             finalY = 100;
                             finalX += rect.Width + 2;
                         }
 
-                        if (finalX >= Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X - 100)
+                        if (finalX >= ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X - 100)
                         {
                             finalX = 100;
                         }
@@ -258,7 +259,7 @@ namespace ClassicUO.Game.Scenes
                         hbgc.Y = finalY;
 
 
-                        foreach (var bar in Engine.UI.Gumps
+                        foreach (var bar in UIManager.Gumps
                                                 .OfType<BaseHealthBarGump>()
                                                   //.OrderBy(s => mobile.NotorietyFlag)
                                                   //.OrderBy(s => s.ScreenCoordinateX) ///testing placement SYRUPZ SYRUPZ SYRUPZ
@@ -269,13 +270,13 @@ namespace ClassicUO.Game.Scenes
                             {
                                 finalY = bar.Bounds.Bottom + 2;
 
-                                if (finalY >= Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - 100)
+                                if (finalY >= ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y - 100)
                                 {
                                     finalY = 100;
                                     finalX = bar.Bounds.Right + 2;
                                 }
 
-                                if (finalX >= Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X - 100)
+                                if (finalX >= ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X - 100)
                                 {
                                     finalX = 100;
                                 }
@@ -289,7 +290,7 @@ namespace ClassicUO.Game.Scenes
                         finalY += rect.Height + 2;
 
 
-                        Engine.UI.Add(hbgc);
+                        UIManager.Add(hbgc);
 
                         hbgc.SetInScreen();
                     }
@@ -307,7 +308,7 @@ namespace ClassicUO.Game.Scenes
             _dragginObject = SelectedObject.Object as GameObject;
             _dragOffset = Mouse.LDropPosition;
 
-            if (Engine.Profile.Current.EnableDragSelect && DragSelectModifierActive())
+            if (ProfileManager.Current.EnableDragSelect && DragSelectModifierActive())
             {
                 if (CanDragSelectOnObject(SelectedObject.Object as GameObject))
                 {
@@ -345,7 +346,7 @@ namespace ClassicUO.Game.Scenes
             {
                 if (IsHoldingItem)
                 {
-                    Engine.UI.MouseOverControl?.InvokeMouseUp(Mouse.Position, MouseButton.Left);
+                    UIManager.MouseOverControl?.InvokeMouseUp(Mouse.Position, MouseButton.Left);
                 }
                 return;
             }
@@ -355,7 +356,7 @@ namespace ClassicUO.Game.Scenes
             if (_dragginObject != null)
                 _dragginObject = null;
 
-            if (Engine.UI.IsDragging)
+            if (UIManager.IsDragging)
                 return;
 
             if (IsHoldingItem)
@@ -435,7 +436,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             TargetManager.TargetGameObject(obj2);
                             Mouse.LastLeftButtonClickTime = 0;
-                            Engine.UI.Add(new InfoGump(obj2));
+                            UIManager.Add(new InfoGump(obj2));
                         }
 
                         break;
@@ -593,9 +594,9 @@ namespace ClassicUO.Game.Scenes
             if (!IsMouseOverViewport)
                 return false;
 
-            if (Engine.Profile.Current.EnablePathfind && !Pathfinder.AutoWalking)
+            if (ProfileManager.Current.EnablePathfind && !Pathfinder.AutoWalking)
             {
-                if (Engine.Profile.Current.UseShiftToPathfind && !_isShiftDown)
+                if (ProfileManager.Current.UseShiftToPathfind && !_isShiftDown)
                     return false;
 
                 if (SelectedObject.Object is GameObject obj)
@@ -636,7 +637,7 @@ namespace ClassicUO.Game.Scenes
             if (!IsMouseOverViewport)
                 return;
 
-            if (!Engine.Profile.Current.EnableScaleZoom || !Keyboard.Ctrl)
+            if (!ProfileManager.Current.EnableScaleZoom || !Keyboard.Ctrl)
                 return;
 
             if (!up)
@@ -644,8 +645,8 @@ namespace ClassicUO.Game.Scenes
             else
                 ScalePos--;
 
-            if (Engine.Profile.Current.SaveScaleAfterClose)
-                Engine.Profile.Current.ScaleZoom = Scale;
+            if (ProfileManager.Current.SaveScaleAfterClose)
+                ProfileManager.Current.ScaleZoom = Scale;
         }
 
 
@@ -660,7 +661,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                 {
-                    GameObject obj = Engine.Profile.Current.SallosEasyGrab && SelectedObject.LastObject is GameObject o ? o : _dragginObject;
+                    GameObject obj = ProfileManager.Current.SallosEasyGrab && SelectedObject.LastObject is GameObject o ? o : _dragginObject;
 
 
                     switch (obj)
@@ -672,7 +673,7 @@ namespace ClassicUO.Game.Scenes
                                 break;
 
                             GameActions.RequestMobileStatus(entity);
-                            var customgump = Engine.UI.GetGump<BaseHealthBarGump>(entity);
+                            var customgump = UIManager.GetGump<BaseHealthBarGump>(entity);
                             if (customgump != null)
                             {
                                 if (!customgump.IsInitialized)
@@ -683,17 +684,17 @@ namespace ClassicUO.Game.Scenes
                             if (entity == World.Player)
                                 StatusGumpBase.GetStatusGump()?.Dispose();
 
-                            if (Engine.Profile.Current.CustomBarsToggled)
+                            if (ProfileManager.Current.CustomBarsToggled)
                             {
                                 Rectangle rect = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
-                                Engine.UI.Add(customgump = new HealthBarGumpCustom(entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                                UIManager.Add(customgump = new HealthBarGumpCustom(entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                             }
                             else
                             {
                                 Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-                                Engine.UI.Add(customgump = new HealthBarGump(entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                                UIManager.Add(customgump = new HealthBarGump(entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                             }
-                            Engine.UI.AttemptDragControl(customgump, Mouse.Position, true);
+                            UIManager.AttemptDragControl(customgump, Mouse.Position, true);
 
                             break;
 
@@ -734,22 +735,22 @@ namespace ClassicUO.Game.Scenes
 
             if (_isUpDown || _isDownDown || _isLeftDown || _isRightDown)
             {
-                if (Engine.UI.SystemChat?.IsActive == false || Engine.UI.SystemChat?.textBox.Text.Length == 0)
+                if (UIManager.SystemChat?.IsActive == false || UIManager.SystemChat?.textBox.Text.Length == 0)
                     _arrowKeyPressed = true;
             }
 
-            if (_isAuraActive && !Engine.AuraManager.IsEnabled)
-                Engine.AuraManager.ToggleVisibility();
+            if (_isAuraActive && !AuraManager.IsEnabled)
+                AuraManager.ToggleVisibility();
 
             if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
                 TargetManager.CancelTarget();
 
-            if (!Engine.UI.IsKeyboardFocusAllowHotkeys)
+            if (!UIManager.IsKeyboardFocusAllowHotkeys)
                 return;
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !Engine.Profile.Current.DisableTabBtn)
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !ProfileManager.Current.DisableTabBtn)
             {
-                if (Engine.Profile.Current.HoldDownKeyTab)
+                if (ProfileManager.Current.HoldDownKeyTab)
                 {
                     if (!_requestedWarMode)
                     {
@@ -788,8 +789,8 @@ namespace ClassicUO.Game.Scenes
             bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
             bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
 
-            if (Engine.Profile.Current.EnableScaleZoom && Engine.Profile.Current.RestoreScaleAfterUnpressCtrl && _isCtrlDown && !isctrl)
-                Scale = Engine.Profile.Current.RestoreScaleValue;
+            if (ProfileManager.Current.EnableScaleZoom && ProfileManager.Current.RestoreScaleAfterUnpressCtrl && _isCtrlDown && !isctrl)
+                Scale = ProfileManager.Current.RestoreScaleValue;
 
             _isShiftDown = isshift;
             _isCtrlDown = isctrl;
@@ -820,7 +821,7 @@ namespace ClassicUO.Game.Scenes
             if (_isAuraActive)
             {
                 _isAuraActive = false;
-                Engine.AuraManager.ToggleVisibility();
+                AuraManager.ToggleVisibility();
             }
 
             if (_isMacroMoveDown)
@@ -860,9 +861,9 @@ namespace ClassicUO.Game.Scenes
 
             _ctrlAndShiftPressed = isctrl && isshift;
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !Engine.Profile.Current.DisableTabBtn)
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !ProfileManager.Current.DisableTabBtn)
             {
-                if (Engine.Profile.Current.HoldDownKeyTab)
+                if (ProfileManager.Current.HoldDownKeyTab)
                 {
                     if (_requestedWarMode)
                     {

@@ -28,6 +28,12 @@ namespace ClassicUO
             // - enjoy
 
 
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            {
+
+            };
+
+
             ReadSettingsFromArgs(args);
 
 
@@ -70,26 +76,28 @@ namespace ClassicUO
 
 
 
+            GameController controller = new GameController();
+            controller.Run();
+            controller.Dispose();
 
 
 
 
 
+//            Engine.Configure();
 
-            Engine.Configure();
+//#if DEV_BUILD
+//            Updater updater = new Updater();
+//            if (updater.Check())
+//                return;
+//#endif
+//            //ParseMainArgs(args);
 
-#if DEV_BUILD
-            Updater updater = new Updater();
-            if (updater.Check())
-                return;
-#endif
-            //ParseMainArgs(args);
+//            if (!SkipUpdate)
+//                if (CheckUpdate(args))
+//                    return;
 
-            if (!SkipUpdate)
-                if (CheckUpdate(args))
-                    return;
-
-            Engine.Run(args);
+//            Engine.Run(args);
         }
 
         public static bool StartMinimized { get; set; }

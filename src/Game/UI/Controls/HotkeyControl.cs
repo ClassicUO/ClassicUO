@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                 }
                 else // show a popup
-                    Engine.UI.Add(new MessageBoxGump(400, 200, "Key combination already exists.", null));
+                    UIManager.Add(new MessageBoxGump(400, 200, "Key combination already exists.", null));
             };
 
             box.HotkeyCancelled += (sender, e) =>

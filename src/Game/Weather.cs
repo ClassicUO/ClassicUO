@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using ClassicUO.Configuration;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -58,8 +60,8 @@ namespace ClassicUO.Game
             if (Type == 0xFF || Type == 0xFE)
                 return;
 
-            //int drawX = Engine.Profile.Current.GameWindowPosition.X;
-            //int drawY = Engine.Profile.Current.GameWindowPosition.Y;
+            //int drawX = ProfileManager.Current.GameWindowPosition.X;
+            //int drawY = ProfileManager.Current.GameWindowPosition.Y;
 
             if (Count > 70)
                 Count = 70;
@@ -70,8 +72,8 @@ namespace ClassicUO.Game
             {
                 WeatherEffect effect = new WeatherEffect()
                 {
-                    X = RandomHelper.GetValue( 0, Engine.Profile.Current.GameWindowSize.X),
-                    Y = RandomHelper.GetValue(0, Engine.Profile.Current.GameWindowSize.Y)
+                    X = RandomHelper.GetValue( 0, ProfileManager.Current.GameWindowSize.X),
+                    Y = RandomHelper.GetValue(0, ProfileManager.Current.GameWindowSize.Y)
                 };
 
                 _effects.Add(effect);
@@ -147,8 +149,8 @@ namespace ClassicUO.Game
             //        break;
             //}
 
-            //Point winpos = Engine.Profile.Current.GameWindowPosition;
-            Point winsize = Engine.Profile.Current.GameWindowSize;
+            //Point winpos = ProfileManager.Current.GameWindowPosition;
+            Point winsize = ProfileManager.Current.GameWindowSize;
 
             for (int i = 0; i < _effects.Count; i++)
             {

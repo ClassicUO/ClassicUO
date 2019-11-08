@@ -29,6 +29,7 @@ using System.Runtime.InteropServices;
 
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.Utility.Logging;
@@ -360,7 +361,7 @@ namespace ClassicUO.Network
         {
             bool result = true;
 
-            if (!Engine.UI.IsKeyboardFocusAllowHotkeys)
+            if (!UIManager.IsKeyboardFocusAllowHotkeys)
                 return true;
 
             foreach (Plugin plugin in _plugins)

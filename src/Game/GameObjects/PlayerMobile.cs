@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
@@ -265,12 +266,12 @@ namespace ClassicUO.Game.GameObjects
                 skill.CapFixed = cap;
 
                 // check needed to avoid crash when you create a char
-                if (Engine.Profile != null && Engine.Profile.Current != null)
+                if (ProfileManager.Current != null)
                 {
-                    if (Engine.Profile.Current.StandardSkillsGump)
-                        Engine.UI.GetGump<StandardSkillsGump>()?.ForceUpdate(id);
+                    if (ProfileManager.Current.StandardSkillsGump)
+                        UIManager.GetGump<StandardSkillsGump>()?.ForceUpdate(id);
                     else
-                        Engine.UI.GetGump<SkillGumpAdvanced>()?.ForceUpdate();
+                        UIManager.GetGump<SkillGumpAdvanced>()?.ForceUpdate();
                 }
             }
         }
@@ -1263,15 +1264,15 @@ namespace ClassicUO.Game.GameObjects
 
         public void TryOpenCorpses()
         {
-            if (Engine.Profile.Current.AutoOpenCorpses)
+            if (ProfileManager.Current.AutoOpenCorpses)
             {
-                if ((Engine.Profile.Current.CorpseOpenOptions == 1 || Engine.Profile.Current.CorpseOpenOptions == 3) && TargetManager.IsTargeting)
+                if ((ProfileManager.Current.CorpseOpenOptions == 1 || ProfileManager.Current.CorpseOpenOptions == 3) && TargetManager.IsTargeting)
                     return;
 
-                if ((Engine.Profile.Current.CorpseOpenOptions == 2 || Engine.Profile.Current.CorpseOpenOptions == 3) && IsHidden)
+                if ((ProfileManager.Current.CorpseOpenOptions == 2 || ProfileManager.Current.CorpseOpenOptions == 3) && IsHidden)
                     return;
 
-                foreach (var c in World.Items.Where(t => t.Graphic == 0x2006 && !OpenedCorpses.Contains(t.Serial) && t.Distance <= Engine.Profile.Current.AutoOpenCorpseRange))
+                foreach (var c in World.Items.Where(t => t.Graphic == 0x2006 && !OpenedCorpses.Contains(t.Serial) && t.Distance <= ProfileManager.Current.AutoOpenCorpseRange))
                 {
                     OpenedCorpses.Add(c.Serial);
                     GameActions.DoubleClickQueued(c.Serial);
@@ -1288,7 +1289,7 @@ namespace ClassicUO.Game.GameObjects
 
         private void TryOpenDoors()
         {
-            if (!World.Player.IsDead && Engine.Profile.Current.AutoOpenDoors)
+            if (!World.Player.IsDead && ProfileManager.Current.AutoOpenDoors)
             {
                 int x = X, y = Y, z = Z;
                 Pathfinder.GetNewXY((byte) Direction, ref x, ref y);
@@ -1312,13 +1313,13 @@ namespace ClassicUO.Game.GameObjects
 
             if (bank != null)
             {
-                Engine.UI.GetGump<ContainerGump>(bank)?.Dispose();
+                UIManager.GetGump<ContainerGump>(bank)?.Dispose();
             }
         }
 
         public void CloseRangedGumps()
         {
-            foreach (var gump in Engine.UI.Gumps)
+            foreach (var gump in UIManager.Gumps)
             {
                 switch (gump)
                 {
@@ -1394,7 +1395,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (enemy != null)
                 {
-                    Point center = new Point(Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1), Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1));
+                    Point center = new Point(ProfileManager.Current.GameWindowPosition.X + (ProfileManager.Current.GameWindowSize.X >> 1), ProfileManager.Current.GameWindowPosition.Y + (ProfileManager.Current.GameWindowSize.Y >> 1));
                     Direction direction = DirectionHelper.DirectionFromPoints(center, new Point(enemy.RealScreenPosition.X, enemy.RealScreenPosition.Y));
 
                     if (Direction != direction)
@@ -1419,8 +1420,8 @@ namespace ClassicUO.Game.GameObjects
             else if (!run)
             {
                 if (!IsHidden ||
-                    IsHidden && !Engine.Profile.Current.AlwaysRunUnlessHidden)
-                    run = Engine.Profile.Current.AlwaysRun;
+                    IsHidden && !ProfileManager.Current.AlwaysRunUnlessHidden)
+                    run = ProfileManager.Current.AlwaysRun;
             }
 
             int x = X;

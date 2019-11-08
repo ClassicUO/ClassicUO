@@ -23,6 +23,8 @@
 
 using System;
 
+using ClassicUO.Configuration;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
@@ -132,8 +134,8 @@ namespace ClassicUO.Game.GameObjects
             //}
 
 
-            int screenCenterX = Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1);
-            int screenCenterY = Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1);
+            int screenCenterX = ProfileManager.Current.GameWindowPosition.X + (ProfileManager.Current.GameWindowSize.X >> 1);
+            int screenCenterY = ProfileManager.Current.GameWindowPosition.Y + (ProfileManager.Current.GameWindowSize.Y >> 1);
             int playerX = World.Player.X;
             int playerY = World.Player.Y;
             int offsetX = sx - playerX;

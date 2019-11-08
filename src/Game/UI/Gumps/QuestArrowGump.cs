@@ -23,6 +23,7 @@
 
 using System;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -64,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             var scene = Engine.SceneManager.GetScene<GameScene>();
 
-            if (IsDisposed || Engine.Profile.Current == null || scene == null)
+            if (IsDisposed || ProfileManager.Current == null || scene == null)
                 return;
 
             Direction dir = (Direction) GameCursor.GetMouseDirection(World.Player.X, World.Player.Y, _mx, _my, 0);
@@ -90,23 +91,23 @@ namespace ClassicUO.Game.UI.Gumps
             int goy = _my - World.Player.Y;
 
 
-            int x = (Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1)) + 6 + ((gox - goy) * (int) (22 / scale)) - (int) ((_arrow.Width / 2f) / scale);
-            int y = (Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1)) + 6 + ((gox + goy) * (int) (22 / scale)) + (int) ((_arrow.Height) / scale);
+            int x = (ProfileManager.Current.GameWindowPosition.X + (ProfileManager.Current.GameWindowSize.X >> 1)) + 6 + ((gox - goy) * (int) (22 / scale)) - (int) ((_arrow.Width / 2f) / scale);
+            int y = (ProfileManager.Current.GameWindowPosition.Y + (ProfileManager.Current.GameWindowSize.Y >> 1)) + 6 + ((gox + goy) * (int) (22 / scale)) + (int) ((_arrow.Height) / scale);
 
             x -= (int) (World.Player.Offset.X / scale);
             y -= (int) (((World.Player.Offset.Y - World.Player.Offset.Z) + (World.Player.Z >> 2)) / scale);
 
          
-            if (x < Engine.Profile.Current.GameWindowPosition.X)
-                x = Engine.Profile.Current.GameWindowPosition.X;
-            else if (x > Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X - _arrow.Width)
-                x = Engine.Profile.Current.GameWindowPosition.X + Engine.Profile.Current.GameWindowSize.X - _arrow.Width;
+            if (x < ProfileManager.Current.GameWindowPosition.X)
+                x = ProfileManager.Current.GameWindowPosition.X;
+            else if (x > ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X - _arrow.Width)
+                x = ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X - _arrow.Width;
 
 
-            if (y < Engine.Profile.Current.GameWindowPosition.Y)
-                y = Engine.Profile.Current.GameWindowPosition.Y;
-            else if (y > Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - _arrow.Height)
-                y = Engine.Profile.Current.GameWindowPosition.Y + Engine.Profile.Current.GameWindowSize.Y - _arrow.Height;
+            if (y < ProfileManager.Current.GameWindowPosition.Y)
+                y = ProfileManager.Current.GameWindowPosition.Y;
+            else if (y > ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y - _arrow.Height)
+                y = ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y - _arrow.Height;
 
             X = x;
             Y = y;

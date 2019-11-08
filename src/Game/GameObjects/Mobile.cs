@@ -24,6 +24,7 @@
 using System;
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -433,7 +434,7 @@ namespace ClassicUO.Game.GameObjects
 
         private void ProcessFootstepsSound()
         {
-            if (Engine.Profile.Current.EnableFootstepsSound && IsHuman && !IsHidden)
+            if (ProfileManager.Current.EnableFootstepsSound && IsHuman && !IsHidden)
             {
                 long ticks = Engine.Ticks;
 
@@ -467,7 +468,7 @@ namespace ClassicUO.Game.GameObjects
 
                     int distance = Distance;
 
-                    float volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
+                    float volume = ProfileManager.Current.SoundVolume / Constants.SOUND_DELTA;
 
                     if (distance <= World.ClientViewRange && distance >= 1)
                     {
@@ -925,12 +926,12 @@ namespace ClassicUO.Game.GameObjects
 
             int offY = 0;
 
-            bool health = Engine.Profile.Current.ShowMobilesHP;
-            int alwaysHP = Engine.Profile.Current.MobileHPShowWhen;
-            int mode = Engine.Profile.Current.MobileHPType;
+            bool health = ProfileManager.Current.ShowMobilesHP;
+            int alwaysHP = ProfileManager.Current.MobileHPShowWhen;
+            int mode = ProfileManager.Current.MobileHPType;
 
-            int startX = Engine.Profile.Current.GameWindowPosition.X + 6;
-            int startY = Engine.Profile.Current.GameWindowPosition.Y + 6;
+            int startX = ProfileManager.Current.GameWindowPosition.X + 6;
+            int startY = ProfileManager.Current.GameWindowPosition.Y + 6;
             var scene = Engine.SceneManager.GetScene<GameScene>();
             float scale = scene?.Scale ?? 1;
 

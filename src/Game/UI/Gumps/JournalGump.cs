@@ -24,6 +24,7 @@
 using System;
 using System.IO;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -64,13 +65,13 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = _background.Width - width -2, 
                 Y = _diffY + 7,
-                IsChecked = Engine.Profile.Current.JournalDarkMode
+                IsChecked = ProfileManager.Current.JournalDarkMode
             });
 
-            Hue = (ushort)(Engine.Profile.Current.JournalDarkMode ? DARK_MODE_JOURNAL_HUE : 0);
+            Hue = (ushort)(ProfileManager.Current.JournalDarkMode ? DARK_MODE_JOURNAL_HUE : 0);
             darkMode.ValueChanged += (sender, e) =>
             {
-                var ok = Engine.Profile.Current.JournalDarkMode = !Engine.Profile.Current.JournalDarkMode;
+                var ok = ProfileManager.Current.JournalDarkMode = !ProfileManager.Current.JournalDarkMode;
                 Hue = (ushort) (ok ? DARK_MODE_JOURNAL_HUE : 0);
             };
 

@@ -31,11 +31,11 @@ using Newtonsoft.Json;
 
 namespace ClassicUO.Configuration
 {
-    internal class ProfileManager
+    internal static class ProfileManager
     {
-        public Profile Current { get; private set; }
+        public static Profile Current { get; private set; }
 
-        public void Load(string servername, string username, string charactername)
+        public static void Load(string servername, string username, string charactername)
         {
             string path = FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Data", "Profiles", username, servername, charactername);
 
@@ -88,7 +88,7 @@ namespace ClassicUO.Configuration
             }
         }
 
-        public void UnLoadProfile()
+        public static void UnLoadProfile()
         {
             Current = null;
         }

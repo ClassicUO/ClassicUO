@@ -23,6 +23,8 @@
 
 using System;
 using System.Collections.Generic;
+
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -82,9 +84,9 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = false;
             AcceptKeyboardInput = false;
 
-            int height = FileManager.Fonts.GetHeightUnicode(Engine.Profile.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
+            int height = FileManager.Fonts.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
 
-            textBox = new TextBox(Engine.Profile.Current.ChatFont, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
+            textBox = new TextBox(ProfileManager.Current.ChatFont, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
             {
                 X = 0,
                 Y = Height - height - 3,
@@ -98,7 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = textBox.Y,
                 Width = Width,
                 Height = height + 5,
-                IsVisible = !Engine.Profile.Current.ActivateChatAfterEnter,
+                IsVisible = !ProfileManager.Current.ActivateChatAfterEnter,
                 AcceptMouseInput = true
             });
             Add(textBox);
@@ -115,7 +117,7 @@ namespace ClassicUO.Game.UI.Gumps
             Chat.MessageReceived += ChatOnMessageReceived;
             Mode = ChatMode.Default;
 
-            IsActive = !Engine.Profile.Current.ActivateChatAfterEnter;
+            IsActive = !ProfileManager.Current.ActivateChatAfterEnter;
         }
 
         public bool IsActive
@@ -135,7 +137,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    int height = FileManager.Fonts.GetHeightUnicode(Engine.Profile.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
+                    int height = FileManager.Fonts.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
                     textBox.Width = 1;
                     _trans.Y = textBox.Y + height + 3;
                 }
@@ -160,43 +162,43 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         case ChatMode.Default:
                             DisposeChatModePrefix();
-                            textBox.Hue = Engine.Profile.Current.SpeechHue;
+                            textBox.Hue = ProfileManager.Current.SpeechHue;
                             textBox.SetText(string.Empty);
 
                             break;
 
                         case ChatMode.Whisper:
-                            AppendChatModePrefix("[Whisper]: ", Engine.Profile.Current.WhisperHue);
+                            AppendChatModePrefix("[Whisper]: ", ProfileManager.Current.WhisperHue);
 
                             break;
 
                         case ChatMode.Emote:
-                            AppendChatModePrefix("[Emote]: ", Engine.Profile.Current.EmoteHue);
+                            AppendChatModePrefix("[Emote]: ", ProfileManager.Current.EmoteHue);
 
                             break;
 
                         case ChatMode.Yell:
-                            AppendChatModePrefix("[Yell]: ", Engine.Profile.Current.YellHue);
+                            AppendChatModePrefix("[Yell]: ", ProfileManager.Current.YellHue);
 
                             break;
 
                         case ChatMode.Party:
-                            AppendChatModePrefix("[Party]: ", Engine.Profile.Current.PartyMessageHue);
+                            AppendChatModePrefix("[Party]: ", ProfileManager.Current.PartyMessageHue);
 
                             break;
 
                         case ChatMode.PartyPrivate:
-                            AppendChatModePrefix("[Private Party Message]: ", Engine.Profile.Current.PartyMessageHue);
+                            AppendChatModePrefix("[Private Party Message]: ", ProfileManager.Current.PartyMessageHue);
 
                             break;
 
                         case ChatMode.Guild:
-                            AppendChatModePrefix("[Guild]: ", Engine.Profile.Current.GuildMessageHue);
+                            AppendChatModePrefix("[Guild]: ", ProfileManager.Current.GuildMessageHue);
 
                             break;
 
                         case ChatMode.Alliance:
-                            AppendChatModePrefix("[Alliance]: ", Engine.Profile.Current.AllyMessageHue);
+                            AppendChatModePrefix("[Alliance]: ", ProfileManager.Current.AllyMessageHue);
 
                             break;
 
@@ -248,17 +250,17 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case MessageType.Party:
-                    AddLine($"[Party][{e.Name}]: {e.Text}", e.Font, Engine.Profile.Current.PartyMessageHue, e.IsUnicode);
+                    AddLine($"[Party][{e.Name}]: {e.Text}", e.Font, ProfileManager.Current.PartyMessageHue, e.IsUnicode);
 
                     break;
 
                 case MessageType.Guild:
-                    AddLine($"[Guild][{e.Name}]: {e.Text}", e.Font, Engine.Profile.Current.GuildMessageHue, e.IsUnicode);
+                    AddLine($"[Guild][{e.Name}]: {e.Text}", e.Font, ProfileManager.Current.GuildMessageHue, e.IsUnicode);
 
                     break;
 
                 case MessageType.Alliance:
-                    AddLine($"[Alliance][{e.Name}]: {e.Text}", e.Font, Engine.Profile.Current.AllyMessageHue, e.IsUnicode);
+                    AddLine($"[Alliance][{e.Name}]: {e.Text}", e.Font, ProfileManager.Current.AllyMessageHue, e.IsUnicode);
 
                     break;
             }
@@ -306,7 +308,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (textBox != null)
             {
-                int height = FileManager.Fonts.GetHeightUnicode(Engine.Profile.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
+                int height = FileManager.Fonts.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
                 textBox.Y = Height - height - 3;
                 textBox.Width = IsActive ? Width : 1;
                 textBox.Height = height - 3;
@@ -377,7 +379,7 @@ namespace ClassicUO.Game.UI.Gumps
             else if (Mode == ChatMode.ClientCommand && textBox.Text.Length == 1 && textBox.Text[0] == '-')
                 Mode = ChatMode.UOAMChat;
 
-            if (Engine.Profile.Current.SpeechHue != textBox.Hue) textBox.Hue = Engine.Profile.Current.SpeechHue;
+            if (ProfileManager.Current.SpeechHue != textBox.Hue) textBox.Hue = ProfileManager.Current.SpeechHue;
 
             base.Update(totalMS, frameMS);
         }
@@ -401,7 +403,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             switch (key)
             {
-                case SDL.SDL_Keycode.SDLK_q when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && _messageHistoryIndex > -1 && !Engine.Profile.Current.DisableCtrlQWBtn:
+                case SDL.SDL_Keycode.SDLK_q when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && _messageHistoryIndex > -1 && !ProfileManager.Current.DisableCtrlQWBtn:
 
                     var scene = Engine.SceneManager.GetScene<GameScene>();
 
@@ -419,7 +421,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_w when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && !Engine.Profile.Current.DisableCtrlQWBtn:
+                case SDL.SDL_Keycode.SDLK_w when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && !ProfileManager.Current.DisableCtrlQWBtn:
 
                     scene = Engine.SceneManager.GetScene<GameScene>();
 
@@ -458,7 +460,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case SDL.SDL_Keycode.SDLK_1 when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT): // !
                 case SDL.SDL_Keycode.SDLK_BACKSLASH when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT): // \
 
-                    if (Engine.Profile.Current.ActivateChatAfterEnter && Engine.Profile.Current.ActivateChatAdditionalButtons && !IsActive)
+                    if (ProfileManager.Current.ActivateChatAfterEnter && ProfileManager.Current.ActivateChatAdditionalButtons && !IsActive)
                         IsActive = true;
 
                     break;
@@ -474,8 +476,8 @@ namespace ClassicUO.Game.UI.Gumps
                 case SDL.SDL_Keycode.SDLK_LEFTBRACKET: // [
                 case SDL.SDL_Keycode.SDLK_MINUS: // -
                 case SDL.SDL_Keycode.SDLK_KP_MINUS: // -
-                    if (Engine.Profile.Current.ActivateChatAfterEnter &&
-                        Engine.Profile.Current.ActivateChatAdditionalButtons && !IsActive)
+                    if (ProfileManager.Current.ActivateChatAfterEnter &&
+                        ProfileManager.Current.ActivateChatAdditionalButtons && !IsActive)
                     {
                         if (Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE))
                             IsActive = true;
@@ -487,11 +489,11 @@ namespace ClassicUO.Game.UI.Gumps
                 case SDL.SDL_Keycode.SDLK_KP_ENTER:
                 case SDL.SDL_Keycode.SDLK_RETURN:
 
-                    if (Engine.Profile.Current.ActivateChatAfterEnter)
+                    if (ProfileManager.Current.ActivateChatAfterEnter)
                     {
                         Mode = ChatMode.Default;
 
-                        if (!(Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT) && Engine.Profile.Current.ActivateChatShiftEnterSupport))
+                        if (!(Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT) && ProfileManager.Current.ActivateChatShiftEnterSupport))
                             ToggleChatVisibility();
                     }
 
@@ -501,7 +503,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnKeyboardReturn(int textID, string text)
         {
-            if ((!IsActive && Engine.Profile.Current.ActivateChatAfterEnter) || (Mode != ChatMode.Default && string.IsNullOrEmpty(text)))
+            if ((!IsActive && ProfileManager.Current.ActivateChatAfterEnter) || (Mode != ChatMode.Default && string.IsNullOrEmpty(text)))
             {
                 textBox.SetText(string.Empty);
                 text = string.Empty;
@@ -534,19 +536,19 @@ namespace ClassicUO.Game.UI.Gumps
                 switch (sentMode)
                 {
                     case ChatMode.Default:
-                        GameActions.Say(text, Engine.Profile.Current.SpeechHue);
+                        GameActions.Say(text, ProfileManager.Current.SpeechHue);
                         break;
 
                     case ChatMode.Whisper:
-                        GameActions.Say(text, Engine.Profile.Current.WhisperHue, MessageType.Whisper);
+                        GameActions.Say(text, ProfileManager.Current.WhisperHue, MessageType.Whisper);
                         break;
 
                     case ChatMode.Emote:
-                        GameActions.Say(text, Engine.Profile.Current.EmoteHue, MessageType.Emote);
+                        GameActions.Say(text, ProfileManager.Current.EmoteHue, MessageType.Emote);
                         break;
 
                     case ChatMode.Yell:
-                        GameActions.Say(text, Engine.Profile.Current.YellHue, MessageType.Yell);
+                        GameActions.Say(text, ProfileManager.Current.YellHue, MessageType.Yell);
                         break;
 
                     case ChatMode.Party:
@@ -631,12 +633,12 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case ChatMode.Guild:
-                        GameActions.Say(text, Engine.Profile.Current.GuildMessageHue, MessageType.Guild);
+                        GameActions.Say(text, ProfileManager.Current.GuildMessageHue, MessageType.Guild);
 
                         break;
 
                     case ChatMode.Alliance:
-                        GameActions.Say(text, Engine.Profile.Current.AllyMessageHue, MessageType.Alliance);
+                        GameActions.Say(text, ProfileManager.Current.AllyMessageHue, MessageType.Alliance);
 
                         break;
 

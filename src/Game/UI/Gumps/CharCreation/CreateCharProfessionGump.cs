@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -92,7 +93,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
             else
             {
-                CharCreationGump charCreationGump = Engine.UI.GetGump<CharCreationGump>();
+                CharCreationGump charCreationGump = UIManager.GetGump<CharCreationGump>();
 
                 charCreationGump?.SetProfession(info);
             }
@@ -113,7 +114,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     else
                     {
                         Parent.Remove(this);
-                        CharCreationGump charCreationGump = Engine.UI.GetGump<CharCreationGump>();
+                        CharCreationGump charCreationGump = UIManager.GetGump<CharCreationGump>();
                         charCreationGump?.StepBack();
                     }
 

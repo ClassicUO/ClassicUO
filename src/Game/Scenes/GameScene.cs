@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -71,10 +72,10 @@ namespace ClassicUO.Game.Scenes
 
 
         public GameScene() : base(
-            Engine.Profile.Current.WindowClientPosition.X,
-            Engine.Profile.Current.WindowClientPosition.Y,
-            Engine.Profile.Current.WindowClientBounds.X, 
-            Engine.Profile.Current.WindowClientBounds.Y,
+            ProfileManager.Current.WindowClientPosition.X,
+            ProfileManager.Current.WindowClientPosition.Y,
+            ProfileManager.Current.WindowClientBounds.X, 
+            ProfileManager.Current.WindowClientBounds.Y,
             true,
             true,
             true)
@@ -117,8 +118,8 @@ namespace ClassicUO.Game.Scenes
 
         public Weather Weather => _weather;
 
-        public bool UseLights => Engine.Profile.Current != null && Engine.Profile.Current.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
-        public bool UseAltLights => Engine.Profile.Current != null && Engine.Profile.Current.UseAlternativeLights;
+        public bool UseLights => ProfileManager.Current != null && ProfileManager.Current.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
+        public bool UseAltLights => ProfileManager.Current != null && ProfileManager.Current.UseAlternativeLights;
        
         public void DoubleClickDelayed(Serial serial)
         {
@@ -140,28 +141,28 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
-            if (!Engine.Profile.Current.DebugGumpIsDisabled)
+            if (!ProfileManager.Current.DebugGumpIsDisabled)
             {
-                Engine.UI.Add(new DebugGump
+                UIManager.Add(new DebugGump
                 {
-                    X = Engine.Profile.Current.DebugGumpPosition.X,
-                    Y = Engine.Profile.Current.DebugGumpPosition.Y
+                    X = ProfileManager.Current.DebugGumpPosition.X,
+                    Y = ProfileManager.Current.DebugGumpPosition.Y
                 });
                 Engine.DropFpsMinMaxValues();
             }
 
             HeldItem = new ItemHold();
             Hotkeys = new HotkeysManager();
-            Macros = new MacroManager(Engine.Profile.Current.Macros);
+            Macros = new MacroManager(ProfileManager.Current.Macros);
             InfoBars = new InfoBarManager();
             _healthLinesManager = new HealthLinesManager();
             _weather = new Weather();
 
             WorldViewportGump viewport = new WorldViewportGump(this);
 
-            Engine.UI.Add(viewport);
+            UIManager.Add(viewport);
 
-            if (!Engine.Profile.Current.TopbarGumpIsDisabled)
+            if (!ProfileManager.Current.TopbarGumpIsDisabled)
                 TopBarGump.Create();
 
             _viewPortGump = viewport.FindControls<WorldViewport>().SingleOrDefault();
@@ -174,13 +175,13 @@ namespace ClassicUO.Game.Scenes
 
             Chat.MessageReceived += ChatOnMessageReceived;
 
-            if (!Engine.Profile.Current.EnableScaleZoom || !Engine.Profile.Current.SaveScaleAfterClose)
+            if (!ProfileManager.Current.EnableScaleZoom || !ProfileManager.Current.SaveScaleAfterClose)
                 Scale = 1f;
             else
-                Scale = Engine.Profile.Current.ScaleZoom;
+                Scale = ProfileManager.Current.ScaleZoom;
 
-            Engine.Profile.Current.RestoreScaleValue = Engine.Profile.Current.ScaleZoom = Scale;
-            Engine.UI.ContainerScale = Engine.Profile.Current.ContainersScale / 100f;
+            ProfileManager.Current.RestoreScaleValue = ProfileManager.Current.ScaleZoom = Scale;
+            UIManager.ContainerScale = ProfileManager.Current.ContainersScale / 100f;
 
             Plugin.OnConnected();
         }
@@ -219,7 +220,7 @@ namespace ClassicUO.Game.Scenes
                     text = $"*{e.Text}*";
 
                     if (e.Hue == 0)
-                        hue = Engine.Profile.Current.EmoteHue;
+                        hue = ProfileManager.Current.EmoteHue;
 
                     break;
 
@@ -238,21 +239,21 @@ namespace ClassicUO.Game.Scenes
                 case MessageType.Party:
                     text = e.Text;
                     name = $"[Party][{e.Name}]";
-                    hue = Engine.Profile.Current.PartyMessageHue;
+                    hue = ProfileManager.Current.PartyMessageHue;
 
                     break;
 
                 case MessageType.Alliance:
                     text = e.Text;
                     name = $"[Alliance][{e.Name}]";
-                    hue = Engine.Profile.Current.AllyMessageHue;
+                    hue = ProfileManager.Current.AllyMessageHue;
 
                     break;
 
                 case MessageType.Guild:
                     text = e.Text;
                     name = $"[Guild][{e.Name}]";
-                    hue = Engine.Profile.Current.GuildMessageHue;
+                    hue = ProfileManager.Current.GuildMessageHue;
 
                     break;
 
@@ -273,9 +274,9 @@ namespace ClassicUO.Game.Scenes
         {
             HeldItem?.Clear();
 
-            if (Engine.Profile.Current != null)
+            if (ProfileManager.Current != null)
             {
-                Engine.Profile.Current.WindowClientPosition = Engine.WindowPosition;
+                ProfileManager.Current.WindowClientPosition = Engine.WindowPosition;
             }
             
             try
@@ -290,8 +291,8 @@ namespace ClassicUO.Game.Scenes
 
             TargetManager.ClearTargetingWithoutTargetCancelPacket();
 
-            Engine.Profile.Current?.Save(Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
-            Engine.Profile.UnLoadProfile();
+            ProfileManager.Current?.Save(UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
+            ProfileManager.UnLoadProfile();
 
             NetClient.Socket.Disconnected -= SocketOnDisconnected;
             NetClient.Socket.Disconnect();
@@ -301,7 +302,7 @@ namespace ClassicUO.Game.Scenes
             CommandManager.UnRegisterAll();
             _weather.Reset();
 
-            Engine.UI?.Clear();
+            UIManager.Clear();
             World.Clear();
 
           
@@ -316,11 +317,11 @@ namespace ClassicUO.Game.Scenes
 
         private void SocketOnDisconnected(object sender, SocketError e)
         {
-            if (Engine.GlobalSettings.Reconnect)
+            if (Settings.GlobalSettings.Reconnect)
                 _forceStopScene = true;
             else
             {
-                Engine.UI.Add(new MessageBoxGump(200, 200, $"Connection lost:\n{e}", s =>
+                UIManager.Add(new MessageBoxGump(200, 200, $"Connection lost:\n{e}", s =>
                 {
                     if (s)
                         Engine.SceneManager.ChangeScene(ScenesType.Login);
@@ -330,7 +331,7 @@ namespace ClassicUO.Game.Scenes
 
         public void RequestQuitGame()
         {
-            Engine.UI.Add(new QuestionGump("Quit\nUltima Online?", s =>
+            UIManager.Add(new QuestionGump("Quit\nUltima Online?", s =>
             {
                 if (s)
                     Engine.SceneManager.ChangeScene(ScenesType.Login);
@@ -403,7 +404,7 @@ namespace ClassicUO.Game.Scenes
                 if (light.ID >= Constants.MAX_LIGHTS_DATA_INDEX_COUNT)
                     return;
 
-                light.Color = Engine.Profile.Current.UseColoredLights ? LightColors.GetHue(graphic) : (ushort) 0;
+                light.Color = ProfileManager.Current.UseColoredLights ? LightColors.GetHue(graphic) : (ushort) 0;
 
                 light.DrawX = x;
                 light.DrawY = y;
@@ -547,7 +548,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_rightMousePressed || _continueRunning)
                 MoveCharacterByMouseInput();
-            else if (!Engine.Profile.Current.DisableArrowBtn || _isMacroMoveDown)
+            else if (!ProfileManager.Current.DisableArrowBtn || _isMacroMoveDown)
             {
                 if (_arrowKeyPressed)
                     MoveCharacterByKeyboardInput(false);
@@ -659,13 +660,13 @@ namespace ClassicUO.Game.Scenes
             if (!World.InGame)
                 return false;
 
-            if (Engine.Profile.Current.EnableDeathScreen)
+            if (ProfileManager.Current.EnableDeathScreen)
             {
                 if (_deathScreenLabel == null || _deathScreenLabel.IsDisposed)
                 {
                     if (World.Player.IsDead && World.Player.DeathScreenTimer > Engine.Ticks)
                     {
-                        Engine.UI.Add(_deathScreenLabel = new Label("You are dead.", false, 999, 200, 3)
+                        UIManager.Add(_deathScreenLabel = new Label("You are dead.", false, 999, 200, 3)
                         {
                             X = (Engine.WindowWidth >> 1) - 50,
                             Y = (Engine.WindowHeight >> 1) - 50
@@ -697,13 +698,13 @@ namespace ClassicUO.Game.Scenes
             //if (CircleOfTransparency.Circle == null)
             //    CircleOfTransparency.Create(200);
             //CircleOfTransparency.Circle.Draw(batcher,
-            //                                 ((Engine.Profile.Current.GameWindowSize.X / 2)),
-            //                                 ((Engine.Profile.Current.GameWindowSize.Y / 2)));
+            //                                 ((ProfileManager.Current.GameWindowSize.X / 2)),
+            //                                 ((ProfileManager.Current.GameWindowSize.Y / 2)));
 
             //batcher.GraphicsDevice.Clear(ClearOptions.Stencil | ClearOptions.Target | ClearOptions.DepthBuffer, Color.Black, 0, 0);
 
 
-            batcher.SetBrightlight(Engine.Profile.Current.Brighlight);
+            batcher.SetBrightlight(ProfileManager.Current.Brighlight);
 
             batcher.Begin();
 
@@ -714,7 +715,7 @@ namespace ClassicUO.Game.Scenes
                 RenderedObjectsCount = 0;
 
                 int z = World.Player.Z + 5;
-                bool usecircle = Engine.Profile.Current.UseCircleOfTransparency;
+                bool usecircle = ProfileManager.Current.UseCircleOfTransparency;
 
                 for (int i = 0; i < _renderListCount; i++)
                 {
@@ -740,7 +741,7 @@ namespace ClassicUO.Game.Scenes
 
             // draw weather
             batcher.Begin();
-            _weather.Draw(batcher, 0, 0 /*Engine.Profile.Current.GameWindowPosition.X, Engine.Profile.Current.GameWindowPosition.Y*/);
+            _weather.Draw(batcher, 0, 0 /*ProfileManager.Current.GameWindowPosition.X, ProfileManager.Current.GameWindowPosition.Y*/);
             batcher.End();
 
             batcher.GraphicsDevice.SetRenderTarget(null);
@@ -763,7 +764,7 @@ namespace ClassicUO.Game.Scenes
             {
                 var lightColor = World.Light.IsometricLevel;
 
-                if (Engine.Profile.Current.UseDarkNights)
+                if (ProfileManager.Current.UseDarkNights)
                     lightColor -= 0.02f;
 
                 _vectorClear.X = _vectorClear.Y = _vectorClear.Z = lightColor;

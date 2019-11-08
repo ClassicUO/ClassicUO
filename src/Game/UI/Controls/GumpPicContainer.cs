@@ -23,6 +23,7 @@
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 
@@ -58,7 +59,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            float scale = Engine.UI.ContainerScale;
+            float scale = UIManager.ContainerScale;
 
             x = (int)(x / scale);
             y = (int)(y / scale);

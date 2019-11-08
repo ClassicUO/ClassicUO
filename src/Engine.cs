@@ -79,19 +79,15 @@ namespace ClassicUO
         private readonly GraphicsDeviceManager _graphicDeviceManager;
         private readonly bool _isHighDPI;
         private readonly Settings _settings;
-        private AuraManager _auraManager;
         private UltimaBatcher2D _batcher;
         private double _currentFpsTime;
         private DebugInfo _debugInfo;
-        private InputManager _inputManager;
         private bool _isRunningSlowly;
         private double _previous;
-        private ProfileManager _profileManager;
         private SceneManager _sceneManager;
         private double _statisticsTimer;
         private double _totalElapsed;
         private int _totalFrames;
-        private UIManager _uiManager;
 
         private Engine(string[] args)
         {
@@ -180,7 +176,7 @@ namespace ClassicUO
 
                 SetPreferredBackBufferSize(width, height);
 
-                WorldViewportGump gump = _uiManager.GetGump<WorldViewportGump>();
+                WorldViewportGump gump = UIManager.GetGump<WorldViewportGump>();
 
                 if (gump != null && _profileManager.Current.GameWindowFullSize)
                 {
@@ -300,17 +296,9 @@ namespace ClassicUO
             set => SDL.SDL_SetWindowPosition(_window.Handle, value.X, value.Y);
         }
 
-        public static UIManager UI => _engine._uiManager;
 
-        public static InputManager Input => _engine._inputManager;
-
-        public static ProfileManager Profile => _engine._profileManager;
-
-        public static Settings GlobalSettings => _engine._settings;
 
         public static SceneManager SceneManager => _engine._sceneManager;
-
-        public static AuraManager AuraManager => _engine._auraManager;
 
         public static string ExePath { get; private set; }
 
@@ -567,9 +555,6 @@ namespace ClassicUO
             Log.NewLine();
 
             _batcher = new UltimaBatcher2D(GraphicsDevice);
-            _inputManager = new InputManager();
-            _uiManager = new UIManager();
-            _profileManager = new ProfileManager();
             _sceneManager = new SceneManager();
             _debugInfo = new DebugInfo();
 
@@ -617,8 +602,6 @@ namespace ClassicUO
             GraphicsDevice.Textures[1] = texture0;
             GraphicsDevice.Textures[2] = texture1;
 
-            _auraManager = new AuraManager();
-            _auraManager.CreateAuraTexture();
 
             Log.Message(LogTypes.Trace, "Network calibration...");
             Log.PushIndent();
@@ -629,7 +612,6 @@ namespace ClassicUO
             Log.Message(LogTypes.Trace, "Done!");
             Log.PopIndent();
 
-            _uiManager.InitializeGameCursor();
 
             Log.Message(LogTypes.Trace, "Loading plugins...");
             Log.PushIndent();
@@ -654,7 +636,6 @@ namespace ClassicUO
 
         protected override void UnloadContent()
         {
-            _inputManager.Dispose();
             _sceneManager.CurrentScene?.Unload();
             _settings.Save();
             Plugin.OnClosing();
@@ -780,10 +761,6 @@ namespace ClassicUO
             //GraphicsDevice?.Present();
         }
 
-        public override void OnSDLEvent(ref SDL.SDL_Event ev)
-        {
-            _inputManager.EventHandler(ref ev);
-        }
 
         private void UpdateWindowCaption()
         {

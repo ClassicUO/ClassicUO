@@ -27,6 +27,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -122,7 +123,7 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true;
             }
 
-            Engine.UI.GameCursor.IsDraggingCursorForced = false;
+            UIManager.GameCursor.IsDraggingCursorForced = false;
 
             base.OnMouseUp(x, y, button);
         }
@@ -138,7 +139,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _isScrolling = true;
                     CanMove = false;
 
-                    Engine.UI.GameCursor.IsDraggingCursorForced = true;
+                    UIManager.GameCursor.IsDraggingCursorForced = true;
                 }
             }
 
@@ -554,7 +555,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            Engine.UI.GameCursor.IsDraggingCursorForced = false;
+            UIManager.GameCursor.IsDraggingCursorForced = false;
 
             _mapTexture?.Dispose();
             base.Dispose();

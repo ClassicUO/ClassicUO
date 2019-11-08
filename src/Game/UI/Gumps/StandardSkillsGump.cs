@@ -171,7 +171,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (i == 0)
                         {
-                            Engine.UI.Add(new MessageBoxGump(200, 150, "Cannot delete this group.", null));
+                            UIManager.Add(new MessageBoxGump(200, 150, "Cannot delete this group.", null));
                             break;
                         }
 
@@ -225,13 +225,13 @@ namespace ClassicUO.Game.UI.Gumps
         public void ForceUpdate(int skillIndex)
         {
             if (skillIndex < _allSkillControls.Length)
-                _allSkillControls[skillIndex]?.UpdateSkillValue(Engine.UI.GetGump<StandardSkillsGump>());
+                _allSkillControls[skillIndex]?.UpdateSkillValue(UIManager.GetGump<StandardSkillsGump>());
             _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
         }
 
         private void UpdateGump(object sender, EventArgs e)
         {
-            StandardSkillsGump skg = Engine.UI.GetGump<StandardSkillsGump>();
+            StandardSkillsGump skg = UIManager.GetGump<StandardSkillsGump>();
             for (int i = 0; i < _allSkillControls.Length; i++) _allSkillControls[i]?.UpdateSkillValue(skg);
             _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
         }
@@ -372,7 +372,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (CanMove)
                     return;
 
-                var c = Engine.UI.MouseOverControl;
+                var c = UIManager.MouseOverControl;
 
                 if (c != null && c != this)
                 {
@@ -413,13 +413,13 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     uint serial = (uint) (World.Player + _skillIndex + 1);
 
-                    if (Engine.UI.GetGump<SkillButtonGump>(serial) != null)
-                        Engine.UI.Remove<SkillButtonGump>(serial);
+                    if (UIManager.GetGump<SkillButtonGump>(serial) != null)
+                        UIManager.Remove<SkillButtonGump>(serial);
 
                     SkillButtonGump skillButtonGump = new SkillButtonGump(World.Player.Skills[_skillIndex], Mouse.Position.X, Mouse.Position.Y);
-                    Engine.UI.Add(skillButtonGump);
+                    UIManager.Add(skillButtonGump);
                     Rectangle rect = FileManager.Gumps.GetTexture(0x24B8).Bounds;
-                    Engine.UI.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
+                    UIManager.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
                 }
 
                 base.OnMouseOver(x, y);

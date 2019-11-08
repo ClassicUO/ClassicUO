@@ -21,8 +21,10 @@
 
 #endregion
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
@@ -59,7 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (Mobile == null || Mobile.IsDestroyed)
             {
                 Dispose();
-                Engine.UI.RemoveTargetLineGump(Mobile);
+                UIManager.RemoveTargetLineGump(Mobile);
 
                 return;
             }
@@ -101,15 +103,15 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (Engine.Profile == null || Engine.Profile.Current == null || Mobile == null || Mobile.IsDestroyed)
+            if (ProfileManager.Current == null || Mobile == null || Mobile.IsDestroyed)
                 return false;
 
             float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
 
-            int gx = Engine.Profile.Current.GameWindowPosition.X;
-            int gy = Engine.Profile.Current.GameWindowPosition.Y;
-            int w = Engine.Profile.Current.GameWindowSize.X;
-            int h = Engine.Profile.Current.GameWindowSize.Y;
+            int gx = ProfileManager.Current.GameWindowPosition.X;
+            int gy = ProfileManager.Current.GameWindowPosition.Y;
+            int w = ProfileManager.Current.GameWindowSize.X;
+            int h = ProfileManager.Current.GameWindowSize.Y;
 
             x = gx + Mobile.RealScreenPosition.X;
             y = gy + Mobile.RealScreenPosition.Y;

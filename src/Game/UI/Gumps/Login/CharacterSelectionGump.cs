@@ -24,6 +24,7 @@
 using System;
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -57,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             }
 
             LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
-            var lastSelected = loginScene.Characters.FirstOrDefault(o => o == Engine.GlobalSettings.LastCharacterName);
+            var lastSelected = loginScene.Characters.FirstOrDefault(o => o == Settings.GlobalSettings.LastCharacterName);
 
             if (!string.IsNullOrEmpty(lastSelected))
                 _selectedCharacter = (uint) Array.IndexOf(loginScene.Characters, lastSelected);

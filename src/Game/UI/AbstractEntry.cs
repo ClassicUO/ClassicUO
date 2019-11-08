@@ -21,6 +21,7 @@
 
 #endregion
 
+using ClassicUO.Configuration;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
@@ -257,7 +258,7 @@ namespace ClassicUO.Game.UI
             if (oldPos != CaretIndex)
                 UpdateCaretPosition();
 
-            if (mouseclick && World.InGame && Engine.Profile.Current.EnableSelectionArea)
+            if (mouseclick && World.InGame && ProfileManager.Current.EnableSelectionArea)
             {
                 _selectionArea = (x, y);
                 _isSelection = true;

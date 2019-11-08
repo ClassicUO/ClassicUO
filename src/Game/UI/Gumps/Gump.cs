@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
@@ -139,7 +140,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, switches.ToArray(), entries.ToArray());
 
-                Engine.UI.SavePosition(ServerSerial, Location);
+                UIManager.SavePosition(ServerSerial, Location);
                 Dispose();
             }
         }

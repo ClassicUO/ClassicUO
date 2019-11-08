@@ -25,7 +25,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
@@ -109,9 +111,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsInitialized { get; set; }
 
-        public bool HasKeyboardFocus => Engine.UI.KeyboardFocusControl == this;
+        public bool HasKeyboardFocus => UIManager.KeyboardFocusControl == this;
 
-        public bool MouseIsOver => Engine.UI.MouseOverControl == this;
+        public bool MouseIsOver => UIManager.MouseOverControl == this;
 
         public virtual bool CanMove { get; set; }
 
@@ -263,24 +265,24 @@ namespace ClassicUO.Game.UI.Controls
 
                 OnPageChanged();
 
-                if (Engine.UI.KeyboardFocusControl != null)
+                if (UIManager.KeyboardFocusControl != null)
                 {
-                    if (Children.Contains(Engine.UI.KeyboardFocusControl))
+                    if (Children.Contains(UIManager.KeyboardFocusControl))
                     {
-                        if (Engine.UI.KeyboardFocusControl.Page != 0)
-                            Engine.UI.KeyboardFocusControl = null;
+                        if (UIManager.KeyboardFocusControl.Page != 0)
+                            UIManager.KeyboardFocusControl = null;
                     }
                 }
 
                 // When ActivePage changes, check to see if there are new text input boxes
                 // that we should redirect text input to.
-                if (Engine.UI.KeyboardFocusControl == null)
+                if (UIManager.KeyboardFocusControl == null)
                 {
                     foreach (Control c in Children)
                     {
                         if (c.HandlesKeyboardFocus && c.Page == _activePage)
                         {
-                            Engine.UI.KeyboardFocusControl = c;
+                            UIManager.KeyboardFocusControl = c;
 
                             break;
                         }
@@ -378,18 +380,18 @@ namespace ClassicUO.Game.UI.Controls
 
         private void DrawDebug(UltimaBatcher2D batcher, int x, int y)
         {
-            if (IsVisible && (Engine.GlobalSettings.Debug))
+            if (IsVisible && (Settings.GlobalSettings.Debug))
             {
                 ResetHueVector();
 
-                if (Engine.GlobalSettings.Debug) 
+                if (Settings.GlobalSettings.Debug) 
                     batcher.DrawRectangle(Textures.GetTexture(Color.Green), x, y, Width, Height, ref _hueVector);
             }
         }
 
         public void BringOnTop()
         {
-            Engine.UI.MakeTopMostGump(this);
+            UIManager.MakeTopMostGump(this);
         }
 
         public void SetTooltip(string text, int maxWidth = 0)
@@ -418,7 +420,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public void SetKeyboardFocus()
         {
-            if (AcceptKeyboardInput && !HasKeyboardFocus) Engine.UI.KeyboardFocusControl = this;
+            if (AcceptKeyboardInput && !HasKeyboardFocus) UIManager.KeyboardFocusControl = this;
         }
 
         internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseOver, MouseEnter, MouseExit, DragBegin, DragEnd;
@@ -450,7 +452,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (!initializedKeyboardFocusedControl && c.AcceptKeyboardInput)
                     {
-                        Engine.UI.KeyboardFocusControl = c;
+                        UIManager.KeyboardFocusControl = c;
                         initializedKeyboardFocusedControl = true;
                     }
                 }
@@ -522,8 +524,8 @@ namespace ClassicUO.Game.UI.Controls
                     return a;
             }
 
-            if (World.InGame && Engine.UI.SystemChat != null)
-                return Engine.UI.SystemChat.textBox;
+            if (World.InGame && UIManager.SystemChat != null)
+                return UIManager.SystemChat.textBox;
 
             return null;
         }

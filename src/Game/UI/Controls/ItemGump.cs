@@ -23,6 +23,7 @@
 
 using System;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -127,9 +128,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
+            if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
             {
-                float scale = Engine.UI.ContainerScale;
+                float scale = UIManager.ContainerScale;
 
                 x = (int)(x / scale);
                 y = (int)(y / scale);
@@ -236,7 +237,7 @@ namespace ClassicUO.Game.UI.Controls
                             {
                                 TargetManager.TargetGameObject(Item);
                                 Mouse.LastLeftButtonClickTime = 0;
-                                Engine.UI.Add(new InfoGump(Item));
+                                UIManager.Add(new InfoGump(Item));
                             }
 
                             break;
@@ -303,7 +304,7 @@ namespace ClassicUO.Game.UI.Controls
         private bool CanPickup()
         {
             Point offset = Mouse.LDroppedOffset;
-            var split = Engine.UI.GetGump<SplitMenuGump>(LocalSerial);
+            var split = UIManager.GetGump<SplitMenuGump>(LocalSerial);
 
             split?.Dispose();
 
@@ -319,7 +320,7 @@ namespace ClassicUO.Game.UI.Controls
             Item container;
 
             if ( !Input.Keyboard.Ctrl &&
-                Engine.Profile.Current.DoubleClickToLootInsideContainers &&
+                ProfileManager.Current.DoubleClickToLootInsideContainers &&
                 Item != null && !Item.IsDestroyed &&
                 !Item.ItemData.IsContainer && Item.Items.Count == 0 &&
                 (container = World.Items.Get(Item.RootContainer)) != null &&

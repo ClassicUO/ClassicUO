@@ -192,7 +192,7 @@ namespace ClassicUO.Game.UI.Controls
         //                    {
         //                        TargetManager.TargetGameObject(Item);
         //                        Mouse.LastLeftButtonClickTime = 0;
-        //                        Engine.UI.Add(new InfoGump(Item));
+        //                        UIManager.Add(new InfoGump(Item));
         //                    }
 
         //                    break;

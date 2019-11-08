@@ -21,6 +21,7 @@
 
 #endregion
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
@@ -32,7 +33,7 @@ namespace ClassicUO.Game.Managers
 {
     internal class HealthLinesManager
     {
-        public bool IsEnabled => Engine.Profile.Current != null && Engine.Profile.Current.ShowMobilesHP;
+        public bool IsEnabled => ProfileManager.Current != null && ProfileManager.Current.ShowMobilesHP;
 
 
         private Vector3 _vectorHue = Vector3.Zero;
@@ -56,21 +57,21 @@ namespace ClassicUO.Game.Managers
             const int BAR_WIDTH_HALF = BAR_WIDTH >> 1;
             const int BAR_HEIGHT_HALF = BAR_HEIGHT >> 1;
 
-            int screenX = Engine.Profile.Current.GameWindowPosition.X;
-            int screenY = Engine.Profile.Current.GameWindowPosition.Y;
-            int screenW = Engine.Profile.Current.GameWindowSize.X;
-            int screenH = Engine.Profile.Current.GameWindowSize.Y;
+            int screenX = ProfileManager.Current.GameWindowPosition.X;
+            int screenY = ProfileManager.Current.GameWindowPosition.Y;
+            int screenW = ProfileManager.Current.GameWindowSize.X;
+            int screenH = ProfileManager.Current.GameWindowSize.Y;
 
             
 
             Color color;
 
-            int mode = Engine.Profile.Current.MobileHPType;
+            int mode = ProfileManager.Current.MobileHPType;
 
             if (mode < 0)
                 return;
 
-            int showWhen = Engine.Profile.Current.MobileHPShowWhen;
+            int showWhen = ProfileManager.Current.MobileHPShowWhen;
 
             foreach (Mobile mobile in World.Mobiles)
             {

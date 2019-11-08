@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -54,7 +55,7 @@ namespace ClassicUO.Game.GameObjects
 
             ushort hue = Hue;
 
-            if (Engine.Profile.Current.FieldsType == 1 && StaticFilters.IsField(Graphic)) // static
+            if (ProfileManager.Current.FieldsType == 1 && StaticFilters.IsField(Graphic)) // static
             {
                 unsafe
                 {
@@ -73,7 +74,7 @@ namespace ClassicUO.Game.GameObjects
 
                 _force = false;
             }
-            else if (Engine.Profile.Current.FieldsType == 2)
+            else if (ProfileManager.Current.FieldsType == 2)
             {
                 if (StaticFilters.IsFireField(Graphic))
                 {
@@ -130,17 +131,17 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 HueVector.X = 0x0023;
                 HueVector.Y = 1;
             }
-            else if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 HueVector.X = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;
             }
-            else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
                 HueVector.X = Constants.DEAD_RANGE_COLOR;
                 HueVector.Y = 1;
@@ -311,21 +312,21 @@ namespace ClassicUO.Game.GameObjects
 
                 ResetHueVector();
                 
-                if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+                if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
                 {
                     HueVector.X = Constants.OUT_RANGE_COLOR;
                     HueVector.Y = 1;
                 }
-                else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
+                else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
                 {
                     HueVector.X = Constants.DEAD_RANGE_COLOR;
                     HueVector.Y = 1;
                 }
                 else
                 {
-                    if (Engine.Profile.Current.GridLootType > 0 && SelectedObject.CorpseObject == this)
+                    if (ProfileManager.Current.GridLootType > 0 && SelectedObject.CorpseObject == this)
                         color = 0x0034;
-                    else if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
+                    else if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
                         color = 0x0023;
 
                     ShaderHuesTraslator.GetHueVector(ref HueVector, color, ispartialhue, 0);

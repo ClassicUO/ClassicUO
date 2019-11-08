@@ -24,6 +24,7 @@
 using System;
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -174,28 +175,28 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (Entity is Mobile || Entity is Item it && it.IsDamageable)
             {
-                if (Engine.UI.IsDragging)
+                if (UIManager.IsDragging)
                     return;
 
                 GameActions.RequestMobileStatus(Entity);
-                BaseHealthBarGump gump = Engine.UI.GetGump<BaseHealthBarGump>(Entity);
+                BaseHealthBarGump gump = UIManager.GetGump<BaseHealthBarGump>(Entity);
                 gump?.Dispose();
 
                 if (Entity == World.Player)
                     StatusGumpBase.GetStatusGump()?.Dispose();
 
-                if (Engine.Profile.Current.CustomBarsToggled)
+                if (ProfileManager.Current.CustomBarsToggled)
                 {
                     Rectangle rect = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
-                    Engine.UI.Add(gump = new HealthBarGumpCustom(Entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                    UIManager.Add(gump = new HealthBarGumpCustom(Entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                 }
                 else
                 {
                     Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-                    Engine.UI.Add(gump = new HealthBarGump(Entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                    UIManager.Add(gump = new HealthBarGump(Entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                 }
 
-                Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
+                UIManager.AttemptDragControl(gump, Mouse.Position, true);
             }
             else
                 GameActions.PickUp(Entity);
@@ -225,7 +226,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!scene.IsHoldingItem)
                 {
-                    if (Engine.UI.IsDragging || Math.Max(Math.Abs(Mouse.LDroppedOffset.X), Math.Abs(Mouse.LDroppedOffset.Y)) >= 1)
+                    if (UIManager.IsDragging || Math.Max(Math.Abs(Mouse.LDroppedOffset.X), Math.Abs(Mouse.LDroppedOffset.Y)) >= 1)
                     {
                         _positionLocked = false;
 
@@ -249,7 +250,7 @@ namespace ClassicUO.Game.UI.Gumps
                         case CursorTarget.SetTargetClientSide:
                             TargetManager.TargetGameObject(Entity);
                             Mouse.LastLeftButtonClickTime = 0;
-                            Engine.UI.Add(new InfoGump(Entity));
+                            UIManager.Add(new InfoGump(Entity));
 
                             break;
 
@@ -331,7 +332,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_isPressed)
             {
-                if (Engine.UI.IsDragging)
+                if (UIManager.IsDragging)
                 {
                     _clickTiming = 0;
                     _isPressed = false;
@@ -360,10 +361,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             float scale = Engine.SceneManager.GetScene<GameScene>().Scale;
 
-            int gx = Engine.Profile.Current.GameWindowPosition.X;
-            int gy = Engine.Profile.Current.GameWindowPosition.Y;
-            int w = Engine.Profile.Current.GameWindowSize.X;
-            int h = Engine.Profile.Current.GameWindowSize.Y;
+            int gx = ProfileManager.Current.GameWindowPosition.X;
+            int gy = ProfileManager.Current.GameWindowPosition.Y;
+            int w = ProfileManager.Current.GameWindowSize.X;
+            int h = ProfileManager.Current.GameWindowSize.Y;
 
             if (Entity is Mobile m)
             {

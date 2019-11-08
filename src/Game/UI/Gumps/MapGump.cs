@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Network;
@@ -228,7 +229,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _pinTimer = Engine.Ticks + 300;
 
-            if (Engine.UI.MouseOverControl is PinControl pin)
+            if (UIManager.MouseOverControl is PinControl pin)
             {
                 _currentPin = pin;
             }

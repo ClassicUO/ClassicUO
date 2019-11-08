@@ -91,7 +91,7 @@ namespace ClassicUO.Game.UI.Controls
             if (b.Key != SDL.SDL_Keycode.SDLK_UNKNOWN && Engine.SceneManager.GetScene<GameScene>().Macros.FindMacro(b.Key, alt, ctrl, shift) != null)
             {
                 MessageBoxGump gump = new MessageBoxGump(250, 250, "This key combination\nalready exists.", s => { b.SetKey(SDL.SDL_Keycode.SDLK_UNKNOWN, SDL.SDL_Keymod.KMOD_NONE); });
-                Engine.UI.Add(gump);
+                UIManager.Add(gump);
             }
             else
             {
@@ -118,10 +118,10 @@ namespace ClassicUO.Game.UI.Controls
                 _collection.RemoveLast();
             else if (buttonID == 2) // add macro button
             {
-                Engine.UI.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == _collection.Macro)?.Dispose();
+                UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == _collection.Macro)?.Dispose();
 
                 MacroButtonGump macroButtonGump = new MacroButtonGump(_collection.Macro, Mouse.Position.X, Mouse.Position.Y);
-                Engine.UI.Add(macroButtonGump);
+                UIManager.Add(macroButtonGump);
             }
         }
     }

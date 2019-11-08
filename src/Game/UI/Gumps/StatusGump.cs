@@ -25,6 +25,7 @@ using System;
 using System.IO;
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -48,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
         protected StatusGumpBase() : base(0, 0)
         {
             // sanity check
-            Engine.UI.GetGump<HealthBarGump>(World.Player)?.Dispose();
+            UIManager.GetGump<HealthBarGump>(World.Player)?.Dispose();
 
             CanMove = true;
             CanBeSaved = true;
@@ -60,10 +61,10 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case ButtonType.BuffIcon:
 
-                    BuffGump gump = Engine.UI.GetGump<BuffGump>();
+                    BuffGump gump = UIManager.GetGump<BuffGump>();
 
                     if (gump == null)
-                        Engine.UI.Add(new BuffGump(100, 100));
+                        UIManager.Add(new BuffGump(100, 100));
                     else
                     {
                         gump.SetInScreen();
@@ -90,15 +91,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
                     {
-                        Engine.UI.GetGump<BaseHealthBarGump>(World.Player)?.Dispose();
+                        UIManager.GetGump<BaseHealthBarGump>(World.Player)?.Dispose();
 
-                        if (Engine.Profile.Current.CustomBarsToggled)
+                        if (ProfileManager.Current.CustomBarsToggled)
                         {
-                            Engine.UI.Add(new HealthBarGumpCustom(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                            UIManager.Add(new HealthBarGumpCustom(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
                         }
                         else
                         {
-                            Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                            UIManager.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
                         }
                         Dispose();
                     }
@@ -122,29 +123,29 @@ namespace ClassicUO.Game.UI.Gumps
             StatusGumpBase gump;
 
 
-            switch (Engine.GlobalSettings.ShardType)
+            switch (Settings.GlobalSettings.ShardType)
             {
                 case 0: // modern
 
-                    gump = Engine.UI.GetGump<StatusGumpModern>();
+                    gump = UIManager.GetGump<StatusGumpModern>();
 
                     break;
 
                 case 1: // old
 
-                    gump = Engine.UI.GetGump<StatusGumpOld>();
+                    gump = UIManager.GetGump<StatusGumpOld>();
 
                     break;
 
                 case 2: // outlands
 
-                    gump = Engine.UI.GetGump<StatusGumpOutlands>();
+                    gump = UIManager.GetGump<StatusGumpOutlands>();
 
                     break;
 
                 default:
 
-                    gump = Engine.UI.Gumps.OfType<StatusGumpBase>().FirstOrDefault();
+                    gump = UIManager.Gumps.OfType<StatusGumpBase>().FirstOrDefault();
 
                     break;
             }
@@ -156,25 +157,25 @@ namespace ClassicUO.Game.UI.Gumps
 
         public static void AddStatusGump(int x, int y)
         {
-            switch (Engine.GlobalSettings.ShardType)
+            switch (Settings.GlobalSettings.ShardType)
             {
                 case 0: // modern
 
-                    Engine.UI.Add(new StatusGumpModern
+                    UIManager.Add(new StatusGumpModern
                     { X = x, Y = y });
 
                     break;
 
                 case 1: // old
 
-                    Engine.UI.Add(new StatusGumpOld
+                    UIManager.Add(new StatusGumpOld
                     { X = x, Y = y });
 
                     break;
 
                 case 2: // outlands
 
-                    Engine.UI.Add(new StatusGumpOutlands
+                    UIManager.Add(new StatusGumpOutlands
                     { X = x, Y = y });
 
                     break;
@@ -209,7 +210,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void UpdateLocksAfterPacket()
         {
-            if (Engine.GlobalSettings.ShardType != 1)
+            if (Settings.GlobalSettings.ShardType != 1)
             {
                 for (int i = 0; i < 3; i++)
                 {
@@ -379,7 +380,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(reader);
 
-            if (Engine.GlobalSettings.ShardType != 1)
+            if (Settings.GlobalSettings.ShardType != 1)
                 Dispose();
         }
 
@@ -745,7 +746,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(reader);
 
-            if (Engine.GlobalSettings.ShardType != 0)
+            if (Settings.GlobalSettings.ShardType != 0)
                 Dispose();
         }
 
@@ -1060,16 +1061,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (rect.Contains(p))
                     {
-                        Engine.UI.GetGump<BaseHealthBarGump>(World.Player)?.Dispose();
+                        UIManager.GetGump<BaseHealthBarGump>(World.Player)?.Dispose();
 
                         //TCH whole if else
-                        if (Engine.Profile.Current.CustomBarsToggled)
+                        if (ProfileManager.Current.CustomBarsToggled)
                         {
-                            Engine.UI.Add(new HealthBarGumpCustom(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                            UIManager.Add(new HealthBarGumpCustom(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
                         }
                         else
                         {
-                            Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                            UIManager.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
                         }
                         Dispose();
                     }
@@ -1137,7 +1138,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(reader);
 
-            if (Engine.GlobalSettings.ShardType != 2)
+            if (Settings.GlobalSettings.ShardType != 2)
                 Dispose();
         }
 
@@ -1188,7 +1189,7 @@ namespace ClassicUO.Game.UI.Gumps
 
     //    public StatusGump() : base(0, 0)
     //    {
-    //        Engine.UI.GetByLocalSerial<HealthBarGump>(World.Player)?.Dispose();
+    //        UIManager.GetByLocalSerial<HealthBarGump>(World.Player)?.Dispose();
 
     //        CanBeSaved = true;
     //        CanMove = true;
@@ -1201,7 +1202,7 @@ namespace ClassicUO.Game.UI.Gumps
     //    {
     //        Clear();
 
-    //        bool oldStatus = Engine.Profile.Current.UseOldStatusGump;
+    //        bool oldStatus = ProfileManager.Current.UseOldStatusGump;
     //        Point p = Point.Zero;
 
     //        if (FileManager.ClientVersion >= ClientVersions.CV_308D && !oldStatus)
@@ -1825,11 +1826,11 @@ namespace ClassicUO.Game.UI.Gumps
     //                {
     //                    //var list = Engine.SceneManager.GetScene<GameScene>().MobileGumpStack;
     //                    //list.Add(World.Player);
-    //                    Engine.UI.Add(new HealthBarGump(World.Player) {X = ScreenCoordinateX, Y = ScreenCoordinateY});
+    //                    UIManager.Add(new HealthBarGump(World.Player) {X = ScreenCoordinateX, Y = ScreenCoordinateY});
 
     //                    //if (dict.ContainsKey(World.Player))
     //                    //{
-    //                    //    Engine.UI.Remove<HealthBarGump>(World.Player);
+    //                    //    UIManager.Remove<HealthBarGump>(World.Player);
     //                    //}
     //                    Dispose();
     //                }
@@ -1840,7 +1841,7 @@ namespace ClassicUO.Game.UI.Gumps
     //                {
     //                    //var list = Engine.SceneManager.GetScene<GameScene>().MobileGumpStack;
     //                    //list.Add(World.Player);
-    //                    Engine.UI.Add(new HealthBarGump(World.Player) {X = ScreenCoordinateX, Y = ScreenCoordinateY});
+    //                    UIManager.Add(new HealthBarGump(World.Player) {X = ScreenCoordinateX, Y = ScreenCoordinateY});
     //                    Dispose();
     //                }
     //            }
@@ -1862,7 +1863,7 @@ namespace ClassicUO.Game.UI.Gumps
     //        if (_refreshTime < totalMS)
     //        {
     //            _refreshTime = totalMS + 250;
-    //            bool oldStatus = Engine.Profile.Current.UseOldStatusGump;
+    //            bool oldStatus = ProfileManager.Current.UseOldStatusGump;
 
     //            if (FileManager.ClientVersion > ClientVersions.CV_308Z && !oldStatus)
     //            {

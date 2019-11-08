@@ -27,8 +27,10 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Game.UI.Gumps.CharCreation;
 using ClassicUO.Game.UI.Gumps.Login;
@@ -61,8 +63,8 @@ namespace ClassicUO.Game.Scenes
 
 
         public LoginScene() : base(
-            Engine.Profile.Current.WindowClientPosition.X,
-            Engine.Profile.Current.WindowClientPosition.Y,
+            ProfileManager.Current.WindowClientPosition.X,
+            ProfileManager.Current.WindowClientPosition.Y,
             640,
             480,
             false,
@@ -96,10 +98,10 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
-            Engine.FpsLimit = Engine.GlobalSettings.MaxLoginFPS;
+            Engine.FpsLimit = Settings.GlobalSettings.MaxLoginFPS;
 
-            Engine.UI.Add(new LoginBackground());
-            Engine.UI.Add(_currentGump = new LoginGump());
+            UIManager.Add(new LoginBackground());
+            UIManager.Add(_currentGump = new LoginGump());
 
             // Registering Packet Events
             NetClient.PacketReceived += NetClient_PacketReceived;
@@ -111,10 +113,10 @@ namespace ClassicUO.Game.Scenes
 
             Audio.PlayMusic(music);
 
-            if ((Engine.GlobalSettings.AutoLogin || Reconnect) && CurrentLoginStep != LoginStep.Main)
+            if ((Settings.GlobalSettings.AutoLogin || Reconnect) && CurrentLoginStep != LoginStep.Main)
             {
-                if (!string.IsNullOrEmpty(Engine.GlobalSettings.Username))
-                    Connect(Engine.GlobalSettings.Username, Crypter.Decrypt(Engine.GlobalSettings.Password));
+                if (!string.IsNullOrEmpty(Settings.GlobalSettings.Username))
+                    Connect(Settings.GlobalSettings.Username, Crypter.Decrypt(Settings.GlobalSettings.Password));
             }
         }
 
@@ -123,7 +125,7 @@ namespace ClassicUO.Game.Scenes
         {
             Audio.StopMusic();
 
-            Engine.UI.Remove<LoginBackground>();
+            UIManager.Remove<LoginBackground>();
             _currentGump?.Dispose();
 
             // UnRegistering Packet Events           
@@ -133,7 +135,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Disconnected -= Login_NetClient_Disconnected;
             NetClient.PacketReceived -= NetClient_PacketReceived;
 
-            Engine.UI.GameCursor.IsLoading = false;
+            UIManager.GameCursor.IsLoading = false;
 
             base.Unload();
         }
@@ -142,11 +144,11 @@ namespace ClassicUO.Game.Scenes
         {
             if (_lastLoginStep != CurrentLoginStep)
             {
-                Engine.UI.GameCursor.IsLoading = false;
+                UIManager.GameCursor.IsLoading = false;
 
                 // this trick avoid the flickering
                 var g = _currentGump;
-                Engine.UI.Add(_currentGump = GetGumpForStep());
+                UIManager.Add(_currentGump = GetGumpForStep());
                 g.Dispose();
 
                 _lastLoginStep = CurrentLoginStep;
@@ -154,7 +156,7 @@ namespace ClassicUO.Game.Scenes
 
             if (Reconnect && (CurrentLoginStep == LoginStep.PopUpMessage || CurrentLoginStep == LoginStep.Main))
             {
-                long rt = (long) totalMS + Engine.GlobalSettings.ReconnectTime * 1000;
+                long rt = (long) totalMS + Settings.GlobalSettings.ReconnectTime * 1000;
 
                 if (_reconnectTime == null)
                     _reconnectTime = rt;
@@ -162,9 +164,9 @@ namespace ClassicUO.Game.Scenes
                 if (_reconnectTime < totalMS)
                 {
                     if (!string.IsNullOrEmpty(Account))
-                        Connect(Account, Crypter.Decrypt(Engine.GlobalSettings.Password));
-                    else if (!string.IsNullOrEmpty(Engine.GlobalSettings.Username))
-                        Connect(Engine.GlobalSettings.Username, Crypter.Decrypt(Engine.GlobalSettings.Password));
+                        Connect(Account, Crypter.Decrypt(Settings.GlobalSettings.Password));
+                    else if (!string.IsNullOrEmpty(Settings.GlobalSettings.Username))
+                        Connect(Settings.GlobalSettings.Username, Crypter.Decrypt(Settings.GlobalSettings.Password));
 
                     _reconnectTime = rt;
                     _reconnectTryCounter++;
@@ -191,7 +193,7 @@ namespace ClassicUO.Game.Scenes
                 case LoginStep.LoginInToServer:
                 case LoginStep.EnteringBritania:
                 case LoginStep.PopUpMessage:
-                    Engine.UI.GameCursor.IsLoading = CurrentLoginStep != LoginStep.PopUpMessage;
+                    UIManager.GameCursor.IsLoading = CurrentLoginStep != LoginStep.PopUpMessage;
 
                     return GetLoadingScreen();
 
@@ -264,16 +266,16 @@ namespace ClassicUO.Game.Scenes
             Password = password;
 
             // Save credentials to config file
-            if (Engine.GlobalSettings.SaveAccount)
+            if (Settings.GlobalSettings.SaveAccount)
             {
-                Engine.GlobalSettings.Username = Account;
-                Engine.GlobalSettings.Password = Crypter.Encrypt(Password);
-                Engine.GlobalSettings.Save();
+                Settings.GlobalSettings.Username = Account;
+                Settings.GlobalSettings.Password = Crypter.Encrypt(Password);
+                Settings.GlobalSettings.Save();
             }
 
-            Log.Message(LogTypes.Trace, $"Start login to: {Engine.GlobalSettings.IP},{Engine.GlobalSettings.Port}");
+            Log.Message(LogTypes.Trace, $"Start login to: {Settings.GlobalSettings.IP},{Settings.GlobalSettings.Port}");
 
-            if (!NetClient.LoginSocket.Connect(Engine.GlobalSettings.IP, Engine.GlobalSettings.Port))
+            if (!NetClient.LoginSocket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port))
             {
                 PopupMessage = "Check your internet connection and try again";
                 Log.Message(LogTypes.Error, "No Internet Access");
@@ -296,8 +298,8 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
 
-                Engine.GlobalSettings.LastServerNum = (ushort) (1 + ServerIndex);
-                Engine.GlobalSettings.Save();
+                Settings.GlobalSettings.LastServerNum = (ushort) (1 + ServerIndex);
+                Settings.GlobalSettings.Save();
 
                 CurrentLoginStep = LoginStep.LoginInToServer;
                 World.ServerName = Servers[ServerIndex].Name;
@@ -309,8 +311,8 @@ namespace ClassicUO.Game.Scenes
         {
             if (CurrentLoginStep == LoginStep.CharacterSelection)
             {
-                Engine.GlobalSettings.LastCharacterName = Characters[index];
-                Engine.GlobalSettings.Save();
+                Settings.GlobalSettings.LastCharacterName = Characters[index];
+                Settings.GlobalSettings.Save();
                 CurrentLoginStep = LoginStep.EnteringBritania;
                 NetClient.Socket.Send(new PSelectCharacter(index, Characters[index], NetClient.Socket.ClientAddress));
             }
@@ -332,7 +334,7 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
 
-            Engine.GlobalSettings.LastCharacterName = character.Name;
+            Settings.GlobalSettings.LastCharacterName = character.Name;
             NetClient.Socket.Send(new PCreateCharacter(character, startingCity, NetClient.Socket.ClientAddress, ServerIndex, (uint) i, profession));
         }
 
@@ -430,7 +432,7 @@ namespace ClassicUO.Game.Scenes
                 Characters = null;
                 Servers = null;
 
-                if (Engine.GlobalSettings.Reconnect)
+                if (Settings.GlobalSettings.Reconnect)
                 {
                     Reconnect = true;
                     PopupMessage = $"Reconnect, please wait...`{_reconnectTryCounter}`\n`{e}`";
@@ -453,11 +455,11 @@ namespace ClassicUO.Game.Scenes
 
                     CurrentLoginStep = LoginStep.ServerSelection;
 
-                    if (Engine.GlobalSettings.AutoLogin || Reconnect)
+                    if (Settings.GlobalSettings.AutoLogin || Reconnect)
                     {
                         if (Servers.Length != 0)
                         {
-                            int index = Engine.GlobalSettings.LastServerNum;
+                            int index = Settings.GlobalSettings.LastServerNum;
 
                             if (index <= 0 || index > Servers.Length)
                             {
@@ -482,11 +484,11 @@ namespace ClassicUO.Game.Scenes
                 case 0x86: // UpdateCharacterList
                     ParseCharacterList(e);
 
-                    Engine.UI.Remove<CharacterSelectionGump>();
+                    UIManager.Remove<CharacterSelectionGump>();
 
                     _currentGump?.Dispose();
 
-                    Engine.UI.Add(_currentGump = new CharacterSelectionGump());
+                    UIManager.Add(_currentGump = new CharacterSelectionGump());
 
                     break;
 
@@ -499,7 +501,7 @@ namespace ClassicUO.Game.Scenes
                     uint charToSelect = 0;
 
                     bool haveAnyCharacter = false;
-                    bool tryAutologin = Engine.GlobalSettings.AutoLogin || Reconnect;
+                    bool tryAutologin = Settings.GlobalSettings.AutoLogin || Reconnect;
 
                     for (byte i = 0; i < Characters.Length; i++)
                     {
@@ -507,7 +509,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             haveAnyCharacter = true;
 
-                            if (Characters[i] == Engine.GlobalSettings.LastCharacterName)
+                            if (Characters[i] == Settings.GlobalSettings.LastCharacterName)
                             {
                                 charToSelect = i;
 
@@ -524,7 +526,7 @@ namespace ClassicUO.Game.Scenes
                     break;
 
                 case 0xBD: // ReceiveVersionRequest
-                    NetClient.Socket.Send(new PClientVersion(Engine.GlobalSettings.ClientVersion));
+                    NetClient.Socket.Send(new PClientVersion(Settings.GlobalSettings.ClientVersion));
 
                     break;
 
