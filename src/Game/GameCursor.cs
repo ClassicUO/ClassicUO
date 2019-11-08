@@ -341,7 +341,7 @@ namespace ClassicUO.Game
 
                 if (ProfileManager.Current.ShowTargetRangeIndicator)
                 {
-                    GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+                    GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
 
                     if (gs != null && gs.IsMouseOverViewport)
                     {
@@ -400,7 +400,7 @@ namespace ClassicUO.Game
 
         private void DrawToolTip(UltimaBatcher2D batcher, Point position)
         {
-            if (Engine.SceneManager.CurrentScene is GameScene gs)
+            if (CUOEnviroment.Client.Scene is GameScene gs)
             {
                 if (!World.ClientFeatures.TooltipsEnabled || gs.IsHoldingItem)
                 {
@@ -478,7 +478,7 @@ namespace ClassicUO.Game
 
             if (TargetManager.IsTargeting)
             {
-                GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+                GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
 
                 if (gs != null && !gs.IsHoldingItem)
                     return _cursorData[war, 12];

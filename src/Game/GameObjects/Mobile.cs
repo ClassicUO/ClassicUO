@@ -476,7 +476,7 @@ namespace ClassicUO.Game.GameObjects
                         volume -= volumeByDist * distance;
                     }
 
-                    Engine.SceneManager.CurrentScene.Audio.PlaySoundWithDistance(soundID, volume);
+                    CUOEnviroment.Client.Scene.Audio.PlaySoundWithDistance(soundID, volume);
                     LastStepSoundTime = ticks + delaySound;
                 }
             }
@@ -932,7 +932,7 @@ namespace ClassicUO.Game.GameObjects
 
             int startX = ProfileManager.Current.GameWindowPosition.X + 6;
             int startY = ProfileManager.Current.GameWindowPosition.Y + 6;
-            var scene = Engine.SceneManager.GetScene<GameScene>();
+            var scene = CUOEnviroment.Client.GetScene<GameScene>();
             float scale = scene?.Scale ?? 1;
 
             int x = RealScreenPosition.X;

@@ -178,7 +178,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _activated = 1;
 
-            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
+            CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
         }
 
         private void SetActivePage(int page)
@@ -201,7 +201,7 @@ namespace ClassicUO.Game.UI.Gumps
                 m_Forward.IsVisible = true;
             }
 
-            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
+            CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
 
             ActivePage = page;
         }

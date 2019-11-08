@@ -84,7 +84,7 @@ namespace ClassicUO
         private DebugInfo _debugInfo;
         private bool _isRunningSlowly;
         private double _previous;
-        private SceneManager _sceneManager;
+        //private SceneManager _sceneManager;
         private double _statisticsTimer;
         private double _totalElapsed;
         private int _totalFrames;
@@ -298,7 +298,7 @@ namespace ClassicUO
 
 
 
-        public static SceneManager SceneManager => _engine._sceneManager;
+        //public static SceneManager SceneManager => _engine._sceneManager;
 
         public static string ExePath { get; private set; }
 
@@ -555,7 +555,7 @@ namespace ClassicUO
             Log.NewLine();
 
             _batcher = new UltimaBatcher2D(GraphicsDevice);
-            _sceneManager = new SceneManager();
+            //_sceneManager = new SceneManager();
             _debugInfo = new DebugInfo();
 
             FpsLimit = Constants.LOGIN_SCREEN_FPS;

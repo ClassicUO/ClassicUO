@@ -180,7 +180,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             if (_data.OpenSound != 0)
-                Engine.SceneManager.CurrentScene.Audio.PlaySound(_data.OpenSound);
+                CUOEnviroment.Client.Scene.Audio.PlaySound(_data.OpenSound);
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -232,7 +232,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             LocalSerial = reader.ReadUInt32();
-            Engine.SceneManager.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
+            CUOEnviroment.Client.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
             reader.ReadUInt16();
 
             Dispose();
@@ -411,7 +411,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 if (_data.ClosedSound != 0)
-                    Engine.SceneManager.CurrentScene.Audio.PlaySound(_data.ClosedSound);
+                    CUOEnviroment.Client.Scene.Audio.PlaySound(_data.ClosedSound);
             }
 
             base.Dispose();

@@ -220,7 +220,7 @@ namespace ClassicUO.Game.UI.Controls
             if (button == MouseButton.Left)
             {
                 IsClicked = false;
-                if (_entered || Engine.SceneManager.CurrentScene is GameScene)
+                if (_entered || CUOEnviroment.Client.Scene is GameScene)
                 {
                     switch (ButtonAction)
                     {

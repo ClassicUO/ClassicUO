@@ -102,7 +102,7 @@ namespace ClassicUO.Game
 
         public static void DoubleClickQueued(Serial serial)
         {
-            Engine.SceneManager.GetScene<GameScene>()?.DoubleClickDelayed(serial);
+            CUOEnviroment.Client.GetScene<GameScene>()?.DoubleClickDelayed(serial);
         }
 
         public static void DoubleClick(Serial serial)

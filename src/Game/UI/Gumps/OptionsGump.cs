@@ -703,7 +703,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (string.IsNullOrWhiteSpace(name))
                         return;
 
-                    MacroManager manager = Engine.SceneManager.GetScene<GameScene>().Macros;
+                    MacroManager manager = CUOEnviroment.Client.GetScene<GameScene>().Macros;
                     List<Macro> macros = manager.GetAllMacros();
 
                     if (macros.Any(s => s.Name == name))
@@ -792,7 +792,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 return;
 
                             UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == control.Macro)?.Dispose();
-                            Engine.SceneManager.GetScene<GameScene>().Macros.RemoveMacro(control.Macro);
+                            CUOEnviroment.Client.GetScene<GameScene>().Macros.RemoveMacro(control.Macro);
                         }
 
                         if (rightArea.Children.OfType<ScrollAreaItem>().All(s => s.IsDisposed)) _macroControl?.Dispose();
@@ -806,7 +806,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(rightArea, PAGE);
             Add(new Line(191 + 150, 21, 1, 418, Color.Gray.PackedValue), PAGE);
 
-            foreach (Macro macro in Engine.SceneManager.GetScene<GameScene>().Macros.GetAllMacros())
+            foreach (Macro macro in CUOEnviroment.Client.GetScene<GameScene>().Macros.GetAllMacros())
             {
                 NiceButton nb;
 
@@ -1298,7 +1298,7 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(new Line(0, 0, rightArea.Width, 5, Color.Black.PackedValue));
 
 
-            InfoBarManager ibmanager = Engine.SceneManager.GetScene<GameScene>().InfoBars;
+            InfoBarManager ibmanager = CUOEnviroment.Client.GetScene<GameScene>().InfoBars;
 
             List<InfoBarItem> _infoBarItems = ibmanager.GetInfoBars();
 
@@ -1450,7 +1450,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _gameWindowFullsize.IsChecked = false;
                     _enableDeathScreen.IsChecked = true;
                     _enableBlackWhiteEffect.IsChecked = true;
-                    Engine.SceneManager.GetScene<GameScene>().Scale = 1;
+                    CUOEnviroment.Client.GetScene<GameScene>().Scale = 1;
                     ProfileManager.Current.RestoreScaleValue = ProfileManager.Current.ScaleZoom = 1f;
                     _lightBar.Value = 0;
                     _enableLight.IsChecked = false;
@@ -1598,7 +1598,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (ProfileManager.Current.DrawRoofs == _drawRoofs.IsChecked)
             {
                 ProfileManager.Current.DrawRoofs = !_drawRoofs.IsChecked;
-                Engine.SceneManager.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+                CUOEnviroment.Client.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
             }
 
             if (ProfileManager.Current.TopbarGumpIsDisabled != _enableTopbar.IsChecked)
@@ -1669,10 +1669,10 @@ namespace ClassicUO.Game.UI.Gumps
             Settings.GlobalSettings.LoginMusicVolume = _loginMusicVolume.Value;
             Settings.GlobalSettings.LoginMusic = _loginMusic.IsChecked;
 
-            Engine.SceneManager.CurrentScene.Audio.UpdateCurrentMusicVolume();
+            CUOEnviroment.Client.Scene.Audio.UpdateCurrentMusicVolume();
 
             if (!ProfileManager.Current.EnableMusic)
-                Engine.SceneManager.CurrentScene.Audio.StopMusic();
+                CUOEnviroment.Client.Scene.Audio.StopMusic();
 
             // speech
             ProfileManager.Current.ScaleSpeechDelay = _scaleSpeechDelay.IsChecked;
@@ -1704,7 +1704,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (ProfileManager.Current.EnableScaleZoom != _zoomCheckbox.IsChecked)
             {
                 if (!_zoomCheckbox.IsChecked)
-                    Engine.SceneManager.GetScene<GameScene>().Scale = 1;
+                    CUOEnviroment.Client.GetScene<GameScene>().Scale = 1;
 
                 ProfileManager.Current.EnableScaleZoom = _zoomCheckbox.IsChecked;
             }
@@ -1714,7 +1714,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_restorezoomCheckbox.IsChecked != ProfileManager.Current.RestoreScaleAfterUnpressCtrl)
             {
                 if (_restorezoomCheckbox.IsChecked)
-                    ProfileManager.Current.RestoreScaleValue = Engine.SceneManager.GetScene<GameScene>().Scale;
+                    ProfileManager.Current.RestoreScaleValue = CUOEnviroment.Client.GetScene<GameScene>().Scale;
 
                 ProfileManager.Current.RestoreScaleAfterUnpressCtrl = _restorezoomCheckbox.IsChecked;
             }
@@ -1855,7 +1855,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.SpellDisplayFormat = _spellFormatBox.Text;
 
             // macros
-            ProfileManager.Current.Macros = Engine.SceneManager.GetScene<GameScene>().Macros.GetAllMacros().ToArray();
+            ProfileManager.Current.Macros = CUOEnviroment.Client.GetScene<GameScene>().Macros.GetAllMacros().ToArray();
 
             // counters
 
@@ -1990,7 +1990,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.InfoBarHighlightType = _infoBarHighlightType.SelectedIndex;
 
 
-            InfoBarManager ibmanager = Engine.SceneManager.GetScene<GameScene>().InfoBars;
+            InfoBarManager ibmanager = CUOEnviroment.Client.GetScene<GameScene>().InfoBars;
             ibmanager.Clear();
 
             for (int i = 0; i < _infoBarBuilderControls.Count; i++)

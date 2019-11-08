@@ -22,5 +22,7 @@ namespace ClassicUO
         public static readonly bool IsUnix = Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX;
         public static readonly string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString().Replace(",", ".");
         public static readonly string ExecutablePath = Assembly.GetEntryAssembly()?.Location;
+
+        public static GameController Client;
     }
 }

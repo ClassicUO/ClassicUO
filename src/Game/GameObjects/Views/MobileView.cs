@@ -266,7 +266,7 @@ namespace ClassicUO.Game.GameObjects
                         else
                         {
                             if (item.ItemData.IsLight)
-                                Engine.SceneManager.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
+                                CUOEnviroment.Client.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
                         }
 
                         _equipConvData = null;
@@ -275,7 +275,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (item.ItemData.IsLight)
                         {
-                            Engine.SceneManager.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
+                            CUOEnviroment.Client.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
                             break;
                         }
                     }
@@ -488,7 +488,7 @@ namespace ClassicUO.Game.GameObjects
                     owner.Select(mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y);
 
                     if (entity != null && entity.ItemData.IsLight)
-                        Engine.SceneManager.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x, y);
+                        CUOEnviroment.Client.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x, y);
                 }
 
                 return FileManager.Animations.DataIndex[id].MountedHeightOffset;

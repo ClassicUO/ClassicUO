@@ -116,7 +116,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseEnter(int x, int y)
         {
-            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+            GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
 
             if (gs.IsHoldingItem)
             {
@@ -272,7 +272,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+            GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
 
             if (!gs.IsHoldingItem || !gs.IsMouseOverUI || _paperDollInteractable.IsOverBackpack)
                 return;
@@ -374,7 +374,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(reader);
             LocalSerial = reader.ReadUInt32();
-            Engine.SceneManager.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
+            CUOEnviroment.Client.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
             Dispose();
         }
 
@@ -414,7 +414,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.LogOut:
-                    Engine.SceneManager.GetScene<GameScene>()?.RequestQuitGame();
+                    CUOEnviroment.Client.GetScene<GameScene>()?.RequestQuitGame();
 
                     break;
 

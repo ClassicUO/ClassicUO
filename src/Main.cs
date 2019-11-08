@@ -76,9 +76,9 @@ namespace ClassicUO
 
 
 
-            GameController controller = new GameController();
-            controller.Run();
-            controller.Dispose();
+            CUOEnviroment.Client = new GameController();
+            CUOEnviroment.Client.Run();
+            CUOEnviroment.Client.Dispose();
 
 
 

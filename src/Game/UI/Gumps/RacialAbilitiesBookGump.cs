@@ -236,7 +236,7 @@ namespace ClassicUO.Game.UI.Gumps
             _pageCornerLeft.Page = ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = ActivePage != _pagesCount ? 0 : int.MaxValue;
 
-            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
+            CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
         }
     }
 }

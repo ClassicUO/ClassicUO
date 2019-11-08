@@ -88,7 +88,7 @@ namespace ClassicUO.Game.UI.Controls
             bool alt = (b.Mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
             bool ctrl = (b.Mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
 
-            if (b.Key != SDL.SDL_Keycode.SDLK_UNKNOWN && Engine.SceneManager.GetScene<GameScene>().Macros.FindMacro(b.Key, alt, ctrl, shift) != null)
+            if (b.Key != SDL.SDL_Keycode.SDLK_UNKNOWN && CUOEnviroment.Client.GetScene<GameScene>().Macros.FindMacro(b.Key, alt, ctrl, shift) != null)
             {
                 MessageBoxGump gump = new MessageBoxGump(250, 250, "This key combination\nalready exists.", s => { b.SetKey(SDL.SDL_Keycode.SDLK_UNKNOWN, SDL.SDL_Keymod.KMOD_NONE); });
                 UIManager.Add(gump);
@@ -139,7 +139,7 @@ namespace ClassicUO.Game.UI.Controls
             Add(_scrollArea);
 
 
-            GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+            GameScene scene = CUOEnviroment.Client.GetScene<GameScene>();
 
             foreach (Macro macro in scene.Macros.GetAllMacros())
             {

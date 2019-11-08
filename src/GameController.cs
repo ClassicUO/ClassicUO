@@ -40,7 +40,10 @@ namespace ClassicUO
 
         public Scene Scene => _scene;
 
-
+        public T GetScene<T>() where T : Scene
+        {
+            return _scene as T;
+        }
 
 
         protected override void Initialize()

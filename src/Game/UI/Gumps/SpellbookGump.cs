@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Restore(BinaryReader reader)
         {
             base.Restore(reader);
-            Engine.SceneManager.GetScene<GameScene>().DoubleClickDelayed(reader.ReadUInt32());
+            CUOEnviroment.Client.GetScene<GameScene>().DoubleClickDelayed(reader.ReadUInt32());
             Dispose();
         }
 
@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Update();
 
-            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
+            CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
         }
 
         public override void Dispose()
@@ -98,7 +98,7 @@ namespace ClassicUO.Game.UI.Gumps
                 item.Items.Removed -= ItemsOnRemoved;
             }
 
-            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
+            CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
             UIManager.SavePosition(LocalSerial, Location);
             base.Dispose();
         }
@@ -777,7 +777,7 @@ namespace ClassicUO.Game.UI.Gumps
             _pageCornerLeft.Page = ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = ActivePage != _maxPage ? 0 : int.MaxValue;
 
-            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
+            CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
         }
 
 

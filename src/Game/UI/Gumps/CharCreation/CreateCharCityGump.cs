@@ -60,7 +60,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         public CreateCharCityGump(byte profession) : base(0, 0)
         {
             _selectedProfession = profession;
-            var loginScene = Engine.SceneManager.GetScene<LoginScene>();
+            var loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
 
             _maps = loginScene.Cities.GroupBy(city => city.Map)
                               .ToDictionary(group => group.Key,

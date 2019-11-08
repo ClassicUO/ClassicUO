@@ -62,7 +62,7 @@ namespace ClassicUO.Game.UI.Gumps
                 c.Dispose();
             }
 
-            List<InfoBarItem> infoBarItems = Engine.SceneManager.GetScene<GameScene>().InfoBars.GetInfoBars();
+            List<InfoBarItem> infoBarItems = CUOEnviroment.Client.GetScene<GameScene>().InfoBars.GetInfoBars();
 
             for (int i = 0; i < infoBarItems.Count; i++)
             {

@@ -720,7 +720,7 @@ namespace ClassicUO.Network
                             UIManager.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == tradeBox || s.ID2 == tradeBox)?.UpdateContent();
                     }
 
-                    GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+                    GameScene scene = CUOEnviroment.Client.GetScene<GameScene>();
 
                     if (cont == World.Player && it.Layer == Layer.Invalid)
                         scene.HeldItem.Enabled = false;
@@ -852,7 +852,7 @@ namespace ClassicUO.Network
 #endif
             World.Player.ProcessDelta();
 
-            var scene = Engine.SceneManager.GetScene<GameScene>();
+            var scene = CUOEnviroment.Client.GetScene<GameScene>();
 
             if (scene != null)
                 scene.UpdateDrawPosition = true;
@@ -999,7 +999,7 @@ namespace ClassicUO.Network
                 spellbookGump.Location = location;
                 UIManager.Add(spellbookGump);
 
-                Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
+                CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
             }
             else if (graphic == 0x30)
             {
@@ -1111,7 +1111,7 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+            GameScene scene = CUOEnviroment.Client.GetScene<GameScene>();
 
             ItemHold hold = scene.HeldItem;
 
@@ -1207,7 +1207,7 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+            GameScene scene = CUOEnviroment.Client.GetScene<GameScene>();
 
             scene.HeldItem.Enabled = false;
             scene.HeldItem.Dropped = false;
@@ -1218,7 +1218,7 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+            GameScene scene = CUOEnviroment.Client.GetScene<GameScene>();
 
             scene.HeldItem.Enabled = false;
             scene.HeldItem.Dropped = false;
@@ -1231,8 +1231,8 @@ namespace ClassicUO.Network
 
             if (action != 1)
             {
-                Engine.SceneManager.GetScene<GameScene>()?.Weather?.Reset();
-                Engine.SceneManager.CurrentScene.Audio.PlayMusic(42);
+                CUOEnviroment.Client.GetScene<GameScene>()?.Weather?.Reset();
+                CUOEnviroment.Client.Scene.Audio.PlayMusic(42);
 
                 if (ProfileManager.Current.EnableDeathScreen)
                     World.Player.DeathScreenTimer = Engine.Ticks + Constants.DEATH_SCREEN_TIMER;
@@ -1325,7 +1325,7 @@ namespace ClassicUO.Network
             if (mobile == World.Player && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded))
                 World.Player.UpdateAbilities();
 
-            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+            GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
 
             if (gs.HeldItem.Serial == item.Serial)
                 gs.HeldItem.Clear();
@@ -1567,21 +1567,21 @@ namespace ClassicUO.Network
                 volume -= volumeByDist * distance;
             }
 
-            Engine.SceneManager.CurrentScene.Audio.PlaySoundWithDistance(index, volume, true);
+            CUOEnviroment.Client.Scene.Audio.PlaySoundWithDistance(index, volume, true);
         }
 
         private static void PlayMusic(Packet p)
         {
             ushort index = p.ReadUShort();
 
-            Engine.SceneManager.CurrentScene.Audio.PlayMusic(index);
+            CUOEnviroment.Client.Scene.Audio.PlayMusic(index);
         }
 
         private static void LoginComplete(Packet p)
         {
-            if (World.Player != null && Engine.SceneManager.CurrentScene is LoginScene)
+            if (World.Player != null && CUOEnviroment.Client.Scene is LoginScene)
             {
-                Engine.SceneManager.ChangeScene(ScenesType.Game);
+                CUOEnviroment.Client.SetScene(new GameScene());
 
                 NetClient.Socket.Send(new PSkillsRequest(World.Player));
 
@@ -1643,7 +1643,7 @@ namespace ClassicUO.Network
 
         private static void SetWeather(Packet p)
         {
-            var scene = Engine.SceneManager.GetScene<GameScene>();
+            var scene = CUOEnviroment.Client.GetScene<GameScene>();
             if (scene == null)
                 return;
 
@@ -2635,7 +2635,7 @@ namespace ClassicUO.Network
         {
             if (!World.InGame)
             {
-                LoginScene scene = Engine.SceneManager.GetScene<LoginScene>();
+                LoginScene scene = CUOEnviroment.Client.GetScene<LoginScene>();
 
                 if (scene != null)
                 {
@@ -3190,7 +3190,7 @@ namespace ClassicUO.Network
                         house.Generate();
                         UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
                         if (World.HouseManager.EntityIntoHouse(serial, World.Player))
-                            Engine.SceneManager.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+                            CUOEnviroment.Client.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
                     }
 
                     break;
@@ -3624,7 +3624,7 @@ namespace ClassicUO.Network
                     UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
 
                     if (World.HouseManager.EntityIntoHouse(serial, World.Player))
-                        Engine.SceneManager.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+                        CUOEnviroment.Client.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
                 }
                 stream.ReleaseData();
 
@@ -3986,7 +3986,7 @@ namespace ClassicUO.Network
 #endif
                 World.Player.ProcessDelta();
 
-                var scene = Engine.SceneManager.GetScene<GameScene>();
+                var scene = CUOEnviroment.Client.GetScene<GameScene>();
 
                 if (scene != null)
                     scene.UpdateDrawPosition = true;
@@ -4073,7 +4073,7 @@ namespace ClassicUO.Network
 
         private static void AddItemToContainer(Serial serial, Graphic graphic, ushort amount, ushort x, ushort y, Hue hue, Serial containerSerial)
         {
-            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+            GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
 
             if (gs != null && gs.HeldItem.Serial == serial && gs.HeldItem.Dropped)
                 gs.HeldItem.Clear();

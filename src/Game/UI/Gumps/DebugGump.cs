@@ -107,7 +107,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             _sb.Clear();
-            GameScene scene = Engine.SceneManager.GetScene<GameScene>();
+            GameScene scene = CUOEnviroment.Client.GetScene<GameScene>();
 
             if (FullDisplayMode && scene != null)
             {

@@ -134,7 +134,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             });
             // Sever Scroll Area
             ScrollArea scrollArea = new ScrollArea(150, 100, 383, 271, true);
-            LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
+            LoginScene loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
 
             foreach (ServerListEntry server in loginScene.Servers)
             {
@@ -174,7 +174,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
+            LoginScene loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
 
             if (buttonID >= (int) Buttons.Server)
             {
@@ -216,7 +216,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             if (key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER)
             {
-                LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
+                LoginScene loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
 
                 if (loginScene.Servers.Any())
                 {

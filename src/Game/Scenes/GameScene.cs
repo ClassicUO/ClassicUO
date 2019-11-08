@@ -324,7 +324,7 @@ namespace ClassicUO.Game.Scenes
                 UIManager.Add(new MessageBoxGump(200, 200, $"Connection lost:\n{e}", s =>
                 {
                     if (s)
-                        Engine.SceneManager.ChangeScene(ScenesType.Login);
+                        CUOEnviroment.Client.SetScene(new LoginScene());
                 }));
             }
         }
@@ -334,7 +334,7 @@ namespace ClassicUO.Game.Scenes
             UIManager.Add(new QuestionGump("Quit\nUltima Online?", s =>
             {
                 if (s)
-                    Engine.SceneManager.ChangeScene(ScenesType.Login);
+                    CUOEnviroment.Client.SetScene(new LoginScene());
             }));
         }
 
@@ -510,12 +510,9 @@ namespace ClassicUO.Game.Scenes
 
             if (_forceStopScene)
             {
-                Engine.SceneManager.ChangeScene(ScenesType.Login);
-
-                LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
-
-                if (loginScene != null)
-                    loginScene.Reconnect = true;
+                var loginScene = new LoginScene();
+                CUOEnviroment.Client.SetScene(loginScene);
+                loginScene.Reconnect = true;
 
                 return;
             }

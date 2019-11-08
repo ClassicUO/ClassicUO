@@ -171,7 +171,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ProfileManager.Current.GameWindowPosition = position;
 
-            var scene = Engine.SceneManager.GetScene<GameScene>();
+            var scene = CUOEnviroment.Client.GetScene<GameScene>();
             if (scene != null)
                 scene.UpdateDrawPosition = true;
         }
@@ -212,7 +212,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ProfileManager.Current.GameWindowSize = _lastSize;
                 Resize();
 
-                Engine.SceneManager.GetScene<GameScene>().UpdateDrawPosition = true;
+                CUOEnviroment.Client.GetScene<GameScene>().UpdateDrawPosition = true;
             }
             return newSize;
         }

@@ -408,7 +408,7 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
                 else
-                    Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0051);
+                    CUOEnviroment.Client.Scene.Audio.PlaySound(0x0051);
             }
             else if (TargetManager.IsTargeting)
             {

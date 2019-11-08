@@ -119,7 +119,7 @@ namespace ClassicUO.Game.Managers
             get
             {
                 // We are not at the game scene or no player character present
-                if (World.Player == null || !(Engine.SceneManager.CurrentScene is GameScene gs))
+                if (World.Player == null || !(CUOEnviroment.Client.Scene is GameScene gs))
                     return false;
 
                 // System Chat is NOT focused (items stack amount field or macros text fields is probably focused),
@@ -1137,7 +1137,7 @@ namespace ClassicUO.Game.Managers
 
         public static void AttemptDragControl(Control control, Point mousePosition, bool attemptAlwaysSuccessful = false)
         {
-            if (_isDraggingControl || (Engine.SceneManager.CurrentScene is GameScene gs && gs.IsHoldingItem))
+            if (_isDraggingControl || (CUOEnviroment.Client.Scene is GameScene gs && gs.IsHoldingItem))
                 return;
 
             Control dragTarget = control;

@@ -99,7 +99,7 @@ namespace ClassicUO.Game.Managers
 
             float volume;
 
-            if (Engine.SceneManager.CurrentScene is LoginScene)
+            if (CUOEnviroment.Client.Scene is LoginScene)
             {
                 if (!Settings.GlobalSettings.LoginMusic)
                     return;

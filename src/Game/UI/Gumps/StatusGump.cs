@@ -1824,7 +1824,7 @@ namespace ClassicUO.Game.UI.Gumps
     //            {
     //                if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
     //                {
-    //                    //var list = Engine.SceneManager.GetScene<GameScene>().MobileGumpStack;
+    //                    //var list = CUOEnviroment.Client.GetScene<GameScene>().MobileGumpStack;
     //                    //list.Add(World.Player);
     //                    UIManager.Add(new HealthBarGump(World.Player) {X = ScreenCoordinateX, Y = ScreenCoordinateY});
 
@@ -1839,7 +1839,7 @@ namespace ClassicUO.Game.UI.Gumps
     //            {
     //                if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
     //                {
-    //                    //var list = Engine.SceneManager.GetScene<GameScene>().MobileGumpStack;
+    //                    //var list = CUOEnviroment.Client.GetScene<GameScene>().MobileGumpStack;
     //                    //list.Add(World.Player);
     //                    UIManager.Add(new HealthBarGump(World.Player) {X = ScreenCoordinateX, Y = ScreenCoordinateY});
     //                    Dispose();

@@ -638,7 +638,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.QuitGame:
-                    Engine.SceneManager.GetScene<GameScene>()?.RequestQuitGame();
+                    CUOEnviroment.Client.GetScene<GameScene>()?.RequestQuitGame();
 
                     break;
 
@@ -709,7 +709,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.ArmDisarm:
                     int handIndex = 1 - (macro.SubCode - MacroSubType.LeftHand);
-                    GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+                    GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
 
                     if (handIndex < 0 || handIndex > 1 || gs.IsHoldingItem)
                         break;
@@ -1032,7 +1032,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.DefaultScale:
-                    Engine.SceneManager.GetScene<GameScene>().Scale = 1;
+                    CUOEnviroment.Client.GetScene<GameScene>().Scale = 1;
 
                     break;
 
