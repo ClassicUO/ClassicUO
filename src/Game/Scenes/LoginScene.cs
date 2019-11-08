@@ -56,9 +56,22 @@ namespace ClassicUO.Game.Scenes
 
         private Gump _currentGump;
         private LoginStep _lastLoginStep;
-
         private long? _reconnectTime;
         private int _reconnectTryCounter = 1;
+
+
+        public LoginScene() : base(
+            Engine.Profile.Current.WindowClientPosition.X,
+            Engine.Profile.Current.WindowClientPosition.Y,
+            640,
+            480,
+            false,
+            false,
+            true)
+        {
+
+        }
+
 
         public bool Reconnect { get; set; }
 

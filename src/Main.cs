@@ -28,6 +28,10 @@ namespace ClassicUO
             // - enjoy
 
 
+            ReadSettingsFromArgs(args);
+
+
+
             Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI",  CUOEnviroment.IsHighDPI ? "1" : "0");
             Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
             Environment.SetEnvironmentVariable("FNA_OPENGL_FORCE_COMPATIBILITY_PROFILE", "1");
@@ -38,15 +42,38 @@ namespace ClassicUO
             CUOEnviroment.GameThread.Name = "CUO_MAIN_THREAD";
 
 
-
             string globalSettingsPath = Settings.GetSettingsFilepath();
 
-            if (!Directory.Exists(Path.GetDirectoryName(globalSettingsPath)) ||
-                !File.Exists(globalSettingsPath))
+            if (!Settings.GlobalSettings.IsValid())
             {
-                Settings.GlobalSettings.Save();
-                return;
+                // settings specified in path does not exists, make new one
+                if (!Directory.Exists(Path.GetDirectoryName(globalSettingsPath)) ||
+                !File.Exists(globalSettingsPath))
+                {
+                    // TODO: 
+                    Settings.GlobalSettings.Save();
+                    return;
+                }
+
+                Settings.GlobalSettings = ConfigurationResolver.Load<Settings>(Settings.GetSettingsFilepath());
+
+                // still invalid, cannot load settings
+                if (Settings.GlobalSettings == null || !Settings.GlobalSettings.IsValid())
+                {
+                    // TODO: 
+                    Settings.GlobalSettings?.Save();
+                    return;
+                }
             }
+            
+
+
+
+
+
+
+
+
 
 
             Engine.Configure();
@@ -56,7 +83,7 @@ namespace ClassicUO
             if (updater.Check())
                 return;
 #endif
-            ParseMainArgs(args);
+            //ParseMainArgs(args);
 
             if (!SkipUpdate)
                 if (CheckUpdate(args))
@@ -69,7 +96,7 @@ namespace ClassicUO
         public static bool StartInLittleWindow { get; set; }
         public static bool SkipUpdate { get; set; }
 
-        private static void ParseMainArgs(string[] args)
+        private static void ReadSettingsFromArgs(string[] args)
         {
             for (int i = 0; i <= args.Length - 1; i++)
             {
@@ -105,6 +132,115 @@ namespace ClassicUO
                     case "skipupdate":
                         SkipUpdate = true;
                         break;
+
+
+
+                    case "username":
+                        Settings.GlobalSettings.Username = value;
+
+                        break;
+
+                    case "password":
+                        Settings.GlobalSettings.Password = Crypter.Encrypt(value);
+
+                        break;
+
+                    case "password_enc": // Non-standard setting, similar to `password` but for already encrypted password
+                        Settings.GlobalSettings.Password = value;
+
+                        break;
+
+                    case "ip":
+                        Settings.GlobalSettings.IP = value;
+
+                        break;
+
+                    case "port":
+                        Settings.GlobalSettings.Port = ushort.Parse(value);
+
+                        break;
+
+                    case "ultimaonlinedirectory":
+                    case "uopath":
+                        Settings.GlobalSettings.UltimaOnlineDirectory = value; // Required
+
+                        break;
+
+                    case "clientversion":
+                        Settings.GlobalSettings.ClientVersion = value; // Required
+
+                        break;
+
+                    case "lastcharactername":
+                    case "lastcharname":
+                        Settings.GlobalSettings.LastCharacterName = value;
+
+                        break;
+
+                    case "lastservernum":
+                        Settings.GlobalSettings.LastServerNum = ushort.Parse(value);
+
+                        break;
+
+                    case "login_fps":
+                    case "fps":
+                        CUOEnviroment.RefreshRate = Settings.GlobalSettings.MaxLoginFPS = int.Parse(value);
+                        
+                        break;
+
+                    case "debug":
+                        CUOEnviroment.Debug = Settings.GlobalSettings.Debug = bool.Parse(value);
+                        
+                        break;
+
+                    case "profiler":
+                        Settings.GlobalSettings.Profiler = bool.Parse(value);
+
+                        break;
+
+                    case "saveaccount":
+                        Settings.GlobalSettings.SaveAccount = bool.Parse(value);
+
+                        break;
+
+                    case "autologin":
+                        Settings.GlobalSettings.AutoLogin = bool.Parse(value);
+
+                        break;
+
+                    case "reconnect":
+                        Settings.GlobalSettings.Reconnect = bool.Parse(value);
+
+                        break;
+
+                    case "reconnect_time":
+                        Settings.GlobalSettings.ReconnectTime = int.Parse(value);
+
+                        break;
+
+                    case "login_music":
+                    case "music":
+                        Settings.GlobalSettings.LoginMusic = bool.Parse(value);
+
+                        break;
+
+                    case "login_music_volume":
+                    case "music_volume":
+                        Settings.GlobalSettings.LoginMusicVolume = int.Parse(value);
+
+                        break;
+
+                    case "shard_type":
+                    case "shard":
+                        Settings.GlobalSettings.ShardType = int.Parse(value);
+
+                        break;
+
+                    case "fixed_time_step":
+                        Settings.GlobalSettings.FixedTimeStep = bool.Parse(value);
+
+                        break;
+
                 }
             }
         }

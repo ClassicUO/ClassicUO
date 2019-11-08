@@ -11,7 +11,7 @@ namespace ClassicUO
     static class CUOEnviroment
     {
         public static Thread GameThread;
-        public static uint RefreshRate = 60;
+        public static int RefreshRate = 60;
         public static float DPIScaleFactor = 1.0f;
         public static bool NoSound;
         public static string[] Args;

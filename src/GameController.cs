@@ -29,7 +29,7 @@ namespace ClassicUO
         private readonly GraphicsDeviceManager _graphicDeviceManager;
         private readonly UltimaBatcher2D _uoSpriteBatch;
 
-        public GameController()
+        public GameController(Settings settings)
         {
             _graphicDeviceManager = new GraphicsDeviceManager(this);
             _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice);

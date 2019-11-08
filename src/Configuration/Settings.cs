@@ -30,12 +30,13 @@ namespace ClassicUO.Configuration
 {
     internal sealed class Settings
     {
-        public static readonly Settings GlobalSettings = new Settings();
+        public static Settings GlobalSettings = new Settings();
 
         [JsonConstructor]
         public Settings()
         {
         }
+
 
         [JsonProperty(PropertyName = "username")]
         public string Username { get; set; } = string.Empty;
@@ -97,9 +98,10 @@ namespace ClassicUO.Configuration
         [JsonProperty(propertyName: "run_mouse_in_separate_thread")]
         public bool RunMouseInASeparateThread { get; set; } = true;
 
-
         [JsonProperty(PropertyName = "plugins")]
         public string[] Plugins { get; set; } = {@"./Assistant/Razor.dll"};
+
+
 
 
         public const string SETTINGS_FILENAME = "settings.json";
@@ -118,10 +120,7 @@ namespace ClassicUO.Configuration
             return Path.Combine(Engine.ExePath, SETTINGS_FILENAME);
         }
 
-        public void Load(string path)
-        {
-            //this = ConfigurationResolver.Load<Settings>(path);
-        }
+
 
         public void Save()
         {

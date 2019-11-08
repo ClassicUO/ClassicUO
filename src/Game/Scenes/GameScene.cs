@@ -69,6 +69,20 @@ namespace ClassicUO.Game.Scenes
         private WorldViewport _viewPortGump;
         private Weather _weather;
 
+
+        public GameScene() : base(
+            Engine.Profile.Current.WindowClientPosition.X,
+            Engine.Profile.Current.WindowClientPosition.Y,
+            Engine.Profile.Current.WindowClientBounds.X, 
+            Engine.Profile.Current.WindowClientBounds.Y,
+            true,
+            true,
+            true)
+        {
+
+        }
+
+
         public bool UpdateDrawPosition { get; set; }
 
         private int ScalePos

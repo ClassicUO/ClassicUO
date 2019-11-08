@@ -37,8 +37,10 @@ namespace ClassicUO.Game.Scenes
 {
     internal abstract class Scene : IUpdateable
     {
-        protected Scene(int width, int height, bool canresize, bool maximized, bool loadaudio)
+        protected Scene(int x, int y, int width, int height, bool canresize, bool maximized, bool loadaudio)
         {
+            X = x;
+            Y = y;
             Width = width;
             Height = height;
             CanResize = canresize;
@@ -46,7 +48,7 @@ namespace ClassicUO.Game.Scenes
             CanLoadAudio = loadaudio;
         }
 
-        public readonly int Width, Height;
+        public readonly int X, Y, Width, Height;
         public readonly bool CanResize, IsMaximized, CanLoadAudio;
 
         public bool IsDestroyed { get; private set; }
