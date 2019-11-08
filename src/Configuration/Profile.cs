@@ -310,8 +310,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool DoubleClickToLootInsideContainers { get; set; }
 
 
-        internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
-        internal static string DataPath { get; } = Path.Combine(Engine.ExePath, "Data");
+        internal static string ProfilePath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
+        internal static string DataPath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data");
 
         public void Save(List<Gump> gumps = null)
         {

@@ -256,7 +256,7 @@ namespace ClassicUO.Game.UI.Gumps
                         debugGump.SetInScreen();
                     }
 
-                    Engine.DropFpsMinMaxValues();
+                    //Engine.DropFpsMinMaxValues();
 
                     break;
                 case Buttons.WorldMap:

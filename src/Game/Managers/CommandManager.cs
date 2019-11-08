@@ -50,7 +50,6 @@ namespace ClassicUO.Game.Managers
                 if(World.Player != null)
                 {
                     GameActions.Print($"Current DateTime.Now is {DateTime.Now}");
-                    GameActions.Print($"Current CurrDateTime is {Engine.CurrDateTime}");
                 }
             });
             Register("hue", s =>

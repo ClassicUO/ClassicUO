@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI
             if (string.IsNullOrEmpty(Text))
                 return false;
 
-            if (_lastHoverTime > Engine.Ticks)
+            if (_lastHoverTime > Time.Ticks)
                 return false;
 
             if (_renderedText == null)
@@ -101,13 +101,13 @@ namespace ClassicUO.Game.UI
 
             if (x < 0)
                 x = 0;
-            else if (x > Engine.WindowWidth - (_renderedText.Width + 8))
-                x = Engine.WindowWidth - (_renderedText.Width + 8);
+            else if (x > CUOEnviroment.Client.Window.ClientBounds.Width - (_renderedText.Width + 8))
+                x = CUOEnviroment.Client.Window.ClientBounds.Width - (_renderedText.Width + 8);
 
             if (y < 0)
                 y = 0;
-            else if (y > Engine.WindowHeight - (_renderedText.Height + 8))
-                y = Engine.WindowHeight - (_renderedText.Height + 8);
+            else if (y > CUOEnviroment.Client.Window.ClientBounds.Height - (_renderedText.Height + 8))
+                y = CUOEnviroment.Client.Window.ClientBounds.Height - (_renderedText.Height + 8);
 
             Vector3 hue = Vector3.Zero;
             ShaderHuesTraslator.GetHueVector(ref hue, 0, false, 0.3f, true);
@@ -136,7 +136,7 @@ namespace ClassicUO.Game.UI
                     _gameObject = obj;
                     _hash = revision2;
                     Text = ReadProperties(obj, out _textHTML);
-                    _lastHoverTime = Engine.Ticks + 250;
+                    _lastHoverTime = Time.Ticks + 250;
                 }
             }
         }

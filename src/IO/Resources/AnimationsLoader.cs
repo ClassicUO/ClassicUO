@@ -1261,7 +1261,7 @@ namespace ClassicUO.IO.Resources
                 return false;
             }
 
-            animDirection.LastAccessTime = Engine.Ticks;
+            animDirection.LastAccessTime = Time.Ticks;
             int decLen = (int)animData.DecompressedLength;
             var file = _filesUop[animData.FileIndex];
             file.Seek(animData.Offset);
@@ -1413,7 +1413,7 @@ namespace ClassicUO.IO.Resources
 
         private unsafe void ReadMULAnimationFrame(ref AnimationDirection animDir, UOFile reader)
         {
-            animDir.LastAccessTime = Engine.Ticks;
+            animDir.LastAccessTime = Time.Ticks;
 
             ushort* palette = (ushort*)reader.PositionAddress;
             reader.Skip(512);
@@ -1631,7 +1631,7 @@ namespace ClassicUO.IO.Resources
         public override void CleaUnusedResources()
         {
             int count = 0;
-            long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
+            long ticks = Time.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
             for (int i = 0; i < _usedTextures.Count; i++)
             {

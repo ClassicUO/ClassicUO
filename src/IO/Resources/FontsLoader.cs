@@ -1603,7 +1603,7 @@ namespace ClassicUO.IO.Resources
             }
             catch (Exception ex)
             {
-                string path = Path.Combine(Engine.ExePath, "Logs");
+                string path = Path.Combine(CUOEnviroment.ExecutablePath, "Logs");
                 FileSystemHelper.CreateFolderIfNotExists(path);
 
                 StringBuilder sb = new StringBuilder();

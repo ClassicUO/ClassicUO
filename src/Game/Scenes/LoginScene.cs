@@ -63,8 +63,8 @@ namespace ClassicUO.Game.Scenes
 
 
         public LoginScene() : base(
-            ProfileManager.Current.WindowClientPosition.X,
-            ProfileManager.Current.WindowClientPosition.Y,
+            0,
+            0,
             640,
             480,
             false,
@@ -98,7 +98,7 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
-            Engine.FpsLimit = Settings.GlobalSettings.MaxLoginFPS;
+            //Engine.FpsLimit = Settings.GlobalSettings.MaxLoginFPS;
 
             UIManager.Add(new LoginBackground());
             UIManager.Add(_currentGump = new LoginGump());

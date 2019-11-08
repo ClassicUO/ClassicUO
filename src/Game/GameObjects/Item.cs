@@ -301,7 +301,7 @@ namespace ClassicUO.Game.GameObjects
                             }
                         }
 
-                        LastAnimationChangeTime = Engine.Ticks;
+                        LastAnimationChangeTime = Time.Ticks;
                     }
 
                     _originalGraphic = DisplayedGraphic;
@@ -807,7 +807,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                     {
-                        if (offY == 0 && last.Time < Engine.Ticks)
+                        if (offY == 0 && last.Time < Time.Ticks)
                             continue;
 
 
@@ -827,7 +827,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                     {
-                        if (offY == 0 && last.Time < Engine.Ticks)
+                        if (offY == 0 && last.Time < Time.Ticks)
                             continue;
 
                         x = last.X - startX;
@@ -852,7 +852,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 dir = (byte) Layer;
 
-                if (LastAnimationChangeTime < Engine.Ticks)
+                if (LastAnimationChangeTime < Time.Ticks)
                 {
                     sbyte frameIndex = (sbyte) (AnimIndex + 1);
                     ushort id = GetGraphicForAnimation();
@@ -882,7 +882,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (direction.Address != 0 && direction.Size != 0 || direction.IsUOP)
                         {
-                            direction.LastAccessTime = Engine.Ticks;
+                            direction.LastAccessTime = Time.Ticks;
                             int fc = direction.FrameCount;
 
                             if (frameIndex >= fc)
@@ -891,10 +891,10 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    LastAnimationChangeTime = Engine.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
+                    LastAnimationChangeTime = Time.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
                 }
             }
-            else if (OnGround && ItemData.IsAnimated && LastAnimationChangeTime < Engine.Ticks)
+            else if (OnGround && ItemData.IsAnimated && LastAnimationChangeTime < Time.Ticks)
             {
                 IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
 
@@ -913,7 +913,7 @@ namespace ClassicUO.Game.GameObjects
 
                             _force = _originalGraphic == DisplayedGraphic;
 
-                            LastAnimationChangeTime = Engine.Ticks + _animSpeed;
+                            LastAnimationChangeTime = Time.Ticks + _animSpeed;
                         }
                     }
                 }

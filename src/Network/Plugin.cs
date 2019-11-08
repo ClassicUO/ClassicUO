@@ -80,7 +80,7 @@ namespace ClassicUO.Network
 
         public static Plugin Create(string path)
         {
-            path = Path.GetFullPath(Path.Combine(Engine.ExePath, "Data", "Plugins", path));
+            path = Path.GetFullPath(Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Plugins", path));
 
             if (!File.Exists(path))
             {
@@ -250,13 +250,13 @@ namespace ClassicUO.Network
 
         private static void SetWindowTitle(string str)
         {
-            if (string.IsNullOrEmpty(str))
-                Engine.Instance.DisableUpdateWindowCaption = false;
-            else
-            {
-                Engine.Instance.DisableUpdateWindowCaption = true;
-                Engine.Instance.Window.Title = str;
-            }
+            //if (string.IsNullOrEmpty(str))
+            //    CUOEnviroment.Client.DisableUpdateWindowCaption = false;
+            //else
+            //{
+            //    CUOEnviroment.Client.DisableUpdateWindowCaption = true;
+            //    CUOEnviroment.Client.Window.Title = str;
+            //}
         }
 
         private static void GetStaticImage(ushort g, ref ArtInfo info)

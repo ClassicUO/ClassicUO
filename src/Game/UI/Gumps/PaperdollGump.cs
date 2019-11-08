@@ -400,8 +400,8 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         UIManager.Add(new OptionsGump
                         {
-                            X = (Engine.WindowWidth >> 1) - 300,
-                            Y = (Engine.WindowHeight >> 1) - 250
+                            X = (CUOEnviroment.Client.Window.ClientBounds.Width >> 1) - 300,
+                            Y = (CUOEnviroment.Client.Window.ClientBounds.Height >> 1) - 250
                         });
                     }
                     else

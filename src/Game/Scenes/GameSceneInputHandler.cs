@@ -319,7 +319,7 @@ namespace ClassicUO.Game.Scenes
             else
             {
                 _isMouseLeftDown = true;
-                _holdMouse2secOverItemTime = Engine.Ticks;
+                _holdMouse2secOverItemTime = Time.Ticks;
             }
         }
 

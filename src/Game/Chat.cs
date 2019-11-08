@@ -283,7 +283,7 @@ namespace ClassicUO.Game
                 timeToLive = (delay >> 31) + delay;
             }
 
-            timeToLive += Engine.Ticks;
+            timeToLive += Time.Ticks;
 
             return timeToLive;
         }

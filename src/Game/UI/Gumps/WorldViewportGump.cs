@@ -126,11 +126,11 @@ namespace ClassicUO.Game.UI.Gumps
                     if (h < 480)
                         h = 480;
 
-                    if (w > Engine.WindowWidth - BORDER_WIDTH)
-                        w = Engine.WindowWidth - BORDER_WIDTH;
+                    if (w > CUOEnviroment.Client.Window.ClientBounds.Width - BORDER_WIDTH)
+                        w = CUOEnviroment.Client.Window.ClientBounds.Width - BORDER_WIDTH;
 
-                    if (h > Engine.WindowHeight - BORDER_HEIGHT)
-                        h = Engine.WindowHeight - BORDER_HEIGHT;
+                    if (h > CUOEnviroment.Client.Window.ClientBounds.Height - BORDER_HEIGHT)
+                        h = CUOEnviroment.Client.Window.ClientBounds.Height - BORDER_HEIGHT;
 
                     _lastSize.X = w;
                     _lastSize.Y = h;
@@ -155,14 +155,14 @@ namespace ClassicUO.Game.UI.Gumps
         {
             Point position = Location;
 
-            if (position.X + Width - BORDER_WIDTH > Engine.Batcher.GraphicsDevice.Viewport.Width)
-                position.X = Engine.Batcher.GraphicsDevice.Viewport.Width - (Width - BORDER_WIDTH);
+            if (position.X + Width - BORDER_WIDTH > CUOEnviroment.Client.GraphicsDevice.Viewport.Width)
+                position.X = CUOEnviroment.Client.GraphicsDevice.Viewport.Width - (Width - BORDER_WIDTH);
 
             if (position.X < -BORDER_WIDTH)
                 position.X = -BORDER_WIDTH;
 
-            if (position.Y + Height - BORDER_HEIGHT > Engine.Batcher.GraphicsDevice.Viewport.Height)
-                position.Y = Engine.Batcher.GraphicsDevice.Viewport.Height - (Height - BORDER_HEIGHT);
+            if (position.Y + Height - BORDER_HEIGHT > CUOEnviroment.Client.GraphicsDevice.Viewport.Height)
+                position.Y = CUOEnviroment.Client.GraphicsDevice.Viewport.Height - (Height - BORDER_HEIGHT);
 
             if (position.Y < -BORDER_HEIGHT)
                 position.Y = -BORDER_HEIGHT;

@@ -61,7 +61,7 @@ namespace ClassicUO
             Window.ClientSizeChanged += WindowOnClientSizeChanged;
             Window.AllowUserResizing = true;
             Window.Title = $"ClassicUO - {CUOEnviroment.Version}";
-
+            IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread;
 
             SetRefreshRate(CUOEnviroment.RefreshRate);
 
@@ -106,7 +106,7 @@ namespace ClassicUO
 
         public void SetRefreshRate(int rate)
         {
-            TargetElapsedTime = TimeSpan.FromMilliseconds(1.0f / rate);
+            TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0f / rate);
         }
 
         public void SetWindowPosition(int x, int y)
@@ -199,6 +199,9 @@ namespace ClassicUO
         {
             Time.Ticks = (uint) gameTime.TotalGameTime.TotalMilliseconds;
 
+            OnNetworkUpdate(0, 0);
+            UIManager.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
+            
             _scene?.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
             base.Update(gameTime);
 
@@ -208,10 +211,25 @@ namespace ClassicUO
         protected override void Draw(GameTime gameTime)
         {
             _scene?.Draw(_uoSpriteBatch);
+            UIManager.Draw(_uoSpriteBatch);
             base.Draw(gameTime);
         }
 
-
+        private void OnNetworkUpdate(double totalMS, double frameMS)
+        {
+            if (NetClient.LoginSocket.IsDisposed && NetClient.LoginSocket.IsConnected)
+                NetClient.LoginSocket.Disconnect();
+            else if (!NetClient.Socket.IsConnected)
+            {
+                NetClient.LoginSocket.Update();
+                //UpdateSockeStats(NetClient.LoginSocket, totalMS);
+            }
+            else if (!NetClient.Socket.IsDisposed)
+            {
+                NetClient.Socket.Update();
+                //UpdateSockeStats(NetClient.Socket, totalMS);
+            }
+        }
 
         public override void OnSDLEvent(ref SDL_Event ev)
         {
@@ -305,9 +323,9 @@ namespace ClassicUO
                     {
                         _ignoreNextTextInput = false;
 
-                        if (UIManager.IsMouseOverUI)
+                        //if (UIManager.IsMouseOverUI)
                             UIManager.KeyboardFocusControl?.InvokeKeyDown(e.key.keysym.sym, e.key.keysym.mod);
-                        else 
+                        //else 
                             _scene.OnKeyDown(e.key);
                     }
                     else
@@ -319,9 +337,9 @@ namespace ClassicUO
                     
                     Keyboard.OnKeyUp(e.key);
 
-                    if (UIManager.IsMouseOverUI)
+                    //if (UIManager.IsMouseOverUI)
                         UIManager.KeyboardFocusControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
-                    else
+                   // else
                         _scene.OnKeyUp(e.key);
 
                     break;

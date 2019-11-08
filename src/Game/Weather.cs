@@ -55,7 +55,7 @@ namespace ClassicUO.Game
 
         public void Generate()
         {
-            LastTick = Engine.Ticks;
+            LastTick = Time.Ticks;
 
             if (Type == 0xFF || Type == 0xFE)
                 return;
@@ -86,7 +86,7 @@ namespace ClassicUO.Game
         {
             bool removeEffects = false;
 
-            if (Timer < Engine.Ticks)
+            if (Timer < Time.Ticks)
             {
                 if (CurrentCount == 0)
                     return;
@@ -96,22 +96,22 @@ namespace ClassicUO.Game
             else if (Type == 0xFF || Type == 0xFE)
                 return;
 
-            uint passed = Engine.Ticks - LastTick;
+            uint passed = Time.Ticks - LastTick;
 
             if (passed > 7000)
             {
-                LastTick = Engine.Ticks;
+                LastTick = Time.Ticks;
                 passed = 25;
             }
 
             bool windChanged = false;
 
-            if (WindTimer < Engine.Ticks)
+            if (WindTimer < Time.Ticks)
             {
                 if (WindTimer == 0)
                     windChanged = true;
 
-                WindTimer = Engine.Ticks + (uint)(RandomHelper.GetValue(7, 13) * 1000);
+                WindTimer = Time.Ticks + (uint)(RandomHelper.GetValue(7, 13) * 1000);
 
                 sbyte lastWind = Wind;
 
@@ -213,7 +213,7 @@ namespace ClassicUO.Game
 
                         speed_magnitude += effect.ScaleRatio;
 
-                        speed_angle += SinOscillate(0.4f, 20, Engine.Ticks + effect.ID);
+                        speed_angle += SinOscillate(0.4f, 20, Time.Ticks + effect.ID);
 
                         var rad = MathHelper.ToRadians(speed_angle);
                         effect.SpeedX = speed_magnitude * (float)Math.Sin(rad);
@@ -279,7 +279,7 @@ namespace ClassicUO.Game
 
             }
 
-            LastTick = Engine.Ticks;
+            LastTick = Time.Ticks;
         }
     }
 }

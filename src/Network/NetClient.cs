@@ -147,7 +147,7 @@ namespace ClassicUO.Network
                 if (e.SocketError == SocketError.Success)
                 {
                     Connected.Raise();
-                    Statistics.ConnectedFrom = Engine.CurrDateTime;
+                    Statistics.ConnectedFrom = DateTime.Now;
                     StartRecv();
                 }
                 else
@@ -284,7 +284,7 @@ namespace ClassicUO.Network
         private static void LogPacket(byte[] buffer, bool toServer)
         {
             if (_logFile == null)
-                _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Logs", "Network"), "packets.log");
+                _logFile = new LogFile(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Logs", "Network"), "packets.log");
 
             int length = buffer.Length;
             int pos = 0;

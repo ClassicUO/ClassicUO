@@ -72,8 +72,8 @@ namespace ClassicUO.Game.Scenes
 
 
         public GameScene() : base(
-            ProfileManager.Current.WindowClientPosition.X,
-            ProfileManager.Current.WindowClientPosition.Y,
+            0,
+            0,
             ProfileManager.Current.WindowClientBounds.X, 
             ProfileManager.Current.WindowClientBounds.Y,
             true,
@@ -148,7 +148,7 @@ namespace ClassicUO.Game.Scenes
                     X = ProfileManager.Current.DebugGumpPosition.X,
                     Y = ProfileManager.Current.DebugGumpPosition.Y
                 });
-                Engine.DropFpsMinMaxValues();
+                //Engine.DropFpsMinMaxValues();
             }
 
             HeldItem = new ItemHold();
@@ -276,7 +276,8 @@ namespace ClassicUO.Game.Scenes
 
             if (ProfileManager.Current != null)
             {
-                ProfileManager.Current.WindowClientPosition = Engine.WindowPosition;
+                SDL.SDL_GetWindowPosition(CUOEnviroment.Client.Window.Handle, out int x, out int y);
+                ProfileManager.Current.WindowClientPosition = new Point(x, y);
             }
             
             try
@@ -414,10 +415,10 @@ namespace ClassicUO.Game.Scenes
 
         private void FillGameObjectList()
         {
-            _alphaChanged = _alphaTimer < Engine.Ticks;
+            _alphaChanged = _alphaTimer < Time.Ticks;
 
             if (_alphaChanged)
-                _alphaTimer = Engine.Ticks + Constants.ALPHA_TIME;
+                _alphaTimer = Time.Ticks + Constants.ALPHA_TIME;
 
             GetViewPort();
 
@@ -638,7 +639,7 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            if (_isMouseLeftDown && !IsHoldingItem && Engine.Ticks - _holdMouse2secOverItemTime >= 1000)
+            if (_isMouseLeftDown && !IsHoldingItem && Time.Ticks - _holdMouse2secOverItemTime >= 1000)
             {
                 if (PickupItemBegin(SelectedObject.LastObject as Item, 0, 0))
                 {
@@ -661,17 +662,17 @@ namespace ClassicUO.Game.Scenes
             {
                 if (_deathScreenLabel == null || _deathScreenLabel.IsDisposed)
                 {
-                    if (World.Player.IsDead && World.Player.DeathScreenTimer > Engine.Ticks)
+                    if (World.Player.IsDead && World.Player.DeathScreenTimer > Time.Ticks)
                     {
                         UIManager.Add(_deathScreenLabel = new Label("You are dead.", false, 999, 200, 3)
                         {
-                            X = (Engine.WindowWidth >> 1) - 50,
-                            Y = (Engine.WindowHeight >> 1) - 50
+                            X = (CUOEnviroment.Client.Window.ClientBounds.Width >> 1) - 50,
+                            Y = (CUOEnviroment.Client.Window.ClientBounds.Height >> 1) - 50
                         });
                         _deathScreenActive = true;
                     }
                 }
-                else if (World.Player.DeathScreenTimer < Engine.Ticks)
+                else if (World.Player.DeathScreenTimer < Time.Ticks)
                 {
                     _deathScreenActive = false;
                     _deathScreenLabel.Dispose();

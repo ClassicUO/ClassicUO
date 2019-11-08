@@ -60,7 +60,7 @@ namespace ClassicUO.Game.Managers
 
             float volume = ProfileManager.Current.SoundVolume / Constants.SOUND_DELTA;
 
-            if (Engine.Instance.IsActive)
+            if (CUOEnviroment.Client.IsActive)
             {
                 if (!ProfileManager.Current.ReproduceSoundsInBackground) volume = ProfileManager.Current.SoundVolume / Constants.SOUND_DELTA;
             }
@@ -78,10 +78,10 @@ namespace ClassicUO.Game.Managers
             if (!_canReproduceAudio)
                 return;
 
-            if (ProfileManager.Current == null || !ProfileManager.Current.EnableSound || !Engine.Instance.IsActive && !ProfileManager.Current.ReproduceSoundsInBackground)
+            if (ProfileManager.Current == null || !ProfileManager.Current.EnableSound || !CUOEnviroment.Client.IsActive && !ProfileManager.Current.ReproduceSoundsInBackground)
                 return;
 
-            if (!Engine.Instance.IsActive && !ProfileManager.Current.ReproduceSoundsInBackground) volume = 0;
+            if (!CUOEnviroment.Client.IsActive && !ProfileManager.Current.ReproduceSoundsInBackground) volume = 0;
 
             if (volume < -1 || volume > 1f)
                 return;
@@ -166,7 +166,7 @@ namespace ClassicUO.Game.Managers
 
             if (_currentMusic != null && ProfileManager.Current != null)
             {
-                if (Engine.Instance.IsActive)
+                if (CUOEnviroment.Client.IsActive)
                 {
                     if (!ProfileManager.Current.ReproduceSoundsInBackground) _currentMusic.Volume = ProfileManager.Current.MusicVolume / Constants.SOUND_DELTA;
                 }

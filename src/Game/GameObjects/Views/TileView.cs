@@ -38,7 +38,7 @@ namespace ClassicUO.Game.GameObjects
             if (!AllowedToDraw || IsDestroyed)
                 return false;
 
-            Engine.DebugInfo.LandsRendered++;
+            //Engine.DebugInfo.LandsRendered++;
 
             ResetHueVector();
 
@@ -87,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
 
         private bool Draw3DStretched(UltimaBatcher2D batcher, int posX, int posY)
         {
-            Texture.Ticks = Engine.Ticks;
+            Texture.Ticks = Time.Ticks;
 
             if (batcher.DrawSpriteLand(Texture, posX, posY + (Z << 2), ref Rectangle, ref Normals, ref HueVector))
             {

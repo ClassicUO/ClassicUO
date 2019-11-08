@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -11,7 +12,7 @@ namespace ClassicUO
     static class CUOEnviroment
     {
         public static Thread GameThread;
-        public static int RefreshRate = 60;
+        public static int RefreshRate = 250;
         public static float DPIScaleFactor = 1.0f;
         public static bool NoSound;
         public static string[] Args;
@@ -20,8 +21,8 @@ namespace ClassicUO
         public static bool IsHighDPI;
 
         public static readonly bool IsUnix = Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX;
-        public static readonly string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString().Replace(",", ".");
-        public static readonly string ExecutablePath = Assembly.GetEntryAssembly()?.Location;
+        public static readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version;
+        public static readonly string ExecutablePath = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
 
         public static GameController Client;
     }

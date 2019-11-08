@@ -47,8 +47,8 @@
 //    //        {
 //    //            case ScenesType.Login:
 //    //                Engine.IsMaximized = false;
-//    //                Engine.WindowWidth = 640;
-//    //                Engine.WindowHeight = 480;
+//    //                CUOEnviroment.Client.Window.ClientBounds.Width = 640;
+//    //                CUOEnviroment.Client.Window.ClientBounds.Height = 480;
 //    //                Engine.AllowWindowResizing = false;
 //    //                CurrentScene = new LoginScene();
 
@@ -70,8 +70,8 @@
 //    //                        }
 //    //                        else
 //    //                        {
-//    //                            Engine.WindowWidth = ProfileManager.Current.WindowClientBounds.X;
-//    //                            Engine.WindowHeight = ProfileManager.Current.WindowClientBounds.Y;
+//    //                            CUOEnviroment.Client.Window.ClientBounds.Width = ProfileManager.Current.WindowClientBounds.X;
+//    //                            CUOEnviroment.Client.Window.ClientBounds.Height = ProfileManager.Current.WindowClientBounds.Y;
 //    //                            if (ProfileManager.Current.WindowClientPosition.HasValue)
 //    //                            {
 //    //                                Engine.WindowPosition = ProfileManager.Current.WindowClientPosition.Value;

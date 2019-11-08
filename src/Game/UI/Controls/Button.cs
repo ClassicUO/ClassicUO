@@ -169,7 +169,7 @@ namespace ClassicUO.Game.UI.Controls
                 UOTexture t = _textures[i];
 
                 if (t != null)
-                    t.Ticks = Engine.Ticks;
+                    t.Ticks = Time.Ticks;
             }
         }
 

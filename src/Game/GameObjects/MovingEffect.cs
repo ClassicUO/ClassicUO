@@ -92,10 +92,10 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_lastMoveTime > Engine.Ticks)
+            if (_lastMoveTime > Time.Ticks)
                 return;
 
-            _lastMoveTime = Engine.Ticks + MovingDelay;
+            _lastMoveTime = Time.Ticks + MovingDelay;
             base.Update(totalMS, frameMS);
             (int sx, int sy, int sz) = GetSource();
             (int tx, int ty, int tz) = GetTarget();

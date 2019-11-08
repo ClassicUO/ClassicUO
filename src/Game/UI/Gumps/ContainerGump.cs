@@ -154,12 +154,12 @@ namespace ClassicUO.Game.UI.Gumps
                                 break;
                         }
 
-                        if ((X + Width) > Engine.WindowWidth)
+                        if ((X + Width) > CUOEnviroment.Client.Window.ClientBounds.Width)
                         {
                             X -= Width;
                         }
 
-                        if ((Y + Height) > Engine.WindowHeight)
+                        if ((Y + Height) > CUOEnviroment.Client.Window.ClientBounds.Height)
                         {
                             Y -= Height;
                         }
@@ -381,7 +381,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void SetPositionTopRight()
         {
-            X = Engine.WindowWidth - Width;
+            X = CUOEnviroment.Client.Window.ClientBounds.Width - Width;
             Y = 0;
         }
 

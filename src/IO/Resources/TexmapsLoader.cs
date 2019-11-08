@@ -138,7 +138,7 @@ namespace ClassicUO.IO.Resources
                 ResourceDictionary.Add(g, texture);
             }
             //else
-            //    texture.Ticks = Engine.Ticks + 3000;
+            //    texture.Ticks = Time.Ticks + 3000;
 
             return texture;
         }
@@ -151,7 +151,7 @@ namespace ClassicUO.IO.Resources
         //public void ClearUnusedTextures()
         //{
         //    int count = 0;
-        //    long ticks = Engine.Ticks - 3000;
+        //    long ticks = Time.Ticks - 3000;
 
         //    for (int i = 0; i < _usedIndex.Count; i++)
         //    {

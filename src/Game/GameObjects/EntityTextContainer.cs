@@ -145,7 +145,7 @@ namespace ClassicUO.Game.GameObjects
             _messages.AddToFront(new TextOverhead
             {
                 RenderedText = RenderedText.Create(damage.ToString(), (Hue)(Parent == World.Player ? 0x0034 : 0x0021), 3, false),
-                Time = Engine.Ticks + 1500
+                Time = Time.Ticks + 1500
             });
 
 
@@ -164,12 +164,12 @@ namespace ClassicUO.Game.GameObjects
             {
                 var c = _messages[i];
 
-                float delta = c.Time - Engine.Ticks;
+                float delta = c.Time - Time.Ticks;
 
-                if (c.SecondTime < Engine.Ticks)
+                if (c.SecondTime < Time.Ticks)
                 {
                     c.OffsetY += 1;
-                    c.SecondTime = Engine.Ticks + DAMAGE_Y_MOVING_TIME;
+                    c.SecondTime = Time.Ticks + DAMAGE_Y_MOVING_TIME;
                 }
 
                 if (delta <= 0)

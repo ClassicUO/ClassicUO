@@ -189,7 +189,7 @@ namespace ClassicUO.Game.GameObjects
                     break;
             }
 
-            Engine.DebugInfo.EffectsRendered++;
+            //Engine.DebugInfo.EffectsRendered++;
 
 
             if (data.IsLight && Source != null)

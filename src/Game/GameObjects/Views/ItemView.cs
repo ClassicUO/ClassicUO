@@ -45,7 +45,7 @@ namespace ClassicUO.Game.GameObjects
             if (!AllowedToDraw || IsDestroyed)
                 return false;
 
-            Engine.DebugInfo.ItemsRendered++;
+            //Engine.DebugInfo.ItemsRendered++;
 
             ResetHueVector();
 
@@ -272,7 +272,7 @@ namespace ClassicUO.Game.GameObjects
             if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return;
 
-            direction.LastAccessTime = Engine.Ticks;
+            direction.LastAccessTime = Time.Ticks;
             int fc = direction.FrameCount;
 
             if (fc > 0 && animIndex >= fc)
@@ -285,7 +285,7 @@ namespace ClassicUO.Game.GameObjects
                 if (frame == null || frame.IsDisposed)
                     return;
 
-                frame.Ticks = Engine.Ticks;
+                frame.Ticks = Time.Ticks;
 
                 if (IsFlipped)
                     posX -= frame.Width - frame.CenterX;

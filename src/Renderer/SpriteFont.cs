@@ -192,7 +192,7 @@ namespace ClassicUO.Renderer
                     levelDataSizeInBytes = levelData.Length;
                 }
 
-                Texture2D texture = new Texture2D(Engine.Batcher.GraphicsDevice, width, height, false, SurfaceFormat.Color);
+                Texture2D texture = new Texture2D(CUOEnviroment.Client.GraphicsDevice, width, height, false, SurfaceFormat.Color);
                 texture.SetData(levelData);
 
                 reader.Read7BitEncodedInt();

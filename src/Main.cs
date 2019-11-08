@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +20,11 @@ namespace ClassicUO
 {
     static class Bootstrap
     {
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetDllDirectory(string lpPathName);
+
+
         static void Main(string[] args)
         {
             // - check for update
@@ -27,6 +33,7 @@ namespace ClassicUO
             // - game launch
             // - enjoy
 
+            Log.Start(LogTypes.All);
 
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
@@ -50,30 +57,32 @@ namespace ClassicUO
 
             string globalSettingsPath = Settings.GetSettingsFilepath();
 
-            if (!Settings.GlobalSettings.IsValid())
+            if ((!Directory.Exists(Path.GetDirectoryName(globalSettingsPath)) ||
+                                                       !File.Exists(globalSettingsPath)))
             {
                 // settings specified in path does not exists, make new one
-                if (!Directory.Exists(Path.GetDirectoryName(globalSettingsPath)) ||
-                !File.Exists(globalSettingsPath))
                 {
                     // TODO: 
                     Settings.GlobalSettings.Save();
                     return;
                 }
-
-                Settings.GlobalSettings = ConfigurationResolver.Load<Settings>(Settings.GetSettingsFilepath());
-
-                // still invalid, cannot load settings
-                if (Settings.GlobalSettings == null || !Settings.GlobalSettings.IsValid())
-                {
-                    // TODO: 
-                    Settings.GlobalSettings?.Save();
-                    return;
-                }
             }
-            
 
+            Settings.GlobalSettings = ConfigurationResolver.Load<Settings>(Settings.GetSettingsFilepath());
 
+            // still invalid, cannot load settings
+            if (Settings.GlobalSettings == null || !Settings.GlobalSettings.IsValid())
+            {
+                // TODO: 
+                Settings.GlobalSettings?.Save();
+                return;
+            }
+
+            if (!CUOEnviroment.IsUnix)
+            {
+                string libsPath = Path.Combine(CUOEnviroment.ExecutablePath, "libs", Environment.Is64BitProcess ? "x64" : "x86");
+                SetDllDirectory(libsPath);
+            }
 
 
             CUOEnviroment.Client = new GameController();
@@ -255,7 +264,7 @@ namespace ClassicUO
 
         private static bool CheckUpdate(string[] args)
         {
-            string currentPath = Engine.ExePath;
+            string currentPath = CUOEnviroment.ExecutablePath;
 
             string path = string.Empty;
             string action = string.Empty;

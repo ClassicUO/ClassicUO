@@ -123,10 +123,10 @@ namespace ClassicUO.IO.Audio
         /// <param name="asEffect">Set to false for music, true for sound effects.</param>
         public void Play(bool asEffect, AudioEffects effect = AudioEffects.None, float volume = 1.0f, bool spamCheck = false)
         {
-            double now = Engine.Ticks;
+            double now = Time.Ticks;
             CullExpiredEffects(now);
 
-            if (spamCheck && LastPlayed + MinimumDelay > Engine.CurrDateTime)
+            if (spamCheck && LastPlayed + MinimumDelay > DateTime.Now)
                 return;
 
             BeforePlay();
@@ -148,7 +148,7 @@ namespace ClassicUO.IO.Audio
                     break;
             }
 
-            LastPlayed = Engine.CurrDateTime;
+            LastPlayed = DateTime.Now;
 
             byte[] buffer = GetBuffer();
 

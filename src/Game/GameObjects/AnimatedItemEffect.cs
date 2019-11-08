@@ -29,7 +29,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Graphic = graphic;
             Hue = hue;
-            Duration = duration > 0 ? Engine.Ticks + duration : -1;
+            Duration = duration > 0 ? Time.Ticks + duration : -1;
             Speed = speed;
             Load();
         }

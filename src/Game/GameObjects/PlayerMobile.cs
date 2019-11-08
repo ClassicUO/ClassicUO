@@ -182,7 +182,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Lock IntLock { get; set; }
 
-        protected override bool IsWalking => LastStepTime > Engine.Ticks - Constants.PLAYER_WALKING_DELAY;
+        protected override bool IsWalking => LastStepTime > Time.Ticks - Constants.PLAYER_WALKING_DELAY;
 
         public Item FindBandage()
         {
@@ -1389,7 +1389,7 @@ namespace ClassicUO.Game.GameObjects
 
             /*const int TIME_TURN_TO_LASTTARGET = 2000;
 
-            if (InWarMode && Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Engine.Ticks)
+            if (InWarMode && Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks)
             {
                 Mobile enemy = World.Mobiles.Get(World.LastAttack);
 
@@ -1411,7 +1411,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
-            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Engine.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT ||
+            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT ||
                 (FileManager.ClientVersion >= ClientVersions.CV_60142 && IsParalyzed))
                 return false;
 
@@ -1494,7 +1494,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (!IsWalking)
                     SetAnimation(0xFF);
-                LastStepTime = Engine.Ticks;
+                LastStepTime = Time.Ticks;
             }
 
             ref var step = ref Walker.StepInfos[Walker.StepsCount];
@@ -1503,7 +1503,7 @@ namespace ClassicUO.Game.GameObjects
             step.Running = run;
             step.OldDirection = (byte) (oldDirection & Direction.Mask);
             step.Direction = (byte) direction;
-            step.Timer = Engine.Ticks;
+            step.Timer = Time.Ticks;
             step.X = (ushort) x;
             step.Y = (ushort) y;
             step.Z = z;
@@ -1536,7 +1536,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (_lastDir == (int) direction && _lastMount == IsMounted && _lastRun == run)
             {
-                nowDelta = (int) (Engine.Ticks - _lastStepTime - walkTime + _lastDelta);
+                nowDelta = (int) (Time.Ticks - _lastStepTime - walkTime + _lastDelta);
 
                 if (Math.Abs(nowDelta) > 70)
                     nowDelta = 0;
@@ -1545,13 +1545,13 @@ namespace ClassicUO.Game.GameObjects
             else
                 _lastDelta = 0;
 
-            _lastStepTime = (int) Engine.Ticks;
+            _lastStepTime = (int) Time.Ticks;
             _lastRun = run;
             _lastMount = IsMounted;
             _lastDir = (int) direction;
 
 
-            Walker.LastStepRequestTime = Engine.Ticks + walkTime - nowDelta;
+            Walker.LastStepRequestTime = Time.Ticks + walkTime - nowDelta;
             GetGroupForAnimation(this, 0, true);
 
             return true;
@@ -1569,18 +1569,18 @@ namespace ClassicUO.Game.GameObjects
         private int _resynchronizing;
         private long _nextAllowedStepTime;
 
-        public bool IsWaitingNextMovement => _nextAllowedStepTime > Engine.Ticks;
+        public bool IsWaitingNextMovement => _nextAllowedStepTime > Time.Ticks;
 
         public bool Walk(Direction direction, bool run)
         {
-            if (_nextAllowedStepTime > Engine.Ticks || IsParalyzed)
+            if (_nextAllowedStepTime > Time.Ticks || IsParalyzed)
             {
                 return false;
             }
 
             if (_stepsOutstanding > Constants.MAX_STEP_COUNT)
             {
-                if (_nextAllowedStepTime + 1000 > Engine.Ticks)
+                if (_nextAllowedStepTime + 1000 > Time.Ticks)
                     Resynchronize();
                 return false;
             }
@@ -1651,7 +1651,7 @@ namespace ClassicUO.Game.GameObjects
                 _sequenceNumber = 1;
             else
                 _sequenceNumber++;
-            _nextAllowedStepTime = Engine.Ticks + walkTime;
+            _nextAllowedStepTime = Time.Ticks + walkTime;
             _stepsOutstanding++;
             GetGroupForAnimation(this);
 
@@ -1671,7 +1671,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
-            if (LastStepRequestedTime > Engine.Ticks)
+            if (LastStepRequestedTime > Time.Ticks)
                 return false;
 
             if (RequestedSteps.Count >= Constants.MAX_STEP_COUNT)
@@ -1785,7 +1785,7 @@ namespace ClassicUO.Game.GameObjects
                 SequenceNumber = 1;
             else SequenceNumber++;
 
-            LastStepRequestedTime = Engine.Ticks + walkTime;
+            LastStepRequestedTime = Time.Ticks + walkTime;
 
             GetGroupForAnimation(this);
 
@@ -1872,7 +1872,7 @@ namespace ClassicUO.Game.GameObjects
 
             //Log.Message(LogTypes.Warning, $"Forced position. - SEQUENCE: {_sequenceNumber}");
 
-            _nextAllowedStepTime = Engine.Ticks;
+            _nextAllowedStepTime = Time.Ticks;
             _sequenceNumber = 0;
             _stepsOutstanding = 0;
             _movementX = x;
@@ -1888,7 +1888,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (_resynchronizing > 0)
             {
-                if (_nextAllowedStepTime + (_resynchronizing * 1000) > Engine.Ticks)
+                if (_nextAllowedStepTime + (_resynchronizing * 1000) > Time.Ticks)
                     return;
             }
 

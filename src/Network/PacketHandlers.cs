@@ -229,7 +229,7 @@ namespace ClassicUO.Network
         {
             TargetManager.SetTargeting((CursorTarget) p.ReadByte(), p.ReadUInt(), (TargetType) p.ReadByte());
 
-            if (World.Party.PartyHealTimer < Engine.Ticks && World.Party.PartyHealTarget != 0)
+            if (World.Party.PartyHealTimer < Time.Ticks && World.Party.PartyHealTarget != 0)
             {
                 TargetManager.TargetGameObject(World.Get(World.Party.PartyHealTarget));
                 World.Party.PartyHealTimer = 0;
@@ -952,7 +952,7 @@ namespace ClassicUO.Network
                 effect = new MovingEffect(source, dest, sourceX, sourceY, sourceZ,
                                           destX, destY, destZ, graphic, hue, true)
                 {
-                    Duration = Engine.Ticks + 5000,
+                    Duration = Time.Ticks + 5000,
                     MovingDelay = 5
                 };
             }
@@ -961,7 +961,7 @@ namespace ClassicUO.Network
                 effect = new DragEffect(source, dest, sourceX, sourceY, sourceZ,
                                         destX, destY, destZ, graphic, hue)
                 {
-                    Duration = Engine.Ticks + 5000
+                    Duration = Time.Ticks + 5000
                 };
             }
 
@@ -1235,7 +1235,7 @@ namespace ClassicUO.Network
                 CUOEnviroment.Client.Scene.Audio.PlayMusic(42);
 
                 if (ProfileManager.Current.EnableDeathScreen)
-                    World.Player.DeathScreenTimer = Engine.Ticks + Constants.DEATH_SCREEN_TIMER;
+                    World.Player.DeathScreenTimer = Time.Ticks + Constants.DEATH_SCREEN_TIMER;
 
                 GameActions.ChangeWarMode(0);
             }
@@ -1591,7 +1591,7 @@ namespace ClassicUO.Network
                 if (FileManager.ClientVersion >= ClientVersions.CV_305D)
                     NetClient.Socket.Send(new PClientViewRange(World.ClientViewRange));
 
-                Engine.FpsLimit = ProfileManager.Current.MaxFPS;
+                //Engine.FpsLimit = ProfileManager.Current.MaxFPS;
 
                 ProfileManager.Current.ReadGumps()?.ForEach(UIManager.Add);
             }
@@ -1661,7 +1661,7 @@ namespace ClassicUO.Network
                 weather.Count = 70;
 
             weather.Temperature = p.ReadByte();
-            weather.Timer = Engine.Ticks + Constants.WEATHER_TIMER;
+            weather.Timer = Time.Ticks + Constants.WEATHER_TIMER;
             weather.Generate();
 
             switch (type)
@@ -1817,8 +1817,8 @@ namespace ClassicUO.Network
                         BulletinBoardGump bulletinBoard = UIManager.GetGump<BulletinBoardGump>(serial);
                         bulletinBoard?.Dispose();
 
-                        int x = (Engine.WindowWidth >> 1) - 245;
-                        int y = (Engine.WindowHeight >> 1) - 205;
+                        int x = (CUOEnviroment.Client.Window.ClientBounds.Width >> 1) - 245;
+                        int y = (CUOEnviroment.Client.Window.ClientBounds.Height >> 1) - 205;
 
                         bulletinBoard = new BulletinBoardGump(item, x, y, p.ReadASCII(22));
                         UIManager.Add(bulletinBoard);
@@ -2225,8 +2225,8 @@ namespace ClassicUO.Network
             {
                 GrayMenuGump gump = new GrayMenuGump(serial, id, name)
                 {
-                    X = (Engine.WindowWidth >> 1) - 200,
-                    Y = (Engine.WindowHeight >> 1) - ((121 + count * 21) >> 1)
+                    X = (CUOEnviroment.Client.Window.ClientBounds.Width >> 1) - 200,
+                    Y = (CUOEnviroment.Client.Window.ClientBounds.Height >> 1) - ((121 + count * 21) >> 1)
                 };
 
                 int offsetY = 35 + gump.Height;
@@ -2415,8 +2415,8 @@ namespace ClassicUO.Network
 
             Rectangle rect = FileManager.Gumps.GetTexture(0x0906).Bounds;
 
-            int x = (Engine.WindowWidth >> 1) - (rect.Width >> 1);
-            int y = (Engine.WindowHeight >> 1) - (rect.Height >> 1);
+            int x = (CUOEnviroment.Client.Window.ClientBounds.Width >> 1) - (rect.Width >> 1);
+            int y = (CUOEnviroment.Client.Window.ClientBounds.Height >> 1) - (rect.Height >> 1);
 
             ColorPickerGump gump = new ColorPickerGump(serial, graphic, x, y, null);
 

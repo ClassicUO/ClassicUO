@@ -32,7 +32,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (World.ClientFeatures.TooltipsEnabled || msg == null)
                 return;
 
-            msg.Time = Engine.Ticks + 4000;
+            msg.Time = Time.Ticks + 4000;
            
             TextRenderer.AddMessage(msg);
         }

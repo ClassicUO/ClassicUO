@@ -304,7 +304,7 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed) return false;
 
             if (Texture != null && !Texture.IsDisposed)
-                Texture.Ticks = Engine.Ticks;
+                Texture.Ticks = Time.Ticks;
 
             foreach (Control c in Children)
             {

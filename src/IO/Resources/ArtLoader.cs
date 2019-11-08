@@ -78,7 +78,7 @@ namespace ClassicUO.IO.Resources
             }
 
             //else
-            //    texture.Ticks = Engine.Ticks + 3000;
+            //    texture.Ticks = Time.Ticks + 3000;
             return texture;
         }
 
@@ -91,7 +91,7 @@ namespace ClassicUO.IO.Resources
             }
 
             //else
-            //    texture.Ticks = Engine.Ticks + 3000;
+            //    texture.Ticks = Time.Ticks + 3000;
             return texture;
         }
 

@@ -50,10 +50,11 @@ namespace ClassicUO.Game.Managers
                 isunicode = ProfileManager.Current.OverrideAllFontsIsUnicode;
             }
 
-            JournalEntry entry = new JournalEntry(text, font, hue, name, isunicode, Engine.CurrDateTime);
+            var n = DateTime.Now;
+            JournalEntry entry = new JournalEntry(text, font, hue, name, isunicode, n);
             Entries.AddToBack(entry);
             EntryAdded.Raise(entry);
-            _fileWriter?.WriteLine($"[{Engine.CurrDateTime:g}]  {name}: {text}");
+            _fileWriter?.WriteLine($"[{n:g}]  {name}: {text}");
         }
 
         public void CreateWriter(bool create)
@@ -62,7 +63,7 @@ namespace ClassicUO.Game.Managers
             {
                 try
                 {
-                    _fileWriter = new StreamWriter(File.Open($"{Engine.CurrDateTime:yyyy_MM_dd_HH_mm_ss}_journal.txt", FileMode.Create, FileAccess.Write, FileShare.Read))
+                    _fileWriter = new StreamWriter(File.Open($"{DateTime.Now:yyyy_MM_dd_HH_mm_ss}_journal.txt", FileMode.Create, FileAccess.Write, FileShare.Read))
                     {
                         AutoFlush = true
                     };

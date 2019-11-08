@@ -92,7 +92,7 @@ namespace ClassicUO.Game
                 }
             }
 
-            _aura = new Texture2D(Engine.Batcher.GraphicsDevice, ww, hh);
+            _aura = new Texture2D(CUOEnviroment.Client.GraphicsDevice, ww, hh);
             _aura.SetData(data);
 
             _tooltip = new Tooltip();

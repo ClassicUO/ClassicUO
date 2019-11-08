@@ -62,7 +62,7 @@ namespace ClassicUO.Game.Managers
       
         public static float ContainerScale { get; set; } = 1f;
 
-        public static AnchorManager AnchorManager { get; }
+        public static AnchorManager AnchorManager { get; } = new AnchorManager();
 
         public static Deque<Control> Gumps { get; } = new Deque<Control>();
 
@@ -199,7 +199,7 @@ namespace ClassicUO.Game.Managers
 
             if (MouseOverControl != null)
             {
-                if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
+                //if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
                     MouseOverControl.InvokeMouseUp(Mouse.Position, MouseButton.Left);
 
                 if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
@@ -803,7 +803,7 @@ namespace ClassicUO.Game.Managers
             Add(gump);
 
             gump.Initialize();
-            gump.Update(Engine.Ticks, 0);
+            gump.Update(Time.Ticks, 0);
             gump.SetInScreen();
 
             return gump;

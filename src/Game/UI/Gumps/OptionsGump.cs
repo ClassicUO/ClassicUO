@@ -223,7 +223,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_logoTexture2D == null || _logoTexture2D.IsDisposed)
                 {
-                    Stream stream = typeof(Engine).Assembly.GetManifestResourceStream("ClassicUO.cuologo.png");
+                    Stream stream = typeof(CUOEnviroment).Assembly.GetManifestResourceStream("ClassicUO.cuologo.png");
                     Texture2D.TextureDataFromStreamEXT(stream, out int w, out int h, out byte[] pixels, 350, 365);
 
                     _logoTexture2D = new UOTexture32(w, h);
@@ -1573,7 +1573,7 @@ namespace ClassicUO.Game.UI.Gumps
             WorldViewportGump vp = UIManager.GetGump<WorldViewportGump>();
 
             // general
-            ProfileManager.Current.MaxFPS = Engine.FpsLimit = _sliderFPS.Value;
+            //ProfileManager.Current.MaxFPS = Engine.FpsLimit = _sliderFPS.Value;
             Settings.GlobalSettings.MaxLoginFPS = _sliderFPSLogin.Value;
             ProfileManager.Current.HighlightGameObjects = _highlightObjects.IsChecked;
             ProfileManager.Current.ReduceFPSWhenInactive = _reduceFPSWhenInactive.IsChecked;
@@ -1775,7 +1775,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (vp != null)
                     {
-                        n = vp.ResizeWindow(new Point(Engine.WindowWidth, Engine.WindowHeight));
+                        n = vp.ResizeWindow(new Point(CUOEnviroment.Client.Window.ClientBounds.Width, CUOEnviroment.Client.Window.ClientBounds.Height));
                         loc = ProfileManager.Current.GameWindowPosition = vp.Location = new Point(-5, -5);
                     }
                 }
@@ -1818,7 +1818,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ProfileManager.Current.ShadowsEnabled = _enableShadows.IsChecked;
             ProfileManager.Current.AuraUnderFeetType = _auraType.SelectedIndex;
-            Engine.Instance.IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread = _runMouseInSeparateThread.IsChecked;
+            CUOEnviroment.Client.IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread = _runMouseInSeparateThread.IsChecked;
             ProfileManager.Current.AuraOnMouse = _auraMouse.IsChecked;
             ProfileManager.Current.UseXBR = _xBR.IsChecked;
             ProfileManager.Current.PartyAura = _partyAura.IsChecked;

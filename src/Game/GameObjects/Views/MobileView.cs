@@ -77,7 +77,7 @@ namespace ClassicUO.Game.GameObjects
 
             DrawCharacter(batcher, posX, posY);
 
-            Engine.DebugInfo.MobilesRendered++;
+            //Engine.DebugInfo.MobilesRendered++;
 
             return true;
         }
@@ -321,7 +321,7 @@ namespace ClassicUO.Game.GameObjects
                     return 0;
             }
 
-            direction.LastAccessTime = Engine.Ticks;
+            direction.LastAccessTime = Time.Ticks;
 
             int fc = direction.FrameCount;
 
@@ -339,7 +339,7 @@ namespace ClassicUO.Game.GameObjects
                     goto SKIP;
                 }
 
-                frame.Ticks = Engine.Ticks;
+                frame.Ticks = Time.Ticks;
 
                 if (mirror)
                     x -= frame.Width - frame.CenterX;

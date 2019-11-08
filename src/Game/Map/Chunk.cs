@@ -51,7 +51,7 @@ namespace ClassicUO.Game.Map
                 }
             }
 
-            LastAccessTime = Engine.Ticks + Constants.CLEAR_TEXTURES_DELAY;
+            LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
         }
 
         private static readonly Queue<Chunk> _pool = new Queue<Chunk>();
@@ -62,7 +62,7 @@ namespace ClassicUO.Game.Map
                 var c = _pool.Dequeue();
                 c.X = x;
                 c.Y = y;
-                c.LastAccessTime = Engine.Ticks + Constants.CLEAR_TEXTURES_DELAY;
+                c.LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
 
                 x <<= 3;
                 y <<= 3;

@@ -1229,14 +1229,14 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case ButtonParty.Heal1:
                     GameActions.CastSpell(29);
-                    World.Party.PartyHealTimer = Engine.Ticks + 50;
+                    World.Party.PartyHealTimer = Time.Ticks + 50;
                     World.Party.PartyHealTarget = LocalSerial;
 
                     break;
 
                 case ButtonParty.Heal2:
                     GameActions.CastSpell(11);
-                    World.Party.PartyHealTimer = Engine.Ticks + 50;
+                    World.Party.PartyHealTimer = Time.Ticks + 50;
                     World.Party.PartyHealTarget = LocalSerial;
 
                     break;

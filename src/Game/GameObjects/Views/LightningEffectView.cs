@@ -91,7 +91,7 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Z = 0;
             }
 
-            Engine.DebugInfo.EffectsRendered++;
+            //Engine.DebugInfo.EffectsRendered++;
 
 
             batcher.SetBlendState(BlendState.Additive);

@@ -237,7 +237,7 @@ namespace ClassicUO.Game.GameObjects
 
             for (var item = TextContainer.Items; item != null; item = item.ListRight)
             {
-                if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null || item.Time < Engine.Ticks)
+                if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null || item.Time < Time.Ticks)
                     continue;
 
                 int startX = item.RealScreenPosition.X;
@@ -339,7 +339,7 @@ namespace ClassicUO.Game.GameObjects
                 timeToLive = (delay >> 31) + delay;
             }
 
-            timeToLive += Engine.Ticks;
+            timeToLive += Time.Ticks;
 
             return timeToLive;
         }

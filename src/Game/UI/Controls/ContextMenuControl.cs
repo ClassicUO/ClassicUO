@@ -214,7 +214,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseOver(int x, int y)
         {
-            if (_timeHover < Engine.Ticks)
+            if (_timeHover < Time.Ticks)
             {
 
             }
@@ -225,7 +225,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseEnter(int x, int y)
         {
-            _timeHover = Engine.Ticks + 500;
+            _timeHover = Time.Ticks + 500;
             base.OnMouseEnter(x, y);
         }
 

@@ -143,7 +143,7 @@ namespace ClassicUO.Network
             JArray data = JsonConvert.DeserializeObject<JArray>(json);
 
 #if DEV_BUILD
-            FileInfo fileLastCommit = new FileInfo(Path.Combine(Engine.ExePath, "version.txt"));
+            FileInfo fileLastCommit = new FileInfo(Path.Combine(CUOEnviroment.ExecutablePath, "version.txt"));
 #endif
             
 
@@ -172,7 +172,7 @@ namespace ClassicUO.Network
                         break;
                     }
 #else
-                if (Version.TryParse(tagName, out Version version) && version > Engine.Version)
+                if (Version.TryParse(tagName, out Version version) && version > CUOEnviroment.Version)
                 {
                     Log.Message(LogTypes.Trace, "Found new version available: " + version);
 
@@ -203,7 +203,7 @@ namespace ClassicUO.Network
                     catch
                     {
                         Log.Message(LogTypes.Warning, "Impossible to retrive OS temp path. CUO will use current path");
-                        temp = Engine.ExePath;
+                        temp = CUOEnviroment.ExecutablePath;
                     }
 
                     string tempPath = Path.Combine(temp, "update-temp");
@@ -246,7 +246,7 @@ namespace ClassicUO.Network
                             FileName = prefix + Path.Combine(tempPath, "ClassicUO.exe"),
                             UseShellExecute = false,
                             Arguments =
-                                $"--source \"{Engine.ExePath}\" --pid {Process.GetCurrentProcess().Id} --action update"
+                                $"--source \"{CUOEnviroment.ExecutablePath}\" --pid {Process.GetCurrentProcess().Id} --action update"
                         }
                     }.Start();
 

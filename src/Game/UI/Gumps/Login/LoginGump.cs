@@ -140,7 +140,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Y = 453
             });
 
-            Add(new Label($"ClassicUO Version {Engine.Version}", false, 0x034E, font: 9)
+            Add(new Label($"ClassicUO Version {CUOEnviroment.Version}", false, 0x034E, font: 9)
             {
                 X = 286,
                 Y = 465
@@ -243,7 +243,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     break;
 
                 case Buttons.Quit:
-                    Engine.Quit();
+                    CUOEnviroment.Client.Exit();
 
                     break;
             }

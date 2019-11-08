@@ -59,7 +59,7 @@ namespace ClassicUO.Game.Managers
                 if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null)
                     continue;
 
-                if (item.Time >= Engine.Ticks)
+                if (item.Time >= Time.Ticks)
                 {
                     if (item.Owner == null || item.Owner.UseInRender != renderIndex)
                         continue;
@@ -83,7 +83,7 @@ namespace ClassicUO.Game.Managers
 
             for (var o = _drawPointer; o != null; o = o.Left)
             {
-                if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < Engine.Ticks || (o.Owner.UseInRender != renderIndex && !isGump))
+                if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < Time.Ticks || (o.Owner.UseInRender != renderIndex && !isGump))
                     continue;
 
                 ushort hue = 0;
@@ -145,7 +145,7 @@ namespace ClassicUO.Game.Managers
 
                 if (doit)
                 {
-                    if (t.Time >= Engine.Ticks && !t.RenderedText.IsDestroyed)
+                    if (t.Time >= Time.Ticks && !t.RenderedText.IsDestroyed)
                     {
                         if (t.Owner != null)
                         {
@@ -162,7 +162,7 @@ namespace ClassicUO.Game.Managers
 
         private void CalculateAlpha(TextOverhead msg)
         {
-            int delta = (int)(msg.Time - Engine.Ticks);
+            int delta = (int)(msg.Time - Time.Ticks);
 
             if (delta >= 0 && delta <= 1000)
             {

@@ -112,9 +112,9 @@ namespace ClassicUO.Game.UI.Gumps
             X = x;
             Y = y;
 
-            if (_timer < Engine.Ticks)
+            if (_timer < Time.Ticks)
             {
-                _timer = Engine.Ticks + 1000;
+                _timer = Time.Ticks + 1000;
                 _needHue = !_needHue;
             }
 

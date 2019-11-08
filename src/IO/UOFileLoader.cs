@@ -81,7 +81,7 @@ namespace ClassicUO.IO
 
         public void ClearUnusedResources<T1>(Dictionary<uint, T1> dict, int maxCount) where T1 : UOTexture
         {
-            long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
+            long ticks = Time.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
             int count = 0;
             foreach (var p in dict)

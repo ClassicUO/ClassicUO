@@ -86,7 +86,7 @@ namespace ClassicUO.Game.Managers
                     if (doesExplode)
                         effect.AddChildEffect(new AnimatedItemEffect(target, targPos.X, targPos.Y, targPos.Z, 0x36Cb, hue, 9, speed));
 
-                    effect.Update(Engine.Ticks, 0);
+                    effect.Update(Time.Ticks, 0);
                     break;
 
                 case GraphicEffectType.Lightning:

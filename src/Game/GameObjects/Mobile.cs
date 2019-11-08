@@ -49,7 +49,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Mobile(Serial serial) : base(serial)
         {
-            LastAnimationChangeTime = Engine.Ticks;
+            LastAnimationChangeTime = Time.Ticks;
             CalculateRandomIdleTime();
         }
 
@@ -154,7 +154,7 @@ namespace ClassicUO.Game.GameObjects
 
         public int StepSoundOffset { get; set; }
 
-        protected virtual bool IsWalking => LastStepTime > Engine.Ticks - Constants.WALKING_DELAY;
+        protected virtual bool IsWalking => LastStepTime > Time.Ticks - Constants.WALKING_DELAY;
 
         public byte AnimationGroup { get; set; } = 0xFF;
 
@@ -173,7 +173,7 @@ namespace ClassicUO.Game.GameObjects
         private void CalculateRandomIdleTime()
         {
             const int TIME = 30000;
-            _lastAnimationIdleDelay = Engine.Ticks + (TIME + RandomHelper.GetValue(0, TIME));
+            _lastAnimationIdleDelay = Time.Ticks + (TIME + RandomHelper.GetValue(0, TIME));
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -183,7 +183,7 @@ namespace ClassicUO.Game.GameObjects
 
             base.Update(totalMS, frameMS);
 
-            if (_lastAnimationIdleDelay < Engine.Ticks)
+            if (_lastAnimationIdleDelay < Time.Ticks)
                 SetIdleAnimation();
 
             ProcessAnimation(out _, true);
@@ -208,7 +208,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (!IsWalking)
                     SetAnimation(0xFF);
-                LastStepTime = Engine.Ticks;
+                LastStepTime = Time.Ticks;
             }
 
             Direction moveDir = CalculateDirection(endX, endY, x, y);
@@ -311,7 +311,7 @@ namespace ClassicUO.Game.GameObjects
             AnimationRepeat = repeat;
             AnimationDirection = frameDirection;
             AnimationFromServer = false;
-            LastAnimationChangeTime = Engine.Ticks;
+            LastAnimationChangeTime = Time.Ticks;
             CalculateRandomIdleTime();
         }
 
@@ -429,14 +429,14 @@ namespace ClassicUO.Game.GameObjects
 
         protected virtual bool NoIterateAnimIndex()
         {
-            return LastStepTime > Engine.Ticks - Constants.WALKING_DELAY && Steps.Count == 0;
+            return LastStepTime > Time.Ticks - Constants.WALKING_DELAY && Steps.Count == 0;
         }
 
         private void ProcessFootstepsSound()
         {
             if (ProfileManager.Current.EnableFootstepsSound && IsHuman && !IsHidden)
             {
-                long ticks = Engine.Ticks;
+                long ticks = Time.Ticks;
 
                 if (Steps.Count != 0 && LastStepSoundTime < ticks)
                 {
@@ -488,7 +488,7 @@ namespace ClassicUO.Game.GameObjects
 
             ProcessFootstepsSound();
 
-            if (LastAnimationChangeTime < Engine.Ticks && !NoIterateAnimIndex())
+            if (LastAnimationChangeTime < Time.Ticks && !NoIterateAnimIndex())
             {
                 sbyte frameIndex = AnimIndex;
 
@@ -539,7 +539,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if ((direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1) || direction.IsUOP)
                     {
-                        direction.LastAccessTime = Engine.Ticks;
+                        direction.LastAccessTime = Time.Ticks;
                         int fc = direction.FrameCount;
 
                         if (AnimationFromServer)
@@ -626,7 +626,7 @@ namespace ClassicUO.Game.GameObjects
                     World.RemoveMobile(Serial);
                 }
 
-                LastAnimationChangeTime = Engine.Ticks + currentDelay;
+                LastAnimationChangeTime = Time.Ticks + currentDelay;
             }
         }
 
@@ -648,8 +648,8 @@ namespace ClassicUO.Game.GameObjects
                     if (AnimationFromServer)
                         SetAnimation(0xFF);
 
-                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (int) Engine.FrameDelay[1];
-                    int delay = (int) Engine.Ticks - (int) LastStepTime;
+                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) /*- (int) Engine.FrameDelay[1]*/;
+                    int delay = (int) Time.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
 
@@ -756,7 +756,7 @@ namespace ClassicUO.Game.GameObjects
                         if (Right != null || Left != null)
                             AddToTile();
 
-                        LastStepTime = Engine.Ticks;
+                        LastStepTime = Time.Ticks;
                         ProcessDelta();
                     }
                 }
@@ -966,7 +966,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                 {
-                    if (offY == 0 && last.Time < Engine.Ticks)
+                    if (offY == 0 && last.Time < Time.Ticks)
                         continue;
 
 

@@ -320,9 +320,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.Update(totalMS, frameMS);
 
-                if (_time < Engine.Ticks)
+                if (_time < Time.Ticks)
                 {
-                    _time = Engine.Ticks + 100;
+                    _time = Time.Ticks + 100;
 
                     if (_graphic == 0)
                     {

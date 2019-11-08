@@ -73,7 +73,7 @@ namespace ClassicUO.Game.GameObjects
             else
                 ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
 
-            Engine.DebugInfo.EffectsRendered++;
+            //Engine.DebugInfo.EffectsRendered++;
 
             if (FixedDir)
                 batcher.DrawSprite(Texture, posX, posY, false, ref HueVector);
@@ -81,7 +81,7 @@ namespace ClassicUO.Game.GameObjects
                 batcher.DrawSpriteRotated(Texture, posX, posY, Bounds.X, Bounds.Y, ref HueVector, AngleToTarget);
 
             //Select(posX, posY);
-            Texture.Ticks = Engine.Ticks;
+            Texture.Ticks = Time.Ticks;
 
             ref readonly StaticTiles data = ref FileManager.TileData.StaticData[_displayedGraphic];
 

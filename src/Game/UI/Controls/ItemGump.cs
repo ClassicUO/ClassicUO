@@ -168,7 +168,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             _clickedCanDrag = true;
-            _picUpTime = Engine.Ticks + 500f;
+            _picUpTime = Time.Ticks + 500f;
         }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
@@ -262,7 +262,7 @@ namespace ClassicUO.Game.UI.Controls
                         {
                             _clickedCanDrag = false;
                             _sendClickIfNotDClick = true;
-                            float totalMS = Engine.Ticks;
+                            float totalMS = Time.Ticks;
                             _sClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
                             _lastClickPosition.X = Mouse.Position.X;
                             _lastClickPosition.Y = Mouse.Position.Y;

@@ -205,7 +205,7 @@ namespace ClassicUO.Game.Managers
 
             if (_lastMacro == null) // MRC_STOP
                 result = 2;
-            else if (_nextTimer <= Engine.Ticks)
+            else if (_nextTimer <= Time.Ticks)
                 result = Process(_lastMacro);
             else // MRC_BREAK_PARSER
                 result = 1;
@@ -670,7 +670,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.LastTarget:
 
                     //if (WaitForTargetTimer == 0)
-                    //    WaitForTargetTimer = Engine.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
+                    //    WaitForTargetTimer = Time.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
 
                     if (TargetManager.IsTargeting)
                     {
@@ -683,7 +683,7 @@ namespace ClassicUO.Game.Managers
 
                         WaitForTargetTimer = 0;
                     }
-                    else if (WaitForTargetTimer < Engine.Ticks)
+                    else if (WaitForTargetTimer < Time.Ticks)
                         WaitForTargetTimer = 0;
                     else
                         result = 1;
@@ -693,14 +693,14 @@ namespace ClassicUO.Game.Managers
                 case MacroType.TargetSelf:
 
                     //if (WaitForTargetTimer == 0)
-                    //    WaitForTargetTimer = Engine.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
+                    //    WaitForTargetTimer = Time.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
 
                     if (TargetManager.IsTargeting)
                     {
                         TargetManager.TargetGameObject(World.Player);
                         WaitForTargetTimer = 0;
                     }
-                    else if (WaitForTargetTimer < Engine.Ticks)
+                    else if (WaitForTargetTimer < Time.Ticks)
                         WaitForTargetTimer = 0;
                     else
                         result = 1;
@@ -749,9 +749,9 @@ namespace ClassicUO.Game.Managers
                 case MacroType.WaitForTarget:
 
                     if (WaitForTargetTimer == 0)
-                        WaitForTargetTimer = Engine.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
+                        WaitForTargetTimer = Time.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
 
-                    if (TargetManager.IsTargeting || WaitForTargetTimer < Engine.Ticks)
+                    if (TargetManager.IsTargeting || WaitForTargetTimer < Time.Ticks)
                         WaitForTargetTimer = 0;
                     else
                         result = 1;
@@ -785,7 +785,7 @@ namespace ClassicUO.Game.Managers
                     string str = mosss.Text;
 
                     if (!string.IsNullOrEmpty(str) && int.TryParse(str, out int rr))
-                        _nextTimer = Engine.Ticks + rr;
+                        _nextTimer = Time.Ticks + rr;
 
                     break;
 
@@ -857,7 +857,7 @@ namespace ClassicUO.Game.Managers
                         if (WaitingBandageTarget)
                         {
                             if (WaitForTargetTimer == 0)
-                                WaitForTargetTimer = Engine.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
+                                WaitForTargetTimer = Time.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
 
                             if (TargetManager.IsTargeting)
                                 TargetManager.TargetGameObject(macro.Code == MacroType.BandageSelf ? World.Player : World.Mobiles.Get(TargetManager.LastTarget));

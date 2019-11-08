@@ -89,7 +89,7 @@ namespace ClassicUO.Game.GameObjects
                         ProcessAlpha(0xFF);
                 }
             }
-            else if (ItemData.IsAnimated && _lastAnimationFrameTime < Engine.Ticks)
+            else if (ItemData.IsAnimated && _lastAnimationFrameTime < Time.Ticks)
             {
                 IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
 
@@ -106,7 +106,7 @@ namespace ClassicUO.Game.GameObjects
                             if (AnimIndex >= animData->FrameCount)
                                 AnimIndex = 0;
 
-                            _lastAnimationFrameTime = Engine.Ticks + (uint)(animData->FrameInterval !=  0 ?
+                            _lastAnimationFrameTime = Time.Ticks + (uint)(animData->FrameInterval !=  0 ?
                                                           animData->FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY + 25 : Constants.ITEM_EFFECT_ANIMATION_DELAY);
                         }
                     }
@@ -140,7 +140,7 @@ namespace ClassicUO.Game.GameObjects
             else
                 ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, ItemData.IsPartialHue, 0);
 
-            Engine.DebugInfo.StaticsRendered++;
+            //Engine.DebugInfo.StaticsRendered++;
 
             //if ((StaticFilters.IsTree(Graphic) || ItemData.IsFoliage || StaticFilters.IsRock(Graphic)))
             //{

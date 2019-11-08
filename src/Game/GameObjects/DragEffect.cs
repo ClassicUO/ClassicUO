@@ -43,13 +43,13 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_lastMoveTime > Engine.Ticks)
+            if (_lastMoveTime > Time.Ticks)
                 return;
             
             Offset.X += 8;
             Offset.Y += 8;
 
-            _lastMoveTime = Engine.Ticks + 20;
+            _lastMoveTime = Time.Ticks + 20;
 
             base.Update(totalMS, frameMS);
         }
@@ -87,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
             else
                 ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
 
-            Engine.DebugInfo.EffectsRendered++;
+            //Engine.DebugInfo.EffectsRendered++;
             base.Draw(batcher, posX, posY);
 
             ref readonly StaticTiles data = ref FileManager.TileData.StaticData[_displayedGraphic];

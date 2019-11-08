@@ -135,7 +135,7 @@ namespace ClassicUO.Game.GameObjects
 
             Select(posX, posY);
 
-            Texture.Ticks = Engine.Ticks;
+            Texture.Ticks = Time.Ticks;
 
             return true;
         }

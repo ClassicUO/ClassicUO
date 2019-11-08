@@ -114,10 +114,10 @@ namespace ClassicUO.Configuration
                 if (Path.IsPathRooted(CustomSettingsFilepath))
                     return CustomSettingsFilepath;
                 else
-                    return Path.Combine(Engine.ExePath, CustomSettingsFilepath);
+                    return Path.Combine(CUOEnviroment.ExecutablePath, CustomSettingsFilepath);
             }
 
-            return Path.Combine(Engine.ExePath, SETTINGS_FILENAME);
+            return Path.Combine(CUOEnviroment.ExecutablePath, SETTINGS_FILENAME);
         }
 
 

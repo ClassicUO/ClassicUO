@@ -150,7 +150,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                 {
-                    if (offY == 0 && last.Time < Engine.Ticks)
+                    if (offY == 0 && last.Time < Time.Ticks)
                         continue;
 
                     last.OffsetY = offY;
