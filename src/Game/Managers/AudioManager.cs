@@ -21,6 +21,7 @@
 
 #endregion
 
+using System.Collections.Generic;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Audio;
@@ -32,6 +33,7 @@ namespace ClassicUO.Game.Managers
     internal class AudioManager
     {
         private UOMusic _currentMusic;
+        private List<UOSound> _currentSounds;
 
         private bool _canReproduceAudio = true;
 
@@ -39,14 +41,15 @@ namespace ClassicUO.Game.Managers
         {
             try
             {
-                new DynamicSoundEffectInstance(0, AudioChannels.Stereo)
-                    .Dispose();
+                new DynamicSoundEffectInstance(0, AudioChannels.Stereo).Dispose();
             }
             catch (NoAudioHardwareException ex)
             {
                 Log.Message(LogTypes.Warning, ex.ToString());
                 _canReproduceAudio = false;
             }
+
+            _currentSounds = new List<UOSound>();
         }
 
         public void PlaySound(int index, AudioEffects effect = AudioEffects.None, bool spamCheck = false)
@@ -69,7 +72,13 @@ namespace ClassicUO.Game.Managers
             if (volume < -1 || volume > 1f)
                 return;
 
-            FileManager.Sounds.GetSound(index)?.Play(true, effect, volume, spamCheck);
+            UOSound sound = (UOSound)FileManager.Sounds.GetSound(index);
+
+            if (sound != null)
+            {
+                sound.Play(true, effect, volume, spamCheck);
+                _currentSounds.Add(sound);
+            }
         }
 
         public void PlaySoundWithDistance(int index, float volume, bool spamCheck = false)
@@ -85,7 +94,13 @@ namespace ClassicUO.Game.Managers
             if (volume < -1 || volume > 1f)
                 return;
 
-            FileManager.Sounds.GetSound(index)?.Play(true, AudioEffects.None, volume, spamCheck);
+            UOSound sound = (UOSound)FileManager.Sounds.GetSound(index);
+
+            if (sound != null)
+            {
+                sound.Play(true, AudioEffects.None, volume, spamCheck);
+                _currentSounds.Add(sound);
+            }
         }
 
         public void PlayMusic(int music)
@@ -148,6 +163,25 @@ namespace ClassicUO.Game.Managers
             }
         }
 
+        public void UpdateCurrentSoundsVolume()
+        {
+            if (!_canReproduceAudio)
+                return;
+
+            if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableSound)
+                return;
+
+            float volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
+
+            if (volume < -1 || volume > 1f)
+                return;
+
+            foreach (UOSound sound in _currentSounds.ToArray())
+            {
+                sound.Volume = volume;
+            }
+        }
+
         public void StopMusic()
         {
             if (_currentMusic != null)
@@ -155,6 +189,16 @@ namespace ClassicUO.Game.Managers
                 _currentMusic.Stop();
                 _currentMusic.Dispose();
                 _currentMusic = null;
+            }
+        }
+
+        public void StopSounds()
+        {
+            foreach (UOSound sound in _currentSounds.ToArray())
+            {
+                sound.Stop();
+                sound.Dispose();
+                _currentSounds.Remove(sound);
             }
         }
 
@@ -173,6 +217,17 @@ namespace ClassicUO.Game.Managers
             }
 
             _currentMusic?.Update();
+
+            foreach (UOSound sound in _currentSounds.ToArray())
+            {
+                if (Engine.Instance.IsActive)
+                {
+                    if (!Engine.Profile.Current.ReproduceSoundsInBackground) sound.Volume = Engine.Profile.Current.MusicVolume / Constants.SOUND_DELTA;
+                }
+                else if (!Engine.Profile.Current.ReproduceSoundsInBackground && sound.Volume != 0) sound.Volume = 0;
+
+                if (!sound.IsPlaying()) _currentSounds.Remove(sound);
+            }
         }
     }
 }
