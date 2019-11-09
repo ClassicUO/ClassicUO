@@ -108,7 +108,8 @@ namespace ClassicUO
                 else
                 {
                     RestoreWindow();
-                    SetWindowPosition(scene.X, scene.Y);
+                    SDL_GetWindowBordersSize(Window.Handle, out int top, out int left, out int bottom, out int right);
+                    SetWindowPosition(left + scene.X, top + scene.Y);
                 }
 
                 scene.Load();
