@@ -1,4 +1,8 @@
-﻿using System;
+﻿#define DEV_BUILD
+
+
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -36,12 +40,16 @@ namespace ClassicUO
 
             Log.Start(LogTypes.All);
 
+            CUOEnviroment.GameThread = Thread.CurrentThread;
+            CUOEnviroment.GameThread.Name = "CUO_MAIN_THREAD";
+
+
 #if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
                 StringBuilder sb = new StringBuilder();
 #if DEV_BUILD
-                                sb.AppendFormat("ClassicUO [dev] - v{0}\nOS: {1} {2}\nThread: {3}\n\n", Version, Environment.OSVersion.Platform, Environment.Is64BitOperatingSystem ? "x64" : "x86", Thread.CurrentThread.Name);
+                sb.AppendFormat("ClassicUO [dev] - v{0}\nOS: {1} {2}\nThread: {3}\n\n", CUOEnviroment.Version, Environment.OSVersion.Platform, Environment.Is64BitOperatingSystem ? "x64" : "x86", Thread.CurrentThread.Name);
 #else
                 sb.AppendFormat("ClassicUO - v{0}\nOS: {1} {2}\nThread: {3}\n\n", CUOEnviroment.Version, Environment.OSVersion.Platform, Environment.Is64BitOperatingSystem ? "x64" : "x86", Thread.CurrentThread.Name);
 #endif
@@ -84,10 +92,7 @@ namespace ClassicUO
             Environment.SetEnvironmentVariable(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
             Environment.SetEnvironmentVariable("PATH", Environment.GetEnvironmentVariable("PATH") + ";" + Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Plugins"));
 
-            CUOEnviroment.GameThread = Thread.CurrentThread;
-            CUOEnviroment.GameThread.Name = "CUO_MAIN_THREAD";
-
-
+          
             string globalSettingsPath = Settings.GetSettingsFilepath();
 
             if ((!Directory.Exists(Path.GetDirectoryName(globalSettingsPath)) ||

@@ -88,8 +88,9 @@ namespace ClassicUO
 
         protected override void UnloadContent()
         {
-            SDL_GetWindowBordersSize(Window.Handle, out int top, out int left, out int bottom, out int right);
-            Settings.GlobalSettings.WindowPosition = new Point(Window.ClientBounds.X - left, Window.ClientBounds.Y - top);
+            SDL_GetWindowBordersSize(Window.Handle, out int top, out int left, out _, out _);
+            Settings.GlobalSettings.WindowPosition = new Point( Math.Max(0, Window.ClientBounds.X - left),
+                                                               Math.Max(0, Window.ClientBounds.Y - top));
             _scene?.Unload();
             Settings.GlobalSettings.Save();
             Plugin.OnClosing();
@@ -231,12 +232,16 @@ namespace ClassicUO
 
         protected override void Update(GameTime gameTime)
         {
+            if (Profiler.InContext("OutOfContext"))
+                Profiler.ExitContext("OutOfContext");
+
             Time.Ticks = (uint) gameTime.TotalGameTime.TotalMilliseconds;
 
+            Mouse.Update();
             OnNetworkUpdate(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
             UIManager.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
+            Plugin.Tick();
 
-          
             _totalElapsed += (float) gameTime.ElapsedGameTime.TotalMilliseconds;
             _currentFpsTime += (float) gameTime.ElapsedGameTime.TotalMilliseconds;
 
@@ -253,7 +258,11 @@ namespace ClassicUO
             if (_totalElapsed > x)
             {
                 if (_scene != null && _scene.IsLoaded && !_scene.IsDestroyed)
+                {
+                    Profiler.EnterContext("Update");
                     _scene.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
+                    Profiler.ExitContext("Update");
+                }
 
                 _totalElapsed %= x;
             }
@@ -272,6 +281,13 @@ namespace ClassicUO
 
         protected override void Draw(GameTime gameTime)
         {
+            Profiler.EndFrame();
+            Profiler.BeginFrame();
+
+            if (Profiler.InContext("OutOfContext"))
+                Profiler.ExitContext("OutOfContext");
+            Profiler.EnterContext("RenderFrame");
+
             _totalFrames++;
 
             if (_scene != null && _scene.IsLoaded && !_scene.IsDestroyed)
@@ -288,6 +304,30 @@ namespace ClassicUO
 
 
             base.Draw(gameTime);
+
+            Profiler.ExitContext("RenderFrame");
+            Profiler.EnterContext("OutOfContext");
+
+            UpdateWindowCaption(gameTime);
+        }
+
+        private void UpdateWindowCaption(GameTime gameTime)
+        {
+            if (!Settings.GlobalSettings.Profiler /*|| DisableUpdateWindowCaption*/)
+                return;
+
+            double timeDraw = Profiler.GetContext("RenderFrame").TimeInContext;
+            double timeUpdate = Profiler.GetContext("Update").TimeInContext;
+            double timeOutOfContext = Profiler.GetContext("OutOfContext").TimeInContext;
+            //double timeTotalCheck = timeOutOfContext + timeDraw + timeUpdate;
+            double timeTotal = Profiler.TrackedTime;
+            double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
+
+#if DEV_BUILD
+            Window.Title = string.Format("ClassicUO [dev] {5} - Draw:{0:0.0}% Update:{1:0.0}% AvgDraw:{2:0.0}ms {3} - FPS: {4}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CUOEnviroment.CurrentRefreshRate, CUOEnviroment.Version);
+#else
+            Window.Title = string.Format("ClassicUO {5} - Draw:{0:0.0}% Update:{1:0.0}% Fixed:{2:0.0}% AvgDraw:{3:0.0}ms {4} - FPS: {4}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CUOEnviroment.CurrentRefreshRate, CUOEnviroment.Version);
+#endif
         }
 
         private void OnNetworkUpdate(double totalMS, double frameMS)
