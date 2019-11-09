@@ -489,10 +489,8 @@ namespace ClassicUO
 
                         if (!string.IsNullOrEmpty(s))
                         {
-                            if (UIManager.IsKeyboardFocusAllowHotkeys)
-                                UIManager.KeyboardFocusControl?.InvokeTextInput(s);
-                            else
-                                _scene.OnTextInput(s);
+                            UIManager.KeyboardFocusControl?.InvokeTextInput(s);
+                            _scene.OnTextInput(s);
                         }
                     }
 
