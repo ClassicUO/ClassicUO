@@ -56,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _cellSize;
 
         // video
-        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura;
+        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient;
         private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
         private Combobox _dragSelectModifierKey;
         private HSliderBar _brighlight;
@@ -677,6 +677,7 @@ namespace ClassicUO.Game.UI.Gumps
             _runMouseInSeparateThread = CreateCheckBox(rightArea, "Run mouse in a separate thread", Settings.GlobalSettings.RunMouseInASeparateThread, 0, 5);
             _auraMouse = CreateCheckBox(rightArea, "Aura on mouse target", ProfileManager.Current.AuraOnMouse, 0, 0);
             _xBR = CreateCheckBox(rightArea, "Use xBR effect [BETA]", ProfileManager.Current.UseXBR, 0, 0);
+            _hideChatGradient = CreateCheckBox(rightArea, "Hide Chat Gradient", ProfileManager.Current.HideChatGradient, 0, 0);
 
             Add(rightArea, PAGE);
         }
@@ -1454,6 +1455,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _runMouseInSeparateThread.IsChecked = true;
                     _auraMouse.IsChecked = true;
                     _xBR.IsChecked = true;
+                    _hideChatGradient.IsChecked = false;
                     _partyAura.IsChecked = true;
                     _partyAuraColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
 
@@ -1820,7 +1822,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.UseXBR = _xBR.IsChecked;
             ProfileManager.Current.PartyAura = _partyAura.IsChecked;
             ProfileManager.Current.PartyAuraHue = _partyAuraColorPickerBox.Hue;
-
+            ProfileManager.Current.HideChatGradient = _hideChatGradient.IsChecked;
 
             // fonts
             var _fontValue = _fontSelectorChat.GetSelectedFont();
