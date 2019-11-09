@@ -43,12 +43,10 @@ namespace ClassicUO.Game.GameObjects
         private int _animSpeed;
         private Graphic? _displayedGraphic;
         private bool _isMulti;
-
-
         private ulong _spellsBitFiled;
 
 
-        private static readonly Queue<Item> _pool = new Queue<Item>();
+        //private static readonly Queue<Item> _pool = new Queue<Item>();
 
         public Item(Serial serial) : base(serial)
         {
@@ -114,15 +112,11 @@ namespace ClassicUO.Game.GameObjects
             //_pool.Enqueue(this);
         }
 
-        public uint Price { get; set; }
-
-        public ushort Amount { get; set; }
-
-        public Serial Container { get; set; }
-
-        public Layer Layer { get; set; }
-
-        public bool UsedLayer { get; set; }
+        public uint Price;
+        public ushort Amount;
+        public Serial Container;
+        public Layer Layer;
+        public bool UsedLayer;
 
         public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
 
@@ -165,11 +159,9 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public bool IsDamageable { get; set; }
-
-        public byte LightID { get; set; }
-
-        public bool WantUpdateMulti { get; set; } = true;
+        public bool IsDamageable;
+        public byte LightID;
+        public bool WantUpdateMulti = true;
 
         public MultiInfo MultiInfo { get; private set; }
 
@@ -202,7 +194,7 @@ namespace ClassicUO.Game.GameObjects
         public SpellBookType BookType { get; private set; } = SpellBookType.Unknown;
 
 
-        public bool CharacterIsBehindFoliage { get; set; }
+        public bool CharacterIsBehindFoliage;
 
         public ref readonly StaticTiles ItemData => ref FileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
 

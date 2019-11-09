@@ -91,12 +91,9 @@ namespace ClassicUO.Game.GameObjects
         public Rectangle Rectangle;
         public ref readonly LandTiles TileData => ref FileManager.TileData.LandData[Graphic];
 
-        public sbyte MinZ { get; set; }
-
-        public sbyte AverageZ { get; set; }
-
-        public bool IsStretched { get; set; }
-        
+        public sbyte MinZ;
+        public sbyte AverageZ;
+        public bool IsStretched;
 
         public void UpdateZ(int zTop, int zRight, int zBottom, sbyte currentZ)
         {

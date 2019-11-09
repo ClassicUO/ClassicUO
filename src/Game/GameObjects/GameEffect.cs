@@ -41,29 +41,29 @@ namespace ClassicUO.Game.GameObjects
 
         public List<GameEffect> Children { get; }
 
-        public GameObject Source { get; set; }
+        public GameObject Source;
 
-        protected GameObject Target { get; set; }
-        
-        protected int TargetX { get; set; }
+        protected GameObject Target;
 
-        protected int TargetY { get; set; }
+        protected int TargetX;
 
-        protected int TargetZ { get; set; }
+        protected int TargetY;
 
-        public int Speed { get; set; }
+        protected int TargetZ;
 
-        public long LastChangeFrameTime { get; set; }
+        public int Speed;
 
-        public bool IsEnabled { get; set; }
+        public long LastChangeFrameTime;
 
-        public Graphic AnimationGraphic { get; set; } = Graphic.INVALID;
+        public bool IsEnabled;
+
+        public Graphic AnimationGraphic = Graphic.INVALID;
 
         public bool IsMoving => Target != null || TargetX != 0 && TargetY != 0;
 
-        public GraphicEffectBlendMode Blend { get; set; }
+        public GraphicEffectBlendMode Blend;
 
-        public long Duration { get; set; } = -1;
+        public long Duration = -1;
 
 
         public void Load()

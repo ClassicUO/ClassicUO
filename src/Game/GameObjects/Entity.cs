@@ -46,7 +46,7 @@ namespace ClassicUO.Game.GameObjects
 
 
 
-        protected long LastAnimationChangeTime { get; set; }
+        protected long LastAnimationChangeTime;
 
         public EntityCollection<Item> Items { get; protected set; }
 
@@ -58,14 +58,14 @@ namespace ClassicUO.Game.GameObjects
             set => _equipment = value;
         }
 
-        public Serial Serial { get; set; }
-        public bool IsClicked { get; set; }
+        public Serial Serial;
+        public bool IsClicked;
 
-        public ushort Hits { get; set; }
+        public ushort Hits;
 
-        public ushort HitsMax { get; set; }
+        public ushort HitsMax;
 
-        public string Name { get; set; }
+        public string Name;
 
         public bool IsHidden => (Flags & Flags.Hidden) != 0;
 
@@ -82,7 +82,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public Flags Flags { get; set; }
+        public Flags Flags;
 
         public bool Exists => World.Contains(Serial);
 

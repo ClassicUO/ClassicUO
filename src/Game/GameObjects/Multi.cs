@@ -103,9 +103,9 @@ namespace ClassicUO.Game.GameObjects
 
         public string Name => ItemData.Name;
 
-        public int MultiOffsetX { get; set; }
-        public int MultiOffsetY { get; set; }
-        public int MultiOffsetZ { get; set; }
+        public int MultiOffsetX;
+        public int MultiOffsetY;
+        public int MultiOffsetZ;
         public ref readonly StaticTiles ItemData => ref FileManager.TileData.StaticData[Graphic];
 
         public override void UpdateGraphicBySeason()

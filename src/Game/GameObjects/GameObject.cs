@@ -44,12 +44,11 @@ namespace ClassicUO.Game.GameObjects
     }
 
 
-    internal abstract partial class GameObject : BaseGameObject, IUpdateable, INode<GameObject>
+    internal abstract partial class GameObject : BaseGameObject, IUpdateable
     {
         private Position _position = Position.INVALID;
         private Point _screenPosition;
 
-        public Vector3 Offset;
 
 
         public bool IsPositionChanged { get; protected set; }
@@ -91,17 +90,16 @@ namespace ClassicUO.Game.GameObjects
             //set => Position = new Position(Position.X, Position.Y, value);
         }
 
-        public Hue Hue { get; set; }
+        public Hue Hue;
+        public Graphic Graphic;
+        public sbyte AnimIndex;
+        public int CurrentRenderIndex;
+        public byte UseInRender;
+        public short PriorityZ;
+        public GameObject Left;
+        public GameObject Right;
+        public Vector3 Offset;
 
-        public Graphic Graphic { get; set; }
-
-        public sbyte AnimIndex { get; set; }
-
-        public int CurrentRenderIndex { get; set; }
-
-        public byte UseInRender { get; set; }
-
-        public short PriorityZ { get; set; }
 
         public bool IsDestroyed { get; protected set; }
 
@@ -138,8 +136,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public Tile Tile { get; private set; }
-        public GameObject Left { get; set; }
-        public GameObject Right { get; set; }
+    
 
         public virtual void Update(double totalMS, double frameMS)
         {

@@ -65,99 +65,98 @@ namespace ClassicUO.Game.GameObjects
 
         public IReadOnlyDictionary<Graphic, BuffIcon> BuffIcons => _buffIcons;
 
-        public ushort Strength { get; set; }
+        public ushort Strength;
 
-        public ushort Intelligence { get; set; }
+        public ushort Intelligence;
 
-        public ushort Dexterity { get; set; }
+        public ushort Dexterity;
 
-        public ushort Weight { get; set; }
+        public ushort Weight;
 
-        public ushort WeightMax { get; set; }
+        public ushort WeightMax;
 
-        public uint Gold { get; set; }
+        public uint Gold;
 
-        public ushort PhysicalResistence { get; set; }
+        public ushort PhysicalResistence;
 
-        public ushort FireResistance { get; set; }
+        public ushort FireResistance;
 
-        public ushort ColdResistance { get; set; }
+        public ushort ColdResistance;
 
-        public ushort PoisonResistance { get; set; }
+        public ushort PoisonResistance;
 
-        public ushort EnergyResistance { get; set; }
+        public ushort EnergyResistance;
 
-        public byte Followers { get; set; }
+        public byte Followers;
 
-        public byte FollowersMax { get; set; }
+        public byte FollowersMax;
 
-        public ushort Luck { get; set; }
+        public ushort Luck;
 
-        public uint TithingPoints { get; set; }
+        public uint TithingPoints;
 
-        public ushort DamageMin { get; set; }
+        public ushort DamageMin;
 
-        public ushort DamageMax { get; set; }
+        public ushort DamageMax;
 
-        public ushort StatsCap { get; set; }
+        public ushort StatsCap;
 
-        public ushort HitChanceIncrease { get; set; }
+        public ushort HitChanceIncrease;
 
-        public ushort SwingSpeedIncrease { get; set; }
+        public ushort SwingSpeedIncrease;
 
-        public ushort DamageIncrease { get; set; }
+        public ushort DamageIncrease;
 
-        public ushort LowerReagentCost { get; set; }
+        public ushort LowerReagentCost;
 
-        public ushort HitPointsRegeneration { get; set; }
+        public ushort HitPointsRegeneration;
 
-        public ushort StaminaRegeneration { get; set; }
+        public ushort StaminaRegeneration;
 
-        public ushort ManaRegeneration { get; set; }
+        public ushort ManaRegeneration;
 
-        public ushort MaxPhysicResistence { get; set; }
+        public ushort MaxPhysicResistence;
 
-        public ushort MaxFireResistence { get; set; }
+        public ushort MaxFireResistence;
 
-        public ushort MaxColdResistence { get; set; }
+        public ushort MaxColdResistence;
 
-        public ushort MaxPoisonResistence { get; set; }
+        public ushort MaxPoisonResistence;
 
-        public ushort MaxEnergyResistence { get; set; }
+        public ushort MaxEnergyResistence;
 
-        public ushort MaxDefenseChanceIncrease { get; set; }
+        public ushort MaxDefenseChanceIncrease;
 
-        public ushort ReflectPhysicalDamage { get; set; }
+        public ushort ReflectPhysicalDamage;
 
-        public ushort EnhancePotions { get; set; }
+        public ushort EnhancePotions;
 
-        public ushort DefenseChanceIncrease { get; set; }
+        public ushort DefenseChanceIncrease;
+        public ushort SpellDamageIncrease;
 
-        public ushort SpellDamageIncrease { get; set; }
+        public ushort FasterCastRecovery;
 
-        public ushort FasterCastRecovery { get; set; }
+        public ushort FasterCasting;
 
-        public ushort FasterCasting { get; set; }
+        public ushort LowerManaCost;
 
-        public ushort LowerManaCost { get; set; }
+        public ushort StrengthIncrease;
 
-        public ushort StrengthIncrease { get; set; }
+        public ushort DexterityIncrease;
 
-        public ushort DexterityIncrease { get; set; }
+        public ushort IntelligenceIncrease;
 
-        public ushort IntelligenceIncrease { get; set; }
+        public ushort HitPointsIncrease;
 
-        public ushort HitPointsIncrease { get; set; }
+        public ushort StaminaIncrease;
 
-        public ushort StaminaIncrease { get; set; }
+        public ushort ManaIncrease;
 
-        public ushort ManaIncrease { get; set; }
+        public ushort MaxHitPointsIncrease;
 
-        public ushort MaxHitPointsIncrease { get; set; }
+        public ushort MaxStaminaIncrease;
 
-        public ushort MaxStaminaIncrease { get; set; }
-
-        public ushort MaxManaIncrease { get; set; }
+        public ushort MaxManaIncrease;
 
         public Ability PrimaryAbility
         {
@@ -171,16 +170,16 @@ namespace ClassicUO.Game.GameObjects
             set => Abilities[1] = value;
         }
 
-        public Ability[] Abilities { get; } = new Ability[2]
+        public Ability[] Abilities = new Ability[2]
         {
             Ability.Invalid, Ability.Invalid
         };
 
-        public Lock StrLock { get; set; }
+        public Lock StrLock;
 
-        public Lock DexLock { get; set; }
+        public Lock DexLock;
 
-        public Lock IntLock { get; set; }
+        public Lock IntLock;
 
         protected override bool IsWalking => LastStepTime > Time.Ticks - Constants.PLAYER_WALKING_DELAY;
 

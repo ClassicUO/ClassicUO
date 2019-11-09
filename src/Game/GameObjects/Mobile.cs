@@ -55,9 +55,9 @@ namespace ClassicUO.Game.GameObjects
 
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);
 
-        public CharacterSpeedType SpeedMode { get; internal set; } = CharacterSpeedType.Normal;
+        public CharacterSpeedType SpeedMode = CharacterSpeedType.Normal;
 
-        public long DeathScreenTimer { get; set; }
+        public long DeathScreenTimer;
 
         private bool _isMale;
 
@@ -72,19 +72,19 @@ namespace ClassicUO.Game.GameObjects
         public bool IsOtherFemale => Graphic == 184 || Graphic == 186;
         public bool IsElfFemale => Graphic == 606 || Graphic == 608;
 
-        public RaceType Race { get; set; }
+        public RaceType Race;
 
-        public ushort Mana { get; set; }
+        public ushort Mana;
 
-        public ushort ManaMax { get; set; }
+        public ushort ManaMax;
 
-        public ushort Stamina { get; set; }
+        public ushort Stamina;
 
-        public ushort StaminaMax { get; set; }
+        public ushort StaminaMax;
 
-        public NotorietyFlag NotorietyFlag { get; set; }
+        public NotorietyFlag NotorietyFlag;
 
-        public bool IsRenamable { get; set; }
+        public bool IsRenamable;
 
         public bool IsParalyzed => ((byte) Flags & 0x01) != 0;
 
@@ -134,29 +134,29 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public bool IsRunning { get; internal set; }
+        public bool IsRunning;
 
-        public byte AnimationInterval { get; set; }
+        public byte AnimationInterval;
 
-        public byte AnimationFrameCount { get; set; }
+        public byte AnimationFrameCount;
 
-        public byte AnimationRepeatMode { get; set; } = 1;
+        public byte AnimationRepeatMode = 1;
 
-        public bool AnimationRepeat { get; set; }
+        public bool AnimationRepeat;
 
-        public bool AnimationFromServer { get; set; }
+        public bool AnimationFromServer;
 
-        public bool AnimationDirection { get; set; }
+        public bool AnimationDirection;
 
-        public long LastStepTime { get; set; }
+        public long LastStepTime;
 
-        public long LastStepSoundTime { get; set; }
+        public long LastStepSoundTime;
 
-        public int StepSoundOffset { get; set; }
+        public int StepSoundOffset;
 
         protected virtual bool IsWalking => LastStepTime > Time.Ticks - Constants.WALKING_DELAY;
 
-        public byte AnimationGroup { get; set; } = 0xFF;
+        public byte AnimationGroup = 0xFF;
 
         //internal bool IsMoving => AnimationGroup != 0xFF && Steps.Count != 0;
 

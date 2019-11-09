@@ -38,9 +38,9 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public Serial Serial { get; }
-        public uint Revision { get; set; }
+        public uint Revision;
         public List<Multi> Components { get; } = new List<Multi>();
-        public bool IsCustom { get; set; }
+        public bool IsCustom;
 
 
         public bool Equals(Serial other)
