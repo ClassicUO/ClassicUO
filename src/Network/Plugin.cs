@@ -250,13 +250,13 @@ namespace ClassicUO.Network
 
         private static void SetWindowTitle(string str)
         {
-            //if (string.IsNullOrEmpty(str))
-            //    CUOEnviroment.Client.DisableUpdateWindowCaption = false;
-            //else
-            //{
-            //    CUOEnviroment.Client.DisableUpdateWindowCaption = true;
-            //    CUOEnviroment.Client.Window.Title = str;
-            //}
+            if (string.IsNullOrEmpty(str))
+                CUOEnviroment.DisableUpdateWindowCaption = false;
+            else
+            {
+                CUOEnviroment.DisableUpdateWindowCaption = true;
+                CUOEnviroment.Client.Window.Title = str;
+            }
         }
 
         private static void GetStaticImage(ushort g, ref ArtInfo info)
