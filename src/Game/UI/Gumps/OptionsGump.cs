@@ -1669,9 +1669,13 @@ namespace ClassicUO.Game.UI.Gumps
             Engine.GlobalSettings.LoginMusic = _loginMusic.IsChecked;
 
             Engine.SceneManager.CurrentScene.Audio.UpdateCurrentMusicVolume();
+            Engine.SceneManager.CurrentScene.Audio.UpdateCurrentSoundsVolume();
 
             if (!Engine.Profile.Current.EnableMusic)
                 Engine.SceneManager.CurrentScene.Audio.StopMusic();
+
+            if (!Engine.Profile.Current.EnableSound)
+                Engine.SceneManager.CurrentScene.Audio.StopSounds();
 
             // speech
             Engine.Profile.Current.ScaleSpeechDelay = _scaleSpeechDelay.IsChecked;
