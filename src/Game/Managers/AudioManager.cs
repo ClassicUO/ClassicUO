@@ -176,9 +176,9 @@ namespace ClassicUO.Game.Managers
             if (volume < -1 || volume > 1f)
                 return;
 
-            foreach (UOSound sound in _currentSounds.ToArray())
+            for (int i = 0; i < _currentSounds.Count; i++)
             {
-                sound.Volume = volume;
+                _currentSounds[i].Volume = volume;
             }
         }
 
@@ -194,11 +194,12 @@ namespace ClassicUO.Game.Managers
 
         public void StopSounds()
         {
-            foreach (UOSound sound in _currentSounds.ToArray())
+            for (int i = 0; i < _currentSounds.Count; i++)
             {
+                var sound = _currentSounds[i];
                 sound.Stop();
                 sound.Dispose();
-                _currentSounds.Remove(sound);
+                _currentSounds.RemoveAt(i);
             }
         }
 
@@ -218,15 +219,22 @@ namespace ClassicUO.Game.Managers
 
             _currentMusic?.Update();
 
-            foreach (UOSound sound in _currentSounds.ToArray())
+            for (int i = 0; i < _currentSounds.Count; i++)
             {
-                if (Engine.Instance.IsActive)
-                {
-                    if (!Engine.Profile.Current.ReproduceSoundsInBackground) sound.Volume = Engine.Profile.Current.MusicVolume / Constants.SOUND_DELTA;
-                }
-                else if (!Engine.Profile.Current.ReproduceSoundsInBackground && sound.Volume != 0) sound.Volume = 0;
+                var sound = _currentSounds[i];
 
-                if (!sound.IsPlaying()) _currentSounds.Remove(sound);
+                if (!sound.IsPlaying())
+                {
+                    _currentSounds.RemoveAt(i);
+                }
+                else
+                {
+                    if (Engine.Instance.IsActive)
+                    {
+                        if (!Engine.Profile.Current.ReproduceSoundsInBackground) sound.Volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
+                    }
+                    else if (!Engine.Profile.Current.ReproduceSoundsInBackground && sound.Volume != 0) sound.Volume = 0;
+                }
             }
         }
     }
