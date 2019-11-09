@@ -70,7 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (!ProfileManager.Current.GameWindowLock)
                 {
-                    Point n = ResizeWindow(_lastSize);
+                    Point n = ResizeGameWindow(_lastSize);
 
                     OptionsGump options = UIManager.GetGump<OptionsGump>();
                     options?.UpdateVideo();
@@ -193,7 +193,7 @@ namespace ClassicUO.Game.UI.Gumps
             WantUpdateSize = true;
         }
 
-        public Point ResizeWindow(Point newSize)
+        public Point ResizeGameWindow(Point newSize)
         {
             if (newSize.X < 640)
                 newSize.X = 640;

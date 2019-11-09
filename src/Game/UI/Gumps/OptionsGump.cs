@@ -1739,7 +1739,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (vp != null)
                 {
-                    Point n = vp.ResizeWindow(new Point(gameWindowSizeWidth, gameWindowSizeHeight));
+                    Point n = vp.ResizeGameWindow(new Point(gameWindowSizeWidth, gameWindowSizeHeight));
 
                     _gameWindowWidth.Text = n.X.ToString();
                     _gameWindowHeight.Text = n.Y.ToString();
@@ -1775,7 +1775,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (vp != null)
                     {
-                        n = vp.ResizeWindow(new Point(CUOEnviroment.Client.Window.ClientBounds.Width, CUOEnviroment.Client.Window.ClientBounds.Height));
+                        n = vp.ResizeGameWindow(new Point(CUOEnviroment.Client.Window.ClientBounds.Width, CUOEnviroment.Client.Window.ClientBounds.Height));
                         loc = ProfileManager.Current.GameWindowPosition = vp.Location = new Point(-5, -5);
                     }
                 }
@@ -1783,7 +1783,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (vp != null)
                     {
-                        n = vp.ResizeWindow(new Point(600, 480));
+                        n = vp.ResizeGameWindow(new Point(600, 480));
                         loc = vp.Location = ProfileManager.Current.GameWindowPosition = new Point(20, 20);
                     }
                 }

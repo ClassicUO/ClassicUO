@@ -72,7 +72,7 @@ namespace ClassicUO.Game.Managers
 
         public static bool IsMouseOverWorld => MouseOverControl is WorldViewport;
 
-        public static bool IsMouseOverUI => IsMouseOverAControl && !IsMouseOverWorld;
+        public static bool IsMouseOverUI => (IsMouseOverAControl && !IsMouseOverWorld) || IsModalControlOpen;
 
         public static Control DraggingControl { get; private set; }
 
@@ -199,7 +199,7 @@ namespace ClassicUO.Game.Managers
 
             if (MouseOverControl != null)
             {
-                //if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
+                if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
                     MouseOverControl.InvokeMouseUp(Mouse.Position, MouseButton.Left);
 
                 if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
@@ -210,7 +210,6 @@ namespace ClassicUO.Game.Managers
 
             CloseIfClickOutGumps();
             _mouseDownControls[btn] = null;
-
         }
 
         public static bool OnLeftMouseDoubleClick()
@@ -307,7 +306,7 @@ namespace ClassicUO.Game.Managers
             GameCursor = new GameCursor();
         }
 
-        private static void CloseIfClickOutGumps()
+        public static void CloseIfClickOutGumps()
         {
             foreach (Gump gump in Gumps.OfType<Gump>().Where(s => s.CloseIfClickOutside)) gump.Dispose();
         }

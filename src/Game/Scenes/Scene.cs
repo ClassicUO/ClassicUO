@@ -44,12 +44,12 @@ namespace ClassicUO.Game.Scenes
             Width = width;
             Height = height;
             CanResize = canresize;
-            IsMaximized = maximized;
+            CanBeMaximized = maximized;
             CanLoadAudio = loadaudio;
         }
 
         public readonly int X, Y, Width, Height;
-        public readonly bool CanResize, IsMaximized, CanLoadAudio;
+        public readonly bool CanResize, CanBeMaximized, CanLoadAudio;
 
         public bool IsDestroyed { get; private set; }
 

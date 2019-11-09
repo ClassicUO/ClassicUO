@@ -74,10 +74,10 @@ namespace ClassicUO.Game.Scenes
         public GameScene() : base(
             0,
             0,
-            ProfileManager.Current.WindowClientBounds.X, 
+            ProfileManager.Current.WindowClientBounds.X,
             ProfileManager.Current.WindowClientBounds.Y,
             true,
-            true,
+            !ProfileManager.Current.RestoreLastGameSize,
             true)
         {
 

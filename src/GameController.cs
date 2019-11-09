@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Network;
@@ -91,14 +93,17 @@ namespace ClassicUO
 
             if (scene != null)
             {
-                if (scene.IsMaximized)
-                    MaximizeWindow();
-                else 
-                    RestoreWindow();
-
-                SetWindowPosition(scene.X, scene.Y);
-                SetWindowSize(scene.Width, scene.Height);
                 Window.AllowUserResizing = scene.CanResize;
+
+                SetWindowSize(scene.Width, scene.Height);
+
+                if (scene.CanBeMaximized)
+                    MaximizeWindow();
+                else
+                {
+                    RestoreWindow();
+                    SetWindowPosition(scene.X, scene.Y);
+                }
 
                 scene.Load();
             }
@@ -251,9 +256,19 @@ namespace ClassicUO
             if ((flags & (uint) SDL.SDL_WindowFlags.SDL_WINDOW_MAXIMIZED) == 0)
             {
                 // TODO: option set WindowClientBounds
+                ProfileManager.Current.WindowClientBounds = new Point(width, height);
             }
 
             SetWindowSize(width, height);
+
+            var viewport = UIManager.GetGump<WorldViewportGump>();
+
+            if (viewport != null && ProfileManager.Current.GameWindowFullSize)
+            {
+                viewport.ResizeGameWindow(new Point(width, height));
+                viewport.X = -5;
+                viewport.Y = -5;
+            }
         }
 
         private unsafe void HandleSDLEvent(ref SDL.SDL_Event e)
@@ -369,10 +384,8 @@ namespace ClassicUO
 
                     if (Mouse.IsDragging)
                     {
-                        if (UIManager.IsMouseOverUI)
-                            UIManager.OnMouseDragging();
-                        else
-                            _scene.OnMouseDragging();
+                        UIManager.OnMouseDragging();
+                        _scene.OnMouseDragging();
                     }
 
                     if (Mouse.IsDragging && !_dragStarted)
@@ -388,10 +401,8 @@ namespace ClassicUO
 
                     Plugin.ProcessMouse(0, e.wheel.y);
 
-                    if (UIManager.IsMouseOverUI)
-                        UIManager.OnMouseWheel(isup);
-                    else
-                        _scene.OnMouseWheel(isup);
+                    UIManager.OnMouseWheel(isup);
+                    _scene.OnMouseWheel(isup);
 
                     break;
 
@@ -425,16 +436,14 @@ namespace ClassicUO
                                 {
                                     Mouse.LastLeftButtonClickTime = 0;
 
-                                    var res = UIManager.IsMouseOverUI ? UIManager.OnLeftMouseDoubleClick() : _scene.OnLeftMouseDoubleClick();
+                                    var res = UIManager.OnLeftMouseDoubleClick() || _scene.OnLeftMouseDoubleClick();
 
                                     MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Left);
 
                                     if (!arg.Result && !res)
                                     {
-                                        if (UIManager.IsMouseOverUI)
-                                            UIManager.OnLeftMouseButtonDown();
-                                        else
-                                            _scene.OnLeftMouseDown();
+                                        UIManager.OnLeftMouseButtonDown();
+                                        _scene.OnLeftMouseDown();
                                     }
                                     else
                                         Mouse.LastLeftButtonClickTime = 0xFFFF_FFFF;
@@ -442,10 +451,8 @@ namespace ClassicUO
                                     break;
                                 }
 
-                                if (UIManager.IsMouseOverUI)
-                                    UIManager.OnLeftMouseButtonDown();
-                                else
-                                    _scene.OnLeftMouseDown();
+                                UIManager.OnLeftMouseButtonDown();
+                                _scene.OnLeftMouseDown();
 
                                 Mouse.LastLeftButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
@@ -456,10 +463,8 @@ namespace ClassicUO
 
                                 if (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF)
                                 {
-                                    if (UIManager.IsMouseOverUI)
-                                        UIManager.OnLeftMouseButtonUp();
-                                    else
-                                        _scene.OnLeftMouseUp();
+                                    UIManager.OnLeftMouseButtonUp();
+                                    _scene.OnLeftMouseUp();
                                 }
                                 Mouse.LButtonPressed = false;
                                 Mouse.End();
@@ -521,16 +526,14 @@ namespace ClassicUO
                                 {
                                     Mouse.LastRightButtonClickTime = 0;
 
-                                    var res = UIManager.IsMouseOverUI ? UIManager.OnRightMouseDoubleClick() : _scene.OnRightMouseDoubleClick();
+                                    var res = UIManager.OnRightMouseDoubleClick() || _scene.OnRightMouseDoubleClick();
 
                                     MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Right);
 
                                     if (!arg.Result && !res)
                                     {
-                                        if (UIManager.IsMouseOverUI)
-                                            UIManager.OnRightMouseButtonDown();
-                                        else
-                                            _scene.OnRightMouseDown();
+                                        UIManager.OnRightMouseButtonDown();
+                                        _scene.OnRightMouseDown();
                                     }
                                     else
                                         Mouse.LastRightButtonClickTime = 0xFFFF_FFFF;
@@ -538,10 +541,8 @@ namespace ClassicUO
                                     break;
                                 }
 
-                                if (UIManager.IsMouseOverUI)
-                                    UIManager.OnRightMouseButtonDown();
-                                else
-                                    _scene.OnRightMouseDown();
+                                UIManager.OnRightMouseButtonDown();
+                                _scene.OnRightMouseDown();
 
                                 Mouse.LastRightButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
@@ -552,10 +553,8 @@ namespace ClassicUO
 
                                 if (Mouse.LastRightButtonClickTime != 0xFFFF_FFFF)
                                 {
-                                    if (UIManager.IsMouseOverUI)
-                                        UIManager.OnRightMouseButtonUp();
-                                    else
-                                        _scene.OnRightMouseUp();
+                                    UIManager.OnRightMouseButtonUp();
+                                    _scene.OnRightMouseUp();
                                 }
                                 Mouse.RButtonPressed = false;
                                 Mouse.End();
