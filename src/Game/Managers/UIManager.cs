@@ -199,7 +199,7 @@ namespace ClassicUO.Game.Managers
 
             if (MouseOverControl != null)
             {
-                if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
+                //if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
                     MouseOverControl.InvokeMouseUp(Mouse.Position, MouseButton.Left);
 
                 if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
