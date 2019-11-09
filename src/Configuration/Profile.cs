@@ -203,8 +203,6 @@ namespace ClassicUO.Configuration
             new InfoBarItem("Weight", InfoBarVars.Weight, 0x3D2),
         };
 
-        [JsonProperty] public int MaxFPS { get; set; } = 60;
-
         [JsonProperty]
         public Macro[] Macros { get; set; } =
         {

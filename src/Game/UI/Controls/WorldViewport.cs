@@ -69,6 +69,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            if (_scene.ViewportTexture == null)
+                return false;
+
             Rectangle rectangle = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
 
             if (ScissorStack.PushScissors(rectangle))

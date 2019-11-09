@@ -43,6 +43,17 @@ namespace ClassicUO.Game.GameObjects
 
         private static readonly Queue<Multi> _pool = new Queue<Multi>();
 
+        static Multi()
+        {
+            for (int i = 0; i < 1000; i++)
+                _pool.Enqueue(new Multi());
+        }
+
+        private Multi()
+        {
+
+        }
+
         public Multi(Graphic graphic)
         {
             Graphic = _originalGraphic = graphic;

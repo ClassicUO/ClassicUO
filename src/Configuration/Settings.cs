@@ -63,8 +63,8 @@ namespace ClassicUO.Configuration
         [JsonProperty(PropertyName = "lastservernum")]
         public ushort LastServerNum { get; set; } = 1;
 
-        [JsonProperty(PropertyName = "login_fps")]
-        public int MaxLoginFPS { get; set; } = 60;
+        [JsonProperty(PropertyName = "fps")]
+        public int FPS { get; set; } = 60;
 
         [JsonProperty(PropertyName = "debug")] public bool Debug { get; set; }
 

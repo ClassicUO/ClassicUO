@@ -106,20 +106,20 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            //_sb.Clear();
-            //GameScene scene = CUOEnviroment.Client.GetScene<GameScene>();
+            _sb.Clear();
+            GameScene scene = CUOEnviroment.Client.GetScene<GameScene>();
 
-            //if (FullDisplayMode && scene != null)
-            //{
-            //    _sb.AppendFormat(DEBUG_STRING_0, Engine.CurrentFPS, Engine.FPSMin == int.MaxValue ? 0 : Engine.FPSMin, Engine.FPSMax, !World.InGame ? 1f : scene.Scale, scene.RenderedObjectsCount);
-            //    _sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
-            //    _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.INVALID, Mouse.Position, (SelectedObject.Object as GameObject)?.Position ?? Position.INVALID);
-            //    _sb.AppendFormat(DEBUG_STRING_3, ReadObject(SelectedObject.Object));
-            //}
-            //else
-            //    _sb.AppendFormat(DEBUG_STRING_SMALL, Engine.CurrentFPS);
+            if (FullDisplayMode && scene != null)
+            {
+                _sb.AppendFormat(DEBUG_STRING_0, CUOEnviroment.CurrentRefreshRate, 0, 0, !World.InGame ? 1f : scene.Scale, scene.RenderedObjectsCount);
+                //_sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
+                _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.INVALID, Mouse.Position, (SelectedObject.Object as GameObject)?.Position ?? Position.INVALID);
+                _sb.AppendFormat(DEBUG_STRING_3, ReadObject(SelectedObject.Object));
+            }
+            else
+                _sb.AppendFormat(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate);
 
-            //_label.Text = _sb.ToString();
+            _label.Text = _sb.ToString();
 
             return base.Draw(batcher, x, y);
         }

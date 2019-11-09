@@ -36,6 +36,16 @@ namespace ClassicUO.Game.GameObjects
     internal sealed partial class Land : GameObject
     {
         private static readonly Queue<Land> _pool = new Queue<Land>();
+        static Land()
+        {
+            for (int i = 0; i < 1000; i++)
+                _pool.Enqueue(new Land());
+        }
+
+        private Land()
+        {
+
+        }
 
         public Land(Graphic graphic)
         {

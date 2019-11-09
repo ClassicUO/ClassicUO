@@ -111,7 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showNetStats;
 
         // general
-        private HSliderBar _sliderFPS, _sliderFPSLogin, _circleOfTranspRadius;
+        private HSliderBar _sliderFPS, _circleOfTranspRadius;
         private HSliderBar _sliderSpeechDelay;
         private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox, _partyAuraColorPickerBox;
@@ -242,15 +242,8 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollAreaItem fpsItem = new ScrollAreaItem();
             Label text = new Label("- FPS:", true, HUE_FONT);
             fpsItem.Add(text);
-            _sliderFPS = new HSliderBar(text.X + 90, 5, 250, Constants.MIN_FPS, Constants.MAX_FPS, ProfileManager.Current.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+            _sliderFPS = new HSliderBar(text.X + 90, 5, 250, Constants.MIN_FPS, Constants.MAX_FPS, Settings.GlobalSettings.FPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             fpsItem.Add(_sliderFPS);
-            rightArea.Add(fpsItem);
-
-            fpsItem = new ScrollAreaItem();
-            text = new Label("- Login FPS:", true, HUE_FONT);
-            fpsItem.Add(text);
-            _sliderFPSLogin = new HSliderBar(text.X + 90, 5, 250, Constants.MIN_FPS, Constants.MAX_FPS, Settings.GlobalSettings.MaxLoginFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
-            fpsItem.Add(_sliderFPSLogin);
             rightArea.Add(fpsItem);
 
 
@@ -1382,7 +1375,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case 1: // general
                     _sliderFPS.Value = 60;
-                    _sliderFPSLogin.Value = 60;
                     _reduceFPSWhenInactive.IsChecked = false;
                     _highlightObjects.IsChecked = true;
                     _enableTopbar.IsChecked = false;
@@ -1573,11 +1565,12 @@ namespace ClassicUO.Game.UI.Gumps
             WorldViewportGump vp = UIManager.GetGump<WorldViewportGump>();
 
             // general
-            //ProfileManager.Current.MaxFPS = Engine.FpsLimit = _sliderFPS.Value;
-            Settings.GlobalSettings.MaxLoginFPS = _sliderFPSLogin.Value;
+            if (Settings.GlobalSettings.FPS != _sliderFPS.Value)
+            {
+                CUOEnviroment.Client.SetRefreshRate(_sliderFPS.Value);
+            }
             ProfileManager.Current.HighlightGameObjects = _highlightObjects.IsChecked;
             ProfileManager.Current.ReduceFPSWhenInactive = _reduceFPSWhenInactive.IsChecked;
-            //ProfileManager.Current.SmoothMovements = _smoothMovements.IsChecked;
             ProfileManager.Current.EnablePathfind = _enablePathfind.IsChecked;
             ProfileManager.Current.UseShiftToPathfind = _useShiftPathfind.IsChecked;
             ProfileManager.Current.AlwaysRun = _alwaysRun.IsChecked;

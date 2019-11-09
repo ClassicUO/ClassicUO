@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -199,9 +200,15 @@ namespace ClassicUO
 
                         break;
 
-                    case "login_fps":
                     case "fps":
-                        CUOEnviroment.RefreshRate = Settings.GlobalSettings.MaxLoginFPS = int.Parse(value);
+                        int v = int.Parse(value);
+
+                        if (v < Constants.MIN_FPS)
+                            v = Constants.MIN_FPS;
+                        else if (v > Constants.MAX_FPS)
+                            v = Constants.MAX_FPS;
+
+                        Settings.GlobalSettings.FPS = v;
                         
                         break;
 

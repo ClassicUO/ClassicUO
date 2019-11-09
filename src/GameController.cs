@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -33,6 +35,8 @@ namespace ClassicUO
         private bool _ignoreNextTextInput;
         private readonly GraphicsDeviceManager _graphicDeviceManager;
         private readonly UltimaBatcher2D _uoSpriteBatch;
+        private readonly float[] _intervalFixedUpdate = new float[2];
+        private double _statisticsTimer;
 
         public GameController()
         {
@@ -41,6 +45,7 @@ namespace ClassicUO
         }
 
         public Scene Scene => _scene;
+        public uint[] FrameDelay { get; } = new uint[2];
 
         public T GetScene<T>() where T : Scene
         {
@@ -65,7 +70,8 @@ namespace ClassicUO
             Window.Title = $"ClassicUO - {CUOEnviroment.Version}";
             IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread;
 
-            SetRefreshRate(CUOEnviroment.RefreshRate);
+            IsFixedTimeStep = false; // Settings.GlobalSettings.FixedTimeStep;
+            SetRefreshRate(Settings.GlobalSettings.FPS);
 
             base.Initialize();
         }
@@ -111,7 +117,19 @@ namespace ClassicUO
 
         public void SetRefreshRate(int rate)
         {
+            if (rate < Constants.MIN_FPS)
+                rate = Constants.MIN_FPS;
+            else if (rate > Constants.MAX_FPS)
+                rate = Constants.MAX_FPS;
+
+            FrameDelay[0] = FrameDelay[1] = (uint) (1000 / rate);
+            FrameDelay[1] = FrameDelay[1] >> 1;
+
+            Settings.GlobalSettings.FPS = rate;
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0f / rate);
+
+            _intervalFixedUpdate[0] = (uint) (1000.0 / rate);
+            _intervalFixedUpdate[1] = 217;  // 5 FPS
         }
 
         public void SetWindowPosition(int x, int y)
@@ -199,24 +217,68 @@ namespace ClassicUO
         }
 
 
+        private float _totalElapsed, _currentFpsTime;
+        private uint _totalFrames;
 
         protected override void Update(GameTime gameTime)
         {
             Time.Ticks = (uint) gameTime.TotalGameTime.TotalMilliseconds;
 
-            OnNetworkUpdate(0, 0);
+            OnNetworkUpdate(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
             UIManager.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
-            
-            _scene?.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
-            base.Update(gameTime);
 
-            // TODO draw time check
+
+
+            _totalElapsed += (float) gameTime.ElapsedGameTime.TotalMilliseconds;
+            _currentFpsTime += (float) gameTime.ElapsedGameTime.TotalMilliseconds;
+
+            if (_currentFpsTime >= 1000)
+            {
+                CUOEnviroment.CurrentRefreshRate = _totalFrames;
+
+                _totalFrames = 0;
+                _currentFpsTime = 0;
+            }
+
+            float x = _intervalFixedUpdate[!IsActive && ProfileManager.Current != null && ProfileManager.Current.ReduceFPSWhenInactive ? 1 : 0];
+
+            if (_totalElapsed > x)
+            {
+                if (_scene != null && _scene.IsLoaded && !_scene.IsDestroyed)
+                    _scene.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
+
+                _totalElapsed = _totalElapsed % x;
+            }
+            else
+            {
+                SuppressDraw();
+
+                if (!gameTime.IsRunningSlowly)
+                {
+                    Thread.Sleep(1);
+                }
+            }
+
+            base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            _scene?.Draw(_uoSpriteBatch);
+            _totalFrames++;
+
+            if (_scene != null && _scene.IsLoaded && !_scene.IsDestroyed)
+                _scene.Draw(_uoSpriteBatch);
             UIManager.Draw(_uoSpriteBatch);
+
+            if (ProfileManager.Current != null && ProfileManager.Current.ShowNetworkStats)
+            {
+                if (!NetClient.Socket.IsConnected)
+                    NetClient.LoginSocket.Statistics.Draw(_uoSpriteBatch, 10, 50);
+                else if (!NetClient.Socket.IsDisposed)
+                    NetClient.Socket.Statistics.Draw(_uoSpriteBatch, 10, 50);
+            }
+
+
             base.Draw(gameTime);
         }
 
@@ -227,12 +289,21 @@ namespace ClassicUO
             else if (!NetClient.Socket.IsConnected)
             {
                 NetClient.LoginSocket.Update();
-                //UpdateSockeStats(NetClient.LoginSocket, totalMS);
+                UpdateSockeStats(NetClient.LoginSocket, totalMS);
             }
             else if (!NetClient.Socket.IsDisposed)
             {
                 NetClient.Socket.Update();
-                //UpdateSockeStats(NetClient.Socket, totalMS);
+                UpdateSockeStats(NetClient.Socket, totalMS);
+            }
+        }
+
+        private void UpdateSockeStats(NetClient socket, double totalMS)
+        {
+            if (_statisticsTimer < totalMS)
+            {
+                socket.Statistics.Update();
+                _statisticsTimer = totalMS + 500;
             }
         }
 
