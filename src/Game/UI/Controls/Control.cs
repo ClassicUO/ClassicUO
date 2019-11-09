@@ -459,13 +459,8 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public Control[] HitTest(int x, int y)
+        public void HitTest(int x, int y, ref Control res)
         {
-            if (!IsVisible)
-                return null;
-
-            Stack<Control> results = new Stack<Control>();
-
             int parentX = ParentX;
             int parentY = ParentY;
 
@@ -474,40 +469,28 @@ namespace ClassicUO.Game.UI.Controls
                 if (Contains(x - X - parentX, y - Y - parentY))
                 {
                     if (AcceptMouseInput)
-                        results.Push(this);
+                    {
+                        if (res == null || res.Priority >= this.Priority)
+                            res = this;
+                    }
 
                     foreach (Control c in Children)
                     {
                         if (c.Page == 0 || c.Page == ActivePage)
                         {
-                            var cl = c.HitTest(x, y);
-
-                            if (cl != null)
-                            {
-                                for (int j = cl.Length - 1; j >= 0; j--)
-                                    results.Push(cl[j]);
-                            }
+                            c.HitTest(x, y, ref res);
                         }
                     }
                 }
             }
-
-            if (results.Count != 0)
-            {
-                var res = results.ToArray();
-                Array.Sort(res, (a, b) => a.Priority.CompareTo(b.Priority));
-
-                return res;
-            }
-
-            return null;
         }
 
-        public Control[] HitTest(Point position)
+        public void HitTest(Point position, ref Control res)
         {
-            return HitTest(position.X, position.Y);
+            HitTest(position.X, position.Y, ref res);
         }
 
+       
         public Control GetFirstControlAcceptKeyboardInput()
         {
             if (_acceptKeyboardInput)

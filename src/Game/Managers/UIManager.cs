@@ -1009,7 +1009,7 @@ namespace ClassicUO.Game.Managers
             if (_isDraggingControl)
                 return DraggingControl;
 
-            Control[] mouseOverControls = null;
+            Control control = null;
 
             bool ismodal = IsModalControlOpen;
 
@@ -1020,22 +1020,11 @@ namespace ClassicUO.Game.Managers
                     continue;
                 }
 
-                Control[] ctrls = c.HitTest(position);
+                c.HitTest(position, ref control);
 
-                if (ctrls != null)
+                if (control != null)
                 {
-                    mouseOverControls = ctrls;
-
-                    break;
-                }
-            }
-
-            if (mouseOverControls != null)
-            {
-                foreach (Control t in mouseOverControls)
-                {
-                    if (t.AcceptMouseInput)
-                        return t;
+                    return control;
                 }
             }
 
