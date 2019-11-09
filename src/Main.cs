@@ -75,7 +75,7 @@ namespace ClassicUO
             };
 #endif
 
-#if DEV_BUILD
+#if DEV_BUILD && !NO_UPDATES
             Updater updater = new Updater();
             if (updater.Check())
                 return;
