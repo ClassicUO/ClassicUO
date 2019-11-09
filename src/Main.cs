@@ -36,15 +36,47 @@ namespace ClassicUO
 
             Log.Start(LogTypes.All);
 
+#if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
+                StringBuilder sb = new StringBuilder();
+#if DEV_BUILD
+                                sb.AppendFormat("ClassicUO [dev] - v{0}\nOS: {1} {2}\nThread: {3}\n\n", Version, Environment.OSVersion.Platform, Environment.Is64BitOperatingSystem ? "x64" : "x86", Thread.CurrentThread.Name);
+#else
+                sb.AppendFormat("ClassicUO - v{0}\nOS: {1} {2}\nThread: {3}\n\n", CUOEnviroment.Version, Environment.OSVersion.Platform, Environment.Is64BitOperatingSystem ? "x64" : "x86", Thread.CurrentThread.Name);
+#endif
+                sb.AppendFormat("Exception:\n{0}", e.ExceptionObject);
 
+                Log.Message(LogTypes.Panic, e.ExceptionObject.ToString());
+                string path = Path.Combine(CUOEnviroment.ExecutablePath, "Logs");
+
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                using (LogFile crashfile = new LogFile(path, "crash.txt"))
+                {
+                    crashfile.WriteAsync(sb.ToString()).RunSynchronously();
+
+                    //SDL.SDL_ShowSimpleMessageBox(
+                    //                             SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
+                    //                             "An error occurred",
+                    //                             $"{crashfile}\ncreated in /Logs.",
+                    //                             SDL.SDL_GL_GetCurrentWindow()
+                    //                            );
+                }
             };
+#endif
 
-
+#if DEV_BUILD
+            Updater updater = new Updater();
+            if (updater.Check())
+                return;
+#endif
             ReadSettingsFromArgs(args);
 
-
+            if (!SkipUpdate)
+                if (CheckUpdate(args))
+                    return;
 
             Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI",  CUOEnviroment.IsHighDPI ? "1" : "0");
             Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
@@ -90,24 +122,7 @@ namespace ClassicUO
             CUOEnviroment.Client.Run();
             CUOEnviroment.Client.Dispose();
 
-
-
-
-
-//            Engine.Configure();
-
-//#if DEV_BUILD
-//            Updater updater = new Updater();
-//            if (updater.Check())
-//                return;
-//#endif
-//            //ParseMainArgs(args);
-
-//            if (!SkipUpdate)
-//                if (CheckUpdate(args))
-//                    return;
-
-//            Engine.Run(args);
+            Log.Trace("Closing...");
         }
 
         public static bool StartMinimized { get; set; }

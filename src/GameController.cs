@@ -71,6 +71,8 @@ namespace ClassicUO
             IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread;
 
             IsFixedTimeStep = false; // Settings.GlobalSettings.FixedTimeStep;
+            TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0f / 250);
+
             SetRefreshRate(Settings.GlobalSettings.FPS);
 
             base.Initialize();
@@ -127,9 +129,9 @@ namespace ClassicUO
             FrameDelay[1] = FrameDelay[1] >> 1;
 
             Settings.GlobalSettings.FPS = rate;
-            TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0f / rate);
+            //TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0f / 250);
 
-            _intervalFixedUpdate[0] = (uint) (1000.0 / rate);
+            _intervalFixedUpdate[0] = 1000.0f / rate;
             _intervalFixedUpdate[1] = 217;  // 5 FPS
         }
 
@@ -228,8 +230,7 @@ namespace ClassicUO
             OnNetworkUpdate(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
             UIManager.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
 
-
-
+          
             _totalElapsed += (float) gameTime.ElapsedGameTime.TotalMilliseconds;
             _currentFpsTime += (float) gameTime.ElapsedGameTime.TotalMilliseconds;
 
@@ -248,7 +249,7 @@ namespace ClassicUO
                 if (_scene != null && _scene.IsLoaded && !_scene.IsDestroyed)
                     _scene.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
 
-                _totalElapsed = _totalElapsed % x;
+                _totalElapsed %= x;
             }
             else
             {
