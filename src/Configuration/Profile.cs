@@ -280,6 +280,9 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool PartyAura { get; set; }
 
         [JsonProperty] public bool UseXBR { get; set; } = true;
+
+        [JsonProperty] public bool HideChatGradient { get; set; } = false;
+
         [JsonProperty] public bool StandardSkillsGump { get; set; } = true;
 
         [JsonProperty] public bool ShowNewMobileNameIncoming { get; set; } = true;

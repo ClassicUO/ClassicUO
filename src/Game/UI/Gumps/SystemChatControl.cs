@@ -94,7 +94,9 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = height - 3
             };
 
-            Add(_trans = new AlphaBlendControl
+            float gradientTransparency = (ProfileManager.Current != null && ProfileManager.Current.HideChatGradient) ? 1.0f : 0.5f;
+
+            Add(_trans = new AlphaBlendControl(gradientTransparency)
             {
                 X = textBox.X,
                 Y = textBox.Y,
@@ -380,6 +382,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Mode = ChatMode.UOAMChat;
 
             if (ProfileManager.Current.SpeechHue != textBox.Hue) textBox.Hue = ProfileManager.Current.SpeechHue;
+
+            _trans.Alpha = (ProfileManager.Current != null && ProfileManager.Current.HideChatGradient) ? 1.0f : 0.5f;
 
             base.Update(totalMS, frameMS);
         }
