@@ -199,7 +199,7 @@ namespace ClassicUO.Game.Managers
                 var sound = _currentSounds[i];
                 sound.Stop();
                 sound.Dispose();
-                _currentSounds.RemoveAt(i);
+                _currentSounds.RemoveAt(i--);
             }
         }
 
@@ -225,7 +225,7 @@ namespace ClassicUO.Game.Managers
 
                 if (!sound.IsPlaying())
                 {
-                    _currentSounds.RemoveAt(i);
+                    _currentSounds.RemoveAt(i--);
                 }
                 else
                 {
