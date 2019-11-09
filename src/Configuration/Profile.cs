@@ -141,7 +141,6 @@ namespace ClassicUO.Configuration
 
         // general
         [JsonProperty] public Point WindowClientBounds { get; set; } = new Point(600, 480);
-        [JsonProperty] public Point WindowClientPosition { get; set; } = new Point(0, 0);
         [JsonProperty] public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
         [JsonProperty] public Point GameWindowPosition { get; set; } = new Point(10, 10);
         [JsonProperty] public bool GameWindowLock { get; set; }

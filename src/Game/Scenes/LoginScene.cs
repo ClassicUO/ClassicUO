@@ -65,8 +65,6 @@ namespace ClassicUO.Game.Scenes
 
 
         public LoginScene() : base(
-            0,
-            0,
             640,
             480,
             false,

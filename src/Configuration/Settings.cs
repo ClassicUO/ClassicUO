@@ -24,6 +24,8 @@
 using System;
 using System.IO;
 
+using Microsoft.Xna.Framework;
+
 using Newtonsoft.Json;
 
 namespace ClassicUO.Configuration
@@ -65,7 +67,7 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "fps")]
         public int FPS { get; set; } = 60;
-
+        [JsonProperty(PropertyName = "window_position")] public Point? WindowPosition { get; set; }
         [JsonProperty(PropertyName = "debug")] public bool Debug { get; set; }
 
         [JsonProperty(PropertyName = "profiler")]

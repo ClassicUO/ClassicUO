@@ -88,6 +88,8 @@ namespace ClassicUO
 
         protected override void UnloadContent()
         {
+            SDL_GetWindowBordersSize(Window.Handle, out int top, out int left, out int bottom, out int right);
+            Settings.GlobalSettings.WindowPosition = new Point(Window.ClientBounds.X - left, Window.ClientBounds.Y - top);
             _scene?.Unload();
             Settings.GlobalSettings.Save();
             Plugin.OnClosing();
@@ -111,7 +113,11 @@ namespace ClassicUO
                 {
                     RestoreWindow();
                     SDL_GetWindowBordersSize(Window.Handle, out int top, out int left, out int bottom, out int right);
-                    SetWindowPosition(left + scene.X, top + scene.Y);
+
+                    if (Settings.GlobalSettings.WindowPosition.HasValue)
+                    {
+                        SetWindowPosition(left + Settings.GlobalSettings.WindowPosition.Value.X, top + Settings.GlobalSettings.WindowPosition.Value.Y);
+                    }
                 }
 
                 scene.Load();

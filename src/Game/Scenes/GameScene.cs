@@ -72,8 +72,6 @@ namespace ClassicUO.Game.Scenes
 
 
         public GameScene() : base(
-            0,
-            0,
             ProfileManager.Current.WindowClientBounds.X,
             ProfileManager.Current.WindowClientBounds.Y,
             true,
@@ -277,7 +275,6 @@ namespace ClassicUO.Game.Scenes
             if (ProfileManager.Current != null)
             {
                 SDL.SDL_GetWindowPosition(CUOEnviroment.Client.Window.Handle, out int x, out int y);
-                ProfileManager.Current.WindowClientPosition = new Point(x, y);
             }
             
             try
