@@ -216,7 +216,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (!ProfileManager.Current.ReproduceSoundsInBackground) _currentMusic.Volume = ProfileManager.Current.MusicVolume / Constants.SOUND_DELTA;
                 }
-                else if (!ProfileManager.Current.ReproduceSoundsInBackground && _currentMusic.Volume != 0) _currentMusic.Volume = 0;
+                else if (!ProfileManager.Current.ReproduceSoundsInBackground && _currentMusic.Volume != 0.0f) _currentMusic.Volume = 0;
             }
 
             _currentMusic?.Update();

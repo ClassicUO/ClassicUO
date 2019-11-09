@@ -73,7 +73,7 @@ namespace ClassicUO.IO.Audio
 
         public float Volume
         {
-            get => m_ThisInstance.Volume;
+            get => m_ThisInstance?.Volume ?? 0f;
             set
             {
                 if (value < 0.0f)
@@ -81,7 +81,8 @@ namespace ClassicUO.IO.Audio
                 else if (value > 1f)
                     value = 1f;
 
-                m_ThisInstance.Volume = value;
+                if (m_ThisInstance != null && !m_ThisInstance.IsDisposed)
+                    m_ThisInstance.Volume = value;
             }
         }
 
