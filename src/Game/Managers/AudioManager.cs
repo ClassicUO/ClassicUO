@@ -22,6 +22,8 @@
 #endregion
 
 using System.Collections.Generic;
+
+using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Audio;
@@ -168,10 +170,10 @@ namespace ClassicUO.Game.Managers
             if (!_canReproduceAudio)
                 return;
 
-            if (Engine.Profile == null || Engine.Profile.Current == null || !Engine.Profile.Current.EnableSound)
+            if (ProfileManager.Current == null || !ProfileManager.Current.EnableSound)
                 return;
 
-            float volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
+            float volume = ProfileManager.Current.SoundVolume / Constants.SOUND_DELTA;
 
             if (volume < -1 || volume > 1f)
                 return;
@@ -229,11 +231,11 @@ namespace ClassicUO.Game.Managers
                 }
                 else
                 {
-                    if (Engine.Instance.IsActive)
+                    if (CUOEnviroment.Client.IsActive)
                     {
-                        if (!Engine.Profile.Current.ReproduceSoundsInBackground) sound.Volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
+                        if (ProfileManager.Current != null && !ProfileManager.Current.ReproduceSoundsInBackground) sound.Volume = ProfileManager.Current.SoundVolume / Constants.SOUND_DELTA;
                     }
-                    else if (!Engine.Profile.Current.ReproduceSoundsInBackground && sound.Volume != 0) sound.Volume = 0;
+                    else if (ProfileManager.Current != null && (!ProfileManager.Current.ReproduceSoundsInBackground && sound.Volume != 0)) sound.Volume = 0;
                 }
             }
         }

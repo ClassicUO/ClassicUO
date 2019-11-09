@@ -1662,14 +1662,14 @@ namespace ClassicUO.Game.UI.Gumps
             Settings.GlobalSettings.LoginMusicVolume = _loginMusicVolume.Value;
             Settings.GlobalSettings.LoginMusic = _loginMusic.IsChecked;
 
-            Engine.SceneManager.CurrentScene.Audio.UpdateCurrentMusicVolume();
-            Engine.SceneManager.CurrentScene.Audio.UpdateCurrentSoundsVolume();
+            CUOEnviroment.Client.Scene.Audio.UpdateCurrentMusicVolume();
+            CUOEnviroment.Client.Scene.Audio.UpdateCurrentSoundsVolume();
 
             if (!ProfileManager.Current.EnableMusic)
                 CUOEnviroment.Client.Scene.Audio.StopMusic();
 
-            if (!Engine.Profile.Current.EnableSound)
-                Engine.SceneManager.CurrentScene.Audio.StopSounds();
+            if (!ProfileManager.Current.EnableSound)
+                CUOEnviroment.Client.Scene.Audio.StopSounds();
 
             // speech
             ProfileManager.Current.ScaleSpeechDelay = _scaleSpeechDelay.IsChecked;
