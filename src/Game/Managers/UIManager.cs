@@ -72,8 +72,6 @@ namespace ClassicUO.Game.Managers
 
         public static bool IsMouseOverWorld => MouseOverControl is WorldViewport;
 
-        public static bool IsMouseOverUI => (IsMouseOverAControl && !IsMouseOverWorld) || IsModalControlOpen;
-
         public static Control DraggingControl { get; private set; }
 
         public static GameCursor GameCursor { get; private set; }

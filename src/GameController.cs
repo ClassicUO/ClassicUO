@@ -267,7 +267,12 @@ namespace ClassicUO
 
             if (_totalElapsed > x)
             {
-               
+                if (_scene != null && _scene.IsLoaded && !_scene.IsDestroyed)
+                {
+                    Profiler.EnterContext("FixedUpdate");
+                    _scene.FixedUpdate(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
+                    Profiler.ExitContext("FixedUpdate");
+                }
 
                 _totalElapsed %= x;
             }
@@ -323,15 +328,16 @@ namespace ClassicUO
 
             double timeDraw = Profiler.GetContext("RenderFrame").TimeInContext;
             double timeUpdate = Profiler.GetContext("Update").TimeInContext;
+            double timeFixedUpdate = Profiler.GetContext("FixedUpdate").TimeInContext;
             double timeOutOfContext = Profiler.GetContext("OutOfContext").TimeInContext;
             //double timeTotalCheck = timeOutOfContext + timeDraw + timeUpdate;
             double timeTotal = Profiler.TrackedTime;
             double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
 
 #if DEV_BUILD
-            Window.Title = string.Format("ClassicUO [dev] {5} - Draw:{0:0.0}% Update:{1:0.0}% AvgDraw:{2:0.0}ms {3} - FPS: {4}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CUOEnviroment.CurrentRefreshRate, CUOEnviroment.Version);
+            Window.Title = string.Format("ClassicUO [dev] {5} - Draw:{0:0.0}% Update:{1:0.0}% FixedUpd:{6:0.0} AvgDraw:{2:0.0}ms {3} - FPS: {4}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CUOEnviroment.CurrentRefreshRate, CUOEnviroment.Version, 100d * (timeFixedUpdate / timeTotal));
 #else
-            Window.Title = string.Format("ClassicUO {5} - Draw:{0:0.0}% Update:{1:0.0}% AvgDraw:{2:0.0}ms {3} - FPS: {4}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CUOEnviroment.CurrentRefreshRate, CUOEnviroment.Version);
+            Window.Title = string.Format("ClassicUO {5} - Draw:{0:0.0}% Update:{1:0.0}% FixedUpd:{6:0.0} AvgDraw:{2:0.0}ms {3} - FPS: {4}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CUOEnviroment.CurrentRefreshRate, CUOEnviroment.Version, 100d * (timeFixedUpdate / timeTotal));
 #endif
         }
 
@@ -462,11 +468,10 @@ namespace ClassicUO
                     {
                         _ignoreNextTextInput = false;
 
-                        //if (UIManager.IsMouseOverUI)
-                            UIManager.MouseOverControl?.InvokeKeyDown(e.key.keysym.sym, e.key.keysym.mod);
+                        UIManager.MouseOverControl?.InvokeKeyDown(e.key.keysym.sym, e.key.keysym.mod);
+                        if (UIManager.MouseOverControl != UIManager.KeyboardFocusControl)
                             UIManager.KeyboardFocusControl?.InvokeKeyDown(e.key.keysym.sym, e.key.keysym.mod);
 
-                        //else 
                         _scene.OnKeyDown(e.key);
                     }
                     else
@@ -478,11 +483,10 @@ namespace ClassicUO
                     
                     Keyboard.OnKeyUp(e.key);
 
-                    //if (UIManager.IsMouseOverUI)
-                        UIManager.MouseOverControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
+                    UIManager.MouseOverControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
+                    if (UIManager.MouseOverControl != UIManager.KeyboardFocusControl)
                         UIManager.KeyboardFocusControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
 
-                    // else
                     _scene.OnKeyUp(e.key);
 
                     break;

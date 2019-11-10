@@ -645,6 +645,10 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
+        }
+
+        public override void FixedUpdate(double totalMS, double frameMS)
+        {
             FillGameObjectList();
         }
 

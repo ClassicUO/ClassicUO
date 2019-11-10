@@ -65,6 +65,11 @@ namespace ClassicUO.Game.Scenes
             Coroutines.Update();
         }
 
+        public virtual void FixedUpdate(double totalMS, double frameMS)
+        {
+
+        }
+
         public virtual void Destroy()
         {
             if (IsDestroyed)

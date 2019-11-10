@@ -3205,6 +3205,24 @@ namespace ClassicUO.Network
 
                     switch (type)
                     {
+                        case 1: // update
+                            break;
+                        case 2: // remove
+                            break;
+                        case 3: // update multi pos
+                            break;
+                        case 4: // begin
+                            HouseCustomizationGump gump = UIManager.GetGump<HouseCustomizationGump>();
+                            if (gump != null)
+                                break;
+
+                            gump = new HouseCustomizationGump(serial, 50, 50);
+                            UIManager.Add(gump);
+
+                            break;
+                        case 5: // end
+                            UIManager.GetGump<HouseCustomizationGump>(serial)?.Dispose();
+                            break;
                     }
 
                     break;
