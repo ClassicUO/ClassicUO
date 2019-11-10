@@ -82,7 +82,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             X = x;
             Y = y;
-            
+            CanMove = true;
+            AcceptMouseInput = true;
 
             ParseFileWithCategory<CustomHouseWall, CustomHouseWallCategory>(_walls, Path.Combine(FileManager.UoFolderPath, "walls.txt"));
             ParseFile(_floors, Path.Combine(FileManager.UoFolderPath, "floors.txt"));
@@ -245,6 +246,26 @@ namespace ClassicUO.Game.UI.Gumps
                 if (endCategory > _walls.Count)
                     endCategory = _walls.Count;
 
+                // TODO: scissor
+
+                for (int i = startCategory; i < endCategory; i++)
+                {
+                    var vec = _walls[i].Items;
+
+                    if (vec.Count == 0)
+                        continue;
+
+                    Rectangle bounds = FileManager.Art.GetTexture((ushort) vec[0].East1).Bounds;
+
+                    int offsetX = x + 121 + (48 - bounds.Width) / 2;
+                    int offsetY = y + 36;
+
+                    _dataBox.Add(new StaticPic((ushort) vec[0].East1,0)
+                    {
+                        X = offsetX, Y = offsetY
+                    });
+
+                }
                 
             }
         }
