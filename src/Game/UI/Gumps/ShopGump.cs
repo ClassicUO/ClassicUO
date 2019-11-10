@@ -223,28 +223,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
-        {
-            if (Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT))
-                _shiftPressed = true;
-        }
-
-        protected override void OnKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
-        {
-            if (key == SDL.SDL_Keycode.SDLK_LSHIFT || key == SDL.SDL_Keycode.SDLK_RSHIFT)
-                _shiftPressed = false;
-        }
-
-        private void InputOnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
-        {
-           
-        }
-
-        private void InputOnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
-        {
-           
-        }
-
 
 
         public void SetIfNameIsFromCliloc(Item it, bool fromcliloc)
@@ -283,6 +261,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (!World.InGame || IsDisposed)
                 return;
+
+            _shiftPressed = Keyboard.Shift;
 
             if (_isUpDOWN || _isDownDOWN || _isDownDOWN_T || _isUpDOWN_T)
             {

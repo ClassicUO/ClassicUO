@@ -468,9 +468,9 @@ namespace ClassicUO
                     {
                         _ignoreNextTextInput = false;
 
-                        UIManager.MouseOverControl?.InvokeKeyDown(e.key.keysym.sym, e.key.keysym.mod);
-                        if (UIManager.MouseOverControl != UIManager.KeyboardFocusControl)
-                            UIManager.KeyboardFocusControl?.InvokeKeyDown(e.key.keysym.sym, e.key.keysym.mod);
+                        //UIManager.MouseOverControl?.InvokeKeyDown(e.key.keysym.sym, e.key.keysym.mod);
+                        //if (UIManager.MouseOverControl != UIManager.KeyboardFocusControl)
+                        UIManager.KeyboardFocusControl?.InvokeKeyDown(e.key.keysym.sym, e.key.keysym.mod);
 
                         _scene.OnKeyDown(e.key);
                     }
@@ -483,9 +483,9 @@ namespace ClassicUO
                     
                     Keyboard.OnKeyUp(e.key);
 
-                    UIManager.MouseOverControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
-                    if (UIManager.MouseOverControl != UIManager.KeyboardFocusControl)
-                        UIManager.KeyboardFocusControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
+                    //UIManager.MouseOverControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
+                    //if (UIManager.MouseOverControl != UIManager.KeyboardFocusControl)
+                    UIManager.KeyboardFocusControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
 
                     _scene.OnKeyUp(e.key);
 
