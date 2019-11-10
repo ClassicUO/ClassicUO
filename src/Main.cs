@@ -1,8 +1,4 @@
-﻿#define DEV_BUILD
-
-
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -75,7 +71,7 @@ namespace ClassicUO
             };
 #endif
 
-#if DEV_BUILD && !NO_UPDATES
+#if DEV_BUILD
             Updater updater = new Updater();
             if (updater.Check())
                 return;
