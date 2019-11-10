@@ -944,6 +944,9 @@ namespace ClassicUO.Game.GameObjects
                 y -= 22;
             }
 
+            if (ObjectHandlesOpened)
+                y -= 22;
+
             if (!IsMounted)
                 y += 22;
 

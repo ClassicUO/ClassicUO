@@ -148,8 +148,9 @@ namespace ClassicUO.Game.Managers
                             xx -= (mobile.HitsTexture.Width >> 1) + 3;
                             xx += 22;
                             yy -= mobile.HitsTexture.Height / 1;
+                            if (mobile.ObjectHandlesOpened)
+                                yy -= 22;
 
-                         
                             if (!(xx < screenX || xx > screenX + screenW - mobile.HitsTexture.Width || yy < screenY || yy > screenY + screenH))
                                 mobile.HitsTexture.Draw(batcher, xx, yy);
                         }
