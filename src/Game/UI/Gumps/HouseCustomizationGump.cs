@@ -10,6 +10,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
+using ClassicUO.Network;
 
 using Microsoft.Xna.Framework;
 
@@ -276,9 +277,15 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            base.OnButtonClick(buttonID);
+            
         }
 
+
+        public override void Dispose()
+        {
+            NetClient.Socket.Send(new PCustomHouseBuildingExit());
+            base.Dispose();
+        }
 
 
         private static void ParseFile<T>(List<T> list, string path) where  T: CustomHouseObject, new()
