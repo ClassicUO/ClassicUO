@@ -464,8 +464,10 @@ namespace ClassicUO
 
                         //if (UIManager.IsMouseOverUI)
                             UIManager.MouseOverControl?.InvokeKeyDown(e.key.keysym.sym, e.key.keysym.mod);
+                            UIManager.KeyboardFocusControl?.InvokeKeyDown(e.key.keysym.sym, e.key.keysym.mod);
+
                         //else 
-                            _scene.OnKeyDown(e.key);
+                        _scene.OnKeyDown(e.key);
                     }
                     else
                         _ignoreNextTextInput = true;
@@ -478,8 +480,10 @@ namespace ClassicUO
 
                     //if (UIManager.IsMouseOverUI)
                         UIManager.MouseOverControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
-                   // else
-                        _scene.OnKeyUp(e.key);
+                        UIManager.KeyboardFocusControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
+
+                    // else
+                    _scene.OnKeyUp(e.key);
 
                     break;
 
