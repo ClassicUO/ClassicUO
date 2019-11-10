@@ -245,6 +245,13 @@ namespace ClassicUO
             UIManager.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
             Plugin.Tick();
 
+            if (_scene != null && _scene.IsLoaded && !_scene.IsDestroyed)
+            {
+                Profiler.EnterContext("Update");
+                _scene.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
+                Profiler.ExitContext("Update");
+            }
+
             _totalElapsed += (float) gameTime.ElapsedGameTime.TotalMilliseconds;
             _currentFpsTime += (float) gameTime.ElapsedGameTime.TotalMilliseconds;
 
@@ -260,12 +267,7 @@ namespace ClassicUO
 
             if (_totalElapsed > x)
             {
-                if (_scene != null && _scene.IsLoaded && !_scene.IsDestroyed)
-                {
-                    Profiler.EnterContext("Update");
-                    _scene.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
-                    Profiler.ExitContext("Update");
-                }
+               
 
                 _totalElapsed %= x;
             }
