@@ -463,7 +463,7 @@ namespace ClassicUO
                         _ignoreNextTextInput = false;
 
                         //if (UIManager.IsMouseOverUI)
-                            UIManager.KeyboardFocusControl?.InvokeKeyDown(e.key.keysym.sym, e.key.keysym.mod);
+                            UIManager.MouseOverControl?.InvokeKeyDown(e.key.keysym.sym, e.key.keysym.mod);
                         //else 
                             _scene.OnKeyDown(e.key);
                     }
@@ -477,7 +477,7 @@ namespace ClassicUO
                     Keyboard.OnKeyUp(e.key);
 
                     //if (UIManager.IsMouseOverUI)
-                        UIManager.KeyboardFocusControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
+                        UIManager.MouseOverControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
                    // else
                         _scene.OnKeyUp(e.key);
 
