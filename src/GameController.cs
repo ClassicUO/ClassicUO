@@ -106,13 +106,16 @@ namespace ClassicUO
             {
                 Window.AllowUserResizing = scene.CanResize;
 
-                SetWindowSize(scene.Width, scene.Height);
 
                 if (scene.CanBeMaximized)
+                {
+                    SetWindowSize(scene.Width, scene.Height);
                     MaximizeWindow();
+                }
                 else
                 {
                     RestoreWindow();
+                    SetWindowSize(scene.Width, scene.Height);
                     SDL_GetWindowBordersSize(Window.Handle, out int top, out int left, out int bottom, out int right);
 
                     if (Settings.GlobalSettings.WindowPosition.HasValue)
