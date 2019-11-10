@@ -362,8 +362,8 @@ namespace ClassicUO.Game.UI.Controls
                 else if (Parent != null && Parent is ContainerGump)
                 {
                     float scale = 1;
-                    if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
-                        scale = Engine.UI.ContainerScale;
+                    if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
+                        scale = UIManager.ContainerScale;
 
                     // drag with mouse offset from containers
                     offset = new Point(
