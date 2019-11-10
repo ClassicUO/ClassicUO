@@ -414,9 +414,7 @@ namespace ClassicUO.Game.GameObjects
                     case 0x3E9D: // 16029 Ethereal Unicorn
 
                     {
-                        graphic = 0x00C0;
-
-                        break;
+                        return 0x00C0;
                     }
 
                     case 0x3E9C: // 16028 Ethereal Kirin
