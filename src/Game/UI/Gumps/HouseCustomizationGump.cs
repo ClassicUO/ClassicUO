@@ -1410,12 +1410,39 @@ namespace ClassicUO.Game.UI.Gumps
 
         private bool ValidateItemPlace(Rectangle rect, ushort grpahic , int x, int y)
         {
+            
             return false;
         }
 
-        private bool ValidateItemPlace(Item foundationItem, Multi multi, int minZ, int maxZ,
+        private bool ValidateItemPlace(Item foundationItem, Multi item, int minZ, int maxZ,
             List<Point> validatedFloors)
         {
+
+            if (item == null || !World.HouseManager.TryGetHouse(foundationItem, out var house) || !house.IsCustom)
+                return true;
+
+            if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0)
+            {
+                bool existsInList(List<Point> list, Point testedPoint)
+                {
+                    foreach (Point point in list)
+                    {
+                        if (testedPoint == point)
+                            return true;
+                    }
+
+                    return false;
+                }
+                // TODO HERE
+
+                //if (ValidatePlaceStructure(foundationItem, house, minZ - 20, maxZ - 20,
+                //    (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT)) ||
+                //    ValidatePlaceStructure(foundationItem,))
+                //{
+
+                //}
+            }
+
             return false;
         }
 

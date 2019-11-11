@@ -42,6 +42,16 @@ namespace ClassicUO.Game.GameObjects
         public List<Multi> Components { get; } = new List<Multi>();
         public bool IsCustom;
 
+        public Multi GetMultiAt(int x, int y)
+        {
+            foreach (Multi component in Components)
+            {
+                if (component.X == x && component.Y == y)
+                    return component;
+            }
+
+            return null;
+        }
 
         public bool Equals(Serial other)
         {
