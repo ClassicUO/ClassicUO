@@ -174,6 +174,7 @@
     <Compile Include="Game\UI\Controls\MultiLineBox.cs" />
     <Compile Include="Game\UI\Controls\MultiSelectionShrinkbox.cs" />
     <Compile Include="Game\UI\Controls\NiceButton.cs" />
+    <Compile Include="Game\UI\Controls\ScissorControl.cs" />
     <Compile Include="Game\UI\Controls\TextureControl.cs" />
     <Compile Include="Game\UI\Gumps\GridLootGump.cs" />
     <Compile Include="Game\UI\Gumps\HouseCustomizationGump.cs" />

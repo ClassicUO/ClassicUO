@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
             X = x;
             Y = y;
             CanMove = true;
-            AcceptMouseInput = true;
+            AcceptMouseInput = false;
 
             ParseFileWithCategory<CustomHouseWall, CustomHouseWallCategory>(_walls, Path.Combine(FileManager.UoFolderPath, "walls.txt"));
             ParseFile(_floors, Path.Combine(FileManager.UoFolderPath, "floors.txt"));
@@ -133,7 +133,12 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             Add(new GumpPicTiled(121, 36, 397, 120, 0x0E14));
-            _dataBox = new DataBox(0, 0, 0, 0);
+            _dataBox = new DataBox(0, 0, 0, 0)
+            {
+                WantUpdateSize = true,
+                CanMove = false,
+                AcceptMouseInput = false
+            };
             Add(_dataBox);
 
             Add(new GumpPic(0, 17, 0x55F0, 0));
@@ -199,7 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
             Label text = new Label(":", false, 0x0481, font: 9)
             {
                 X = 84,
-                Y = 184
+                Y = 142
             };
             Add(text);
 
@@ -219,17 +224,28 @@ namespace ClassicUO.Game.UI.Gumps
             };
             Add(_textCost);
 
-            HitBox box = new HitBox(36, 137, 84, 23);
+            HitBox box = new HitBox(36, 137, 84, 23)
+            {
+                Priority = ClickPriority.Default
+            };
             Add(box);
 
-            box = new HitBox(522, 137, 84, 23);
+            box = new HitBox(522, 137, 84, 23)
+            {
+                Priority = ClickPriority.Default
+            };
             Add(box);
 
-            _dataBoxGUI = new DataBox(0, 0, 0, 0);
+            _dataBoxGUI = new DataBox(0, 0, 0, 0)
+            {
+                WantUpdateSize = true,
+                CanMove = false,
+                AcceptMouseInput = false
+            };
             Add(_dataBoxGUI);
 
 
-
+            UpdateMaxPage();
             Update();
         }
 
@@ -703,6 +719,74 @@ namespace ClassicUO.Game.UI.Gumps
             return (-1, -1);
         }
 
+        private void UpdateMaxPage()
+        {
+            MaxPage = 1;
+
+            switch (State)
+            {
+                case CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL:
+                    if (Category == -1)
+                    {
+                        MaxPage = (int) Math.Ceiling(_walls.Count / 16.0f);
+                    }
+                    else
+                    {
+                        foreach (CustomHouseWallCategory c in _walls)
+                        {
+                            if (c.Index == Category)
+                            {
+                                MaxPage = c.Items.Count;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                case CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR:
+                    MaxPage = _doors.Count;
+                    break;
+                case CUSTOM_HOUSE_GUMP_STATE.CHGS_FLOOR:
+                    MaxPage = _floors.Count;
+                    break;
+                case CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR:
+                    MaxPage = _stairs.Count;
+                    break;
+                case CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF:
+                    if (Category == -1)
+                    {
+                        MaxPage = (int) Math.Ceiling(_roofs.Count / 16.0f);
+                    }
+                    else
+                    {
+                        foreach (var c in _roofs)
+                        {
+                            if (c.Index == Category)
+                            {
+                                MaxPage = c.Items.Count;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                case CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC:
+                    if (Category == -1)
+                    {
+                        MaxPage = (int) Math.Ceiling(_miscs.Count / 16.0f);
+                    }
+                    else
+                    {
+                        foreach (var c in _miscs)
+                        {
+                            if (c.Index == Category)
+                            {
+                                MaxPage = c.Items.Count;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
 
         private void AddWall()
         {
@@ -737,7 +821,10 @@ namespace ClassicUO.Game.UI.Gumps
                     });
 
                     _dataBox.Add(new HitBox(offsetX, offsetY,
-                        bounds.Width, bounds.Height));
+                        bounds.Width, bounds.Height)
+                    {
+                        Priority = ClickPriority.Default
+                    });
 
                     x += 48;
 
@@ -777,7 +864,10 @@ namespace ClassicUO.Game.UI.Gumps
                                 X = offsetX,
                                 Y = offsetY
                             });
-                            _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height));
+                            _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
+                            {
+                                Priority = ClickPriority.Default
+                            });
                         }
 
                         x += 48;
@@ -848,7 +938,10 @@ namespace ClassicUO.Game.UI.Gumps
                             X = offsetX,
                             Y = offsetY
                         });
-                        _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height));
+                        _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
+                        {
+                            Priority = ClickPriority.Default
+                        });
                     }
 
                     x += 48;
@@ -970,7 +1063,10 @@ namespace ClassicUO.Game.UI.Gumps
                                 X = offsetX,
                                 Y = offsetY
                             });
-                            _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height));
+                            _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
+                            {
+                                Priority = ClickPriority.Default
+                            });
                         }
 
                         x += 48;
@@ -1025,7 +1121,10 @@ namespace ClassicUO.Game.UI.Gumps
                                 X = offsetX,
                                 Y = offsetY
                             });
-                            _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height));
+                            _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
+                            {
+                                Priority = ClickPriority.Default
+                            });
                         }
 
                         x += 48;
@@ -1072,7 +1171,10 @@ namespace ClassicUO.Game.UI.Gumps
                         X = offsetX,
                         Y = offsetY
                     });
-                    _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height));
+                    _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
+                    {
+                        Priority = ClickPriority.Default
+                    });
 
                     x += 48;
 
@@ -1118,7 +1220,10 @@ namespace ClassicUO.Game.UI.Gumps
                                     X = offsetX,
                                     Y = offsetY
                                 });
-                                _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height));
+                                _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
+                                {
+                                    Priority = ClickPriority.Default
+                                });
                             }
 
                             x += 48;
@@ -1197,7 +1302,10 @@ namespace ClassicUO.Game.UI.Gumps
                         X = offsetX,
                         Y = offsetY
                     });
-                    _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height));
+                    _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
+                    {
+                        Priority = ClickPriority.Default
+                    });
 
                     x += 48;
 
@@ -1239,7 +1347,10 @@ namespace ClassicUO.Game.UI.Gumps
                                 X = offsetX,
                                 Y = offsetY
                             });
-                            _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height));
+                            _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
+                            {
+                                Priority = ClickPriority.Default
+                            });
                         }
 
                         x += 48;

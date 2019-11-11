@@ -117,7 +117,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public int ToPage { get; set; }
 
-        protected override ClickPriority Priority => ClickPriority.High;
+        public override ClickPriority Priority => ClickPriority.High;
 
         public ushort ButtonGraphicNormal
         {
