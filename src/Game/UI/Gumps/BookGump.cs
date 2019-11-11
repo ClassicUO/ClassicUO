@@ -729,7 +729,7 @@ namespace ClassicUO.Game.UI.Gumps
                     var splits = sb.ToString().Split('\n');
                     int length = splits.Length;
                     WriteUShort((ushort) Math.Min(length, MaxBookLines));
-                    if (length > MaxBookLines && changed[i] >= gump.BookPageCount) Log.Message(LogTypes.Error, $"Book page {changed[i]} split into too many lines: {length - MaxBookLines} Additional lines will be lost");
+                    if (length > MaxBookLines && changed[i] >= gump.BookPageCount) Log.Error( $"Book page {changed[i]} split into too many lines: {length - MaxBookLines} Additional lines will be lost");
 
                     for (int j = 0; j < length; j++)
                     {
@@ -743,7 +743,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 if (buf.Length > 79)
                                 {
-                                    Log.Message(LogTypes.Error, $"Book page {changed[i]} single line too LONG, total lenght -> {buf.Length} vs MAX 79 bytes allowed, some content might get lost");
+                                    Log.Error( $"Book page {changed[i]} single line too LONG, total lenght -> {buf.Length} vs MAX 79 bytes allowed, some content might get lost");
                                     splits[j] = splits[j].Substring(0, 79);
                                 }
 
@@ -754,7 +754,7 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 if (splits[j].Length > 79)
                                 {
-                                    Log.Message(LogTypes.Error, $"Book page {changed[i]} single line too LONG, total lenght -> {splits[j].Length} vs MAX 79 bytes allowed, some content might get lost");
+                                    Log.Error( $"Book page {changed[i]} single line too LONG, total lenght -> {splits[j].Length} vs MAX 79 bytes allowed, some content might get lost");
                                     splits[j] = splits[j].Substring(0, 79);
                                 }
 

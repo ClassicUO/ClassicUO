@@ -142,7 +142,7 @@ namespace ClassicUO.IO.Resources
                     uopValid = false;
                     count = 0;
 
-                    Log.Message(LogTypes.Warning, $"[MultiCollection.uop] invalid entry (0x{graphic:X4})");
+                    Log.Warn( $"[MultiCollection.uop] invalid entry (0x{graphic:X4})");
                 }
 
                 return count;

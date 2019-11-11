@@ -139,7 +139,7 @@ namespace ClassicUO.Game.UI.Gumps
                     gump.ChangePage(2);
             }
             else
-                Log.Message(LogTypes.Error, "TopBarGump already exists!!");
+                Log.Error( "TopBarGump already exists!!");
         }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
@@ -227,7 +227,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Chat:
-                    Log.Message(LogTypes.Warning, "Chat button pushed! Not implemented yet!");
+                    Log.Warn( "Chat button pushed! Not implemented yet!");
 
                     break;
 

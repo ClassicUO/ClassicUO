@@ -243,7 +243,7 @@ namespace ClassicUO.Game.UI.Controls
 
                         if (inbounds && FileManager.Fonts.GetWebLink(link.LinkID, out WebLink result))
                         {
-                            Log.Message(LogTypes.Info, "LINK CLICKED: " + result.Link);
+                            Log.Info("LINK CLICKED: " + result.Link);
                             Process.Start(result.Link);
 
                             break;

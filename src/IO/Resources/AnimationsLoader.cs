@@ -692,7 +692,7 @@ namespace ClassicUO.IO.Resources
 
             if (!File.Exists(animationSequencePath))
             {
-                Log.Message(LogTypes.Warning, "AnimationSequence.uop not found");
+                Log.Warn( "AnimationSequence.uop not found");
 
                 return;
             }
@@ -1256,7 +1256,7 @@ namespace ClassicUO.IO.Resources
 
             if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 && animData.Offset == 0)
             {
-                Log.Message(LogTypes.Warning, "uop animData is null");
+                Log.Warn( "uop animData is null");
 
                 return false;
             }
@@ -1324,7 +1324,7 @@ namespace ClassicUO.IO.Resources
 
 
                 if (animDirection.Frames != null && animDirection.Frames.Length != 0)
-                    Log.Message(LogTypes.Panic, "MEMORY LEAK UOP ANIM");
+                    Log.Panic("MEMORY LEAK UOP ANIM");
 
                 animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
 
@@ -1348,7 +1348,7 @@ namespace ClassicUO.IO.Resources
 
                     if (imageWidth == 0 || imageHeight == 0)
                     {
-                        Log.Message(LogTypes.Warning, "frame size is null");
+                        Log.Warn( "frame size is null");
 
                         continue;
                     }
@@ -1425,7 +1425,7 @@ namespace ClassicUO.IO.Resources
 
 
             if (animDir.Frames != null && animDir.Frames.Length != 0)
-                Log.Message(LogTypes.Panic, "MEMORY LEAK MUL ANIM");
+                Log.Panic("MEMORY LEAK MUL ANIM");
 
 
             animDir.Frames = new AnimationFrameTexture[frameCount];

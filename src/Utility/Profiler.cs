@@ -107,7 +107,7 @@ namespace ClassicUO.Utility
                 return;
 
             if (m_Context[m_Context.Count - 1].Name != context_name)
-                Log.Message(LogTypes.Error, "Profiler.ExitProfiledContext: context_name does not match current context.");
+                Log.Error( "Profiler.ExitProfiledContext: context_name does not match current context.");
             string[] context = new string[m_Context.Count];
 
             for (int i = 0; i < m_Context.Count; i++)

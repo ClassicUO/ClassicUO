@@ -719,7 +719,7 @@ namespace ClassicUO.Game.Managers
                                 if (args.Length > 1)
                                     cliloc = FileManager.Cliloc.Translate(cliloc, args);
                                 else
-                                    Log.Message(LogTypes.Error, $"String '{args}' too short, something wrong with gump tooltip: {cliloc}");
+                                    Log.Error( $"String '{args}' too short, something wrong with gump tooltip: {cliloc}");
                             }
 
                             gump.Children.Last()?.SetTooltip(cliloc);
@@ -745,7 +745,7 @@ namespace ClassicUO.Game.Managers
                         break;
 
                     case "mastergump":
-                        Log.Message(LogTypes.Warning, "Gump part 'mastergump' not handled.");
+                        Log.Warn( "Gump part 'mastergump' not handled.");
 
                         break;
                 }

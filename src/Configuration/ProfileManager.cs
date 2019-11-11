@@ -55,7 +55,7 @@ namespace ClassicUO.Configuration
                     }
                     catch (Exception)
                     {
-                        Log.Message(LogTypes.Warning, $"Failed to delete file: '{fileToLoad}'");
+                        Log.Warn( $"Failed to delete file: '{fileToLoad}'");
                     }
                 }
 

@@ -260,7 +260,7 @@ namespace ClassicUO.Game.Scenes
                     name = e.Name;
                     hue = e.Hue;
 
-                    Log.Message(LogTypes.Warning, $"Unhandled text type {e.Type}  -  text: '{e.Text}'");
+                    Log.Warn( $"Unhandled text type {e.Type}  -  text: '{e.Text}'");
 
                     break;
             }

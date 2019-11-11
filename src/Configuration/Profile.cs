@@ -326,7 +326,7 @@ namespace ClassicUO.Configuration
 
             string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username, ServerName, CharacterName);
 
-            Log.Message(LogTypes.Trace, $"Saving path:\t\t{path}");
+            Log.Trace( $"Saving path:\t\t{path}");
 
             // Save profile settings
             ConfigurationResolver.Save(this, Path.Combine(path, "profile.json"), new JsonSerializerSettings
@@ -338,7 +338,7 @@ namespace ClassicUO.Configuration
             // Save opened gumps
             SaveGumps(path, gumps);
 
-            Log.Message(LogTypes.Trace, "Saving done!");
+            Log.Trace( "Saving done!");
         }
 
         private void SaveGumps(string path, List<Gump> gumps)
@@ -402,7 +402,7 @@ namespace ClassicUO.Configuration
                 catch (Exception e)
                 {
                     SkillsGroupManager.LoadDefault();
-                    Log.Message(LogTypes.Error, e.StackTrace);
+                    Log.Error( e.StackTrace);
                 }
             }
 
@@ -442,7 +442,7 @@ namespace ClassicUO.Configuration
                         }
                         catch (Exception e)
                         {
-                            Log.Message(LogTypes.Error, e.StackTrace);
+                            Log.Error( e.StackTrace);
                         }
                     }
                 }
@@ -460,7 +460,7 @@ namespace ClassicUO.Configuration
                 }
                 catch (Exception e)
                 {
-                    Log.Message(LogTypes.Error, e.StackTrace);
+                    Log.Error( e.StackTrace);
                 }
             }
 

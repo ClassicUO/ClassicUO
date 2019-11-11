@@ -273,12 +273,12 @@ namespace ClassicUO.Game.Scenes
                 Settings.GlobalSettings.Save();
             }
 
-            Log.Message(LogTypes.Trace, $"Start login to: {Settings.GlobalSettings.IP},{Settings.GlobalSettings.Port}");
+            Log.Trace( $"Start login to: {Settings.GlobalSettings.IP},{Settings.GlobalSettings.Port}");
 
             if (!NetClient.LoginSocket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port))
             {
                 PopupMessage = "Check your internet connection and try again";
-                Log.Message(LogTypes.Error, "No Internet Access");
+                Log.Error( "No Internet Access");
             }
 
             CurrentLoginStep = LoginStep.Connecting;
@@ -390,7 +390,7 @@ namespace ClassicUO.Game.Scenes
 
         private void NetClient_Connected(object sender, EventArgs e)
         {
-            Log.Message(LogTypes.Info, "Connected!");
+            Log.Info("Connected!");
             CurrentLoginStep = LoginStep.VerifyingAccount;
 
             if (FileManager.ClientVersion > ClientVersions.CV_6040)
@@ -412,7 +412,7 @@ namespace ClassicUO.Game.Scenes
 
         private void NetClient_Disconnected(object sender, SocketError e)
         {
-            Log.Message(LogTypes.Warning, "Disconnected (game socket)!");
+            Log.Warn( "Disconnected (game socket)!");
 
             if (CurrentLoginStep == LoginStep.CharCreation)
                 return;
@@ -425,7 +425,7 @@ namespace ClassicUO.Game.Scenes
 
         private void Login_NetClient_Disconnected(object sender, SocketError e)
         {
-            Log.Message(LogTypes.Warning, "Disconnected (login socket)!");
+            Log.Warn( "Disconnected (login socket)!");
 
             if (e > 0)
             {
@@ -463,7 +463,7 @@ namespace ClassicUO.Game.Scenes
 
                             if (index <= 0 || index > Servers.Length)
                             {
-                                Log.Message(LogTypes.Warning, $"Wrong server index: {index}");
+                                Log.Warn( $"Wrong server index: {index}");
                                 index = 1;
                             }
 

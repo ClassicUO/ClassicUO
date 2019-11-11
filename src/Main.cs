@@ -51,7 +51,7 @@ namespace ClassicUO
 #endif
                 sb.AppendFormat("Exception:\n{0}", e.ExceptionObject);
 
-                Log.Message(LogTypes.Panic, e.ExceptionObject.ToString());
+                Log.Panic(e.ExceptionObject.ToString());
                 string path = Path.Combine(CUOEnviroment.ExecutablePath, "Logs");
 
                 if (!Directory.Exists(path))
@@ -143,7 +143,7 @@ namespace ClassicUO
                 cmd = cmd.Remove(0, 1);
                 string value = (i < args.Length - 1) ? args[i + 1] : null;
 
-                Log.Message(LogTypes.Trace, $"ARG: {cmd}, VALUE: {value}");
+                Log.Trace( $"ARG: {cmd}, VALUE: {value}");
 
                 switch (cmd)
                 {
@@ -311,7 +311,7 @@ namespace ClassicUO
 
             if (action == "update")
             {
-                Log.Message(LogTypes.Trace, "ClassicUO Updating...", ConsoleColor.Yellow);
+                Log.Trace( "ClassicUO Updating...", ConsoleColor.Yellow);
 
                 try
                 {
@@ -373,7 +373,7 @@ namespace ClassicUO
                 {
                 }
 
-                Log.Message(LogTypes.Trace, "ClassicUO updated successfully!", ConsoleColor.Green);
+                Log.Trace( "ClassicUO updated successfully!", ConsoleColor.Green);
             }
 
             return false;

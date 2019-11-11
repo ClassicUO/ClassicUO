@@ -171,7 +171,7 @@ namespace ClassicUO
 
         public void LoadGameFilesFromFileSystem()
         {
-            Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...");
+            Log.Trace( "Checking for Ultima Online installation...");
             Log.PushIndent();
 
 
@@ -181,16 +181,16 @@ namespace ClassicUO
             }
             catch (FileNotFoundException)
             {
-                Log.Message(LogTypes.Error, "Wrong Ultima Online installation folder.");
+                Log.Error( "Wrong Ultima Online installation folder.");
 
                 throw;
             }
 
-            Log.Message(LogTypes.Trace, "Done!");
-            Log.Message(LogTypes.Trace, $"Ultima Online installation folder: {FileManager.UoFolderPath}");
+            Log.Trace( "Done!");
+            Log.Trace( $"Ultima Online installation folder: {FileManager.UoFolderPath}");
             Log.PopIndent();
 
-            Log.Message(LogTypes.Trace, "Loading files...");
+            Log.Trace( "Loading files...");
             Log.PushIndent();
             FileManager.LoadFiles();
             Log.PopIndent();
@@ -208,23 +208,23 @@ namespace ClassicUO
 
             AuraManager.CreateAuraTexture();
 
-            Log.Message(LogTypes.Trace, "Network calibration...");
+            Log.Trace( "Network calibration...");
             Log.PushIndent();
             PacketHandlers.Load();
             //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
             UltimaLive.Enable();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
-            Log.Message(LogTypes.Trace, "Done!");
+            Log.Trace( "Done!");
             Log.PopIndent();
 
-            Log.Message(LogTypes.Trace, "Loading plugins...");
+            Log.Trace( "Loading plugins...");
             Log.PushIndent();
 
             UIManager.InitializeGameCursor();
 
             foreach (var p in Settings.GlobalSettings.Plugins)
                 Plugin.Create(p);
-            Log.Message(LogTypes.Trace, "Done!");
+            Log.Trace( "Done!");
             Log.PopIndent();
 
 
@@ -436,19 +436,19 @@ namespace ClassicUO
                             Plugin.OnFocusGained();
 
                             // SDL_CaptureMouse(SDL_bool.SDL_TRUE);
-                            //Log.Message(LogTypes.Debug, "FOCUS");
+                            //Log.Debug("FOCUS");
                             break;
 
                         case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST:
                             Plugin.OnFocusLost();
-                            //Log.Message(LogTypes.Debug, "NO FOCUS");
+                            //Log.Debug("NO FOCUS");
                             //SDL_CaptureMouse(SDL_bool.SDL_FALSE);
 
                             break;
 
                         case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_TAKE_FOCUS:
 
-                            //Log.Message(LogTypes.Debug, "TAKE FOCUS");
+                            //Log.Debug("TAKE FOCUS");
                             break;
 
                         case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_HIT_TEST:

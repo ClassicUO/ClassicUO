@@ -188,7 +188,7 @@ namespace ClassicUO.Game
                                 trade.AddText(msg);
                             }
                             else
-                                Log.Message(LogTypes.Warning, "Missing label handler for this control: 'UNKNOWN'. Report it!!");
+                                Log.Warn( "Missing label handler for this control: 'UNKNOWN'. Report it!!");
                         }
                     }
 

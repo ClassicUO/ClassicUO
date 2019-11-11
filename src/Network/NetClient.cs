@@ -100,7 +100,7 @@ namespace ClassicUO.Network
                 LoginSocket.Statistics.TotalPacketsReceived++;
             }
             else
-                Log.Message(LogTypes.Error, "Attempt to write into a dead socket");
+                Log.Error( "Attempt to write into a dead socket");
         }
 
         public bool Connect(string ip, ushort port)
@@ -152,7 +152,7 @@ namespace ClassicUO.Network
                 }
                 else
                 {
-                    Log.Message(LogTypes.Error, e.SocketError.ToString());
+                    Log.Error( e.SocketError.ToString());
                     Disconnect(e.SocketError);
                 }
             };
@@ -474,7 +474,7 @@ namespace ClassicUO.Network
 
                 default:
 
-                    Log.Message(LogTypes.Panic, "The last operation completed on the socket was not a receive or send");
+                    Log.Panic("The last operation completed on the socket was not a receive or send");
 
                     break;
             }
@@ -509,7 +509,7 @@ namespace ClassicUO.Network
             {
                 _count++;
                 if (_count > 1)
-                    Log.Message(LogTypes.Panic, "Double-Access to buffer! Report this error in #BUGS-HUB in CUO Channel!");
+                    Log.Panic("Double-Access to buffer! Report this error in #BUGS-HUB in CUO Channel!");
                 Statistics.TotalBytesReceived += (uint)bytesLen;
                 byte[] buffer = _recvBuffer;
 

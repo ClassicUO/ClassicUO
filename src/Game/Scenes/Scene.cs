@@ -126,7 +126,7 @@ namespace ClassicUO.Game.Scenes
 
         private IEnumerable<IWaitCondition> CleaningResources()
         {
-            Log.Message(LogTypes.Trace, "Cleaning routine running...");
+            Log.Trace( "Cleaning routine running...");
 
             yield return new WaitTime(TimeSpan.FromMilliseconds(10000));
 
@@ -157,7 +157,7 @@ namespace ClassicUO.Game.Scenes
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
             }
 
-            Log.Message(LogTypes.Trace, "Cleaning routine finished");
+            Log.Trace( "Cleaning routine finished");
         }
     }
 }

@@ -66,7 +66,7 @@ namespace ClassicUO.Utility
             {
                 t.Exception?.Handle(e =>
                 {
-                    Log.Message(LogTypes.Panic, e.ToString());
+                    Log.Panic(e.ToString());
                     //try
                     //{
                     //    using (StreamWriter txt = new StreamWriter("crash.log", true))

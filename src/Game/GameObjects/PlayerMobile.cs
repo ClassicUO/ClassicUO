@@ -1302,7 +1302,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Destroy()
         {
-            Log.Message(LogTypes.Warning, "PlayerMobile disposed!");
+            Log.Warn( "PlayerMobile disposed!");
             base.Destroy();
         }
 
@@ -1642,9 +1642,9 @@ namespace ClassicUO.Game.GameObjects
 
             EnqueueStep(_movementX, _movementY, _movementZ, _movementDirection, run);
 
-            Log.Message(LogTypes.Panic, "SEND");
+            Log.Panic("SEND");
             NetClient.Socket.Send(new PWalkRequest(direction, _sequenceNumber, run));
-            //Log.Message(LogTypes.Trace, $"Walk request - SEQUENCE: {_sequenceNumber}");
+            //Log.Trace( $"Walk request - SEQUENCE: {_sequenceNumber}");
 
             if (_sequenceNumber == 0xFF)
                 _sequenceNumber = 1;
@@ -1827,12 +1827,12 @@ namespace ClassicUO.Game.GameObjects
 #elif JAEDAN_MOVEMENT_PATCH
             if (_stepsOutstanding == 0)
             {
-                Log.Message(LogTypes.Warning, $"Resync needed after confirmwalk packet - SEQUENCE: {_sequenceNumber}");
+                Log.Warn( $"Resync needed after confirmwalk packet - SEQUENCE: {_sequenceNumber}");
                 Resynchronize();
             }
             else
             {
-                //Log.Message(LogTypes.Trace, $"Step accepted - SEQUENCE: {_sequenceNumber}");
+                //Log.Trace( $"Step accepted - SEQUENCE: {_sequenceNumber}");
                 _stepsOutstanding--;
             }
 #else
@@ -1869,7 +1869,7 @@ namespace ClassicUO.Game.GameObjects
         public override void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
         {
 
-            //Log.Message(LogTypes.Warning, $"Forced position. - SEQUENCE: {_sequenceNumber}");
+            //Log.Warn( $"Forced position. - SEQUENCE: {_sequenceNumber}");
 
             _nextAllowedStepTime = Time.Ticks;
             _sequenceNumber = 0;
@@ -1893,7 +1893,7 @@ namespace ClassicUO.Game.GameObjects
 
             _resynchronizing++;
             NetClient.Socket.Send(new PResend());
-            Log.Message(LogTypes.Trace, $"Resync request num: {_resynchronizing}");
+            Log.Trace( $"Resync request num: {_resynchronizing}");
         }
 #elif MOVEMENT2
         public void DenyWalk(byte seq, Direction dir, ushort x, ushort y, sbyte z)

@@ -194,7 +194,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                             if (index <= 0 || index > loginScene.Servers.Length)
                             {
-                                Log.Message(LogTypes.Warning, $"Wrong server index: {index}");
+                                Log.Warn( $"Wrong server index: {index}");
 
                                 index = 1;
                             }
@@ -224,7 +224,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                     if (index <= 0 || index > loginScene.Servers.Length)
                     {
-                        Log.Message(LogTypes.Warning, $"Wrong server index: {index}");
+                        Log.Warn( $"Wrong server index: {index}");
 
                         index = 1;
                     }

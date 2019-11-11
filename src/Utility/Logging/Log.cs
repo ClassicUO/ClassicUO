@@ -54,14 +54,19 @@ namespace ClassicUO.Utility.Logging
             _logger.LogTypes = LogTypes.None;
         }
 
-        public static void Message(LogTypes logType, string text, ConsoleColor highlightColor = ConsoleColor.Black)
+        public static void Debug(string text, ConsoleColor highlightColor = ConsoleColor.Black)
         {
-            _logger.Message(logType, text, highlightColor);
+            _logger.Message(LogTypes.Debug, text, highlightColor);
         }
 
-        public static void Trace(string text)
+        public static void Info(string text, ConsoleColor highlightColor = ConsoleColor.Black)
         {
-            _logger.Message(LogTypes.Trace, text, ConsoleColor.Black);
+            _logger.Message(LogTypes.Info, text, highlightColor);
+        }
+
+        public static void Trace(string text, ConsoleColor highlightColor = ConsoleColor.Black)
+        {
+            _logger.Message(LogTypes.Trace, text, highlightColor);
         }
 
         public static void Warn(string text)
@@ -70,6 +75,11 @@ namespace ClassicUO.Utility.Logging
         }
 
         public static void Error(string text)
+        {
+            _logger.Message(LogTypes.Error, text, ConsoleColor.Black);
+        }
+
+        public static void Panic(string text)
         {
             _logger.Message(LogTypes.Error, text, ConsoleColor.Black);
         }

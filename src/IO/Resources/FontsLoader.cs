@@ -2151,7 +2151,7 @@ namespace ClassicUO.IO.Resources
                             j = str.IndexOf("bgcolor", StringComparison.Ordinal);
                         }
                         else
-                            Log.Message(LogTypes.Warning, $"Unhandled HTML param:\t{str}");
+                            Log.Warn( $"Unhandled HTML param:\t{str}");
 
                         break;
                 }

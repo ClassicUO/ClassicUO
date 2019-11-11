@@ -402,7 +402,7 @@ namespace ClassicUO.Game.Scenes
                             break;
 
                         default:
-                            Log.Message(LogTypes.Warning, "Unhandled mouse inputs for GameObject type " + obj.GetType());
+                            Log.Warn( "Unhandled mouse inputs for GameObject type " + obj.GetType());
 
                             return;
                     }
@@ -451,7 +451,7 @@ namespace ClassicUO.Game.Scenes
                         break;
 
                     default:
-                        Log.Message(LogTypes.Warning, "Not implemented.");
+                        Log.Warn( "Not implemented.");
 
                         break;
                 }

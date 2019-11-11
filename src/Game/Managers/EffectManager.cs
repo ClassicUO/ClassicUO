@@ -56,7 +56,7 @@ namespace ClassicUO.Game.Managers
 
         public void Add(GraphicEffectType type, Serial source, Serial target, Graphic graphic, Hue hue, Position srcPos, Position targPos, byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode)
         {
-            if (hasparticles) Log.Message(LogTypes.Warning, "Unhandled particles in an effects packet.");
+            if (hasparticles) Log.Warn( "Unhandled particles in an effects packet.");
             GameEffect effect = null;
 
             if (hue != 0)
@@ -119,12 +119,12 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case GraphicEffectType.ScreenFade:
-                    Log.Message(LogTypes.Warning, "Unhandled 'Screen Fade' effect.");
+                    Log.Warn( "Unhandled 'Screen Fade' effect.");
 
                     break;
 
                 default:
-                    Log.Message(LogTypes.Warning, "Unhandled effect.");
+                    Log.Warn( "Unhandled effect.");
 
                     return;
             }

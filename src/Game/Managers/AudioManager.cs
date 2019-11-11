@@ -47,7 +47,7 @@ namespace ClassicUO.Game.Managers
             }
             catch (NoAudioHardwareException ex)
             {
-                Log.Message(LogTypes.Warning, ex.ToString());
+                Log.Warn( ex.ToString());
                 _canReproduceAudio = false;
             }
 

@@ -1059,7 +1059,7 @@ namespace ClassicUO.Network
                     UIManager.Add(new ContainerGump(item, graphic));
                 }
                 else 
-                    Log.Message(LogTypes.Error, "[OpenContainer]: item not found");
+                    Log.Error( "[OpenContainer]: item not found");
             }
 
         }
@@ -1173,10 +1173,10 @@ namespace ClassicUO.Network
                                     mob.Equipment[(int) hold.Layer] = item;
                                 }
                                 else
-                                    Log.Message(LogTypes.Warning, "SOMETHING WRONG WITH CONTAINER (should be a mobile)");
+                                    Log.Warn( "SOMETHING WRONG WITH CONTAINER (should be a mobile)");
                             }
                             else
-                                Log.Message(LogTypes.Warning, "SOMETHING WRONG WITH CONTAINER (is null)");
+                                Log.Warn( "SOMETHING WRONG WITH CONTAINER (is null)");
                         }
                         else
                             item.AddToTile();
@@ -1195,7 +1195,7 @@ namespace ClassicUO.Network
                 hold.Clear();
             }
             else
-                Log.Message(LogTypes.Warning, "There was a problem with ItemHold object. It was cleared before :|");
+                Log.Warn( "There was a problem with ItemHold object. It was cleared before :|");
 
             byte code = p.ReadByte();
 
@@ -1724,7 +1724,7 @@ namespace ClassicUO.Network
                     pages[pageNum] = sb.ToString();
                 }
                 else
-                    Log.Message(LogTypes.Error, "BOOKGUMP: The server is sending a page number GREATER than the allowed number of pages in BOOK!");
+                    Log.Error( "BOOKGUMP: The server is sending a page number GREATER than the allowed number of pages in BOOK!");
             }
 
             gump.BookPages = pages;
@@ -1766,7 +1766,7 @@ namespace ClassicUO.Network
                         val = 4;
                     }
 
-                    Log.Message(LogTypes.Warning, "Effect not implemented");
+                    Log.Warn( "Effect not implemented");
                 }
 
                 return;
@@ -2559,7 +2559,7 @@ namespace ClassicUO.Network
                 }
                 catch (Exception)
                 {
-                    Log.Message(LogTypes.Warning, "Failed to open url: " + url);
+                    Log.Warn( "Failed to open url: " + url);
                 }
             }
         }
@@ -2646,13 +2646,13 @@ namespace ClassicUO.Network
                     //MessageFont font = (MessageFont)p.ReadUShort();
                     //string lang = p.ReadASCII(4);
                     //string name = p.ReadASCII(30);
-                    Log.Message(LogTypes.Warning, "UnicodeTalk received during LoginScene");
+                    Log.Warn( "UnicodeTalk received during LoginScene");
 
                     if (p.Length > 48)
                     {
                         p.Seek(48);
                         Log.PushIndent();
-                        Log.Message(LogTypes.Warning, "Handled UnicodeTalk in LoginScene");
+                        Log.Warn( "Handled UnicodeTalk in LoginScene");
                         Log.PopIndent();
                     }
                 }
@@ -3385,7 +3385,7 @@ namespace ClassicUO.Network
             if (entity == null)
             {
                 if (serial.IsMobile)
-                    Log.Message(LogTypes.Warning, "Searching a mobile into World.Items from MegaCliloc packet");
+                    Log.Warn( "Searching a mobile into World.Items from MegaCliloc packet");
                 entity = World.Items.Get(serial);
             }
 
@@ -3514,7 +3514,7 @@ namespace ClassicUO.Network
 
             if (multi.MinX <= 0 && multi.MinY <= 0 && multi.MaxX <= 0 && multi.MaxY <= 0)
             {
-                Log.Message(LogTypes.Warning, "[CustomHouse (0xD8) - Invalid multi dimentions. Maybe missing some installation required files");
+                Log.Warn( "[CustomHouse (0xD8) - Invalid multi dimentions. Maybe missing some installation required files");
                 return;
             }
 
@@ -3824,7 +3824,7 @@ namespace ClassicUO.Network
                             byte map = p.ReadByte();
                             byte hits = p.ReadByte();
 
-                            Log.Message(LogTypes.Info, $"Received custom {(isparty ? "party" : "guild")} member info: X: {x}, Y: {y}, Map: {map}, Hits: {hits}");
+                            Log.Info($"Received custom {(isparty ? "party" : "guild")} member info: X: {x}, Y: {y}, Map: {map}, Hits: {hits}");
                         }
                     }
 
@@ -3832,7 +3832,7 @@ namespace ClassicUO.Network
                 case 0xF0:
                     break;
                 case 0xFE:
-                    Log.Message(LogTypes.Info, "Razor ACK sended");
+                    Log.Info("Razor ACK sended");
                     NetClient.Socket.Send(new PRazorAnswer());
                     break;
             }
@@ -4082,7 +4082,7 @@ namespace ClassicUO.Network
                 }
                 else
                 {
-                    Log.Message(LogTypes.Warning, $"Unknown packet ID: [0x{id:X2}] in 0xF7");
+                    Log.Warn( $"Unknown packet ID: [0x{id:X2}] in 0xF7");
 
                     break;
                 }
@@ -4100,14 +4100,14 @@ namespace ClassicUO.Network
 
             if (container == null)
             {
-                Log.Message(LogTypes.Warning, $"No container ({containerSerial}) found");
+                Log.Warn( $"No container ({containerSerial}) found");
 
                 return;
             }
 
             Item item = World.Items.Get(serial);
 
-            if (serial.IsMobile) Log.Message(LogTypes.Warning, "AddItemToContainer function adds mobile as Item");
+            if (serial.IsMobile) Log.Warn( "AddItemToContainer function adds mobile as Item");
 
             if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
             {
@@ -4124,7 +4124,7 @@ namespace ClassicUO.Network
                     initcontainer.ProcessDelta();
                 }
                 else if (item.Container.IsValid) 
-                    Log.Message(LogTypes.Warning, $"This item ({item.Serial}) has a container ({item.Container}), but cannot be found. :|");
+                    Log.Warn( $"This item ({item.Serial}) has a container ({item.Container}), but cannot be found. :|");
 
                 World.Items.Remove(item);
                 World.Items.ProcessDelta();

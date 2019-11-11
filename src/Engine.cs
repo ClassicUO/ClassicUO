@@ -100,7 +100,7 @@
 //            // Check settings file for existence
 //            if (!Directory.Exists(Path.GetDirectoryName(settingsFilepath)) || !File.Exists(settingsFilepath))
 //            {
-//                Log.Message(LogTypes.Trace, "Settings file not found");
+//                Log.Trace( "Settings file not found");
 //                Directory.CreateDirectory(Path.GetDirectoryName(settingsFilepath)); // Make sure we have full path in place
 //                _settings = new Settings();
 //                _settings.Save();
@@ -130,7 +130,7 @@
 //            //   or if settings are invalid, then show an error and exit
 //            if (_settings == null || !_settings.IsValid())
 //            {
-//                Log.Message(LogTypes.Trace, "Invalid settings");
+//                Log.Trace( "Invalid settings");
 //                SDL.SDL_ShowSimpleMessageBox(
 //                    SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
 //                    "Invalid settings",
@@ -361,7 +361,7 @@
 //                    string value = (i < args.Length - 1) ? args[i + 1] : null;
 
 //                    // NOTE: This is duplicated output
-//                    //Log.Message(LogTypes.Trace, $"ARG: {cmd}, VALUE: {value}");
+//                    //Log.Trace( $"ARG: {cmd}, VALUE: {value}");
 
 //                    switch (cmd)
 //                    {
@@ -506,7 +506,7 @@
 //#endif
 //                sb.AppendFormat("Exception:\n{0}", e.ExceptionObject);
 
-//                Log.Message(LogTypes.Panic, e.ExceptionObject.ToString());
+//                Log.Panic(e.ExceptionObject.ToString());
 //                string path = Path.Combine(ExePath, "Logs");
 
 //                if (!Directory.Exists(path))
@@ -547,7 +547,7 @@
 //            Log.NewLine();
 //            Log.NewLine();
 
-//            Log.Message(LogTypes.Trace, $"Starting ClassicUO - {Version}", ConsoleColor.Cyan);
+//            Log.Trace( $"Starting ClassicUO - {Version}", ConsoleColor.Cyan);
 
 //            Log.NewLine();
 //            Log.NewLine();
@@ -559,13 +559,13 @@
 //            FpsLimit = Constants.LOGIN_SCREEN_FPS;
 
 
-//            Log.Message(LogTypes.Trace, "Loading UI Fonts...");
+//            Log.Trace( "Loading UI Fonts...");
 //            Log.PushIndent();
 //            Fonts.Load();
 //            Log.PopIndent();
 
 
-//            Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...");
+//            Log.Trace( "Checking for Ultima Online installation...");
 //            Log.PushIndent();
 
 
@@ -575,16 +575,16 @@
 //            }
 //            catch (FileNotFoundException)
 //            {
-//                Log.Message(LogTypes.Error, "Wrong Ultima Online installation folder.");
+//                Log.Error( "Wrong Ultima Online installation folder.");
 
 //                throw;
 //            }
 
-//            Log.Message(LogTypes.Trace, "Done!");
-//            Log.Message(LogTypes.Trace, $"Ultima Online installation folder: {FileManager.UoFolderPath}");
+//            Log.Trace( "Done!");
+//            Log.Trace( $"Ultima Online installation folder: {FileManager.UoFolderPath}");
 //            Log.PopIndent();
 
-//            Log.Message(LogTypes.Trace, "Loading files...");
+//            Log.Trace( "Loading files...");
 //            Log.PushIndent();
 //            FileManager.LoadFiles();
 //            Log.PopIndent();
@@ -601,22 +601,22 @@
 //            GraphicsDevice.Textures[2] = texture1;
 
 
-//            Log.Message(LogTypes.Trace, "Network calibration...");
+//            Log.Trace( "Network calibration...");
 //            Log.PushIndent();
 //            PacketHandlers.Load();
 //            //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
 //            UltimaLive.Enable();
 //            PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
-//            Log.Message(LogTypes.Trace, "Done!");
+//            Log.Trace( "Done!");
 //            Log.PopIndent();
 
 
-//            Log.Message(LogTypes.Trace, "Loading plugins...");
+//            Log.Trace( "Loading plugins...");
 //            Log.PushIndent();
 
 //            //foreach (var p in GlobalSettings.Plugins)
 //            //    Plugin.Create(p);
-//            Log.Message(LogTypes.Trace, "Done!");
+//            Log.Trace( "Done!");
 //            Log.PopIndent();
 
 

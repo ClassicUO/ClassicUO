@@ -139,7 +139,7 @@ namespace ClassicUO.IO
         {
             if (line >= _parts.Count || line < 0)
             {
-                Log.Message(LogTypes.Error, $"Index out of range [Line: {line}]. Returned '0'");
+                Log.Error( $"Index out of range [Line: {line}]. Returned '0'");
                 return new [] {"0"};
             }
 
@@ -153,7 +153,7 @@ namespace ClassicUO.IO
 
             if (index >= p.Length || index < 0)
             {
-                Log.Message(LogTypes.Error, $"Index out of range [Line: {line}]. Returned '0'");
+                Log.Error( $"Index out of range [Line: {line}]. Returned '0'");
                 return "0";
             }
 
@@ -203,7 +203,7 @@ namespace ClassicUO.IO
                                 .ToArray();
                     }
 
-                    Log.Message(LogTypes.Error, $"Missing }} at line {Line + 1}, in '{_file}'");
+                    Log.Error( $"Missing }} at line {Line + 1}, in '{_file}'");
                 }
             }
 

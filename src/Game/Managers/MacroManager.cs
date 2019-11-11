@@ -413,7 +413,7 @@ namespace ClassicUO.Game.Managers
                                     break;
 
                                 case MacroSubType.Chat:
-                                    Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
+                                    Log.Warn( $"Macro '{macro.SubCode}' not implemented");
 
                                     break;
 
@@ -440,7 +440,7 @@ namespace ClassicUO.Game.Managers
                                     break;
 
                                 case MacroSubType.WorldMap:
-                                    Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
+                                    Log.Warn( $"Macro '{macro.SubCode}' not implemented");
 
                                     break;
 
@@ -469,7 +469,7 @@ namespace ClassicUO.Game.Managers
                                 case MacroSubType.CombatBook:
                                 case MacroSubType.RacialAbilitiesBook:
                                 case MacroSubType.BardSpellbook:
-                                    Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
+                                    Log.Warn( $"Macro '{macro.SubCode}' not implemented");
 
                                     break;
                             }
@@ -531,7 +531,7 @@ namespace ClassicUO.Game.Managers
                                     break;
 
                                 case MacroSubType.Chat:
-                                    Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
+                                    Log.Warn( $"Macro '{macro.SubCode}' not implemented");
 
                                     break;
 
@@ -543,7 +543,7 @@ namespace ClassicUO.Game.Managers
                                     break;
 
                                 case MacroSubType.Mail:
-                                    Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
+                                    Log.Warn( $"Macro '{macro.SubCode}' not implemented");
 
                                     break;
 
@@ -558,7 +558,7 @@ namespace ClassicUO.Game.Managers
                                 case MacroSubType.CombatBook:
                                 case MacroSubType.RacialAbilitiesBook:
                                 case MacroSubType.BardSpellbook:
-                                    Log.Message(LogTypes.Warning, $"Macro '{macro.SubCode}' not implemented");
+                                    Log.Warn( $"Macro '{macro.SubCode}' not implemented");
 
                                     break;
                             }
@@ -890,7 +890,7 @@ namespace ClassicUO.Game.Managers
                             else
                             {
                                 // TODO: NewTargetSystem
-                                Log.Message(LogTypes.Warning, "BandageTarget (NewTargetSystem) not implemented yet.");
+                                Log.Warn( "BandageTarget (NewTargetSystem) not implemented yet.");
                             }
                         }
                     }

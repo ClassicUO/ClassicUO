@@ -63,7 +63,7 @@ namespace ClassicUO.IO.Resources
         {
             if (_file == null || _file.Length == 0)
             {
-                Log.Message(LogTypes.Warning, "MultiMap.rle is not loaded!");
+                Log.Warn( "MultiMap.rle is not loaded!");
 
                 return null;
             }
@@ -75,7 +75,7 @@ namespace ClassicUO.IO.Resources
 
             if (w < 1 || h < 1)
             {
-                Log.Message(LogTypes.Warning, "Failed to load bounds from MultiMap.rle");
+                Log.Warn( "Failed to load bounds from MultiMap.rle");
 
                 return null;
             }
