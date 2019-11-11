@@ -1538,13 +1538,18 @@ namespace ClassicUO.IO.Resources
                         if (direction.Frames != null)
                         {
                             AnimationFrameTexture animationFrameTexture = direction.Frames[frameIndex]; // GetTexture(direction.FramesHashes[frameIndex]);
-                            x = animationFrameTexture.CenterX;
-                            y = animationFrameTexture.CenterY;
-                            w = animationFrameTexture.Width;
-                            h = animationFrameTexture.Height;
-                            _animDimensionCache[id] = new Rectangle(x, y, w, h);
 
-                            return;
+                            if (animationFrameTexture != null)
+                            {
+                                x = animationFrameTexture.CenterX;
+                                y = animationFrameTexture.CenterY;
+                                w = animationFrameTexture.Width;
+                                h = animationFrameTexture.Height;
+                                _animDimensionCache[id] = new Rectangle(x, y, w, h);
+
+                                return;
+                            }
+
                         }
                     }
                 }
