@@ -150,48 +150,68 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new GumpPicTiled(153, 17, 333, 154, 0x55F1));
 
 
-            Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_WALL, 0x5654, 0x5656, 0x5655)
+            var button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_WALL, 0x5654, 0x5656, 0x5655)
             {
                 X = 9,
                 Y = 41,
-                ButtonAction = ButtonAction.Activate
-            });
-            Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_DOOR, 0x5657, 0x5659, 0x5658)
+                ButtonAction = ButtonAction.Activate,
+            };
+            button.SetTooltip("Walls");
+            Add(button);
+
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_DOOR, 0x5657, 0x5659, 0x5658)
             {
                 X = 39,
                 Y = 40,
                 ButtonAction = ButtonAction.Activate
-            });
-            Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_FLOOR, 0x565A, 0x565C, 0x565B)
+            };
+            button.SetTooltip("Doors");
+            Add(button);
+
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_FLOOR, 0x565A, 0x565C, 0x565B)
             {
                 X = 70,
                 Y = 40,
                 ButtonAction = ButtonAction.Activate
-            });
-            Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_STAIR, 0x565D, 0x565F, 0x565E)
+            };
+            button.SetTooltip("Floors");
+            Add(button);
+
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_STAIR, 0x565D, 0x565F, 0x565E)
             {
                 X = 9,
                 Y = 72,
                 ButtonAction = ButtonAction.Activate
-            });
-            Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ROOF, 0x5788, 0x578A, 0x5789)
+            };
+            button.SetTooltip("Stairs");
+            Add(button);
+
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ROOF, 0x5788, 0x578A, 0x5789)
             {
                 X = 39,
                 Y = 72,
                 ButtonAction = ButtonAction.Activate
-            });
-            Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_MISC, 0x5663, 0x5665, 0x5664)
+            };
+            button.SetTooltip("Roofs");
+            Add(button);
+
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_MISC, 0x5663, 0x5665, 0x5664)
             {
                 X = 69,
                 Y = 72,
                 ButtonAction = ButtonAction.Activate
-            });
-            Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_MENU, 0x566C, 0x566E, 0x566D)
+            };
+            button.SetTooltip("Miscellaneous");
+            Add(button);
+
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_MENU, 0x566C, 0x566E, 0x566D)
             {
                 X = 69,
                 Y = 100,
                 ButtonAction = ButtonAction.Activate
-            });
+            };
+            button.SetTooltip("System Menu");
+            Add(button);
 
             _textComponents = new Label(string.Empty, false,
                                         0x0481)
@@ -273,19 +293,23 @@ namespace ClassicUO.Game.UI.Gumps
 
             _gumpPic.Graphic = (ushort)(FloorCount == 4 ? 0x55F2 : 0x55F9);
 
-            _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ERASE, (ushort)(0x5666 + (Erasing ? 1 : 0)), 0x5668, 0x5667)
+            var button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ERASE, (ushort) (0x5666 + (Erasing ? 1 : 0)), 0x5668, 0x5667)
             {
                 X = 9,
                 Y = 100,
                 ButtonAction = ButtonAction.Activate
-            });
+            };
+            button.SetTooltip("Erase");
+            _dataBoxGUI.Add(button);
 
-            Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_EYEDROPPER, (ushort)(0x5669 + (SeekTile ? 1 : 0)), 0x566B, 0x566A)
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_EYEDROPPER, (ushort) (0x5669 + (SeekTile ? 1 : 0)), 0x566B, 0x566A)
             {
                 X = 39,
                 Y = 100,
                 ButtonAction = ButtonAction.Activate
-            });
+            };
+            button.SetTooltip("Eyedropper Tool");
+            Add(button);
 
             ushort[] floorVisionGraphic1 = { 0x572E, 0x5734, 0x5731 };
             ushort[] floorVisionGraphic2 = { 0x5725, 0x5728, 0x572B };
@@ -298,53 +322,71 @@ namespace ClassicUO.Game.UI.Gumps
             ushort floorVisionGraphic = floorVisionGraphic1[associateGraphicTable[_floorVisionState[0]]];
             int graphicOffset = CurrentFloor == 1 ? 3 : 0;
             int graphicOffset2 = CurrentFloor == 1 ? 4 : 0;
-            _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_1, floorVisionGraphic,
-                (ushort)(floorVisionGraphic + 2), (ushort)(floorVisionGraphic + 1))
+
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_1, floorVisionGraphic,
+                                    (ushort) (floorVisionGraphic + 2), (ushort) (floorVisionGraphic + 1))
             {
                 X = 533,
                 Y = 108,
                 ButtonAction = ButtonAction.Activate
-            });
-            _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_1, (ushort)(0x56CD + graphicOffset2),
-                0x56D1, (ushort)(0x56CD + graphicOffset2))
+            };
+            button.SetTooltip("Store 1 Visibility");
+            _dataBoxGUI.Add(button);
+
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_1, (ushort) (0x56CD + graphicOffset2),
+                                0x56D1, (ushort) (0x56CD + graphicOffset2))
             {
                 X = 583,
                 Y = 96,
                 ButtonAction = ButtonAction.Activate
-            });
-            _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_1, (ushort)(0x56F6 + graphicOffset),
-                (ushort)(0x56F8 + graphicOffset), (ushort)(0x56F7 + graphicOffset))
+            };
+            button.SetTooltip("Go To Story 1");
+            _dataBoxGUI.Add(button);
+
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_1, (ushort) (0x56F6 + graphicOffset),
+                                (ushort) (0x56F8 + graphicOffset), (ushort) (0x56F7 + graphicOffset))
             {
                 X = 623,
                 Y = 103,
                 ButtonAction = ButtonAction.Activate
-            });
+            };
+            button.SetTooltip("Go To Story 1");
+            _dataBoxGUI.Add(button);
 
 
             floorVisionGraphic = floorVisionGraphic2[associateGraphicTable[_floorVisionState[1]]];
             graphicOffset = CurrentFloor == 2 ? 3 : 0;
             graphicOffset2 = CurrentFloor == 2 ? 4 : 0;
-            _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_2, floorVisionGraphic,
-                (ushort)(floorVisionGraphic + 2), (ushort)(floorVisionGraphic + 1))
+
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_2, floorVisionGraphic,
+                                (ushort) (floorVisionGraphic + 2), (ushort) (floorVisionGraphic + 1))
             {
                 X = 533,
                 Y = 86,
                 ButtonAction = ButtonAction.Activate
-            });
-            _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_2, (ushort)(0x56CE + graphicOffset2),
-                0x56D2, (ushort)(0x56CE + graphicOffset2))
+            };
+            button.SetTooltip("Store 2 Visibility");
+            _dataBoxGUI.Add(button);
+
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_2, (ushort) (0x56CE + graphicOffset2),
+                                0x56D2, (ushort) (0x56CE + graphicOffset2))
             {
                 X = 583,
                 Y = 73,
                 ButtonAction = ButtonAction.Activate
-            });
-            _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_2, (ushort)(0x56F0 + graphicOffset),
-                (ushort)(0x56F2 + graphicOffset), (ushort)(0x56F1 + graphicOffset))
+            };
+            button.SetTooltip("Go To Story 2");
+            _dataBoxGUI.Add(button);
+
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_2, (ushort) (0x56F0 + graphicOffset),
+                                (ushort) (0x56F2 + graphicOffset), (ushort) (0x56F1 + graphicOffset))
             {
                 X = 623,
                 Y = 86,
                 ButtonAction = ButtonAction.Activate
-            });
+            };
+            button.SetTooltip("Go To Story 2");
+            _dataBoxGUI.Add(button);
 
 
             graphicOffset = CurrentFloor == 3 ? 3 : 0;
@@ -352,79 +394,106 @@ namespace ClassicUO.Game.UI.Gumps
             if (FloorCount == 4)
             {
                 floorVisionGraphic = floorVisionGraphic2[associateGraphicTable[_floorVisionState[2]]];
-                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_3, floorVisionGraphic,
-                    (ushort)(floorVisionGraphic + 2), (ushort)(floorVisionGraphic + 1))
+
+                button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_3, floorVisionGraphic,
+                                    (ushort) (floorVisionGraphic + 2), (ushort) (floorVisionGraphic + 1))
                 {
                     X = 533,
                     Y = 64,
                     ButtonAction = ButtonAction.Activate
-                });
-                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort)(0x56CE + graphicOffset2),
-                    0x56D2, (ushort)(0x56CE + graphicOffset2))
+                };
+                button.SetTooltip("Store 3 Visibility");
+                _dataBoxGUI.Add(button);
+
+                button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort) (0x56CE + graphicOffset2),
+                                    0x56D2, (ushort) (0x56CE + graphicOffset2))
                 {
                     X = 582,
                     Y = 56,
                     ButtonAction = ButtonAction.Activate
-                });
-                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort)(0x56F0 + graphicOffset),
-                    (ushort)(0x56F2 + graphicOffset), (ushort)(0x56F1 + graphicOffset))
+                };
+                button.SetTooltip("Go To Story 3");
+                _dataBoxGUI.Add(button);
+
+                button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort) (0x56F0 + graphicOffset),
+                                    (ushort) (0x56F2 + graphicOffset), (ushort) (0x56F1 + graphicOffset))
                 {
                     X = 623,
                     Y = 69,
                     ButtonAction = ButtonAction.Activate
-                });
+                };
+                button.SetTooltip("Go To Story 3");
+                _dataBoxGUI.Add(button);
 
 
 
                 floorVisionGraphic = floorVisionGraphic2[associateGraphicTable[_floorVisionState[3]]];
                 graphicOffset = CurrentFloor == 4 ? 3 : 0;
                 graphicOffset2 = CurrentFloor == 4 ? 4 : 0;
-                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_4, floorVisionGraphic,
-                    (ushort)(floorVisionGraphic + 2), (ushort)(floorVisionGraphic + 1))
+
+                button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_4, floorVisionGraphic,
+                                    (ushort) (floorVisionGraphic + 2), (ushort) (floorVisionGraphic + 1))
                 {
                     X = 533,
                     Y = 42,
                     ButtonAction = ButtonAction.Activate
-                });
-                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_4, (ushort)(0x56D0 + graphicOffset2),
-                    0x56D4, (ushort)(0x56D0 + graphicOffset2))
+                };
+                button.SetTooltip("Store 4 Visibility");
+                _dataBoxGUI.Add(button);
+
+                button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_4, (ushort) (0x56D0 + graphicOffset2),
+                                    0x56D4, (ushort) (0x56D0 + graphicOffset2))
                 {
                     X = 583,
                     Y = 42,
                     ButtonAction = ButtonAction.Activate
-                });
-                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_4, (ushort)(0x56EA + graphicOffset),
-                    (ushort)(0x56EC + graphicOffset), (ushort)(0x56EB + graphicOffset))
+                };
+                button.SetTooltip("Go To Story 4");
+                _dataBoxGUI.Add(button);
+
+                button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_4, (ushort) (0x56EA + graphicOffset),
+                                    (ushort) (0x56EC + graphicOffset), (ushort) (0x56EB + graphicOffset))
                 {
                     X = 623,
                     Y = 50,
                     ButtonAction = ButtonAction.Activate
-                });
+                };
+                button.SetTooltip("Go To Story 4");
+                _dataBoxGUI.Add(button);
             }
             else
             {
                 floorVisionGraphic = floorVisionGraphic2[associateGraphicTable[_floorVisionState[2]]];
-                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_3, floorVisionGraphic,
-                    (ushort)(floorVisionGraphic + 2), (ushort)(floorVisionGraphic + 1))
+
+                button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_3, floorVisionGraphic,
+                                    (ushort) (floorVisionGraphic + 2), (ushort) (floorVisionGraphic + 1))
                 {
                     X = 533,
                     Y = 64,
                     ButtonAction = ButtonAction.Activate
-                });
-                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort)(0x56D0 + graphicOffset2),
-                    0x56D4, (ushort)(0x56D0 + graphicOffset2))
+                };
+                button.SetTooltip("Store 3 Visibility");
+                _dataBoxGUI.Add(button);
+
+                button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort) (0x56D0 + graphicOffset2),
+                                    0x56D4, (ushort) (0x56D0 + graphicOffset2))
                 {
                     X = 582,
                     Y = 56,
                     ButtonAction = ButtonAction.Activate
-                });
-                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort)(0x56EA + graphicOffset),
-                    (ushort)(0x56EC + graphicOffset), (ushort)(0x56EB + graphicOffset))
+                };
+                button.SetTooltip("Go To Story 3");
+                _dataBoxGUI.Add(button);
+
+                button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort) (0x56EA + graphicOffset),
+                                    (ushort) (0x56EC + graphicOffset), (ushort) (0x56EB + graphicOffset))
                 {
                     X = 623,
                     Y = 69,
                     ButtonAction = ButtonAction.Activate
-                });
+                };
+                button.SetTooltip("Go To Story 3");
+                _dataBoxGUI.Add(button);
             }
 
             switch (State)
@@ -454,18 +523,23 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (MaxPage > 1)
             {
-                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_LIST_LEFT, 0x5625, 0x5627, 0x5626)
+                button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_LIST_LEFT, 0x5625, 0x5627, 0x5626)
                 {
                     X = 110,
                     Y = 63,
                     ButtonAction = ButtonAction.Activate
-                });
-                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_LIST_RIGHT, 0x5628, 0x562A, 0x5629)
+                };
+                button.SetTooltip("Previous Page");
+                _dataBoxGUI.Add(button);
+
+                button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_LIST_RIGHT, 0x5628, 0x562A, 0x5629)
                 {
                     X = 510,
                     Y = 63,
                     ButtonAction = ButtonAction.Activate
-                });
+                };
+                button.SetTooltip("Next Page");
+                _dataBoxGUI.Add(button);
             }
 
             Components = 0;
@@ -877,32 +951,39 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 _dataBoxGUI.Add(new GumpPic(152, 0, 0x55F3, 0));
-                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_CATEGORY, 0x5622, 0x5624, 0x5623)
+
+                var button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_CATEGORY, 0x5622, 0x5624, 0x5623)
                 {
                     X = 167,
                     Y = 5,
                     ButtonAction = ButtonAction.Activate
-                });
+                };
+                button.SetTooltip("To Category");
+                _dataBoxGUI.Add(button);
 
                 _dataBoxGUI.Add(new GumpPic(218, 4, 0x55F4, 0));
 
                 if (ShowWindow)
                 {
-                    _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_WALL_SHOW_WINDOW, 0x562E, 0x5630, 0x562F)
+                    button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_WALL_SHOW_WINDOW, 0x562E, 0x5630, 0x562F)
                     {
                         X = 228,
                         Y = 9,
                         ButtonAction = ButtonAction.Activate
-                    });
+                    };
+                    button.SetTooltip("Window Toggle");
+                    _dataBoxGUI.Add(button);
                 }
                 else
                 {
-                    _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_WALL_SHOW_WINDOW, 0x562B, 0x562D, 0x562C)
+                    button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_WALL_SHOW_WINDOW, 0x562B, 0x562D, 0x562C)
                     {
                         X = 228,
                         Y = 9,
                         ButtonAction = ButtonAction.Activate
-                    });
+                    };
+                    button.SetTooltip("Window Toggle");
+                    _dataBoxGUI.Add(button);
                 }
             }
         }
@@ -1238,24 +1319,33 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 _dataBoxGUI.Add(new GumpPic(152, 0, 0x55F3, 0));
-                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_CATEGORY, 0x5622, 0x5624, 0x5623)
+
+                var button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_CATEGORY, 0x5622, 0x5624, 0x5623)
                 {
                     X = 167,
                     Y = 5,
                     ButtonAction = ButtonAction.Activate
-                });
-                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_ROOF_Z_DOWN, 0x578B, 0x578D, 0x578C)
+                };
+                button.SetTooltip("To Category");
+                _dataBoxGUI.Add(button);
+
+                button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_ROOF_Z_DOWN, 0x578B, 0x578D, 0x578C)
                 {
                     X = 305,
                     Y = 0,
                     ButtonAction = ButtonAction.Activate
-                });
-                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_ROOF_Z_UP, 0x578E, 0x5790, 0x578F)
+                };
+                button.SetTooltip("Lower Roof Placement Level");
+                _dataBoxGUI.Add(button);
+
+                button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_ROOF_Z_UP, 0x578E, 0x5790, 0x578F)
                 {
                     X = 349,
                     Y = 0,
                     ButtonAction = ButtonAction.Activate
-                });
+                };
+                button.SetTooltip("Raise Roof Placement Level");
+                _dataBoxGUI.Add(button);
 
                 _dataBoxGUI.Add(new GumpPic(583, 4, 0x55F4, 0)
                 {
@@ -1373,13 +1463,15 @@ namespace ClassicUO.Game.UI.Gumps
         {
             const int TEXT_WIDTH = 108;
 
-            _dataBox.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_BACKUP,
-                0x098D, 0x098D, 0x098D)
+            var button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_BACKUP,
+                                    0x098D, 0x098D, 0x098D)
             {
                 X = 150,
                 Y = 50,
                 ButtonAction = ButtonAction.Activate
-            });
+            };
+            button.SetTooltip("Store design in progress in a back up buffer, but do not finalize design.");
+            _dataBox.Add(button);
 
             Label entry = new Label("Backup", true, 0x0036, TEXT_WIDTH, font: 0, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
@@ -1389,14 +1481,15 @@ namespace ClassicUO.Game.UI.Gumps
             _dataBox.Add(entry);
 
 
-
-            _dataBox.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_RESTORE,
-                0x098D, 0x098D, 0x098D)
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_RESTORE,
+                                0x098D, 0x098D, 0x098D)
             {
                 X = 150,
                 Y = 90,
                 ButtonAction = ButtonAction.Activate
-            });
+            };
+            button.SetTooltip("Restore your design in progress to a design you have previously backed up.");
+            _dataBox.Add(button);
             entry = new Label("Restore", true, 0x0036, TEXT_WIDTH, font: 0, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 X = 150,
@@ -1405,13 +1498,15 @@ namespace ClassicUO.Game.UI.Gumps
             _dataBox.Add(entry);
 
 
-            _dataBox.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_SYNCH,
-                0x098D, 0x098D, 0x098D)
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_SYNCH,
+                                0x098D, 0x098D, 0x098D)
             {
                 X = 270,
                 Y = 50,
                 ButtonAction = ButtonAction.Activate
-            });
+            };
+            button.SetTooltip("Synchronize design state with server.");
+            _dataBox.Add(button);
             entry = new Label("Synch", true, 0x0036, TEXT_WIDTH, font: 0, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 X = 270,
@@ -1420,14 +1515,15 @@ namespace ClassicUO.Game.UI.Gumps
             _dataBox.Add(entry);
 
 
-
-            _dataBox.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_CLEAR,
-                0x098D, 0x098D, 0x098D)
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_CLEAR,
+                                0x098D, 0x098D, 0x098D)
             {
                 X = 270,
                 Y = 90,
                 ButtonAction = ButtonAction.Activate
-            });
+            };
+            button.SetTooltip("Clear all changes, returning your design in progress to a blank foundation.");
+            _dataBox.Add(button);
             entry = new Label("Clear", true, 0x0036, TEXT_WIDTH, font: 0, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 X = 270,
@@ -1436,14 +1532,15 @@ namespace ClassicUO.Game.UI.Gumps
             _dataBox.Add(entry);
 
 
-
-            _dataBox.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_COMMIT,
-                0x098D, 0x098D, 0x098D)
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_COMMIT,
+                                0x098D, 0x098D, 0x098D)
             {
                 X = 390,
                 Y = 50,
                 ButtonAction = ButtonAction.Activate
-            });
+            };
+            button.SetTooltip("Save existing changes and finalize design.");
+            _dataBox.Add(button);
             entry = new Label("Commit", true, 0x0036, TEXT_WIDTH, font: 0, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 X = 390,
@@ -1452,14 +1549,15 @@ namespace ClassicUO.Game.UI.Gumps
             _dataBox.Add(entry);
 
 
-
-            _dataBox.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_REVERT,
-                0x098D, 0x098D, 0x098D)
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_REVERT,
+                                    0x098D, 0x098D, 0x098D)
             {
                 X = 390,
                 Y = 90,
                 ButtonAction = ButtonAction.Activate
-            });
+            };
+            button.SetTooltip("Revert your design in progress to match your currently visible, finalized design.");
+            _dataBox.Add(button);
             entry = new Label("Revert", true, 0x0036, TEXT_WIDTH, font: 0, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 X = 390,
@@ -1533,26 +1631,76 @@ namespace ClassicUO.Game.UI.Gumps
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ERASE:
+                    // TODO: TARGET
+                    Erasing = !Erasing;
+                    SelectedGraphic = 0;
+                    CombinedStair = false;
+                    Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_EYEDROPPER:
+                    // TODO: TARGET
+                    SeekTile = true;
+                    SelectedGraphic = 0;
+                    CombinedStair = false;
+                    Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_MENU:
+                    Category = -1;
+                    State = CUSTOM_HOUSE_GUMP_STATE.CHGS_MENU;
+                    Page = 0;
+                    MaxPage = 1;
+                    SelectedGraphic = 0;
+                    CombinedStair = false;
+                    TargetManager.CancelTarget();
+                    Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_1:
-                    break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_2:
-                    break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_3:
-                    break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_4:
+                    int selectedFloor = (ID_GUMP_CUSTOM_HOUSE) buttonID - ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_1;
+
+                    _floorVisionState[selectedFloor]++;
+
+                    if (_floorVisionState[selectedFloor] > (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_ALL)
+                    {
+                        _floorVisionState[selectedFloor] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
+                    }
+
+                    GenerateFloorPlace();
+                    Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_1:
+                    CurrentFloor = 1;
+                    NetClient.Socket.Send(new PCustomHouseGoToFloor(1));
+
+                    for (int i = 0; i < _floorVisionState.Length; i++)
+                        _floorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
+                    Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_2:
+                    CurrentFloor = 2;
+                    NetClient.Socket.Send(new PCustomHouseGoToFloor(2));
+
+                    for (int i = 0; i < _floorVisionState.Length; i++)
+                        _floorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
+                    Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3:
+                    CurrentFloor = 3;
+                    NetClient.Socket.Send(new PCustomHouseGoToFloor(3));
+
+                    for (int i = 0; i < _floorVisionState.Length; i++)
+                        _floorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
+                    Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_4:
+                    CurrentFloor = 4;
+                    NetClient.Socket.Send(new PCustomHouseGoToFloor(4));
+
+                    for (int i = 0; i < _floorVisionState.Length; i++)
+                        _floorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
+                    Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_LIST_LEFT:
                     Page--;
@@ -1575,34 +1723,49 @@ namespace ClassicUO.Game.UI.Gumps
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_BACKUP:
+                    NetClient.Socket.Send(new PCustomHouseBackup());
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_RESTORE:
+                    NetClient.Socket.Send(new PCustomHouseRestore());
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_SYNCH:
+                    NetClient.Socket.Send(new PCustomHouseSync());
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_CLEAR:
+                    NetClient.Socket.Send(new PCustomHouseClear());
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_COMMIT:
+                    NetClient.Socket.Send(new PCustomHouseCommit());
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_REVERT:
+                    NetClient.Socket.Send(new PCustomHouseRevert());
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_CATEGORY:
+                    Category = -1;
+                    Page = 0;
+                    SelectedGraphic = 0;
+                    CombinedStair = false;
+                    UpdateMaxPage();
+                    TargetManager.CancelTarget();
+                    Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_WALL_SHOW_WINDOW:
+                    ShowWindow = !ShowWindow;
+                    Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_ROOF_Z_UP:
+                    if (RoofZ < 6)
+                    {
+                        RoofZ++;
+                        Update();
+                    }
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_ROOF_Z_DOWN:
-                    break;
-                case ID_GUMP_CUSTOM_HOUSE.ID_GCH_AREA_OBJECTS_INFO:
-                    break;
-                case ID_GUMP_CUSTOM_HOUSE.ID_GCH_AREA_COST_INFO:
-                    break;
-                case ID_GUMP_CUSTOM_HOUSE.ID_GCH_AREA_ROOF_Z_INFO:
-                    break;
-                case ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST:
-                    break;
-                default:
+                    if (RoofZ > 1)
+                    {
+                        RoofZ--;
+                        Update();
+                    }
                     break;
             }
         }
