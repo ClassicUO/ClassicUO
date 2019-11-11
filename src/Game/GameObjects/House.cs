@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Gumps;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -51,6 +52,36 @@ namespace ClassicUO.Game.GameObjects
             }
 
             return null;
+        }
+
+        public void ClearCustomHouseComponents(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS state)
+        {
+            Item item = World.Items.Get(Serial);
+
+            if (item != null)
+            {
+                int checkZ = item.Z;
+
+                foreach (Multi component in Components)
+                {
+                    component.State = component.State & ~(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT |
+                                                          CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER |
+                                                          CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE |
+                                                          CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE);
+
+                    if (IsCustom)
+                    {
+                        if ((state == 0) || (component.State & state) != 0)
+                        {
+                            component.Destroy();
+                        }
+                    }
+                    else if (component.Z == checkZ)
+                    {
+                        component.State = component.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
+                    }
+                }
+            }
         }
 
         public bool Equals(Serial other)

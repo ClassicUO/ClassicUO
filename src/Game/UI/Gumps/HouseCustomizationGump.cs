@@ -1773,7 +1773,120 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void GenerateFloorPlace()
         {
+            Item foundationItem = World.Items.Get(LocalSerial);
 
+            if (foundationItem != null && World.HouseManager.TryGetHouse(LocalSerial, out var house))
+            {
+                house.ClearCustomHouseComponents(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL);
+
+                foreach (Multi component in house.Components)
+                {
+                    if (!house.IsCustom)
+                        continue;
+
+                    int currentFloor = -1;
+                    int floorZ = foundationItem.Z + 7;
+                    int itemZ = component.Z;
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int offset = i != 0 ? 0 : 7;
+
+                        if (itemZ >= floorZ - offset && itemZ < floorZ + 20)
+                        {
+                            currentFloor = i;
+                            break;
+                        }
+                    }
+
+                    if (currentFloor == -1)
+                    {
+                        continue;
+                    }
+
+                    (int floorCheck1, int floorCheck2) = SeekGraphicInCustomHouseObjectList(_floors, component.Graphic);
+
+                    var state = component.State;
+
+                    if (floorCheck1 != -1 && floorCheck2 != -1)
+                    {
+                        state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR;
+
+                        if (_floorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_FLOOR)
+                        {
+                            state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
+                        }
+                        else if (_floorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_FLOOR ||
+                                 _floorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSLUCENT_FLOOR)
+                        {
+                            state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
+                        }
+                    }
+                    else
+                    {
+                        (int stairCheck1, int stairCheck2) = SeekGraphicInCustomHouseObjectList(_stairs, component.Graphic);
+
+                        if (stairCheck1 != -1 && stairCheck2 != -1)
+                        {
+                            state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR;
+                        }
+                        else
+                        {
+                            (int roofCheck1, int roofCheck2) = SeekGraphicInCustomHouseObjectListWithCategory<CustomHouseRoof, CustomHouseRoofCategory>(_roofs, component.Graphic);
+
+                            if (roofCheck1 != -1 && roofCheck2 != -1)
+                            {
+                                state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF;
+                            }
+                            else
+                            {
+                                (int fixtureCheck1, int fixtureCheck2) = SeekGraphicInCustomHouseObjectList(_doors, component.Graphic);
+
+                                if (fixtureCheck1 == -1 || fixtureCheck2 == -1)
+                                {
+                                    (fixtureCheck1, fixtureCheck2) = SeekGraphicInCustomHouseObjectList(_teleports, component.Graphic);
+
+                                    if (fixtureCheck1 != -1 && fixtureCheck2 != -1)
+                                    {
+                                        state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE;
+                                    }
+                                }
+                            }
+
+                            if (_floorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_CONTENT)
+                            {
+                                state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
+                            }
+                            else if (_floorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_CONTENT)
+                            {
+                                state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
+                            }
+                        }
+
+                        if (_floorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_ALL)
+                        {
+                            state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
+                        }
+
+                        component.State = state;
+                    }
+                }
+
+                int z = foundationItem.Z + 7;
+
+                for (int x = StartPos.X + 1; x < EndPos.X; x++)
+                {
+                    for (int y = StartPos.Y + 1; y < EndPos.Y; y++)
+                    {
+                        var multi = house.GetMultiAt(x, y);
+
+                        if (multi == null)
+                            continue;
+
+
+                    }
+                }
+            }
         }
 
         private void SeekGraphic(ushort graphic)
