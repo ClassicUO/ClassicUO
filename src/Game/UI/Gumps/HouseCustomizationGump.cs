@@ -1473,16 +1473,64 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((ID_GUMP_CUSTOM_HOUSE)buttonID)
             {
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_WALL:
+                    Category = -1;
+                    State = CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL;
+                    Page = 0;
+                    SelectedGraphic = 0;
+                    CombinedStair = false;
+                    UpdateMaxPage();
+                    TargetManager.CancelTarget();
+                    Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_DOOR:
+                    Category = -1;
+                    State = CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR;
+                    Page = 0;
+                    SelectedGraphic = 0;
+                    CombinedStair = false;
+                    UpdateMaxPage();
+                    TargetManager.CancelTarget();
+                    Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_FLOOR:
+                    Category = -1;
+                    State = CUSTOM_HOUSE_GUMP_STATE.CHGS_FLOOR;
+                    Page = 0;
+                    SelectedGraphic = 0;
+                    CombinedStair = false;
+                    UpdateMaxPage();
+                    TargetManager.CancelTarget();
+                    Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_STAIR:
+                    Category = -1;
+                    State = CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR;
+                    Page = 0;
+                    SelectedGraphic = 0;
+                    CombinedStair = false;
+                    UpdateMaxPage();
+                    TargetManager.CancelTarget();
+                    Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ROOF:
+                    Category = -1;
+                    State = CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF;
+                    Page = 0;
+                    SelectedGraphic = 0;
+                    CombinedStair = false;
+                    UpdateMaxPage();
+                    TargetManager.CancelTarget();
+                    Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_MISC:
+                    Category = -1;
+                    State = CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC;
+                    Page = 0;
+                    SelectedGraphic = 0;
+                    CombinedStair = false;
+                    UpdateMaxPage();
+                    TargetManager.CancelTarget();
+                    Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ERASE:
                     break;
@@ -1507,8 +1555,24 @@ namespace ClassicUO.Game.UI.Gumps
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_4:
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_LIST_LEFT:
+                    Page--;
+
+                    if (Page < 0)
+                    {
+                        Page = MaxPage - 1;
+
+                        if (Page < 0)
+                            Page = 0;
+                    }
+                    Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_LIST_RIGHT:
+                    Page++;
+
+                    if (Page >= MaxPage)
+                        Page = 0;
+
+                    Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_BACKUP:
                     break;
