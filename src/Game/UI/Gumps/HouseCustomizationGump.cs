@@ -128,26 +128,26 @@ namespace ClassicUO.Game.UI.Gumps
                 int componentsOnFloor = (width - 1) * (height - 1);
 
                 MaxComponets = FloorCount * (componentsOnFloor + 2 * (width + height) - 4) -
-                               (int) ((double) (FloorCount * componentsOnFloor) * -0.25) + 2 * width + 3 * height - 5;
+                               (int)((double)(FloorCount * componentsOnFloor) * -0.25) + 2 * width + 3 * height - 5;
                 MaxFixtures = MaxComponets / 20;
             }
 
             Add(new GumpPicTiled(121, 36, 397, 120, 0x0E14));
-            _dataBox = new DataBox(0, 0, 0,0);
+            _dataBox = new DataBox(0, 0, 0, 0);
             Add(_dataBox);
 
             Add(new GumpPic(0, 17, 0x55F0, 0));
-            
-            _gumpPic = new GumpPic(486, 17, (ushort) (FloorCount == 4 ? 
+
+            _gumpPic = new GumpPic(486, 17, (ushort)(FloorCount == 4 ?
                                         0x55F2 : 0x55F9), 0);
             Add(_gumpPic);
 
             Add(new GumpPicTiled(153, 17, 333, 154, 0x55F1));
 
 
-            Add(new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_WALL, 0x5654, 0x5656, 0x5655)
+            Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_WALL, 0x5654, 0x5656, 0x5655)
             {
-                X = 9, 
+                X = 9,
                 Y = 41
             });
             Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_DOOR, 0x5657, 0x5659, 0x5658)
@@ -159,7 +159,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = 70,
                 Y = 40
-            }); 
+            });
             Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_STAIR, 0x565D, 0x565F, 0x565E)
             {
                 X = 9,
@@ -184,13 +184,15 @@ namespace ClassicUO.Game.UI.Gumps
             _textComponents = new Label(string.Empty, false,
                                         0x0481)
             {
-                X = 82, Y = 142
+                X = 82,
+                Y = 142
             };
             Add(_textComponents);
 
             Label text = new Label(":", false, 0x0481, font: 9)
             {
-                X = 84, Y = 184
+                X = 84,
+                Y = 184
             };
             Add(text);
 
@@ -216,13 +218,13 @@ namespace ClassicUO.Game.UI.Gumps
             box = new HitBox(522, 137, 84, 23);
             Add(box);
 
-            _dataBoxGUI = new DataBox(0,0 ,0,0);
+            _dataBoxGUI = new DataBox(0, 0, 0, 0);
             Add(_dataBoxGUI);
 
 
-
-
+            Update();
         }
+
 
         public int Category = -1,
                    MaxPage = 1,
@@ -237,7 +239,332 @@ namespace ClassicUO.Game.UI.Gumps
         public ushort SelectedGraphic;
         public bool Erasing, SeekTile, ShowWindow, CombinedStair;
         public Point StartPos, EndPos;
+        public CUSTOM_HOUSE_GUMP_STATE State = CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL;
 
+
+        private void Update()
+        {
+            _dataBox.Clear();
+            _dataBoxGUI.Clear();
+
+            _gumpPic.Graphic = (ushort)(FloorCount == 4 ? 0x55F2 : 0x55F9);
+
+            _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ERASE, (ushort)(0x5666 + (Erasing ? 1 : 0)), 0x5668, 0x5667)
+            {
+                X = 9,
+                Y = 100
+            });
+
+            Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_EYEDROPPER, (ushort)(0x5669 + (SeekTile ? 1 : 0)), 0x566B, 0x566A)
+            {
+                X = 39,
+                Y = 100
+            });
+
+            ushort[] floorVisionGraphic1 = { 0x572E, 0x5734, 0x5731 };
+            ushort[] floorVisionGraphic2 = { 0x5725, 0x5728, 0x572B };
+            ushort[] floorVisionGraphic3 = { 0x571C, 0x571F, 0x5722 };
+            int[] associateGraphicTable =
+            {
+                0, 1, 2, 1, 2, 1, 2
+            };
+
+            ushort floorVisionGraphic = floorVisionGraphic1[associateGraphicTable[_floorVisionState[0]]];
+            int graphicOffset = CurrentFloor == 1 ? 3 : 0;
+            int graphicOffset2 = CurrentFloor == 1 ? 4 : 0;
+            _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_1, floorVisionGraphic,
+                (ushort)(floorVisionGraphic + 2), (ushort)(floorVisionGraphic + 1))
+            {
+                X = 533,
+                Y = 108
+            });
+            _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_1, (ushort)(0x56CD + graphicOffset2),
+                0x56D1, (ushort)(0x56CD + graphicOffset2))
+            {
+                X = 583,
+                Y = 96
+            });
+            _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_1, (ushort)(0x56F6 + graphicOffset),
+                (ushort)(0x56F8 + graphicOffset), (ushort)(0x56F7 + graphicOffset))
+            {
+                X = 623,
+                Y = 103
+            });
+
+
+            floorVisionGraphic = floorVisionGraphic2[associateGraphicTable[_floorVisionState[1]]];
+            graphicOffset = CurrentFloor == 2 ? 3 : 0;
+            graphicOffset2 = CurrentFloor == 2 ? 4 : 0;
+            _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_2, floorVisionGraphic,
+                (ushort)(floorVisionGraphic + 2), (ushort)(floorVisionGraphic + 1))
+            {
+                X = 533,
+                Y = 86
+            });
+            _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_2, (ushort)(0x56CE + graphicOffset2),
+                0x56D2, (ushort)(0x56CE + graphicOffset2))
+            {
+                X = 583,
+                Y = 73
+            });
+            _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_2, (ushort)(0x56F0 + graphicOffset),
+                (ushort)(0x56F2 + graphicOffset), (ushort)(0x56F1 + graphicOffset))
+            {
+                X = 623,
+                Y = 86
+            });
+
+
+            graphicOffset = CurrentFloor == 3 ? 3 : 0;
+            graphicOffset2 = CurrentFloor == 3 ? 4 : 0;
+            if (FloorCount == 4)
+            {
+                floorVisionGraphic = floorVisionGraphic2[associateGraphicTable[_floorVisionState[2]]];
+                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_3, floorVisionGraphic,
+                    (ushort)(floorVisionGraphic + 2), (ushort)(floorVisionGraphic + 1))
+                {
+                    X = 533,
+                    Y = 64
+                });
+                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort)(0x56CE + graphicOffset2),
+                    0x56D2, (ushort)(0x56CE + graphicOffset2))
+                {
+                    X = 582,
+                    Y = 56
+                });
+                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort)(0x56F0 + graphicOffset),
+                    (ushort)(0x56F2 + graphicOffset), (ushort)(0x56F1 + graphicOffset))
+                {
+                    X = 623,
+                    Y = 69
+                });
+
+
+
+                floorVisionGraphic = floorVisionGraphic2[associateGraphicTable[_floorVisionState[3]]];
+                graphicOffset = CurrentFloor == 4 ? 3 : 0;
+                graphicOffset2 = CurrentFloor == 4 ? 4 : 0;
+                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_4, floorVisionGraphic,
+                    (ushort)(floorVisionGraphic + 2), (ushort)(floorVisionGraphic + 1))
+                {
+                    X = 533,
+                    Y = 42
+                });
+                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_4, (ushort)(0x56D0 + graphicOffset2),
+                    0x56D4, (ushort)(0x56D0 + graphicOffset2))
+                {
+                    X = 583,
+                    Y = 42
+                });
+                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_4, (ushort)(0x56EA + graphicOffset),
+                    (ushort)(0x56EC + graphicOffset), (ushort)(0x56EB + graphicOffset))
+                {
+                    X = 623,
+                    Y = 50
+                });
+            }
+            else
+            {
+                floorVisionGraphic = floorVisionGraphic2[associateGraphicTable[_floorVisionState[2]]];
+                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_3, floorVisionGraphic,
+                    (ushort)(floorVisionGraphic + 2), (ushort)(floorVisionGraphic + 1))
+                {
+                    X = 533,
+                    Y = 64
+                });
+                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort)(0x56D0 + graphicOffset2),
+                    0x56D4, (ushort)(0x56D0 + graphicOffset2))
+                {
+                    X = 582,
+                    Y = 56
+                });
+                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort)(0x56EA + graphicOffset),
+                    (ushort)(0x56EC + graphicOffset), (ushort)(0x56EB + graphicOffset))
+                {
+                    X = 623,
+                    Y = 69
+                });
+            }
+
+            switch (State)
+            {
+                case CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL:
+                    AddWall();
+                    break;
+                case CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR:
+                    AddDoor();
+                    break;
+                case CUSTOM_HOUSE_GUMP_STATE.CHGS_FLOOR:
+                    AddFloor();
+                    break;
+                case CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR:
+                    AddStair();
+                    break;
+                case CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF:
+                    AddRoof();
+                    break;
+                case CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC:
+                    AddMisc();
+                    break;
+                case CUSTOM_HOUSE_GUMP_STATE.CHGS_MENU:
+                    AddMenu();
+                    break;
+            }
+
+            if (MaxPage > 1)
+            {
+                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_LIST_LEFT, 0x5625, 0x5627, 0x5626)
+                {
+                    X = 110,
+                    Y = 63
+                });
+                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_LIST_RIGHT, 0x5628, 0x562A, 0x5629)
+                {
+                    X = 510,
+                    Y = 63
+                });
+            }
+
+            Components = 0;
+            Fixtures = 0;
+
+            Item foundationItem = World.Items.Get(LocalSerial);
+
+            if (foundationItem != null)
+            {
+                if (World.HouseManager.TryGetHouse(LocalSerial, out var house))
+                {
+                    foreach (Multi item in house.Components)
+                    {
+                        if (house.IsCustom &&
+                            (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) == 0)
+                        {
+                            CUSTOM_HOUSE_GUMP_STATE state = 0;
+
+                            (int res1, int res2) = ExistsInList(ref state, item.Graphic);
+
+                            if (res1 != -1 && res2 != -1)
+                            {
+                                if (state == CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR)
+                                {
+                                    Fixtures++;
+                                }
+                                else
+                                {
+                                    Components++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            _textComponents.Hue = (ushort)(Components >= MaxComponets ? 0x0026 : 0x0481);
+            _textComponents.Text = Components.ToString();
+            _textComponents.X = 82 - _textComponents.Width;
+
+            _textFixtures.Hue = (ushort)(Fixtures >= MaxFixtures ? 0x0026 : 0x0481);
+            _textFixtures.Text = Fixtures.ToString();
+
+            _textCost.Text = ((Components + Fixtures) * 500).ToString();
+
+        }
+
+        private (int, int) ExistsInList(ref CUSTOM_HOUSE_GUMP_STATE state, ushort graphic)
+        {
+            (int res1, int res2) =
+                SeekGraphicInCustomHouseObjectListWithCategory<CustomHouseWall,
+                    CustomHouseWallCategory>(_walls, graphic);
+
+            if (res1 == -1 || res2 == -1)
+            {
+                (res1, res2) = SeekGraphicInCustomHouseObjectList(_floors, graphic);
+
+                if (res1 == -1 || res2 == -1)
+                {
+                    (res1, res2) = SeekGraphicInCustomHouseObjectList(_doors, graphic);
+
+                    if (res1 == -1 || res2 == -1)
+                    {
+                        (res1, res2) =
+                            SeekGraphicInCustomHouseObjectListWithCategory<CustomHouseMisc, CustomHouseMiscCategory>(
+                                _miscs, graphic);
+
+                        if (res1 == -1 || res2 == -1)
+                        {
+                            (res1, res2) = SeekGraphicInCustomHouseObjectList(_stairs, graphic);
+
+                            if (res1 == -1 || res2 == -1)
+                            {
+                                (res1, res2) =
+                                    SeekGraphicInCustomHouseObjectListWithCategory<CustomHouseRoof,
+                                        CustomHouseRoofCategory>(_roofs, graphic);
+
+                                if (res1 != -1 && res2 != -1)
+                                {
+                                    state = CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF;
+                                }
+                            }
+                            else
+                            {
+                                state = CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR;
+                            }
+                        }
+                        else
+                        {
+                            state = CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC;
+                        }
+                    }
+                    else
+                    {
+                        state = CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR;
+                    }
+                }
+                else
+                {
+                    state = CUSTOM_HOUSE_GUMP_STATE.CHGS_FLOOR;
+                }
+            }
+            else
+            {
+                state = CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL;
+            }
+
+            return (res1, res2);
+        }
+
+        private static (int, int) SeekGraphicInCustomHouseObjectListWithCategory<T, U>(List<U> list, ushort graphic)
+            where T : CustomHouseObject
+            where U : CustomHouseObjectCategory<T>
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                U c = list[i];
+
+                for (int j = 0; j < c.Items.Count; j++)
+                {
+                    int contains = c.Items[j].Contains(graphic);
+
+                    if (contains != -1)
+                        return (i, j);
+                }
+            }
+
+            return (-1, -1);
+        }
+
+        private static (int, int) SeekGraphicInCustomHouseObjectList<T>(List<T> list, ushort graphic)
+            where T : CustomHouseObject
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                int contains = list[i].Contains(graphic);
+                if (contains != -1)
+                    return (i, graphic);
+            }
+            return (-1, -1);
+        }
 
 
         private void AddWall()
@@ -261,14 +588,15 @@ namespace ClassicUO.Game.UI.Gumps
                     if (vec.Count == 0)
                         continue;
 
-                    Rectangle bounds = FileManager.Art.GetTexture((ushort) vec[0].East1).Bounds;
+                    Rectangle bounds = FileManager.Art.GetTexture((ushort)vec[0].East1).Bounds;
 
                     int offsetX = x + 121 + (48 - bounds.Width) / 2;
                     int offsetY = y + 36;
 
-                    _dataBox.Add(new StaticPic((ushort) vec[0].East1,0)
+                    _dataBox.Add(new StaticPic((ushort)vec[0].East1, 0)
                     {
-                        X = offsetX, Y = offsetY
+                        X = offsetX,
+                        Y = offsetY
                     });
 
                     _dataBox.Add(new HitBox(offsetX, offsetY,
@@ -377,7 +705,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _dataBox.Add(new StaticPic(graphic, 0)
                         {
-                            X = offsetX, Y = offsetY
+                            X = offsetX,
+                            Y = offsetY
                         });
                         _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height));
                     }
@@ -467,7 +796,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
                 }
 
-                 // remove scissor
+                // remove scissor
             }
         }
 
@@ -498,7 +827,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                             _dataBox.Add(new StaticPic(graphic, 0)
                             {
-                                X = offsetX, Y = offsetY
+                                X = offsetX,
+                                Y = offsetY
                             });
                             _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height));
                         }
@@ -592,12 +922,12 @@ namespace ClassicUO.Game.UI.Gumps
                     if (vec.Count == 0)
                         continue;
 
-                    Rectangle bounds = FileManager.Art.GetTexture((ushort) vec[0].NSCrosspiece).Bounds;
+                    Rectangle bounds = FileManager.Art.GetTexture((ushort)vec[0].NSCrosspiece).Bounds;
 
                     int offsetX = x + 121 + (48 - bounds.Width) / 2;
                     int offsetY = y + 36;
 
-                    _dataBox.Add(new StaticPic((ushort) vec[0].NSCrosspiece, 0)
+                    _dataBox.Add(new StaticPic((ushort)vec[0].NSCrosspiece, 0)
                     {
                         X = offsetX,
                         Y = offsetY
@@ -663,9 +993,10 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 _dataBoxGUI.Add(new GumpPic(152, 0, 0x55F3, 0));
-                _dataBoxGUI.Add(new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_CATEGORY, 0x5622, 0x5624, 0x5623)
+                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_CATEGORY, 0x5622, 0x5624, 0x5623)
                 {
-                    X = 167, Y = 5
+                    X = 167,
+                    Y = 5
                 });
                 _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_ROOF_Z_DOWN, 0x578B, 0x578D, 0x578C)
                 {
@@ -685,7 +1016,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Label text = new Label(RoofZ.ToString(), false, 0x04E9, font: 3)
                 {
-                    X = 405, 
+                    X = 405,
                     Y = 15
                 };
                 _dataBoxGUI.Add(text);
@@ -713,12 +1044,12 @@ namespace ClassicUO.Game.UI.Gumps
                     if (vec.Count == 0)
                         continue;
 
-                    Rectangle bounds = FileManager.Art.GetTexture((ushort) vec[0].Piece5).Bounds;
+                    Rectangle bounds = FileManager.Art.GetTexture((ushort)vec[0].Piece5).Bounds;
 
                     int offsetX = x + 121 + (48 - bounds.Width) / 2;
                     int offsetY = y + 36;
 
-                    _dataBox.Add(new StaticPic((ushort) vec[0].Piece5, 0)
+                    _dataBox.Add(new StaticPic((ushort)vec[0].Piece5, 0)
                     {
                         X = offsetX,
                         Y = offsetY
@@ -775,7 +1106,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 _dataBoxGUI.Add(new GumpPic(152, 0, 0x55F3, 0));
-                _dataBoxGUI.Add(new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_CATEGORY, 0x5622, 0x5624, 0x5623)
+                _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_CATEGORY, 0x5622, 0x5624, 0x5623)
                 {
                     X = 167,
                     Y = 5
@@ -787,7 +1118,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             const int TEXT_WIDTH = 108;
 
-            _dataBox.Add(new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_BACKUP,
+            _dataBox.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_BACKUP,
                 0x098D, 0x098D, 0x098D)
             {
                 X = 150,
@@ -878,7 +1209,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            switch ((ID_GUMP_CUSTOM_HOUSE) buttonID)
+            switch ((ID_GUMP_CUSTOM_HOUSE)buttonID)
             {
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_WALL:
                     break;
@@ -962,7 +1293,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        private static void ParseFile<T>(List<T> list, string path) where  T: CustomHouseObject, new()
+        private static void ParseFile<T>(List<T> list, string path) where T : CustomHouseObject, new()
         {
             FileInfo file = new FileInfo(path);
             if (!file.Exists)
@@ -981,17 +1312,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (item.Parse(line))
                     {
-                        if (item.FeatureMask == 0 || ((int) World.ClientLockedFeatures.Flags & item.FeatureMask) != 0)
+                        if (item.FeatureMask == 0 || ((int)World.ClientLockedFeatures.Flags & item.FeatureMask) != 0)
                         {
                             list.Add(item);
                         }
                     }
-                    
+
                 }
             }
         }
 
-        private static void ParseFileWithCategory<T, U>(List<U> list, string path) 
+        private static void ParseFileWithCategory<T, U>(List<U> list, string path)
             where T : CustomHouseObject, new()
             where U : CustomHouseObjectCategory<T>, new()
         {
@@ -1012,7 +1343,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (item.Parse(line))
                     {
-                        if (item.FeatureMask != 0 && ((int) World.ClientLockedFeatures.Flags & item.FeatureMask) == 0)
+                        if (item.FeatureMask != 0 && ((int)World.ClientLockedFeatures.Flags & item.FeatureMask) == 0)
                             continue;
 
                         bool found = false;
@@ -1041,5 +1372,63 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
         }
+
+    }
+
+
+    enum CUSTOM_HOUSE_GUMP_STATE
+    {
+        CHGS_WALL = 0,
+        CHGS_DOOR,
+        CHGS_FLOOR,
+        CHGS_STAIR,
+        CHGS_ROOF,
+        CHGS_MISC,
+        CHGS_MENU
+    }
+
+    enum CUSTOM_HOUSE_FLOOR_VISION_STATE
+    {
+        CHGVS_NORMAL = 0,
+        CHGVS_TRANSPARENT_CONTENT,
+        CHGVS_HIDE_CONTENT,
+        CHGVS_TRANSPARENT_FLOOR,
+        CHGVS_HIDE_FLOOR,
+        CHGVS_TRANSLUCENT_FLOOR,
+        CHGVS_HIDE_ALL
+    }
+
+    enum CUSTOM_HOUSE_BUILD_TYPE
+    {
+        CHBT_NORMAL = 0,
+        CHBT_ROOF,
+        CHBT_FLOOR,
+        CHBT_STAIR
+    }
+
+    enum CUSTOM_HOUSE_MULTI_OBJECT_FLAGS
+    {
+        CHMOF_GENERIC_INTERNAL = 0x01,
+        CHMOF_FLOOR = 0x02,
+        CHMOF_STAIR = 0x04,
+        CHMOF_ROOF = 0x08,
+        CHMOF_FIXTURE = 0x10,
+        CHMOF_TRANSPARENT = 0x20,
+        CHMOF_IGNORE_IN_RENDER = 0x40,
+        CHMOF_VALIDATED_PLACE = 0x80,
+        CHMOF_INCORRECT_PLACE = 0x100
+    }
+
+    enum CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS
+    {
+        CHVCF_TOP = 0x01,
+        CHVCF_BOTTOM = 0x02,
+        CHVCF_N = 0x04,
+        CHVCF_E = 0x08,
+        CHVCF_S = 0x10,
+        CHVCF_W = 0x20,
+        CHVCF_DIRECT_SUPPORT = 0x40,
+        CHVCF_CANGO_W = 0x80,
+        CHVCF_CANGO_N = 0x100
     }
 }

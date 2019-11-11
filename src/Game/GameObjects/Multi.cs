@@ -28,6 +28,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -106,6 +107,8 @@ namespace ClassicUO.Game.GameObjects
         public int MultiOffsetX;
         public int MultiOffsetY;
         public int MultiOffsetZ;
+        public CUSTOM_HOUSE_MULTI_OBJECT_FLAGS State;
+
         public ref readonly StaticTiles ItemData => ref FileManager.TileData.StaticData[Graphic];
 
         public override void UpdateGraphicBySeason()

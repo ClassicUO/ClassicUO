@@ -15,6 +15,8 @@ namespace ClassicUO.Game.Data
         {
             return false;
         }
+
+        public abstract int Contains(ushort graphic);
     }
 
     abstract class CustomHouseObjectCategory<T> where T : CustomHouseObject
@@ -47,7 +49,7 @@ namespace ClassicUO.Game.Data
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
         public ushort[] WindowGraphics = new ushort[GRAPHICS_COUNT];
 
-        public int Contains(ushort graphic)
+        public override int Contains(ushort graphic)
         {
             for (int i = 0; i < GRAPHICS_COUNT; i++)
             {
@@ -201,7 +203,7 @@ namespace ClassicUO.Game.Data
             return result;
         }
 
-        public int Contains(ushort graphic)
+        public override int Contains(ushort graphic)
         {
             for (int i = 0; i < GRAPHICS_COUNT; i++)
             {
@@ -292,7 +294,7 @@ namespace ClassicUO.Game.Data
             return result;
         }
 
-        public int Contains(ushort graphic)
+        public override int Contains(ushort graphic)
         {
             for (int i = 0; i < GRAPHICS_COUNT; i++)
             {
@@ -353,7 +355,7 @@ namespace ClassicUO.Game.Data
             return result;
         }
 
-        public int Contains(ushort graphic)
+        public override int Contains(ushort graphic)
         {
             for (int i = 0; i < GRAPHICS_COUNT; i++)
             {
@@ -419,7 +421,7 @@ namespace ClassicUO.Game.Data
             return result;
         }
 
-        public int Contains(ushort graphic)
+        public override int Contains(ushort graphic)
         {
             for (int i = 0; i < GRAPHICS_COUNT; i++)
             {
@@ -489,7 +491,7 @@ namespace ClassicUO.Game.Data
             return result;
         }
 
-        public int Contains(ushort graphic)
+        public override int Contains(ushort graphic)
         {
             for (int i = 0; i < GRAPHICS_COUNT; i++)
             {
@@ -563,7 +565,7 @@ namespace ClassicUO.Game.Data
             return result;
         }
 
-        public int Contains(ushort graphic)
+        public override int Contains(ushort graphic)
         {
             for (int i = 0; i < GRAPHICS_COUNT; i++)
             {
@@ -629,7 +631,7 @@ namespace ClassicUO.Game.Data
             return result;
         }
 
-        public int Contains(ushort graphic)
+        public override int Contains(ushort graphic)
         {
             for (int i = 0; i < GRAPHICS_COUNT; i++)
             {
