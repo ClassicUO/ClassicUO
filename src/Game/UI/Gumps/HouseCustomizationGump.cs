@@ -471,7 +471,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         }
 
-        private (int, int) ExistsInList(ref CUSTOM_HOUSE_GUMP_STATE state, ushort graphic)
+        public (int, int) ExistsInList(ref CUSTOM_HOUSE_GUMP_STATE state, ushort graphic)
         {
             (int res1, int res2) =
                 SeekGraphicInCustomHouseObjectListWithCategory<CustomHouseWall,
@@ -532,6 +532,116 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             return (res1, res2);
+        }
+
+        public bool ValidatePlaceStructure(Item foundationItem, House house, int minZ, int maxZ, int flags)
+        {
+            if (house == null)
+                return false;
+
+
+            foreach (Multi item in house.Components)
+            {
+                List<Point> validatedFloors = new List<Point>();
+
+                if (house.IsCustom && (item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | 
+                                                     CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
+                                                     CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF | 
+                                                     CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) == 0 && 
+                                       item.Z >= minZ && item.Z < maxZ)
+                {
+                    (int info1, int info2) = SeekGraphicInCustomHouseObjectList(_objectsInfo, item.Graphic);
+
+                    if (info1 != -1 && info2 != -1)
+                    {
+                        var info = _objectsInfo[info1];
+
+                        if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT) != 0)
+                        {
+                            if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) != 0 ||
+                                info.DirectSupports == 0)
+                            {
+                                continue;
+                            }
+
+                            if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_W) != 0)
+                            {
+                                if (info.CanGoW != 0)
+                                    return true;
+                            }
+                            else if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_N) != 0)
+                            {
+                                if (info.CanGoN != 0)
+                                    return true;
+                            }
+                            else
+                                return true;
+                        }
+                        else if (
+                            (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM) != 0) && info.Bottom != 0) ||
+                            (((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP)!= 0) && info.Top != 0)
+                        )
+                        {
+                            if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) == 0)
+                            {
+                                if (!ValidateItemPlace(foundationItem, item, minZ, maxZ, validatedFloors))
+                                {
+                                    item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE |
+                                                 CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
+                                }
+                                else
+                                {
+                                    item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
+                                }
+                            }
+
+                            if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0)
+                            {
+                                if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM) != 0)
+                                {
+                                    if (((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N) != 0) && (info.AdjUN != 0))
+                                    {
+                                        return true;
+                                    }
+                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E) != 0) && (info.AdjUE != 0))
+                                    {
+                                        return true;
+                                    }
+                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S) != 0) && (info.AdjUS != 0))
+                                    {
+                                        return true;
+                                    }
+                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W) != 0) && (info.AdjUW != 0))
+                                    {
+                                        return true;
+                                    }
+                                }
+                                else
+                                {
+                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N) != 0) && (info.AdjLN != 0))
+                                    {
+                                        return true;
+                                    }
+                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E) != 0) && (info.AdjLE != 0))
+                                    {
+                                        return true;
+                                    }
+                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S) != 0) && (info.AdjLS != 0))
+                                    {
+                                        return true;
+                                    }
+                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W) != 0) && (info.AdjLW != 0))
+                                    {
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
 
         private static (int, int) SeekGraphicInCustomHouseObjectListWithCategory<T, U>(List<U> list, ushort graphic)
@@ -1283,8 +1393,41 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
+        private void GenerateFloorPlace()
+        {
 
+        }
 
+        private void SeekGraphic(ushort graphic)
+        {
+
+        }
+
+        private bool CanBuildHere()
+        {
+            return false;
+        }
+
+        private bool ValidateItemPlace(Rectangle rect, ushort grpahic , int x, int y)
+        {
+            return false;
+        }
+
+        private bool ValidateItemPlace(Item foundationItem, Multi multi, int minZ, int maxZ,
+            List<Point> validatedFloors)
+        {
+            return false;
+        }
+
+        private bool CanEraseHere(GameObject place, ref CUSTOM_HOUSE_BUILD_TYPE type)
+        {
+            return false;
+        }
+
+        private void OnTargetWorld(GameObject place)
+        {
+
+        }
 
         public override void Dispose()
         {
@@ -1372,7 +1515,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
         }
-
     }
 
 
@@ -1406,6 +1548,7 @@ namespace ClassicUO.Game.UI.Gumps
         CHBT_STAIR
     }
 
+    [Flags]
     enum CUSTOM_HOUSE_MULTI_OBJECT_FLAGS
     {
         CHMOF_GENERIC_INTERNAL = 0x01,
