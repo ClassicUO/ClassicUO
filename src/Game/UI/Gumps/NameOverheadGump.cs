@@ -88,7 +88,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (string.IsNullOrEmpty(t))
                         return false;
 
-                    if (item.Amount > 1)
+                    if (!item.IsCorpse && item.Amount > 1)
                         t += ": " + item.Amount;
 
                     FileManager.Fonts.SetUseHTML(true);
