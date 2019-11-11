@@ -148,37 +148,44 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_WALL, 0x5654, 0x5656, 0x5655)
             {
                 X = 9,
-                Y = 41
+                Y = 41,
+                ButtonAction = ButtonAction.Activate
             });
             Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_DOOR, 0x5657, 0x5659, 0x5658)
             {
                 X = 39,
-                Y = 40
+                Y = 40,
+                ButtonAction = ButtonAction.Activate
             });
             Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_FLOOR, 0x565A, 0x565C, 0x565B)
             {
                 X = 70,
-                Y = 40
+                Y = 40,
+                ButtonAction = ButtonAction.Activate
             });
             Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_STAIR, 0x565D, 0x565F, 0x565E)
             {
                 X = 9,
-                Y = 72
+                Y = 72,
+                ButtonAction = ButtonAction.Activate
             });
             Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ROOF, 0x5788, 0x578A, 0x5789)
             {
                 X = 39,
-                Y = 72
+                Y = 72,
+                ButtonAction = ButtonAction.Activate
             });
             Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_MISC, 0x5663, 0x5665, 0x5664)
             {
                 X = 69,
-                Y = 72
+                Y = 72,
+                ButtonAction = ButtonAction.Activate
             });
             Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_MENU, 0x566C, 0x566E, 0x566D)
             {
                 X = 69,
-                Y = 100
+                Y = 100,
+                ButtonAction = ButtonAction.Activate
             });
 
             _textComponents = new Label(string.Empty, false,
@@ -222,6 +229,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_dataBoxGUI);
 
 
+
             Update();
         }
 
@@ -252,13 +260,15 @@ namespace ClassicUO.Game.UI.Gumps
             _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ERASE, (ushort)(0x5666 + (Erasing ? 1 : 0)), 0x5668, 0x5667)
             {
                 X = 9,
-                Y = 100
+                Y = 100,
+                ButtonAction = ButtonAction.Activate
             });
 
             Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_EYEDROPPER, (ushort)(0x5669 + (SeekTile ? 1 : 0)), 0x566B, 0x566A)
             {
                 X = 39,
-                Y = 100
+                Y = 100,
+                ButtonAction = ButtonAction.Activate
             });
 
             ushort[] floorVisionGraphic1 = { 0x572E, 0x5734, 0x5731 };
@@ -276,19 +286,22 @@ namespace ClassicUO.Game.UI.Gumps
                 (ushort)(floorVisionGraphic + 2), (ushort)(floorVisionGraphic + 1))
             {
                 X = 533,
-                Y = 108
+                Y = 108,
+                ButtonAction = ButtonAction.Activate
             });
             _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_1, (ushort)(0x56CD + graphicOffset2),
                 0x56D1, (ushort)(0x56CD + graphicOffset2))
             {
                 X = 583,
-                Y = 96
+                Y = 96,
+                ButtonAction = ButtonAction.Activate
             });
             _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_1, (ushort)(0x56F6 + graphicOffset),
                 (ushort)(0x56F8 + graphicOffset), (ushort)(0x56F7 + graphicOffset))
             {
                 X = 623,
-                Y = 103
+                Y = 103,
+                ButtonAction = ButtonAction.Activate
             });
 
 
@@ -299,19 +312,22 @@ namespace ClassicUO.Game.UI.Gumps
                 (ushort)(floorVisionGraphic + 2), (ushort)(floorVisionGraphic + 1))
             {
                 X = 533,
-                Y = 86
+                Y = 86,
+                ButtonAction = ButtonAction.Activate
             });
             _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_2, (ushort)(0x56CE + graphicOffset2),
                 0x56D2, (ushort)(0x56CE + graphicOffset2))
             {
                 X = 583,
-                Y = 73
+                Y = 73,
+                ButtonAction = ButtonAction.Activate
             });
             _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_2, (ushort)(0x56F0 + graphicOffset),
                 (ushort)(0x56F2 + graphicOffset), (ushort)(0x56F1 + graphicOffset))
             {
                 X = 623,
-                Y = 86
+                Y = 86,
+                ButtonAction = ButtonAction.Activate
             });
 
 
@@ -324,19 +340,22 @@ namespace ClassicUO.Game.UI.Gumps
                     (ushort)(floorVisionGraphic + 2), (ushort)(floorVisionGraphic + 1))
                 {
                     X = 533,
-                    Y = 64
+                    Y = 64,
+                    ButtonAction = ButtonAction.Activate
                 });
                 _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort)(0x56CE + graphicOffset2),
                     0x56D2, (ushort)(0x56CE + graphicOffset2))
                 {
                     X = 582,
-                    Y = 56
+                    Y = 56,
+                    ButtonAction = ButtonAction.Activate
                 });
                 _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort)(0x56F0 + graphicOffset),
                     (ushort)(0x56F2 + graphicOffset), (ushort)(0x56F1 + graphicOffset))
                 {
                     X = 623,
-                    Y = 69
+                    Y = 69,
+                    ButtonAction = ButtonAction.Activate
                 });
 
 
@@ -348,19 +367,22 @@ namespace ClassicUO.Game.UI.Gumps
                     (ushort)(floorVisionGraphic + 2), (ushort)(floorVisionGraphic + 1))
                 {
                     X = 533,
-                    Y = 42
+                    Y = 42,
+                    ButtonAction = ButtonAction.Activate
                 });
                 _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_4, (ushort)(0x56D0 + graphicOffset2),
                     0x56D4, (ushort)(0x56D0 + graphicOffset2))
                 {
                     X = 583,
-                    Y = 42
+                    Y = 42,
+                    ButtonAction = ButtonAction.Activate
                 });
                 _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_4, (ushort)(0x56EA + graphicOffset),
                     (ushort)(0x56EC + graphicOffset), (ushort)(0x56EB + graphicOffset))
                 {
                     X = 623,
-                    Y = 50
+                    Y = 50,
+                    ButtonAction = ButtonAction.Activate
                 });
             }
             else
@@ -370,19 +392,22 @@ namespace ClassicUO.Game.UI.Gumps
                     (ushort)(floorVisionGraphic + 2), (ushort)(floorVisionGraphic + 1))
                 {
                     X = 533,
-                    Y = 64
+                    Y = 64,
+                    ButtonAction = ButtonAction.Activate
                 });
                 _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort)(0x56D0 + graphicOffset2),
                     0x56D4, (ushort)(0x56D0 + graphicOffset2))
                 {
                     X = 582,
-                    Y = 56
+                    Y = 56,
+                    ButtonAction = ButtonAction.Activate
                 });
                 _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort)(0x56EA + graphicOffset),
                     (ushort)(0x56EC + graphicOffset), (ushort)(0x56EB + graphicOffset))
                 {
                     X = 623,
-                    Y = 69
+                    Y = 69,
+                    ButtonAction = ButtonAction.Activate
                 });
             }
 
@@ -416,12 +441,14 @@ namespace ClassicUO.Game.UI.Gumps
                 _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_LIST_LEFT, 0x5625, 0x5627, 0x5626)
                 {
                     X = 110,
-                    Y = 63
+                    Y = 63,
+                    ButtonAction = ButtonAction.Activate
                 });
                 _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_LIST_RIGHT, 0x5628, 0x562A, 0x5629)
                 {
                     X = 510,
-                    Y = 63
+                    Y = 63,
+                    ButtonAction = ButtonAction.Activate
                 });
             }
 
@@ -763,7 +790,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_CATEGORY, 0x5622, 0x5624, 0x5623)
                 {
                     X = 167,
-                    Y = 5
+                    Y = 5,
+                    ButtonAction = ButtonAction.Activate
                 });
 
                 _dataBoxGUI.Add(new GumpPic(218, 4, 0x55F4, 0));
@@ -773,7 +801,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_WALL_SHOW_WINDOW, 0x562E, 0x5630, 0x562F)
                     {
                         X = 228,
-                        Y = 9
+                        Y = 9,
+                        ButtonAction = ButtonAction.Activate
                     });
                 }
                 else
@@ -781,7 +810,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_WALL_SHOW_WINDOW, 0x562B, 0x562D, 0x562C)
                     {
                         X = 228,
-                        Y = 9
+                        Y = 9,
+                        ButtonAction = ButtonAction.Activate
                     });
                 }
             }
@@ -1106,17 +1136,20 @@ namespace ClassicUO.Game.UI.Gumps
                 _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_CATEGORY, 0x5622, 0x5624, 0x5623)
                 {
                     X = 167,
-                    Y = 5
+                    Y = 5,
+                    ButtonAction = ButtonAction.Activate
                 });
                 _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_ROOF_Z_DOWN, 0x578B, 0x578D, 0x578C)
                 {
                     X = 305,
-                    Y = 0
+                    Y = 0,
+                    ButtonAction = ButtonAction.Activate
                 });
                 _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_ROOF_Z_UP, 0x578E, 0x5790, 0x578F)
                 {
                     X = 349,
-                    Y = 0
+                    Y = 0,
+                    ButtonAction = ButtonAction.Activate
                 });
 
                 _dataBoxGUI.Add(new GumpPic(583, 4, 0x55F4, 0)
@@ -1219,7 +1252,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _dataBoxGUI.Add(new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_CATEGORY, 0x5622, 0x5624, 0x5623)
                 {
                     X = 167,
-                    Y = 5
+                    Y = 5,
+                    ButtonAction = ButtonAction.Activate
                 });
             }
         }
@@ -1232,7 +1266,8 @@ namespace ClassicUO.Game.UI.Gumps
                 0x098D, 0x098D, 0x098D)
             {
                 X = 150,
-                Y = 50
+                Y = 50,
+                ButtonAction = ButtonAction.Activate
             });
 
             Label entry = new Label("Backup", true, 0x0036, TEXT_WIDTH, font: 0, align: TEXT_ALIGN_TYPE.TS_CENTER)
@@ -1248,7 +1283,8 @@ namespace ClassicUO.Game.UI.Gumps
                 0x098D, 0x098D, 0x098D)
             {
                 X = 150,
-                Y = 90
+                Y = 90,
+                ButtonAction = ButtonAction.Activate
             });
             entry = new Label("Restore", true, 0x0036, TEXT_WIDTH, font: 0, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
@@ -1262,7 +1298,8 @@ namespace ClassicUO.Game.UI.Gumps
                 0x098D, 0x098D, 0x098D)
             {
                 X = 270,
-                Y = 50
+                Y = 50,
+                ButtonAction = ButtonAction.Activate
             });
             entry = new Label("Synch", true, 0x0036, TEXT_WIDTH, font: 0, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
@@ -1277,7 +1314,8 @@ namespace ClassicUO.Game.UI.Gumps
                 0x098D, 0x098D, 0x098D)
             {
                 X = 270,
-                Y = 90
+                Y = 90,
+                ButtonAction = ButtonAction.Activate
             });
             entry = new Label("Clear", true, 0x0036, TEXT_WIDTH, font: 0, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
@@ -1292,7 +1330,8 @@ namespace ClassicUO.Game.UI.Gumps
                 0x098D, 0x098D, 0x098D)
             {
                 X = 390,
-                Y = 50
+                Y = 50,
+                ButtonAction = ButtonAction.Activate
             });
             entry = new Label("Commit", true, 0x0036, TEXT_WIDTH, font: 0, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
@@ -1307,7 +1346,8 @@ namespace ClassicUO.Game.UI.Gumps
                 0x098D, 0x098D, 0x098D)
             {
                 X = 390,
-                Y = 90
+                Y = 90,
+                ButtonAction = ButtonAction.Activate
             });
             entry = new Label("Revert", true, 0x0036, TEXT_WIDTH, font: 0, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
