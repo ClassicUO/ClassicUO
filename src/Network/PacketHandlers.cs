@@ -3637,17 +3637,17 @@ namespace ClassicUO.Network
 
                             break;
                     }
-
-                    house.Generate();
-                    UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
-
-                    if (World.HouseManager.EntityIntoHouse(serial, World.Player))
-                        CUOEnviroment.Client.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
                 }
                 stream.ReleaseData();
 
             }
             stream.ReleaseData();
+
+            house.Generate();
+            UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
+
+            if (World.HouseManager.EntityIntoHouse(serial, World.Player))
+                CUOEnviroment.Client.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
         }
 
         private static void CharacterTransferLog(Packet p)
