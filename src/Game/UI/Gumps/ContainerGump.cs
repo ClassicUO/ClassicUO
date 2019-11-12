@@ -72,7 +72,7 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (var c in Children.OfType<ItemGump>())
                 c.Dispose();
 
-            foreach (Item i in item.Items.Where(s => s.ItemData.Layer != (int) Layer.Hair && s.ItemData.Layer != (int) Layer.Beard && s.ItemData.Layer != (int) Layer.Face))
+            foreach (Item i in item.Items.Where(s => s != null && s.IsLootable))
                 //FIXME: this should be disabled. Server sends the right position
                 //CheckItemPosition(i);
                 Add(new ItemGump(i));
@@ -253,7 +253,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 var item = World.Items.Get(s);
 
-                if (item == null || item.ItemData.Layer == (int) Layer.Hair || item.ItemData.Layer == (int) Layer.Beard || item.ItemData.Layer == (int) Layer.Face)
+                if (item == null || !item.IsLootable)
                     continue;
 
 
