@@ -207,7 +207,7 @@ namespace ClassicUO.Game.GameObjects
             // These items appear only on humanoid NPC corpses so they don't look naked
             // They are always a piece of equipment and server always sends their position as 0,0,0
             // So the check works next way: it's true if not Outlands, it's true if it isn't equipment, it's true if position in container is not "0.0.0"
-            (Engine.GlobalSettings.ShardType != 2 || ItemData.Layer == (int) Layer.Invalid || (X != 0 || Y != 0 || Z != 0));
+            (Settings.GlobalSettings.ShardType != 2 || ItemData.Layer == (int) Layer.Invalid || (X != 0 || Y != 0 || Z != 0));
 
         private void LoadMulti()
         {
