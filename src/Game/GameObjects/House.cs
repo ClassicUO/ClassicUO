@@ -84,7 +84,7 @@ namespace ClassicUO.Game.GameObjects
                                                           CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE |
                                                           CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE);
 
-                    if (IsCustom)
+                    if (component.IsCustom)
                     {
                         if ((state == 0) || (component.State & state) != 0)
                         {
@@ -115,6 +115,7 @@ namespace ClassicUO.Game.GameObjects
                     if (recalculate)
                         s.Position = new Position((ushort) (item.X + s.MultiOffsetX), (ushort) (item.Y + s.MultiOffsetY), (sbyte) (item.Position.Z + s.MultiOffsetZ));
                     s.Hue = item.Hue;
+                    s.IsCustom = IsCustom;
                 }
 
                 s.AddToTile();
