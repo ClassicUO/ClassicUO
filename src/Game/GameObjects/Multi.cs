@@ -95,6 +95,7 @@ namespace ClassicUO.Game.GameObjects
 
                 m.MultiOffsetX = m.MultiOffsetY = m.MultiOffsetZ = 0;
                 m.CharacterIsBehindFoliage = false;
+                m.IsCustom = false;
 
                 return m;
             }
@@ -108,6 +109,7 @@ namespace ClassicUO.Game.GameObjects
         public int MultiOffsetY;
         public int MultiOffsetZ;
         public CUSTOM_HOUSE_MULTI_OBJECT_FLAGS State;
+        public bool IsCustom;
 
         public ref readonly StaticTiles ItemData => ref FileManager.TileData.StaticData[Graphic];
 

@@ -54,6 +54,21 @@ namespace ClassicUO.Game.GameObjects
             return null;
         }
 
+        public Multi Add(ushort graphic, ushort hue, int x, int y, sbyte z, bool iscustom)
+        {
+            Item item = World.Items.Get(Serial);
+
+            Multi m = Multi.Create(graphic);
+            m.Hue = hue;
+            m.Position = new Position((ushort) (item.X + x), (ushort) (item.Y +  y), z);
+            m.IsCustom = iscustom;
+            m.AddToTile();
+
+            Components.Add(m);
+
+            return m;
+        }
+
         public void ClearCustomHouseComponents(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS state)
         {
             Item item = World.Items.Get(Serial);

@@ -25,6 +25,7 @@ using System;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -56,6 +57,26 @@ namespace ClassicUO.Game.GameObjects
         {
             if (!AllowedToDraw || IsDestroyed)
                 return false;
+
+            ResetHueVector();
+
+            ushort hue = Hue;
+            float alpha = 0;
+            if (State != 0)
+            {
+                if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER) != 0)
+                    return false;
+
+                if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) != 0)
+                {
+                    hue = 0x002B;
+                }
+
+                if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT) != 0)
+                {
+                    alpha = 0.75f;
+                }
+            }
 
             ushort graphic = Graphic;
 
@@ -96,7 +117,6 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            ResetHueVector();
 
             if (Texture == null || Texture.IsDisposed || Graphic != graphic)
             {
@@ -127,7 +147,7 @@ namespace ClassicUO.Game.GameObjects
                 HueVector.Y = 1;
             }
             else
-                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, ItemData.IsPartialHue, 0);
+                ShaderHuesTraslator.GetHueVector(ref HueVector, hue, ItemData.IsPartialHue, alpha);
 
             //Engine.DebugInfo.MultiRendered++;
 
