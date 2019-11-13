@@ -246,7 +246,7 @@ namespace ClassicUO.Game.GameObjects
                     m.MultiOffsetZ = z;
                     m.Hue = Hue;
                     m.AlphaHue = 255;
-
+                    m.IsCustom = false;
                     house.Components.Add(m);
                 }
                 else if (i == 0)

@@ -1771,7 +1771,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        private void GenerateFloorPlace()
+        public void GenerateFloorPlace()
         {
             Item foundationItem = World.Items.Get(LocalSerial);
 
@@ -1784,18 +1784,13 @@ namespace ClassicUO.Game.UI.Gumps
                     if (!item.IsCustom)
                         continue;
 
-                    if (item.Graphic == 99)
-                    {
-
-                    }
-
                     int currentFloor = -1;
                     int floorZ = foundationItem.Z + 7;
                     int itemZ = item.Z;
 
                     for (int i = 0; i < 4; i++)
                     {
-                        int offset = i != 0 ? 0 : 7;
+                        int offset = 0; //i != 0 ? 0 : 7;
 
                         if (itemZ >= floorZ - offset && itemZ < floorZ + 20)
                         {
