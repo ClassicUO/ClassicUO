@@ -370,6 +370,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            if (IsDisposed || !World.InGame)
+                return false;
+
             if (!_isScrolling && !_freeView)
             {
                 _center.X = World.Player.X;
@@ -463,6 +466,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void DrawMobile(UltimaBatcher2D batcher, Mobile mobile, int x, int y, int width, int height, float zoom, Color color)
         {
+            if (mobile == null || mobile.IsDestroyed)
+                return;
+
             int sx = mobile.X - _center.X;
             int sy = mobile.Y - _center.Y;
 
