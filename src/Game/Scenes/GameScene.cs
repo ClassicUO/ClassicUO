@@ -598,19 +598,31 @@ namespace ClassicUO.Game.Scenes
                     {
                         Graphic = TargetManager.MultiTargetInfo.Model,
                         Hue = TargetManager.MultiTargetInfo.Hue,
-                        IsMulti = true,
+                        IsMulti = !TargetManager.MultiTargetInfo.IsCustomHouse,
                     };
 
                 if (SelectedObject.Object is GameObject gobj)
                 {
                     Position pos = TargetManager.MultiTargetInfo.Offset;
-                    Position pos2 = gobj.Tile?.FirstNode?.Position ?? gobj.Position;
+                    Position pos2 = /*!_multi.IsMulti ? gobj.Position :*/ gobj.Tile?.FirstNode?.Position ?? gobj.Position;
 
-                    World.Map.GetMapZ(pos2.X, pos2.Y, out sbyte groundZ, out sbyte staticZ);
+                    sbyte groundZ = 0, staticZ;
+                    if (TargetManager.MultiTargetInfo.IsCustomHouse)
+                    {
+                        if (gobj is Multi m && m.State == CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE)
+                        {
+                            World.Map.GetMapMultiZ(pos2.X, pos2.Y, out groundZ, out staticZ);
+                            groundZ = (sbyte) (staticZ + 7);
+                        }
+                    }
+                    else
+                    {
+                        World.Map.GetMapZ(pos2.X, pos2.Y, out groundZ, out staticZ);
+                    }
+
 
                     if (gobj is Static st && st.ItemData.IsWet)
                         groundZ = gobj.Z;
-
 
                     pos = new Position((ushort)(pos2.X - pos.X), (ushort)(pos2.Y - pos.Y), groundZ);
 
@@ -618,13 +630,16 @@ namespace ClassicUO.Game.Scenes
                     _multi.CheckGraphicChange();
                     _multi.AddToTile();
 
-                    World.HouseManager.TryGetHouse(_multi.Serial, out var house);
-
-                    foreach (Multi s in house.Components)
+                    if (_multi.IsMulti)
                     {
-                        s.IsFromTarget = true;
-                        s.Position = new Position((ushort)(_multi.X + s.MultiOffsetX), (ushort)(_multi.Y + s.MultiOffsetY), (sbyte)(_multi.Z + s.MultiOffsetZ));
-                        s.AddToTile();
+                        World.HouseManager.TryGetHouse(_multi.Serial, out var house);
+
+                        foreach (Multi s in house.Components)
+                        {
+                            s.IsFromTarget = true;
+                            s.Position = new Position((ushort) (_multi.X + s.MultiOffsetX), (ushort) (_multi.Y + s.MultiOffsetY), (sbyte) (_multi.Z + s.MultiOffsetZ));
+                            s.AddToTile();
+                        }
                     }
                 }
             }

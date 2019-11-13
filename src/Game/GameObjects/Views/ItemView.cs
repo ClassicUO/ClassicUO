@@ -344,7 +344,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
-            if (!Serial.IsValid && IsMulti && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+            if (!Serial.IsValid /*&& IsMulti*/ && TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 return;
 
             if (SelectedObject.Object == this || CharacterIsBehindFoliage)

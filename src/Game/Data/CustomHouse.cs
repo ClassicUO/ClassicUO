@@ -27,7 +27,7 @@ namespace ClassicUO.Game.Data
 
     class CustomHouseWall : CustomHouseObject
     {
-        private const int GRAPHICS_COUNT = 8;
+        public const int GRAPHICS_COUNT = 8;
 
 
         public int Style,
@@ -147,7 +147,7 @@ namespace ClassicUO.Game.Data
 
     class CustomHouseFloor : CustomHouseObject
     {
-        private const int GRAPHICS_COUNT = 16;
+        public const int GRAPHICS_COUNT = 16;
 
         public int F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16;
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
@@ -219,7 +219,7 @@ namespace ClassicUO.Game.Data
 
     class CustomHouseRoof : CustomHouseObject
     {
-        private const int GRAPHICS_COUNT = 16;
+        public const int GRAPHICS_COUNT = 16;
 
         public int Style,
                    TID,
@@ -313,7 +313,7 @@ namespace ClassicUO.Game.Data
 
     class CustomHouseMisc : CustomHouseObject
     {
-        private const int GRAPHICS_COUNT = 8;
+        public const int GRAPHICS_COUNT = 8;
 
         public int Style, TID, Piece1, Piece2, Piece3, Piece4, Piece5, Piece6, Piece7, Piece8;  
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
@@ -374,7 +374,7 @@ namespace ClassicUO.Game.Data
 
     class CustomHouseDoor : CustomHouseObject
     {
-        private const int GRAPHICS_COUNT = 8;
+        public const int GRAPHICS_COUNT = 8;
 
         public int Piece1,
                    Piece2,
@@ -435,7 +435,7 @@ namespace ClassicUO.Game.Data
 
     class CustomHouseTeleport : CustomHouseObject
     {
-        private const int GRAPHICS_COUNT = 16;
+        public const int GRAPHICS_COUNT = 16;
 
         public int F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, F14, F15, F16;
         public ushort[] Graphics = new ushort[GRAPHICS_COUNT];
@@ -507,7 +507,7 @@ namespace ClassicUO.Game.Data
 
     class CustomHouseStair : CustomHouseObject
     {
-        private const int GRAPHICS_COUNT = 9;
+        public const int GRAPHICS_COUNT = 9;
 
         public int Block,
                    North,
@@ -579,7 +579,7 @@ namespace ClassicUO.Game.Data
 
     class CustomHousePlaceInfo : CustomHouseObject
     {
-        private const int GRAPHICS_COUNT = 1;
+        public const int GRAPHICS_COUNT = 1;
         public int Graphic,
                    Top,
                    Bottom,

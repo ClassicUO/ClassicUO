@@ -70,5 +70,10 @@ namespace ClassicUO.Game.UI.Controls
 
             return base.Draw(batcher, x, y);
         }
+
+        public override bool Contains(int x, int y)
+        {
+            return Texture.Contains(x, y);
+        }
     }
 }

@@ -888,17 +888,23 @@ namespace ClassicUO.Game.UI.Gumps
                     int offsetX = x + 121 + (48 - bounds.Width) / 2;
                     int offsetY = y + 36;
 
-                    _dataBox.Add(new StaticPic((ushort)vec[0].East1, 0)
+                    StaticPic pic = new StaticPic((ushort) vec[0].East1, 0)
                     {
                         X = offsetX,
-                        Y = offsetY
-                    });
-
-                    _dataBox.Add(new HitBox(offsetX, offsetY,
-                        bounds.Width, bounds.Height)
+                        Y = offsetY,
+                        LocalSerial = (uint) (ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
+                    };
+                    pic.MouseDown += (sender, e) =>
                     {
-                        Priority = ClickPriority.Default
-                    });
+                        OnButtonClick((int) pic.LocalSerial.Value);
+                    };
+                    _dataBox.Add(pic);
+
+                    //_dataBox.Add(new HitBox(offsetX, offsetY,
+                    //    bounds.Width, bounds.Height)
+                    //{
+                    //    Priority = ClickPriority.Default
+                    //});
 
                     x += 48;
 
@@ -933,15 +939,21 @@ namespace ClassicUO.Game.UI.Gumps
                             int offsetX = x + 130 + (48 - bounds.Width) / 2;
                             int offsetY = y + 36 + (120 - bounds.Height) / 2;
 
-                            _dataBox.Add(new StaticPic(graphic, 0)
+                            var pic = new StaticPic(graphic, 0)
                             {
                                 X = offsetX,
-                                Y = offsetY
-                            });
-                            _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
+                                Y = offsetY,
+                                LocalSerial = (uint) (ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
+                            };
+                            pic.MouseUp += (sender, e) =>
                             {
-                                Priority = ClickPriority.Default
-                            });
+                                OnButtonClick((int) pic.LocalSerial.Value);
+                            };
+                            _dataBox.Add(pic);
+                            //_dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
+                            //{
+                            //    Priority = ClickPriority.Default
+                            //});
                         }
 
                         x += 48;
@@ -1568,7 +1580,122 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            switch ((ID_GUMP_CUSTOM_HOUSE)buttonID)
+            ID_GUMP_CUSTOM_HOUSE idd = (ID_GUMP_CUSTOM_HOUSE) buttonID;
+
+            if (idd >= ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST)
+            {
+                int index = idd - ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST;
+
+                if (Category == -1 && (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL ||
+                                       State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF ||
+                                       State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC))
+                {
+                    int newCategory = -1;
+
+                    if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL && index >= 0 && index < _walls.Count)
+                    {
+                        newCategory = _walls[index].Index;
+                    }
+                    else if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF && index >= 0 && index < _roofs.Count)
+                    {
+                        newCategory = _roofs[index].Index;
+                    }
+                    else if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC && index >= 0 && index < _miscs.Count)
+                    {
+                        newCategory = _miscs[index].Index;
+                    }
+
+
+                    if (newCategory != -1)
+                    {
+                        Category = newCategory;
+                        Page = 0;
+                        SelectedGraphic = 0;
+                        Erasing = false;
+                        SeekTile = false;
+                        CombinedStair = false;
+                        UpdateMaxPage();
+                        Update();
+                    }
+                }
+                else if (index >= 0 && Page >= 0)
+                {
+                    bool combinedStairs = false;
+                    ushort graphic = 0;
+
+                    if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL ||
+                        State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF ||
+                        State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC)
+                    {
+                        if (Category >= 0)
+                        {
+                            if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL && Category < _walls.Count && index < CustomHouseWall.GRAPHICS_COUNT)
+                            {
+                                var list = _walls[Category].Items;
+
+                                if (Page < list.Count)
+                                {
+                                    graphic = (ShowWindow ? list[Page].WindowGraphics[index] : list[Page].Graphics[index]);
+                                }
+                            }
+                            else if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF && Category < _roofs.Count && index < CustomHouseRoof.GRAPHICS_COUNT)
+                            {
+                                var list = _roofs[Category].Items;
+
+                                if (Page < list.Count)
+                                {
+                                    graphic = list[Page].Graphics[index];
+                                }
+                            }
+                            else if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC && Category < _miscs.Count && index < CustomHouseMisc.GRAPHICS_COUNT)
+                            {
+                                var list = _miscs[Category].Items;
+
+                                if (Page < list.Count)
+                                {
+                                    graphic = list[Page].Graphics[index];
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR && Page < _doors.Count && index < CustomHouseDoor.GRAPHICS_COUNT)
+                        {
+                            graphic = _doors[Page].Graphics[index];
+                        }
+                        else if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_FLOOR && Page < _floors.Count && index < CustomHouseFloor.GRAPHICS_COUNT)
+                        {
+                            graphic = _floors[Page].Graphics[index];
+                        }
+                        else if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR && Page < _stairs.Count)
+                        {
+                            if (index > 10)
+                            {
+                                combinedStairs = true;
+                                index -= 10;
+                            }
+
+                            if (index < CustomHouseStair.GRAPHICS_COUNT)
+                            {
+                                graphic = _stairs[Page].Graphics[index];
+                            }
+                        }
+                    }
+
+                    if (graphic != 0)
+                    {
+                        TargetManager.SetTargetingMulti(Serial.INVALID, graphic, 0, 0, 0, 0, true);
+                        CombinedStair = combinedStairs;
+                        SelectedGraphic = graphic;
+                        Update();
+                    }
+                }
+
+                return;
+            }
+
+            switch (idd)
             {
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_WALL:
                     Category = -1;

@@ -170,6 +170,12 @@ namespace ClassicUO.Game.GameObjects
             if (SelectedObject.Object == this || IsFromTarget || CharacterIsBehindFoliage)
                 return;
 
+            if (State != 0)
+            {
+                if (((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER) != 0))
+                    return;
+            }
+
             if (DrawTransparent)
             {
                 int d = Distance;
