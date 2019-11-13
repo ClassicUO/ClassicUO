@@ -23,6 +23,7 @@
 
 using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
@@ -87,6 +88,10 @@ namespace ClassicUO.Game.Map
                 case GameEffect _ /*when effect.Source == null*/:
                     priorityZ += 2;
 
+                    break;
+
+                case Multi m when (m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0:
+                    priorityZ--;
                     break;
 
                 default:

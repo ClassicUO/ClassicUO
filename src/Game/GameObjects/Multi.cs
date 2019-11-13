@@ -108,7 +108,7 @@ namespace ClassicUO.Game.GameObjects
         public int MultiOffsetX;
         public int MultiOffsetY;
         public int MultiOffsetZ;
-        public CUSTOM_HOUSE_MULTI_OBJECT_FLAGS State;
+        public CUSTOM_HOUSE_MULTI_OBJECT_FLAGS State = 0;
         public bool IsCustom;
 
         public ref readonly StaticTiles ItemData => ref FileManager.TileData.StaticData[Graphic];

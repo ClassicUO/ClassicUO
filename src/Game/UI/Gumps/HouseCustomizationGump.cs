@@ -1784,6 +1784,11 @@ namespace ClassicUO.Game.UI.Gumps
                     if (!item.IsCustom)
                         continue;
 
+                    if (item.Graphic == 99)
+                    {
+
+                    }
+
                     int currentFloor = -1;
                     int floorZ = foundationItem.Z + 7;
                     int itemZ = item.Z;
@@ -1847,30 +1852,23 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (fixtureCheck1 == -1 || fixtureCheck2 == -1)
                                 {
                                     (fixtureCheck1, fixtureCheck2) = SeekGraphicInCustomHouseObjectList(_teleports, item.Graphic);
-
-                                    if (fixtureCheck1 != -1 && fixtureCheck2 != -1)
-                                    {
-                                        state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE;
-                                    }
                                 }
-                            }
 
-                            if (_floorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_CONTENT)
-                            {
-                                state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
-                            }
-                            else if (_floorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_CONTENT)
-                            {
-                                state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
+                                if (fixtureCheck1 != -1 && fixtureCheck2 != -1)
+                                {
+                                    state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE;
+                                }
                             }
                         }
 
-                        if (_floorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_ALL)
+                        if (_floorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_CONTENT)
                         {
                             state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
                         }
-
-                        item.State = state;
+                        else if (_floorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_CONTENT)
+                        {
+                            state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
+                        }
                     }
 
                     if (_floorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_ALL)
@@ -2219,14 +2217,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                     return false;
                 }
-                // TODO HERE
-
-                //if (ValidatePlaceStructure(foundationItem, house, minZ - 20, maxZ - 20,
-                //    (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT)) ||
-                //    ValidatePlaceStructure(foundationItem,))
-                //{
-
-                //}
 
                 if (ValidatePlaceStructure(
                         foundationItem,

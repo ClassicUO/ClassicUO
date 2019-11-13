@@ -88,7 +88,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if ((state == 0) || (component.State & state) != 0)
                         {
-                            component.Destroy();
+                            //component.Destroy();
                         }
                     }
                     else if (component.Z == checkZ)
@@ -107,6 +107,7 @@ namespace ClassicUO.Game.GameObjects
         public void Generate(bool recalculate = false)
         {
             Item item = World.Items.Get(Serial);
+            ClearCustomHouseComponents(0);
 
             foreach (Multi s in Components)
             {
@@ -115,7 +116,7 @@ namespace ClassicUO.Game.GameObjects
                     if (recalculate)
                         s.Position = new Position((ushort) (item.X + s.MultiOffsetX), (ushort) (item.Y + s.MultiOffsetY), (sbyte) (item.Position.Z + s.MultiOffsetZ));
                     s.Hue = item.Hue;
-                    s.IsCustom = IsCustom;
+                    //s.IsCustom = IsCustom;
                 }
 
                 s.AddToTile();
