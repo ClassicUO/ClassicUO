@@ -107,7 +107,7 @@ namespace ClassicUO.Game.GameObjects
         public void Generate(bool recalculate = false)
         {
             Item item = World.Items.Get(Serial);
-            ClearCustomHouseComponents(0);
+            //ClearCustomHouseComponents(0);
 
             foreach (Multi s in Components)
             {
