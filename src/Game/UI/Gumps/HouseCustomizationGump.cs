@@ -651,9 +651,9 @@ namespace ClassicUO.Game.UI.Gumps
             return (res1, res2);
         }
 
-        public bool ValidatePlaceStructure(Item foundationItem, House house, int minZ, int maxZ, int flags)
+        public bool ValidatePlaceStructure(Item foundationItem, House house, Multi multi, int minZ, int maxZ, int flags)
         {
-            if (house == null)
+            if (house == null || multi == null)
                 return false;
 
 
@@ -2227,9 +2227,174 @@ namespace ClassicUO.Game.UI.Gumps
                 //{
 
                 //}
+
+                if (ValidatePlaceStructure(
+                        foundationItem,
+                        house,
+                        house.GetMultiAt(item.X, item.Y),
+                        minZ - 20,
+                        maxZ - 20,
+                        (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT) ||
+
+                    ValidatePlaceStructure(
+                        foundationItem,
+                        house,
+                        house.GetMultiAt(item.X - 1, item.Y - 1),
+                        minZ - 20,
+                        maxZ - 20,
+                        (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_W )) ||
+
+                    ValidatePlaceStructure(
+                        foundationItem,
+                        house,
+                        house.GetMultiAt(item.X, item.Y - 1),
+                        minZ - 20,
+                        maxZ - 20,
+                        (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_N)))
+                {
+                    Point[] table =
+                    {
+                        new Point(-1, 0),
+                        new Point(0, -1),
+                        new Point(1, 0),
+                        new Point(0, 1)
+                    };
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        Point testPoint = new Point(item.X + table[i].X,
+                            item.Y + table[i].Y);
+
+                        if (!existsInList(validatedFloors, testPoint))
+                        {
+                            validatedFloors.Add(testPoint);
+                        }
+                    }
+
+                    return true;
+                }
+
+                return false;
             }
 
-            return false;
+            if ((item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
+                               CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
+                               CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) != 0)
+            {
+                foreach (Multi temp in house.Components)
+                {
+                    if ((temp.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 &&
+                        temp.Z >= minZ && temp.Z < maxZ)
+                    {
+                        if ((temp.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 &&
+                            (temp.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0)
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                // TODO ?
+
+                return false;
+            }
+
+
+            (int infoCheck1, int infoCheck2) = SeekGraphicInCustomHouseObjectList(_objectsInfo, item.Graphic);
+
+            if (infoCheck1 != -1 && infoCheck2 != -1)
+            {
+                var info = _objectsInfo[infoCheck1];
+
+                if (info.CanGoW == 0 && item.X == StartPos.X)
+                    return false;
+                if (info.CanGoN == 0 && item.Y == StartPos.Y)
+                    return false;
+                if (info.CanGoNWS == 0 && item.X == StartPos.X && item.Y == StartPos.Y)
+                    return false;
+
+                if (info.Bottom == 0)
+                {
+                    bool found = false;
+
+                    if (info.AdjUN != 0)
+                    {
+                        found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X, item.Y + 1), minZ,
+                            maxZ,
+                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM |
+                                   CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N));
+                    }
+
+                    if (!found && info.AdjUE != 0)
+                    {
+                        found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X - 1, item.Y), minZ,
+                            maxZ,
+                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM |
+                                  CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E));
+                    }
+
+                    if (!found && info.AdjUS != 0)
+                    {
+                        found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X, item.Y - 1), minZ,
+                            maxZ,
+                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM |
+                                  CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S));
+                    }
+
+                    if (!found && info.AdjUW != 0)
+                    {
+                        found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X + 1, item.Y), minZ,
+                            maxZ,
+                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM |
+                                  CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W));
+                    }
+
+                    if (!found)
+                        return false;
+                }
+
+                if (info.Top == 0)
+                {
+                    bool found = false;
+
+                    if (info.AdjLN != 0)
+                    {
+                        found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X, item.Y + 1), minZ,
+                            maxZ,
+                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP |
+                                  CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N));
+                    }
+
+                    if (!found && info.AdjLE != 0)
+                    {
+                        found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X - 1, item.Y), minZ,
+                            maxZ,
+                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP |
+                                  CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E));
+                    }
+
+                    if (!found && info.AdjLS != 0)
+                    {
+                        found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X, item.Y - 1), minZ,
+                            maxZ,
+                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP |
+                                  CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S));
+                    }
+
+                    if (!found && info.AdjLW != 0)
+                    {
+                        found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X + 1, item.Y), minZ,
+                            maxZ,
+                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP |
+                                  CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W));
+                    }
+
+                    if (!found)
+                        return false;
+                }
+            }
+
+            return true;
         }
 
         private bool CanEraseHere(GameObject place, ref CUSTOM_HOUSE_BUILD_TYPE type)
@@ -2375,6 +2540,7 @@ namespace ClassicUO.Game.UI.Gumps
         CHMOF_INCORRECT_PLACE = 0x100
     }
 
+    [Flags]
     enum CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS
     {
         CHVCF_TOP = 0x01,
