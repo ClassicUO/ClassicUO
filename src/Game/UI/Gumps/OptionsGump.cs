@@ -56,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _cellSize;
 
         // video
-        private Checkbox _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient;
+        private Checkbox _windowBorderless, _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient;
         private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
         private Combobox _dragSelectModifierKey;
         private HSliderBar _brighlight;
@@ -474,6 +474,8 @@ namespace ClassicUO.Game.UI.Gumps
             Label text;
 
             _debugControls = CreateCheckBox(rightArea, "Debugging mode", Settings.GlobalSettings.Debug, 0, 0);
+
+            _windowBorderless = CreateCheckBox(rightArea, "Borderless window", ProfileManager.Current.WindowBorderless, 0, 0);
 
             // [BLOCK] game size
             {
@@ -1439,6 +1441,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case 3: // video
                     _debugControls.IsChecked = false;
+                    _windowBorderless.IsChecked = false;
                     _zoomCheckbox.IsChecked = false;
                     _savezoomCheckbox.IsChecked = false;
                     _restorezoomCheckbox.IsChecked = false;
@@ -1804,6 +1807,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 ProfileManager.Current.GameWindowFullSize = _gameWindowFullsize.IsChecked;
             }
+
+            CUOEnviroment.Client.SetWindowBorderless(_windowBorderless.IsChecked);
+            ProfileManager.Current.WindowBorderless = _windowBorderless.IsChecked;
 
             ProfileManager.Current.UseAlternativeLights = _altLights.IsChecked;
             ProfileManager.Current.UseCustomLightLevel = _enableLight.IsChecked;

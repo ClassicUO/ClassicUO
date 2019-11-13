@@ -159,6 +159,39 @@ namespace ClassicUO
             _graphicDeviceManager.ApplyChanges();
         }
 
+        public void SetWindowBorderless(bool borderless)
+        {
+            SDL_SetWindowBordered(Window.Handle, borderless ? SDL_bool.SDL_FALSE : SDL_bool.SDL_TRUE);
+
+            SDL_DisplayMode displayMode;
+            SDL_GetCurrentDisplayMode(0, out displayMode);
+
+            int width = displayMode.w;
+            int height = displayMode.h;
+
+            if (borderless)
+            {
+                SetWindowSize(width, height);
+                SDL_SetWindowPosition(Window.Handle, 0, 0);
+            }
+            else
+            {
+                int top, left, bottom, right;
+                SDL_GetWindowBordersSize(Window.Handle, out top, out left, out bottom, out right);
+                SetWindowSize(width, height - (top - bottom));
+                SDL_SetWindowPosition(Window.Handle, 0, top - bottom);
+            }
+
+            var viewport = UIManager.GetGump<WorldViewportGump>();
+
+            if (viewport != null && ProfileManager.Current.GameWindowFullSize)
+            {
+                viewport.ResizeGameWindow(new Point(width, height));
+                viewport.X = -5;
+                viewport.Y = -5;
+            }
+        }
+
         public void MaximizeWindow()
         {
             SDL.SDL_MaximizeWindow(Window.Handle);
@@ -401,6 +434,8 @@ namespace ClassicUO
                 viewport.X = -5;
                 viewport.Y = -5;
             }
+
+            if (ProfileManager.Current.WindowBorderless) SetWindowBorderless(true);
         }
 
         private unsafe void HandleSDLEvent(ref SDL.SDL_Event e)
