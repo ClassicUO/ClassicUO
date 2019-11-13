@@ -1560,14 +1560,15 @@ namespace ClassicUO.Network
             int distance = Math.Max(distX, distY);
 
             float volume = ProfileManager.Current.SoundVolume / Constants.SOUND_DELTA;
+            float distanceFactor = 0.0f;
 
             if (distance <= World.ClientViewRange && distance >= 1)
             {
                 float volumeByDist = volume / World.ClientViewRange;
-                volume -= volumeByDist * distance;
+                distanceFactor = volumeByDist * distance;
             }
 
-            CUOEnviroment.Client.Scene.Audio.PlaySoundWithDistance(index, volume, true);
+            CUOEnviroment.Client.Scene.Audio.PlaySoundWithDistance(index, volume, distanceFactor, true);
         }
 
         private static void PlayMusic(Packet p)
