@@ -52,6 +52,29 @@ namespace ClassicUO.Game.Managers
             }
 
             _currentSounds = new List<UOSound>();
+
+            CUOEnviroment.Client.Activated += OnWindowActivated;
+            CUOEnviroment.Client.Deactivated += OnWindowDeactivated;
+        }
+
+        private void OnWindowDeactivated(object sender, System.EventArgs e)
+        {
+            if (ProfileManager.Current == null || ProfileManager.Current.ReproduceSoundsInBackground) return;
+
+            for (int i = 0; i < _currentSounds.Count; i++)
+            {
+                _currentSounds[i].Mute();
+            }
+        }
+
+        private void OnWindowActivated(object sender, System.EventArgs e)
+        {
+            if (ProfileManager.Current == null || ProfileManager.Current.ReproduceSoundsInBackground) return;
+
+            for (int i = 0; i < _currentSounds.Count; i++)
+            {
+                _currentSounds[i].Unmute();
+            }
         }
 
         public void PlaySound(int index, AudioEffects effect = AudioEffects.None, bool spamCheck = false)
@@ -78,12 +101,12 @@ namespace ClassicUO.Game.Managers
 
             if (sound != null)
             {
-                sound.Play(true, effect, volume, spamCheck);
+                sound.Play(true, effect, volume, 0.0f, spamCheck);
                 _currentSounds.Add(sound);
             }
         }
 
-        public void PlaySoundWithDistance(int index, float volume, bool spamCheck = false)
+        public void PlaySoundWithDistance(int index, float volume, float distanceFactor = 0.0f, bool spamCheck = false)
         {
             if (!_canReproduceAudio)
                 return;
@@ -100,7 +123,7 @@ namespace ClassicUO.Game.Managers
 
             if (sound != null)
             {
-                sound.Play(true, AudioEffects.None, volume, spamCheck);
+                sound.Play(true, AudioEffects.None, volume, distanceFactor, spamCheck);
                 _currentSounds.Add(sound);
             }
         }
@@ -228,14 +251,6 @@ namespace ClassicUO.Game.Managers
                 if (!sound.IsPlaying())
                 {
                     _currentSounds.RemoveAt(i--);
-                }
-                else
-                {
-                    if (CUOEnviroment.Client.IsActive)
-                    {
-                        if (ProfileManager.Current != null && !ProfileManager.Current.ReproduceSoundsInBackground) sound.Volume = ProfileManager.Current.SoundVolume / Constants.SOUND_DELTA;
-                    }
-                    else if (ProfileManager.Current != null && (!ProfileManager.Current.ReproduceSoundsInBackground && sound.Volume != 0)) sound.Volume = 0;
                 }
             }
         }
