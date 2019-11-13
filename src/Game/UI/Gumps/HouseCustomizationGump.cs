@@ -1779,14 +1779,14 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 house.ClearCustomHouseComponents(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL);
 
-                foreach (Multi component in house.Components)
+                foreach (Multi item in house.Components)
                 {
-                    if (!component.IsCustom)
+                    if (!item.IsCustom)
                         continue;
 
                     int currentFloor = -1;
                     int floorZ = foundationItem.Z + 7;
-                    int itemZ = component.Z;
+                    int itemZ = item.Z;
 
                     for (int i = 0; i < 4; i++)
                     {
@@ -1797,6 +1797,8 @@ namespace ClassicUO.Game.UI.Gumps
                             currentFloor = i;
                             break;
                         }
+
+                        floorZ += 20;
                     }
 
                     if (currentFloor == -1)
@@ -1804,9 +1806,9 @@ namespace ClassicUO.Game.UI.Gumps
                         continue;
                     }
 
-                    (int floorCheck1, int floorCheck2) = SeekGraphicInCustomHouseObjectList(_floors, component.Graphic);
+                    (int floorCheck1, int floorCheck2) = SeekGraphicInCustomHouseObjectList(_floors, item.Graphic);
 
-                    var state = component.State;
+                    var state = item.State;
 
                     if (floorCheck1 != -1 && floorCheck2 != -1)
                     {
@@ -1824,7 +1826,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        (int stairCheck1, int stairCheck2) = SeekGraphicInCustomHouseObjectList(_stairs, component.Graphic);
+                        (int stairCheck1, int stairCheck2) = SeekGraphicInCustomHouseObjectList(_stairs, item.Graphic);
 
                         if (stairCheck1 != -1 && stairCheck2 != -1)
                         {
@@ -1832,7 +1834,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            (int roofCheck1, int roofCheck2) = SeekGraphicInCustomHouseObjectListWithCategory<CustomHouseRoof, CustomHouseRoofCategory>(_roofs, component.Graphic);
+                            (int roofCheck1, int roofCheck2) = SeekGraphicInCustomHouseObjectListWithCategory<CustomHouseRoof, CustomHouseRoofCategory>(_roofs, item.Graphic);
 
                             if (roofCheck1 != -1 && roofCheck2 != -1)
                             {
@@ -1840,11 +1842,11 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                             else
                             {
-                                (int fixtureCheck1, int fixtureCheck2) = SeekGraphicInCustomHouseObjectList(_doors, component.Graphic);
+                                (int fixtureCheck1, int fixtureCheck2) = SeekGraphicInCustomHouseObjectList(_doors, item.Graphic);
 
                                 if (fixtureCheck1 == -1 || fixtureCheck2 == -1)
                                 {
-                                    (fixtureCheck1, fixtureCheck2) = SeekGraphicInCustomHouseObjectList(_teleports, component.Graphic);
+                                    (fixtureCheck1, fixtureCheck2) = SeekGraphicInCustomHouseObjectList(_teleports, item.Graphic);
 
                                     if (fixtureCheck1 != -1 && fixtureCheck2 != -1)
                                     {
@@ -1868,8 +1870,15 @@ namespace ClassicUO.Game.UI.Gumps
                             state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
                         }
 
-                        component.State = state;
+                        item.State = state;
                     }
+
+                    if (_floorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_ALL)
+                    {
+                        state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
+                    }
+
+                    item.State = state;
                 }
 
                 int z = foundationItem.Z + 7;
@@ -1982,7 +1991,7 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                         }
 
-                        if (i != 0 && j != 0)
+                        if (i != 0 && j == 0)
                         {
                             foreach (Point point in validatedFloors)
                             {
@@ -2185,7 +2194,7 @@ namespace ClassicUO.Game.UI.Gumps
             return false;
         }
 
-        private bool ValidateItemPlace(Rectangle rect, ushort grpahic , int x, int y)
+        private bool ValidateItemPlace(Rectangle rect, ushort graphic , int x, int y)
         {
             
             return false;
