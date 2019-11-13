@@ -24,8 +24,10 @@
 using System;
 using System.IO;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -92,7 +94,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            Engine.UI.SavePosition(LocalSerial, Location);
+            UIManager.SavePosition(LocalSerial, Location);
 
             if (Mobile == World.Player)
             {
@@ -114,7 +116,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseEnter(int x, int y)
         {
-            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+            GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
 
             if (gs.IsHoldingItem)
             {
@@ -208,7 +210,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _racialAbilitiesBook.MouseDoubleClick += (sender, e) =>
                         {
-                            if (Engine.UI.GetGump<RacialAbilitiesBookGump>() == null) Engine.UI.Add(new RacialAbilitiesBookGump(100, 100));
+                            if (UIManager.GetGump<RacialAbilitiesBookGump>() == null) UIManager.Add(new RacialAbilitiesBookGump(100, 100));
                         };
                         profileX += SCROLLS_STEP;
                     }
@@ -270,7 +272,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+            GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
 
             if (!gs.IsHoldingItem || !gs.IsMouseOverUI || _paperDollInteractable.IsOverBackpack)
                 return;
@@ -306,10 +308,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (args.Button == MouseButton.Left)
             {
-                var party = Engine.UI.GetGump<PartyGumpAdvanced>();
+                var party = UIManager.GetGump<PartyGumpAdvanced>();
 
                 if (party == null)
-                    Engine.UI.Add(new PartyGumpAdvanced());
+                    UIManager.Add(new PartyGumpAdvanced());
                 else
                     party.BringOnTop();
             }
@@ -372,7 +374,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(reader);
             LocalSerial = reader.ReadUInt32();
-            Engine.SceneManager.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
+            CUOEnviroment.Client.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
             Dispose();
         }
 
@@ -392,14 +394,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case Buttons.Options:
 
-                    OptionsGump gump = Engine.UI.GetGump<OptionsGump>();
+                    OptionsGump gump = UIManager.GetGump<OptionsGump>();
 
                     if (gump == null)
                     {
-                        Engine.UI.Add(new OptionsGump
+                        UIManager.Add(new OptionsGump
                         {
-                            X = (Engine.WindowWidth >> 1) - 300,
-                            Y = (Engine.WindowHeight >> 1) - 250
+                            X = (CUOEnviroment.Client.Window.ClientBounds.Width >> 1) - 300,
+                            Y = (CUOEnviroment.Client.Window.ClientBounds.Height >> 1) - 250
                         });
                     }
                     else
@@ -412,7 +414,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.LogOut:
-                    Engine.SceneManager.GetScene<GameScene>()?.RequestQuitGame();
+                    CUOEnviroment.Client.GetScene<GameScene>()?.RequestQuitGame();
 
                     break;
 
@@ -442,7 +444,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (Mobile == World.Player)
                     {
-                        Engine.UI.GetGump<BaseHealthBarGump>(Mobile)?.Dispose();
+                        UIManager.GetGump<BaseHealthBarGump>(Mobile)?.Dispose();
 
                         StatusGumpBase status = StatusGumpBase.GetStatusGump();
 
@@ -453,16 +455,16 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        if (Engine.UI.GetGump<BaseHealthBarGump>(Mobile) != null)
+                        if (UIManager.GetGump<BaseHealthBarGump>(Mobile) != null)
                             break;
 
                         GameActions.RequestMobileStatus(Mobile);
 
-                        if (Engine.Profile.Current.CustomBarsToggled)
+                        if (ProfileManager.Current.CustomBarsToggled)
                         {
                             Rectangle bounds = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
 
-                            Engine.UI.Add(new HealthBarGumpCustom(Mobile)
+                            UIManager.Add(new HealthBarGumpCustom(Mobile)
                             {
                                 X = Mouse.Position.X - (bounds.Width >> 1),
                                 Y = Mouse.Position.Y - 5
@@ -472,7 +474,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             Rectangle bounds = FileManager.Gumps.GetTexture(0x0804).Bounds;
 
-                            Engine.UI.Add(new HealthBarGump(Mobile)
+                            UIManager.Add(new HealthBarGump(Mobile)
                             {
                                 X = Mouse.Position.X - (bounds.Width >> 1),
                                 Y = Mouse.Position.Y - 5

@@ -36,6 +36,16 @@ namespace ClassicUO.Game.GameObjects
     internal sealed partial class Land : GameObject
     {
         private static readonly Queue<Land> _pool = new Queue<Land>();
+        static Land()
+        {
+            for (int i = 0; i < 1000; i++)
+                _pool.Enqueue(new Land());
+        }
+
+        private Land()
+        {
+
+        }
 
         public Land(Graphic graphic)
         {
@@ -81,12 +91,9 @@ namespace ClassicUO.Game.GameObjects
         public Rectangle Rectangle;
         public ref readonly LandTiles TileData => ref FileManager.TileData.LandData[Graphic];
 
-        public sbyte MinZ { get; set; }
-
-        public sbyte AverageZ { get; set; }
-
-        public bool IsStretched { get; set; }
-        
+        public sbyte MinZ;
+        public sbyte AverageZ;
+        public bool IsStretched;
 
         public void UpdateZ(int zTop, int zRight, int zBottom, sbyte currentZ)
         {

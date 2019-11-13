@@ -26,11 +26,11 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 
 using ClassicUO.Utility.Logging;
+using ClassicUO.Utility;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -68,7 +68,7 @@ namespace ClassicUO.Network
                 if (IsDownloading)
                 {
                     Console.WriteLine();
-                    Log.Message(LogTypes.Trace, "Download finished!");
+                    Log.Trace( "Download finished!");
                 }
             };
         }
@@ -119,7 +119,7 @@ namespace ClassicUO.Network
             }
             catch (Exception e)
             {
-                Log.Message(LogTypes.Error, "UPDATER EXCEPTION: " + e);
+                Log.Error( "UPDATER EXCEPTION: " + e);
 
                 _client.DownloadProgressChanged -= ClientOnDownloadProgressChanged;
             }
@@ -134,7 +134,7 @@ namespace ClassicUO.Network
 
             Interlocked.Increment(ref _countDownload);
 
-            Log.Message(LogTypes.Trace, "Checking update...");
+            Log.Trace( "Checking update...");
 
             Reset();
 
@@ -143,7 +143,7 @@ namespace ClassicUO.Network
             JArray data = JsonConvert.DeserializeObject<JArray>(json);
 
 #if DEV_BUILD
-            FileInfo fileLastCommit = new FileInfo(Path.Combine(Engine.ExePath, "version.txt"));
+            FileInfo fileLastCommit = new FileInfo(Path.Combine(CUOEnviroment.ExecutablePath, "version.txt"));
 #endif
             
 
@@ -151,7 +151,7 @@ namespace ClassicUO.Network
             {
                 string tagName = releaseToken["tag_name"].ToString();
 
-                Log.Message(LogTypes.Trace, "Fetching: " + tagName);
+                Log.Trace( "Fetching: " + tagName);
 
 #if DEV_BUILD
                 if (tagName == "ClassicUO-dev-preview")
@@ -172,9 +172,9 @@ namespace ClassicUO.Network
                         break;
                     }
 #else
-                if (Version.TryParse(tagName, out Version version) && version > Engine.Version)
+                if (Version.TryParse(tagName, out Version version) && version > CUOEnviroment.Version)
                 {
-                    Log.Message(LogTypes.Trace, "Found new version available: " + version);
+                    Log.Trace( "Found new version available: " + version);
 
 #endif
                     string name = releaseToken["name"].ToString();
@@ -184,7 +184,7 @@ namespace ClassicUO.Network
 
                     if (!asset.HasValues)
                     {
-                        Log.Message(LogTypes.Error, "No zip found for: " + name);
+                        Log.Error( "No zip found for: " + name);
 
                         continue;
                     }
@@ -202,8 +202,8 @@ namespace ClassicUO.Network
                     }
                     catch
                     {
-                        Log.Message(LogTypes.Warning, "Impossible to retrive OS temp path. CUO will use current path");
-                        temp = Engine.ExePath;
+                        Log.Warn( "Impossible to retrive OS temp path. CUO will use current path");
+                        temp = CUOEnviroment.ExecutablePath;
                     }
 
                     string tempPath = Path.Combine(temp, "update-temp");
@@ -212,24 +212,31 @@ namespace ClassicUO.Network
                     if (!Directory.Exists(tempPath))
                         Directory.CreateDirectory(tempPath);
 
-                    Log.Message(LogTypes.Trace, "Downloading: " + assetName);
+                    Log.Trace( "Downloading: " + assetName);
 
                     _client.DownloadProgressChanged += ClientOnDownloadProgressChanged;
 
                     _client.DownloadFile(downloadUrl, zipFile);
 
-                    Log.Message(LogTypes.Trace, assetName + "..... done");
+                    Log.Trace( assetName + "..... done");
 
                     _client.DownloadProgressChanged -= ClientOnDownloadProgressChanged;
 
                     Reset();
 
-                    ZipFile.ExtractToDirectory(zipFile, tempPath);
+                    try
+                    {
+                        using (ZipArchive zip = new ZipArchive(File.OpenRead(zipFile)))
+                            zip.ExtractToDirectory(tempPath, true);
 
-                    File.Delete(zipFile);
-
+                        File.Delete(zipFile);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error( "[UPDATER ERROR]: impossible to update.\n" + ex);
+                    }
+                    
                     string prefix = Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? "mono " : string.Empty;
-
 
                     new Process
                     {
@@ -239,7 +246,7 @@ namespace ClassicUO.Network
                             FileName = prefix + Path.Combine(tempPath, "ClassicUO.exe"),
                             UseShellExecute = false,
                             Arguments =
-                                $"--source \"{Engine.ExePath}\" --pid {Process.GetCurrentProcess().Id} --action update"
+                                $"--source \"{CUOEnviroment.ExecutablePath}\" --pid {Process.GetCurrentProcess().Id} --action update"
                         }
                     }.Start();
 

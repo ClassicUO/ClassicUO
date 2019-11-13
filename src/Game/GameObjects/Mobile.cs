@@ -24,6 +24,7 @@
 using System;
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -40,23 +41,6 @@ using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public enum RaceType : byte
-    {
-        HUMAN = 1,
-        ELF,
-        GARGOYLE
-    }
-
-    public enum CharacterSpeedType
-    {
-        Normal,
-        FastUnmount,
-        CantRun,
-        FastUnmountAndCantRun
-    }
-
-
-
     internal partial class Mobile : Entity
     {
         private bool _isDead;
@@ -65,15 +49,15 @@ namespace ClassicUO.Game.GameObjects
 
         public Mobile(Serial serial) : base(serial)
         {
-            LastAnimationChangeTime = Engine.Ticks;
+            LastAnimationChangeTime = Time.Ticks;
             CalculateRandomIdleTime();
         }
 
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);
 
-        public CharacterSpeedType SpeedMode { get; internal set; } = CharacterSpeedType.Normal;
+        public CharacterSpeedType SpeedMode = CharacterSpeedType.Normal;
 
-        public long DeathScreenTimer { get; set; }
+        public long DeathScreenTimer;
 
         private bool _isMale;
 
@@ -88,19 +72,19 @@ namespace ClassicUO.Game.GameObjects
         public bool IsOtherFemale => Graphic == 184 || Graphic == 186;
         public bool IsElfFemale => Graphic == 606 || Graphic == 608;
 
-        public RaceType Race { get; set; }
+        public RaceType Race;
 
-        public ushort Mana { get; set; }
+        public ushort Mana;
 
-        public ushort ManaMax { get; set; }
+        public ushort ManaMax;
 
-        public ushort Stamina { get; set; }
+        public ushort Stamina;
 
-        public ushort StaminaMax { get; set; }
+        public ushort StaminaMax;
 
-        public NotorietyFlag NotorietyFlag { get; set; }
+        public NotorietyFlag NotorietyFlag;
 
-        public bool IsRenamable { get; set; }
+        public bool IsRenamable;
 
         public bool IsParalyzed => ((byte) Flags & 0x01) != 0;
 
@@ -150,29 +134,29 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public bool IsRunning { get; internal set; }
+        public bool IsRunning;
 
-        public byte AnimationInterval { get; set; }
+        public byte AnimationInterval;
 
-        public byte AnimationFrameCount { get; set; }
+        public byte AnimationFrameCount;
 
-        public byte AnimationRepeatMode { get; set; } = 1;
+        public byte AnimationRepeatMode = 1;
 
-        public bool AnimationRepeat { get; set; }
+        public bool AnimationRepeat;
 
-        public bool AnimationFromServer { get; set; }
+        public bool AnimationFromServer;
 
-        public bool AnimationDirection { get; set; }
+        public bool AnimationDirection;
 
-        public long LastStepTime { get; set; }
+        public long LastStepTime;
 
-        public long LastStepSoundTime { get; set; }
+        public long LastStepSoundTime;
 
-        public int StepSoundOffset { get; set; }
+        public int StepSoundOffset;
 
-        protected virtual bool IsWalking => LastStepTime > Engine.Ticks - Constants.WALKING_DELAY;
+        protected virtual bool IsWalking => LastStepTime > Time.Ticks - Constants.WALKING_DELAY;
 
-        public byte AnimationGroup { get; set; } = 0xFF;
+        public byte AnimationGroup = 0xFF;
 
         //internal bool IsMoving => AnimationGroup != 0xFF && Steps.Count != 0;
 
@@ -189,7 +173,7 @@ namespace ClassicUO.Game.GameObjects
         private void CalculateRandomIdleTime()
         {
             const int TIME = 30000;
-            _lastAnimationIdleDelay = Engine.Ticks + (TIME + RandomHelper.GetValue(0, TIME));
+            _lastAnimationIdleDelay = Time.Ticks + (TIME + RandomHelper.GetValue(0, TIME));
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -199,7 +183,7 @@ namespace ClassicUO.Game.GameObjects
 
             base.Update(totalMS, frameMS);
 
-            if (_lastAnimationIdleDelay < Engine.Ticks)
+            if (_lastAnimationIdleDelay < Time.Ticks)
                 SetIdleAnimation();
 
             ProcessAnimation(out _, true);
@@ -224,7 +208,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (!IsWalking)
                     SetAnimation(0xFF);
-                LastStepTime = Engine.Ticks;
+                LastStepTime = Time.Ticks;
             }
 
             Direction moveDir = CalculateDirection(endX, endY, x, y);
@@ -327,7 +311,7 @@ namespace ClassicUO.Game.GameObjects
             AnimationRepeat = repeat;
             AnimationDirection = frameDirection;
             AnimationFromServer = false;
-            LastAnimationChangeTime = Engine.Ticks;
+            LastAnimationChangeTime = Time.Ticks;
             CalculateRandomIdleTime();
         }
 
@@ -445,14 +429,14 @@ namespace ClassicUO.Game.GameObjects
 
         protected virtual bool NoIterateAnimIndex()
         {
-            return LastStepTime > Engine.Ticks - Constants.WALKING_DELAY && Steps.Count == 0;
+            return LastStepTime > Time.Ticks - Constants.WALKING_DELAY && Steps.Count == 0;
         }
 
         private void ProcessFootstepsSound()
         {
-            if (Engine.Profile.Current.EnableFootstepsSound && IsHuman && !IsHidden)
+            if (ProfileManager.Current.EnableFootstepsSound && IsHuman && !IsHidden)
             {
-                long ticks = Engine.Ticks;
+                long ticks = Time.Ticks;
 
                 if (Steps.Count != 0 && LastStepSoundTime < ticks)
                 {
@@ -484,7 +468,7 @@ namespace ClassicUO.Game.GameObjects
 
                     int distance = Distance;
 
-                    float volume = Engine.Profile.Current.SoundVolume / Constants.SOUND_DELTA;
+                    float volume = ProfileManager.Current.SoundVolume / Constants.SOUND_DELTA;
 
                     if (distance <= World.ClientViewRange && distance >= 1)
                     {
@@ -492,7 +476,7 @@ namespace ClassicUO.Game.GameObjects
                         volume -= volumeByDist * distance;
                     }
 
-                    Engine.SceneManager.CurrentScene.Audio.PlaySoundWithDistance(soundID, volume);
+                    CUOEnviroment.Client.Scene.Audio.PlaySoundWithDistance(soundID, volume);
                     LastStepSoundTime = ticks + delaySound;
                 }
             }
@@ -504,7 +488,7 @@ namespace ClassicUO.Game.GameObjects
 
             ProcessFootstepsSound();
 
-            if (LastAnimationChangeTime < Engine.Ticks && !NoIterateAnimIndex())
+            if (LastAnimationChangeTime < Time.Ticks && !NoIterateAnimIndex())
             {
                 sbyte frameIndex = AnimIndex;
 
@@ -521,21 +505,21 @@ namespace ClassicUO.Game.GameObjects
                     AnimationGroup = animGroup;
                 }
 
-                Item mount = HasEquipment ? Equipment[(int) Layer.Mount] : null;
+                //Item mount = HasEquipment ? Equipment[(int) Layer.Mount] : null;
 
-                if (mount != null)
-                {
-                    switch (animGroup)
-                    {
-                        case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1:
-                        case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2:
-                        case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3:
-                            id = mount.GetGraphicForAnimation();
-                            animGroup = GetGroupForAnimation(this, id, true);
+                //if (mount != null)
+                //{
+                //    switch (animGroup)
+                //    {
+                //        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1:
+                //        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2:
+                //        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3:
+                //            id = mount.GetGraphicForAnimation();
+                //            animGroup = GetGroupForAnimation(this, id, true);
 
-                            break;
-                    }
-                }
+                //            break;
+                //    }
+                //}
 
                 bool mirror = false;
                 FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
@@ -555,7 +539,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if ((direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1) || direction.IsUOP)
                     {
-                        direction.LastAccessTime = Engine.Ticks;
+                        direction.LastAccessTime = Time.Ticks;
                         int fc = direction.FrameCount;
 
                         if (AnimationFromServer)
@@ -642,7 +626,7 @@ namespace ClassicUO.Game.GameObjects
                     World.RemoveMobile(Serial);
                 }
 
-                LastAnimationChangeTime = Engine.Ticks + currentDelay;
+                LastAnimationChangeTime = Time.Ticks + currentDelay;
             }
         }
 
@@ -664,8 +648,8 @@ namespace ClassicUO.Game.GameObjects
                     if (AnimationFromServer)
                         SetAnimation(0xFF);
 
-                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (int) Engine.FrameDelay[1];
-                    int delay = (int) Engine.Ticks - (int) LastStepTime;
+                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (int) CUOEnviroment.Client.FrameDelay[1];
+                    int delay = (int) Time.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
 
@@ -772,7 +756,7 @@ namespace ClassicUO.Game.GameObjects
                         if (Right != null || Left != null)
                             AddToTile();
 
-                        LastStepTime = Engine.Ticks;
+                        LastStepTime = Time.Ticks;
                         ProcessDelta();
                     }
                 }
@@ -942,13 +926,13 @@ namespace ClassicUO.Game.GameObjects
 
             int offY = 0;
 
-            bool health = Engine.Profile.Current.ShowMobilesHP;
-            int alwaysHP = Engine.Profile.Current.MobileHPShowWhen;
-            int mode = Engine.Profile.Current.MobileHPType;
+            bool health = ProfileManager.Current.ShowMobilesHP;
+            int alwaysHP = ProfileManager.Current.MobileHPShowWhen;
+            int mode = ProfileManager.Current.MobileHPType;
 
-            int startX = Engine.Profile.Current.GameWindowPosition.X + 6;
-            int startY = Engine.Profile.Current.GameWindowPosition.Y + 6;
-            var scene = Engine.SceneManager.GetScene<GameScene>();
+            int startX = ProfileManager.Current.GameWindowPosition.X + 6;
+            int startY = ProfileManager.Current.GameWindowPosition.Y + 6;
+            var scene = CUOEnviroment.Client.GetScene<GameScene>();
             float scale = scene?.Scale ?? 1;
 
             int x = RealScreenPosition.X;
@@ -959,6 +943,9 @@ namespace ClassicUO.Game.GameObjects
             {
                 y -= 22;
             }
+
+            if (ObjectHandlesOpened)
+                y -= 22;
 
             if (!IsMounted)
                 y += 22;
@@ -973,23 +960,24 @@ namespace ClassicUO.Game.GameObjects
                                                           out int centerY,
                                                           out _,
                                                           out int height);
-            x += (int)Offset.X;
-            x += 22;
+            x += (int)Offset.X + 22;
             y += (int)(Offset.Y - Offset.Z - (height + centerY + 8));
+            x = (int) (x / scale);
+            y = (int) (y / scale);
 
             for (; last != null; last = last.ListLeft)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                 {
-                    if (offY == 0 && last.Time < Engine.Ticks)
+                    if (offY == 0 && last.Time < Time.Ticks)
                         continue;
 
 
                     last.OffsetY = offY;
                     offY += last.RenderedText.Height;
 
-                    last.RealScreenPosition.X = startX + (int)((x - (last.RenderedText.Width >> 1)) / scale);
-                    last.RealScreenPosition.Y = startY + (int)((y - offY) / scale);
+                    last.RealScreenPosition.X = startX + (x - (last.RenderedText.Width >> 1));
+                    last.RealScreenPosition.Y = startY + (y - offY);
                 }
             }
 

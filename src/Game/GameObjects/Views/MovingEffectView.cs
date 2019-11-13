@@ -21,6 +21,9 @@
 
 #endregion
 
+using System;
+
+using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -44,26 +47,25 @@ namespace ClassicUO.Game.GameObjects
             {
                 _displayedGraphic = AnimationGraphic;
                 Texture = FileManager.Art.GetTexture(AnimationGraphic);
-                Bounds.X = 0;
-                Bounds.Y = 0;
+                Bounds.X = -((Texture.Width >> 1) - 22);
+                Bounds.Y = -(Texture.Height - 44);
                 Bounds.Width = Texture.Width;
                 Bounds.Height = Texture.Height;
             }
 
-            int x = posX + (int) Offset.X;
-            int y = posY + (int) (Offset.Y + Offset.Z);
-            x += 22;
-            y += 22;
-            //Bounds.X = (int) -Offset.X + 0;
-            //Bounds.Y = (int) (Offset.Z - Offset.Y) + 0;
-            Rotation = AngleToTarget;
 
-            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            posX += (int) Offset.X;
+            posY += (int) (Offset.Y + Offset.Z);
+
+            //posX += 22;
+            //posY += 22;
+
+            if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 HueVector.X = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;
             }
-            else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
                 HueVector.X = Constants.DEAD_RANGE_COLOR;
                 HueVector.Y = 1;
@@ -71,15 +73,22 @@ namespace ClassicUO.Game.GameObjects
             else
                 ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
 
-            Engine.DebugInfo.EffectsRendered++;
-            base.Draw(batcher, x, y);
+            //Engine.DebugInfo.EffectsRendered++;
+
+            if (FixedDir)
+                batcher.DrawSprite(Texture, posX, posY, false, ref HueVector);
+            else
+                batcher.DrawSpriteRotated(Texture, posX, posY, Bounds.X, Bounds.Y, ref HueVector, AngleToTarget);
+
+            //Select(posX, posY);
+            Texture.Ticks = Time.Ticks;
 
             ref readonly StaticTiles data = ref FileManager.TileData.StaticData[_displayedGraphic];
 
-            if (data.IsLight && (Source is Item || Source is Static || Source is Multi))
+            if (data.IsLight && Source != null)
             {
-                Engine.SceneManager.GetScene<GameScene>()
-                      .AddLight(Source, Source, x, y);
+                CUOEnviroment.Client.GetScene<GameScene>()
+                      .AddLight(Source, Source, posX + 22, posY + 22);
             }
 
             return true;

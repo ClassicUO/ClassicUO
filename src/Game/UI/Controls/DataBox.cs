@@ -35,5 +35,10 @@ namespace ClassicUO.Game.UI.Controls
             Height = h;
             WantUpdateSize = false;
         }
+
+    //    public override void OnButtonClick(int buttonID)
+    //    {
+    //        Parent?.OnButtonClick(buttonID);
+    //    }
     }
 }

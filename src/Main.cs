@@ -4,42 +4,133 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+
+using SDL2;
 
 namespace ClassicUO
 {
     static class Bootstrap
     {
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetDllDirectory(string lpPathName);
+
+
         static void Main(string[] args)
         {
-            Engine.Configure();
+            // - check for update
+            // - launcher & user setup
+            // - game setup 
+            // - game launch
+            // - enjoy
+
+            Log.Start(LogTypes.All);
+
+            CUOEnviroment.GameThread = Thread.CurrentThread;
+            CUOEnviroment.GameThread.Name = "CUO_MAIN_THREAD";
+
+
+#if !DEBUG
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            {
+                StringBuilder sb = new StringBuilder();
+#if DEV_BUILD
+                sb.AppendFormat("ClassicUO [dev] - v{0}\nOS: {1} {2}\nThread: {3}\n\n", CUOEnviroment.Version, Environment.OSVersion.Platform, Environment.Is64BitOperatingSystem ? "x64" : "x86", Thread.CurrentThread.Name);
+#else
+                sb.AppendFormat("ClassicUO - v{0}\nOS: {1} {2}\nThread: {3}\n\n", CUOEnviroment.Version, Environment.OSVersion.Platform, Environment.Is64BitOperatingSystem ? "x64" : "x86", Thread.CurrentThread.Name);
+#endif
+                sb.AppendFormat("Exception:\n{0}", e.ExceptionObject);
+
+                Log.Panic(e.ExceptionObject.ToString());
+                string path = Path.Combine(CUOEnviroment.ExecutablePath, "Logs");
+
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                using (LogFile crashfile = new LogFile(path, "crash.txt"))
+                {
+                    crashfile.WriteAsync(sb.ToString()).RunSynchronously();
+
+                    //SDL.SDL_ShowSimpleMessageBox(
+                    //                             SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
+                    //                             "An error occurred",
+                    //                             $"{crashfile}\ncreated in /Logs.",
+                    //                             SDL.SDL_GL_GetCurrentWindow()
+                    //                            );
+                }
+            };
+#endif
 
 #if DEV_BUILD
             Updater updater = new Updater();
             if (updater.Check())
                 return;
 #endif
-            ParseMainArgs(args);
+            ReadSettingsFromArgs(args);
 
             if (!SkipUpdate)
                 if (CheckUpdate(args))
                     return;
 
-            Engine.Run(args);
+            Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI",  CUOEnviroment.IsHighDPI ? "1" : "0");
+            Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
+            Environment.SetEnvironmentVariable("FNA_OPENGL_FORCE_COMPATIBILITY_PROFILE", "1");
+            Environment.SetEnvironmentVariable(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
+            Environment.SetEnvironmentVariable("PATH", Environment.GetEnvironmentVariable("PATH") + ";" + Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Plugins"));
+
+          
+            string globalSettingsPath = Settings.GetSettingsFilepath();
+
+            if ((!Directory.Exists(Path.GetDirectoryName(globalSettingsPath)) ||
+                                                       !File.Exists(globalSettingsPath)))
+            {
+                // settings specified in path does not exists, make new one
+                {
+                    // TODO: 
+                    Settings.GlobalSettings.Save();
+                    return;
+                }
+            }
+
+            Settings.GlobalSettings = ConfigurationResolver.Load<Settings>(Settings.GetSettingsFilepath());
+
+            // still invalid, cannot load settings
+            if (Settings.GlobalSettings == null || !Settings.GlobalSettings.IsValid())
+            {
+                // TODO: 
+                Settings.GlobalSettings?.Save();
+                return;
+            }
+
+            if (!CUOEnviroment.IsUnix)
+            {
+                string libsPath = Path.Combine(CUOEnviroment.ExecutablePath, "libs", Environment.Is64BitProcess ? "x64" : "x86");
+                SetDllDirectory(libsPath);
+            }
+
+
+            CUOEnviroment.Client = new GameController();
+            CUOEnviroment.Client.Run();
+            CUOEnviroment.Client.Dispose();
+
+            Log.Trace("Closing...");
         }
 
         public static bool StartMinimized { get; set; }
         public static bool StartInLittleWindow { get; set; }
         public static bool SkipUpdate { get; set; }
 
-        private static void ParseMainArgs(string[] args)
+        private static void ReadSettingsFromArgs(string[] args)
         {
             for (int i = 0; i <= args.Length - 1; i++)
             {
@@ -52,7 +143,7 @@ namespace ClassicUO
                 cmd = cmd.Remove(0, 1);
                 string value = (i < args.Length - 1) ? args[i + 1] : null;
 
-                Log.Message(LogTypes.Trace, $"ARG: {cmd}, VALUE: {value}");
+                Log.Trace( $"ARG: {cmd}, VALUE: {value}");
 
                 switch (cmd)
                 {
@@ -75,13 +166,128 @@ namespace ClassicUO
                     case "skipupdate":
                         SkipUpdate = true;
                         break;
+
+
+
+                    case "username":
+                        Settings.GlobalSettings.Username = value;
+
+                        break;
+
+                    case "password":
+                        Settings.GlobalSettings.Password = Crypter.Encrypt(value);
+
+                        break;
+
+                    case "password_enc": // Non-standard setting, similar to `password` but for already encrypted password
+                        Settings.GlobalSettings.Password = value;
+
+                        break;
+
+                    case "ip":
+                        Settings.GlobalSettings.IP = value;
+
+                        break;
+
+                    case "port":
+                        Settings.GlobalSettings.Port = ushort.Parse(value);
+
+                        break;
+
+                    case "ultimaonlinedirectory":
+                    case "uopath":
+                        Settings.GlobalSettings.UltimaOnlineDirectory = value; // Required
+
+                        break;
+
+                    case "clientversion":
+                        Settings.GlobalSettings.ClientVersion = value; // Required
+
+                        break;
+
+                    case "lastcharactername":
+                    case "lastcharname":
+                        Settings.GlobalSettings.LastCharacterName = value;
+
+                        break;
+
+                    case "lastservernum":
+                        Settings.GlobalSettings.LastServerNum = ushort.Parse(value);
+
+                        break;
+
+                    case "fps":
+                        int v = int.Parse(value);
+
+                        if (v < Constants.MIN_FPS)
+                            v = Constants.MIN_FPS;
+                        else if (v > Constants.MAX_FPS)
+                            v = Constants.MAX_FPS;
+
+                        Settings.GlobalSettings.FPS = v;
+                        
+                        break;
+
+                    case "debug":
+                        CUOEnviroment.Debug = Settings.GlobalSettings.Debug = bool.Parse(value);
+                        
+                        break;
+
+                    case "profiler":
+                        Settings.GlobalSettings.Profiler = bool.Parse(value);
+
+                        break;
+
+                    case "saveaccount":
+                        Settings.GlobalSettings.SaveAccount = bool.Parse(value);
+
+                        break;
+
+                    case "autologin":
+                        Settings.GlobalSettings.AutoLogin = bool.Parse(value);
+
+                        break;
+
+                    case "reconnect":
+                        Settings.GlobalSettings.Reconnect = bool.Parse(value);
+
+                        break;
+
+                    case "reconnect_time":
+                        Settings.GlobalSettings.ReconnectTime = int.Parse(value);
+
+                        break;
+
+                    case "login_music":
+                    case "music":
+                        Settings.GlobalSettings.LoginMusic = bool.Parse(value);
+
+                        break;
+
+                    case "login_music_volume":
+                    case "music_volume":
+                        Settings.GlobalSettings.LoginMusicVolume = int.Parse(value);
+
+                        break;
+
+                    case "shard_type":
+                    case "shard":
+                        Settings.GlobalSettings.ShardType = int.Parse(value);
+
+                        break;
+
+                    case "fixed_time_step":
+                        Settings.GlobalSettings.FixedTimeStep = bool.Parse(value);
+
+                        break;
+
                 }
             }
         }
 
         private static bool CheckUpdate(string[] args)
         {
-            string currentPath = Engine.ExePath;
+            string currentPath = CUOEnviroment.ExecutablePath;
 
             string path = string.Empty;
             string action = string.Empty;
@@ -105,7 +311,7 @@ namespace ClassicUO
 
             if (action == "update")
             {
-                Log.Message(LogTypes.Trace, "ClassicUO Updating...", ConsoleColor.Yellow);
+                Log.Trace( "ClassicUO Updating...", ConsoleColor.Yellow);
 
                 try
                 {
@@ -167,7 +373,7 @@ namespace ClassicUO
                 {
                 }
 
-                Log.Message(LogTypes.Trace, "ClassicUO updated successfully!", ConsoleColor.Green);
+                Log.Trace( "ClassicUO updated successfully!", ConsoleColor.Green);
             }
 
             return false;

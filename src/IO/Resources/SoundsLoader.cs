@@ -32,7 +32,7 @@ using ClassicUO.IO.Audio;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class SoundsLoader : ResourceLoader
+    internal class SoundsLoader : UOFileLoader
     {
         private static readonly char[] _mConfigFileDelimiters = {' ', ',', '\t'};
         private static readonly Dictionary<int, Tuple<string, bool>> _mMusicData = new Dictionary<int, Tuple<string, bool>>();

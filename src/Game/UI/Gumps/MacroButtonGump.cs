@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -102,7 +103,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             Point offset = Mouse.LDroppedOffset;
 
-            if (Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left && !Keyboard.Alt && Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
+            if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButton.Left && !Keyboard.Alt && Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
             {
                 RunMacro();
             }
@@ -110,7 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            if (Engine.Profile.Current.CastSpellsByOneClick || button != MouseButton.Left)
+            if (ProfileManager.Current.CastSpellsByOneClick || button != MouseButton.Left)
                 return false;
 
             RunMacro();
@@ -122,7 +123,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_macro != null)
             {
-                GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+                GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
                 gs.Macros.SetMacroToExecute(_macro.FirstNode);
                 gs.Macros.WaitForTargetTimer = 0;
                 gs.Macros.Update();
@@ -147,7 +148,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if(_macro != null)
             {
-                int macroid = Engine.SceneManager.GetScene<GameScene>().Macros.GetAllMacros().IndexOf(_macro);
+                int macroid = CUOEnviroment.Client.GetScene<GameScene>().Macros.GetAllMacros().IndexOf(_macro);
 
                 LocalSerial = (uint) macroid + 1000;
 
@@ -166,7 +167,7 @@ namespace ClassicUO.Game.UI.Gumps
             string name = reader.ReadString();
             LocalSerial = reader.ReadUInt32();
 
-            Macro macro = Engine.SceneManager.GetScene<GameScene>().Macros.FindMacro(name);
+            Macro macro = CUOEnviroment.Client.GetScene<GameScene>().Macros.FindMacro(name);
 
             if (macro != null)
             {

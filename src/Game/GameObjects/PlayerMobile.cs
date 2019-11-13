@@ -3,9 +3,9 @@
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+//	The goal of this is to develop a lightweight client considering
+//	new technologies.
+//
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
@@ -64,99 +65,98 @@ namespace ClassicUO.Game.GameObjects
 
         public IReadOnlyDictionary<Graphic, BuffIcon> BuffIcons => _buffIcons;
 
-        public ushort Strength { get; set; }
+        public ushort Strength;
 
-        public ushort Intelligence { get; set; }
+        public ushort Intelligence;
 
-        public ushort Dexterity { get; set; }
+        public ushort Dexterity;
 
-        public ushort Weight { get; set; }
+        public ushort Weight;
 
-        public ushort WeightMax { get; set; }
+        public ushort WeightMax;
 
-        public uint Gold { get; set; }
+        public uint Gold;
 
-        public ushort PhysicalResistence { get; set; }
+        public ushort PhysicalResistence;
 
-        public ushort FireResistance { get; set; }
+        public ushort FireResistance;
 
-        public ushort ColdResistance { get; set; }
+        public ushort ColdResistance;
 
-        public ushort PoisonResistance { get; set; }
+        public ushort PoisonResistance;
 
-        public ushort EnergyResistance { get; set; }
+        public ushort EnergyResistance;
 
-        public byte Followers { get; set; }
+        public byte Followers;
 
-        public byte FollowersMax { get; set; }
+        public byte FollowersMax;
 
-        public ushort Luck { get; set; }
+        public ushort Luck;
 
-        public uint TithingPoints { get; set; }
+        public uint TithingPoints;
 
-        public ushort DamageMin { get; set; }
+        public ushort DamageMin;
 
-        public ushort DamageMax { get; set; }
+        public ushort DamageMax;
 
-        public ushort StatsCap { get; set; }
+        public ushort StatsCap;
 
-        public ushort HitChanceIncrease { get; set; }
+        public ushort HitChanceIncrease;
 
-        public ushort SwingSpeedIncrease { get; set; }
+        public ushort SwingSpeedIncrease;
 
-        public ushort DamageIncrease { get; set; }
+        public ushort DamageIncrease;
 
-        public ushort LowerReagentCost { get; set; }
+        public ushort LowerReagentCost;
 
-        public ushort HitPointsRegeneration { get; set; }
+        public ushort HitPointsRegeneration;
 
-        public ushort StaminaRegeneration { get; set; }
+        public ushort StaminaRegeneration;
 
-        public ushort ManaRegeneration { get; set; }
+        public ushort ManaRegeneration;
 
-        public ushort MaxPhysicResistence { get; set; }
+        public ushort MaxPhysicResistence;
 
-        public ushort MaxFireResistence { get; set; }
+        public ushort MaxFireResistence;
 
-        public ushort MaxColdResistence { get; set; }
+        public ushort MaxColdResistence;
 
-        public ushort MaxPoisonResistence { get; set; }
+        public ushort MaxPoisonResistence;
 
-        public ushort MaxEnergyResistence { get; set; }
+        public ushort MaxEnergyResistence;
 
-        public ushort MaxDefenseChanceIncrease { get; set; }
+        public ushort MaxDefenseChanceIncrease;
 
-        public ushort ReflectPhysicalDamage { get; set; }
+        public ushort ReflectPhysicalDamage;
 
-        public ushort EnhancePotions { get; set; }
+        public ushort EnhancePotions;
 
-        public ushort DefenseChanceIncrease { get; set; }
+        public ushort DefenseChanceIncrease;
+        public ushort SpellDamageIncrease;
 
-        public ushort SpellDamageIncrease { get; set; }
+        public ushort FasterCastRecovery;
 
-        public ushort FasterCastRecovery { get; set; }
+        public ushort FasterCasting;
 
-        public ushort FasterCasting { get; set; }
+        public ushort LowerManaCost;
 
-        public ushort LowerManaCost { get; set; }
+        public ushort StrengthIncrease;
 
-        public ushort StrengthIncrease { get; set; }
+        public ushort DexterityIncrease;
 
-        public ushort DexterityIncrease { get; set; }
+        public ushort IntelligenceIncrease;
 
-        public ushort IntelligenceIncrease { get; set; }
+        public ushort HitPointsIncrease;
 
-        public ushort HitPointsIncrease { get; set; }
+        public ushort StaminaIncrease;
 
-        public ushort StaminaIncrease { get; set; }
+        public ushort ManaIncrease;
 
-        public ushort ManaIncrease { get; set; }
+        public ushort MaxHitPointsIncrease;
 
-        public ushort MaxHitPointsIncrease { get; set; }
+        public ushort MaxStaminaIncrease;
 
-        public ushort MaxStaminaIncrease { get; set; }
-
-        public ushort MaxManaIncrease { get; set; }
+        public ushort MaxManaIncrease;
 
         public Ability PrimaryAbility
         {
@@ -170,18 +170,18 @@ namespace ClassicUO.Game.GameObjects
             set => Abilities[1] = value;
         }
 
-        public Ability[] Abilities { get; } = new Ability[2]
+        public Ability[] Abilities = new Ability[2]
         {
             Ability.Invalid, Ability.Invalid
         };
 
-        public Lock StrLock { get; set; }
+        public Lock StrLock;
 
-        public Lock DexLock { get; set; }
+        public Lock DexLock;
 
-        public Lock IntLock { get; set; }
+        public Lock IntLock;
 
-        protected override bool IsWalking => LastStepTime > Engine.Ticks - Constants.PLAYER_WALKING_DELAY;
+        protected override bool IsWalking => LastStepTime > Time.Ticks - Constants.PLAYER_WALKING_DELAY;
 
         public Item FindBandage()
         {
@@ -265,12 +265,12 @@ namespace ClassicUO.Game.GameObjects
                 skill.CapFixed = cap;
 
                 // check needed to avoid crash when you create a char
-                if (Engine.Profile != null && Engine.Profile.Current != null)
+                if (ProfileManager.Current != null)
                 {
-                    if (Engine.Profile.Current.StandardSkillsGump)
-                        Engine.UI.GetGump<StandardSkillsGump>()?.ForceUpdate(id);
+                    if (ProfileManager.Current.StandardSkillsGump)
+                        UIManager.GetGump<StandardSkillsGump>()?.ForceUpdate(id);
                     else
-                        Engine.UI.GetGump<SkillGumpAdvanced>()?.ForceUpdate();
+                        UIManager.GetGump<SkillGumpAdvanced>()?.ForceUpdate();
                 }
             }
         }
@@ -1263,15 +1263,15 @@ namespace ClassicUO.Game.GameObjects
 
         public void TryOpenCorpses()
         {
-            if (Engine.Profile.Current.AutoOpenCorpses)
+            if (ProfileManager.Current.AutoOpenCorpses)
             {
-                if ((Engine.Profile.Current.CorpseOpenOptions == 1 || Engine.Profile.Current.CorpseOpenOptions == 3) && TargetManager.IsTargeting)
+                if ((ProfileManager.Current.CorpseOpenOptions == 1 || ProfileManager.Current.CorpseOpenOptions == 3) && TargetManager.IsTargeting)
                     return;
 
-                if ((Engine.Profile.Current.CorpseOpenOptions == 2 || Engine.Profile.Current.CorpseOpenOptions == 3) && IsHidden)
+                if ((ProfileManager.Current.CorpseOpenOptions == 2 || ProfileManager.Current.CorpseOpenOptions == 3) && IsHidden)
                     return;
 
-                foreach (var c in World.Items.Where(t => t.Graphic == 0x2006 && !OpenedCorpses.Contains(t.Serial) && t.Distance <= Engine.Profile.Current.AutoOpenCorpseRange))
+                foreach (var c in World.Items.Where(t => t.Graphic == 0x2006 && !OpenedCorpses.Contains(t.Serial) && t.Distance <= ProfileManager.Current.AutoOpenCorpseRange))
                 {
                     OpenedCorpses.Add(c.Serial);
                     GameActions.DoubleClickQueued(c.Serial);
@@ -1288,7 +1288,7 @@ namespace ClassicUO.Game.GameObjects
 
         private void TryOpenDoors()
         {
-            if (!World.Player.IsDead && Engine.Profile.Current.AutoOpenDoors)
+            if (!World.Player.IsDead && ProfileManager.Current.AutoOpenDoors)
             {
                 int x = X, y = Y, z = Z;
                 Pathfinder.GetNewXY((byte) Direction, ref x, ref y);
@@ -1302,7 +1302,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Destroy()
         {
-            Log.Message(LogTypes.Warning, "PlayerMobile disposed!");
+            Log.Warn( "PlayerMobile disposed!");
             base.Destroy();
         }
 
@@ -1312,13 +1312,13 @@ namespace ClassicUO.Game.GameObjects
 
             if (bank != null)
             {
-                Engine.UI.GetGump<ContainerGump>(bank)?.Dispose();
+                UIManager.GetGump<ContainerGump>(bank)?.Dispose();
             }
         }
 
         public void CloseRangedGumps()
         {
-            foreach (var gump in Engine.UI.Gumps)
+            foreach (var gump in UIManager.Gumps)
             {
                 switch (gump)
                 {
@@ -1361,7 +1361,7 @@ namespace ClassicUO.Game.GameObjects
                             if (ent.Serial.IsItem)
                             {
                                 var top = World.Get(((Item) ent).RootContainer);
-                                
+
                                 if (top != null)
                                     distance = top.Distance;
                             }
@@ -1388,13 +1388,13 @@ namespace ClassicUO.Game.GameObjects
 
             /*const int TIME_TURN_TO_LASTTARGET = 2000;
 
-            if (InWarMode && Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Engine.Ticks)
+            if (InWarMode && Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks)
             {
                 Mobile enemy = World.Mobiles.Get(World.LastAttack);
 
                 if (enemy != null)
                 {
-                    Point center = new Point(Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1), Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1));
+                    Point center = new Point(ProfileManager.Current.GameWindowPosition.X + (ProfileManager.Current.GameWindowSize.X >> 1), ProfileManager.Current.GameWindowPosition.Y + (ProfileManager.Current.GameWindowSize.Y >> 1));
                     Direction direction = DirectionHelper.DirectionFromPoints(center, new Point(enemy.RealScreenPosition.X, enemy.RealScreenPosition.Y));
 
                     if (Direction != direction)
@@ -1410,14 +1410,18 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
-            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Engine.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || 
+            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT ||
                 (FileManager.ClientVersion >= ClientVersions.CV_60142 && IsParalyzed))
                 return false;
 
             if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead)
                 run = false;
             else if (!run)
-                run = Engine.Profile.Current.AlwaysRun;
+            {
+                if (!IsHidden ||
+                    IsHidden && !ProfileManager.Current.AlwaysRunUnlessHidden)
+                    run = ProfileManager.Current.AlwaysRun;
+            }
 
             int x = X;
             int y = Y;
@@ -1489,7 +1493,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (!IsWalking)
                     SetAnimation(0xFF);
-                LastStepTime = Engine.Ticks;
+                LastStepTime = Time.Ticks;
             }
 
             ref var step = ref Walker.StepInfos[Walker.StepsCount];
@@ -1498,7 +1502,7 @@ namespace ClassicUO.Game.GameObjects
             step.Running = run;
             step.OldDirection = (byte) (oldDirection & Direction.Mask);
             step.Direction = (byte) direction;
-            step.Timer = Engine.Ticks;
+            step.Timer = Time.Ticks;
             step.X = (ushort) x;
             step.Y = (ushort) y;
             step.Z = z;
@@ -1515,7 +1519,7 @@ namespace ClassicUO.Game.GameObjects
                 Run = run
             });
 
-           
+
             NetClient.Socket.Send(new PWalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue()));
 
 
@@ -1531,7 +1535,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (_lastDir == (int) direction && _lastMount == IsMounted && _lastRun == run)
             {
-                nowDelta = (int) (Engine.Ticks - _lastStepTime - walkTime + _lastDelta);
+                nowDelta = (int) (Time.Ticks - _lastStepTime - walkTime + _lastDelta);
 
                 if (Math.Abs(nowDelta) > 70)
                     nowDelta = 0;
@@ -1540,13 +1544,13 @@ namespace ClassicUO.Game.GameObjects
             else
                 _lastDelta = 0;
 
-            _lastStepTime = (int) Engine.Ticks;
+            _lastStepTime = (int) Time.Ticks;
             _lastRun = run;
             _lastMount = IsMounted;
             _lastDir = (int) direction;
 
 
-            Walker.LastStepRequestTime = Engine.Ticks + walkTime - nowDelta;
+            Walker.LastStepRequestTime = Time.Ticks + walkTime - nowDelta;
             GetGroupForAnimation(this, 0, true);
 
             return true;
@@ -1564,23 +1568,23 @@ namespace ClassicUO.Game.GameObjects
         private int _resynchronizing;
         private long _nextAllowedStepTime;
 
-        public bool IsWaitingNextMovement => _nextAllowedStepTime > Engine.Ticks;
+        public bool IsWaitingNextMovement => _nextAllowedStepTime > Time.Ticks;
 
         public bool Walk(Direction direction, bool run)
         {
-            if (_nextAllowedStepTime > Engine.Ticks || IsParalyzed)
+            if (_nextAllowedStepTime > Time.Ticks || IsParalyzed)
             {
                 return false;
             }
 
             if (_stepsOutstanding > Constants.MAX_STEP_COUNT)
             {
-                if (_nextAllowedStepTime + 1000 > Engine.Ticks)
+                if (_nextAllowedStepTime + 1000 > Time.Ticks)
                     Resynchronize();
                 return false;
             }
 
-       
+
 
             if (SpeedMode >= CharacterSpeedType.CantRun)
                 run = false;
@@ -1638,15 +1642,15 @@ namespace ClassicUO.Game.GameObjects
 
             EnqueueStep(_movementX, _movementY, _movementZ, _movementDirection, run);
 
-            Log.Message(LogTypes.Panic, "SEND");
+            Log.Panic("SEND");
             NetClient.Socket.Send(new PWalkRequest(direction, _sequenceNumber, run));
-            //Log.Message(LogTypes.Trace, $"Walk request - SEQUENCE: {_sequenceNumber}");
+            //Log.Trace( $"Walk request - SEQUENCE: {_sequenceNumber}");
 
             if (_sequenceNumber == 0xFF)
                 _sequenceNumber = 1;
             else
                 _sequenceNumber++;
-            _nextAllowedStepTime = Engine.Ticks + walkTime;
+            _nextAllowedStepTime = Time.Ticks + walkTime;
             _stepsOutstanding++;
             GetGroupForAnimation(this);
 
@@ -1663,10 +1667,10 @@ namespace ClassicUO.Game.GameObjects
             ANIMATE_IMMEDIATELY = 0,
             ANIMATE_ON_CONFIRM,
         }
-        
+
         public bool Walk(Direction direction, bool run)
         {
-            if (LastStepRequestedTime > Engine.Ticks)
+            if (LastStepRequestedTime > Time.Ticks)
                 return false;
 
             if (RequestedSteps.Count >= Constants.MAX_STEP_COUNT)
@@ -1767,7 +1771,7 @@ namespace ClassicUO.Game.GameObjects
                         EnqueueStep(s.X, s.Y, s.Z, (Direction) s.Direction, s.Run);
                     }
                 }
-            
+
                 step1.Anim = true;
 
                 EnqueueStep(step1.X, step1.Y, step1.Z, (Direction) step1.Direction, step1.Run);
@@ -1780,7 +1784,7 @@ namespace ClassicUO.Game.GameObjects
                 SequenceNumber = 1;
             else SequenceNumber++;
 
-            LastStepRequestedTime = Engine.Ticks + walkTime;
+            LastStepRequestedTime = Time.Ticks + walkTime;
 
             GetGroupForAnimation(this);
 
@@ -1823,12 +1827,12 @@ namespace ClassicUO.Game.GameObjects
 #elif JAEDAN_MOVEMENT_PATCH
             if (_stepsOutstanding == 0)
             {
-                Log.Message(LogTypes.Warning, $"Resync needed after confirmwalk packet - SEQUENCE: {_sequenceNumber}");
+                Log.Warn( $"Resync needed after confirmwalk packet - SEQUENCE: {_sequenceNumber}");
                 Resynchronize();
             }
             else
             {
-                //Log.Message(LogTypes.Trace, $"Step accepted - SEQUENCE: {_sequenceNumber}");
+                //Log.Trace( $"Step accepted - SEQUENCE: {_sequenceNumber}");
                 _stepsOutstanding--;
             }
 #else
@@ -1865,9 +1869,9 @@ namespace ClassicUO.Game.GameObjects
         public override void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
         {
 
-            //Log.Message(LogTypes.Warning, $"Forced position. - SEQUENCE: {_sequenceNumber}");
+            //Log.Warn( $"Forced position. - SEQUENCE: {_sequenceNumber}");
 
-            _nextAllowedStepTime = Engine.Ticks;
+            _nextAllowedStepTime = Time.Ticks;
             _sequenceNumber = 0;
             _stepsOutstanding = 0;
             _movementX = x;
@@ -1883,13 +1887,13 @@ namespace ClassicUO.Game.GameObjects
         {
             if (_resynchronizing > 0)
             {
-                if (_nextAllowedStepTime + (_resynchronizing * 1000) > Engine.Ticks)
+                if (_nextAllowedStepTime + (_resynchronizing * 1000) > Time.Ticks)
                     return;
             }
 
             _resynchronizing++;
             NetClient.Socket.Send(new PResend());
-            Log.Message(LogTypes.Trace, $"Resync request num: {_resynchronizing}");
+            Log.Trace( $"Resync request num: {_resynchronizing}");
         }
 #elif MOVEMENT2
         public void DenyWalk(byte seq, Direction dir, ushort x, ushort y, sbyte z)
@@ -1915,7 +1919,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                
+
             }
         }
 

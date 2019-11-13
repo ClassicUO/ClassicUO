@@ -117,7 +117,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public int ToPage { get; set; }
 
-        protected override ClickPriority Priority => ClickPriority.High;
+        public override ClickPriority Priority => ClickPriority.High;
 
         public ushort ButtonGraphicNormal
         {
@@ -169,7 +169,7 @@ namespace ClassicUO.Game.UI.Controls
                 UOTexture t = _textures[i];
 
                 if (t != null)
-                    t.Ticks = Engine.Ticks;
+                    t.Ticks = Time.Ticks;
             }
         }
 
@@ -220,7 +220,7 @@ namespace ClassicUO.Game.UI.Controls
             if (button == MouseButton.Left)
             {
                 IsClicked = false;
-                if (_entered || Engine.SceneManager.CurrentScene is GameScene)
+                if (_entered || CUOEnviroment.Client.Scene is GameScene)
                 {
                     switch (ButtonAction)
                     {

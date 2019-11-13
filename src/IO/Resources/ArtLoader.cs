@@ -27,6 +27,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Renderer;
@@ -35,7 +36,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class ArtLoader : ResourceLoader<ArtTexture>
+    internal class ArtLoader : UOFileLoader<ArtTexture>
     {
         private static readonly ushort[] _empty = { };
 
@@ -77,7 +78,7 @@ namespace ClassicUO.IO.Resources
             }
 
             //else
-            //    texture.Ticks = Engine.Ticks + 3000;
+            //    texture.Ticks = Time.Ticks + 3000;
             return texture;
         }
 
@@ -90,7 +91,7 @@ namespace ClassicUO.IO.Resources
             }
 
             //else
-            //    texture.Ticks = Engine.Ticks + 3000;
+            //    texture.Ticks = Time.Ticks + 3000;
             return texture;
         }
 
@@ -217,7 +218,7 @@ namespace ClassicUO.IO.Resources
                     pixels[i * width + width - 1] = 0;
                 }
             }
-            else if (StaticFilters.IsCave(graphic) && Engine.Profile.Current != null && Engine.Profile.Current.EnableCaveBorder)
+            else if (StaticFilters.IsCave(graphic) && ProfileManager.Current != null && ProfileManager.Current.EnableCaveBorder)
             {
                 for (int yy = 0; yy < height; yy++)
                 {
@@ -360,7 +361,7 @@ namespace ClassicUO.IO.Resources
                     pixels[i * width + width - 1] = 0;
                 }
             }
-            else if (StaticFilters.IsCave(graphic) && Engine.Profile.Current != null && Engine.Profile.Current.EnableCaveBorder)
+            else if (StaticFilters.IsCave(graphic) && ProfileManager.Current != null && ProfileManager.Current.EnableCaveBorder)
             {
                 for (int yy = 0; yy < height; yy++)
                 {

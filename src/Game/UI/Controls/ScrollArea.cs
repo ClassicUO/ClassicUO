@@ -35,7 +35,6 @@ namespace ClassicUO.Game.UI.Controls
         private readonly IScrollBar _scrollBar;
         private readonly int _scrollbarHeight;
         private bool _isNormalScroll;
-        private bool _needUpdate = true;
 
         public ScrollArea(int x, int y, int w, int h, bool normalScrollbar, int scrollbarHeight = -1)
         {
@@ -78,24 +77,10 @@ namespace ClassicUO.Game.UI.Controls
         {
             base.Update(totalMS, frameMS);
 
-            if (_needUpdate)
-            {
-                CalculateScrollBarMaxValue();
-                _scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
-                _needUpdate = false;
-            }
+            CalculateScrollBarMaxValue();
+            _scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
         }
 
-        public void ForceUpdate()
-        {
-            _needUpdate = true;
-        }
-
-        protected override void OnInitialize()
-        {
-            _needUpdate = true;
-            base.OnInitialize();
-        }
 
         public void Scroll(bool isup)
         {
@@ -170,21 +155,6 @@ namespace ClassicUO.Game.UI.Controls
 
                     break;
             }
-        }
-
-        protected override void OnChildAdded()
-        {
-            _needUpdate = true;
-        }
-
-        protected override void OnChildRemoved()
-        {
-            _needUpdate = true;
-        }
-
-        public override void OnPageChanged()
-        {
-            _needUpdate = true;
         }
 
         public override void Remove(Control c)

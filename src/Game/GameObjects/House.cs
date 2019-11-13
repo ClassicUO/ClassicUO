@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Gumps;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -38,10 +39,68 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public Serial Serial { get; }
-        public uint Revision { get; set; }
+        public uint Revision;
         public List<Multi> Components { get; } = new List<Multi>();
-        public bool IsCustom { get; set; }
+        public bool IsCustom;
 
+        public Multi GetMultiAt(int x, int y)
+        {
+            foreach (Multi component in Components)
+            {
+                if (component.X == x && component.Y == y)
+                    return component;
+            }
+
+            return null;
+        }
+
+        public Multi Add(ushort graphic, ushort hue, int x, int y, sbyte z, bool iscustom)
+        {
+            Item item = World.Items.Get(Serial);
+
+            Multi m = Multi.Create(graphic);
+            m.Hue = hue;
+            m.Position = new Position((ushort) (item.X + x), (ushort) (item.Y +  y), z);
+            m.IsCustom = iscustom;
+            m.AddToTile();
+
+            Components.Add(m);
+
+            return m;
+        }
+
+        public void ClearCustomHouseComponents(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS state)
+        {
+            Item item = World.Items.Get(Serial);
+
+            if (item != null)
+            {
+                int checkZ = item.Z + 7;
+
+                for (int i = 0; i < Components.Count; i++)
+                {
+                    var component = Components[i];
+
+                    component.State = component.State & ~(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT |
+                                                          CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER |
+                                                          CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE |
+                                                          CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE);
+
+                    if (component.IsCustom)
+                    {
+                        if ((state == 0) || (component.State & state) != 0)
+                        {
+                            //component.Destroy();
+                            //Components.RemoveAt(i--);
+                        }
+                    }
+                    else if (component.Z == checkZ)
+                    {
+                        component.State = component.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
+                    }
+                }
+            }
+        }
 
         public bool Equals(Serial other)
         {
@@ -51,6 +110,7 @@ namespace ClassicUO.Game.GameObjects
         public void Generate(bool recalculate = false)
         {
             Item item = World.Items.Get(Serial);
+            ClearCustomHouseComponents(0);
 
             foreach (Multi s in Components)
             {
@@ -59,23 +119,32 @@ namespace ClassicUO.Game.GameObjects
                     if (recalculate)
                         s.Position = new Position((ushort) (item.X + s.MultiOffsetX), (ushort) (item.Y + s.MultiOffsetY), (sbyte) (item.Position.Z + s.MultiOffsetZ));
                     s.Hue = item.Hue;
+                    s.State = 0;
+                    //s.IsCustom = IsCustom;
                 }
 
                 s.AddToTile();
             }
+
+
+            UIManager.GetGump<HouseCustomizationGump>(Serial)?.GenerateFloorPlace();
         }
 
-        public void ClearComponents()
+        public void ClearComponents(/*bool removeCustomOnly = false*/)
         {
             Item item = World.Items.Get(Serial);
 
             if (item != null && !item.IsDestroyed)
                 item.WantUpdateMulti = true;
 
-
-            foreach (Multi s in Components)
+            for (int i = 0; i < Components.Count; i++)
             {
+                var s = Components[i];
+
+                //if (!s.IsCustom && removeCustomOnly)
+                //    continue;
                 s.Destroy();
+                //Components.RemoveAt(i--);
             }
 
             Components.Clear();

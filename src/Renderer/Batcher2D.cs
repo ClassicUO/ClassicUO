@@ -371,14 +371,14 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool DrawSpriteRotated(Texture2D texture, int x, int y, int w, int h, int destX, int destY, ref Vector3 hue, float angle)
+        public bool DrawSpriteRotated(Texture2D texture, int x, int y, int destX, int destY, ref Vector3 hue, float angle)
         {
             EnsureSize();
 
             ref var vertex = ref _vertexInfo[_numSprites];
 
-            float ww = w / 2f;
-            float hh = h / 2f;
+            float ww = texture.Width * 0.5f;
+            float hh = texture.Height * 0.5f;
 
 
             float startX = x - (destX - 44 + ww);
@@ -461,7 +461,7 @@ namespace ClassicUO.Renderer
             ref var vertex = ref _vertexInfo[_numSprites];
 
             float width = texture.Width;
-            float height = texture.Height / 2f;
+            float height = texture.Height * 0.5f;
 
             float translatedY = y + height * 0.75f;
 
@@ -573,8 +573,6 @@ namespace ClassicUO.Renderer
         [MethodImpl(256)]
         public bool DrawCharacterSitted(Texture2D texture, int x, int y, bool mirror, float h3mod, float h6mod, float h9mod, ref Vector3 hue)
         {
-            EnsureSize();
-
             float width = texture.Width;
             float height = texture.Height;
 
@@ -588,13 +586,12 @@ namespace ClassicUO.Renderer
             float widthOffset = width + SITTING_OFFSET;
 
 
-            int count = 0;
-
             if (mirror)
             {
                 if (h3mod != 0.0f)
                 {
-                    ref var vertex = ref _vertexInfo[_numSprites + count++];
+                    EnsureSize();
+                    ref var vertex = ref _vertexInfo[_numSprites];
 
                     vertex.Position0.X = x + width;
                     vertex.Position0.Y = y;
@@ -640,6 +637,8 @@ namespace ClassicUO.Renderer
                     vertex.Hue1 = 
                     vertex.Hue2 = 
                     vertex.Hue3 = hue;
+
+                    PushSprite(texture);
                 }
 
                 if (h6mod != 0.0f)
@@ -671,12 +670,13 @@ namespace ClassicUO.Renderer
                     //    vertex4.Hue = vertex5.Hue = hue;
                     //}
 
-                    if (_numSprites + count >= MAX_SPRITES)
-                    {
-                        Flush();
-                    }
+                    //if (_numSprites + count >= MAX_SPRITES)
+                    //{
+                    //    Flush();
+                    //}
 
-                    ref var vertex = ref _vertexInfo[_numSprites + count++];
+                    EnsureSize();
+                    ref var vertex = ref _vertexInfo[_numSprites];
 
 
                     vertex.Position0.X = x + width;
@@ -740,7 +740,7 @@ namespace ClassicUO.Renderer
                     vertex.Hue2 = 
                     vertex.Hue3 = hue;
 
-
+                    PushSprite(texture);
                     //vertex4_s.Position.X = x + widthOffset;
                     //vertex4_s.Position.Y = y + h06;
                     //vertex4_s.Position.Z = 0;
@@ -789,12 +789,13 @@ namespace ClassicUO.Renderer
                     //    vertex6.Hue = vertex7.Hue = hue;
                     //}
 
-                    if (_numSprites + count >= MAX_SPRITES)
-                    {
-                        Flush();
-                    }
+                    //if (_numSprites + count >= MAX_SPRITES)
+                    //{
+                    //    Flush();
+                    //}
 
-                    ref var vertex = ref _vertexInfo[_numSprites + count++];
+                    EnsureSize();
+                    ref var vertex = ref _vertexInfo[_numSprites];
 
                     vertex.Position0.X = x + widthOffset;
                     vertex.Position0.Y = y + h06;
@@ -844,7 +845,7 @@ namespace ClassicUO.Renderer
                     vertex.Hue3 = hue;
 
 
-
+                    PushSprite(texture);
                     //vertex6_s.Position.X = x + widthOffset;
                     //vertex6_s.Position.Y = y + h09;
                     //vertex6_s.Position.Z = 0;
@@ -868,12 +869,13 @@ namespace ClassicUO.Renderer
             {
                 if (h3mod != 0.0f)
                 {
-                    if (_numSprites + count >= MAX_SPRITES)
-                    {
-                        Flush();
-                    }
+                    //if (_numSprites + count >= MAX_SPRITES)
+                    //{
+                    //    Flush();
+                    //}
 
-                    ref var vertex = ref _vertexInfo[_numSprites + count++];
+                    EnsureSize();
+                    ref var vertex = ref _vertexInfo[_numSprites];
 
                     vertex.Position0.X = x + SITTING_OFFSET;
                     vertex.Position0.Y = y;
@@ -917,6 +919,8 @@ namespace ClassicUO.Renderer
                     vertex.Normal3.Z = 1;
 
                     vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
+
+                    PushSprite(texture);
                 }
 
                 if (h6mod != 0.0f)
@@ -926,12 +930,13 @@ namespace ClassicUO.Renderer
 
                     }
 
-                    if (_numSprites + count >= MAX_SPRITES)
-                    {
-                        Flush();
-                    }
+                    //if (_numSprites + count >= MAX_SPRITES)
+                    //{
+                    //    Flush();
+                    //}
 
-                    ref var vertex = ref _vertexInfo[_numSprites + count++];
+                    EnsureSize();
+                    ref var vertex = ref _vertexInfo[_numSprites];
 
                     vertex.Position0.X = x + SITTING_OFFSET;
                     vertex.Position0.Y = y + h03;
@@ -975,6 +980,8 @@ namespace ClassicUO.Renderer
                     vertex.Normal3.Z = 1;
 
                     vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
+
+                    PushSprite(texture);
                 }
 
                 if (h9mod != 0.0f)
@@ -984,13 +991,13 @@ namespace ClassicUO.Renderer
 
                     }
 
-                    if (_numSprites + count >= MAX_SPRITES)
-                    {
-                        Flush();
-                    }
+                    //if (_numSprites + count >= MAX_SPRITES)
+                    //{
+                    //    Flush();
+                    //}
 
-
-                    ref var vertex = ref _vertexInfo[_numSprites + count++];
+                    EnsureSize();
+                    ref var vertex = ref _vertexInfo[_numSprites];
 
                     vertex.Position0.X = x;
                     vertex.Position0.Y = y + h06;
@@ -1034,17 +1041,9 @@ namespace ClassicUO.Renderer
                     vertex.Normal3.Z = 1;
 
                     vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
+
+                    PushSprite(texture);
                 }
-            }
-
-
-
-            for (int i = 0; i < count; i++)
-            {
-                //if (!CheckInScreen(_numSprites + (i << 2)))
-                //    return false;
-
-                PushSprite(texture);
             }
 
             return true;
@@ -1189,8 +1188,8 @@ namespace ClassicUO.Renderer
                 //angle = (float)(angle * 57.295780);
                 angle = (float)(angle * Math.PI) / 180.0f;
 
-                float ww = dwidth / 2f;
-                float hh = dheight / 2f;
+                float ww = dwidth * 0.5f;
+                float hh = dheight * 0.5f;
 
                 float sin = (float)Math.Sin(angle);
                 float cos = (float)Math.Cos(angle);
@@ -1424,8 +1423,8 @@ namespace ClassicUO.Renderer
             angle = -(float)(angle * Math.PI) / 180.0f;
 
 
-            float ww = r.Width / 2f;
-            float hh = r.Height / 2f;
+            float ww = r.Width * 0.5f;
+            float hh = r.Height * 0.5f;
 
 
             float rotSin = (float) Math.Sin(angle);

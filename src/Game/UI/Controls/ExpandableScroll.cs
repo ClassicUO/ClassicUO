@@ -157,19 +157,27 @@ namespace ClassicUO.Game.UI.Controls
             x += ScreenCoordinateX;
             y += ScreenCoordinateY;
 
-            if (_gumpTop.HitTest(x, y) != null)
+            Control c = null;
+
+
+            _gumpTop.HitTest(x, y, ref c);
+            if (c != null)
                 return true;
 
-            if (_gumpMiddle.HitTest(x, y) != null)
+            _gumpMiddle.HitTest(x, y, ref c);
+            if (c != null)
                 return true;
 
-            if (_gumpRight.HitTest(x, y) != null)
+            _gumpRight.HitTest(x, y, ref c);
+            if (c != null)
                 return true;
 
-            if (_gumpBottom.HitTest(x, y) != null)
+            _gumpBottom.HitTest(x, y, ref c);
+            if (c != null)
                 return true;
 
-            if (_isResizable && _gumpExpander.HitTest(x, y) != null)
+            _gumpExpander.HitTest(x, y, ref c);
+            if (c != null)
                 return true;
 
             return false;

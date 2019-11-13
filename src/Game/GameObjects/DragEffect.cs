@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -19,57 +20,20 @@ namespace ClassicUO.Game.GameObjects
 
         public DragEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, Graphic graphic, Hue hue)
         {
-            sbyte zSourceB = (sbyte)zSource;
-            sbyte zTargB = (sbyte)zTarget;
+            Entity source = World.Get(src);
 
-            if (src.IsValid)
-            {
-                Entity source = World.Get(src);
-
-                if (source is Mobile mobile)
-                {
-                    SetSource(mobile.Position.X, mobile.Position.Y, mobile.Position.Z);
-
-                    //if (mobile != World.Player && !mobile.IsMoving && (xSource | ySource | zSource) != 0)
-                    //    mobile.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
-                }
-                else if (source is Item)
-                {
-                    SetSource(source.Position.X, source.Position.Y, source.Position.Z);
-
-                    //if ((xSource | ySource | zSource) != 0)
-                    //    source.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
-                }
-                else
-                    SetSource(xSource, ySource, zSourceB);
-            }
+            if (src.IsValid && source != null)
+                SetSource(source);
             else
                 SetSource(xSource, ySource, zSource);
 
-            if (trg.IsValid)
-            {
-                Entity target = World.Get(trg);
 
-                if (target is Mobile mobile)
-                {
-                    SetTarget(target);
+            Entity target = World.Get(trg);
 
-                    //if (mobile != World.Player && !mobile.IsMoving && (xTarget | yTarget | zTarget) != 0)
-                    //    mobile.Position = new Position((ushort) xTarget, (ushort) yTarget, zTargB);
-                }
-                else if (target is Item)
-                {
-                    SetTarget(target);
-
-                    //if ((xTarget | yTarget | zTarget) != 0)
-                    //    target.Position = new Position((ushort) xTarget, (ushort) yTarget, zTargB);
-                }
-                else
-                    SetTarget(xTarget, yTarget, zTargB);
-            }
+            if (trg.IsValid && target != null)
+                SetTarget(target);
             else
-                SetTarget(xTarget, yTarget, zTargB);
-
+                SetTarget(xTarget, yTarget, zTarget);
 
             AlphaHue = 255;
             Hue = hue;
@@ -79,13 +43,13 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_lastMoveTime > Engine.Ticks)
+            if (_lastMoveTime > Time.Ticks)
                 return;
             
             Offset.X += 8;
             Offset.Y += 8;
 
-            _lastMoveTime = Engine.Ticks + 20;
+            _lastMoveTime = Time.Ticks + 20;
 
             base.Update(totalMS, frameMS);
         }
@@ -110,12 +74,12 @@ namespace ClassicUO.Game.GameObjects
             Bounds.X = (int) Offset.X + 22;
             Bounds.Y = (int) -Offset.Y + 22;
 
-            if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 HueVector.X = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;
             }
-            else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
                 HueVector.X = Constants.DEAD_RANGE_COLOR;
                 HueVector.Y = 1;
@@ -123,14 +87,14 @@ namespace ClassicUO.Game.GameObjects
             else
                 ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
 
-            Engine.DebugInfo.EffectsRendered++;
+            //Engine.DebugInfo.EffectsRendered++;
             base.Draw(batcher, posX, posY);
 
             ref readonly StaticTiles data = ref FileManager.TileData.StaticData[_displayedGraphic];
 
-            if (data.IsLight && (Source is Item || Source is Static || Source is Multi))
+            if (data.IsLight && Source != null)
             {
-                Engine.SceneManager.GetScene<GameScene>()
+                CUOEnviroment.Client.GetScene<GameScene>()
                       .AddLight(Source, Source, posX + 22, posY + 22);
             }
 

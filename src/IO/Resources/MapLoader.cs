@@ -33,7 +33,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class MapLoader : ResourceLoader
+    internal class MapLoader : UOFileLoader
     {
         internal const int MAPS_COUNT = 6;
         private protected readonly UOFileMul[] _filesIdxStatics = new UOFileMul[MAPS_COUNT];

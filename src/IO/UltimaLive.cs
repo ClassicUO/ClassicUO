@@ -31,6 +31,7 @@ using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO.Resources;
@@ -66,7 +67,7 @@ namespace ClassicUO.IO
 
         internal static void Enable()
         {
-            Log.Message(LogTypes.Trace, "Setup packet for UltimaLive");
+            Log.Trace( "Setup packet for UltimaLive");
             PacketHandlers.ToClient.Add(0x3F, OnUltimaLivePacket);
             PacketHandlers.ToClient.Add(0x40, OnUpdateTerrainPacket);
         }
@@ -194,7 +195,7 @@ namespace ClassicUO.IO
                         {
                             //update index lookup AND static size on disk (first 4 bytes lookup, next 4 is statics size)
                             _UL._filesIdxStatics[mapID].WriteArray(index, new byte[8] {0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00});
-                            Log.Message(LogTypes.Trace, $"writing zero length statics to index at 0x{index:X8}");
+                            Log.Trace( $"writing zero length statics to index at 0x{index:X8}");
                         }
                         else
                         {
@@ -204,12 +205,12 @@ namespace ClassicUO.IO
 
                             //Do we have enough room to write the statics into the existing location?
                             if (existingStaticsLength >= totallen && lookup != 0xFFFFFFFF)
-                                Log.Message(LogTypes.Trace, $"writing statics to existing file location at 0x{lookup:X8}, length:{totallen}");
+                                Log.Trace( $"writing statics to existing file location at 0x{lookup:X8}, length:{totallen}");
                             else
                             {
                                 lookup = _UL._EOF[mapID];
                                 _UL._EOF[mapID] += (uint) totallen;
-                                Log.Message(LogTypes.Trace, $"writing statics to end of file at 0x{lookup:X8}, length:{totallen}");
+                                Log.Trace( $"writing statics to end of file at 0x{lookup:X8}, length:{totallen}");
                             }
 
                             _UL._filesStatics[mapID].WriteArray(lookup, staticsData);
@@ -230,7 +231,7 @@ namespace ClassicUO.IO
 
                         _UL._ULMap.ReloadBlock(mapID, block);
                         chunk?.LoadStatics(mapID);
-                        Engine.UI.GetGump<MiniMapGump>()?.ForceUpdate();
+                        UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
                         //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                         //also the server should always send FIRST the landdata packet, and only AFTER land the statics packet
                         _UL.MapCRCs[mapID][block] = ushort.MaxValue;
@@ -401,7 +402,7 @@ namespace ClassicUO.IO
                     }
                 }
 
-                Engine.UI.GetGump<MiniMapGump>()?.ForceUpdate();
+                UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
             }
         }
 
@@ -511,7 +512,7 @@ namespace ClassicUO.IO
                     throw new FileNotFoundException(fileInfo.FullName);
 
                 uint size = (uint) fileInfo.Length;
-                Log.Message(LogTypes.Trace, $"UltimaLive -> ReLoading file:\t{FilePath}");
+                Log.Trace( $"UltimaLive -> ReLoading file:\t{FilePath}");
 
                 if (size > 0 || isstaticmul) //if new map is generated automatically, staticX.mul size is equal to ZERO, other files should always be major than zero!
                 {
@@ -700,7 +701,7 @@ namespace ClassicUO.IO
                             Entries[mapID] = new UOFileIndex[uop.TotalEntriesCount];
                             uop.FillEntries(ref Entries[mapID]);
 
-                            Log.Message(LogTypes.Trace, $"UltimaLive -> converting file:\t{mapPath} from {uop.FilePath}");
+                            Log.Trace( $"UltimaLive -> converting file:\t{mapPath} from {uop.FilePath}");
 
                             using (FileStream stream = File.Create(mapPath))
                             {
@@ -749,8 +750,8 @@ namespace ClassicUO.IO
                 //create map new file
                 using (FileStream stream = File.Create(mapPath))
                 {
-                    Log.Message(LogTypes.Trace, $"UltimaLive -> creating new blank map:\t{mapPath}");
-                    Log.Message(LogTypes.Trace, $"Writing {mapWidthInBlocks} blocks by {mapHeightInBlocks} blocks");
+                    Log.Trace( $"UltimaLive -> creating new blank map:\t{mapPath}");
+                    Log.Trace( $"Writing {mapWidthInBlocks} blocks by {mapHeightInBlocks} blocks");
                     for (int x = 0; x < mapWidthInBlocks; x++) stream.Write(pVerticalBlockStrip, 0, numberOfBytesInStrip);
                     stream.Flush();
                 }
@@ -763,19 +764,19 @@ namespace ClassicUO.IO
                 //create map new file
                 using (FileStream stream = File.Create(staidxPath))
                 {
-                    Log.Message(LogTypes.Trace, "UltimaLive -> creating new index file");
+                    Log.Trace( "UltimaLive -> creating new index file");
                     for (int x = 0; x < mapWidthInBlocks; x++) stream.Write(pVerticalBlockStrip, 0, numberOfBytesInStrip);
                     stream.Flush();
                 }
 
-                using (FileStream stream = File.Create(staticsPath)) Log.Message(LogTypes.Trace, "UltimaLive -> creating empty static file");
+                using (FileStream stream = File.Create(staticsPath)) Log.Trace( "UltimaLive -> creating empty static file");
             }
 
             private static void CopyFile(string fromfile, string tofile)
             {
                 if (!File.Exists(tofile) || new FileInfo(tofile).Length == 0)
                 {
-                    Log.Message(LogTypes.Trace, $"UltimaLive -> copying file:\t{tofile} from {fromfile}");
+                    Log.Trace( $"UltimaLive -> copying file:\t{tofile} from {fromfile}");
                     File.Copy(fromfile, tofile, true);
                 }
             }

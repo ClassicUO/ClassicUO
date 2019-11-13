@@ -21,8 +21,10 @@
 
 #endregion
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -65,9 +67,9 @@ namespace ClassicUO.Game.Scenes
 
             if (!amount.HasValue && item.Amount > 1 && item.ItemData.IsStackable)
             {
-                if (Engine.Profile.Current.HoldShiftToSplitStack == _isShiftDown)
+                if (ProfileManager.Current.HoldShiftToSplitStack == _isShiftDown)
                 {
-                    if (Engine.UI.GetGump<SplitMenuGump>(item) != null)
+                    if (UIManager.GetGump<SplitMenuGump>(item) != null)
                         return false;
 
                     SplitMenuGump gump = new SplitMenuGump(item, new Point(x, y))
@@ -75,8 +77,8 @@ namespace ClassicUO.Game.Scenes
                         X = Mouse.Position.X - 80,
                         Y = Mouse.Position.Y - 40
                     };
-                    Engine.UI.Add(gump);
-                    Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
+                    UIManager.Add(gump);
+                    UIManager.AttemptDragControl(gump, Mouse.Position, true);
 
                     return true;
                 }
@@ -90,17 +92,17 @@ namespace ClassicUO.Game.Scenes
             if (World.Player.IsDead || HeldItem.Enabled || item == null || item.IsDestroyed /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/) return false;
 
             HeldItem.Clear();
-            HeldItem.Set(item, amount <= 0 ? item.Amount : (ushort) amount);
+            HeldItem.Set(item, amount <= 0 ? item.Amount : (ushort) amount, new Point(x, y));
 
             if (!item.OnGround)
             {
                 Entity entity = World.Get(item.Container);
-                item.Container = Serial.INVALID;
-                entity.Items.Remove(item);
+                //item.Container = Serial.INVALID;
+                //entity.Items.Remove(item);
 
                 if (entity.HasEquipment) entity.Equipment[(int) item.Layer] = null;
 
-                entity.Items.ProcessDelta();
+                //entity.Items.ProcessDelta();
             }
             else
             {
@@ -108,8 +110,8 @@ namespace ClassicUO.Game.Scenes
             }
             item.TextContainer?.Clear();
 
-            World.Items.Remove(item);
-            World.Items.ProcessDelta();
+            //World.Items.Remove(item);
+            //World.Items.ProcessDelta();
             CloseItemGumps(item);
 
             NetClient.Socket.Send(new PPickUpRequest(item, (ushort) amount));
@@ -119,7 +121,7 @@ namespace ClassicUO.Game.Scenes
 
         private void CloseItemGumps(Item item)
         {
-            Engine.UI.Remove<Gump>(item);
+            UIManager.Remove<Gump>(item);
 
             if (item.Container.IsValid)
             {
@@ -159,13 +161,13 @@ namespace ClassicUO.Game.Scenes
         {
             if (HeldItem.Enabled && container != null && HeldItem.Serial != container.Serial)
             {
-                ContainerGump gump = Engine.UI.GetGump<ContainerGump>(container);
+                ContainerGump gump = UIManager.GetGump<ContainerGump>(container);
 
                 if (gump != null && (x != 0xFFFF || y != 0xFFFF))
                 {
                     Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
                     ArtTexture texture = FileManager.Art.GetTexture(HeldItem.DisplayedGraphic);
-                    float scale = Engine.UI.ContainerScale;
+                    float scale = UIManager.ContainerScale;
 
                     bounds.X = (int)(bounds.X * scale);
                     bounds.Y = (int)(bounds.Y * scale);
@@ -176,7 +178,7 @@ namespace ClassicUO.Game.Scenes
                     {
                         int textureW, textureH;
 
-                        if (Engine.Profile.Current != null && Engine.Profile.Current.ScaleItemsInsideContainers)
+                        if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
                         {
                             textureW = (int)(texture.Width * scale);
                             textureH = (int)(texture.Height * scale);
@@ -187,8 +189,8 @@ namespace ClassicUO.Game.Scenes
                             textureH = texture.Height;
                         }
 
-                        x -= textureW >> 1;
-                        y -= textureH >> 1;
+                        x -= (int)(HeldItem.Offset.X * scale);
+                        y -= (int)(HeldItem.Offset.Y * scale);
 
                         if (x + textureW > bounds.Width)
                             x = bounds.Width - textureW;

@@ -51,7 +51,7 @@ namespace ClassicUO.Game.Map
                 }
             }
 
-            LastAccessTime = Engine.Ticks + Constants.CLEAR_TEXTURES_DELAY;
+            LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
         }
 
         private static readonly Queue<Chunk> _pool = new Queue<Chunk>();
@@ -62,7 +62,7 @@ namespace ClassicUO.Game.Map
                 var c = _pool.Dequeue();
                 c.X = x;
                 c.Y = y;
-                c.LastAccessTime = Engine.Ticks + Constants.CLEAR_TEXTURES_DELAY;
+                c.LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
 
                 x <<= 3;
                 y <<= 3;
@@ -149,18 +149,11 @@ namespace ClassicUO.Game.Map
 
                                 Static staticObject = Static.Create(sb->Color, sb->Hue, pos);
                                 staticObject.Position = new Position(staticX, staticY, z);
-
-                                if (staticObject.ItemData.IsAnimated)
-                                    World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
-                                else
-                                    staticObject.AddToTile(Tiles[x, y]);
+                                staticObject.AddToTile(Tiles[x, y]);
                             }
                         }
                     }
                 }
-
-
-                //CreateLand();
             }
         }
 
@@ -200,11 +193,7 @@ namespace ClassicUO.Game.Map
 
                                 Static staticObject = Static.Create(sb->Color, sb->Hue, pos);
                                 staticObject.Position = new Position(staticX, staticY, z);
-
-                                if (staticObject.ItemData.IsAnimated)
-                                    World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
-                                else
-                                    staticObject.AddToTile(Tiles[x, y]);
+                                staticObject.AddToTile(Tiles[x, y]);
                             }
                         }
                     }
@@ -247,42 +236,6 @@ namespace ClassicUO.Game.Map
                 }
             }
         }
-
-        //private void CreateLand()
-        //{
-        //    for (int x = 0; x < 8; x++)
-        //    {
-        //        for (int y = 0; y < 8; y++)
-        //        {
-        //            Land tile = null;
-        //            Tile t = Tiles[x, y];
-        //            GameObject obj = t.FirstNode;
-
-        //            while (obj != null)
-        //            {
-        //                if (obj is Land land)
-        //                {
-        //                    tile = land;
-        //                    break;
-        //                }
-
-        //                obj = obj.Right;
-        //            }
-
-        //            if (tile != null)
-        //            {
-        //                int tileX = tile.X;
-        //                int tileY = tile.Y;
-        //                sbyte tileZ = tile.Z;
-
-        //                tile.Calculate(tileX, tileY, tileZ);
-
-        //                t.AddGameObject(tile);
-        //            }
-
-        //        }
-        //    }
-        //}
 
         private ref IndexMap GetIndex(int map)
         {

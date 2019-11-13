@@ -32,7 +32,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class TileDataLoader : ResourceLoader
+    internal class TileDataLoader : UOFileLoader
     {
         private static StaticTiles[] _staticData;
         private static LandTiles[] _landData;

@@ -3,9 +3,9 @@
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+//	The goal of this is to develop a lightweight client considering
+//	new technologies.
+//
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -132,6 +132,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool EnablePathfind { get; set; }
         [JsonProperty] public bool UseShiftToPathfind { get; set; }
         [JsonProperty] public bool AlwaysRun { get; set; }
+        [JsonProperty] public bool AlwaysRunUnlessHidden { get; set; }
         [JsonProperty] public bool SmoothMovements { get; set; } = true;
         [JsonProperty] public bool HoldDownKeyTab { get; set; } = true;
         [JsonProperty] public bool HoldDownKeyAltToCloseAnchored { get; set; } = true;
@@ -200,8 +201,6 @@ namespace ClassicUO.Configuration
             new InfoBarItem("Stam", InfoBarVars.Stamina, 0x22E),
             new InfoBarItem("Weight", InfoBarVars.Weight, 0x3D2),
         };
-
-        [JsonProperty] public int MaxFPS { get; set; } = 60;
 
         [JsonProperty]
         public Macro[] Macros { get; set; } =
@@ -281,6 +280,9 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool PartyAura { get; set; }
 
         [JsonProperty] public bool UseXBR { get; set; } = true;
+
+        [JsonProperty] public bool HideChatGradient { get; set; } = false;
+
         [JsonProperty] public bool StandardSkillsGump { get; set; } = true;
 
         [JsonProperty] public bool ShowNewMobileNameIncoming { get; set; } = true;
@@ -308,8 +310,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool DoubleClickToLootInsideContainers { get; set; }
 
 
-        internal static string ProfilePath { get; } = Path.Combine(Engine.ExePath, "Data", "Profiles");
-        internal static string DataPath { get; } = Path.Combine(Engine.ExePath, "Data");
+        internal static string ProfilePath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
+        internal static string DataPath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data");
 
         public void Save(List<Gump> gumps = null)
         {
@@ -324,7 +326,7 @@ namespace ClassicUO.Configuration
 
             string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username, ServerName, CharacterName);
 
-            Log.Message(LogTypes.Trace, $"Saving path:\t\t{path}");
+            Log.Trace( $"Saving path:\t\t{path}");
 
             // Save profile settings
             ConfigurationResolver.Save(this, Path.Combine(path, "profile.json"), new JsonSerializerSettings
@@ -336,7 +338,7 @@ namespace ClassicUO.Configuration
             // Save opened gumps
             SaveGumps(path, gumps);
 
-            Log.Message(LogTypes.Trace, "Saving done!");
+            Log.Trace( "Saving done!");
         }
 
         private void SaveGumps(string path, List<Gump> gumps)
@@ -371,7 +373,7 @@ namespace ClassicUO.Configuration
             }
 
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin"))))
-                Engine.UI.AnchorManager.Save(writer);
+                UIManager.AnchorManager.Save(writer);
 
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "skillsgroups.bin"))))
                 SkillsGroupManager.Save(writer);
@@ -400,7 +402,7 @@ namespace ClassicUO.Configuration
                 catch (Exception e)
                 {
                     SkillsGroupManager.LoadDefault();
-                    Log.Message(LogTypes.Error, e.StackTrace);
+                    Log.Error( e.StackTrace);
                 }
             }
 
@@ -434,13 +436,13 @@ namespace ClassicUO.Configuration
                             //gump.SetInScreen();
 
                             if (gump.LocalSerial != 0)
-                                Engine.UI.SavePosition(gump.LocalSerial, new Point(x, y));
+                                UIManager.SavePosition(gump.LocalSerial, new Point(x, y));
 
                             if (!gump.IsDisposed) gumps.Add(gump);
                         }
                         catch (Exception e)
                         {
-                            Log.Message(LogTypes.Error, e.StackTrace);
+                            Log.Error( e.StackTrace);
                         }
                     }
                 }
@@ -454,11 +456,11 @@ namespace ClassicUO.Configuration
                 try
                 {
                     using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath)))
-                        Engine.UI.AnchorManager.Restore(reader, gumps);
+                        UIManager.AnchorManager.Restore(reader, gumps);
                 }
                 catch (Exception e)
                 {
-                    Log.Message(LogTypes.Error, e.StackTrace);
+                    Log.Error( e.StackTrace);
                 }
             }
 

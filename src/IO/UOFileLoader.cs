@@ -31,7 +31,7 @@ using ClassicUO.Renderer;
 
 namespace ClassicUO.IO
 {
-    internal abstract class ResourceLoader : IDisposable
+    internal abstract class UOFileLoader : IDisposable
     {
         public UOFileIndex[] Entries;
 
@@ -65,7 +65,7 @@ namespace ClassicUO.IO
         }
     }
 
-    internal abstract class ResourceLoader<T> : ResourceLoader where T : UOTexture
+    internal abstract class UOFileLoader<T> : UOFileLoader where T : UOTexture
     {
         private readonly List<uint> _texturesToClear = new List<uint>();
 
@@ -81,7 +81,7 @@ namespace ClassicUO.IO
 
         public void ClearUnusedResources<T1>(Dictionary<uint, T1> dict, int maxCount) where T1 : UOTexture
         {
-            long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
+            long ticks = Time.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
             int count = 0;
             foreach (var p in dict)

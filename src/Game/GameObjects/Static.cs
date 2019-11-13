@@ -24,6 +24,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -39,6 +40,16 @@ namespace ClassicUO.Game.GameObjects
     internal sealed partial class Static : GameObject
     {
         private static readonly Queue<Static> _pool = new Queue<Static>();
+        static Static()
+        {
+            for (int i = 0; i < 1000; i++)
+                _pool.Enqueue(new Static());
+        }
+
+        private Static()
+        {
+
+        }
 
         public Static(Graphic graphic, Hue hue, int index)
         {
@@ -68,7 +79,6 @@ namespace ClassicUO.Game.GameObjects
                 s.Index = index;
                 s.IsDestroyed = false;
                 s.AlphaHue = 0;
-                s._oldGraphic = 0;
                 s.CharacterIsBehindFoliage = false;
                 s.UpdateGraphicBySeason();
 
@@ -98,17 +108,21 @@ namespace ClassicUO.Game.GameObjects
         public void SetGraphic(Graphic g)
         {
             Graphic = g;
+            SetTextureByGraphic(g);
         }
 
         public void RestoreOriginalGraphic()
         {
             Graphic = OriginalGraphic;
+            SetTextureByGraphic(Graphic);
         }
 
         public override void UpdateGraphicBySeason()
         {
             SetGraphic(Season.GetSeasonGraphic(World.Season, OriginalGraphic));
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
+            SetTextureByGraphic(Graphic);
+
         }
 
         public override void UpdateTextCoordsV()
@@ -126,9 +140,9 @@ namespace ClassicUO.Game.GameObjects
 
             int offY = 0;
 
-            int startX = Engine.Profile.Current.GameWindowPosition.X + 6;
-            int startY = Engine.Profile.Current.GameWindowPosition.Y + 6;
-            var scene = Engine.SceneManager.GetScene<GameScene>();
+            int startX = ProfileManager.Current.GameWindowPosition.X + 6;
+            int startY = ProfileManager.Current.GameWindowPosition.Y + 6;
+            var scene = CUOEnviroment.Client.GetScene<GameScene>();
             float scale = scene?.Scale ?? 1;
             int x = RealScreenPosition.X;
             int y = RealScreenPosition.Y;
@@ -139,19 +153,21 @@ namespace ClassicUO.Game.GameObjects
             if (Texture != null)
                 y -= Texture is ArtTexture t ? (t.ImageRectangle.Height >> 1) : (Texture.Height >> 1);
 
+            x = (int)(x / scale);
+            y = (int)(y / scale);
+
             for (; last != null; last = last.ListLeft)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                 {
-                    if (offY == 0 && last.Time < Engine.Ticks)
+                    if (offY == 0 && last.Time < Time.Ticks)
                         continue;
-
 
                     last.OffsetY = offY;
                     offY += last.RenderedText.Height;
 
-                    last.RealScreenPosition.X = startX + (int)((x - (last.RenderedText.Width >> 1)) / scale);
-                    last.RealScreenPosition.Y = startY + (int)((y - offY) / scale);
+                    last.RealScreenPosition.X = startX + (x - (last.RenderedText.Width >> 1));
+                    last.RealScreenPosition.Y = startY + (y - offY);
                 }
             }
 

@@ -24,6 +24,7 @@
 using System;
 using System.IO;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -176,7 +177,7 @@ namespace ClassicUO.Game.UI.Gumps
             else if (_canChangeName)
             {
                 _textBox.IsEditable = false;
-                Engine.UI.SystemChat.SetFocus();
+                UIManager.SystemChat.SetFocus();
             }
         }
 
@@ -216,7 +217,7 @@ namespace ClassicUO.Game.UI.Gumps
             if ((key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER) && _textBox.IsEditable)
             {
                 GameActions.Rename(entity, _textBox.Text);
-                Engine.UI.SystemChat?.SetFocus();
+                UIManager.SystemChat?.SetFocus();
                 _textBox.IsEditable = false;
             }
         }
@@ -347,8 +348,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity == null || entity.IsDestroyed)
             {
-                if (LocalSerial != World.Player && (Engine.Profile.Current.CloseHealthBarType == 1 ||
-                                                    Engine.Profile.Current.CloseHealthBarType == 2 && World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
+                if (LocalSerial != World.Player && (ProfileManager.Current.CloseHealthBarType == 1 ||
+                                                    ProfileManager.Current.CloseHealthBarType == 2 && World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
                 {
                     //### KEEPS PARTY BAR ACTIVE WHEN PARTY MEMBER DIES & MOBILEBAR CLOSE SELECTED ###//
                     if (!inparty)
@@ -413,7 +414,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Mobile mobile = entity.Serial.IsMobile ? (Mobile)entity : null;
 
-                if (!_isDead && entity != World.Player && (mobile != null && mobile.IsDead) && Engine.Profile.Current.CloseHealthBarType == 2) // is dead
+                if (!_isDead && entity != World.Player && (mobile != null && mobile.IsDead) && ProfileManager.Current.CloseHealthBarType == 2) // is dead
                 {
                     if (!inparty)
                     {
@@ -503,13 +504,13 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _background.Hue = 912;
                     }
-                    else if (!Engine.Profile.Current.CBBlackBGToggled)
+                    else if (!ProfileManager.Current.CBBlackBGToggled)
                     {
                         _background.Hue = barColor;
                     }
                 }
 
-                if ((mobile != null && mobile.IsDead) || Engine.Profile.Current.CBBlackBGToggled)
+                if ((mobile != null && mobile.IsDead) || ProfileManager.Current.CBBlackBGToggled)
                 {
                     if (_background.Hue != 912)
                         _background.Hue = 912;
@@ -562,7 +563,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                if (Engine.UI.MouseOverControl != null && Engine.UI.MouseOverControl.RootParent == this)
+                if (UIManager.MouseOverControl != null && UIManager.MouseOverControl.RootParent == this)
                 {
                     SelectedObject.HealthbarObject = entity;
                     SelectedObject.Object = entity;
@@ -977,8 +978,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity == null || entity.IsDestroyed)
             {
-                if (LocalSerial != World.Player && (Engine.Profile.Current.CloseHealthBarType == 1 ||
-                                                    Engine.Profile.Current.CloseHealthBarType == 2 && World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
+                if (LocalSerial != World.Player && (ProfileManager.Current.CloseHealthBarType == 1 ||
+                                                    ProfileManager.Current.CloseHealthBarType == 2 && World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
                 {
                     Dispose();
 
@@ -1043,7 +1044,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Mobile mobile = entity.Serial.IsMobile ? (Mobile)entity : null;
 
-                if (!_isDead && entity != World.Player && (mobile != null && mobile.IsDead) && Engine.Profile.Current.CloseHealthBarType == 2) // is dead
+                if (!_isDead && entity != World.Player && (mobile != null && mobile.IsDead) && ProfileManager.Current.CloseHealthBarType == 2) // is dead
                 {
                     Dispose();
 
@@ -1190,7 +1191,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
 
-                if ( /*!Mobile.IsSelected &&*/ Engine.UI.MouseOverControl != null && Engine.UI.MouseOverControl.RootParent == this)
+                if ( /*!Mobile.IsSelected &&*/ UIManager.MouseOverControl != null && UIManager.MouseOverControl.RootParent == this)
                 {
                     //Mobile.IsSelected = true;
                     SelectedObject.HealthbarObject = entity;
@@ -1228,14 +1229,14 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case ButtonParty.Heal1:
                     GameActions.CastSpell(29);
-                    World.Party.PartyHealTimer = Engine.Ticks + 50;
+                    World.Party.PartyHealTimer = Time.Ticks + 50;
                     World.Party.PartyHealTarget = LocalSerial;
 
                     break;
 
                 case ButtonParty.Heal2:
                     GameActions.CastSpell(11);
-                    World.Party.PartyHealTimer = Engine.Ticks + 50;
+                    World.Party.PartyHealTimer = Time.Ticks + 50;
                     World.Party.PartyHealTarget = LocalSerial;
 
                     break;

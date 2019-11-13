@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -76,7 +77,7 @@ namespace ClassicUO.Game.GameObjects
 
             DrawCharacter(batcher, posX, posY);
 
-            Engine.DebugInfo.MobilesRendered++;
+            //Engine.DebugInfo.MobilesRendered++;
 
             return true;
         }
@@ -98,27 +99,27 @@ namespace ClassicUO.Game.GameObjects
             drawX += 22;
             drawY += 22;
 
-            bool hasShadow = !IsDead && !IsHidden && Engine.Profile.Current.ShadowsEnabled;
+            bool hasShadow = !IsDead && !IsHidden && ProfileManager.Current.ShadowsEnabled;
 
-            if (Engine.AuraManager.IsEnabled)
+            if (AuraManager.IsEnabled)
             {
-                Engine.AuraManager.Draw(batcher, drawX, drawY, Engine.Profile.Current.PartyAura && World.Party.Contains(this) ? Engine.Profile.Current.PartyAuraHue : (ushort)Notoriety.GetHue(NotorietyFlag));
+                AuraManager.Draw(batcher, drawX, drawY, ProfileManager.Current.PartyAura && World.Party.Contains(this) ? ProfileManager.Current.PartyAuraHue : (ushort)Notoriety.GetHue(NotorietyFlag));
             }
 
             bool isHuman = IsHuman;
 
 
-            if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 _viewHue = 0x0023;
                 HueVector.Y = 1;
             }
-            else if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 _viewHue = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;
             }
-            else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
                 _viewHue = Constants.DEAD_RANGE_COLOR;
                 HueVector.Y = 1;
@@ -136,16 +137,16 @@ namespace ClassicUO.Game.GameObjects
                     if (!isHuman)
                         _viewHue = 0x0386;
                 }
-                else if (Engine.Profile.Current.HighlightMobilesByFlags)
+                else if (ProfileManager.Current.HighlightMobilesByFlags)
                 {
                     if (IsPoisoned)
-                        _viewHue = Engine.Profile.Current.PoisonHue;
+                        _viewHue = ProfileManager.Current.PoisonHue;
 
                     if (IsParalyzed)
-                        _viewHue = Engine.Profile.Current.ParalyzedHue;
+                        _viewHue = ProfileManager.Current.ParalyzedHue;
 
                     if (NotorietyFlag != NotorietyFlag.Invulnerable && IsYellowHits)
-                        _viewHue = Engine.Profile.Current.InvulnerableHue;
+                        _viewHue = ProfileManager.Current.InvulnerableHue;
                 }
             }
 
@@ -161,7 +162,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (this == TargetManager.LastTarget)
                 {
-                    Engine.UI.SetTargetLineGump(this);
+                    UIManager.SetTargetLineGump(this);
                     //needHpLine = true;
                 }
             }
@@ -265,7 +266,7 @@ namespace ClassicUO.Game.GameObjects
                         else
                         {
                             if (item.ItemData.IsLight)
-                                Engine.SceneManager.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
+                                CUOEnviroment.Client.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
                         }
 
                         _equipConvData = null;
@@ -274,7 +275,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (item.ItemData.IsLight)
                         {
-                            Engine.SceneManager.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
+                            CUOEnviroment.Client.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
                             break;
                         }
                     }
@@ -309,14 +310,18 @@ namespace ClassicUO.Game.GameObjects
             FileManager.Animations.AnimID = id;
 
             if (direction == null || direction.Address == -1 || direction.FileIndex == -1)
-                return 0;
+            {
+                if (!(_transform && owner != null && entity == null && !hasShadow))
+                    return 0;
+            }
 
             if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
             {
-                return 0;
+                if (!(_transform && owner != null && entity == null && !hasShadow))
+                    return 0;
             }
 
-            direction.LastAccessTime = Engine.Ticks;
+            direction.LastAccessTime = Time.Ticks;
 
             int fc = direction.FrameCount;
 
@@ -327,9 +332,14 @@ namespace ClassicUO.Game.GameObjects
                 var frame = direction.Frames[frameIndex];
 
                 if (frame == null || frame.IsDisposed)
-                    return 0;
+                {
+                    if (!(_transform && owner != null && entity == null && !hasShadow))
+                        return 0;
 
-                frame.Ticks = Engine.Ticks;
+                    goto SKIP;
+                }
+
+                frame.Ticks = Time.Ticks;
 
                 if (mirror)
                     x -= frame.Width - frame.CenterX;
@@ -337,6 +347,8 @@ namespace ClassicUO.Game.GameObjects
                     x -= frame.CenterX;
 
                 y -= frame.Height + frame.CenterY;
+
+                SKIP:
 
                 if (hasShadow)
                     batcher.DrawSpriteShadow(frame, x, y, mirror);
@@ -377,12 +389,15 @@ namespace ClassicUO.Game.GameObjects
 
                         if (entity == null && isHuman)
                         {
-                            int frameHeight = frame.Height;
-                            _characterFrameStartY = y;
-                            _characterFrameHeight = frame.Height;
+                            int frameHeight = frame?.Height ?? 61;
+                            _characterFrameStartY = y - (frame != null ? 0 : (frameHeight -4));
+                            _characterFrameHeight = frameHeight;
                             _startCharacterWaistY = (int) (frameHeight * UPPER_BODY_RATIO) + _characterFrameStartY;
                             _startCharacterKneesY = (int) (frameHeight * MID_BODY_RATIO) + _characterFrameStartY;
                             _startCharacterFeetY = (int) (frameHeight * LOWER_BODY_RATIO) + _characterFrameStartY;
+
+                            if (frame == null)
+                                return 0;
                         }
 
                         float h3mod = UPPER_BODY_RATIO;
@@ -473,7 +488,7 @@ namespace ClassicUO.Game.GameObjects
                     owner.Select(mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y);
 
                     if (entity != null && entity.ItemData.IsLight)
-                        Engine.SceneManager.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x, y);
+                        CUOEnviroment.Client.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x, y);
                 }
 
                 return FileManager.Animations.DataIndex[id].MountedHeightOffset;

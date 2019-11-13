@@ -23,6 +23,7 @@
 
 using System;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
@@ -124,7 +125,7 @@ namespace ClassicUO.Game.Managers
             IsTargeting = cursorType < TargetType.Cancel;
 
             if (IsTargeting)
-                Engine.UI.RemoveTargetLineGump(LastTarget);
+                UIManager.RemoveTargetLineGump(LastTarget);
             else if (lastTargetting)
             {
                 CancelTarget();
@@ -171,14 +172,14 @@ namespace ClassicUO.Game.Managers
 
             if (selectedEntity is GameEffect effect && effect.Source != null)
                 selectedEntity = effect.Source;
-            else if (selectedEntity is MessageInfo overhead && overhead.Owner != null)
+            else if (selectedEntity is TextOverhead overhead && overhead.Owner != null)
                 selectedEntity = overhead.Owner;
 
             if (TargetingState == CursorTarget.SetGrabBag)
             {
                 if (selectedEntity is Item item)
                 {
-                    Engine.Profile.Current.GrabBagSerial = item.Serial;
+                    ProfileManager.Current.GrabBagSerial = item.Serial;
                     GameActions.Print($"Grab Bag set: {item.Serial}");
                 }
 
@@ -203,8 +204,8 @@ namespace ClassicUO.Game.Managers
             {
                 if (selectedEntity != World.Player)
                 {
-                    Engine.UI.RemoveTargetLineGump(LastAttack);
-                    Engine.UI.RemoveTargetLineGump(LastTarget);
+                    UIManager.RemoveTargetLineGump(LastAttack);
+                    UIManager.RemoveTargetLineGump(LastTarget);
                     LastTarget = entity.Serial;
                 }
 
@@ -212,7 +213,7 @@ namespace ClassicUO.Game.Managers
                     _enqueuedAction(entity.Serial, entity.Graphic, entity.X, entity.Y, entity.Z, entity is Item it && it.OnGround || entity.Serial.IsMobile);
                 else
                 {
-                    if (Engine.Profile.Current.EnabledCriminalActionQuery && TargeringType == TargetType.Harmful)
+                    if (ProfileManager.Current.EnabledCriminalActionQuery && TargeringType == TargetType.Harmful)
                     {
                         Mobile m = World.Mobiles.Get(entity);
 
@@ -228,7 +229,7 @@ namespace ClassicUO.Game.Managers
                                                                            }
                                                                        });
 
-                            Engine.UI.Add(messageBox);
+                            UIManager.Add(messageBox);
 
                             return;
                         }
@@ -340,10 +341,10 @@ namespace ClassicUO.Game.Managers
                 return;
 
             GameActions.MessageOverhead($"Target: {target.Name}", Notoriety.GetHue(target.NotorietyFlag), World.Player);
-            Engine.UI.RemoveTargetLineGump(TargetManager.LastTarget);
-            Engine.UI.RemoveTargetLineGump(TargetManager.LastAttack);
+            UIManager.RemoveTargetLineGump(TargetManager.LastTarget);
+            UIManager.RemoveTargetLineGump(TargetManager.LastAttack);
             TargetManager.LastTarget = target.Serial;
-            Engine.UI.SetTargetLineGump(TargetManager.LastTarget);
+            UIManager.SetTargetLineGump(TargetManager.LastTarget);
         }
 
         public static void SelectNextMobile(int type = -1)

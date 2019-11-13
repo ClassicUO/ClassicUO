@@ -47,7 +47,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        protected override ClickPriority Priority { get; } = ClickPriority.High;
+        public override ClickPriority Priority { get; set; } = ClickPriority.High;
 
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

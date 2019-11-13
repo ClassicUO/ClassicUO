@@ -23,6 +23,10 @@
 
 using System;
 
+using ClassicUO.Configuration;
+
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class MovingEffect : GameEffect
@@ -57,79 +61,81 @@ namespace ClassicUO.Game.GameObjects
 
         public MovingEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, Graphic graphic, Hue hue, bool fixedDir) : this(graphic, hue)
         {
-            sbyte zSourceB = (sbyte) zSource;
-            sbyte zTargB = (sbyte) zTarget;
             FixedDir = fixedDir;
 
-            if (src.IsValid)
-            {
-                Entity source = World.Get(src);
+            Entity source = World.Get(src);
 
-                if (source is Mobile mobile)
-                {
-                    SetSource(mobile.Position.X, mobile.Position.Y, mobile.Position.Z);
-
-                    //if (mobile != World.Player && !mobile.IsMoving && (xSource | ySource | zSource) != 0)
-                    //    mobile.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
-                }
-                else if (source is Item)
-                {
-                    SetSource(source.Position.X, source.Position.Y, source.Position.Z);
-
-                    //if ((xSource | ySource | zSource) != 0)
-                    //    source.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
-                }
-                else
-                    SetSource(xSource, ySource, zSourceB);
-            }
+            if (src.IsValid && source != null)
+                SetSource(source);
             else
                 SetSource(xSource, ySource, zSource);
 
-            if (trg.IsValid)
-            {
-                Entity target = World.Get(trg);
 
-                if (target is Mobile mobile)
-                {
-                    SetTarget(target);
+            Entity target = World.Get(trg);
 
-                    //if (mobile != World.Player && !mobile.IsMoving && (xTarget | yTarget | zTarget) != 0)
-                    //    mobile.Position = new Position((ushort) xTarget, (ushort) yTarget, zTargB);
-                }
-                else if (target is Item)
-                {
-                    SetTarget(target);
-
-                    //if ((xTarget | yTarget | zTarget) != 0)
-                    //    target.Position = new Position((ushort) xTarget, (ushort) yTarget, zTargB);
-                }
-                else
-                    SetTarget(xTarget, yTarget, zTargB);
-            }
+            if (trg.IsValid && target != null)
+                SetTarget(target);
             else
-                SetTarget(xTarget, yTarget, zTargB);
+                SetTarget(xTarget, yTarget, zTarget);
         }
 
         public float AngleToTarget { get; set; }
 
         public bool Explode { get; set; }
 
-        public bool FixedDir { get; private set; }
+        public bool FixedDir { get; }
 
         public byte MovingDelay { get; set; } = 20;
 
 
+        private float _timeUntilHit, _timeActive;
+
         public override void Update(double totalMS, double frameMS)
         {
-            if (_lastMoveTime > Engine.Ticks)
+            if (_lastMoveTime > Time.Ticks)
                 return;
 
-            _lastMoveTime = Engine.Ticks + MovingDelay;
+            _lastMoveTime = Time.Ticks + MovingDelay;
             base.Update(totalMS, frameMS);
             (int sx, int sy, int sz) = GetSource();
             (int tx, int ty, int tz) = GetTarget();
-            int screenCenterX = Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1);
-            int screenCenterY = Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1);
+
+            //if (_timeUntilHit == 0.0f)
+            //{
+            //    _timeActive = 0f;
+
+            //    _timeUntilHit = (float) Math.Sqrt(
+            //                                      Math.Pow((tx - sx), 2) +
+            //                                      Math.Pow((ty - sy), 2) +
+            //                                      Math.Pow((tz - sz), 2)) * 20;
+            //}
+            //else
+            //{
+            //    _timeActive += (float) frameMS;
+            //}
+
+            //if (_timeActive >= _timeUntilHit)
+            //{
+            //    Destroy();
+            //    return;
+            //}
+            //else
+            //{
+            //    float x, y, z;
+            //    x = (sx + (_timeActive / _timeUntilHit) * (float) (tx - sx));
+            //    y = (sy + (_timeActive / _timeUntilHit) * (float) (ty - sy));
+            //    z = (sz + (_timeActive / _timeUntilHit) * (float) (tz - sz));
+            //    Position = new Position((ushort) x, (ushort) y, (sbyte) z);
+            //    AddToTile();
+            //    Offset.X = x % 1;
+            //    Offset.Y = y % 1;
+            //    Offset.Z = z % 1;
+            //    AngleToTarget = -((float) Math.Atan2((ty - sy), (tx - sx)) + (float) (Math.PI) * (1f / 4f));
+            //}
+
+
+            int screenCenterX = ProfileManager.Current.GameWindowPosition.X + (ProfileManager.Current.GameWindowSize.X >> 1);
+            int screenCenterY = ProfileManager.Current.GameWindowPosition.Y + (ProfileManager.Current.GameWindowSize.Y >> 1);
             int playerX = World.Player.X;
             int playerY = World.Player.Y;
             int offsetX = sx - playerX;
@@ -215,7 +221,7 @@ namespace ClassicUO.Game.GameObjects
             int newX = playerX + newCoordX;
             int newY = playerY + newCoordY;
 
-            if ( (newX == tx && newY == ty && sz == tz) || (Target != null && Target.IsDestroyed))
+            if ((newX == tx && newY == ty && sz == tz) || (Target != null && Target.IsDestroyed))
             {
                 if (Explode)
                 {
@@ -258,7 +264,6 @@ namespace ClassicUO.Game.GameObjects
                     if (totalOffsetZ == 0)
                         totalOffsetZ = 1;
                     Offset.Z += totalOffsetZ;
-
                     if (Offset.Z >= 4)
                     {
                         const int COUNT_Z = 1;
@@ -279,8 +284,7 @@ namespace ClassicUO.Game.GameObjects
                 countY -= (int) Offset.Z + ((tz - sz) << 2);
                 if (!FixedDir)
                 {
-                    float angle = (float)(Math.Atan2(countY, countX) * 57.295780);
-                    AngleToTarget = -(float)(angle * Math.PI) / 180.0f;
+                    AngleToTarget = -(float) Math.Atan2(countY, countX); 
                 }
 
                 if (sx != newX || sy != newY)
@@ -291,7 +295,8 @@ namespace ClassicUO.Game.GameObjects
                     wantUpdateInRenderList = true;
                 }
 
-                if (wantUpdateInRenderList) SetSource(sx, sy, sz);
+                if (wantUpdateInRenderList)
+                    SetSource(sx, sy, sz);
             }
         }
 

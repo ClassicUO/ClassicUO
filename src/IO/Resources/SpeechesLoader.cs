@@ -30,7 +30,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class SpeechesLoader : ResourceLoader
+    internal class SpeechesLoader : UOFileLoader
     {
         private SpeechEntry[] _speech;
 

@@ -28,11 +28,18 @@ namespace ClassicUO.IO.Audio
     internal class UOSound : Sound
     {
         private readonly byte[] m_WaveBuffer;
+        private bool m_Playing;
 
         public UOSound(string name, int index, byte[] buffer)
             : base(name, index)
         {
+            m_Playing = false;
             m_WaveBuffer = buffer;
+        }
+
+        public bool IsPlaying()
+        {
+            return m_Playing;
         }
 
         protected override void OnBufferNeeded(object sender, EventArgs e)
@@ -43,6 +50,16 @@ namespace ClassicUO.IO.Audio
         protected override byte[] GetBuffer()
         {
             return m_WaveBuffer;
+        }
+
+        protected override void BeforePlay()
+        {
+            m_Playing = true;
+        }
+
+        protected override void AfterStop()
+        {
+            m_Playing = false;
         }
     }
 }
