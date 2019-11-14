@@ -1159,15 +1159,17 @@ namespace ClassicUO.Game.UI.Gumps
                             int offsetX = x + 123 + (48 - bounds.Width) / 2;
                             int offsetY = y + 36 + (60 - bounds.Height) / 2;
 
-                            _dataBox.Add(new StaticPic(graphic, 0)
+                            StaticPic pic = new StaticPic(graphic, 0)
                             {
                                 X = offsetX,
-                                Y = offsetY
-                            });
-                            _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
+                                Y = offsetY,
+                                LocalSerial = (uint) (ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
+                            };
+                            pic.MouseDown += (sender, e) =>
                             {
-                                Priority = ClickPriority.Default
-                            });
+                                OnButtonClick((int) pic.LocalSerial.Value);
+                            };
+                            _dataBox.Add(pic);
                         }
 
                         x += 48;
