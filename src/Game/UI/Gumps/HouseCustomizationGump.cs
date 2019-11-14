@@ -1163,7 +1163,7 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 X = offsetX,
                                 Y = offsetY,
-                                LocalSerial = (uint) (ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
+                                LocalSerial = (uint) (ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + index)
                             };
                             pic.MouseDown += (sender, e) =>
                             {
