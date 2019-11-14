@@ -181,6 +181,8 @@ namespace ClassicUO.Game.Scenes
             ProfileManager.Current.RestoreScaleValue = ProfileManager.Current.ScaleZoom = Scale;
             UIManager.ContainerScale = ProfileManager.Current.ContainersScale / 100f;
 
+            if (ProfileManager.Current.WindowBorderless) CUOEnviroment.Client.SetWindowBorderless(false);
+
             Plugin.OnConnected();
         }
 
