@@ -138,10 +138,10 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public void GetMapMultiZ(int x, int y, out sbyte groundZ, out sbyte staticZ)
+        public void GetMapMultiZ(int x, int y, out sbyte multiZ)
         {
             var tile = GetTile(x, y);
-            groundZ = staticZ = 0;
+            multiZ = 0;
 
             if (tile == null)
             {
@@ -150,18 +150,13 @@ namespace ClassicUO.Game.Map
 
             var obj = tile.FirstNode;
 
-            while (obj != null)
+            for (var o = obj; o != null; o = o.Right)
             {
-                if (obj is Land)
-                    groundZ = obj.Z;
-                else if (obj is Multi m)
+                if (o is Multi)
                 {
-                    staticZ = (sbyte) (m.Z + 7);
+                    multiZ = o.Z;
                     break;
                 }
-                //else if (staticZ < obj.Z)
-                //    staticZ = obj.Z;
-                obj = obj.Right;
             }
         }
 

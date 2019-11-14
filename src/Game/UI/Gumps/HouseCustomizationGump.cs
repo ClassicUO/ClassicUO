@@ -1026,15 +1026,23 @@ namespace ClassicUO.Game.UI.Gumps
 
                         int offsetY = y + 36 + (120 - bounds.Height) / 2;
 
-                        _dataBox.Add(new StaticPic(graphic, 0)
+                        var pic = new StaticPic(graphic, 0)
                         {
                             X = offsetX,
-                            Y = offsetY
-                        });
-                        _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
-                        {
-                            Priority = ClickPriority.Default
-                        });
+                            Y = offsetY,
+                            LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
+                        };
+                        pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial.Value); };
+                        _dataBox.Add(pic);
+                        //_dataBox.Add(new StaticPic(graphic, 0)
+                        //{
+                        //    X = offsetX,
+                        //    Y = offsetY
+                        //});
+                        //_dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
+                        //{
+                        //    Priority = ClickPriority.Default
+                        //});
                     }
 
                     x += 48;
@@ -1209,15 +1217,18 @@ namespace ClassicUO.Game.UI.Gumps
                             int offsetX = x + 123 + (48 - bounds.Width) / 2;
                             int offsetY = y + 36 + (60 - bounds.Height) / 2;
 
-                            _dataBox.Add(new StaticPic(graphic, 0)
+                            var pic = new StaticPic(graphic, 0)
                             {
                                 X = offsetX,
-                                Y = offsetY
-                            });
-                            _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
-                            {
-                                Priority = ClickPriority.Default
-                            });
+                                Y = offsetY,
+                                LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
+                            };
+                            pic.MouseUp += (sender, e) => { OnButtonClick((int) pic.LocalSerial.Value);};
+                            _dataBox.Add(pic);
+                            //_dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
+                            //{
+                            //    Priority = ClickPriority.Default
+                            //});
                         }
 
                         x += 48;
@@ -1259,15 +1270,24 @@ namespace ClassicUO.Game.UI.Gumps
                     int offsetX = x + 121 + (48 - bounds.Width) / 2;
                     int offsetY = y + 36;
 
-                    _dataBox.Add(new StaticPic((ushort)vec[0].NSCrosspiece, 0)
+                    var pic = new StaticPic((ushort)vec[0].NSCrosspiece, 0)
                     {
                         X = offsetX,
-                        Y = offsetY
-                    });
-                    _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
-                    {
-                        Priority = ClickPriority.Default
-                    });
+                        Y = offsetY,
+                        LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
+                    };
+                    pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial.Value); };
+                    _dataBox.Add(pic);
+
+                    //_dataBox.Add(new StaticPic((ushort)vec[0].NSCrosspiece, 0)
+                    //{
+                    //    X = offsetX,
+                    //    Y = offsetY
+                    //});
+                    //_dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
+                    //{
+                    //    Priority = ClickPriority.Default
+                    //});
 
                     x += 48;
 
@@ -1308,15 +1328,24 @@ namespace ClassicUO.Game.UI.Gumps
                                 int offsetX = x + 130 + (48 - bounds.Width) / 2;
                                 int offsetY = y + 44 + (60 - bounds.Height) / 2;
 
-                                _dataBox.Add(new StaticPic(graphic, 0)
+                                var pic = new StaticPic(graphic, 0)
                                 {
                                     X = offsetX,
-                                    Y = offsetY
-                                });
-                                _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
-                                {
-                                    Priority = ClickPriority.Default
-                                });
+                                    Y = offsetY,
+                                    LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
+                                };
+                                pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial.Value); };
+                                _dataBox.Add(pic);
+
+                                //_dataBox.Add(new StaticPic(graphic, 0)
+                                //{
+                                //    X = offsetX,
+                                //    Y = offsetY
+                                //});
+                                //_dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
+                                //{
+                                //    Priority = ClickPriority.Default
+                                //});
                             }
 
                             x += 48;
@@ -1399,15 +1428,24 @@ namespace ClassicUO.Game.UI.Gumps
                     int offsetX = x + 121 + (48 - bounds.Width) / 2;
                     int offsetY = y + 36;
 
-                    _dataBox.Add(new StaticPic((ushort)vec[0].Piece5, 0)
+                    //_dataBox.Add(new StaticPic((ushort)vec[0].Piece5, 0)
+                    //{
+                    //    X = offsetX,
+                    //    Y = offsetY
+                    //});
+                    //_dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
+                    //{
+                    //    Priority = ClickPriority.Default
+                    //});
+
+                    var pic = new StaticPic((ushort) vec[0].Piece5, 0)
                     {
                         X = offsetX,
-                        Y = offsetY
-                    });
-                    _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
-                    {
-                        Priority = ClickPriority.Default
-                    });
+                        Y = offsetY,
+                        LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
+                    };
+                    pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial.Value); };
+                    _dataBox.Add(pic);
 
                     x += 48;
 
@@ -1444,15 +1482,24 @@ namespace ClassicUO.Game.UI.Gumps
                             int offsetX = x + 130 + (48 - bounds.Width) / 2;
                             int offsetY = y + 44 + (120 - bounds.Height) / 2;
 
-                            _dataBox.Add(new StaticPic(graphic, 0)
+                            var pic = new StaticPic(graphic, 0)
                             {
                                 X = offsetX,
-                                Y = offsetY
-                            });
-                            _dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
-                            {
-                                Priority = ClickPriority.Default
-                            });
+                                Y = offsetY,
+                                LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
+                            };
+                            pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial.Value); };
+                            _dataBox.Add(pic);
+
+                            //_dataBox.Add(new StaticPic(graphic, 0)
+                            //{
+                            //    X = offsetX,
+                            //    Y = offsetY
+                            //});
+                            //_dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
+                            //{
+                            //    Priority = ClickPriority.Default
+                            //});
                         }
 
                         x += 48;
@@ -1685,7 +1732,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (graphic != 0)
                     {
-                        TargetManager.SetTargetingMulti(Serial.INVALID, graphic, 0, 0, 0, 0, true);
+                        ushort z = (ushort) (World.Items.Get(LocalSerial).Z /*+ 7 + ((CurrentFloor - 1) * 20)*/);
+                        TargetManager.SetTargetingMulti(Serial.INVALID, graphic, 0, 0, z, 0, true);
                         CombinedStair = combinedStairs;
                         SelectedGraphic = graphic;
                         Update();
@@ -1803,6 +1851,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                     for (int i = 0; i < _floorVisionState.Length; i++)
                         _floorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
+
+                    if (SelectedGraphic != 0)
+                    {
+                        TargetManager.MultiTargetInfo.ZOff = (ushort)(World.Items.Get(LocalSerial).Z);
+                    }
+
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_2:
@@ -1811,6 +1865,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                     for (int i = 0; i < _floorVisionState.Length; i++)
                         _floorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
+
+                    if (SelectedGraphic != 0)
+                    {
+                        TargetManager.MultiTargetInfo.ZOff = (ushort)(World.Items.Get(LocalSerial).Z);
+                    }
+
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3:
@@ -1819,6 +1879,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                     for (int i = 0; i < _floorVisionState.Length; i++)
                         _floorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
+
+                    if (SelectedGraphic != 0)
+                    {
+                        TargetManager.MultiTargetInfo.ZOff = (ushort)(World.Items.Get(LocalSerial).Z);
+                    }
+
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_4:
@@ -1827,6 +1893,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                     for (int i = 0; i < _floorVisionState.Length; i++)
                         _floorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
+
+                    if (SelectedGraphic != 0)
+                    {
+                        TargetManager.MultiTargetInfo.ZOff = (ushort)(World.Items.Get(LocalSerial).Z);
+                    }
+
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_LIST_LEFT:
@@ -1915,6 +1987,8 @@ namespace ClassicUO.Game.UI.Gumps
                     int floorZ = foundationItem.Z + 7;
                     int itemZ = item.Z;
 
+                    bool ignore = false;
+
                     for (int i = 0; i < 4; i++)
                     {
                         int offset = 0; //i != 0 ? 0 : 7;
@@ -1930,7 +2004,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (currentFloor == -1)
                     {
-                        continue;
+                        ignore = true;
+                        currentFloor = 0;
+                        //continue;
                     }
 
                     (int floorCheck1, int floorCheck2) = SeekGraphicInCustomHouseObjectList(_floors, item.Graphic);
@@ -1983,14 +2059,18 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                         }
 
-                        if (_floorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_CONTENT)
+                        if (!ignore)
                         {
-                            state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
+                            if (_floorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_CONTENT)
+                            {
+                                state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
+                            }
+                            else if (_floorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_CONTENT)
+                            {
+                                state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
+                            }
                         }
-                        else if (_floorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_CONTENT)
-                        {
-                            state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
-                        }
+                      
                     }
 
                     if (_floorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_ALL)

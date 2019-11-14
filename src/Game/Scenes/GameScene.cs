@@ -603,17 +603,45 @@ namespace ClassicUO.Game.Scenes
 
                 if (SelectedObject.Object is GameObject gobj)
                 {
-                    Position pos = TargetManager.MultiTargetInfo.Offset;
-                    Position pos2 = /*!_multi.IsMulti ? gobj.Position :*/ gobj.Tile?.FirstNode?.Position ?? gobj.Position;
+                    Position pos2 = gobj.Tile?.FirstNode?.Position ?? gobj.Position;
 
                     sbyte groundZ = 0, staticZ;
                     if (TargetManager.MultiTargetInfo.IsCustomHouse)
                     {
-                        if (gobj is Multi m && m.State == CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE)
+                        sbyte floorZ = (sbyte) (TargetManager.MultiTargetInfo.ZOff + 7);
+
+                        if (gobj is Multi m)
                         {
-                            World.Map.GetMapMultiZ(pos2.X, pos2.Y, out groundZ, out staticZ);
-                            groundZ = (sbyte) (staticZ + 7);
+                            int itemZ = m.Z;
+
+                            for (int i = 0; i < 4; i++)
+                            {
+                                int offset = i != 0 ? 0 : 7;
+
+                                if (itemZ >= floorZ - offset &&
+                                    itemZ < floorZ + 20)
+                                {
+
+                                    if (itemZ < floorZ)
+                                    {
+                                        if ((m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
+                                        {
+                                            groundZ = m.Z;
+                                            continue;
+                                        }
+                                    }
+
+
+                                    groundZ = floorZ;
+
+                                    break;
+                                }
+
+                                floorZ += 20;
+                            }
                         }
+                        else
+                            groundZ = floorZ;
                     }
                     else
                     {
@@ -624,7 +652,9 @@ namespace ClassicUO.Game.Scenes
                     if (gobj is Static st && st.ItemData.IsWet)
                         groundZ = gobj.Z;
 
-                    pos = new Position((ushort)(pos2.X - pos.X), (ushort)(pos2.Y - pos.Y), groundZ);
+                    var pos = new Position(
+                        (ushort)(pos2.X - TargetManager.MultiTargetInfo.XOff), 
+                        (ushort)(pos2.Y - TargetManager.MultiTargetInfo.YOff), groundZ);
 
                     _multi.Position = pos;
                     _multi.CheckGraphicChange();

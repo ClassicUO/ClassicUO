@@ -71,10 +71,10 @@ namespace ClassicUO.Game.Managers
             ZOff = z;
             Hue = hue;
 
-            Offset = new Position(XOff, YOff, (sbyte)ZOff);
+            //Offset = new Position(XOff, YOff, (sbyte)ZOff);
         }
 
-        public readonly Position Offset;
+        //public readonly Position Offset;
         public bool IsCustomHouse;
     }
 
