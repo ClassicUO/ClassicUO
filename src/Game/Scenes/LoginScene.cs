@@ -109,7 +109,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Connected += NetClient_Connected;
             NetClient.LoginSocket.Disconnected += Login_NetClient_Disconnected;
 
-           int music = FileManager.ClientVersion >= ClientVersions.CV_7000 ? 78 : FileManager.ClientVersion > ClientVersions.CV_308Z ? 0 : 8;
+            int music = FileManager.ClientVersion >= ClientVersions.CV_7000 ? 78 : FileManager.ClientVersion > ClientVersions.CV_308Z ? 0 : 8;
 
             Audio.PlayMusic(music);
 
@@ -118,6 +118,9 @@ namespace ClassicUO.Game.Scenes
                 if (!string.IsNullOrEmpty(Settings.GlobalSettings.Username))
                     Connect(Settings.GlobalSettings.Username, Crypter.Decrypt(Settings.GlobalSettings.Password));
             }
+
+            CUOEnviroment.Client.SetWindowBorderless(false);
+            CUOEnviroment.Client.SetWindowSize(Width, Height);
         }
 
 
