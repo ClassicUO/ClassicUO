@@ -608,40 +608,60 @@ namespace ClassicUO.Game.Scenes
                     sbyte groundZ = 0, staticZ;
                     if (TargetManager.MultiTargetInfo.IsCustomHouse)
                     {
-                        sbyte floorZ = (sbyte) (TargetManager.MultiTargetInfo.ZOff + 7);
+                        //groundZ = (sbyte) (TargetManager.MultiTargetInfo.ZOff + 7);
 
-                        if (gobj is Multi m)
+                        var gump = UIManager.GetGump<HouseCustomizationGump>();
+                        //List<Multi> list = new List<Multi>();
+
+                        if (!gump.GetBuildZ(ref groundZ))
                         {
-                            int itemZ = m.Z;
-
-                            for (int i = 0; i < 4; i++)
-                            {
-                                int offset = i != 0 ? 0 : 7;
-
-                                if (itemZ >= floorZ - offset &&
-                                    itemZ < floorZ + 20)
-                                {
-
-                                    if (itemZ < floorZ)
-                                    {
-                                        if ((m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
-                                        {
-                                            groundZ = m.Z;
-                                            continue;
-                                        }
-                                    }
-
-
-                                    groundZ = floorZ;
-
-                                    break;
-                                }
-
-                                floorZ += 20;
-                            }
+                            groundZ = gobj.Z;
+                            _multi.Hue = 0x21;
                         }
                         else
-                            groundZ = floorZ;
+                            _multi.Hue = 0;
+
+
+                        //if (gump.CanBuildHere(list, out var type))
+                        //{
+                        //    foreach (Multi multi in list)
+                        //    {
+                        //        groundZ = multi.Z;
+                        //    }
+                        //}
+
+                        //if (gobj is Multi m)
+                        //{
+                        //    int itemZ = m.Z;
+
+                        //    for (int i = 0; i < 4; i++)
+                        //    {
+                        //        int offset = i != 0 ? 0 : 7;
+
+                        //        if (itemZ >= floorZ - offset &&
+                        //            itemZ < floorZ + 20)
+                        //        {
+
+                        //            if (itemZ < floorZ)
+                        //            {
+                        //                if ((m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
+                        //                {
+                        //                    groundZ = m.Z;
+                        //                    continue;
+                        //                }
+                        //            }
+
+
+                        //            groundZ = floorZ;
+
+                        //            break;
+                        //        }
+
+                        //        floorZ += 20;
+                        //    }
+                        //}
+                        //else
+                        //    groundZ = (sbyte) (World.Player.Z);
                     }
                     else
                     {

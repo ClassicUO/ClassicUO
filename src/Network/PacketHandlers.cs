@@ -3561,6 +3561,7 @@ namespace ClassicUO.Network
                                     Multi m = Multi.Create(id);
                                     m.Position = new Position((ushort) (foundation.X + x), (ushort) (foundation.Y + y), (sbyte) (foundation.Z + z));
                                     m.IsCustom = true;
+                                    m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
                                     house.Components.Add(m);
                                 }
                             }
@@ -3586,6 +3587,7 @@ namespace ClassicUO.Network
                                     Multi m = Multi.Create(id);
                                     m.Position = new Position((ushort)(foundation.X + x), (ushort)(foundation.Y + y), (sbyte)(foundation.Z + z));
                                     m.IsCustom = true;
+                                    m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
                                     house.Components.Add(m);
                                 }
                             }
@@ -3632,6 +3634,7 @@ namespace ClassicUO.Network
                                     Multi m = Multi.Create(id);
                                     m.Position = new Position((ushort)(foundation.X + x), (ushort)(foundation.Y + y), (sbyte)(foundation.Z + z));
                                     m.IsCustom = true;
+                                    m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
                                     house.Components.Add(m);
                                 }
                             }

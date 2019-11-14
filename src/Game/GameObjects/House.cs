@@ -83,15 +83,15 @@ namespace ClassicUO.Game.GameObjects
 
                     component.State = component.State & ~(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT |
                                                           CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER |
-                                                          CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE |
+                                                         // CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE |
                                                           CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE);
 
                     if (component.IsCustom)
                     {
-                        if ((state == 0) || (component.State & state) != 0)
+                        if (((state == 0) || (component.State & state) != 0) && (component.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) == 0)
                         {
-                            //component.Destroy();
-                            //Components.RemoveAt(i--);
+                            component.Destroy();
+                            Components.RemoveAt(i--);
                         }
                     }
                     else if (component.Z == checkZ)
@@ -119,7 +119,7 @@ namespace ClassicUO.Game.GameObjects
                     if (recalculate)
                         s.Position = new Position((ushort) (item.X + s.MultiOffsetX), (ushort) (item.Y + s.MultiOffsetY), (sbyte) (item.Position.Z + s.MultiOffsetZ));
                     s.Hue = item.Hue;
-                    s.State = 0;
+                    s.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
                     //s.IsCustom = IsCustom;
                 }
 

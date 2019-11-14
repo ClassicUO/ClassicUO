@@ -248,6 +248,7 @@ namespace ClassicUO.Game.GameObjects
                     m.Hue = Hue;
                     m.AlphaHue = 255;
                     m.IsCustom = false;
+                    m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
                     house.Components.Add(m);
                 }
                 else if (i == 0)
