@@ -27,6 +27,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -122,7 +123,7 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true;
             }
 
-            Engine.UI.GameCursor.IsDraggingCursorForced = false;
+            UIManager.GameCursor.IsDraggingCursorForced = false;
 
             base.OnMouseUp(x, y, button);
         }
@@ -138,7 +139,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _isScrolling = true;
                     CanMove = false;
 
-                    Engine.UI.GameCursor.IsDraggingCursorForced = true;
+                    UIManager.GameCursor.IsDraggingCursorForced = true;
                 }
             }
 
@@ -219,7 +220,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     for (int by = 0; by < fixedHeight; by++)
                     {
-                        ref readonly IndexMap indexMap = ref World.Map.GetIndex(bx, by);
+                        ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
 
                         if (indexMap.MapAddress == 0)
                             continue;
@@ -275,7 +276,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             for (int x = 0; x < 8; x++)
                             {
-                                ref readonly var c = ref infoCells[pos];
+                                ref var c = ref infoCells[pos];
 
                                 ushort color = (ushort)(0x8000 | (colored[pos] ? FileManager.Hues.GetColor16(16384, c.TileID) : FileManager.Hues.GetRadarColorData(c.TileID)));
                                 Color cc;
@@ -369,6 +370,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            if (IsDisposed || !World.InGame)
+                return false;
+
             if (!_isScrolling && !_freeView)
             {
                 _center.X = World.Player.X;
@@ -462,6 +466,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void DrawMobile(UltimaBatcher2D batcher, Mobile mobile, int x, int y, int width, int height, float zoom, Color color)
         {
+            if (mobile == null || mobile.IsDestroyed)
+                return;
+
             int sx = mobile.X - _center.X;
             int sy = mobile.Y - _center.Y;
 
@@ -554,7 +561,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            Engine.UI.GameCursor.IsDraggingCursorForced = false;
+            UIManager.GameCursor.IsDraggingCursorForced = false;
 
             _mapTexture?.Dispose();
             base.Dispose();

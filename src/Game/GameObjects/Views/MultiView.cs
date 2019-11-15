@@ -21,8 +21,13 @@
 
 #endregion
 
+using System;
+
+using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -32,7 +37,6 @@ namespace ClassicUO.Game.GameObjects
     internal partial class Multi
     {
         private int _canBeTransparent;
-        private bool _isFoliage;
 
         public bool CharacterIsBehindFoliage { get; set; }
         public bool IsFromTarget { get; set; }
@@ -56,20 +60,33 @@ namespace ClassicUO.Game.GameObjects
 
             ResetHueVector();
 
-            if (Texture == null || Texture.IsDisposed)
+            ushort hue = Hue;
+            float alpha = 0;
+            if (State != 0)
             {
-                ArtTexture texture = FileManager.Art.GetTexture(Graphic);
-                Texture = texture;
-                Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
+                if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER) != 0)
+                    return false;
 
-                FrameInfo.Width = texture.ImageRectangle.Width;
-                FrameInfo.Height = texture.ImageRectangle.Height;
+                if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) != 0)
+                {
+                    hue = 0x002B;
+                }
 
-                FrameInfo.X = (Texture.Width >> 1) - 22 - texture.ImageRectangle.X;
-                FrameInfo.Y = Texture.Height - 44 - texture.ImageRectangle.Y;
+                if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT) != 0)
+                {
+                    if (AlphaHue >= 192)
+                    {
+                        alpha = 0.25f;
+                        AlphaHue = 0xFF;
+                    }
+                    else
+                        ProcessAlpha(192);
+                }
             }
 
-            if (_isFoliage)
+            ushort graphic = Graphic;
+
+            if (ItemData.IsFoliage)
             {
                 if (CharacterIsBehindFoliage)
                 {
@@ -82,27 +99,63 @@ namespace ClassicUO.Game.GameObjects
                         ProcessAlpha(0xFF);
                 }
             }
+            else if (ItemData.IsAnimated && _lastAnimationFrameTime < Time.Ticks)
+            {
+                IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
+
+                if (ptr != IntPtr.Zero)
+                {
+                    unsafe
+                    {
+                        AnimDataFrame2* animData = (AnimDataFrame2*)ptr;
+
+                        if (animData->FrameCount != 0)
+                        {
+                            graphic = (Graphic)(Graphic + animData->FrameData[AnimIndex++]);
+
+                            if (AnimIndex >= animData->FrameCount)
+                                AnimIndex = 0;
+
+                            _lastAnimationFrameTime = Time.Ticks + (uint)(animData->FrameInterval != 0 ?
+                                                          animData->FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY + 25 : Constants.ITEM_EFFECT_ANIMATION_DELAY);
+                        }
+                    }
+                }
+            }
 
 
-            if (Engine.Profile.Current.HighlightGameObjects && SelectedObject.LastObject == this)
+            if (Texture == null || Texture.IsDisposed || Graphic != graphic)
+            {
+                ArtTexture texture = FileManager.Art.GetTexture(graphic);
+                Texture = texture;
+                Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
+
+                FrameInfo.Width = texture.ImageRectangle.Width;
+                FrameInfo.Height = texture.ImageRectangle.Height;
+
+                FrameInfo.X = (Texture.Width >> 1) - 22 - texture.ImageRectangle.X;
+                FrameInfo.Y = Texture.Height - 44 - texture.ImageRectangle.Y;
+            }
+
+            if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 HueVector.X = 0x0023;
                 HueVector.Y = 1;
             }
-            else if (Engine.Profile.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            else if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 HueVector.X = Constants.OUT_RANGE_COLOR;
                 HueVector.Y = 1;
             }
-            else if (World.Player.IsDead && Engine.Profile.Current.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect)
             {
                 HueVector.X = Constants.DEAD_RANGE_COLOR;
                 HueVector.Y = 1;
             }
             else
-                ShaderHuesTraslator.GetHueVector(ref HueVector, Hue, ItemData.IsPartialHue, 0);
+                ShaderHuesTraslator.GetHueVector(ref HueVector, hue, ItemData.IsPartialHue, alpha);
 
-            Engine.DebugInfo.MultiRendered++;
+            //Engine.DebugInfo.MultiRendered++;
 
             if (IsFromTarget)
                 HueVector.Z = 0.5f;
@@ -111,7 +164,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (ItemData.IsLight)
             {
-                Engine.SceneManager.GetScene<GameScene>()
+                CUOEnviroment.Client.GetScene<GameScene>()
                       .AddLight(this, this, posX + 22, posY + 22);
             }
 
@@ -123,10 +176,16 @@ namespace ClassicUO.Game.GameObjects
             if (SelectedObject.Object == this || IsFromTarget || CharacterIsBehindFoliage)
                 return;
 
+            if (State != 0)
+            {
+                if (((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER) != 0))
+                    return;
+            }
+
             if (DrawTransparent)
             {
                 int d = Distance;
-                int maxD = Engine.Profile.Current.CircleOfTransparencyRadius + 1;
+                int maxD = ProfileManager.Current.CircleOfTransparencyRadius + 1;
 
                 if (d <= maxD && d <= 3)
                     return;

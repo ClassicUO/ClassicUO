@@ -24,7 +24,9 @@
 using System;
 using System.IO;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -47,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public UseSpellButtonGump(SpellDefinition spell) : this()
         {
-            Engine.UI.GetGump<UseSpellButtonGump>((uint) spell.ID)?.Dispose();
+            UIManager.GetGump<UseSpellButtonGump>((uint) spell.ID)?.Dispose();
             _spell = spell;
             BuildGump();
         }
@@ -102,13 +104,13 @@ namespace ClassicUO.Game.UI.Gumps
         {
             Point offset = Mouse.LDroppedOffset;
 
-            if (Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left && Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
+            if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButton.Left && Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
                 GameActions.CastSpell(_spell.ID);
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            if (!Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left)
+            if (!ProfileManager.Current.CastSpellsByOneClick && button == MouseButton.Left)
                 GameActions.CastSpell(_spell.ID);
 
             return true;

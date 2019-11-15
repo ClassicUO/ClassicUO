@@ -27,12 +27,12 @@ namespace ClassicUO.Game.UI.Gumps
         public TextRenderer TextRenderer { get; } = new TextRenderer();
 
 
-        public void AddText(MessageInfo msg)
+        public void AddText(TextOverhead msg)
         {
             if (World.ClientFeatures.TooltipsEnabled || msg == null)
                 return;
 
-            msg.Time = Engine.Ticks + 4000;
+            msg.Time = Time.Ticks + 4000;
            
             TextRenderer.AddMessage(msg);
         }

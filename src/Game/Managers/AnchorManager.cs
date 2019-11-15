@@ -91,7 +91,7 @@ namespace ClassicUO.Game.Managers
         {
             if (host.AnchorGroupName == draggedControl.AnchorGroupName && this[draggedControl] == null)
             {
-                Point? relativePosition = GetAnchorDirection(draggedControl, host);
+                (Point? relativePosition, _) = GetAnchorDirection(draggedControl, host);
 
                 if (relativePosition.HasValue)
                 {
@@ -111,13 +111,13 @@ namespace ClassicUO.Game.Managers
         {
             if (host.AnchorGroupName == draggedControl.AnchorGroupName && this[draggedControl] == null)
             {
-                Point? relativePosition = GetAnchorDirection(draggedControl, host);
+                (Point? relativePosition, AnchorableGump g) = GetAnchorDirection(draggedControl, host);
 
                 if (relativePosition.HasValue)
                 {
                     if (this[host] == null || this[host].IsEmptyDirection(draggedControl, host, relativePosition.Value))
                     {
-                        var offset = relativePosition.Value * new Point(host.GroupMatrixWidth, host.GroupMatrixHeight);
+                        var offset = relativePosition.Value * new Point(g.GroupMatrixWidth, g.GroupMatrixHeight);
 
                         return new Point(host.X + offset.X, host.Y + offset.Y);
                     }
@@ -194,7 +194,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        private Point? GetAnchorDirection(AnchorableGump draggedControl, AnchorableGump host)
+        private (Point?, AnchorableGump) GetAnchorDirection(AnchorableGump draggedControl, AnchorableGump host)
         {
             int xdistancescale = Math.Abs(draggedControl.X - host.X)*100 / host.Width;
             int ydistancescale = Math.Abs(draggedControl.Y - host.Y)*100 / host.Height;
@@ -202,16 +202,16 @@ namespace ClassicUO.Game.Managers
             if (xdistancescale > ydistancescale)
             {
                 if (draggedControl.X > host.X)
-                    return new Point(host.WidthMultiplier, 0);
+                    return (new Point(host.WidthMultiplier, 0), host);
                 else
-                    return new Point(-draggedControl.WidthMultiplier, 0);
+                    return (new Point(-draggedControl.WidthMultiplier, 0), draggedControl);
             }
             else
             {
                 if (draggedControl.Y > host.Y)
-                    return new Point(0, host.HeightMultiplier);
+                    return (new Point(0, host.HeightMultiplier), host);
                 else
-                    return new Point(0, -draggedControl.HeightMultiplier);
+                    return (new Point(0, -draggedControl.HeightMultiplier), draggedControl);
             }
         }
 
@@ -234,7 +234,7 @@ namespace ClassicUO.Game.Managers
             AnchorableGump closestControl = null;
             int closestDistance = 99999;
 
-            var hosts = Engine.UI.Gumps.OfType<AnchorableGump>().Where(s => s.AnchorGroupName == control.AnchorGroupName);
+            var hosts = UIManager.Gumps.OfType<AnchorableGump>().Where(s => s.AnchorGroupName == control.AnchorGroupName);
             foreach (AnchorableGump host in hosts)
             {
                 if (IsOverlapping(control, host))
@@ -313,7 +313,7 @@ namespace ClassicUO.Game.Managers
                     for (int y = 0; y < controlMatrix.GetLength(1); y++)
                     {
                         if (controlMatrix[x, y] != null)
-                            Engine.UI.MakeTopMostGump(controlMatrix[x, y]);
+                            UIManager.MakeTopMostGump(controlMatrix[x, y]);
                     }
                 }
             }

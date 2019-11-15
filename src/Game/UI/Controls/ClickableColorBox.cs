@@ -22,6 +22,7 @@
 #endregion
 
 
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -64,7 +65,7 @@ namespace ClassicUO.Game.UI.Controls
             if (button == MouseButton.Left)
             {
                 ColorPickerGump pickerGump = new ColorPickerGump(0, 0, 100, 100, s => SetColor(s, FileManager.Hues.GetPolygoneColor(CELL, s)));
-                Engine.UI.Add(pickerGump);
+                UIManager.Add(pickerGump);
             }
         }
     }

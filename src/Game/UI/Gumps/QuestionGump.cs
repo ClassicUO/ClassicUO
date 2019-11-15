@@ -60,8 +60,8 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = false;
             ControlInfo.IsModal = true;
 
-            X = (Engine.WindowWidth - Width) >> 1;
-            Y = (Engine.WindowHeight - Height) >> 1;
+            X = (CUOEnviroment.Client.Window.ClientBounds.Width - Width) >> 1;
+            Y = (CUOEnviroment.Client.Window.ClientBounds.Height - Height) >> 1;
 
             WantUpdateSize = false;
             _result = result;

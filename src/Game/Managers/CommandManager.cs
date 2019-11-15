@@ -45,13 +45,11 @@ namespace ClassicUO.Game.Managers
                     TargetManager.CancelTarget();
             });
 
-            Register("focus", s => { Engine.DebugFocus = !Engine.DebugFocus; });
             Register("datetime", s =>
             {
                 if(World.Player != null)
                 {
                     GameActions.Print($"Current DateTime.Now is {DateTime.Now}");
-                    GameActions.Print($"Current CurrDateTime is {Engine.CurrDateTime}");
                 }
             });
             Register("hue", s =>
@@ -71,7 +69,7 @@ namespace ClassicUO.Game.Managers
             if (!_commands.ContainsKey(name))
                 _commands.Add(name, callback);
             else
-                Log.Message(LogTypes.Error, string.Format($"Attempted to register command: '{0}' twice.", name));
+                Log.Error( string.Format($"Attempted to register command: '{0}' twice.", name));
         }
 
         public static void UnRegister(string name)
@@ -94,7 +92,7 @@ namespace ClassicUO.Game.Managers
             if (_commands.TryGetValue(name, out var action))
                 action.Invoke(args);
             else
-                Log.Message(LogTypes.Warning, $"Commad: '{name}' not exists");
+                Log.Warn( $"Commad: '{name}' not exists");
         }
 
         public static void OnHueTarget(Entity entity)

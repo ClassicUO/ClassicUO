@@ -21,6 +21,7 @@
 
 #endregion
 
+using ClassicUO.Configuration;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 
@@ -29,25 +30,25 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class AuraManager
+    internal static class AuraManager
     {
         /*private readonly BlendState _blend = new BlendState
         {
             ColorSourceBlend = Blend.SourceAlpha,
             ColorDestinationBlend = Blend.InverseSourceAlpha
         };*/
-        private Vector3 _auraHueVector = new Vector3(0, 13, 0);
+        private static Vector3 _auraHueVector = new Vector3(0, 13, 0);
 
-        private int _saveAuraUnderFeetType;
+        private static int _saveAuraUnderFeetType;
 
-        public bool IsEnabled
+        public static bool IsEnabled
         {
             get
             {
-                if (Engine.Profile.Current == null)
+                if (ProfileManager.Current == null)
                     return false;
 
-                switch (Engine.Profile.Current.AuraUnderFeetType)
+                switch (ProfileManager.Current.AuraUnderFeetType)
                 {
                     default:
                     case 0: return false;
@@ -58,20 +59,20 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public Texture2D AuraTexture { get; private set; }
+        public static Texture2D AuraTexture { get; private set; }
 
-        public void ToggleVisibility()
+        public static void ToggleVisibility()
         {
             if (!IsEnabled)
             {
-                _saveAuraUnderFeetType = Engine.Profile.Current.AuraUnderFeetType;
-                Engine.Profile.Current.AuraUnderFeetType = 3;
+                _saveAuraUnderFeetType = ProfileManager.Current.AuraUnderFeetType;
+                ProfileManager.Current.AuraUnderFeetType = 3;
             }
             else
-                Engine.Profile.Current.AuraUnderFeetType = _saveAuraUnderFeetType;
+                ProfileManager.Current.AuraUnderFeetType = _saveAuraUnderFeetType;
         }
 
-        public void CreateAuraTexture(int radius = 30)
+        public static void CreateAuraTexture(int radius = 30)
         {
             AuraTexture?.Dispose();
 
@@ -94,11 +95,11 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            AuraTexture = new Texture2D(Engine.Batcher.GraphicsDevice, w, h);
+            AuraTexture = new Texture2D(CUOEnviroment.Client.GraphicsDevice, w, h);
             AuraTexture.SetData(data);
         }
 
-        public void Draw(UltimaBatcher2D batcher, int x, int y, Hue hue)
+        public static void Draw(UltimaBatcher2D batcher, int x, int y, Hue hue)
         {
             x -= AuraTexture.Width >> 1;
             y -= AuraTexture.Height >> 1;

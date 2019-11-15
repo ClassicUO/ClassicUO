@@ -23,6 +23,8 @@
 
 using System;
 
+using ClassicUO.Configuration;
+
 namespace ClassicUO.Game.Data
 {
     public enum NotorietyFlag : byte
@@ -45,24 +47,24 @@ namespace ClassicUO.Game.Data
             {
                 case NotorietyFlag.Innocent:
 
-                    return Engine.Profile.Current.InnocentHue;
+                    return ProfileManager.Current.InnocentHue;
 
                 case NotorietyFlag.Ally:
 
-                    return Engine.Profile.Current.FriendHue;
+                    return ProfileManager.Current.FriendHue;
 
                 case NotorietyFlag.Criminal:
                 case NotorietyFlag.Gray:
 
-                    return Engine.Profile.Current.CriminalHue;
+                    return ProfileManager.Current.CriminalHue;
 
                 case NotorietyFlag.Enemy:
 
-                    return Engine.Profile.Current.EnemyHue;
+                    return ProfileManager.Current.EnemyHue;
 
                 case NotorietyFlag.Murderer:
 
-                    return Engine.Profile.Current.MurdererHue;
+                    return ProfileManager.Current.MurdererHue;
 
                 case NotorietyFlag.Invulnerable:
 

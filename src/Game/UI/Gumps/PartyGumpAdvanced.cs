@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
@@ -23,6 +23,7 @@
 
 using System.Collections.Generic;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -76,66 +77,88 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new Label("Bar", true, 1153)
             {
-                X = 30, Y = 25
+                X = 30,
+                Y = 25
             });
 
             Add(new Label("Kick", true, 1153)
             {
-                X = 60, Y = 25
+                X = 60,
+                Y = 25
             });
 
             Add(new Label("Player", true, 1153)
             {
-                X = 100, Y = 25
+                X = 100,
+                Y = 25
             });
 
             Add(new Label("Status", true, 1153)
             {
-                X = 250, Y = 25
+                X = 250,
+                Y = 25
             });
 
             //======================================================
-            Add(_messagePartyButton = new Button((int) Buttons.Message, 0xFAB, 0xFAC, 0xFAD)
+            Add(_messagePartyButton = new Button((int)Buttons.Message, 0xFAB, 0xFAC, 0xFAD)
             {
-                X = 30, Y = 275, ButtonAction = ButtonAction.Activate, IsVisible = false
+                X = 30,
+                Y = 275,
+                ButtonAction = ButtonAction.Activate,
+                IsVisible = false
             });
 
             Add(_messagePartyLabel = new Label("Message party", true, 1153)
             {
-                X = 70, Y = 275, IsVisible = false
+                X = 70,
+                Y = 275,
+                IsVisible = false
             });
 
             //======================================================
-            Add(_lootMeButton = new Button((int) Buttons.Loot, 0xFA2, 0xFA3, 0xFA4)
+            Add(_lootMeButton = new Button((int)Buttons.Loot, 0xFA2, 0xFA3, 0xFA4)
             {
-                X = 30, Y = 300, ButtonAction = ButtonAction.Activate, IsVisible = false
+                X = 30,
+                Y = 300,
+                ButtonAction = ButtonAction.Activate,
+                IsVisible = false
             });
 
             Add(_lootMeLabel = new Label("Party CANNOT loot me", true, 1153)
             {
-                X = 70, Y = 300, IsVisible = false
+                X = 70,
+                Y = 300,
+                IsVisible = false
             });
 
             //======================================================
-            Add(_leaveButton = new Button((int) Buttons.Leave, 0xFAE, 0xFAF, 0xFB0)
+            Add(_leaveButton = new Button((int)Buttons.Leave, 0xFAE, 0xFAF, 0xFB0)
             {
-                X = 30, Y = 325, ButtonAction = ButtonAction.Activate, IsVisible = false
+                X = 30,
+                Y = 325,
+                ButtonAction = ButtonAction.Activate,
+                IsVisible = false
             });
 
             Add(_leaveLabel = new Label("Leave party", true, 1153)
             {
-                X = 70, Y = 325, IsVisible = false
+                X = 70,
+                Y = 325,
+                IsVisible = false
             });
 
             //======================================================
-            Add(_createAddButton = new Button((int) Buttons.Add, 0xFA8, 0xFA9, 0xFAA)
+            Add(_createAddButton = new Button((int)Buttons.Add, 0xFA8, 0xFA9, 0xFAA)
             {
-                X = 30, Y = 350, ButtonAction = ButtonAction.Activate
+                X = 30,
+                Y = 350,
+                ButtonAction = ButtonAction.Activate
             });
 
             Add(_createAddLabel = new Label("Add party member", true, 1153)
             {
-                X = 70, Y = 350
+                X = 70,
+                Y = 350
             });
             //======================================================
 
@@ -254,7 +277,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            switch ((Buttons) buttonID)
+            switch ((Buttons)buttonID)
             {
                 case Buttons.Add:
                     //World.Party.TriggerAddPartyMember();
@@ -344,19 +367,20 @@ namespace ClassicUO.Game.UI.Gumps
             Mobile mobile = World.Mobiles.Get(member.Serial);
 
             //======================================================
-            Add(_status = new GumpPic(240, 0, 0x29F6, (Hue) (mobile != null && mobile.IsDead ? 0 : 0x43)));
+            Add(_status = new GumpPic(240, 0, 0x29F6, (Hue)(mobile != null && mobile.IsDead ? 0 : 0x43)));
 
             //======================================================
-            Button pmButton = new Button((int) Buttons.GetBar, 0xFAE, 0xFAF, 0xFB0)
+            Button pmButton = new Button((int)Buttons.GetBar, 0xFAE, 0xFAF, 0xFB0)
             {
-                X = 10, ButtonAction = ButtonAction.Activate
+                X = 10,
+                ButtonAction = ButtonAction.Activate
             };
             Add(pmButton);
-
             //======================================================
-            Button kickButton = new Button((int) Buttons.Kick, 0xFB1, 0xFB2, 0xFB3)
+            Button kickButton = new Button((int)Buttons.Kick, 0xFB1, 0xFB2, 0xFB3)
             {
-                X = 40, ButtonAction = ButtonAction.Activate
+                X = 40,
+                ButtonAction = ButtonAction.Activate
             };
             Add(kickButton);
         }
@@ -394,7 +418,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (member == null)
                 return;
 
-            switch ((Buttons) buttonID)
+            switch ((Buttons)buttonID)
             {
                 case Buttons.Kick:
                     //
@@ -405,14 +429,23 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.GetBar:
-
-                    Engine.UI.GetGump<HealthBarGump>(member.Serial)?.Dispose();
+                    UIManager.GetGump<BaseHealthBarGump>(member.Serial)?.Dispose();
 
                     if (member.Serial == World.Player)
                         StatusGumpBase.GetStatusGump()?.Dispose();
 
-                    Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-                    Engine.UI.Add(new HealthBarGump(member.Serial) {X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
+
+
+                    if (ProfileManager.Current.CustomBarsToggled)
+                    {
+                        Rectangle rect = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
+                        UIManager.Add(new HealthBarGumpCustom(member.Serial) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                    }
+                    else
+                    {
+                        Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
+                        UIManager.Add(new HealthBarGump(member.Serial) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                    }
 
                     break;
             }

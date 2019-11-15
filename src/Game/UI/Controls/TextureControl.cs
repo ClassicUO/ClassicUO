@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
 
             if (Texture != null)
-                Texture.Ticks = Engine.Ticks;
+                Texture.Ticks = Time.Ticks;
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

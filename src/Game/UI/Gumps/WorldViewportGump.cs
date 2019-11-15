@@ -21,6 +21,8 @@
 
 #endregion
 
+using ClassicUO.Configuration;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -48,29 +50,29 @@ namespace ClassicUO.Game.UI.Gumps
         public WorldViewportGump(GameScene scene) : base(0, 0)
         {
             AcceptMouseInput = false;
-            CanMove = !Engine.Profile.Current.GameWindowLock;
+            CanMove = !ProfileManager.Current.GameWindowLock;
             CanCloseWithEsc = false;
             CanCloseWithRightClick = false;
             ControlInfo.Layer = UILayer.Under;
-            X = Engine.Profile.Current.GameWindowPosition.X;
-            Y = Engine.Profile.Current.GameWindowPosition.Y;
-            _worldWidth = Engine.Profile.Current.GameWindowSize.X;
-            _worldHeight = Engine.Profile.Current.GameWindowSize.Y;
+            X = ProfileManager.Current.GameWindowPosition.X;
+            Y = ProfileManager.Current.GameWindowPosition.Y;
+            _worldWidth = ProfileManager.Current.GameWindowSize.X;
+            _worldHeight = ProfileManager.Current.GameWindowSize.Y;
             _button = new Button(0, 0x837, 0x838, 0x838);
 
             _button.MouseDown += (sender, e) =>
             {
-                if (!Engine.Profile.Current.GameWindowLock)
+                if (!ProfileManager.Current.GameWindowLock)
                     _clicked = true;
             };
 
             _button.MouseUp += (sender, e) =>
             {
-                if (!Engine.Profile.Current.GameWindowLock)
+                if (!ProfileManager.Current.GameWindowLock)
                 {
-                    Point n = ResizeWindow(_lastSize);
+                    Point n = ResizeGameWindow(_lastSize);
 
-                    OptionsGump options = Engine.UI.GetGump<OptionsGump>();
+                    OptionsGump options = UIManager.GetGump<OptionsGump>();
                     options?.UpdateVideo();
 
                     if (FileManager.ClientVersion >= ClientVersions.CV_200)
@@ -86,12 +88,12 @@ namespace ClassicUO.Game.UI.Gumps
             _border = new GameBorder(0, 0, Width, Height, 4);
             _border.DragEnd += (sender, e) => 
             {
-                OptionsGump options = Engine.UI.GetGump<OptionsGump>();
+                OptionsGump options = UIManager.GetGump<OptionsGump>();
                 options?.UpdateVideo();
             };
             _viewport = new WorldViewport(scene, BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
 
-            Engine.UI.SystemChat = _systemChatControl = new SystemChatControl(BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
+            UIManager.SystemChat = _systemChatControl = new SystemChatControl(BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
 
             Add(_border);
             Add(_button);
@@ -99,7 +101,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_systemChatControl);
             Resize();
 
-            _savedSize = _lastSize = Engine.Profile.Current.GameWindowSize;
+            _savedSize = _lastSize = ProfileManager.Current.GameWindowSize;
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -124,11 +126,11 @@ namespace ClassicUO.Game.UI.Gumps
                     if (h < 480)
                         h = 480;
 
-                    if (w > Engine.WindowWidth - BORDER_WIDTH)
-                        w = Engine.WindowWidth - BORDER_WIDTH;
+                    if (w > CUOEnviroment.Client.Window.ClientBounds.Width - BORDER_WIDTH)
+                        w = CUOEnviroment.Client.Window.ClientBounds.Width - BORDER_WIDTH;
 
-                    if (h > Engine.WindowHeight - BORDER_HEIGHT)
-                        h = Engine.WindowHeight - BORDER_HEIGHT;
+                    if (h > CUOEnviroment.Client.Window.ClientBounds.Height - BORDER_HEIGHT)
+                        h = CUOEnviroment.Client.Window.ClientBounds.Height - BORDER_HEIGHT;
 
                     _lastSize.X = w;
                     _lastSize.Y = h;
@@ -140,7 +142,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _worldHeight = _lastSize.Y;
                     Width = _worldWidth + BORDER_WIDTH * 2;
                     Height = _worldHeight + BORDER_HEIGHT * 2;
-                    Engine.Profile.Current.GameWindowSize = _lastSize;
+                    ProfileManager.Current.GameWindowSize = _lastSize;
                     Resize();
                 }
             }
@@ -153,23 +155,23 @@ namespace ClassicUO.Game.UI.Gumps
         {
             Point position = Location;
 
-            if (position.X + Width - BORDER_WIDTH > Engine.Batcher.GraphicsDevice.Viewport.Width)
-                position.X = Engine.Batcher.GraphicsDevice.Viewport.Width - (Width - BORDER_WIDTH);
+            if (position.X + Width - BORDER_WIDTH > CUOEnviroment.Client.GraphicsDevice.Viewport.Width)
+                position.X = CUOEnviroment.Client.GraphicsDevice.Viewport.Width - (Width - BORDER_WIDTH);
 
             if (position.X < -BORDER_WIDTH)
                 position.X = -BORDER_WIDTH;
 
-            if (position.Y + Height - BORDER_HEIGHT > Engine.Batcher.GraphicsDevice.Viewport.Height)
-                position.Y = Engine.Batcher.GraphicsDevice.Viewport.Height - (Height - BORDER_HEIGHT);
+            if (position.Y + Height - BORDER_HEIGHT > CUOEnviroment.Client.GraphicsDevice.Viewport.Height)
+                position.Y = CUOEnviroment.Client.GraphicsDevice.Viewport.Height - (Height - BORDER_HEIGHT);
 
             if (position.Y < -BORDER_HEIGHT)
                 position.Y = -BORDER_HEIGHT;
 
             Location = position;
 
-            Engine.Profile.Current.GameWindowPosition = position;
+            ProfileManager.Current.GameWindowPosition = position;
 
-            var scene = Engine.SceneManager.GetScene<GameScene>();
+            var scene = CUOEnviroment.Client.GetScene<GameScene>();
             if (scene != null)
                 scene.UpdateDrawPosition = true;
         }
@@ -191,7 +193,7 @@ namespace ClassicUO.Game.UI.Gumps
             WantUpdateSize = true;
         }
 
-        public Point ResizeWindow(Point newSize)
+        public Point ResizeGameWindow(Point newSize)
         {
             if (newSize.X < 640)
                 newSize.X = 640;
@@ -200,17 +202,17 @@ namespace ClassicUO.Game.UI.Gumps
                 newSize.Y = 480;
 
             //Resize();
-            _lastSize = _savedSize = Engine.Profile.Current.GameWindowSize = newSize;
+            _lastSize = _savedSize = ProfileManager.Current.GameWindowSize = newSize;
             if (_worldWidth != _lastSize.X || _worldHeight != _lastSize.Y)
             {
                 _worldWidth = _lastSize.X;
                 _worldHeight = _lastSize.Y;
                 Width = _worldWidth + BORDER_WIDTH * 2;
                 Height = _worldHeight + BORDER_HEIGHT * 2;
-                Engine.Profile.Current.GameWindowSize = _lastSize;
+                ProfileManager.Current.GameWindowSize = _lastSize;
                 Resize();
 
-                Engine.SceneManager.GetScene<GameScene>().UpdateDrawPosition = true;
+                CUOEnviroment.Client.GetScene<GameScene>().UpdateDrawPosition = true;
             }
             return newSize;
         }
@@ -218,7 +220,7 @@ namespace ClassicUO.Game.UI.Gumps
         public void ReloadChatControl(SystemChatControl chat)
         {
             _systemChatControl.Dispose();
-            Engine.UI.SystemChat = _systemChatControl = chat;
+            UIManager.SystemChat = _systemChatControl = chat;
             Add(_systemChatControl);
             Resize();
         }

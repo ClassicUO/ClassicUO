@@ -23,6 +23,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
+
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -60,7 +62,7 @@ namespace ClassicUO.Game.UI.Gumps
                 c.Dispose();
             }
 
-            List<InfoBarItem> infoBarItems = Engine.SceneManager.GetScene<GameScene>().InfoBars.GetInfoBars();
+            List<InfoBarItem> infoBarItems = CUOEnviroment.Client.GetScene<GameScene>().InfoBars.GetInfoBars();
 
             for (int i = 0; i < infoBarItems.Count; i++)
             {
@@ -135,7 +137,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _data.Text = GetVarData(_var);
                 
-                if (Engine.Profile.Current.InfoBarHighlightType == 0 || _var == InfoBarVars.NameNotoriety)
+                if (ProfileManager.Current.InfoBarHighlightType == 0 || _var == InfoBarVars.NameNotoriety)
                 {
                     _data.Hue = GetVarHue(_var);
                 }
@@ -159,7 +161,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResetHueVector();
 
-            if (_var != InfoBarVars.NameNotoriety && Engine.Profile.Current.InfoBarHighlightType == 1 && _warningLinesHue != 0x0481)
+            if (_var != InfoBarVars.NameNotoriety && ProfileManager.Current.InfoBarHighlightType == 1 && _warningLinesHue != 0x0481)
             {
                 ShaderHuesTraslator.GetHueVector(ref _hueVector, _warningLinesHue);
                 batcher.Draw2D(Textures.GetTexture(Color.White), _data.ScreenCoordinateX, _data.ScreenCoordinateY, _data.Width, 2, ref _hueVector);

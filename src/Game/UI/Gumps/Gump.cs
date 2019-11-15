@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
@@ -76,11 +77,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetInScreen()
         {
-            if (X >= Engine.Instance.Window.ClientBounds.Width || X < 0)
-                X = 0;
+            Rectangle rect = new Rectangle(0, 0, CUOEnviroment.Client.Window.ClientBounds.Width, CUOEnviroment.Client.Window.ClientBounds.Height);
 
-            if (Y >= Engine.Instance.Window.ClientBounds.Height || Y < 0)
-                Y = 0;
+            if (rect.Intersects(Bounds))
+                return;
+
+            X = 0;
+            Y = 0;
         }
 
         public virtual void Restore(BinaryReader reader)
@@ -90,8 +93,8 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnDragEnd(int x, int y)
         {
             Point position = Location;
-            int halfWidth = Width >> 1;
-            int halfHeight = Height >> 1;
+            int halfWidth = Width - (Width >> 2);
+            int halfHeight = Height - (Height >> 2);
 
             if (X < -halfWidth)
                 position.X = -halfWidth;
@@ -99,11 +102,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (Y < -halfHeight)
                 position.Y = -halfHeight;
 
-            if (X > Engine.Batcher.GraphicsDevice.Viewport.Width - halfWidth)
-                position.X = Engine.Batcher.GraphicsDevice.Viewport.Width - halfWidth;
+            if (X > CUOEnviroment.Client.Window.ClientBounds.Width - (Width - halfWidth))
+                position.X = CUOEnviroment.Client.Window.ClientBounds.Width - (Width - halfWidth);
 
-            if (Y > Engine.Batcher.GraphicsDevice.Viewport.Height - halfHeight)
-                position.Y = Engine.Batcher.GraphicsDevice.Viewport.Height - halfHeight;
+            if (Y > CUOEnviroment.Client.Window.ClientBounds.Height - (Height - halfHeight))
+                position.Y = CUOEnviroment.Client.Window.ClientBounds.Height - (Height - halfHeight);
             Location = position;
         }
 
@@ -137,7 +140,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, switches.ToArray(), entries.ToArray());
 
-                Engine.UI.SavePosition(ServerSerial, Location);
+                UIManager.SavePosition(ServerSerial, Location);
                 Dispose();
             }
         }

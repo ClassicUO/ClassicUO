@@ -127,14 +127,14 @@ namespace ClassicUO.Game.Managers
             {
                 if (!info.Exists)
                 {
-                    Log.Message(LogTypes.Info, "skillgrp.mul not present, using CUO defaults!");
+                    Log.Info("skillgrp.mul not present, using CUO defaults!");
                     MakeCUODefault();
 
                     return;
                 }
 
                 Groups.Clear();
-                Log.Message(LogTypes.Info, "Loading skillgrp.mul...");
+                Log.Info("Loading skillgrp.mul...");
 
                 using (FileStream fs = new FileStream(info.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
@@ -197,7 +197,7 @@ namespace ClassicUO.Game.Managers
             }
             catch (Exception e)
             {
-                Log.Message(LogTypes.Debug, $"Error while reading skillgrp.mul, using CUO defaults! exception given is: {e}");
+                Log.Debug($"Error while reading skillgrp.mul, using CUO defaults! exception given is: {e}");
                 MakeCUODefault();
             }
         }

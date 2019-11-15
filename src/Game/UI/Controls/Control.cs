@@ -25,7 +25,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
@@ -80,7 +82,7 @@ namespace ClassicUO.Game.UI.Controls
             Page = 0;
         }
 
-        protected virtual ClickPriority Priority => ClickPriority.Default;
+        public virtual ClickPriority Priority { get; set; } = ClickPriority.Default;
 
         public Serial ServerSerial { get; set; }
 
@@ -109,9 +111,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsInitialized { get; set; }
 
-        public bool HasKeyboardFocus => Engine.UI.KeyboardFocusControl == this;
+        public bool HasKeyboardFocus => UIManager.KeyboardFocusControl == this;
 
-        public bool MouseIsOver => Engine.UI.MouseOverControl == this;
+        public bool MouseIsOver => UIManager.MouseOverControl == this;
 
         public virtual bool CanMove { get; set; }
 
@@ -263,24 +265,24 @@ namespace ClassicUO.Game.UI.Controls
 
                 OnPageChanged();
 
-                if (Engine.UI.KeyboardFocusControl != null)
+                if (UIManager.KeyboardFocusControl != null)
                 {
-                    if (Children.Contains(Engine.UI.KeyboardFocusControl))
+                    if (Children.Contains(UIManager.KeyboardFocusControl))
                     {
-                        if (Engine.UI.KeyboardFocusControl.Page != 0)
-                            Engine.UI.KeyboardFocusControl = null;
+                        if (UIManager.KeyboardFocusControl.Page != 0)
+                            UIManager.KeyboardFocusControl = null;
                     }
                 }
 
                 // When ActivePage changes, check to see if there are new text input boxes
                 // that we should redirect text input to.
-                if (Engine.UI.KeyboardFocusControl == null)
+                if (UIManager.KeyboardFocusControl == null)
                 {
                     foreach (Control c in Children)
                     {
                         if (c.HandlesKeyboardFocus && c.Page == _activePage)
                         {
-                            Engine.UI.KeyboardFocusControl = c;
+                            UIManager.KeyboardFocusControl = c;
 
                             break;
                         }
@@ -302,7 +304,7 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed) return false;
 
             if (Texture != null && !Texture.IsDisposed)
-                Texture.Ticks = Engine.Ticks;
+                Texture.Ticks = Time.Ticks;
 
             foreach (Control c in Children)
             {
@@ -378,19 +380,18 @@ namespace ClassicUO.Game.UI.Controls
 
         private void DrawDebug(UltimaBatcher2D batcher, int x, int y)
         {
-            if (IsVisible && (Engine.GlobalSettings.Debug || Engine.DebugFocus))
+            if (IsVisible && (Settings.GlobalSettings.Debug))
             {
                 ResetHueVector();
 
-                if (Engine.DebugFocus && HasKeyboardFocus)
-                    batcher.DrawRectangle(Textures.GetTexture(Color.Red), x, y, Width, Height, ref _hueVector);
-                else if (Engine.GlobalSettings.Debug) batcher.DrawRectangle(Textures.GetTexture(Color.Green), x, y, Width, Height, ref _hueVector);
+                if (Settings.GlobalSettings.Debug) 
+                    batcher.DrawRectangle(Textures.GetTexture(Color.Green), x, y, Width, Height, ref _hueVector);
             }
         }
 
         public void BringOnTop()
         {
-            Engine.UI.MakeTopMostGump(this);
+            UIManager.MakeTopMostGump(this);
         }
 
         public void SetTooltip(string text, int maxWidth = 0)
@@ -419,10 +420,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public void SetKeyboardFocus()
         {
-            if (AcceptKeyboardInput && !HasKeyboardFocus) Engine.UI.KeyboardFocusControl = this;
+            if (AcceptKeyboardInput && !HasKeyboardFocus) UIManager.KeyboardFocusControl = this;
         }
-
-        public event EventHandler Disposed;
 
         internal event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseOver, MouseEnter, MouseExit, DragBegin, DragEnd;
 
@@ -453,20 +452,15 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (!initializedKeyboardFocusedControl && c.AcceptKeyboardInput)
                     {
-                        Engine.UI.KeyboardFocusControl = c;
+                        UIManager.KeyboardFocusControl = c;
                         initializedKeyboardFocusedControl = true;
                     }
                 }
             }
         }
 
-        public Control[] HitTest(int x, int y)
+        public void HitTest(int x, int y, ref Control res)
         {
-            if (!IsVisible)
-                return null;
-
-            Stack<Control> results = new Stack<Control>();
-
             int parentX = ParentX;
             int parentY = ParentY;
 
@@ -475,40 +469,28 @@ namespace ClassicUO.Game.UI.Controls
                 if (Contains(x - X - parentX, y - Y - parentY))
                 {
                     if (AcceptMouseInput)
-                        results.Push(this);
+                    {
+                        if (res == null || res.Priority >= this.Priority)
+                            res = this;
+                    }
 
                     foreach (Control c in Children)
                     {
                         if (c.Page == 0 || c.Page == ActivePage)
                         {
-                            var cl = c.HitTest(x, y);
-
-                            if (cl != null)
-                            {
-                                for (int j = cl.Length - 1; j >= 0; j--)
-                                    results.Push(cl[j]);
-                            }
+                            c.HitTest(x, y, ref res);
                         }
                     }
                 }
             }
-
-            if (results.Count != 0)
-            {
-                var res = results.ToArray();
-                Array.Sort(res, (a, b) => a.Priority.CompareTo(b.Priority));
-
-                return res;
-            }
-
-            return null;
         }
 
-        public Control[] HitTest(Point position)
+        public void HitTest(Point position, ref Control res)
         {
-            return HitTest(position.X, position.Y);
+            HitTest(position.X, position.Y, ref res);
         }
 
+       
         public Control GetFirstControlAcceptKeyboardInput()
         {
             if (_acceptKeyboardInput)
@@ -525,8 +507,8 @@ namespace ClassicUO.Game.UI.Controls
                     return a;
             }
 
-            if (World.InGame && Engine.UI.SystemChat != null)
-                return Engine.UI.SystemChat.textBox;
+            if (World.InGame && UIManager.SystemChat != null)
+                return UIManager.SystemChat.textBox;
 
             return null;
         }
@@ -869,8 +851,6 @@ namespace ClassicUO.Game.UI.Controls
             Children.Clear();
 
             IsDisposed = true;
-
-            Disposed.Raise();
         }
     }
 }

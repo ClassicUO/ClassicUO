@@ -70,7 +70,13 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         public Direction GetDirectionForAnimation()
         {
-            return Steps.Count != 0 ? (Direction) Steps.Front().Direction : Direction;
+            if (Steps.Count != 0)
+            {
+                ref Step step = ref Steps.Front();
+
+                return (Direction) step.Direction;
+            }
+            return Direction;
         }
 
 
@@ -946,7 +952,8 @@ namespace ClassicUO.Game.GameObjects
             if (mobile.Steps.Count != 0)
             {
                 isWalking = true;
-                isRun = mobile.Steps.Front().Run;
+                ref Step step = ref mobile.Steps.Front();
+                isRun = step.Run;
             }
 
             switch (type)
@@ -1206,9 +1213,9 @@ namespace ClassicUO.Game.GameObjects
                 case PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED:
                 case PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED:
 
-                    if (mob.IsMoving)
+                    if (mob.Steps.Count != 0)
                     {
-                        var s = mob.Steps.Front();
+                        ref var s = ref mob.Steps.Front();
 
                         if (s.X != mob.X || s.Y != mob.Y)
                             return true;

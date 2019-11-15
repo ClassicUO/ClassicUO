@@ -30,7 +30,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class SkillsLoader : ResourceLoader
+    internal class SkillsLoader : UOFileLoader
     {
         private readonly Dictionary<int, SkillEntry> _skills = new Dictionary<int, SkillEntry>();
         private UOFileMul _file;

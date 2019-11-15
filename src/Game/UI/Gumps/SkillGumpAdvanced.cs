@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -296,13 +297,13 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 uint serial = (uint) (World.Player + _skill.Index + 1);
 
-                if (Engine.UI.GetGump<SkillButtonGump>(serial) != null)
-                    Engine.UI.Remove<SkillButtonGump>(serial);
+                if (UIManager.GetGump<SkillButtonGump>(serial) != null)
+                    UIManager.Remove<SkillButtonGump>(serial);
 
                 SkillButtonGump skillButtonGump = new SkillButtonGump(_skill, Mouse.Position.X, Mouse.Position.Y);
-                Engine.UI.Add(skillButtonGump);
+                UIManager.Add(skillButtonGump);
                 Rectangle rect = FileManager.Gumps.GetTexture(0x24B8).Bounds;
-                Engine.UI.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
+                UIManager.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
             }
         }
 

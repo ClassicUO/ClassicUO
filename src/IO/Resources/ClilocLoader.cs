@@ -30,9 +30,9 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class ClilocLoader : ResourceLoader
+    internal class ClilocLoader : UOFileLoader
     {
-        private readonly Dictionary<int, StringEntry> _entries = new Dictionary<int, StringEntry>();
+        private readonly Dictionary<int, string> _entries = new Dictionary<int, string>();
         private string _cliloc;
 
         public Task Load(string cliloc)
@@ -73,7 +73,7 @@ namespace ClassicUO.IO.Resources
                         reader.Read(buffer, 0, length);
                         string text = string.Intern(Encoding.UTF8.GetString(buffer, 0, length));
 
-                        _entries[number] = new StringEntry(number, text);
+                        _entries[number] = text;
                     }
                 }
             });
@@ -86,14 +86,8 @@ namespace ClassicUO.IO.Resources
 
         public string GetString(int number)
         {
-            return GetEntry(number).Text;
-        }
-
-        public StringEntry GetEntry(int number)
-        {
-            _entries.TryGetValue(number, out StringEntry res);
-
-            return res;
+            _entries.TryGetValue(number, out string text);
+            return text;
         }
 
         public string Translate(int baseCliloc, string arg = "", bool capitalize = false)
@@ -159,17 +153,5 @@ namespace ClassicUO.IO.Resources
 
             return baseCliloc;
         }
-    }
-
-    internal readonly struct StringEntry
-    {
-        public StringEntry(int num, string text)
-        {
-            Number = num;
-            Text = text;
-        }
-
-        public readonly int Number;
-        public readonly string Text;
     }
 }

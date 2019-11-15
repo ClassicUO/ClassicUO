@@ -140,9 +140,9 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_btUpClicked || _btDownClicked)
             {
-                if (_timeUntilNextClick < Engine.Ticks)
+                if (_timeUntilNextClick < Time.Ticks)
                 {
-                    _timeUntilNextClick = Engine.Ticks + TIME_BETWEEN_CLICKS;
+                    _timeUntilNextClick = Time.Ticks + TIME_BETWEEN_CLICKS;
 
                     if (_btUpClicked)
                         Value -= 1 + _StepChanger;

@@ -43,6 +43,8 @@ namespace ClassicUO.IO.Audio
         protected int Frequency = 22050;
         public DateTime LastPlayed = DateTime.MinValue;
         private string m_Name;
+        private float m_volume = 1.0f;
+        private float m_volumeFactor = 0.0f;
         protected DynamicSoundEffectInstance m_ThisInstance;
 
         static Sound()
@@ -51,7 +53,7 @@ namespace ClassicUO.IO.Audio
             m_MusicInstances = new List<Tuple<DynamicSoundEffectInstance, double>>();
         }
 
-        public Sound(string name, int index)
+        protected Sound(string name, int index)
         {
             Name = name;
             Index = index;
@@ -73,7 +75,7 @@ namespace ClassicUO.IO.Audio
 
         public float Volume
         {
-            get => m_ThisInstance.Volume;
+            get => m_volume;
             set
             {
                 if (value < 0.0f)
@@ -81,7 +83,22 @@ namespace ClassicUO.IO.Audio
                 else if (value > 1f)
                     value = 1f;
 
-                m_ThisInstance.Volume = value;
+                m_volume = value;
+
+                float instanceVolume = Math.Max(value - VolumeFactor, 0.0f);
+
+                if (m_ThisInstance != null && !m_ThisInstance.IsDisposed)
+                    m_ThisInstance.Volume = instanceVolume;
+            }
+        }
+
+        public float VolumeFactor
+        {
+            get => m_volumeFactor;
+            set
+            {
+                m_volumeFactor = value;
+                Volume = m_volume;
             }
         }
 
@@ -106,6 +123,19 @@ namespace ClassicUO.IO.Audio
             }
         }
 
+        public void Mute()
+        {
+            if (m_ThisInstance != null)
+            {
+                m_ThisInstance.Volume = 0.0f;
+            }
+        }
+
+        public void Unmute()
+        {
+            Volume = m_volume;
+        }
+
         protected abstract byte[] GetBuffer();
         protected abstract void OnBufferNeeded(object sender, EventArgs e);
 
@@ -121,12 +151,12 @@ namespace ClassicUO.IO.Audio
         ///     Plays the effect.
         /// </summary>
         /// <param name="asEffect">Set to false for music, true for sound effects.</param>
-        public void Play(bool asEffect, AudioEffects effect = AudioEffects.None, float volume = 1.0f, bool spamCheck = false)
+        public void Play(bool asEffect, AudioEffects effect = AudioEffects.None, float volume = 1.0f, float volumeFactor = 0.0f, bool spamCheck = false)
         {
-            double now = Engine.Ticks;
+            double now = Time.Ticks;
             CullExpiredEffects(now);
 
-            if (spamCheck && LastPlayed + MinimumDelay > Engine.CurrDateTime)
+            if (spamCheck && LastPlayed + MinimumDelay > DateTime.Now)
                 return;
 
             BeforePlay();
@@ -148,7 +178,7 @@ namespace ClassicUO.IO.Audio
                     break;
             }
 
-            LastPlayed = Engine.CurrDateTime;
+            LastPlayed = DateTime.Now;
 
             byte[] buffer = GetBuffer();
 
@@ -156,7 +186,8 @@ namespace ClassicUO.IO.Audio
             {
                 m_ThisInstance.BufferNeeded += OnBufferNeeded;
                 m_ThisInstance.SubmitBuffer(buffer);
-                m_ThisInstance.Volume = volume;
+                VolumeFactor = volumeFactor;
+                Volume = volume;
                 m_ThisInstance.Play();
                 List<Tuple<DynamicSoundEffectInstance, double>> list = asEffect ? m_EffectInstances : m_MusicInstances;
                 double ms = m_ThisInstance.GetSampleDuration(buffer.Length).TotalMilliseconds;
@@ -166,6 +197,18 @@ namespace ClassicUO.IO.Audio
 
         public void Stop()
         {
+            foreach(Tuple<DynamicSoundEffectInstance, double> sound in m_EffectInstances)
+            {
+                sound.Item1.Stop();
+                sound.Item1.Dispose();
+            }
+
+            foreach (Tuple<DynamicSoundEffectInstance, double> music in m_MusicInstances)
+            {
+                music.Item1.Stop();
+                music.Item1.Dispose();
+            }
+
             AfterStop();
         }
 

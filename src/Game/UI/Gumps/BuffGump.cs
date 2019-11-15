@@ -26,9 +26,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -326,12 +327,14 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = Texture.Height;
                 _alpha = 0xFF;
                 _decreaseAlpha = true;
-                _timer = (uint) (icon.Timer <= 0 ? 0xFFFF_FFFF : Engine.Ticks + icon.Timer * 1000);
+                _timer = (uint) (icon.Timer <= 0 ? 0xFFFF_FFFF : Time.Ticks + icon.Timer * 1000);
+                _gText = RenderedText.Create("", 0xFFFF, 2, true, FontStyle.Fixed | FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, Texture.Width);
 
                 SetTooltip(icon.Text);
             }
 
             public BuffIcon Icon { get; }
+            private readonly RenderedText _gText;
 
             protected override void OnInitialize()
             {
@@ -354,6 +357,11 @@ namespace ClassicUO.Game.UI.Gumps
                     TimeSpan span = TimeSpan.FromMilliseconds(delta);
                     SetTooltip($"{Icon.Text}\nTime left: {span.Hours:00}:{span.Minutes:00}:{span.Seconds:00}");
                     _updateTooltipTime = (float) totalMS + 1000;
+
+                    if (span.Hours > 0)
+                        _gText.Text = $"+{span.Hours}hr";
+                    else
+                        _gText.Text = span.Minutes > 0 ? $"{span.Minutes}:{span.Seconds}" : $"{span.Seconds}";
                 }
 
                 if (_timer != 0xFFFF_FFFF && delta < 10000)
@@ -396,7 +404,19 @@ namespace ClassicUO.Game.UI.Gumps
                 ResetHueVector();
                 ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, 1.0f - _alpha / 255f, true);
 
-                return batcher.Draw2D(Texture, x, y, ref _hueVector);
+                if (ProfileManager.Current != null && ProfileManager.Current.BuffBarTime)
+                {
+                    batcher.Draw2D(Texture, x, y, ref _hueVector);
+                    return _gText.Draw(batcher, x - 3, y + Texture.Height / 2 - 3, _hueVector.Z);
+                }
+                else
+                    return batcher.Draw2D(Texture, x, y, ref _hueVector);
+            }
+
+            public override void Dispose()
+            {
+                _gText?.Destroy();
+                base.Dispose();
             }
         }
     }

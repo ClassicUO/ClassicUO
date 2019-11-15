@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public CharCreationGump() : base(0, 0)
         {
-            loginScene = Engine.SceneManager.GetScene<LoginScene>();
+            loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
             Add(new CreateCharAppearanceGump(), 1);
             SetStep(CharCreationStep.Appearence);
             CanCloseWithRightClick = false;

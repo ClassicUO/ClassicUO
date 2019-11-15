@@ -29,6 +29,7 @@ using System.Runtime.InteropServices;
 
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.Utility.Logging;
@@ -79,28 +80,28 @@ namespace ClassicUO.Network
 
         public static Plugin Create(string path)
         {
-            path = Path.GetFullPath(Path.Combine(Engine.ExePath, "Data", "Plugins", path));
+            path = Path.GetFullPath(Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Plugins", path));
 
             if (!File.Exists(path))
             {
-                Log.Message(LogTypes.Error, $"Plugin '{path}' not found.");
+                Log.Error( $"Plugin '{path}' not found.");
 
                 return null;
             }
 
-            Log.Message(LogTypes.Trace, $"Loading plugin: {path}");
+            Log.Trace( $"Loading plugin: {path}");
 
             Plugin p = new Plugin(path);
             p.Load();
 
             if (!p.IsValid)
             {
-                Log.Message(LogTypes.Warning, $"Invalid plugin: {path}");
+                Log.Warn( $"Invalid plugin: {path}");
 
                 return null;
             }
 
-            Log.Message(LogTypes.Trace, $"Plugin: {path} loaded.");
+            Log.Trace( $"Plugin: {path} loaded.");
             _plugins.Add(p);
 
             return p;
@@ -149,15 +150,15 @@ namespace ClassicUO.Network
             {
                 IntPtr assptr = Native.LoadLibrary(_path);
 
-                Log.Message(LogTypes.Trace, $"assembly: {assptr}");
+                Log.Trace( $"assembly: {assptr}");
 
                 if (assptr == IntPtr.Zero) throw new Exception("Invalid Assembly, Attempting managed load.");
 
-                Log.Message(LogTypes.Trace, $"Searching for 'Install' entry point  -  {assptr}");
+                Log.Trace( $"Searching for 'Install' entry point  -  {assptr}");
 
                 IntPtr installPtr = Native.GetProcessAddress(assptr, "Install");
 
-                Log.Message(LogTypes.Trace, $"Entry point: {installPtr}");
+                Log.Trace( $"Entry point: {installPtr}");
 
                 if (installPtr == IntPtr.Zero) throw new Exception("Invalid Entry Point, Attempting managed load.");
 
@@ -174,7 +175,7 @@ namespace ClassicUO.Network
 
                     if (type == null)
                     {
-                        Log.Message(LogTypes.Error,
+                        Log.Error(
                                     "Unable to find Plugin Type, API requires the public class Engine in namespace Assistant.");
 
                         return;
@@ -184,7 +185,7 @@ namespace ClassicUO.Network
 
                     if (meth == null)
                     {
-                        Log.Message(LogTypes.Error, "Engine class missing public static Install method Needs 'public static unsafe void Install(PluginHeader *plugin)' ");
+                        Log.Error( "Engine class missing public static Install method Needs 'public static unsafe void Install(PluginHeader *plugin)' ");
 
                         return;
                     }
@@ -193,7 +194,7 @@ namespace ClassicUO.Network
                 }
                 catch (Exception err)
                 {
-                    Log.Message(LogTypes.Error,
+                    Log.Error(
                                 $"Plugin threw an error during Initialization. {err.Message} {err.StackTrace} {err.InnerException?.Message} {err.InnerException?.StackTrace}");
 
                     return;
@@ -250,11 +251,11 @@ namespace ClassicUO.Network
         private static void SetWindowTitle(string str)
         {
             if (string.IsNullOrEmpty(str))
-                Engine.Instance.DisableUpdateWindowCaption = false;
+                CUOEnviroment.DisableUpdateWindowCaption = false;
             else
             {
-                Engine.Instance.DisableUpdateWindowCaption = true;
-                Engine.Instance.Window.Title = str;
+                CUOEnviroment.DisableUpdateWindowCaption = true;
+                CUOEnviroment.Client.Window.Title = str;
             }
         }
 
@@ -360,7 +361,7 @@ namespace ClassicUO.Network
         {
             bool result = true;
 
-            if (!Engine.UI.IsKeyboardFocusAllowHotkeys)
+            if (!UIManager.IsKeyboardFocusAllowHotkeys)
                 return true;
 
             foreach (Plugin plugin in _plugins)
@@ -390,7 +391,7 @@ namespace ClassicUO.Network
                 }
                 catch
                 {
-                    Log.Message(LogTypes.Error, "Plugin initialization failed, please re login");
+                    Log.Error( "Plugin initialization failed, please re login");
                 }
             }
         }

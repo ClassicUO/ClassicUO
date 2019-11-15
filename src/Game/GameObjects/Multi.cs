@@ -24,9 +24,11 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -36,17 +38,27 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class Multi : GameObject
     {
-        private StaticTiles? _itemData;
-
         private ushort _originalGraphic;
+        private uint _lastAnimationFrameTime;
+
 
         private static readonly Queue<Multi> _pool = new Queue<Multi>();
+
+        static Multi()
+        {
+            for (int i = 0; i < 1000; i++)
+                _pool.Enqueue(new Multi());
+        }
+
+        private Multi()
+        {
+
+        }
 
         public Multi(Graphic graphic)
         {
             Graphic = _originalGraphic = graphic;
             UpdateGraphicBySeason();
-            _isFoliage = ItemData.IsFoliage;
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
 
             if (ItemData.Height > 5)
@@ -67,9 +79,7 @@ namespace ClassicUO.Game.GameObjects
 
                 m.Graphic = m._originalGraphic = graphic;
                 m.IsDestroyed = false;
-                m._itemData = null;
                 m.UpdateGraphicBySeason();
-                m._isFoliage = m.ItemData.IsFoliage;
                 m.AllowedToDraw = !GameObjectHelper.IsNoDrawable(m.Graphic);
                 m.AlphaHue = 0;
                 m.IsFromTarget = false;
@@ -85,6 +95,7 @@ namespace ClassicUO.Game.GameObjects
 
                 m.MultiOffsetX = m.MultiOffsetY = m.MultiOffsetZ = 0;
                 m.CharacterIsBehindFoliage = false;
+                m.IsCustom = false;
 
                 return m;
             }
@@ -94,26 +105,17 @@ namespace ClassicUO.Game.GameObjects
 
         public string Name => ItemData.Name;
 
-        public int MultiOffsetX { get; set; }
-        public int MultiOffsetY { get; set; }
-        public int MultiOffsetZ { get; set; }
+        public int MultiOffsetX;
+        public int MultiOffsetY;
+        public int MultiOffsetZ;
+        public CUSTOM_HOUSE_MULTI_OBJECT_FLAGS State = 0;
+        public bool IsCustom;
 
-        public StaticTiles ItemData
-        {
-            [MethodImpl(256)]
-            get
-            {
-                if (!_itemData.HasValue)
-                    _itemData = FileManager.TileData.StaticData[Graphic];
-
-                return _itemData.Value;
-            }
-        }
+        public ref readonly StaticTiles ItemData => ref FileManager.TileData.StaticData[Graphic];
 
         public override void UpdateGraphicBySeason()
         {
             Graphic = Season.GetSeasonGraphic(World.Season, _originalGraphic);
-            _itemData = FileManager.TileData.StaticData[Graphic];
         }
 
         public override void UpdateTextCoordsV()
@@ -131,9 +133,9 @@ namespace ClassicUO.Game.GameObjects
 
             int offY = 0;
 
-            int startX = Engine.Profile.Current.GameWindowPosition.X + 6;
-            int startY = Engine.Profile.Current.GameWindowPosition.Y + 6;
-            var scene = Engine.SceneManager.GetScene<GameScene>();
+            int startX = ProfileManager.Current.GameWindowPosition.X + 6;
+            int startY = ProfileManager.Current.GameWindowPosition.Y + 6;
+            var scene = CUOEnviroment.Client.GetScene<GameScene>();
             float scale = scene?.Scale ?? 1;
             int x = RealScreenPosition.X;
             int y = RealScreenPosition.Y;
@@ -144,19 +146,22 @@ namespace ClassicUO.Game.GameObjects
             if (Texture != null)
                 y -= Texture is ArtTexture t ? (t.ImageRectangle.Height >> 1) : (Texture.Height >> 1);
 
+            x = (int)(x / scale);
+            y = (int)(y / scale);
+
             for (; last != null; last = last.ListLeft)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                 {
-                    if (offY == 0 && last.Time < Engine.Ticks)
+                    if (offY == 0 && last.Time < Time.Ticks)
                         continue;
 
 
                     last.OffsetY = offY;
                     offY += last.RenderedText.Height;
 
-                    last.RealScreenPosition.X = startX + (int)((x - (last.RenderedText.Width >> 1)) / scale);
-                    last.RealScreenPosition.Y = startY + (int)((y - offY) / scale);
+                    last.RealScreenPosition.X = startX + (x - (last.RenderedText.Width >> 1));
+                    last.RealScreenPosition.Y = startY + (y - offY);
                 }
             }
 

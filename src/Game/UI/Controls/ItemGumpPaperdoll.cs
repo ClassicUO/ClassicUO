@@ -51,10 +51,7 @@ namespace ClassicUO.Game.UI.Controls
             Mobile = owner;
             HighlightOnMouseOver = false;
 
-            if (transparent)
-                Alpha = 0.5f;
-
-            Update(item);
+            Update(item, transparent);
         }
 
         public Mobile Mobile { get; set; }
@@ -74,9 +71,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Item item = World.Items.Get(LocalSerial);
-
-            if (item == null)
+            if (Item == null || Item.IsDestroyed)
             {
                 Dispose();
             }
@@ -86,7 +81,7 @@ namespace ClassicUO.Game.UI.Controls
 
             ResetHueVector();
 
-            ShaderHuesTraslator.GetHueVector(ref _hueVector, item.Hue & 0x3FFF, _isPartialHue, Alpha, true);
+            ShaderHuesTraslator.GetHueVector(ref _hueVector, Item.Hue & 0x3FFF, _isPartialHue, Alpha, true);
 
             return batcher.Draw2D(Texture, x, y, ref _hueVector);
         }
@@ -102,8 +97,6 @@ namespace ClassicUO.Game.UI.Controls
         {
             Alpha = transparent ? 0.5f : 0;
 
-            Item currentItem = World.Items.Get(LocalSerial);
-
             if (item == null)
             {
                 Dispose();
@@ -112,15 +105,15 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return;
 
-            currentItem.Graphic = item.Graphic;
-            currentItem.Hue = item.Hue;
-            currentItem.CheckGraphicChange();
+            Item.Graphic = item.Graphic;
+            Item.Hue = item.Hue;
+            Item.CheckGraphicChange();
 
             _isPartialHue = item.ItemData.IsPartialHue;
 
             int offset = !Mobile.IsMale ? FEMALE_OFFSET : MALE_OFFSET;
 
-            ushort id = currentItem.ItemData.AnimID;
+            ushort id = Item.ItemData.AnimID;
 
             if (FileManager.Animations.EquipConversions.TryGetValue(Mobile.Graphic, out var dict))
             {
@@ -141,7 +134,7 @@ namespace ClassicUO.Game.UI.Controls
             if (Texture == null)
             {
                 if (item.Layer != Layer.Face)
-                    Log.Message(LogTypes.Error, $"No texture found for Item ({item.Serial}) {item.Graphic} {item.ItemData.Name} {item.Layer}");
+                    Log.Error( $"No texture found for Item ({item.Serial}) {item.Graphic} {item.ItemData.Name} {item.Layer}");
                 Dispose();
 
                 return;
@@ -161,7 +154,7 @@ namespace ClassicUO.Game.UI.Controls
 
         //    if (button == MouseButton.Left)
         //    {
-        //        GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+        //        GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
 
         //        if (TargetManager.IsTargeting)
         //        {
@@ -199,7 +192,7 @@ namespace ClassicUO.Game.UI.Controls
         //                    {
         //                        TargetManager.TargetGameObject(Item);
         //                        Mouse.LastLeftButtonClickTime = 0;
-        //                        Engine.UI.Add(new InfoGump(Item));
+        //                        UIManager.Add(new InfoGump(Item));
         //                    }
 
         //                    break;

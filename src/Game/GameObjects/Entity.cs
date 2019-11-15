@@ -26,6 +26,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
 
@@ -35,8 +36,6 @@ namespace ClassicUO.Game.GameObjects
     {
         private Direction _direction;
         private Item[] _equipment;
-        private Hue _hue;
-
 
         protected Entity(Serial serial)
         {
@@ -47,7 +46,7 @@ namespace ClassicUO.Game.GameObjects
 
 
 
-        protected long LastAnimationChangeTime { get; set; }
+        protected long LastAnimationChangeTime;
 
         public EntityCollection<Item> Items { get; protected set; }
 
@@ -59,14 +58,14 @@ namespace ClassicUO.Game.GameObjects
             set => _equipment = value;
         }
 
-        public Serial Serial { get; set; }
-        public bool IsClicked { get; set; }
+        public Serial Serial;
+        public bool IsClicked;
 
-        public ushort Hits { get; set; }
+        public ushort Hits;
 
-        public ushort HitsMax { get; set; }
+        public ushort HitsMax;
 
-        public string Name { get; set; }
+        public string Name;
 
         public bool IsHidden => (Flags & Flags.Hidden) != 0;
 
@@ -83,7 +82,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public Flags Flags { get; set; }
+        public Flags Flags;
 
         public bool Exists => World.Contains(Serial);
 
@@ -110,11 +109,11 @@ namespace ClassicUO.Game.GameObjects
 
             if (UseObjectHandles && !ObjectHandlesOpened)
             {
-                //NameOverheadGump gump = Engine.UI.GetByLocalSerial<NameOverheadGump>(Serial);
+                //NameOverheadGump gump = UIManager.GetByLocalSerial<NameOverheadGump>(Serial);
 
                 //if (gump == null)
                 {
-                    Engine.UI.Add(new NameOverheadGump(this));
+                    UIManager.Add(new NameOverheadGump(this));
                     ObjectHandlesOpened = true;
                 }
             }
