@@ -610,58 +610,16 @@ namespace ClassicUO.Game.Scenes
                     {
                         //groundZ = (sbyte) (TargetManager.MultiTargetInfo.ZOff + 7);
 
-                        var gump = UIManager.GetGump<HouseCustomizationGump>();
                         //List<Multi> list = new List<Multi>();
-
-                        if (!gump.GetBuildZ(ref groundZ))
+                        _multis.ForEach(s => s.Destroy());
+                        _multis.Clear();
+                        if (!World.CustomHouseManager.GetBuildZ(_multis, ref groundZ))
                         {
                             groundZ = gobj.Z;
                             _multi.Hue = 0x21;
                         }
                         else
                             _multi.Hue = 0;
-
-
-                        //if (gump.CanBuildHere(list, out var type))
-                        //{
-                        //    foreach (Multi multi in list)
-                        //    {
-                        //        groundZ = multi.Z;
-                        //    }
-                        //}
-
-                        //if (gobj is Multi m)
-                        //{
-                        //    int itemZ = m.Z;
-
-                        //    for (int i = 0; i < 4; i++)
-                        //    {
-                        //        int offset = i != 0 ? 0 : 7;
-
-                        //        if (itemZ >= floorZ - offset &&
-                        //            itemZ < floorZ + 20)
-                        //        {
-
-                        //            if (itemZ < floorZ)
-                        //            {
-                        //                if ((m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
-                        //                {
-                        //                    groundZ = m.Z;
-                        //                    continue;
-                        //                }
-                        //            }
-
-
-                        //            groundZ = floorZ;
-
-                        //            break;
-                        //        }
-
-                        //        floorZ += 20;
-                        //    }
-                        //}
-                        //else
-                        //    groundZ = (sbyte) (World.Player.Z);
                     }
                     else
                     {
@@ -680,7 +638,20 @@ namespace ClassicUO.Game.Scenes
                     _multi.CheckGraphicChange();
                     _multi.AddToTile();
 
-                    if (_multi.IsMulti)
+                    if (TargetManager.MultiTargetInfo.IsCustomHouse)
+                    {
+                        if (_multis.Count > 0)
+                        {
+                            foreach (Multi multi in _multis)
+                            {
+                                multi.AlphaHue = 0xFF;
+                                multi.IsCustom = true;
+                                multi.Position = pos + new Position( (ushort) multi.MultiOffsetX, (ushort)multi.MultiOffsetY, (sbyte) multi.MultiOffsetZ);
+                                multi.AddToTile();
+                            }
+                        }
+                    }
+                    else
                     {
                         World.HouseManager.TryGetHouse(_multi.Serial, out var house);
 
@@ -709,8 +680,9 @@ namespace ClassicUO.Game.Scenes
                     _holdMouse2secOverItemTime = 0;
                 }
             }
-
         }
+
+        private readonly List<Multi> _multis = new List<Multi>();
 
         public override void FixedUpdate(double totalMS, double frameMS)
         {

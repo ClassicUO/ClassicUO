@@ -126,8 +126,7 @@ namespace ClassicUO.Game.GameObjects
                 s.AddToTile();
             }
 
-
-            UIManager.GetGump<HouseCustomizationGump>(Serial)?.GenerateFloorPlace();
+            World.CustomHouseManager.GenerateFloorPlace(Serial);
         }
 
         public void ClearComponents(/*bool removeCustomOnly = false*/)
