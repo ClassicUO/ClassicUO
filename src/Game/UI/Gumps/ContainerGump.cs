@@ -45,7 +45,6 @@ namespace ClassicUO.Game.UI.Gumps
         private HitBox _iconizerArea;
         internal override HitBox IconizerArea => _iconizerArea;
         private long _corpseEyeTicks;
-        private int _hadItems;
         private bool _hideIfEmpty;
         private ContainerData _data;
         private int _eyeCorspeOffset;
@@ -282,7 +281,6 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_hideIfEmpty && !IsVisible)
                     IsVisible = true;
 
-                _hadItems++;
                 Add(itemControl);
             }
         }
