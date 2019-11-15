@@ -219,8 +219,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (World.Player.InWarMode && Entity is Mobile)
                     GameActions.Attack(Entity);
-                else
-                    GameActions.DoubleClick(Entity);
+                else if (!GameActions.OpenCorpse(Entity))
+                        GameActions.DoubleClick(Entity);
             }
 
             return true;
