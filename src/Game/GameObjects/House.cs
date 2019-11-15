@@ -126,7 +126,7 @@ namespace ClassicUO.Game.GameObjects
                 s.AddToTile();
             }
 
-            World.CustomHouseManager.GenerateFloorPlace(Serial);
+            World.CustomHouseManager?.GenerateFloorPlace();
         }
 
         public void ClearComponents(/*bool removeCustomOnly = false*/)

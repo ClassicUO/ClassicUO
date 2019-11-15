@@ -77,6 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = false;
 
             _customHouseManager = new CustomHouseManager(serial);
+            World.CustomHouseManager = _customHouseManager;
 
             Add(new GumpPicTiled(121, 36, 397, 120, 0x0E14));
             _dataBox = new DataBox(0, 0, 0, 0)
@@ -1459,8 +1460,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (graphic != 0)
                     {
-                        ushort z = (ushort) (World.Items.Get(LocalSerial).Z + 7 + ((_customHouseManager.CurrentFloor - 1) * 20));
-                        TargetManager.SetTargetingMulti(Serial.INVALID, graphic, 0, 0, z, 0, true);
+                        //ushort z = (ushort) (World.Items.Get(LocalSerial).Z + 7 + ((_customHouseManager.CurrentFloor - 1) * 20));
+                        TargetManager.SetTargetingMulti(Serial.INVALID, graphic, 0, 0, 0, 0, true);
                         _customHouseManager.CombinedStair = combinedStairs;
                         _customHouseManager.SelectedGraphic = graphic;
                         Update();
@@ -1579,10 +1580,10 @@ namespace ClassicUO.Game.UI.Gumps
                     for (int i = 0; i < _customHouseManager.FloorVisionState.Length; i++)
                         _customHouseManager.FloorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
 
-                    if (_customHouseManager.SelectedGraphic != 0)
-                    {
-                        TargetManager.MultiTargetInfo.ZOff = (ushort)(World.Items.Get(LocalSerial).Z + 7 + (_customHouseManager.CurrentFloor - 1) * 20);
-                    }
+                    //if (_customHouseManager.SelectedGraphic != 0)
+                    //{
+                    //    TargetManager.MultiTargetInfo.ZOff = (ushort)(World.Items.Get(LocalSerial).Z + 7 + (_customHouseManager.CurrentFloor - 1) * 20);
+                    //}
 
                     Update();
                     break;
@@ -1593,10 +1594,10 @@ namespace ClassicUO.Game.UI.Gumps
                     for (int i = 0; i < _customHouseManager.FloorVisionState.Length; i++)
                         _customHouseManager.FloorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
 
-                    if (_customHouseManager.SelectedGraphic != 0)
-                    {
-                        TargetManager.MultiTargetInfo.ZOff = (ushort) (World.Items.Get(LocalSerial).Z + 7 + (_customHouseManager.CurrentFloor - 1) * 20);
-                    }
+                    //if (_customHouseManager.SelectedGraphic != 0)
+                    //{
+                    //    TargetManager.MultiTargetInfo.ZOff = (ushort) (World.Items.Get(LocalSerial).Z + 7 + (_customHouseManager.CurrentFloor - 1) * 20);
+                    //}
 
                     Update();
                     break;
@@ -1607,10 +1608,10 @@ namespace ClassicUO.Game.UI.Gumps
                     for (int i = 0; i < _customHouseManager.FloorVisionState.Length; i++)
                         _customHouseManager.FloorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
 
-                    if (_customHouseManager.SelectedGraphic != 0)
-                    {
-                        TargetManager.MultiTargetInfo.ZOff = (ushort) (World.Items.Get(LocalSerial).Z + 7 + (_customHouseManager.CurrentFloor - 1) * 20);
-                    }
+                    //if (_customHouseManager.SelectedGraphic != 0)
+                    //{
+                    //    TargetManager.MultiTargetInfo.ZOff = (ushort) (World.Items.Get(LocalSerial).Z + 7 + (_customHouseManager.CurrentFloor - 1) * 20);
+                    //}
 
                     Update();
                     break;
@@ -1621,10 +1622,10 @@ namespace ClassicUO.Game.UI.Gumps
                     for (int i = 0; i < _customHouseManager.FloorVisionState.Length; i++)
                         _customHouseManager.FloorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
 
-                    if (_customHouseManager.SelectedGraphic != 0)
-                    {
-                        TargetManager.MultiTargetInfo.ZOff = (ushort) (World.Items.Get(LocalSerial).Z + 7 + (_customHouseManager.CurrentFloor - 1) * 20);
-                    }
+                    //if (_customHouseManager.SelectedGraphic != 0)
+                    //{
+                    //    TargetManager.MultiTargetInfo.ZOff = (ushort) (World.Items.Get(LocalSerial).Z + 7 + (_customHouseManager.CurrentFloor - 1) * 20);
+                    //}
 
                     Update();
                     break;
@@ -1716,6 +1717,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
+            World.CustomHouseManager = null;
             NetClient.Socket.Send(new PCustomHouseBuildingExit());
             base.Dispose();
         }

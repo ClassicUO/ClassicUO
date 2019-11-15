@@ -34,6 +34,9 @@ namespace ClassicUO.Game.Managers
         public static readonly List<CustomHouseRoofCategory> Roofs = new List<CustomHouseRoofCategory>();
         public static readonly List<CustomHousePlaceInfo> ObjectsInfo = new List<CustomHousePlaceInfo>();
 
+        public static readonly List<Multi> StairMultis = new List<Multi>();
+
+
         public readonly int[] FloorVisionState = new int[4];
 
         public int Category = -1,
@@ -47,7 +50,29 @@ namespace ClassicUO.Game.Managers
                  MaxComponets,
                  MaxFixtures;
 
-        public ushort SelectedGraphic;
+        private ushort _selectedGraphic;
+
+        public ushort SelectedGraphic
+        {
+            get => _selectedGraphic;
+            set
+            {
+                if (_selectedGraphic != value)
+                {
+                    _selectedGraphic = value;
+
+                    if (StairMultis.Count != 0)
+                    {
+                        foreach (Multi m in StairMultis)
+                        {
+                            m.Destroy();
+                        }
+                        StairMultis.Clear();
+                    }
+                }
+            }
+        }
+
         public bool Erasing, SeekTile, ShowWindow, CombinedStair;
         public Point StartPos, EndPos;
         public CUSTOM_HOUSE_GUMP_STATE State = CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL;
@@ -517,7 +542,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public bool GetBuildZ(List<Multi> list, ref sbyte z)
+        public bool GetBuildZ(Item mainMulti, ref sbyte z)
         {
             if (SelectedGraphic != 0)
             {
@@ -526,15 +551,14 @@ namespace ClassicUO.Game.Managers
                 if (foundationItem == null)
                     return false;
 
-                if (CanBuildHere(list, out var type) && list.Count != 0)
+                if (CanBuildHere(mainMulti, out var type))
                 {
                     if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
                     {
-                        z = foundationItem.Z;
-
-                        return true;
+                        z = (sbyte) (CurrentFloor == 1 ? -7 : 0);
                     }
-                    z = (sbyte)(foundationItem.Z + 7 + (CurrentFloor - 1) * 20);
+
+                    z += (sbyte)(foundationItem.Z + 7 + (CurrentFloor - 1) * 20);
 
                     return true;
                 }
@@ -543,7 +567,7 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public bool CanBuildHere(List<Multi> list, out CUSTOM_HOUSE_BUILD_TYPE type)
+        public bool CanBuildHere(Item mainMulti, out CUSTOM_HOUSE_BUILD_TYPE type)
         {
             type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_NORMAL;
 
@@ -561,69 +585,72 @@ namespace ClassicUO.Game.Managers
 
                 if (res1 == -1 || res2 == -1 || res1 >= Stairs.Count)
                 {
-                    Multi m = Multi.Create(SelectedGraphic);
-                    list.Add(m);
+                    //Multi m = Multi.Create(SelectedGraphic);
+                    //list.Add(m);
 
                     return false;
                 }
 
                 var item = Stairs[res1];
 
-                if (SelectedGraphic == item.North)
+                if (StairMultis.Count == 0)
                 {
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = 0, MultiOffsetY = -3, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = 0, MultiOffsetY = -2, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = 0, MultiOffsetY = -1, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort)item.North) { MultiOffsetX = 0, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = 0, MultiOffsetY = -3, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = 0, MultiOffsetY = -2, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort)item.North) { MultiOffsetX = 0, MultiOffsetY = -1, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = 0, MultiOffsetY = -3, MultiOffsetZ = 10 });
-                    list.Add(new Multi((ushort)item.North) { MultiOffsetX = 0, MultiOffsetY = -2, MultiOffsetZ = 10 });
-                    list.Add(new Multi((ushort)item.North) { MultiOffsetX = 0, MultiOffsetY = -3, MultiOffsetZ = 15 });
-                }
-                else if (SelectedGraphic == item.East)
-                {
-                    list.Add(new Multi((ushort)item.East) { MultiOffsetX = 0, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = 1, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = 2, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = 3, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort)item.East) { MultiOffsetX = 1, MultiOffsetY = 0, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = 2, MultiOffsetY = 0, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = 3, MultiOffsetY = 0, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort)item.East) { MultiOffsetX = 2, MultiOffsetY = 0, MultiOffsetZ = 10 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = 3, MultiOffsetY = 0, MultiOffsetZ = 10 });
-                    list.Add(new Multi((ushort)item.East) { MultiOffsetX = 3, MultiOffsetY = 0, MultiOffsetZ = 15 });
-                }
-                else if (SelectedGraphic == item.South)
-                {
-                    list.Add(new Multi((ushort)item.South) { MultiOffsetX = 0, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = 0, MultiOffsetY = 1, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = 0, MultiOffsetY = 2, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = 0, MultiOffsetY = 3, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort)item.South) { MultiOffsetX = 0, MultiOffsetY = 1, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = 0, MultiOffsetY = 2, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = 0, MultiOffsetY = 3, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort)item.South) { MultiOffsetX = 0, MultiOffsetY = 2, MultiOffsetZ = 10 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = 0, MultiOffsetY = 3, MultiOffsetZ = 10 });
-                    list.Add(new Multi((ushort)item.South) { MultiOffsetX = 0, MultiOffsetY = 3, MultiOffsetZ = 15 });
-                }
-                else if (SelectedGraphic == item.West)
-                {
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = -3, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = -2, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = -1, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort)item.West) { MultiOffsetX = 0, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = -3, MultiOffsetY = 0, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = -2, MultiOffsetY = 0, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort)item.West) { MultiOffsetX = -1, MultiOffsetY = 0, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort)item.Block) { MultiOffsetX = -3, MultiOffsetY = 0, MultiOffsetZ = 10 });
-                    list.Add(new Multi((ushort)item.West) { MultiOffsetX = -2, MultiOffsetY = 0, MultiOffsetZ = 10 });
-                    list.Add(new Multi((ushort)item.West) { MultiOffsetX = -3, MultiOffsetY = 0, MultiOffsetZ = 15 });
-                }
-                else
-                {
-                    list.Add(new Multi(SelectedGraphic));
+                    if (SelectedGraphic == item.North)
+                    {
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = -3, MultiOffsetZ = 0});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = -2, MultiOffsetZ = 0});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = -1, MultiOffsetZ = 0});
+                        StairMultis.Add(new Multi((ushort) item.North) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = 0, MultiOffsetZ = 0});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = -3, MultiOffsetZ = 5});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = -2, MultiOffsetZ = 5});
+                        StairMultis.Add(new Multi((ushort) item.North) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = -1, MultiOffsetZ = 5});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = -3, MultiOffsetZ = 10});
+                        StairMultis.Add(new Multi((ushort) item.North) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = -2, MultiOffsetZ = 10});
+                        StairMultis.Add(new Multi((ushort) item.North) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = -3, MultiOffsetZ = 15});
+                    }
+                    else if (SelectedGraphic == item.East)
+                    {
+                        StairMultis.Add(new Multi((ushort) item.East)  {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = 0, MultiOffsetZ = 0});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 1, MultiOffsetY = 0, MultiOffsetZ = 0});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 2, MultiOffsetY = 0, MultiOffsetZ = 0});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 3, MultiOffsetY = 0, MultiOffsetZ = 0});
+                        StairMultis.Add(new Multi((ushort) item.East)  {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 1, MultiOffsetY = 0, MultiOffsetZ = 5});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 2, MultiOffsetY = 0, MultiOffsetZ = 5});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 3, MultiOffsetY = 0, MultiOffsetZ = 5});
+                        StairMultis.Add(new Multi((ushort) item.East)  {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 2, MultiOffsetY = 0, MultiOffsetZ = 10});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 3, MultiOffsetY = 0, MultiOffsetZ = 10});
+                        StairMultis.Add(new Multi((ushort) item.East)  { State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 3, MultiOffsetY = 0, MultiOffsetZ = 15});
+                    }
+                    else if (SelectedGraphic == item.South)
+                    {
+                        StairMultis.Add(new Multi((ushort) item.South) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = 0, MultiOffsetZ = 0});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = 1, MultiOffsetZ = 0});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = 2, MultiOffsetZ = 0});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = 3, MultiOffsetZ = 0});
+                        StairMultis.Add(new Multi((ushort) item.South) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = 1, MultiOffsetZ = 5});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = 2, MultiOffsetZ = 5});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = 3, MultiOffsetZ = 5});
+                        StairMultis.Add(new Multi((ushort) item.South) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = 2, MultiOffsetZ = 10});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = 3, MultiOffsetZ = 10});
+                        StairMultis.Add(new Multi((ushort) item.South) { State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = 0, MultiOffsetY = 3, MultiOffsetZ = 15});
+                    }
+                    else if (SelectedGraphic == item.West)
+                    {
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF,MultiOffsetX = -3, MultiOffsetY = 0, MultiOffsetZ = 0});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false,AlphaHue = 0xFF,MultiOffsetX = -2, MultiOffsetY = 0, MultiOffsetZ = 0});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false,AlphaHue = 0xFF,MultiOffsetX = -1, MultiOffsetY = 0, MultiOffsetZ = 0});
+                        StairMultis.Add(new Multi((ushort) item.West)  {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false,AlphaHue = 0xFF,MultiOffsetX = 0, MultiOffsetY = 0, MultiOffsetZ = 0});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false,AlphaHue = 0xFF,MultiOffsetX = -3, MultiOffsetY = 0, MultiOffsetZ = 5});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false,AlphaHue = 0xFF,MultiOffsetX = -2, MultiOffsetY = 0, MultiOffsetZ = 5});
+                        StairMultis.Add(new Multi((ushort) item.West)  {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false,AlphaHue = 0xFF,MultiOffsetX = -1, MultiOffsetY = 0, MultiOffsetZ = 5});
+                        StairMultis.Add(new Multi((ushort) item.Block) {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false,AlphaHue = 0xFF,MultiOffsetX = -3, MultiOffsetY = 0, MultiOffsetZ = 10});
+                        StairMultis.Add(new Multi((ushort) item.West)  {State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false,AlphaHue = 0xFF,MultiOffsetX = -2, MultiOffsetY = 0, MultiOffsetZ = 10});
+                        StairMultis.Add(new Multi((ushort) item.West)  { State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_SELECTION, IsFromTarget = false, AlphaHue = 0xFF, MultiOffsetX = -3, MultiOffsetY = 0, MultiOffsetZ = 15});
+                    }
+                    else
+                    {
+                        //list.Add(new Multi(SelectedGraphic));
+                    }
                 }
 
                 type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR;
@@ -659,7 +686,8 @@ namespace ClassicUO.Game.Managers
 
                 if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF)
                 {
-                    list.Add(new Multi(SelectedGraphic) { MultiOffsetZ = (RoofZ - 2) * 3 });
+                    TargetManager.MultiTargetInfo.ZOff = (ushort) ((RoofZ - 2) * 3);
+                    //list.Add(new Multi(SelectedGraphic) { MultiOffsetZ = (RoofZ - 2) * 3 });
                     type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF;
                 }
                 else
@@ -667,7 +695,8 @@ namespace ClassicUO.Game.Managers
                     if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR)
                     {
                         type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR;
-                        list.Add(new Multi(SelectedGraphic) { MultiOffsetY = 1 });
+                        //TargetManager.MultiTargetInfo.YOff = 1;
+                        //list.Add(new Multi(SelectedGraphic) { MultiOffsetY = 1 });
                     }
                     else
                     {
@@ -676,15 +705,27 @@ namespace ClassicUO.Game.Managers
                             type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR;
                         }
 
-                        list.Add(new Multi(SelectedGraphic));
+                        //list.Add(new Multi(SelectedGraphic));
                     }
                 }
             }
 
             if (SelectedObject.Object is GameObject gobj)
             {
+                if (gobj.Z < MinHouseZ)
+                {
+                    if (CombinedStair)
+                    {
+
+                    }
+                    else if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
+                    {
+
+                    }
+                }
+
                 if ((type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR || CombinedStair) && gobj.Z < MinHouseZ &&
-                    (gobj.X == EndPos.X - 1 || gobj.Y == EndPos.Y - 1))
+                    (gobj.X >= EndPos.X - 1 || gobj.Y >= EndPos.Y - 1))
                 {
                     return false;
                 }
@@ -698,42 +739,83 @@ namespace ClassicUO.Game.Managers
 
                 Rectangle rect = new Rectangle(StartPos.X + boundsOffset, StartPos.Y + boundsOffset, EndPos.X, EndPos.Y);
 
-                foreach (Multi item in list)
+                if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
                 {
-                    if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
+                    if (StairMultis.Count != 0)
                     {
-                        if (CombinedStair)
+                        foreach (Multi item in StairMultis)
                         {
-                            if (item.Z != 0)
+                            if (CombinedStair)
                             {
+                                if (item.MultiOffsetZ != 0)
+                                {
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                if (gobj.Y + item.MultiOffsetY < EndPos.Y || gobj.X + item.MultiOffsetX == StartPos.X ||
+                                    gobj.Z >= MinHouseZ)
+                                {
+                                    return false;
+                                }
+
+                                if (gobj.Y + item.MultiOffsetY != EndPos.Y)
+                                {
+                                    StairMultis[0].MultiOffsetY = 0;
+                                }
+
                                 continue;
                             }
-                        }
-                        else
-                        {
-                            if (gobj.Y + item.MultiOffsetY < EndPos.Y || gobj.X + item.MultiOffsetX == StartPos.X ||
-                                gobj.Z >= MinHouseZ)
+
+
+                            if (!ValidateItemPlace(rect, item.Graphic, gobj.X + item.MultiOffsetX, gobj.Y + item.MultiOffsetY))
                             {
                                 return false;
                             }
 
-                            if (gobj.Y + item.MultiOffsetY != EndPos.Y)
+                            if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR && foundationItem != null && World.HouseManager.TryGetHouse(Serial, out var house))
                             {
-                                list[0].MultiOffsetY = 0;
-                            }
+                                var multi = house.GetMultiAt(gobj.X + item.MultiOffsetX, gobj.Y + item.MultiOffsetY);
 
-                            continue;
+                                if (multi != null)
+                                {
+                                    foreach (Multi multiObject in house.Components)
+                                    {
+                                        if (multiObject.IsCustom && (((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) == 0) &&
+                                                                     multiObject.Z >= minZ && multiObject.Z < maxZ))
+                                        {
+                                            if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
+                                            {
+                                                if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) == 0)
+                                                {
+                                                    return false;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
+                                                {
+                                                    return false;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
-
-                    if (!ValidateItemPlace(rect, item.Graphic, gobj.X + item.MultiOffsetX, gobj.Y + item.MultiOffsetY))
+                }
+                else
+                {
+                    if (!ValidateItemPlace(rect, mainMulti.Graphic, gobj.X + TargetManager.MultiTargetInfo.XOff, gobj.Y + TargetManager.MultiTargetInfo.YOff))
                     {
                         return false;
                     }
 
                     if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR && foundationItem != null && World.HouseManager.TryGetHouse(Serial, out var house))
                     {
-                        var multi = house.GetMultiAt(gobj.X + item.MultiOffsetX, gobj.Y + item.MultiOffsetY);
+                        var multi = house.GetMultiAt(gobj.X + TargetManager.MultiTargetInfo.XOff, gobj.Y + TargetManager.MultiTargetInfo.YOff);
 
                         if (multi != null)
                         {
@@ -761,6 +843,8 @@ namespace ClassicUO.Game.Managers
                         }
                     }
                 }
+                
+
             }
             else
             {
@@ -885,8 +969,7 @@ namespace ClassicUO.Game.Managers
             return true;
         }
 
-        public bool ValidateItemPlace(Item foundationItem, Multi item, int minZ, int maxZ,
-         List<Point> validatedFloors)
+        public bool ValidateItemPlace(Item foundationItem, Multi item, int minZ, int maxZ, List<Point> validatedFloors)
         {
 
             if (item == null || !World.HouseManager.TryGetHouse(foundationItem, out var house) || !item.IsCustom)
@@ -1339,7 +1422,8 @@ namespace ClassicUO.Game.Managers
         CHMOF_TRANSPARENT = 0x20,
         CHMOF_IGNORE_IN_RENDER = 0x40,
         CHMOF_VALIDATED_PLACE = 0x80,
-        CHMOF_INCORRECT_PLACE = 0x100
+        CHMOF_INCORRECT_PLACE = 0x100,
+        CHMOF_IGNORE_SELECTION = 0x200,
     }
 
     [Flags]

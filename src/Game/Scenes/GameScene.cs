@@ -608,14 +608,16 @@ namespace ClassicUO.Game.Scenes
                     sbyte groundZ = 0, staticZ;
                     if (TargetManager.MultiTargetInfo.IsCustomHouse)
                     {
-                        //groundZ = (sbyte) (TargetManager.MultiTargetInfo.ZOff + 7);
-
-                        //List<Multi> list = new List<Multi>();
-                        _multis.ForEach(s => s.Destroy());
-                        _multis.Clear();
-                        if (!World.CustomHouseManager.GetBuildZ(_multis, ref groundZ))
+                        if (!World.CustomHouseManager.GetBuildZ(_multi, ref groundZ))
                         {
                             groundZ = gobj.Z;
+
+                            //if (gobj is Multi m)
+                            //{
+                            //    if ((m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
+                            //        groundZ -= 7;
+                            //}
+
                             _multi.Hue = 0x21;
                         }
                         else
@@ -630,29 +632,38 @@ namespace ClassicUO.Game.Scenes
                     if (gobj is Static st && st.ItemData.IsWet)
                         groundZ = gobj.Z;
 
-                    var pos = new Position(
-                        (ushort)(pos2.X - TargetManager.MultiTargetInfo.XOff), 
-                        (ushort)(pos2.Y - TargetManager.MultiTargetInfo.YOff), groundZ);
+                    
 
-                    _multi.Position = pos;
-                    _multi.CheckGraphicChange();
-                    _multi.AddToTile();
 
                     if (TargetManager.MultiTargetInfo.IsCustomHouse)
                     {
-                        if (_multis.Count > 0)
+                        var pos = new Position(
+                                               (ushort) (pos2.X + TargetManager.MultiTargetInfo.XOff),
+                                               (ushort) (pos2.Y + TargetManager.MultiTargetInfo.YOff), (sbyte) (groundZ + TargetManager.MultiTargetInfo.ZOff));
+
+                        _multi.Position = pos;
+                        _multi.CheckGraphicChange();
+                        _multi.AddToTile();
+
+                        if (World.CustomHouseManager.CombinedStair && CustomHouseManager.StairMultis.Count != 0)
                         {
-                            foreach (Multi multi in _multis)
+                            foreach (Multi s in CustomHouseManager.StairMultis)
                             {
-                                multi.AlphaHue = 0xFF;
-                                multi.IsCustom = true;
-                                multi.Position = pos + new Position( (ushort) multi.MultiOffsetX, (ushort)multi.MultiOffsetY, (sbyte) multi.MultiOffsetZ);
-                                multi.AddToTile();
+                                s.Hue = _multi.Hue;
+                                s.Position = new Position((ushort) (_multi.X + s.MultiOffsetX), (ushort) (_multi.Y + s.MultiOffsetY), (sbyte) (_multi.Z + s.MultiOffsetZ));
+                                s.AddToTile();
                             }
                         }
                     }
                     else
                     {
+                        var pos = new Position(
+                                               (ushort) (pos2.X - TargetManager.MultiTargetInfo.XOff),
+                                               (ushort) (pos2.Y - TargetManager.MultiTargetInfo.YOff), (sbyte) (groundZ - TargetManager.MultiTargetInfo.ZOff));
+
+                        _multi.Position = pos;
+                        _multi.CheckGraphicChange();
+                        _multi.AddToTile();
                         World.HouseManager.TryGetHouse(_multi.Serial, out var house);
 
                         foreach (Multi s in house.Components)
@@ -681,8 +692,6 @@ namespace ClassicUO.Game.Scenes
                 }
             }
         }
-
-        private readonly List<Multi> _multis = new List<Multi>();
 
         public override void FixedUpdate(double totalMS, double frameMS)
         {

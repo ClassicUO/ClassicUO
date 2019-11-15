@@ -70,6 +70,9 @@ namespace ClassicUO.Game
 
         public static JournalManager Journal { get; } = new JournalManager();
 
+        public static CustomHouseManager CustomHouseManager;
+
+
         public static int MapIndex
         {
             get => Map?.Index ?? -1;
