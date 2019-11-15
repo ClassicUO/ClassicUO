@@ -646,7 +646,9 @@ namespace ClassicUO.Game.Managers
                         break;
 
                     case "page":
-                        page = int.Parse(gparams[1]);
+
+                        if (gparams.Count >= 1)
+                            page = int.Parse(gparams[1]);
 
                         break;
 
