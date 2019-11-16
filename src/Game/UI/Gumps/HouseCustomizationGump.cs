@@ -1706,20 +1706,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-
-
-
         private void SeekGraphic(ushort graphic)
-        {
-
-        }
-
-
-
-     
-
-
-        private void OnTargetWorld(GameObject place)
         {
 
         }

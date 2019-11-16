@@ -48,8 +48,6 @@ namespace ClassicUO.Game.Managers
         public static readonly List<CustomHouseRoofCategory> Roofs = new List<CustomHouseRoofCategory>();
         public static readonly List<CustomHousePlaceInfo> ObjectsInfo = new List<CustomHousePlaceInfo>();
 
-        public static readonly List<Multi> StairMultis = new List<Multi>();
-
 
         public readonly int[] FloorVisionState = new int[4];
 
@@ -64,29 +62,8 @@ namespace ClassicUO.Game.Managers
                  MaxComponets,
                  MaxFixtures;
 
-        private ushort _selectedGraphic;
 
-        public ushort SelectedGraphic
-        {
-            get => _selectedGraphic;
-            set
-            {
-                if (_selectedGraphic != value)
-                {
-                    _selectedGraphic = value;
-
-                    if (StairMultis.Count != 0)
-                    {
-                        foreach (Multi m in StairMultis)
-                        {
-                            m.Destroy();
-                        }
-                        StairMultis.Clear();
-                    }
-                }
-            }
-        }
-
+        public ushort SelectedGraphic;
         public bool Erasing, SeekTile, ShowWindow, CombinedStair;
         public Point StartPos, EndPos;
         public CUSTOM_HOUSE_GUMP_STATE State = CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL;
@@ -138,7 +115,6 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-      
         public void GenerateFloorPlace()
         {
             Item foundationItem = World.Items.Get(Serial);
@@ -556,30 +532,10 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        //public bool GetBuildZ(ref sbyte z)
-        //{
-        //    if (SelectedGraphic != 0)
-        //    {
-        //        var foundationItem = World.Items.Get(Serial);
+        public void OnTargetWorld(GameObject place)
+        {
 
-        //        if (foundationItem == null)
-        //            return false;
-
-        //        if (CanBuildHere(mainMulti, out var type))
-        //        {
-        //            if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
-        //            {
-        //                z = (sbyte) (CurrentFloor == 1 ? -7 : 0);
-        //            }
-
-        //            z += (sbyte)(foundationItem.Z + 7 + (CurrentFloor - 1) * 20);
-
-        //            return true;
-        //        }
-        //    }
-
-        //    return false;
-        //}
+        }
 
         public bool CanBuildHere(RawList<CustomBuildObject> list, out CUSTOM_HOUSE_BUILD_TYPE type)
         {
