@@ -608,20 +608,20 @@ namespace ClassicUO.Game.Scenes
                     sbyte groundZ = 0, staticZ;
                     if (TargetManager.MultiTargetInfo.IsCustomHouse)
                     {
-                        if (!World.CustomHouseManager.GetBuildZ(_multi, ref groundZ))
-                        {
-                            groundZ = gobj.Z;
+                        //if (!World.CustomHouseManager.GetBuildZ(_multi, ref groundZ))
+                        //{
+                        //    groundZ = gobj.Z;
 
-                            //if (gobj is Multi m)
-                            //{
-                            //    if ((m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
-                            //        groundZ -= 7;
-                            //}
+                        //    //if (gobj is Multi m)
+                        //    //{
+                        //    //    if ((m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
+                        //    //        groundZ -= 7;
+                        //    //}
 
-                            _multi.Hue = 0x21;
-                        }
-                        else
-                            _multi.Hue = 0;
+                        //    _multi.Hue = 0x21;
+                        //}
+                        //else
+                        //    _multi.Hue = 0;
                     }
                     else
                     {
@@ -637,23 +637,23 @@ namespace ClassicUO.Game.Scenes
 
                     if (TargetManager.MultiTargetInfo.IsCustomHouse)
                     {
-                        var pos = new Position(
-                                               (ushort) (pos2.X + TargetManager.MultiTargetInfo.XOff),
-                                               (ushort) (pos2.Y + TargetManager.MultiTargetInfo.YOff), (sbyte) (groundZ + TargetManager.MultiTargetInfo.ZOff));
+                        //var pos = new Position(
+                        //                       (ushort) (pos2.X + TargetManager.MultiTargetInfo.XOff),
+                        //                       (ushort) (pos2.Y + TargetManager.MultiTargetInfo.YOff), (sbyte) (groundZ + TargetManager.MultiTargetInfo.ZOff));
 
-                        _multi.Position = pos;
-                        _multi.CheckGraphicChange();
-                        _multi.AddToTile();
+                        //_multi.Position = pos;
+                        //_multi.CheckGraphicChange();
+                        //_multi.AddToTile();
 
-                        if (World.CustomHouseManager.CombinedStair && CustomHouseManager.StairMultis.Count != 0)
-                        {
-                            foreach (Multi s in CustomHouseManager.StairMultis)
-                            {
-                                s.Hue = _multi.Hue;
-                                s.Position = new Position((ushort) (_multi.X + s.MultiOffsetX), (ushort) (_multi.Y + s.MultiOffsetY), (sbyte) (_multi.Z + s.MultiOffsetZ));
-                                s.AddToTile();
-                            }
-                        }
+                        //if (World.CustomHouseManager.CombinedStair && CustomHouseManager.StairMultis.Count != 0)
+                        //{
+                        //    foreach (Multi s in CustomHouseManager.StairMultis)
+                        //    {
+                        //        s.Hue = _multi.Hue;
+                        //        s.Position = new Position((ushort) (_multi.X + s.MultiOffsetX), (ushort) (_multi.Y + s.MultiOffsetY), (sbyte) (_multi.Z + s.MultiOffsetZ));
+                        //        s.AddToTile();
+                        //    }
+                        //}
                     }
                     else
                     {
@@ -855,6 +855,8 @@ namespace ClassicUO.Game.Scenes
             World.WorldTextManager.ProcessWorldText(true);
             World.WorldTextManager.Draw(batcher, x, y, renderIndex);
 
+            if (!IsMouseOverViewport)
+                SelectedObject.Object = null;
 
             SelectedObject.LastObject = SelectedObject.Object;
         }

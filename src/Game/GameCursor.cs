@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -34,6 +35,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Collections;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -305,6 +307,56 @@ namespace ClassicUO.Game
         {
             if (TargetManager.IsTargeting && ProfileManager.Current != null)
             {
+                if (TargetManager.TargetingState == CursorTarget.MultiPlacement)
+                {
+                    if (World.CustomHouseManager != null && World.CustomHouseManager.SelectedGraphic != 0)
+                    {
+                        Vector3 hue = Vector3.Zero;
+
+                        RawList<CustomBuildObject> list = new RawList<CustomBuildObject>();
+
+                        if (!World.CustomHouseManager.CanBuildHere(list, out var type))
+                        {
+                            hue.X = 0x0021;
+                            hue.Y = 1;
+                        }
+
+                        if (list.Count != 0)
+                        {
+                            Item foundationItem = World.Items.Get(World.CustomHouseManager.Serial);
+                            GameObject selectedObj = SelectedObject.LastObject as GameObject;
+
+
+                            int z = (sbyte) (foundationItem.Z + 7 + (World.CustomHouseManager.CurrentFloor - 1) * 20);
+                            int startX, startY;
+
+                            if (selectedObj != null)
+                            {
+                                startX = selectedObj.RealScreenPosition.X /*+ ProfileManager.Current.GameWindowPosition.X*/;
+                                startY = selectedObj.RealScreenPosition.Y /*+ ProfileManager.Current.GameWindowPosition.Y*/;
+                            }
+                            else
+                            {
+                                startX = Mouse.Position.X;
+                                startY = Mouse.Position.Y;
+                            }
+
+                            foreach (CustomBuildObject item in list)
+                            {
+                                int x = startX + (item.X - item.Y) * 22;
+                                int y = startY + (item.X + item.Y) * 22 - (item.Z * 4);
+
+                                var texture = FileManager.Art.GetTexture(item.Graphic);
+
+                                x -= ((texture.Width >> 1) - 22);
+                                y -= ((texture.Height - 44));
+
+                                sb.DrawSprite(texture, x, y, false, ref hue);
+                            }
+                        }
+                    }
+                }
+
                 if (ProfileManager.Current.AuraOnMouse)
                 {
                     ushort id = Graphic;
