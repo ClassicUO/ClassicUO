@@ -420,13 +420,20 @@ namespace ClassicUO.Game.Scenes
                     case CursorTarget.Object:
                     case CursorTarget.MultiPlacement:
 
-                        var obj = SelectedObject.Object;
-
-                        if (obj != null)
+                        if (SelectedObject.Object is GameObject obj)
                         {
-                            TargetManager.TargetGameObject(obj);
+                            if (World.CustomHouseManager != null)
+                            {
+                                World.CustomHouseManager.OnTargetWorld(obj);
+                            }
+                            else
+                            {
+                                TargetManager.TargetGameObject(obj);
+                            }
+
                             Mouse.LastLeftButtonClickTime = 0;
                         }
+
 
                         break;
 

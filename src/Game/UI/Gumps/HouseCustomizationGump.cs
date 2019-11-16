@@ -217,7 +217,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        private void Update()
+        public void Update()
         {
             _dataBox.Clear();
             _dataBoxGUI.Clear();
@@ -1706,10 +1706,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void SeekGraphic(ushort graphic)
-        {
 
-        }
 
         public override void Dispose()
         {

@@ -9,6 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Network;
 using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.Managers
@@ -534,8 +536,203 @@ namespace ClassicUO.Game.Managers
 
         public void OnTargetWorld(GameObject place)
         {
+            if (place != null && place is Multi m)
+            {
+                int zOffset = 0;
+
+                var gump = UIManager.GetGump<HouseCustomizationGump>(Serial);
+
+                if (CurrentFloor == 1)
+                {
+                    zOffset = -7;
+                }
+
+                if (SeekTile)
+                {
+                    SeekGraphic(place.Graphic);
+                }
+                else if (place.Z >= World.Player.Z + zOffset && place.Z < World.Player.Z + 20)
+                {
+                    Item foundationItem = World.Items.Get(Serial);
+
+                    if (foundationItem == null || !World.HouseManager.TryGetHouse(Serial, out var house))
+                        return;
+
+                    if (Erasing)
+                    {
+                        if (CanEraseHere(place, out var type))
+                        {
+                            var multi = house.GetMultiAt(place.X, place.Y);
+
+                            if (multi == null)
+                                return;
+
+                            int z = 7 + (CurrentFloor - 1) * 20;
+
+                            if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR || type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
+                            {
+                                z = place.Z - (foundationItem.Z + z) + z;
+                            }
+
+                            if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
+                            {
+                                NetClient.Socket.Send(new PCustomHouseDeleteRoof(place.Graphic, (uint) (place.X - foundationItem.X), (uint) (place.Y - foundationItem.Y), (uint) z));
+                            }
+                            else
+                            {
+                                NetClient.Socket.Send(new PCustomHouseDeleteItem(place.Graphic, (uint) (place.X - foundationItem.X), (uint) (place.Y - foundationItem.Y), (uint) z));
+                            }
+
+                            place.Destroy();
+                        }
+                    }
+                    else if (SelectedGraphic != 0)
+                    {
+                        RawList<CustomBuildObject> list = new RawList<CustomBuildObject>();
+
+                        if (CanBuildHere(list, out var type) && list.Count != 0)
+                        {
+                            int placeX = place.X;
+                            int placeY = place.Y;
+
+                            if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR && CombinedStair)
+                            {
+                                if (gump.Page >= 0 && gump.Page < Stairs.Count)
+                                {
+                                    var stair = Stairs[gump.Page];
+
+                                    ushort graphic = 0;
+
+                                    if (SelectedGraphic == stair.North)
+                                    {
+                                        graphic = (ushort) stair.MultiNorth;
+                                    }
+                                    else if (SelectedGraphic == stair.East)
+                                    {
+                                        graphic = (ushort) stair.MultiEast;
+                                    }
+                                    else if (SelectedGraphic == stair.South)
+                                    {
+                                        graphic = (ushort) stair.MultiSouth;
+                                    }
+                                    else if (SelectedGraphic == stair.West)
+                                    {
+                                        graphic = (ushort) stair.MultiWest;
+                                    }
+
+                                    if (graphic != 0)
+                                    {
+                                        NetClient.Socket.Send(new PCustomHouseAddStair(graphic, (uint) (placeX - foundationItem.X), (uint) (placeY - foundationItem.Y)));
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                var item = list[0];
+
+                                int x = placeX - foundationItem.X + item.X;
+                                int y = placeY - foundationItem.Y + item.Y;
+
+                                var multi = house.Components.Where(s => s.X == placeX + item.X && s.Y == placeY + item.Y);
+
+                                if (multi.Any())
+                                {
+                                    if (!CombinedStair)
+                                    {
+                                        int minZ = foundationItem.Z + 7 + (CurrentFloor - 1) * 20;
+                                        int maxZ = minZ + 20;
+
+                                        if (CurrentFloor == 1)
+                                        {
+                                            minZ -= 7;
+                                        }
+
+                                        foreach (Multi multiObject in multi)
+                                        {
+                                            int testMinZ = minZ;
+
+                                            if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF) != 0)
+                                            {
+                                                testMinZ -= 3;
+                                            }
+
+                                            if (multiObject.Z < testMinZ ||
+                                                multiObject.Z >= maxZ ||
+                                                !multiObject.IsCustom ||
+                                                (multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0)
+                                                continue;
+
+                                            if ( type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
+                                            {
+                                                if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
+                                                {
+                                                    multiObject.Destroy();
+                                                }
+                                            }
+                                            else if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
+                                            {
+                                                if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF) != 0)
+                                                {
+                                                    multiObject.Destroy();
+                                                }
+                                            }
+                                            else if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR)
+                                            {
+                                                if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0)
+                                                {
+                                                    multiObject.Destroy();
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if ((multiObject.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR)) == 0)
+                                                {
+                                                    multiObject.Destroy();
+                                                }
+                                            }
+                                        }
+
+                                        // todo: remove foundation if no components
+                                    }
+
+                                    if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
+                                    {
+                                        NetClient.Socket.Send(new PCustomHouseAddRoof(item.Graphic, (ushort) x, (ushort) y, (ushort) item.Z));
+                                    }
+                                    else
+                                    {
+                                        NetClient.Socket.Send(new PCustomHouseAddItem(item.Graphic, (ushort) x, (ushort) y));
+                                    }
+                                }
+                            }
+
+                            int xx = placeX - foundationItem.X;
+                            int yy = placeY - foundationItem.Y;
+                            int z = foundationItem.Z + 7 + (CurrentFloor - 1) * 20;
+
+                            if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR && !CombinedStair)
+                            {
+                                z = foundationItem.Z;
+                            }
+
+                            foreach (CustomBuildObject item in list)
+                            {
+                                house.Add(item.Graphic, 0, xx + item.X, yy + item.Y, (sbyte) (z + item.Z), true);
+                            }
+                        }
+                    }
+
+                    GenerateFloorPlace();
+                    gump.Update();
+                }
+            }
+        }
+
+        private void SeekGraphic(ushort graphic)
+        {
 
         }
+
 
         public bool CanBuildHere(RawList<CustomBuildObject> list, out CUSTOM_HOUSE_BUILD_TYPE type)
         {
@@ -785,7 +982,7 @@ namespace ClassicUO.Game.Managers
             return true;
         }
         
-        public bool CanEraseHere(GameObject place, ref CUSTOM_HOUSE_BUILD_TYPE type)
+        public bool CanEraseHere(GameObject place, out CUSTOM_HOUSE_BUILD_TYPE type)
         {
             type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_NORMAL;
 
