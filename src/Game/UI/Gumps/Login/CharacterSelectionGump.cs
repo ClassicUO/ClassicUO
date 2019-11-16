@@ -50,15 +50,16 @@ namespace ClassicUO.Game.UI.Gumps.Login
             int yBonus = 0;
             int listTitleY = 106;
 
-            if (FileManager.ClientVersion >= ClientVersions.CV_6040)
+            LoginScene loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
+            var lastSelected = loginScene.Characters.FirstOrDefault(o => o == Settings.GlobalSettings.LastCharacterName);
+
+            if ((FileManager.ClientVersion >= ClientVersions.CV_6040) ||
+                (FileManager.ClientVersion >= ClientVersions.CV_5020 && loginScene.Characters.Length > 5))
             {
                 listTitleY = 96;
                 yOffset = 125;
                 yBonus = 45;
             }
-
-            LoginScene loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
-            var lastSelected = loginScene.Characters.FirstOrDefault(o => o == Settings.GlobalSettings.LastCharacterName);
 
             if (!string.IsNullOrEmpty(lastSelected))
                 _selectedCharacter = (uint) Array.IndexOf(loginScene.Characters, lastSelected);
