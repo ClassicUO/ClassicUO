@@ -646,7 +646,9 @@ namespace ClassicUO.Game.Managers
                         break;
 
                     case "page":
-                        page = int.Parse(gparams[1]);
+
+                        if (gparams.Count >= 1)
+                            page = int.Parse(gparams[1]);
 
                         break;
 
@@ -1013,7 +1015,7 @@ namespace ClassicUO.Game.Managers
 
             foreach (Control c in Gumps)
             {
-                if (ismodal && !c.ControlInfo.IsModal)
+                if (ismodal && !c.ControlInfo.IsModal || !c.IsVisible || !c.IsEnabled)
                 {
                     continue;
                 }
