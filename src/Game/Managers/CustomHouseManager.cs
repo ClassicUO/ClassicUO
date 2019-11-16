@@ -734,7 +734,7 @@ namespace ClassicUO.Game.Managers
                     }
                     else if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
                     {
-                        if (gobj.X >= EndPos.X - 1 || gobj.Y >= EndPos.Y - 1)
+                        if (gobj.X > EndPos.X - 1 || gobj.Y > EndPos.Y - 1)
                         {
                             return false;
                         }
@@ -792,11 +792,11 @@ namespace ClassicUO.Game.Managers
 
                     if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR && foundationItem != null && World.HouseManager.TryGetHouse(Serial, out var house))
                     {
-                        var multi = house.GetMultiAt(gobj.X + item.X, gobj.Y + item.Y);
+                        //var multi = house.GetMultiAt(gobj.X + item.X, gobj.Y + item.Y);
 
-                        if (multi != null)
+                        //if (multi != null)
                         {
-                            foreach (Multi multiObject in house.Components)
+                            foreach (Multi multiObject in house.Components.Where(s => s.X == gobj.X + item.X && s.Y == gobj.Y + item.Y))
                             {
                                 if (multiObject.IsCustom && (((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) == 0) &&
                                                              multiObject.Z >= minZ && multiObject.Z < maxZ))

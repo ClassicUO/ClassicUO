@@ -323,17 +323,23 @@ namespace ClassicUO.Game
 
                         if (list.Count != 0)
                         {
-                            Item foundationItem = World.Items.Get(World.CustomHouseManager.Serial);
                             GameObject selectedObj = SelectedObject.LastObject as GameObject;
-
-
-                            int z = (sbyte) (foundationItem.Z + 7 + (World.CustomHouseManager.CurrentFloor - 1) * 20);
                             int startX, startY;
+                            int z = 0;
 
                             if (selectedObj != null)
                             {
-                                startX = selectedObj.RealScreenPosition.X /*+ ProfileManager.Current.GameWindowPosition.X*/;
-                                startY = selectedObj.RealScreenPosition.Y /*+ ProfileManager.Current.GameWindowPosition.Y*/;
+                                if (selectedObj.Z < World.CustomHouseManager.MinHouseZ)
+                                {
+                                    if (selectedObj.X >= World.CustomHouseManager.StartPos.X && selectedObj.X <= World.CustomHouseManager.EndPos.X - 1 &&
+                                        selectedObj.Y >= World.CustomHouseManager.StartPos.Y && selectedObj.Y <= World.CustomHouseManager.EndPos.Y - 1)
+                                    {
+                                        z += 7;
+                                    }
+                                }
+
+                                startX = selectedObj.RealScreenPosition.X + Math.Max(0, ProfileManager.Current.GameWindowPosition.X);
+                                startY = selectedObj.RealScreenPosition.Y + Math.Max(0, ProfileManager.Current.GameWindowPosition.Y);
                             }
                             else
                             {
@@ -344,7 +350,7 @@ namespace ClassicUO.Game
                             foreach (CustomBuildObject item in list)
                             {
                                 int x = startX + (item.X - item.Y) * 22;
-                                int y = startY + (item.X + item.Y) * 22 - (item.Z * 4);
+                                int y = startY + (item.X + item.Y) * 22 - ((item.Z + z) * 4);
 
                                 var texture = FileManager.Art.GetTexture(item.Graphic);
 
