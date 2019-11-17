@@ -251,23 +251,24 @@ namespace ClassicUO.Game.GameObjects
                     if (Multis == null)
                         Multis = new List<Multi>();
 
-                    //Multi m = Multi.Create(graphic);
-                    //m.Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z));
-                    //m.MultiOffsetX = x;
-                    //m.MultiOffsetY = y;
-                    //m.MultiOffsetZ = z;
-                    //m.Hue = Hue;
-                    //m.AlphaHue = 255;
-                    //m.IsCustom = false;
-                    //m.State = (Z + 7 == m.Z ? CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER : 0); //CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
-                    //m.AddToTile();
-                    //house.Components.Add(m);
-                    var m = house.Add(graphic, Hue, x, y, (sbyte) (Z + z), false);
+                    Multi m = Multi.Create(graphic);
+                    m.Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z));
                     m.MultiOffsetX = x;
                     m.MultiOffsetY = y;
                     m.MultiOffsetZ = z;
-                    m.State = 0;
-                    m.AlphaHue = 0xFF;
+                    m.Hue = Hue;
+                    m.AlphaHue = 255;
+                    m.IsCustom = false;
+                    house.Components.Add(m);
+
+                    //m.State = (Z + 7 == m.Z ? CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER : 0); //CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
+                    //m.AddToTile();
+                    //var m = house.Add(graphic, Hue, x, y, (sbyte) (Z + z), false);
+                    //m.MultiOffsetX = x;
+                    //m.MultiOffsetY = y;
+                    //m.MultiOffsetZ = z;
+                    //m.State = 0;
+                    //m.AlphaHue = 0xFF;
                     //Multis.Add(m);
                 }
                 else if (i == 0)
