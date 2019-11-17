@@ -127,8 +127,6 @@ namespace ClassicUO.Game.GameObjects
                 ref var b = ref list[i];
                 Add(b.Graphic, 0, b.X, b.Y, (sbyte) (item.Z + b.Z), true);
             }
-
-            World.CustomHouseManager?.GenerateFloorPlace();
         }
 
         public void Generate(bool recalculate = false)

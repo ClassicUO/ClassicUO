@@ -3639,7 +3639,13 @@ namespace ClassicUO.Network
             stream.ReleaseData();
 
             house.Fill(list);
-            //house.Generate();
+
+            if (World.CustomHouseManager != null)
+            {
+                World.CustomHouseManager.GenerateFloorPlace();
+                UIManager.GetGump<HouseCustomizationGump>(house.Serial)?.Update();
+            }
+
             UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
 
             if (World.HouseManager.EntityIntoHouse(serial, World.Player))
