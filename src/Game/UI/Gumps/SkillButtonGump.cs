@@ -73,11 +73,11 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true
             });
 
-            HoveredLabel label;
+            Label label;
 
-            Add(label = new HoveredLabel(_skill.Name, true, 0, 1151, Width, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+            Add(label = new Label(_skill.Name, true, 0, Width, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
             {
-                X = 0,
+                X = -4,
                 Y = 0,
                 Width = Width - 10,
                 AcceptMouseInput = true,

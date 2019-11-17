@@ -3826,9 +3826,13 @@ namespace ClassicUO.Network
                             byte map = p.ReadByte();
                             byte hits = p.ReadByte();
 
-                            Log.Info($"Received custom {(isparty ? "party" : "guild")} member info: X: {x}, Y: {y}, Map: {map}, Hits: {hits}");
+                            World.WMapManager.AddOrUpdate(serial, x, y, hits, map);
+
+                            //Log.Info($"Received custom {(isparty ? "party" : "guild")} member info: X: {x}, Y: {y}, Map: {map}, Hits: {hits}");
                         }
                     }
+
+                    World.WMapManager.RemoveUnupdatedWEntity();
 
                     break;
                 case 0xF0:

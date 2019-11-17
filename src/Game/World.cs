@@ -72,6 +72,7 @@ namespace ClassicUO.Game
 
         public static CustomHouseManager CustomHouseManager;
 
+        public static WorldMapEntityManager WMapManager = new WorldMapEntityManager();
 
         public static int MapIndex
         {
@@ -346,6 +347,7 @@ namespace ClassicUO.Game
             _toRemove.Clear();
             CorpseManager.Clear();
             OPL.Clear();
+            WMapManager.Clear();
 
             Season = Seasons.Summer;
             OldSeason = Seasons.Summer;

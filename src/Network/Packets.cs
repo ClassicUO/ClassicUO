@@ -918,6 +918,23 @@ namespace ClassicUO.Network
         }
     }
 
+    internal sealed class PQueryGuildPosition : PacketWriter
+    {
+        public PQueryGuildPosition() : base(0xF0)
+        {
+            WriteByte(0x01);
+            WriteBool(true);
+        }
+    }
+
+    internal sealed class PQueryPartyPosition : PacketWriter
+    {
+        public PQueryPartyPosition() : base(0xF0)
+        {
+            WriteByte(0x00);
+        }
+    }
+
     internal sealed class PLanguage : PacketWriter
     {
         public PLanguage(string lang) : base(0xBF)
