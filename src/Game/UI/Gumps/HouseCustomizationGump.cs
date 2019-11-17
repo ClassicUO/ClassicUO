@@ -164,7 +164,8 @@ namespace ClassicUO.Game.UI.Gumps
                                         0x0481)
             {
                 X = 82,
-                Y = 142
+                Y = 142,
+                AcceptMouseInput = true
             };
             Add(_textComponents);
 
@@ -179,7 +180,8 @@ namespace ClassicUO.Game.UI.Gumps
                                         0x0481)
             {
                 X = 94,
-                Y = 142
+                Y = 142,
+                AcceptMouseInput = true
             };
             Add(_textFixtures);
 
@@ -187,8 +189,10 @@ namespace ClassicUO.Game.UI.Gumps
                                       0x0481)
             {
                 X = 524,
-                Y = 142
+                Y = 142,
+                AcceptMouseInput =  true
             };
+            _textCost.SetTooltip("Cost");
             Add(_textCost);
 
             //HitBox box = new HitBox(36, 137, 84, 23)
@@ -197,7 +201,7 @@ namespace ClassicUO.Game.UI.Gumps
             //};
             //Add(box);
 
-            //box = new HitBox(522, 137, 84, 23)
+            //HitBox box = new HitBox(522, 137, 84, 23)
             //{
             //    Priority = ClickPriority.Default
             //};
@@ -515,8 +519,11 @@ namespace ClassicUO.Game.UI.Gumps
             _textFixtures.Hue = (ushort)(_customHouseManager.Fixtures >= _customHouseManager.MaxFixtures ? 0x0026 : 0x0481);
             _textFixtures.Text = _customHouseManager.Fixtures.ToString();
 
-            _textCost.Text = ((_customHouseManager.Components + _customHouseManager.Fixtures) * 500).ToString();
+            string tooltip = FileManager.Cliloc.Translate(1061039, $"{_customHouseManager.MaxComponets}\t{_customHouseManager.MaxFixtures}", true);
+            _textComponents.SetTooltip(tooltip);
+            _textFixtures.SetTooltip(tooltip);
 
+            _textCost.Text = ((_customHouseManager.Components + _customHouseManager.Fixtures) * 500).ToString();
         }
 
         public void UpdateMaxPage()
