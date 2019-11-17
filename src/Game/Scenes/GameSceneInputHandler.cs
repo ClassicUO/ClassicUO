@@ -476,7 +476,7 @@ namespace ClassicUO.Game.Scenes
                         obj.AddMessage(MessageType.Label, name, 3, 1001, false);
 
 
-                        if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
+                        if (obj.TextContainer != null && obj.TextContainer.MaxSize != 1)
                             obj.TextContainer.MaxSize = 1;
                         break;
 
