@@ -607,7 +607,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (endCategory > CustomHouseManager.Walls.Count)
                     endCategory = CustomHouseManager.Walls.Count;
 
-                // TODO: scissor
+                _dataBox.Add(new ScissorControl(true, 121, 36, 384, 60));
 
                 for (int i = startCategory; i < endCategory; i++)
                 {
@@ -647,12 +647,13 @@ namespace ClassicUO.Game.UI.Gumps
                         x = 0;
                         y += 60;
 
-                        // disable scissor
-                        // add scissor
+                        _dataBox.Add(new ScissorControl(false));
+                        _dataBox.Add(new ScissorControl(true, 121, 96, 384, 60));
                     }
                 }
 
                 // disable scissor
+                _dataBox.Add(new ScissorControl(false));
             }
             else if (_customHouseManager.Category >= 0 && _customHouseManager.Category <= CustomHouseManager.Walls.Count)
             {
@@ -661,6 +662,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     var item = vec[Page];
                     // add scissor
+                    _dataBox.Add(new ScissorControl(true, 121, 36, 384, 120));
 
                     for (int i = 0; i < 8; i++)
                     {
@@ -695,6 +697,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     // remove scissor
+                    _dataBox.Add(new ScissorControl(false));
                 }
 
                 _dataBoxGUI.Add(new GumpPic(152, 0, 0x55F3, 0));
@@ -744,6 +747,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = 0, y = 0;
 
                 // add scissor
+                _dataBox.Add(new ScissorControl(true, 138, 36, 384, 120));
 
                 for (int i = 0; i < 8; i++)
                 {
@@ -867,6 +871,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 // remove scissor
+                _dataBox.Add(new ScissorControl(false));
             }
         }
 
@@ -879,6 +884,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = 0, y = 0;
 
                 // add scissor
+                _dataBox.Add(new ScissorControl(true, 123, 36, 384, 120));
 
                 int index = 0;
 
@@ -918,6 +924,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 // remove scissor
+                _dataBox.Add(new ScissorControl(false));
             }
         }
 
@@ -933,6 +940,7 @@ namespace ClassicUO.Game.UI.Gumps
                     int y = (j != 0 ? 60 : 0);
 
                     // add scissor
+                    _dataBox.Add(new ScissorControl(true, 121, 36 + y, 384, 60));
 
                     Label text = new Label(FileManager.Cliloc.GetString(1062113 + j), true, 0xFFFF, 90, 0)
                     {
@@ -974,6 +982,7 @@ namespace ClassicUO.Game.UI.Gumps
                         x += 48;
                     }
                     // remove scissor
+                    _dataBox.Add(new ScissorControl(false));
                 }
 
                 _dataBox.Add(new ColorBox(384, 2, 0, 0xFF7F7F7F)
@@ -997,6 +1006,7 @@ namespace ClassicUO.Game.UI.Gumps
                     endCategory = CustomHouseManager.Roofs.Count;
 
                 // push scissor
+                _dataBox.Add(new ScissorControl(true, 121, 36, 384, 60));
 
                 for (int i = startCategory; i < endCategory; i++)
                 {
@@ -1039,10 +1049,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                         // pop scissor,
                         // push scissor
+
+                        _dataBox.Add(new ScissorControl(false));
+                        _dataBox.Add(new ScissorControl(true, 121, 96, 384, 60));
+
                     }
                 }
 
                 // pop scissor
+                _dataBox.Add(new ScissorControl(false));
             }
             else if (_customHouseManager.Category >= 0 && _customHouseManager.Category < CustomHouseManager.Roofs.Count)
             {
@@ -1053,6 +1068,7 @@ namespace ClassicUO.Game.UI.Gumps
                     var item = vec[Page];
 
                     // push scissor
+                    _dataBox.Add(new ScissorControl(true, 130, 44, 384, 120));
 
                     int index = 0;
 
@@ -1099,6 +1115,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     // pop scissor
+                    _dataBox.Add(new ScissorControl(false));
                 }
 
                 _dataBoxGUI.Add(new GumpPic(152, 0, 0x55F3, 0));
@@ -1154,6 +1171,7 @@ namespace ClassicUO.Game.UI.Gumps
                     endCategory = CustomHouseManager.Miscs.Count;
 
                 // push scissor
+                _dataBox.Add(new ScissorControl(true, 121, 36, 384, 60));
 
                 for (int i = startCategory; i < endCategory; i++)
                 {
@@ -1196,10 +1214,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                         // pop scissor
                         // push scissor
+                        _dataBox.Add(new ScissorControl(false));
+                        _dataBox.Add(new ScissorControl(true, 121, 96, 384, 60));
                     }
                 }
 
                 // pop scissor
+                _dataBox.Add(new ScissorControl(false));
             }
             else if (_customHouseManager.Category >= 0 && _customHouseManager.Category < CustomHouseManager.Miscs.Count)
             {
@@ -1210,6 +1231,7 @@ namespace ClassicUO.Game.UI.Gumps
                     var item = vec[Page];
 
                     // push scissor
+                    _dataBox.Add(new ScissorControl(true, 130, 44, 384, 120));
 
                     for (int i = 0; i < 8; i++)
                     {
@@ -1247,6 +1269,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     // pop scissor
+                    _dataBox.Add(new ScissorControl(false));
                 }
 
                 _dataBoxGUI.Add(new GumpPic(152, 0, 0x55F3, 0));
