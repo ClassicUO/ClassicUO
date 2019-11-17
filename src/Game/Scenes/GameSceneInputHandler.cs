@@ -666,6 +666,12 @@ namespace ClassicUO.Game.Scenes
             {
                 Point offset = Mouse.LDroppedOffset;
 
+                //if (World.CustomHouseManager != null && World.CustomHouseManager.SelectedGraphic != 0)
+                //{
+                //    World.CustomHouseManager.OnTargetWorld(SelectedObject.Object as GameObject);
+                //    return;
+                //}
+
                 if (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                 {
                     GameObject obj = ProfileManager.Current.SallosEasyGrab && SelectedObject.LastObject is GameObject o ? o : _dragginObject;
