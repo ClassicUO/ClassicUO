@@ -591,87 +591,39 @@ namespace ClassicUO.Game.Scenes
                     SelectedObject.TranslatedMousePositionByViewport = Point.Zero;
             }
 
-            if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+            if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement && World.CustomHouseManager == null)
             {
                 if (_multi == null)
                     _multi = new Item(Serial.INVALID)
                     {
                         Graphic = TargetManager.MultiTargetInfo.Model,
                         Hue = TargetManager.MultiTargetInfo.Hue,
-                        IsMulti = !TargetManager.MultiTargetInfo.IsCustomHouse,
+                        IsMulti = true,
                     };
 
                 if (SelectedObject.Object is GameObject gobj)
                 {
                     Position pos2 = gobj.Tile?.FirstNode?.Position ?? gobj.Position;
 
-                    sbyte groundZ = 0, staticZ;
-                    if (TargetManager.MultiTargetInfo.IsCustomHouse)
-                    {
-                        //if (!World.CustomHouseManager.GetBuildZ(_multi, ref groundZ))
-                        //{
-                        //    groundZ = gobj.Z;
-
-                        //    //if (gobj is Multi m)
-                        //    //{
-                        //    //    if ((m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
-                        //    //        groundZ -= 7;
-                        //    //}
-
-                        //    _multi.Hue = 0x21;
-                        //}
-                        //else
-                        //    _multi.Hue = 0;
-                    }
-                    else
-                    {
-                        World.Map.GetMapZ(pos2.X, pos2.Y, out groundZ, out staticZ);
-                    }
-
+                    World.Map.GetMapZ(pos2.X, pos2.Y, out sbyte groundZ, out sbyte _);
 
                     if (gobj is Static st && st.ItemData.IsWet)
                         groundZ = gobj.Z;
 
-                    
+                    var pos = new Position(
+                                           (ushort) (pos2.X - TargetManager.MultiTargetInfo.XOff),
+                                           (ushort) (pos2.Y - TargetManager.MultiTargetInfo.YOff), (sbyte) (groundZ - TargetManager.MultiTargetInfo.ZOff));
 
+                    _multi.Position = pos;
+                    _multi.CheckGraphicChange();
+                    _multi.AddToTile();
+                    World.HouseManager.TryGetHouse(_multi.Serial, out var house);
 
-                    if (TargetManager.MultiTargetInfo.IsCustomHouse)
+                    foreach (Multi s in house.Components)
                     {
-                        //var pos = new Position(
-                        //                       (ushort) (pos2.X + TargetManager.MultiTargetInfo.XOff),
-                        //                       (ushort) (pos2.Y + TargetManager.MultiTargetInfo.YOff), (sbyte) (groundZ + TargetManager.MultiTargetInfo.ZOff));
-
-                        //_multi.Position = pos;
-                        //_multi.CheckGraphicChange();
-                        //_multi.AddToTile();
-
-                        //if (World.CustomHouseManager.CombinedStair && CustomHouseManager.StairMultis.Count != 0)
-                        //{
-                        //    foreach (Multi s in CustomHouseManager.StairMultis)
-                        //    {
-                        //        s.Hue = _multi.Hue;
-                        //        s.Position = new Position((ushort) (_multi.X + s.MultiOffsetX), (ushort) (_multi.Y + s.MultiOffsetY), (sbyte) (_multi.Z + s.MultiOffsetZ));
-                        //        s.AddToTile();
-                        //    }
-                        //}
-                    }
-                    else
-                    {
-                        var pos = new Position(
-                                               (ushort) (pos2.X - TargetManager.MultiTargetInfo.XOff),
-                                               (ushort) (pos2.Y - TargetManager.MultiTargetInfo.YOff), (sbyte) (groundZ - TargetManager.MultiTargetInfo.ZOff));
-
-                        _multi.Position = pos;
-                        _multi.CheckGraphicChange();
-                        _multi.AddToTile();
-                        World.HouseManager.TryGetHouse(_multi.Serial, out var house);
-
-                        foreach (Multi s in house.Components)
-                        {
-                            s.IsFromTarget = true;
-                            s.Position = new Position((ushort) (_multi.X + s.MultiOffsetX), (ushort) (_multi.Y + s.MultiOffsetY), (sbyte) (_multi.Z + s.MultiOffsetZ));
-                            s.AddToTile();
-                        }
+                        s.IsFromTarget = true;
+                        s.Position = new Position((ushort) (_multi.X + s.MultiOffsetX), (ushort) (_multi.Y + s.MultiOffsetY), (sbyte) (_multi.Z + s.MultiOffsetZ));
+                        s.AddToTile();
                     }
                 }
             }

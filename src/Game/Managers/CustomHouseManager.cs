@@ -732,9 +732,43 @@ namespace ClassicUO.Game.Managers
 
         private void SeekGraphic(ushort graphic)
         {
+            CUSTOM_HOUSE_GUMP_STATE state = 0;
+            (int res1, int res2) = ExistsInList(ref state, graphic);
 
+            if (res1 != -1 && res2 != -1)
+            {
+                State = state;
+                var gump = UIManager.GetGump<HouseCustomizationGump>(Serial);
+
+                if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL || 
+                    State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF ||
+                    State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC)
+                {
+                    Category = res1;
+                    gump.Page = res2;
+                }
+                else
+                {
+                    Category = -1;
+                    gump.Page = res1;
+                }
+
+                gump.UpdateMaxPage();
+                SetTargetMulti();
+                SelectedGraphic = graphic;
+                gump.Update();
+            }
         }
 
+        public void SetTargetMulti()
+        {
+            TargetManager.SetTargetingMulti(0, 0, 0, 0, 0, 0);
+
+            Erasing = false;
+            SeekTile = false;
+            SelectedGraphic = 0;
+            CombinedStair = false;
+        }
 
         public bool CanBuildHere(RawList<CustomBuildObject> list, out CUSTOM_HOUSE_BUILD_TYPE type)
         {

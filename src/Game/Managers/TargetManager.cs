@@ -61,7 +61,7 @@ namespace ClassicUO.Game.Managers
 
     internal class MultiTargetInfo
     {
-        public ushort XOff, YOff, ZOff, Model, Hue;
+        public readonly ushort XOff, YOff, ZOff, Model, Hue;
 
         public MultiTargetInfo(ushort model, ushort x, ushort y, ushort z, ushort hue)
         {
@@ -70,12 +70,7 @@ namespace ClassicUO.Game.Managers
             YOff = y;
             ZOff = z;
             Hue = hue;
-
-            //Offset = new Position(XOff, YOff, (sbyte)ZOff);
         }
-
-        //public readonly Position Offset;
-        public bool IsCustomHouse;
     }
 
     internal static class TargetManager
@@ -145,14 +140,12 @@ namespace ClassicUO.Game.Managers
             IsTargeting = false;
         }
 
-        public static void SetTargetingMulti(Serial deedSerial, ushort model, ushort x, ushort y, ushort z, ushort hue, bool iscustomhouse = false)
+        public static void SetTargetingMulti(Serial deedSerial, ushort model, ushort x, ushort y, ushort z, ushort hue)
         {
             SetTargeting(CursorTarget.MultiPlacement, deedSerial, TargetType.Neutral);
 
-            MultiTargetInfo = new MultiTargetInfo(model, x, y, z, hue)
-            {
-                IsCustomHouse = iscustomhouse
-            };
+            if (model != 0)
+                MultiTargetInfo = new MultiTargetInfo(model, x, y, z, hue);
         }
 
 
