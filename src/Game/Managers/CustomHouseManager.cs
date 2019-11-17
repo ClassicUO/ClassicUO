@@ -597,8 +597,8 @@ namespace ClassicUO.Game.Managers
 
                         if (CanBuildHere(list, out var type) && list.Count != 0)
                         {
-                            if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR && !(place is Multi))
-                                return;
+                            //if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR && !(place is Multi))
+                            //    return;
 
                             int placeX = place.X;
                             int placeY = place.Y;
