@@ -161,7 +161,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(button);
 
             _textComponents = new Label(string.Empty, false,
-                                        0x0481)
+                                        0x0481, font: 9)
             {
                 X = 82,
                 Y = 142,
@@ -177,7 +177,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(text);
 
             _textFixtures = new Label(string.Empty, false,
-                                        0x0481)
+                                        0x0481, font: 9)
             {
                 X = 94,
                 Y = 142,
@@ -186,7 +186,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_textFixtures);
 
             _textCost = new Label(string.Empty, false,
-                                      0x0481)
+                                      0x0481, font: 9)
             {
                 X = 524,
                 Y = 142,
