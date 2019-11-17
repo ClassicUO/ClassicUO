@@ -454,7 +454,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         graphic = 0x00BF;
 
-                        break;
+                        return  graphic;
                     }
 
                     case 0x3E9E: // 16030
