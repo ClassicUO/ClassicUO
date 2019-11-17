@@ -259,6 +259,8 @@ namespace ClassicUO.Game.GameObjects
                     m.Hue = Hue;
                     m.AlphaHue = 255;
                     m.IsCustom = false;
+                    m.State = 0;
+                    m.AddToTile();
                     house.Components.Add(m);
 
                     //m.State = (Z + 7 == m.Z ? CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER : 0); //CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
