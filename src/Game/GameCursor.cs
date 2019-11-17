@@ -334,7 +334,8 @@ namespace ClassicUO.Game
                                     if (selectedObj.X >= World.CustomHouseManager.StartPos.X && selectedObj.X <= World.CustomHouseManager.EndPos.X - 1 &&
                                         selectedObj.Y >= World.CustomHouseManager.StartPos.Y && selectedObj.Y <= World.CustomHouseManager.EndPos.Y - 1)
                                     {
-                                        z += 7;
+                                        if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
+                                            z += 7;
                                     }
                                 }
 

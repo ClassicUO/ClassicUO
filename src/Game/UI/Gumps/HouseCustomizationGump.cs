@@ -191,17 +191,17 @@ namespace ClassicUO.Game.UI.Gumps
             };
             Add(_textCost);
 
-            HitBox box = new HitBox(36, 137, 84, 23)
-            {
-                Priority = ClickPriority.Default
-            };
-            Add(box);
+            //HitBox box = new HitBox(36, 137, 84, 23)
+            //{
+            //    Priority = ClickPriority.Default
+            //};
+            //Add(box);
 
-            box = new HitBox(522, 137, 84, 23)
-            {
-                Priority = ClickPriority.Default
-            };
-            Add(box);
+            //box = new HitBox(522, 137, 84, 23)
+            //{
+            //    Priority = ClickPriority.Default
+            //};
+            //Add(box);
 
             _dataBoxGUI = new DataBox(0, 0, 0, 0)
             {
