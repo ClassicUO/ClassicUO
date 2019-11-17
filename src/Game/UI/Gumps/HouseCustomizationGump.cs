@@ -1067,7 +1067,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     X = offsetX,
                                     Y = offsetY,
                                     CanMove = false,
-                                    LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
+                                    LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + index)
                                 };
                                 pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial.Value); };
                                 _dataBox.Add(pic);
@@ -1123,10 +1123,7 @@ namespace ClassicUO.Game.UI.Gumps
                 button.SetTooltip("Raise Roof Placement Level");
                 _dataBoxGUI.Add(button);
 
-                _dataBoxGUI.Add(new GumpPic(583, 4, 0x55F4, 0)
-                {
-
-                });
+                _dataBoxGUI.Add(new GumpPic(583, 4, 0x55F4, 0));
 
                 Label text = new Label(_customHouseManager.RoofZ.ToString(), false, 0x04E9, font: 3)
                 {
