@@ -22,6 +22,7 @@
 #endregion
 
 using System.IO;
+using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Configuration;
@@ -30,7 +31,6 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 
@@ -45,7 +45,9 @@ namespace ClassicUO.Game.UI.Gumps
         private HitBox _iconizerArea;
         internal override HitBox IconizerArea => _iconizerArea;
         private long _corpseEyeTicks;
-        private bool _hideIfEmpty;
+        private float _autoLootGoldTimeout;
+        private bool _hideIfEmpty, _hasGold;
+        private readonly HashSet<Serial> _lootedGold = new HashSet<Serial>();
         private ContainerData _data;
         private int _eyeCorspeOffset;
         private GumpPic _eyeGumpPic;
@@ -207,14 +209,41 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (IsDisposed) return;
 
-            if (_isCorspeContainer && _corpseEyeTicks < totalMS)
+            if (_isCorspeContainer)
             {
-                _eyeCorspeOffset = _eyeCorspeOffset == 0 ? 1 : 0;
-                _corpseEyeTicks = (long) totalMS + 750;
-                _eyeGumpPic.Graphic = (Graphic) (0x0045 + _eyeCorspeOffset);
-                float scale = UIManager.ContainerScale;
-                _eyeGumpPic.Width = (int)(_eyeGumpPic.Texture.Width * scale);
-                _eyeGumpPic.Height = (int)(_eyeGumpPic.Texture.Height * scale);
+                if (_hasGold)
+                {
+                    if (_autoLootGoldTimeout == 0)
+                        _autoLootGoldTimeout = (float) totalMS + 350;
+                    else if (_autoLootGoldTimeout < totalMS)
+                    {
+                        _autoLootGoldTimeout = (float) totalMS + 350;
+
+                        int count = 0;
+                        foreach(Item gold in item.Items.Where(n => n.Graphic == 0x0EED))
+                        {
+                            count++;
+                            if (!_lootedGold.Contains(gold))
+                            {
+                                _lootedGold.Add(gold);
+                                GameActions.Print($"Auto looting {gold.Amount} gold from {item.ItemData.Name}", 0x35);
+                            }
+                            GameActions.GrabItem(gold, gold.Amount);
+                        }
+                        if (count <= 0)
+                            _hasGold = false;
+                    }
+                }
+
+                if (_corpseEyeTicks < totalMS)
+                {
+                    _eyeCorspeOffset = _eyeCorspeOffset == 0 ? 1 : 0;
+                    _corpseEyeTicks = (long) totalMS + 750;
+                    _eyeGumpPic.Graphic = (Graphic) (0x0045 + _eyeCorspeOffset);
+                    float scale = UIManager.ContainerScale;
+                    _eyeGumpPic.Width = (int)(_eyeGumpPic.Texture.Width * scale);
+                    _eyeGumpPic.Height = (int)(_eyeGumpPic.Texture.Height * scale);
+                }
             }
             if(Iconized != null) Iconized.Hue = item.Hue;
         }
@@ -278,8 +307,13 @@ namespace ClassicUO.Game.UI.Gumps
                     itemControl.Height = (int)(itemControl.Height * scale);
                 }
 
-                if (_hideIfEmpty && !IsVisible)
+                if (_hideIfEmpty && !IsVisible &&
+                !(item.Graphic == 0x0EED && ProfileManager.Current.AutoLootGold))
                     IsVisible = true;
+
+                if (item.Graphic == 0x0EED && ProfileManager.Current.AutoLootGold)
+                    _hasGold = true;
+
 
                 Add(itemControl);
             }

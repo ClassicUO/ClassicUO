@@ -67,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _autoLootGold, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG;
         private Combobox _overrideContainerLocationSetting;
 
         // sounds
@@ -1149,6 +1149,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(_autoOpenCorpseArea);
 
+           _autoLootGold = CreateCheckBox(rightArea, "Auto loot gold from corpses", ProfileManager.Current.AutoLootGold, 0, 0);
+
             // [BLOCK] disable hotkeys
             {
                 _disableDefaultHotkeys = new Checkbox(0x00D2, 0x00D3, "Disable default UO hotkeys", FONT, HUE_FONT)
@@ -1552,7 +1554,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _customBarsBBG.IsChecked = false;
                     _autoOpenCorpse.IsChecked = false;
                     _skipEmptyCorpse.IsChecked = false;
-                    
+                    _autoLootGold.IsChecked = false;
+
                     break;
 
                 case 11:
@@ -1952,6 +1955,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.AutoOpenCorpseRange = int.Parse(_autoOpenCorpseRange.Text);
             ProfileManager.Current.CorpseOpenOptions = _autoOpenCorpseOptions.SelectedIndex;
             ProfileManager.Current.SkipEmptyCorpse = _skipEmptyCorpse.IsChecked;
+            ProfileManager.Current.AutoLootGold = _autoLootGold.IsChecked;
 
             ProfileManager.Current.EnableDragSelect = _enableDragSelect.IsChecked;
             ProfileManager.Current.DragSelectModifierKey = _dragSelectModifierKey.SelectedIndex;
