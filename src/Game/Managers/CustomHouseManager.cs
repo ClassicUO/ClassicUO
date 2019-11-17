@@ -537,7 +537,7 @@ namespace ClassicUO.Game.Managers
 
         public void OnTargetWorld(GameObject place)
         {
-            if (place != null && place is Multi m)
+            if (place != null /*&& place is Multi m*/)
             {
                 int zOffset = 0;
 
@@ -550,7 +550,8 @@ namespace ClassicUO.Game.Managers
 
                 if (SeekTile)
                 {
-                    SeekGraphic(place.Graphic);
+                    if (place is Multi)
+                        SeekGraphic(place.Graphic);
                 }
                 else if (place.Z >= World.Player.Z + zOffset && place.Z < World.Player.Z + 20)
                 {
@@ -561,6 +562,9 @@ namespace ClassicUO.Game.Managers
 
                     if (Erasing)
                     {
+                        if (!(place is Multi))
+                            return;
+
                         if (CanEraseHere(place, out var type))
                         {
                             var multi = house.GetMultiAt(place.X, place.Y);
@@ -593,6 +597,9 @@ namespace ClassicUO.Game.Managers
 
                         if (CanBuildHere(list, out var type) && list.Count != 0)
                         {
+                            if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR && !(place is Multi))
+                                return;
+
                             int placeX = place.X;
                             int placeY = place.Y;
 
@@ -636,7 +643,7 @@ namespace ClassicUO.Game.Managers
 
                                 var multi = house.Components.Where(s => s.X == placeX + item.X && s.Y == placeY + item.Y);
 
-                                if (multi.Any())
+                                if (multi.Any() || type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
                                 {
                                     if (!CombinedStair)
                                     {
@@ -959,8 +966,10 @@ namespace ClassicUO.Game.Managers
                         }
                         else
                         {
-                            if (gobj.Y + item.Y < EndPos.Y || gobj.X + item.X == StartPos.X ||
-                                gobj.Z >= MinHouseZ)
+                            int sx = gobj.X + item.X;
+                            int sy = gobj.Y + item.Y;
+
+                            if ( !(sx > StartPos.X && sx < EndPos.X && sy >= EndPos.Y && sy <= EndPos.Y + 1)  || gobj.Z >= MinHouseZ)
                             {
                                 return false;
                             }
