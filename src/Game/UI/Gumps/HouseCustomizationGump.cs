@@ -1543,7 +1543,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ERASE:
-                    // TODO: TARGET
+                    TargetManager.SetTargetingMulti(0, 0, 0, 0, 0, 0, true);
                     _customHouseManager.Erasing = !_customHouseManager.Erasing;
                     _customHouseManager.SelectedGraphic = 0;
                     _customHouseManager.CombinedStair = false;

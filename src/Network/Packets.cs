@@ -1297,86 +1297,86 @@ namespace ClassicUO.Network
 
     internal sealed class PCustomHouseAddItem : PacketWriter
     {
-        public PCustomHouseAddItem(Graphic graphic, uint x, uint y) : base(0xD7)
+        public PCustomHouseAddItem(Graphic graphic, int x, int y) : base(0xD7)
         {
             WriteUInt(World.Player);
             WriteUShort(0x06);
             WriteByte(0);
             WriteUInt(graphic);
             WriteByte(0);
-            WriteUInt(x);
+            WriteUInt((uint) x);
             WriteByte(0);
-            WriteUInt(y);
+            WriteUInt((uint) y);
             WriteByte(0x0A);
         }
     }
 
     internal sealed class PCustomHouseDeleteItem : PacketWriter
     {
-        public PCustomHouseDeleteItem(Graphic graphic, uint x, uint y, uint z) : base(0xD7)
+        public PCustomHouseDeleteItem(Graphic graphic, int x, int y, int z) : base(0xD7)
         {
             WriteUInt(World.Player);
             WriteUShort(0x05);
             WriteByte(0);
             WriteUInt(graphic);
             WriteByte(0);
-            WriteUInt(x);
+            WriteUInt((uint) x);
             WriteByte(0);
-            WriteUInt(y);
+            WriteUInt((uint) y);
             WriteByte(0);
-            WriteUInt(z);
+            WriteUInt((uint) z);
             WriteByte(0x0A);
         }
     }
 
     internal sealed class PCustomHouseAddRoof : PacketWriter
     {
-        public PCustomHouseAddRoof(Graphic graphic, uint x, uint y, uint z) : base(0xD7)
+        public PCustomHouseAddRoof(Graphic graphic, int x, int y, int z) : base(0xD7)
         {
             WriteUInt(World.Player);
             WriteUShort(0x13);
             WriteByte(0);
             WriteUInt(graphic);
             WriteByte(0);
-            WriteUInt(x);
+            WriteUInt((uint) x);
             WriteByte(0);
-            WriteUInt(y);
+            WriteUInt((uint) y);
             WriteByte(0);
-            WriteUInt(z);
+            WriteUInt((uint) z);
             WriteByte(0x0A);
         }
     }
 
     internal sealed class PCustomHouseDeleteRoof : PacketWriter
     {
-        public PCustomHouseDeleteRoof(Graphic graphic, uint x, uint y, uint z) : base(0xD7)
+        public PCustomHouseDeleteRoof(Graphic graphic, int x, int y, int z) : base(0xD7)
         {
             WriteUInt(World.Player);
             WriteUShort(0x14);
             WriteByte(0);
             WriteUInt(graphic);
             WriteByte(0);
-            WriteUInt(x);
+            WriteUInt((uint) x);
             WriteByte(0);
-            WriteUInt(y);
+            WriteUInt((uint) y);
             WriteByte(0);
-            WriteUInt(z);
+            WriteUInt((uint) z);
             WriteByte(0x0A);
         }
     }
 
     internal sealed class PCustomHouseAddStair : PacketWriter
     {
-        public PCustomHouseAddStair(Graphic graphic, uint x, uint y) : base(0xD7)
+        public PCustomHouseAddStair(Graphic graphic, int x, int y) : base(0xD7)
         {
             WriteUInt(World.Player);
             WriteUShort(0x0D);
             WriteByte(0);
             WriteUInt(graphic);
             WriteByte(0);
-            WriteUInt(x);
+            WriteUInt((uint) x);
             WriteByte(0);
-            WriteUInt(y);
+            WriteUInt((uint) y);
             WriteByte(0x0A);
         }
     }

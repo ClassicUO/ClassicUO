@@ -132,7 +132,7 @@ namespace ClassicUO.Game.Map
             {
                 int testPriorityZ = o.PriorityZ;
 
-                if (testPriorityZ > priorityZ || testPriorityZ == priorityZ && (obj is Land || obj is Multi) && !(o is Land))
+                if (testPriorityZ > priorityZ || testPriorityZ == priorityZ && (obj is Land || obj is Multi m) && !(o is Land))
                     break;
 
                 found = o;

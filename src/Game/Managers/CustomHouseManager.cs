@@ -138,7 +138,7 @@ namespace ClassicUO.Game.Managers
 
                     for (int i = 0; i < 4; i++)
                     {
-                        int offset = 0; //i != 0 ? 0 : 7;
+                        int offset = 0/*i != 0 ? 0 : 7*/;
 
                         if (itemZ >= floorZ - offset && itemZ < floorZ + 20)
                         {
@@ -237,7 +237,7 @@ namespace ClassicUO.Game.Managers
                 {
                     for (int y = StartPos.Y + 1; y < EndPos.Y; y++)
                     {
-                        var multi = house.GetMultiAt(x, y);
+                        var multi = house.Components.Where(s => s.X == x && s.Y == y);
 
                         if (multi == null)
                             continue;
@@ -245,7 +245,7 @@ namespace ClassicUO.Game.Managers
                         Multi floorMulti = null;
                         Multi floorCustomMulti = null;
 
-                        foreach (Multi item in house.Components)
+                        foreach (Multi item in multi)
                         {
                             if (item.Z != z || (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) == 0)
                             {
@@ -265,6 +265,7 @@ namespace ClassicUO.Game.Managers
                         if (floorMulti != null && floorCustomMulti == null)
                         {
                             var mo = house.Add(floorMulti.Graphic, 0, x - foundationItem.X, y - foundationItem.Y, (sbyte)z, true);
+                            mo.AlphaHue = 0xFF;
 
                             CUSTOM_HOUSE_MULTI_OBJECT_FLAGS state = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR;
 
@@ -576,11 +577,11 @@ namespace ClassicUO.Game.Managers
 
                             if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
                             {
-                                NetClient.Socket.Send(new PCustomHouseDeleteRoof(place.Graphic, (uint) (place.X - foundationItem.X), (uint) (place.Y - foundationItem.Y), (uint) z));
+                                NetClient.Socket.Send(new PCustomHouseDeleteRoof(place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z));
                             }
                             else
                             {
-                                NetClient.Socket.Send(new PCustomHouseDeleteItem(place.Graphic, (uint) (place.X - foundationItem.X), (uint) (place.Y - foundationItem.Y), (uint) z));
+                                NetClient.Socket.Send(new PCustomHouseDeleteItem(place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z));
                             }
 
                             place.Destroy();
@@ -622,7 +623,7 @@ namespace ClassicUO.Game.Managers
 
                                     if (graphic != 0)
                                     {
-                                        NetClient.Socket.Send(new PCustomHouseAddStair(graphic, (uint) (placeX - foundationItem.X), (uint) (placeY - foundationItem.Y)));
+                                        NetClient.Socket.Send(new PCustomHouseAddStair(graphic, placeX - foundationItem.X, placeY - foundationItem.Y));
                                     }
                                 }
                             }
@@ -659,7 +660,8 @@ namespace ClassicUO.Game.Managers
                                             if (multiObject.Z < testMinZ ||
                                                 multiObject.Z >= maxZ ||
                                                 !multiObject.IsCustom ||
-                                                (multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0)
+                                                (multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0 || 
+                                                (multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE) != 0)
                                                 continue;
 
                                             if ( type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
@@ -697,11 +699,11 @@ namespace ClassicUO.Game.Managers
 
                                     if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
                                     {
-                                        NetClient.Socket.Send(new PCustomHouseAddRoof(item.Graphic, (ushort) x, (ushort) y, (ushort) item.Z));
+                                        NetClient.Socket.Send(new PCustomHouseAddRoof(item.Graphic, x, y, item.Z));
                                     }
                                     else
                                     {
-                                        NetClient.Socket.Send(new PCustomHouseAddItem(item.Graphic, (ushort) x, (ushort) y));
+                                        NetClient.Socket.Send(new PCustomHouseAddItem(item.Graphic, x, y));
                                     }
                                 }
                             }
@@ -859,7 +861,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR)
                     {
-                        list.Add(new CustomBuildObject() { Graphic = SelectedGraphic, Y = 0 });
+                        list.Add(new CustomBuildObject() { Graphic = SelectedGraphic, Y = 1 });
                         type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR;
                     }
                     else
@@ -1001,6 +1003,15 @@ namespace ClassicUO.Game.Managers
                     else if ((multi.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF) != 0)
                     {
                         type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF;
+                    }
+                    else if (place.X >= StartPos.X && place.X <= EndPos.X &&
+                             place.Y >= StartPos.Y && place.Y <= EndPos.Y && place.Z >= MinHouseZ)
+                    {
+
+                    }
+                    else
+                    {
+                        return false;
                     }
 
                     return true;
@@ -1551,7 +1562,8 @@ namespace ClassicUO.Game.Managers
         CHMOF_IGNORE_IN_RENDER = 0x40,
         CHMOF_VALIDATED_PLACE = 0x80,
         CHMOF_INCORRECT_PLACE = 0x100,
-        CHMOF_IGNORE_SELECTION = 0x200,
+
+        CHMOF_DONT_REMOVE = 0x200,
     }
 
     [Flags]

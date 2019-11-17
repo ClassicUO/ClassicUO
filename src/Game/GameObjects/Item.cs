@@ -34,6 +34,7 @@ using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Platforms;
 
 namespace ClassicUO.Game.GameObjects
@@ -227,7 +228,14 @@ namespace ClassicUO.Game.GameObjects
                 World.HouseManager.Add(Serial, house);
             }
             else
+            {
+                foreach (Multi multi in Multis)
+                {
+                    multi.Destroy();
+                }
+                Multis.Clear();
                 house.ClearComponents();
+            }
 
             for (int i = 0; i < count; i++)
             {
@@ -240,16 +248,27 @@ namespace ClassicUO.Game.GameObjects
 
                 if (add)
                 {
-                    Multi m = Multi.Create(graphic);
-                    m.Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z));
+                    if (Multis == null)
+                        Multis = new List<Multi>();
+
+                    //Multi m = Multi.Create(graphic);
+                    //m.Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z));
+                    //m.MultiOffsetX = x;
+                    //m.MultiOffsetY = y;
+                    //m.MultiOffsetZ = z;
+                    //m.Hue = Hue;
+                    //m.AlphaHue = 255;
+                    //m.IsCustom = false;
+                    //m.State = (Z + 7 == m.Z ? CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER : 0); //CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
+                    //m.AddToTile();
+                    //house.Components.Add(m);
+                    var m = house.Add(graphic, Hue, x, y, (sbyte) (Z + z), false);
                     m.MultiOffsetX = x;
                     m.MultiOffsetY = y;
                     m.MultiOffsetZ = z;
-                    m.Hue = Hue;
-                    m.AlphaHue = 255;
-                    m.IsCustom = false;
-                    m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
-                    house.Components.Add(m);
+                    m.State = 0;
+                    m.AlphaHue = 0xFF;
+                    //Multis.Add(m);
                 }
                 else if (i == 0)
                 {
@@ -269,7 +288,7 @@ namespace ClassicUO.Game.GameObjects
 
             MultiDistanceBonus = Math.Max(Math.Max(Math.Abs(minX), maxX), Math.Max(Math.Abs(minY), maxY));
 
-            house.Generate();
+            //house.Generate();
 
             UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
 
@@ -277,6 +296,7 @@ namespace ClassicUO.Game.GameObjects
                 CUOEnviroment.Client.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
         }
 
+        public List<Multi> Multis;
 
         public void CheckGraphicChange(sbyte animIndex = 0)
         {
