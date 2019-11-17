@@ -591,7 +591,7 @@ namespace ClassicUO.Game.Scenes
                     SelectedObject.TranslatedMousePositionByViewport = Point.Zero;
             }
 
-            if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement && World.CustomHouseManager == null)
+            if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement && World.CustomHouseManager == null && TargetManager.MultiTargetInfo != null)
             {
                 if (_multi == null)
                     _multi = new Item(Serial.INVALID)

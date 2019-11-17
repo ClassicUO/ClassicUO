@@ -667,8 +667,7 @@ namespace ClassicUO.Game.Managers
                                             if (multiObject.Z < testMinZ ||
                                                 multiObject.Z >= maxZ ||
                                                 !multiObject.IsCustom ||
-                                                (multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0 || 
-                                                (multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE) != 0)
+                                                (multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0 /*|| (multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE) != 0*/)
                                                 continue;
 
                                             if ( type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
