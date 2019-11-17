@@ -19,17 +19,6 @@ namespace ClassicUO.Game.UI.Gumps
 {
     class HouseCustomizationGump : Gump
     {
-        private readonly List<CustomHouseWallCategory> _walls = new List<CustomHouseWallCategory>();
-        private readonly List<CustomHouseFloor> _floors = new List<CustomHouseFloor>();
-        private readonly List<CustomHouseDoor> _doors = new List<CustomHouseDoor>();
-        private readonly List<CustomHouseMiscCategory> _miscs = new List<CustomHouseMiscCategory>();
-        private readonly List<CustomHouseStair> _stairs = new List<CustomHouseStair>();
-        private readonly List<CustomHouseTeleport> _teleports = new List<CustomHouseTeleport>();
-        private readonly List<CustomHouseRoofCategory> _roofs = new List<CustomHouseRoofCategory>();
-        private readonly List<CustomHousePlaceInfo> _objectsInfo = new List<CustomHousePlaceInfo>();
-
-        private readonly int[] _floorVisionState = new int[4];
-
         private DataBox _dataBox, _dataBoxGUI;
         private GumpPic _gumpPic;
         private Label _textComponents, _textFixtures, _textCost;
@@ -78,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
             ID_GCH_ITEM_IN_LIST
         }
 
-
+        private readonly CustomHouseManager _customHouseManager;
 
         public HouseCustomizationGump(Serial serial, int x, int y) : base(serial, 0)
         {
@@ -87,50 +76,8 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             AcceptMouseInput = false;
 
-            ParseFileWithCategory<CustomHouseWall, CustomHouseWallCategory>(_walls, Path.Combine(FileManager.UoFolderPath, "walls.txt"));
-            ParseFile(_floors, Path.Combine(FileManager.UoFolderPath, "floors.txt"));
-            ParseFile(_doors, Path.Combine(FileManager.UoFolderPath, "doors.txt"));
-            ParseFileWithCategory<CustomHouseMisc, CustomHouseMiscCategory>(_miscs, Path.Combine(FileManager.UoFolderPath, "misc.txt"));
-            ParseFile(_stairs, Path.Combine(FileManager.UoFolderPath, "stairs.txt"));
-            ParseFile(_teleports, Path.Combine(FileManager.UoFolderPath, "teleprts.txt"));
-            ParseFileWithCategory<CustomHouseRoof, CustomHouseRoofCategory>(_roofs, Path.Combine(FileManager.UoFolderPath, "roof.txt"));
-            ParseFile(_objectsInfo, Path.Combine(FileManager.UoFolderPath, "suppinfo.txt"));
-
-
-            Item foundation = World.Items.Get(serial);
-
-            if (foundation != null)
-            {
-                MinHouseZ = foundation.Z + 7;
-
-                MultiInfo multi = foundation.MultiInfo;
-
-                if (multi != null)
-                {
-                    StartPos.X = foundation.X + multi.MinX;
-                    StartPos.Y = foundation.Y + multi.MinY;
-                    EndPos.X = foundation.X + multi.MaxX + 1;
-                    EndPos.Y = foundation.Y + multi.MaxY + 1;
-                }
-
-                int width = Math.Abs(EndPos.X - StartPos.X);
-                int height = Math.Abs(EndPos.Y - StartPos.Y);
-
-                if (width > 13 || height > 13)
-                {
-                    FloorCount = 4;
-                }
-                else
-                {
-                    FloorCount = 3;
-                }
-
-                int componentsOnFloor = (width - 1) * (height - 1);
-
-                MaxComponets = FloorCount * (componentsOnFloor + 2 * (width + height) - 4) -
-                               (int)((double)(FloorCount * componentsOnFloor) * -0.25) + 2 * width + 3 * height - 5;
-                MaxFixtures = MaxComponets / 20;
-            }
+            _customHouseManager = new CustomHouseManager(serial);
+            World.CustomHouseManager = _customHouseManager;
 
             Add(new GumpPicTiled(121, 36, 397, 120, 0x0E14));
             _dataBox = new DataBox(0, 0, 0, 0)
@@ -143,7 +90,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPic(0, 17, 0x55F0, 0));
 
-            _gumpPic = new GumpPic(486, 17, (ushort)(FloorCount == 4 ?
+            _gumpPic = new GumpPic(486, 17, (ushort)(_customHouseManager.FloorCount == 4 ?
                                         0x55F2 : 0x55F9), 0);
             Add(_gumpPic);
 
@@ -214,10 +161,11 @@ namespace ClassicUO.Game.UI.Gumps
             Add(button);
 
             _textComponents = new Label(string.Empty, false,
-                                        0x0481)
+                                        0x0481, font: 9)
             {
                 X = 82,
-                Y = 142
+                Y = 142,
+                AcceptMouseInput = true
             };
             Add(_textComponents);
 
@@ -229,32 +177,35 @@ namespace ClassicUO.Game.UI.Gumps
             Add(text);
 
             _textFixtures = new Label(string.Empty, false,
-                                        0x0481)
+                                        0x0481, font: 9)
             {
                 X = 94,
-                Y = 142
+                Y = 142,
+                AcceptMouseInput = true
             };
             Add(_textFixtures);
 
             _textCost = new Label(string.Empty, false,
-                                      0x0481)
+                                      0x0481, font: 9)
             {
                 X = 524,
-                Y = 142
+                Y = 142,
+                AcceptMouseInput =  true
             };
+            _textCost.SetTooltip("Cost");
             Add(_textCost);
 
-            HitBox box = new HitBox(36, 137, 84, 23)
-            {
-                Priority = ClickPriority.Default
-            };
-            Add(box);
+            //HitBox box = new HitBox(36, 137, 84, 23)
+            //{
+            //    Priority = ClickPriority.Default
+            //};
+            //Add(box);
 
-            box = new HitBox(522, 137, 84, 23)
-            {
-                Priority = ClickPriority.Default
-            };
-            Add(box);
+            //HitBox box = new HitBox(522, 137, 84, 23)
+            //{
+            //    Priority = ClickPriority.Default
+            //};
+            //Add(box);
 
             _dataBoxGUI = new DataBox(0, 0, 0, 0)
             {
@@ -270,30 +221,14 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public int Category = -1,
-                   MaxPage = 1,
-                   CurrentFloor = 1,
-                   FloorCount = 4,
-                   RoofZ = 1,
-                   MinHouseZ = -120,
-                   Components,
-                   Fixtures,
-                   MaxComponets,
-                   MaxFixtures;
-        public ushort SelectedGraphic;
-        public bool Erasing, SeekTile, ShowWindow, CombinedStair;
-        public Point StartPos, EndPos;
-        public CUSTOM_HOUSE_GUMP_STATE State = CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL;
-
-
-        private void Update()
+        public void Update()
         {
             _dataBox.Clear();
             _dataBoxGUI.Clear();
 
-            _gumpPic.Graphic = (ushort)(FloorCount == 4 ? 0x55F2 : 0x55F9);
+            _gumpPic.Graphic = (ushort)(_customHouseManager.FloorCount == 4 ? 0x55F2 : 0x55F9);
 
-            var button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ERASE, (ushort) (0x5666 + (Erasing ? 1 : 0)), 0x5668, 0x5667)
+            var button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ERASE, (ushort) (0x5666 + (_customHouseManager.Erasing ? 1 : 0)), 0x5668, 0x5667)
             {
                 X = 9,
                 Y = 100,
@@ -302,7 +237,7 @@ namespace ClassicUO.Game.UI.Gumps
             button.SetTooltip("Erase");
             _dataBoxGUI.Add(button);
 
-            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_EYEDROPPER, (ushort) (0x5669 + (SeekTile ? 1 : 0)), 0x566B, 0x566A)
+            button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_EYEDROPPER, (ushort) (0x5669 + (_customHouseManager.SeekTile ? 1 : 0)), 0x566B, 0x566A)
             {
                 X = 39,
                 Y = 100,
@@ -319,9 +254,9 @@ namespace ClassicUO.Game.UI.Gumps
                 0, 1, 2, 1, 2, 1, 2
             };
 
-            ushort floorVisionGraphic = floorVisionGraphic1[associateGraphicTable[_floorVisionState[0]]];
-            int graphicOffset = CurrentFloor == 1 ? 3 : 0;
-            int graphicOffset2 = CurrentFloor == 1 ? 4 : 0;
+            ushort floorVisionGraphic = floorVisionGraphic1[associateGraphicTable[_customHouseManager.FloorVisionState[0]]];
+            int graphicOffset = _customHouseManager.CurrentFloor == 1 ? 3 : 0;
+            int graphicOffset2 = _customHouseManager.CurrentFloor == 1 ? 4 : 0;
 
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_1, floorVisionGraphic,
                                     (ushort) (floorVisionGraphic + 2), (ushort) (floorVisionGraphic + 1))
@@ -354,9 +289,9 @@ namespace ClassicUO.Game.UI.Gumps
             _dataBoxGUI.Add(button);
 
 
-            floorVisionGraphic = floorVisionGraphic2[associateGraphicTable[_floorVisionState[1]]];
-            graphicOffset = CurrentFloor == 2 ? 3 : 0;
-            graphicOffset2 = CurrentFloor == 2 ? 4 : 0;
+            floorVisionGraphic = floorVisionGraphic2[associateGraphicTable[_customHouseManager.FloorVisionState[1]]];
+            graphicOffset = _customHouseManager.CurrentFloor == 2 ? 3 : 0;
+            graphicOffset2 = _customHouseManager.CurrentFloor == 2 ? 4 : 0;
 
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_2, floorVisionGraphic,
                                 (ushort) (floorVisionGraphic + 2), (ushort) (floorVisionGraphic + 1))
@@ -389,11 +324,11 @@ namespace ClassicUO.Game.UI.Gumps
             _dataBoxGUI.Add(button);
 
 
-            graphicOffset = CurrentFloor == 3 ? 3 : 0;
-            graphicOffset2 = CurrentFloor == 3 ? 4 : 0;
-            if (FloorCount == 4)
+            graphicOffset = _customHouseManager.CurrentFloor == 3 ? 3 : 0;
+            graphicOffset2 = _customHouseManager.CurrentFloor == 3 ? 4 : 0;
+            if (_customHouseManager.FloorCount == 4)
             {
-                floorVisionGraphic = floorVisionGraphic2[associateGraphicTable[_floorVisionState[2]]];
+                floorVisionGraphic = floorVisionGraphic2[associateGraphicTable[_customHouseManager.FloorVisionState[2]]];
 
                 button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_3, floorVisionGraphic,
                                     (ushort) (floorVisionGraphic + 2), (ushort) (floorVisionGraphic + 1))
@@ -427,9 +362,9 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-                floorVisionGraphic = floorVisionGraphic2[associateGraphicTable[_floorVisionState[3]]];
-                graphicOffset = CurrentFloor == 4 ? 3 : 0;
-                graphicOffset2 = CurrentFloor == 4 ? 4 : 0;
+                floorVisionGraphic = floorVisionGraphic2[associateGraphicTable[_customHouseManager.FloorVisionState[3]]];
+                graphicOffset = _customHouseManager.CurrentFloor == 4 ? 3 : 0;
+                graphicOffset2 = _customHouseManager.CurrentFloor == 4 ? 4 : 0;
 
                 button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_4, floorVisionGraphic,
                                     (ushort) (floorVisionGraphic + 2), (ushort) (floorVisionGraphic + 1))
@@ -463,7 +398,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                floorVisionGraphic = floorVisionGraphic2[associateGraphicTable[_floorVisionState[2]]];
+                floorVisionGraphic = floorVisionGraphic2[associateGraphicTable[_customHouseManager.FloorVisionState[2]]];
 
                 button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_3, floorVisionGraphic,
                                     (ushort) (floorVisionGraphic + 2), (ushort) (floorVisionGraphic + 1))
@@ -496,7 +431,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _dataBoxGUI.Add(button);
             }
 
-            switch (State)
+            switch (_customHouseManager.State)
             {
                 case CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL:
                     AddWall();
@@ -521,7 +456,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
             }
 
-            if (MaxPage > 1)
+            if (_customHouseManager.MaxPage > 1)
             {
                 button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_LIST_LEFT, 0x5625, 0x5627, 0x5626)
                 {
@@ -542,8 +477,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _dataBoxGUI.Add(button);
             }
 
-            Components = 0;
-            Fixtures = 0;
+            _customHouseManager.Components = 0;
+            _customHouseManager.Fixtures = 0;
 
             Item foundationItem = World.Items.Get(LocalSerial);
 
@@ -558,17 +493,17 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             CUSTOM_HOUSE_GUMP_STATE state = 0;
 
-                            (int res1, int res2) = ExistsInList(ref state, item.Graphic);
+                            (int res1, int res2) = _customHouseManager.ExistsInList(ref state, item.Graphic);
 
                             if (res1 != -1 && res2 != -1)
                             {
                                 if (state == CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR)
                                 {
-                                    Fixtures++;
+                                    _customHouseManager.Fixtures++;
                                 }
                                 else
                                 {
-                                    Components++;
+                                    _customHouseManager.Components++;
                                 }
                             }
                         }
@@ -577,283 +512,81 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            _textComponents.Hue = (ushort)(Components >= MaxComponets ? 0x0026 : 0x0481);
-            _textComponents.Text = Components.ToString();
+            _textComponents.Hue = (ushort)(_customHouseManager.Components >= _customHouseManager.MaxComponets ? 0x0026 : 0x0481);
+            _textComponents.Text = _customHouseManager.Components.ToString();
             _textComponents.X = 82 - _textComponents.Width;
 
-            _textFixtures.Hue = (ushort)(Fixtures >= MaxFixtures ? 0x0026 : 0x0481);
-            _textFixtures.Text = Fixtures.ToString();
+            _textFixtures.Hue = (ushort)(_customHouseManager.Fixtures >= _customHouseManager.MaxFixtures ? 0x0026 : 0x0481);
+            _textFixtures.Text = _customHouseManager.Fixtures.ToString();
 
-            _textCost.Text = ((Components + Fixtures) * 500).ToString();
+            string tooltip = FileManager.Cliloc.Translate(1061039, $"{_customHouseManager.MaxComponets}\t{_customHouseManager.MaxFixtures}", true);
+            _textComponents.SetTooltip(tooltip);
+            _textFixtures.SetTooltip(tooltip);
 
+            _textCost.Text = ((_customHouseManager.Components + _customHouseManager.Fixtures) * 500).ToString();
         }
 
-        public (int, int) ExistsInList(ref CUSTOM_HOUSE_GUMP_STATE state, ushort graphic)
+        public void UpdateMaxPage()
         {
-            (int res1, int res2) =
-                SeekGraphicInCustomHouseObjectListWithCategory<CustomHouseWall,
-                    CustomHouseWallCategory>(_walls, graphic);
+            _customHouseManager.MaxPage = 1;
 
-            if (res1 == -1 || res2 == -1)
-            {
-                (res1, res2) = SeekGraphicInCustomHouseObjectList(_floors, graphic);
-
-                if (res1 == -1 || res2 == -1)
-                {
-                    (res1, res2) = SeekGraphicInCustomHouseObjectList(_doors, graphic);
-
-                    if (res1 == -1 || res2 == -1)
-                    {
-                        (res1, res2) =
-                            SeekGraphicInCustomHouseObjectListWithCategory<CustomHouseMisc, CustomHouseMiscCategory>(
-                                _miscs, graphic);
-
-                        if (res1 == -1 || res2 == -1)
-                        {
-                            (res1, res2) = SeekGraphicInCustomHouseObjectList(_stairs, graphic);
-
-                            if (res1 == -1 || res2 == -1)
-                            {
-                                (res1, res2) =
-                                    SeekGraphicInCustomHouseObjectListWithCategory<CustomHouseRoof,
-                                        CustomHouseRoofCategory>(_roofs, graphic);
-
-                                if (res1 != -1 && res2 != -1)
-                                {
-                                    state = CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF;
-                                }
-                            }
-                            else
-                            {
-                                state = CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR;
-                            }
-                        }
-                        else
-                        {
-                            state = CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC;
-                        }
-                    }
-                    else
-                    {
-                        state = CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR;
-                    }
-                }
-                else
-                {
-                    state = CUSTOM_HOUSE_GUMP_STATE.CHGS_FLOOR;
-                }
-            }
-            else
-            {
-                state = CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL;
-            }
-
-            return (res1, res2);
-        }
-
-        public bool ValidatePlaceStructure(Item foundationItem, House house, Multi multi, int minZ, int maxZ, int flags)
-        {
-            if (house == null || multi == null)
-                return false;
-
-
-            foreach (Multi item in house.Components)
-            {
-                List<Point> validatedFloors = new List<Point>();
-
-                if (item.IsCustom && (item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | 
-                                                     CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
-                                                     CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF | 
-                                                     CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) == 0 && 
-                                       item.Z >= minZ && item.Z < maxZ)
-                {
-                    (int info1, int info2) = SeekGraphicInCustomHouseObjectList(_objectsInfo, item.Graphic);
-
-                    if (info1 != -1 && info2 != -1)
-                    {
-                        var info = _objectsInfo[info1];
-
-                        if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT) != 0)
-                        {
-                            if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) != 0 ||
-                                info.DirectSupports == 0)
-                            {
-                                continue;
-                            }
-
-                            if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_W) != 0)
-                            {
-                                if (info.CanGoW != 0)
-                                    return true;
-                            }
-                            else if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_N) != 0)
-                            {
-                                if (info.CanGoN != 0)
-                                    return true;
-                            }
-                            else
-                                return true;
-                        }
-                        else if (
-                            (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM) != 0) && info.Bottom != 0) ||
-                            (((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP)!= 0) && info.Top != 0)
-                        )
-                        {
-                            if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) == 0)
-                            {
-                                if (!ValidateItemPlace(foundationItem, item, minZ, maxZ, validatedFloors))
-                                {
-                                    item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE |
-                                                 CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
-                                }
-                                else
-                                {
-                                    item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
-                                }
-                            }
-
-                            if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0)
-                            {
-                                if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM) != 0)
-                                {
-                                    if (((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N) != 0) && (info.AdjUN != 0))
-                                    {
-                                        return true;
-                                    }
-                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E) != 0) && (info.AdjUE != 0))
-                                    {
-                                        return true;
-                                    }
-                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S) != 0) && (info.AdjUS != 0))
-                                    {
-                                        return true;
-                                    }
-                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W) != 0) && (info.AdjUW != 0))
-                                    {
-                                        return true;
-                                    }
-                                }
-                                else
-                                {
-                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N) != 0) && (info.AdjLN != 0))
-                                    {
-                                        return true;
-                                    }
-                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E) != 0) && (info.AdjLE != 0))
-                                    {
-                                        return true;
-                                    }
-                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S) != 0) && (info.AdjLS != 0))
-                                    {
-                                        return true;
-                                    }
-                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W) != 0) && (info.AdjLW != 0))
-                                    {
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        private static (int, int) SeekGraphicInCustomHouseObjectListWithCategory<T, U>(List<U> list, ushort graphic)
-            where T : CustomHouseObject
-            where U : CustomHouseObjectCategory<T>
-        {
-            for (int i = 0; i < list.Count; i++)
-            {
-                U c = list[i];
-
-                for (int j = 0; j < c.Items.Count; j++)
-                {
-                    int contains = c.Items[j].Contains(graphic);
-
-                    if (contains != -1)
-                        return (i, j);
-                }
-            }
-
-            return (-1, -1);
-        }
-
-        private static (int, int) SeekGraphicInCustomHouseObjectList<T>(List<T> list, ushort graphic)
-            where T : CustomHouseObject
-        {
-            for (int i = 0; i < list.Count; i++)
-            {
-                int contains = list[i].Contains(graphic);
-                if (contains != -1)
-                    return (i, graphic);
-            }
-            return (-1, -1);
-        }
-
-        private void UpdateMaxPage()
-        {
-            MaxPage = 1;
-
-            switch (State)
+            switch (_customHouseManager.State)
             {
                 case CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL:
-                    if (Category == -1)
+                    if (_customHouseManager.Category == -1)
                     {
-                        MaxPage = (int) Math.Ceiling(_walls.Count / 16.0f);
+                        _customHouseManager.MaxPage = (int) Math.Ceiling(CustomHouseManager.Walls.Count / 16.0f);
                     }
                     else
                     {
-                        foreach (CustomHouseWallCategory c in _walls)
+                        foreach (CustomHouseWallCategory c in CustomHouseManager.Walls)
                         {
-                            if (c.Index == Category)
+                            if (c.Index == _customHouseManager.Category)
                             {
-                                MaxPage = c.Items.Count;
+                                _customHouseManager.MaxPage = c.Items.Count;
                                 break;
                             }
                         }
                     }
                     break;
                 case CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR:
-                    MaxPage = _doors.Count;
+                    _customHouseManager.MaxPage = CustomHouseManager.Doors.Count;
                     break;
                 case CUSTOM_HOUSE_GUMP_STATE.CHGS_FLOOR:
-                    MaxPage = _floors.Count;
+                    _customHouseManager.MaxPage = CustomHouseManager.Floors.Count;
                     break;
                 case CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR:
-                    MaxPage = _stairs.Count;
+                    _customHouseManager.MaxPage = CustomHouseManager.Stairs.Count;
                     break;
                 case CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF:
-                    if (Category == -1)
+                    if (_customHouseManager.Category == -1)
                     {
-                        MaxPage = (int) Math.Ceiling(_roofs.Count / 16.0f);
+                        _customHouseManager.MaxPage = (int) Math.Ceiling(CustomHouseManager.Roofs.Count / 16.0f);
                     }
                     else
                     {
-                        foreach (var c in _roofs)
+                        foreach (var c in CustomHouseManager.Roofs)
                         {
-                            if (c.Index == Category)
+                            if (c.Index == _customHouseManager.Category)
                             {
-                                MaxPage = c.Items.Count;
+                                _customHouseManager.MaxPage = c.Items.Count;
                                 break;
                             }
                         }
                     }
                     break;
                 case CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC:
-                    if (Category == -1)
+                    if (_customHouseManager.Category == -1)
                     {
-                        MaxPage = (int) Math.Ceiling(_miscs.Count / 16.0f);
+                        _customHouseManager.MaxPage = (int) Math.Ceiling(CustomHouseManager.Miscs.Count / 16.0f);
                     }
                     else
                     {
-                        foreach (var c in _miscs)
+                        foreach (var c in CustomHouseManager.Miscs)
                         {
-                            if (c.Index == Category)
+                            if (c.Index == _customHouseManager.Category)
                             {
-                                MaxPage = c.Items.Count;
+                                _customHouseManager.MaxPage = c.Items.Count;
                                 break;
                             }
                         }
@@ -866,19 +599,19 @@ namespace ClassicUO.Game.UI.Gumps
         {
             int x = 0, y = 0;
 
-            if (Category == -1)
+            if (_customHouseManager.Category == -1)
             {
                 int startCategory = Page * 16;
                 int endCategory = startCategory + 16;
 
-                if (endCategory > _walls.Count)
-                    endCategory = _walls.Count;
+                if (endCategory > CustomHouseManager.Walls.Count)
+                    endCategory = CustomHouseManager.Walls.Count;
 
-                // TODO: scissor
+                _dataBox.Add(new ScissorControl(true, 121, 36, 384, 60));
 
                 for (int i = startCategory; i < endCategory; i++)
                 {
-                    var vec = _walls[i].Items;
+                    var vec = CustomHouseManager.Walls[i].Items;
 
                     if (vec.Count == 0)
                         continue;
@@ -892,9 +625,10 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         X = offsetX,
                         Y = offsetY,
+                        CanMove = false,
                         LocalSerial = (uint) (ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
                     };
-                    pic.MouseDown += (sender, e) =>
+                    pic.MouseUp += (sender, e) =>
                     {
                         OnButtonClick((int) pic.LocalSerial.Value);
                     };
@@ -913,24 +647,26 @@ namespace ClassicUO.Game.UI.Gumps
                         x = 0;
                         y += 60;
 
-                        // disable scissor
-                        // add scissor
+                        _dataBox.Add(new ScissorControl(false));
+                        _dataBox.Add(new ScissorControl(true, 121, 96, 384, 60));
                     }
                 }
 
                 // disable scissor
+                _dataBox.Add(new ScissorControl(false));
             }
-            else if (Category >= 0 && Category <= _walls.Count)
+            else if (_customHouseManager.Category >= 0 && _customHouseManager.Category <= CustomHouseManager.Walls.Count)
             {
-                var vec = _walls[Category].Items;
+                var vec = CustomHouseManager.Walls[_customHouseManager.Category].Items;
                 if (Page >= 0 && Page < vec.Count)
                 {
                     var item = vec[Page];
                     // add scissor
+                    _dataBox.Add(new ScissorControl(true, 121, 36, 384, 120));
 
                     for (int i = 0; i < 8; i++)
                     {
-                        ushort graphic = (ShowWindow ? item.WindowGraphics[i] : item.Graphics[i]);
+                        ushort graphic = (_customHouseManager.ShowWindow ? item.WindowGraphics[i] : item.Graphics[i]);
 
                         if (graphic != 0)
                         {
@@ -943,6 +679,7 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 X = offsetX,
                                 Y = offsetY,
+                                CanMove = false,
                                 LocalSerial = (uint) (ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
                             };
                             pic.MouseUp += (sender, e) =>
@@ -960,6 +697,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     // remove scissor
+                    _dataBox.Add(new ScissorControl(false));
                 }
 
                 _dataBoxGUI.Add(new GumpPic(152, 0, 0x55F3, 0));
@@ -970,12 +708,12 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 5,
                     ButtonAction = ButtonAction.Activate
                 };
-                button.SetTooltip("To Category");
+                button.SetTooltip("To _customHouseManager.Category");
                 _dataBoxGUI.Add(button);
 
                 _dataBoxGUI.Add(new GumpPic(218, 4, 0x55F4, 0));
 
-                if (ShowWindow)
+                if (_customHouseManager.ShowWindow)
                 {
                     button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_WALL_SHOW_WINDOW, 0x562E, 0x5630, 0x562F)
                     {
@@ -1002,13 +740,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void AddDoor()
         {
-            if (Page >= 0 && Page < _doors.Count)
+            if (Page >= 0 && Page < CustomHouseManager.Doors.Count)
             {
-                var item = _doors[Page];
+                var item = CustomHouseManager.Doors[Page];
 
                 int x = 0, y = 0;
 
                 // add scissor
+                _dataBox.Add(new ScissorControl(true, 138, 36, 384, 120));
 
                 for (int i = 0; i < 8; i++)
                 {
@@ -1030,6 +769,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             X = offsetX,
                             Y = offsetY,
+                            CanMove = false,
                             LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
                         };
                         pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial.Value); };
@@ -1131,18 +871,20 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 // remove scissor
+                _dataBox.Add(new ScissorControl(false));
             }
         }
 
         private void AddFloor()
         {
-            if (Page >= 0 && Page < _floors.Count)
+            if (Page >= 0 && Page < CustomHouseManager.Floors.Count)
             {
-                var item = _floors[Page];
+                var item = CustomHouseManager.Floors[Page];
 
                 int x = 0, y = 0;
 
                 // add scissor
+                _dataBox.Add(new ScissorControl(true, 123, 36, 384, 120));
 
                 int index = 0;
 
@@ -1163,9 +905,10 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 X = offsetX,
                                 Y = offsetY,
+                                CanMove = false,
                                 LocalSerial = (uint) (ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + index)
                             };
-                            pic.MouseDown += (sender, e) =>
+                            pic.MouseUp += (sender, e) =>
                             {
                                 OnButtonClick((int) pic.LocalSerial.Value);
                             };
@@ -1181,14 +924,15 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 // remove scissor
+                _dataBox.Add(new ScissorControl(false));
             }
         }
 
         private void AddStair()
         {
-            if (Page >= 0 && Page < _stairs.Count)
+            if (Page >= 0 && Page < CustomHouseManager.Stairs.Count)
             {
-                var item = _stairs[Page];
+                var item = CustomHouseManager.Stairs[Page];
 
                 for (int j = 0; j < 2; j++)
                 {
@@ -1196,6 +940,7 @@ namespace ClassicUO.Game.UI.Gumps
                     int y = (j != 0 ? 60 : 0);
 
                     // add scissor
+                    _dataBox.Add(new ScissorControl(true, 121, 36 + y, 384, 60));
 
                     Label text = new Label(FileManager.Cliloc.GetString(1062113 + j), true, 0xFFFF, 90, 0)
                     {
@@ -1223,6 +968,7 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 X = offsetX,
                                 Y = offsetY,
+                                CanMove = false,
                                 LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i + combinedStair)
                             };
                             pic.MouseUp += (sender, e) => { OnButtonClick((int) pic.LocalSerial.Value);};
@@ -1236,6 +982,7 @@ namespace ClassicUO.Game.UI.Gumps
                         x += 48;
                     }
                     // remove scissor
+                    _dataBox.Add(new ScissorControl(false));
                 }
 
                 _dataBox.Add(new ColorBox(384, 2, 0, 0xFF7F7F7F)
@@ -1250,19 +997,20 @@ namespace ClassicUO.Game.UI.Gumps
         {
             int x = 0, y = 0;
 
-            if (Category == -1)
+            if (_customHouseManager.Category == -1)
             {
                 int startCategory = Page * 16;
                 int endCategory = startCategory + 16;
 
-                if (endCategory > _roofs.Count)
-                    endCategory = _roofs.Count;
+                if (endCategory > CustomHouseManager.Roofs.Count)
+                    endCategory = CustomHouseManager.Roofs.Count;
 
                 // push scissor
+                _dataBox.Add(new ScissorControl(true, 121, 36, 384, 60));
 
                 for (int i = startCategory; i < endCategory; i++)
                 {
-                    var vec = _roofs[i].Items;
+                    var vec = CustomHouseManager.Roofs[i].Items;
 
                     if (vec.Count == 0)
                         continue;
@@ -1276,6 +1024,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         X = offsetX,
                         Y = offsetY,
+                        CanMove = false,
                         LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
                     };
                     pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial.Value); };
@@ -1300,20 +1049,26 @@ namespace ClassicUO.Game.UI.Gumps
 
                         // pop scissor,
                         // push scissor
+
+                        _dataBox.Add(new ScissorControl(false));
+                        _dataBox.Add(new ScissorControl(true, 121, 96, 384, 60));
+
                     }
                 }
 
                 // pop scissor
+                _dataBox.Add(new ScissorControl(false));
             }
-            else if (Category >= 0 && Category < _roofs.Count)
+            else if (_customHouseManager.Category >= 0 && _customHouseManager.Category < CustomHouseManager.Roofs.Count)
             {
-                var vec = _roofs[Category].Items;
+                var vec = CustomHouseManager.Roofs[_customHouseManager.Category].Items;
 
                 if (Page >= 0 && Page < vec.Count)
                 {
                     var item = vec[Page];
 
                     // push scissor
+                    _dataBox.Add(new ScissorControl(true, 130, 44, 384, 120));
 
                     int index = 0;
 
@@ -1334,7 +1089,8 @@ namespace ClassicUO.Game.UI.Gumps
                                 {
                                     X = offsetX,
                                     Y = offsetY,
-                                    LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
+                                    CanMove = false,
+                                    LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + index)
                                 };
                                 pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial.Value); };
                                 _dataBox.Add(pic);
@@ -1359,6 +1115,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     // pop scissor
+                    _dataBox.Add(new ScissorControl(false));
                 }
 
                 _dataBoxGUI.Add(new GumpPic(152, 0, 0x55F3, 0));
@@ -1369,7 +1126,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 5,
                     ButtonAction = ButtonAction.Activate
                 };
-                button.SetTooltip("To Category");
+                button.SetTooltip("To _customHouseManager.Category");
                 _dataBoxGUI.Add(button);
 
                 button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_ROOF_Z_DOWN, 0x578B, 0x578D, 0x578C)
@@ -1390,12 +1147,9 @@ namespace ClassicUO.Game.UI.Gumps
                 button.SetTooltip("Raise Roof Placement Level");
                 _dataBoxGUI.Add(button);
 
-                _dataBoxGUI.Add(new GumpPic(583, 4, 0x55F4, 0)
-                {
+                _dataBoxGUI.Add(new GumpPic(583, 4, 0x55F4, 0));
 
-                });
-
-                Label text = new Label(RoofZ.ToString(), false, 0x04E9, font: 3)
+                Label text = new Label(_customHouseManager.RoofZ.ToString(), false, 0x04E9, font: 3)
                 {
                     X = 405,
                     Y = 15
@@ -1408,19 +1162,20 @@ namespace ClassicUO.Game.UI.Gumps
         {
             int x = 0, y = 0;
 
-            if (Category == -1)
+            if (_customHouseManager.Category == -1)
             {
                 int startCategory = Page * 16;
                 int endCategory = startCategory + 16;
 
-                if (endCategory > _miscs.Count)
-                    endCategory = _miscs.Count;
+                if (endCategory > CustomHouseManager.Miscs.Count)
+                    endCategory = CustomHouseManager.Miscs.Count;
 
                 // push scissor
+                _dataBox.Add(new ScissorControl(true, 121, 36, 384, 60));
 
                 for (int i = startCategory; i < endCategory; i++)
                 {
-                    var vec = _miscs[i].Items;
+                    var vec = CustomHouseManager.Miscs[i].Items;
 
                     if (vec.Count == 0)
                         continue;
@@ -1444,6 +1199,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         X = offsetX,
                         Y = offsetY,
+                        CanMove = false,
                         LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
                     };
                     pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial.Value); };
@@ -1458,20 +1214,24 @@ namespace ClassicUO.Game.UI.Gumps
 
                         // pop scissor
                         // push scissor
+                        _dataBox.Add(new ScissorControl(false));
+                        _dataBox.Add(new ScissorControl(true, 121, 96, 384, 60));
                     }
                 }
 
                 // pop scissor
+                _dataBox.Add(new ScissorControl(false));
             }
-            else if (Category >= 0 && Category < _miscs.Count)
+            else if (_customHouseManager.Category >= 0 && _customHouseManager.Category < CustomHouseManager.Miscs.Count)
             {
-                var vec = _miscs[Category].Items;
+                var vec = CustomHouseManager.Miscs[_customHouseManager.Category].Items;
 
                 if (Page >= 0 && Page < vec.Count)
                 {
                     var item = vec[Page];
 
                     // push scissor
+                    _dataBox.Add(new ScissorControl(true, 130, 44, 384, 120));
 
                     for (int i = 0; i < 8; i++)
                     {
@@ -1488,6 +1248,7 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 X = offsetX,
                                 Y = offsetY,
+                                CanMove = false,
                                 LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
                             };
                             pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial.Value); };
@@ -1508,6 +1269,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     // pop scissor
+                    _dataBox.Add(new ScissorControl(false));
                 }
 
                 _dataBoxGUI.Add(new GumpPic(152, 0, 0x55F3, 0));
@@ -1635,34 +1397,34 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 int index = idd - ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST;
 
-                if (Category == -1 && (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL ||
-                                       State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF ||
-                                       State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC))
+                if (_customHouseManager.Category == -1 && (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL ||
+                                       _customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF ||
+                                       _customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC))
                 {
                     int newCategory = -1;
 
-                    if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL && index >= 0 && index < _walls.Count)
+                    if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL && index >= 0 && index < CustomHouseManager.Walls.Count)
                     {
-                        newCategory = _walls[index].Index;
+                        newCategory = CustomHouseManager.Walls[index].Index;
                     }
-                    else if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF && index >= 0 && index < _roofs.Count)
+                    else if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF && index >= 0 && index < CustomHouseManager.Roofs.Count)
                     {
-                        newCategory = _roofs[index].Index;
+                        newCategory = CustomHouseManager.Roofs[index].Index;
                     }
-                    else if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC && index >= 0 && index < _miscs.Count)
+                    else if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC && index >= 0 && index < CustomHouseManager.Miscs.Count)
                     {
-                        newCategory = _miscs[index].Index;
+                        newCategory = CustomHouseManager.Miscs[index].Index;
                     }
 
 
                     if (newCategory != -1)
                     {
-                        Category = newCategory;
+                        _customHouseManager.Category = newCategory;
                         Page = 0;
-                        SelectedGraphic = 0;
-                        Erasing = false;
-                        SeekTile = false;
-                        CombinedStair = false;
+                        _customHouseManager.SelectedGraphic = 0;
+                        _customHouseManager.Erasing = false;
+                        _customHouseManager.SeekTile = false;
+                        _customHouseManager.CombinedStair = false;
                         UpdateMaxPage();
                         Update();
                     }
@@ -1672,33 +1434,33 @@ namespace ClassicUO.Game.UI.Gumps
                     bool combinedStairs = false;
                     ushort graphic = 0;
 
-                    if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL ||
-                        State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF ||
-                        State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC)
+                    if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL ||
+                        _customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF ||
+                        _customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC)
                     {
-                        if (Category >= 0)
+                        if (_customHouseManager.Category >= 0)
                         {
-                            if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL && Category < _walls.Count && index < CustomHouseWall.GRAPHICS_COUNT)
+                            if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL && _customHouseManager.Category < CustomHouseManager.Walls.Count && index < CustomHouseWall.GRAPHICS_COUNT)
                             {
-                                var list = _walls[Category].Items;
+                                var list = CustomHouseManager.Walls[_customHouseManager.Category].Items;
 
                                 if (Page < list.Count)
                                 {
-                                    graphic = (ShowWindow ? list[Page].WindowGraphics[index] : list[Page].Graphics[index]);
+                                    graphic = (_customHouseManager.ShowWindow ? list[Page].WindowGraphics[index] : list[Page].Graphics[index]);
                                 }
                             }
-                            else if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF && Category < _roofs.Count && index < CustomHouseRoof.GRAPHICS_COUNT)
+                            else if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF && _customHouseManager.Category < CustomHouseManager.Roofs.Count && index < CustomHouseRoof.GRAPHICS_COUNT)
                             {
-                                var list = _roofs[Category].Items;
+                                var list = CustomHouseManager.Roofs[_customHouseManager.Category].Items;
 
                                 if (Page < list.Count)
                                 {
                                     graphic = list[Page].Graphics[index];
                                 }
                             }
-                            else if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC && Category < _miscs.Count && index < CustomHouseMisc.GRAPHICS_COUNT)
+                            else if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC && _customHouseManager.Category < CustomHouseManager.Miscs.Count && index < CustomHouseMisc.GRAPHICS_COUNT)
                             {
-                                var list = _miscs[Category].Items;
+                                var list = CustomHouseManager.Miscs[_customHouseManager.Category].Items;
 
                                 if (Page < list.Count)
                                 {
@@ -1709,15 +1471,15 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR && Page < _doors.Count && index < CustomHouseDoor.GRAPHICS_COUNT)
+                        if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR && Page < CustomHouseManager.Doors.Count && index < CustomHouseDoor.GRAPHICS_COUNT)
                         {
-                            graphic = _doors[Page].Graphics[index];
+                            graphic = CustomHouseManager.Doors[Page].Graphics[index];
                         }
-                        else if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_FLOOR && Page < _floors.Count && index < CustomHouseFloor.GRAPHICS_COUNT)
+                        else if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_FLOOR && Page < CustomHouseManager.Floors.Count && index < CustomHouseFloor.GRAPHICS_COUNT)
                         {
-                            graphic = _floors[Page].Graphics[index];
+                            graphic = CustomHouseManager.Floors[Page].Graphics[index];
                         }
-                        else if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR && Page < _stairs.Count)
+                        else if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR && Page < CustomHouseManager.Stairs.Count)
                         {
                             if (index > 10)
                             {
@@ -1727,17 +1489,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (index < CustomHouseStair.GRAPHICS_COUNT)
                             {
-                                graphic = _stairs[Page].Graphics[index];
+                                graphic = CustomHouseManager.Stairs[Page].Graphics[index];
                             }
                         }
                     }
 
                     if (graphic != 0)
                     {
-                        ushort z = (ushort) (World.Items.Get(LocalSerial).Z + 7 + ((CurrentFloor - 1) * 20));
-                        TargetManager.SetTargetingMulti(Serial.INVALID, graphic, 0, 0, z, 0, true);
-                        CombinedStair = combinedStairs;
-                        SelectedGraphic = graphic;
+                        _customHouseManager.SetTargetMulti();
+                        _customHouseManager.CombinedStair = combinedStairs;
+                        _customHouseManager.SelectedGraphic = graphic;
                         Update();
                     }
                 }
@@ -1748,86 +1509,86 @@ namespace ClassicUO.Game.UI.Gumps
             switch (idd)
             {
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_WALL:
-                    Category = -1;
-                    State = CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL;
+                    _customHouseManager.Category = -1;
+                    _customHouseManager.State = CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL;
                     Page = 0;
-                    SelectedGraphic = 0;
-                    CombinedStair = false;
+                    _customHouseManager.SelectedGraphic = 0;
+                    _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
                     TargetManager.CancelTarget();
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_DOOR:
-                    Category = -1;
-                    State = CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR;
+                    _customHouseManager.Category = -1;
+                    _customHouseManager.State = CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR;
                     Page = 0;
-                    SelectedGraphic = 0;
-                    CombinedStair = false;
+                    _customHouseManager.SelectedGraphic = 0;
+                    _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
                     TargetManager.CancelTarget();
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_FLOOR:
-                    Category = -1;
-                    State = CUSTOM_HOUSE_GUMP_STATE.CHGS_FLOOR;
+                    _customHouseManager.Category = -1;
+                    _customHouseManager.State = CUSTOM_HOUSE_GUMP_STATE.CHGS_FLOOR;
                     Page = 0;
-                    SelectedGraphic = 0;
-                    CombinedStair = false;
+                    _customHouseManager.SelectedGraphic = 0;
+                    _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
                     TargetManager.CancelTarget();
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_STAIR:
-                    Category = -1;
-                    State = CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR;
+                    _customHouseManager.Category = -1;
+                    _customHouseManager.State = CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR;
                     Page = 0;
-                    SelectedGraphic = 0;
-                    CombinedStair = false;
+                    _customHouseManager.SelectedGraphic = 0;
+                    _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
                     TargetManager.CancelTarget();
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ROOF:
-                    Category = -1;
-                    State = CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF;
+                    _customHouseManager.Category = -1;
+                    _customHouseManager.State = CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF;
                     Page = 0;
-                    SelectedGraphic = 0;
-                    CombinedStair = false;
+                    _customHouseManager.SelectedGraphic = 0;
+                    _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
                     TargetManager.CancelTarget();
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_MISC:
-                    Category = -1;
-                    State = CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC;
+                    _customHouseManager.Category = -1;
+                    _customHouseManager.State = CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC;
                     Page = 0;
-                    SelectedGraphic = 0;
-                    CombinedStair = false;
+                    _customHouseManager.SelectedGraphic = 0;
+                    _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
                     TargetManager.CancelTarget();
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ERASE:
-                    // TODO: TARGET
-                    Erasing = !Erasing;
-                    SelectedGraphic = 0;
-                    CombinedStair = false;
+                    _customHouseManager.SetTargetMulti();
+                    _customHouseManager.Erasing = !_customHouseManager.Erasing;
+                    _customHouseManager.SelectedGraphic = 0;
+                    _customHouseManager.CombinedStair = false;
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_EYEDROPPER:
-                    // TODO: TARGET
-                    SeekTile = true;
-                    SelectedGraphic = 0;
-                    CombinedStair = false;
+                    _customHouseManager.SetTargetMulti();
+                    _customHouseManager.SeekTile = true;
+                    _customHouseManager.SelectedGraphic = 0;
+                    _customHouseManager.CombinedStair = false;
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_MENU:
-                    Category = -1;
-                    State = CUSTOM_HOUSE_GUMP_STATE.CHGS_MENU;
+                    _customHouseManager.Category = -1;
+                    _customHouseManager.State = CUSTOM_HOUSE_GUMP_STATE.CHGS_MENU;
                     Page = 0;
-                    MaxPage = 1;
-                    SelectedGraphic = 0;
-                    CombinedStair = false;
+                    _customHouseManager.MaxPage = 1;
+                    _customHouseManager.SelectedGraphic = 0;
+                    _customHouseManager.CombinedStair = false;
                     TargetManager.CancelTarget();
                     Update();
                     break;
@@ -1837,69 +1598,49 @@ namespace ClassicUO.Game.UI.Gumps
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_4:
                     int selectedFloor = (ID_GUMP_CUSTOM_HOUSE) buttonID - ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_1;
 
-                    _floorVisionState[selectedFloor]++;
+                    _customHouseManager.FloorVisionState[selectedFloor]++;
 
-                    if (_floorVisionState[selectedFloor] > (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_ALL)
+                    if (_customHouseManager.FloorVisionState[selectedFloor] > (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_ALL)
                     {
-                        _floorVisionState[selectedFloor] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
+                        _customHouseManager.FloorVisionState[selectedFloor] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
                     }
 
-                    GenerateFloorPlace();
+                    _customHouseManager.GenerateFloorPlace();
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_1:
-                    CurrentFloor = 1;
+                    _customHouseManager.CurrentFloor = 1;
                     NetClient.Socket.Send(new PCustomHouseGoToFloor(1));
 
-                    for (int i = 0; i < _floorVisionState.Length; i++)
-                        _floorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
-
-                    if (SelectedGraphic != 0)
-                    {
-                        TargetManager.MultiTargetInfo.ZOff = (ushort)(World.Items.Get(LocalSerial).Z + 7 + (CurrentFloor - 1) * 20);
-                    }
+                    for (int i = 0; i < _customHouseManager.FloorVisionState.Length; i++)
+                        _customHouseManager.FloorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
 
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_2:
-                    CurrentFloor = 2;
+                    _customHouseManager.CurrentFloor = 2;
                     NetClient.Socket.Send(new PCustomHouseGoToFloor(2));
 
-                    for (int i = 0; i < _floorVisionState.Length; i++)
-                        _floorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
-
-                    if (SelectedGraphic != 0)
-                    {
-                        TargetManager.MultiTargetInfo.ZOff = (ushort) (World.Items.Get(LocalSerial).Z + 7 + (CurrentFloor - 1) * 20);
-                    }
+                    for (int i = 0; i < _customHouseManager.FloorVisionState.Length; i++)
+                        _customHouseManager.FloorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
 
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3:
-                    CurrentFloor = 3;
+                    _customHouseManager.CurrentFloor = 3;
                     NetClient.Socket.Send(new PCustomHouseGoToFloor(3));
 
-                    for (int i = 0; i < _floorVisionState.Length; i++)
-                        _floorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
-
-                    if (SelectedGraphic != 0)
-                    {
-                        TargetManager.MultiTargetInfo.ZOff = (ushort) (World.Items.Get(LocalSerial).Z + 7 + (CurrentFloor - 1) * 20);
-                    }
-
+                    for (int i = 0; i < _customHouseManager.FloorVisionState.Length; i++)
+                        _customHouseManager.FloorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
+                    
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_4:
-                    CurrentFloor = 4;
+                    _customHouseManager.CurrentFloor = 4;
                     NetClient.Socket.Send(new PCustomHouseGoToFloor(4));
 
-                    for (int i = 0; i < _floorVisionState.Length; i++)
-                        _floorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
-
-                    if (SelectedGraphic != 0)
-                    {
-                        TargetManager.MultiTargetInfo.ZOff = (ushort) (World.Items.Get(LocalSerial).Z + 7 + (CurrentFloor - 1) * 20);
-                    }
+                    for (int i = 0; i < _customHouseManager.FloorVisionState.Length; i++)
+                        _customHouseManager.FloorVisionState[i] = (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_NORMAL;
 
                     Update();
                     break;
@@ -1908,7 +1649,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (Page < 0)
                     {
-                        Page = MaxPage - 1;
+                        Page = _customHouseManager.MaxPage - 1;
 
                         if (Page < 0)
                             Page = 0;
@@ -1918,7 +1659,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_LIST_RIGHT:
                     Page++;
 
-                    if (Page >= MaxPage)
+                    if (Page >= _customHouseManager.MaxPage)
                         Page = 0;
 
                     Update();
@@ -1942,29 +1683,29 @@ namespace ClassicUO.Game.UI.Gumps
                     NetClient.Socket.Send(new PCustomHouseRevert());
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_CATEGORY:
-                    Category = -1;
+                    _customHouseManager.Category = -1;
                     Page = 0;
-                    SelectedGraphic = 0;
-                    CombinedStair = false;
+                    _customHouseManager.SelectedGraphic = 0;
+                    _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
                     TargetManager.CancelTarget();
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_WALL_SHOW_WINDOW:
-                    ShowWindow = !ShowWindow;
+                    _customHouseManager.ShowWindow = !_customHouseManager.ShowWindow;
                     Update();
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_ROOF_Z_UP:
-                    if (RoofZ < 6)
+                    if (_customHouseManager.RoofZ < 6)
                     {
-                        RoofZ++;
+                        _customHouseManager.RoofZ++;
                         Update();
                     }
                     break;
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_ROOF_Z_DOWN:
-                    if (RoofZ > 1)
+                    if (_customHouseManager.RoofZ > 1)
                     {
-                        RoofZ--;
+                        _customHouseManager.RoofZ--;
                         Update();
                     }
                     break;
@@ -1972,1073 +1713,14 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public void GenerateFloorPlace()
-        {
-            Item foundationItem = World.Items.Get(LocalSerial);
-
-            if (foundationItem != null && World.HouseManager.TryGetHouse(LocalSerial, out var house))
-            {
-                house.ClearCustomHouseComponents(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL);
-
-                foreach (Multi item in house.Components)
-                {
-                    if (!item.IsCustom)
-                        continue;
-
-                    int currentFloor = -1;
-                    int floorZ = foundationItem.Z + 7;
-                    int itemZ = item.Z;
-
-                    bool ignore = false;
-
-                    for (int i = 0; i < 4; i++)
-                    {
-                        int offset = 0; //i != 0 ? 0 : 7;
-
-                        if (itemZ >= floorZ - offset && itemZ < floorZ + 20)
-                        {
-                            currentFloor = i;
-                            break;
-                        }
-
-                        floorZ += 20;
-                    }
-
-                    if (currentFloor == -1)
-                    {
-                        ignore = true;
-                        currentFloor = 0;
-                        //continue;
-                    }
-
-                    (int floorCheck1, int floorCheck2) = SeekGraphicInCustomHouseObjectList(_floors, item.Graphic);
-
-                    var state = item.State;
-
-                    if (floorCheck1 != -1 && floorCheck2 != -1)
-                    {
-                        state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR;
-
-                        if (_floorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_FLOOR)
-                        {
-                            state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
-                        }
-                        else if (_floorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_FLOOR ||
-                                 _floorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSLUCENT_FLOOR)
-                        {
-                            state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
-                        }
-                    }
-                    else
-                    {
-                        (int stairCheck1, int stairCheck2) = SeekGraphicInCustomHouseObjectList(_stairs, item.Graphic);
-
-                        if (stairCheck1 != -1 && stairCheck2 != -1)
-                        {
-                            state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR;
-                        }
-                        else
-                        {
-                            (int roofCheck1, int roofCheck2) = SeekGraphicInCustomHouseObjectListWithCategory<CustomHouseRoof, CustomHouseRoofCategory>(_roofs, item.Graphic);
-
-                            if (roofCheck1 != -1 && roofCheck2 != -1)
-                            {
-                                state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF;
-                            }
-                            else
-                            {
-                                (int fixtureCheck1, int fixtureCheck2) = SeekGraphicInCustomHouseObjectList(_doors, item.Graphic);
-
-                                if (fixtureCheck1 == -1 || fixtureCheck2 == -1)
-                                {
-                                    (fixtureCheck1, fixtureCheck2) = SeekGraphicInCustomHouseObjectList(_teleports, item.Graphic);
-                                }
-
-                                if (fixtureCheck1 != -1 && fixtureCheck2 != -1)
-                                {
-                                    state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE;
-                                }
-                            }
-                        }
-
-                        if (!ignore)
-                        {
-                            if (_floorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_CONTENT)
-                            {
-                                state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
-                            }
-                            else if (_floorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_CONTENT)
-                            {
-                                state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
-                            }
-                        }
-                      
-                    }
-
-                    if (!ignore)
-                    {
-                        if (_floorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_ALL)
-                        {
-                            state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
-                        }
-                    }
-                    
-                    item.State = state;
-                }
-
-                int z = foundationItem.Z + 7;
-
-                for (int x = StartPos.X + 1; x < EndPos.X; x++)
-                {
-                    for (int y = StartPos.Y + 1; y < EndPos.Y; y++)
-                    {
-                        var multi = house.GetMultiAt(x, y);
-
-                        if (multi == null)
-                            continue;
-
-                        Multi floorMulti = null;
-                        Multi floorCustomMulti = null;
-
-                        foreach (Multi item in house.Components)
-                        {
-                            if (item.Z != z || (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) == 0)
-                            {
-                                continue;
-                            }
-
-                            if (item.IsCustom)
-                            {
-                                floorCustomMulti = item;
-                            }
-                            else
-                            {
-                                floorMulti = item;
-                            }
-                        }
-
-                        if (floorMulti != null && floorCustomMulti == null)
-                        {
-                            var mo = house.Add(floorMulti.Graphic, 0, x - foundationItem.X, y - foundationItem.Y, (sbyte) z, true);
-
-                            CUSTOM_HOUSE_MULTI_OBJECT_FLAGS state = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR;
-
-                            if (_floorVisionState[0] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_FLOOR)
-                            {
-                                state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
-                            }
-                            else if (_floorVisionState[0] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_FLOOR ||
-                                     _floorVisionState[0] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSLUCENT_FLOOR)
-                            {
-                                state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
-                            }
-
-                            mo.State = state;
-                        }
-                    }
-                }
-
-                for (int i = 0; i < FloorCount; i++)
-                {
-                    int minZ = foundationItem.Z + 7 + i * 20;
-                    int maxZ = minZ + 20;
-
-                    for (int j = 0; j < 2; j++)
-                    {
-                        List<Point> validatedFloors = new List<Point>();
-
-                        for (int x = StartPos.X; x < EndPos.X + 1; x++)
-                        {
-                            for (int y = StartPos.Y; y < EndPos.Y + 1; y++)
-                            {
-                                var multi = house.GetMultiAt(x, y);
-
-                                if (multi == null)
-                                    continue;
-
-                                foreach (Multi item in house.Components)
-                                {
-                                    if (!item.IsCustom)
-                                        continue;
-
-                                    if (j == 0)
-                                    {
-                                        if (i == 0 && item.Z < minZ)
-                                        {
-                                            item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
-                                            continue;
-                                        }
-
-                                        if (((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) == 0))
-                                        {
-                                            continue;
-                                        }
-
-                                        if (i == 0 && item.Z >= minZ && item.Z < maxZ)
-                                        {
-                                            item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
-                                            continue;
-                                        }
-                                    }
-
-                                    if (((item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL)) == 0) && item.Z >= minZ && item.Z < maxZ)
-                                    {
-                                        if (!ValidateItemPlace(foundationItem, item, minZ, maxZ, validatedFloors))
-                                        {
-                                            item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
-                                        }
-                                        else
-                                        {
-                                            item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        if (i != 0 && j == 0)
-                        {
-                            foreach (Point point in validatedFloors)
-                            {
-                                var multi = house.GetMultiAt(point.X, point.Y);
-
-                                if (multi == null)
-                                    continue;
-
-                                foreach (Multi item in house.Components)
-                                {
-                                    if (item.IsCustom && (((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0) && item.Z >= minZ && item.Z < maxZ))
-                                    {
-                                        item.State = item.State & ~CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
-                                    }
-                                }
-                            }
-
-                            for (int x = StartPos.X; x < EndPos.X + 1; x++)
-                            {
-                                int minY = 0, maxY = 0;
-
-                                for (int y = StartPos.Y; y < EndPos.Y + 1; y++)
-                                {
-                                    var multi = house.GetMultiAt(x, y);
-
-                                    if (multi == null)
-                                        continue;
-
-                                    foreach (Multi item in house.Components)
-                                    {
-                                        if (item.IsCustom && ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0) &&
-                                            ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0) &&
-                                            ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0) &&
-                                            item.Z >= minZ && item.Z < maxZ)
-                                        {
-                                            minY = y;
-                                            break;
-                                        }
-                                    }
-
-                                    if (minY != 0)
-                                    {
-                                        break;
-                                    }
-                                }
-
-                                for (int y = EndPos.Y; y >= StartPos.Y; y--)
-                                {
-                                    var multi = house.GetMultiAt(x, y);
-                                    if (multi == null)
-                                        continue;
-
-                                    foreach (Multi item in house.Components)
-                                    {
-                                        if (item.IsCustom && ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0) &&
-                                            ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0) &&
-                                            ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0) &&
-                                            item.Z >= minZ && item.Z < maxZ)
-                                        {
-                                            maxY = y;
-                                            break;
-                                        }
-                                    }
-
-                                    if (maxY != 0)
-                                    {
-                                        break;
-                                    }
-                                }
-
-                                for (int y = minY; y < maxY; y++)
-                                {
-                                    var multi = house.GetMultiAt(x, y);
-                                    if (multi == null)
-                                        continue;
-
-                                    foreach (Multi item in house.Components)
-                                    {
-                                        if (item.IsCustom && ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0) &&
-                                            ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0) &&
-                                            item.Z >= minZ && item.Z < maxZ)
-                                        {
-                                            item.State = item.State & ~CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
-                                        }
-                                    }
-                                }
-                            }
-
-                            for (int y = StartPos.Y; y < EndPos.Y + 1; y++)
-                            {
-                                int minX = 0;
-                                int maxX = 0;
-
-                                for (int x = StartPos.X; x < EndPos.X + 1; x++)
-                                {
-                                    var multi = house.GetMultiAt(x, y);
-                                    if (multi == null)
-                                        continue;
-
-                                    foreach (Multi item in house.Components)
-                                    {
-                                        if (item.IsCustom && ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0) &&
-                                            ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0) &&
-                                            ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0) &&
-                                            item.Z >= minZ && item.Z < maxZ)
-                                        {
-                                            minX = x;
-                                            break;
-                                        }
-                                    }
-
-                                    if (minX != 0)
-                                    {
-                                        break;
-                                    }
-                                }
-
-                                for (int x = EndPos.X; x >= StartPos.X; x--)
-                                {
-                                    var multi = house.GetMultiAt(x, y);
-                                    if (multi == null)
-                                        continue;
-
-                                    foreach (Multi item in house.Components)
-                                    {
-                                        if (item.IsCustom && ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0) &&
-                                            ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0) &&
-                                            ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0) &&
-                                            item.Z >= minZ && item.Z < maxZ)
-                                        {
-                                            maxX = x;
-                                            break;
-                                        }
-                                    }
-
-                                    if (maxX != 0)
-                                    {
-                                        break;
-                                    }
-                                }
-
-                                for (int x = minX; x < maxX; x++)
-                                {
-                                    var multi = house.GetMultiAt(x, y);
-                                    if (multi == null)
-                                        continue;
-
-                                    foreach (Multi item in house.Components)
-                                    {
-                                        if (item.IsCustom && ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0) &&
-                                            ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0) &&
-                                            item.Z >= minZ && item.Z < maxZ)
-                                        {
-                                            item.State = item.State & ~CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                z = foundationItem.Z + 7 + 20;
-
-                ushort color = 0x0051;
-
-                for (int i = 1; i < CurrentFloor; i++)
-                {
-                    for (int x = StartPos.X; x < EndPos.X; x++)
-                    {
-                        for (int y = StartPos.Y; y < EndPos.Y; y++)
-                        {
-                            ushort tempColor = color;
-
-                            if (x == StartPos.X || y == StartPos.Y)
-                            {
-                                tempColor++;
-                            }
-
-                            var mo = house.Add(0x0496, tempColor, x - foundationItem.X, y - foundationItem.Y, (sbyte) z, true);
-
-                            mo.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
-                            mo.AddToTile();
-                        }
-                    }
-
-                    color += 5;
-                    z += 20;
-                }
-            }
-        }
-
-        public bool GetBuildZ(ref sbyte z)
-        {
-            if (SelectedGraphic != 0)
-            {
-                var foundationItem = World.Items.Get(LocalSerial);
-
-                if (foundationItem == null)
-                    return false;
-
-                List<Multi> list = new List<Multi>();
-
-                if (CanBuildHere(list, out var type) && list.Count != 0)
-                {
-                    if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
-                    {
-                        z = foundationItem.Z;
-
-                        return true;
-                    }
-                    z = (sbyte) (foundationItem.Z + 7 + (CurrentFloor - 1) * 20);
-
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private void SeekGraphic(ushort graphic)
-        {
-
-        }
-
-        public bool CanBuildHere(List<Multi> list, out CUSTOM_HOUSE_BUILD_TYPE type)
-        {
-            type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_NORMAL;
-
-            if (SelectedGraphic == 0)
-                return false;
-
-            if (CombinedStair)
-            {
-                if (Components + 10 > MaxComponets)
-                {
-                    return false;
-                }
-
-                (int res1, int res2) = SeekGraphicInCustomHouseObjectList(_stairs, SelectedGraphic);
-
-                if (res1 == -1 || res2 == -1 || res1 >= _stairs.Count)
-                {
-                    Multi m = Multi.Create(SelectedGraphic);
-                    list.Add(m);
-
-                    return false;
-                }
-
-                var item = _stairs[res1];
-
-                if (SelectedGraphic == item.North)
-                {
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = 0, MultiOffsetY = -3, MultiOffsetZ = 0});
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = 0, MultiOffsetY = -2, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = 0, MultiOffsetY = -1, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort) item.North) { MultiOffsetX = 0, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = 0, MultiOffsetY = -3, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = 0, MultiOffsetY = -2, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort) item.North) { MultiOffsetX = 0, MultiOffsetY = -1, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = 0, MultiOffsetY = -3, MultiOffsetZ = 10 });
-                    list.Add(new Multi((ushort) item.North) { MultiOffsetX = 0, MultiOffsetY = -2, MultiOffsetZ = 10});
-                    list.Add(new Multi((ushort) item.North) { MultiOffsetX = 0, MultiOffsetY = -3, MultiOffsetZ = 15 });
-                }
-                else if (SelectedGraphic == item.East)
-                {
-                    list.Add(new Multi((ushort) item.East) { MultiOffsetX = 0, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = 1, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = 2, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = 3, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort) item.East) { MultiOffsetX = 1, MultiOffsetY = 0, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = 2, MultiOffsetY = 0, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = 3, MultiOffsetY = 0, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort) item.East) { MultiOffsetX = 2, MultiOffsetY = 0, MultiOffsetZ = 10 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = 3, MultiOffsetY = 0, MultiOffsetZ = 10 });
-                    list.Add(new Multi((ushort) item.East) { MultiOffsetX = 3, MultiOffsetY = 0, MultiOffsetZ = 15 });
-                }
-                else if (SelectedGraphic == item.South)
-                {
-                    list.Add(new Multi((ushort) item.South) { MultiOffsetX = 0, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = 0, MultiOffsetY = 1, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = 0, MultiOffsetY = 2, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = 0, MultiOffsetY = 3, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort) item.South) { MultiOffsetX = 0, MultiOffsetY = 1, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = 0, MultiOffsetY = 2, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = 0, MultiOffsetY = 3, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort) item.South) { MultiOffsetX = 0, MultiOffsetY = 2, MultiOffsetZ = 10 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = 0, MultiOffsetY = 3, MultiOffsetZ = 10 });
-                    list.Add(new Multi((ushort) item.South) { MultiOffsetX = 0, MultiOffsetY = 3, MultiOffsetZ = 15 });
-                }
-                else if (SelectedGraphic == item.West)
-                {
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = -3, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = -2, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = -1, MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort) item.West) {  MultiOffsetX = 0,  MultiOffsetY = 0, MultiOffsetZ = 0 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = -3, MultiOffsetY = 0, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = -2, MultiOffsetY = 0, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort) item.West) {  MultiOffsetX = -1, MultiOffsetY = 0, MultiOffsetZ = 5 });
-                    list.Add(new Multi((ushort) item.Block) { MultiOffsetX = -3, MultiOffsetY = 0, MultiOffsetZ = 10 });
-                    list.Add(new Multi((ushort) item.West) {  MultiOffsetX = -2, MultiOffsetY = 0, MultiOffsetZ = 10 });
-                    list.Add(new Multi((ushort) item.West) {  MultiOffsetX = -3, MultiOffsetY = 0, MultiOffsetZ = 15 });
-                }
-                else
-                {
-                    list.Add(new Multi(SelectedGraphic));
-                }
-
-                type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR;
-            }
-            else
-            {
-                (int fixCheck1, int fixCheck2) = SeekGraphicInCustomHouseObjectList(_doors, SelectedGraphic);
-
-                bool isFixture = false;
-
-                if (fixCheck1 == -1 || fixCheck2 == -1)
-                {
-                    (fixCheck1, fixCheck2) = SeekGraphicInCustomHouseObjectList(_teleports, SelectedGraphic);
-
-                    isFixture = fixCheck1 != -1 && fixCheck2 != -1;
-                }
-                else
-                {
-                    isFixture = true;
-                }
-
-                if (isFixture)
-                {
-                    if (Fixtures + 1 > MaxFixtures)
-                    {
-                        return false;
-                    }
-                }
-                else if (Components + 1 > MaxComponets)
-                {
-                    return false;
-                }
-
-                if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF)
-                {
-                    list.Add(new Multi(SelectedGraphic) { MultiOffsetZ = (RoofZ - 2) * 3});
-                    type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF;
-                }
-                else
-                {
-                    if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR)
-                    {
-                        type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR;
-                        list.Add(new Multi(SelectedGraphic) { MultiOffsetY = 1 });
-                    }
-                    else
-                    {
-                        if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_FLOOR)
-                        {
-                            type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR;
-                        }
-
-                        list.Add(new Multi(SelectedGraphic));
-                    }
-                }
-            }
-
-            if (SelectedObject.Object is GameObject gobj)
-            {
-                if ((type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR || CombinedStair) && gobj.Z < MinHouseZ &&
-                    (gobj.X == EndPos.X - 1 || gobj.Y == EndPos.Y - 1))
-                {
-                    return false;
-                }
-
-                Item foundationItem = World.Items.Get(LocalSerial);
-
-                int minZ = (foundationItem?.Z ?? 0) + 7 + (CurrentFloor - 1) * 20;
-                int maxZ = minZ + 20;
-
-                int boundsOffset = State != CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL ? 1 : 0;
-
-                Rectangle rect = new Rectangle(StartPos.X + boundsOffset, StartPos.Y + boundsOffset, EndPos.X, EndPos.Y);
-
-                foreach (Multi item in list)
-                {
-                    if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
-                    {
-                        if (CombinedStair)
-                        {
-                            if (item.Z != 0)
-                            {
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            if (gobj.Y + item.MultiOffsetY < EndPos.Y || gobj.X + item.MultiOffsetX == StartPos.X ||
-                                gobj.Z >= MinHouseZ)
-                            {
-                                return false;
-                            }
-
-                            if (gobj.Y + item.MultiOffsetY != EndPos.Y)
-                            {
-                                list[0].MultiOffsetY = 0;
-                            }
-
-                            continue;
-                        }
-                    }
-
-                    if (!ValidateItemPlace(rect, item.Graphic, gobj.X + item.MultiOffsetX, gobj.Y + item.MultiOffsetY))
-                    {
-                        return false;
-                    }
-
-                    if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR && foundationItem != null && World.HouseManager.TryGetHouse(LocalSerial, out var house))
-                    {
-                        var multi = house.GetMultiAt(gobj.X + item.MultiOffsetX, gobj.Y + item.MultiOffsetY);
-
-                        if (multi != null)
-                        {
-                            foreach (Multi multiObject in house.Components)
-                            {
-                                if (multiObject.IsCustom && (((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) == 0) &&
-                                                             multiObject.Z >= minZ && multiObject.Z < maxZ))
-                                {
-                                    if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
-                                    {
-                                        if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) == 0)
-                                        {
-                                            return false;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
-                                        {
-                                            return false;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        private bool ValidateItemPlace(Rectangle rect, ushort graphic , int x, int y)
-        {
-            if (!rect.Contains(x, y))
-                return false;
-
-            (int infoCheck1, int infoCheck2) = SeekGraphicInCustomHouseObjectList(_objectsInfo, graphic);
-
-            if (infoCheck1 != -1 && infoCheck2 != -1)
-            {
-                var info = _objectsInfo[infoCheck1];
-
-                if (info.CanGoW == 0 && x == StartPos.X)
-                    return false;
-
-                if (info.CanGoN == 0 && y == StartPos.Y)
-                    return false;
-
-                if (info.CanGoNWS == 0 && x == StartPos.X && y == StartPos.Y)
-                    return false;
-            }
-            
-            return true;
-        }
-
-        private bool ValidateItemPlace(Item foundationItem, Multi item, int minZ, int maxZ,
-            List<Point> validatedFloors)
-        {
-
-            if (item == null || !World.HouseManager.TryGetHouse(foundationItem, out var house) || !item.IsCustom)
-                return true;
-
-            if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0)
-            {
-                bool existsInList(List<Point> list, Point testedPoint)
-                {
-                    foreach (Point point in list)
-                    {
-                        if (testedPoint == point)
-                            return true;
-                    }
-
-                    return false;
-                }
-
-                if (ValidatePlaceStructure(
-                        foundationItem,
-                        house,
-                        house.GetMultiAt(item.X, item.Y),
-                        minZ - 20,
-                        maxZ - 20,
-                        (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT) ||
-
-                    ValidatePlaceStructure(
-                        foundationItem,
-                        house,
-                        house.GetMultiAt(item.X - 1, item.Y - 1),
-                        minZ - 20,
-                        maxZ - 20,
-                        (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_W )) ||
-
-                    ValidatePlaceStructure(
-                        foundationItem,
-                        house,
-                        house.GetMultiAt(item.X, item.Y - 1),
-                        minZ - 20,
-                        maxZ - 20,
-                        (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_N)))
-                {
-                    Point[] table =
-                    {
-                        new Point(-1, 0),
-                        new Point(0, -1),
-                        new Point(1, 0),
-                        new Point(0, 1)
-                    };
-
-                    for (int i = 0; i < 4; i++)
-                    {
-                        Point testPoint = new Point(item.X + table[i].X,
-                            item.Y + table[i].Y);
-
-                        if (!existsInList(validatedFloors, testPoint))
-                        {
-                            validatedFloors.Add(testPoint);
-                        }
-                    }
-
-                    return true;
-                }
-
-                return false;
-            }
-
-            if ((item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
-                               CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
-                               CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) != 0)
-            {
-                foreach (Multi temp in house.Components)
-                {
-                    if ((temp.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 &&
-                        temp.Z >= minZ && temp.Z < maxZ)
-                    {
-                        if ((temp.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 &&
-                            (temp.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0)
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                // TODO ?
-
-                return false;
-            }
-
-
-            (int infoCheck1, int infoCheck2) = SeekGraphicInCustomHouseObjectList(_objectsInfo, item.Graphic);
-
-            if (infoCheck1 != -1 && infoCheck2 != -1)
-            {
-                var info = _objectsInfo[infoCheck1];
-
-                if (info.CanGoW == 0 && item.X == StartPos.X)
-                    return false;
-                if (info.CanGoN == 0 && item.Y == StartPos.Y)
-                    return false;
-                if (info.CanGoNWS == 0 && item.X == StartPos.X && item.Y == StartPos.Y)
-                    return false;
-
-                if (info.Bottom == 0)
-                {
-                    bool found = false;
-
-                    if (info.AdjUN != 0)
-                    {
-                        found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X, item.Y + 1), minZ,
-                            maxZ,
-                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM |
-                                   CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N));
-                    }
-
-                    if (!found && info.AdjUE != 0)
-                    {
-                        found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X - 1, item.Y), minZ,
-                            maxZ,
-                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM |
-                                  CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E));
-                    }
-
-                    if (!found && info.AdjUS != 0)
-                    {
-                        found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X, item.Y - 1), minZ,
-                            maxZ,
-                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM |
-                                  CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S));
-                    }
-
-                    if (!found && info.AdjUW != 0)
-                    {
-                        found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X + 1, item.Y), minZ,
-                            maxZ,
-                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM |
-                                  CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W));
-                    }
-
-                    if (!found)
-                        return false;
-                }
-
-                if (info.Top == 0)
-                {
-                    bool found = false;
-
-                    if (info.AdjLN != 0)
-                    {
-                        found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X, item.Y + 1), minZ,
-                            maxZ,
-                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP |
-                                  CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N));
-                    }
-
-                    if (!found && info.AdjLE != 0)
-                    {
-                        found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X - 1, item.Y), minZ,
-                            maxZ,
-                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP |
-                                  CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E));
-                    }
-
-                    if (!found && info.AdjLS != 0)
-                    {
-                        found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X, item.Y - 1), minZ,
-                            maxZ,
-                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP |
-                                  CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S));
-                    }
-
-                    if (!found && info.AdjLW != 0)
-                    {
-                        found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X + 1, item.Y), minZ,
-                            maxZ,
-                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP |
-                                  CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W));
-                    }
-
-                    if (!found)
-                        return false;
-                }
-            }
-
-            return true;
-        }
-
-        private bool CanEraseHere(GameObject place, ref CUSTOM_HOUSE_BUILD_TYPE type)
-        {
-            type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_NORMAL;
-
-            if (place != null && place is Multi multi)
-            {
-                if (multi.IsCustom && (multi.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) == 0)
-                {
-                    if ((multi.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0)
-                    {
-                        type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR;
-                    }
-                    else if ((multi.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
-                    {
-                        type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR;
-                    }
-                    else if ((multi.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF) != 0)
-                    {
-                        type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF;
-                    }
-
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private void OnTargetWorld(GameObject place)
-        {
-
-        }
 
         public override void Dispose()
         {
+            World.CustomHouseManager = null;
             NetClient.Socket.Send(new PCustomHouseBuildingExit());
+            TargetManager.CancelTarget();
+            
             base.Dispose();
         }
-
-
-        private static void ParseFile<T>(List<T> list, string path) where T : CustomHouseObject, new()
-        {
-            FileInfo file = new FileInfo(path);
-            if (!file.Exists)
-                return;
-
-            using (StreamReader reader = File.OpenText(file.FullName))
-            {
-                while (!reader.EndOfStream)
-                {
-                    string line = reader.ReadLine();
-
-                    if (string.IsNullOrWhiteSpace(line))
-                        continue;
-
-                    T item = new T();
-
-                    if (item.Parse(line))
-                    {
-                        if (item.FeatureMask == 0 || ((int)World.ClientLockedFeatures.Flags & item.FeatureMask) != 0)
-                        {
-                            list.Add(item);
-                        }
-                    }
-
-                }
-            }
-        }
-
-        private static void ParseFileWithCategory<T, U>(List<U> list, string path)
-            where T : CustomHouseObject, new()
-            where U : CustomHouseObjectCategory<T>, new()
-        {
-            FileInfo file = new FileInfo(path);
-            if (!file.Exists)
-                return;
-
-            using (StreamReader reader = File.OpenText(file.FullName))
-            {
-                while (!reader.EndOfStream)
-                {
-                    string line = reader.ReadLine();
-
-                    if (string.IsNullOrWhiteSpace(line))
-                        continue;
-
-                    T item = new T();
-
-                    if (item.Parse(line))
-                    {
-                        if (item.FeatureMask != 0 && ((int)World.ClientLockedFeatures.Flags & item.FeatureMask) == 0)
-                            continue;
-
-                        bool found = false;
-
-                        foreach (var c in list)
-                        {
-                            if (c.Index == item.Category)
-                            {
-                                c.Items.Add(item);
-                                found = true;
-                                break;
-                            }
-                        }
-
-
-                        if (!found)
-                        {
-                            U c = new U
-                            {
-                                Index = item.Category
-                            };
-                            c.Items.Add(item);
-                            list.Add(c);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
-    enum CUSTOM_HOUSE_GUMP_STATE
-    {
-        CHGS_WALL = 0,
-        CHGS_DOOR,
-        CHGS_FLOOR,
-        CHGS_STAIR,
-        CHGS_ROOF,
-        CHGS_MISC,
-        CHGS_MENU
-    }
-
-    enum CUSTOM_HOUSE_FLOOR_VISION_STATE
-    {
-        CHGVS_NORMAL = 0,
-        CHGVS_TRANSPARENT_CONTENT,
-        CHGVS_HIDE_CONTENT,
-        CHGVS_TRANSPARENT_FLOOR,
-        CHGVS_HIDE_FLOOR,
-        CHGVS_TRANSLUCENT_FLOOR,
-        CHGVS_HIDE_ALL
-    }
-
-    enum CUSTOM_HOUSE_BUILD_TYPE
-    {
-        CHBT_NORMAL = 0,
-        CHBT_ROOF,
-        CHBT_FLOOR,
-        CHBT_STAIR
-    }
-
-    [Flags]
-    enum CUSTOM_HOUSE_MULTI_OBJECT_FLAGS
-    {
-        CHMOF_GENERIC_INTERNAL = 0x01,
-        CHMOF_FLOOR = 0x02,
-        CHMOF_STAIR = 0x04,
-        CHMOF_ROOF = 0x08,
-        CHMOF_FIXTURE = 0x10,
-        CHMOF_TRANSPARENT = 0x20,
-        CHMOF_IGNORE_IN_RENDER = 0x40,
-        CHMOF_VALIDATED_PLACE = 0x80,
-        CHMOF_INCORRECT_PLACE = 0x100
-    }
-
-    [Flags]
-    enum CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS
-    {
-        CHVCF_TOP = 0x01,
-        CHVCF_BOTTOM = 0x02,
-        CHVCF_N = 0x04,
-        CHVCF_E = 0x08,
-        CHVCF_S = 0x10,
-        CHVCF_W = 0x20,
-        CHVCF_DIRECT_SUPPORT = 0x40,
-        CHVCF_CANGO_W = 0x80,
-        CHVCF_CANGO_N = 0x100
     }
 }

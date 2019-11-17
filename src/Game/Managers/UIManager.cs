@@ -197,7 +197,7 @@ namespace ClassicUO.Game.Managers
 
             if (MouseOverControl != null)
             {
-                //if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
+                if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
                     MouseOverControl.InvokeMouseUp(Mouse.Position, MouseButton.Left);
 
                 if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
@@ -1141,7 +1141,7 @@ namespace ClassicUO.Game.Managers
                 if (attemptAlwaysSuccessful)
                 {
                     DraggingControl = dragTarget;
-                    if (control == dragTarget && _needSort)
+                    //if (control == dragTarget && _needSort)
                     {
                         _dragOriginX = mousePosition.X;
                         _dragOriginY = mousePosition.Y;

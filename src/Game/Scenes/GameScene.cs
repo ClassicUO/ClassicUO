@@ -591,105 +591,39 @@ namespace ClassicUO.Game.Scenes
                     SelectedObject.TranslatedMousePositionByViewport = Point.Zero;
             }
 
-            if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+            if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement && World.CustomHouseManager == null)
             {
                 if (_multi == null)
                     _multi = new Item(Serial.INVALID)
                     {
                         Graphic = TargetManager.MultiTargetInfo.Model,
                         Hue = TargetManager.MultiTargetInfo.Hue,
-                        IsMulti = !TargetManager.MultiTargetInfo.IsCustomHouse,
+                        IsMulti = true,
                     };
 
                 if (SelectedObject.Object is GameObject gobj)
                 {
                     Position pos2 = gobj.Tile?.FirstNode?.Position ?? gobj.Position;
 
-                    sbyte groundZ = 0, staticZ;
-                    if (TargetManager.MultiTargetInfo.IsCustomHouse)
-                    {
-                        //groundZ = (sbyte) (TargetManager.MultiTargetInfo.ZOff + 7);
-
-                        var gump = UIManager.GetGump<HouseCustomizationGump>();
-                        //List<Multi> list = new List<Multi>();
-
-                        if (!gump.GetBuildZ(ref groundZ))
-                        {
-                            groundZ = gobj.Z;
-                            _multi.Hue = 0x21;
-                        }
-                        else
-                            _multi.Hue = 0;
-
-
-                        //if (gump.CanBuildHere(list, out var type))
-                        //{
-                        //    foreach (Multi multi in list)
-                        //    {
-                        //        groundZ = multi.Z;
-                        //    }
-                        //}
-
-                        //if (gobj is Multi m)
-                        //{
-                        //    int itemZ = m.Z;
-
-                        //    for (int i = 0; i < 4; i++)
-                        //    {
-                        //        int offset = i != 0 ? 0 : 7;
-
-                        //        if (itemZ >= floorZ - offset &&
-                        //            itemZ < floorZ + 20)
-                        //        {
-
-                        //            if (itemZ < floorZ)
-                        //            {
-                        //                if ((m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
-                        //                {
-                        //                    groundZ = m.Z;
-                        //                    continue;
-                        //                }
-                        //            }
-
-
-                        //            groundZ = floorZ;
-
-                        //            break;
-                        //        }
-
-                        //        floorZ += 20;
-                        //    }
-                        //}
-                        //else
-                        //    groundZ = (sbyte) (World.Player.Z);
-                    }
-                    else
-                    {
-                        World.Map.GetMapZ(pos2.X, pos2.Y, out groundZ, out staticZ);
-                    }
-
+                    World.Map.GetMapZ(pos2.X, pos2.Y, out sbyte groundZ, out sbyte _);
 
                     if (gobj is Static st && st.ItemData.IsWet)
                         groundZ = gobj.Z;
 
                     var pos = new Position(
-                        (ushort)(pos2.X - TargetManager.MultiTargetInfo.XOff), 
-                        (ushort)(pos2.Y - TargetManager.MultiTargetInfo.YOff), groundZ);
+                                           (ushort) (pos2.X - TargetManager.MultiTargetInfo.XOff),
+                                           (ushort) (pos2.Y - TargetManager.MultiTargetInfo.YOff), (sbyte) (groundZ - TargetManager.MultiTargetInfo.ZOff));
 
                     _multi.Position = pos;
                     _multi.CheckGraphicChange();
                     _multi.AddToTile();
+                    World.HouseManager.TryGetHouse(_multi.Serial, out var house);
 
-                    if (_multi.IsMulti)
+                    foreach (Multi s in house.Components)
                     {
-                        World.HouseManager.TryGetHouse(_multi.Serial, out var house);
-
-                        foreach (Multi s in house.Components)
-                        {
-                            s.IsFromTarget = true;
-                            s.Position = new Position((ushort) (_multi.X + s.MultiOffsetX), (ushort) (_multi.Y + s.MultiOffsetY), (sbyte) (_multi.Z + s.MultiOffsetZ));
-                            s.AddToTile();
-                        }
+                        s.IsFromTarget = true;
+                        s.Position = new Position((ushort) (_multi.X + s.MultiOffsetX), (ushort) (_multi.Y + s.MultiOffsetY), (sbyte) (_multi.Z + s.MultiOffsetZ));
+                        s.AddToTile();
                     }
                 }
             }
@@ -709,7 +643,6 @@ namespace ClassicUO.Game.Scenes
                     _holdMouse2secOverItemTime = 0;
                 }
             }
-
         }
 
         public override void FixedUpdate(double totalMS, double frameMS)
@@ -874,6 +807,8 @@ namespace ClassicUO.Game.Scenes
             World.WorldTextManager.ProcessWorldText(true);
             World.WorldTextManager.Draw(batcher, x, y, renderIndex);
 
+            if (!IsMouseOverViewport)
+                SelectedObject.Object = null;
 
             SelectedObject.LastObject = SelectedObject.Object;
         }

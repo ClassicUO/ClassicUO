@@ -41,6 +41,7 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 
@@ -3504,7 +3505,7 @@ namespace ClassicUO.Network
             }
             else
             {
-                house.ClearComponents();
+                house.ClearComponents(true);
                 house.Revision = revision;
                 house.IsCustom = true;
             }
@@ -3523,6 +3524,8 @@ namespace ClassicUO.Network
 
             DataReader stream = new DataReader();
             ref byte[] buffer = ref p.ToArray();
+
+            RawList<CustomBuildObject> list = new RawList<CustomBuildObject>();
 
             for (int plane = 0; plane < planes; plane++)
             {
@@ -3558,11 +3561,7 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    Multi m = Multi.Create(id);
-                                    m.Position = new Position((ushort) (foundation.X + x), (ushort) (foundation.Y + y), (sbyte) (foundation.Z + z));
-                                    m.IsCustom = true;
-                                    m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
-                                    house.Components.Add(m);
+                                    list.Add(new CustomBuildObject(id){ X= x, Y = y, Z = z});
                                 }
                             }
 
@@ -3584,11 +3583,7 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    Multi m = Multi.Create(id);
-                                    m.Position = new Position((ushort)(foundation.X + x), (ushort)(foundation.Y + y), (sbyte)(foundation.Z + z));
-                                    m.IsCustom = true;
-                                    m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
-                                    house.Components.Add(m);
+                                    list.Add(new CustomBuildObject(id) { X = x, Y = y, Z = z });
                                 }
                             }
 
@@ -3631,11 +3626,7 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    Multi m = Multi.Create(id);
-                                    m.Position = new Position((ushort)(foundation.X + x), (ushort)(foundation.Y + y), (sbyte)(foundation.Z + z));
-                                    m.IsCustom = true;
-                                    m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
-                                    house.Components.Add(m);
+                                    list.Add(new CustomBuildObject(id) { X = x, Y = y, Z = z });
                                 }
                             }
 
@@ -3647,7 +3638,14 @@ namespace ClassicUO.Network
             }
             stream.ReleaseData();
 
-            house.Generate();
+            house.Fill(list);
+
+            if (World.CustomHouseManager != null)
+            {
+                World.CustomHouseManager.GenerateFloorPlace();
+                UIManager.GetGump<HouseCustomizationGump>(house.Serial)?.Update();
+            }
+
             UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
 
             if (World.HouseManager.EntityIntoHouse(serial, World.Player))

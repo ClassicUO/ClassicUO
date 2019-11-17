@@ -96,6 +96,7 @@ namespace ClassicUO.Game.GameObjects
                 m.MultiOffsetX = m.MultiOffsetY = m.MultiOffsetZ = 0;
                 m.CharacterIsBehindFoliage = false;
                 m.IsCustom = false;
+                m.State = 0;
 
                 return m;
             }

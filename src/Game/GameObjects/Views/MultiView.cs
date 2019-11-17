@@ -24,6 +24,7 @@
 using System;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
@@ -178,7 +179,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (State != 0)
             {
-                if (((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER) != 0))
+                if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER) != 0)
                     return;
             }
 

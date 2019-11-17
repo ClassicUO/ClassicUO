@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -34,6 +35,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Collections;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -305,6 +307,63 @@ namespace ClassicUO.Game
         {
             if (TargetManager.IsTargeting && ProfileManager.Current != null)
             {
+                if (TargetManager.TargetingState == CursorTarget.MultiPlacement)
+                {
+                    if (World.CustomHouseManager != null && World.CustomHouseManager.SelectedGraphic != 0)
+                    {
+                        Vector3 hue = Vector3.Zero;
+
+                        RawList<CustomBuildObject> list = new RawList<CustomBuildObject>();
+
+                        if (!World.CustomHouseManager.CanBuildHere(list, out var type))
+                        {
+                            hue.X = 0x0021;
+                            hue.Y = 1;
+                        }
+
+                        if (list.Count != 0)
+                        {
+                            GameObject selectedObj = SelectedObject.LastObject as GameObject;
+                            int startX, startY;
+                            int z = 0;
+
+                            if (selectedObj != null)
+                            {
+                                if (selectedObj.Z < World.CustomHouseManager.MinHouseZ)
+                                {
+                                    if (selectedObj.X >= World.CustomHouseManager.StartPos.X && selectedObj.X <= World.CustomHouseManager.EndPos.X - 1 &&
+                                        selectedObj.Y >= World.CustomHouseManager.StartPos.Y && selectedObj.Y <= World.CustomHouseManager.EndPos.Y - 1)
+                                    {
+                                        if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
+                                            z += 7;
+                                    }
+                                }
+
+                                startX = selectedObj.RealScreenPosition.X + Math.Max(0, ProfileManager.Current.GameWindowPosition.X);
+                                startY = selectedObj.RealScreenPosition.Y + Math.Max(0, ProfileManager.Current.GameWindowPosition.Y);
+                            }
+                            else
+                            {
+                                startX = Mouse.Position.X;
+                                startY = Mouse.Position.Y;
+                            }
+
+                            foreach (CustomBuildObject item in list)
+                            {
+                                int x = startX + (item.X - item.Y) * 22;
+                                int y = startY + (item.X + item.Y) * 22 - ((item.Z + z) * 4);
+
+                                var texture = FileManager.Art.GetTexture(item.Graphic);
+
+                                x -= ((texture.Width >> 1) - 22);
+                                y -= ((texture.Height - 44));
+
+                                sb.DrawSprite(texture, x, y, false, ref hue);
+                            }
+                        }
+                    }
+                }
+
                 if (ProfileManager.Current.AuraOnMouse)
                 {
                     ushort id = Graphic;

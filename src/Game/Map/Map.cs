@@ -138,28 +138,6 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public void GetMapMultiZ(int x, int y, out sbyte multiZ)
-        {
-            var tile = GetTile(x, y);
-            multiZ = 0;
-
-            if (tile == null)
-            {
-                return;
-            }
-
-            var obj = tile.FirstNode;
-
-            for (var o = obj; o != null; o = o.Right)
-            {
-                if (o is Multi)
-                {
-                    multiZ = o.Z;
-                    break;
-                }
-            }
-        }
-
         public void ClearBockAccess()
         {
             Array.Clear(_blockAccessList, 0, _blockAccessList.Length);

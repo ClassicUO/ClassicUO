@@ -420,13 +420,20 @@ namespace ClassicUO.Game.Scenes
                     case CursorTarget.Object:
                     case CursorTarget.MultiPlacement:
 
-                        var obj = SelectedObject.Object;
-
-                        if (obj != null)
+                        if (SelectedObject.Object is GameObject obj)
                         {
-                            TargetManager.TargetGameObject(obj);
+                            if (World.CustomHouseManager != null)
+                            {
+                                World.CustomHouseManager.OnTargetWorld(obj);
+                            }
+                            else
+                            {
+                                TargetManager.TargetGameObject(obj);
+                            }
+
                             Mouse.LastLeftButtonClickTime = 0;
                         }
+
 
                         break;
 
@@ -659,6 +666,12 @@ namespace ClassicUO.Game.Scenes
             if (Mouse.LButtonPressed && !IsHoldingItem)
             {
                 Point offset = Mouse.LDroppedOffset;
+
+                //if (World.CustomHouseManager != null && World.CustomHouseManager.SelectedGraphic != 0)
+                //{
+                //    World.CustomHouseManager.OnTargetWorld(SelectedObject.Object as GameObject);
+                //    return;
+                //}
 
                 if (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                 {
