@@ -638,7 +638,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int BAR_MAX_WIDTH = 25;
             const int BAR_MAX_WIDTH_HALF = BAR_MAX_WIDTH / 2;
 
-            const int BAR_MAX_HEIGHT = 4;
+            const int BAR_MAX_HEIGHT = 3;
             const int BAR_MAX_HEIGHT_HALF = BAR_MAX_HEIGHT / 2;
 
             rotY += DOT_SIZE + 1;
