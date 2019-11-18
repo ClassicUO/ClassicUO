@@ -568,14 +568,14 @@ namespace ClassicUO
                                 {
                                     Mouse.LastLeftButtonClickTime = 0;
 
-                                    var res = UIManager.OnLeftMouseDoubleClick() || _scene.OnLeftMouseDoubleClick();
+                                    var res = _scene.OnLeftMouseDoubleClick() || UIManager.OnLeftMouseDoubleClick();
 
                                     MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Left);
 
                                     if (!arg.Result && !res)
                                     {
-                                        UIManager.OnLeftMouseButtonDown();
                                         _scene.OnLeftMouseDown();
+                                        UIManager.OnLeftMouseButtonDown();
                                     }
                                     else
                                         Mouse.LastLeftButtonClickTime = 0xFFFF_FFFF;
@@ -583,8 +583,8 @@ namespace ClassicUO
                                     break;
                                 }
 
-                                UIManager.OnLeftMouseButtonDown();
                                 _scene.OnLeftMouseDown();
+                                UIManager.OnLeftMouseButtonDown();
 
                                 Mouse.LastLeftButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
@@ -595,8 +595,8 @@ namespace ClassicUO
 
                                 if (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF)
                                 {
-                                    UIManager.OnLeftMouseButtonUp();
                                     _scene.OnLeftMouseUp();
+                                    UIManager.OnLeftMouseButtonUp();
                                 }
                                 Mouse.LButtonPressed = false;
                                 Mouse.End();
@@ -658,14 +658,14 @@ namespace ClassicUO
                                 {
                                     Mouse.LastRightButtonClickTime = 0;
 
-                                    var res = UIManager.OnRightMouseDoubleClick() || _scene.OnRightMouseDoubleClick();
+                                    var res = _scene.OnRightMouseDoubleClick() || UIManager.OnRightMouseDoubleClick();
 
                                     MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Right);
 
                                     if (!arg.Result && !res)
                                     {
-                                        UIManager.OnRightMouseButtonDown();
                                         _scene.OnRightMouseDown();
+                                        UIManager.OnRightMouseButtonDown();
                                     }
                                     else
                                         Mouse.LastRightButtonClickTime = 0xFFFF_FFFF;
@@ -673,8 +673,8 @@ namespace ClassicUO
                                     break;
                                 }
 
-                                UIManager.OnRightMouseButtonDown();
                                 _scene.OnRightMouseDown();
+                                UIManager.OnRightMouseButtonDown();
 
                                 Mouse.LastRightButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
@@ -685,8 +685,8 @@ namespace ClassicUO
 
                                 if (Mouse.LastRightButtonClickTime != 0xFFFF_FFFF)
                                 {
-                                    UIManager.OnRightMouseButtonUp();
                                     _scene.OnRightMouseUp();
+                                    UIManager.OnRightMouseButtonUp();
                                 }
                                 Mouse.RButtonPressed = false;
                                 Mouse.End();
