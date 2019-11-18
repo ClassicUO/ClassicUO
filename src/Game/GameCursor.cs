@@ -324,11 +324,12 @@ namespace ClassicUO.Game
                         if (list.Count != 0)
                         {
                             GameObject selectedObj = SelectedObject.LastObject as GameObject;
-                            int startX, startY;
-                            int z = 0;
-
+                          
+                          
                             if (selectedObj != null)
                             {
+                                int z = 0;
+
                                 if (selectedObj.Z < World.CustomHouseManager.MinHouseZ)
                                 {
                                     if (selectedObj.X >= World.CustomHouseManager.StartPos.X && selectedObj.X <= World.CustomHouseManager.EndPos.X - 1 &&
@@ -337,29 +338,28 @@ namespace ClassicUO.Game
                                         if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
                                             z += 7;
                                     }
+                                }                           
+
+                                int startX = selectedObj.RealScreenPosition.X + Math.Max(0, ProfileManager.Current.GameWindowPosition.X);
+                                int startY = selectedObj.RealScreenPosition.Y + Math.Max(0, ProfileManager.Current.GameWindowPosition.Y);
+
+                                GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+                                float scale = gs?.Scale ?? 1;
+
+                                foreach (CustomBuildObject item in list)
+                                {
+                                    int x = startX + (item.X - item.Y) * 22;
+                                    int y = startY + (item.X + item.Y) * 22 - ((item.Z + z) * 4);
+
+                                    var texture = FileManager.Art.GetTexture(item.Graphic);
+
+                                    x -= ((texture.Width >> 1) - 22);
+                                    y -= ((texture.Height - 44));
+
+                                    sb.Draw2D(texture, (int)(x / scale), (int)(y / scale), texture.Width / scale, texture.Height / scale, ref hue);
+                                    //sb.DrawSprite(texture, x, y, false, ref hue);
                                 }
-
-                                startX = selectedObj.RealScreenPosition.X + Math.Max(0, ProfileManager.Current.GameWindowPosition.X);
-                                startY = selectedObj.RealScreenPosition.Y + Math.Max(0, ProfileManager.Current.GameWindowPosition.Y);
-                            }
-                            else
-                            {
-                                startX = Mouse.Position.X;
-                                startY = Mouse.Position.Y;
-                            }
-
-                            foreach (CustomBuildObject item in list)
-                            {
-                                int x = startX + (item.X - item.Y) * 22;
-                                int y = startY + (item.X + item.Y) * 22 - ((item.Z + z) * 4);
-
-                                var texture = FileManager.Art.GetTexture(item.Graphic);
-
-                                x -= ((texture.Width >> 1) - 22);
-                                y -= ((texture.Height - 44));
-
-                                sb.DrawSprite(texture, x, y, false, ref hue);
-                            }
+                            }                           
                         }
                     }
                 }
