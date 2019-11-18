@@ -3826,7 +3826,7 @@ namespace ClassicUO.Network
                             byte map = p.ReadByte();
                             byte hits = p.ReadByte();
 
-                            World.WMapManager.AddOrUpdate(serial, x, y, hits, map);
+                            World.WMapManager.AddOrUpdate(serial, x, y, hits, map, type == 0x02);
 
                             //Log.Info($"Received custom {(isparty ? "party" : "guild")} member info: X: {x}, Y: {y}, Map: {map}, Hits: {hits}");
                         }

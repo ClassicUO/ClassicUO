@@ -17,6 +17,7 @@ namespace ClassicUO.Game.Managers
         public readonly Serial Serial;
         public int X, Y, HP, Map;
         public uint LastUpdate;
+        public bool IsGuild;
 
         public string GetName()
         {
@@ -35,7 +36,7 @@ namespace ClassicUO.Game.Managers
 
         private readonly List<WMapEntity> _toRemove = new List<WMapEntity>();
  
-        public void AddOrUpdate(Serial serial, int x, int y, int hp, int map)
+        public void AddOrUpdate(Serial serial, int x, int y, int hp, int map, bool isguild)
         {
             if (!Entities.TryGetValue(serial, out var entity) || entity == null)
             {
@@ -43,6 +44,7 @@ namespace ClassicUO.Game.Managers
                 {
                     X = x, Y = y, HP = hp, Map = map,
                     LastUpdate = Time.Ticks + 1000,
+                    IsGuild = isguild
                 };
 
                 Entities[serial] = entity;
@@ -53,6 +55,7 @@ namespace ClassicUO.Game.Managers
                 entity.Y = y;
                 entity.HP = hp;
                 entity.Map = map;
+                entity.IsGuild = isguild;
                 entity.LastUpdate = Time.Ticks + 1000;
             }
         }

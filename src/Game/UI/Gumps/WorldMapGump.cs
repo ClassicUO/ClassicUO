@@ -27,6 +27,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
@@ -457,7 +458,7 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (Mobile mobile in World.Mobiles)
             {
                 if (mobile != World.Player)
-                    DrawMobile(batcher, mobile.X, mobile.Y, gX, gY, halfWidth, halfHeight, Zoom, Color.Red);
+                    DrawMobile(batcher, mobile, gX, gY, halfWidth, halfHeight, Zoom, Color.Red);
             }
 
             if (_showPartyMembers)
@@ -471,33 +472,26 @@ namespace ClassicUO.Game.UI.Gumps
                         var mob = World.Mobiles.Get(partyMember.Serial);
 
                         if (mob != null)
-                            DrawMobile(batcher, mob.X, mob.Y, gX, gY, halfWidth, halfHeight, Zoom, Color.Yellow);
+                            DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Yellow);
                     }
                 }
             }
 
             foreach (var wme in World.WMapManager.Entities.Values)
             {
-                Color c = Color.Beige;
-
-                if (wme.Map != World.MapIndex)
-                {
-                    c = Color.Gray;
-                }
-
-                DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom, c);
+                DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom);
             }
 
 
-            DrawMobile(batcher, World.Player.X, World.Player.Y, gX, gY, halfWidth, halfHeight, Zoom, Color.White);
-
-
+            DrawMobile(batcher, World.Player, gX, gY, halfWidth, halfHeight, Zoom, Color.White, true);
         }
 
-        private void DrawMobile(UltimaBatcher2D batcher, int mobX, int mobY, int x, int y, int width, int height, float zoom, Color color)
+        private void DrawMobile(UltimaBatcher2D batcher, Mobile mobile, int x, int y, int width, int height, float zoom, Color color, bool drawName = false)
         {
-            int sx = mobX - _center.X;
-            int sy = mobY - _center.Y;
+            ResetHueVector();
+
+            int sx = mobile.X - _center.X;
+            int sy = mobile.Y - _center.Y;
 
             (int rotX, int rotY) = RotatePoint(sx, sy, zoom, 1, _flipMap ? 45f : 0f);
             AdjustPosition(rotX, rotY, width - 4, height - 4, out rotX, out rotY);
@@ -521,10 +515,66 @@ namespace ClassicUO.Game.UI.Gumps
                 rotY = y + Height - 8 - DOT_SIZE;
 
             batcher.Draw2D(Textures.GetTexture(color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE, DOT_SIZE, ref _hueVector);
+
+            if (drawName && !string.IsNullOrEmpty(mobile.Name))
+            {
+                Vector2 size = Fonts.Regular.MeasureString(mobile.Name);
+
+                if (rotX + size.X / 2 > x + Width - 8)
+                {
+                    rotX = x + Width - 8 - (int) (size.X / 2);
+                }
+                else if (rotX - size.X / 2 < x)
+                {
+                    rotX = x + (int) (size.X / 2);
+                }
+
+                if (rotY + size.Y > y + Height)
+                {
+                    rotY = y + Height - (int) (size.Y);
+                }
+                else if (rotY - size.Y < y)
+                {
+                    rotY = y + (int) size.Y;
+                }
+
+                int xx = (int) (rotX - size.X / 2);
+                int yy = (int) (rotY - size.Y);
+
+                _hueVector.X = 0;
+                _hueVector.Y = 1;
+                batcher.DrawString(Fonts.Regular, mobile.Name, xx - 1, yy - 1, ref _hueVector);
+                ResetHueVector();
+                _hueVector.X = Notoriety.GetHue(mobile.NotorietyFlag);
+                _hueVector.Y = 1;
+                batcher.DrawString(Fonts.Regular, mobile.Name, xx, yy, ref _hueVector);
+            }
         }
 
-        private void DrawWMEntity(UltimaBatcher2D batcher, WMapEntity entity, int x, int y, int width, int height, float zoom, Color color)
+        private void DrawWMEntity(UltimaBatcher2D batcher, WMapEntity entity, int x, int y, int width, int height, float zoom)
         {
+            ResetHueVector();
+
+            ushort uohue;
+            Color color;
+
+            if (entity.IsGuild)
+            {
+                uohue = 0x0044;
+                color = Color.LimeGreen;
+            }
+            else
+            {
+                uohue = 0x0022;
+                color = Color.DarkRed;
+            }
+
+            if (entity.Map != World.MapIndex)
+            {
+                uohue = 992;
+                color = Color.DarkGray;
+            }
+
             int sx = entity.X - _center.X;
             int sy = entity.Y - _center.Y;
 
@@ -554,19 +604,33 @@ namespace ClassicUO.Game.UI.Gumps
             string name = entity.GetName();
             Vector2 size = Fonts.Regular.MeasureString(name);
 
-            ResetHueVector();
-            _hueVector.X = 0;
-            _hueVector.Y = 1;
-
             if (rotX + size.X / 2 > x + Width - 8)
             {
                 rotX = x + Width - 8 - (int) (size.X / 2);
             }
+            else if (rotX - size.X / 2 < x)
+            {
+                rotX = x + (int) (size.X / 2);
+            }
+
+            if (rotY + size.Y > y + Height)
+            {
+                rotY = y + Height - (int) (size.Y);
+            }
+            else if (rotY - size.Y < y)
+            {
+                rotY = y + (int) size.Y;
+            }
 
             int xx = (int) (rotX - size.X / 2);
             int yy = (int) (rotY - size.Y);
+
+            _hueVector.X = 0;
+            _hueVector.Y = 1;
             batcher.DrawString(Fonts.Regular, name, xx - 1,  yy - 1, ref _hueVector);
             ResetHueVector();
+            _hueVector.X = uohue;
+            _hueVector.Y = 1;
             batcher.DrawString(Fonts.Regular, name, xx, yy, ref _hueVector);
         }
 
