@@ -293,7 +293,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (skill.IsClickable)
                 {
                     Button button = new Button(0, 0x0837, 0x0838, 0x0837);
-                    button.MouseUp += (ss, e) => { GameActions.UseSkill(skillIndexIndex); };
+                    button.MouseUp += (ss, e) => { if (IsVisible) GameActions.UseSkill(skillIndexIndex); };
                     Add(button);
                 }
 
@@ -311,20 +311,23 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _lock.MouseUp += (sender, e) =>
                 {
-                    byte slock = (byte) skill.Lock;
+                    if (IsVisible)
+                    {
+                        byte slock = (byte)skill.Lock;
 
-                    if (slock < 2)
-                        slock++;
-                    else
-                        slock = 0;
+                        if (slock < 2)
+                            slock++;
+                        else
+                            slock = 0;
 
-                    skill.Lock = (Lock) slock;
+                        skill.Lock = (Lock)slock;
 
-                    GameActions.ChangeSkillLockStatus((ushort) skill.Index, slock);
+                        GameActions.ChangeSkillLockStatus((ushort)skill.Index, slock);
 
-                    ushort graphic = GetLockValue(skill.Lock);
-                    _lock.Graphic = graphic;
-                    _lock.Texture = FileManager.Gumps.GetTexture(graphic);
+                        ushort graphic = GetLockValue(skill.Lock);
+                        _lock.Graphic = graphic;
+                        _lock.Texture = FileManager.Gumps.GetTexture(graphic);
+                    }
                 };
                 Add(_lock);
 
