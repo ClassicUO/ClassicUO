@@ -511,9 +511,9 @@ namespace ClassicUO.Game.Managers
 
                 for (int i = 1; i < CurrentFloor; i++)
                 {
-                    for (int x = StartPos.X; x < EndPos.X; x++)
+                    for (int x = StartPos.X + 1; x < EndPos.X; x++)
                     {
-                        for (int y = StartPos.Y; y < EndPos.Y; y++)
+                        for (int y = StartPos.Y + 1; y < EndPos.Y; y++)
                         {
                             ushort tempColor = color;
 
