@@ -66,7 +66,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _tips = this;
                 _background.TitleGumpID = 0x9CA;
                 _idx = 0;
-                Button b;
                 Add(_prev = new Button(0, 0x9cc, 0x9cc) {X = 35, ContainsByBounds = true});
 
                 _prev.MouseUp += (o, e) =>

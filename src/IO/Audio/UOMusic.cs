@@ -107,7 +107,7 @@ namespace ClassicUO.IO.Audio
 
                 m_Playing = true;
             }
-            catch (Exception e)
+            catch
             {
                 // file in use or access denied.
                 m_Playing = false;

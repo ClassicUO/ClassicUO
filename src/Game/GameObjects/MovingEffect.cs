@@ -88,7 +88,7 @@ namespace ClassicUO.Game.GameObjects
         public byte MovingDelay { get; set; } = 20;
 
 
-        private float _timeUntilHit, _timeActive;
+        //private float _timeUntilHit, _timeActive;
 
         public override void Update(double totalMS, double frameMS)
         {

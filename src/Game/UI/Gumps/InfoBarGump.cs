@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private readonly AlphaBlendControl _background;
         private long _refreshTime;
-        private Label _name;
+        //private Label _name;
 
         public InfoBarGump() : base(0, 0)
         {

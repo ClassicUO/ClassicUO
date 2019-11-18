@@ -27,14 +27,14 @@ namespace ClassicUO.Game.UI.Controls
             AcceptKeyboardInput = false;
             Alpha = 1.0f;
             WantUpdateSize = false;
-            IsEnabled = enabled;
+            DoScissor = enabled;
         }
 
-        public bool IsEnabled;
+        public bool DoScissor;
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (IsEnabled)
+            if (DoScissor)
             {
                 ScissorStack.PushScissors(new Rectangle(x, y, Width, Height));
                 batcher.EnableScissorTest(true);

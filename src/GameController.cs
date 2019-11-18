@@ -101,7 +101,7 @@ namespace ClassicUO
 
         public void SetScene(Scene scene)
         {
-            _scene?.Destroy();
+            _scene?.Dispose();
             _scene = scene;
 
             if (scene != null)

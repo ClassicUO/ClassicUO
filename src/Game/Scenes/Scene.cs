@@ -35,7 +35,7 @@ using SDL2;
 
 namespace ClassicUO.Game.Scenes
 {
-    internal abstract class Scene : IUpdateable
+    internal abstract class Scene : IUpdateable, IDisposable
     {
         protected Scene(int width, int height, bool canresize, bool maximized, bool loadaudio)
         {
@@ -70,7 +70,7 @@ namespace ClassicUO.Game.Scenes
 
         }
 
-        public virtual void Destroy()
+        public virtual void Dispose()
         {
             if (IsDestroyed)
                 return;
