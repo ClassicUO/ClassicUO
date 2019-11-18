@@ -543,7 +543,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _hueVector.X = 0;
                 _hueVector.Y = 1;
-                batcher.DrawString(Fonts.Regular, mobile.Name, xx - 1, yy - 1, ref _hueVector);
+                batcher.DrawString(Fonts.Regular, mobile.Name, xx + 1, yy + 1, ref _hueVector);
                 ResetHueVector();
                 _hueVector.X = Notoriety.GetHue(mobile.NotorietyFlag);
                 _hueVector.Y = 1;
@@ -627,11 +627,40 @@ namespace ClassicUO.Game.UI.Gumps
 
             _hueVector.X = 0;
             _hueVector.Y = 1;
-            batcher.DrawString(Fonts.Regular, name, xx - 1,  yy - 1, ref _hueVector);
+            batcher.DrawString(Fonts.Regular, name, xx + 1,  yy + 1, ref _hueVector);
             ResetHueVector();
             _hueVector.X = uohue;
             _hueVector.Y = 1;
             batcher.DrawString(Fonts.Regular, name, xx, yy, ref _hueVector);
+
+            ResetHueVector();
+
+            const int BAR_MAX_WIDTH = 25;
+            const int BAR_MAX_WIDTH_HALF = BAR_MAX_WIDTH / 2;
+
+            const int BAR_MAX_HEIGHT = 4;
+            const int BAR_MAX_HEIGHT_HALF = BAR_MAX_HEIGHT / 2;
+
+            rotY += DOT_SIZE + 1;
+
+            batcher.Draw2D(Textures.GetTexture(Color.Black), rotX - BAR_MAX_WIDTH_HALF - 1, rotY - BAR_MAX_HEIGHT_HALF - 1, BAR_MAX_WIDTH + 2, BAR_MAX_HEIGHT + 2, ref _hueVector);
+            batcher.Draw2D(Textures.GetTexture(Color.Red), rotX - BAR_MAX_WIDTH_HALF, rotY - BAR_MAX_HEIGHT_HALF, BAR_MAX_WIDTH, BAR_MAX_HEIGHT_HALF, ref _hueVector);
+
+            int max = 100;
+            int current = entity.HP;
+
+            if (max > 0)
+            {
+                max = current * 100 / max;
+
+                if (max > 100)
+                    max = 100;
+
+                if (max > 1)
+                    max = BAR_MAX_WIDTH * max / 100;
+            }
+
+            batcher.Draw2D(Textures.GetTexture(Color.CornflowerBlue), rotX - BAR_MAX_WIDTH_HALF, rotY - BAR_MAX_HEIGHT_HALF, max, BAR_MAX_HEIGHT, ref _hueVector);
         }
 
         private (int, int) RotatePoint(int x, int y, float zoom, int dist, float angle = 45f)
