@@ -102,7 +102,9 @@ namespace ClassicUO
                 }
             }
 
-            Settings.GlobalSettings = ConfigurationResolver.Load<Settings>(Settings.GetSettingsFilepath());
+            Settings.GlobalSettings = ConfigurationResolver.Load<Settings>(globalSettingsPath);
+
+            ReadSettingsFromArgs(args);
 
             // still invalid, cannot load settings
             if (Settings.GlobalSettings == null || !Settings.GlobalSettings.IsValid())
