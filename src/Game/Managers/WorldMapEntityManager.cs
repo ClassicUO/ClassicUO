@@ -12,7 +12,14 @@ namespace ClassicUO.Game.Managers
     class WMapEntity
     {
         public WMapEntity(Serial serial)
-            => Serial = serial;
+        {
+            Serial = serial;
+
+            var mob = World.Mobiles.Get(serial);
+
+            if (mob != null)
+                GetName();
+        } 
 
         public readonly Serial Serial;
         public int X, Y, HP, Map;

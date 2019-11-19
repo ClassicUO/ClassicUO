@@ -40,6 +40,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 
 namespace ClassicUO.Game.UI.Gumps
@@ -57,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _flipMap = true;
         private bool _freeView;
         private int _mapIndex;
-        private bool _showPartyMembers;
+        private bool _showPartyMembers = true;
 
         public WorldMapGump() : base(400, 400, 100, 100, 0, 0)
         {
@@ -199,7 +200,23 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _nextQueryPacket = Time.Ticks + 250;
                 NetClient.Socket.Send(new PQueryGuildPosition());
-                NetClient.Socket.Send(new PQueryPartyPosition());
+
+                if (World.InGame && World.Party != null  && World.Party.Leader != 0)
+                {
+                    foreach (var e in World.Party.Members)
+                    {
+                        if (e != null && e.Serial.IsValid)
+                        {
+                            var mob = World.Mobiles.Get(e.Serial);
+
+                            if (mob == null || mob.Distance > World.ClientViewRange)
+                            {
+                                NetClient.Socket.Send(new PQueryPartyPosition());
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -472,21 +489,24 @@ namespace ClassicUO.Game.UI.Gumps
                         var mob = World.Mobiles.Get(partyMember.Serial);
 
                         if (mob != null)
-                            DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Yellow);
+                            DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Yellow, true, true, true);
                     }
                 }
             }
 
             foreach (var wme in World.WMapManager.Entities.Values)
             {
+                if (!wme.IsGuild && !_showPartyMembers)
+                    continue;
+
                 DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom);
             }
 
 
-            DrawMobile(batcher, World.Player, gX, gY, halfWidth, halfHeight, Zoom, Color.White, true);
+            DrawMobile(batcher, World.Player, gX, gY, halfWidth, halfHeight, Zoom, Color.White, true, false, true);
         }
 
-        private void DrawMobile(UltimaBatcher2D batcher, Mobile mobile, int x, int y, int width, int height, float zoom, Color color, bool drawName = false)
+        private void DrawMobile(UltimaBatcher2D batcher, Mobile mobile, int x, int y, int width, int height, float zoom, Color color, bool drawName = false, bool isparty = false, bool drawHpBar = false)
         {
             ResetHueVector();
 
@@ -545,9 +565,28 @@ namespace ClassicUO.Game.UI.Gumps
                 _hueVector.Y = 1;
                 batcher.DrawString(Fonts.Regular, mobile.Name, xx + 1, yy + 1, ref _hueVector);
                 ResetHueVector();
-                _hueVector.X = Notoriety.GetHue(mobile.NotorietyFlag);
+                _hueVector.X = isparty ? 0x0034 : Notoriety.GetHue(mobile.NotorietyFlag);
                 _hueVector.Y = 1;
                 batcher.DrawString(Fonts.Regular, mobile.Name, xx, yy, ref _hueVector);
+            }
+
+            if (drawHpBar)
+            {
+                int ww = mobile.HitsMax;
+
+                if (ww > 0)
+                {
+                    ww = mobile.Hits * 100 / ww;
+
+                    if (ww > 100)
+                        ww = 100;
+                    else if (ww < 1)
+                        ww = 0;
+                }
+
+                rotY += DOT_SIZE + 1;
+
+                DrawHpBar(batcher, rotX, rotY, ww);
             }
         }
 
@@ -565,8 +604,8 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                uohue = 0x0022;
-                color = Color.DarkRed;
+                uohue = 0x0034;
+                color = Color.Yellow;
             }
 
             if (entity.Map != World.MapIndex)
@@ -633,6 +672,13 @@ namespace ClassicUO.Game.UI.Gumps
             _hueVector.Y = 1;
             batcher.DrawString(Fonts.Regular, name, xx, yy, ref _hueVector);
 
+            rotY += DOT_SIZE + 1;
+
+            DrawHpBar(batcher, rotX, rotY, entity.HP);
+        }
+
+        private void DrawHpBar(UltimaBatcher2D batcher, int x, int y, int hp)
+        {
             ResetHueVector();
 
             const int BAR_MAX_WIDTH = 25;
@@ -641,13 +687,12 @@ namespace ClassicUO.Game.UI.Gumps
             const int BAR_MAX_HEIGHT = 3;
             const int BAR_MAX_HEIGHT_HALF = BAR_MAX_HEIGHT / 2;
 
-            rotY += DOT_SIZE + 1;
 
-            batcher.Draw2D(Textures.GetTexture(Color.Black), rotX - BAR_MAX_WIDTH_HALF - 1, rotY - BAR_MAX_HEIGHT_HALF - 1, BAR_MAX_WIDTH + 2, BAR_MAX_HEIGHT + 2, ref _hueVector);
-            batcher.Draw2D(Textures.GetTexture(Color.Red), rotX - BAR_MAX_WIDTH_HALF, rotY - BAR_MAX_HEIGHT_HALF, BAR_MAX_WIDTH, BAR_MAX_HEIGHT, ref _hueVector);
+            batcher.Draw2D(Textures.GetTexture(Color.Black), x - BAR_MAX_WIDTH_HALF - 1, y - BAR_MAX_HEIGHT_HALF - 1, BAR_MAX_WIDTH + 2, BAR_MAX_HEIGHT + 2, ref _hueVector);
+            batcher.Draw2D(Textures.GetTexture(Color.Red), x - BAR_MAX_WIDTH_HALF, y - BAR_MAX_HEIGHT_HALF, BAR_MAX_WIDTH, BAR_MAX_HEIGHT, ref _hueVector);
 
             int max = 100;
-            int current = entity.HP;
+            int current = hp;
 
             if (max > 0)
             {
@@ -660,7 +705,7 @@ namespace ClassicUO.Game.UI.Gumps
                     max = BAR_MAX_WIDTH * max / 100;
             }
 
-            batcher.Draw2D(Textures.GetTexture(Color.CornflowerBlue), rotX - BAR_MAX_WIDTH_HALF, rotY - BAR_MAX_HEIGHT_HALF, max, BAR_MAX_HEIGHT, ref _hueVector);
+            batcher.Draw2D(Textures.GetTexture(Color.CornflowerBlue), x - BAR_MAX_WIDTH_HALF, y - BAR_MAX_HEIGHT_HALF, max, BAR_MAX_HEIGHT, ref _hueVector);
         }
 
         private (int, int) RotatePoint(int x, int y, float zoom, int dist, float angle = 45f)

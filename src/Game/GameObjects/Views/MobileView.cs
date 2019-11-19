@@ -45,10 +45,10 @@ namespace ClassicUO.Game.GameObjects
         private static int _startCharacterKneesY;
         private static int _startCharacterFeetY;
         private static int _characterFrameHeight;
-      
 
-        public byte HitsPercentage { get; set; }
-        public RenderedText HitsTexture { get; set; }
+
+        public byte HitsPercentage;
+        public RenderedText HitsTexture;
 
         public void UpdateHits(byte perc)
         {
