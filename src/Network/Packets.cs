@@ -932,6 +932,7 @@ namespace ClassicUO.Network
         public PQueryPartyPosition() : base(0xF0)
         {
             WriteByte(0x00);
+            WriteBool(false);
         }
     }
 
