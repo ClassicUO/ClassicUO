@@ -38,18 +38,17 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class ContainerGump : MinimizableGump
+    internal class ContainerGump : TextContainerGump
     {
-        private GumpPic _iconized;
-        internal override GumpPic Iconized => _iconized;
-        private HitBox _iconizerArea;
-        internal override HitBox IconizerArea => _iconizerArea;
         private long _corpseEyeTicks;
         private bool _hideIfEmpty;
         private ContainerData _data;
         private int _eyeCorspeOffset;
         private GumpPic _eyeGumpPic;
         private bool _isCorspeContainer;
+        private bool _isMinimized;
+        private GumpPicContainer _gumpPicContainer;
+        private HitBox _hitBox;
 
         public ContainerGump() : base(0, 0)
         {
@@ -76,12 +75,41 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (Item i in item.Items.Where(s => s != null && s.IsLootable))
                 //FIXME: this should be disabled. Server sends the right position
                 //CheckItemPosition(i);
-                Add(new ItemGump(i));
+            {
+                var x = new ItemGump(i);
+                x.Initialize();
+                Add(x);
+            }
         }
 
         public Graphic Graphic { get; }
 
         public TextContainer TextContainer { get; } = new TextContainer();
+
+        public bool IsMinimized
+        {
+            get => _isMinimized;
+            set
+            {
+                if (_isMinimized != value)
+                {
+                    _isMinimized = value;
+                    _gumpPicContainer.Graphic = value ? (Graphic) _data.IconizedGraphic : Graphic;
+                    float scale = UIManager.ContainerScale;
+
+                    _gumpPicContainer.Width = (int) (_gumpPicContainer.Width * scale);
+                    _gumpPicContainer.Height = (int) (_gumpPicContainer.Height * scale);
+                    foreach (ItemGump itemGump in Children.OfType<ItemGump>())
+                    {
+                        if (!itemGump.IsInitialized)
+                            itemGump.Initialize();
+                        itemGump.IsVisible = !value;
+                    }
+
+                    _hitBox.IsVisible = !value;
+                }
+            }
+        }
 
         private void BuildGump()
         {
@@ -106,19 +134,14 @@ namespace ClassicUO.Game.UI.Gumps
             float scale = UIManager.ContainerScale;
 
             _data = ContainerManager.Get(Graphic);
-            if(_data.MinimizerArea != Rectangle.Empty && _data.IconizedGraphic != 0)
-            {
-                _iconizerArea = new HitBox((int) (_data.MinimizerArea.X* scale), 
-                                           (int) (_data.MinimizerArea.Y * scale),
-                                           (int) (_data.MinimizerArea.Width * scale),
-                                           (int) (_data.MinimizerArea.Height * scale));
-                _iconized = new GumpPic(0, 0, _data.IconizedGraphic, 0);
-            }
             Graphic g = _data.Graphic;
 
-            GumpPicContainer container;
-            Add(container = new GumpPicContainer(0, 0, g, 0, item));
+            _hitBox = new HitBox((int) (_data.MinimizerArea.X * scale), (int) (_data.MinimizerArea.Y * scale), (int) (_data.MinimizerArea.Width * scale), (int) (_data.MinimizerArea.Height * scale));
+            _hitBox.MouseUp += HitBoxOnMouseUp;
+            Add(_hitBox);
 
+            Add(_gumpPicContainer = new GumpPicContainer(0, 0, g, 0, item));
+            _gumpPicContainer.MouseDoubleClick += GumpPicContainerOnMouseDoubleClick;
             if (_isCorspeContainer)
             {
                 if (World.Player.ManualOpenedCorpses.Contains(LocalSerial))
@@ -138,8 +161,8 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            Width = container.Width = (int)(container.Width * scale);
-            Height = container.Height = (int) (container.Height * scale);
+            Width = _gumpPicContainer.Width = (int)(_gumpPicContainer.Width * scale);
+            Height = _gumpPicContainer.Height = (int) (_gumpPicContainer.Height * scale);
 
             ContainerGump gg = UIManager.Gumps.OfType<ContainerGump>().FirstOrDefault(s => s.LocalSerial == LocalSerial);
 
@@ -193,6 +216,23 @@ namespace ClassicUO.Game.UI.Gumps
                 CUOEnviroment.Client.Scene.Audio.PlaySound(_data.OpenSound);
         }
 
+        private void HitBoxOnMouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButton.Left && !IsMinimized)
+            {
+                IsMinimized = true;
+            }
+        }
+
+        private void GumpPicContainerOnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
+        {
+            if (e.Button == MouseButton.Left && IsMinimized)
+            {
+                IsMinimized = false;
+                e.Result = true;
+            }
+        }
+
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
@@ -216,19 +256,16 @@ namespace ClassicUO.Game.UI.Gumps
                 _eyeGumpPic.Width = (int)(_eyeGumpPic.Texture.Width * scale);
                 _eyeGumpPic.Height = (int)(_eyeGumpPic.Texture.Height * scale);
             }
-            if(Iconized != null) Iconized.Hue = item.Hue;
         }
 
         public void ForceUpdate()
         {
             Children[0].Dispose();
-            _iconizerArea?.Dispose();
-            _iconized?.Dispose();
 
             BuildGump();
             ItemsOnAdded(null, new CollectionChangedEventArgs<Serial>(FindControls<ItemGump>().Select(s => s.LocalSerial)));
         }
-
+        
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);
@@ -268,6 +305,9 @@ namespace ClassicUO.Game.UI.Gumps
 
 
                 var itemControl = new ItemGump(item);
+                itemControl.Initialize();
+                itemControl.IsVisible = !IsMinimized;
+
                 CheckItemControlPosition(itemControl, item);
 
                 if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
@@ -278,7 +318,7 @@ namespace ClassicUO.Game.UI.Gumps
                     itemControl.Height = (int)(itemControl.Height * scale);
                 }
 
-                if (_hideIfEmpty && !IsVisible)
+                if ((_hideIfEmpty && !IsVisible))
                     IsVisible = true;
 
                 Add(itemControl);
