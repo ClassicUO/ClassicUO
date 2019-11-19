@@ -1808,8 +1808,11 @@ namespace ClassicUO.Game.UI.Gumps
                 ProfileManager.Current.GameWindowFullSize = _gameWindowFullsize.IsChecked;
             }
 
-            CUOEnviroment.Client.SetWindowBorderless(_windowBorderless.IsChecked);
-            ProfileManager.Current.WindowBorderless = _windowBorderless.IsChecked;
+            if (ProfileManager.Current.WindowBorderless != _windowBorderless.IsChecked)
+            {
+                ProfileManager.Current.WindowBorderless = _windowBorderless.IsChecked;
+                CUOEnviroment.Client.SetWindowBorderless(_windowBorderless.IsChecked);
+            }
 
             ProfileManager.Current.UseAlternativeLights = _altLights.IsChecked;
             ProfileManager.Current.UseCustomLightLevel = _enableLight.IsChecked;

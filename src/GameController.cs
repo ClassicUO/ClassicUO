@@ -163,8 +163,7 @@ namespace ClassicUO
         {
             SDL_SetWindowBordered(Window.Handle, borderless ? SDL_bool.SDL_FALSE : SDL_bool.SDL_TRUE);
 
-            SDL_DisplayMode displayMode;
-            SDL_GetCurrentDisplayMode(0, out displayMode);
+            SDL_GetCurrentDisplayMode(0, out SDL_DisplayMode displayMode);
 
             int width = displayMode.w;
             int height = displayMode.h;
