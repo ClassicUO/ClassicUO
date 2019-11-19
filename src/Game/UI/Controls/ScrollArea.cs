@@ -101,9 +101,6 @@ namespace ClassicUO.Game.UI.Controls
             {
                 batcher.EnableScissorTest(true);
                 int height = 0;
-                int maxheight = _scrollBar.Value + Height;
-                bool drawOnly1 = true;
-
 
                 for (int i = 1; i < Children.Count; i++)
                 {
@@ -118,17 +115,9 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         // do nothing
                     }
-                    else if (height + child.Height <= maxheight)
-                    {
-                        child.Draw(batcher, x + child.X, y + child.Y);
-                    }
                     else
                     {
-                        if (drawOnly1)
-                        {
-                            child.Draw(batcher, x + child.X, y + child.Y);
-                            drawOnly1 = false;
-                        }
+                        child.Draw(batcher, x + child.X, y + child.Y);
                     }
 
                     height += child.Height;
