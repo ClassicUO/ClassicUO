@@ -25,7 +25,7 @@ namespace ClassicUO.Game.Managers
         public int X, Y, HP, Map;
         public uint LastUpdate;
         public bool IsGuild;
-        public string Name = "<out of range>";
+        public string Name;
 
         public string GetName()
         {
@@ -36,7 +36,7 @@ namespace ClassicUO.Game.Managers
                 Name = e.Name;
             }
 
-            return Name;
+            return string.IsNullOrEmpty(Name) ? "<out of range>" : Name;
         }
     }
 
@@ -45,6 +45,8 @@ namespace ClassicUO.Game.Managers
         public readonly Dictionary<Serial, WMapEntity> Entities = new Dictionary<Serial, WMapEntity>();
 
         private readonly List<WMapEntity> _toRemove = new List<WMapEntity>();
+
+        private uint _lastUpdate;
  
         public void AddOrUpdate(Serial serial, int x, int y, int hp, int map, bool isguild)
         {
@@ -80,6 +82,11 @@ namespace ClassicUO.Game.Managers
 
         public void RemoveUnupdatedWEntity()
         {
+            if (_lastUpdate < Time.Ticks)
+                return;
+
+            _lastUpdate = Time.Ticks + 1000;
+
             long ticks = Time.Ticks - 1000;
 
             foreach (WMapEntity entity in Entities.Values)

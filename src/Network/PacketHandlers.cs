@@ -3806,12 +3806,9 @@ namespace ClassicUO.Network
         {
             byte type = p.ReadByte();
 
-            bool isparty = false;
             switch (type)
             {
                 case 0x01: // custom party info
-                    isparty = true;
-                    goto case 0x02;
                 case 0x02: // guild track info
                     bool locations = type == 0x01 || p.ReadBool();
 

@@ -496,8 +496,24 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (var wme in World.WMapManager.Entities.Values)
             {
-                if (!wme.IsGuild && !_showPartyMembers)
-                    continue;
+                if (!wme.IsGuild)
+                {
+                    if (string.IsNullOrEmpty(wme.Name))
+                    {
+                        for (int i = 0; i < World.Party.Members.Length; i++)
+                        {
+                            if (World.Party.Members[i] != null && wme.Serial == World.Party.Members[i].Serial)
+                            {
+                                wme.Name = World.Party.Members[i].Name;
+
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!_showPartyMembers)
+                        continue;
+                }
 
                 DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom);
             }

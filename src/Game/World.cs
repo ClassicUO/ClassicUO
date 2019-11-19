@@ -220,6 +220,7 @@ namespace ClassicUO.Game
                 _effectManager.Update(totalMS, frameMS);
 
                 WorldTextManager.Update(totalMS, frameMS);
+                WMapManager.RemoveUnupdatedWEntity();
             }
         }
 
