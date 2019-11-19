@@ -644,7 +644,7 @@ namespace ClassicUO.Game.UI.Gumps
             rotY += DOT_SIZE + 1;
 
             batcher.Draw2D(Textures.GetTexture(Color.Black), rotX - BAR_MAX_WIDTH_HALF - 1, rotY - BAR_MAX_HEIGHT_HALF - 1, BAR_MAX_WIDTH + 2, BAR_MAX_HEIGHT + 2, ref _hueVector);
-            batcher.Draw2D(Textures.GetTexture(Color.Red), rotX - BAR_MAX_WIDTH_HALF, rotY - BAR_MAX_HEIGHT_HALF, BAR_MAX_WIDTH, BAR_MAX_HEIGHT_HALF, ref _hueVector);
+            batcher.Draw2D(Textures.GetTexture(Color.Red), rotX - BAR_MAX_WIDTH_HALF, rotY - BAR_MAX_HEIGHT_HALF, BAR_MAX_WIDTH, BAR_MAX_HEIGHT, ref _hueVector);
 
             int max = 100;
             int current = entity.HP;

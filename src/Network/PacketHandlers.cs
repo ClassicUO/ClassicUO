@@ -3813,7 +3813,7 @@ namespace ClassicUO.Network
                     isparty = true;
                     goto case 0x02;
                 case 0x02: // guild track info
-                    bool locations = p.ReadBool();
+                    bool locations = type == 0x01 || p.ReadBool();
 
                     uint serial;
 

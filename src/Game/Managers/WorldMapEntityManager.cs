@@ -18,15 +18,18 @@ namespace ClassicUO.Game.Managers
         public int X, Y, HP, Map;
         public uint LastUpdate;
         public bool IsGuild;
+        public string Name = "<out of range>";
 
         public string GetName()
         {
             Entity e = World.Get(Serial);
 
-            if (e != null && !e.IsDestroyed && string.IsNullOrEmpty(e.Name))
-                return e.Name;
+            if (e != null && !e.IsDestroyed && !string.IsNullOrEmpty(e.Name) && Name != e.Name)
+            {
+                Name = e.Name;
+            }
 
-            return "<out of range>";
+            return Name;
         }
     }
 
