@@ -25,6 +25,7 @@ using System;
 using System.IO;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -36,12 +37,15 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class JournalGump : MinimizableGump
+    internal class JournalGump : Gump
     {
         private readonly ExpandableScroll _background;
         private readonly RenderedTextList _journalEntries;
         private readonly ScrollFlag _scrollBar;
         private const int _diffY = 22;
+        private bool _isMinimized;
+        private HitBox _hitBox;
+        private GumpPic _gumpPic;
 
         public JournalGump() : base(Constants.JOURNAL_LOCALSERIAL, 0)
         {
@@ -49,7 +53,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanBeSaved = true;
 
-            Add(new GumpPic(160, 0, 0x82D, 0));
+            Add(_gumpPic = new GumpPic(160, 0, 0x82D, 0));
             Add(_background = new ExpandableScroll(0, _diffY, Height - _diffY, 0x1F40)
             {
                 TitleGumpID = 0x82A
@@ -80,17 +84,51 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_journalEntries = new RenderedTextList(25, _diffY + 36, _background.Width - (_scrollBar.Width >> 1) - 5, 200, _scrollBar));
 
             Add(_scrollBar);
+
+            Add(_hitBox = new HitBox(160, 0, 23, 24));
+            _hitBox.MouseUp += _hitBox_MouseUp;
+            _gumpPic.MouseDoubleClick += _gumpPic_MouseDoubleClick;
         }
 
-        internal override GumpPic Iconized { get; } = new GumpPic(0, 0, 0x830, 0);
-        internal override HitBox IconizerArea { get; } = new HitBox(160, 0, 23, 24);
-
-
+       
 
         public Hue Hue
         {
             get => _background.Hue;
             set => _background.Hue = value;
+        }
+
+        public bool IsMinimized
+        {
+            get => _isMinimized;
+            set
+            {
+                if (_isMinimized != value)
+                {
+                    _isMinimized = value;
+
+                    _gumpPic.Graphic = value ? (Graphic) 0x830 : (Graphic) 0x82D;
+
+                    if (value)
+                    {
+                        _gumpPic.X = 0;
+                    }
+                    else
+                    {
+                        _gumpPic.X = 160;
+                    }
+
+                    foreach (var c in Children)
+                    {
+                        if (!c.IsInitialized)
+                            c.Initialize();
+                        c.IsVisible = !value;
+                    }
+
+                    _gumpPic.IsVisible = true;
+                    WantUpdateSize = true;
+                }
+            }
         }
 
         protected override void OnMouseWheel(MouseEvent delta)
@@ -146,13 +184,23 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Save(writer);
             writer.Write(_background.SpecialHeight);
+            writer.Write(IsMinimized);
         }
 
         public override void Restore(BinaryReader reader)
         {
             base.Restore(reader);
-
+            if (Configuration.Profile.GumpsVersion == 2)
+            {
+                reader.ReadUInt32();
+                IsMinimized = reader.ReadBoolean();
+            }
             _background.Height = _background.SpecialHeight = reader.ReadInt32();
+
+            if (Profile.GumpsVersion >= 3)
+            {
+                IsMinimized = reader.ReadBoolean();
+            }
         }
 
         private void InitializeJournalEntries()
@@ -161,6 +209,23 @@ namespace ClassicUO.Game.UI.Gumps
                 AddJournalEntry(null, t);
 
             _scrollBar.MinValue = 0;
+        }
+
+        private void _gumpPic_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
+        {
+            if (e.Button == MouseButton.Left && IsMinimized)
+            {
+                IsMinimized = false;
+                e.Result = true;
+            }
+        }
+
+        private void _hitBox_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButton.Left && !IsMinimized)
+            {
+                IsMinimized = true;
+            }
         }
 
         private class RenderedTextList : Control
@@ -242,6 +307,9 @@ namespace ClassicUO.Game.UI.Gumps
             public override void Update(double totalMS, double frameMS)
             {
                 base.Update(totalMS, frameMS);
+                if (!IsVisible)
+                    return;
+
                 _scrollBar.X = X + Width - (_scrollBar.Width >> 1) + 5;
                 _scrollBar.Height = Height;
                 CalculateScrollBarMaxValue();

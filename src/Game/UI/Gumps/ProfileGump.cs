@@ -30,14 +30,15 @@ using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class ProfileGump : MinimizableGump
+    internal class ProfileGump : Gump
     {
-        internal override GumpPic Iconized { get; } = new GumpPic(0, 0, 0x9D4, 0);
-        internal override HitBox IconizerArea { get; } = new HitBox(143, 0, 23, 24);
         private readonly string _originalText;
         private readonly ScrollArea _scrollArea;
         private readonly ExpandableScroll _scrollExp;
         private readonly MultiLineBox _textBox;
+        private readonly GumpPic _gumpPic;
+        private readonly HitBox _hitBox;
+        private bool _isMinimized;
         private const int _diffY = 22;
 
         public ProfileGump(Serial serial, string header, string footer, string body, bool canEdit) : base(serial == World.Player.Serial ? serial = Constants.PROFILE_LOCALSERIAL : serial, serial)
@@ -46,7 +47,8 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             AcceptKeyboardInput = true;
 
-            Add(new GumpPic(143, 0, 0x82D, 0));
+            Add(_gumpPic = new GumpPic(143, 0, 0x82D, 0));
+            _gumpPic.MouseDoubleClick += _picBase_MouseDoubleClick;
             Add(_scrollExp = new ExpandableScroll(0, _diffY, Height - _diffY, 0x0820));
             _scrollArea = new ScrollArea(0, 32 + _diffY, 272, Height - (96 + _diffY), false);
 
@@ -75,6 +77,60 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 0
             });
             Add(_scrollArea);
+
+            Add(_hitBox = new HitBox(143, 0, 23, 24));
+            _hitBox.MouseUp += _hitBox_MouseUp;
+        }
+
+
+        public bool IsMinimized
+        {
+            get => _isMinimized;
+            set
+            {
+                if (_isMinimized != value)
+                {
+                    _isMinimized = value;
+
+                    _gumpPic.Graphic = value ? (Graphic)0x9D4 : (Graphic)0x82D;
+
+                    if (value)
+                    {
+                        _gumpPic.X = 0;
+                    }
+                    else
+                    {
+                        _gumpPic.X = 143;
+                    }
+
+                    foreach (var c in Children)
+                    {
+                        if (!c.IsInitialized)
+                            c.Initialize();
+                        c.IsVisible = !value;
+                    }
+
+                    _gumpPic.IsVisible = true;
+                    WantUpdateSize = true;
+                }
+            }
+        }
+
+
+        private void _hitBox_MouseUp(object sender, Input.MouseEventArgs e)
+        {
+            if (e.Button == Input.MouseButton.Left && !IsMinimized)
+            {
+                IsMinimized = true;
+            }
+        }
+
+        private void _picBase_MouseDoubleClick(object sender, Input.MouseDoubleClickEventArgs e)
+        {
+            if (e.Button == Input.MouseButton.Left && IsMinimized)
+            {
+                IsMinimized = false;
+            }
         }
 
         public override void OnButtonClick(int buttonID)

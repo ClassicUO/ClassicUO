@@ -39,13 +39,8 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class PaperDollGump : MinimizableGump
+    internal class PaperDollGump : TextContainerGump
     {
-        private readonly GumpPic _Iconized;
-        internal override GumpPic Iconized => _Iconized;
-        private readonly HitBox _IconizerArea;
-        internal override HitBox IconizerArea => _IconizerArea;
-
         private static readonly ushort[] PeaceModeBtnGumps =
         {
             0x07e5, 0x07e6, 0x07e7
@@ -55,13 +50,17 @@ namespace ClassicUO.Game.UI.Gumps
             0x07e8, 0x07e9, 0x07ea
         };
         private GumpPic _combatBook, _racialAbilitiesBook;
-        private bool _isWarMode;
+        private bool _isWarMode, _isMinimized;
 
         private PaperDollInteractable _paperDollInteractable;
         private GumpPic _partyManifestPic;
         private GumpPic _profilePic;
         private GumpPic _virtueMenuPic;
         private Button _warModeBtn;
+
+        private GumpPic _picBase;
+        private HitBox _hitBox;
+
 
         public PaperDollGump() : base(0, 0)
         {
@@ -74,16 +73,35 @@ namespace ClassicUO.Game.UI.Gumps
             if (mobile != null)
             {
                 Mobile = mobile;
-                Title = mobileTitle;
-                if (mobile == World.Player)
-                {
-                    _Iconized = new GumpPic(0, 0, 0x7EE, 0);
-                    _IconizerArea = new HitBox(228, 260, 16, 16);
-                }
+                Title = mobileTitle;           
                 BuildGump();
             }
             else
                 Dispose();
+        }
+
+        public bool IsMinimized
+        {
+            get => _isMinimized;
+            set
+            {
+                if (_isMinimized != value)
+                {
+                    _isMinimized = value;
+
+                    _picBase.Graphic = value ? (Graphic)0x7EE : (Graphic) (0x07d0 + (Mobile == World.Player ? 0 : 1)) ;
+
+                    foreach (var c in Children)
+                    {
+                        if (!c.IsInitialized)
+                            c.Initialize();
+                        c.IsVisible = !value;
+                    }
+
+                    _picBase.IsVisible = true;
+                    WantUpdateSize = true;
+                }
+            }
         }
 
         public string Title { get; }
@@ -109,6 +127,15 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
+        private void _hitBox_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButton.Left && !IsMinimized)
+            {
+                IsMinimized = true;
+            }
+        }
+
+
         protected override void OnMouseExit(int x, int y)
         {
             _paperDollInteractable.AddFakeDress(null);
@@ -133,10 +160,14 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             LocalSerial = Mobile.Serial;
 
+            _picBase?.Dispose();
+            _hitBox?.Dispose();
+
+
             if (Mobile == World.Player)
             {
-                Add(new GumpPic(0, 0, 0x07d0, 0));
-
+                Add(_picBase = new GumpPic(0, 0, 0x07d0, 0));
+                _picBase.MouseDoubleClick += _picBase_MouseDoubleClick;
                 //HELP BUTTON
                 Add(new Button((int)Buttons.Help, 0x07ef, 0x07f0, 0x07f1)
                 {
@@ -223,10 +254,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(_partyManifestPic = new GumpPic(profileX, 196, 0x07D2, 0));
                 _partyManifestPic.MouseDoubleClick += PartyManifest_MouseDoubleClickEvent;
+
+
+                _hitBox = new HitBox(228, 260, 16, 16);
+                _hitBox.MouseUp += _hitBox_MouseUp;
+
+                Add(_hitBox);
             }
             else
             {
-                Add(new GumpPic(0, 0, 0x07d1, 0));
+                Add(_picBase = new GumpPic(0, 0, 0x07d1, 0));
                 Add(_profilePic = new GumpPic(25, 196, 0x07D2, 0));
                 _profilePic.MouseDoubleClick += Profile_MouseDoubleClickEvent;
             }
@@ -268,7 +305,13 @@ namespace ClassicUO.Game.UI.Gumps
             Add(titleLabel);
         }
 
-
+        private void _picBase_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
+        {
+            if (e.Button == MouseButton.Left && IsMinimized)
+            {
+                IsMinimized = false;
+            }
+        }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
