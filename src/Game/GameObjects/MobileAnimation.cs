@@ -72,7 +72,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (Steps.Count != 0)
             {
-                ref readonly Step step = ref Steps.Front();
+                ref Step step = ref Steps.Front();
 
                 return (Direction) step.Direction;
             }
@@ -952,7 +952,7 @@ namespace ClassicUO.Game.GameObjects
             if (mobile.Steps.Count != 0)
             {
                 isWalking = true;
-                ref readonly Step step = ref mobile.Steps.Front();
+                ref Step step = ref mobile.Steps.Front();
                 isRun = step.Run;
             }
 
@@ -1213,9 +1213,9 @@ namespace ClassicUO.Game.GameObjects
                 case PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED:
                 case PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED:
 
-                    if (mob.IsMoving)
+                    if (mob.Steps.Count != 0)
                     {
-                        ref readonly var s = ref mob.Steps.Front();
+                        ref var s = ref mob.Steps.Front();
 
                         if (s.X != mob.X || s.Y != mob.Y)
                             return true;

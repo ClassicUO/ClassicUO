@@ -24,6 +24,7 @@
 using System;
 using System.Linq;
 
+using ClassicUO.Game.Managers;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 
@@ -77,7 +78,7 @@ namespace ClassicUO.Game.UI.Controls
                 if (_items != null)
                 {
                     _label.Text = _items[value];
-                    Engine.UI.Remove<ComboboxContextMenu>();
+                    UIManager.Remove<ComboboxContextMenu>();
                     OnOptionSelected?.Invoke(this, value);
                 }
             }
@@ -120,8 +121,8 @@ namespace ClassicUO.Game.UI.Controls
                 X = ScreenCoordinateX,
                 Y = ScreenCoordinateY
             };
-            if (contextMenu.Height + ScreenCoordinateY > Engine.WindowHeight) contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - Engine.WindowHeight;
-            Engine.UI.Add(contextMenu);
+            if (contextMenu.Height + ScreenCoordinateY > CUOEnviroment.Client.Window.ClientBounds.Height) contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - CUOEnviroment.Client.Window.ClientBounds.Height;
+            UIManager.Add(contextMenu);
             base.OnMouseUp(x, y, button);
         }
 

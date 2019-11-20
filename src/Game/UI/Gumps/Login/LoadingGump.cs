@@ -82,21 +82,19 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     X = 348, Y = 304, ButtonAction = ButtonAction.Activate
                 });
             }
-
-            Engine.Input.KeyDown += InputOnKeyDown;
         }
 
         private void InputOnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_KP_ENTER || e.keysym.sym == SDL.SDL_Keycode.SDLK_RETURN)
+           
+        }
+
+        protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+        {
+            if (key == SDL.SDL_Keycode.SDLK_KP_ENTER || key == SDL.SDL_Keycode.SDLK_RETURN)
                 OnButtonClick((int) Buttons.OK);
         }
 
-        public override void Dispose()
-        {
-            Engine.Input.KeyDown -= InputOnKeyDown;
-            base.Dispose();
-        }
 
         public override void OnButtonClick(int buttonID)
         {

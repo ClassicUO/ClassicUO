@@ -24,6 +24,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Interfaces;
@@ -43,12 +44,11 @@ namespace ClassicUO.Game.GameObjects
     }
 
 
-    internal abstract partial class GameObject : BaseGameObject, IUpdateable, INode<GameObject>
+    internal abstract partial class GameObject : BaseGameObject, IUpdateable
     {
         private Position _position = Position.INVALID;
         private Point _screenPosition;
 
-        public Vector3 Offset;
 
 
         public bool IsPositionChanged { get; protected set; }
@@ -75,32 +75,31 @@ namespace ClassicUO.Game.GameObjects
         public ushort X
         {
             get => Position.X;
-            set => Position = new Position(value, Position.Y, Position.Z);
+            //set => Position = new Position(value, Position.Y, Position.Z);
         }
 
         public ushort Y
         {
             get => Position.Y;
-            set => Position = new Position(Position.X, value, Position.Z);
+            //set => Position = new Position(Position.X, value, Position.Z);
         }
 
         public sbyte Z
         {
             get => Position.Z;
-            set => Position = new Position(Position.X, Position.Y, value);
+            //set => Position = new Position(Position.X, Position.Y, value);
         }
 
-        public Hue Hue { get; set; }
+        public Hue Hue;
+        public Graphic Graphic;
+        public sbyte AnimIndex;
+        public int CurrentRenderIndex;
+        public byte UseInRender;
+        public short PriorityZ;
+        public GameObject Left;
+        public GameObject Right;
+        public Vector3 Offset;
 
-        public Graphic Graphic { get; set; }
-
-        public sbyte AnimIndex { get; set; }
-
-        public int CurrentRenderIndex { get; set; }
-
-        public byte UseInRender { get; set; }
-
-        public short PriorityZ { get; set; }
 
         public bool IsDestroyed { get; protected set; }
 
@@ -117,9 +116,9 @@ namespace ClassicUO.Game.GameObjects
 
                 int x, y;
 
-                if (this is Mobile m && m.IsMoving)
+                if (this is Mobile m && m.Steps.Count != 0)
                 {
-                    ref readonly var step = ref m.Steps.Back();
+                    ref var step = ref m.Steps.Back();
                     x = step.X;
                     y = step.Y;
                 }
@@ -137,8 +136,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public Tile Tile { get; private set; }
-        public GameObject Left { get; set; }
-        public GameObject Right { get; set; }
+    
 
         public virtual void Update(double totalMS, double frameMS)
         {
@@ -214,7 +212,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void AddMessage(MessageType type, string message)
         {
-            AddMessage(type, message, Engine.Profile.Current.ChatFont, Engine.Profile.Current.SpeechHue, true);
+            AddMessage(type, message, ProfileManager.Current.ChatFont, ProfileManager.Current.SpeechHue, true);
         }
 
         public virtual void UpdateTextCoordsV()
@@ -229,14 +227,14 @@ namespace ClassicUO.Game.GameObjects
 
             int offsetY = 0;
 
-            int minX = Engine.Profile.Current.GameWindowPosition.X + 6;
-            int maxX = minX + Engine.Profile.Current.GameWindowSize.X;
-            int minY = Engine.Profile.Current.GameWindowPosition.Y;
-            //int maxY = minY + Engine.Profile.Current.GameWindowSize.Y - 6;
+            int minX = ProfileManager.Current.GameWindowPosition.X + 6;
+            int maxX = minX + ProfileManager.Current.GameWindowSize.X;
+            int minY = ProfileManager.Current.GameWindowPosition.Y;
+            //int maxY = minY + ProfileManager.Current.GameWindowSize.Y - 6;
 
             for (var item = TextContainer.Items; item != null; item = item.ListRight)
             {
-                if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null || item.Time < Engine.Ticks)
+                if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null || item.Time < Time.Ticks)
                     continue;
 
                 int startX = item.RealScreenPosition.X;
@@ -273,7 +271,7 @@ namespace ClassicUO.Game.GameObjects
             AddMessage(msg);
         }
 
-        public void AddMessage(MessageInfo msg)
+        public void AddMessage(TextOverhead msg)
         {
             if (TextContainer == null)
                 TextContainer = new TextContainer();
@@ -291,12 +289,12 @@ namespace ClassicUO.Game.GameObjects
                 World.WorldTextManager.AddMessage(msg);
             }
         }
-        private static MessageInfo CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type)
+        private static TextOverhead CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type)
         {
-            if (Engine.Profile.Current != null && Engine.Profile.Current.OverrideAllFonts)
+            if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
             {
-                font = Engine.Profile.Current.ChatFont;
-                isunicode = Engine.Profile.Current.OverrideAllFontsIsUnicode;
+                font = ProfileManager.Current.ChatFont;
+                isunicode = ProfileManager.Current.OverrideAllFontsIsUnicode;
             }
 
             int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, msg) : FileManager.Fonts.GetWidthASCII(font, msg);
@@ -308,7 +306,7 @@ namespace ClassicUO.Game.GameObjects
 
             RenderedText rtext = RenderedText.Create(msg, hue, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, width, 30, false, false, true);
 
-            return new MessageInfo
+            return new TextOverhead
             {
                 Alpha = 255,
                 RenderedText = rtext,
@@ -322,9 +320,9 @@ namespace ClassicUO.Game.GameObjects
         {
             long timeToLive;
 
-            if (Engine.Profile.Current.ScaleSpeechDelay)
+            if (ProfileManager.Current.ScaleSpeechDelay)
             {
-                int delay = Engine.Profile.Current.SpeechDelay;
+                int delay = ProfileManager.Current.SpeechDelay;
 
                 if (delay < 10)
                     delay = 10;
@@ -333,12 +331,12 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                long delay = (5497558140000 * Engine.Profile.Current.SpeechDelay) >> 32 >> 5;
+                long delay = (5497558140000 * ProfileManager.Current.SpeechDelay) >> 32 >> 5;
 
                 timeToLive = (delay >> 31) + delay;
             }
 
-            timeToLive += Engine.Ticks;
+            timeToLive += Time.Ticks;
 
             return timeToLive;
         }
@@ -374,7 +372,6 @@ namespace ClassicUO.Game.GameObjects
             _screenPosition = Point.Zero;
             _position = Position.INVALID;
             IsFlipped = false;
-            Rotation = 0;
             Graphic = 0;
             UseObjectHandles = ClosedObjectHandles = ObjectHandlesOpened = false;
             Bounds = Rectangle.Empty;

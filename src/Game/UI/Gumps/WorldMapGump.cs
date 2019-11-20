@@ -22,20 +22,25 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 
 namespace ClassicUO.Game.UI.Gumps
@@ -43,6 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class WorldMapGump : ResizableGump
     {
         private UOTexture _mapTexture;
+        private uint _nextQueryPacket;
 
         private bool _isTopMost;
         private readonly float[] _zooms = new float[10] { 0.125f, 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f, 4f, 6f, 8f };
@@ -52,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _flipMap = true;
         private bool _freeView;
         private int _mapIndex;
-        private bool _showPartyMembers;
+        private bool _showPartyMembers = true;
 
         public WorldMapGump() : base(400, 400, 100, 100, 0, 0)
         {
@@ -122,7 +128,7 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true;
             }
 
-            Engine.UI.GameCursor.IsDraggingCursorForced = false;
+            UIManager.GameCursor.IsDraggingCursorForced = false;
 
             base.OnMouseUp(x, y, button);
         }
@@ -138,7 +144,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _isScrolling = true;
                     CanMove = false;
 
-                    Engine.UI.GameCursor.IsDraggingCursorForced = true;
+                    UIManager.GameCursor.IsDraggingCursorForced = true;
                 }
             }
 
@@ -189,6 +195,29 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Load();
             }
+
+            if (_nextQueryPacket < Time.Ticks)
+            {
+                _nextQueryPacket = Time.Ticks + 250;
+                NetClient.Socket.Send(new PQueryGuildPosition());
+
+                if (World.InGame && World.Party != null  && World.Party.Leader != 0)
+                {
+                    foreach (var e in World.Party.Members)
+                    {
+                        if (e != null && e.Serial.IsValid)
+                        {
+                            var mob = World.Mobiles.Get(e.Serial);
+
+                            if (mob == null || mob.Distance > World.ClientViewRange)
+                            {
+                                NetClient.Socket.Send(new PQueryPartyPosition());
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private unsafe Task Load()
@@ -219,7 +248,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     for (int by = 0; by < fixedHeight; by++)
                     {
-                        ref readonly IndexMap indexMap = ref World.Map.GetIndex(bx, by);
+                        ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
 
                         if (indexMap.MapAddress == 0)
                             continue;
@@ -275,7 +304,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             for (int x = 0; x < 8; x++)
                             {
-                                ref readonly var c = ref infoCells[pos];
+                                ref var c = ref infoCells[pos];
 
                                 ushort color = (ushort)(0x8000 | (colored[pos] ? FileManager.Hues.GetColor16(16384, c.TileID) : FileManager.Hues.GetRadarColorData(c.TileID)));
                                 Color cc;
@@ -369,6 +398,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            if (IsDisposed || !World.InGame)
+                return false;
+
             if (!_isScrolling && !_freeView)
             {
                 _center.X = World.Player.X;
@@ -418,6 +450,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                                    ref _hueVector, _flipMap ? 45 : 0);
 
+                    DrawAll(batcher, gX, gY, halfWidth, halfHeight);
+
                     batcher.EnableScissorTest(false);
                     ScissorStack.PopScissors();
                 }
@@ -432,6 +466,12 @@ namespace ClassicUO.Game.UI.Gumps
             //    }
             //}
 
+           
+            return base.Draw(batcher, x, y);
+        }
+
+        private void DrawAll(UltimaBatcher2D batcher, int gX, int gY, int halfWidth, int halfHeight)
+        {
             foreach (Mobile mobile in World.Mobiles)
             {
                 if (mobile != World.Player)
@@ -449,19 +489,43 @@ namespace ClassicUO.Game.UI.Gumps
                         var mob = World.Mobiles.Get(partyMember.Serial);
 
                         if (mob != null)
-                            DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Yellow);
+                            DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Yellow, true, true, true);
                     }
                 }
             }
 
-            DrawMobile(batcher, World.Player, gX, gY, halfWidth, halfHeight, Zoom, Color.White);
+            foreach (var wme in World.WMapManager.Entities.Values)
+            {
+                if (!wme.IsGuild)
+                {
+                    if (string.IsNullOrEmpty(wme.Name))
+                    {
+                        for (int i = 0; i < World.Party.Members.Length; i++)
+                        {
+                            if (World.Party.Members[i] != null && wme.Serial == World.Party.Members[i].Serial)
+                            {
+                                wme.Name = World.Party.Members[i].Name;
+
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!_showPartyMembers)
+                        continue;
+                }
+
+                DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom);
+            }
 
 
-            return base.Draw(batcher, x, y);
+            DrawMobile(batcher, World.Player, gX, gY, halfWidth, halfHeight, Zoom, Color.White, true, false, true);
         }
 
-        private void DrawMobile(UltimaBatcher2D batcher, Mobile mobile, int x, int y, int width, int height, float zoom, Color color)
+        private void DrawMobile(UltimaBatcher2D batcher, Mobile mobile, int x, int y, int width, int height, float zoom, Color color, bool drawName = false, bool isparty = false, bool drawHpBar = false)
         {
+            ResetHueVector();
+
             int sx = mobile.X - _center.X;
             int sy = mobile.Y - _center.Y;
 
@@ -487,6 +551,177 @@ namespace ClassicUO.Game.UI.Gumps
                 rotY = y + Height - 8 - DOT_SIZE;
 
             batcher.Draw2D(Textures.GetTexture(color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE, DOT_SIZE, ref _hueVector);
+
+            if (drawName && !string.IsNullOrEmpty(mobile.Name))
+            {
+                Vector2 size = Fonts.Regular.MeasureString(mobile.Name);
+
+                if (rotX + size.X / 2 > x + Width - 8)
+                {
+                    rotX = x + Width - 8 - (int) (size.X / 2);
+                }
+                else if (rotX - size.X / 2 < x)
+                {
+                    rotX = x + (int) (size.X / 2);
+                }
+
+                if (rotY + size.Y > y + Height)
+                {
+                    rotY = y + Height - (int) (size.Y);
+                }
+                else if (rotY - size.Y < y)
+                {
+                    rotY = y + (int) size.Y;
+                }
+
+                int xx = (int) (rotX - size.X / 2);
+                int yy = (int) (rotY - size.Y);
+
+                _hueVector.X = 0;
+                _hueVector.Y = 1;
+                batcher.DrawString(Fonts.Regular, mobile.Name, xx + 1, yy + 1, ref _hueVector);
+                ResetHueVector();
+                _hueVector.X = isparty ? 0x0034 : Notoriety.GetHue(mobile.NotorietyFlag);
+                _hueVector.Y = 1;
+                batcher.DrawString(Fonts.Regular, mobile.Name, xx, yy, ref _hueVector);
+            }
+
+            if (drawHpBar)
+            {
+                int ww = mobile.HitsMax;
+
+                if (ww > 0)
+                {
+                    ww = mobile.Hits * 100 / ww;
+
+                    if (ww > 100)
+                        ww = 100;
+                    else if (ww < 1)
+                        ww = 0;
+                }
+
+                rotY += DOT_SIZE + 1;
+
+                DrawHpBar(batcher, rotX, rotY, ww);
+            }
+        }
+
+        private void DrawWMEntity(UltimaBatcher2D batcher, WMapEntity entity, int x, int y, int width, int height, float zoom)
+        {
+            ResetHueVector();
+
+            ushort uohue;
+            Color color;
+
+            if (entity.IsGuild)
+            {
+                uohue = 0x0044;
+                color = Color.LimeGreen;
+            }
+            else
+            {
+                uohue = 0x0034;
+                color = Color.Yellow;
+            }
+
+            if (entity.Map != World.MapIndex)
+            {
+                uohue = 992;
+                color = Color.DarkGray;
+            }
+
+            int sx = entity.X - _center.X;
+            int sy = entity.Y - _center.Y;
+
+            (int rotX, int rotY) = RotatePoint(sx, sy, zoom, 1, _flipMap ? 45f : 0f);
+            AdjustPosition(rotX, rotY, width - 4, height - 4, out rotX, out rotY);
+
+            rotX += x + width;
+            rotY += y + height;
+
+            const int DOT_SIZE = 4;
+            const int DOT_SIZE_HALF = DOT_SIZE >> 1;
+
+            if (rotX < x)
+                rotX = x;
+
+            if (rotX > x + Width - 8 - DOT_SIZE)
+                rotX = x + Width - 8 - DOT_SIZE;
+
+            if (rotY < y)
+                rotY = y;
+
+            if (rotY > y + Height - 8 - DOT_SIZE)
+                rotY = y + Height - 8 - DOT_SIZE;
+
+            batcher.Draw2D(Textures.GetTexture(color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE, DOT_SIZE, ref _hueVector);
+
+            string name = entity.GetName();
+            Vector2 size = Fonts.Regular.MeasureString(name);
+
+            if (rotX + size.X / 2 > x + Width - 8)
+            {
+                rotX = x + Width - 8 - (int) (size.X / 2);
+            }
+            else if (rotX - size.X / 2 < x)
+            {
+                rotX = x + (int) (size.X / 2);
+            }
+
+            if (rotY + size.Y > y + Height)
+            {
+                rotY = y + Height - (int) (size.Y);
+            }
+            else if (rotY - size.Y < y)
+            {
+                rotY = y + (int) size.Y;
+            }
+
+            int xx = (int) (rotX - size.X / 2);
+            int yy = (int) (rotY - size.Y);
+
+            _hueVector.X = 0;
+            _hueVector.Y = 1;
+            batcher.DrawString(Fonts.Regular, name, xx + 1,  yy + 1, ref _hueVector);
+            ResetHueVector();
+            _hueVector.X = uohue;
+            _hueVector.Y = 1;
+            batcher.DrawString(Fonts.Regular, name, xx, yy, ref _hueVector);
+
+            rotY += DOT_SIZE + 1;
+
+            DrawHpBar(batcher, rotX, rotY, entity.HP);
+        }
+
+        private void DrawHpBar(UltimaBatcher2D batcher, int x, int y, int hp)
+        {
+            ResetHueVector();
+
+            const int BAR_MAX_WIDTH = 25;
+            const int BAR_MAX_WIDTH_HALF = BAR_MAX_WIDTH / 2;
+
+            const int BAR_MAX_HEIGHT = 3;
+            const int BAR_MAX_HEIGHT_HALF = BAR_MAX_HEIGHT / 2;
+
+
+            batcher.Draw2D(Textures.GetTexture(Color.Black), x - BAR_MAX_WIDTH_HALF - 1, y - BAR_MAX_HEIGHT_HALF - 1, BAR_MAX_WIDTH + 2, BAR_MAX_HEIGHT + 2, ref _hueVector);
+            batcher.Draw2D(Textures.GetTexture(Color.Red), x - BAR_MAX_WIDTH_HALF, y - BAR_MAX_HEIGHT_HALF, BAR_MAX_WIDTH, BAR_MAX_HEIGHT, ref _hueVector);
+
+            int max = 100;
+            int current = hp;
+
+            if (max > 0)
+            {
+                max = current * 100 / max;
+
+                if (max > 100)
+                    max = 100;
+
+                if (max > 1)
+                    max = BAR_MAX_WIDTH * max / 100;
+            }
+
+            batcher.Draw2D(Textures.GetTexture(Color.CornflowerBlue), x - BAR_MAX_WIDTH_HALF, y - BAR_MAX_HEIGHT_HALF, max, BAR_MAX_HEIGHT, ref _hueVector);
         }
 
         private (int, int) RotatePoint(int x, int y, float zoom, int dist, float angle = 45f)
@@ -554,7 +789,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            Engine.UI.GameCursor.IsDraggingCursorForced = false;
+            UIManager.GameCursor.IsDraggingCursorForced = false;
 
             _mapTexture?.Dispose();
             base.Dispose();

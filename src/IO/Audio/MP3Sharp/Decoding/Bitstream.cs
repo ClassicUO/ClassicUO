@@ -204,7 +204,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             {
                 case 0:
 
-                    Log.Message(LogTypes.Trace, "Bitstream: 0 bytes read == sync?");
+                    Log.Trace( "Bitstream: 0 bytes read == sync?");
                     sync = true;
 
                     break;
@@ -303,21 +303,21 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
             if (sync)
             {
                 sync = (SupportClass.URShift(headerstring, 10) & 3) != 3;
-                if (!sync) Log.Message(LogTypes.Trace, "Bitstream: INVALID SAMPLE RATE DETECTED");
+                if (!sync) Log.Trace( "Bitstream: INVALID SAMPLE RATE DETECTED");
             }
 
             // filter out invalid layer
             if (sync)
             {
                 sync = (SupportClass.URShift(headerstring, 17) & 3) != 0;
-                if (!sync) Log.Message(LogTypes.Trace, "Bitstream: INVALID LAYER DETECTED");
+                if (!sync) Log.Trace( "Bitstream: INVALID LAYER DETECTED");
             }
 
             // filter out invalid version
             if (sync)
             {
                 sync = (SupportClass.URShift(headerstring, 19) & 3) != 1;
-                if (!sync) Log.Message(LogTypes.Trace, "Bitstream: INVALID VERSION DETECTED");
+                if (!sync) Log.Trace( "Bitstream: INVALID VERSION DETECTED");
             }
 
             return sync;
@@ -444,7 +444,7 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding
                     if (bytesread == -1 || bytesread == 0) // t/DD -- .NET returns 0 at end-of-stream!
                     {
                         // t/DD: this really SHOULD throw an exception here...
-                        Log.Message(LogTypes.Trace, "Bitstream: readFully -- returning success at EOF? (" + bytesread + ")"
+                        Log.Trace( "Bitstream: readFully -- returning success at EOF? (" + bytesread + ")"
                                    );
                         while (len-- > 0) b[offs++] = 0;
 

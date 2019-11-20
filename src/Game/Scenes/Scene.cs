@@ -35,8 +35,20 @@ using SDL2;
 
 namespace ClassicUO.Game.Scenes
 {
-    internal abstract class Scene : IUpdateable
+    internal abstract class Scene : IUpdateable, IDisposable
     {
+        protected Scene(int width, int height, bool canresize, bool maximized, bool loadaudio)
+        {
+            Width = width;
+            Height = height;
+            CanResize = canresize;
+            CanBeMaximized = maximized;
+            CanLoadAudio = loadaudio;
+        }
+
+        public readonly int Width, Height;
+        public readonly bool CanResize, CanBeMaximized, CanLoadAudio;
+
         public bool IsDestroyed { get; private set; }
 
         public bool IsLoaded { get; private set; }
@@ -53,7 +65,12 @@ namespace ClassicUO.Game.Scenes
             Coroutines.Update();
         }
 
-        public virtual void Destroy()
+        public virtual void FixedUpdate(double totalMS, double frameMS)
+        {
+
+        }
+
+        public virtual void Dispose()
         {
             if (IsDestroyed)
                 return;
@@ -65,7 +82,7 @@ namespace ClassicUO.Game.Scenes
 
         public virtual void Load()
         {
-            if (this is GameScene || this is LoginScene)
+            if (CanLoadAudio)
             {
                 Audio = new AudioManager();
                 Audio.Initialize();
@@ -109,7 +126,7 @@ namespace ClassicUO.Game.Scenes
 
         private IEnumerable<IWaitCondition> CleaningResources()
         {
-            Log.Message(LogTypes.Trace, "Cleaning routine running...");
+            Log.Trace( "Cleaning routine running...");
 
             yield return new WaitTime(TimeSpan.FromMilliseconds(10000));
 
@@ -140,7 +157,7 @@ namespace ClassicUO.Game.Scenes
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
             }
 
-            Log.Message(LogTypes.Trace, "Cleaning routine finished");
+            Log.Trace( "Cleaning routine finished");
         }
     }
 }

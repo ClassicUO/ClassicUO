@@ -30,7 +30,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class LightsLoader : ResourceLoader<UOTexture16>
+    internal class LightsLoader : UOFileLoader<UOTexture16>
     {
         private UOFileMul _file;
 

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using ClassicUO.Configuration;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -10,14 +12,14 @@ using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO.Game
 {
-    class WeatherEffect
-    {
-        public float SpeedX, SpeedY, X, Y, ScaleRatio, SpeedAngle, SpeedMagnitude;
-        public uint ID;
-    }
-
     class Weather
     {
+        private class WeatherEffect
+        {
+            public float SpeedX, SpeedY, X, Y, ScaleRatio, SpeedAngle, SpeedMagnitude;
+            public uint ID;
+        }
+
         enum WEATHER_TYPE
         {
             WT_RAIN = 0,
@@ -32,7 +34,8 @@ namespace ClassicUO.Game
         public uint Timer, WindTimer, LastTick;
         public float SimulationRation = 37.0f;
 
-        public List<WeatherEffect> Effects = new List<WeatherEffect>();
+        private readonly List<WeatherEffect> _effects = new List<WeatherEffect>();
+        private Vector3 _hueVector;
 
 
         private float SinOscillate(float freq, int range, uint current_tick)
@@ -47,18 +50,18 @@ namespace ClassicUO.Game
             Wind = 0;
             WindTimer = Timer = 0;
 
-            Effects.Clear();
+            _effects.Clear();
         }
 
         public void Generate()
         {
-            LastTick = Engine.Ticks;
+            LastTick = Time.Ticks;
 
             if (Type == 0xFF || Type == 0xFE)
                 return;
 
-            //int drawX = Engine.Profile.Current.GameWindowPosition.X;
-            //int drawY = Engine.Profile.Current.GameWindowPosition.Y;
+            //int drawX = ProfileManager.Current.GameWindowPosition.X;
+            //int drawY = ProfileManager.Current.GameWindowPosition.Y;
 
             if (Count > 70)
                 Count = 70;
@@ -69,23 +72,21 @@ namespace ClassicUO.Game
             {
                 WeatherEffect effect = new WeatherEffect()
                 {
-                    X = RandomHelper.GetValue( 0, Engine.Profile.Current.GameWindowSize.X),
-                    Y = RandomHelper.GetValue(0, Engine.Profile.Current.GameWindowSize.Y)
+                    X = RandomHelper.GetValue( 0, ProfileManager.Current.GameWindowSize.X),
+                    Y = RandomHelper.GetValue(0, ProfileManager.Current.GameWindowSize.Y)
                 };
 
-                Effects.Add(effect);
+                _effects.Add(effect);
 
                 CurrentCount++;
             }
         }
 
-        private Vector3 _hueVector;
-
         public void Draw(UltimaBatcher2D batcher, int x, int y)
         {
             bool removeEffects = false;
 
-            if (Timer < Engine.Ticks)
+            if (Timer < Time.Ticks)
             {
                 if (CurrentCount == 0)
                     return;
@@ -95,22 +96,22 @@ namespace ClassicUO.Game
             else if (Type == 0xFF || Type == 0xFE)
                 return;
 
-            uint passed = Engine.Ticks - LastTick;
+            uint passed = Time.Ticks - LastTick;
 
             if (passed > 7000)
             {
-                LastTick = Engine.Ticks;
+                LastTick = Time.Ticks;
                 passed = 25;
             }
 
             bool windChanged = false;
 
-            if (WindTimer < Engine.Ticks)
+            if (WindTimer < Time.Ticks)
             {
                 if (WindTimer == 0)
                     windChanged = true;
 
-                WindTimer = Engine.Ticks + (uint)(RandomHelper.GetValue(7, 13) * 1000);
+                WindTimer = Time.Ticks + (uint)(RandomHelper.GetValue(7, 13) * 1000);
 
                 sbyte lastWind = Wind;
 
@@ -148,19 +149,19 @@ namespace ClassicUO.Game
             //        break;
             //}
 
-            //Point winpos = Engine.Profile.Current.GameWindowPosition;
-            Point winsize = Engine.Profile.Current.GameWindowSize;
+            //Point winpos = ProfileManager.Current.GameWindowPosition;
+            Point winsize = ProfileManager.Current.GameWindowSize;
 
-            for (int i = 0; i < Effects.Count; i++)
+            for (int i = 0; i < _effects.Count; i++)
             {
-                var effect = Effects[i];
+                var effect = _effects[i];
 
                 if (effect.X < x || effect.X > x + winsize.X ||
                     effect.Y < y || effect.Y > y + winsize.Y)
                 {
                     if (removeEffects)
                     {
-                        Effects.RemoveAt(i--);
+                        _effects.RemoveAt(i--);
 
                         if (CurrentCount > 0)
                             CurrentCount--;
@@ -212,14 +213,12 @@ namespace ClassicUO.Game
 
                         speed_magnitude += effect.ScaleRatio;
 
-                        speed_angle += SinOscillate(0.4f, 20, Engine.Ticks + effect.ID);
+                        speed_angle += SinOscillate(0.4f, 20, Time.Ticks + effect.ID);
 
                         var rad = MathHelper.ToRadians(speed_angle);
                         effect.SpeedX = speed_magnitude * (float)Math.Sin(rad);
                         effect.SpeedY = speed_magnitude * (float)Math.Cos(rad);
 
-                        break;
-                    default:
                         break;
                 }
 
@@ -276,13 +275,11 @@ namespace ClassicUO.Game
                             x + (int)effect.X, y + (int)effect.Y, 2, 2, ref _hueVector);
 
                         break;
-                    default:
-                        break;
                 }
 
             }
 
-            LastTick = Engine.Ticks;
+            LastTick = Time.Ticks;
         }
     }
 }

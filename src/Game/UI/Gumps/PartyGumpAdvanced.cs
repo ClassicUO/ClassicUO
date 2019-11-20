@@ -23,6 +23,7 @@
 
 using System.Collections.Generic;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -428,27 +429,22 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.GetBar:
+                    UIManager.GetGump<BaseHealthBarGump>(member.Serial)?.Dispose();
 
-                    if (Engine.Profile.Current.CustomBarsToggled)
+                    if (member.Serial == World.Player)
+                        StatusGumpBase.GetStatusGump()?.Dispose();
+
+
+
+                    if (ProfileManager.Current.CustomBarsToggled)
                     {
-                        Engine.UI.GetGump<HealthBarGumpCustom>(member.Serial)?.Dispose();
-
-                        if (member.Serial == World.Player)
-                            StatusGumpBase.GetStatusGump()?.Dispose();
-
-
                         Rectangle rect = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
-                        Engine.UI.Add(new HealthBarGumpCustom(member.Serial) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                        UIManager.Add(new HealthBarGumpCustom(member.Serial) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                     }
                     else
                     {
-                        Engine.UI.GetGump<HealthBarGump>(member.Serial)?.Dispose();
-
-                        if (member.Serial == World.Player)
-                            StatusGumpBase.GetStatusGump()?.Dispose();
-
                         Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
-                        Engine.UI.Add(new HealthBarGump(member.Serial) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                        UIManager.Add(new HealthBarGump(member.Serial) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                     }
 
                     break;

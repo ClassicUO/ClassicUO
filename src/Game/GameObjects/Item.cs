@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -33,24 +34,20 @@ using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Platforms;
 
 namespace ClassicUO.Game.GameObjects
 {
     internal partial class Item : Entity
     {
-        private AnimDataFrame2 _animDataFrame;
         private int _animSpeed;
         private Graphic? _displayedGraphic;
         private bool _isMulti;
-
-
-        private StaticTiles? _itemData;
-
         private ulong _spellsBitFiled;
 
 
-        private static readonly Queue<Item> _pool = new Queue<Item>();
+        //private static readonly Queue<Item> _pool = new Queue<Item>();
 
         public Item(Serial serial) : base(serial)
         {
@@ -116,15 +113,11 @@ namespace ClassicUO.Game.GameObjects
             //_pool.Enqueue(this);
         }
 
-        public uint Price { get; set; }
-
-        public ushort Amount { get; set; }
-
-        public Serial Container { get; set; }
-
-        public Layer Layer { get; set; }
-
-        public bool UsedLayer { get; set; }
+        public uint Price;
+        public ushort Amount;
+        public Serial Container;
+        public Layer Layer;
+        public bool UsedLayer;
 
         public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
 
@@ -167,11 +160,9 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public bool IsDamageable { get; set; }
-
-        public byte LightID { get; set; }
-
-        public bool WantUpdateMulti { get; set; } = true;
+        public bool IsDamageable;
+        public byte LightID;
+        public bool WantUpdateMulti = true;
 
         public MultiInfo MultiInfo { get; private set; }
 
@@ -204,20 +195,21 @@ namespace ClassicUO.Game.GameObjects
         public SpellBookType BookType { get; private set; } = SpellBookType.Unknown;
 
 
-        public bool CharacterIsBehindFoliage { get; set; }
+        public bool CharacterIsBehindFoliage;
 
-        public StaticTiles ItemData
-        {
-            [MethodImpl(256)]
-            get
-            {
-                if (!_itemData.HasValue)
-                    _itemData = FileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
+        public ref readonly StaticTiles ItemData => ref FileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
 
-                return _itemData.Value;
-            }
-        }
-
+        public bool IsLootable =>
+            ItemData.Layer != (int) Layer.Hair &&
+            ItemData.Layer != (int) Layer.Beard &&
+            ItemData.Layer != (int) Layer.Face &&
+            // TODO: Remove this check when the issue with non-lootable items will be resolved on the server side
+            // Skip non-lootable items (the check below is for UO:Outlands only)
+            // These items appear only on humanoid NPC corpses so they don't look naked
+            // They are always a piece of equipment and server always sends their position as 0,0,0
+            // So the check works next way: it's true if not Outlands, it's true if it isn't equipment, it's true if position in container is not "0.0.0"
+            // NOTE: There are still items that aren't lootable but still have invalid layer
+            (Settings.GlobalSettings.ShardType != 2 /* || ItemData.Layer == (int) Layer.Invalid */ || (X != 0 || Y != 0 || Z != 0));
 
         private void LoadMulti()
         {
@@ -236,7 +228,14 @@ namespace ClassicUO.Game.GameObjects
                 World.HouseManager.Add(Serial, house);
             }
             else
+            {
+                foreach (Multi multi in Multis)
+                {
+                    multi.Destroy();
+                }
+                Multis.Clear();
                 house.ClearComponents();
+            }
 
             for (int i = 0; i < count; i++)
             {
@@ -249,6 +248,9 @@ namespace ClassicUO.Game.GameObjects
 
                 if (add)
                 {
+                    if (Multis == null)
+                        Multis = new List<Multi>();
+
                     Multi m = Multi.Create(graphic);
                     m.Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z));
                     m.MultiOffsetX = x;
@@ -256,13 +258,24 @@ namespace ClassicUO.Game.GameObjects
                     m.MultiOffsetZ = z;
                     m.Hue = Hue;
                     m.AlphaHue = 255;
-
+                    m.IsCustom = false;
+                    m.State = 0;
+                    m.AddToTile();
                     house.Components.Add(m);
+
+                    //m.State = (Z + 7 == m.Z ? CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER : 0); //CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
+                    //m.AddToTile();
+                    //var m = house.Add(graphic, Hue, x, y, (sbyte) (Z + z), false);
+                    //m.MultiOffsetX = x;
+                    //m.MultiOffsetY = y;
+                    //m.MultiOffsetZ = z;
+                    //m.State = 0;
+                    //m.AlphaHue = 0xFF;
+                    //Multis.Add(m);
                 }
                 else if (i == 0)
                 {
                     MultiGraphic = graphic;
-                    _itemData = null;
                 }
             }
 
@@ -278,19 +291,18 @@ namespace ClassicUO.Game.GameObjects
 
             MultiDistanceBonus = Math.Max(Math.Max(Math.Abs(minX), maxX), Math.Max(Math.Abs(minY), maxY));
 
-            house.Generate();
+            //house.Generate();
 
-            Engine.UI.GetGump<MiniMapGump>()?.ForceUpdate();
+            UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
 
             if (World.HouseManager.EntityIntoHouse(Serial, World.Player))
-                Engine.SceneManager.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+                CUOEnviroment.Client.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
         }
 
+        public List<Multi> Multis;
 
         public void CheckGraphicChange(sbyte animIndex = 0)
         {
-            _itemData = FileManager.TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
-
             if (!IsMulti)
             {
                 if (!IsCorpse)
@@ -299,14 +311,25 @@ namespace ClassicUO.Game.GameObjects
 
                     if (OnGround && ItemData.IsAnimated)
                     {
-                        _animDataFrame = FileManager.AnimData.CalculateCurrentGraphic(Graphic);
-
                         AnimIndex = animIndex;
-                        _animSpeed = _animDataFrame.FrameInterval != 0 ? _animDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
-                        LastAnimationChangeTime = Engine.Ticks;
+
+                        IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
+
+                        if (ptr != IntPtr.Zero)
+                        {
+                            unsafe
+                            {
+                                AnimDataFrame2* animData = (AnimDataFrame2*) ptr;
+
+                                if (animData->FrameCount != 0)
+                                {
+                                    _animSpeed = animData->FrameInterval != 0 ? animData->FrameInterval * 25 + Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
+                                }
+                            }
+                        }
+
+                        LastAnimationChangeTime = Time.Ticks;
                     }
-                    else
-                        _animDataFrame = default;
 
                     _originalGraphic = DisplayedGraphic;
                     _force = true;
@@ -426,9 +449,7 @@ namespace ClassicUO.Game.GameObjects
                     case 0x3E9D: // 16029 Ethereal Unicorn
 
                     {
-                        graphic = 0x00C0;
-
-                        break;
+                        return 0x00C0;
                     }
 
                     case 0x3E9C: // 16028 Ethereal Kirin
@@ -436,7 +457,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         graphic = 0x00BF;
 
-                        break;
+                        return  graphic;
                     }
 
                     case 0x3E9E: // 16030
@@ -700,7 +721,6 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x01B0;
-
                         break;
                     }
 
@@ -708,7 +728,6 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x04E6;
-
                         break;
                     }
 
@@ -716,7 +735,6 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x04E7;
-
                         break;
                     }
 
@@ -724,7 +742,6 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x042D;
-
                         break;
                     }
 
@@ -732,21 +749,14 @@ namespace ClassicUO.Game.GameObjects
 
                     {
                         graphic = 0x0579;
-
-                        break;
-                    }
-
-                    default:
-
-                    {
-                        if (ItemData.AnimID != 0)
-                            graphic = ItemData.AnimID;
-                        else
-                            graphic = 0xFFFF;
-
                         break;
                     }
                 }
+
+                if (ItemData.AnimID != 0)
+                    graphic = ItemData.AnimID;
+                //else
+                //    graphic = 0xFFFF;
             }
             else if (IsCorpse)
                 return Amount;
@@ -799,8 +809,8 @@ namespace ClassicUO.Game.GameObjects
 
             int offY = 0;
 
-            int startX = Engine.Profile.Current.GameWindowPosition.X + 6;
-            int startY = Engine.Profile.Current.GameWindowPosition.Y + 6;
+            int startX = ProfileManager.Current.GameWindowPosition.X + 6;
+            int startY = ProfileManager.Current.GameWindowPosition.Y + 6;
 
             int x = RealScreenPosition.X;
             int y = RealScreenPosition.Y;
@@ -808,25 +818,29 @@ namespace ClassicUO.Game.GameObjects
 
             if (OnGround)
             {
-                var scene = Engine.SceneManager.GetScene<GameScene>();
+                var scene = CUOEnviroment.Client.GetScene<GameScene>();
                 float scale = scene?.Scale ?? 1;
 
                 if (Texture != null)
                     y -= Texture is ArtTexture t ? (t.ImageRectangle.Height >> 1) : (Texture.Height >> 1);
                 x += 22;
+
+                x = (int)(x / scale);
+                y = (int)(y / scale);
+
                 for (; last != null; last = last.ListLeft)
                 {
                     if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                     {
-                        if (offY == 0 && last.Time < Engine.Ticks)
+                        if (offY == 0 && last.Time < Time.Ticks)
                             continue;
 
 
                         last.OffsetY = offY;
                         offY += last.RenderedText.Height;
 
-                        last.RealScreenPosition.X = startX + (int)((x - (last.RenderedText.Width >> 1)) / scale);
-                        last.RealScreenPosition.Y = startY + (int)((y - offY) / scale);
+                        last.RealScreenPosition.X = startX + (x - (last.RenderedText.Width >> 1));
+                        last.RealScreenPosition.Y = startY + (y - offY);
                     }
                 }
 
@@ -838,7 +852,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                     {
-                        if (offY == 0 && last.Time < Engine.Ticks)
+                        if (offY == 0 && last.Time < Time.Ticks)
                             continue;
 
                         x = last.X - startX;
@@ -863,7 +877,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 dir = (byte) Layer;
 
-                if (LastAnimationChangeTime < Engine.Ticks)
+                if (LastAnimationChangeTime < Time.Ticks)
                 {
                     sbyte frameIndex = (sbyte) (AnimIndex + 1);
                     ushort id = GetGraphicForAnimation();
@@ -893,7 +907,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (direction.Address != 0 && direction.Size != 0 || direction.IsUOP)
                         {
-                            direction.LastAccessTime = Engine.Ticks;
+                            direction.LastAccessTime = Time.Ticks;
                             int fc = direction.FrameCount;
 
                             if (frameIndex >= fc)
@@ -902,23 +916,32 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    LastAnimationChangeTime = Engine.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
+                    LastAnimationChangeTime = Time.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
                 }
             }
-            else if (OnGround && _animDataFrame.FrameCount != 0 && LastAnimationChangeTime < Engine.Ticks)
+            else if (OnGround && ItemData.IsAnimated && LastAnimationChangeTime < Time.Ticks)
             {
+                IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
 
-                unsafe
+                if (ptr != IntPtr.Zero)
                 {
-                    _originalGraphic = (Graphic) (DisplayedGraphic + _animDataFrame.FrameData[AnimIndex++]);
+                    unsafe
+                    {
+                        AnimDataFrame2* animData = (AnimDataFrame2*) ptr;
+
+                        if (animData->FrameCount != 0)
+                        {
+                            _originalGraphic = (Graphic) (DisplayedGraphic + animData->FrameData[AnimIndex++]);
+
+                            if (AnimIndex >= animData->FrameCount)
+                                AnimIndex = 0;
+
+                            _force = _originalGraphic == DisplayedGraphic;
+
+                            LastAnimationChangeTime = Time.Ticks + _animSpeed;
+                        }
+                    }
                 }
-
-                if (AnimIndex >= _animDataFrame.FrameCount)
-                    AnimIndex = 0;
-
-                _force = _originalGraphic == DisplayedGraphic;
-
-                LastAnimationChangeTime = Engine.Ticks + _animSpeed;
             }
         }
     }

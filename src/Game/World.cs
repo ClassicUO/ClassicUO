@@ -23,6 +23,7 @@
 
 using System.Collections.Generic;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -68,6 +69,10 @@ namespace ClassicUO.Game
         public static WorldTextManager WorldTextManager { get; } = new WorldTextManager();
 
         public static JournalManager Journal { get; } = new JournalManager();
+
+        public static CustomHouseManager CustomHouseManager;
+
+        public static WorldMapEntityManager WMapManager = new WorldMapEntityManager();
 
         public static int MapIndex
         {
@@ -155,8 +160,8 @@ namespace ClassicUO.Game
                 }
             }
 
-            if (Engine.Profile.Current.EnableCombatMusic)
-                Engine.SceneManager.CurrentScene.Audio.PlayMusic(music);
+            if (ProfileManager.Current.EnableCombatMusic)
+                CUOEnviroment.Client.Scene.Audio.PlayMusic(music);
         }
 
 
@@ -215,6 +220,7 @@ namespace ClassicUO.Game
                 _effectManager.Update(totalMS, frameMS);
 
                 WorldTextManager.Update(totalMS, frameMS);
+                WMapManager.RemoveUnupdatedWEntity();
             }
         }
 
@@ -342,6 +348,7 @@ namespace ClassicUO.Game
             _toRemove.Clear();
             CorpseManager.Clear();
             OPL.Clear();
+            WMapManager.Clear();
 
             Season = Seasons.Summer;
             OldSeason = Seasons.Summer;

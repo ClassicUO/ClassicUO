@@ -21,8 +21,10 @@
 
 #endregion
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Utility.Logging;
@@ -120,24 +122,24 @@ namespace ClassicUO.Game.UI.Gumps
 
         public static void Create()
         {
-            TopBarGump gump = Engine.UI.GetGump<TopBarGump>();
+            TopBarGump gump = UIManager.GetGump<TopBarGump>();
 
             if (gump == null)
             {
-                if (Engine.Profile.Current.TopbarGumpPosition.X < 0 || Engine.Profile.Current.TopbarGumpPosition.Y < 0)
-                    Engine.Profile.Current.TopbarGumpPosition = Point.Zero;
+                if (ProfileManager.Current.TopbarGumpPosition.X < 0 || ProfileManager.Current.TopbarGumpPosition.Y < 0)
+                    ProfileManager.Current.TopbarGumpPosition = Point.Zero;
 
-                Engine.UI.Add(gump = new TopBarGump
+                UIManager.Add(gump = new TopBarGump
                 {
-                    X = Engine.Profile.Current.TopbarGumpPosition.X,
-                    Y = Engine.Profile.Current.TopbarGumpPosition.Y
+                    X = ProfileManager.Current.TopbarGumpPosition.X,
+                    Y = ProfileManager.Current.TopbarGumpPosition.Y
                 });
 
-                if (Engine.Profile.Current.TopbarGumpIsMinimized)
+                if (ProfileManager.Current.TopbarGumpIsMinimized)
                     gump.ChangePage(2);
             }
             else
-                Log.Message(LogTypes.Error, "TopBarGump already exists!!");
+                Log.Error( "TopBarGump already exists!!");
         }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
@@ -147,20 +149,20 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 0;
                 Y = 0;
 
-                Engine.Profile.Current.TopbarGumpPosition = Location;
+                ProfileManager.Current.TopbarGumpPosition = Location;
             }
         }
 
         public override void OnPageChanged()
         {
-            Engine.Profile.Current.TopbarGumpIsMinimized = IsMinimized = ActivePage == 2;
+            ProfileManager.Current.TopbarGumpIsMinimized = IsMinimized = ActivePage == 2;
             WantUpdateSize = true;
         }
 
         protected override void OnDragEnd(int x, int y)
         {
             base.OnDragEnd(x, y);
-            Engine.Profile.Current.TopbarGumpPosition = Location;
+            ProfileManager.Current.TopbarGumpPosition = Location;
         }
 
         public override void OnButtonClick(int buttonID)
@@ -168,10 +170,10 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((Buttons) buttonID)
             {
                 case Buttons.Map:
-                    MiniMapGump miniMapGump = Engine.UI.GetGump<MiniMapGump>();
+                    MiniMapGump miniMapGump = UIManager.GetGump<MiniMapGump>();
 
                     if (miniMapGump == null)
-                        Engine.UI.Add(new MiniMapGump());
+                        UIManager.Add(new MiniMapGump());
                     else
                     {
                         miniMapGump.SetInScreen();
@@ -181,7 +183,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Paperdoll:
-                    PaperDollGump paperdollGump = Engine.UI.GetGump<PaperDollGump>(World.Player);
+                    PaperDollGump paperdollGump = UIManager.GetGump<PaperDollGump>(World.Player);
 
                     if (paperdollGump == null)
                         GameActions.OpenPaperdoll(World.Player);
@@ -196,7 +198,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case Buttons.Inventory:
                     Item backpack = World.Player.Equipment[(int) Layer.Backpack];
 
-                    ContainerGump backpackGump = Engine.UI.GetGump<ContainerGump>(backpack);
+                    ContainerGump backpackGump = UIManager.GetGump<ContainerGump>(backpack);
 
                     if (backpackGump == null)
                         GameActions.DoubleClick(backpack);
@@ -209,11 +211,11 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Journal:
-                    JournalGump journalGump = Engine.UI.GetGump<JournalGump>();
+                    JournalGump journalGump = UIManager.GetGump<JournalGump>();
 
                     if (journalGump == null)
                     {
-                        Engine.UI.Add(new JournalGump
+                        UIManager.Add(new JournalGump
                                           {X = 64, Y = 64});
                     }
                     else
@@ -225,7 +227,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Chat:
-                    Log.Message(LogTypes.Warning, "Chat button pushed! Not implemented yet!");
+                    Log.Warn( "Chat button pushed! Not implemented yet!");
 
                     break;
 
@@ -236,17 +238,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case Buttons.Debug:
 
-                    DebugGump debugGump = Engine.UI.GetGump<DebugGump>();
+                    DebugGump debugGump = UIManager.GetGump<DebugGump>();
 
                     if (debugGump == null)
                     {
                         debugGump = new DebugGump
                         {
-                            X = Engine.Profile.Current.DebugGumpPosition.X,
-                            Y = Engine.Profile.Current.DebugGumpPosition.Y
+                            X = ProfileManager.Current.DebugGumpPosition.X,
+                            Y = ProfileManager.Current.DebugGumpPosition.Y
                         };
 
-                        Engine.UI.Add(debugGump);
+                        UIManager.Add(debugGump);
                     }
                     else
                     {
@@ -254,17 +256,17 @@ namespace ClassicUO.Game.UI.Gumps
                         debugGump.SetInScreen();
                     }
 
-                    Engine.DropFpsMinMaxValues();
+                    //Engine.DropFpsMinMaxValues();
 
                     break;
                 case Buttons.WorldMap:
 
-                    WorldMapGump worldMap = Engine.UI.GetGump<WorldMapGump>();
+                    WorldMapGump worldMap = UIManager.GetGump<WorldMapGump>();
 
                     if (worldMap == null || worldMap.IsDisposed)
                     {
                         worldMap = new WorldMapGump();
-                        Engine.UI.Add(worldMap);
+                        UIManager.Add(worldMap);
                     }
                     else
                     {

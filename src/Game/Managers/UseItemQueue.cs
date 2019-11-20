@@ -34,7 +34,7 @@ namespace ClassicUO.Game.Managers
 
         public UseItemQueue()
         {
-            _timer = Engine.Ticks + 2000;
+            _timer = Time.Ticks + 2000;
         }
 
         public void Update(double totalMS, double frameMS)

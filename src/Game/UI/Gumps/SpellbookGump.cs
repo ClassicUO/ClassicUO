@@ -26,6 +26,7 @@ using System.IO;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -64,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Restore(BinaryReader reader)
         {
             base.Restore(reader);
-            Engine.SceneManager.GetScene<GameScene>().DoubleClickDelayed(reader.ReadUInt32());
+            CUOEnviroment.Client.GetScene<GameScene>().DoubleClickDelayed(reader.ReadUInt32());
             Dispose();
         }
 
@@ -84,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Update();
 
-            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
+            CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
         }
 
         public override void Dispose()
@@ -97,8 +98,8 @@ namespace ClassicUO.Game.UI.Gumps
                 item.Items.Removed -= ItemsOnRemoved;
             }
 
-            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
-            Engine.UI.SavePosition(LocalSerial, Location);
+            CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
+            UIManager.SavePosition(LocalSerial, Location);
             base.Dispose();
         }
 
@@ -402,7 +403,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 icon.DragBegin += (sender, e) =>
                 {
-                    if (Engine.UI.IsDragging)
+                    if (UIManager.IsDragging)
                         return;
 
                     SpellDefinition def = GetSpellDefinition(sender as Control);
@@ -415,8 +416,8 @@ namespace ClassicUO.Game.UI.Gumps
                         X = Mouse.Position.X - 22, Y = Mouse.Position.Y - 22
                     };
 
-                    Engine.UI.Add(gump);
-                    Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
+                    UIManager.Add(gump);
+                    UIManager.AttemptDragControl(gump, Mouse.Position, true);
                 };
 
                 Add(icon, page1);
@@ -776,7 +777,7 @@ namespace ClassicUO.Game.UI.Gumps
             _pageCornerLeft.Page = ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = ActivePage != _maxPage ? 0 : int.MaxValue;
 
-            Engine.SceneManager.CurrentScene.Audio.PlaySound(0x0055);
+            CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
         }
 
 

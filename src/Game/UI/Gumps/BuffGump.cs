@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
@@ -326,7 +327,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = Texture.Height;
                 _alpha = 0xFF;
                 _decreaseAlpha = true;
-                _timer = (uint) (icon.Timer <= 0 ? 0xFFFF_FFFF : Engine.Ticks + icon.Timer * 1000);
+                _timer = (uint) (icon.Timer <= 0 ? 0xFFFF_FFFF : Time.Ticks + icon.Timer * 1000);
                 _gText = RenderedText.Create("", 0xFFFF, 2, true, FontStyle.Fixed | FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, Texture.Width);
 
                 SetTooltip(icon.Text);
@@ -403,7 +404,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ResetHueVector();
                 ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, 1.0f - _alpha / 255f, true);
 
-                if (Engine.Profile.Current != null && Engine.Profile.Current.BuffBarTime)
+                if (ProfileManager.Current != null && ProfileManager.Current.BuffBarTime)
                 {
                     batcher.Draw2D(Texture, x, y, ref _hueVector);
                     return _gText.Draw(batcher, x - 3, y + Texture.Height / 2 - 3, _hueVector.Z);

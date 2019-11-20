@@ -39,11 +39,11 @@ namespace ClassicUO.Game
     internal static class SelectedObject
     {
         public static Point TranslatedMousePositionByViewport;
-        public static BaseGameObject Object { get; set; }
-        public static BaseGameObject LastObject { get; set; }
+        public static BaseGameObject Object;
+        public static BaseGameObject LastObject;
+        public static GameObject HealthbarObject;
+        public static GameObject CorpseObject;
 
-        public static GameObject HealthbarObject { get; set; }
-        public static GameObject CorpseObject { get; set; }
 
         public static bool IsPointInMobile(Mobile mobile, int xx, int yy)
         {

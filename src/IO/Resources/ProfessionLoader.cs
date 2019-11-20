@@ -31,7 +31,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class ProfessionLoader : ResourceLoader
+    internal class ProfessionLoader : UOFileLoader
     {
         private readonly string[] _Keys =
         {

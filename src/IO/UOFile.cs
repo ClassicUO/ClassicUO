@@ -50,13 +50,13 @@ namespace ClassicUO.IO
 
         protected virtual void Load()
         {
-            Log.Message(LogTypes.Trace, $"Loading file:\t\t{FilePath}");
+            Log.Trace( $"Loading file:\t\t{FilePath}");
 
             FileInfo fileInfo = new FileInfo(FilePath);
 
             if (!fileInfo.Exists)
             {
-                Log.Message(LogTypes.Error, $"{FilePath}  not exists.");
+                Log.Error( $"{FilePath}  not exists.");
 
                 return;
             }
@@ -83,7 +83,7 @@ namespace ClassicUO.IO
                 }
             }
             else
-                Log.Message(LogTypes.Error, $"{FilePath}  size must be > 0");
+                Log.Error( $"{FilePath}  size must be > 0");
         }
 
         public virtual void FillEntries(ref UOFileIndex[] entries)
@@ -96,7 +96,7 @@ namespace ClassicUO.IO
             _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
             _accessor.Dispose();
             _file.Dispose();
-            Log.Message(LogTypes.Trace, $"Unloaded:\t\t{FilePath}");
+            Log.Trace( $"Unloaded:\t\t{FilePath}");
         }
 
 

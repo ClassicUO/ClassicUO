@@ -23,6 +23,8 @@
 
 using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
@@ -84,9 +86,13 @@ namespace ClassicUO.Game.Map
 
                     break;
 
-                case GameEffect effect when effect.Source == null || !effect.IsItemEffect:
+                case GameEffect _ /*when effect.Source == null*/:
                     priorityZ += 2;
 
+                    break;
+
+                case Multi m when (m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0:
+                    priorityZ--;
                     break;
 
                 default:
@@ -126,7 +132,7 @@ namespace ClassicUO.Game.Map
             {
                 int testPriorityZ = o.PriorityZ;
 
-                if (testPriorityZ > priorityZ || testPriorityZ == priorityZ && (obj is Land || obj is Multi) && !(o is Land))
+                if (testPriorityZ > priorityZ || testPriorityZ == priorityZ && (obj is Land || obj is Multi m) && !(o is Land))
                     break;
 
                 found = o;

@@ -39,7 +39,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class AnimationsLoader : ResourceLoader<AnimationFrameTexture>
+    internal class AnimationsLoader : UOFileLoader<AnimationFrameTexture>
     {
         private readonly Dictionary<ushort, byte> _animationSequenceReplacing = new Dictionary<ushort, byte>();
         private readonly Dictionary<Graphic, Rectangle> _animDimensionCache = new Dictionary<Graphic, Rectangle>();
@@ -306,7 +306,7 @@ namespace ClassicUO.IO.Resources
                     DataIndex[i].Graphic = i;
                     DataIndex[i].CorpseGraphic = i;
 
-                    long offsetToData = DataIndex[i].CalculateOffset(i, out int count);
+                    long offsetToData = DataIndex[i].CalculateOffset(i, DataIndex[i].Type, out int count);
 
                     if (offsetToData >= idxfile0.Length) continue;
 
@@ -510,10 +510,13 @@ namespace ClassicUO.IO.Resources
                             if (realAnimID != 0xFFFF && animFile != 0)
                             {
                                 UOFile currentIdxFile = _files[animFile].IdxFile;
-                                long addressOffset = DataIndex[index].CalculateOffset(realAnimID, out int count);
+                                var realType = FileManager.ClientVersion < ClientVersions.CV_500A 
+                                    ? CalculateTypeByGraphic(realAnimID) : DataIndex[index].Type;
+                                long addressOffset = DataIndex[index].CalculateOffset(realAnimID, realType, out int count);
 
                                 if (addressOffset < currentIdxFile.Length)
                                 {
+                                    DataIndex[index].Type = realType;
                                     DataIndex[index].MountedHeightOffset = mountedHeightOffset;
                                     DataIndex[index].GraphicConversion = (ushort)(realAnimID | 0x8000);
                                     DataIndex[index].FileIndex = (byte)animFile;
@@ -689,7 +692,7 @@ namespace ClassicUO.IO.Resources
 
             if (!File.Exists(animationSequencePath))
             {
-                Log.Message(LogTypes.Warning, "AnimationSequence.uop not found");
+                Log.Warn( "AnimationSequence.uop not found");
 
                 return;
             }
@@ -1227,14 +1230,14 @@ namespace ClassicUO.IO.Resources
             if (animDir.FileIndex == -1 && animDir.Address == -1)
                 return false;
 
-            if (animDir.IsUOP || animDir.Address == 0 && animDir.Size == 0)
+            if (animDir.IsUOP || (animDir.Address == 0 && animDir.Size == 0))
             {
                 var animData = DataIndex[AnimID].GetUopGroup(AnimGroup);
 
                 if (animData == null || animData.Offset == 0)
                     return false;
 
-                return TryReadUOPAnimDimension(ref animDir);
+                return ReadUOPAnimationFrame(ref animDir);
             }
 
             if (animDir.Address == 0 && animDir.Size == 0)
@@ -1242,23 +1245,23 @@ namespace ClassicUO.IO.Resources
 
             UOFileMul file = _files[animDir.FileIndex];
             file.Seek(animDir.Address);
-            ReadFramesPixelData(ref animDir, file);
+            ReadMULAnimationFrame(ref animDir, file);
 
             return true;
         }
 
-        private unsafe bool TryReadUOPAnimDimension(ref AnimationDirection animDirection)
+        private unsafe bool ReadUOPAnimationFrame(ref AnimationDirection animDirection)
         {
             var animData = DataIndex[AnimID].GetUopGroup(AnimGroup); //ref DataIndex[AnimID].Groups[AnimGroup];
 
             if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 && animData.Offset == 0)
             {
-                Log.Message(LogTypes.Warning, "uop animData is null");
+                Log.Warn( "uop animData is null");
 
                 return false;
             }
 
-            animDirection.LastAccessTime = Engine.Ticks;
+            animDirection.LastAccessTime = Time.Ticks;
             int decLen = (int)animData.DecompressedLength;
             var file = _filesUop[animData.FileIndex];
             file.Seek(animData.Offset);
@@ -1321,7 +1324,7 @@ namespace ClassicUO.IO.Resources
 
 
                 if (animDirection.Frames != null && animDirection.Frames.Length != 0)
-                    Log.Message(LogTypes.Panic, "MEMORY LEAK UOP ANIM");
+                    Log.Panic("MEMORY LEAK UOP ANIM");
 
                 animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
 
@@ -1330,7 +1333,7 @@ namespace ClassicUO.IO.Resources
                     if (animDirection.Frames[i] != null)
                         continue;
 
-                    ref readonly UOPFrameData frameData = ref pixelDataOffsets[i + dirFrameStartIdx];
+                    ref UOPFrameData frameData = ref pixelDataOffsets[i + dirFrameStartIdx];
 
                     if (frameData.DataStart == 0)
                         continue;
@@ -1345,37 +1348,49 @@ namespace ClassicUO.IO.Resources
 
                     if (imageWidth == 0 || imageHeight == 0)
                     {
-                        Log.Message(LogTypes.Warning, "frame size is null");
+                        Log.Warn( "frame size is null");
 
                         continue;
                     }
 
                     ushort[] data = new ushort[imageWidth * imageHeight];
 
-                    fixed (ushort* ptrData = data)
+                    uint header = reader.ReadUInt();
+
+                    long pos = reader.Position;
+                    long end = (long) reader.StartAddress + reader.Length;
+
+                    while (header != 0x7FFF7FFF && pos < end)
                     {
-                        int header;
+                        ushort runLength = (ushort) (header & 0x0FFF);
+                        int x = (int) ((header >> 22) & 0x03FF);
 
-                        const int DOUBLE_XOR = (0x200 << 22) | (0x200 << 12);
+                        if ((x & 0x0200) > 0)
+                            x |= unchecked((int) 0xFFFFFE00);
+                        int y = (int) ((header >> 12) & 0x3FF);
 
-                        while ((header = reader.ReadInt()) != 0x7FFF7FFF)
+                        if ((y & 0x0200) > 0)
+                            y |= unchecked((int) 0xFFFFFE00);
+
+                        x += imageCenterX;
+                        y += imageCenterY + imageHeight;
+
+                        int block = y * imageWidth + x;
+
+                        for (int k = 0; k < runLength; k++)
                         {
-                            header ^= DOUBLE_XOR;
-                            int x = ((header >> 22) & 0x3FF) + imageCenterX - 0x200;
-                            int y = ((header >> 12) & 0x3FF) + imageCenterY + imageHeight - 0x200;
+                            ushort val = palette[reader.ReadByte()];
 
-                            ushort* cur = ptrData + y * imageWidth + x;
-                            ushort* end = cur + (header & 0xFFF);
-                            int filecounter = 0;
-
-                            byte* filedata = (byte*)reader.PositionAddress;
-                            reader.Skip(header & 0xFFF);
-                            while (cur < end)
-                            {
-                                *cur++ = (ushort)(0x8000 | palette[filedata[filecounter++]]);
-                            }
+                            if (val != 0)
+                                data[block] = (ushort) (0x8000 | val);
+                            else
+                                data[block] = 0;
+                            block++;
                         }
+
+                        header = reader.ReadUInt();
                     }
+
 
                     AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
                     {
@@ -1396,9 +1411,9 @@ namespace ClassicUO.IO.Resources
             return true;
         }
 
-        private unsafe void ReadFramesPixelData(ref AnimationDirection animDir, UOFile reader)
+        private unsafe void ReadMULAnimationFrame(ref AnimationDirection animDir, UOFile reader)
         {
-            animDir.LastAccessTime = Engine.Ticks;
+            animDir.LastAccessTime = Time.Ticks;
 
             ushort* palette = (ushort*)reader.PositionAddress;
             reader.Skip(512);
@@ -1410,7 +1425,7 @@ namespace ClassicUO.IO.Resources
 
 
             if (animDir.Frames != null && animDir.Frames.Length != 0)
-                Log.Message(LogTypes.Panic, "MEMORY LEAK MUL ANIM");
+                Log.Panic("MEMORY LEAK MUL ANIM");
 
 
             animDir.Frames = new AnimationFrameTexture[frameCount];
@@ -1432,32 +1447,42 @@ namespace ClassicUO.IO.Resources
 
                 ushort[] data = new ushort[imageWidth * imageHeight];
 
-                fixed (ushort* ptrData = data)
+                uint header = reader.ReadUInt();
+
+                long pos = reader.Position;
+                long end = (long) reader.StartAddress + reader.Length;
+
+                while (header != 0x7FFF7FFF && pos < end)
                 {
-                    ushort* dataRef = ptrData;
+                    ushort runLength = (ushort) (header & 0x0FFF);
+                    int x = (int) ((header >> 22) & 0x03FF);
 
-                    int header;
+                    if ((x & 0x0200) > 0)
+                        x |= unchecked((int) 0xFFFFFE00);
+                    int y = (int) ((header >> 12) & 0x3FF);
 
-                    const int DOUBLE_XOR = (0x200 << 22) | (0x200 << 12);
+                    if ((y & 0x0200) > 0)
+                        y |= unchecked((int) 0xFFFFFE00);
 
-                    while ((header = reader.ReadInt()) != 0x7FFF7FFF)
+                    x += imageCenterX;
+                    y += imageCenterY + imageHeight;
+
+                    int block = y * imageWidth + x;
+
+                    for (int k = 0; k < runLength; k++)
                     {
-                        header ^= DOUBLE_XOR;
-                        int x = ((header >> 22) & 0x3FF) + imageCenterX - 0x200;
-                        int y = ((header >> 12) & 0x3FF) + imageCenterY + imageHeight - 0x200;
+                        ushort val = palette[reader.ReadByte()];
 
-                        ushort* cur = ptrData + y * imageWidth + x;
-                        ushort* end = cur + (header & 0xFFF);
-                        int filecounter = 0;
-
-                        byte* filedata = (byte*)reader.PositionAddress;
-                        reader.Skip(header & 0xFFF);
-                        while (cur < end)
-                        {
-                            *cur++ = (ushort)(0x8000 | palette[filedata[filecounter++]]);
-                        }
+                        if (val != 0)
+                            data[block] = (ushort) (0x8000 | val);
+                        else
+                            data[block] = 0;
+                        block++;
                     }
+
+                    header = reader.ReadUInt();
                 }
+
 
                 AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
                 {
@@ -1513,13 +1538,18 @@ namespace ClassicUO.IO.Resources
                         if (direction.Frames != null)
                         {
                             AnimationFrameTexture animationFrameTexture = direction.Frames[frameIndex]; // GetTexture(direction.FramesHashes[frameIndex]);
-                            x = animationFrameTexture.CenterX;
-                            y = animationFrameTexture.CenterY;
-                            w = animationFrameTexture.Width;
-                            h = animationFrameTexture.Height;
-                            _animDimensionCache[id] = new Rectangle(x, y, w, h);
 
-                            return;
+                            if (animationFrameTexture != null)
+                            {
+                                x = animationFrameTexture.CenterX;
+                                y = animationFrameTexture.CenterY;
+                                w = animationFrameTexture.Width;
+                                h = animationFrameTexture.Height;
+                                _animDimensionCache[id] = new Rectangle(x, y, w, h);
+
+                                return;
+                            }
+
                         }
                     }
                 }
@@ -1606,7 +1636,7 @@ namespace ClassicUO.IO.Resources
         public override void CleaUnusedResources()
         {
             int count = 0;
-            long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
+            long ticks = Time.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
             for (int i = 0; i < _usedTextures.Count; i++)
             {
@@ -1892,14 +1922,14 @@ namespace ClassicUO.IO.Resources
             _uopReplaceGroupIndex[old] = newG;
         }
 
-        public long CalculateOffset(ushort graphic, out int groupCount)
+        public long CalculateOffset(ushort graphic, ANIMATION_GROUPS_TYPE type, out int groupCount)
         {
             long result = 0;
             groupCount = 0;
 
             ANIMATION_GROUPS group = ANIMATION_GROUPS.AG_NONE;
 
-            switch (Type)
+            switch (type)
             {
                 case ANIMATION_GROUPS_TYPE.MONSTER:
 

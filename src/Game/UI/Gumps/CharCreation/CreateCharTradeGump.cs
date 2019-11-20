@@ -25,6 +25,7 @@ using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
 
@@ -127,7 +128,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            var charCreationGump = Engine.UI.GetGump<CharCreationGump>();
+            var charCreationGump = UIManager.GetGump<CharCreationGump>();
 
             switch ((Buttons) buttonID)
             {
@@ -167,14 +168,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 if (duplicated > 0)
                 {
-                    Engine.UI.GetGump<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(1080032));
+                    UIManager.GetGump<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(1080032));
 
                     return false;
                 }
             }
             else
             {
-                Engine.UI.GetGump<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(1080032));
+                UIManager.GetGump<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(1080032));
 
                 return false;
             }

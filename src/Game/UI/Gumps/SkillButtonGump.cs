@@ -23,6 +23,7 @@
 
 using System.IO;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -72,11 +73,11 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true
             });
 
-            HoveredLabel label;
+            Label label;
 
-            Add(label = new HoveredLabel(_skill.Name, true, 0, 1151, Width, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+            Add(label = new Label(_skill.Name, true, 0, Width, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
             {
-                X = 0,
+                X = -4,
                 Y = 0,
                 Width = Width - 10,
                 AcceptMouseInput = true,
@@ -88,13 +89,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            if (Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left && !Keyboard.Alt)
+            if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButton.Left && !Keyboard.Alt)
                 GameActions.UseSkill(_skill.Index);
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            if (!Engine.Profile.Current.CastSpellsByOneClick && button == MouseButton.Left && !Keyboard.Alt)
+            if (!ProfileManager.Current.CastSpellsByOneClick && button == MouseButton.Left && !Keyboard.Alt)
                 GameActions.UseSkill(_skill.Index);
 
             return true;

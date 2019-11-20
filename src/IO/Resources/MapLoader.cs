@@ -33,7 +33,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class MapLoader : ResourceLoader
+    internal class MapLoader : UOFileLoader
     {
         internal const int MAPS_COUNT = 6;
         private protected readonly UOFileMul[] _filesIdxStatics = new UOFileMul[MAPS_COUNT];
@@ -519,7 +519,7 @@ namespace ClassicUO.IO.Resources
     [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 4 + 64 * 3)]
     internal struct MapBlock
     {
-        public readonly uint Header;
+        public uint Header;
         public unsafe MapCells* Cells;
     }
 
@@ -553,6 +553,6 @@ namespace ClassicUO.IO.Resources
         public uint OriginalStaticCount;
         public ulong StaticAddress;
         public uint StaticCount;
-        public static readonly IndexMap Invalid = new IndexMap();
+        public static IndexMap Invalid = new IndexMap();
     }
 }

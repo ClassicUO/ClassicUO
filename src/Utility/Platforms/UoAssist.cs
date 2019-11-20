@@ -21,7 +21,7 @@ namespace ClassicUO.Utility.Platforms
         {
             if (Environment.OSVersion.Platform != PlatformID.Win32NT)
             {
-                Log.Message(LogTypes.Warning, "This OS does not support the UOAssist API");
+                Log.Warn( "This OS does not support the UOAssist API");
 
                 return;
             }

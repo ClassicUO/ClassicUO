@@ -35,7 +35,6 @@ namespace ClassicUO.Game.UI.Controls
         private readonly IScrollBar _scrollBar;
         private readonly int _scrollbarHeight;
         private bool _isNormalScroll;
-        private bool _needUpdate = true;
 
         public ScrollArea(int x, int y, int w, int h, bool normalScrollbar, int scrollbarHeight = -1)
         {
@@ -78,24 +77,10 @@ namespace ClassicUO.Game.UI.Controls
         {
             base.Update(totalMS, frameMS);
 
-            if (_needUpdate)
-            {
-                CalculateScrollBarMaxValue();
-                _scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
-                _needUpdate = false;
-            }
+            CalculateScrollBarMaxValue();
+            _scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
         }
 
-        public void ForceUpdate()
-        {
-            _needUpdate = true;
-        }
-
-        protected override void OnInitialize()
-        {
-            _needUpdate = true;
-            base.OnInitialize();
-        }
 
         public void Scroll(bool isup)
         {
@@ -116,9 +101,6 @@ namespace ClassicUO.Game.UI.Controls
             {
                 batcher.EnableScissorTest(true);
                 int height = 0;
-                int maxheight = _scrollBar.Value + Height;
-                bool drawOnly1 = true;
-
 
                 for (int i = 1; i < Children.Count; i++)
                 {
@@ -133,17 +115,9 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         // do nothing
                     }
-                    else if (height + child.Height <= maxheight)
-                    {
-                        child.Draw(batcher, x + child.X, y + child.Y);
-                    }
                     else
                     {
-                        if (drawOnly1)
-                        {
-                            child.Draw(batcher, x + child.X, y + child.Y);
-                            drawOnly1 = false;
-                        }
+                        child.Draw(batcher, x + child.X, y + child.Y);
                     }
 
                     height += child.Height;
@@ -170,21 +144,6 @@ namespace ClassicUO.Game.UI.Controls
 
                     break;
             }
-        }
-
-        protected override void OnChildAdded()
-        {
-            _needUpdate = true;
-        }
-
-        protected override void OnChildRemoved()
-        {
-            _needUpdate = true;
-        }
-
-        public override void OnPageChanged()
-        {
-            _needUpdate = true;
         }
 
         public override void Remove(Control c)

@@ -24,6 +24,7 @@
 using System;
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -74,9 +75,22 @@ namespace ClassicUO.Game
             DoubleClick(serial | 0x80000000);
         }
 
+        public static bool OpenCorpse(Serial serial)
+        {
+            if (!serial.IsItem) return false;
+
+            Item item = World.Items.Get(serial);
+            if (item == null || !item.IsCorpse || item.IsDestroyed) return false;
+
+            World.Player.ManualOpenedCorpses.Add(serial);
+            DoubleClick(serial);
+
+            return true;
+        }
+
         public static void Attack(Serial serial)
         {
-            if (Engine.Profile.Current.EnabledCriminalActionQuery)
+            if (ProfileManager.Current.EnabledCriminalActionQuery)
             {
                 Mobile m = World.Mobiles.Get(serial);
 
@@ -89,7 +103,7 @@ namespace ClassicUO.Game
                                                                        Socket.Send(new PAttackRequest(serial));
                                                                });
 
-                    Engine.UI.Add(messageBox);
+                    UIManager.Add(messageBox);
 
                     return;
                 }
@@ -101,7 +115,7 @@ namespace ClassicUO.Game
 
         public static void DoubleClickQueued(Serial serial)
         {
-            Engine.SceneManager.GetScene<GameScene>()?.DoubleClickDelayed(serial);
+            CUOEnviroment.Client.GetScene<GameScene>()?.DoubleClickDelayed(serial);
         }
 
         public static void DoubleClick(Serial serial)
@@ -132,7 +146,7 @@ namespace ClassicUO.Game
         public static void Say(string message, ushort hue = 0xFFFF, MessageType type = MessageType.Regular, byte font = 3)
         {
             if (hue == 0xFFFF)
-                hue = Engine.Profile.Current.SpeechHue;
+                hue = ProfileManager.Current.SpeechHue;
 
             if (FileManager.ClientVersion >= ClientVersions.CV_500A)
                 Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
@@ -159,7 +173,7 @@ namespace ClassicUO.Game
         public static void RequestPartyAccept(Serial serial)
         {
             Socket.Send(new PPartyAccept(serial));
-            Engine.UI.Gumps.OfType<PartyInviteGump>().FirstOrDefault()?.Dispose();
+            UIManager.Gumps.OfType<PartyInviteGump>().FirstOrDefault()?.Dispose();
         }
 
         public static void RequestPartyRemoveMember(Serial serial)
@@ -291,7 +305,7 @@ namespace ClassicUO.Game
         {
             shift = shift || Input.Keyboard.Shift;
 
-            if (Engine.Profile.Current.HoldShiftForContext && !shift)
+            if (ProfileManager.Current.HoldShiftForContext && !shift)
                 return;
 
             Socket.Send(new PRequestPopupMenu(serial));
@@ -343,7 +357,7 @@ namespace ClassicUO.Game
 
         public static void OpenAbilitiesBook()
         {
-            if (Engine.UI.GetGump<CombatBookGump>() == null) Engine.UI.Add(new CombatBookGump(100, 100));
+            if (UIManager.GetGump<CombatBookGump>() == null) UIManager.Add(new CombatBookGump(100, 100));
         }
 
         public static void UsePrimaryAbility()
@@ -388,14 +402,14 @@ namespace ClassicUO.Game
             Socket.Send(new PPickUpRequest(item, amount));
 
             if(bag == default(Serial))
-                bag = Engine.Profile.Current.GrabBagSerial == 0
+                bag = ProfileManager.Current.GrabBagSerial == 0
                     ? World.Player.Equipment[(int) Layer.Backpack].Serial
-                    : (Serial) Engine.Profile.Current.GrabBagSerial;
+                    : (Serial) ProfileManager.Current.GrabBagSerial;
 
             if (!World.Items.Contains(bag))
             {
                 GameActions.Print("Grab Bag not found, setting to Backpack.");
-                Engine.Profile.Current.GrabBagSerial = 0;
+                ProfileManager.Current.GrabBagSerial = 0;
                 bag = World.Player.Equipment[(int) Layer.Backpack].Serial;
             }
             DropItem(item.Serial, Position.INVALID, bag);

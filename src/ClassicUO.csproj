@@ -71,7 +71,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE;JAEDAN_MOVEMENT_PATCH_, MOVEMENT2_,</DefineConstants>
+    <DefineConstants>TRACE;JAEDAN_MOVEMENT_PATCH_, MOVEMENT2_</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -98,6 +98,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
@@ -105,13 +106,17 @@
   <ItemGroup>
     <Compile Include="Configuration\Profile.cs" />
     <Compile Include="Configuration\ProfileManager.cs" />
+    <Compile Include="CUOEnviroment.cs" />
+    <Compile Include="GameController.cs" />
     <Compile Include="Game\CircleOfTransparency.cs" />
     <Compile Include="Game\Constants.cs" />
     <Compile Include="Game\Data\Ability.cs" />
     <Compile Include="Game\Data\BuffIcon.cs" />
     <Compile Include="Game\Data\BuffTable.cs" />
     <Compile Include="Game\Data\CharacterCreationValues.cs" />
+    <Compile Include="Game\Data\CharacterSpeedType.cs" />
     <Compile Include="Game\Data\ClientFeatures.cs" />
+    <Compile Include="Game\Data\CustomHouse.cs" />
     <Compile Include="Game\Data\EntityFlags.cs" />
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
@@ -123,6 +128,7 @@
     <Compile Include="Game\Data\PopupMenuData.cs" />
     <Compile Include="Game\Data\PopupMenuItem.cs" />
     <Compile Include="Game\Data\PromptData.cs" />
+    <Compile Include="Game\Data\RaceType.cs" />
     <Compile Include="Game\Data\Seasons.cs" />
     <Compile Include="Game\Data\ServerErrorMessages.cs" />
     <Compile Include="Game\Data\SpellsBardic.cs" />
@@ -136,10 +142,12 @@
     <Compile Include="Game\GameObjects\DragEffect.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
     <Compile Include="Game\GameObjects\EntityTextContainer.cs" />
+    <Compile Include="Game\GameObjects\TextOverhead.cs" />
     <Compile Include="Game\ItemHold.cs" />
     <Compile Include="Game\Managers\AnchorManager.cs" />
     <Compile Include="Game\Managers\AuraManager.cs" />
     <Compile Include="Game\Managers\CorpseManager.cs" />
+    <Compile Include="Game\Managers\CustomHouseManager.cs" />
     <Compile Include="Game\Managers\HealthLinesManager.cs" />
     <Compile Include="Game\Managers\HotkeysManager.cs" />
     <Compile Include="Game\Managers\InfoBarManager.cs" />
@@ -149,6 +157,7 @@
     <Compile Include="Game\Managers\ObjectPropertiesListManager.cs" />
     <Compile Include="Game\Managers\PoolsManager.cs" />
     <Compile Include="Game\Managers\SkillsGroupManager.cs" />
+    <Compile Include="Game\Managers\WorldMapEntityManager.cs" />
     <Compile Include="Game\SelectedObject.cs" />
     <Compile Include="Game\UI\AbstractEntry.cs" />
     <Compile Include="Game\UI\Controls\AbstractTextBox.cs" />
@@ -167,8 +176,10 @@
     <Compile Include="Game\UI\Controls\MultiLineBox.cs" />
     <Compile Include="Game\UI\Controls\MultiSelectionShrinkbox.cs" />
     <Compile Include="Game\UI\Controls\NiceButton.cs" />
+    <Compile Include="Game\UI\Controls\ScissorControl.cs" />
     <Compile Include="Game\UI\Controls\TextureControl.cs" />
     <Compile Include="Game\UI\Gumps\GridLootGump.cs" />
+    <Compile Include="Game\UI\Gumps\HouseCustomizationGump.cs" />
     <Compile Include="Game\UI\Gumps\InfoBarGump.cs" />
     <Compile Include="Game\UI\Gumps\MacroButtonGump.cs" />
     <Compile Include="Game\UI\Gumps\NameOverHeadHandlerGump.cs" />
@@ -180,6 +191,7 @@
     <Compile Include="Game\Weather.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Renderer\MatrixEffect.cs" />
+    <Compile Include="Time.cs" />
     <Compile Include="Utility\Collections\RawList.cs" />
     <Compile Include="Utility\Collections\ReadOnlyArrayView.cs" />
     <Compile Include="Utility\GraphicHelper.cs" />
@@ -262,7 +274,7 @@
     <Compile Include="IO\Audio\UOSound.cs" />
     <Compile Include="IO\Audio\VolumeState.cs" />
     <Compile Include="IO\DefReader.cs" />
-    <Compile Include="IO\ResourceLoader.cs" />
+    <Compile Include="IO\UoFileLoader.cs" />
     <Compile Include="IO\Resources\AnimationsLoader.cs" />
     <Compile Include="IO\Resources\AnimDataLoader.cs" />
     <Compile Include="IO\Resources\ArtLoader.cs" />
@@ -322,7 +334,6 @@
     <Compile Include="Game\UI\Gumps\Login\ServerSelectionGump.cs" />
     <Compile Include="Game\UI\Gumps\QuestionGump.cs" />
     <Compile Include="Game\UI\Gumps\HealthBarGump.cs" />
-    <Compile Include="Game\UI\Gumps\HealthBarGumpCustom.cs" />
     <Compile Include="Game\UI\Gumps\OptionsGump.cs" />
     <Compile Include="Game\UI\Gumps\PartyGumpAdvanced.cs" />
     <Compile Include="Game\UI\Gumps\PopupMenuGump.cs" />
@@ -420,7 +431,6 @@
     <Compile Include="Game\Map\Map.cs" />
     <Compile Include="Game\Map\Chunk.cs" />
     <Compile Include="Game\Map\Tile.cs" />
-    <Compile Include="Game\Map\TileSorter.cs" />
     <Compile Include="Game\Pathfinder.cs" />
     <Compile Include="Game\Position.cs" />
     <Compile Include="Game\Scenes\GameScene.cs" />
@@ -439,7 +449,6 @@
     <Compile Include="Input\EventArgs.cs" />
     <Compile Include="Input\InputEvent.cs" />
     <Compile Include="Input\InputKeyboardEvent.cs" />
-    <Compile Include="Input\InputManager.cs" />
     <Compile Include="Input\InputMouseEvent.cs" />
     <Compile Include="Input\KeyboardEvent.cs" />
     <Compile Include="Input\MouseButtons.cs" />
@@ -575,6 +584,5 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

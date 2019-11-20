@@ -23,6 +23,7 @@
 
 using System.Collections.Generic;
 
+using ClassicUO.Configuration;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -35,11 +36,11 @@ namespace ClassicUO.Game.GameObjects
 {
     class TextContainer
     {
-        public MessageInfo Items;
+        public TextOverhead Items;
 
         public int Size, MaxSize = 5;
 
-        public void Add(MessageInfo obj)
+        public void Add(TextOverhead obj)
         {
             if (obj != null)
             {
@@ -118,7 +119,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private const int DAMAGE_Y_MOVING_TIME = 25;
 
-        private readonly Deque<MessageInfo> _messages;
+        private readonly Deque<TextOverhead> _messages;
 
         private Rectangle _rectangle;
 
@@ -126,7 +127,7 @@ namespace ClassicUO.Game.GameObjects
         public OverheadDamage(GameObject parent)
         {
             Parent = parent;
-            _messages = new Deque<MessageInfo>();
+            _messages = new Deque<TextOverhead>();
         }
 
 
@@ -141,10 +142,10 @@ namespace ClassicUO.Game.GameObjects
 
         public void Add(int damage)
         {
-            _messages.AddToFront(new MessageInfo
+            _messages.AddToFront(new TextOverhead
             {
                 RenderedText = RenderedText.Create(damage.ToString(), (Hue)(Parent == World.Player ? 0x0034 : 0x0021), 3, false),
-                Time = Engine.Ticks + 1500
+                Time = Time.Ticks + 1500
             });
 
 
@@ -163,12 +164,12 @@ namespace ClassicUO.Game.GameObjects
             {
                 var c = _messages[i];
 
-                float delta = c.Time - Engine.Ticks;
+                float delta = c.Time - Time.Ticks;
 
-                if (c.SecondTime < Engine.Ticks)
+                if (c.SecondTime < Time.Ticks)
                 {
                     c.OffsetY += 1;
-                    c.SecondTime = Engine.Ticks + DAMAGE_Y_MOVING_TIME;
+                    c.SecondTime = Time.Ticks + DAMAGE_Y_MOVING_TIME;
                 }
 
                 if (delta <= 0)
@@ -192,10 +193,10 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed || _messages.Count == 0)
                 return;
 
-            int screenX = Engine.Profile.Current.GameWindowPosition.X;
-            int screenY = Engine.Profile.Current.GameWindowPosition.Y;
-            int screenW = Engine.Profile.Current.GameWindowSize.X;
-            int screenH = Engine.Profile.Current.GameWindowSize.Y;
+            int screenX = ProfileManager.Current.GameWindowPosition.X;
+            int screenY = ProfileManager.Current.GameWindowPosition.Y;
+            int screenW = ProfileManager.Current.GameWindowSize.X;
+            int screenH = ProfileManager.Current.GameWindowSize.Y;
 
             int offY = 0;
 
@@ -267,7 +268,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 ushort hue = 0;
 
-                //if (Engine.Profile.Current.HighlightGameObjects)
+                //if (ProfileManager.Current.HighlightGameObjects)
                 //{
                 //    if (SelectedObject.LastObject == item)
                 //        hue = 23;
@@ -296,22 +297,5 @@ namespace ClassicUO.Game.GameObjects
 
             _messages.Clear();
         }
-    }
-
-    internal class MessageInfo : BaseGameObject
-    {
-        public byte Alpha;
-        public ushort Hue;
-        public bool IsTransparent;
-
-        public RenderedText RenderedText;
-        public long Time, SecondTime;
-        public MessageType Type;
-        public int X, Y, OffsetY;
-        public GameObject Owner;
-
-        public MessageInfo Left, Right;
-
-        public MessageInfo ListLeft, ListRight;
     }
 }

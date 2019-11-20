@@ -26,6 +26,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -59,7 +60,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         public CreateCharCityGump(byte profession) : base(0, 0)
         {
             _selectedProfession = profession;
-            var loginScene = Engine.SceneManager.GetScene<LoginScene>();
+            var loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
 
             _maps = loginScene.Cities.GroupBy(city => city.Map)
                               .ToDictionary(group => group.Key,
@@ -133,7 +134,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            var charCreationGump = Engine.UI.GetGump<CharCreationGump>();
+            var charCreationGump = UIManager.GetGump<CharCreationGump>();
 
             switch ((Buttons) buttonID)
             {
@@ -418,7 +419,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 if (IsSelected)
                     return;
 
-                bool contains = Children.Contains(Engine.UI.MouseOverControl);
+                bool contains = Children.Contains(UIManager.MouseOverControl);
 
                 if (contains && _label.Hue != 153)
                     _label.Hue = 153;

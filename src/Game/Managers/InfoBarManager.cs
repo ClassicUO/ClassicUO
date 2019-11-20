@@ -24,6 +24,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using ClassicUO.Configuration;
+
 using Newtonsoft.Json;
 
 namespace ClassicUO.Game.Managers
@@ -36,9 +39,9 @@ namespace ClassicUO.Game.Managers
         {
             infoBarItems = new List<InfoBarItem>();
 
-            if (Engine.Profile.Current.InfoBarItems != null)
+            if (ProfileManager.Current.InfoBarItems != null)
             {
-                infoBarItems = Engine.Profile.Current.InfoBarItems?.ToList<InfoBarItem>();
+                infoBarItems = ProfileManager.Current.InfoBarItems?.ToList<InfoBarItem>();
             }
         }
 

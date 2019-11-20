@@ -40,7 +40,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class FontsLoader : ResourceLoader
+    internal class FontsLoader : UOFileLoader
     {
         private const int UOFONT_SOLID = 0x0001;
         private const int UOFONT_ITALIC = 0x0002;
@@ -1603,7 +1603,7 @@ namespace ClassicUO.IO.Resources
             }
             catch (Exception ex)
             {
-                string path = Path.Combine(Engine.ExePath, "Logs");
+                string path = Path.Combine(CUOEnviroment.ExecutablePath, "Logs");
                 FileSystemHelper.CreateFolderIfNotExists(path);
 
                 StringBuilder sb = new StringBuilder();
@@ -1926,7 +1926,7 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < list.Count; i++)
             {
-                ref readonly HTMLDataInfo current = ref list[i];
+                ref HTMLDataInfo current = ref list[i];
 
                 switch (current.Tag)
                 {
@@ -2151,7 +2151,7 @@ namespace ClassicUO.IO.Resources
                             j = str.IndexOf("bgcolor", StringComparison.Ordinal);
                         }
                         else
-                            Log.Message(LogTypes.Warning, $"Unhandled HTML param:\t{str}");
+                            Log.Warn( $"Unhandled HTML param:\t{str}");
 
                         break;
                 }

@@ -30,7 +30,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class ClilocLoader : ResourceLoader
+    internal class ClilocLoader : UOFileLoader
     {
         private readonly Dictionary<int, string> _entries = new Dictionary<int, string>();
         private string _cliloc;
