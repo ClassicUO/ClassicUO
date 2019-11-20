@@ -182,15 +182,16 @@ namespace ClassicUO.Game.Scenes
                         {
                             textureW = (int)(texture.Width * scale);
                             textureH = (int)(texture.Height * scale);
+                            x -= (int) (HeldItem.Offset.X * scale);
+                            y -= (int) (HeldItem.Offset.Y * scale);
                         }
                         else
                         {
                             textureW = texture.Width;
                             textureH = texture.Height;
+                            x -= HeldItem.Offset.X;
+                            y -= HeldItem.Offset.Y;
                         }
-
-                        x -= (int)(HeldItem.Offset.X * scale);
-                        y -= (int)(HeldItem.Offset.Y * scale);
 
                         if (x + textureW > bounds.Width)
                             x = bounds.Width - textureW;
