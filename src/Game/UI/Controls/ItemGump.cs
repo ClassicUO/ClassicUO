@@ -41,7 +41,6 @@ namespace ClassicUO.Game.UI.Controls
     {
         protected bool _clickedCanDrag;
 
-        private Point _lastClickPosition;
         private float _picUpTime;
         private float _sClickTime;
         private bool _sendClickIfNotDClick;
@@ -161,9 +160,6 @@ namespace ClassicUO.Game.UI.Controls
             if (button != MouseButton.Left)
                 return;
 
-            _lastClickPosition.X = Mouse.Position.X;
-            _lastClickPosition.Y = Mouse.Position.Y;
-
             if (TargetManager.IsTargeting)
             {
                 if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
@@ -267,8 +263,6 @@ namespace ClassicUO.Game.UI.Controls
                             _sendClickIfNotDClick = true;
                             float totalMS = Time.Ticks;
                             _sClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                            _lastClickPosition.X = Mouse.Position.X;
-                            _lastClickPosition.Y = Mouse.Position.Y;
                         }
                     }
                     else
@@ -334,7 +328,6 @@ namespace ClassicUO.Game.UI.Controls
                 GameActions.DoubleClick(LocalSerial);
  
             _sendClickIfNotDClick = false;
-            _lastClickPosition = Point.Zero;
  
             return true;
         }
@@ -344,9 +337,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (CanPickUp)
             {
-                // fetch texture for item
-                Rectangle bounds = Texture.Bounds;
-                Point offset = Point.Zero;
+                Rectangle bounds = FileManager.Art.GetTexture(Item.DisplayedGraphic).Bounds;
+                int centerX = bounds.Width >> 1;
+                int centerY = bounds.Height >> 1;
 
                 if (this is ItemGumpPaperdoll)
                 {
@@ -356,25 +349,27 @@ namespace ClassicUO.Game.UI.Controls
                     if (IsDisposed)
                         return;
 
-                    // fetch DisplayedGraphic for paperdoll item
-                    bounds = FileManager.Art.GetTexture(Item.DisplayedGraphic).Bounds;
+                    GameActions.PickUp(LocalSerial, centerX, centerY);
                 }
-                else if (Parent != null && Parent is ContainerGump)
+                else
                 {
-                    float scale = 1;
                     if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
-                        scale = UIManager.ContainerScale;
+                    {
+                        float scale = UIManager.ContainerScale;
+                        centerX = (int) (centerX * scale);
+                        centerY = (int) (centerY * scale);
+                    }
 
-                    // drag with mouse offset from containers
-                    offset = new Point(
-                        (int)((_lastClickPosition.X - (ParentX + X)) / scale),
-                        (int)((_lastClickPosition.Y - (ParentY + Y)) / scale));
+                    if (ProfileManager.Current != null && ProfileManager.Current.RelativeDragAndDropItems)
+                    {
+                        Point p = new Point(centerX - (Mouse.Position.X - ScreenCoordinateX), centerY - (Mouse.Position.Y - ScreenCoordinateY));
+                        GameActions.PickUp(LocalSerial, centerX, centerY, offset: p);
+                    }
+                    else
+                    {
+                        GameActions.PickUp(LocalSerial, centerX, centerY);
+                    }
                 }
-
-                if (offset == Point.Zero) // drag from center by default
-                    offset = new Point(bounds.Width >> 1, bounds.Height >> 1);
-
-                GameActions.PickUp(LocalSerial, offset);
             }
         }
     }

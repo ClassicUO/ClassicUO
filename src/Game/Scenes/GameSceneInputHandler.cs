@@ -306,7 +306,6 @@ namespace ClassicUO.Game.Scenes
                 return;
 
             _dragginObject = SelectedObject.Object as GameObject;
-            _dragOffset = Mouse.LDropPosition;
 
             if (ProfileManager.Current.EnableDragSelect && DragSelectModifierActive())
             {
@@ -667,16 +666,9 @@ namespace ClassicUO.Game.Scenes
             {
                 Point offset = Mouse.LDroppedOffset;
 
-                //if (World.CustomHouseManager != null && World.CustomHouseManager.SelectedGraphic != 0)
-                //{
-                //    World.CustomHouseManager.OnTargetWorld(SelectedObject.Object as GameObject);
-                //    return;
-                //}
-
                 if (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                 {
                     GameObject obj = ProfileManager.Current.SallosEasyGrab && SelectedObject.LastObject is GameObject o ? o : _dragginObject;
-
 
                     switch (obj)
                     {
@@ -712,12 +704,12 @@ namespace ClassicUO.Game.Scenes
 
                             break;
 
-                        case Item item /*when !item.IsCorpse*/:
+                        case Item item:
 
                             if (item.IsDamageable)
                                 goto mobile;
 
-                            PickupItemBegin(item, item.Bounds.Width >> 1, item.Bounds.Height >> 1);
+                            PickupItemBegin(item, Mouse.Position.X, Mouse.Position.Y);
 
                             break;
                     }

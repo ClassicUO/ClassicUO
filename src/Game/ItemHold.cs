@@ -33,7 +33,6 @@ namespace ClassicUO.Game
     {
         public bool OnGround { get; private set; }
         public Position Position { get; private set; }
-        public Point Offset { get; private set; }
         public Serial Container { get; private set; }
         public Serial Serial { get; private set; }
         public Graphic Graphic { get; private set; }
@@ -50,7 +49,7 @@ namespace ClassicUO.Game
         public bool Enabled { get; set; }
         public bool Dropped { get; set; }
 
-        public void Set(Item item, ushort amount, Point offset)
+        public void Set(Item item, ushort amount, Point? offset = null)
         {
             Enabled = true;
 
@@ -68,9 +67,6 @@ namespace ClassicUO.Game
             IsWearable = item.ItemData.IsWearable;
             Layer = item.Layer;
             Flags = item.Flags;
-            Offset = offset;
-
-            UIManager.GameCursor.SetDraggedItem(this);
         }
 
         public void Clear()

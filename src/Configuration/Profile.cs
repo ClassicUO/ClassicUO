@@ -311,6 +311,8 @@ namespace ClassicUO.Configuration
 
         [JsonProperty] public bool DoubleClickToLootInsideContainers { get; set; }
 
+        [JsonProperty] public bool RelativeDragAndDropItems { get; set; }
+
 
         internal static string ProfilePath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data");

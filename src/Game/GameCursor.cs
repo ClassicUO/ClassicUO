@@ -71,7 +71,6 @@ namespace ClassicUO.Game
         private ItemHold _itemHold;
         private bool _needGraphicUpdate = true;
         private Point _offset;
-        private Rectangle _rect;
 
         public GameCursor()
         {
@@ -250,14 +249,24 @@ namespace ClassicUO.Game
         public bool IsDraggingCursorForced { get; set; }
 
 
-        public void SetDraggedItem(ItemHold hold)
+        public void SetDraggedItem(ItemHold hold, Point? offset)
         {
             _itemHold = hold;
             _draggedItemTexture = FileManager.Art.GetTexture(_itemHold.DisplayedGraphic);
-            _offset = hold.Offset;
+            if (_draggedItemTexture == null)
+                return;
 
-            _rect.Width = _draggedItemTexture.Width;
-            _rect.Height = _draggedItemTexture.Height;
+            float scale = 1;
+            if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
+                scale = UIManager.ContainerScale;
+
+            _offset.X = (int) ((_draggedItemTexture.Width >> 1) * scale);
+            _offset.Y = (int) ((_draggedItemTexture.Height >> 1) * scale);
+
+            if (offset.HasValue)
+            {
+                _offset -= offset.Value;
+            }
         }
 
         public unsafe void Update(double totalMS, double frameMS)
@@ -323,10 +332,7 @@ namespace ClassicUO.Game
 
                         if (list.Count != 0)
                         {
-                            GameObject selectedObj = SelectedObject.LastObject as GameObject;
-                          
-                          
-                            if (selectedObj != null)
+                            if (SelectedObject.LastObject is GameObject selectedObj)
                             {
                                 int z = 0;
 
@@ -421,19 +427,19 @@ namespace ClassicUO.Game
                 if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
                     scale = UIManager.ContainerScale;
 
-                int x = Mouse.Position.X - (int) (_offset.X * scale);
-                int y = Mouse.Position.Y - (int) (_offset.Y * scale);
+                int x = Mouse.Position.X - (int) (_offset.X );
+                int y = Mouse.Position.Y - (int) (_offset.Y);
 
                 Vector3 hue = Vector3.Zero;
                 ShaderHuesTraslator.GetHueVector(ref hue, _itemHold.Hue, _itemHold.IsPartialHue, _itemHold.HasAlpha ? .5f : 0);
 
-                sb.Draw2D(_draggedItemTexture, x, y, _rect.Width * scale, _rect.Height * scale, _rect.X, _rect.Y, _rect.Width, _rect.Height, ref hue);
+                sb.Draw2D(_draggedItemTexture, x, y, _draggedItemTexture.Width * scale, _draggedItemTexture.Height * scale, ref hue);
 
                 if (_itemHold.Amount > 1 && _itemHold.DisplayedGraphic == _itemHold.Graphic && _itemHold.IsStackable)
                 {
                     x += 5;
                     y += 5;
-                    sb.Draw2D(_draggedItemTexture, x, y, _rect.Width * scale, _rect.Height * scale, _rect.X, _rect.Y, _rect.Width, _rect.Height, ref hue);
+                    sb.Draw2D(_draggedItemTexture, x, y, _draggedItemTexture.Width * scale, _draggedItemTexture.Height * scale, ref hue);
                 }
             }
 

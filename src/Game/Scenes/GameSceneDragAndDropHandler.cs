@@ -38,8 +38,6 @@ namespace ClassicUO.Game.Scenes
     internal partial class GameScene
     {
         private GameObject _dragginObject;
-        private Point _dragOffset;
-
 
         public ItemHold HeldItem { get; private set; }
 
@@ -60,7 +58,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private bool PickupItemBegin(Item item, int x, int y, int? amount = null)
+        private bool PickupItemBegin(Item item, int x, int y, int? amount = null, Point? offset = null)
         {
             if (World.Player.IsDead || item == null || item.IsDestroyed || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
                 return false;
@@ -84,15 +82,16 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            return PickupItemDirectly(item, x, y, amount ?? item.Amount);
+            return PickupItemDirectly(item, x, y, amount ?? item.Amount, offset);
         }
 
-        private bool PickupItemDirectly(Item item, int x, int y, int amount)
+        private bool PickupItemDirectly(Item item, int x, int y, int amount, Point? offset)
         {
             if (World.Player.IsDead || HeldItem.Enabled || item == null || item.IsDestroyed /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/) return false;
 
             HeldItem.Clear();
-            HeldItem.Set(item, amount <= 0 ? item.Amount : (ushort) amount, new Point(x, y));
+            HeldItem.Set(item, amount <= 0 ? item.Amount : (ushort) amount);
+            UIManager.GameCursor.SetDraggedItem(HeldItem, offset);
 
             if (!item.OnGround)
             {
@@ -182,16 +181,15 @@ namespace ClassicUO.Game.Scenes
                         {
                             textureW = (int)(texture.Width * scale);
                             textureH = (int)(texture.Height * scale);
-                            x -= (int) (HeldItem.Offset.X * scale);
-                            y -= (int) (HeldItem.Offset.Y * scale);
                         }
                         else
                         {
                             textureW = texture.Width;
                             textureH = texture.Height;
-                            x -= HeldItem.Offset.X;
-                            y -= HeldItem.Offset.Y;
                         }
+
+                        x -= textureW >> 1;
+                        y -= textureH >> 1;
 
                         if (x + textureW > bounds.Width)
                             x = bounds.Width - textureW;
