@@ -1403,10 +1403,12 @@ namespace ClassicUO.Game.GameObjects
             }*/
         }
 
-        protected override bool NoIterateAnimIndex()
-        {
-            return false;
-        }
+        // ############# DO NOT DELETE IT! #############
+        //protected override bool NoIterateAnimIndex()
+        //{
+        //    return false;
+        //}
+        // #############################################
 
         public bool Walk(Direction direction, bool run)
         {
