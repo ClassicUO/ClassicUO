@@ -184,13 +184,23 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Save(writer);
             writer.Write(_background.SpecialHeight);
+            writer.Write(IsMinimized);
         }
 
         public override void Restore(BinaryReader reader)
         {
             base.Restore(reader);
-
+            if (Configuration.Profile.GumpsVersion == 2)
+            {
+                reader.ReadUInt32();
+                IsMinimized = reader.ReadBoolean();
+            }
             _background.Height = _background.SpecialHeight = reader.ReadInt32();
+
+            if (Profile.GumpsVersion >= 3)
+            {
+                IsMinimized = reader.ReadBoolean();
+            }
         }
 
         private void InitializeJournalEntries()
@@ -297,6 +307,9 @@ namespace ClassicUO.Game.UI.Gumps
             public override void Update(double totalMS, double frameMS)
             {
                 base.Update(totalMS, frameMS);
+                if (!IsVisible)
+                    return;
+
                 _scrollBar.X = X + Width - (_scrollBar.Width >> 1) + 5;
                 _scrollBar.Height = Height;
                 CalculateScrollBarMaxValue();

@@ -24,6 +24,7 @@
 using System;
 using System.IO;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -93,12 +94,26 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Save(writer);
             writer.Write(LocalSerial);
+            writer.Write(IsMinimized);
         }
 
         public override void Restore(BinaryReader reader)
         {
             base.Restore(reader);
+
+            if (Profile.GumpsVersion == 2)
+            {
+                reader.ReadUInt32();
+                IsMinimized = reader.ReadBoolean();
+            }
+
             CUOEnviroment.Client.GetScene<GameScene>().DoubleClickDelayed(reader.ReadUInt32());
+
+            if (Profile.GumpsVersion >= 3)
+            {
+                reader.ReadBoolean();
+            }
+
             Dispose();
         }
 

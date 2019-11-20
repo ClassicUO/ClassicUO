@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -300,11 +301,19 @@ namespace ClassicUO.Game.UI.Gumps
             writer.Write(_boxes.Count);
 
             for (int i = 0; i < _boxes.Count; i++) writer.Write(_boxes[i].Opened);
+            writer.Write(IsMinimized);
         }
 
         public override void Restore(BinaryReader reader)
         {
             base.Restore(reader);
+
+            if (Configuration.Profile.GumpsVersion == 2)
+            {
+                reader.ReadUInt32();
+                IsMinimized = reader.ReadBoolean();
+            }
+
             _scrollArea.Height = _scrollArea.SpecialHeight = reader.ReadInt32();
 
             int count = reader.ReadInt32();
@@ -315,6 +324,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (i < _boxes.Count)
                     _boxes[i].Opened = opened;
+            }
+
+            if (Profile.GumpsVersion >= 3)
+            {
+                IsMinimized = reader.ReadBoolean();
             }
         }
 

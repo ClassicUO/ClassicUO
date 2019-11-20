@@ -347,7 +347,7 @@ namespace ClassicUO.Configuration
         {
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "gumps.bin"))))
             {
-                const uint VERSION = 2;
+                const uint VERSION = 3;
 
                 writer.Write(VERSION);
                 writer.Write(0);
