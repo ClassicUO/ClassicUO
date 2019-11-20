@@ -97,16 +97,19 @@ namespace ClassicUO.Game.UI.Gumps
                     _gumpPicContainer.Graphic = value ? (Graphic) _data.IconizedGraphic : Graphic;
                     float scale = UIManager.ContainerScale;
 
-                    _gumpPicContainer.Width = (int) (_gumpPicContainer.Width * scale);
-                    _gumpPicContainer.Height = (int) (_gumpPicContainer.Height * scale);
-                    foreach (ItemGump itemGump in Children.OfType<ItemGump>())
+                    Width = _gumpPicContainer.Width = (int) (_gumpPicContainer.Width * scale);
+                    Height = _gumpPicContainer.Height = (int) (_gumpPicContainer.Height * scale);
+
+                    foreach (var c in Children)
                     {
-                        if (!itemGump.IsInitialized)
-                            itemGump.Initialize();
-                        itemGump.IsVisible = !value;
+                        if (!c.IsInitialized)
+                            c.Initialize();
+                        c.IsVisible = !value;
                     }
 
-                    _hitBox.IsVisible = !value;
+                    _gumpPicContainer.IsVisible = true;
+
+                    SetInScreen();
                 }
             }
         }
@@ -135,6 +138,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             _data = ContainerManager.Get(Graphic);
             Graphic g = _data.Graphic;
+
+
+            _gumpPicContainer?.Dispose();
+            _hitBox?.Dispose();
 
             _hitBox = new HitBox((int) (_data.MinimizerArea.X * scale), (int) (_data.MinimizerArea.Y * scale), (int) (_data.MinimizerArea.Width * scale), (int) (_data.MinimizerArea.Height * scale));
             _hitBox.MouseUp += HitBoxOnMouseUp;
@@ -260,8 +267,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void ForceUpdate()
         {
-            Children[0].Dispose();
-
             BuildGump();
             ItemsOnAdded(null, new CollectionChangedEventArgs<Serial>(FindControls<ItemGump>().Select(s => s.LocalSerial)));
         }

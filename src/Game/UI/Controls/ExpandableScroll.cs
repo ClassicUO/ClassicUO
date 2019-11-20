@@ -200,11 +200,13 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             if (!_gumpTop.IsInitialized)
-                IsVisible = false;
+            {
+                //IsVisible = false;
+            }
             else
             {
-                if (!IsVisible)
-                    IsVisible = true;
+                //if (!IsVisible)
+                //    IsVisible = true;
                 //TOP
                 _gumpTop.X = 0;
                 _gumpTop.Y = 0;

@@ -41,10 +41,8 @@ using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class StandardSkillsGump : MinimizableGump
+    internal class StandardSkillsGump : Gump
     {
-        internal override GumpPic Iconized { get; } = new GumpPic(0, 0, 0x839, 0);
-        internal override HitBox IconizerArea { get; } = new HitBox(160, 0, 23, 24);
         private readonly SkillControl[] _allSkillControls;
         private readonly GumpPic _bottomComment;
         private readonly GumpPic _bottomLine;
@@ -57,6 +55,9 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Label _skillsLabelSum;
         internal Checkbox _checkReal, _checkCaps;
         private const int _diffY = 22;
+        private GumpPic _gumpPic;
+        private HitBox _hitBox;
+        private bool _isMinimized;
 
         public StandardSkillsGump() : base(Constants.SKILLSTD_LOCALSERIAL, 0)
         {
@@ -65,7 +66,8 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             Height = 200 + _diffY;
 
-            Add(new GumpPic(160, 0, 0x82D, 0));
+            Add(_gumpPic = new GumpPic(160, 0, 0x82D, 0));
+            _gumpPic.MouseDoubleClick += _picBase_MouseDoubleClick;
             _scrollArea = new ExpandableScroll(0, _diffY, Height, 0x1F40)
             {
                 TitleGumpID = 0x0834,
@@ -101,8 +103,62 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (KeyValuePair<string, List<int>> k in SkillsGroupManager.Groups)
                 AddSkillsToGroup(k.Key, k.Value.OrderBy(s => s, _instance).ToList());
 
+
+            _hitBox = new HitBox(160, 0, 23, 24);
+            Add(_hitBox);
+            _hitBox.MouseUp += _hitBox_MouseUp;
         }
 
+      
+        public bool IsMinimized
+        {
+            get => _isMinimized;
+            set
+            {
+                if (_isMinimized != value)
+                {
+                    _isMinimized = value;
+
+                    _gumpPic.Graphic = value ? (Graphic)0x839 : (Graphic)0x82D;
+
+                    if (value)
+                    {
+                        _gumpPic.X = 0;
+                    }
+                    else
+                    {
+                        _gumpPic.X = 160;
+                    }
+
+                    foreach (var c in Children)
+                    {
+                        if (!c.IsInitialized)
+                            c.Initialize();
+                        c.IsVisible = !value;
+                    }
+
+                    _gumpPic.IsVisible = true;
+                    WantUpdateSize = true;
+                }
+            }
+        }
+
+
+        private void _picBase_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
+        {
+            if (e.Button == MouseButton.Left && IsMinimized)
+            {
+                IsMinimized = false;
+            }
+        }
+
+        private void _hitBox_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButton.Left && !IsMinimized)
+            {
+                IsMinimized = true;
+            }
+        }
 
         public override void OnButtonClick(int buttonID)
         {

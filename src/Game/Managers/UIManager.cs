@@ -1015,7 +1015,7 @@ namespace ClassicUO.Game.Managers
 
             foreach (Control c in Gumps)
             {
-                if (ismodal && !c.ControlInfo.IsModal || !c.IsVisible || !c.IsEnabled)
+                if ((ismodal && !c.ControlInfo.IsModal) || !c.IsVisible || !c.IsEnabled)
                 {
                     continue;
                 }

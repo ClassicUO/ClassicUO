@@ -348,7 +348,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (WantUpdateSize)
                     {
-                        if (c.Page == 0 || c.Page == ActivePage)
+                        if ((c.Page == 0 || c.Page == ActivePage) && c.IsVisible)
                         {
                             if (w < c.Bounds.Right)
                                 w = c.Bounds.Right;
@@ -359,7 +359,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
                 }
 
-                if (WantUpdateSize)
+                if (WantUpdateSize && IsVisible)
                 {
                     if (w != Width)
                         Width = w;
@@ -461,6 +461,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public void HitTest(int x, int y, ref Control res)
         {
+            if (!IsVisible || !IsEnabled)
+                return;
+
             int parentX = ParentX;
             int parentY = ParentY;
 
