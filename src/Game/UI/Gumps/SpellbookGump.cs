@@ -116,12 +116,12 @@ namespace ClassicUO.Game.UI.Gumps
             item.Items.Added += ItemsOnAdded;
             item.Items.Removed += ItemsOnRemoved;
 
-          
-            _pageCornerLeft = _pageCornerRight = null;
+            AssignGraphic(item);
             GetBookInfo(_spellBookType, out Graphic bookGraphic, out Graphic minimizedGraphic, out Graphic iconStartGraphic, out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount);
             Add(_picBase = new GumpPic(0, 0, bookGraphic, 0));
             _picBase.MouseDoubleClick += _picBase_MouseDoubleClick;
-           
+
+
             _dataBox = new DataBox(0, 0, 0, 0)
             {
                 CanMove = true,
@@ -132,6 +132,20 @@ namespace ClassicUO.Game.UI.Gumps
             _hitBox = new HitBox(0, 98, 27, 23);
             Add(_hitBox);
             _hitBox.MouseUp += _hitBox_MouseUp;
+
+
+            Add(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
+            _pageCornerLeft.LocalSerial = 0;
+            _pageCornerLeft.Page = int.MaxValue;
+            _pageCornerLeft.MouseUp += PageCornerOnMouseClick;
+            _pageCornerLeft.MouseDoubleClick += PageCornerOnMouseDoubleClick;
+            Add(_pageCornerRight = new GumpPic(321, 8, 0x08BC, 0));
+            _pageCornerRight.LocalSerial = 1;
+            _pageCornerRight.Page = 1;
+            _pageCornerRight.MouseUp += PageCornerOnMouseClick;
+            _pageCornerRight.MouseDoubleClick += PageCornerOnMouseDoubleClick;
+
+            
 
 
             Update();
@@ -824,7 +838,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void SetActivePage(int page)
         {
-            if (page == ActivePage)
+            if (page == _dataBox.ActivePage)
                 return;
 
             if (page < 1)
@@ -832,9 +846,9 @@ namespace ClassicUO.Game.UI.Gumps
             else if (page > _maxPage)
                 page = _maxPage;
 
-            ActivePage = page;
-            _pageCornerLeft.Page = ActivePage != 1 ? 0 : int.MaxValue;
-            _pageCornerRight.Page = ActivePage != _maxPage ? 0 : int.MaxValue;
+            _dataBox.ActivePage = page;
+            _pageCornerLeft.Page = _dataBox.ActivePage != 1 ? 0 : int.MaxValue;
+            _pageCornerRight.Page = _dataBox.ActivePage != _maxPage ? 0 : int.MaxValue;
 
             CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
         }
@@ -904,6 +918,13 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
+            AssignGraphic(item);
+
+            CreateBook();
+        }
+
+        private void AssignGraphic(Item item)
+        {
             switch (item.Graphic)
             {
                 default:
@@ -948,13 +969,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
             }
-
-            CreateBook();
         }
 
         private void PageCornerOnMouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? ActivePage - 1 : ActivePage + 1);
+            if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? _dataBox.ActivePage - 1 : _dataBox.ActivePage + 1);
         }
 
         private void PageCornerOnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
