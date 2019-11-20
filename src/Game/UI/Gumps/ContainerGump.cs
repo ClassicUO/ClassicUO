@@ -91,7 +91,7 @@ namespace ClassicUO.Game.UI.Gumps
             get => _isMinimized;
             set
             {
-                if (_isMinimized != value)
+                //if (_isMinimized != value)
                 {
                     _isMinimized = value;
                     _gumpPicContainer.Graphic = value ? (Graphic) _data.IconizedGraphic : Graphic;
@@ -121,6 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
             WantUpdateSize = false;
             _isCorspeContainer = Graphic == 0x0009;
 
+          
             Item item = World.Items.Get(LocalSerial);
 
             if (item == null)
@@ -216,6 +217,12 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = gg.X;
                 Y = gg.Y;
+            }
+
+            // workaroud to force the children update
+            if (IsInitialized)
+            {
+                IsMinimized = IsMinimized;
             }
 
 
