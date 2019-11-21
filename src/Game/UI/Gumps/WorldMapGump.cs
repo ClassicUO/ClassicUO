@@ -515,6 +515,16 @@ namespace ClassicUO.Game.UI.Gumps
                     continue;
                 }
 
+                if (string.IsNullOrEmpty(wme.Name))
+                {
+                    Mobile m = World.Mobiles.Get(wme.Serial);
+
+                    if (m != null && !string.IsNullOrEmpty(m.Name))
+                    {
+                        wme.Name = m.Name;
+                    }
+                }
+
                 DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom);
             }
 
