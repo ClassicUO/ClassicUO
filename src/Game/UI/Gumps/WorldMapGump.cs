@@ -491,7 +491,7 @@ namespace ClassicUO.Game.UI.Gumps
                         if (mob != null && mob.Distance <= World.ClientViewRange)
                         {
                             var wme = World.WMapManager.GetEntity(mob);
-                            if (string.IsNullOrEmpty(wme.Name))
+                            if (wme != null && string.IsNullOrEmpty(wme.Name))
                                 wme.Name = mob.Name ?? "<out of range>";
 
                             DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Yellow, true, true, true);                  
