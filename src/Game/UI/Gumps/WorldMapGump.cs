@@ -488,8 +488,22 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         var mob = World.Mobiles.Get(partyMember.Serial);
 
-                        if (mob != null)
-                            DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Yellow, true, true, true);
+                        if (mob != null && mob.Distance <= World.ClientViewRange)
+                        {
+                            var wme = World.WMapManager.GetEntity(mob);
+                            if (string.IsNullOrEmpty(wme.Name))
+                                wme.Name = mob.Name ?? "<out of range>";
+
+                            DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Yellow, true, true, true);                  
+                        }
+                        else
+                        {
+                            var wme = World.WMapManager.GetEntity(mob);
+                            if (wme != null && !wme.IsGuild)
+                            {                             
+                                DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom);
+                            }
+                        }
                     }
                 }
             }
@@ -497,22 +511,8 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (var wme in World.WMapManager.Entities.Values)
             {
                 if (!wme.IsGuild)
-                {
-                    if (string.IsNullOrEmpty(wme.Name))
-                    {
-                        for (int i = 0; i < World.Party.Members.Length; i++)
-                        {
-                            if (World.Party.Members[i] != null && wme.Serial == World.Party.Members[i].Serial)
-                            {
-                                wme.Name = World.Party.Members[i].Name;
-
-                                break;
-                            }
-                        }
-                    }
-
-                    if (!_showPartyMembers)
-                        continue;
+                {          
+                    continue;
                 }
 
                 DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom);
