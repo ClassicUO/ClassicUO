@@ -2702,6 +2702,9 @@ namespace ClassicUO.Network
                 entity.ProcessDelta();
             }
 
+            if (text.StartsWith("(summoned"))
+                Mobile.SetSummonTime(text, serial);
+
             Chat.HandleMessage(entity, text, name, hue, type, ProfileManager.Current.ChatFont, true, lang);
         }
 

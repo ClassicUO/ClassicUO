@@ -87,7 +87,7 @@ namespace ClassicUO.Game.UI.Gumps
         // GameWindowSize
         private TextBox _gameWindowWidth;
         private Combobox _gridLoot;
-        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _useShiftPathfind, _alwaysRun, _alwaysRunUnlessHidden, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
+        private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _useShiftPathfind, _alwaysRun, _alwaysRunUnlessHidden, _showHpMobile, _overheadSummonTime, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _chatAfterEnter, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
         private Combobox _hpComboBox, _healtbarType, _fieldsType, _hpComboBoxShowWhen;
 
         // combat & spells
@@ -361,6 +361,13 @@ namespace ClassicUO.Game.UI.Gumps
             }, mode);
             hpAreaItem.Add(_hpComboBoxShowWhen);
 
+            _overheadSummonTime = new Checkbox(0x00D2, 0x00D3, "Show summon time after HP", FONT, HUE_FONT)
+            {
+                X = 0, Y = _hpComboBox.Bounds.Bottom + 10, IsChecked = ProfileManager.Current.OverheadSummonTime
+            };
+
+            hpAreaItem.Add(_overheadSummonTime);
+
             mode = ProfileManager.Current.CloseHealthBarType;
 
             if (mode < 0 || mode > 2)
@@ -368,11 +375,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             text = new Label("Close healthbar gump when:", true, HUE_FONT)
             {
-                Y = _hpComboBox.Bounds.Bottom + 10
+                Y = _overheadSummonTime.Bounds.Bottom + 10
             };
             hpAreaItem.Add(text);
 
-            _healtbarType = new Combobox(text.Bounds.Right + 10, _hpComboBox.Bounds.Bottom + 10, 150, new[]
+            _healtbarType = new Combobox(text.Bounds.Right + 10, _overheadSummonTime.Bounds.Bottom + 10, 150, new[]
             {
                 "None", "Mobile Out of Range", "Mobile is Dead"
             }, mode);
@@ -380,7 +387,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             text = new Label("Fields: ", true, HUE_FONT)
             {
-                Y = _hpComboBox.Bounds.Bottom + 45
+                Y = _overheadSummonTime.Bounds.Bottom + 45
             };
             hpAreaItem.Add(text);
 
@@ -389,7 +396,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (mode < 0 || mode > 2)
                 mode = 0;
 
-            _fieldsType = new Combobox(text.Bounds.Right + 10, _hpComboBox.Bounds.Bottom + 45, 150, new[]
+            _fieldsType = new Combobox(text.Bounds.Right + 10, _overheadSummonTime.Bounds.Bottom + 45, 150, new[]
             {
                 "Normal fields", "Static fields", "Tile fields"
             }, mode);
@@ -1400,6 +1407,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _showHpMobile.IsChecked = false;
                     _hpComboBox.SelectedIndex = 0;
                     _hpComboBoxShowWhen.SelectedIndex = 0;
+                    _overheadSummonTime.IsChecked = false;
                     _highlightByState.IsChecked = true;
                     _poisonColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
                     _paralyzedColorPickerBox.SetColor(0x014C, FileManager.Hues.GetPolygoneColor(12, 0x014C));
@@ -1597,6 +1605,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.InvulnerableHue = _invulnerableColorPickerBox.Hue;
             ProfileManager.Current.MobileHPType = _hpComboBox.SelectedIndex;
             ProfileManager.Current.MobileHPShowWhen = _hpComboBoxShowWhen.SelectedIndex;
+            ProfileManager.Current.OverheadSummonTime = _overheadSummonTime.IsChecked;
             ProfileManager.Current.HoldDownKeyTab = _holdDownKeyTab.IsChecked;
             ProfileManager.Current.HoldDownKeyAltToCloseAnchored = _holdDownKeyAlt.IsChecked;
             ProfileManager.Current.HoldShiftForContext = _holdShiftForContext.IsChecked;

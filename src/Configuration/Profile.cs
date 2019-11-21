@@ -187,6 +187,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool DragSelectHumanoidsOnly { get; set; }
         [JsonProperty] public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
         [JsonProperty] public bool NameOverheadToggled { get; set; } = false;
+        [JsonProperty] public bool OverheadSummonTime { get; set; }
         [JsonProperty] public bool ShowTargetRangeIndicator { get; set; }
         [JsonProperty] public bool PartyInviteGump { get; set; }
         [JsonProperty] public bool CustomBarsToggled { get; set; }

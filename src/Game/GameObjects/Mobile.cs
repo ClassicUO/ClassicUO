@@ -152,6 +152,10 @@ namespace ClassicUO.Game.GameObjects
 
         public long LastStepSoundTime;
 
+        public int SummonTime { get; set; } = 0;
+
+        public uint SummonTimeTick { get; set; } = 0;
+
         public int StepSoundOffset;
 
         protected virtual bool IsWalking => LastStepTime > Time.Ticks - Constants.WALKING_DELAY;
@@ -412,6 +416,45 @@ namespace ClassicUO.Game.GameObjects
                 if (isLowExtended && AnimationGroup == 18)
                     AnimationGroup = 1;
             }
+        }
+
+        public static void SetSummonTime(string text, Serial serial)
+        {
+            String minutes = null;
+            String seconds = null;
+            String[] arraystring = null;
+            String str = text.Replace("(summoned ", "").Replace(")", "");
+
+            if (str.Contains(" "))
+            {
+                arraystring = str.Split(' ');
+
+                minutes = arraystring[0].Replace("m", "");
+                seconds = arraystring[1].Replace("s", "");
+            }
+            else
+            {
+                if (str.Contains("m"))
+                {
+                    minutes = str.Replace("m", "");
+                }
+                else
+                {
+                    seconds = str.Replace("s", "");
+                }
+            }
+
+            int intm = 0;
+            Int32.TryParse(minutes, out intm);
+            int ints = 0;
+            Int32.TryParse(seconds, out ints);
+            int time = (intm * 60) + ints;
+
+            Mobile targetmobile = World.Mobiles.Get(serial);
+
+            targetmobile.SummonTimeTick = Time.Ticks;
+            targetmobile.SummonTime = time;
+
         }
 
         private static readonly byte[,] _animationIdle =

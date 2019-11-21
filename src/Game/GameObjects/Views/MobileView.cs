@@ -49,6 +49,7 @@ namespace ClassicUO.Game.GameObjects
 
         public byte HitsPercentage;
         public RenderedText HitsTexture;
+        public RenderedText SummonTexture { get; set; }
 
         public void UpdateHits(byte perc)
         {
@@ -68,6 +69,27 @@ namespace ClassicUO.Game.GameObjects
                 HitsTexture?.Destroy();
                 HitsTexture = RenderedText.Create($"[{perc}%]", color, 3, false);
             }
+        }
+
+        public void UpdateSummonTime()
+        {
+            if (Time.Ticks >= (SummonTimeTick + 1000))
+            {
+                SummonTime = SummonTime - 1;
+                SummonTimeTick = Time.Ticks;
+            }
+
+            ushort color = 0x0044;
+
+            if (SummonTime < 20)
+                color = 0x0021;
+            else if (SummonTime < 40)
+                color = 0x0030;
+            else if (SummonTime < 60)
+                color = 0x0035;
+
+            SummonTexture?.Destroy();
+            SummonTexture = RenderedText.Create($"[{SummonTime}s]", color, 3, false);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)

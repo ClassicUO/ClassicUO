@@ -103,6 +103,11 @@ namespace ClassicUO.Game.Managers
                 x -= BAR_WIDTH_HALF;
                 y -= BAR_HEIGHT_HALF;
 
+                if (ProfileManager.Current.OverheadSummonTime && mobile.SummonTime != 0)
+                {
+                    mobile.UpdateSummonTime();
+                }
+
                 if (mode != 1 && !mobile.IsDead)
                 {
                     if ((showWhen == 2 && current != max) || showWhen <= 1)
@@ -153,6 +158,8 @@ namespace ClassicUO.Game.Managers
 
                             if (!(xx < screenX || xx > screenX + screenW - mobile.HitsTexture.Width || yy < screenY || yy > screenY + screenH))
                                 mobile.HitsTexture.Draw(batcher, xx, yy);
+                            if (ProfileManager.Current.OverheadSummonTime && mobile.SummonTime != 0)
+                                mobile.SummonTexture.Draw(batcher, xx + mobile.HitsTexture.Width, yy);
                         }
                     }
                 }
