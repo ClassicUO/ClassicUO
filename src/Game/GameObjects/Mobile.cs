@@ -420,6 +420,9 @@ namespace ClassicUO.Game.GameObjects
 
         public static void SetSummonTime(string text, Serial serial)
         {
+            if (text.Equals("(summoned)"))   
+                return;
+
             String minutes = null;
             String seconds = null;
             String[] arraystring = null;
