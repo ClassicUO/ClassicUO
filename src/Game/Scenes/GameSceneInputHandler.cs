@@ -524,7 +524,14 @@ namespace ClassicUO.Game.Scenes
             bool result = false;
 
             if (!IsMouseOverViewport)
+            {
+                result = _queuedObject != null;
+                ClearDequeued();
                 return result;
+            }
+
+            if (_queuedObject == null)
+                return true;
 
             BaseGameObject obj = SelectedObject.Object;
 
