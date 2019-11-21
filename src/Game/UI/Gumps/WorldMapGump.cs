@@ -498,7 +498,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            var wme = World.WMapManager.GetEntity(mob);
+                            var wme = World.WMapManager.GetEntity(partyMember.Serial);
                             if (wme != null && !wme.IsGuild)
                             {                             
                                 DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom);
