@@ -139,16 +139,16 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             switch ((Buttons) buttonID)
             {
                 case Buttons.PreviousScreen:
-                    charCreationGump.StepBack(_selectedProfession > 0 ? 2 : 1);
+                    charCreationGump?.StepBack(_selectedProfession > 0 ? 2 : 1);
 
                     break;
 
                 case Buttons.Finish:
 
                     if (_selectedCity != default)
-                        charCreationGump.SetCity(_selectedCity);
+                        charCreationGump?.SetCity(_selectedCity);
 
-                    charCreationGump.CreateCharacter(_selectedProfession);
+                    charCreationGump?.CreateCharacter(_selectedProfession);
 
                     break;
 
