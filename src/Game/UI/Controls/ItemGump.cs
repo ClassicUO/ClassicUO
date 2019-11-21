@@ -111,7 +111,7 @@ namespace ClassicUO.Game.UI.Controls
                 Dispose();
             }
 
-            if (IsDisposed)
+            if (IsDisposed || !Item.AllowedToDraw)
                 return false;
 
             ResetHueVector();

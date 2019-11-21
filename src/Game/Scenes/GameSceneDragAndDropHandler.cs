@@ -109,6 +109,7 @@ namespace ClassicUO.Game.Scenes
             }
             item.TextContainer?.Clear();
 
+            item.AllowedToDraw = false;
             //World.Items.Remove(item);
             //World.Items.ProcessDelta();
             CloseItemGumps(item);
