@@ -15,10 +15,10 @@ namespace ClassicUO.Game.Managers
         {
             Serial = serial;
 
-            var mob = World.Mobiles.Get(serial);
+            //var mob = World.Mobiles.Get(serial);
 
-            if (mob != null)
-                GetName();
+            //if (mob != null)
+            //    GetName();
         } 
 
         public readonly Serial Serial;
@@ -27,17 +27,17 @@ namespace ClassicUO.Game.Managers
         public bool IsGuild;
         public string Name;
 
-        public string GetName()
-        {
-            Entity e = World.Get(Serial);
+        //public string GetName()
+        //{
+        //    Entity e = World.Get(Serial);
 
-            if (e != null && !e.IsDestroyed && !string.IsNullOrEmpty(e.Name) && Name != e.Name)
-            {
-                Name = e.Name;
-            }
+        //    if (e != null && !e.IsDestroyed && !string.IsNullOrEmpty(e.Name) && Name != e.Name)
+        //    {
+        //        Name = e.Name;
+        //    }
 
-            return string.IsNullOrEmpty(Name) ? "<out of range>" : Name;
-        }
+        //    return string.IsNullOrEmpty(Name) ? "<out of range>" : Name;
+        //}
     }
 
     class WorldMapEntityManager

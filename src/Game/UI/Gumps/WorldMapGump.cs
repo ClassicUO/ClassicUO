@@ -491,8 +491,8 @@ namespace ClassicUO.Game.UI.Gumps
                         if (mob != null && mob.Distance <= World.ClientViewRange)
                         {
                             var wme = World.WMapManager.GetEntity(mob);
-                            if (wme != null && string.IsNullOrEmpty(wme.Name))
-                                wme.Name = mob.Name ?? "<out of range>";
+                            if (wme != null)
+                                wme.Name = partyMember.Name;
 
                             DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Yellow, true, true, true);                  
                         }
@@ -656,8 +656,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             batcher.Draw2D(Textures.GetTexture(color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE, DOT_SIZE, ref _hueVector);
 
-            string name = entity.GetName();
-            Vector2 size = Fonts.Regular.MeasureString(name);
+            //string name = entity.GetName();
+            string name = entity.Name ?? "<out of range>";
+            Vector2 size = Fonts.Regular.MeasureString(entity.Name ?? name);
 
             if (rotX + size.X / 2 > x + Width - 8)
             {
