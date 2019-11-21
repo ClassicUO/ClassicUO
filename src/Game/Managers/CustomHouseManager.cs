@@ -112,7 +112,7 @@ namespace ClassicUO.Game.Managers
                 int componentsOnFloor = (width - 1) * (height - 1);
 
                 MaxComponets = FloorCount * (componentsOnFloor + 2 * (width + height) - 4) -
-                               (int)((double)(FloorCount * componentsOnFloor) * -0.25) + 2 * width + 3 * height - 5;
+                               (int)(FloorCount * componentsOnFloor * -0.25) + 2 * width + 3 * height - 5;
                 MaxFixtures = MaxComponets / 20;
             }
         }

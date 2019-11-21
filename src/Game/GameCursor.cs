@@ -427,8 +427,8 @@ namespace ClassicUO.Game
                 if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
                     scale = UIManager.ContainerScale;
 
-                int x = Mouse.Position.X - (int) (_offset.X );
-                int y = Mouse.Position.Y - (int) (_offset.Y);
+                int x = Mouse.Position.X - _offset.X;
+                int y = Mouse.Position.Y - _offset.Y;
 
                 Vector3 hue = Vector3.Zero;
                 ShaderHuesTraslator.GetHueVector(ref hue, _itemHold.Hue, _itemHold.IsPartialHue, _itemHold.HasAlpha ? .5f : 0);

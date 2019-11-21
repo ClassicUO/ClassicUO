@@ -234,7 +234,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch (var)
             {
                 case InfoBarVars.HP:
-                    percent = (float) World.Player.Hits / (float) World.Player.HitsMax;
+                    percent = World.Player.Hits / (float) World.Player.HitsMax;
                     if (percent <= 0.25)
                         return 0x0021;
                     else if (percent <= 0.5)
@@ -244,7 +244,7 @@ namespace ClassicUO.Game.UI.Gumps
                     else
                         return 0x0481;
                 case InfoBarVars.Mana:
-                    percent = (float) World.Player.Mana / (float) World.Player.ManaMax;
+                    percent = World.Player.Mana / (float) World.Player.ManaMax;
                     if (percent <= 0.25)
                         return 0x0021;
                     else if (percent <= 0.5)
@@ -254,7 +254,7 @@ namespace ClassicUO.Game.UI.Gumps
                     else
                         return 0x0481;
                 case InfoBarVars.Stamina:
-                    percent = (float) World.Player.Stamina / (float) World.Player.StaminaMax;
+                    percent = World.Player.Stamina / (float) World.Player.StaminaMax;
                     if (percent <= 0.25)
                         return 0x0021;
                     else if (percent <= 0.5)
@@ -264,7 +264,7 @@ namespace ClassicUO.Game.UI.Gumps
                     else
                         return 0x0481;
                 case InfoBarVars.Weight:
-                    percent = (float) World.Player.Weight / (float) World.Player.WeightMax;
+                    percent = World.Player.Weight / (float) World.Player.WeightMax;
                     if (percent >= 1)
                         return 0x0021;
                     else if (percent >= 0.75)

@@ -1114,9 +1114,9 @@ namespace ClassicUO.Renderer
             EnsureSize();
 
             float minX = sx / (float) texture.Width;
-            float maxX = (sx + swidth) / (float) texture.Width;
+            float maxX = (sx + swidth) / texture.Width;
             float minY = sy / (float) texture.Height;
-            float maxY = (sy + sheight) / (float) texture.Height;
+            float maxY = (sy + sheight) / texture.Height;
 
             ref var vertex = ref _vertexInfo[_numSprites];
 
@@ -1173,8 +1173,8 @@ namespace ClassicUO.Renderer
         {
             EnsureSize();
 
-            float minX = sx / (float) texture.Width, maxX = (sx + swidth) / (float) texture.Width;
-            float minY = sy / (float) texture.Height, maxY = (sy + sheight) / (float) texture.Height;
+            float minX = sx / (float) texture.Width, maxX = (sx + swidth) / texture.Width;
+            float minY = sy / (float) texture.Height, maxY = (sy + sheight) / texture.Height;
 
             ref var vertex = ref _vertexInfo[_numSprites];
 

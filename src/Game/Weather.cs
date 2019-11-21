@@ -40,7 +40,7 @@ namespace ClassicUO.Game
 
         private float SinOscillate(float freq, int range, uint current_tick)
         {
-            float anglef = (float) ((int) ((current_tick / 2.7777f) * freq) % 360);
+            float anglef = (int) ((current_tick / 2.7777f) * freq) % 360;
             return Math.Sign(MathHelper.ToRadians(anglef)) * range;
         }
 
