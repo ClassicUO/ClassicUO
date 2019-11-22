@@ -36,7 +36,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class InfoGump : Gump
     {
         private const int WIDTH = 500;
-        private const int HEIGHT = 710;
+        private const int HEIGHT = 400;
         private readonly ScrollArea _scrollArea;
 
         public InfoGump(GameObject obj) : base(0, 0)
