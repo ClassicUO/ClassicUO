@@ -419,33 +419,63 @@ namespace ClassicUO.Game.Scenes
                     case CursorTarget.Object:
                     case CursorTarget.MultiPlacement:
 
-                        if (SelectedObject.Object is GameObject obj)
+                        if (World.CustomHouseManager != null)
                         {
-                            if (World.CustomHouseManager != null)
-                            {
-                                World.CustomHouseManager.OnTargetWorld(obj);
-                            }
-                            else
-                            {
-                                TargetManager.TargetGameObject(obj);
-                            }
+                            World.CustomHouseManager.OnTargetWorld(SelectedObject.Object as GameObject);
+                        }
+                        else
+                        {
+                            var obj = SelectedObject.Object;
+                            if (obj is TextOverhead ov)
+                                obj = ov.Owner;
+                            else if (obj is GameEffect eff && eff.Source != null)
+                                obj = eff.Source;
 
-                            Mouse.LastLeftButtonClickTime = 0;
+                            switch (obj)
+                            {
+                                case Entity ent:
+                                    TargetManager.Target(ent.Serial);
+                                    break;
+                                case Land land:
+                                    TargetManager.Target(land.X, land.Y, land.Z);
+                                    break;
+                                case GameObject o:
+                                    TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
+                                    break;
+                            }
                         }
 
-
+                        Mouse.LastLeftButtonClickTime = 0;
                         break;
 
                     case CursorTarget.SetTargetClientSide:
+                    {
+                        var obj = SelectedObject.Object;
+                        if (obj is TextOverhead ov)
+                            obj = ov.Owner;
+                        else if (obj is GameEffect eff && eff.Source != null)
+                            obj = eff.Source;
 
-                        if (SelectedObject.Object is GameObject obj2)
+                        switch (obj)
                         {
-                            TargetManager.TargetGameObject(obj2);
-                            Mouse.LastLeftButtonClickTime = 0;
-                            UIManager.Add(new InfoGump(obj2));
+                            case Entity ent:
+                                TargetManager.Target(ent.Serial);
+                                UIManager.Add(new InfoGump(ent));
+                                break;
+                            case Land land:
+                                TargetManager.Target(land.X, land.Y, land.Z);
+                                UIManager.Add(new InfoGump(land));
+                                break;
+                            case GameObject o:
+                                TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
+                                UIManager.Add(new InfoGump(o));
+                                break;
                         }
 
-                        break;
+                        Mouse.LastLeftButtonClickTime = 0;
+                    }
+
+                    break;
 
                     case CursorTarget.HueCommandTarget:
 

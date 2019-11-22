@@ -250,13 +250,15 @@ namespace ClassicUO.Game.UI.Gumps
                         case CursorTarget.Object:
                         case CursorTarget.Grab:
                         case CursorTarget.SetGrabBag:
-                            TargetManager.TargetGameObject(Entity);
+                            if (Entity != null)
+                                TargetManager.Target(Entity);
                             Mouse.LastLeftButtonClickTime = 0;
 
                             break;
 
                         case CursorTarget.SetTargetClientSide:
-                            TargetManager.TargetGameObject(Entity);
+                            if (Entity != null)
+                                TargetManager.Target(Entity);
                             Mouse.LastLeftButtonClickTime = 0;
                             UIManager.Add(new InfoGump(Entity));
 

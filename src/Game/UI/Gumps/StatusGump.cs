@@ -82,7 +82,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (TargetManager.IsTargeting)
                 {
-                    TargetManager.TargetGameObject(World.Player);
+                    TargetManager.Target(World.Player);
                     Mouse.LastLeftButtonClickTime = 0;
                 }
                 else if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
@@ -113,7 +113,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (TargetManager.IsTargeting)
             {
-                TargetManager.TargetGameObject(World.Player);
+                TargetManager.Target(World.Player);
                 Mouse.LastLeftButtonClickTime = 0;
             }
         }
@@ -1051,7 +1051,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (TargetManager.IsTargeting)
                 {
-                    TargetManager.TargetGameObject(World.Player);
+                    TargetManager.Target(World.Player);
                     Mouse.LastLeftButtonClickTime = 0;
                 }
                 else

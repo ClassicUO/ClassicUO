@@ -135,7 +135,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (TargetManager.IsTargeting)
             {
-                TargetManager.TargetGameObject(World.Get(LocalSerial));
+                TargetManager.Target(LocalSerial);
                 Mouse.LastLeftButtonClickTime = 0;
             }
             else if (_canChangeName && !_targetBroke)
@@ -171,7 +171,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (TargetManager.IsTargeting)
             {
                 _targetBroke = true;
-                TargetManager.TargetGameObject(World.Get(LocalSerial));
+                TargetManager.Target(LocalSerial);
                 Mouse.LastLeftButtonClickTime = 0;
             }
             else if (_canChangeName)

@@ -679,7 +679,7 @@ namespace ClassicUO.Game.Managers
                         //    TargetManager.TargetGameObject(TargetManager.LastGameObject);
                         //}
                         //else 
-                        TargetManager.TargetGameObject(World.Get(TargetManager.LastTarget));
+                        TargetManager.Target(TargetManager.LastTarget);
 
                         WaitForTargetTimer = 0;
                     }
@@ -697,7 +697,7 @@ namespace ClassicUO.Game.Managers
 
                     if (TargetManager.IsTargeting)
                     {
-                        TargetManager.TargetGameObject(World.Player);
+                        TargetManager.Target(World.Player);
                         WaitForTargetTimer = 0;
                     }
                     else if (WaitForTargetTimer < Time.Ticks)
@@ -831,22 +831,31 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.AttackSelectedTarget:
 
-                    // TODO:
+                    GameActions.Attack(TargetManager.SelectedTarget);
                     break;
 
                 case MacroType.UseSelectedTarget:
 
-                    // TODO:
+                    GameActions.DoubleClick(TargetManager.SelectedTarget);
                     break;
 
                 case MacroType.CurrentTarget:
 
-                    // TODO:
+                    if (WaitForTargetTimer == 0)
+                    {
+                        WaitForTargetTimer = Time.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
+                    }
+
+                    if (TargetManager.IsTargeting)
+                    {
+                        TargetManager.Target(TargetManager.SelectedTarget);
+                    }
                     break;
 
                 case MacroType.TargetSystemOnOff:
 
                     // TODO:
+                    GameActions.Print("[WARN] - TargetSystem On/Off not implemented");
                     break;
 
                 case MacroType.BandageSelf:
@@ -860,7 +869,7 @@ namespace ClassicUO.Game.Managers
                                 WaitForTargetTimer = Time.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
 
                             if (TargetManager.IsTargeting)
-                                TargetManager.TargetGameObject(macro.Code == MacroType.BandageSelf ? World.Player : World.Mobiles.Get(TargetManager.LastTarget));
+                                TargetManager.Target(macro.Code == MacroType.BandageSelf ? World.Player : TargetManager.LastTarget);
                             else
                                 result = 1;
 
@@ -891,6 +900,7 @@ namespace ClassicUO.Game.Managers
                             {
                                 // TODO: NewTargetSystem
                                 Log.Warn( "BandageTarget (NewTargetSystem) not implemented yet.");
+
                             }
                         }
                     }

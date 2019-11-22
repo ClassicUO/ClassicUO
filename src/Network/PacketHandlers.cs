@@ -232,7 +232,7 @@ namespace ClassicUO.Network
 
             if (World.Party.PartyHealTimer < Time.Ticks && World.Party.PartyHealTarget != 0)
             {
-                TargetManager.TargetGameObject(World.Get(World.Party.PartyHealTarget));
+                TargetManager.Target(World.Party.PartyHealTarget);
                 World.Party.PartyHealTimer = 0;
                 World.Party.PartyHealTarget = 0;
             }
