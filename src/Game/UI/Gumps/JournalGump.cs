@@ -193,13 +193,13 @@ namespace ClassicUO.Game.UI.Gumps
             if (Configuration.Profile.GumpsVersion == 2)
             {
                 reader.ReadUInt32();
-                IsMinimized = reader.ReadBoolean();
+                _isMinimized = reader.ReadBoolean();
             }
             _background.Height = _background.SpecialHeight = reader.ReadInt32();
 
             if (Profile.GumpsVersion >= 3)
             {
-                IsMinimized = reader.ReadBoolean();
+                _isMinimized = reader.ReadBoolean();
             }
         }
 

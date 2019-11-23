@@ -293,7 +293,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (Configuration.Profile.GumpsVersion == 2)
             {
                 reader.ReadUInt32();
-                IsMinimized = reader.ReadBoolean();
+                _isMinimized = reader.ReadBoolean();
             }
 
             LocalSerial = reader.ReadUInt32();
@@ -302,7 +302,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Profile.GumpsVersion >= 3)
             {
-                IsMinimized = reader.ReadBoolean();
+                _isMinimized = reader.ReadBoolean();
             }
 
             Dispose();

@@ -411,13 +411,23 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Save(writer);
             writer.Write(Mobile.Serial);
+            writer.Write(IsMinimized);
         }
 
         public override void Restore(BinaryReader reader)
         {
             base.Restore(reader);
+            if (Configuration.Profile.GumpsVersion == 2)
+            {
+                reader.ReadUInt32();
+                _isMinimized = reader.ReadBoolean();
+            }
             LocalSerial = reader.ReadUInt32();
             CUOEnviroment.Client.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
+            if (Profile.GumpsVersion >= 3)
+            {
+                _isMinimized = reader.ReadBoolean();
+            }
             Dispose();
         }
 
