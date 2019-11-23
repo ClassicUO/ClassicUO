@@ -97,7 +97,8 @@ namespace ClassicUO.Game.Managers
 
         public static void OnHueTarget(Entity entity)
         {
-            TargetManager.TargetGameObject(entity);
+            if (entity != null)
+                TargetManager.Target(entity);
             Mouse.LastLeftButtonClickTime = 0;
             GameActions.Print($"Item ID: {entity.Graphic}\nHue: {entity.Hue}");
         }

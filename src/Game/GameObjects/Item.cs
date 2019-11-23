@@ -229,11 +229,6 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                foreach (Multi multi in Multis)
-                {
-                    multi.Destroy();
-                }
-                Multis.Clear();
                 house.ClearComponents();
             }
 
@@ -248,9 +243,6 @@ namespace ClassicUO.Game.GameObjects
 
                 if (add)
                 {
-                    if (Multis == null)
-                        Multis = new List<Multi>();
-
                     Multi m = Multi.Create(graphic);
                     m.Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z));
                     m.MultiOffsetX = x;
@@ -298,8 +290,6 @@ namespace ClassicUO.Game.GameObjects
             if (World.HouseManager.EntityIntoHouse(Serial, World.Player))
                 CUOEnviroment.Client.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
         }
-
-        public List<Multi> Multis;
 
         public void CheckGraphicChange(sbyte animIndex = 0)
         {

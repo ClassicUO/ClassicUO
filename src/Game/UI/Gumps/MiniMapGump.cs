@@ -102,9 +102,17 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public bool ToggleSize()
+        public bool ToggleSize(bool? large = null)
         {
-            _useLargeMap = !_useLargeMap;
+            if (large.HasValue)
+            {
+                _useLargeMap = large.Value;
+            }
+            else
+            {
+                _useLargeMap = !_useLargeMap;
+            }
+
             CreateMap();
             return _useLargeMap;
         }

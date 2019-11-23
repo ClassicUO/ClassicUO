@@ -223,7 +223,7 @@ namespace ClassicUO.Game.UI.Controls
 
                             if (Item != null)
                             {
-                                TargetManager.TargetGameObject(Item);
+                                TargetManager.Target(Item);
                                 Mouse.LastLeftButtonClickTime = 0;
                             }
 
@@ -234,7 +234,7 @@ namespace ClassicUO.Game.UI.Controls
 
                             if (Item != null)
                             {
-                                TargetManager.TargetGameObject(Item);
+                                TargetManager.Target(Item);
                                 Mouse.LastLeftButtonClickTime = 0;
                                 UIManager.Add(new InfoGump(Item));
                             }

@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 using ClassicUO.Configuration;
@@ -34,6 +35,21 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game
 {
+    enum SCAN_TYPE_OBJECT
+    {
+        STO_HOSTILE = 0,
+        STO_PARTY,
+        STO_FOLLOWERS,
+        STO_OBJECTS,
+        STO_MOBILES
+    }
+    enum SCAN_MODE_OBJECT
+    {
+        SMO_NEXT = 0,
+        SMO_PREV,
+        SMO_NEAREST
+    }
+
     internal static class World
     {
         private static readonly EffectManager _effectManager = new EffectManager();
@@ -324,6 +340,286 @@ namespace ClassicUO.Game
         public static void AddEffect(GraphicEffectType type, Serial source, Serial target, Graphic graphic, Hue hue, Position srcPos, Position targPos, byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode)
         {
             _effectManager.Add(type, source, target, graphic, hue, srcPos, targPos, speed, duration, fixedDir, doesExplode, hasparticles, blendmode);
+        }
+
+        private static bool CanBeSelected(Mobile mobile, SCAN_TYPE_OBJECT scanType)
+        {
+            if (mobile == null || mobile.IsDestroyed || mobile == Player)
+                return false;
+
+            return true;
+        }
+
+        public static Serial SearchObject(SCAN_TYPE_OBJECT scanType, SCAN_MODE_OBJECT scanMode)
+        {
+            Entity first = null, selected = null;
+            int distance = int.MaxValue;
+            bool currentTargetFound = false;
+
+            if (scanType == SCAN_TYPE_OBJECT.STO_OBJECTS)
+            {
+                if (scanMode == SCAN_MODE_OBJECT.SMO_NEAREST)
+                {
+                    foreach (Item item in Items)
+                    {
+                        if (item.IsMulti || item.IsDestroyed || !item.OnGround)
+                            continue;
+
+                        var dist = item.Distance;
+
+                        if (dist < distance)
+                            distance = dist;
+                    }
+                }
+
+                foreach (Item item in Items)
+                {
+                    if (item.IsMulti || item.IsDestroyed || !item.OnGround)
+                        continue;
+
+                    if (TargetManager.SelectedTarget == 0)
+                        return item;
+
+                    if (scanMode == SCAN_MODE_OBJECT.SMO_NEXT)
+                    {
+                        if (TargetManager.SelectedTarget == item)
+                        {
+                            currentTargetFound = true;
+                            continue;
+                        }
+
+                        if (first == null)
+                            first = item;
+
+                        if (currentTargetFound)
+                        {
+                            selected = item;
+                            break;
+                        }
+                    }
+                    else if (scanMode == SCAN_MODE_OBJECT.SMO_PREV)
+                    {
+                        if (!currentTargetFound && first != null)
+                            selected = first;
+
+                        if (TargetManager.SelectedTarget == item)
+                        {
+                            currentTargetFound = true;
+                            continue;
+                        }
+
+                        first = item;
+                    }
+                    else if (scanMode == SCAN_MODE_OBJECT.SMO_NEAREST)
+                    {
+                        if (item.Distance > distance)
+                            continue;
+
+                        if (TargetManager.SelectedTarget == item.Serial)
+                        {
+                            currentTargetFound = true;
+                            continue;
+                        }
+
+                        if (first == null)
+                            first = item;
+
+                        if (currentTargetFound)
+                        {
+                            selected = item;
+                            break;
+                        }
+                    }
+                    else 
+                        break;
+                }
+            }
+            else
+            {
+                if (scanMode == SCAN_MODE_OBJECT.SMO_NEAREST)
+                {
+                    foreach (Mobile mobile in Mobiles)
+                    {
+                        if (mobile.IsDestroyed || mobile == Player)
+                            continue;
+
+                        if (scanType == SCAN_TYPE_OBJECT.STO_PARTY)
+                        {
+                            if (!Party.Contains(mobile))
+                            {
+                                continue;
+                            }
+                        }
+                        else if (scanType == SCAN_TYPE_OBJECT.STO_FOLLOWERS)
+                        {
+                            if (!(mobile.IsRenamable &&
+                                  mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
+                                  mobile.NotorietyFlag != NotorietyFlag.Enemy))
+                            {
+                                continue;
+                            }
+                        }
+                        else if (scanType == SCAN_TYPE_OBJECT.STO_HOSTILE)
+                        {
+                            if (mobile.NotorietyFlag == NotorietyFlag.Ally ||
+                                mobile.NotorietyFlag == NotorietyFlag.Innocent ||
+                                mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
+                            {
+                                continue;
+                            }
+                        }
+
+                        var dist = mobile.Distance;
+
+                        if (dist < distance)
+                            distance = dist;
+                    }
+                }
+
+                foreach (Mobile mobile in Mobiles)
+                {
+                    if (mobile.IsDestroyed || mobile == Player)
+                        continue;
+
+                    if (scanMode == SCAN_MODE_OBJECT.SMO_NEXT)
+                    {
+                        if (scanType == SCAN_TYPE_OBJECT.STO_PARTY)
+                        {
+                            if (!Party.Contains(mobile))
+                            {
+                                continue;
+                            }
+                        }
+                        else if (scanType == SCAN_TYPE_OBJECT.STO_FOLLOWERS)
+                        {
+                            if (!(mobile.IsRenamable && 
+                                mobile.NotorietyFlag != NotorietyFlag.Invulnerable && 
+                                mobile.NotorietyFlag != NotorietyFlag.Enemy))
+                            {
+                                continue;
+                            }
+                        }
+                        else if (scanType == SCAN_TYPE_OBJECT.STO_HOSTILE)
+                        {
+                            if (mobile.NotorietyFlag == NotorietyFlag.Ally ||
+                                mobile.NotorietyFlag == NotorietyFlag.Innocent ||
+                                mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
+                            {
+                               continue;
+                            }
+                        }
+
+                        if (TargetManager.SelectedTarget == mobile)
+                        {
+                            currentTargetFound = true;
+                            continue;
+                        }
+
+                        if (first == null)
+                            first = mobile;
+
+                        if (currentTargetFound)
+                        {
+                            selected = mobile;
+                            break;
+                        }
+                    }
+                    else if (scanMode == SCAN_MODE_OBJECT.SMO_PREV)
+                    {
+                        if (scanType == SCAN_TYPE_OBJECT.STO_PARTY)
+                        {
+                            if (!Party.Contains(mobile))
+                            {
+                                continue;
+                            }
+                        }
+                        else if (scanType == SCAN_TYPE_OBJECT.STO_FOLLOWERS)
+                        {
+                            if (!(mobile.IsRenamable &&
+                                  mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
+                                  mobile.NotorietyFlag != NotorietyFlag.Enemy))
+                            {
+                                continue;
+                            }
+                        }
+                        else if (scanType == SCAN_TYPE_OBJECT.STO_HOSTILE)
+                        {
+                            if (mobile.NotorietyFlag == NotorietyFlag.Ally ||
+                                mobile.NotorietyFlag == NotorietyFlag.Innocent ||
+                                mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
+                            {
+                                continue;
+                            }
+                        }
+
+                        if (!currentTargetFound && first != null)
+                            selected = first;
+
+                        if (TargetManager.SelectedTarget == mobile)
+                        {
+                            currentTargetFound = true;
+                            continue;
+                        }
+
+                        first = mobile;
+                    }
+                    else if (scanMode == SCAN_MODE_OBJECT.SMO_NEAREST)
+                    {
+                        if (scanType == SCAN_TYPE_OBJECT.STO_PARTY)
+                        {
+                            if (!Party.Contains(mobile))
+                            {
+                                continue;
+                            }
+                        }
+                        else if (scanType == SCAN_TYPE_OBJECT.STO_FOLLOWERS)
+                        {
+                            if (!(mobile.IsRenamable &&
+                                  mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
+                                  mobile.NotorietyFlag != NotorietyFlag.Enemy))
+                            {
+                                continue;
+                            }
+                        }
+                        else if (scanType == SCAN_TYPE_OBJECT.STO_HOSTILE)
+                        {
+                            if (mobile.NotorietyFlag == NotorietyFlag.Ally ||
+                                mobile.NotorietyFlag == NotorietyFlag.Innocent ||
+                                mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
+                            {
+                                continue;
+                            }
+                        }
+
+                        if (mobile.Distance > distance)
+                            continue;
+
+                        if (TargetManager.SelectedTarget == mobile.Serial)
+                        {
+                            currentTargetFound = true;
+                            continue;
+                        }
+
+                        if (first == null)
+                            first = mobile;
+
+                        if (currentTargetFound)
+                        {
+                            selected = mobile;
+                            break;
+                        }
+                    }
+                    else 
+                        break;
+                }
+            }
+
+            if (first != null && selected == null)
+            {
+                return first;
+            }
+
+            return selected?.Serial ?? 0;
         }
 
         public static void Clear()

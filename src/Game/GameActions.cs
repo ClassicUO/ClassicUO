@@ -397,9 +397,9 @@ namespace ClassicUO.Game
             Socket.Send(new PClickQuestArrow(rightClick));
         }
 
-        public static void GrabItem(Item item, ushort amount, Serial bag = default(Serial))
+        public static void GrabItem(Serial serial, ushort amount, Serial bag = default(Serial))
         {
-            Socket.Send(new PPickUpRequest(item, amount));
+            Socket.Send(new PPickUpRequest(serial, amount));
 
             if(bag == default(Serial))
                 bag = ProfileManager.Current.GrabBagSerial == 0
@@ -412,7 +412,7 @@ namespace ClassicUO.Game
                 ProfileManager.Current.GrabBagSerial = 0;
                 bag = World.Player.Equipment[(int) Layer.Backpack].Serial;
             }
-            DropItem(item.Serial, Position.INVALID, bag);
+            DropItem(serial, Position.INVALID, bag);
         }
     }
 }
