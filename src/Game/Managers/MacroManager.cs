@@ -1125,29 +1125,34 @@ namespace ClassicUO.Game.Managers
 
         private static void SetLastTarget(Serial serial)
         {
-            Entity ent = World.Get(serial);
+            if (serial.IsValid)
+            {
+                Entity ent = World.Get(serial);
 
-            if (serial.IsMobile)
-            {
-                if (ent != null)
+                if (serial.IsMobile)
                 {
-                    GameActions.MessageOverhead($"Target: {ent.Name}", Notoriety.GetHue(((Mobile) ent).NotorietyFlag), World.Player);
-                    UIManager.RemoveTargetLineGump(TargetManager.LastTarget);
-                    UIManager.RemoveTargetLineGump(TargetManager.LastAttack);
-                    TargetManager.SelectedTarget = TargetManager.LastTarget = serial;
-                    UIManager.SetTargetLineGump(serial);
-                    return;
+                    if (ent != null)
+                    {
+                        GameActions.MessageOverhead($"Target: {ent.Name}", Notoriety.GetHue(((Mobile) ent).NotorietyFlag), World.Player);
+                        UIManager.RemoveTargetLineGump(TargetManager.LastTarget);
+                        UIManager.RemoveTargetLineGump(TargetManager.LastAttack);
+                        TargetManager.SelectedTarget = TargetManager.LastTarget = serial;
+                        UIManager.SetTargetLineGump(serial);
+
+                        return;
+                    }
                 }
-            }
-            else if (serial.IsItem)
-            {
-                if (ent != null)
+                else if (serial.IsItem)
                 {
-                    GameActions.MessageOverhead($"Target: {ent.Name}", 992, World.Player);
-                    UIManager.RemoveTargetLineGump(TargetManager.LastTarget);
-                    UIManager.RemoveTargetLineGump(TargetManager.LastAttack);
-                    TargetManager.SelectedTarget = TargetManager.LastTarget = serial;
-                    return;
+                    if (ent != null)
+                    {
+                        GameActions.MessageOverhead($"Target: {ent.Name}", 992, World.Player);
+                        UIManager.RemoveTargetLineGump(TargetManager.LastTarget);
+                        UIManager.RemoveTargetLineGump(TargetManager.LastAttack);
+                        TargetManager.SelectedTarget = TargetManager.LastTarget = serial;
+
+                        return;
+                    }
                 }
             }
 
