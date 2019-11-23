@@ -35,6 +35,8 @@ using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 
+using Microsoft.Xna.Framework;
+
 using Newtonsoft.Json;
 
 using SDL2;
@@ -491,29 +493,107 @@ namespace ClassicUO.Game.Managers
 
                                 case MacroSubType.Paperdoll:
 
-                                    if (macro.Code == MacroType.Close)
-                                        UIManager.GetGump<PaperDollGump>()?.Dispose();
+                                    var paperdoll = UIManager.GetGump<PaperDollGump>();
+
+                                    if (paperdoll != null)
+                                    {
+                                        if (macro.Code == MacroType.Close)
+                                            paperdoll.Dispose();
+                                        else if (macro.Code == MacroType.Minimize)
+                                            paperdoll.IsMinimized = true;
+                                        else if (macro.Code == MacroType.Maximize)
+                                            paperdoll.IsMinimized = false;
+                                    }
 
                                     break;
 
                                 case MacroSubType.Status:
 
+                                    var status = StatusGumpBase.GetStatusGump();
+
                                     if (macro.Code == MacroType.Close)
-                                        StatusGumpBase.GetStatusGump()?.Dispose();
+                                    {
+                                        if (status != null)
+                                        {
+                                            status.Dispose();
+                                        }
+                                        else
+                                        {
+                                            UIManager.GetGump<BaseHealthBarGump>(World.Player)?.Dispose();
+                                        }
+                                    }
+                                    else if (macro.Code == MacroType.Minimize)
+                                    {
+                                        if (status != null)
+                                        {
+                                            status.Dispose();
+
+                                            if (ProfileManager.Current.CustomBarsToggled)
+                                            {
+                                                UIManager.Add(new HealthBarGumpCustom(World.Player) { X = status.ScreenCoordinateX, Y = status.ScreenCoordinateY });
+                                            }
+                                            else
+                                            {
+                                                UIManager.Add(new HealthBarGump(World.Player) { X = status.ScreenCoordinateX, Y = status.ScreenCoordinateY });
+                                            }
+                                        }
+                                        else
+                                        {
+                                            UIManager.GetGump<BaseHealthBarGump>(World.Player)?.BringOnTop();
+                                        }
+                                    }
+                                    else if (macro.Code == MacroType.Maximize)
+                                    {
+                                        if (status != null)
+                                            status.BringOnTop();
+                                        else
+                                        {
+                                            var healthbar = UIManager.GetGump<BaseHealthBarGump>(World.Player);
+                                            
+                                            if (healthbar != null)
+                                            {
+                                                StatusGumpBase.AddStatusGump(healthbar.ScreenCoordinateX, healthbar.ScreenCoordinateY);
+
+                                            }
+                                        }
+                                    }
 
                                     break;
 
                                 case MacroSubType.Journal:
 
-                                    if (macro.Code == MacroType.Close)
-                                        UIManager.GetGump<JournalGump>()?.Dispose();
+                                    var journal = UIManager.GetGump<JournalGump>();
+
+                                    if (journal != null)
+                                    {
+                                        if (macro.Code == MacroType.Close)
+                                            journal.Dispose();
+                                        else if (macro.Code == MacroType.Minimize)
+                                            journal.IsMinimized = true;
+                                        else if (macro.Code == MacroType.Maximize)
+                                            journal.IsMinimized = false;
+                                    }
 
                                     break;
 
                                 case MacroSubType.Skills:
 
-                                    if (macro.Code == MacroType.Close)
-                                        UIManager.GetGump<SkillGumpAdvanced>()?.Dispose();
+                                    if (ProfileManager.Current.StandardSkillsGump)
+                                    {
+                                        var skillgump = UIManager.GetGump<StandardSkillsGump>();
+
+                                        if (macro.Code == MacroType.Close)
+                                            skillgump?.Dispose();
+                                        else if (macro.Code == MacroType.Minimize)
+                                            skillgump.IsMinimized = true;
+                                        else if (macro.Code == MacroType.Maximize)
+                                            skillgump.IsMinimized = false;
+                                    }
+                                    else
+                                    {
+                                        if (macro.Code == MacroType.Close)
+                                            UIManager.GetGump<SkillGumpAdvanced>()?.Dispose();
+                                    }
 
                                     break;
 
@@ -525,8 +605,17 @@ namespace ClassicUO.Game.Managers
                                 case MacroSubType.SpellWeavingSpellbook:
                                 case MacroSubType.MysticismSpellbook:
 
-                                    if (macro.Code == MacroType.Close)
-                                        UIManager.GetGump<SpellbookGump>()?.Dispose();
+                                    var spellbook = UIManager.GetGump<SpellbookGump>();
+
+                                    if (spellbook != null)
+                                    {
+                                        if (macro.Code == MacroType.Close)
+                                            spellbook.Dispose();
+                                        else if (macro.Code == MacroType.Minimize)
+                                            spellbook.IsMinimized = true;
+                                        else if (macro.Code == MacroType.Maximize)
+                                            spellbook.IsMinimized = false;
+                                    }
 
                                     break;
 
@@ -539,6 +628,10 @@ namespace ClassicUO.Game.Managers
 
                                     if (macro.Code == MacroType.Close)
                                         UIManager.GetGump<MiniMapGump>()?.Dispose();
+                                    else if (macro.Code == MacroType.Minimize)
+                                        UIManager.GetGump<MiniMapGump>()?.ToggleSize(false);
+                                    else if (macro.Code == MacroType.Maximize)
+                                        UIManager.GetGump<MiniMapGump>()?.ToggleSize(true);
 
                                     break;
 
@@ -1036,7 +1129,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.KillGumpOpen:
                     // TODO:
-
+                    
                     break;
 
                 case MacroType.DefaultScale:
