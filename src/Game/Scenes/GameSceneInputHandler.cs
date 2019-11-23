@@ -560,10 +560,8 @@ namespace ClassicUO.Game.Scenes
                 return result;
             }
 
-            if (_queuedObject == null)
-                return true;
-
             BaseGameObject obj = SelectedObject.Object;
+
 
             switch (obj)
             {

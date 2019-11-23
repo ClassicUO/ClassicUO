@@ -601,8 +601,16 @@ namespace ClassicUO
                                 if (Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
                                 {
                                     Mouse.LastLeftButtonClickTime = 0;
+                                    bool res;
 
-                                    var res = _scene.OnLeftMouseDoubleClick() || UIManager.OnLeftMouseDoubleClick();
+                                    if (UIManager.ValidForDClick())
+                                    {
+                                        res = UIManager.OnLeftMouseDoubleClick();
+                                    }
+                                    else
+                                        res = _scene.OnLeftMouseDoubleClick();
+
+                                    //bool res = _scene.OnLeftMouseDoubleClick() || UIManager.OnLeftMouseDoubleClick();
 
                                     MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Left);
 

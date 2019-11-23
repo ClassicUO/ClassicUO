@@ -55,7 +55,7 @@ namespace ClassicUO.Game.Managers
         private static readonly Dictionary<Serial, TargetLineGump> _targetLineGumps = new Dictionary<Serial, TargetLineGump>();
         private static int _dragOriginX, _dragOriginY;
         private static bool _isDraggingControl;
-        private static Control _keyboardFocusControl;
+        private static Control _keyboardFocusControl,  _validForDClick;
         private static bool _needSort;
 
 
@@ -145,6 +145,10 @@ namespace ClassicUO.Game.Managers
         public static TargetLineGump TargetLine { get; set; }
 
 
+        public static bool ValidForDClick() => !(_validForDClick is WorldViewport);
+
+
+
         public static void OnMouseDragging()
         {
             HandleMouseInput();
@@ -162,7 +166,7 @@ namespace ClassicUO.Game.Managers
         public static void OnLeftMouseButtonDown()
         {
             HandleMouseInput();
-
+            _validForDClick = null;
             if (MouseOverControl != null)
             {
                 MakeTopMostGump(MouseOverControl);
@@ -208,6 +212,7 @@ namespace ClassicUO.Game.Managers
 
             CloseIfClickOutGumps();
             _mouseDownControls[btn] = null;
+            _validForDClick = MouseOverControl;
         }
 
         public static bool OnLeftMouseDoubleClick()
