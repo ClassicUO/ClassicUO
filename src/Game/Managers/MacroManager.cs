@@ -831,7 +831,8 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.AttackSelectedTarget:
 
-                    GameActions.Attack(TargetManager.SelectedTarget);
+                    if (TargetManager.SelectedTarget.IsMobile)
+                        GameActions.Attack(TargetManager.SelectedTarget);
                     break;
 
                 case MacroType.UseSelectedTarget:
@@ -841,20 +842,32 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.CurrentTarget:
 
-                    if (WaitForTargetTimer == 0)
+                    if (TargetManager.SelectedTarget != 0)
                     {
-                        WaitForTargetTimer = Time.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
-                    }
+                        if (WaitForTargetTimer == 0)
+                        {
+                            WaitForTargetTimer = Time.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
+                        }
 
-                    if (TargetManager.IsTargeting)
-                    {
-                        TargetManager.Target(TargetManager.SelectedTarget);
+                        if (TargetManager.IsTargeting)
+                        {
+                            TargetManager.Target(TargetManager.SelectedTarget);
+                            WaitForTargetTimer = 0;
+                        }
+                        else if (WaitForTargetTimer < Time.Ticks)
+                        {
+                            WaitForTargetTimer = 0;
+                        }
+                        else
+                        {
+                            result = 1;
+                        }
                     }
+                    
                     break;
 
                 case MacroType.TargetSystemOnOff:
 
-                    // TODO:
                     GameActions.Print("[WARN] - TargetSystem On/Off not implemented");
                     break;
 
@@ -895,12 +908,13 @@ namespace ClassicUO.Game.Managers
                         if (bandage != null)
                         {
                             if (macro.Code == MacroType.BandageSelf)
-                                NetClient.Socket.Send(new PTargetSelectedObject(bandage.Serial, World.Player.Serial));
-                            else
                             {
-                                // TODO: NewTargetSystem
-                                Log.Warn( "BandageTarget (NewTargetSystem) not implemented yet.");
-
+                                TargetManager.Target(World.Player.Serial);
+                                NetClient.Socket.Send(new PTargetSelectedObject(bandage.Serial, World.Player.Serial));
+                            }
+                            else if (TargetManager.SelectedTarget.IsMobile)
+                            {
+                                NetClient.Socket.Send(new PTargetSelectedObject(bandage.Serial, TargetManager.SelectedTarget));
                             }
                         }
                     }
@@ -978,23 +992,7 @@ namespace ClassicUO.Game.Managers
                     // 4 - Mobile (any mobiles)
                     int scantype = macro.SubCode - MacroSubType.Hostile;
 
-                    switch (scanRange)
-                    {
-                        case 0:
-                            //GameActions.MessageOverhead($"SelectNext ({scantype})", World.Player);
-                            TargetManager.SelectNextMobile(scantype);
-                            break;
-
-                        case 1:
-                            //GameActions.MessageOverhead($"SelectPrevious ({scantype})", World.Player);
-                            TargetManager.SelectPreviousMobile(scantype);
-                            break;
-
-                        case 2:
-                            //GameActions.MessageOverhead($"SelectNearest ({scantype})", World.Player);
-                            TargetManager.SelectNearestMobile(scantype);
-                            break;
-                    }
+                    SetLastTarget(World.SearchObject((SCAN_TYPE_OBJECT) scantype, (SCAN_MODE_OBJECT) scanRange));
 
                     break;
 
@@ -1124,7 +1122,40 @@ namespace ClassicUO.Game.Managers
 
             return result;
         }
+
+        private static void SetLastTarget(Serial serial)
+        {
+            Entity ent = World.Get(serial);
+
+            if (serial.IsMobile)
+            {
+                if (ent != null)
+                {
+                    GameActions.MessageOverhead($"Target: {ent.Name}", Notoriety.GetHue(((Mobile) ent).NotorietyFlag), World.Player);
+                    UIManager.RemoveTargetLineGump(TargetManager.LastTarget);
+                    UIManager.RemoveTargetLineGump(TargetManager.LastAttack);
+                    TargetManager.SelectedTarget = TargetManager.LastTarget = serial;
+                    UIManager.SetTargetLineGump(serial);
+                    return;
+                }
+            }
+            else if (serial.IsItem)
+            {
+                if (ent != null)
+                {
+                    GameActions.MessageOverhead($"Target: {ent.Name}", 992, World.Player);
+                    UIManager.RemoveTargetLineGump(TargetManager.LastTarget);
+                    UIManager.RemoveTargetLineGump(TargetManager.LastAttack);
+                    TargetManager.SelectedTarget = TargetManager.LastTarget = serial;
+                    return;
+                }
+            }
+
+            GameActions.Print("Entity not found.");
+        }
     }
+
+
 
     [JsonObject]
     internal class Macro : IEquatable<Macro>, INode<Macro>

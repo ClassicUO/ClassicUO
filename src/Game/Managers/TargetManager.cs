@@ -374,6 +374,21 @@ namespace ClassicUO.Game.Managers
             ClearTargetingWithoutTargetCancelPacket();
         }
 
+        enum SCAN_TYPE_OBJECT
+        {
+            STO_HOSTILE = 0,
+            STO_PARTY,
+            STO_FOLLOWERS,
+            STO_OBJECTS,
+            STO_MOBILES
+        }
+        enum SCAN_MODE_OBJECT
+        {
+            SMO_NEXT = 0,
+            SMO_PREV,
+            SMO_NEAREST
+        }
+
         public static bool IsMobileSelectableAsTarget(Serial serial, int type)
         {
             Mobile mobile = World.Mobiles.Get(serial);
@@ -422,149 +437,31 @@ namespace ClassicUO.Game.Managers
             return true;
         }
 
-        public static void SetLastTarget(Serial serial)
+        private static bool CanBeSelectedAsTarget(Serial serial, SCAN_TYPE_OBJECT scanType)
         {
-            Mobile target = World.Mobiles.Get(serial);
-
-            if (target == null)
-                return;
-
-            GameActions.MessageOverhead($"Target: {target.Name}", Notoriety.GetHue(target.NotorietyFlag), World.Player);
-            UIManager.RemoveTargetLineGump(TargetManager.LastTarget);
-            UIManager.RemoveTargetLineGump(TargetManager.LastAttack);
-            SelectedTarget = LastTarget = serial;
-            UIManager.SetTargetLineGump(serial);
-        }
-
-        public static void SelectNextMobile(int type = -1)
-        {
-            Mobile target = null;
-            Mobile firstMobile = null;
-            bool currentTargetFound = false;
-
-            foreach (Mobile mobile in World.Mobiles)
+            if (scanType == SCAN_TYPE_OBJECT.STO_OBJECTS)
             {
-                if (mobile == null)
-                    continue;
-
-                if (!IsMobileSelectableAsTarget(mobile.Serial, type))
-                    continue;
-
-                if (TargetManager.LastTarget != null && TargetManager.LastTarget == mobile.Serial)
+                if (serial.IsItem)
                 {
-                    currentTargetFound = true;
-                    continue;
+                    return true;
                 }
-
-                if (firstMobile == null)
-                    firstMobile = mobile;
-
-                if (!currentTargetFound)
-                    continue;
-
-                target = mobile;
-                break;
             }
-
-            if (target == null && firstMobile != null)
-                target = firstMobile;
-
-            if (target != null)
-                SetLastTarget(target.Serial);
             else
-                GameActions.Print("No new target found");
-        }
-
-        public static void SelectPreviousMobile(int type = -1)
-        {
-            Mobile target = null;
-            Mobile lastMobile = null;
-            bool currentTargetFound = false;
-
-            foreach (Mobile mobile in World.Mobiles)
             {
-                if (mobile == null)
-                    continue;
-
-                if (!IsMobileSelectableAsTarget(mobile.Serial, type))
-                    continue;
-
-                if (!currentTargetFound && lastMobile != null)
-                    target = lastMobile;
-
-                if (TargetManager.LastTarget != null && TargetManager.LastTarget == mobile.Serial)
+                switch (scanType)
                 {
-                    currentTargetFound = true;
-                    continue;
+                    case SCAN_TYPE_OBJECT.STO_HOSTILE: 
+                        return true;
+                    case SCAN_TYPE_OBJECT.STO_PARTY:
+                        return World.Party.Contains(serial);
+                    case SCAN_TYPE_OBJECT.STO_FOLLOWERS: 
+                        break;
+                    case SCAN_TYPE_OBJECT.STO_MOBILES: 
+                        break;
                 }
-
-                lastMobile = mobile;
             }
 
-            if (target == null && lastMobile != null)
-                target = lastMobile;
-
-            if (target != null)
-                SetLastTarget(target.Serial);
-            else
-                GameActions.Print("No new target found");
-        }
-
-        public static void SelectNearestMobile(int type = -1)
-        {
-            Mobile target = null;
-            int closestDist = ushort.MaxValue;
-            Mobile firstMobile = null;
-            bool currentTargetFound = false;
-
-            // NOTE: This first cycle is required to first determine closest distance
-            // that we will use to rotate our nearest group of mobiles
-            foreach (Mobile mobile in World.Mobiles)
-            {
-                if (mobile == null)
-                    continue;
-
-                if (!IsMobileSelectableAsTarget(mobile.Serial, type))
-                    continue;
-
-                if (mobile.Distance < closestDist)
-                    closestDist = mobile.Distance;
-            }
-
-            foreach (Mobile mobile in World.Mobiles)
-            {
-                if (mobile == null)
-                    continue;
-
-                if (!IsMobileSelectableAsTarget(mobile.Serial, type))
-                    continue;
-
-                if (mobile.Distance > closestDist)
-                    continue;
-
-                if (TargetManager.LastTarget != null && TargetManager.LastTarget == mobile.Serial)
-                {
-                    currentTargetFound = true;
-                    continue;
-                }
-
-                if (firstMobile == null)
-                    firstMobile = mobile;
-
-                if (!currentTargetFound)
-                    continue;
-
-                target = mobile;
-                break;
-            }
-
-            if (target == null && firstMobile != null)
-                target = firstMobile;
-
-            if (target != null)
-                SetLastTarget(target.Serial);
-            else
-                GameActions.Print("No new target found");
+            return false;
         }
     }
 }
