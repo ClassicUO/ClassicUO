@@ -157,6 +157,9 @@ namespace ClassicUO
             _graphicDeviceManager.PreferredBackBufferWidth = width;
             _graphicDeviceManager.PreferredBackBufferHeight = height;
             _graphicDeviceManager.ApplyChanges();
+
+            _buffer?.Dispose();
+            _buffer = new RenderTarget2D(GraphicsDevice, _graphicDeviceManager.PreferredBackBufferWidth, _graphicDeviceManager.PreferredBackBufferHeight, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
         }
 
         public void SetWindowBorderless(bool borderless)
@@ -323,6 +326,8 @@ namespace ClassicUO
             base.Update(gameTime);
         }
 
+        private RenderTarget2D _buffer;
+
         protected override void Draw(GameTime gameTime)
         {
             Profiler.EndFrame();
@@ -336,6 +341,8 @@ namespace ClassicUO
 
             if (_scene != null && _scene.IsLoaded && !_scene.IsDestroyed)
                 _scene.Draw(_uoSpriteBatch);
+
+            GraphicsDevice.SetRenderTarget(_buffer);
             UIManager.Draw(_uoSpriteBatch);
 
             if (ProfileManager.Current != null && ProfileManager.Current.ShowNetworkStats)
@@ -352,8 +359,15 @@ namespace ClassicUO
             Profiler.ExitContext("RenderFrame");
             Profiler.EnterContext("OutOfContext");
 
+            GraphicsDevice.SetRenderTarget(null);
+            _uoSpriteBatch.Begin();
+            _uoSpriteBatch.Draw2D(_buffer, 0, 0, ref _hueVector);
+            _uoSpriteBatch.End();
+
             UpdateWindowCaption(gameTime);
         }
+
+        private Vector3 _hueVector;
 
         private void UpdateWindowCaption(GameTime gameTime)
         {
