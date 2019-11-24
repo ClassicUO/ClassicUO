@@ -846,6 +846,9 @@ namespace ClassicUO.IO.Resources
 
         public void ConvertBodyIfNeeded(ref ushort graphic, bool isParent = false)
         {
+            if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                return;
+
             ref var dataIndex = ref DataIndex[graphic];
 
             if (dataIndex.IsUOP && (isParent || !dataIndex.IsValidMUL))
