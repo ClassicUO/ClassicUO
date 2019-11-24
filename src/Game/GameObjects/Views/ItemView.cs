@@ -236,7 +236,10 @@ namespace ClassicUO.Game.GameObjects
                 graphic = itemEquip.ItemData.AnimID;
                 ispartialhue = itemEquip.ItemData.IsPartialHue;
 
-                if (FileManager.Animations.EquipConversions.TryGetValue(Amount, out Dictionary<ushort, EquipConvData> map))
+                ushort mobGraphic = Amount;
+                FileManager.Animations.ConvertBodyIfNeeded(ref mobGraphic);
+
+                if (FileManager.Animations.EquipConversions.TryGetValue(mobGraphic, out Dictionary<ushort, EquipConvData> map))
                 {
                     if (map.TryGetValue(graphic, out EquipConvData data))
                     {

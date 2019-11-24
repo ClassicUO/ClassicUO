@@ -115,7 +115,10 @@ namespace ClassicUO.Game.UI.Controls
 
             ushort id = Item.ItemData.AnimID;
 
-            if (FileManager.Animations.EquipConversions.TryGetValue(Mobile.Graphic, out var dict))
+            ushort mobGraphic = Mobile.Graphic;
+            FileManager.Animations.ConvertBodyIfNeeded(ref mobGraphic);
+
+            if (FileManager.Animations.EquipConversions.TryGetValue(mobGraphic, out var dict))
             {
                 if (dict.TryGetValue(id, out EquipConvData data))
                 {

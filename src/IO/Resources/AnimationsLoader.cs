@@ -844,6 +844,34 @@ namespace ClassicUO.IO.Resources
             return graphic < 200 ? ANIMATION_GROUPS_TYPE.MONSTER : graphic < 400 ? ANIMATION_GROUPS_TYPE.ANIMAL : ANIMATION_GROUPS_TYPE.HUMAN;
         }
 
+        public void ConvertBodyIfNeeded(ref ushort graphic, bool isParent = false)
+        {
+            ref var dataIndex = ref DataIndex[graphic];
+
+            if (dataIndex.IsUOP && (isParent || !dataIndex.IsValidMUL))
+            {
+                // do nothing ?
+            }
+            else
+            {
+                ushort newGraphic = dataIndex.Graphic;
+
+                do
+                {
+                    if ((DataIndex[newGraphic].HasBodyConversion || !dataIndex.HasBodyConversion) && !(DataIndex[newGraphic].HasBodyConversion && dataIndex.HasBodyConversion))
+                    {
+                        if (graphic != newGraphic)
+                        {
+                            graphic = newGraphic;
+                            newGraphic = DataIndex[graphic].Graphic;
+                        }
+                    }
+                    else
+                        break;
+                } while (graphic != newGraphic);
+
+            }
+        }
 
         public AnimationGroup GetBodyAnimationGroup(ref ushort graphic, ref byte group, ref ushort hue, bool isParent = false)
         {
