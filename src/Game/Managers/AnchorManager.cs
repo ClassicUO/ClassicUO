@@ -188,9 +188,12 @@ namespace ClassicUO.Game.Managers
                 var group = new AnchorGroup();
                 var groupGumps = group.Restore(reader, gumps);
 
-                // Rebuild reverse map
-                foreach (var g in groupGumps)
-                    this[g] = group;
+                // Rebuild reverse map, skip if group count is <= 1
+                if (groupGumps.Count > 1)
+                {
+                    foreach (var g in groupGumps)
+                        this[g] = group;
+                }
             }
         }
 
