@@ -179,6 +179,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _textBox.IsEditable = false;
                 UIManager.SystemChat.SetFocus();
             }
+
+            base.OnMouseDown(x, y, button);
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
