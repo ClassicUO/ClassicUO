@@ -91,11 +91,11 @@ namespace ClassicUO.Game.GameObjects
 
             (x2, y2, z2) = GetTarget();
             x2 -= playerX;
-            int num = y2 - playerY;
+            y2 -= playerY;
             z2 -= playerZ;
 
-            int targetX = (ProfileManager.Current.GameWindowSize.X >> 1) + (x2 - num) * 22;
-            int targetY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (x2 + num) * 22 - z2 * 4;
+            int targetX = (ProfileManager.Current.GameWindowSize.X >> 1) + (x2 - y2) * 22;
+            int targetY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (x2 + y2) * 22 - z2 * 4;
             targetX += ProfileManager.Current.GameWindowPosition.X;
             targetY += ProfileManager.Current.GameWindowPosition.Y;
             targetX += (int) Offset.X;
@@ -104,11 +104,7 @@ namespace ClassicUO.Game.GameObjects
             posX = sourceX + (int) ((targetX - sourceX) * normalized);
             posY = sourceY + (int) ((targetY - sourceY) * normalized);
 
-            AngleToTarget =  MathHelper.ToDegrees((float) (Math.Atan2(sourceY - targetY, sourceX - targetY)));
-
-
-
-
+            AngleToTarget = (float) -(Math.Atan2(sourceY - targetY, sourceX - targetX) + Math.PI);
 
 
             if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
