@@ -94,9 +94,6 @@ namespace ClassicUO.Game.Scenes
         {
             Audio?.StopMusic();
             Coroutines.Clear();
-
-            SDL.SDL_GetWindowBordersSize(CUOEnviroment.Client.Window.Handle, out int top, out int left, out int bottom, out int right);
-            Settings.GlobalSettings.WindowPosition = new Point(Math.Max(0, CUOEnviroment.Client.Window.ClientBounds.X - left), Math.Max(0, CUOEnviroment.Client.Window.ClientBounds.Y - top));
         }
 
         public virtual bool Draw(UltimaBatcher2D batcher)

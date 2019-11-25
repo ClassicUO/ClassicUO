@@ -86,6 +86,7 @@ namespace ClassicUO
             base.LoadContent();
 
             SetScene(new LoginScene());
+            SetWindowPositionBySettings();
         }
 
         protected override void UnloadContent()
@@ -145,6 +146,18 @@ namespace ClassicUO
 
         public void SetWindowBorderless(bool borderless)
         {
+            SDL_WindowFlags flags = (SDL_WindowFlags) SDL.SDL_GetWindowFlags(Window.Handle);
+
+            if ((flags & SDL_WindowFlags.SDL_WINDOW_BORDERLESS) != 0 && borderless)
+            {
+                return;
+            }
+
+            if ((flags & SDL_WindowFlags.SDL_WINDOW_BORDERLESS) == 0 && !borderless)
+            {
+                return;
+            }
+            
             SDL_SetWindowBordered(Window.Handle, borderless ? SDL_bool.SDL_FALSE : SDL_bool.SDL_TRUE);
 
             SDL_GetCurrentDisplayMode(0, out SDL_DisplayMode displayMode);
@@ -162,7 +175,7 @@ namespace ClassicUO
                 int top, left, bottom, right;
                 SDL_GetWindowBordersSize(Window.Handle, out top, out left, out bottom, out right);
                 SetWindowSize(width, height - (top - bottom));
-                SDL_SetWindowPosition(Window.Handle, 0, top - bottom);
+                SetWindowPositionBySettings();
             }
 
             var viewport = UIManager.GetGump<WorldViewportGump>();

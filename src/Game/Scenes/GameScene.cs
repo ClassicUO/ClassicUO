@@ -179,10 +179,12 @@ namespace ClassicUO.Game.Scenes
             ProfileManager.Current.RestoreScaleValue = ProfileManager.Current.ScaleZoom = Scale;
             UIManager.ContainerScale = ProfileManager.Current.ContainersScale / 100f;
 
-
-            if (Settings.GlobalSettings.IsWindowMaximized)
+            if (ProfileManager.Current.WindowBorderless)
             {
-                CUOEnviroment.Client.SetWindowBorderless(ProfileManager.Current.WindowBorderless);
+                CUOEnviroment.Client.SetWindowBorderless(true);
+            }
+            else if (Settings.GlobalSettings.IsWindowMaximized)
+            {
                 CUOEnviroment.Client.MaximizeWindow();
             }
             else if (Settings.GlobalSettings.WindowSize.HasValue)
@@ -194,7 +196,7 @@ namespace ClassicUO.Game.Scenes
                 h = Math.Max(480, h);
 
                 CUOEnviroment.Client.SetWindowSize(w, h);
-                CUOEnviroment.Client.SetWindowPositionBySettings();
+                //CUOEnviroment.Client.SetWindowPositionBySettings();
             }
 
 
