@@ -104,7 +104,7 @@ namespace ClassicUO.Game.GameObjects
             posX = sourceX + (int) ((targetX - sourceX) * normalized);
             posY = sourceY + (int) ((targetY - sourceY) * normalized);
 
-            AngleToTarget =  MathHelper.ToDegrees((float) (Math.Atan2(sourceY - targetY, sourceX - targetY)));
+            AngleToTarget = (float) -Math.Atan2(sourceY - targetY, sourceX - targetX) + (float) Math.PI;
 
 
 
