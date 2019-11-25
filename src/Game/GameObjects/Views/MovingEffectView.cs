@@ -66,16 +66,18 @@ namespace ClassicUO.Game.GameObjects
 
 
             double normalized = Normalized();
+
             if (normalized >= 1.0)
+            {
+                Destroy();
                 return false;
+            }
 
             int playerX = World.Player.X;
             int playerY = World.Player.Y;
             int playerZ = World.Player.Z;
 
             (int x1, int y1, int z1) = GetSource();
-
-            int offsetX = 0, offsetY, offsetZ = 0;
 
             int x2 = x1 - playerX;
             int y2 = y1 - playerY;
@@ -85,8 +87,8 @@ namespace ClassicUO.Game.GameObjects
             int sourceY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (x2 + y2) * 22 - z2 * 4;
             sourceX += ProfileManager.Current.GameWindowPosition.X;
             sourceY += ProfileManager.Current.GameWindowPosition.Y;
-            sourceX += (int) Offset.X;
-            sourceY += (int) Offset.Y;
+            //sourceX -= (int) World.Player.Offset.X;
+            //sourceY -= (int) (World.Player.Offset.Y + World.Player.Offset.Z);
 
 
             (x2, y2, z2) = GetTarget();
@@ -98,11 +100,11 @@ namespace ClassicUO.Game.GameObjects
             int targetY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (x2 + num) * 22 - z2 * 4;
             targetX += ProfileManager.Current.GameWindowPosition.X;
             targetY += ProfileManager.Current.GameWindowPosition.Y;
-            targetX += (int) Offset.X;
-            targetY += (int) Offset.Y;
+            //targetX += (int) World.Player.Offset.X;
+            //targetY += (int) (World.Player.Offset.Y + World.Player.Offset.Z);
 
-            posX = sourceX + (int) ((targetX - sourceX) * normalized);
-            posY = sourceY + (int) ((targetY - sourceY) * normalized);
+            posX = sourceX + (int) (((targetX - sourceX) * normalized) - World.Player.Offset.X);
+            posY = sourceY + (int) (((targetY - sourceY) * normalized) - (World.Player.Offset.Y - World.Player.Offset.Z));
 
             AngleToTarget = (float) -Math.Atan2(sourceY - targetY, sourceX - targetX) + (float) Math.PI;
 
@@ -125,6 +127,9 @@ namespace ClassicUO.Game.GameObjects
                 ShaderHuesTraslator.GetHueVector(ref HueVector, Hue);
 
             //Engine.DebugInfo.EffectsRendered++;
+
+            //Bounds.X = -(int) ((Offset.X - Offset.Y) * 22);
+            //Bounds.Y = (int) ((Offset.Z + Z) * 4) - (int) ((Offset.X + Offset.Y) * 22); 
 
             if (FixedDir)
                 batcher.DrawSprite(Texture, posX, posY, false, ref HueVector);

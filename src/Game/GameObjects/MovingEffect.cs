@@ -43,7 +43,7 @@ namespace ClassicUO.Game.GameObjects
             Load();
 
             _startTime = Time.Ticks;
-            _rSeconds = 1.0 / ( (.5) * 1000.0);
+            _rSeconds = 1.0 / (.5 * 1000.0);
         }
 
         public MovingEffect(GameObject source, GameObject target, Graphic graphic, Hue hue) : this(graphic, hue)
@@ -93,7 +93,7 @@ namespace ClassicUO.Game.GameObjects
         public byte MovingDelay { get; set; } = 20;
 
 
-        private float _timeUntilHit, _timeActive;
+        //private float _timeUntilHit, _timeActive;
 
         private double Normalized()
         {
@@ -111,19 +111,78 @@ namespace ClassicUO.Game.GameObjects
 
         private void UpdateEx(double totalMS, double frameMS)
         {
-          
+            double normalized = Normalized();
+            if (normalized >= 1.0)
+                return;
+
+            int playerX = World.Player.X;
+            int playerY = World.Player.Y;
+            int playerZ = World.Player.Z;
+
+            int screenCenterX = ProfileManager.Current.GameWindowPosition.X;
+            int screenCenterY = ProfileManager.Current.GameWindowPosition.Y;
+
+            (int sX, int sY, int sZ) = GetSource();
+
+
+            int offsetSourceX = sX - playerX;
+            int offsetSourceY = sY - playerY;
+            int offsetSourceZ = sZ - playerZ;
+
+            int sourceX = (ProfileManager.Current.GameWindowSize.X >> 1) + (offsetSourceX - offsetSourceY) * 22;
+            int sourceY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (offsetSourceX + offsetSourceY) * 22 - offsetSourceZ * 4;
+            sourceX += screenCenterX;
+            sourceY += screenCenterY;
+            sourceX += (int) World.Player.Offset.X;
+            sourceY += (int) World.Player.Offset.Y;
+
+
+            (int tX, int tY, int tZ) = GetTarget();
+
+            int offsetTargetX = tX - playerX;
+            int offsetTargetY = tY - playerY;
+            int offsetTargetZ = tZ - playerZ;
+
+            int targetX = (ProfileManager.Current.GameWindowSize.X >> 1) + (offsetTargetX - offsetTargetY) * 22;
+            int targetY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (offsetTargetX + offsetTargetY) * 22 - offsetTargetZ * 4;
+            targetX += screenCenterX;
+            targetY += screenCenterY;
+            targetX += (int) Offset.X;
+            targetY += (int) Offset.Y;
+
+            int posX = sourceX + (int) ((targetX - sourceX) * normalized);
+            int posY = sourceY + (int) ((targetY - sourceY) * normalized);
+            AngleToTarget = (float) -Math.Atan2(sourceY - targetY, sourceX - targetX) + (float) Math.PI;
+
+            //float x, y, z;
+            //x = (sX + ((float) normalized) * (float) (tX - sX));
+            //y = (sY + ((float) normalized) * (float) (tY - sY));
+            //z = (sZ + ((float) normalized) * (float) (tZ - sZ));
+
+            int newX = sX + (int) ((tX - sX) * normalized);
+            int newY = sY + (int) ((tY - sY) * normalized);
+
+            //if (newX == tX && newY == tY)
+            //{
+            //    Destroy();
+            //    return;
+            //}
+
+            Position = new Position((ushort) newX, (ushort) newY, (sbyte) Z);
+            AddToTile();
+
+            Offset.X = (sourceX - screenCenterX) / 22f;
+            Offset.Y = (sourceY - screenCenterY) / 22f;
+
         }
 
 
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
-            UpdateEx(totalMS, frameMS);
-
-            //if (_lastMoveTime > Time.Ticks)
-            //    return;
-
-            //_lastMoveTime = Time.Ticks + MovingDelay;
+            //UpdateEx(totalMS, frameMS);
+            //Standard();
+          
             //base.Update(totalMS, frameMS);
             //(int sx, int sy, int sz) = GetSource();
             //(int tx, int ty, int tz) = GetTarget();
@@ -158,174 +217,186 @@ namespace ClassicUO.Game.GameObjects
             //    Offset.X = x % 1;
             //    Offset.Y = y % 1;
             //    Offset.Z = z % 1;
-            //    AngleToTarget = -((float) Math.Atan2((ty - sy), (tx - sx)) + (float) (Math.PI) * (1f / 4f));
+            //    AngleToTarget = (float) -((float) Math.Atan2((ty - sy), (tx - sx)) + (float) (Math.PI) * (1f / 4f));
             //}
 
-            return;
-            //int screenCenterX = ProfileManager.Current.GameWindowPosition.X + (ProfileManager.Current.GameWindowSize.X >> 1);
-            //int screenCenterY = ProfileManager.Current.GameWindowPosition.Y + (ProfileManager.Current.GameWindowSize.Y >> 1);
-            //int playerX = World.Player.X;
-            //int playerY = World.Player.Y;
-            //int offsetX = sx - playerX;
-            //int offsetY = sy - playerY;
-            //int drawX = screenCenterX + (offsetX - offsetY) * 22;
-            //int drawY = screenCenterY + (offsetX + offsetY) * 22;
-            //int realDrawX = drawX + (int) Offset.X;
-            //int realDrawY = drawY + (int) Offset.Y;
-            //int offsetDestX = tx - playerX;
-            //int offsetDestY = ty - playerY;
-            //int drawDestX = screenCenterX + (offsetDestX - offsetDestY) * 22;
-            //int drawDestY = screenCenterY + (offsetDestX + offsetDestY) * 22;
 
-            //int[] deltaXY =
-            //{
-            //    Math.Abs(drawDestX - realDrawX), Math.Abs(drawDestY - realDrawY)
-            //};
-            //int x = 0;
+            
+        }
 
-            //if (deltaXY[0] < deltaXY[1])
-            //{
-            //    x = 1;
-            //    int temp = deltaXY[0];
-            //    deltaXY[0] = deltaXY[1];
-            //    deltaXY[1] = temp;
-            //}
+        private void Standard()
+        {
+            if (_lastMoveTime > Time.Ticks)
+                return;
 
-            //int delta = deltaXY[0];
-            //int stepXY = 0;
-            //const int EFFECT_SPEED = 5;
+            _lastMoveTime = Time.Ticks + MovingDelay;
 
-            //int[] tempXY =
-            //{
-            //    EFFECT_SPEED, 0
-            //};
+            (int sx, int sy, int sz) = GetSource();
+            (int tx, int ty, int tz) = GetTarget();
+            int screenCenterX = ProfileManager.Current.GameWindowPosition.X + (ProfileManager.Current.GameWindowSize.X >> 1);
+            int screenCenterY = ProfileManager.Current.GameWindowPosition.Y + (ProfileManager.Current.GameWindowSize.Y >> 1);
+            int playerX = World.Player.X;
+            int playerY = World.Player.Y;
+            int offsetX = sx - playerX;
+            int offsetY = sy - playerY;
+            int drawX = screenCenterX + (offsetX - offsetY) * 22;
+            int drawY = screenCenterY + (offsetX + offsetY) * 22;
+            int realDrawX = drawX + (int) Offset.X;
+            int realDrawY = drawY + (int) Offset.Y;
+            int offsetDestX = tx - playerX;
+            int offsetDestY = ty - playerY;
+            int drawDestX = screenCenterX + (offsetDestX - offsetDestY) * 22;
+            int drawDestY = screenCenterY + (offsetDestX + offsetDestY) * 22;
 
-            //for (int j = 0; j < EFFECT_SPEED; j++)
-            //{
-            //    stepXY += deltaXY[1];
+            int[] deltaXY =
+            {
+                Math.Abs(drawDestX - realDrawX), Math.Abs(drawDestY - realDrawY)
+            };
+            int x = 0;
 
-            //    if (stepXY >= delta)
-            //    {
-            //        tempXY[1]++;
-            //        stepXY -= deltaXY[0];
-            //    }
-            //}
+            if (deltaXY[0] < deltaXY[1])
+            {
+                x = 1;
+                int temp = deltaXY[0];
+                deltaXY[0] = deltaXY[1];
+                deltaXY[1] = temp;
+            }
 
-            //if (realDrawX < drawDestX)
-            //{
-            //    realDrawX += tempXY[x];
+            int delta = deltaXY[0];
+            int stepXY = 0;
+            const int EFFECT_SPEED = 5;
 
-            //    if (realDrawX > drawDestX)
-            //        realDrawX = drawDestX;
-            //}
-            //else
-            //{
-            //    realDrawX -= tempXY[x];
+            int[] tempXY =
+            {
+                EFFECT_SPEED, 0
+            };
 
-            //    if (realDrawX < drawDestX)
-            //        realDrawX = drawDestX;
-            //}
+            for (int j = 0; j < EFFECT_SPEED; j++)
+            {
+                stepXY += deltaXY[1];
 
-            //if (realDrawY < drawDestY)
-            //{
-            //    realDrawY += tempXY[(x + 1) % 2];
+                if (stepXY >= delta)
+                {
+                    tempXY[1]++;
+                    stepXY -= deltaXY[0];
+                }
+            }
 
-            //    if (realDrawY > drawDestY)
-            //        realDrawY = drawDestY;
-            //}
-            //else
-            //{
-            //    realDrawY -= tempXY[(x + 1) % 2];
+            if (realDrawX < drawDestX)
+            {
+                realDrawX += tempXY[x];
 
-            //    if (realDrawY < drawDestY)
-            //        realDrawY = drawDestY;
-            //}
+                if (realDrawX > drawDestX)
+                    realDrawX = drawDestX;
+            }
+            else
+            {
+                realDrawX -= tempXY[x];
 
-            //int newOffsetX = (realDrawX - screenCenterX) / 22;
-            //int newOffsetY = (realDrawY - screenCenterY) / 22;
-            //int newCoordX = 0;
-            //int newCoordY = 0;
-            //TileOffsetOnMonitorToXY(ref newOffsetX, ref newOffsetY, ref newCoordX, ref newCoordY);
-            //int newX = playerX + newCoordX;
-            //int newY = playerY + newCoordY;
+                if (realDrawX < drawDestX)
+                    realDrawX = drawDestX;
+            }
 
-            //if ((newX == tx && newY == ty && sz == tz) || (Target != null && Target.IsDestroyed))
-            //{
-            //    if (Explode)
-            //    {
-            //        Position = new Position(Position.X, Position.Y, (sbyte) tz);
-            //        Tile = World.Map.GetTile(tx, ty);
-            //    }
+            if (realDrawY < drawDestY)
+            {
+                realDrawY += tempXY[(x + 1) % 2];
 
-            //    Destroy();
-            //}
-            //else
-            //{
-            //    int newDrawX = screenCenterX + (newCoordX - newCoordY) * 22;
-            //    int newDrawY = screenCenterY + (newCoordX + newCoordY) * 22;
-            //    IsPositionChanged = true;
-            //    Offset.X = realDrawX - newDrawX;
-            //    Offset.Y = realDrawY - newDrawY;
-            //    bool wantUpdateInRenderList = false;
-            //    int countX = drawDestX - (newDrawX + (int) Offset.X);
-            //    int countY = drawDestY - (newDrawY + (int) Offset.Y);
+                if (realDrawY > drawDestY)
+                    realDrawY = drawDestY;
+            }
+            else
+            {
+                realDrawY -= tempXY[(x + 1) % 2];
 
-            //    if (sz != tz)
-            //    {
-            //        int stepsCountX = countX / (tempXY[x] + 1);
-            //        int stepsCountY = countY / (tempXY[(x + 1) % 2] + 1);
+                if (realDrawY < drawDestY)
+                    realDrawY = drawDestY;
+            }
 
-            //        if (stepsCountX < stepsCountY)
-            //            stepsCountX = stepsCountY;
+            int newOffsetX = (realDrawX - screenCenterX) / 22;
+            int newOffsetY = (realDrawY - screenCenterY) / 22;
+            int newCoordX = 0;
+            int newCoordY = 0;
+            TileOffsetOnMonitorToXY(ref newOffsetX, ref newOffsetY, ref newCoordX, ref newCoordY);
+            int newX = playerX + newCoordX;
+            int newY = playerY + newCoordY;
 
-            //        if (stepsCountX <= 0)
-            //            stepsCountX = 1;
-            //        int totalOffsetZ = 0;
-            //        bool incZ = sz < tz;
+            if ((newX == tx && newY == ty && sz == tz) || (Target != null && Target.IsDestroyed))
+            {
+                if (Explode)
+                {
+                    //Position = new Position(Position.X, Position.Y, (sbyte) tz);
+                    //Tile = World.Map.GetTile(tx, ty);
+                }
 
-            //        if (incZ)
-            //            totalOffsetZ = (tz - sz) << 2;
-            //        else
-            //            totalOffsetZ = (sz - tz) << 2;
-            //        totalOffsetZ /= stepsCountX;
+                Destroy();
+            }
+            else
+            {
+                int newDrawX = screenCenterX + (newCoordX - newCoordY) * 22;
+                int newDrawY = screenCenterY + (newCoordX + newCoordY) * 22;
+                IsPositionChanged = true;
+                Offset.X = realDrawX - newDrawX;
+                Offset.Y = realDrawY - newDrawY;
+                bool wantUpdateInRenderList = false;
+                int countX = drawDestX - (newDrawX + (int) Offset.X);
+                int countY = drawDestY - (newDrawY + (int) Offset.Y);
 
-            //        if (totalOffsetZ == 0)
-            //            totalOffsetZ = 1;
-            //        Offset.Z += totalOffsetZ;
-            //        if (Offset.Z >= 4)
-            //        {
-            //            const int COUNT_Z = 1;
+                if (sz != tz)
+                {
+                    int stepsCountX = countX / (tempXY[x] + 1);
+                    int stepsCountY = countY / (tempXY[(x + 1) % 2] + 1);
 
-            //            if (incZ)
-            //                sz += COUNT_Z;
-            //            else
-            //                sz -= COUNT_Z;
+                    if (stepsCountX < stepsCountY)
+                        stepsCountX = stepsCountY;
 
-            //            if (sz == tz)
-            //                Offset.Z = 0;
-            //            else
-            //                Offset.Z %= 8;
-            //            wantUpdateInRenderList = true;
-            //        }
-            //    }
+                    if (stepsCountX <= 0)
+                        stepsCountX = 1;
+                    int totalOffsetZ = 0;
+                    bool incZ = sz < tz;
 
-            //    countY -= (int) Offset.Z + ((tz - sz) << 2);
-            //    if (!FixedDir)
-            //    {
-            //        AngleToTarget = -(float) Math.Atan2(countY, countX);
-            //    }
+                    if (incZ)
+                        totalOffsetZ = (tz - sz) << 2;
+                    else
+                        totalOffsetZ = (sz - tz) << 2;
+                    totalOffsetZ /= stepsCountX;
 
-            //    if (sx != newX || sy != newY)
-            //    {
-            //        sx = newX;
-            //        sy = newY;
+                    if (totalOffsetZ == 0)
+                        totalOffsetZ = 1;
+                    Offset.Z += totalOffsetZ;
+                    if (Offset.Z >= 4)
+                    {
+                        const int COUNT_Z = 1;
 
-            //        wantUpdateInRenderList = true;
-            //    }
+                        if (incZ)
+                            sz += COUNT_Z;
+                        else
+                            sz -= COUNT_Z;
 
-            //    if (wantUpdateInRenderList)
-            //        SetSource(sx, sy, sz);
-            //}
+                        if (sz == tz)
+                            Offset.Z = 0;
+                        else
+                            Offset.Z %= 8;
+                        wantUpdateInRenderList = true;
+                    }
+                }
+
+                countY -= (int) Offset.Z + ((tz - sz) << 2);
+                if (!FixedDir)
+                {
+                    AngleToTarget = -(float) Math.Atan2(countY, countX);
+                }
+
+                if (sx != newX || sy != newY)
+                {
+                    sx = newX;
+                    sy = newY;
+
+                    wantUpdateInRenderList = true;
+                }
+
+                if (wantUpdateInRenderList)
+                    SetSource(sx, sy, sz);
+            }
         }
 
         private static void TileOffsetOnMonitorToXY(ref int ofsX, ref int ofsY, ref int x, ref int y)

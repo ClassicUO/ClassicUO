@@ -25,11 +25,11 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class AnimatedItemEffect : GameEffect
     {
-        public AnimatedItemEffect(Graphic graphic, Hue hue, int duration, int speed)
+        public AnimatedItemEffect(Graphic graphic, Hue hue, int duration, int speed) : base()
         {
             Graphic = graphic;
             Hue = hue;
-            Duration = duration > 0 ? Time.Ticks + duration : -1;
+            Duration = duration > 0 ? Time.Ticks + duration * 80 : -1;
             Speed = speed;
             Load();
         }

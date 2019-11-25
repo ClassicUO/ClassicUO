@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
@@ -32,11 +33,12 @@ namespace ClassicUO.Game.GameObjects
     internal abstract class GameEffect : GameObject
     {
         public AnimDataFrame2 AnimDataFrame;
+        private double _start;
 
         protected GameEffect()
         {
             Children = new List<GameEffect>();
-            AlphaHue = 0;
+            AlphaHue = 0xFF;
         }
 
         public List<GameEffect> Children { get; }
@@ -71,7 +73,13 @@ namespace ClassicUO.Game.GameObjects
             AnimDataFrame = FileManager.AnimData.CalculateCurrentGraphic(Graphic);
             IsEnabled = true;
             AnimIndex = 0;
-            Speed = AnimDataFrame.FrameInterval != 0 ? AnimDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY + Speed : Constants.ITEM_EFFECT_ANIMATION_DELAY;
+            //Speed = AnimDataFrame.FrameInterval != 0 ? AnimDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY + Speed : Constants.ITEM_EFFECT_ANIMATION_DELAY;
+            Speed = AnimDataFrame.FrameInterval;
+
+            if (Speed == 0)
+                Speed = 1;
+
+            //_start = Time.Ticks;
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -93,28 +101,39 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (Duration < totalMS && Duration >= 0)
                     Destroy();
-                else if (LastChangeFrameTime < totalMS)
+                else
                 {
-                    if (AnimDataFrame.FrameCount != 0)
+                    unsafe
                     {
-                        unsafe
-                        {
-                            AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
-                        }
-
-                        AnimIndex++;
-
-                        if (AnimIndex >= AnimDataFrame.FrameCount)
-                            AnimIndex = 0;
-                    }
-                    else
-                    {
-                        if (Graphic != AnimationGraphic)
-                            AnimationGraphic = Graphic;
+                        AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[((int) (_start / 50d) / Speed) % AnimDataFrame.FrameCount]);
                     }
 
-                    LastChangeFrameTime = (long) totalMS + Speed;
+                    _start += frameMS;
                 }
+
+                //else if (LastChangeFrameTime < totalMS)
+                //{
+                   
+                //    if (AnimDataFrame.FrameCount != 0)
+                //    {
+                //        unsafe
+                //        {
+                //            AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
+                //        }
+
+                //        AnimIndex++;
+
+                //        if (AnimIndex >= AnimDataFrame.FrameCount)
+                //            AnimIndex = 0;
+                //    }
+                //    else
+                //    {
+                //        if (Graphic != AnimationGraphic)
+                //            AnimationGraphic = Graphic;
+                //    }
+
+                //    LastChangeFrameTime = (long) totalMS + Speed;
+                //}
             }
             else if (Graphic != AnimationGraphic)
                 AnimationGraphic = Graphic;

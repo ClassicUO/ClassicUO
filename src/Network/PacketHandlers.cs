@@ -1780,7 +1780,7 @@ namespace ClassicUO.Network
             Position srcPos = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
             Position targPos = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
             byte speed = p.ReadByte();
-            ushort duration = (ushort) (p.ReadByte() * 50);
+            ushort duration = p.ReadByte();
             p.Skip(2);
             bool fixedDirection = p.ReadBool();
             bool doesExplode = p.ReadBool();
