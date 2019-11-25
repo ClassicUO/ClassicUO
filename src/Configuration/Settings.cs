@@ -68,6 +68,10 @@ namespace ClassicUO.Configuration
         [JsonProperty(PropertyName = "fps")]
         public int FPS { get; set; } = 60;
         [JsonProperty(PropertyName = "window_position")] public Point? WindowPosition { get; set; }
+        [JsonProperty(PropertyName = "window_size")] public Point? WindowSize { get; set; }
+
+        [JsonProperty(PropertyName = "is_win_maximized")]
+        public bool IsWindowMaximized { get; set; } = true;
         [JsonProperty(PropertyName = "debug")] public bool Debug { get; set; }
 
         [JsonProperty(PropertyName = "profiler")]
