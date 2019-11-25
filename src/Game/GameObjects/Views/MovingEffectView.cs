@@ -29,6 +29,8 @@ using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class MovingEffect
@@ -59,6 +61,55 @@ namespace ClassicUO.Game.GameObjects
 
             //posX += 22;
             //posY += 22;
+
+
+
+
+            double normalized = Normalized();
+            if (normalized >= 1.0)
+                return false;
+
+            int playerX = World.Player.X;
+            int playerY = World.Player.Y;
+            int playerZ = World.Player.Z;
+
+            (int x1, int y1, int z1) = GetSource();
+
+            int offsetX = 0, offsetY, offsetZ = 0;
+
+            int x2 = x1 - playerX;
+            int y2 = y1 - playerY;
+            int z2 = z1 - playerZ;
+
+            int sourceX = (ProfileManager.Current.GameWindowSize.X >> 1) + (x2 - y2) * 22;
+            int sourceY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (x2 + y2) * 22 - z2 * 4;
+            sourceX += ProfileManager.Current.GameWindowPosition.X;
+            sourceY += ProfileManager.Current.GameWindowPosition.Y;
+            sourceX += (int) Offset.X;
+            sourceY += (int) Offset.Y;
+
+
+            (x2, y2, z2) = GetTarget();
+            x2 -= playerX;
+            int num = y2 - playerY;
+            z2 -= playerZ;
+
+            int targetX = (ProfileManager.Current.GameWindowSize.X >> 1) + (x2 - num) * 22;
+            int targetY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (x2 + num) * 22 - z2 * 4;
+            targetX += ProfileManager.Current.GameWindowPosition.X;
+            targetY += ProfileManager.Current.GameWindowPosition.Y;
+            targetX += (int) Offset.X;
+            targetY += (int) Offset.Y;
+
+            posX = sourceX + (int) ((targetX - sourceX) * normalized);
+            posY = sourceY + (int) ((targetY - sourceY) * normalized);
+
+            AngleToTarget =  MathHelper.ToDegrees((float) (Math.Atan2(sourceY - targetY, sourceX - targetY)));
+
+
+
+
+
 
             if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
