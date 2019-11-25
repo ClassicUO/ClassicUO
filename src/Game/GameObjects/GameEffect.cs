@@ -36,7 +36,7 @@ namespace ClassicUO.Game.GameObjects
         protected GameEffect()
         {
             Children = new List<GameEffect>();
-            AlphaHue = 0;
+            AlphaHue = 0xFF;
         }
 
         public List<GameEffect> Children { get; }
