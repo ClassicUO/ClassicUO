@@ -111,7 +111,56 @@ namespace ClassicUO.Game.GameObjects
 
         private void UpdateEx(double totalMS, double frameMS)
         {
-          
+            double normalized = Normalized();
+            if (normalized >= 1.0)
+            {
+                Destroy();
+                return;
+            }
+
+            int playerX = World.Player.X;
+            int playerY = World.Player.Y;
+            int playerZ = World.Player.Z;
+
+
+
+            (int sX, int sY, int sZ) = GetSource();
+            int sourceOffsetX = sX - playerX;
+            int sourceOffsetY = sY - playerY;
+            int sourceOffsetZ = sZ - playerZ;
+
+            int sourceX = (ProfileManager.Current.GameWindowSize.X >> 1) + (sourceOffsetX - sourceOffsetY) * 22;
+            int sourceY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (sourceOffsetX + sourceOffsetY) * 22 - sourceOffsetZ * 4;
+            sourceX += ProfileManager.Current.GameWindowPosition.X;
+            sourceY += ProfileManager.Current.GameWindowPosition.Y;
+            //sourceX += (int) Offset.X;
+            //sourceY += (int) Offset.Y;
+
+
+            (int tX, int tY, int tZ) = GetTarget();
+            int targetOffsetX = tX - playerX;
+            int targetOffsetY = tY - playerY;
+            int targetOffsetZ = tZ - playerZ;
+
+            int targetX = (ProfileManager.Current.GameWindowSize.X >> 1) + (targetOffsetX - targetOffsetY) * 22;
+            int targetY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (targetOffsetX + targetOffsetY) * 22 - targetOffsetZ * 4;
+            targetX += ProfileManager.Current.GameWindowPosition.X;
+            targetY += ProfileManager.Current.GameWindowPosition.Y;
+            //targetX += (int) Offset.X;
+            //targetY += (int) Offset.Y;
+
+            //posX = sourceX + (int) ((targetX - sourceX) * normalized);
+            //posY = sourceY + (int) ((targetY - sourceY) * normalized);
+
+
+            //Offset.X = posX / 22;
+            //Offset.Y = posY / 22;
+
+            Offset.X = targetX - sourceX;
+            Offset.Y = targetY - sourceY;
+           
+
+            AngleToTarget = (float) -(Math.Atan2(sourceY - targetY, sourceX - targetX) + Math.PI);
         }
 
 
@@ -125,6 +174,7 @@ namespace ClassicUO.Game.GameObjects
 
             //_lastMoveTime = Time.Ticks + MovingDelay;
             //base.Update(totalMS, frameMS);
+
             //(int sx, int sy, int sz) = GetSource();
             //(int tx, int ty, int tz) = GetTarget();
 
@@ -161,7 +211,6 @@ namespace ClassicUO.Game.GameObjects
             //    AngleToTarget = -((float) Math.Atan2((ty - sy), (tx - sx)) + (float) (Math.PI) * (1f / 4f));
             //}
 
-            return;
             //int screenCenterX = ProfileManager.Current.GameWindowPosition.X + (ProfileManager.Current.GameWindowSize.X >> 1);
             //int screenCenterY = ProfileManager.Current.GameWindowPosition.Y + (ProfileManager.Current.GameWindowSize.Y >> 1);
             //int playerX = World.Player.X;
@@ -253,8 +302,8 @@ namespace ClassicUO.Game.GameObjects
             //{
             //    if (Explode)
             //    {
-            //        Position = new Position(Position.X, Position.Y, (sbyte) tz);
-            //        Tile = World.Map.GetTile(tx, ty);
+            //        //Position = new Position(Position.X, Position.Y, (sbyte) tz);
+            //        //Tile = World.Map.GetTile(tx, ty);
             //    }
 
             //    Destroy();
@@ -312,7 +361,7 @@ namespace ClassicUO.Game.GameObjects
             //    countY -= (int) Offset.Z + ((tz - sz) << 2);
             //    if (!FixedDir)
             //    {
-            //        AngleToTarget = -(float) Math.Atan2(countY, countX);
+            //        AngleToTarget = -(float) (Math.Atan2(countY, countX));
             //    }
 
             //    if (sx != newX || sy != newY)
