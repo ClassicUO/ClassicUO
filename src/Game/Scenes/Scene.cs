@@ -23,31 +23,29 @@
 
 using System;
 using System.Collections.Generic;
-
+using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
-using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Coroutines;
 using ClassicUO.Utility.Logging;
-
+using Microsoft.Xna.Framework;
 using SDL2;
+using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.Scenes
 {
     internal abstract class Scene : IUpdateable, IDisposable
     {
-        protected Scene(int width, int height, bool canresize, bool maximized, bool loadaudio)
+        protected Scene(int sceneID,  bool canresize, bool maximized, bool loadaudio)
         {
-            Width = width;
-            Height = height;
             CanResize = canresize;
             CanBeMaximized = maximized;
             CanLoadAudio = loadaudio;
         }
 
-        public readonly int Width, Height;
         public readonly bool CanResize, CanBeMaximized, CanLoadAudio;
+        public readonly int ID;
 
         public bool IsDestroyed { get; private set; }
 
@@ -96,8 +94,11 @@ namespace ClassicUO.Game.Scenes
         {
             Audio?.StopMusic();
             Coroutines.Clear();
+
+            SDL.SDL_GetWindowBordersSize(CUOEnviroment.Client.Window.Handle, out int top, out int left, out int bottom, out int right);
+            Settings.GlobalSettings.WindowPosition = new Point(Math.Max(0, CUOEnviroment.Client.Window.ClientBounds.X - left), Math.Max(0, CUOEnviroment.Client.Window.ClientBounds.Y - top));
         }
-        
+
         public virtual bool Draw(UltimaBatcher2D batcher)
         {
             return true;

@@ -158,6 +158,7 @@
     <Compile Include="Game\Managers\PoolsManager.cs" />
     <Compile Include="Game\Managers\SkillsGroupManager.cs" />
     <Compile Include="Game\Managers\WorldMapEntityManager.cs" />
+    <Compile Include="Game\Scenes\SceneID.cs" />
     <Compile Include="Game\SelectedObject.cs" />
     <Compile Include="Game\UI\AbstractEntry.cs" />
     <Compile Include="Game\UI\Controls\AbstractTextBox.cs" />
@@ -436,7 +437,6 @@
     <Compile Include="Game\Scenes\GameScene.cs" />
     <Compile Include="Game\Scenes\LoginScene.cs" />
     <Compile Include="Game\Scenes\Scene.cs" />
-    <Compile Include="Game\Scenes\SceneManager.cs" />
     <Compile Include="Game\Serial.cs" />
     <Compile Include="Game\GameObjects\Views\AnimatedEffectView.cs" />
     <Compile Include="Game\GameObjects\Views\ItemView.cs" />

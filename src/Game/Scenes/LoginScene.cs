@@ -38,7 +38,7 @@ using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-
+using Microsoft.Xna.Framework;
 using SDL2;
 
 namespace ClassicUO.Game.Scenes
@@ -64,9 +64,7 @@ namespace ClassicUO.Game.Scenes
         private int _reconnectTryCounter = 1;
 
 
-        public LoginScene() : base(
-            640,
-            480,
+        public LoginScene() : base((int) SceneID.Login,
             false,
             false,
             true)
@@ -119,8 +117,10 @@ namespace ClassicUO.Game.Scenes
                     Connect(Settings.GlobalSettings.Username, Crypter.Decrypt(Settings.GlobalSettings.Password));
             }
 
-            CUOEnviroment.Client.SetWindowBorderless(false);
-            CUOEnviroment.Client.SetWindowSize(Width, Height);
+            if (CUOEnviroment.Client.IsWindowMaximized())
+                CUOEnviroment.Client.RestoreWindow();
+            CUOEnviroment.Client.SetWindowSize(640, 480);
+            CUOEnviroment.Client.SetWindowPositionBySettings();
         }
 
 
@@ -139,7 +139,6 @@ namespace ClassicUO.Game.Scenes
             NetClient.PacketReceived -= NetClient_PacketReceived;
 
             UIManager.GameCursor.IsLoading = false;
-
             base.Unload();
         }
 

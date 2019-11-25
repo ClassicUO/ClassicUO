@@ -71,9 +71,7 @@ namespace ClassicUO.Game.Scenes
         private Weather _weather;
 
 
-        public GameScene() : base(
-            ProfileManager.Current.WindowClientBounds.X,
-            ProfileManager.Current.WindowClientBounds.Y,
+        public GameScene() : base( (int) SceneID.Game,
             true,
             !ProfileManager.Current.RestoreLastGameSize,
             true)
@@ -181,7 +179,24 @@ namespace ClassicUO.Game.Scenes
             ProfileManager.Current.RestoreScaleValue = ProfileManager.Current.ScaleZoom = Scale;
             UIManager.ContainerScale = ProfileManager.Current.ContainersScale / 100f;
 
-            if (ProfileManager.Current.WindowBorderless) CUOEnviroment.Client.SetWindowBorderless(false);
+
+            if (Settings.GlobalSettings.IsWindowMaximized)
+            {
+                CUOEnviroment.Client.SetWindowBorderless(ProfileManager.Current.WindowBorderless);
+                CUOEnviroment.Client.MaximizeWindow();
+            }
+            else if (Settings.GlobalSettings.WindowSize.HasValue)
+            {
+                int w = Settings.GlobalSettings.WindowSize.Value.X;
+                int h = Settings.GlobalSettings.WindowSize.Value.Y;
+
+                w = Math.Max(640, w);
+                h = Math.Max(480, h);
+
+                CUOEnviroment.Client.SetWindowSize(w, h);
+                CUOEnviroment.Client.SetWindowPositionBySettings();
+            }
+
 
             Plugin.OnConnected();
         }
@@ -274,11 +289,6 @@ namespace ClassicUO.Game.Scenes
         {
             HeldItem?.Clear();
 
-            if (ProfileManager.Current != null)
-            {
-                SDL.SDL_GetWindowPosition(CUOEnviroment.Client.Window.Handle, out int x, out int y);
-            }
-            
             try
             {
                 Plugin.OnDisconnected();
@@ -311,6 +321,11 @@ namespace ClassicUO.Game.Scenes
             Hotkeys = null;
             Macros = null;
             Chat.MessageReceived -= ChatOnMessageReceived;
+
+
+            Settings.GlobalSettings.WindowSize = new Point(CUOEnviroment.Client.Window.ClientBounds.Width, CUOEnviroment.Client.Window.ClientBounds.Height);
+            Settings.GlobalSettings.IsWindowMaximized = CUOEnviroment.Client.IsWindowMaximized();
+            CUOEnviroment.Client.SetWindowBorderless(false);
 
             base.Unload();
         }
