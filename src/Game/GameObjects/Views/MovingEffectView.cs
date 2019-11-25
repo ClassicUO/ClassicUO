@@ -75,8 +75,6 @@ namespace ClassicUO.Game.GameObjects
 
             (int x1, int y1, int z1) = GetSource();
 
-            int offsetX = 0, offsetY, offsetZ = 0;
-
             int x2 = x1 - playerX;
             int y2 = y1 - playerY;
             int z2 = z1 - playerZ;
