@@ -951,10 +951,9 @@ namespace ClassicUO.Network
             if (!source.IsValid || !dest.IsValid)
             {
                 effect = new MovingEffect(source, dest, sourceX, sourceY, sourceZ,
-                                          destX, destY, destZ, graphic, hue, true)
+                                          destX, destY, destZ, graphic, hue, true, 5)
                 {
                     Duration = Time.Ticks + 5000,
-                    MovingDelay = 5
                 };
             }
             else

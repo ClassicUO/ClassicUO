@@ -80,10 +80,9 @@ namespace ClassicUO.Game.Managers
                     else if (delay >= 20)
                         delay = 20;
                     
-                    effect = new MovingEffect(source, target, srcPos.X, srcPos.Y, srcPos.Z, targPos.X, targPos.Y, targPos.Z, graphic, hue, fixedDir)
+                    effect = new MovingEffect(source, target, srcPos.X, srcPos.Y, srcPos.Z, targPos.X, targPos.Y, targPos.Z, graphic, hue, fixedDir, (byte) delay)
                     {
                         Blend = blendmode,
-                        MovingDelay = (byte) delay
                     };
 
                     if (doesExplode)

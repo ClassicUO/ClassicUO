@@ -34,38 +34,22 @@ namespace ClassicUO.Game.GameObjects
         private uint _lastMoveTime;
 
         private double _startTime, _rSeconds;
+        private float _timeToReach;
 
-        public MovingEffect(Graphic graphic, Hue hue)
+        private MovingEffect(Graphic graphic, Hue hue)
         {
             Hue = hue;
             Graphic = graphic;
             Load();
 
             _startTime = Time.Ticks;
-            //_rSeconds = 1.0 / ( (Constants.ITEM_EFFECT_ANIMATION_DELAY / 1) * 1000.0);
+            _rSeconds = 1.0 / ( (0.5) * 1000.0);
         }
 
-        public MovingEffect(GameObject source, GameObject target, Graphic graphic, Hue hue) : this(graphic, hue)
-        {
-            SetSource(source);
-            SetTarget(target);
-        }
-
-        public MovingEffect(int xSource, int ySource, int zSource, GameObject target, Graphic graphic, Hue hue) : this(graphic, hue)
-        {
-            SetSource(xSource, ySource, zSource);
-            SetTarget(target);
-        }
-
-        public MovingEffect(int xSource, int ySource, int zSource, int xTarg, int yTarg, int zTarg, Graphic graphic, Hue hue) : this(graphic, hue)
-        {
-            SetSource(xSource, ySource, zSource);
-            SetTarget(xTarg, yTarg, zTarg);
-        }
-
-        public MovingEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, Graphic graphic, Hue hue, bool fixedDir) : this(graphic, hue)
+        public MovingEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, Graphic graphic, Hue hue, bool fixedDir, byte speed) : this(graphic, hue)
         {
             FixedDir = fixedDir;
+            MovingDelay = speed;
 
             Entity source = World.Get(src);
 
@@ -81,6 +65,8 @@ namespace ClassicUO.Game.GameObjects
                 SetTarget(target);
             else
                 SetTarget(xTarget, yTarget, zTarget);
+
+            CalculateTimeToReach();
         }
 
         public float AngleToTarget { get; set; }
@@ -108,20 +94,8 @@ namespace ClassicUO.Game.GameObjects
             return n2;
         }
 
-        private void UpdateEx(double totalMS, double frameMS)
+        private void CalculateTimeToReach()
         {
-            if (_lastMoveTime > Time.Ticks)
-                return;
-
-            _lastMoveTime = Time.Ticks + MovingDelay;
-
-            double normalized = 1.0 / (MovingDelay / 10.0) * 1000.0;
-            if (normalized >= 1.0)
-            {
-                //Destroy();
-                return;
-            }
-
             int playerX = World.Player.X;
             int playerY = World.Player.Y;
             int playerZ = World.Player.Z;
@@ -132,7 +106,6 @@ namespace ClassicUO.Game.GameObjects
 
 
             (int sX, int sY, int sZ) = GetSource();
-
             int offsetSourceX = sX - playerX;
             int offsetSourceY = sY - playerY;
             int offsetSourceZ = sZ - playerZ;
@@ -141,12 +114,60 @@ namespace ClassicUO.Game.GameObjects
             int sourceY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (offsetSourceX + offsetSourceY) * 22 - offsetSourceZ * 4;
             sourceX += screenCenterX;
             sourceY += screenCenterY;
-            //sourceX += (int) Offset.X;
-            //sourceY += (int) Offset.Y;
 
 
             (int tX, int tY, int tZ) = GetTarget();
+            int offsetTargetX = tX - playerX;
+            int offsetTargetY = tY - playerY;
+            int offsetTargetZ = tZ - playerZ;
 
+            int targetX = (ProfileManager.Current.GameWindowSize.X >> 1) + (offsetTargetX - offsetTargetY) * 22;
+            int targetY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (offsetTargetX + offsetTargetY) * 22 - offsetTargetZ * 4;
+            targetX += screenCenterX;
+            targetY += screenCenterY;
+
+
+            int distance = (int) Math.Sqrt(Math.Pow(sourceX - targetX, 2) + Math.Pow(sourceY - targetY, 2));
+
+            _timeToReach = Time.Ticks + (uint) (distance / (MovingDelay));
+        }
+
+        private void UpdateEx(double totalMS, double frameMS)
+        {
+            if (_lastMoveTime > Time.Ticks)
+                return;
+
+            _lastMoveTime = Time.Ticks + MovingDelay;
+
+            if (Time.Ticks > _timeToReach)
+            {
+                Destroy();
+                return;
+            }
+
+            double normalized = 1;
+
+
+            int playerX = World.Player.X;
+            int playerY = World.Player.Y;
+            int playerZ = World.Player.Z;
+
+            int screenCenterX = ProfileManager.Current.GameWindowPosition.X;
+            int screenCenterY = ProfileManager.Current.GameWindowPosition.Y;
+
+
+            (int sX, int sY, int sZ) = GetSource();
+            int offsetSourceX = sX - playerX;
+            int offsetSourceY = sY - playerY;
+            int offsetSourceZ = sZ - playerZ;
+
+            int sourceX = (ProfileManager.Current.GameWindowSize.X >> 1) + (offsetSourceX - offsetSourceY) * 22;
+            int sourceY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (offsetSourceX + offsetSourceY) * 22 - offsetSourceZ * 4;
+            sourceX += screenCenterX;
+            sourceY += screenCenterY;
+
+
+            (int tX, int tY, int tZ) = GetTarget();
             int offsetTargetX = tX - playerX;
             int offsetTargetY = tY - playerY;
             int offsetTargetZ = tZ - playerZ;
@@ -163,29 +184,26 @@ namespace ClassicUO.Game.GameObjects
             AngleToTarget = (float) -Math.Atan2(targetY - sourceY, targetX - sourceX);
 
 
-            //int newX = sX + (int) ((tX - sX));
-            //int newY = sY + (int) ((tY - sY));
+            Offset.X += (int) ((targetX - sourceX) / 22);
+            Offset.Y += (int) ((targetY - sourceY) / 22);
 
-            //if (newX == tX && newY == tY)
+            int offsetX = (int) (Offset.X);
+            int offsetY = (int) (Offset.Y);
+
+            int currX = (targetX - sourceX) + offsetX;
+            currX /= 44;
+            int currY = (targetY - sourceY) + offsetY;
+            currY /= 44;
+
+            Console.WriteLine("X: {0}, Y: {1}", currX, currY);
+
+            //int distance = (int) Math.Sqrt(Math.Pow(sX - tX, 2) + Math.Pow(sY - tY, 2));
+
+            //if (sourceX + offsetX >= targetX && sourceY + offsetY >= targetY)
             //{
-            //    Destroy();
-            //    return;
+
             //}
 
-            //Position = new Position((ushort) newX, (ushort) newY, (sbyte) Z);
-            //AddToTile();
-
-            int newOffsetX = targetX - sourceX;
-            int newOffsetY = targetY - sourceY;
-
-            //if (newOffsetX == 0 && newOffsetY == 0)
-            //{
-            //    Destroy();
-            //    return;
-            //}
-
-            Offset.X += (float) (((newOffsetX) * normalized) / 22);
-            Offset.Y += (float) (((newOffsetY) * normalized) / 22);
 
         }
 
@@ -250,16 +268,19 @@ namespace ClassicUO.Game.GameObjects
             int screenCenterY = ProfileManager.Current.GameWindowPosition.Y + (ProfileManager.Current.GameWindowSize.Y >> 1);
             int playerX = World.Player.X;
             int playerY = World.Player.Y;
+            int playerZ = World.Player.Z;
             int offsetX = sx - playerX;
             int offsetY = sy - playerY;
+            int offsetZ = sz - playerZ;
             int drawX = screenCenterX + (offsetX - offsetY) * 22;
-            int drawY = screenCenterY + (offsetX + offsetY) * 22;
+            int drawY = screenCenterY + ((offsetX + offsetY) * 22 - offsetZ * 4);
             int realDrawX = drawX + (int) Offset.X;
             int realDrawY = drawY + (int) Offset.Y;
             int offsetDestX = tx - playerX;
             int offsetDestY = ty - playerY;
+            int offsetDestZ = tz - playerZ;
             int drawDestX = screenCenterX + (offsetDestX - offsetDestY) * 22;
-            int drawDestY = screenCenterY + (offsetDestX + offsetDestY) * 22;
+            int drawDestY = screenCenterY + ((offsetDestX + offsetDestY) * 22 - offsetDestZ * 4);
 
             int[] deltaXY =
             {
@@ -346,7 +367,7 @@ namespace ClassicUO.Game.GameObjects
             else
             {
                 int newDrawX = screenCenterX + (newCoordX - newCoordY) * 22;
-                int newDrawY = screenCenterY + (newCoordX + newCoordY) * 22;
+                int newDrawY = screenCenterY + ((newCoordX + newCoordY) * 22 - (offsetZ * 4));
                 IsPositionChanged = true;
                 Offset.X = realDrawX - newDrawX;
                 Offset.Y = realDrawY - newDrawY;
@@ -356,44 +377,44 @@ namespace ClassicUO.Game.GameObjects
 
                 if (sz != tz)
                 {
-                    int stepsCountX = countX / (tempXY[x] + 1);
-                    int stepsCountY = countY / (tempXY[(x + 1) % 2] + 1);
+                    //int stepsCountX = countX / (tempXY[x] + 1);
+                    //int stepsCountY = countY / (tempXY[(x + 1) % 2] + 1);
 
-                    if (stepsCountX < stepsCountY)
-                        stepsCountX = stepsCountY;
+                    //if (stepsCountX < stepsCountY)
+                    //    stepsCountX = stepsCountY;
 
-                    if (stepsCountX <= 0)
-                        stepsCountX = 1;
-                    int totalOffsetZ = 0;
-                    bool incZ = sz < tz;
+                    //if (stepsCountX <= 0)
+                    //    stepsCountX = 1;
+                    //int totalOffsetZ = 0;
+                    //bool incZ = sz < tz;
 
-                    if (incZ)
-                        totalOffsetZ = (tz - sz) << 2;
-                    else
-                        totalOffsetZ = (sz - tz) << 2;
-                    totalOffsetZ /= stepsCountX;
+                    //if (incZ)
+                    //    totalOffsetZ = (tz - sz) << 2;
+                    //else
+                    //    totalOffsetZ = (sz - tz) << 2;
+                    //totalOffsetZ /= stepsCountX;
 
-                    if (totalOffsetZ == 0)
-                        totalOffsetZ = 1;
-                    Offset.Z += totalOffsetZ;
-                    if (Offset.Z >= 4)
-                    {
-                        const int COUNT_Z = 1;
+                    //if (totalOffsetZ == 0)
+                    //    totalOffsetZ = 1;
+                    //Offset.Z += totalOffsetZ;
+                    //if (Offset.Z >= 4)
+                    //{
+                    //    const int COUNT_Z = 1;
 
-                        if (incZ)
-                            sz += COUNT_Z;
-                        else
-                            sz -= COUNT_Z;
+                    //    if (incZ)
+                    //        sz += COUNT_Z;
+                    //    else
+                    //        sz -= COUNT_Z;
 
-                        if (sz == tz)
-                            Offset.Z = 0;
-                        else
-                            Offset.Z %= 8;
-                        wantUpdateInRenderList = true;
-                    }
+                    //    if (sz == tz)
+                    //        Offset.Z = 0;
+                    //    else
+                    //        Offset.Z %= 8;
+                    //    wantUpdateInRenderList = true;
+                    //}
                 }
 
-                countY -= (int) Offset.Z + ((tz - sz) << 2);
+                //countY -= (int) Offset.Z + ((tz - sz) << 2);
                 if (!FixedDir)
                 {
                     AngleToTarget = -(float) Math.Atan2(countY, countX);
