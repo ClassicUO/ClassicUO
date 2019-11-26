@@ -180,7 +180,7 @@ namespace ClassicUO.Game.GameObjects
         {
             base.Update(totalMS, frameMS);
             //UpdateEx(totalMS, frameMS);
-            //Standard();
+            Standard();
           
             //base.Update(totalMS, frameMS);
             //(int sx, int sy, int sz) = GetSource();

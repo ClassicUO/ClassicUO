@@ -62,6 +62,8 @@ namespace ClassicUO.Game.Managers
             if (hue != 0)
                 hue++;
 
+            duration *= Constants.ITEM_EFFECT_ANIMATION_DELAY;
+
             switch (type)
             {
                 case GraphicEffectType.Moving:

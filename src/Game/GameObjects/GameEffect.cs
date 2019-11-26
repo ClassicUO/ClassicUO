@@ -33,7 +33,6 @@ namespace ClassicUO.Game.GameObjects
     internal abstract class GameEffect : GameObject
     {
         public AnimDataFrame2 AnimDataFrame;
-        private double _start;
 
         protected GameEffect()
         {
@@ -67,19 +66,12 @@ namespace ClassicUO.Game.GameObjects
 
         public long Duration = -1;
 
-
         public void Load()
         {
             AnimDataFrame = FileManager.AnimData.CalculateCurrentGraphic(Graphic);
             IsEnabled = true;
             AnimIndex = 0;
-            //Speed = AnimDataFrame.FrameInterval != 0 ? AnimDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY + Speed : Constants.ITEM_EFFECT_ANIMATION_DELAY;
-            Speed = AnimDataFrame.FrameInterval;
-
-            if (Speed == 0)
-                Speed = 1;
-
-            //_start = Time.Ticks;
+            Speed = AnimDataFrame.FrameInterval != 0 ? AnimDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY + Speed : Constants.ITEM_EFFECT_ANIMATION_DELAY;
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -101,39 +93,43 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (Duration < totalMS && Duration >= 0)
                     Destroy();
-                else
+                //else
+                //{
+                //    unsafe
+                //    {
+                //        int count = AnimDataFrame.FrameCount;
+                //        if (count == 0)
+                //            count = 1;
+
+                //        AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[((int) Math.Max(1, (_start / 50d) / Speed)) % count]);
+                //    }
+
+                //    _start += frameMS;
+                //}
+
+                else if (LastChangeFrameTime < totalMS)
                 {
-                    unsafe
+
+                    if (AnimDataFrame.FrameCount != 0)
                     {
-                        AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[((int) (_start / 50d) / Speed) % AnimDataFrame.FrameCount]);
+                        unsafe
+                        {
+                            AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
+                        }
+
+                        AnimIndex++;
+
+                        if (AnimIndex >= AnimDataFrame.FrameCount)
+                            AnimIndex = 0;
+                    }
+                    else
+                    {
+                        if (Graphic != AnimationGraphic)
+                            AnimationGraphic = Graphic;
                     }
 
-                    _start += frameMS;
+                    LastChangeFrameTime = (long) totalMS + Speed;
                 }
-
-                //else if (LastChangeFrameTime < totalMS)
-                //{
-                   
-                //    if (AnimDataFrame.FrameCount != 0)
-                //    {
-                //        unsafe
-                //        {
-                //            AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
-                //        }
-
-                //        AnimIndex++;
-
-                //        if (AnimIndex >= AnimDataFrame.FrameCount)
-                //            AnimIndex = 0;
-                //    }
-                //    else
-                //    {
-                //        if (Graphic != AnimationGraphic)
-                //            AnimationGraphic = Graphic;
-                //    }
-
-                //    LastChangeFrameTime = (long) totalMS + Speed;
-                //}
             }
             else if (Graphic != AnimationGraphic)
                 AnimationGraphic = Graphic;
