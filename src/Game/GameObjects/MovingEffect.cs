@@ -37,13 +37,12 @@ namespace ClassicUO.Game.GameObjects
 
         public MovingEffect(Graphic graphic, Hue hue)
         {
-            AlphaHue = 255;
             Hue = hue;
             Graphic = graphic;
             Load();
 
             _startTime = Time.Ticks;
-            _rSeconds = 1.0 / (.5 * 1000.0);
+            _rSeconds = 1.0 / ( (Constants.ITEM_EFFECT_ANIMATION_DELAY / 100f) * 1000.0);
         }
 
         public MovingEffect(GameObject source, GameObject target, Graphic graphic, Hue hue) : this(graphic, hue)
