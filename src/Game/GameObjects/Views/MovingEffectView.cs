@@ -85,8 +85,8 @@ namespace ClassicUO.Game.GameObjects
 
             int sourceX = (ProfileManager.Current.GameWindowSize.X >> 1) + (x2 - y2) * 22;
             int sourceY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (x2 + y2) * 22 - z2 * 4;
-            sourceX += ProfileManager.Current.GameWindowPosition.X;
-            sourceY += ProfileManager.Current.GameWindowPosition.Y;
+            sourceX += ProfileManager.Current.GameWindowPosition.X - 22;
+            sourceY += ProfileManager.Current.GameWindowPosition.Y - 22;
             //sourceX -= (int) World.Player.Offset.X;
             //sourceY -= (int) (World.Player.Offset.Y + World.Player.Offset.Z);
 
@@ -98,8 +98,8 @@ namespace ClassicUO.Game.GameObjects
 
             int targetX = (ProfileManager.Current.GameWindowSize.X >> 1) + (x2 - num) * 22;
             int targetY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (x2 + num) * 22 - z2 * 4;
-            targetX += ProfileManager.Current.GameWindowPosition.X;
-            targetY += ProfileManager.Current.GameWindowPosition.Y;
+            targetX += ProfileManager.Current.GameWindowPosition.X - 22;
+            targetY += ProfileManager.Current.GameWindowPosition.Y - 22;
             //targetX += (int) World.Player.Offset.X;
             //targetY += (int) (World.Player.Offset.Y + World.Player.Offset.Z);
 
