@@ -110,9 +110,17 @@ namespace ClassicUO.Game.GameObjects
 
         private void UpdateEx(double totalMS, double frameMS)
         {
-            double normalized = Normalized();
-            if (normalized >= 1.0)
+            if (_lastMoveTime > Time.Ticks)
                 return;
+
+            _lastMoveTime = Time.Ticks + MovingDelay;
+
+            double normalized = 1 - 1.0 / ((MovingDelay)); // Normalized();
+            if (normalized >= 1.0)
+            {
+                //Destroy();
+                return;
+            }
 
             int playerX = World.Player.X;
             int playerY = World.Player.Y;
@@ -121,8 +129,9 @@ namespace ClassicUO.Game.GameObjects
             int screenCenterX = ProfileManager.Current.GameWindowPosition.X;
             int screenCenterY = ProfileManager.Current.GameWindowPosition.Y;
 
-            (int sX, int sY, int sZ) = GetSource();
 
+
+            (int sX, int sY, int sZ) = GetSource();
 
             int offsetSourceX = sX - playerX;
             int offsetSourceY = sY - playerY;
@@ -132,8 +141,8 @@ namespace ClassicUO.Game.GameObjects
             int sourceY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (offsetSourceX + offsetSourceY) * 22 - offsetSourceZ * 4;
             sourceX += screenCenterX;
             sourceY += screenCenterY;
-            sourceX += (int) World.Player.Offset.X;
-            sourceY += (int) World.Player.Offset.Y;
+            //sourceX += (int) Offset.X;
+            //sourceY += (int) Offset.Y;
 
 
             (int tX, int tY, int tZ) = GetTarget();
@@ -146,20 +155,16 @@ namespace ClassicUO.Game.GameObjects
             int targetY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (offsetTargetX + offsetTargetY) * 22 - offsetTargetZ * 4;
             targetX += screenCenterX;
             targetY += screenCenterY;
-            targetX += (int) Offset.X;
-            targetY += (int) Offset.Y;
 
-            int posX = sourceX + (int) ((targetX - sourceX) * normalized);
-            int posY = sourceY + (int) ((targetY - sourceY) * normalized);
-            AngleToTarget = (float) -Math.Atan2(sourceY - targetY, sourceX - targetX) + (float) Math.PI;
 
-            //float x, y, z;
-            //x = (sX + ((float) normalized) * (float) (tX - sX));
-            //y = (sY + ((float) normalized) * (float) (tY - sY));
-            //z = (sZ + ((float) normalized) * (float) (tZ - sZ));
+            //int posX = sourceX + (int) ((targetX - sourceX) * normalized);
+            //int posY = sourceY + (int) ((targetY - sourceY) * normalized);
 
-            int newX = sX + (int) ((tX - sX) * normalized);
-            int newY = sY + (int) ((tY - sY) * normalized);
+            AngleToTarget = (float) -Math.Atan2(targetY - sourceY, targetX - sourceX);
+
+
+            //int newX = sX + (int) ((tX - sX));
+            //int newY = sY + (int) ((tY - sY));
 
             //if (newX == tX && newY == tY)
             //{
@@ -167,11 +172,20 @@ namespace ClassicUO.Game.GameObjects
             //    return;
             //}
 
-            Position = new Position((ushort) newX, (ushort) newY, (sbyte) Z);
-            AddToTile();
+            //Position = new Position((ushort) newX, (ushort) newY, (sbyte) Z);
+            //AddToTile();
 
-            Offset.X = (sourceX - screenCenterX) / 22f;
-            Offset.Y = (sourceY - screenCenterY) / 22f;
+            int newOffsetX = targetX - sourceX;
+            int newOffsetY = targetY - sourceY;
+
+            //if (newOffsetX == 0 && newOffsetY == 0)
+            //{
+            //    Destroy();
+            //    return;
+            //}
+
+            Offset.X += (float) (((newOffsetX) * normalized) / 22);
+            Offset.Y += (float) (((newOffsetY) * normalized) / 22);
 
         }
 
@@ -179,8 +193,8 @@ namespace ClassicUO.Game.GameObjects
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
-            //UpdateEx(totalMS, frameMS);
-            Standard();
+            UpdateEx(totalMS, frameMS);
+            //Standard();
           
             //base.Update(totalMS, frameMS);
             //(int sx, int sy, int sz) = GetSource();

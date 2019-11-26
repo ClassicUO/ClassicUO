@@ -67,7 +67,6 @@ namespace ClassicUO.Game.Managers
             switch (type)
             {
                 case GraphicEffectType.Moving:
-
                     if (graphic <= 0)
                         return;
 
