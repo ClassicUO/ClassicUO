@@ -33,17 +33,11 @@ namespace ClassicUO.Game.GameObjects
     {
         private uint _lastMoveTime;
 
-        private double _startTime, _rSeconds;
-        private float _timeToReach;
-
         private MovingEffect(Graphic graphic, Hue hue)
         {
             Hue = hue;
             Graphic = graphic;
             Load();
-
-            _startTime = Time.Ticks;
-            _rSeconds = 1.0 / ( (0.5) * 1000.0);
         }
 
         public MovingEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, Graphic graphic, Hue hue, bool fixedDir, byte speed) : this(graphic, hue)
@@ -65,72 +59,13 @@ namespace ClassicUO.Game.GameObjects
                 SetTarget(target);
             else
                 SetTarget(xTarget, yTarget, zTarget);
-
-            CalculateTimeToReach();
         }
 
-        public float AngleToTarget { get; set; }
+        public float AngleToTarget;
+        public bool Explode;
+        public readonly bool FixedDir;
+        public byte MovingDelay = 10;
 
-        public bool Explode { get; set; }
-
-        public bool FixedDir { get; }
-
-        public byte MovingDelay { get; set; } = 20;
-
-
-        //private float _timeUntilHit, _timeActive;
-
-        private double Normalized()
-        {
-            double n = Time.Ticks;
-
-            double n2 = (n - _startTime) * _rSeconds;
-
-            if (n2 < 0.0)
-                n2 = 0.0;
-            else if (n2 > 1.0)
-                n2 = 1.0;
-
-            return n2;
-        }
-
-        private void CalculateTimeToReach()
-        {
-            int playerX = World.Player.X;
-            int playerY = World.Player.Y;
-            int playerZ = World.Player.Z;
-
-            int screenCenterX = ProfileManager.Current.GameWindowPosition.X;
-            int screenCenterY = ProfileManager.Current.GameWindowPosition.Y;
-
-
-
-            (int sX, int sY, int sZ) = GetSource();
-            int offsetSourceX = sX - playerX;
-            int offsetSourceY = sY - playerY;
-            int offsetSourceZ = sZ - playerZ;
-
-            int sourceX = (ProfileManager.Current.GameWindowSize.X >> 1) + (offsetSourceX - offsetSourceY) * 22;
-            int sourceY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (offsetSourceX + offsetSourceY) * 22 - offsetSourceZ * 4;
-            sourceX += screenCenterX;
-            sourceY += screenCenterY;
-
-
-            (int tX, int tY, int tZ) = GetTarget();
-            int offsetTargetX = tX - playerX;
-            int offsetTargetY = tY - playerY;
-            int offsetTargetZ = tZ - playerZ;
-
-            int targetX = (ProfileManager.Current.GameWindowSize.X >> 1) + (offsetTargetX - offsetTargetY) * 22;
-            int targetY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (offsetTargetX + offsetTargetY) * 22 - offsetTargetZ * 4;
-            targetX += screenCenterX;
-            targetY += screenCenterY;
-
-
-            int distance = (int) Math.Sqrt(Math.Pow(sourceX - targetX, 2) + Math.Pow(sourceY - targetY, 2));
-
-            _timeToReach = Time.Ticks + (uint) (distance / (MovingDelay));
-        }
 
         private void UpdateEx(double totalMS, double frameMS)
         {
@@ -139,15 +74,13 @@ namespace ClassicUO.Game.GameObjects
 
             _lastMoveTime = Time.Ticks + MovingDelay;
 
-            if (Time.Ticks > _timeToReach)
+            if (Target != null && Target.IsDestroyed)
             {
                 Destroy();
                 return;
             }
 
-            double normalized = 1;
-
-
+            
             int playerX = World.Player.X;
             int playerY = World.Player.Y;
             int playerZ = World.Player.Z;
@@ -161,10 +94,10 @@ namespace ClassicUO.Game.GameObjects
             int offsetSourceY = sY - playerY;
             int offsetSourceZ = sZ - playerZ;
 
-            int sourceX = (ProfileManager.Current.GameWindowSize.X >> 1) + (offsetSourceX - offsetSourceY) * 22;
-            int sourceY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (offsetSourceX + offsetSourceY) * 22 - offsetSourceZ * 4;
-            sourceX += screenCenterX;
-            sourceY += screenCenterY;
+            int screenSourceX = (ProfileManager.Current.GameWindowSize.X >> 1) + (offsetSourceX - offsetSourceY) * 22;
+            int screenSourceY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (offsetSourceX + offsetSourceY) * 22 - offsetSourceZ * 4;
+            screenSourceX += screenCenterX;
+            screenSourceY += screenCenterY;
 
 
             (int tX, int tY, int tZ) = GetTarget();
@@ -172,39 +105,29 @@ namespace ClassicUO.Game.GameObjects
             int offsetTargetY = tY - playerY;
             int offsetTargetZ = tZ - playerZ;
 
-            int targetX = (ProfileManager.Current.GameWindowSize.X >> 1) + (offsetTargetX - offsetTargetY) * 22;
-            int targetY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (offsetTargetX + offsetTargetY) * 22 - offsetTargetZ * 4;
-            targetX += screenCenterX;
-            targetY += screenCenterY;
+            int screenTargetX = (ProfileManager.Current.GameWindowSize.X >> 1) + (offsetTargetX - offsetTargetY) * 22;
+            int screenTargetY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (offsetTargetX + offsetTargetY) * 22 - offsetTargetZ * 4;
+            screenTargetX += screenCenterX;
+            screenTargetY += screenCenterY;
 
 
-            //int posX = sourceX + (int) ((targetX - sourceX) * normalized);
-            //int posY = sourceY + (int) ((targetY - sourceY) * normalized);
 
-            AngleToTarget = (float) -Math.Atan2(targetY - sourceY, targetX - sourceX);
+            int distance = (int) Math.Sqrt(Math.Pow(screenSourceX - screenTargetX, 2) + Math.Pow(screenSourceY - screenTargetY, 2));
 
+            int startX = screenSourceX + (screenSourceX - screenTargetX) + (int) (Offset.X);
+            int startY = screenSourceY + (screenSourceY - screenTargetY) + (int) (Offset.Y);
 
-            Offset.X += (int) ((targetX - sourceX) / 22);
-            Offset.Y += (int) ((targetY - sourceY) / 22);
+            int distanceNow = (int) Math.Sqrt(Math.Pow(startX - screenTargetX, 2) + Math.Pow(startY - screenTargetY, 2));
 
-            int offsetX = (int) (Offset.X);
-            int offsetY = (int) (Offset.Y);
+            if (distanceNow < distance)
+            {
+                Destroy();
+                return;
+            }
 
-            int currX = (targetX - sourceX) + offsetX;
-            currX /= 44;
-            int currY = (targetY - sourceY) + offsetY;
-            currY /= 44;
-
-            Console.WriteLine("X: {0}, Y: {1}", currX, currY);
-
-            //int distance = (int) Math.Sqrt(Math.Pow(sX - tX, 2) + Math.Pow(sY - tY, 2));
-
-            //if (sourceX + offsetX >= targetX && sourceY + offsetY >= targetY)
-            //{
-
-            //}
-
-
+            AngleToTarget = (float) -Math.Atan2(screenTargetY - screenSourceY, screenTargetX - screenSourceX);
+            Offset.X += (int) ((screenTargetX - screenSourceX) / 22);
+            Offset.Y += (int) ((screenTargetY - screenSourceY) / 22);
         }
 
 
