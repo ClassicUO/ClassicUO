@@ -70,17 +70,10 @@ namespace ClassicUO.Game.Managers
                     if (graphic <= 0)
                         return;
 
-                    // speed: min 0 - max 20
-                    // higher = faster
-                    const int MAX_DELAY = 20;
-
-                    int delay = MAX_DELAY - speed;
-                    if (delay <= 0)
-                        delay = 1;
-                    else if (delay >= 20)
-                        delay = 20;
+                    if (speed == 0)
+                        speed++;
                     
-                    effect = new MovingEffect(source, target, srcPos.X, srcPos.Y, srcPos.Z, targPos.X, targPos.Y, targPos.Z, graphic, hue, fixedDir, (byte) delay)
+                    effect = new MovingEffect(source, target, srcPos.X, srcPos.Y, srcPos.Z, targPos.X, targPos.Y, targPos.Z, graphic, hue, fixedDir, speed)
                     {
                         Blend = blendmode,
                     };

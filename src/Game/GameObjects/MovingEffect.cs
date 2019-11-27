@@ -97,10 +97,10 @@ namespace ClassicUO.Game.GameObjects
 
             _distance = (int) Math.Sqrt(Math.Pow(screenSourceX - screenTargetX, 2) + Math.Pow(screenSourceY - screenTargetY, 2));
 
-            _velocity.X = (((screenTargetX - screenSourceX) * ((MovingDelay) / (float) _distance)));
-            _velocity.Y = (((screenTargetY - screenSourceY) * ((MovingDelay) / (float) _distance)));
+            _velocity.X = (screenTargetX - screenSourceX) * (MovingDelay / (float) _distance);
+            _velocity.Y = (screenTargetY - screenSourceY) * (MovingDelay / (float) _distance);
 
-            Vector2.Normalize(ref _velocity, out _velocity);
+            //Vector2.Normalize(ref _velocity, out _velocity);
 
             AngleToTarget = (float) -Math.Atan2(screenTargetY - screenSourceY, screenTargetX - screenSourceX);
         }
@@ -155,20 +155,32 @@ namespace ClassicUO.Game.GameObjects
             screenTargetY += screenCenterY;
 
 
+            int offX = (screenSourceX - screenTargetX) + (int) Math.Floor(Offset.X);
+            int offY = (screenSourceY - screenTargetY) + (int) Math.Floor(Offset.Y);
 
-            int startX = screenSourceX + (screenSourceX - screenTargetX) + (int) (Offset.X);
-            int startY = screenSourceY + (screenSourceY - screenTargetY) + (int) (Offset.Y);
+            int tileX = _distance + offX;
+            tileX /= 44;
+
+            int tileY = _distance + offY;
+            tileY /= 44;
+
+
+            Console.WriteLine("TILE: {0},{1}", tileX, tileY);
+
+            int startX = screenSourceX + offX;
+            int startY = screenSourceY + offY;
 
             int distanceNow = (int) Math.Sqrt(Math.Pow(startX - screenTargetX, 2) + Math.Pow(startY - screenTargetY, 2));
 
             if (distanceNow < _distance)
+            //if (tileX <= 0 && tileY <= 0)
             {
                 Destroy();
                 return;
             }
 
-            Offset.X += _velocity.X * (float) frameMS;
-            Offset.Y += _velocity.Y * (float) frameMS;
+            Offset.X += _velocity.X;
+            Offset.Y += _velocity.Y;
         }
 
         public override void Update(double totalMS, double frameMS)
