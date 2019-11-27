@@ -32,15 +32,13 @@ namespace ClassicUO.Game.GameObjects
     internal sealed partial class MovingEffect : GameEffect
     {
         private uint _lastMoveTime;
-        private float _startTime;
-        private double _rSeconds;
+
 
         private MovingEffect(Graphic graphic, Hue hue)
         {
             Hue = hue;
             Graphic = graphic;
             Load();
-            _startTime = Time.Ticks;
         }
 
         public MovingEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, Graphic graphic, Hue hue, bool fixedDir, byte speed) : this(graphic, hue)
@@ -62,10 +60,6 @@ namespace ClassicUO.Game.GameObjects
                 SetTarget(target);
             else
                 SetTarget(xTarget, yTarget, zTarget);
-
-            double v = (20 - speed) / 20d;
-
-            _rSeconds = 1.0 / (speed * 1000.0);
         }
 
         public float AngleToTarget;
@@ -134,24 +128,9 @@ namespace ClassicUO.Game.GameObjects
 
             AngleToTarget = (float) -Math.Atan2(screenTargetY - screenSourceY, screenTargetX - screenSourceX);
 
-            double q = Normalized(); // (distance / (float) (21 - MovingDelay));
 
-            Offset.X += (int) Math.Floor(((screenTargetX - screenSourceX)    *   (distance / (float) MovingDelay)    ));
-            Offset.Y += (int) Math.Floor(((screenTargetY - screenSourceY)    *   (distance / (float) MovingDelay)    ));
-        }
-
-        private double Normalized()
-        {
-            double n = Time.Ticks;
-
-            double n2 = (n - _startTime) * _rSeconds;
-
-            if (n2 < 0.0)
-                n2 = 0.0;
-            else if (n2 > 1.0)
-                n2 = 1.0;
-
-            return n2;
+            Offset.X += (((screenTargetX - screenSourceX)    *   ( (MovingDelay) / (float) distance)    ));
+            Offset.Y += (((screenTargetY - screenSourceY)    *   ( (MovingDelay) / (float) distance)    ));
         }
 
         public override void Update(double totalMS, double frameMS)
