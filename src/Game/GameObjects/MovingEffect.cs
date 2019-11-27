@@ -32,7 +32,8 @@ namespace ClassicUO.Game.GameObjects
     internal sealed partial class MovingEffect : GameEffect
     {
         private uint _lastMoveTime;
-
+        private int _distance;
+        private Vector2 _velocity;
 
         private MovingEffect(Graphic graphic, Hue hue)
         {
@@ -60,6 +61,45 @@ namespace ClassicUO.Game.GameObjects
                 SetTarget(target);
             else
                 SetTarget(xTarget, yTarget, zTarget);
+
+
+
+            int playerX = World.Player.X;
+            int playerY = World.Player.Y;
+            int playerZ = World.Player.Z;
+
+            int screenCenterX = ProfileManager.Current.GameWindowPosition.X;
+            int screenCenterY = ProfileManager.Current.GameWindowPosition.Y;
+
+
+            (int sX, int sY, int sZ) = GetSource();
+            int offsetSourceX = sX - playerX;
+            int offsetSourceY = sY - playerY;
+            int offsetSourceZ = sZ - playerZ;
+
+            int screenSourceX = (ProfileManager.Current.GameWindowSize.X >> 1) + (offsetSourceX - offsetSourceY) * 22;
+            int screenSourceY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (offsetSourceX + offsetSourceY) * 22 - offsetSourceZ * 4;
+            screenSourceX += screenCenterX;
+            screenSourceY += screenCenterY;
+
+
+            (int tX, int tY, int tZ) = GetTarget();
+            int offsetTargetX = tX - playerX;
+            int offsetTargetY = tY - playerY;
+            int offsetTargetZ = tZ - playerZ;
+
+            int screenTargetX = (ProfileManager.Current.GameWindowSize.X >> 1) + (offsetTargetX - offsetTargetY) * 22;
+            int screenTargetY = (ProfileManager.Current.GameWindowSize.Y >> 1) + (offsetTargetX + offsetTargetY) * 22 - offsetTargetZ * 4;
+            screenTargetX += screenCenterX;
+            screenTargetY += screenCenterY;
+
+
+
+            _distance = (int) Math.Sqrt(Math.Pow(screenSourceX - screenTargetX, 2) + Math.Pow(screenSourceY - screenTargetY, 2));
+
+            _velocity.X = (((screenTargetX - screenSourceX) * ((MovingDelay) / (float) _distance)));
+            _velocity.Y = (((screenTargetY - screenSourceY) * ((MovingDelay) / (float) _distance)));
+            AngleToTarget = (float) -Math.Atan2(screenTargetY - screenSourceY, screenTargetX - screenSourceX);
         }
 
         public float AngleToTarget;
@@ -113,24 +153,25 @@ namespace ClassicUO.Game.GameObjects
 
 
 
-            int distance = (int) Math.Sqrt(Math.Pow(screenSourceX - screenTargetX, 2) + Math.Pow(screenSourceY - screenTargetY, 2));
+            //int startX = screenSourceX + (screenSourceX - screenTargetX) + (int) (Offset.X);
+            //int startY = screenSourceY + (screenSourceY - screenTargetY) + (int) (Offset.Y);
 
-            int startX = screenSourceX + (screenSourceX - screenTargetX) + (int) (Offset.X);
-            int startY = screenSourceY + (screenSourceY - screenTargetY) + (int) (Offset.Y);
+            //int distanceNow = (int) Math.Sqrt(Math.Pow(startX - screenTargetX, 2) + Math.Pow(startY - screenTargetY, 2));
 
-            int distanceNow = (int) Math.Sqrt(Math.Pow(startX - screenTargetX, 2) + Math.Pow(startY - screenTargetY, 2));
+            //if (distanceNow < _distance)
+            //{
+            //    Destroy();
+            //    return;
+            //}
 
-            if (distanceNow < distance)
-            {
-                Destroy();
-                return;
-            }
+            int tileX = (int) ((_distance + Offset.X) / 44f);
+            int tileY = (int) ((_distance + Offset.Y) / 44f);
 
-            AngleToTarget = (float) -Math.Atan2(screenTargetY - screenSourceY, screenTargetX - screenSourceX);
+            Console.WriteLine("TILE: {0}, {1}",  tileX, tileY);
 
 
-            Offset.X += (((screenTargetX - screenSourceX)    *   ( (MovingDelay) / (float) distance)    ));
-            Offset.Y += (((screenTargetY - screenSourceY)    *   ( (MovingDelay) / (float) distance)    ));
+            Offset.X += _velocity.X;
+            Offset.Y += _velocity.Y;
         }
 
         public override void Update(double totalMS, double frameMS)
