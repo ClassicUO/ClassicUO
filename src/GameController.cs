@@ -548,6 +548,33 @@ namespace ClassicUO
                     
                     Keyboard.OnKeyUp(e.key);
 
+                    //if (e.key.keysym.sym == SDL_Keycode.SDLK_0)
+                    //{
+
+                       
+                    //    byte[] firebreathcode = {
+
+                    //   0xC0, 
+                    //  0x00, 0x00, 0x00, 0x00 , // source serial
+                    //  0x00 ,0x00 ,0x00 , 0x00,  // target serial
+                    //    0x00, 0xAA,  // graphic
+                    //    0xAC, 0x06, // src X
+                    //    0x74, 0x06,  // src Y
+                    //    0x28,       // src Z
+                    //   0x3F, 0x06, // targ X
+                    //    0x74, 0x06, // targY
+                    //        0x2B,   // targZ
+                    //        0x3F, 0x01, 0xF0 , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ,0x00, 0x00,
+                    //   0x00, 0x00, 0x00, 0x00, 
+                    //    };
+                    //    int xx =  (0x06 << 8) | (0xAC ) ;
+                    //    int yy =  (0x06 << 8) | (0x74 ) ;
+                    //    int txx = (0x06 << 8) |  (0x3F);
+                    //    int tyy = (0x06 << 8) | (0x74 );
+
+                    //    NetClient.EnqueuePacketFromPlugin(firebreathcode, 36);
+                    //}
+
                     //UIManager.MouseOverControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
                     //if (UIManager.MouseOverControl != UIManager.KeyboardFocusControl)
                     UIManager.KeyboardFocusControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
