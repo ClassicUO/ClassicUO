@@ -342,14 +342,6 @@ namespace ClassicUO.Game
             _effectManager.Add(type, source, target, graphic, hue, srcPos, targPos, speed, duration, fixedDir, doesExplode, hasparticles, blendmode);
         }
 
-        private static bool CanBeSelected(Mobile mobile, SCAN_TYPE_OBJECT scanType)
-        {
-            if (mobile == null || mobile.IsDestroyed || mobile == Player)
-                return false;
-
-            return true;
-        }
-
         public static Serial SearchObject(SCAN_TYPE_OBJECT scanType, SCAN_MODE_OBJECT scanMode)
         {
             Entity first = null, selected = null;

@@ -43,7 +43,7 @@ namespace ClassicUO.Game.GameObjects
         public MovingEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, Graphic graphic, Hue hue, bool fixedDir, byte speed) : this(graphic, hue)
         {
             FixedDir = fixedDir;
-            MovingDelay = speed;
+            MovingDelay = 20;
 
             Entity source = World.Get(src);
 
@@ -69,10 +69,10 @@ namespace ClassicUO.Game.GameObjects
 
         private void UpdateEx(double totalMS, double frameMS)
         {
-            if (_lastMoveTime > Time.Ticks)
-                return;
+            //if (_lastMoveTime > Time.Ticks)
+            //    return;
 
-            _lastMoveTime = Time.Ticks + MovingDelay;
+            //_lastMoveTime = Time.Ticks + MovingDelay;
 
             if (Target != null && Target.IsDestroyed)
             {
@@ -126,8 +126,11 @@ namespace ClassicUO.Game.GameObjects
             }
 
             AngleToTarget = (float) -Math.Atan2(screenTargetY - screenSourceY, screenTargetX - screenSourceX);
-            Offset.X += (int) ((screenTargetX - screenSourceX) / 22);
-            Offset.Y += (int) ((screenTargetY - screenSourceY) / 22);
+
+            float q = (distance / (float) (21 - MovingDelay));
+
+            Offset.X += (int) Math.Floor(((screenTargetX - screenSourceX) /   q    ));
+            Offset.Y += (int) Math.Floor(((screenTargetY - screenSourceY) /   q    ));
         }
 
 
