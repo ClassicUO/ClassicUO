@@ -158,14 +158,14 @@ namespace ClassicUO.Game.GameObjects
             int offX = (screenSourceX - screenTargetX) + (int) Math.Floor(Offset.X);
             int offY = (screenSourceY - screenTargetY) + (int) Math.Floor(Offset.Y);
 
-            int tileX = _distance + offX;
-            tileX /= 44;
+            //int tileX = _distance + offX;
+            //tileX /= 44;
 
-            int tileY = _distance + offY;
-            tileY /= 44;
+            //int tileY = _distance + offY;
+            //tileY /= 44;
 
 
-            Console.WriteLine("TILE: {0},{1}", tileX, tileY);
+            //Console.WriteLine("TILE: {0},{1}", tileX, tileY);
 
             int startX = screenSourceX + offX;
             int startY = screenSourceY + offY;
