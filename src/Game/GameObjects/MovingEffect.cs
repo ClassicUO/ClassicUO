@@ -63,9 +63,9 @@ namespace ClassicUO.Game.GameObjects
             else
                 SetTarget(xTarget, yTarget, zTarget);
 
-            double v = speed / 20d;
+            double v = (20 - speed) / 20d;
 
-            _rSeconds = 1.0 / (v * 1000.0);
+            _rSeconds = 1.0 / (speed * 1000.0);
         }
 
         public float AngleToTarget;
@@ -136,8 +136,8 @@ namespace ClassicUO.Game.GameObjects
 
             double q = Normalized(); // (distance / (float) (21 - MovingDelay));
 
-            Offset.X += (int) Math.Floor(((screenTargetX - screenSourceX)    *   q    ));
-            Offset.Y += (int) Math.Floor(((screenTargetY - screenSourceY)    *   q    ));
+            Offset.X += (int) Math.Floor(((screenTargetX - screenSourceX)    *   (distance / (float) MovingDelay)    ));
+            Offset.Y += (int) Math.Floor(((screenTargetY - screenSourceY)    *   (distance / (float) MovingDelay)    ));
         }
 
         private double Normalized()
