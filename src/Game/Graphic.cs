@@ -26,13 +26,8 @@ using System.Globalization;
 
 namespace ClassicUO.Game
 {
-    internal readonly struct Graphic : IComparable<ushort>
+    internal readonly struct Graphic : IEquatable<ushort>, IEquatable<Graphic>
     {
-        public bool Equals(Graphic other)
-        {
-            return Value == other.Value;
-        }
-
         public const ushort INVARIANT = ushort.MaxValue;
         public const ushort INVALID = 0xFFFF;
 
@@ -55,12 +50,12 @@ namespace ClassicUO.Game
 
         public static bool operator ==(Graphic g1, Graphic g2)
         {
-            return g1.Value == g2.Value;
+            return Equals(g1, g2);
         }
 
         public static bool operator !=(Graphic g1, Graphic g2)
         {
-            return g1.Value != g2.Value;
+            return !Equals(g1, g2);
         }
 
         public static bool operator <(Graphic g1, Graphic g2)
@@ -73,24 +68,32 @@ namespace ClassicUO.Game
             return g1.Value > g2.Value;
         }
 
-        public override bool Equals(object obj)
+        public readonly bool Equals(ushort other)
         {
-            if (ReferenceEquals(null, obj)) return false;
-
-            return obj is Graphic other && Equals(other);
+            return Value == other;
         }
 
-        public int CompareTo(ushort other)
+        public readonly bool Equals(Graphic other)
+        {
+            return Value == other.Value;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (obj is Graphic graphic) && Equals(graphic.Value);
+        }
+
+        public readonly int CompareTo(ushort other)
         {
             return Value.CompareTo(other);
         }
 
-        public override string ToString()
+        public readonly override string ToString()
         {
             return $"{Value} (0x{Value:X4})";
         }
 
-        public override int GetHashCode()
+        public readonly override int GetHashCode()
         {
             return Value.GetHashCode();
         }

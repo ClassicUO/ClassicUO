@@ -1724,6 +1724,7 @@ namespace ClassicUO.Renderer
 
         public void Dispose()
         {
+            DefaultEffect?.Dispose();
             _vertexBuffer.Dispose();
             _indexBuffer.Dispose();
             _handle.Free();

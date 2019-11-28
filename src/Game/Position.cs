@@ -25,7 +25,7 @@ using System;
 
 namespace ClassicUO.Game
 {
-    internal readonly struct Position
+    internal readonly struct Position : IEquatable<Position>
     {
         public static readonly Position INVALID = new Position(0xFFFF, 0xFFFF);
 
@@ -42,12 +42,12 @@ namespace ClassicUO.Game
 
         public static bool operator ==(Position p1, Position p2)
         {
-            return p1.X == p2.X && p1.Y == p2.Y && p1.Z == p2.Z;
+            return Equals(p1, p2);
         }
 
         public static bool operator !=(Position p1, Position p2)
         {
-            return p1.X != p2.X || p1.Y != p2.Y || p1.Z != p2.Z;
+            return !Equals(p1, p2);
         }
 
         public static Position operator +(Position p1, Position p2)
@@ -90,17 +90,17 @@ namespace ClassicUO.Game
             return p1.X >= p2.X && p1.Y >= p2.Y;
         }
 
-        public int DistanceTo(Position position)
+        public readonly int DistanceTo(Position position)
         {
             return Math.Max(Math.Abs(position.X - X), Math.Abs(position.Y - Y));
         }
 
-        public int DistanceTo(int x, int y)
+        public readonly int DistanceTo(int x, int y)
         {
             return Math.Max(Math.Abs(x - X), Math.Abs(y - Y));
         }
 
-        public double DistanceToSqrt(Position position)
+        public readonly double DistanceToSqrt(Position position)
         {
             int a = position.X - X;
             int b = position.Y - Y;
@@ -108,14 +108,19 @@ namespace ClassicUO.Game
             return Math.Sqrt(a * a + b * b);
         }
 
-        public override int GetHashCode()
+        public readonly override int GetHashCode()
         {
             return X ^ Y ^ Z;
         }
 
+        public readonly bool Equals(Position pos)
+        {
+            return (X, Y, Z) == (pos.X, pos.Y, pos.Z);
+        }
+
         public override bool Equals(object obj)
         {
-            return obj is Position position && this == position;
+            return obj is Position position && Equals(position);
         }
 
         public override string ToString()

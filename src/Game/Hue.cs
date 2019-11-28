@@ -26,13 +26,8 @@ using System.Globalization;
 
 namespace ClassicUO.Game
 {
-    internal readonly struct Hue : IComparable<ushort>
+    internal readonly struct Hue : IEquatable<ushort>, IEquatable<Hue>
     {
-        public bool Equals(Hue other)
-        {
-            return _value == other._value;
-        }
-
         public const ushort INVALID = 0xFFFF;
 
         public const ushort ZERO = 0;
@@ -56,12 +51,12 @@ namespace ClassicUO.Game
 
         public static bool operator ==(Hue h1, Hue h2)
         {
-            return h1._value == h2._value;
+            return Equals(h1, h2);
         }
 
         public static bool operator !=(Hue h1, Hue h2)
         {
-            return h1._value != h2._value;
+            return !Equals(h1, h2);
         }
 
         public static bool operator <(Hue h1, Hue h2)
@@ -74,25 +69,32 @@ namespace ClassicUO.Game
             return h1._value > h2._value;
         }
 
-        public int CompareTo(ushort other)
+        public readonly int CompareTo(ushort other)
         {
             return _value.CompareTo(other);
         }
 
+        public readonly bool Equals(ushort other)
+        {
+            return _value == other;
+        }
+
+        public readonly bool Equals(Hue hue)
+        {
+            return _value == hue._value;
+        }
+
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-
             return obj is Hue other && Equals(other);
         }
 
-
-        public override string ToString()
+        public readonly override string ToString()
         {
             return $"{_value} (0x{_value:X4})";
         }
 
-        public override int GetHashCode()
+        public readonly override int GetHashCode()
         {
             return _value.GetHashCode();
         }
