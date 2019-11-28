@@ -155,8 +155,8 @@ namespace ClassicUO.Game.GameObjects
             screenTargetY += screenCenterY;
 
 
-            int offX = (screenSourceX - screenTargetX) + (int) Math.Floor(Offset.X);
-            int offY = (screenSourceY - screenTargetY) + (int) Math.Floor(Offset.Y);
+            int offX = (screenSourceX - screenTargetX) + (int) (Offset.X);
+            int offY = (screenSourceY - screenTargetY) + (int) (Offset.Y);
 
             //int tileX = _distance + offX;
             //tileX /= 44;
@@ -173,7 +173,6 @@ namespace ClassicUO.Game.GameObjects
             int distanceNow = (int) Math.Sqrt(Math.Pow(startX - screenTargetX, 2) + Math.Pow(startY - screenTargetY, 2));
 
             if (distanceNow < _distance)
-            //if (tileX <= 0 && tileY <= 0)
             {
                 Destroy();
                 return;
