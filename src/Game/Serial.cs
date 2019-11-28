@@ -36,13 +36,13 @@ namespace ClassicUO.Game
             Value = serial;
         }
 
-        public bool IsMobile => Value > 0 && Value < 0x40000000;
+        public readonly bool IsMobile => Value > 0 && Value < 0x40000000;
 
-        public bool IsItem => Value >= 0x40000000 && Value < 0x80000000;
+        public readonly bool IsItem => Value >= 0x40000000 && Value < 0x80000000;
 
-        public bool IsValid => Value > 0 && Value < 0x80000000;
+        public readonly bool IsValid => Value > 0 && Value < 0x80000000;
 
-        public bool IsValidLocalGumpSerial => Value >= Constants.JOURNAL_LOCALSERIAL && Value < MINUS_ONE;
+        public readonly bool IsValidLocalGumpSerial => Value >= Constants.JOURNAL_LOCALSERIAL && Value < MINUS_ONE;
 
         public readonly uint Value;
 
@@ -86,21 +86,21 @@ namespace ClassicUO.Game
             return s1.Value >= s2.Value;
         }
 
-        public int CompareTo(uint other)
+        public readonly int CompareTo(uint other)
         {
             return Value.CompareTo(other);
         }
-        public int CompareTo(Serial other)
+        public readonly int CompareTo(Serial other)
         {
             return Value.CompareTo(other.Value);
         }
 
-        public override string ToString()
+        public readonly override string ToString()
         {
             return $"0x{Value:X8}";
         }
 
-        public override int GetHashCode()
+        public readonly override int GetHashCode()
         {
             return (int)Value;
         }
@@ -110,12 +110,12 @@ namespace ClassicUO.Game
             return obj is Serial other && Equals(other);
         }
 
-        public bool Equals(uint other)
+        public readonly bool Equals(uint other)
         {
             return Value == other;
         }
 
-        public bool Equals(Serial other)
+        public readonly bool Equals(Serial other)
         {
             return Value == other.Value;
         }

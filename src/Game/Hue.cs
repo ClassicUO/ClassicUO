@@ -69,17 +69,17 @@ namespace ClassicUO.Game
             return h1._value > h2._value;
         }
 
-        public int CompareTo(ushort other)
+        public readonly int CompareTo(ushort other)
         {
             return _value.CompareTo(other);
         }
 
-        public bool Equals(ushort other)
+        public readonly bool Equals(ushort other)
         {
             return _value == other;
         }
 
-        public bool Equals(Hue hue)
+        public readonly bool Equals(Hue hue)
         {
             return _value == hue._value;
         }
@@ -89,12 +89,12 @@ namespace ClassicUO.Game
             return obj is Hue other && Equals(other);
         }
 
-        public override string ToString()
+        public readonly override string ToString()
         {
             return $"{_value} (0x{_value:X4})";
         }
 
-        public override int GetHashCode()
+        public readonly override int GetHashCode()
         {
             return _value.GetHashCode();
         }

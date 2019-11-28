@@ -68,12 +68,12 @@ namespace ClassicUO.Game
             return g1.Value > g2.Value;
         }
 
-        public bool Equals(ushort other)
+        public readonly bool Equals(ushort other)
         {
             return Value == other;
         }
 
-        public bool Equals(Graphic other)
+        public readonly bool Equals(Graphic other)
         {
             return Value == other.Value;
         }
@@ -83,17 +83,17 @@ namespace ClassicUO.Game
             return (obj is Graphic graphic) && Equals(graphic.Value);
         }
 
-        public int CompareTo(ushort other)
+        public readonly int CompareTo(ushort other)
         {
             return Value.CompareTo(other);
         }
 
-        public override string ToString()
+        public readonly override string ToString()
         {
             return $"{Value} (0x{Value:X4})";
         }
 
-        public override int GetHashCode()
+        public readonly override int GetHashCode()
         {
             return Value.GetHashCode();
         }
