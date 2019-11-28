@@ -45,7 +45,7 @@ namespace ClassicUO.Game.GameObjects
         public MovingEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, Graphic graphic, Hue hue, bool fixedDir, byte speed) : this(graphic, hue)
         {
             FixedDir = fixedDir;
-            MovingDelay = speed;
+            MovingDelay = (byte) (20 - speed);
 
             Entity source = World.Get(src);
 
@@ -100,7 +100,7 @@ namespace ClassicUO.Game.GameObjects
             _velocity.X = (screenTargetX - screenSourceX) * (MovingDelay / (float) _distance);
             _velocity.Y = (screenTargetY - screenSourceY) * (MovingDelay / (float) _distance);
 
-            //Vector2.Normalize(ref _velocity, out _velocity);
+            Vector2.Normalize(ref _velocity, out _velocity);
 
             AngleToTarget = (float) -Math.Atan2(screenTargetY - screenSourceY, screenTargetX - screenSourceX);
         }
@@ -179,8 +179,8 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            Offset.X += _velocity.X;
-            Offset.Y += _velocity.Y;
+            Offset.X += _velocity.X * (float) frameMS;
+            Offset.Y += _velocity.Y * (float) frameMS;
         }
 
         public override void Update(double totalMS, double frameMS)
