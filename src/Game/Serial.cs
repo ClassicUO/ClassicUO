@@ -26,7 +26,7 @@ using System.Globalization;
 
 namespace ClassicUO.Game
 {
-    internal readonly struct Serial : IComparable<Serial>, IComparable<uint>
+    internal readonly struct Serial : IEquatable<Serial>, IEquatable<uint>
     {
         public const uint INVALID = 0;
         public const uint MINUS_ONE = 0xFFFF_FFFF;
@@ -58,12 +58,12 @@ namespace ClassicUO.Game
 
         public static bool operator ==(Serial s1, Serial s2)
         {
-            return s1.Value == s2.Value;
+            return Equals(s1, s2);
         }
 
         public static bool operator !=(Serial s1, Serial s2)
         {
-            return s1.Value != s2.Value;
+            return !Equals(s1, s2);
         }
 
         public static bool operator <(Serial s1, Serial s2)
@@ -95,7 +95,6 @@ namespace ClassicUO.Game
             return Value.CompareTo(other.Value);
         }
 
-
         public override string ToString()
         {
             return $"0x{Value:X8}";
@@ -108,9 +107,12 @@ namespace ClassicUO.Game
 
         public override bool Equals(object obj)
         {
-            if (obj == null) return false;
-
             return obj is Serial other && Equals(other);
+        }
+
+        public bool Equals(uint other)
+        {
+            return Value == other;
         }
 
         public bool Equals(Serial other)

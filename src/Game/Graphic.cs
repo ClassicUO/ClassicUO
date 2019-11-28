@@ -26,13 +26,8 @@ using System.Globalization;
 
 namespace ClassicUO.Game
 {
-    internal readonly struct Graphic : IComparable<ushort>
+    internal readonly struct Graphic : IEquatable<ushort>, IEquatable<Graphic>
     {
-        public bool Equals(Graphic other)
-        {
-            return Value == other.Value;
-        }
-
         public const ushort INVARIANT = ushort.MaxValue;
         public const ushort INVALID = 0xFFFF;
 
@@ -55,12 +50,12 @@ namespace ClassicUO.Game
 
         public static bool operator ==(Graphic g1, Graphic g2)
         {
-            return g1.Value == g2.Value;
+            return Equals(g1, g2);
         }
 
         public static bool operator !=(Graphic g1, Graphic g2)
         {
-            return g1.Value != g2.Value;
+            return !Equals(g1, g2);
         }
 
         public static bool operator <(Graphic g1, Graphic g2)
@@ -73,11 +68,19 @@ namespace ClassicUO.Game
             return g1.Value > g2.Value;
         }
 
+        public bool Equals(ushort other)
+        {
+            return Value == other;
+        }
+
+        public bool Equals(Graphic other)
+        {
+            return Value == other.Value;
+        }
+
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-
-            return obj is Graphic other && Equals(other);
+            return (obj is Graphic graphic) && Equals(graphic.Value);
         }
 
         public int CompareTo(ushort other)
