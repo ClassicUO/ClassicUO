@@ -179,8 +179,8 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            Offset.X += _velocity.X * (float) frameMS;
-            Offset.Y += _velocity.Y * (float) frameMS;
+            Offset.X += _velocity.X/* * (float) frameMS*/;
+            Offset.Y += _velocity.Y/* * (float) frameMS*/;
         }
 
         public override void Update(double totalMS, double frameMS)
