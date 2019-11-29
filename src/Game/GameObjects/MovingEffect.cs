@@ -271,6 +271,7 @@ namespace ClassicUO.Game.GameObjects
             //Offset.X += _velocity.X/* * (float) frameMS*/;
             //Offset.Y += _velocity.Y/* * (float) frameMS*/;
         }
+
         private static void TileOffsetOnMonitorToXY(ref int ofsX, ref int ofsY, ref int x, ref int y)
         {
             if (ofsX == 0)
