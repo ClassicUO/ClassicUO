@@ -90,17 +90,17 @@ namespace ClassicUO.Game
             return p1.X >= p2.X && p1.Y >= p2.Y;
         }
 
-        public readonly int DistanceTo(Position position)
+        public int DistanceTo(Position position)
         {
             return Math.Max(Math.Abs(position.X - X), Math.Abs(position.Y - Y));
         }
 
-        public readonly int DistanceTo(int x, int y)
+        public int DistanceTo(int x, int y)
         {
             return Math.Max(Math.Abs(x - X), Math.Abs(y - Y));
         }
 
-        public readonly double DistanceToSqrt(Position position)
+        public double DistanceToSqrt(Position position)
         {
             int a = position.X - X;
             int b = position.Y - Y;
@@ -108,12 +108,12 @@ namespace ClassicUO.Game
             return Math.Sqrt(a * a + b * b);
         }
 
-        public readonly override int GetHashCode()
+        public override int GetHashCode()
         {
             return X ^ Y ^ Z;
         }
 
-        public readonly bool Equals(Position pos)
+        public bool Equals(Position pos)
         {
             return (X, Y, Z) == (pos.X, pos.Y, pos.Z);
         }
@@ -123,7 +123,7 @@ namespace ClassicUO.Game
             return obj is Position position && Equals(position);
         }
 
-        public readonly override string ToString()
+        public override string ToString()
         {
             return $"{X}.{Y}.{Z}";
         }
