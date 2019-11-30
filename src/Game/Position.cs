@@ -123,7 +123,7 @@ namespace ClassicUO.Game
             return obj is Position position && Equals(position);
         }
 
-        public override string ToString()
+        public readonly override string ToString()
         {
             return $"{X}.{Y}.{Z}";
         }
