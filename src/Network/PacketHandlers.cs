@@ -1558,11 +1558,11 @@ namespace ClassicUO.Network
             int distX = Math.Abs(x - World.Player.X);
             int distY = Math.Abs(y - World.Player.Y);
             int distance = Math.Max(distX, distY);
-            if (ProfileManager.Current.FilterRepeat)
+            if (ProfileManager.Current.FilterRepeatSounds)
             {
                 if (_LastSound.ContainsKey(index))
                 {
-                    if (DateTime.UtcNow - _LastSound[index] < TimeSpan.FromSeconds(ProfileManager.Current.FilterRepeatAllowed))
+                    if (DateTime.UtcNow - _LastSound[index] < TimeSpan.FromSeconds(ProfileManager.Current.FilterRepeatSoundsAllowed))
                         return;
                 }
             }

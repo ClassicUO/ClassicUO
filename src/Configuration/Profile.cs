@@ -61,8 +61,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool EnableFootstepsSound { get; set; } = true;
         [JsonProperty] public bool EnableCombatMusic { get; set; } = true;
         [JsonProperty] public bool ReproduceSoundsInBackground { get; set; }
-        [JsonProperty] public bool FilterRepeat { get; set; } = true;
-        [JsonProperty] public float FilterRepeatAllowed { get; set; } = 1f;
+        [JsonProperty] public bool FilterRepeatSounds { get; set; } = true;
+        [JsonProperty] public float FilterRepeatSoundsAllowed { get; set; } = 1.5f;
         // fonts and speech
         [JsonProperty] public byte ChatFont { get; set; } = 1;
         [JsonProperty] public int SpeechDelay { get; set; } = 100;

@@ -463,11 +463,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             _preventRepeat = new Checkbox(0x00D2, 0x00D3, "Prevent Repeat Sounds", FONT, HUE_FONT)
             {
-                IsChecked = ProfileManager.Current.FilterRepeat
+                IsChecked = ProfileManager.Current.FilterRepeatSounds
             };
             _preventRepeat.ValueChanged += (sender, e) => { _preventAmount.IsVisible = _preventRepeat.IsChecked; };
             item.Add(_preventRepeat);
-            _preventAmount = new HSliderBar(200, 0, 180, 0, 10, ProfileManager.Current.FilterRepeatAllowed, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true, false, 0.1f, "s");
+            _preventAmount = new HSliderBar(200, 0, 180, 0, 10, ProfileManager.Current.FilterRepeatSoundsAllowed, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true, false, 0.1f, "s");
             item.Add(_preventAmount);
             rightArea.Add(item);
 
@@ -1689,7 +1689,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.ReproduceSoundsInBackground = _musicInBackground.IsChecked;
             ProfileManager.Current.SoundVolume = (int)_soundsVolume.Value;
             ProfileManager.Current.MusicVolume = (int)_musicVolume.Value;
-            ProfileManager.Current.FilterRepeatAllowed = _preventAmount.Value;
+            ProfileManager.Current.FilterRepeatSoundsAllowed = _preventAmount.Value;
             Settings.GlobalSettings.LoginMusicVolume = (int)_loginMusicVolume.Value;
             Settings.GlobalSettings.LoginMusic = _loginMusic.IsChecked;
 
