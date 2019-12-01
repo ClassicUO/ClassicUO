@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Gumps
             });
             HSliderBar slider;
             Add(slider = new HSliderBar(39, 142, 145, SLIDER_MIN, SLIDER_MAX, 1, HSliderBarStyle.BlueWidgetNoBar));
-            slider.ValueChanged += (sender, e) => { _box.Graduation = slider.Value; };
+            slider.ValueChanged += (sender, e) => { _box.Graduation = (int)slider.Value; };
             Add(_box = new ColorPickerBox(34, 34));
             _box.ColorSelectedIndex += (sender, e) => { _dyeTybeImage.Hue = (ushort) (_box.SelectedHue + 1); };
 

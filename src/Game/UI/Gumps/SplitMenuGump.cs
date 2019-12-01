@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
             GumpPic background = new GumpPic(0, 0, 0x085C, 0);
             Add(background);
             Add(_slider = new HSliderBar(29, 16, 105, 1, item.Amount, item.Amount, HSliderBarStyle.BlueWidgetNoBar));
-            _lastValue = _slider.Value;
+            _lastValue = (int)_slider.Value;
 
             Add(_okButton = new Button(0, 0x085d, 0x085e, 0x085f)
             {
@@ -81,13 +81,13 @@ namespace ClassicUO.Game.UI.Gumps
      
         private void OkButtonOnMouseClick(object sender, MouseEventArgs e)
         {
-            if (_slider.Value > 0) GameActions.PickUp(LocalSerial, _offsert, _slider.Value);
+            if (_slider.Value > 0) GameActions.PickUp(LocalSerial, _offsert, (int)_slider.Value);
             Dispose();
         }
 
         public override void OnKeyboardReturn(int textID, string text)
         {
-            if (_slider.Value > 0) GameActions.PickUp(LocalSerial, _offsert, _slider.Value);
+            if (_slider.Value > 0) GameActions.PickUp(LocalSerial, _offsert, (int)_slider.Value);
             Dispose();
         }
 
@@ -134,7 +134,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            _lastValue = _slider.Value;
+            _lastValue = (int)_slider.Value;
         }
 
         public override void Dispose()

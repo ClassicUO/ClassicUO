@@ -71,7 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Combobox _overrideContainerLocationSetting;
 
         // sounds
-        private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
+        private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic, _preventRepeat;
 
         // fonts
         private FontSelector _fontSelectorChat;
@@ -113,7 +113,7 @@ namespace ClassicUO.Game.UI.Gumps
         // general
         private HSliderBar _sliderFPS, _circleOfTranspRadius;
         private HSliderBar _sliderSpeechDelay;
-        private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
+        private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume, _preventAmount;
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox, _partyAuraColorPickerBox;
         private ColorBox _poisonColorPickerBox, _paralyzedColorPickerBox, _invulnerableColorPickerBox;
         private TextBox _spellFormatBox;
@@ -459,9 +459,23 @@ namespace ClassicUO.Game.UI.Gumps
             _musicInBackground = CreateCheckBox(rightArea, "Reproduce sounds and music when ClassicUO is not focused", ProfileManager.Current.ReproduceSoundsInBackground, 0, 0);
 
 
+            item = new ScrollAreaItem();
+
+            _preventRepeat = new Checkbox(0x00D2, 0x00D3, "Prevent Repeat Sounds", FONT, HUE_FONT)
+            {
+                IsChecked = ProfileManager.Current.FilterRepeat
+            };
+            _preventRepeat.ValueChanged += (sender, e) => { _preventAmount.IsVisible = _preventRepeat.IsChecked; };
+            item.Add(_preventRepeat);
+            _preventAmount = new HSliderBar(200, 0, 180, 0, 10, ProfileManager.Current.FilterRepeatAllowed, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT, true, false, 0.1f, "s");
+            item.Add(_preventAmount);
+            rightArea.Add(item);
+
             _loginMusicVolume.IsVisible = _loginMusic.IsChecked;
             _soundsVolume.IsVisible = _enableSounds.IsChecked;
             _musicVolume.IsVisible = _enableMusic.IsChecked;
+
+            _preventAmount.IsVisible = _preventRepeat.IsChecked;
 
             Add(rightArea, PAGE);
         }
@@ -1583,7 +1597,7 @@ namespace ClassicUO.Game.UI.Gumps
             // general
             if (Settings.GlobalSettings.FPS != _sliderFPS.Value)
             {
-                CUOEnviroment.Client.SetRefreshRate(_sliderFPS.Value);
+                CUOEnviroment.Client.SetRefreshRate((int)_sliderFPS.Value);
             }
             ProfileManager.Current.HighlightGameObjects = _highlightObjects.IsChecked;
             ProfileManager.Current.ReduceFPSWhenInactive = _reduceFPSWhenInactive.IsChecked;
@@ -1631,7 +1645,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.HideVegetation = _hideVegetation.IsChecked;
             ProfileManager.Current.NoColorObjectsOutOfRange = _noColorOutOfRangeObjects.IsChecked;
             ProfileManager.Current.UseCircleOfTransparency = _useCircleOfTransparency.IsChecked;
-            ProfileManager.Current.CircleOfTransparencyRadius = _circleOfTranspRadius.Value;
+            ProfileManager.Current.CircleOfTransparencyRadius = (int)_circleOfTranspRadius.Value;
 
             ProfileManager.Current.VendorGumpHeight = (int) _vendorGumpSize.Tag;
             ProfileManager.Current.StandardSkillsGump = _useStandardSkillsGump.IsChecked;
@@ -1673,9 +1687,10 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.EnableFootstepsSound = _footStepsSound.IsChecked;
             ProfileManager.Current.EnableCombatMusic = _combatMusic.IsChecked;
             ProfileManager.Current.ReproduceSoundsInBackground = _musicInBackground.IsChecked;
-            ProfileManager.Current.SoundVolume = _soundsVolume.Value;
-            ProfileManager.Current.MusicVolume = _musicVolume.Value;
-            Settings.GlobalSettings.LoginMusicVolume = _loginMusicVolume.Value;
+            ProfileManager.Current.SoundVolume = (int)_soundsVolume.Value;
+            ProfileManager.Current.MusicVolume = (int)_musicVolume.Value;
+            ProfileManager.Current.FilterRepeatAllowed = _preventAmount.Value;
+            Settings.GlobalSettings.LoginMusicVolume = (int)_loginMusicVolume.Value;
             Settings.GlobalSettings.LoginMusic = _loginMusic.IsChecked;
 
             CUOEnviroment.Client.Scene.Audio.UpdateCurrentMusicVolume();
@@ -1689,7 +1704,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             // speech
             ProfileManager.Current.ScaleSpeechDelay = _scaleSpeechDelay.IsChecked;
-            ProfileManager.Current.SpeechDelay = _sliderSpeechDelay.Value;
+            ProfileManager.Current.SpeechDelay = (int)_sliderSpeechDelay.Value;
             ProfileManager.Current.SpeechHue = _speechColorPickerBox.Hue;
             ProfileManager.Current.EmoteHue = _emoteColorPickerBox.Hue;
             ProfileManager.Current.YellHue = _yellColorPickerBox.Hue;
@@ -1880,7 +1895,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             bool before = ProfileManager.Current.CounterBarEnabled;
             ProfileManager.Current.CounterBarEnabled = _enableCounters.IsChecked;
-            ProfileManager.Current.CounterBarCellSize = _cellSize.Value;
+            ProfileManager.Current.CounterBarCellSize = (int)_cellSize.Value;
             ProfileManager.Current.CounterBarRows = int.Parse(_rows.Text);
             ProfileManager.Current.CounterBarColumns = int.Parse(_columns.Text);
             ProfileManager.Current.CounterBarHighlightOnUse = _highlightOnUse.IsChecked;

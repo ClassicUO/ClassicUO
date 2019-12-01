@@ -71,7 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_container);
 
             Add(_slider = new HSliderBar(40, _container.Y + _container.Height + 12, 217, 0, 1, 0, HSliderBarStyle.MetalWidgetRecessedBar));
-            _slider.ValueChanged += (sender, e) => { _container.Value = _slider.Value; };
+            _slider.ValueChanged += (sender, e) => { _container.Value = (int)_slider.Value; };
 
             HitBox left = new HitBox(25, 60, 10, 15)
             {

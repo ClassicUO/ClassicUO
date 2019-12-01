@@ -51,12 +51,14 @@ namespace ClassicUO.Game.UI.Controls
         private UOTexture[] _gumpSpliderBackground;
         private UOTexture _gumpWidget;
         private Rectangle _rect;
+        private float _increment;
+        private string _unit;
 
         //private int _newValue;
         private int _sliderX;
-        private int _value = -1;
+        private float _value = -1;
 
-        public HSliderBar(int x, int y, int w, int min, int max, int value, HSliderBarStyle style, bool hasText = false, byte font = 0, ushort color = 0, bool unicode = true, bool drawUp = false)
+        public HSliderBar(int x, int y, int w, float min, float max, float value, HSliderBarStyle style, bool hasText = false, byte font = 0, ushort color = 0, bool unicode = true, bool drawUp = false, float incrementBy = 1, string unit = "")
         {
             X = x;
             Y = y;
@@ -66,24 +68,25 @@ namespace ClassicUO.Game.UI.Controls
                 _text = RenderedText.Create(string.Empty, color, font, unicode);
                 _drawUp = drawUp;
             }
-
+            _unit = unit;
             MinValue = min;
             MaxValue = max;
             BarWidth = w;
+            _increment = incrementBy;
             Value = value;
             _style = style;
             AcceptMouseInput = true;
         }
 
-        public int MinValue { get; set; }
+        public float MinValue { get; set; }
 
-        public int MaxValue { get; set; }
+        public float MaxValue { get; set; }
 
         public int BarWidth { get; set; }
 
         public float Percents { get; private set; }
 
-        public int Value
+        public float Value
         {
             get => _value;
             set
@@ -91,7 +94,8 @@ namespace ClassicUO.Game.UI.Controls
                 if (_value != value)
                 {
                     var oldValue = _value;
-                    _value = /*_newValue =*/ value;
+                    var newval = ((int)(value / _increment) * _increment);
+                    _value = /*_newValue =*/ newval;
                     //if (IsInitialized)
                     //    RecalculateSliderX();
 
@@ -101,7 +105,7 @@ namespace ClassicUO.Game.UI.Controls
                         _value = MaxValue;
 
                     if (_text != null)
-                        _text.Text = Value.ToString();
+                        _text.Text = $"{Value}{_unit}";
 
                     if (_value != oldValue)
                     {
@@ -184,13 +188,13 @@ namespace ClassicUO.Game.UI.Controls
             return base.Draw(batcher, x, y);
         }
 
-        private void InternalSetValue(int value)
+        private void InternalSetValue(float value)
         {
             _value = value;
             CalculateOffset();
 
             if (_text != null)
-                _text.Text = Value.ToString();
+                _text.Text = $"{Value}{_unit}";
         }
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
@@ -214,12 +218,12 @@ namespace ClassicUO.Game.UI.Controls
             switch (delta)
             {
                 case MouseEvent.WheelScrollUp:
-                    Value--;
+                    Value -= _increment;
 
                     break;
 
                 case MouseEvent.WheelScrollDown:
-                    Value++;
+                    Value += _increment;
 
                     break;
             }
@@ -235,10 +239,10 @@ namespace ClassicUO.Game.UI.Controls
         private void CalculateNew(int x)
         {
             int len = BarWidth;
-            int maxValue = MaxValue - MinValue;
+            float maxValue = MaxValue - MinValue;
             len -= _gumpWidget.Width;
             float perc = x / (float) len * 100.0f;
-            Value = (int) (maxValue * perc / 100.0f) + MinValue;
+            Value = (maxValue * perc / 100.0f) + MinValue;
             CalculateOffset();
         }
 
@@ -248,8 +252,8 @@ namespace ClassicUO.Game.UI.Controls
                 Value = MinValue;
             else if (Value > MaxValue)
                 Value = MaxValue;
-            int value = Value - MinValue;
-            int maxValue = MaxValue - MinValue;
+            float value = Value - MinValue;
+            float maxValue = MaxValue - MinValue;
             int length = BarWidth;
             length -= _gumpWidget.Width;
 
@@ -275,7 +279,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private void RecalculateSliderX()
         {
-            _sliderX = (BarWidth - _gumpWidget.Width) * ((Value - MinValue) / (MaxValue - MinValue));
+            _sliderX = (int) ((BarWidth - _gumpWidget.Width) * ((Value - MinValue) / (MaxValue - MinValue)));
         }
 
         public void AddParisSlider(HSliderBar s)
@@ -283,15 +287,15 @@ namespace ClassicUO.Game.UI.Controls
             _pairedSliders.Add(s);
         }
 
-        private void ModifyPairedValues(int delta)
+        private void ModifyPairedValues(float delta)
         {
             if (_pairedSliders.Count == 0)
                 return;
 
             bool updateSinceLastCycle = true;
             int d = delta > 0 ? -1 : 1;
-            int points = Math.Abs(delta);
-            int sliderIndex = Value % _pairedSliders.Count;
+            float points = Math.Abs(delta);
+            int sliderIndex = (int)Value % _pairedSliders.Count;
 
             while (points > 0)
             {
@@ -300,7 +304,7 @@ namespace ClassicUO.Game.UI.Controls
                     if (_pairedSliders[sliderIndex].Value < _pairedSliders[sliderIndex].MaxValue)
                     {
                         updateSinceLastCycle = true;
-                        _pairedSliders[sliderIndex].InternalSetValue(_pairedSliders[sliderIndex].Value + d);
+                        _pairedSliders[sliderIndex].InternalSetValue((int)_pairedSliders[sliderIndex].Value + d);
                         points--;
                     }
                 }
@@ -309,7 +313,7 @@ namespace ClassicUO.Game.UI.Controls
                     if (_pairedSliders[sliderIndex].Value > _pairedSliders[sliderIndex].MinValue)
                     {
                         updateSinceLastCycle = true;
-                        _pairedSliders[sliderIndex].InternalSetValue(_pairedSliders[sliderIndex]._value + d);
+                        _pairedSliders[sliderIndex].InternalSetValue((int)_pairedSliders[sliderIndex]._value + d);
                         points--;
                     }
                 }

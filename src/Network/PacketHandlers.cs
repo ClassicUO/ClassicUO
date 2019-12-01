@@ -1541,7 +1541,7 @@ namespace ClassicUO.Network
             if (!ProfileManager.Current.UseCustomLightLevel)
                 World.Light.Overall = level;
         }
-
+        private static Dictionary<ushort, DateTime> _LastSound = new Dictionary<ushort, DateTime>();
         private static void PlaySoundEffect(Packet p)
         {
             if (World.Player == null)
@@ -1558,7 +1558,17 @@ namespace ClassicUO.Network
             int distX = Math.Abs(x - World.Player.X);
             int distY = Math.Abs(y - World.Player.Y);
             int distance = Math.Max(distX, distY);
-
+            if (ProfileManager.Current.FilterRepeat)
+            {
+                if (_LastSound.ContainsKey(index))
+                {
+                    if (DateTime.UtcNow - _LastSound[index] < TimeSpan.FromSeconds(ProfileManager.Current.FilterRepeatAllowed))
+                        return;
+                }
+            }
+            if (!_LastSound.ContainsKey(index))
+                _LastSound.Add(index, DateTime.MinValue);
+            _LastSound[index] = DateTime.UtcNow;
             float volume = ProfileManager.Current.SoundVolume / Constants.SOUND_DELTA;
             float distanceFactor = 0.0f;
 
