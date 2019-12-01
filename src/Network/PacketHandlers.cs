@@ -1568,7 +1568,7 @@ namespace ClassicUO.Network
                 distanceFactor = volumeByDist * distance;
             }
 
-            CUOEnviroment.Client.Scene.Audio.PlaySoundWithDistance(index, volume, distanceFactor, true);
+            CUOEnviroment.Client.Scene.Audio.PlaySoundWithDistance(index, volume, distanceFactor);
         }
 
         private static void PlayMusic(Packet p)

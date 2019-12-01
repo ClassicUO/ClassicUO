@@ -77,7 +77,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void PlaySound(int index, AudioEffects effect = AudioEffects.None, bool spamCheck = false)
+        public void PlaySound(int index, AudioEffects effect = AudioEffects.None)
         {
             if (!_canReproduceAudio)
                 return;
@@ -101,12 +101,12 @@ namespace ClassicUO.Game.Managers
 
             if (sound != null)
             {
-                sound.Play(true, effect, volume, 0.0f, spamCheck);
+                sound.Play(true, effect, volume, 0.0f);
                 _currentSounds.Add(sound);
             }
         }
 
-        public void PlaySoundWithDistance(int index, float volume, float distanceFactor = 0.0f, bool spamCheck = false)
+        public void PlaySoundWithDistance(int index, float volume, float distanceFactor = 0.0f)
         {
             if (!_canReproduceAudio)
                 return;
@@ -123,7 +123,7 @@ namespace ClassicUO.Game.Managers
 
             if (sound != null)
             {
-                sound.Play(true, AudioEffects.None, volume, distanceFactor, spamCheck);
+                sound.Play(true, AudioEffects.None, volume, distanceFactor);
                 _currentSounds.Add(sound);
             }
         }
