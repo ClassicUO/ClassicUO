@@ -155,7 +155,12 @@ namespace ClassicUO.Game.Managers
 
             //if (_mouseDownControls[0] == MouseOverControl && MouseOverControl != null)
             if (_mouseDownControls[0] != null)
-                AttemptDragControl(_mouseDownControls[0], Mouse.Position, true);
+            {
+                if (ProfileManager.Current == null || !ProfileManager.Current.HoldAltToMoveGumps || Keyboard.Alt)
+                {
+                    AttemptDragControl(_mouseDownControls[0], Mouse.Position, true);
+                }
+            }
 
             if (_isDraggingControl)
             {
@@ -997,7 +1002,12 @@ namespace ClassicUO.Game.Managers
                 gump.InvokeMouseOver(Mouse.Position);
 
                 if (_mouseDownControls[0] == gump)
-                    AttemptDragControl(gump, Mouse.Position);
+                {
+                    if (ProfileManager.Current == null || !ProfileManager.Current.HoldAltToMoveGumps || Keyboard.Alt)
+                    {
+                        AttemptDragControl(gump, Mouse.Position);
+                    }
+                }
             }
 
             MouseOverControl = gump;
@@ -1132,7 +1142,7 @@ namespace ClassicUO.Game.Managers
         {
             if (_isDraggingControl || (CUOEnviroment.Client.Scene is GameScene gs && gs.IsHoldingItem))
                 return;
-
+       
             Control dragTarget = control;
 
             if (!dragTarget.CanMove)
