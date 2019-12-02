@@ -220,6 +220,8 @@ namespace ClassicUO.Game.UI.Controls
 
             if (Children.Count == 0)
                 Dispose();
+
+            WantUpdateSize = true;
         }
 
         public override void OnPageChanged()
