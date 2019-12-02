@@ -135,7 +135,6 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool AlwaysRunUnlessHidden { get; set; }
         [JsonProperty] public bool SmoothMovements { get; set; } = true;
         [JsonProperty] public bool HoldDownKeyTab { get; set; } = true;
-        [JsonProperty] public bool HoldDownKeyAltToCloseAnchored { get; set; } = true;
         [JsonProperty] public bool HoldShiftForContext { get; set; } = false;
         [JsonProperty] public bool HoldShiftToSplitStack { get; set; } = false;
 
@@ -160,6 +159,9 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool ActivateChatAdditionalButtons { get; set; } = true;
         [JsonProperty] public bool ActivateChatShiftEnterSupport { get; set; } = true;
         [JsonProperty] public bool UseObjectsFading { get; set; } = true;
+        [JsonProperty] public bool HoldDownKeyAltToCloseAnchored { get; set; } = true;
+        [JsonProperty] public bool CloseAllAnchoredGumpsInGroupWithRightClick { get; set; } = false;
+        [JsonProperty] public bool HoldAltToMoveGumps { get; set; }
 
         // Experimental
         [JsonProperty] public bool EnableSelectionArea { get; set; }

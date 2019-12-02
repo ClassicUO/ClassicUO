@@ -155,7 +155,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (UIManager.AnchorManager[this] == null || Keyboard.Alt || !ProfileManager.Current.HoldDownKeyAltToCloseAnchored)
             {
-                UIManager.AnchorManager.DisposeAllControls(this);
+                if (ProfileManager.Current.CloseAllAnchoredGumpsInGroupWithRightClick)
+                    UIManager.AnchorManager.DisposeAllControls(this);
                 base.CloseWithRightClick();
             }
         }
