@@ -751,14 +751,12 @@ namespace ClassicUO.Game.Scenes
             }
 
             //batcher.SetStencil(null);
-            batcher.End();
-
-            DrawLights(batcher);
 
             // draw weather
-            batcher.Begin();
             _weather.Draw(batcher, 0, 0 /*ProfileManager.Current.GameWindowPosition.X, ProfileManager.Current.GameWindowPosition.Y*/);
             batcher.End();
+
+            DrawLights(batcher);          
 
             batcher.GraphicsDevice.SetRenderTarget(null);
         }
