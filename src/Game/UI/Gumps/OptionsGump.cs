@@ -2074,12 +2074,11 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         internal void UpdateVideo()
-        {
-            WorldViewportGump gump = UIManager.GetGump<WorldViewportGump>();
-            _gameWindowWidth.Text = gump.Width.ToString();
-            _gameWindowHeight.Text = gump.Height.ToString();
-            _gameWindowPositionX.Text = gump.X.ToString();
-            _gameWindowPositionY.Text = gump.Y.ToString();
+        {            
+            _gameWindowWidth.Text = ProfileManager.Current.GameWindowSize.X.ToString();
+            _gameWindowHeight.Text = ProfileManager.Current.GameWindowSize.Y.ToString();
+            _gameWindowPositionX.Text = ProfileManager.Current.GameWindowPosition.X.ToString();
+            _gameWindowPositionY.Text = ProfileManager.Current.GameWindowPosition.Y.ToString();
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

@@ -72,8 +72,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Point n = ResizeGameWindow(_lastSize);
 
-                    OptionsGump options = UIManager.GetGump<OptionsGump>();
-                    options?.UpdateVideo();
+                    UIManager.GetGump<OptionsGump>()?.UpdateVideo();
 
                     if (FileManager.ClientVersion >= ClientVersions.CV_200)
                         NetClient.Socket.Send(new PGameWindowSize((uint) n.X, (uint) n.Y));
@@ -88,8 +87,7 @@ namespace ClassicUO.Game.UI.Gumps
             _border = new GameBorder(0, 0, Width, Height, 4);
             _border.DragEnd += (sender, e) => 
             {
-                OptionsGump options = UIManager.GetGump<OptionsGump>();
-                options?.UpdateVideo();
+                UIManager.GetGump<OptionsGump>()?.UpdateVideo();
             };
             _viewport = new WorldViewport(scene, BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
 
