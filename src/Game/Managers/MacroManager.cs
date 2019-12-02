@@ -442,7 +442,17 @@ namespace ClassicUO.Game.Managers
                                     break;
 
                                 case MacroSubType.WorldMap:
-                                    Log.Warn( $"Macro '{macro.SubCode}' not implemented");
+
+                                    WorldMapGump worldMap = UIManager.GetGump<WorldMapGump>();
+                                    if (worldMap == null)
+                                    {
+                                        UIManager.Add(new WorldMapGump());
+                                    }
+                                    else
+                                    {
+                                        worldMap.SetInScreen();
+                                        worldMap.BringOnTop();
+                                    }
 
                                     break;
 
