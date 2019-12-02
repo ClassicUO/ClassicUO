@@ -153,14 +153,14 @@ namespace ClassicUO.Game.UI.Gumps
         {
             Point position = Location;
 
-            if (position.X + Width - BORDER_WIDTH > CUOEnviroment.Client.GraphicsDevice.Viewport.Width)
-                position.X = CUOEnviroment.Client.GraphicsDevice.Viewport.Width - (Width - BORDER_WIDTH);
+            if (position.X + Width - BORDER_WIDTH > CUOEnviroment.Client.Window.ClientBounds.Width)
+                position.X = CUOEnviroment.Client.Window.ClientBounds.Width - (Width - BORDER_WIDTH);
 
             if (position.X < -BORDER_WIDTH)
                 position.X = -BORDER_WIDTH;
 
-            if (position.Y + Height - BORDER_HEIGHT > CUOEnviroment.Client.GraphicsDevice.Viewport.Height)
-                position.Y = CUOEnviroment.Client.GraphicsDevice.Viewport.Height - (Height - BORDER_HEIGHT);
+            if (position.Y + Height - BORDER_HEIGHT > CUOEnviroment.Client.Window.ClientBounds.Height)
+                position.Y = CUOEnviroment.Client.Window.ClientBounds.Height - (Height - BORDER_HEIGHT);
 
             if (position.Y < -BORDER_HEIGHT)
                 position.Y = -BORDER_HEIGHT;
