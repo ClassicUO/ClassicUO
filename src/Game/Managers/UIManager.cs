@@ -1156,7 +1156,7 @@ namespace ClassicUO.Game.Managers
                 if (attemptAlwaysSuccessful)
                 {
                     DraggingControl = dragTarget;
-                    //if (control == dragTarget && _needSort)
+                    if (control == dragTarget && _needSort)
                     {
                         _dragOriginX = mousePosition.X;
                         _dragOriginY = mousePosition.Y;
