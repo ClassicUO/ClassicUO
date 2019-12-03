@@ -2096,7 +2096,8 @@ namespace ClassicUO.Network
             {
                 Item item = World.GetOrCreateItem(itemSerial);
                 Graphic itemGraphic = p.ReadUShort();
-                item.Layer = (Layer) p.ReadByte();
+                byte layer = p.ReadByte();
+                item.Layer = (Layer) layer;
 
                 if (FileManager.ClientVersion >= ClientVersions.CV_70331)
                     item.FixHue(p.ReadUShort());
@@ -2112,7 +2113,15 @@ namespace ClassicUO.Network
                 item.Amount = 1;
                 item.Container = mobile;
                 mobile.Items.Add(item);
-                mobile.Equipment[(int) item.Layer] = item;
+
+                if (layer < mobile.Equipment.Length)
+                {
+                    mobile.Equipment[layer] = item;
+                }
+                else
+                {
+                    Log.Warn($"Invalid layer in UpdateObject(). Layer: {layer}");
+                }
 
                 //if (World.OPL.Contains(serial))
                 //    NetClient.Socket.Send(new PMegaClilocRequest(item));
