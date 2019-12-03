@@ -111,10 +111,14 @@ namespace ClassicUO.Game.Scenes
 
             Audio.PlayMusic(music);
 
-            if ((Settings.GlobalSettings.AutoLogin || Reconnect) && CurrentLoginStep != LoginStep.Main)
+            if (((Settings.GlobalSettings.AutoLogin || Reconnect) && (CurrentLoginStep != LoginStep.Main)) || CUOEnviroment.SkipLoginScreen)
             {
                 if (!string.IsNullOrEmpty(Settings.GlobalSettings.Username))
+                {
+                    // disable if it's the 2nd attempt
+                    CUOEnviroment.SkipLoginScreen = false;
                     Connect(Settings.GlobalSettings.Username, Crypter.Decrypt(Settings.GlobalSettings.Password));
+                }
             }
 
             if (CUOEnviroment.Client.IsWindowMaximized())

@@ -283,6 +283,10 @@ namespace ClassicUO
 
                         break;
 
+                    case "skiploginscreen":
+                        CUOEnviroment.SkipLoginScreen = true;
+                        break;
+
                 }
             }
         }

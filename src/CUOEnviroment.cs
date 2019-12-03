@@ -19,6 +19,7 @@ namespace ClassicUO
         public static bool Debug;
         public static bool IsHighDPI;
         public static uint CurrentRefreshRate;
+        public static bool SkipLoginScreen;
 
         public static readonly bool IsUnix = Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX;
         public static readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version;
