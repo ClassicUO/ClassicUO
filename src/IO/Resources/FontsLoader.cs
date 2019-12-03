@@ -1212,7 +1212,7 @@ namespace ClassicUO.IO.Resources
                         case TEXT_ALIGN_TYPE.TS_CENTER:
 
                         {
-                            w += ((width - 10) - ptr.Width) >> 1;
+                            w += ((width - 8) / 2 - ptr.Width / 2);
 
                             if (w < 0)
                                 w = 0;
