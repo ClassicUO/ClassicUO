@@ -45,6 +45,10 @@ namespace ClassicUO.Game.GameObjects
         public MovingEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, Graphic graphic, Hue hue, bool fixedDir, byte speed) : this(graphic, hue)
         {
             FixedDir = fixedDir;
+
+            if (speed > 20)
+                speed = (byte) (speed - 20);
+
             MovingDelay = (byte) (20 - speed);
 
             Entity source = World.Get(src);
