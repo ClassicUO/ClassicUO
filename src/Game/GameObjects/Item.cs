@@ -741,6 +741,12 @@ namespace ClassicUO.Game.GameObjects
                         graphic = 0x0579;
                         break;
                     }
+
+                    case 0x3ECC:
+                    {
+                        graphic = 0x0582;
+                        break;
+                    }
                 }
 
                 if (ItemData.AnimID != 0)
