@@ -276,8 +276,8 @@ namespace ClassicUO.Game.UI.Gumps
                         if (yy < 0)
                         {
                             // this entry starts above the renderable area, but exists partially within it.
-                            hour.Draw(batcher, mx, y, t.Width, t.Height + yy, 0, -yy);
-                            t.Draw(batcher, mx + hour.Width, y, t.Width, t.Height + yy, 0, -yy);
+                            hour.Draw(batcher, hour.Width, hour.Height, mx, y, t.Width, t.Height + yy, 0, -yy);
+                            t.Draw(batcher, t.Width, t.Height, mx + hour.Width, y, t.Width, t.Height + yy, 0, -yy);
                             my += t.Height + yy;
                         }
                         else
@@ -293,8 +293,8 @@ namespace ClassicUO.Game.UI.Gumps
                     else
                     {
                         int yyy = maxheight - height;
-                        hour.Draw(batcher, mx, y + _scrollBar.Height - yyy, t.Width, yyy, 0, 0);
-                        t.Draw(batcher, mx + hour.Width, y + _scrollBar.Height - yyy, t.Width, yyy, 0, 0);
+                        hour.Draw(batcher, hour.Width, hour.Height, mx, y + _scrollBar.Height - yyy, t.Width, yyy, 0, 0);
+                        t.Draw(batcher, t.Width, t.Height, mx + hour.Width, y + _scrollBar.Height - yyy, t.Width, yyy, 0, 0);
 
                         // can't fit any more entries - so we break!
                         break;

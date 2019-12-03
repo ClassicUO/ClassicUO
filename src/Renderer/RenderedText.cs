@@ -177,20 +177,19 @@ namespace ClassicUO.Renderer
 
         public FontTexture Texture => _texture;
 
-        public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 0, ushort hue = 0)
-        {
-            return Draw(batcher, x, y, Width, Height, 0, 0, alpha, hue);
-        }
 
         private static Vector3 _hueVector = Vector3.Zero;
 
-        public bool Draw(UltimaBatcher2D batcher, int dx, int dy, int dwidth, int dheight, int offsetX, int offsetY, float alpha = 0, ushort hue = 0)
+        public bool Draw(UltimaBatcher2D batcher, 
+            int swidth, int sheight,
+            int dx, int dy, int dwidth, int dheight, 
+            int offsetX, int offsetY, float alpha = 0, ushort hue = 0)
         {
             if (string.IsNullOrEmpty(Text) || Texture == null)
                 return false;
 
 
-            if (offsetX > Width || offsetX < -MaxWidth || offsetY > Height || offsetY < -Height)
+            if (offsetX > swidth || offsetX < -swidth || offsetY > sheight || offsetY < -sheight)
                 return false;
 
             int srcX = offsetX;
@@ -200,21 +199,21 @@ namespace ClassicUO.Renderer
             int srcWidth;
             int srcHeight;
 
-            if (maxX <= Width)
+            if (maxX <= swidth)
                 srcWidth = dwidth;
             else
             {
-                srcWidth = Width - srcX;
+                srcWidth = swidth - srcX;
                 dwidth = srcWidth;
             }
 
             int maxY = srcY + dheight;
 
-            if (maxY <= Height)
+            if (maxY <= sheight)
                 srcHeight = dheight;
             else
             {
-                srcHeight = Height - srcY;
+                srcHeight = sheight - srcY;
                 dheight = srcHeight;
             }
 
@@ -237,6 +236,32 @@ namespace ClassicUO.Renderer
             _hueVector.Z = alpha;
 
             return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, srcX, srcY, srcWidth, srcHeight, ref _hueVector);
+        }
+
+        public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 0, ushort hue = 0)
+        {
+            if (string.IsNullOrEmpty(Text) || Texture == null)
+                return false;
+
+            _hueVector.X = hue;
+
+            if (hue != 0)
+            {
+                if (IsUnicode)
+                    _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE_NO_BLACK;
+                else if (Font == 3)
+                    _hueVector.Y = 5;
+                else if (Font != 5 && Font != 8)
+                    _hueVector.Y = ShaderHuesTraslator.SHADER_PARTIAL_HUED;
+                else
+                    _hueVector.Y = ShaderHuesTraslator.SHADER_HUED;
+            }
+            else
+                _hueVector.Y = 0;
+
+            _hueVector.Z = alpha;
+
+            return batcher.Draw2D(Texture, x, y, Width, Height, ref _hueVector);
         }
 
         public void CreateTexture()

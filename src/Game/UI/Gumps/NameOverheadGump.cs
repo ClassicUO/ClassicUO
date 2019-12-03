@@ -443,7 +443,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int renderedTextOffset = Math.Max(0, Width - _renderedText.Width - 4) >> 1;
 
-            return _renderedText.Draw(batcher, x + 2 + renderedTextOffset, y + 2, Width, Height, 0, 0);
+            return _renderedText.Draw(batcher, Width, Height, x + 2 + renderedTextOffset, y + 2, Width, Height, 0, 0);
         }
 
 

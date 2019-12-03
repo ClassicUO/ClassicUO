@@ -214,13 +214,23 @@ namespace ClassicUO.Game.UI.Controls
             if (IsDisposed)
                 return false;
 
+            ResetHueVector();
+
             Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
 
             if (ScissorStack.PushScissors(scissor))
             {
                 batcher.EnableScissorTest(true);
                 base.Draw(batcher, x, y);
-                _gameText.Draw(batcher, x + (HasBackground ? 4 : 0), y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0), ScrollX, ScrollY);
+               
+                _gameText.Draw(batcher,
+                    Width, Height,
+                    x + (HasBackground ? 4 : 0),
+                    y + (HasBackground ? 4 : 0),
+                    Width - (HasBackground ? 8 : 0),
+                    Height - (HasBackground ? 8 : 0),
+                    ScrollX,
+                    ScrollY);
 
                 batcher.EnableScissorTest(false);
                 ScissorStack.PopScissors();
@@ -228,7 +238,6 @@ namespace ClassicUO.Game.UI.Controls
 
             return true;
         }
-
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
