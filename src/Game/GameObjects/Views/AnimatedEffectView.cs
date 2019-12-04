@@ -102,7 +102,7 @@ namespace ClassicUO.Game.GameObjects
             if ((AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed) && AnimationGraphic != Graphic.INVALID)
             {
                 _displayedGraphic = AnimationGraphic;
-                Texture = FileManager.Art.GetTexture(AnimationGraphic);
+                Texture = UOFileManager.Art.GetTexture(AnimationGraphic);
                 Bounds.Width = Texture.Width;
                 Bounds.Height = Texture.Height;
             }
@@ -113,7 +113,7 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Y = Texture.Height - 44 + (int) (Offset.Z - Offset.Y);
             }
 
-            ref readonly StaticTiles data = ref FileManager.TileData.StaticData[Graphic];
+            ref readonly StaticTiles data = ref UOFileManager.TileData.StaticData[Graphic];
 
 
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)

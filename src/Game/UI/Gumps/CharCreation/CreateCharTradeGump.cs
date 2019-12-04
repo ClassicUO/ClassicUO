@@ -58,23 +58,23 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             // title text
             //TextLabelAscii(AControl parent, int x, int y, int font, int hue, string text, int width = 400)
-            Add(new Label(FileManager.Cliloc.GetString(3000326), false, 0x0386, font: 2)
+            Add(new Label(UOFileManager.Cliloc.GetString(3000326), false, 0x0386, font: 2)
             {
                 X = 148, Y = 132
             });
 
             // strength, dexterity, intelligence
-            Add(new Label(FileManager.Cliloc.GetString(3000111), false, 1, font: 1)
+            Add(new Label(UOFileManager.Cliloc.GetString(3000111), false, 1, font: 1)
             {
                 X = 158, Y = 170
             });
 
-            Add(new Label(FileManager.Cliloc.GetString(3000112), false, 1, font: 1)
+            Add(new Label(UOFileManager.Cliloc.GetString(3000112), false, 1, font: 1)
             {
                 X = 158, Y = 250
             });
 
-            Add(new Label(FileManager.Cliloc.GetString(3000113), false, 1, font: 1)
+            Add(new Label(UOFileManager.Cliloc.GetString(3000113), false, 1, font: 1)
             {
                 X = 158, Y = 330
             });
@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(_attributeSliders[1] = new HSliderBar(164, 276, 93, 10, 60, ProfessionInfo._VoidStats[1], HSliderBarStyle.MetalWidgetRecessedBar, true));
             Add(_attributeSliders[2] = new HSliderBar(164, 356, 93, 10, 60, ProfessionInfo._VoidStats[2], HSliderBarStyle.MetalWidgetRecessedBar, true));
 
-            string[] skillList = FileManager.Skills.SkillNames;
+            string[] skillList = UOFileManager.Skills.SkillNames;
             int y = 172;
             _skillSliders = new HSliderBar[CharCreationGump._skillsCount];
             _skills = new Combobox[CharCreationGump._skillsCount];
@@ -168,14 +168,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 if (duplicated > 0)
                 {
-                    UIManager.GetGump<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(1080032));
+                    UIManager.GetGump<CharCreationGump>()?.ShowMessage(UOFileManager.Cliloc.GetString(1080032));
 
                     return false;
                 }
             }
             else
             {
-                UIManager.GetGump<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(1080032));
+                UIManager.GetGump<CharCreationGump>()?.ShowMessage(UOFileManager.Cliloc.GetString(1080032));
 
                 return false;
             }

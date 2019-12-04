@@ -114,7 +114,7 @@ namespace ClassicUO.Game.Managers
                             yy += (int) (22 / scale);
 
 
-                        FileManager.Animations.GetAnimationDimensions(mobile.AnimIndex,
+                        UOFileManager.Animations.GetAnimationDimensions(mobile.AnimIndex,
                                                                       mobile.GetGraphicForAnimation(),
                                                                       /*(byte) m.GetDirectionForAnimation()*/ 0,
                                                                       /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,

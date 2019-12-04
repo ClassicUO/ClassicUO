@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public CroppedText(string text, Hue hue, int maxWidth = 0)
         {
-            _gameText = RenderedText.Create(text, hue, (byte)(FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0), true, maxWidth > 0 ? FontStyle.BlackBorder | FontStyle.Cropped : FontStyle.BlackBorder,
+            _gameText = RenderedText.Create(text, hue, (byte)(UOFileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0), true, maxWidth > 0 ? FontStyle.BlackBorder | FontStyle.Cropped : FontStyle.BlackBorder,
                                             maxWidth: maxWidth);
             AcceptMouseInput = false;
         }

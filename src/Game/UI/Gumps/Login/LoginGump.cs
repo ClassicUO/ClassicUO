@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             AcceptKeyboardInput = false;
 
-            if (FileManager.ClientVersion >= ClientVersions.CV_500A)
+            if (UOFileManager.ClientVersion >= ClientVersions.CV_500A)
                 // Full background
                 Add(new GumpPic(0, 0, 0x2329, 0));
 
@@ -72,7 +72,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Height = 157
             });
 
-            if (FileManager.ClientVersion < ClientVersions.CV_500A)
+            if (UOFileManager.ClientVersion < ClientVersions.CV_500A)
                 Add(new GumpPic(286, 45, 0x058A, 0));
 
             // Arrow Button

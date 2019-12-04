@@ -84,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = false;
             AcceptKeyboardInput = false;
 
-            int height = FileManager.Fonts.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
+            int height = UOFileManager.Fonts.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
 
             textBox = new TextBox(ProfileManager.Current.ChatFont, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
             {
@@ -139,7 +139,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    int height = FileManager.Fonts.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
+                    int height = UOFileManager.Fonts.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
                     textBox.Width = 1;
                     _trans.Y = textBox.Y + height + 3;
                 }
@@ -310,7 +310,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (textBox != null)
             {
-                int height = FileManager.Fonts.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
+                int height = UOFileManager.Fonts.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
                 textBox.Y = Height - height - 3;
                 textBox.Width = IsActive ? Width : 1;
                 textBox.Height = height - 3;

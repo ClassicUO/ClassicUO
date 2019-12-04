@@ -38,7 +38,7 @@ namespace ClassicUO.IO.Resources
         {
             return Task.Run(() =>
             {
-                string path = Path.Combine(FileManager.UoFolderPath, "speech.mul");
+                string path = UOFileManager.GetUOFilePath("speech.mul");
 
                 if (!File.Exists(path))
                 {
@@ -102,7 +102,7 @@ namespace ClassicUO.IO.Resources
         {
             List<SpeechEntry> list = new List<SpeechEntry>();
 
-            if (FileManager.ClientVersion < ClientVersions.CV_305D) return list;
+            if (UOFileManager.ClientVersion < ClientVersions.CV_305D) return list;
 
             text = text.ToLower().TrimStart(' ').TrimEnd(' ');
 

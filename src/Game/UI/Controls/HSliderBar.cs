@@ -128,14 +128,14 @@ namespace ClassicUO.Game.UI.Controls
 
                         _gumpSpliderBackground = new UOTexture[3]
                         {
-                            FileManager.Gumps.GetTexture(213), FileManager.Gumps.GetTexture(214), FileManager.Gumps.GetTexture(215)
+                            UOFileManager.Gumps.GetTexture(213), UOFileManager.Gumps.GetTexture(214), UOFileManager.Gumps.GetTexture(215)
                         };
-                        _gumpWidget = FileManager.Gumps.GetTexture(216);
+                        _gumpWidget = UOFileManager.Gumps.GetTexture(216);
 
                         break;
 
                     case HSliderBarStyle.BlueWidgetNoBar:
-                        _gumpWidget = FileManager.Gumps.GetTexture(0x845);
+                        _gumpWidget = UOFileManager.Gumps.GetTexture(0x845);
 
                         break;
                 }

@@ -40,7 +40,7 @@ namespace ClassicUO.Game.Data
 
             OnePerson = (flags & CharacterListFlags.CLF_ONE_CHARACTER_SLOT) != 0;
             PopupEnabled = (flags & CharacterListFlags.CLF_CONTEXT_MENU) != 0;
-            TooltipsEnabled = (flags & CharacterListFlags.CLF_PALADIN_NECROMANCER_TOOLTIPS) != 0 && FileManager.ClientVersion >= ClientVersions.CV_308Z;
+            TooltipsEnabled = (flags & CharacterListFlags.CLF_PALADIN_NECROMANCER_TOOLTIPS) != 0 && UOFileManager.ClientVersion >= ClientVersions.CV_308Z;
             PaperdollBooks = (flags & CharacterListFlags.CLF_PALADIN_NECROMANCER_TOOLTIPS) != 0;
         }
     }

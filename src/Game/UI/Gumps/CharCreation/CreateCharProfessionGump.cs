@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         public CreateCharProfessionGump(ProfessionInfo parent = null) : base(0, 0)
         {
             _Parent = parent;
-            if (parent == null || !FileManager.Profession.Professions.TryGetValue(parent, out List<ProfessionInfo> professions) || professions == null) professions = new List<ProfessionInfo>(FileManager.Profession.Professions.Keys);
+            if (parent == null || !UOFileManager.Profession.Professions.TryGetValue(parent, out List<ProfessionInfo> professions) || professions == null) professions = new List<ProfessionInfo>(UOFileManager.Profession.Professions.Keys);
 
             /* Build the gump */
             Add(new ResizePic(2600)
@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(new GumpPic(214, 58, 0x058B, 0));
             Add(new GumpPic(300, 51, 0x15A9, 0));
 
-            ClilocLoader localization = FileManager.Cliloc;
+            ClilocLoader localization = UOFileManager.Cliloc;
 
             Add(new Label(localization.Translate(3000326), false, 0x0386, font: 2)
             {
@@ -86,7 +86,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public void SelectProfession(ProfessionInfo info)
         {
-            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && FileManager.Profession.Professions.TryGetValue(info, out List<ProfessionInfo> list) && list != null)
+            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && UOFileManager.Profession.Professions.TryGetValue(info, out List<ProfessionInfo> list) && list != null)
             {
                 Parent.Add(new CreateCharProfessionGump(info));
                 Parent.Remove(this);
@@ -141,7 +141,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             _info = info;
 
-            ClilocLoader localization = FileManager.Cliloc;
+            ClilocLoader localization = UOFileManager.Cliloc;
 
             ResizePic background = new ResizePic(3000)
             {
@@ -170,10 +170,10 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
     internal class ProfessionInfo
     {
-        internal static readonly int[,] _VoidSkills = new int[4, 2] {{0, InitialSkillValue}, {0, InitialSkillValue}, {0, FileManager.ClientVersion < ClientVersions.CV_70160 ? 0 : InitialSkillValue}, {0, 10}};
+        internal static readonly int[,] _VoidSkills = new int[4, 2] {{0, InitialSkillValue}, {0, InitialSkillValue}, {0, UOFileManager.ClientVersion < ClientVersions.CV_70160 ? 0 : InitialSkillValue}, {0, 10}};
         internal static readonly int[] _VoidStats = new int[3] {60, RemainStatValue, RemainStatValue};
-        public static int InitialSkillValue => FileManager.ClientVersion >= ClientVersions.CV_70160 ? 30 : 50;
-        public static int RemainStatValue => FileManager.ClientVersion >= ClientVersions.CV_70160 ? 15 : 10;
+        public static int InitialSkillValue => UOFileManager.ClientVersion >= ClientVersions.CV_70160 ? 30 : 50;
+        public static int RemainStatValue => UOFileManager.ClientVersion >= ClientVersions.CV_70160 ? 15 : 10;
         public string Name { get; set; }
         public string TrueName { get; set; }
         public int Localization { get; set; }

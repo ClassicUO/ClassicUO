@@ -134,7 +134,7 @@ namespace ClassicUO.Network
         {
             int skillcount = 3;
 
-            if (FileManager.ClientVersion >= ClientVersions.CV_70160)
+            if (UOFileManager.ClientVersion >= ClientVersions.CV_70160)
             {
                 skillcount++;
                 this[0] = 0xF8;
@@ -147,7 +147,7 @@ namespace ClassicUO.Network
             WriteASCII(character.Name, 30);
             WriteUShort(0x00);
             uint clientflag = 0;
-            uint flags = (uint) FileManager.ClientFlags;
+            uint flags = (uint) UOFileManager.ClientFlags;
 
             for (ushort i = 0; i < flags; i++)
                 clientflag |= (uint) (1 << i);
@@ -159,13 +159,13 @@ namespace ClassicUO.Network
             Skip(15);
             byte val;
 
-            if (FileManager.ClientVersion < ClientVersions.CV_4011D)
+            if (UOFileManager.ClientVersion < ClientVersions.CV_4011D)
                 val = Convert.ToByte(character.Flags.HasFlag(Flags.Female));
             else
             {
                 val = (byte) character.Race;
 
-                if (FileManager.ClientVersion < ClientVersions.CV_7000)
+                if (UOFileManager.ClientVersion < ClientVersions.CV_7000)
                     val--;
                 val = (byte) (val * 2 + Convert.ToByte(character.Flags.HasFlag(Flags.Female)));
             }
@@ -209,7 +209,7 @@ namespace ClassicUO.Network
 
             var location = startingCity.Index; // City
 
-            if (FileManager.ClientVersion < ClientVersions.CV_70130 && location > 0)
+            if (UOFileManager.ClientVersion < ClientVersions.CV_70130 && location > 0)
                 location--;
 
             WriteByte((byte) location);
@@ -244,10 +244,10 @@ namespace ClassicUO.Network
             Skip(2);
             uint clientFlag = 0;
 
-            for (int i = 0; i < (uint) FileManager.ClientFlags; i++)
+            for (int i = 0; i < (uint) UOFileManager.ClientFlags; i++)
                 clientFlag |= (uint) (1 << i);
 
-            WriteUInt((uint) FileManager.ClientFlags);
+            WriteUInt((uint) UOFileManager.ClientFlags);
             Skip(24);
             WriteUInt(index);
             WriteUInt(ipclient);
@@ -407,7 +407,7 @@ namespace ClassicUO.Network
     {
         public PUnicodeSpeechRequest(string text, MessageType type, byte font, Hue hue, string lang) : base(0xAD)
         {
-            var entries = FileManager.Speeches.GetKeywords(text);
+            var entries = UOFileManager.Speeches.GetKeywords(text);
 
             bool encoded = entries != null && entries.Count != 0;
             if(encoded)
@@ -466,7 +466,7 @@ namespace ClassicUO.Network
     {
         public PCastSpell(int idx) : base(0xBF)
         {
-            if (FileManager.ClientVersion >= ClientVersions.CV_60142)
+            if (UOFileManager.ClientVersion >= ClientVersions.CV_60142)
             {
                 WriteUShort(0x1C);
                 WriteUShort(0x02);
@@ -952,7 +952,7 @@ namespace ClassicUO.Network
             WriteByte(0x0A);
             uint clientFlag = 0;
 
-            for (int i = 0; i < (uint) FileManager.ClientFlags; i++)
+            for (int i = 0; i < (uint) UOFileManager.ClientFlags; i++)
                 clientFlag |= (uint) (1 << i);
 
             WriteUInt(clientFlag);

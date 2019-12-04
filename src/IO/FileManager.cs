@@ -37,7 +37,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
 {
-    internal static class FileManager
+    internal static class UOFileManager
     {
         private static string _uofolderpath;
 
@@ -147,6 +147,11 @@ namespace ClassicUO.IO
                 Log.Trace( "Client flags by version: " + ClientFlags);
                 Log.Trace( "UOP? " + (IsUOPInstallation ? "yes" : "no"));
             }
+        }
+
+        public static string GetUOFilePath(string file)
+        {
+            return Path.Combine(UoFolderPath, file);
         }
 
         public static ClientVersions ClientVersion { get; private set; }

@@ -192,17 +192,17 @@ namespace ClassicUO.IO.Resources
 
                 for (int i = 0; i < 5; i++)
                 {
-                    string pathmul = Path.Combine(FileManager.UoFolderPath, "anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".mul");
-                    string pathidx = Path.Combine(FileManager.UoFolderPath, "anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".idx");
+                    string pathmul = UOFileManager.GetUOFilePath("anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".mul");
+                    string pathidx = UOFileManager.GetUOFilePath("anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".idx");
 
                     if (File.Exists(pathmul) && File.Exists(pathidx))
                     {
                         _files[i] = new UOFileMul(pathmul, pathidx, un[i], i == 0 ? 6 : -1);
                     }
 
-                    if (i > 0 && FileManager.ClientVersion >= ClientVersions.CV_7000)
+                    if (i > 0 && UOFileManager.ClientVersion >= ClientVersions.CV_7000)
                     {
-                        string pathuop = Path.Combine(FileManager.UoFolderPath, $"AnimationFrame{i}.uop");
+                        string pathuop = UOFileManager.GetUOFilePath($"AnimationFrame{i}.uop");
 
                         if (File.Exists(pathuop))
                         {
@@ -229,9 +229,9 @@ namespace ClassicUO.IO.Resources
                 UOFile idxfile5 = _files[4]?.IdxFile;
                 long? maxAddress5 = (long?)idxfile5?.StartAddress + idxfile5?.Length;
 
-                if (FileManager.ClientVersion >= ClientVersions.CV_500A)
+                if (UOFileManager.ClientVersion >= ClientVersions.CV_500A)
                 {
-                    string path = Path.Combine(FileManager.UoFolderPath, "mobtypes.txt");
+                    string path = UOFileManager.GetUOFilePath("mobtypes.txt");
 
                     if (File.Exists(path))
                     {
@@ -354,7 +354,7 @@ namespace ClassicUO.IO.Resources
                     DataIndex[i].IsValidMUL = isValid;
                 }
 
-                string file = Path.Combine(FileManager.UoFolderPath, "Anim1.def");
+                string file = UOFileManager.GetUOFilePath("Anim1.def");
 
                 if (File.Exists(file))
                 {
@@ -369,7 +369,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                file = Path.Combine(FileManager.UoFolderPath, "Anim2.def");
+                file = UOFileManager.GetUOFilePath("Anim2.def");
 
                 if (File.Exists(file))
                 {
@@ -384,10 +384,10 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                if (FileManager.ClientVersion < ClientVersions.CV_305D)
+                if (UOFileManager.ClientVersion < ClientVersions.CV_305D)
                     return;
 
-                file = Path.Combine(FileManager.UoFolderPath, "Equipconv.def");
+                file = UOFileManager.GetUOFilePath("Equipconv.def");
 
                 if (File.Exists(file))
                 {
@@ -435,7 +435,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                file = Path.Combine(FileManager.UoFolderPath, "Bodyconv.def");
+                file = UOFileManager.GetUOFilePath("Bodyconv.def");
 
                 if (File.Exists(file))
                 {
@@ -510,7 +510,7 @@ namespace ClassicUO.IO.Resources
                             if (realAnimID != 0xFFFF && animFile != 0)
                             {
                                 UOFile currentIdxFile = _files[animFile].IdxFile;
-                                var realType = FileManager.ClientVersion < ClientVersions.CV_500A 
+                                var realType = UOFileManager.ClientVersion < ClientVersions.CV_500A 
                                     ? CalculateTypeByGraphic(realAnimID) : DataIndex[index].Type;
                                 long addressOffset = DataIndex[index].CalculateOffset(realAnimID, realType, out int count);
 
@@ -564,7 +564,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                file = Path.Combine(FileManager.UoFolderPath, "Body.def");
+                file = UOFileManager.GetUOFilePath("Body.def");
 
                 if (File.Exists(file))
                 {
@@ -597,7 +597,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                file = Path.Combine(FileManager.UoFolderPath, "Corpse.def");
+                file = UOFileManager.GetUOFilePath("Corpse.def");
 
                 if (File.Exists(file))
                 {
@@ -635,7 +635,7 @@ namespace ClassicUO.IO.Resources
 
         private void LoadUop()
         {
-            if (FileManager.ClientVersion <= ClientVersions.CV_60144)
+            if (UOFileManager.ClientVersion <= ClientVersions.CV_60144)
                 return;
 
             for (ushort animID = 0; animID < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)
@@ -688,7 +688,7 @@ namespace ClassicUO.IO.Resources
                 _filesUop[i]?.ClearHashes();
             }
 
-            string animationSequencePath = Path.Combine(FileManager.UoFolderPath, "AnimationSequence.uop");
+            string animationSequencePath = UOFileManager.GetUOFilePath("AnimationSequence.uop");
 
             if (!File.Exists(animationSequencePath))
             {
@@ -1245,7 +1245,7 @@ namespace ClassicUO.IO.Resources
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
                 ushort hue = 0;
-                AnimationDirection direction = isCorpse ? FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref group, ref hue)?.Direction[0] : FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue, true)?.Direction[0];
+                AnimationDirection direction = isCorpse ? UOFileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref group, ref hue)?.Direction[0] : UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue, true)?.Direction[0];
 
 
                 return direction != null && (direction.Address != 0 && direction.Size != 0 ||
@@ -1533,11 +1533,11 @@ namespace ClassicUO.IO.Resources
         {
             dir &= 0x7F;
             bool mirror = false;
-            FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
+            UOFileManager.Animations.GetAnimDirection(ref dir, ref mirror);
 
             if (frameIndex == 0xFF)
                 frameIndex = (byte)animIndex;
-            FileManager.Animations.GetAnimationDimensions(frameIndex, graphic, dir, animGroup, out centerX, out centerY, out width, out height);
+            UOFileManager.Animations.GetAnimationDimensions(frameIndex, graphic, dir, animGroup, out centerX, out centerY, out width, out height);
             if (centerX == 0 && centerY == 0 && width == 0 && height == 0) height = ismounted ? 100 : 60;
         }
 
@@ -1559,7 +1559,7 @@ namespace ClassicUO.IO.Resources
 
                 if (dir < 5)
                 {
-                    AnimationDirection direction = FileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
+                    AnimationDirection direction = UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
                     int fc = direction.FrameCount;
 
                     if (fc > 0)
@@ -1585,7 +1585,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                AnimationDirection direction1 = FileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[0];
+                AnimationDirection direction1 = UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[0];
 
                 if (direction1.Address != 0 && direction1.Size != 0)
                 {
@@ -1599,7 +1599,7 @@ namespace ClassicUO.IO.Resources
                         return;
                     }
                 }
-                else if (direction1.IsUOP && FileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true) is AnimationGroupUop animDataStruct)
+                else if (direction1.IsUOP && UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true) is AnimationGroupUop animDataStruct)
                 {
                     if (!(animDataStruct.FileIndex == 0 && animDataStruct.CompressedLength == 0 && animDataStruct.DecompressedLength == 0 && animDataStruct.Offset == 0))
                     {

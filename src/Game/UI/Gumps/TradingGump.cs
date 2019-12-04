@@ -184,7 +184,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int myX, myY, otherX, otherY;
 
-            if (FileManager.ClientVersion >= ClientVersions.CV_704565)
+            if (UOFileManager.ClientVersion >= ClientVersions.CV_704565)
             {
                 myX = 37;
                 myY = 29;
@@ -233,12 +233,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            if (FileManager.ClientVersion >= ClientVersions.CV_704565)
+            if (UOFileManager.ClientVersion >= ClientVersions.CV_704565)
             {
                 Add(new GumpPic(0, 0, 0x088A, 0));
                 Add(new Label(World.Player.Name, false, 0x0481, font: 3)
                         { X = 73, Y = 32 });
-                int fontWidth = 250 - FileManager.Fonts.GetWidthASCII(3, _name);
+                int fontWidth = 250 - UOFileManager.Fonts.GetWidthASCII(3, _name);
 
                 Add(new Label(_name, false, 0x0481, font: 3)
                         { X = fontWidth, Y = 244 });
@@ -248,14 +248,14 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(new GumpPic(0, 0, 0x0866, 0));
                 Add(new Label(World.Player.Name, false, 0x0386, font: 1)
                         { X = 84, Y = 40 });
-                int fontWidth = 260 - FileManager.Fonts.GetWidthASCII(1, _name);
+                int fontWidth = 260 - UOFileManager.Fonts.GetWidthASCII(1, _name);
 
                 Add(new Label(_name, false, 0x0386, font: 1)
                         { X = fontWidth, Y = 170 });
             }
 
 
-            if (FileManager.ClientVersion < ClientVersions.CV_500A)
+            if (UOFileManager.ClientVersion < ClientVersions.CV_500A)
             {
                 Add(new ColorBox(110, 60, 0, 0xFF000001)
                 {
@@ -291,7 +291,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
                         return;
 
-                    ArtTexture texture = FileManager.Art.GetTexture(gs.HeldItem.DisplayedGraphic);
+                    ArtTexture texture = UOFileManager.Art.GetTexture(gs.HeldItem.DisplayedGraphic);
 
                     int x = e.X;
                     int y = e.Y;

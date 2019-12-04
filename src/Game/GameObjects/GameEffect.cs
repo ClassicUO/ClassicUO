@@ -68,7 +68,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void Load()
         {
-            AnimDataFrame = FileManager.AnimData.CalculateCurrentGraphic(Graphic);
+            AnimDataFrame = UOFileManager.AnimData.CalculateCurrentGraphic(Graphic);
             IsEnabled = true;
             AnimIndex = 0;
             Speed += AnimDataFrame.FrameInterval != 0 ? AnimDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;

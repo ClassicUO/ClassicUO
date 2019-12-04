@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Controls
             Y = item.Y;
             HighlightOnMouseOver = true;
             CanPickUp = true;
-            ArtTexture texture = FileManager.Art.GetTexture(item.DisplayedGraphic);
+            ArtTexture texture = UOFileManager.Art.GetTexture(item.DisplayedGraphic);
             Texture = texture;
 
             Width = texture.Width;
@@ -337,7 +337,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (CanPickUp)
             {
-                Rectangle bounds = FileManager.Art.GetTexture(Item.DisplayedGraphic).Bounds;
+                Rectangle bounds = UOFileManager.Art.GetTexture(Item.DisplayedGraphic).Bounds;
                 int centerX = bounds.Width >> 1;
                 int centerY = bounds.Height >> 1;
 

@@ -45,14 +45,14 @@ namespace ClassicUO.IO.Resources
         {
             return Task.Run(() =>
             {
-                string path = Path.Combine(FileManager.UoFolderPath, "Multimap.rle");
+                string path = UOFileManager.GetUOFilePath("Multimap.rle");
 
                 if (File.Exists(path))
                     _file = new UOFile(path, true);
 
                 for (int i = 0; i < 6; i++)
                 {
-                    path = Path.Combine(FileManager.UoFolderPath, $"facet0{i}.mul");
+                    path = UOFileManager.GetUOFilePath($"facet0{i}.mul");
 
                     if (File.Exists(path)) _facets[i] = new UOFileMul(path);
                 }
@@ -149,10 +149,10 @@ namespace ClassicUO.IO.Resources
             if (maxPixelValue >= 1)
             {
                 int s = Marshal.SizeOf<HuesGroup>();
-                IntPtr ptr = Marshal.AllocHGlobal(s * FileManager.Hues.HuesRange.Length);
+                IntPtr ptr = Marshal.AllocHGlobal(s * UOFileManager.Hues.HuesRange.Length);
 
-                for (int i = 0; i < FileManager.Hues.HuesRange.Length; i++)
-                    Marshal.StructureToPtr(FileManager.Hues.HuesRange[i], ptr + i * s, false);
+                for (int i = 0; i < UOFileManager.Hues.HuesRange.Length; i++)
+                    Marshal.StructureToPtr(UOFileManager.Hues.HuesRange[i], ptr + i * s, false);
 
                 ushort* huesData = (ushort*) (byte*) (ptr + 30800);
 

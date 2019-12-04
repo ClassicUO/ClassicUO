@@ -157,7 +157,7 @@ namespace ClassicUO.Game.UI.Gumps
                 GumpPic pic = new GumpPic(iconX, 40, iconStartGraphic, 0);
 
                 Add(pic, page1);
-                pic.SetTooltip(FileManager.Cliloc.GetString(_tooltipOffset + i), 150);
+                pic.SetTooltip(UOFileManager.Cliloc.GetString(_tooltipOffset + i), 150);
                 Add(new GumpPicTiled(iconX, 88, 120, 4, 0x0835), page1);
             }
         }

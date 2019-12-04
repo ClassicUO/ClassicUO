@@ -166,7 +166,7 @@ namespace ClassicUO.Game.Scenes
                 if (gump != null && (x != 0xFFFF || y != 0xFFFF))
                 {
                     Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
-                    ArtTexture texture = FileManager.Art.GetTexture(HeldItem.DisplayedGraphic);
+                    ArtTexture texture = UOFileManager.Art.GetTexture(HeldItem.DisplayedGraphic);
                     float scale = UIManager.ContainerScale;
 
                     bounds.X = (int)(bounds.X * scale);
@@ -225,7 +225,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (HeldItem.Enabled && HeldItem.IsWearable)
             {
-                GameActions.Equip(HeldItem.Serial, (Layer) FileManager.TileData.StaticData[HeldItem.Graphic].Layer, target);
+                GameActions.Equip(HeldItem.Serial, (Layer) UOFileManager.TileData.StaticData[HeldItem.Graphic].Layer, target);
                 HeldItem.Enabled = false;
                 HeldItem.Dropped = true;
             }

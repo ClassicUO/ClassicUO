@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Controls
             uint color = 0xFF7F7F7F;
 
             if (item.hue != 0xFFFF)
-                color = FileManager.Hues.GetPolygoneColor(12, item.hue);
+                color = UOFileManager.Hues.GetPolygoneColor(12, item.hue);
 
             labelColor = new ClickableColorBox(150, 0, 13, 14, item.hue, color);
 

@@ -222,7 +222,7 @@ namespace ClassicUO.Game.Data
             public ComboContent(int[] labels, int[] ids)
             {
                 _ids = ids;
-                Labels = labels.Select(o => FileManager.Cliloc.GetString(o)).ToArray();
+                Labels = labels.Select(o => UOFileManager.Cliloc.GetString(o)).ToArray();
             }
 
             public string[] Labels { get; }

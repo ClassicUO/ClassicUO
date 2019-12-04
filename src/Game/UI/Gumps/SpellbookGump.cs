@@ -474,7 +474,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (toolTipCliloc > 0)
                 {
-                    string tooltip = FileManager.Cliloc.GetString(toolTipCliloc + i);
+                    string tooltip = UOFileManager.Cliloc.GetString(toolTipCliloc + i);
                     icon.SetTooltip(tooltip, 150);
                 }
 

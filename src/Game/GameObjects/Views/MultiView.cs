@@ -102,7 +102,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (ItemData.IsAnimated && _lastAnimationFrameTime < Time.Ticks)
             {
-                IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
+                IntPtr ptr = UOFileManager.AnimData.GetAddressToAnim(Graphic);
 
                 if (ptr != IntPtr.Zero)
                 {
@@ -127,7 +127,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (Texture == null || Texture.IsDisposed || Graphic != graphic)
             {
-                ArtTexture texture = FileManager.Art.GetTexture(graphic);
+                ArtTexture texture = UOFileManager.Art.GetTexture(graphic);
                 Texture = texture;
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
 

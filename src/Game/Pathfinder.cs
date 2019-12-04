@@ -168,7 +168,7 @@ namespace ClassicUO.Game
 
                             if (!(obj is Mobile))
                             {
-                                ref readonly var itemdata = ref FileManager.TileData.StaticData[obj.Graphic];
+                                ref readonly var itemdata = ref UOFileManager.TileData.StaticData[obj.Graphic];
 
                             //if (GameObjectHelper.TryGetStaticData(obj, out StaticTiles itemdata))
                             // {

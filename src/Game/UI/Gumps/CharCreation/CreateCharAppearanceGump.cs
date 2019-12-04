@@ -128,7 +128,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }, 1);
             _elfRadio.ValueChanged += Race_ValueChanged;
 
-            if (FileManager.ClientVersion >= ClientVersions.CV_60144)
+            if (UOFileManager.ClientVersion >= ClientVersions.CV_60144)
             {
                 Add(_gargoyleRadio = new RadioButton(1, 0x0768, 0x0767)
                 {
@@ -276,7 +276,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // Hair
             CharacterCreationValues.ComboContent content = CharacterCreationValues.GetHairComboContent(isFemale, race);
 
-            Add(_hairLabel = new Label(FileManager.Cliloc.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), false, 0, font: 9)
+            Add(_hairLabel = new Label(UOFileManager.Cliloc.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), false, 0, font: 9)
             {
                 X = 98, Y = 142
             }, 1);
@@ -288,7 +288,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             {
                 content = CharacterCreationValues.GetFacialHairComboContent(race);
 
-                Add(_facialLabel = new Label(FileManager.Cliloc.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), false, 0, font: 9)
+                Add(_facialLabel = new Label(UOFileManager.Cliloc.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), false, 0, font: 9)
                 {
                     X = 98, Y = 186
                 }, 1);
@@ -438,7 +438,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             if (string.IsNullOrEmpty(character.Name))
             {
-                UIManager.GetGump<CharCreationGump>()?.ShowMessage(FileManager.Cliloc.GetString(3000612));
+                UIManager.GetGump<CharCreationGump>()?.ShowMessage(UOFileManager.Cliloc.GetString(3000612));
 
                 return false;
             }
@@ -529,7 +529,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 _layer = layer;
                 _pallet = pallet;
 
-                Add(new Label(FileManager.Cliloc.GetString(label), false, 0, font: 9)
+                Add(new Label(UOFileManager.Cliloc.GetString(label), false, 0, font: 9)
                 {
                     X = 0,
                     Y = 0

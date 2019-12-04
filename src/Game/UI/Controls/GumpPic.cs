@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _graphic = value;
 
-                Texture = FileManager.Gumps.GetTexture(_graphic);
+                Texture = UOFileManager.Gumps.GetTexture(_graphic);
 
                 if (Texture == null)
                 {

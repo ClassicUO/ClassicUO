@@ -70,7 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void CreateMap()
         {
-            _gumpTexture = FileManager.Gumps.GetTexture(_useLargeMap ? (ushort) 5011 : (ushort) 5010);
+            _gumpTexture = UOFileManager.Gumps.GetTexture(_useLargeMap ? (ushort) 5011 : (ushort) 5010);
             Width = _gumpTexture.Width;
             Height = _gumpTexture.Height;
             CreateMiniMapTexture(true);
@@ -222,8 +222,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (minBlockY < 0)
                 minBlockY = 0;
             int maxBlockIndex = World.Map.MapBlockIndex;
-            int mapBlockHeight = FileManager.Map.MapBlocksSize[World.MapIndex, 1];
-            ushort[] data = FileManager.Gumps.GetGumpPixels(_useLargeMap ? (uint) 5011 : 5010, out _, out _);
+            int mapBlockHeight = UOFileManager.Map.MapBlocksSize[World.MapIndex, 1];
+            ushort[] data = UOFileManager.Gumps.GetGumpPixels(_useLargeMap ? (uint) 5011 : 5010, out _, out _);
 
             Point[] table = new Point[2]
             {
@@ -241,7 +241,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (blockIndex >= maxBlockIndex)
                         break;
 
-                    RadarMapBlock? mbbv = FileManager.Map.GetRadarMapBlock(World.MapIndex, i, j);
+                    RadarMapBlock? mbbv = UOFileManager.Map.GetRadarMapBlock(World.MapIndex, i, j);
 
                     if (!mbbv.HasValue)
                         break;
@@ -290,9 +290,9 @@ namespace ClassicUO.Game.UI.Gumps
                                 color += 0x4000;
                             int tableSize = 2;
                             if(island && color > 0x4000)
-                                color = FileManager.Hues.GetColor16(16384, (ushort)(color - 0x4000));//28672 is an arbitrary position in hues.mul, is the 14 position in the range
+                                color = UOFileManager.Hues.GetColor16(16384, (ushort)(color - 0x4000));//28672 is an arbitrary position in hues.mul, is the 14 position in the range
                             else
-                                color = FileManager.Hues.GetRadarColorData(color);
+                                color = UOFileManager.Hues.GetRadarColorData(color);
                             CreatePixels(data, 0x8000 | color, gx, gy, Width, Height, table, tableSize);
                         }
                     }

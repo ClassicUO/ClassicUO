@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Controls
             Y = y + 3;
             WantUpdateSize = false;
 
-            _background = FileManager.Gumps.GetTexture(0x00D4);
+            _background = UOFileManager.Gumps.GetTexture(0x00D4);
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button == MouseButton.Left)
             {
-                ColorPickerGump pickerGump = new ColorPickerGump(0, 0, 100, 100, s => SetColor(s, FileManager.Hues.GetPolygoneColor(CELL, s)));
+                ColorPickerGump pickerGump = new ColorPickerGump(0, 0, 100, 100, s => SetColor(s, UOFileManager.Hues.GetPolygoneColor(CELL, s)));
                 UIManager.Add(pickerGump);
             }
         }

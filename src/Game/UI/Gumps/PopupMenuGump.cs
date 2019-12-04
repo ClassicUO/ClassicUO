@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (PopupMenuItem item in data.Items)
             {
-                string text = FileManager.Cliloc.GetString(item.Cliloc);
+                string text = UOFileManager.Cliloc.GetString(item.Cliloc);
 
                 ushort hue = item.Hue;
 
@@ -65,14 +65,14 @@ namespace ClassicUO.Game.UI.Gumps
                     if (c.A == 0)
                         c.A = 0xFF;
 
-                    FileManager.Fonts.SetUseHTML(true, HuesHelper.RgbaToArgb(c.PackedValue));
+                    UOFileManager.Fonts.SetUseHTML(true, HuesHelper.RgbaToArgb(c.PackedValue));
                 }
 
                 Label label = new Label(text, true, 0xFFFF, font: 1)
                 {
                     X = 10, Y = offsetY
                 };
-                FileManager.Fonts.SetUseHTML(false);
+                UOFileManager.Fonts.SetUseHTML(false);
 
                 HitBox box = new HitBox(10, offsetY, label.Width, label.Height)
                 {

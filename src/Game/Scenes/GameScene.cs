@@ -407,7 +407,7 @@ namespace ClassicUO.Game.Scenes
                         light.ID = 1;
                     else
                     {
-                        ref readonly var data = ref FileManager.TileData.StaticData[obj.Graphic];
+                        ref readonly var data = ref UOFileManager.TileData.StaticData[obj.Graphic];
                         light.ID = data.Layer;
                     }
                     //else if (GameObjectHelper.TryGetStaticData(lightObject, out StaticTiles data))
@@ -796,7 +796,7 @@ namespace ClassicUO.Game.Scenes
             {
                 ref var l = ref _lights[i];
 
-                UOTexture texture = FileManager.Lights.GetTexture(l.ID);
+                UOTexture texture = UOFileManager.Lights.GetTexture(l.ID);
 
                 hue.X = l.Color;
                 hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;

@@ -38,7 +38,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             CanMove = true;
             AcceptMouseInput = true;
-            Texture = FileManager.Gumps.GetTexture(graphic);
+            Texture = UOFileManager.Gumps.GetTexture(graphic);
             Graphic = _lastGraphic = graphic;
         }
 
@@ -78,7 +78,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (_lastGraphic != Graphic)
             {
-                Texture = FileManager.Gumps.GetTexture(Graphic);
+                Texture = UOFileManager.Gumps.GetTexture(Graphic);
                 _lastGraphic = Graphic;
             }
 

@@ -43,8 +43,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public Checkbox(ushort inactive, ushort active, string text = "", byte font = 0, ushort color = 0, bool isunicode = true, int maxWidth = 0)
         {
-            _textures[INACTIVE] = FileManager.Gumps.GetTexture(inactive);
-            _textures[ACTIVE] = FileManager.Gumps.GetTexture(active);
+            _textures[INACTIVE] = UOFileManager.Gumps.GetTexture(inactive);
+            _textures[ACTIVE] = UOFileManager.Gumps.GetTexture(active);
 
             if (_textures[0] == null || _textures[1] == null)
             {

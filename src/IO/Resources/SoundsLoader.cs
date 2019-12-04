@@ -44,7 +44,7 @@ namespace ClassicUO.IO.Resources
         {
             return Task.Run(() =>
             {
-                string path = Path.Combine(FileManager.UoFolderPath, "soundLegacyMUL.uop");
+                string path = UOFileManager.GetUOFilePath("soundLegacyMUL.uop");
 
                 if (File.Exists(path))
                 {
@@ -53,8 +53,8 @@ namespace ClassicUO.IO.Resources
                 }
                 else
                 {
-                    path = Path.Combine(FileManager.UoFolderPath, "sound.mul");
-                    string idxpath = Path.Combine(FileManager.UoFolderPath, "soundidx.mul");
+                    path = UOFileManager.GetUOFilePath("sound.mul");
+                    string idxpath = UOFileManager.GetUOFilePath("soundidx.mul");
 
                     if (File.Exists(path) && File.Exists(idxpath))
                     {
@@ -66,7 +66,7 @@ namespace ClassicUO.IO.Resources
 
                 _file.FillEntries(ref Entries);
 
-                string def = Path.Combine(FileManager.UoFolderPath, "Sound.def");
+                string def = UOFileManager.GetUOFilePath("Sound.def");
 
                 if (File.Exists(def))
                 {
@@ -109,7 +109,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                path = Path.Combine(FileManager.UoFolderPath, @"Music/Digital/Config.txt");
+                path = UOFileManager.GetUOFilePath(@"Music/Digital/Config.txt");
 
                 if (File.Exists(path))
                 {
@@ -124,7 +124,7 @@ namespace ClassicUO.IO.Resources
                         }
                     }
                 }
-                else if (FileManager.ClientVersion <= ClientVersions.CV_5090)
+                else if (UOFileManager.ClientVersion <= ClientVersions.CV_5090)
                 {
                     _mMusicData.Add(0, new Tuple<string, bool>("oldult01", true));
                     _mMusicData.Add(1, new Tuple<string, bool>("create1", false));

@@ -405,7 +405,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (graphic != 0)
                     {
-                        _textureControl.Texture = FileManager.Art.GetTexture(graphic);
+                        _textureControl.Texture = UOFileManager.Art.GetTexture(graphic);
                         _textureControl.Hue = hue;
                         _textureControl.Width = Parent.Width;
                         _textureControl.Height = Parent.Height;

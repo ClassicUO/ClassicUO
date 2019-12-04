@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Managers
         {
             Groups.Clear();
 
-            int count = FileManager.Skills.SkillsCount;
+            int count = UOFileManager.Skills.SkillsCount;
 
             Groups.Add("Miscellaneous", new List<int>
                        {
@@ -121,7 +121,7 @@ namespace ClassicUO.Game.Managers
 
         public static void LoadDefault()
         {
-            FileInfo info = new FileInfo(Path.Combine(FileManager.UoFolderPath, "skillgrp.mul"));
+            FileInfo info = new FileInfo(UOFileManager.GetUOFilePath("skillgrp.mul"));
 
             if (!info.Exists)
             {
@@ -187,7 +187,7 @@ namespace ClassicUO.Game.Managers
                     {
                         int grp = bin.ReadInt32();
 
-                        if (grp < groups.Count && skillidx + 1 < FileManager.Skills.SkillsCount)
+                        if (grp < groups.Count && skillidx + 1 < UOFileManager.Skills.SkillsCount)
                             Groups[groups[grp]].Add(skillidx++);
                     }
                 }
@@ -276,7 +276,7 @@ namespace ClassicUO.Game.Managers
                 for (int j = 0; j < entriesCount; j++)
                 {
                     int skillIndex = reader.ReadInt32();
-                    if (skillIndex < FileManager.Skills.SkillsCount)
+                    if (skillIndex < UOFileManager.Skills.SkillsCount)
                         list.Add(skillIndex);
                 }
             }

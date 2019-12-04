@@ -47,7 +47,7 @@ namespace ClassicUO.IO.Resources
         {
             return Task.Run(() =>
             {
-                string filepath = Path.Combine(FileManager.UoFolderPath, "artLegacyMUL.uop");
+                string filepath = UOFileManager.GetUOFilePath("artLegacyMUL.uop");
 
                 if (File.Exists(filepath))
                 {
@@ -56,8 +56,8 @@ namespace ClassicUO.IO.Resources
                 }
                 else
                 {
-                    filepath = Path.Combine(FileManager.UoFolderPath, "art.mul");
-                    string idxpath = Path.Combine(FileManager.UoFolderPath, "artidx.mul");
+                    filepath = UOFileManager.GetUOFilePath("art.mul");
+                    string idxpath = UOFileManager.GetUOFilePath("artidx.mul");
 
                     if (File.Exists(filepath) && File.Exists(idxpath))
                     {
@@ -438,7 +438,7 @@ namespace ClassicUO.IO.Resources
         {
             const int SIZE = 44 * 44;
 
-            graphic &= FileManager.GraphicMask;
+            graphic &= UOFileManager.GraphicMask;
             ref readonly var entry = ref GetValidRefEntry(graphic);
 
             if (entry.Length == 0)

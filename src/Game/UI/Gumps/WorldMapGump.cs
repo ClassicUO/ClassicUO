@@ -171,11 +171,11 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_center.Y < 0)
                     _center.Y = 0;
 
-                if (_center.X > FileManager.Map.MapsDefaultSize[World.MapIndex, 0])
-                    _center.X = FileManager.Map.MapsDefaultSize[World.MapIndex, 0];
+                if (_center.X > UOFileManager.Map.MapsDefaultSize[World.MapIndex, 0])
+                    _center.X = UOFileManager.Map.MapsDefaultSize[World.MapIndex, 0];
 
-                if (_center.Y > FileManager.Map.MapsDefaultSize[World.MapIndex, 1])
-                    _center.Y = FileManager.Map.MapsDefaultSize[World.MapIndex, 1];
+                if (_center.Y > UOFileManager.Map.MapsDefaultSize[World.MapIndex, 1])
+                    _center.Y = UOFileManager.Map.MapsDefaultSize[World.MapIndex, 1];
 
                 _lastScroll.X = x;
                 _lastScroll.Y = y;
@@ -231,11 +231,11 @@ namespace ClassicUO.Game.UI.Gumps
                 const int OFFSET_PIX = 2;
                 const int OFFSET_PIX_HALF = OFFSET_PIX / 2;
 
-                int realWidth = FileManager.Map.MapsDefaultSize[World.MapIndex, 0];
-                int realHeight = FileManager.Map.MapsDefaultSize[World.MapIndex, 1];
+                int realWidth = UOFileManager.Map.MapsDefaultSize[World.MapIndex, 0];
+                int realHeight = UOFileManager.Map.MapsDefaultSize[World.MapIndex, 1];
 
-                int fixedWidth = FileManager.Map.MapBlocksSize[World.MapIndex, 0];
-                int fixedHeight = FileManager.Map.MapBlocksSize[World.MapIndex, 1];
+                int fixedWidth = UOFileManager.Map.MapBlocksSize[World.MapIndex, 0];
+                int fixedHeight = UOFileManager.Map.MapBlocksSize[World.MapIndex, 1];
 
                 int size = (realWidth + OFFSET_PIX) * (realHeight + OFFSET_PIX);
                 uint[] buffer = new uint[size];
@@ -306,7 +306,7 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 ref var c = ref infoCells[pos];
 
-                                ushort color = (ushort)(0x8000 | (colored[pos] ? FileManager.Hues.GetColor16(16384, c.TileID) : FileManager.Hues.GetRadarColorData(c.TileID)));
+                                ushort color = (ushort)(0x8000 | (colored[pos] ? UOFileManager.Hues.GetColor16(16384, c.TileID) : UOFileManager.Hues.GetRadarColorData(c.TileID)));
                                 Color cc;
 
                                 if (x > 0)

@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         public ushort BookPageCount { get; internal set; }
-        public static bool IsNewBookD4 => FileManager.ClientVersion > ClientVersions.CV_200;
+        public static bool IsNewBookD4 => UOFileManager.ClientVersion > ClientVersions.CV_200;
         public static byte DefaultFont => (byte) (IsNewBookD4 ? 1 : 4);
 
         public string[] BookPages

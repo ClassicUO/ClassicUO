@@ -57,9 +57,9 @@ namespace ClassicUO.Game.UI.Controls
             _gumpGraphics[NORMAL] = normal;
             _gumpGraphics[PRESSED] = pressed;
             _gumpGraphics[OVER] = over;
-            _textures[NORMAL] = FileManager.Gumps.GetTexture(normal);
-            _textures[PRESSED] = FileManager.Gumps.GetTexture(pressed);
-            if (over > 0) _textures[OVER] = FileManager.Gumps.GetTexture(over);
+            _textures[NORMAL] = UOFileManager.Gumps.GetTexture(normal);
+            _textures[PRESSED] = UOFileManager.Gumps.GetTexture(pressed);
+            if (over > 0) _textures[OVER] = UOFileManager.Gumps.GetTexture(over);
             UOTexture t = _textures[NORMAL];
 
             if (t == null)
@@ -124,7 +124,7 @@ namespace ClassicUO.Game.UI.Controls
             get => _gumpGraphics[NORMAL];
             set
             {
-                _textures[NORMAL] = FileManager.Gumps.GetTexture(value);
+                _textures[NORMAL] = UOFileManager.Gumps.GetTexture(value);
                 _gumpGraphics[NORMAL] = value;
             }
         }
@@ -134,7 +134,7 @@ namespace ClassicUO.Game.UI.Controls
             get => _gumpGraphics[PRESSED];
             set
             {
-                _textures[PRESSED] = FileManager.Gumps.GetTexture(value);
+                _textures[PRESSED] = UOFileManager.Gumps.GetTexture(value);
                 _gumpGraphics[PRESSED] = value;
             }
         }
@@ -144,7 +144,7 @@ namespace ClassicUO.Game.UI.Controls
             get => _gumpGraphics[OVER];
             set
             {
-                _textures[OVER] = FileManager.Gumps.GetTexture(value);
+                _textures[OVER] = UOFileManager.Gumps.GetTexture(value);
                 _gumpGraphics[OVER] = value;
             }
         }

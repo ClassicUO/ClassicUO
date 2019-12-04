@@ -250,7 +250,7 @@ namespace ClassicUO.Game.UI.Controls
                         Rectangle rect = new Rectangle(link.StartX, link.StartY, link.EndX, link.EndY);
                         bool inbounds = rect.Contains(x, (_scrollBar == null ? 0 : _scrollBar.Value) + y);
 
-                        if (inbounds && FileManager.Fonts.GetWebLink(link.LinkID, out WebLink result))
+                        if (inbounds && UOFileManager.Fonts.GetWebLink(link.LinkID, out WebLink result))
                         {
                             Log.Info("LINK CLICKED: " + result.Link);
                             Process.Start(result.Link);

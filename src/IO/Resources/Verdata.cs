@@ -52,7 +52,7 @@ namespace ClassicUO.IO.Resources
     {
         static Verdata()
         {
-            string path = Path.Combine(FileManager.UoFolderPath, "verdata.mul");
+            string path = UOFileManager.GetUOFilePath("verdata.mul");
 
             if (!System.IO.File.Exists(path))
             {

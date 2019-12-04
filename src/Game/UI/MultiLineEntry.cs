@@ -96,7 +96,7 @@ namespace ClassicUO.Game.UI
 
             if (MaxWidth > 0)
             {
-                int width = RenderText.IsUnicode ? FileManager.Fonts.GetWidthUnicode(RenderText.Font, text) : FileManager.Fonts.GetWidthASCII(RenderText.Font, text);
+                int width = RenderText.IsUnicode ? UOFileManager.Fonts.GetWidthUnicode(RenderText.Font, text) : UOFileManager.Fonts.GetWidthASCII(RenderText.Font, text);
                 int len = text.Length;
 
                 while (MaxWidth < width && len > 0)
@@ -111,7 +111,7 @@ namespace ClassicUO.Game.UI
 
                     text = CaretIndex < text.Length ? text.Remove(CaretIndex, 1) : text.Remove(text.Length - 1);
                     len--;
-                    width = RenderText.IsUnicode ? FileManager.Fonts.GetWidthUnicode(RenderText.Font, text) : FileManager.Fonts.GetWidthASCII(RenderText.Font, text);
+                    width = RenderText.IsUnicode ? UOFileManager.Fonts.GetWidthUnicode(RenderText.Font, text) : UOFileManager.Fonts.GetWidthASCII(RenderText.Font, text);
                 }
             }
 
@@ -121,12 +121,12 @@ namespace ClassicUO.Game.UI
 
         public int[] GetLinesCharsCount()
         {
-            return RenderText.IsUnicode ? FileManager.Fonts.GetLinesCharsCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true) : FileManager.Fonts.GetLinesCharsCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true);
+            return RenderText.IsUnicode ? UOFileManager.Fonts.GetLinesCharsCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true) : UOFileManager.Fonts.GetLinesCharsCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true);
         }
 
         public int[] GetLinesCharsCount(string text)
         {
-            return RenderText.IsUnicode ? FileManager.Fonts.GetLinesCharsCountUnicode(RenderText.Font, text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true, true) : FileManager.Fonts.GetLinesCharsCountASCII(RenderText.Font, text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true, true);
+            return RenderText.IsUnicode ? UOFileManager.Fonts.GetLinesCharsCountUnicode(RenderText.Font, text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true, true) : UOFileManager.Fonts.GetLinesCharsCountASCII(RenderText.Font, text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true, true);
         }
     }
 }

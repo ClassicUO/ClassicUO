@@ -45,7 +45,7 @@ namespace ClassicUO.Game.Map
         public Map(int index)
         {
             Index = index;
-            MapBlockIndex = FileManager.Map.MapBlocksSize[Index, 0] * FileManager.Map.MapBlocksSize[Index, 1];
+            MapBlockIndex = UOFileManager.Map.MapBlocksSize[Index, 0] * UOFileManager.Map.MapBlocksSize[Index, 1];
             Chunks = new Chunk[MapBlockIndex];
         }
 
@@ -165,10 +165,10 @@ namespace ClassicUO.Game.Map
                     if (!(obj is Static) && !(obj is Multi))
                         continue;
 
-                    if (obj.Graphic >= FileManager.TileData.StaticData.Length)
+                    if (obj.Graphic >= UOFileManager.TileData.StaticData.Length)
                         continue;
 
-                    ref readonly var itemdata = ref FileManager.TileData.StaticData[obj.Graphic];
+                    ref readonly var itemdata = ref UOFileManager.TileData.StaticData[obj.Graphic];
 
                     if (!itemdata.IsRoof || Math.Abs(z - obj.Z) > 6)
                         continue;
@@ -200,8 +200,8 @@ namespace ClassicUO.Game.Map
         {
             int block = GetBlock(blockX, blockY);
             int map = Index;
-            FileManager.Map.SanitizeMapIndex(ref map);
-            IndexMap[] list = FileManager.Map.BlockData[map];
+            UOFileManager.Map.SanitizeMapIndex(ref map);
+            IndexMap[] list = UOFileManager.Map.BlockData[map];
 
             return ref block >= list.Length ? ref IndexMap.Invalid : ref list[block];
         }
@@ -209,7 +209,7 @@ namespace ClassicUO.Game.Map
         [MethodImpl(256)]
         private int GetBlock(int blockX, int blockY)
         {
-            return blockX * FileManager.Map.MapBlocksSize[Index, 1] + blockY;
+            return blockX * UOFileManager.Map.MapBlocksSize[Index, 1] + blockY;
         }
 
 
@@ -270,17 +270,17 @@ namespace ClassicUO.Game.Map
             if (minBlockY < 0)
                 minBlockY = 0;
 
-            if (maxBlockX >= FileManager.Map.MapBlocksSize[Index, 0])
-                maxBlockX = FileManager.Map.MapBlocksSize[Index, 0] - 1;
+            if (maxBlockX >= UOFileManager.Map.MapBlocksSize[Index, 0])
+                maxBlockX = UOFileManager.Map.MapBlocksSize[Index, 0] - 1;
 
-            if (maxBlockY >= FileManager.Map.MapBlocksSize[Index, 1])
-                maxBlockY = FileManager.Map.MapBlocksSize[Index, 1] - 1;
+            if (maxBlockY >= UOFileManager.Map.MapBlocksSize[Index, 1])
+                maxBlockY = UOFileManager.Map.MapBlocksSize[Index, 1] - 1;
             long tick = Time.Ticks;
             long maxDelay = 100; /*Engine.FrameDelay[1] >> 1*/;
 
             for (int i = minBlockX; i <= maxBlockX; i++)
             {
-                int index = i * FileManager.Map.MapBlocksSize[Index, 1];
+                int index = i * UOFileManager.Map.MapBlocksSize[Index, 1];
 
                 for (int j = minBlockY; j <= maxBlockY; j++)
                 {

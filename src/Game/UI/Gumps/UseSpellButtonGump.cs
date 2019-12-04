@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (cliloc != 0 || spl != 0)
             {
-                SetTooltip(FileManager.Cliloc.GetString(cliloc - spl + _spell.ID));
+                SetTooltip(UOFileManager.Cliloc.GetString(cliloc - spl + _spell.ID));
             }
 
             WantUpdateSize = true;

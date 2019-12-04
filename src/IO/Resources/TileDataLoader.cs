@@ -44,12 +44,12 @@ namespace ClassicUO.IO.Resources
         {
             return Task.Run(() =>
             {
-                string path = Path.Combine(FileManager.UoFolderPath, "tiledata.mul");
+                string path = UOFileManager.GetUOFilePath("tiledata.mul");
 
                 FileSystemHelper.EnsureFileExists(path);
 
                 UOFileMul tiledata = new UOFileMul(path);
-                bool isold = FileManager.ClientVersion < ClientVersions.CV_7090;
+                bool isold = UOFileManager.ClientVersion < ClientVersions.CV_7090;
                 int staticscount = !isold ? (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupNew>()) / UnsafeMemoryManager.SizeOf<StaticGroupNew>() : (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupOld>()) / UnsafeMemoryManager.SizeOf<StaticGroupOld>();
 
                 if (staticscount > 2048)
@@ -238,7 +238,7 @@ namespace ClassicUO.IO.Resources
                 //    reader.ReleaseData();
                 //}
 
-                string pathdef = Path.Combine(FileManager.UoFolderPath, "art.def");
+                string pathdef = UOFileManager.GetUOFilePath("art.def");
 
                 if (File.Exists(pathdef))
                 {

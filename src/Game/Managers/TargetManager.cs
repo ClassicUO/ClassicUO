@@ -232,12 +232,12 @@ namespace ClassicUO.Game.Managers
 
         public static void Target(Graphic graphic, ushort x, ushort y, short z)
         {
-            if (!IsTargeting || TargeringType != TargetType.Neutral || graphic >= FileManager.TileData.StaticData.Length)
+            if (!IsTargeting || TargeringType != TargetType.Neutral || graphic >= UOFileManager.TileData.StaticData.Length)
                 return;
 
-            ref readonly var itemData = ref FileManager.TileData.StaticData[graphic];
+            ref readonly var itemData = ref UOFileManager.TileData.StaticData[graphic];
 
-            if (FileManager.ClientVersion >= ClientVersions.CV_7090 && itemData.IsSurface)
+            if (UOFileManager.ClientVersion >= ClientVersions.CV_7090 && itemData.IsSurface)
             {
                 z += itemData.Height;
             }

@@ -92,8 +92,8 @@ namespace ClassicUO.IO
 
                     if (World.Map == null || mapID != World.Map.Index) return;
 
-                    int mapWidthInBlocks = FileManager.Map.MapBlocksSize[mapID, 0];
-                    int mapHeightInBlocks = FileManager.Map.MapBlocksSize[mapID, 1];
+                    int mapWidthInBlocks = UOFileManager.Map.MapBlocksSize[mapID, 0];
+                    int mapHeightInBlocks = UOFileManager.Map.MapBlocksSize[mapID, 1];
                     int blocks = mapWidthInBlocks * mapHeightInBlocks;
 
                     if (block < 0 || block >= blocks) return;
@@ -168,7 +168,7 @@ namespace ClassicUO.IO
                     byte[] staticsData = new byte[totallen];
                     for (int i = 0; i < totallen; i++) staticsData[i] = p.ReadByte();
 
-                    if (block >= 0 && block < FileManager.Map.MapBlocksSize[mapID, 0] * FileManager.Map.MapBlocksSize[mapID, 1])
+                    if (block >= 0 && block < UOFileManager.Map.MapBlocksSize[mapID, 0] * UOFileManager.Map.MapBlocksSize[mapID, 1])
                     {
                         Chunk chunk = World.Map.Chunks[block];
 
@@ -281,8 +281,8 @@ namespace ClassicUO.IO
                     for (int i = 0; i < maps; i++)
                     {
                         int mapnum = p.ReadByte();
-                        _UL.MapSizeWrapSize[mapnum, 0] = Math.Min((ushort) FileManager.Map.MapsDefaultSize[0, 0], p.ReadUShort());
-                        _UL.MapSizeWrapSize[mapnum, 1] = Math.Min((ushort) FileManager.Map.MapsDefaultSize[0, 1], p.ReadUShort());
+                        _UL.MapSizeWrapSize[mapnum, 0] = Math.Min((ushort) UOFileManager.Map.MapsDefaultSize[0, 0], p.ReadUShort());
+                        _UL.MapSizeWrapSize[mapnum, 1] = Math.Min((ushort) UOFileManager.Map.MapsDefaultSize[0, 1], p.ReadUShort());
                         _UL.MapSizeWrapSize[mapnum, 2] = Math.Min(p.ReadUShort(), _UL.MapSizeWrapSize[mapnum, 0]);
                         _UL.MapSizeWrapSize[mapnum, 3] = Math.Min(p.ReadUShort(), _UL.MapSizeWrapSize[mapnum, 1]);
                     }
@@ -356,8 +356,8 @@ namespace ClassicUO.IO
             if (World.Map == null || mapID != World.Map.Index)
                 return;
 
-            int mapWidthInBlocks = FileManager.Map.MapBlocksSize[mapID, 0];
-            int mapHeightInBlocks = FileManager.Map.MapBlocksSize[mapID, 1];
+            int mapWidthInBlocks = UOFileManager.Map.MapBlocksSize[mapID, 0];
+            int mapHeightInBlocks = UOFileManager.Map.MapBlocksSize[mapID, 1];
 
             if (block >= 0 && block < mapWidthInBlocks * mapHeightInBlocks)
             {
@@ -552,7 +552,7 @@ namespace ClassicUO.IO
 
             public override void Dispose()
             {
-                FileManager.Map.Dispose();
+                UOFileManager.Map.Dispose();
             }
 
             internal void WriteArray(long position, byte[] array)
@@ -621,10 +621,10 @@ namespace ClassicUO.IO
             {
                 return Task.Run(() =>
                 {
-                    if (FileManager.Map is ULMapLoader)
+                    if (UOFileManager.Map is ULMapLoader)
                         return;
 
-                    FileManager.MapLoaderReLoad(this);
+                    UOFileManager.MapLoaderReLoad(this);
                     _UL._EOF = new uint[NumMaps];
                     _filesStaticsStream = new FileStream[NumMaps];
                     bool foundedOneMap = false;
@@ -680,9 +680,9 @@ namespace ClassicUO.IO
 
             internal void CheckForShardMapFile(int mapID)
             {
-                string oldmap = Path.Combine(FileManager.UoFolderPath, $"map{mapID}.mul");
-                string oldstaidx = Path.Combine(FileManager.UoFolderPath, $"staidx{mapID}.mul");
-                string oldstatics = Path.Combine(FileManager.UoFolderPath, $"statics{mapID}.mul");
+                string oldmap = UOFileManager.GetUOFilePath($"map{mapID}.mul");
+                string oldstaidx = UOFileManager.GetUOFilePath($"staidx{mapID}.mul");
+                string oldstatics = UOFileManager.GetUOFilePath($"statics{mapID}.mul");
                 //create file names
                 string mapPath = Path.Combine(_UL.ShardName, $"map{mapID}.mul");
                 string staidxPath = Path.Combine(_UL.ShardName, $"staidx{mapID}.mul");
@@ -728,8 +728,8 @@ namespace ClassicUO.IO
 
             private static void CreateNewPersistantMap(int mapID, string mapPath, string staidxPath, string staticsPath)
             {
-                int mapWidthInBlocks = FileManager.Map.MapBlocksSize[mapID, 0]; //orizontal
-                int mapHeightInBlocks = FileManager.Map.MapBlocksSize[mapID, 1]; //vertical
+                int mapWidthInBlocks = UOFileManager.Map.MapBlocksSize[mapID, 0]; //orizontal
+                int mapHeightInBlocks = UOFileManager.Map.MapBlocksSize[mapID, 1]; //vertical
                 int numberOfBytesInStrip = 196 * mapHeightInBlocks;
                 byte[] pVerticalBlockStrip = new byte[numberOfBytesInStrip];
 

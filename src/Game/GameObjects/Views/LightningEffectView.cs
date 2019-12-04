@@ -62,7 +62,7 @@ namespace ClassicUO.Game.GameObjects
                 if (_displayed > 0x4E29)
                     return false;
 
-                Texture = FileManager.Gumps.GetTexture(_displayed);
+                Texture = UOFileManager.Gumps.GetTexture(_displayed);
                 ref Point offset = ref _offsets[_displayed - 20000];
 
                 Bounds.X = offset.X;

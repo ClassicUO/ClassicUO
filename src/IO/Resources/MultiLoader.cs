@@ -44,7 +44,7 @@ namespace ClassicUO.IO.Resources
         {
             return Task.Run(() =>
             {
-                string uopPath = Path.Combine(FileManager.UoFolderPath, "MultiCollection.uop");
+                string uopPath = UOFileManager.GetUOFilePath("MultiCollection.uop");
 
                 if (File.Exists(uopPath))
                 {
@@ -55,13 +55,13 @@ namespace ClassicUO.IO.Resources
                 }
                 else
                 {
-                    string path = Path.Combine(FileManager.UoFolderPath, "multi.mul");
-                    string pathidx = Path.Combine(FileManager.UoFolderPath, "multi.idx");
+                    string path = UOFileManager.GetUOFilePath("multi.mul");
+                    string pathidx = UOFileManager.GetUOFilePath("multi.idx");
 
                     if (File.Exists(path) && File.Exists(pathidx))
                     {
                         _file = new UOFileMul(path, pathidx, Constants.MAX_MULTI_DATA_INDEX_COUNT, 14);
-                        Count = _itemOffset = FileManager.ClientVersion >= ClientVersions.CV_7090 ? UnsafeMemoryManager.SizeOf<MultiBlockNew>() : UnsafeMemoryManager.SizeOf<MultiBlock>();
+                        Count = _itemOffset = UOFileManager.ClientVersion >= ClientVersions.CV_7090 ? UnsafeMemoryManager.SizeOf<MultiBlockNew>() : UnsafeMemoryManager.SizeOf<MultiBlock>();
                     }
                 }
 

@@ -31,14 +31,14 @@ namespace ClassicUO.Game.Managers
     {
         static CustomHouseManager()
         {
-            ParseFileWithCategory<CustomHouseWall, CustomHouseWallCategory>(Walls, Path.Combine(FileManager.UoFolderPath, "walls.txt"));
-            ParseFile(Floors, Path.Combine(FileManager.UoFolderPath, "floors.txt"));
-            ParseFile(Doors, Path.Combine(FileManager.UoFolderPath, "doors.txt"));
-            ParseFileWithCategory<CustomHouseMisc, CustomHouseMiscCategory>(Miscs, Path.Combine(FileManager.UoFolderPath, "misc.txt"));
-            ParseFile(Stairs, Path.Combine(FileManager.UoFolderPath, "stairs.txt"));
-            ParseFile(Teleports, Path.Combine(FileManager.UoFolderPath, "teleprts.txt"));
-            ParseFileWithCategory<CustomHouseRoof, CustomHouseRoofCategory>(Roofs, Path.Combine(FileManager.UoFolderPath, "roof.txt"));
-            ParseFile(ObjectsInfo, Path.Combine(FileManager.UoFolderPath, "suppinfo.txt"));
+            ParseFileWithCategory<CustomHouseWall, CustomHouseWallCategory>(Walls, UOFileManager.GetUOFilePath("walls.txt"));
+            ParseFile(Floors, UOFileManager.GetUOFilePath("floors.txt"));
+            ParseFile(Doors, UOFileManager.GetUOFilePath("doors.txt"));
+            ParseFileWithCategory<CustomHouseMisc, CustomHouseMiscCategory>(Miscs, UOFileManager.GetUOFilePath("misc.txt"));
+            ParseFile(Stairs, UOFileManager.GetUOFilePath("stairs.txt"));
+            ParseFile(Teleports, UOFileManager.GetUOFilePath("teleprts.txt"));
+            ParseFileWithCategory<CustomHouseRoof, CustomHouseRoofCategory>(Roofs, UOFileManager.GetUOFilePath("roof.txt"));
+            ParseFile(ObjectsInfo, UOFileManager.GetUOFilePath("suppinfo.txt"));
         }
 
         public static readonly List<CustomHouseWallCategory> Walls = new List<CustomHouseWallCategory>();

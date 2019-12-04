@@ -92,12 +92,12 @@ namespace ClassicUO.IO.Resources
         {
             return Task.Run(() =>
             {
-                UOFileMul fonts = new UOFileMul(Path.Combine(FileManager.UoFolderPath, "fonts.mul"));
+                UOFileMul fonts = new UOFileMul(UOFileManager.GetUOFilePath("fonts.mul"));
                 UOFileMul[] uniFonts = new UOFileMul[20];
 
                 for (int i = 0; i < 20; i++)
                 {
-                    string path = Path.Combine(FileManager.UoFolderPath, "unifont" + (i == 0 ? "" : i.ToString()) + ".mul");
+                    string path = UOFileManager.GetUOFilePath("unifont" + (i == 0 ? "" : i.ToString()) + ".mul");
 
                     if (File.Exists(path))
                     {
@@ -501,9 +501,9 @@ namespace ClassicUO.IO.Resources
                                 uint pcl = 0;
 
                                 if (isPartial)
-                                    pcl = FileManager.Hues.GetPartialHueColor(pic, charColor) | 0xFF000000;
+                                    pcl = UOFileManager.Hues.GetPartialHueColor(pic, charColor) | 0xFF000000;
                                 else
-                                    pcl = FileManager.Hues.GetColor(pic, charColor) | 0xFF000000;
+                                    pcl = UOFileManager.Hues.GetColor(pic, charColor) | 0xFF000000;
                                 int block = testrY * width + x + w;
                                 pData[block] = pcl; //HuesHelper.RgbaToArgb((pcl << 8) | 0xFF);
                             }
@@ -1187,7 +1187,7 @@ namespace ClassicUO.IO.Resources
                 else
                 {
                     datacolor = /*FileManager.Hues.GetPolygoneColor(cell, color) << 8 | 0xFF;*/
-                        HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(cell, color) << 8) | 0xFF);
+                        HuesHelper.RgbaToArgb((UOFileManager.Hues.GetPolygoneColor(cell, color) << 8) | 0xFF);
                 }
 
                 bool isItalic = (flags & UOFONT_ITALIC) != 0;

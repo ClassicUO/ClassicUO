@@ -103,7 +103,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Graphic OriginalGraphic { get; private set; }
 
-        public ref readonly StaticTiles ItemData => ref FileManager.TileData.StaticData[Graphic];
+        public ref readonly StaticTiles ItemData => ref UOFileManager.TileData.StaticData[Graphic];
 
         public void SetGraphic(Graphic g)
         {

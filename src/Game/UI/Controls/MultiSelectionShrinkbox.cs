@@ -111,7 +111,7 @@ namespace ClassicUO.Game.UI.Controls
             };
 
             int xx = _label.X + _label.Width + 5;
-            int hh = FileManager.Gumps.GetTexture(0x0835)?.Height ?? 0;
+            int hh = UOFileManager.Gumps.GetTexture(0x0835)?.Height ?? 0;
             int decWidth = width - xx - 10;
 
             if (decWidth < 0)

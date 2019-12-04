@@ -39,29 +39,29 @@ namespace ClassicUO.IO.Resources
         {
             return Task.Run(() => {
 
-                string path = Path.Combine(FileManager.UoFolderPath, "gumpartLegacyMUL.uop");
+                string path = UOFileManager.GetUOFilePath("gumpartLegacyMUL.uop");
 
                 if (File.Exists(path))
                 {
                     _file = new UOFileUop(path, "build/gumpartlegacymul/{0:D8}.tga", true);
                     Entries = new UOFileIndex[Constants.MAX_GUMP_DATA_INDEX_COUNT];
-                    FileManager.UseUOPGumps = true;
+                    UOFileManager.UseUOPGumps = true;
                 }
                 else
                 {
-                    path = Path.Combine(FileManager.UoFolderPath, "Gumpart.mul");
-                    string pathidx = Path.Combine(FileManager.UoFolderPath, "Gumpidx.mul");
+                    path = UOFileManager.GetUOFilePath("Gumpart.mul");
+                    string pathidx = UOFileManager.GetUOFilePath("Gumpidx.mul");
 
                     if (File.Exists(path) && File.Exists(pathidx))
                     {
                         _file = new UOFileMul(path, pathidx, Constants.MAX_GUMP_DATA_INDEX_COUNT, 12);
                     }
-                    FileManager.UseUOPGumps = false;
+                    UOFileManager.UseUOPGumps = false;
                 }
 
                 _file.FillEntries(ref Entries);
 
-                string pathdef = Path.Combine(FileManager.UoFolderPath, "gump.def");
+                string pathdef = UOFileManager.GetUOFilePath("gump.def");
 
                 if (!File.Exists(pathdef))
                     return;

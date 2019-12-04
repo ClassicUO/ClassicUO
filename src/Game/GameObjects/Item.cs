@@ -197,7 +197,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool CharacterIsBehindFoliage;
 
-        public ref readonly StaticTiles ItemData => ref FileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
+        public ref readonly StaticTiles ItemData => ref UOFileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
 
         public bool IsLootable =>
             ItemData.Layer != (int) Layer.Hair &&
@@ -220,7 +220,7 @@ namespace ClassicUO.Game.GameObjects
             short maxX = 0;
             short maxY = 0;
 
-            int count = FileManager.Multi.GetCount(Graphic, out bool uopValid);
+            int count = UOFileManager.Multi.GetCount(Graphic, out bool uopValid);
 
             if (!World.HouseManager.TryGetHouse(Serial, out House house))
             {
@@ -234,7 +234,7 @@ namespace ClassicUO.Game.GameObjects
 
             for (int i = 0; i < count; i++)
             {
-                FileManager.Multi.GetMultiData(i, Graphic, uopValid, out ushort graphic, out short x, out short y, out short z, out bool add);
+                UOFileManager.Multi.GetMultiData(i, Graphic, uopValid, out ushort graphic, out short x, out short y, out short z, out bool add);
 
                 if (x < minX) minX = x;
                 if (x > maxX) maxX = x;
@@ -271,7 +271,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            FileManager.Multi.ReleaseLastMultiDataRead();
+            UOFileManager.Multi.ReleaseLastMultiDataRead();
 
             MultiInfo = new MultiInfo((short) X, (short) Y)
             {
@@ -303,7 +303,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         AnimIndex = animIndex;
 
-                        IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
+                        IntPtr ptr = UOFileManager.AnimData.GetAddressToAnim(Graphic);
 
                         if (ptr != IntPtr.Zero)
                         {
@@ -886,20 +886,20 @@ namespace ClassicUO.Game.GameObjects
                     //    id = corpseGraphic;
 
                     bool mirror = false;
-                    FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
+                    UOFileManager.Animations.GetAnimDirection(ref dir, ref mirror);
 
                     if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                     {
-                        byte animGroup = FileManager.Animations.GetDieGroupIndex(id, UsedLayer);
+                        byte animGroup = UOFileManager.Animations.GetDieGroupIndex(id, UsedLayer);
 
                         ushort hue = 0;
-                        ref var direction = ref FileManager.Animations.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
-                        FileManager.Animations.AnimID = id;
-                        FileManager.Animations.AnimGroup = animGroup;
-                        FileManager.Animations.Direction = dir;
+                        ref var direction = ref UOFileManager.Animations.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
+                        UOFileManager.Animations.AnimID = id;
+                        UOFileManager.Animations.AnimGroup = animGroup;
+                        UOFileManager.Animations.Direction = dir;
 
                         if (direction.FrameCount == 0 || direction.Frames == null)
-                            FileManager.Animations.LoadDirectionGroup(ref direction);
+                            UOFileManager.Animations.LoadDirectionGroup(ref direction);
 
                         if (direction.Address != 0 && direction.Size != 0 || direction.IsUOP)
                         {
@@ -917,7 +917,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (OnGround && ItemData.IsAnimated && LastAnimationChangeTime < Time.Ticks)
             {
-                IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
+                IntPtr ptr = UOFileManager.AnimData.GetAddressToAnim(Graphic);
 
                 if (ptr != IntPtr.Zero)
                 {

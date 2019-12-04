@@ -97,7 +97,7 @@ namespace ClassicUO.Game.Managers
             if (volume < -1 || volume > 1f)
                 return;
 
-            UOSound sound = (UOSound)FileManager.Sounds.GetSound(index);
+            UOSound sound = (UOSound)UOFileManager.Sounds.GetSound(index);
 
             if (sound != null)
             {
@@ -119,7 +119,7 @@ namespace ClassicUO.Game.Managers
             if (volume < -1 || volume > 1f)
                 return;
 
-            UOSound sound = (UOSound)FileManager.Sounds.GetSound(index);
+            UOSound sound = (UOSound)UOFileManager.Sounds.GetSound(index);
 
             if (sound != null)
             {
@@ -157,7 +157,7 @@ namespace ClassicUO.Game.Managers
             if (volume < -1 || volume > 1f)
                 return;
 
-            Sound m = FileManager.Sounds.GetMusic(music);
+            Sound m = UOFileManager.Sounds.GetMusic(music);
 
             if (m == null && _currentMusic != null)
                 StopMusic();

@@ -72,7 +72,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                                             }
                                            );
 
-            SelectedMapIndex = FileManager.ClientVersion >= ClientVersions.CV_70130 ? 0 : 3;
+            SelectedMapIndex = UOFileManager.ClientVersion >= ClientVersions.CV_70130 ? 0 : 3;
 
             if (_selectedMap.SkipSection)
             {
@@ -213,7 +213,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     Remove(_mapName);
 
                 var name = map.Name;
-                var nameWidth = FileManager.Fonts.GetWidthASCII(3, name);
+                var nameWidth = UOFileManager.Fonts.GetWidthASCII(3, name);
 
                 Add(_mapName = new Label(name, false, 1153, font: 3)
                 {
@@ -292,7 +292,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 if (mapInfo.Index == 0 || mapInfo.Index == 3)
                 {
-                    if (FileManager.Gumps.GetTexture(mapInfo.Gump) == null)
+                    if (UOFileManager.Gumps.GetTexture(mapInfo.Gump) == null)
                     {
                         SkipSection = true;
 
@@ -300,7 +300,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     }
                 }
 
-                if (FileManager.ClientVersion == ClientVersions.CV_70130)
+                if (UOFileManager.ClientVersion == ClientVersions.CV_70130)
                 {
                     Add(new GumpPic(5, 5, _mapInfo.Gump, 0));
                     Add(new GumpPic(0, 0, 0x15DF, 0));
@@ -335,7 +335,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     var textY = buttonY - 16;
 
                     var cityName = city.City;
-                    var cityNameWidth = FileManager.Fonts.GetWidthASCII(3, cityName);
+                    var cityNameWidth = UOFileManager.Fonts.GetWidthASCII(3, cityName);
 
                     var right = textX + cityNameWidth;
                     var mapRight = width - 20;

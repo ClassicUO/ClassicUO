@@ -148,7 +148,7 @@ namespace ClassicUO.Game
             if (hue == 0xFFFF)
                 hue = ProfileManager.Current.SpeechHue;
 
-            if (FileManager.ClientVersion >= ClientVersions.CV_500A)
+            if (UOFileManager.ClientVersion >= ClientVersions.CV_500A)
                 Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
             else
                 Socket.Send(new PASCIISpeechRequest(message, type, font, hue));
@@ -213,7 +213,7 @@ namespace ClassicUO.Game
 
         public static void DropItem(Serial serial, int x, int y, int z, Serial container)
         {
-            if (FileManager.ClientVersion >= ClientVersions.CV_6017)
+            if (UOFileManager.ClientVersion >= ClientVersions.CV_6017)
                 Socket.Send(new PDropRequestNew(serial, (ushort) x, (ushort) y, (sbyte) z, 0, container));
             else
                 Socket.Send(new PDropRequestOld(serial, (ushort) x, (ushort) y, (sbyte) z, container));

@@ -37,8 +37,8 @@ namespace ClassicUO.IO.Resources
         public override Task Load()
         {
             return Task.Run(() => {
-                string path = Path.Combine(FileManager.UoFolderPath, "light.mul");
-                string pathidx = Path.Combine(FileManager.UoFolderPath, "lightidx.mul");
+                string path = UOFileManager.GetUOFilePath("light.mul");
+                string pathidx = UOFileManager.GetUOFilePath("lightidx.mul");
 
                 FileSystemHelper.EnsureFileExists(path);
                 FileSystemHelper.EnsureFileExists(pathidx);

@@ -45,7 +45,7 @@ namespace ClassicUO.IO.Resources
         {
             return Task.Run(() =>
             {
-                string path = Path.Combine(FileManager.UoFolderPath, "hues.mul");
+                string path = UOFileManager.GetUOFilePath("hues.mul");
 
                 FileSystemHelper.EnsureFileExists(path);
 
@@ -59,7 +59,7 @@ namespace ClassicUO.IO.Resources
                 for (int i = 0; i < entrycount; i++)
                     HuesRange[i] = Marshal.PtrToStructure<HuesGroup>((IntPtr) (addr + (ulong) (i * groupSize)));
 
-                path = Path.Combine(FileManager.UoFolderPath, "radarcol.mul");
+                path = UOFileManager.GetUOFilePath("radarcol.mul");
 
                 FileSystemHelper.EnsureFileExists(path);
 

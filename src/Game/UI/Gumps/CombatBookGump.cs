@@ -43,9 +43,9 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanCloseWithRightClick = true;
 
-            if (FileManager.ClientVersion < ClientVersions.CV_7000)
+            if (UOFileManager.ClientVersion < ClientVersions.CV_7000)
             {
-                if (FileManager.ClientVersion < ClientVersions.CV_500A)
+                if (UOFileManager.ClientVersion < ClientVersions.CV_500A)
                     _abilityCount = 29;
                 else
                 {

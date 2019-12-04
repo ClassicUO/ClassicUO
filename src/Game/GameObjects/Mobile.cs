@@ -90,7 +90,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsYellowHits => ((byte) Flags & 0x08) != 0;
 
-        public bool IsPoisoned => FileManager.ClientVersion >= ClientVersions.CV_7000 ? _isSA_Poisoned : ((byte) Flags & 0x04) != 0;
+        public bool IsPoisoned => UOFileManager.ClientVersion >= ClientVersions.CV_7000 ? _isSA_Poisoned : ((byte) Flags & 0x04) != 0;
 
         public bool IgnoreCharacters => ((byte) Flags & 0x10) != 0;
 
@@ -103,7 +103,7 @@ namespace ClassicUO.Game.GameObjects
             set => _isDead = value;
         }
 
-        public bool IsFlying => FileManager.ClientVersion >= ClientVersions.CV_7000 && ((byte) Flags & 0x04) != 0;
+        public bool IsFlying => UOFileManager.ClientVersion >= ClientVersions.CV_7000 && ((byte) Flags & 0x04) != 0;
 
         public virtual bool InWarMode
         {
@@ -124,7 +124,7 @@ namespace ClassicUO.Game.GameObjects
         {
             get
             {
-                if (FileManager.ClientVersion >= ClientVersions.CV_70331 && HasEquipment)
+                if (UOFileManager.ClientVersion >= ClientVersions.CV_70331 && HasEquipment)
                 {
                     Item m = Equipment[0x19];
                     return m != null && m.Graphic == 0x3E96; // TODO: im not sure if each server sends this value ever
@@ -332,29 +332,29 @@ namespace ClassicUO.Game.GameObjects
 
                 ushort graphic = GetGraphicForAnimation();
 
-                ANIMATION_GROUPS_TYPE type = FileManager.Animations.DataIndex[graphic].Type;
+                ANIMATION_GROUPS_TYPE type = UOFileManager.Animations.DataIndex[graphic].Type;
 
-                if (FileManager.Animations.DataIndex[graphic].IsUOP && !FileManager.Animations.DataIndex[graphic].IsValidMUL)
+                if (UOFileManager.Animations.DataIndex[graphic].IsUOP && !UOFileManager.Animations.DataIndex[graphic].IsValidMUL)
                 {
                     // do nothing ?
                 }
                 else
                 {
-                    if (!FileManager.Animations.DataIndex[graphic].HasBodyConversion)
+                    if (!UOFileManager.Animations.DataIndex[graphic].HasBodyConversion)
                     {
-                        ushort newGraphic = FileManager.Animations.DataIndex[graphic].Graphic;
+                        ushort newGraphic = UOFileManager.Animations.DataIndex[graphic].Graphic;
 
                         if (graphic != newGraphic)
                         {
                             graphic = newGraphic;
-                            ANIMATION_GROUPS_TYPE newType = FileManager.Animations.DataIndex[graphic].Type;
+                            ANIMATION_GROUPS_TYPE newType = UOFileManager.Animations.DataIndex[graphic].Type;
 
                             if (newType != type) type = newType;
                         }
                     }
                 }
 
-                ANIMATION_FLAGS flags = (ANIMATION_FLAGS) FileManager.Animations.DataIndex[graphic].Flags;
+                ANIMATION_FLAGS flags = (ANIMATION_FLAGS) UOFileManager.Animations.DataIndex[graphic].Flags;
                 ANIMATION_GROUPS animGroup = ANIMATION_GROUPS.AG_NONE;
 
                 bool isLowExtended = false;
@@ -522,20 +522,20 @@ namespace ClassicUO.Game.GameObjects
                 //}
 
                 bool mirror = false;
-                FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
+                UOFileManager.Animations.GetAnimDirection(ref dir, ref mirror);
                 int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
 
                 if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
                     ushort hue = 0;
-                    ref var direction = ref FileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
-                    FileManager.Animations.AnimID = id;
-                    FileManager.Animations.AnimGroup = animGroup;
-                    FileManager.Animations.Direction = dir;
+                    ref var direction = ref UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
+                    UOFileManager.Animations.AnimID = id;
+                    UOFileManager.Animations.AnimGroup = animGroup;
+                    UOFileManager.Animations.Direction = dir;
 
 
                     if (direction.FrameCount == 0 || direction.Frames == null)
-                        FileManager.Animations.LoadDirectionGroup(ref direction);
+                        UOFileManager.Animations.LoadDirectionGroup(ref direction);
 
                     if ((direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1) || direction.IsUOP)
                     {
@@ -891,7 +891,7 @@ namespace ClassicUO.Game.GameObjects
 
                                     for (int i = 0; i < 98; i++)
                                     {
-                                        if (FileManager.Animations.SittingInfos[i].Graphic == graphic)
+                                        if (UOFileManager.Animations.SittingInfos[i].Graphic == graphic)
                                         {
                                             result = i + 1;
 
@@ -950,7 +950,7 @@ namespace ClassicUO.Game.GameObjects
             if (!IsMounted)
                 y += 22;
 
-            FileManager.Animations.GetAnimationDimensions(AnimIndex,
+            UOFileManager.Animations.GetAnimationDimensions(AnimIndex,
                                                           GetGraphicForAnimation(),
                                                           /*(byte) m.GetDirectionForAnimation()*/ 0,
                                                           /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,

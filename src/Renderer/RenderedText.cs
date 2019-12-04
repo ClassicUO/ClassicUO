@@ -109,7 +109,7 @@ namespace ClassicUO.Renderer
             set
             {
                 if (value == 0xFF)
-                    value = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
+                    value = (byte) (UOFileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
                 _font = value;
             }
         }
@@ -152,7 +152,7 @@ namespace ClassicUO.Renderer
                         IsPartialHue = false;
 
                         if (IsHTML)
-                            FileManager.Fonts.SetUseHTML(false);
+                            UOFileManager.Fonts.SetUseHTML(false);
                         Links.Clear();
                         _texture?.Dispose();
                         _texture = null;
@@ -273,16 +273,16 @@ namespace ClassicUO.Renderer
             }
 
             if (IsHTML)
-                FileManager.Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
+                UOFileManager.Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
 
-            FileManager.Fonts.RecalculateWidthByInfo = RecalculateWidthByInfo;
+            UOFileManager.Fonts.RecalculateWidthByInfo = RecalculateWidthByInfo;
 
             bool ispartial = false;
 
             if (IsUnicode)
-                FileManager.Fonts.GenerateUnicode(ref _texture, Font, Text, Hue, Cell, MaxWidth, Align, (ushort)FontStyle, SaveHitMap, MaxHeight);
+                UOFileManager.Fonts.GenerateUnicode(ref _texture, Font, Text, Hue, Cell, MaxWidth, Align, (ushort)FontStyle, SaveHitMap, MaxHeight);
             else
-                FileManager.Fonts.GenerateASCII(ref _texture, Font, Text, Hue, MaxWidth, Align, (ushort)FontStyle, out ispartial, SaveHitMap, MaxHeight);
+                UOFileManager.Fonts.GenerateASCII(ref _texture, Font, Text, Hue, MaxWidth, Align, (ushort)FontStyle, out ispartial, SaveHitMap, MaxHeight);
 
             IsPartialHue = ispartial;
 
@@ -294,8 +294,8 @@ namespace ClassicUO.Renderer
             }
 
             if (IsHTML)
-                FileManager.Fonts.SetUseHTML(false);
-            FileManager.Fonts.RecalculateWidthByInfo = false;
+                UOFileManager.Fonts.SetUseHTML(false);
+            UOFileManager.Fonts.RecalculateWidthByInfo = false;
         }
 
         public void Destroy()

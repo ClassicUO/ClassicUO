@@ -40,7 +40,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal abstract class StatusGumpBase : Gump
     {
         protected readonly GumpPic[] _lockers = new GumpPic[3];
-        protected readonly bool _useUOPGumps = FileManager.UseUOPGumps;
+        protected readonly bool _useUOPGumps = UOFileManager.UseUOPGumps;
 
         protected Label[] _labels;
         protected Point _point;
@@ -411,7 +411,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPic(0, 0, 0x2A6C, 0));
 
-            if (FileManager.ClientVersion >= ClientVersions.CV_308Z)
+            if (UOFileManager.ClientVersion >= ClientVersions.CV_308Z)
             {
                 p.X = 389;
                 p.Y = 152;
@@ -420,7 +420,7 @@ namespace ClassicUO.Game.UI.Gumps
                 AddStatTextLabel(!string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty, MobileStats.Name, _useUOPGumps ? 90 : 58, 50, 320, 0x0386, TEXT_ALIGN_TYPE.TS_CENTER);
 
 
-                if (FileManager.ClientVersion >= ClientVersions.CV_5020)
+                if (UOFileManager.ClientVersion >= ClientVersions.CV_5020)
                 {
                     Add(new Button((int)ButtonType.BuffIcon, 0x7538, 0x7539, 0x7539)
                     {
@@ -452,7 +452,7 @@ namespace ClassicUO.Game.UI.Gumps
                     else if (st == Lock.Locked)
                         gumpid = 0x082C; //Lock
                     _lockers[0].Graphic = gumpid;
-                    _lockers[0].Texture = FileManager.Gumps.GetTexture(gumpid);
+                    _lockers[0].Texture = UOFileManager.Gumps.GetTexture(gumpid);
                 };
 
                 //AddChildren(_lockers[0] = new Button((int)ButtonType.LockerStr, gumpID, gumpID)
@@ -483,7 +483,7 @@ namespace ClassicUO.Game.UI.Gumps
                     else if (st == Lock.Locked)
                         gumpid = 0x082C; //Lock
                     _lockers[1].Graphic = gumpid;
-                    _lockers[1].Texture = FileManager.Gumps.GetTexture(gumpid);
+                    _lockers[1].Texture = UOFileManager.Gumps.GetTexture(gumpid);
                 };
                 //AddChildren(_lockers[1] = new Button((int)ButtonType.LockerDex, gumpID, gumpID)
                 //{
@@ -513,7 +513,7 @@ namespace ClassicUO.Game.UI.Gumps
                     else if (st == Lock.Locked)
                         gumpid = 0x082C; //Lock
                     _lockers[2].Graphic = gumpid;
-                    _lockers[2].Texture = FileManager.Gumps.GetTexture(gumpid);
+                    _lockers[2].Texture = UOFileManager.Gumps.GetTexture(gumpid);
                 };
                 //AddChildren(_lockers[2] = new Button((int)ButtonType.LockerInt, gumpID, gumpID)
                 //{
@@ -641,9 +641,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                if (FileManager.ClientVersion == ClientVersions.CV_308D)
+                if (UOFileManager.ClientVersion == ClientVersions.CV_308D)
                     AddStatTextLabel(World.Player.StatsCap.ToString(), MobileStats.StatCap, 171, 124);
-                else if (FileManager.ClientVersion == ClientVersions.CV_308J)
+                else if (UOFileManager.ClientVersion == ClientVersions.CV_308J)
                 {
                     AddStatTextLabel(World.Player.StatsCap.ToString(), MobileStats.StatCap, 180, 131);
                     AddStatTextLabel($"{World.Player.Followers}/{World.Player.FollowersMax}", MobileStats.Followers, 180, 144);
@@ -802,7 +802,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new GumpPic(34, 25, 0x0805, 0)); // Mana bar
             Add(new GumpPic(34, 38, 0x0805, 0)); // Stamina bar
 
-            if (FileManager.ClientVersion >= ClientVersions.CV_5020)
+            if (UOFileManager.ClientVersion >= ClientVersions.CV_5020)
             {
                 Add(new Button((int)ButtonType.BuffIcon, 0x837, 0x838, 0x838)
                 {
@@ -857,7 +857,7 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Player.StrLock = (Lock)(((byte)World.Player.StrLock + 1) % 3);
                 GameActions.ChangeStatLock((byte)StatType.Str, World.Player.StrLock);
                 _lockers[(int)StatType.Str].Graphic = GetStatLockGraphic(World.Player.StrLock);
-                _lockers[(int)StatType.Str].Texture = FileManager.Gumps.GetTexture(GetStatLockGraphic(World.Player.StrLock));
+                _lockers[(int)StatType.Str].Texture = UOFileManager.Gumps.GetTexture(GetStatLockGraphic(World.Player.StrLock));
             };
 
             _lockers[(int)StatType.Dex].MouseUp += (sender, e) =>
@@ -865,7 +865,7 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Player.DexLock = (Lock)(((byte)World.Player.DexLock + 1) % 3);
                 GameActions.ChangeStatLock((byte)StatType.Dex, World.Player.DexLock);
                 _lockers[(int)StatType.Dex].Graphic = GetStatLockGraphic(World.Player.DexLock);
-                _lockers[(int)StatType.Dex].Texture = FileManager.Gumps.GetTexture(GetStatLockGraphic(World.Player.DexLock));
+                _lockers[(int)StatType.Dex].Texture = UOFileManager.Gumps.GetTexture(GetStatLockGraphic(World.Player.DexLock));
             };
 
             _lockers[(int)StatType.Int].MouseUp += (sender, e) =>
@@ -873,7 +873,7 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Player.IntLock = (Lock)(((byte)World.Player.IntLock + 1) % 3);
                 GameActions.ChangeStatLock((byte)StatType.Int, World.Player.IntLock);
                 _lockers[(int)StatType.Int].Graphic = GetStatLockGraphic(World.Player.IntLock);
-                _lockers[(int)StatType.Int].Texture = FileManager.Gumps.GetTexture(GetStatLockGraphic(World.Player.IntLock));
+                _lockers[(int)StatType.Int].Texture = UOFileManager.Gumps.GetTexture(GetStatLockGraphic(World.Player.IntLock));
             };
 
             // Str/dex/int text labels
@@ -1117,7 +1117,7 @@ namespace ClassicUO.Game.UI.Gumps
                 //}
 
                 _fillBars[(int)id].Percent = CalculatePercents(max, current, 109);
-                _fillBars[(int)id].Texture = FileManager.Gumps.GetTexture(gumpId);
+                _fillBars[(int)id].Texture = UOFileManager.Gumps.GetTexture(gumpId);
             }
         }
 

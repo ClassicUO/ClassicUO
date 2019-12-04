@@ -99,7 +99,7 @@ namespace ClassicUO.Game.UI.Gumps
             _checkReal.ValueChanged += UpdateGump;
             _checkCaps.ValueChanged += UpdateGump;
 
-            _allSkillControls = new SkillControl[FileManager.Skills.SkillsCount];
+            _allSkillControls = new SkillControl[UOFileManager.Skills.SkillsCount];
 
             foreach (KeyValuePair<string, List<int>> k in SkillsGroupManager.Groups)
                 AddSkillsToGroup(k.Key, k.Value.OrderBy(s => s, _instance).ToList());
@@ -336,10 +336,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             public int Compare(int x, int y)
             {
-                if (x >= FileManager.Skills.SkillNames.Length || y >= FileManager.Skills.SkillNames.Length)
+                if (x >= UOFileManager.Skills.SkillNames.Length || y >= UOFileManager.Skills.SkillNames.Length)
                     return 0;
 
-                return FileManager.Skills.SkillNames[x].CompareTo(FileManager.Skills.SkillNames[y]);
+                return UOFileManager.Skills.SkillNames[x].CompareTo(UOFileManager.Skills.SkillNames[y]);
             }
         }
 
@@ -396,7 +396,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         ushort graphic = GetLockValue(skill.Lock);
                         _lock.Graphic = graphic;
-                        _lock.Texture = FileManager.Gumps.GetTexture(graphic);
+                        _lock.Texture = UOFileManager.Gumps.GetTexture(graphic);
                     }
                 };
                 Add(_lock);
@@ -491,7 +491,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     SkillButtonGump skillButtonGump = new SkillButtonGump(World.Player.Skills[_skillIndex], Mouse.Position.X, Mouse.Position.Y);
                     UIManager.Add(skillButtonGump);
-                    Rectangle rect = FileManager.Gumps.GetTexture(0x24B8).Bounds;
+                    Rectangle rect = UOFileManager.Gumps.GetTexture(0x24B8).Bounds;
                     UIManager.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
                 }
 
@@ -524,7 +524,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     ushort graphic = GetLockValue(skill.Lock);
                     _lock.Graphic = graphic;
-                    _lock.Texture = FileManager.Gumps.GetTexture(graphic);
+                    _lock.Texture = UOFileManager.Gumps.GetTexture(graphic);
                 }
             }
         }

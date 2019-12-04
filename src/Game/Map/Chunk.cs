@@ -239,9 +239,9 @@ namespace ClassicUO.Game.Map
 
         private ref IndexMap GetIndex(int map)
         {
-            FileManager.Map.SanitizeMapIndex(ref map);
+            UOFileManager.Map.SanitizeMapIndex(ref map);
 
-            return ref FileManager.Map.GetIndex(map, X, Y);
+            return ref UOFileManager.Map.GetIndex(map, X, Y);
         }
 
         public void Destroy()

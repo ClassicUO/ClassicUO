@@ -39,7 +39,7 @@ namespace ClassicUO.IO.Resources
         {
             return Task.Run(() => 
             {
-                string path = Path.Combine(FileManager.UoFolderPath, "animdata.mul");
+                string path = UOFileManager.GetUOFilePath("animdata.mul");
 
                 if (File.Exists(path))
                 {

@@ -443,7 +443,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
+                        Rectangle rect = UOFileManager.Gumps.GetTexture(0x0804).Bounds;
                         UIManager.Add(new HealthBarGump(member.Serial) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                     }
 

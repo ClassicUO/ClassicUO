@@ -55,7 +55,7 @@ namespace ClassicUO.Game.GameObjects
 
         private void SetTextureByGraphic(ushort graphic)
         {
-            ArtTexture texture = FileManager.Art.GetTexture(graphic);
+            ArtTexture texture = UOFileManager.Art.GetTexture(graphic);
             Texture = texture;
             Bounds.X = (Texture.Width >> 1) - 22;
             Bounds.Y = Texture.Height - 44;
@@ -91,7 +91,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (ItemData.IsAnimated && _lastAnimationFrameTime < Time.Ticks)
             {
-                IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
+                IntPtr ptr = UOFileManager.AnimData.GetAddressToAnim(Graphic);
 
                 if (ptr != IntPtr.Zero)
                 {

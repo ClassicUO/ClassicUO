@@ -62,7 +62,7 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 0; i < 4; i++)
             {
-                var t = FileManager.Gumps.GetTexture((ushort) (graphic + i));
+                var t = UOFileManager.Gumps.GetTexture((ushort) (graphic + i));
 
                 if (t == null)
                 {

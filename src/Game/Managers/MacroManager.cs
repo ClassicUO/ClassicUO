@@ -977,7 +977,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.BandageSelf:
                 case MacroType.BandageTarget:
 
-                    if (FileManager.ClientVersion < ClientVersions.CV_5020 || ProfileManager.Current.BandageSelfOld)
+                    if (UOFileManager.ClientVersion < ClientVersions.CV_5020 || ProfileManager.Current.BandageSelfOld)
                     {
                         if (WaitingBandageTarget)
                         {

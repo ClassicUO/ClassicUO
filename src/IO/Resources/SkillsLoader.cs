@@ -46,8 +46,8 @@ namespace ClassicUO.IO.Resources
                 if (SkillsCount > 0)
                     return;
 
-                string path = Path.Combine(FileManager.UoFolderPath, "skills.mul");
-                string pathidx = Path.Combine(FileManager.UoFolderPath, "Skills.idx");
+                string path = UOFileManager.GetUOFilePath("skills.mul");
+                string pathidx = UOFileManager.GetUOFilePath("Skills.idx");
 
                 FileSystemHelper.EnsureFileExists(path);
                 FileSystemHelper.EnsureFileExists(pathidx);

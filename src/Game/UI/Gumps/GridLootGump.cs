@@ -246,7 +246,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _texture.IsPartial = item.ItemData.IsPartialHue;
                 _texture.ScaleTexture = true;
                 _texture.Hue = item.Hue;
-                _texture.Texture = FileManager.Art.GetTexture(item.DisplayedGraphic);
+                _texture.Texture = UOFileManager.Art.GetTexture(item.DisplayedGraphic);
                 _texture.Y = 15;
                 _texture.Width = SIZE;
                 _texture.Height = SIZE;

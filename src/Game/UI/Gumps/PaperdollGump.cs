@@ -235,7 +235,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(_combatBook = new GumpPic(156, 200, 0x2B34, 0));
                     _combatBook.MouseDoubleClick += (sender, e) => { GameActions.OpenAbilitiesBook(); };
 
-                    if (FileManager.ClientVersion >= ClientVersions.CV_7000)
+                    if (UOFileManager.ClientVersion >= ClientVersions.CV_7000)
                     {
                         Add(_racialAbilitiesBook = new GumpPic(23, 200, 0x2B28, 0));
 
@@ -525,7 +525,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            Rectangle bounds = FileManager.Gumps.GetTexture(0x0804).Bounds;
+                            Rectangle bounds = UOFileManager.Gumps.GetTexture(0x0804).Bounds;
 
                             UIManager.Add(new HealthBarGump(Mobile)
                             {

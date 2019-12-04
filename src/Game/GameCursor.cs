@@ -104,7 +104,7 @@ namespace ClassicUO.Game
                 {
                     ushort id = _cursorData[i, j];
 
-                    ushort[] pixels = FileManager.Art.ReadStaticArt(id, out short w, out short h, out _);
+                    ushort[] pixels = UOFileManager.Art.ReadStaticArt(id, out short w, out short h, out _);
 
                     if (i == 0)
                     {
@@ -252,7 +252,7 @@ namespace ClassicUO.Game
         public void SetDraggedItem(ItemHold hold, Point? offset)
         {
             _itemHold = hold;
-            _draggedItemTexture = FileManager.Art.GetTexture(_itemHold.DisplayedGraphic);
+            _draggedItemTexture = UOFileManager.Art.GetTexture(_itemHold.DisplayedGraphic);
             if (_draggedItemTexture == null)
                 return;
 
@@ -357,7 +357,7 @@ namespace ClassicUO.Game
                                     int x = startX + (item.X - item.Y) * 22;
                                     int y = startY + (item.X + item.Y) * 22 - ((item.Z + z) * 4);
 
-                                    var texture = FileManager.Art.GetTexture(item.Graphic);
+                                    var texture = UOFileManager.Art.GetTexture(item.Graphic);
 
                                     x -= ((texture.Width >> 1) - 22);
                                     y -= ((texture.Height - 44));
@@ -457,7 +457,7 @@ namespace ClassicUO.Game
                 int offX = _cursorOffset[0, graphic];
                 int offY = _cursorOffset[1, graphic];
 
-                sb.Draw2D(FileManager.Art.GetTexture(Graphic), Mouse.Position.X + offX, Mouse.Position.Y + offY, ref _vec);
+                sb.Draw2D(UOFileManager.Art.GetTexture(Graphic), Mouse.Position.X + offX, Mouse.Position.Y + offY, ref _vec);
             }
 
         }

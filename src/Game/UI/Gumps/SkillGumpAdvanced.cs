@@ -137,7 +137,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Graphic g = (Graphic) (_sortAsc ? 0x985 : 0x983);
 
                 _sortOrderIndicator.Graphic = g;
-                _sortOrderIndicator.Texture = FileManager.Gumps.GetTexture(g);
+                _sortOrderIndicator.Texture = UOFileManager.Gumps.GetTexture(g);
                 _sortOrderIndicator.X = btn.X + btn.Width - 15;
                 _sortOrderIndicator.Y = btn.Y + 5;
             }
@@ -268,7 +268,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _skill.Lock = Lock.Down;
                         GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Down);
                         loc.Graphic = 0x985;
-                        loc.Texture = FileManager.Gumps.GetTexture(0x985);
+                        loc.Texture = UOFileManager.Gumps.GetTexture(0x985);
 
                         break;
 
@@ -276,7 +276,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _skill.Lock = Lock.Locked;
                         GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Locked);
                         loc.Graphic = 0x82C;
-                        loc.Texture = FileManager.Gumps.GetTexture(0x82C);
+                        loc.Texture = UOFileManager.Gumps.GetTexture(0x82C);
 
                         break;
 
@@ -284,7 +284,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _skill.Lock = Lock.Up;
                         GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Up);
                         loc.Graphic = 0x983;
-                        loc.Texture = FileManager.Gumps.GetTexture(0x983);
+                        loc.Texture = UOFileManager.Gumps.GetTexture(0x983);
 
                         break;
                 }
@@ -302,7 +302,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 SkillButtonGump skillButtonGump = new SkillButtonGump(_skill, Mouse.Position.X, Mouse.Position.Y);
                 UIManager.Add(skillButtonGump);
-                Rectangle rect = FileManager.Gumps.GetTexture(0x24B8).Bounds;
+                Rectangle rect = UOFileManager.Gumps.GetTexture(0x24B8).Bounds;
                 UIManager.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
             }
         }

@@ -179,7 +179,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void GenerateVirtualTextures()
         {
             _shopGumpParts = new UOTexture[12];
-            UOTexture t = FileManager.Gumps.GetTexture(0x0870);
+            UOTexture t = UOFileManager.Gumps.GetTexture(0x0870);
             UOTexture[][] splits = new UOTexture[4][];
 
             splits[0] = GraphicHelper.SplitTexture16(t,
@@ -189,7 +189,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                          {0, 64, t.Width, 124},
                                                          {0, 124, t.Width, t.Height - 124}
                                                      });
-            t = FileManager.Gumps.GetTexture(0x0871);
+            t = UOFileManager.Gumps.GetTexture(0x0871);
 
             splits[1] = GraphicHelper.SplitTexture16(t,
                                                      new int[3, 4]
@@ -198,7 +198,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                          {0, 64, t.Width, 94},
                                                          {0, 94, t.Width, t.Height - 94}
                                                      });
-            t = FileManager.Gumps.GetTexture(0x0872);
+            t = UOFileManager.Gumps.GetTexture(0x0872);
 
             splits[2] = GraphicHelper.SplitTexture16(t,
                                                      new int[3, 4]
@@ -207,7 +207,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                          {0, 64, t.Width, 124},
                                                          {0, 124, t.Width, t.Height - 124}
                                                      });
-            t = FileManager.Gumps.GetTexture(0x0873);
+            t = UOFileManager.Gumps.GetTexture(0x0873);
 
             splits[3] = GraphicHelper.SplitTexture16(t,
                                                      new int[3, 4]
@@ -404,7 +404,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     byte group = 0;
 
-                    switch (FileManager.Animations.GetGroupIndex(item.Graphic))
+                    switch (UOFileManager.Animations.GetGroupIndex(item.Graphic))
                     {
                         case ANIMATION_GROUPS.AG_LOW:
                             group = (byte) LOW_ANIMATION_GROUP.LAG_STAND;
@@ -425,13 +425,13 @@ namespace ClassicUO.Game.UI.Gumps
                     ushort graphic = item.Graphic;
                     ushort hue2 = item.Hue;
 
-                    ref AnimationDirection direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue2, true).Direction[1];
-                    FileManager.Animations.AnimID = item.Graphic;
-                    FileManager.Animations.AnimGroup = group;
-                    FileManager.Animations.Direction = 1;
+                    ref AnimationDirection direction = ref UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue2, true).Direction[1];
+                    UOFileManager.Animations.AnimID = item.Graphic;
+                    UOFileManager.Animations.AnimGroup = group;
+                    UOFileManager.Animations.Direction = 1;
 
                     if (direction.FrameCount == 0)
-                        FileManager.Animations.LoadDirectionGroup(ref direction);
+                        UOFileManager.Animations.LoadDirectionGroup(ref direction);
 
                     Add(control = new TextureControl
                     {
@@ -454,7 +454,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (item.Serial.IsItem)
                 {
-                    var texture = FileManager.Art.GetTexture(item.Graphic);
+                    var texture = UOFileManager.Art.GetTexture(item.Graphic);
 
                     Add(control = new TextureControl
                     {
@@ -540,7 +540,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         byte group = 0;
 
-                        switch (FileManager.Animations.GetGroupIndex(Item.Graphic))
+                        switch (UOFileManager.Animations.GetGroupIndex(Item.Graphic))
                         {
                             case ANIMATION_GROUPS.AG_LOW:
                                 group = (byte) LOW_ANIMATION_GROUP.LAG_STAND;
@@ -561,7 +561,7 @@ namespace ClassicUO.Game.UI.Gumps
                         ushort graphic = Item.Graphic;
                         ushort hue2 = Item.Hue;
 
-                        ref AnimationDirection direction = ref FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue2, true).Direction[1];
+                        ref AnimationDirection direction = ref UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue2, true).Direction[1];
                         direction.LastAccessTime = Time.Ticks;
                     }
                 }
@@ -736,7 +736,7 @@ namespace ClassicUO.Game.UI.Gumps
                 for (int i = 0; i < _gumpTexture.Length; i++)
                 {
                     if (_gumpTexture[i] == null)
-                        _gumpTexture[i] = FileManager.Gumps.GetTexture((Graphic) (_graphic + i));
+                        _gumpTexture[i] = UOFileManager.Gumps.GetTexture((Graphic) (_graphic + i));
                 }
 
                 Height = _gumpTexture.Max(o => o.Height);

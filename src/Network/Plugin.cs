@@ -131,7 +131,7 @@ namespace ClassicUO.Network
 
             PluginHeader header = new PluginHeader
             {
-                ClientVersion = (int) FileManager.ClientVersion,
+                ClientVersion = (int) UOFileManager.ClientVersion,
                 Recv = Marshal.GetFunctionPointerForDelegate(_recv),
                 Send = Marshal.GetFunctionPointerForDelegate(_send),
                 GetPacketLength = Marshal.GetFunctionPointerForDelegate(_getPacketLength),
@@ -245,7 +245,7 @@ namespace ClassicUO.Network
 
         private static string GetUOFilePath()
         {
-            return FileManager.UoFolderPath;
+            return UOFileManager.UoFolderPath;
         }
 
         private static void SetWindowTitle(string str)
@@ -261,7 +261,7 @@ namespace ClassicUO.Network
 
         private static void GetStaticImage(ushort g, ref ArtInfo info)
         {
-            FileManager.Art.TryGetEntryInfo(g, out long address, out long size, out long compressedsize);
+            UOFileManager.Art.TryGetEntryInfo(g, out long address, out long size, out long compressedsize);
             info.Address = address;
             info.Size = size;
             info.CompressedSize = compressedsize;

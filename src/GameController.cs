@@ -227,7 +227,7 @@ namespace ClassicUO
 
             try
             {
-                FileManager.UoFolderPath = Settings.GlobalSettings.UltimaOnlineDirectory;
+                UOFileManager.UoFolderPath = Settings.GlobalSettings.UltimaOnlineDirectory;
             }
             catch (FileNotFoundException)
             {
@@ -237,17 +237,17 @@ namespace ClassicUO
             }
 
             Log.Trace( "Done!");
-            Log.Trace( $"Ultima Online installation folder: {FileManager.UoFolderPath}");
+            Log.Trace( $"Ultima Online installation folder: {UOFileManager.UoFolderPath}");
             Log.PopIndent();
 
             Log.Trace( "Loading files...");
             Log.PushIndent();
-            FileManager.LoadFiles();
+            UOFileManager.LoadFiles();
             Log.PopIndent();
 
-            uint[] hues = FileManager.Hues.CreateShaderColors();
+            uint[] hues = UOFileManager.Hues.CreateShaderColors();
 
-            int size = FileManager.Hues.HuesCount;
+            int size = UOFileManager.Hues.HuesCount;
 
             Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size * 2);
             texture0.SetData(hues, 0, size * 2);
@@ -263,7 +263,7 @@ namespace ClassicUO
             PacketHandlers.Load();
             //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
             UltimaLive.Enable();
-            PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
+            PacketsTable.AdjustPacketSizeByVersion(UOFileManager.ClientVersion);
             Log.Trace( "Done!");
             Log.PopIndent();
 

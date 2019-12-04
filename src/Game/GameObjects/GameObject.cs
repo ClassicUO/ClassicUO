@@ -297,10 +297,10 @@ namespace ClassicUO.Game.GameObjects
                 isunicode = ProfileManager.Current.OverrideAllFontsIsUnicode;
             }
 
-            int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, msg) : FileManager.Fonts.GetWidthASCII(font, msg);
+            int width = isunicode ? UOFileManager.Fonts.GetWidthUnicode(font, msg) : UOFileManager.Fonts.GetWidthASCII(font, msg);
 
             if (width > 200)
-                width = isunicode ? FileManager.Fonts.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder) : FileManager.Fonts.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder);
+                width = isunicode ? UOFileManager.Fonts.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder) : UOFileManager.Fonts.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder);
             else
                 width = 0;
 

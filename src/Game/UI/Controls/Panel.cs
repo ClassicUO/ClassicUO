@@ -35,7 +35,7 @@ namespace ClassicUO.Game.UI.Controls
         public Panel(ushort background)
         {
             for (int i = 0; i < _frame.Length; i++)
-                _frame[i] = FileManager.Gumps.GetTexture((ushort) (background + i));
+                _frame[i] = UOFileManager.Gumps.GetTexture((ushort) (background + i));
         }
 
         public override void Update(double totalMS, double frameMS)

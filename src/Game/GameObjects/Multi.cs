@@ -112,7 +112,7 @@ namespace ClassicUO.Game.GameObjects
         public CUSTOM_HOUSE_MULTI_OBJECT_FLAGS State = 0;
         public bool IsCustom;
 
-        public ref readonly StaticTiles ItemData => ref FileManager.TileData.StaticData[Graphic];
+        public ref readonly StaticTiles ItemData => ref UOFileManager.TileData.StaticData[Graphic];
 
         public override void UpdateGraphicBySeason()
         {

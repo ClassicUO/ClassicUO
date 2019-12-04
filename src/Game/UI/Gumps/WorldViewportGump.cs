@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     UIManager.GetGump<OptionsGump>()?.UpdateVideo();
 
-                    if (FileManager.ClientVersion >= ClientVersions.CV_200)
+                    if (UOFileManager.ClientVersion >= ClientVersions.CV_200)
                         NetClient.Socket.Send(new PGameWindowSize((uint) n.X, (uint) n.Y));
 
                     _clicked = false;
@@ -235,8 +235,8 @@ namespace ClassicUO.Game.UI.Gumps
             Y = y;
             Width = w;
             Height = h;
-            _borders[0] = FileManager.Gumps.GetTexture(0x0A8C);
-            _borders[1] = FileManager.Gumps.GetTexture(0x0A8D);
+            _borders[0] = UOFileManager.Gumps.GetTexture(0x0A8C);
+            _borders[1] = UOFileManager.Gumps.GetTexture(0x0A8D);
             _borderSize = borderSize;
             CanMove = true;
             AcceptMouseInput = true;

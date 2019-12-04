@@ -46,7 +46,7 @@ namespace ClassicUO.IO.Resources
             {
                 bool result = false;
 
-                FileInfo file = new FileInfo(Path.Combine(FileManager.UoFolderPath, "Prof.txt"));
+                FileInfo file = new FileInfo(UOFileManager.GetUOFilePath("Prof.txt"));
 
                 if (file.Exists)
                 {
@@ -224,9 +224,9 @@ namespace ClassicUO.IO.Resources
                                 }
                             }
 
-                            for (int j = 0; j < FileManager.Skills.SkillsCount; j++)
+                            for (int j = 0; j < UOFileManager.Skills.SkillsCount; j++)
                             {
-                                SkillEntry skill = FileManager.Skills.GetSkill(j);
+                                SkillEntry skill = UOFileManager.Skills.GetSkill(j);
 
                                 if (strings[1] == skill.Name)
                                 {
@@ -263,7 +263,7 @@ namespace ClassicUO.IO.Resources
 
                     {
                         int.TryParse(strings[1], out nameClilocID);
-                        name = FileManager.Cliloc.GetString(nameClilocID);
+                        name = UOFileManager.Cliloc.GetString(nameClilocID);
 
                         break;
                     }

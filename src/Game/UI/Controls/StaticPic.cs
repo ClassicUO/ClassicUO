@@ -37,10 +37,10 @@ namespace ClassicUO.Game.UI.Controls
         public StaticPic(Graphic graphic, Hue hue)
         {
             Hue = hue;
-            _isPartial = FileManager.TileData.StaticData[graphic].IsPartialHue;
+            _isPartial = UOFileManager.TileData.StaticData[graphic].IsPartialHue;
             CanMove = true;
 
-            Texture = FileManager.Art.GetTexture(graphic);
+            Texture = UOFileManager.Art.GetTexture(graphic);
             Width = Texture.Width;
             Height = Texture.Height;
 

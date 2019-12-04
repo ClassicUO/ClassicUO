@@ -45,10 +45,10 @@ namespace ClassicUO.Game.GameObjects
             if (Texture == null || Texture.IsDisposed)
             {
                 if (IsStretched)
-                    Texture = FileManager.Textmaps.GetTexture(TileData.TexID);
+                    Texture = UOFileManager.Textmaps.GetTexture(TileData.TexID);
                 else
                 {
-                    Texture = FileManager.Art.GetLandTexture(Graphic);
+                    Texture = UOFileManager.Art.GetLandTexture(Graphic);
                     Bounds.Width = 44;
                     Bounds.Height = 44;
                 }
@@ -120,7 +120,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Map.Map map = World.Map;
 
-            if (IsStretched || FileManager.Textmaps.GetTexture(TileData.TexID) == null || !TestStretched(x, y, z, true))
+            if (IsStretched || UOFileManager.Textmaps.GetTexture(TileData.TexID) == null || !TestStretched(x, y, z, true))
             {
                 IsStretched = false;
                 MinZ = z;

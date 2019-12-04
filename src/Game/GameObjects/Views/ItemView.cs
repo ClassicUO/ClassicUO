@@ -59,7 +59,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 unsafe
                 {
-                    IntPtr ptr = FileManager.AnimData.GetAddressToAnim(Graphic);
+                    IntPtr ptr = UOFileManager.AnimData.GetAddressToAnim(Graphic);
 
                     if (ptr != IntPtr.Zero)
                     {
@@ -108,7 +108,7 @@ namespace ClassicUO.Game.GameObjects
                 if (_originalGraphic == 0)
                     _originalGraphic = DisplayedGraphic;
 
-                Texture = FileManager.Art.GetTexture(_originalGraphic);
+                Texture = UOFileManager.Art.GetTexture(_originalGraphic);
                 Bounds.X = (Texture.Width >> 1) - 22;
                 Bounds.Y = Texture.Height - 44;
                 Bounds.Width = Texture.Width;
@@ -188,9 +188,9 @@ namespace ClassicUO.Game.GameObjects
 
             byte dir = (byte) ((byte) Layer & 0x7F & 7);
             bool mirror = false;
-            FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
+            UOFileManager.Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
-            FileManager.Animations.Direction = dir;
+            UOFileManager.Animations.Direction = dir;
             byte animIndex = (byte) AnimIndex;
 
             bool ishuman = MathHelper.InRange(Amount, 0x0190, 0x0193) ||
@@ -222,7 +222,7 @@ namespace ClassicUO.Game.GameObjects
             if (layer == Layer.Invalid)
             {
                 graphic = GetGraphicForAnimation();
-                FileManager.Animations.AnimGroup = FileManager.Animations.GetDieGroupIndex(graphic, UsedLayer);
+                UOFileManager.Animations.AnimGroup = UOFileManager.Animations.GetDieGroupIndex(graphic, UsedLayer);
 
                 if (color == 0)
                     color = Hue;
@@ -237,9 +237,9 @@ namespace ClassicUO.Game.GameObjects
                 ispartialhue = itemEquip.ItemData.IsPartialHue;
 
                 ushort mobGraphic = Amount;
-                FileManager.Animations.ConvertBodyIfNeeded(ref mobGraphic);
+                UOFileManager.Animations.ConvertBodyIfNeeded(ref mobGraphic);
 
-                if (FileManager.Animations.EquipConversions.TryGetValue(mobGraphic, out Dictionary<ushort, EquipConvData> map))
+                if (UOFileManager.Animations.EquipConversions.TryGetValue(mobGraphic, out Dictionary<ushort, EquipConvData> map))
                 {
                     if (map.TryGetValue(graphic, out EquipConvData data))
                     {
@@ -255,24 +255,24 @@ namespace ClassicUO.Game.GameObjects
 
 
 
-            byte animGroup = FileManager.Animations.AnimGroup;
+            byte animGroup = UOFileManager.Animations.AnimGroup;
             ushort newHue = 0;
 
             var gr = layer == Layer.Invalid
-                         ? FileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue)
-                         : FileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
+                         ? UOFileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue)
+                         : UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
 
-            FileManager.Animations.AnimID = graphic;
+            UOFileManager.Animations.AnimID = graphic;
 
             if (color == 0)
                 color = newHue;
 
-            ref var direction = ref gr.Direction[FileManager.Animations.Direction];
+            ref var direction = ref gr.Direction[UOFileManager.Animations.Direction];
 
             if (direction == null)
                 return;
 
-            if ((direction.FrameCount == 0 || direction.Frames == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
+            if ((direction.FrameCount == 0 || direction.Frames == null) && !UOFileManager.Animations.LoadDirectionGroup(ref direction))
                 return;
 
             direction.LastAccessTime = Time.Ticks;

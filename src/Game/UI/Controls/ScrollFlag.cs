@@ -63,12 +63,12 @@ namespace ClassicUO.Game.UI.Controls
         {
             AcceptMouseInput = true;
 
-            Texture = FileManager.Gumps.GetTexture(0x0828);
+            Texture = UOFileManager.Gumps.GetTexture(0x0828);
             Width = Texture.Width;
             Height = Texture.Height;
 
-            _upButton = FileManager.Gumps.GetTexture(0x0824);
-            _downButton = FileManager.Gumps.GetTexture(0x0825);
+            _upButton = UOFileManager.Gumps.GetTexture(0x0824);
+            _downButton = UOFileManager.Gumps.GetTexture(0x0825);
 
             _rectUpButton = new Rectangle(0, 0, _upButton.Width, _upButton.Height);
             _rectDownButton = new Rectangle(0, Height, _downButton.Width, _downButton.Height);

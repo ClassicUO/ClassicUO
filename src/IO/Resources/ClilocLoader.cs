@@ -39,7 +39,7 @@ namespace ClassicUO.IO.Resources
         {
             _cliloc = cliloc;
 
-            if (!File.Exists(Path.Combine(FileManager.UoFolderPath, cliloc)))
+            if (!File.Exists(UOFileManager.GetUOFilePath(cliloc)))
                 _cliloc = "Cliloc.enu";
 
             return Load();
@@ -51,7 +51,7 @@ namespace ClassicUO.IO.Resources
                 if (string.IsNullOrEmpty(_cliloc))
                     _cliloc = "Cliloc.enu";
 
-                string path = Path.Combine(FileManager.UoFolderPath, _cliloc);
+                string path = UOFileManager.GetUOFilePath(_cliloc);
 
                 if (!File.Exists(path))
                     return;

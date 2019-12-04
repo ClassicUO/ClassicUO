@@ -100,7 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (!_textBox.IsDisposed && _textBox.IsChanged)
             {
-                _textBox.Height = Math.Max(FileManager.Fonts.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
+                _textBox.Height = Math.Max(UOFileManager.Fonts.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
 
                 foreach (Control c in _scrollArea.Children)
                 {
