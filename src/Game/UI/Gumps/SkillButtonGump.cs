@@ -75,11 +75,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             Label label;
 
-            Add(label = new Label(_skill.Name, true, 0, Width, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+            Add(label = new Label(_skill.Name, true, 0, Width - 8, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
             {
-                X = -4,
+                X = 4,
                 Y = 0,
-                Width = Width - 10,
+                Width = Width - 8,
                 AcceptMouseInput = true,
                 CanMove = true
             });
