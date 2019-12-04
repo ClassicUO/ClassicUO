@@ -703,7 +703,15 @@ namespace ClassicUO.Game.Scenes
 
                 if (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                 {
-                    GameObject obj = ProfileManager.Current.SallosEasyGrab && SelectedObject.LastObject is GameObject o ? o : _dragginObject;
+                    GameObject obj;
+                    if (ProfileManager.Current.SallosEasyGrab && _dragginObject is Entity)
+                    {
+                        obj = _dragginObject;
+                    }
+                    else
+                    {
+                        obj = SelectedObject.LastObject as GameObject;
+                    }
 
                     switch (obj)
                     {
