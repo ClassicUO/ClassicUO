@@ -160,8 +160,6 @@ namespace ClassicUO.Game.Managers
                     case CursorTarget.Invalid:                     
                         return;
                     case CursorTarget.MultiPlacement:
-                        return;
-
                     case CursorTarget.Position:
                     case CursorTarget.Object:
                     case CursorTarget.HueCommandTarget:
