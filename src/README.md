@@ -6,7 +6,9 @@ An open source implementation of the Ultima Online Classic Client.
 
 
 #### Paypal  
-[![PayPal](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://www.paypal.me/muskara)  
+[![PayPal](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://www.paypal.me/muskara) 
+#### Patreon  
+[![Patreon](https://img.shields.io/badge/patreon-donate-green.svg)](https://www.patreon.com/join/3228816?) 
 #### Discord  
  <a href="https://discord.gg/VdyCpjQ">
         <img src="https://img.shields.io/discord/458277173208547350.svg?logo=discord"
