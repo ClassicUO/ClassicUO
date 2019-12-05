@@ -37,7 +37,7 @@ namespace ClassicUO.Game.Scenes
 {
     internal partial class GameScene
     {
-        private GameObject _dragginObject;
+        private Entity _dragginObject;
 
         public ItemHold HeldItem { get; private set; }
 
