@@ -465,7 +465,7 @@ namespace ClassicUO.IO
         {
             try
             {
-                string fullPath = Path.GetFullPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "UltimaLive", shardname));
+                string fullPath = Path.GetFullPath(Path.Combine(Environment.GetFolderPath(CUOEnviroment.IsUnix ? Environment.SpecialFolder.LocalApplicationData : Environment.SpecialFolder.CommonApplicationData), "UltimaLive", shardname));
 
                 if (shardname.IndexOfAny(_pathSeparatorChars) == -1 && !string.IsNullOrEmpty(fullPath)) //we cannot allow directory separator inside our name
                     return fullPath;
