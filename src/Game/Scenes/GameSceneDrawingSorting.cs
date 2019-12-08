@@ -193,6 +193,91 @@ namespace ClassicUO.Game.Scenes
 
         private static StaticTiles _empty;
 
+        private readonly struct TreeUnion
+        {
+            public TreeUnion(ushort start, ushort end)
+            {
+                Start = start;
+                End = end;
+            }
+
+            public readonly ushort Start, End;
+        }
+
+        private static readonly TreeUnion[] _treeInfos =
+        {
+            new TreeUnion(0x0D45, 0x0D4C),
+            new TreeUnion(0x0D5C, 0x0D62),
+            new TreeUnion(0x0D73, 0x0D79),
+            new TreeUnion(0x0D87, 0x0D8B),
+            new TreeUnion(0x12BE, 0x12C7),
+            new TreeUnion(0x0D4D, 0x0D53),
+            new TreeUnion(0x0D63, 0x0D69),
+            new TreeUnion(0x0D7A, 0x0D7F),
+            new TreeUnion(0x0D8C, 0x0D90)
+        };
+
+        private void IsFoliageUnion(ushort graphic, int x, int y, int z, bool ok)
+        {
+            for (int i = 0; i < _treeInfos.Length; i++)
+            {
+                ref readonly var info = ref _treeInfos[i];
+
+                if (info.Start <= graphic && graphic <= info.End)
+                {
+                    while (graphic > info.Start)
+                    {
+                        graphic--;
+                        x--;
+                        y++;
+                    }
+
+                    for (graphic = info.Start; graphic <= info.End; graphic++, x++, y--)
+                    {
+                        ApplyFoliageTransparency(graphic, x, y, z, ok);
+                    }
+
+                    break;
+                }
+            }
+        }
+
+        private void ApplyFoliageTransparency(ushort graphic, int x, int y, int z, bool ok)
+        {
+            Tile tile = World.Map.GetTile(x, y);
+
+            if (tile != null)
+            {
+                for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+                {
+                    ushort testGraphic = obj.Graphic;
+
+                    if (testGraphic == graphic && obj.Z == z)
+                    {
+                        switch (obj)
+                        {
+                            case Static st:
+                                st.CharacterIsBehindFoliage = ok;
+
+                                break;
+
+                            case Multi m:
+                                m.CharacterIsBehindFoliage = ok;
+
+                                break;
+
+                            case Item it:
+                                it.CharacterIsBehindFoliage = ok;
+
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
+
+
         private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ/*, GameObject entity*/)
         {
             /*sbyte HeightChecks = 0;
@@ -410,6 +495,8 @@ namespace ClassicUO.Game.Scenes
 
                         check = Exstentions.InRect(ref _rectangleObj, ref _rectanglePlayer);
                     }
+
+                    IsFoliageUnion(obj.Graphic, obj.X, obj.Y, obj.Z, check);
 
                     switch (obj)
                     {
