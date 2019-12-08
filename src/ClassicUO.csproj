@@ -138,7 +138,7 @@
     <Compile Include="Game\Data\SpellsNecromancy.cs" />
     <Compile Include="Game\Data\SpellsNinjitsu.cs" />
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
-    <Compile Include="Game\Data\StaticFilters.cs" />
+    <Compile Include="Game\Data\StaticsHelper.cs" />
     <Compile Include="Game\GameObjects\DragEffect.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
     <Compile Include="Game\GameObjects\EntityTextContainer.cs" />

@@ -218,7 +218,7 @@ namespace ClassicUO.IO.Resources
                     pixels[i * width + width - 1] = 0;
                 }
             }
-            else if (StaticFilters.IsCave(graphic) && ProfileManager.Current != null && ProfileManager.Current.EnableCaveBorder)
+            else if (StaticsHelper.IsCave(graphic) && ProfileManager.Current != null && ProfileManager.Current.EnableCaveBorder)
             {
                 for (int yy = 0; yy < height; yy++)
                 {
@@ -361,7 +361,7 @@ namespace ClassicUO.IO.Resources
                     pixels[i * width + width - 1] = 0;
                 }
             }
-            else if (StaticFilters.IsCave(graphic) && ProfileManager.Current != null && ProfileManager.Current.EnableCaveBorder)
+            else if (StaticsHelper.IsCave(graphic) && ProfileManager.Current != null && ProfileManager.Current.EnableCaveBorder)
             {
                 for (int yy = 0; yy < height; yy++)
                 {

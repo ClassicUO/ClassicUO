@@ -262,7 +262,7 @@ namespace ClassicUO.Game.Scenes
 
                             if (obj is Static st)
                             {
-                                if (StaticFilters.IsTree(st.OriginalGraphic))
+                                if (StaticsHelper.IsTree(st.OriginalGraphic))
                                 {
                                     if (ProfileManager.Current.TreeToStumps && st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
                                     {
@@ -287,7 +287,7 @@ namespace ClassicUO.Game.Scenes
                             }
 
                             //we avoid to hide impassable foliage or bushes, if present...
-                            if ((ProfileManager.Current.TreeToStumps && itemData.IsFoliage) || (ProfileManager.Current.HideVegetation && !itemData.IsImpassable && StaticFilters.IsVegetation(obj.Graphic)))
+                            if ((ProfileManager.Current.TreeToStumps && itemData.IsFoliage) || (ProfileManager.Current.HideVegetation && !itemData.IsImpassable && StaticsHelper.IsVegetation(obj.Graphic)))
                                 continue;
 
                             //if (HeightChecks <= 0 && (!itemData.IsBridge || ((itemData.Flags & TileFlag.StairBack | TileFlag.StairRight) != 0) || itemData.IsWall))

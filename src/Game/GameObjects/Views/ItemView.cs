@@ -55,7 +55,7 @@ namespace ClassicUO.Game.GameObjects
 
             ushort hue = Hue;
 
-            if (ProfileManager.Current.FieldsType == 1 && StaticFilters.IsField(Graphic)) // static
+            if (ProfileManager.Current.FieldsType == 1 && StaticsHelper.IsField(Graphic)) // static
             {
                 unsafe
                 {
@@ -76,27 +76,27 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (ProfileManager.Current.FieldsType == 2)
             {
-                if (StaticFilters.IsFireField(Graphic))
+                if (StaticsHelper.IsFireField(Graphic))
                 {
                     _originalGraphic = Constants.FIELD_REPLACE_GRAPHIC;
                     hue = 0x0020;
                 }
-                else if (StaticFilters.IsParalyzeField(Graphic))
+                else if (StaticsHelper.IsParalyzeField(Graphic))
                 {
                     _originalGraphic = Constants.FIELD_REPLACE_GRAPHIC;
                     hue = 0x0058;
                 }
-                else if (StaticFilters.IsEnergyField(Graphic))
+                else if (StaticsHelper.IsEnergyField(Graphic))
                 {
                     _originalGraphic = Constants.FIELD_REPLACE_GRAPHIC;
                     hue = 0x0070;
                 }
-                else if (StaticFilters.IsPoisonField(Graphic))
+                else if (StaticsHelper.IsPoisonField(Graphic))
                 {
                     _originalGraphic = Constants.FIELD_REPLACE_GRAPHIC;
                     hue = 0x0044;
                 }
-                else if (StaticFilters.IsWallOfStone(Graphic))
+                else if (StaticsHelper.IsWallOfStone(Graphic))
                 {
                     _originalGraphic = Constants.FIELD_REPLACE_GRAPHIC;
                     hue = 0x038A;

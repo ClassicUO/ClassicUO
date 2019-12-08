@@ -25,7 +25,7 @@ using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Game.Data
 {
-    internal static class StaticFilters
+    internal static class StaticsHelper
     {
         [MethodImpl(256)]
         public static bool IsTree(ushort g)
