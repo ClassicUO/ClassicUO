@@ -1012,7 +1012,6 @@ namespace ClassicUO.Game.Managers
                         {
                             if (macro.Code == MacroType.BandageSelf)
                             {
-                                TargetManager.Target(World.Player.Serial);
                                 NetClient.Socket.Send(new PTargetSelectedObject(bandage.Serial, World.Player.Serial));
                             }
                             else if (TargetManager.SelectedTarget.IsMobile)
