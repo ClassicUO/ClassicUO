@@ -98,34 +98,35 @@ namespace ClassicUO.Network
             WriteByte((byte) v);
         }
 
-        public unsafe void WriteASCII(string value)
+        public void WriteASCII(string value)
         {
             EnsureSize(value.Length + 1);
 
-            fixed (char* ptr = value)
+            for (int i = 0; i < value.Length; i++)
             {
-                char* buff = ptr;
+                char c = value[i];
 
-                while (*buff != 0)
-                    WriteByte((byte) *buff++);
+                if (c != '\0')
+                {
+                    WriteByte((byte) c);
+                }
             }
 
             WriteByte(0);
         }
 
-        public unsafe void WriteASCII(string value, int length)
+        public void WriteASCII(string value, int length)
         {
             EnsureSize(length);
-
-            if (value.Length > length) throw new ArgumentOutOfRangeException();
-
-            fixed (char* ptr = value)
+            
+            for (int i = 0; i < length && i < value.Length; i++)
             {
-                char* buff = ptr;
-                byte* end = (byte*) ptr + length;
+                char c = value[i];
 
-                while (*buff != 0 && &buff != &end)
-                    WriteByte((byte) *buff++);
+                if (c != '\0')
+                {
+                    WriteByte((byte) c);
+                }
             }
 
             if (value.Length < length)
@@ -135,40 +136,37 @@ namespace ClassicUO.Network
             }
         }
 
-        public unsafe void WriteUnicode(string value)
+        public void WriteUnicode(string value)
         {
             EnsureSize((value.Length + 1) * 2);
 
-            fixed (char* ptr = value)
+            for (int i = 0; i < value.Length; i++)
             {
-                short* buff = (short*) ptr;
+                char c = value[i];
 
-                while (*buff != 0)
-                    WriteUShort((ushort) *buff++);
+                if (c != '\0')
+                {
+                    WriteUShort(c);
+                }
             }
 
             WriteUShort(0);
         }
 
-        public unsafe void WriteUnicode(string value, int length)
+        public void WriteUnicode(string value, int length)
         {
             EnsureSize(length);
 
-            //the string is automatically resized based on length provided
-            /*if (value.Length > length)
-                throw new ArgumentOutOfRangeException();*/
-
-            fixed (char* ptr = value)
+            for (int i = 0; i < length && i < value.Length; i++)
             {
-                short* buff = (short*) ptr;
-                int pos = 0;
+                char c = value[i];
 
-                while (*buff != 0 && pos < length)
+                if (c != '\0')
                 {
-                    WriteUShort((ushort) *buff++);
-                    pos++;
+                    WriteUShort(c);
                 }
             }
+
 
             if (value.Length < length)
             {
