@@ -45,7 +45,7 @@ namespace ClassicUO.IO.Audio
             Channels = AudioChannels.Stereo;
         }
 
-        private string Path => System.IO.Path.Combine(UOFileManager.ClientVersion <= ClientVersions.CV_5090 ? $"music/{Name}.mp3" : $"Music/Digital/{Name}.mp3");
+        private string Path => System.IO.Path.Combine(UOFileManager.UoFolderPath, UOFileManager.ClientVersion <= ClientVersions.CV_5090 ? $"music/{Name}.mp3" : $"Music/Digital/{Name}.mp3");
 
         public void Update()
         {
