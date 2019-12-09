@@ -461,37 +461,41 @@ namespace ClassicUO.Game.Scenes
 
                 if (ismobile || iscorpse)
                     AddOffsetCharacterTileToRenderList(obj, useObjectHandles);
-                else if (!island && itemData.IsFoliage && obj.FoliageIndex != _foliageIndex)
+                else if (!island && itemData.IsFoliage)
                 {
-                    sbyte index = 0;
-
-                    bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
-
-                    if (!check)
+                    if (obj.FoliageIndex != _foliageIndex)
                     {
-                        check = World.Player.Y <= worldY && World.Player.X <= worldX + 1;
+                        sbyte index = 0;
+
+                        bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
 
                         if (!check)
-                            check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
-                    }
+                        {
+                            check = World.Player.Y <= worldY && World.Player.X <= worldX + 1;
 
-                    if (check)
-                    {
-                        _rectangleObj.X = drawX - obj.FrameInfo.X;
-                        _rectangleObj.Y = drawY - obj.FrameInfo.Y;
-                        _rectangleObj.Width = obj.FrameInfo.Width;
-                        _rectangleObj.Height = obj.FrameInfo.Height;
-
-                        check = Exstentions.InRect(ref _rectangleObj, ref _rectanglePlayer);
+                            if (!check)
+                                check = World.Player.X <= worldX && World.Player.Y <= worldY + 1;
+                        }
 
                         if (check)
                         {
-                            index = _foliageIndex;
-                            IsFoliageUnion(obj.Graphic, obj.X, obj.Y, z);
-                        }
-                    }
+                            _rectangleObj.X = drawX - obj.FrameInfo.X;
+                            _rectangleObj.Y = drawY - obj.FrameInfo.Y;
+                            _rectangleObj.Width = obj.FrameInfo.Width;
+                            _rectangleObj.Height = obj.FrameInfo.Height;
 
-                    obj.FoliageIndex = index;
+                            check = Exstentions.InRect(ref _rectangleObj, ref _rectanglePlayer);
+
+                            if (check)
+                            {
+                                index = _foliageIndex;
+                                IsFoliageUnion(obj.Graphic, obj.X, obj.Y, z);
+                            }
+                        }
+
+                        obj.FoliageIndex = index;
+
+                    }
 
                     if (_foliageCount >= _foliages.Length)
                     {
