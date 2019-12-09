@@ -702,10 +702,10 @@ namespace ClassicUO.Game.UI.Gumps
                     offset = 1072042;
                     break;
                 case SpellBookType.Mysticism:
-                    offset = 0; //TODO
+                    offset = 1095193;
                     break;
                 case SpellBookType.Bardic:
-                    offset = 0; //TODO
+                    offset = 1115689;
                     break;
                 default:
                     offset = 0;
@@ -979,9 +979,6 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case 0x225A:
-                    _spellBookType = SpellBookType.Mastery;
-
-                    break;
                 case 0x225B:
                     _spellBookType = SpellBookType.Bardic;
 
