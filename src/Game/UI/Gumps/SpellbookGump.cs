@@ -979,6 +979,9 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case 0x225A:
+                    _spellBookType = SpellBookType.Mastery;
+
+                    break;
                 case 0x225B:
                     _spellBookType = SpellBookType.Bardic;
 

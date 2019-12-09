@@ -134,6 +134,7 @@
     <Compile Include="Game\Data\SpellsBardic.cs" />
     <Compile Include="Game\Data\SpellsBushido.cs" />
     <Compile Include="Game\Data\SpellsChivalry.cs" />
+    <Compile Include="Game\Data\SpellsMastery.cs" />
     <Compile Include="Game\Data\SpellsMysticism.cs" />
     <Compile Include="Game\Data\SpellsNecromancy.cs" />
     <Compile Include="Game\Data\SpellsNinjitsu.cs" />
