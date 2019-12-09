@@ -769,13 +769,6 @@ namespace ClassicUO.Network
                     {
                         UIManager.GetGump<PaperDollGump>(cont)?.Update();
                     }
-
-                    if (ProfileManager.Current.GridLootType > 0)
-                    {
-                        GridLootGump grid = UIManager.GetGump<GridLootGump>(it.Container);
-
-                        if (grid != null) grid.RedrawItems();
-                    }
                 }
 
                 World.RemoveItem(it, true);
@@ -1490,8 +1483,6 @@ namespace ClassicUO.Network
                         _requestedGridLoot = 0;
                     }
                 }
-
-                if (grid != null) grid.RedrawItems();
             }
 
             container?.Items.ProcessDelta();

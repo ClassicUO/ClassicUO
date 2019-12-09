@@ -19,6 +19,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly AlphaBlendControl _background;
         private readonly NiceButton _buttonPrev, _buttonNext;
         private readonly Item _corpse;
+        private readonly Label _currentPageLabel;
 
         private int _currentPage = 1;
         private int _pagesCount;
@@ -42,9 +43,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             CanMove = true;
             AcceptMouseInput = true;
+            WantUpdateSize = false;
 
             _background = new AlphaBlendControl();
-            _background.Width = 300 - 10;
+            _background.Width = 300;
             _background.Height = 400;
             Add(_background);
 
@@ -54,8 +56,8 @@ namespace ClassicUO.Game.UI.Gumps
             NiceButton setLootBag = new NiceButton(3, Height - 23, 100, 20, ButtonAction.Activate, "Set loot bag") { ButtonParameter = 2, IsSelectable = false };
             Add(setLootBag);
 
-            _buttonPrev = new NiceButton(Width - 50, Height - 20, 20, 20, ButtonAction.Activate, "<<") {ButtonParameter = 0, IsSelectable = false};
-            _buttonNext = new NiceButton(Width - 20, Height - 20, 20, 20, ButtonAction.Activate, ">>") {ButtonParameter = 1, IsSelectable = false};
+            _buttonPrev = new NiceButton(Width - 80, Height - 20, 40, 20, ButtonAction.Activate, "<<") {ButtonParameter = 0, IsSelectable = false};
+            _buttonNext = new NiceButton(Width - 40, Height - 20, 40, 20, ButtonAction.Activate, ">>") {ButtonParameter = 1, IsSelectable = false};
 
             _buttonNext.IsEnabled = _buttonPrev.IsEnabled = false;
             _buttonNext.IsVisible = _buttonPrev.IsVisible = false;
@@ -63,7 +65,23 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_buttonPrev);
             Add(_buttonNext);
+            Add(_currentPageLabel = new Label("1", true, 999, align: IO.Resources.TEXT_ALIGN_TYPE.TS_CENTER)
+            {
+                X = Width / 2 - 5,
+                Y = Height - 20,
+            });
 
+            _corpse.Items.Added += Items_Added;
+            _corpse.Items.Removed += Items_Removed;      
+        }
+
+        private void Items_Removed(object sender, CollectionChangedEventArgs<Serial> e)
+        {
+            RedrawItems();
+        }
+
+        private void Items_Added(object sender, CollectionChangedEventArgs<Serial> e)
+        {
             RedrawItems();
         }
 
@@ -79,8 +97,10 @@ namespace ClassicUO.Game.UI.Gumps
                     _buttonPrev.IsVisible = false;
                 }
                 _buttonNext.IsVisible = true;
-
                 ChangePage(_currentPage);
+
+                _currentPageLabel.Text = ActivePage.ToString();
+                _currentPageLabel.X = Width / 2 - _currentPageLabel.Width / 2;
             }
             else if (buttonID == 1)
             {
@@ -95,6 +115,9 @@ namespace ClassicUO.Game.UI.Gumps
                 _buttonPrev.IsVisible = true;
 
                 ChangePage(_currentPage);
+
+                _currentPageLabel.Text = ActivePage.ToString();
+                _currentPageLabel.X = Width / 2 - _currentPageLabel.Width / 2;
             }
             else if (buttonID == 2)
             {
@@ -122,17 +145,14 @@ namespace ClassicUO.Game.UI.Gumps
                 if (x >= _background.Width - 20)
                 {
                     x = 20;
-                    y += gridItem.Height + 40;
+                    y += gridItem.Height + 20;
 
                     if (y >= _background.Height - 40)
                     {
                         _pagesCount++;
                         y = 20;
-
-                        _buttonNext.IsEnabled = true;
-                        _buttonNext.IsVisible = true;
                     }
-                }
+                }             
 
                 gridItem.X = x;
                 gridItem.Y = y;
@@ -141,6 +161,24 @@ namespace ClassicUO.Game.UI.Gumps
                 x += gridItem.Width + 20;
 
                 count++;
+            }
+
+            if (ActivePage <= 1)
+            {
+                ActivePage = 1;
+                _buttonNext.IsVisible = _pagesCount > 1;
+                _buttonPrev.IsVisible = false;
+            }
+            else if (ActivePage >= _pagesCount)
+            {
+                ActivePage = _pagesCount;
+                _buttonNext.IsVisible = false;
+                _buttonPrev.IsVisible = _pagesCount > 1;
+            }
+            else if (ActivePage > 1 && ActivePage < _pagesCount)
+            {
+                _buttonNext.IsVisible = true;
+                _buttonPrev.IsVisible = true;
             }
 
             if (count == 0)
@@ -156,6 +194,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_corpse == SelectedObject.CorpseObject)
                     SelectedObject.CorpseObject = null;
+
+                _corpse.Items.Added -= Items_Added;
+                _corpse.Items.Removed -= Items_Removed;
             }
 
             _lastX = X;
@@ -168,6 +209,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             ResetHueVector();
             base.Draw(batcher, x, y);
+            ResetHueVector();
             batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
 
             return true;
@@ -205,13 +247,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class GridLootItem : Control
         {
-            private readonly Serial _serial;
-
             private readonly TextureControl _texture;
 
             public GridLootItem(Serial serial)
             {
-                _serial = serial;
+                LocalSerial = serial;
 
                 Item item = World.Items.Get(serial);
 
@@ -222,7 +262,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                const int SIZE = 70;
+                const int SIZE = 50;
 
                 CanMove = false;
 
@@ -272,6 +312,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ResetHueVector();
                 base.Draw(batcher, x, y);
+                ResetHueVector();
+
                 batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y + 15, Width, Height - 15, ref _hueVector);
 
                 if (_texture.MouseIsOver)
