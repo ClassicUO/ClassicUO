@@ -192,7 +192,7 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-        private StaticTiles _empty;
+        private readonly StaticTiles _empty;
         private sbyte _foliageIndex;
 
 
