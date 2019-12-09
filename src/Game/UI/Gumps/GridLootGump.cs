@@ -76,11 +76,9 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_currentPage <= 1)
                 {
                     _currentPage = 1;
-                    _buttonPrev.IsEnabled = false;
-                    _buttonNext.IsEnabled = true;
                     _buttonPrev.IsVisible = false;
-                    _buttonNext.IsVisible = true;
                 }
+                _buttonNext.IsVisible = true;
 
                 ChangePage(_currentPage);
             }
@@ -91,11 +89,10 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_currentPage >= _pagesCount)
                 {
                     _currentPage = _pagesCount;
-                    _buttonPrev.IsEnabled = true;
-                    _buttonNext.IsEnabled = false;
-                    _buttonPrev.IsVisible = true;
                     _buttonNext.IsVisible = false;
                 }
+
+                _buttonPrev.IsVisible = true;
 
                 ChangePage(_currentPage);
             }

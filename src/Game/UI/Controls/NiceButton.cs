@@ -43,10 +43,7 @@ namespace ClassicUO.Game.UI.Controls
             _action = action;
             Label label;
 
-            Add(label = new Label(text, true, 999, w, 0xFF, FontStyle.BlackBorder | FontStyle.Cropped, align)
-            {
-                X = align == TEXT_ALIGN_TYPE.TS_CENTER ? -2 : 0
-            });
+            Add(label = new Label(text, true, 999, w, 0xFF, FontStyle.BlackBorder | FontStyle.Cropped, align));
             label.Y = (h - label.Height) >> 1;
             _groupnumber = groupnumber;
         }
