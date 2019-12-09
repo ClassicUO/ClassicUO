@@ -500,6 +500,8 @@ namespace ClassicUO.Game.Scenes
                     }
 
                     _foliages[_foliageCount++] = obj;
+
+                    goto FOLIAGE_SKIP;
                 }
 
                 if (!island && _alphaChanged && !changinAlpha)
@@ -509,6 +511,8 @@ namespace ClassicUO.Game.Scenes
                     else if (!itemData.IsFoliage && obj.AlphaHue != 0xFF)
                         obj.ProcessAlpha(0xFF);
                 }
+
+                FOLIAGE_SKIP:
 
                 if (_renderListCount >= _renderList.Length)
                 {

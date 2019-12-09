@@ -509,9 +509,6 @@ namespace ClassicUO.Game.Scenes
                 {
                     var f = _foliages[i];
 
-                    if (f == null)
-                        break;
-
                     if (f.FoliageIndex == _foliageIndex)
                     {
                         f.ProcessAlpha(Constants.FOLIAGE_ALPHA);
