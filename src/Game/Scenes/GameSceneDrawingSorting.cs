@@ -54,7 +54,8 @@ namespace ClassicUO.Game.Scenes
         private int _renderIndex = 1;
 
         private GameObject[] _renderList = new GameObject[10000];
-        private int _renderListCount;
+        private GameObject[] _foliages = new GameObject[100];
+        private int _renderListCount, _foliageCount;
 
         public void UpdateMaxDrawZ(bool force = false)
         {
@@ -191,7 +192,9 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-        private static StaticTiles _empty;
+        private StaticTiles _empty;
+        private sbyte _foliageIndex;
+
 
         private readonly struct TreeUnion
         {
@@ -217,7 +220,7 @@ namespace ClassicUO.Game.Scenes
             new TreeUnion(0x0D8C, 0x0D90)
         };
 
-        private void IsFoliageUnion(ushort graphic, int x, int y, int z, bool ok)
+        private void IsFoliageUnion(ushort graphic, int x, int y, int z)
         {
             for (int i = 0; i < _treeInfos.Length; i++)
             {
@@ -234,7 +237,7 @@ namespace ClassicUO.Game.Scenes
 
                     for (graphic = info.Start; graphic <= info.End; graphic++, x++, y--)
                     {
-                        ApplyFoliageTransparency(graphic, x, y, z, ok);
+                        ApplyFoliageTransparency(graphic, x, y, z);
                     }
 
                     break;
@@ -242,7 +245,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private void ApplyFoliageTransparency(ushort graphic, int x, int y, int z, bool ok)
+        private void ApplyFoliageTransparency(ushort graphic, int x, int y, int z)
         {
             Tile tile = World.Map.GetTile(x, y);
 
@@ -254,23 +257,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (testGraphic == graphic && obj.Z == z)
                     {
-                        switch (obj)
-                        {
-                            case Static st:
-                                st.CharacterIsBehindFoliage = ok;
-
-                                break;
-
-                            case Multi m:
-                                m.CharacterIsBehindFoliage = ok;
-
-                                break;
-
-                            case Item it:
-                                it.CharacterIsBehindFoliage = ok;
-
-                                break;
-                        }
+                        obj.FoliageIndex = _foliageIndex;
                     }
                 }
             }
@@ -474,8 +461,10 @@ namespace ClassicUO.Game.Scenes
 
                 if (ismobile || iscorpse)
                     AddOffsetCharacterTileToRenderList(obj, useObjectHandles);
-                else if (!island && itemData.IsFoliage)
+                else if (!island && itemData.IsFoliage && obj.FoliageIndex != _foliageIndex)
                 {
+                    sbyte index = 0;
+
                     bool check = World.Player.X <= worldX && World.Player.Y <= worldY;
 
                     if (!check)
@@ -494,27 +483,23 @@ namespace ClassicUO.Game.Scenes
                         _rectangleObj.Height = obj.FrameInfo.Height;
 
                         check = Exstentions.InRect(ref _rectangleObj, ref _rectanglePlayer);
+
+                        if (check)
+                        {
+                            index = _foliageIndex;
+                            IsFoliageUnion(obj.Graphic, obj.X, obj.Y, z);
+                        }
                     }
 
-                    IsFoliageUnion(obj.Graphic, obj.X, obj.Y, obj.Z, check);
+                    obj.FoliageIndex = index;
 
-                    switch (obj)
+                    if (_foliageCount >= _foliages.Length)
                     {
-                        case Static st:
-                            st.CharacterIsBehindFoliage = check;
-
-                            break;
-
-                        case Multi m:
-                            m.CharacterIsBehindFoliage = check;
-
-                            break;
-
-                        case Item it:
-                            it.CharacterIsBehindFoliage = check;
-
-                            break;
+                        int newsize = _foliages.Length + 50;
+                        Array.Resize(ref _foliages, newsize);
                     }
+
+                    _foliages[_foliageCount++] = obj;
                 }
 
                 if (!island && _alphaChanged && !changinAlpha)

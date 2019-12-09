@@ -436,6 +436,13 @@ namespace ClassicUO.Game.Scenes
             if (_alphaChanged)
                 _alphaTimer = Time.Ticks + Constants.ALPHA_TIME;
 
+            _foliageIndex++;
+            if (_foliageIndex >= 100)
+            {
+                _foliageIndex = 1;
+            }
+            _foliageCount = 0;
+
             GetViewPort();
 
             _renderListCount = 0;
@@ -496,6 +503,26 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
+            if (_alphaChanged)
+            {
+                for (int i = 0; i < _foliageCount; i++)
+                {
+                    var f = _foliages[i];
+
+                    if (f == null)
+                        break;
+
+                    if (f.FoliageIndex == _foliageIndex)
+                    {
+                        f.ProcessAlpha(Constants.FOLIAGE_ALPHA);
+                    }
+                    else
+                    {
+                        f.ProcessAlpha(0xFF);
+                    }
+                }
+            }
+                
 
             UpdateTextServerEntities(World.Mobiles);
             UpdateTextServerEntities(World.Items);

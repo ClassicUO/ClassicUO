@@ -43,7 +43,6 @@ namespace ClassicUO.Game.GameObjects
         public Point RealScreenPosition;
     }
 
-
     internal abstract partial class GameObject : BaseGameObject, IUpdateable
     {
         private Position _position = Position.INVALID;
@@ -100,6 +99,8 @@ namespace ClassicUO.Game.GameObjects
         public GameObject Right;
         public Vector3 Offset;
 
+        // FIXME: remove it
+        public sbyte FoliageIndex = -1;
 
         public bool IsDestroyed { get; protected set; }
 

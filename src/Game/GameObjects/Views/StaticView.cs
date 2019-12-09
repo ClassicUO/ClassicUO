@@ -39,8 +39,6 @@ namespace ClassicUO.Game.GameObjects
         private int _canBeTransparent;
         private uint _lastAnimationFrameTime;
 
-        public bool CharacterIsBehindFoliage { get; set; }
-
         public override bool TransparentTest(int z)
         {
             bool r = true;
@@ -76,20 +74,7 @@ namespace ClassicUO.Game.GameObjects
 
             ushort graphic = Graphic;
 
-            if (ItemData.IsFoliage)
-            {
-                if (CharacterIsBehindFoliage)
-                {
-                    if (AlphaHue != Constants.FOLIAGE_ALPHA)
-                        ProcessAlpha(Constants.FOLIAGE_ALPHA);
-                }
-                else
-                {
-                    if (AlphaHue != 0xFF)
-                        ProcessAlpha(0xFF);
-                }
-            }
-            else if (ItemData.IsAnimated && _lastAnimationFrameTime < Time.Ticks)
+            if (ItemData.IsAnimated && _lastAnimationFrameTime < Time.Ticks)
             {
                 IntPtr ptr = UOFileManager.AnimData.GetAddressToAnim(Graphic);
 
@@ -164,7 +149,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
-            if (SelectedObject.Object == this || CharacterIsBehindFoliage)
+            if (SelectedObject.Object == this)
                 return;
 
             if (DrawTransparent)

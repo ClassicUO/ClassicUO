@@ -40,6 +40,7 @@ namespace ClassicUO.Game.GameObjects
         private bool _force;
         private Graphic _originalGraphic;
 
+
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)
@@ -115,20 +116,6 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Height = Texture.Height;
 
                 _force = false;
-            }
-
-            if (ItemData.IsFoliage)
-            {
-                if (CharacterIsBehindFoliage)
-                {
-                    if (AlphaHue != Constants.FOLIAGE_ALPHA)
-                        ProcessAlpha(Constants.FOLIAGE_ALPHA);
-                }
-                else
-                {
-                    if (AlphaHue != 0xFF)
-                        ProcessAlpha(0xFF);
-                }
             }
 
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
@@ -350,7 +337,7 @@ namespace ClassicUO.Game.GameObjects
             if (!Serial.IsValid /*&& IsMulti*/ && TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 return;
 
-            if (SelectedObject.Object == this || CharacterIsBehindFoliage)
+            if (SelectedObject.Object == this)
                 return;
 
             if (IsCorpse)

@@ -79,7 +79,7 @@ namespace ClassicUO.Game.GameObjects
                 s.Index = index;
                 s.IsDestroyed = false;
                 s.AlphaHue = 0;
-                s.CharacterIsBehindFoliage = false;
+                s.FoliageIndex = 0;
                 s.UpdateGraphicBySeason();
 
                 if (s.ItemData.Height > 5)
