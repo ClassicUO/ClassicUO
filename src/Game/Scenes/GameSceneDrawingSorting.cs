@@ -494,7 +494,6 @@ namespace ClassicUO.Game.Scenes
                         }
 
                         obj.FoliageIndex = index;
-
                     }
 
                     if (_foliageCount >= _foliages.Length)
