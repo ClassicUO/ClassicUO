@@ -32,7 +32,7 @@ namespace ClassicUO.Game.Data
         Ninjitsu,
         Spellweaving,
         Mysticism,
-        Bardic,
+        Mastery,
         Unknown = 0xFF
     }
 }

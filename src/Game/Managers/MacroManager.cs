@@ -405,7 +405,7 @@ namespace ClassicUO.Game.Managers
                                             break;
 
                                         case MacroSubType.BardSpellbook:
-                                            type = SpellBookType.Bardic;
+                                            type = SpellBookType.Mastery;
 
                                             break;
                                     }

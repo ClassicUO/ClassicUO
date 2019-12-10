@@ -226,7 +226,7 @@ namespace ClassicUO.Game.Data
             if (fullidx < 700)
                 return SpellsMysticism.GetSpell((fullidx - 77) % 100);
 
-            return SpellsBardic.GetSpell(fullidx % 100);
+            return SpellsMastery.GetSpell(fullidx % 100);
         }
 
         public static void FullIndexSetModifySpell(int fullidx, int id, int iconid, int smalliconid, int minskill, int manacost, int tithing, string name, string words, TargetType target, params Reagents[] regs)
@@ -274,7 +274,7 @@ namespace ClassicUO.Game.Data
             else if (fullidx < 700)
                 SpellsMysticism.SetSpell(id - 77, in sd);
             else
-                SpellsBardic.SetSpell(id, in sd);
+                SpellsMastery.SetSpell(id, in sd);
         }
     }
 }
