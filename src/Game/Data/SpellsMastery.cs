@@ -22,6 +22,7 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Managers;
 
@@ -36,7 +37,7 @@ namespace ClassicUO.Game.Data
             _spellsDict = new Dictionary<int, SpellDefinition>
             {
                 // Spell List
-                {
+               {
                     1, new SpellDefinition("Inspire", 701, 0x945, 0x945, "Uus Por", 16, 90, 4, TargetType.Beneficial, Reagents.None)
                 },
                 {
@@ -171,6 +172,7 @@ namespace ClassicUO.Game.Data
                 {
                     45, new SpellDefinition("Boarding", 744, 0x9BB1, 0x9BB1, "", 0, 90, 0, TargetType.Neutral)
                 },
+
             };
         }
 
@@ -218,6 +220,24 @@ namespace ClassicUO.Game.Data
                 return "Peacemaking";
 
             return "Discordance";
+        }
+
+        [MethodImpl(256)]
+        public static bool IsPassive(int i)
+        {
+            switch (i)
+            {
+                case 15:
+                case 16:
+                case 18:
+                case 33:
+                case 39:
+                case 42:
+                case 45:
+                    return true;
+            }
+
+            return false;
         }
 
         public static SpellDefinition GetSpell(int spellIndex)

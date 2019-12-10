@@ -336,7 +336,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _dataBox.Add(text, page);
 
                     if (_spellBookType == SpellBookType.Mastery && j >= 1)
+                    {
                         break;
+                    }
 
                     if (_spellBookType == SpellBookType.Magery)
                     {
@@ -455,6 +457,22 @@ namespace ClassicUO.Game.UI.Gumps
                             Y = 34
                         };
                         _dataBox.Add(text, page1);
+
+                        if (!string.IsNullOrEmpty(abbreviature))
+                        {
+                            int abbreviatureY = 26;
+
+                            if (text.Height < 24)
+                                abbreviatureY = 31;
+                            abbreviatureY += text.Height;
+
+                            text = new Label(abbreviature, false, 0x0288, 80, 6)
+                            {
+                                X = iconTextX,
+                                Y = abbreviatureY
+                            };
+                            _dataBox.Add(text, page1);
+                        }
 
                         break;
                     }
@@ -872,7 +890,10 @@ namespace ClassicUO.Game.UI.Gumps
                     manaCost = def.ManaCost;
                     minSkill = def.MinSkill;
                     y = 140;
-                    text = $"Upkeep Cost: {def.TithingCost}\nMana cost: {manaCost}\nMin. Skill: {minSkill}";
+                    if (def.TithingCost > 0)
+                        text = $"Upkeep Cost: {def.TithingCost}\nMana cost: {manaCost}\nMin. Skill: {minSkill}";
+                    else
+                        text = $"Mana cost: {manaCost}\nMin. Skill: {minSkill}";
 
                     return;
             }
