@@ -37,23 +37,140 @@ namespace ClassicUO.Game.Data
             {
                 // Spell List
                 {
-                    1, new SpellDefinition("Inspire", 701, 0x945, 0x945, "Uus Por", 30, 90, 8, TargetType.Beneficial, Reagents.None)
+                    1, new SpellDefinition("Inspire", 701, 0x945, 0x945, "Uus Por", 16, 90, 4, TargetType.Beneficial, Reagents.None)
                 },
                 {
-                    2, new SpellDefinition("Invigorate", 702, 0x946, 0x946, "An Zu", 30, 90, 8, TargetType.Beneficial, Reagents.None)
+                    2, new SpellDefinition("Invigorate", 702, 0x946, 0x946, "An Zu", 22, 90, 5, TargetType.Beneficial, Reagents.None)
                 },
                 {
-                    3, new SpellDefinition("Resilience", 703, 0x947, 0x947, "Kal Mani Tym", 30, 90, 8, TargetType.Beneficial, Reagents.None)
+                    3, new SpellDefinition("Resilience", 703, 0x947, 0x947, "Kal Mani Tym", 16, 90, 4, TargetType.Beneficial, Reagents.None)
                 },
                 {
-                    4, new SpellDefinition("Perseverance", 704, 0x948, 0x948, "Uus Jux Sanct", 30, 90, 8, TargetType.Beneficial, Reagents.None)
+                    4, new SpellDefinition("Perseverance", 704, 0x948, 0x948, "Uus Jux Sanct", 18, 90, 5, TargetType.Beneficial, Reagents.None)
                 },
                 {
-                    5, new SpellDefinition("Tribulation", 705, 0x949, 0x949, "In Jux Hur Rel", 30, 90, 16, TargetType.Harmful, Reagents.None)
+                    5, new SpellDefinition("Tribulation", 705, 0x949, 0x949, "In Jux Hur Rel", 24, 90, 10, TargetType.Harmful, Reagents.None)
                 },
                 {
-                    6, new SpellDefinition("Despair", 706, 0x94A, 0x94A, "Kal Des Mani Tym", 30, 90, 18, TargetType.Harmful, Reagents.None)
-                }
+                    6, new SpellDefinition("Despair", 706, 0x94A, 0x94A, "Kal Des Mani Tym", 26, 90, 12, TargetType.Harmful, Reagents.None)
+                },
+                {
+                    7, new SpellDefinition("Death Ray", 707, 0x9B8B, 0x9B8B, "In Grav Corp", 50, 90, 35, TargetType.Harmful, Reagents.BlackPearl, Reagents.Bloodmoss, Reagents.SpidersSilk)
+                },
+                {
+                    8, new SpellDefinition("Ethereal Burst", 709, 0x9B8C, 0x9B8C, "Uus Ort Grav", 0, 90, 0, TargetType.Beneficial, Reagents.Bloodmoss, Reagents.Ginseng, Reagents.MandrakeRoot)
+                },
+                {
+                    9, new SpellDefinition("Nether Blast", 710, 0x9B8D, 0x9B8D, "In Vas Xen Por", 40, 90, 0, TargetType.Harmful, Reagents.DragonsBlood, Reagents.DemonBone)
+                },
+                {
+                    10, new SpellDefinition("Mystic Weapon", 711, 0x9B8E, 0x9B8E, "Vas Ylem Wis", 40, 90, 0, TargetType.Neutral, Reagents.FertileDirt, Reagents.Bone)
+                },
+                {
+                    11, new SpellDefinition("Command Undead", 712, 0x9B8F, 0x9B8F, "In Corp Xen Por", 40, 90, 0, TargetType.Neutral, Reagents.DaemonBlood, Reagents.PigIron, Reagents.BatWing)
+                },
+                {
+                    12, new SpellDefinition("Conduit", 713, 0x9B90, 0x9B90, "Uus Corp Grav", 40, 90, 0, TargetType.Harmful, Reagents.NoxCrystal, Reagents.BatWing, Reagents.GraveDust)
+                },
+                {
+                    13, new SpellDefinition("Mana Shield", 716, 0x9B91, 0x9B91, "Faerkulggen", 40, 90, 0, TargetType.Beneficial)
+                },
+                {
+                    14, new SpellDefinition("Summon Reaper", 718, 0x9B92, 0x9B92, "Lartarisstree", 50, 90, 0, TargetType.Neutral)
+                },
+                {
+                    15, new SpellDefinition("Enchanted Summoning", 719, 0x9B93, 0x9B93, "", 0, 90, 0, TargetType.Neutral)
+                },
+                {
+                    16, new SpellDefinition("Anticipate Hit", 720, 0x9B94, 0x9B94, "", 10, 90, 0, TargetType.Neutral)
+                },
+                {
+                    17, new SpellDefinition("Warcry", 721, 0x9B95, 0x9B95, "", 40, 90, 0, TargetType.Neutral)
+                },
+                {
+                    18, new SpellDefinition("Intuition", 722, 0x9B96, 0x9B96, "", 0, 90, 0, TargetType.Neutral)
+                },
+                {
+                    19, new SpellDefinition("Rejuvenate", 723, 0x9B97, 0x9B97, "", 10, 90, 35, TargetType.Neutral)
+                },
+                {
+                    20, new SpellDefinition("Holy Fist", 724, 0x9B98, 0x9B98, "", 50, 90, 35, TargetType.Neutral)
+                },
+                {
+                    21, new SpellDefinition("Shadow", 725, 0x9B99, 0x9B99, "", 10, 90, 4, TargetType.Neutral)
+                },
+                {
+                    22, new SpellDefinition("White Tiger Form", 726, 0x9B9A, 0x9B9A, "", 10, 90, 0, TargetType.Neutral)
+                },
+                {
+                    23, new SpellDefinition("Flaming Shot", 727, 0x9B9B, 0x9B9B, "", 30, 90, 0, TargetType.Neutral)
+                },
+                {
+                    24, new SpellDefinition("Playing The Odds", 728, 0x9B9C, 0x9B9C, "", 25, 90, 0, TargetType.Neutral)
+                },
+                {
+                    25, new SpellDefinition("Thrust", 729, 0x9B9D, 0x9B9D, "", 30, 90, 20, TargetType.Neutral)
+                },
+                {
+                    26, new SpellDefinition("Pierce", 730, 0x9B9E, 0x9B9E, "", 20, 90, 0, TargetType.Neutral)
+                },
+                {
+                    27, new SpellDefinition("Stagger", 731, 0x9B9F, 0x9B9F, "", 20, 90, 0, TargetType.Neutral)
+                },
+                {
+                    28, new SpellDefinition("Toughness", 733, 0x9BA0, 0x9BA0, "", 20, 90, 20, TargetType.Neutral)
+                },
+                {
+                    29, new SpellDefinition("Onslaught", 734, 0x9BA1, 0x9BA1, "", 20, 90, 0, TargetType.Neutral)
+                },
+                {
+                    30, new SpellDefinition("Focused Eye", 735, 0x9BA2, 0x9BA2, "", 20, 90, 20, TargetType.Neutral)
+                },
+                {
+                    31, new SpellDefinition("Elemental Fury", 736, 0x9BA3, 0x9BA3, "", 20, 90, 0, TargetType.Neutral)
+                },
+                {
+                    32, new SpellDefinition("Called Shot", 737, 0x9BA4, 0x9BA4, "", 40, 90, 0, TargetType.Neutral)
+                },
+                {
+                    33, new SpellDefinition("Warrior's Gifts", 739, 0x9BA5, 0x9BA5, "", 50, 90, 0, TargetType.Neutral)
+                },
+                {
+                    34, new SpellDefinition("Shield Bash", 740, 0x9BA6, 0x9BA6, "", 50, 90, 0, TargetType.Neutral)
+                },
+                {
+                    35, new SpellDefinition("Bodyguard", 742, 0x9BA7, 0x9BA7, "", 40, 90, 0, TargetType.Neutral)
+                },
+                {
+                    36, new SpellDefinition("Heighten Senses", 743, 0x9BA8, 0x9BA8, "", 10, 90, 10, TargetType.Neutral)
+                },
+                {
+                    37, new SpellDefinition("Tolerance", 743, 0x9BA9, 0x9BA9, "", 20, 90, 0, TargetType.Neutral)
+                },
+                {
+                    38, new SpellDefinition("Injected Strike", 743, 0x9BAA, 0x9BAA, "", 30, 90, 0, TargetType.Neutral)
+                },
+                {
+                    39, new SpellDefinition("Potency", 743, 0x9BAB, 0x9BAB, "", 0, 90, 0, TargetType.Neutral)
+                },
+                {
+                    40, new SpellDefinition("Rampage", 743, 0x9BAC, 0x9BAC, "", 20, 90, 0, TargetType.Neutral)
+                },
+                {
+                    41, new SpellDefinition("Fists of Fury", 743, 0x9BAD, 0x9BAD, "", 20, 90, 0, TargetType.Neutral)
+                },
+                {
+                    42, new SpellDefinition("Knockout", 743, 0x9BAE, 0x9BAE, "", 0, 90, 0, TargetType.Neutral)
+                },
+                {
+                    43, new SpellDefinition("Whispering", 743, 0x9BAF, 0x9BAF, "", 40, 90, 0, TargetType.Neutral)
+                },
+                {
+                    44, new SpellDefinition("Combat Training", 743, 0x9BB0, 0x9BB0, "", 40, 90, 0, TargetType.Neutral)
+                },
+                {
+                    45, new SpellDefinition("Boarding", 743, 0x9BB1, 0x9BB1, "", 0, 90, 0, TargetType.Neutral)
+                },
             };
         }
 
