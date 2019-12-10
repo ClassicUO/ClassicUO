@@ -222,23 +222,12 @@ namespace ClassicUO.Game.Data
             return "Discordance";
         }
 
-        [MethodImpl(256)]
-        public static bool IsPassive(int i)
+        public static bool IsPassive(int spellID)
         {
-            switch (i)
-            {
-                case 15:
-                case 16:
-                case 18:
-                case 33:
-                case 39:
-                case 42:
-                case 45:
-                    return true;
-            }
-
-            return false;
+            return spellID == 714 || spellID == 715 || spellID == 716 || spellID == 732 || spellID == 738 || spellID == 741 || spellID == 744;
         }
+
+        public static readonly int[] Passives = {714, 715, 716, 732, 738, 741, 744};
 
         public static SpellDefinition GetSpell(int spellIndex)
         {
@@ -248,10 +237,7 @@ namespace ClassicUO.Game.Data
             return SpellDefinition.EmptySpell;
         }
 
-        //public static int GetCliloc(int i)
-        //{
 
-        //}
 
         public static void SetSpell(int id, in SpellDefinition newspell)
         {

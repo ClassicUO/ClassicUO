@@ -355,12 +355,19 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (_spells[offs])
                         {
+                            if (_spellBookType == SpellBookType.Mastery && i < pagesToFill && SpellsMastery.IsPassive(SpellsMastery.GetSpell(offs + 1).ID))
+                            {
+                                offs++;
+                                continue;
+                            }
+
                             GetSpellNames(offs, out string name, out string abbreviature, out string reagents);
 
                             if (spellDone % 2 == 0)
                                 topage++;
 
                             spellDone++;
+
 
                             text = new HoveredLabel(name, false, 0x0288, 0x33, font: 9)
                             {
@@ -369,7 +376,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                             text.MouseUp += OnClicked;
                             text.MouseDoubleClick += OnDoubleClicked;
+
+                            
                             _dataBox.Add(text, page);
+
                             y += 15;
                         }
 
