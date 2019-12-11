@@ -1487,11 +1487,9 @@ namespace ClassicUO.Network
 
             container?.Items.ProcessDelta();
 
-            if (container is Item itemContainer && itemContainer.IsSpellBook && SpellbookData.GetTypeByGraphic(itemContainer.Graphic) != SpellBookType.Unknown)
+            if (container is Item itemContainer && SpellbookData.GetTypeByGraphic(itemContainer.Graphic) != SpellBookType.Unknown)
             {
-                SpellbookData.GetData(itemContainer, out ulong field, out SpellBookType type);
-
-                if (itemContainer.FillSpellbook(type, field)) UIManager.GetGump<SpellbookGump>(itemContainer)?.Update();
+                UIManager.GetGump<SpellbookGump>(itemContainer)?.Update();
             }
 
 
@@ -3129,52 +3127,34 @@ namespace ClassicUO.Network
                     p.Skip(2);
                     Item spellbook = World.GetOrCreateItem(p.ReadUInt());
                     spellbook.Graphic = p.ReadUShort();
-
-                    if (!spellbook.IsSpellBook)
-                        return;
-
+                    spellbook.Items.Clear();
                     ushort type = p.ReadUShort();
-                    ulong filed = p.ReadUInt() + ((ulong) p.ReadUInt() << 32);
-                    SpellBookType sbtype = SpellBookType.Unknown;
 
-                    switch (type)
+                    for (int j = 0; j < 2; j++)
                     {
-                        case 1:
-                            sbtype = SpellBookType.Magery;
+                        uint spells = 0;
 
-                            break;
+                        for (int i = 0; i < 4; i++)
+                        {
+                            spells |= (uint) (p.ReadByte() << (i * 8));
+                        }
 
-                        case 101:
-                            sbtype = SpellBookType.Necromancy;
+                        for (int i = 0; i < 32; i++)
+                        {
+                            if ((spells & (1 << i)) != 0)
+                            {
+                                ushort cc = (ushort) ((j * 32) + i + 1);
 
-                            break;
-
-                        case 201:
-                            sbtype = SpellBookType.Chivalry;
-
-                            break;
-
-                        case 401:
-                            sbtype = SpellBookType.Bushido;
-
-                            break;
-
-                        case 501:
-                            sbtype = SpellBookType.Ninjitsu;
-
-                            break;
-
-                        case 601:
-                            sbtype = SpellBookType.Spellweaving;
-
-                            break;
+                                Item spellItem = new Item(cc)
+                                {
+                                    Graphic = 0x1F2E, Amount = cc
+                                };
+                                spellbook.Items.Add(spellItem);
+                            }
+                        }
                     }
-
-                    if (spellbook.FillSpellbook(sbtype, filed))
-                    {
-                        SpellbookGump gump = UIManager.GetGump<SpellbookGump>(spellbook);
-                        gump?.Update();
-                    }
+                    spellbook.Items.ProcessDelta();
+                    UIManager.GetGump<SpellbookGump>(spellbook)?.Update();
 
                     break;
 

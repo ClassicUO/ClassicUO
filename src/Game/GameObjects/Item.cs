@@ -44,7 +44,6 @@ namespace ClassicUO.Game.GameObjects
         private int _animSpeed;
         private Graphic? _displayedGraphic;
         private bool _isMulti;
-        private ulong _spellsBitFiled;
 
 
         //private static readonly Queue<Item> _pool = new Queue<Item>();
@@ -170,8 +169,6 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsCorpse => /*MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) ||*/ Graphic == 0x2006;
 
-        public bool IsSpellBook => Graphic == 0x0E38 || Graphic == 0x0EFA || Graphic == 0x2252 || Graphic == 0x2253 || Graphic == 0x238C || Graphic == 0x23A0 || Graphic == 0x2D50 || Graphic == 0x2D9D; // mysticism
-
         public bool OnGround => !Container.IsValid;
 
         public Serial RootContainer
@@ -191,8 +188,6 @@ namespace ClassicUO.Game.GameObjects
                 return item.Container.IsMobile ? item.Container : item;
             }
         }
-
-        public SpellBookType BookType { get; private set; } = SpellBookType.Unknown;
 
         public ref readonly StaticTiles ItemData => ref UOFileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
 
@@ -749,37 +744,7 @@ namespace ClassicUO.Game.GameObjects
 
             return graphic;
         }
-
-        public bool HasSpell(int circle, int index)
-        {
-            index = (3 - circle % 4 + (circle >> 2) * 4) * 8 + (index - 1);
-            ulong flag = (ulong) 1 << index;
-
-            return (_spellsBitFiled & flag) == flag;
-        }
-
-        public bool FillSpellbook(SpellBookType type, ulong field)
-        {
-            if (!IsSpellBook)
-                return false;
-
-            bool needUpdate = false;
-
-            if (BookType != type)
-            {
-                BookType = type;
-                needUpdate = true;
-            }
-
-            if (_spellsBitFiled != field)
-            {
-                _spellsBitFiled = field;
-                needUpdate = true;
-            }
-
-            return needUpdate;
-        }
-
+        
         public override void UpdateTextCoordsV()
         {
             if (TextContainer == null)

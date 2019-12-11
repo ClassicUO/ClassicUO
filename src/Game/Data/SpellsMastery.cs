@@ -32,6 +32,18 @@ namespace ClassicUO.Game.Data
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
 
+        public readonly struct MasteryEntry
+        {
+            public MasteryEntry(int a, int b, int p)
+            {
+                SpellA = a;
+                SpellB = b;
+                Passive = p;
+            }
+
+            public readonly int SpellA, SpellB, Passive;
+        }
+
         static SpellsMastery()
         {
             _spellsDict = new Dictionary<int, SpellDefinition>
@@ -176,7 +188,30 @@ namespace ClassicUO.Game.Data
             };
         }
 
-        public static string SpellBookName { get; set; } = SpellBookType.Mastery.ToString();
+        public static readonly Dictionary<long, MasteryEntry> ActiveMasteryIndex = new Dictionary<long, MasteryEntry>()
+        {
+            { 1151945, new MasteryEntry(705, 706, 0) },
+            { 1151946, new MasteryEntry(701, 702, 0) },
+            { 1151947, new MasteryEntry(703, 704, 0) },
+            { 1155771, new MasteryEntry(707, 708, 715) },
+            { 1155772, new MasteryEntry(709, 710, 715) },
+            { 1155773, new MasteryEntry(711, 712, 715) },
+            { 1155774, new MasteryEntry(713, 714, 715) },
+            { 1155775, new MasteryEntry(716, 717, 718) },
+            { 1155776, new MasteryEntry(719, 720, 718) },
+            { 1155777, new MasteryEntry(721, 722, 718) },
+            { 1155778, new MasteryEntry(725, 726, 733) },
+            { 1155779, new MasteryEntry(727, 728, 733) },
+            { 1155780, new MasteryEntry(729, 730, 733) },
+            { 1155781, new MasteryEntry(731, 732, 718) },
+            { 1155782, new MasteryEntry(734, 735, 736) },
+            { 1155783, new MasteryEntry(737, 738, 739) },
+            { 1155784, new MasteryEntry(740, 741, 742) },
+            { 1155785, new MasteryEntry(743, 744, 745) },
+            { 1155786, new MasteryEntry(723, 724, 733) },
+        };
+
+        public static readonly string SpellBookName = SpellBookType.Mastery.ToString();
 
         public static IReadOnlyDictionary<int, SpellDefinition> GetAllSpells => _spellsDict;
         internal static int MaxSpellCount => _spellsDict.Count;
@@ -221,13 +256,6 @@ namespace ClassicUO.Game.Data
 
             return "Discordance";
         }
-
-        public static bool IsPassive(int spellID)
-        {
-            return spellID == 714 || spellID == 715 || spellID == 716 || spellID == 732 || spellID == 738 || spellID == 741 || spellID == 744;
-        }
-
-        public static readonly int[] Passives = {714, 715, 716, 732, 738, 741, 744};
 
         public static SpellDefinition GetSpell(int spellIndex)
         {
