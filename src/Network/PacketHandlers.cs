@@ -1487,9 +1487,9 @@ namespace ClassicUO.Network
 
             container?.Items.ProcessDelta();
 
-            if (container is Item itemContainer && SpellbookData.GetTypeByGraphic(itemContainer.Graphic) != SpellBookType.Unknown)
+            if (container != null && container.Serial.IsItem)
             {
-                UIManager.GetGump<SpellbookGump>(itemContainer)?.Update();
+                UIManager.GetGump<SpellbookGump>(container)?.Update();
             }
 
 

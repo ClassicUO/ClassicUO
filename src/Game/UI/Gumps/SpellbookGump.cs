@@ -351,8 +351,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                     for (int k = 0; k < spellsOnPage; k++, currentSpellIndex++)
                     {
-                        var sp = item.Items.Get((uint) currentSpellIndex);
-
                         if (_spells[currentSpellIndex])
                         {
                             GetSpellNames(currentSpellIndex, out string name, out string abbreviature, out string reagents);
