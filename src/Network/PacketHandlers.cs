@@ -3147,7 +3147,7 @@ namespace ClassicUO.Network
 
                                 Item spellItem = new Item(cc)
                                 {
-                                    Graphic = 0x1F2E, Amount = cc
+                                    Graphic = 0x1F2E, Amount = cc, Container = spellbook
                                 };
                                 spellbook.Items.Add(spellItem);
                             }

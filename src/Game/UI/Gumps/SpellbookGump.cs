@@ -251,7 +251,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            int pagesToFill =/* _spellBookType == SpellBookType.Mastery ? dictionaryPagesCount : */(dictionaryPagesCount >> 1);
+            int pagesToFill = _spellBookType == SpellBookType.Mastery ? dictionaryPagesCount : (dictionaryPagesCount >> 1);
 
             _maxPage = pagesToFill + ((totalSpells + 1) >> 1);
 
@@ -332,10 +332,10 @@ namespace ClassicUO.Game.UI.Gumps
                     };
                     _dataBox.Add(text, page);
 
-                    //if (_spellBookType == SpellBookType.Mastery && j >= 1)
-                    //{
-                    //    break;
-                    //}
+                    if (_spellBookType == SpellBookType.Mastery && j >= 1)
+                    {
+                        break;
+                    }
 
                     if (_spellBookType == SpellBookType.Magery)
                     {
