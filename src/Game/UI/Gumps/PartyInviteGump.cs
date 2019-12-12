@@ -38,7 +38,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (World.Party.Inviter != 0)
                 {
-                    GameActions.RequestPartyAccept(World.Party.Inviter);
+                    GameActions.RequestPartyAccept(World.Party.Inviter && World.Party.Leader == 0);
                     World.Party.Leader = World.Party.Inviter;
                     World.Party.Inviter = 0;
                 }
@@ -47,7 +47,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             declineButton.MouseUp += (sender, e) =>
             {
-                if (World.Party.Inviter != 0)
+                if (World.Party.Inviter != 0 && World.Party.Leader == 0)
                 {
                     NetClient.Socket.Send(new PPartyDecline(World.Party.Inviter));
                     World.Party.Inviter = 0;
