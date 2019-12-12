@@ -216,6 +216,15 @@ namespace ClassicUO.Game.Data
         public static IReadOnlyDictionary<int, SpellDefinition> GetAllSpells => _spellsDict;
         internal static int MaxSpellCount => _spellsDict.Count;
 
+        public static bool IsPassive(int index)
+        {
+            return index == 714 || index == 715 || index == 717 ||
+                   index == 732 || index == 738 || index == 741 ||
+                   index == 744;
+        }
+
+        public static readonly int[] Passives = {714, 715, 717, 732, 738, 741, 744};
+
         internal static string GetUsedSkillName(int spellid)
         {
             int div = (MaxSpellCount * 3) >> 3;

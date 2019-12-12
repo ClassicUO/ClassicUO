@@ -334,6 +334,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (_spellBookType == SpellBookType.Mastery && j >= 1)
                     {
+                        text = new Label("Abilities", false, 0x0288, font: 6)
+                        {
+                            X = dataX,
+                            Y = 30
+                        };
+                        _dataBox.Add(text, page);
                         break;
                     }
 
@@ -345,12 +351,28 @@ namespace ClassicUO.Game.UI.Gumps
                         };
                         _dataBox.Add(text, page);
                     }
+                    else if (_spellBookType == SpellBookType.Mastery)
+                    {
+                        text = new Label(page == pagesToFill ? "Passive" : "Activated", false, 0x0288, font: 6)
+                        {
+                            X = dataX,
+                            Y = 30
+                        };
+                        _dataBox.Add(text, page);
+                    }
 
 
                     int topage = pagesToFill + ((spellDone + 1) >> 1);
 
                     for (int k = 0; k < spellsOnPage; k++, currentSpellIndex++)
                     {
+                        //if (_spellBookType == SpellBookType.Mastery && SpellsMastery.IsPassive(SpellsMastery.GetSpell(currentSpellIndex + 1).ID))
+                        //{
+                        //    currentSpellIndex++;
+                        //    k--;
+                        //    continue;
+                        //}
+
                         if (_spells[currentSpellIndex])
                         {
                             GetSpellNames(currentSpellIndex, out string name, out string abbreviature, out string reagents);
@@ -371,6 +393,37 @@ namespace ClassicUO.Game.UI.Gumps
 
                             y += 15;
                         }
+                    }
+
+                    // push passives
+                    if (page == pagesToFill && _spellBookType == SpellBookType.Mastery)
+                    {
+                        //y = 0;
+
+                        //for (int k = 0; k < spellsOnPage; k++)
+                        //{
+                        //    GetSpellNames(currentSpellIndex, out string name, out string abbreviature, out string reagents);
+
+                        //    if (spellDone % 2 == 0)
+                        //        topage++;
+
+                        //    spellDone++;
+
+
+                        //    text = new HoveredLabel(name, false, 0x0288, 0x33, font: 9)
+                        //    {
+                        //        X = dataX,
+                        //        Y = 52 + y,
+                        //        LocalSerial = (uint) topage,
+                        //        AcceptMouseInput = true,
+                        //        Tag = currentSpellIndex + 1
+                        //    };
+                        //    text.MouseUp += OnClicked;
+                        //    text.MouseDoubleClick += OnDoubleClicked;
+                        //    _dataBox.Add(text, page);
+
+                        //    y += 15;
+                        //}
                     }
                 }
             }
