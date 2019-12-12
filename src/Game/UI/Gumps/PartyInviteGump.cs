@@ -36,9 +36,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             acceptButton.MouseUp += (sender, e) =>
             {
-                if (World.Party.Inviter != 0)
+                if (World.Party.Inviter != 0 && World.Party.Leader == 0)
                 {
-                    GameActions.RequestPartyAccept(World.Party.Inviter && World.Party.Leader == 0);
+                    GameActions.RequestPartyAccept(World.Party.Inviter);
                     World.Party.Leader = World.Party.Inviter;
                     World.Party.Inviter = 0;
                 }
