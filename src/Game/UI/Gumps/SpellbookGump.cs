@@ -243,7 +243,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     int currentCount = spell.Amount;
 
-                    if (currentCount > 0 && currentCount < maxSpellsCount)
+                    if (currentCount > 0 && currentCount <= maxSpellsCount)
                     {
                         _spells[currentCount - 1] = true;
                         totalSpells++;
