@@ -36,17 +36,22 @@ namespace ClassicUO.Game.UI.Gumps
 
             acceptButton.MouseUp += (sender, e) =>
             {
-                GameActions.RequestPartyAccept(World.Party.Inviter);
-                World.Party.Leader = World.Party.Inviter;
-                World.Party.Inviter = 0;
+                if (World.Party.Inviter != 0)
+                {
+                    GameActions.RequestPartyAccept(World.Party.Inviter);
+                    World.Party.Leader = World.Party.Inviter;
+                    World.Party.Inviter = 0;
+                }
                 base.Dispose();
             };
 
             declineButton.MouseUp += (sender, e) =>
             {
-                NetClient.Socket.Send(new PPartyDecline(World.Party.Inviter));
-                World.Party.Leader = 0;
-                World.Party.Inviter = 0;
+                if (World.Party.Inviter != 0)
+                {
+                    NetClient.Socket.Send(new PPartyDecline(World.Party.Inviter));
+                    World.Party.Inviter = 0;
+                }
                 base.Dispose();
             };
         }
