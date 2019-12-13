@@ -88,6 +88,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 var c = Children[i];
 
+                // might be wrong x, y. They should be calculated by position
                 if (c.Contains(x, y))
                     return true;
             }

@@ -21,6 +21,10 @@
 
 #endregion
 
+using Microsoft.Xna.Framework.Input;
+
+using Mouse = ClassicUO.Input.Mouse;
+
 namespace ClassicUO.Game.UI.Controls
 {
     internal class DataBox : Control
@@ -36,9 +40,22 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
         }
 
-    //    public override void OnButtonClick(int buttonID)
-    //    {
-    //        Parent?.OnButtonClick(buttonID);
-    //    }
+
+        public override bool Contains(int x, int y)
+        {
+            Control t = null;
+            x += ScreenCoordinateX;
+            y += ScreenCoordinateY;
+
+            foreach (Control child in Children)
+            {
+                child.HitTest(x, y, ref t);
+
+                if (t != null)
+                    return true;
+            }
+
+            return false;
+        }
     }
 }

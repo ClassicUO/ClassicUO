@@ -635,6 +635,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         X = iconX, Y = requiriesY
                     };
+
                     _dataBox.Add(text, page1);
                 }
             }
@@ -814,6 +815,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             switch (_spellBookType)
             {
+                default:
                 case SpellBookType.Magery:
                     SpellDefinition def = SpellsMagery.GetSpell(offset + 1);
                     name = def.Name;
@@ -874,13 +876,9 @@ namespace ClassicUO.Game.UI.Gumps
                     def = SpellsMastery.GetSpell(offset + 1);
                     name = def.Name;
                     abbreviature = def.PowerWords;
-                    reagents = string.Empty;
+                    reagents = def.CreateReagentListString("\n");
 
                     break;
-
-                default:
-
-                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -938,11 +936,16 @@ namespace ClassicUO.Game.UI.Gumps
                     def = SpellsMastery.GetSpell(offset + 1);
                     manaCost = def.ManaCost;
                     minSkill = def.MinSkill;
-                    y = 140;
+
                     if (def.TithingCost > 0)
+                    {
+                        y = 148;
                         text = $"Upkeep Cost: {def.TithingCost}\nMana cost: {manaCost}\nMin. Skill: {minSkill}";
+                    }
                     else
+                    {
                         text = $"Mana cost: {manaCost}\nMin. Skill: {minSkill}";
+                    }
 
                     return;
             }

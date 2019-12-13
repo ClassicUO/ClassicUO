@@ -182,8 +182,6 @@ namespace ClassicUO.Game.Data
 
                         if (Regs[i] < Reagents.None)
                             sb.Append(StringHelper.AddSpaceBeforeCapital(Regs[i].ToString()));
-                        else
-                            sb.Append("Unknown reagent");
 
                         break;
                 }
