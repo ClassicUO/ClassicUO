@@ -300,7 +300,7 @@ namespace ClassicUO.Game.UI.Gumps
                 });
             }
 
-            int spellDone = 0;
+            int spellDone = 0, passivesDone = 0;
 
             for (int page = 1; page <= pagesToFill; page++)
             {
@@ -364,67 +364,68 @@ namespace ClassicUO.Game.UI.Gumps
 
                     int topage = pagesToFill + ((spellDone + 1) >> 1);
 
-                    for (int k = 0; k < spellsOnPage; k++, currentSpellIndex++)
+                    if (_spellBookType == SpellBookType.Mastery)
                     {
-                        //if (_spellBookType == SpellBookType.Mastery && SpellsMastery.IsPassive(SpellsMastery.GetSpell(currentSpellIndex + 1).ID))
-                        //{
-                        //    currentSpellIndex++;
-                        //    k--;
-                        //    continue;
-                        //}
-
-                        if (_spells[currentSpellIndex])
+                        int length = SpellsMastery.SpellbookIndices[page - 1].Length;
+                        for (int k = 0; k < length; k++)
                         {
-                            GetSpellNames(currentSpellIndex, out string name, out string abbreviature, out string reagents);
-
-                            if (spellDone % 2 == 0)
-                                topage++;
-
-                            spellDone++;
-
-
-                            text = new HoveredLabel(name, false, 0x0288, 0x33, font: 9, maxwidth: 140, style: FontStyle.Cropped)
+                            currentSpellIndex = SpellsMastery.SpellbookIndices[page - 1][k] - 1;
+                            if (_spells[currentSpellIndex])
                             {
-                                X = dataX, Y = 52 + y, LocalSerial = (uint) topage, AcceptMouseInput = true, Tag = currentSpellIndex + 1
-                            };
-                            text.MouseUp += OnClicked;
-                            text.MouseDoubleClick += OnDoubleClicked;
-                            _dataBox.Add(text, page);
+                                GetSpellNames(currentSpellIndex , out string name, out string abbreviature, out string reagents);
 
-                            y += 15;
+                                if (spellDone % 2 == 0)
+                                    topage++;
+
+                                spellDone++;
+
+                                text = new HoveredLabel(name, false, 0x0288, 0x33, font: 9, maxwidth: 130, style: FontStyle.Cropped)
+                                {
+                                    X = dataX,
+                                    Y = 52 + y,
+                                    LocalSerial = (uint) (pagesToFill + (currentSpellIndex / 2) + 1),
+                                    AcceptMouseInput = true,
+                                    Tag = currentSpellIndex + 1
+                                };
+                                text.MouseUp += OnClicked;
+                                text.MouseDoubleClick += OnDoubleClicked;
+                                _dataBox.Add(text, page);
+
+                                y += 15;
+                            }
                         }
                     }
-
-                    // push passives
-                    if (page == pagesToFill && _spellBookType == SpellBookType.Mastery)
+                    else
                     {
-                        //y = 0;
+                        for (int k = 0; k < spellsOnPage; k++, currentSpellIndex++)
+                        {
+                            if (_spells[currentSpellIndex])
+                            {
+                                GetSpellNames(currentSpellIndex, out string name, out string abbreviature, out string reagents);
 
-                        //for (int k = 0; k < spellsOnPage; k++)
-                        //{
-                        //    GetSpellNames(currentSpellIndex, out string name, out string abbreviature, out string reagents);
+                                if (spellDone % 2 == 0)
+                                    topage++;
 
-                        //    if (spellDone % 2 == 0)
-                        //        topage++;
+                                spellDone++;
 
-                        //    spellDone++;
+                                text = new HoveredLabel(name, false, 0x0288, 0x33, font: 9, maxwidth: 130, style: FontStyle.Cropped)
+                                {
+                                    X = dataX,
+                                    Y = 52 + y,
+                                    LocalSerial = (uint) topage,
+                                    AcceptMouseInput = true,
+                                    Tag = currentSpellIndex + 1
+                                };
+                                text.MouseUp += OnClicked;
+                                text.MouseDoubleClick += OnDoubleClicked;
+                                _dataBox.Add(text, page);
 
+                                y += 15;
+                            }
+                        }
 
-                        //    text = new HoveredLabel(name, false, 0x0288, 0x33, font: 9)
-                        //    {
-                        //        X = dataX,
-                        //        Y = 52 + y,
-                        //        LocalSerial = (uint) topage,
-                        //        AcceptMouseInput = true,
-                        //        Tag = currentSpellIndex + 1
-                        //    };
-                        //    text.MouseUp += OnClicked;
-                        //    text.MouseDoubleClick += OnDoubleClicked;
-                        //    _dataBox.Add(text, page);
-
-                        //    y += 15;
-                        //}
                     }
+
                 }
             }
 
@@ -494,7 +495,7 @@ namespace ClassicUO.Game.UI.Gumps
                     case SpellBookType.Mastery:
 
                     {
-                        Label text = new Label(SpellsMastery.GetUsedSkillName(i), false, 0x0288, font: 6)
+                        Label text = new Label(SpellsMastery.GetMasteryGroupByID(i + 1), false, 0x0288, font: 6)
                         {
                             X = topTextX,
                             Y = topTextY + 4
@@ -552,14 +553,17 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 ushort iconGraphic;
+                int toolTipCliloc;
 
                 if (_spellBookType == SpellBookType.Mastery)
                 {
                     iconGraphic = (ushort) SpellsMastery.GetSpell(i + 1).GumpIconID;
+                    toolTipCliloc = i >= 0 && i < 6 ? 1115689 : 1155938 - 6;
                 }
                 else
                 {
                     iconGraphic = (Graphic) (iconStartGraphic + i);
+                    GetSpellToolTip(out toolTipCliloc);
                 }
 
                 GumpPic icon = new GumpPic(iconX, 40, iconGraphic, 0)
@@ -567,12 +571,11 @@ namespace ClassicUO.Game.UI.Gumps
                     X = iconX, Y = 40, LocalSerial = iconSerial
                 };
 
-                GetSpellToolTip(out int toolTipCliloc);
 
                 if (toolTipCliloc > 0)
                 {
                     string tooltip = UOFileManager.Cliloc.GetString(toolTipCliloc + i);
-                    icon.SetTooltip(tooltip, 150);
+                    icon.SetTooltip(tooltip, 250);
                 }
 
                 icon.MouseDoubleClick += (sender, e) =>
@@ -639,6 +642,7 @@ namespace ClassicUO.Game.UI.Gumps
             SetActivePage(1);
         }
 
+
         private SpellDefinition GetSpellDefinition(Control ctrl)
         {
             int idx = (int) (ctrl.LocalSerial > 1000 ? ctrl.LocalSerial - 1000 : ctrl.LocalSerial >= 100 ? ctrl.LocalSerial - 100 : ctrl.LocalSerial.Value) + 1;
@@ -700,6 +704,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             switch (type)
             {
+                default:
                 case SpellBookType.Magery:
                     maxSpellsCount = SpellsMagery.MaxSpellCount;
                     bookGraphic = 0x08AC;
@@ -759,14 +764,9 @@ namespace ClassicUO.Game.UI.Gumps
                 case SpellBookType.Mastery:
                     maxSpellsCount = SpellsMastery.MaxSpellCount;
                     bookGraphic = 0x8AC;
-                    minimizedGraphic = 0x2B27;
+                    minimizedGraphic = 0x08BA;
                     iconStartGraphic = 0x945;
-
                     break;
-
-                default:
-
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
 
             spellsOnPage = Math.Min(maxSpellsCount >> 1, 8);
@@ -802,13 +802,12 @@ namespace ClassicUO.Game.UI.Gumps
                     offset = 1095193;
                     break;
                 case SpellBookType.Mastery:
-                    offset = 1115689;
+                    offset = 0;
                     break;
                 default:
                     offset = 0;
                     break;
             }
-
         }
 
         private void GetSpellNames(int offset, out string name, out string abbreviature, out string reagents)

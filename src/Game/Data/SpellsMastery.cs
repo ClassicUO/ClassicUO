@@ -22,6 +22,7 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Managers;
@@ -32,24 +33,13 @@ namespace ClassicUO.Game.Data
     {
         private static readonly Dictionary<int, SpellDefinition> _spellsDict;
 
-        public readonly struct MasteryEntry
-        {
-            public MasteryEntry(int a, int b, int p)
-            {
-                SpellA = a;
-                SpellB = b;
-                Passive = p;
-            }
-
-            public readonly int SpellA, SpellB, Passive;
-        }
-
+      
         static SpellsMastery()
         {
             _spellsDict = new Dictionary<int, SpellDefinition>
             {
                 // Spell List
-               {
+                {
                     1, new SpellDefinition("Inspire", 701, 0x945, 0x945, "Uus Por", 16, 90, 4, TargetType.Beneficial, Reagents.None)
                 },
                 {
@@ -188,43 +178,21 @@ namespace ClassicUO.Game.Data
             };
         }
 
-        public static readonly Dictionary<long, MasteryEntry> ActiveMasteryIndex = new Dictionary<long, MasteryEntry>()
+
+        public static readonly int[][] SpellbookIndices =
         {
-            { 1151945, new MasteryEntry(705, 706, 0) },
-            { 1151946, new MasteryEntry(701, 702, 0) },
-            { 1151947, new MasteryEntry(703, 704, 0) },
-            { 1155771, new MasteryEntry(707, 708, 715) },
-            { 1155772, new MasteryEntry(709, 710, 715) },
-            { 1155773, new MasteryEntry(711, 712, 715) },
-            { 1155774, new MasteryEntry(713, 714, 715) },
-            { 1155775, new MasteryEntry(716, 717, 718) },
-            { 1155776, new MasteryEntry(719, 720, 718) },
-            { 1155777, new MasteryEntry(721, 722, 718) },
-            { 1155778, new MasteryEntry(725, 726, 733) },
-            { 1155779, new MasteryEntry(727, 728, 733) },
-            { 1155780, new MasteryEntry(729, 730, 733) },
-            { 1155781, new MasteryEntry(731, 732, 718) },
-            { 1155782, new MasteryEntry(734, 735, 736) },
-            { 1155783, new MasteryEntry(737, 738, 739) },
-            { 1155784, new MasteryEntry(740, 741, 742) },
-            { 1155785, new MasteryEntry(743, 744, 745) },
-            { 1155786, new MasteryEntry(723, 724, 733) },
+            new [] { 1,  2,  3,  4,  5,  6,  7,  8 },
+            new [] { 9,  10, 11, 12, 13, 14, 19, 20,  },
+            new [] { 17, 21, 22, 25, 34, 35, 36,      },
+            new [] { 27, 28, 29, 32, 37, 38, 40, 41,  },
+            new [] { 23, 24, 30, 31, 43, 44,          },
+            new [] { 15, 16, 18, 33, 39, 42, 45 }
         };
 
         public static readonly string SpellBookName = SpellBookType.Mastery.ToString();
-
         public static IReadOnlyDictionary<int, SpellDefinition> GetAllSpells => _spellsDict;
         internal static int MaxSpellCount => _spellsDict.Count;
-
-        public static bool IsPassive(int index)
-        {
-            return index == 714 || index == 715 || index == 717 ||
-                   index == 732 || index == 738 || index == 741 ||
-                   index == 744;
-        }
-
-        public static readonly int[] Passives = {714, 715, 717, 732, 738, 741, 744};
-
+        
         internal static string GetUsedSkillName(int spellid)
         {
             int div = (MaxSpellCount * 3) >> 3;
@@ -274,7 +242,78 @@ namespace ClassicUO.Game.Data
             return SpellDefinition.EmptySpell;
         }
 
-
+        public static string GetMasteryGroupByID(int id)
+        {
+            switch (id)
+            {
+                default:
+                case 1:
+                case 2:
+                    return "Provocation";
+                case 3:
+                case 4:
+                    return "Peacemaking";
+                case 5:
+                case 6:
+                    return "Discordance";
+                case 7:
+                case 8:
+                    return "Magery";
+                case 9:
+                case 10:
+                    return "Mysticism";
+                case 11:
+                case 12:
+                    return "Necromancy";
+                case 13:
+                case 14:
+                    return "Spellweaving";
+                case 16:
+                case 17:
+                    return "Bushido";
+                case 19:
+                case 20:
+                    return "Chivalry";
+                case 21:
+                case 22:
+                    return "Ninjitsu";
+                case 23:
+                case 24:
+                    return "Archery";
+                case 25:
+                case 26:
+                    return "Fencing";
+                case 27:
+                case 28:
+                    return "Mace Fighting";
+                case 29:
+                case 30:
+                    return "Swordmanship";
+                case 31:
+                case 32:
+                    return "Throwing";
+                case 34:
+                case 35:
+                case 36:
+                    return "Parrying";
+                case 37:
+                case 38:
+                case 39:
+                    return "Poisoning";
+                case 40:
+                case 41:
+                case 42:
+                    return "Wrestling";
+                case 43:
+                case 44:
+                case 45:
+                    return "Animal Taming";
+                case 15:
+                case 18:
+                case 33:
+                    return "Passive";
+            }
+        }
 
         public static void SetSpell(int id, in SpellDefinition newspell)
         {
