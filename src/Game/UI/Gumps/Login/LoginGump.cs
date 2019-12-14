@@ -145,10 +145,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Add(new GumpPic(0, 0, 0x014E, 0));
 
                 //// Quit Button
-                Add(new Button((int) Buttons.Quit, 0x1589, 0x158B, 0x158A)
+                Add(new Button((int) Buttons.Quit, 0x05CA, 0x05C9, 0x05C8)
                 {
-                    X = 555,
-                    Y = 4,
+                    X = 25,
+                    Y = 240,
                     ButtonAction = ButtonAction.Activate
                 });
 
