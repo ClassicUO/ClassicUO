@@ -165,26 +165,26 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 offtextY = 50;
 
 
-                Add(new Label($"UO Version {Settings.GlobalSettings.ClientVersion}.", false, 0xFFFF, font: 9)
+                Add(new Label($"UO Version {Settings.GlobalSettings.ClientVersion}.", false, 0x0481, font: 9)
                 {
                     X = 286,
                     Y = 453
                 });
 
-                Add(new Label($"ClassicUO Version {CUOEnviroment.Version}", false, 0xFFFF, font: 9)
+                Add(new Label($"ClassicUO Version {CUOEnviroment.Version}", false, 0x0481, font: 9)
                 {
                     X = 286,
                     Y = 465
                 });
 
 
-                Add(_checkboxAutologin = new Checkbox(0x00D2, 0x00D3, "Autologin", 9, 0xFFFF, false)
+                Add(_checkboxAutologin = new Checkbox(0x00D2, 0x00D3, "Autologin", 9, 0x0481, false)
                 {
                     X = 200,
                     Y = 417
                 });
 
-                Add(_checkboxSaveAccount = new Checkbox(0x00D2, 0x00D3, "Save Account", 9, 0xFFFF, false)
+                Add(_checkboxSaveAccount = new Checkbox(0x00D2, 0x00D3, "Save Account", 9, 0x0481, false)
                 {
                     X = _checkboxAutologin.X + _checkboxAutologin.Width + 10,
                     Y = 417
