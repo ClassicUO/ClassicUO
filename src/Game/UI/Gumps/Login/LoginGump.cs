@@ -32,8 +32,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
 {
     internal class LoginGump : Gump
     {
-        private readonly ushort _buttonNormal = 0x15A4;
-        private readonly ushort _buttonOver = 0x15A5;
+        private readonly ushort _buttonNormal;
+        private readonly ushort _buttonOver;
         private readonly Checkbox _checkboxAutologin;
         private readonly Checkbox _checkboxSaveAccount;
         private readonly Button _nextArrow0;
@@ -48,46 +48,155 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             AcceptKeyboardInput = false;
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_500A)
-                // Full background
-                Add(new GumpPic(0, 0, 0x2329, 0));
 
-            // UO Flag
-            Add(new GumpPic(0, 4, 0x15A0, 0) { AcceptKeyboardInput = false });
+            int offsetX, offsetY, offtextY;
 
-            //// Quit Button
-            Add(new Button((int) Buttons.Quit, 0x1589, 0x158B, 0x158A)
+            if (UOFileManager.ClientVersion < ClientVersions.CV_706400)
             {
-                X = 555,
-                Y = 4,
-                ButtonAction = ButtonAction.Activate
-            });
+                _buttonNormal = 0x15A4;
+                _buttonOver = 0x15A5;
+                const ushort HUE = 0x0386;
 
-            // Login Panel
-            Add(new ResizePic(0x13BE)
+                if (UOFileManager.ClientVersion >= ClientVersions.CV_500A)
+                    Add(new GumpPic(0, 0, 0x2329, 0));
+
+                // UO Flag
+                Add(new GumpPic(0, 4, 0x15A0, 0) { AcceptKeyboardInput = false });
+                //// Quit Button
+                Add(new Button((int) Buttons.Quit, 0x1589, 0x158B, 0x158A)
+                {
+                    X = 555,
+                    Y = 4,
+                    ButtonAction = ButtonAction.Activate
+                });
+
+                // Login Panel
+                Add(new ResizePic(0x13BE)
+                {
+                    X = 128,
+                    Y = 288,
+                    Width = 451,
+                    Height = 157
+                });
+
+                if (UOFileManager.ClientVersion < ClientVersions.CV_500A)
+                    Add(new GumpPic(286, 45, 0x058A, 0));
+
+                Add(new Label("Log in to Ultima Online", false, HUE, font: 2)
+                {
+                    X = 253,
+                    Y = 305
+                });
+
+                Add(new Label("Account Name", false, HUE, font: 2)
+                {
+                    X = 183,
+                    Y = 345
+                });
+
+                Add(new Label("Password", false, HUE, font: 2)
+                {
+                    X = 183,
+                    Y = 385
+                });
+
+                // Arrow Button
+                Add(_nextArrow0 = new Button((int) Buttons.NextArrow, 0x15A4, 0x15A6, 0x15A5)
+                {
+                    X = 610,
+                    Y = 445,
+                    ButtonAction = ButtonAction.Activate
+                });
+
+
+                offsetX = 328;
+                offsetY = 343;
+                offtextY = 40;
+
+                Add(new Label($"UO Version {Settings.GlobalSettings.ClientVersion}.", false, 0x034E, font: 9)
+                {
+                    X = 286,
+                    Y = 453
+                });
+
+                Add(new Label($"ClassicUO Version {CUOEnviroment.Version}", false, 0x034E, font: 9)
+                {
+                    X = 286,
+                    Y = 465
+                });
+
+                Add(_checkboxAutologin = new Checkbox(0x00D2, 0x00D3, "Autologin", 1, 0x0386, false)
+                {
+                    X = 200,
+                    Y = 417
+                });
+
+                Add(_checkboxSaveAccount = new Checkbox(0x00D2, 0x00D3, "Save Account", 1, 0x0386, false)
+                {
+                    X = _checkboxAutologin.X + _checkboxAutologin.Width + 10,
+                    Y = 417
+                });
+            }
+            else
             {
-                X = 128,
-                Y = 288,
-                Width = 451,
-                Height = 157
-            });
+                _buttonNormal = 0x5CD;
+                _buttonOver = 0x5CB;
 
-            if (UOFileManager.ClientVersion < ClientVersions.CV_500A)
-                Add(new GumpPic(286, 45, 0x058A, 0));
+                Add(new GumpPic(0, 0, 0x014E, 0));
 
-            // Arrow Button
-            Add(_nextArrow0 = new Button((int) Buttons.NextArrow, 0x15A4, 0x15A6, 0x15A5)
-            {
-                X = 610,
-                Y = 445,
-                ButtonAction = ButtonAction.Activate
-            });
+                //// Quit Button
+                Add(new Button((int) Buttons.Quit, 0x1589, 0x158B, 0x158A)
+                {
+                    X = 555,
+                    Y = 4,
+                    ButtonAction = ButtonAction.Activate
+                });
+
+                // Arrow Button
+                Add(_nextArrow0 = new Button((int) Buttons.NextArrow, 0x5CD, 0x5CC, 0x5CB)
+                {
+                    X = 280,
+                    Y = 365,
+                    ButtonAction = ButtonAction.Activate
+                });
+
+                offsetX = 218;
+                offsetY = 283;
+                offtextY = 50;
+
+
+                Add(new Label($"UO Version {Settings.GlobalSettings.ClientVersion}.", false, 0xFFFF, font: 9)
+                {
+                    X = 286,
+                    Y = 453
+                });
+
+                Add(new Label($"ClassicUO Version {CUOEnviroment.Version}", false, 0xFFFF, font: 9)
+                {
+                    X = 286,
+                    Y = 465
+                });
+
+
+                Add(_checkboxAutologin = new Checkbox(0x00D2, 0x00D3, "Autologin", 9, 0xFFFF, false)
+                {
+                    X = 200,
+                    Y = 417
+                });
+
+                Add(_checkboxSaveAccount = new Checkbox(0x00D2, 0x00D3, "Save Account", 9, 0xFFFF, false)
+                {
+                    X = _checkboxAutologin.X + _checkboxAutologin.Width + 10,
+                    Y = 417
+                });
+            }
+
 
             // Account Text Input Background
             Add(new ResizePic(0x0BB8)
             {
-                X = 328,
-                Y = 343,
+                X = offsetX,
+                Y = offsetY,
                 Width = 210,
                 Height = 30
             });
@@ -95,77 +204,19 @@ namespace ClassicUO.Game.UI.Gumps.Login
             // Password Text Input Background
             Add(new ResizePic(0x0BB8)
             {
-                X = 328,
-                Y = 383,
+                X = offsetX,
+                Y = offsetY + offtextY,
                 Width = 210,
                 Height = 30
             });
 
-            Add(_checkboxAutologin = new Checkbox(0x00D2, 0x00D3, "Autologin", 1, 0x0386, false)
-            {
-                X = 200,
-                Y = 417
-            });
-
-            Add(_checkboxSaveAccount = new Checkbox(0x00D2, 0x00D3, "Save Account", 1, 0x0386, false)
-            {
-                X = _checkboxAutologin.X + _checkboxAutologin.Width + 10,
-                Y = 417
-            });
-
-            _checkboxSaveAccount.IsChecked = Settings.GlobalSettings.SaveAccount;
-            _checkboxAutologin.IsChecked = Settings.GlobalSettings.AutoLogin;
-
-            Add(new Label("Log in to Ultima Online", false, 0x0386, font: 2)
-            {
-                X = 253,
-                Y = 305
-            });
-
-            Add(new Label("Account Name", false, 0x0386, font: 2)
-            {
-                X = 183,
-                Y = 345
-            });
-          
-            Add(new Label("Password", false, 0x0386, font: 2)
-            {
-                X = 183,
-                Y = 385
-            });
-
-            Add(new Label($"UO Version {Settings.GlobalSettings.ClientVersion}.", false, 0x034E, font: 9)
-            {
-                X = 286,
-                Y = 453
-            });
-
-            Add(new Label($"ClassicUO Version {CUOEnviroment.Version}", false, 0x034E, font: 9)
-            {
-                X = 286,
-                Y = 465
-            });
-
-            int htmlX = 130;
-            int htmlY = 442;
-
-            Add(new HtmlControl(htmlX, htmlY, 300, 100,
-                                false, false,
-                                false, 
-                                text: "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.paypal.me/muskara\">> Instant donation",
-                                0x32, true, isunicode: true, style: FontStyle.BlackBorder));
-            Add(new HtmlControl(htmlX, htmlY + 20, 300, 100,
-                                false, false,
-                                false,
-                                text: "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.patreon.com/user?u=21694183\">> Become a Patreon!",
-                                0x32, true, isunicode: true, style: FontStyle.BlackBorder));
-            
+            offsetX += 7;
 
             // Text Inputs
             Add(_textboxAccount = new TextBox(5, 16, 190, 190, false)
             {
-                X = 335,
-                Y = 343,
+                X = offsetX,
+                Y = offsetY,
                 Width = 190,
                 Height = 25,
                 Hue = 0x034F,
@@ -174,8 +225,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             Add(_textboxPassword = new TextBox(5, 16, 190, 190, false)
             {
-                X = 335,
-                Y = 385,
+                X = offsetX,
+                Y = offsetY + offtextY + 2,
                 Width = 190,
                 Height = 25,
                 Hue = 0x034F,
@@ -184,7 +235,29 @@ namespace ClassicUO.Game.UI.Gumps.Login
             });
             _textboxAccount.SetText(Settings.GlobalSettings.Username);
             _textboxPassword.SetText(Crypter.Decrypt(Settings.GlobalSettings.Password));
+
+            
+            _checkboxSaveAccount.IsChecked = Settings.GlobalSettings.SaveAccount;
+            _checkboxAutologin.IsChecked = Settings.GlobalSettings.AutoLogin;
+
+
+            int htmlX = 130;
+            int htmlY = 442;
+
+            Add(new HtmlControl(htmlX, htmlY, 300, 100,
+                                false, false,
+                                false,
+                                text: "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.paypal.me/muskara\">> Instant donation",
+                                0x32, true, isunicode: true, style: FontStyle.BlackBorder));
+            Add(new HtmlControl(htmlX, htmlY + 20, 300, 100,
+                                false, false,
+                                false,
+                                text: "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.patreon.com/user?u=21694183\">> Become a Patreon!",
+                                0x32, true, isunicode: true, style: FontStyle.BlackBorder));
         }
+
+
+
 
         public override void OnKeyboardReturn(int textID, string text)
         {
