@@ -144,6 +144,7 @@
     <Compile Include="Game\GameObjects\EntityTextContainer.cs" />
     <Compile Include="Game\GameObjects\TextOverhead.cs" />
     <Compile Include="Game\ItemHold.cs" />
+    <Compile Include="Game\LinkedObject.cs" />
     <Compile Include="Game\Managers\AnchorManager.cs" />
     <Compile Include="Game\Managers\AuraManager.cs" />
     <Compile Include="Game\Managers\CorpseManager.cs" />
