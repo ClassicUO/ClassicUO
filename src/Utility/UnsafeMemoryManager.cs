@@ -55,12 +55,8 @@ namespace ClassicUO.Utility
             byte* str = (byte*) ptr;
 
             T result = default;
-            TypedReference resultRef = __makeref(result);
-            byte* resultPtr = (byte*) *((IntPtr*) &resultRef + (PlatformHelper.IsMonoRuntime ? 1 : 0));
-
-            int sizeOf = size;
-
-            for (int i = 0; i < sizeOf; i++) resultPtr[i] = str[i];
+            byte* resultPtr = (byte*) AsPointer(ref result);
+            Buffer.MemoryCopy(str, resultPtr, size, size);
 
             return result;
         }
