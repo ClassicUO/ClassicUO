@@ -262,8 +262,8 @@ namespace ClassicUO.Game.GameObjects
             MultiInfo = new Rectangle()
             {
                 X = minX,
-                Y = maxX,
-                Width = minY,
+                Y = minY,
+                Width = maxX,
                 Height = maxY
             };
 
