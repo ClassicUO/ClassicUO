@@ -181,7 +181,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         public int DescriptionIndex { get; set; }
         public ProfessionLoader.PROF_TYPE Type { get; set; }
 
-        public Graphic Graphic { get; set; }
+        public ushort Graphic { get; set; }
 
         public bool TopLevel { get; set; }
         public int[,] SkillDefVal { get; set; } = _VoidSkills;

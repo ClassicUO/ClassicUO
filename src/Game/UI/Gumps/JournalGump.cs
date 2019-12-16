@@ -107,7 +107,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _isMinimized = value;
 
-                    _gumpPic.Graphic = value ? (Graphic) 0x830 : (Graphic) 0x82D;
+                    _gumpPic.Graphic = value ? (ushort) 0x830 : (ushort) 0x82D;
 
                     if (value)
                     {

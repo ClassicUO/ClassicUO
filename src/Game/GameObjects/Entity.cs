@@ -210,6 +210,6 @@ namespace ClassicUO.Game.GameObjects
 
         public abstract void ProcessAnimation(out byte dir, bool evalutate = false);
 
-        public abstract Graphic GetGraphicForAnimation();
+        public abstract ushort GetGraphicForAnimation();
     }
 }

@@ -47,9 +47,9 @@ namespace ClassicUO.Game.GameObjects
 
         }
 
-        public Graphic OriginalGraphic;
+        public ushort OriginalGraphic;
 
-        public Land(Graphic graphic)
+        public Land(ushort graphic)
         {
             OriginalGraphic = Graphic = graphic;
             IsStretched = TileData.TexID == 0 && TileData.IsWet;
@@ -59,7 +59,7 @@ namespace ClassicUO.Game.GameObjects
             AlphaHue = 255;
         }
 
-        public static Land Create(Graphic graphic)
+        public static Land Create(ushort graphic)
         {
             if (_pool.Count != 0)
             {

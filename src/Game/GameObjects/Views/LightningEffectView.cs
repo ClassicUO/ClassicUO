@@ -38,7 +38,7 @@ namespace ClassicUO.Game.GameObjects
         {
             new Point(48, 0), new Point(68, 0), new Point(92, 0), new Point(72, 0), new Point(48, 0), new Point(56, 0), new Point(76, 0), new Point(76, 0), new Point(92, 0), new Point(80, 0)
         };
-        private Graphic _displayed = Graphic.INVALID;
+        private ushort _displayed = 0xFFFF;
 
 
         private static readonly Lazy<BlendState> _multiplyBlendState = new Lazy<BlendState>(() =>

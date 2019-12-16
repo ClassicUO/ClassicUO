@@ -176,7 +176,7 @@ namespace ClassicUO.Game.UI.Controls
             //Clear();
 
             // Add the base gump - the semi-naked paper doll.
-            Graphic body = 0;
+            ushort body = 0;
 
             bool isGM = false;
 

@@ -14,11 +14,11 @@ namespace ClassicUO.Game.GameObjects
 {
     class DragEffect : GameEffect
     {
-        private Graphic _displayedGraphic = Graphic.INVALID;
+        private ushort _displayedGraphic = 0xFFFF;
         private uint _lastMoveTime;
 
 
-        public DragEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, Graphic graphic, Hue hue)
+        public DragEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, ushort graphic, Hue hue)
         {
             Entity source = World.Get(src);
 

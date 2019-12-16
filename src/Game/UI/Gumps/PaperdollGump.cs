@@ -89,7 +89,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _isMinimized = value;
 
-                    _picBase.Graphic = value ? (Graphic)0x7EE : (Graphic) (0x07d0 + (Mobile == World.Player ? 0 : 1)) ;
+                    _picBase.Graphic = value ? (ushort) 0x7EE : (ushort) (0x07d0 + (Mobile == World.Player ? 0 : 1)) ;
 
                     foreach (var c in Children)
                     {

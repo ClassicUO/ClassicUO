@@ -86,20 +86,20 @@ namespace ClassicUO.Game.GameObjects
 
             return state;
         });
-        private Graphic _displayedGraphic = Graphic.INVALID;
+        private ushort _displayedGraphic = 0xFFFF;
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (IsDestroyed)
                 return false;
 
-            if (AnimationGraphic == Graphic.INVALID)
+            if (AnimationGraphic == 0xFFFF)
                 return false;
 
             ResetHueVector();
 
 
-            if ((AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed) && AnimationGraphic != Graphic.INVALID)
+            if ((AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed) && AnimationGraphic != 0xFFFF)
             {
                 _displayedGraphic = AnimationGraphic;
                 Texture = UOFileManager.Art.GetTexture(AnimationGraphic);

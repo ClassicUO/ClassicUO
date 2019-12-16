@@ -55,7 +55,7 @@ namespace ClassicUO.Game.GameObjects
 
         }
 
-        public Multi(Graphic graphic)
+        public Multi(ushort graphic)
         {
             Graphic = _originalGraphic = graphic;
             UpdateGraphicBySeason();
@@ -71,7 +71,7 @@ namespace ClassicUO.Game.GameObjects
                 _canBeTransparent = 0;
         }
 
-        public static Multi Create(Graphic graphic)
+        public static Multi Create(ushort graphic)
         {
             if (_pool.Count != 0)
             {

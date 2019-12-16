@@ -245,7 +245,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         internal class MapInfo
         {
-            public MapInfo(int mapIndex, string name, Graphic gump, int width, int widthOffset, int height, int heightOffset)
+            public MapInfo(int mapIndex, string name, ushort gump, int width, int widthOffset, int height, int heightOffset)
             {
                 Index = mapIndex;
                 Name = name;
@@ -260,7 +260,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             public int Index { get; set; }
             public string Name { get; set; }
-            public Graphic Gump { get; set; }
+            public ushort Gump { get; set; }
 
             public int Width { get; set; }
             public int Height { get; set; }

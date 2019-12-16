@@ -48,7 +48,7 @@ namespace ClassicUO.Game.GameObjects
         };
 
         [MethodImpl(256)]
-        public override Graphic GetGraphicForAnimation()
+        public override ushort GetGraphicForAnimation()
         {
             ushort g = Graphic;
 
@@ -463,7 +463,7 @@ namespace ClassicUO.Game.GameObjects
 
         public static byte GetGroupForAnimation(Mobile mobile, ushort checkGraphic = 0, bool isParent = false)
         {
-            Graphic graphic = checkGraphic;
+            ushort graphic = checkGraphic;
 
             if (graphic == 0)
                 graphic = mobile.GetGraphicForAnimation();
@@ -1118,7 +1118,7 @@ namespace ClassicUO.Game.GameObjects
             return false;
         }
 
-        public static byte GetReplacedObjectAnimation(Graphic graphic, ushort index)
+        public static byte GetReplacedObjectAnimation(ushort graphic, ushort index)
         {
             ushort getReplacedGroup(List<Tuple<ushort, byte>> list, ushort idx, ushort walkIdx)
             {

@@ -134,7 +134,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (FindControls<NiceButton>().Any(s => s.ButtonParameter == buttonID))
             {
                 NiceButton btn = FindControls<NiceButton>().First(s => s.ButtonParameter == buttonID);
-                Graphic g = (Graphic) (_sortAsc ? 0x985 : 0x983);
+                var g = (ushort) (_sortAsc ? 0x985 : 0x983);
 
                 _sortOrderIndicator.Graphic = g;
                 _sortOrderIndicator.Texture = UOFileManager.Gumps.GetTexture(g);
@@ -257,7 +257,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(skillCap);
 
-            GumpPic loc = new GumpPic(425, 4, (Graphic) (skill.Lock == Lock.Up ? 0x983 : skill.Lock == Lock.Down ? 0x985 : 0x82C), 0);
+            GumpPic loc = new GumpPic(425, 4, (ushort) (skill.Lock == Lock.Up ? 0x983 : skill.Lock == Lock.Down ? 0x985 : 0x82C), 0);
             Add(loc);
 
             loc.MouseUp += (sender, e) =>

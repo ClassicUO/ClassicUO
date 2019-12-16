@@ -111,7 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public void AddItem(Graphic graphic, Hue hue, string name, int x, int y, int index)
+        public void AddItem(ushort graphic, Hue hue, string name, int x, int y, int index)
         {
             StaticPic pic = new StaticPic(graphic, hue)
             {
@@ -123,7 +123,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             pic.MouseDoubleClick += (sender, e) =>
             {
-                NetClient.Socket.Send(new PMenuResponse(LocalSerial, (Graphic) ServerSerial.Value, index, graphic, hue));
+                NetClient.Socket.Send(new PMenuResponse(LocalSerial, (ushort) ServerSerial.Value, index, graphic, hue));
                 Dispose();
                 e.Result = true;
             };
@@ -265,7 +265,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch (buttonID)
             {
                 case 0: // cancel
-                    NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (Graphic) ServerSerial.Value, 0));
+                    NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (ushort) ServerSerial.Value, 0));
 
                     Dispose();
 
@@ -279,7 +279,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (radioButton.IsChecked)
                         {
-                            NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (Graphic) ServerSerial.Value, index));
+                            NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (ushort) ServerSerial.Value, index));
 
                             break;
                         }

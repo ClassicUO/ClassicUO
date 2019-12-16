@@ -897,7 +897,7 @@ namespace ClassicUO.Network
 
         private static void DragAnimation(Packet p)
         {
-            Graphic graphic = p.ReadUShort();
+            ushort graphic = p.ReadUShort();
             graphic += p.ReadByte();
             Hue hue = p.ReadUShort();
             ushort count = p.ReadUShort();
@@ -976,7 +976,7 @@ namespace ClassicUO.Network
                 return;
 
             Serial serial = p.ReadUInt();
-            Graphic graphic = p.ReadUShort();
+            ushort graphic = p.ReadUShort();
 
 
             if (graphic == 0xFFFF)
@@ -1063,7 +1063,7 @@ namespace ClassicUO.Network
                 return;
 
             Serial serial = p.ReadUInt();
-            Graphic graphic = (Graphic) (p.ReadUShort() + p.ReadByte());
+            ushort graphic = (ushort) (p.ReadUShort() + p.ReadByte());
             ushort amount = Math.Max((ushort) 1, p.ReadUShort());
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
@@ -1424,7 +1424,7 @@ namespace ClassicUO.Network
             for (int i = 0; i < count; i++)
             {
                 Serial serial = p.ReadUInt();
-                Graphic graphic = (Graphic) (p.ReadUShort() + p.ReadByte());
+                ushort graphic = (ushort) (p.ReadUShort() + p.ReadByte());
                 ushort amount = Math.Max(p.ReadUShort(), (ushort) 1);
                 ushort x = p.ReadUShort();
                 ushort y = p.ReadUShort();
@@ -1764,7 +1764,7 @@ namespace ClassicUO.Network
 
             Serial source = p.ReadUInt();
             Serial target = p.ReadUInt();
-            Graphic graphic = p.ReadUShort();
+            ushort graphic = p.ReadUShort();
             Position srcPos = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
             Position targPos = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
             byte speed = p.ReadByte();
@@ -2053,7 +2053,7 @@ namespace ClassicUO.Network
                 return;
 
             Serial serial = p.ReadUInt();
-            Graphic graphic = p.ReadUShort();
+            ushort graphic = p.ReadUShort();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
             sbyte z = p.ReadSByte();
@@ -2084,7 +2084,7 @@ namespace ClassicUO.Network
             while ((itemSerial = p.ReadUInt()) != 0)
             {
                 Item item = World.GetOrCreateItem(itemSerial);
-                Graphic itemGraphic = p.ReadUShort();
+                ushort itemGraphic = p.ReadUShort();
                 byte layer = p.ReadByte();
                 item.Layer = (Layer) layer;
 
@@ -2182,7 +2182,7 @@ namespace ClassicUO.Network
             string name = p.ReadASCII(p.ReadByte());
             int count = p.ReadByte();
 
-            Graphic menuid = p.ReadUShort();
+            ushort menuid = p.ReadUShort();
             p.Seek(p.Position - 2);
 
             if (menuid != 0)
@@ -2197,7 +2197,7 @@ namespace ClassicUO.Network
 
                 for (int i = 0; i < count; i++)
                 {
-                    Graphic graphic = p.ReadUShort();
+                    ushort graphic = p.ReadUShort();
                     Hue hue = p.ReadUShort();
                     name = p.ReadASCII(p.ReadByte());
 
@@ -2323,7 +2323,7 @@ namespace ClassicUO.Network
         private static void DisplayMap(Packet p)
         {
             Serial serial = p.ReadUInt();
-            Graphic gumpid = p.ReadUShort();
+            ushort gumpid = p.ReadUShort();
             ushort startX = p.ReadUShort();
             ushort startY = p.ReadUShort();
             ushort endX = p.ReadUShort();
@@ -2410,7 +2410,7 @@ namespace ClassicUO.Network
         {
             Serial serial = p.ReadUInt();
             p.Skip(2);
-            Graphic graphic = p.ReadUShort();
+            ushort graphic = p.ReadUShort();
 
             Rectangle rect = UOFileManager.Gumps.GetTexture(0x0906).Bounds;
 
@@ -3181,7 +3181,7 @@ namespace ClassicUO.Network
                 case 0x20:
                     serial = p.ReadUInt();
                     type = p.ReadByte();
-                    Graphic graphic = p.ReadUShort();
+                    ushort graphic = p.ReadUShort();
                     Position position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
 
                     switch (type)
@@ -3832,7 +3832,7 @@ namespace ClassicUO.Network
             p.Skip(2);
             byte type = p.ReadByte();
             Serial serial = p.ReadUInt();
-            Graphic graphic = p.ReadUShort();
+            ushort graphic = p.ReadUShort();
             byte graphicInc = p.ReadByte();
             ushort amount = p.ReadUShort();
             p.Skip(2);
@@ -3926,7 +3926,7 @@ namespace ClassicUO.Network
             else if (p.ID == 0xF7)
             {
 
-                Graphic oldGraphic = World.Player.Graphic;
+                ushort oldGraphic = World.Player.Graphic;
                 bool oldDead = World.Player.IsDead;
 
                 World.Player.Position = new Position(x, y, z);
@@ -4071,7 +4071,7 @@ namespace ClassicUO.Network
             }
         }
 
-        private static void AddItemToContainer(Serial serial, Graphic graphic, ushort amount, ushort x, ushort y, Hue hue, Serial containerSerial)
+        private static void AddItemToContainer(Serial serial, ushort graphic, ushort amount, ushort x, ushort y, Hue hue, Serial containerSerial)
         {
             GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
 

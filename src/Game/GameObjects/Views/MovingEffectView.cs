@@ -35,7 +35,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class MovingEffect
     {
-        private Graphic _displayedGraphic = Graphic.INVALID;
+        private ushort _displayedGraphic = 0xFFFF;
 
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)

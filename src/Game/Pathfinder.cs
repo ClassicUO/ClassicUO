@@ -90,13 +90,13 @@ namespace ClassicUO.Game
             for (; obj != null; obj = obj.Right)
             {
                 // TODO: custom house gump
-                Graphic graphic = obj.Graphic;
+                var graphicHelper = obj.Graphic;
 
                 switch (obj)
                 {
                     case Land tile1:
 
-                        if (graphic < 0x01AE && graphic != 2 || graphic > 0x01B5 && graphic != 0x01DB)
+                        if (graphicHelper < 0x01AE && graphicHelper != 2 || graphicHelper > 0x01B5 && graphicHelper != 0x01DB)
                         {
                             uint flags = (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE;
 
@@ -157,7 +157,7 @@ namespace ClassicUO.Game
                                 }
                                 else
                                 {
-                                    dropFlags = graphic >= 0x3946 && graphic <= 0x3964 || graphic == 0x0082;
+                                    dropFlags = graphicHelper >= 0x3946 && graphicHelper <= 0x3964 || graphicHelper == 0x0082;
                                 }
                                 break;
                         }
@@ -193,12 +193,12 @@ namespace ClassicUO.Game
 
                                     if (stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM)
                                     {
-                                        if (graphic <= 0x0846)
+                                        if (graphicHelper <= 0x0846)
                                         {
-                                            if (!(graphic != 0x0846 && graphic != 0x0692 && (graphic <= 0x06F4 || graphic > 0x06F6)))
+                                            if (!(graphicHelper != 0x0846 && graphicHelper != 0x0692 && (graphicHelper <= 0x06F4 || graphicHelper > 0x06F6)))
                                                 dropFlags = true;
                                         }
-                                        else if (graphic == 0x0873)
+                                        else if (graphicHelper == 0x0873)
                                             dropFlags = true;
                                     }
 

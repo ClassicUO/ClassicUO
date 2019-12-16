@@ -58,7 +58,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsEnabled;
 
-        public Graphic AnimationGraphic = Graphic.INVALID;
+        public ushort AnimationGraphic = 0xFFFF;
 
         public bool IsMoving => Target != null || TargetX != 0 && TargetY != 0;
 
@@ -114,7 +114,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         unsafe
                         {
-                            AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
+                            AnimationGraphic = (ushort) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
                         }
 
                         AnimIndex++;

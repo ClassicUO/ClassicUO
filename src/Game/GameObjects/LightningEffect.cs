@@ -65,7 +65,7 @@ namespace ClassicUO.Game.GameObjects
                     Destroy();
                 else
                 {
-                    AnimationGraphic = (Graphic) (Graphic + AnimIndex);
+                    AnimationGraphic = (ushort) (Graphic + AnimIndex);
 
                     if (LastChangeFrameTime < totalMS)
                     {

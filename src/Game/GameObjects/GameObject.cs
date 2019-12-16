@@ -90,7 +90,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public Hue Hue;
-        public Graphic Graphic;
+        public ushort Graphic;
         public sbyte AnimIndex;
         public int CurrentRenderIndex;
         public byte UseInRender;

@@ -169,7 +169,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             switch (race)
             {
                 case RaceType.GARGOYLE:
-                    character.Graphic = isFemale ? (Graphic) 0x029B : (Graphic) 0x029A;
+                    character.Graphic = isFemale ? (ushort) 0x029B : (ushort) 0x029A;
 
                     character.Equipment[(int) Layer.Robe] = CreateItem(0x4001, CurrentColorOption[Layer.Shirt].Item2, Layer.Robe);
 

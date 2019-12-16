@@ -98,7 +98,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (animData->FrameCount != 0)
                         {
-                            graphic = (Graphic)(Graphic + animData->FrameData[AnimIndex++]);
+                            graphic = (ushort) (Graphic + animData->FrameData[AnimIndex++]);
 
                             if (AnimIndex >= animData->FrameCount)
                                 AnimIndex = 0;

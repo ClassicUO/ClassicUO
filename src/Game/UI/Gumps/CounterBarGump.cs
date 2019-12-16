@@ -241,7 +241,7 @@ namespace ClassicUO.Game.UI.Gumps
         private class CounterItem : Control
         {
             private int _amount;
-            private Graphic _graphic;
+            private ushort _graphic;
             private Hue _hue;
             private uint _time;
 
@@ -346,7 +346,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            private static void GetAmount(Item parent, Graphic graphic, Hue hue, ref int amount)
+            private static void GetAmount(Item parent, ushort graphic, Hue hue, ref int amount)
             {
                 if (parent == null)
                     return;

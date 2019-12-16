@@ -564,7 +564,7 @@ namespace ClassicUO.Network
 
     internal sealed class PMenuResponse : PacketWriter
     {
-        public PMenuResponse(Serial serial, Graphic graphic, int code, Graphic itemGraphic, Hue itemHue) : base(0x7D)
+        public PMenuResponse(Serial serial, ushort graphic, int code, ushort itemGraphic, Hue itemHue) : base(0x7D)
         {
             WriteUInt(serial);
             WriteUShort(graphic);
@@ -581,7 +581,7 @@ namespace ClassicUO.Network
 
     internal sealed class PGrayMenuResponse : PacketWriter
     {
-        public PGrayMenuResponse(Serial serial, Graphic graphic, ushort code) : base(0x7D)
+        public PGrayMenuResponse(Serial serial, ushort graphic, ushort code) : base(0x7D)
         {
             WriteUInt(serial);
             WriteUShort(graphic);
@@ -649,7 +649,7 @@ namespace ClassicUO.Network
 
     internal sealed class PTargetObject : PacketWriter
     {
-        public PTargetObject(Serial entity, Graphic graphic, ushort x, ushort y, sbyte z, Serial cursorID, byte cursorType) : base(0x6C)
+        public PTargetObject(Serial entity, ushort graphic, ushort x, ushort y, sbyte z, Serial cursorID, byte cursorType) : base(0x6C)
         {
             WriteByte(0x00);
             WriteUInt(cursorID);
@@ -717,7 +717,7 @@ namespace ClassicUO.Network
 
     internal sealed class PDyeDataResponse : PacketWriter
     {
-        public PDyeDataResponse(Serial serial, Graphic graphic, Hue hue) : base(0x95)
+        public PDyeDataResponse(Serial serial, ushort graphic, Hue hue) : base(0x95)
         {
             WriteUInt(serial);
             WriteUShort(graphic);
@@ -970,7 +970,7 @@ namespace ClassicUO.Network
 
     internal sealed class PPopupMenuSelection : PacketWriter
     {
-        public PPopupMenuSelection(Serial serial, Graphic menuid) : base(0xBF)
+        public PPopupMenuSelection(Serial serial, ushort menuid) : base(0xBF)
         {
             WriteUShort(0x15);
             WriteUInt(serial);
@@ -1314,7 +1314,7 @@ namespace ClassicUO.Network
 
     internal sealed class PCustomHouseAddItem : PacketWriter
     {
-        public PCustomHouseAddItem(Graphic graphic, int x, int y) : base(0xD7)
+        public PCustomHouseAddItem(ushort graphic, int x, int y) : base(0xD7)
         {
             WriteUInt(World.Player);
             WriteUShort(0x06);
@@ -1330,7 +1330,7 @@ namespace ClassicUO.Network
 
     internal sealed class PCustomHouseDeleteItem : PacketWriter
     {
-        public PCustomHouseDeleteItem(Graphic graphic, int x, int y, int z) : base(0xD7)
+        public PCustomHouseDeleteItem(ushort graphic, int x, int y, int z) : base(0xD7)
         {
             WriteUInt(World.Player);
             WriteUShort(0x05);
@@ -1348,7 +1348,7 @@ namespace ClassicUO.Network
 
     internal sealed class PCustomHouseAddRoof : PacketWriter
     {
-        public PCustomHouseAddRoof(Graphic graphic, int x, int y, int z) : base(0xD7)
+        public PCustomHouseAddRoof(ushort graphic, int x, int y, int z) : base(0xD7)
         {
             WriteUInt(World.Player);
             WriteUShort(0x13);
@@ -1366,7 +1366,7 @@ namespace ClassicUO.Network
 
     internal sealed class PCustomHouseDeleteRoof : PacketWriter
     {
-        public PCustomHouseDeleteRoof(Graphic graphic, int x, int y, int z) : base(0xD7)
+        public PCustomHouseDeleteRoof(ushort graphic, int x, int y, int z) : base(0xD7)
         {
             WriteUInt(World.Player);
             WriteUShort(0x14);
@@ -1384,7 +1384,7 @@ namespace ClassicUO.Network
 
     internal sealed class PCustomHouseAddStair : PacketWriter
     {
-        public PCustomHouseAddStair(Graphic graphic, int x, int y) : base(0xD7)
+        public PCustomHouseAddStair(ushort graphic, int x, int y) : base(0xD7)
         {
             WriteUInt(World.Player);
             WriteUShort(0x0D);

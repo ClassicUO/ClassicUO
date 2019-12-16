@@ -27,14 +27,14 @@ namespace ClassicUO.Game.Data
 {
     internal readonly struct BuffIcon : IEquatable<BuffIcon>
     {
-        public BuffIcon(Graphic graphic, long timer, string text)
+        public BuffIcon(ushort graphic, long timer, string text)
         {
             Graphic = graphic;
             Timer = timer;
             Text = text;
         }
 
-        public readonly Graphic Graphic;
+        public readonly ushort Graphic;
 
         public readonly long Timer;
 

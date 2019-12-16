@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
         }
 
-        public ContainerGump(Serial serial, Graphic gumpid) : this()
+        public ContainerGump(Serial serial, ushort gumpid) : this()
         {
             LocalSerial = serial;
             Item item = World.Items.Get(serial);
@@ -82,7 +82,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public Graphic Graphic { get; }
+        public ushort Graphic { get; }
 
         public TextContainer TextContainer { get; } = new TextContainer();
 
@@ -94,7 +94,7 @@ namespace ClassicUO.Game.UI.Gumps
                 //if (_isMinimized != value)
                 {
                     _isMinimized = value;
-                    _gumpPicContainer.Graphic = value ? (Graphic) _data.IconizedGraphic : Graphic;
+                    _gumpPicContainer.Graphic = value ? _data.IconizedGraphic : Graphic;
                     float scale = UIManager.ContainerScale;
 
                     Width = _gumpPicContainer.Width = (int) (_gumpPicContainer.Width * scale);
@@ -138,7 +138,7 @@ namespace ClassicUO.Game.UI.Gumps
             float scale = UIManager.ContainerScale;
 
             _data = ContainerManager.Get(Graphic);
-            Graphic g = _data.Graphic;
+            ushort g = _data.Graphic;
 
 
             _gumpPicContainer?.Dispose();
@@ -265,7 +265,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _eyeCorspeOffset = _eyeCorspeOffset == 0 ? 1 : 0;
                 _corpseEyeTicks = (long) totalMS + 750;
-                _eyeGumpPic.Graphic = (Graphic) (0x0045 + _eyeCorspeOffset);
+                _eyeGumpPic.Graphic = (ushort) (0x0045 + _eyeCorspeOffset);
                 float scale = UIManager.ContainerScale;
                 _eyeGumpPic.Width = (int)(_eyeGumpPic.Texture.Width * scale);
                 _eyeGumpPic.Height = (int)(_eyeGumpPic.Texture.Height * scale);
@@ -412,7 +412,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void SetPositionNearGameObject(Graphic g, Item item)
+        private void SetPositionNearGameObject(ushort g, Item item)
         {
             if (World.Player.Equipment[(int)Layer.Bank] != null && item.Serial == World.Player.Equipment[(int)Layer.Bank])
             {

@@ -35,8 +35,8 @@ namespace ClassicUO.Game
         public Position Position { get; private set; }
         public Serial Container { get; private set; }
         public Serial Serial { get; private set; }
-        public Graphic Graphic { get; private set; }
-        public Graphic DisplayedGraphic { get; private set; }
+        public ushort Graphic { get; private set; }
+        public ushort DisplayedGraphic { get; private set; }
         public Hue Hue { get; private set; }
         public ushort Amount { get; private set; }
         public bool IsStackable { get; private set; }
@@ -74,7 +74,7 @@ namespace ClassicUO.Game
             Serial = Serial.INVALID;
             Position = Position.INVALID;
             Container = Serial.INVALID;
-            DisplayedGraphic = Graphic = Graphic.INVALID;
+            DisplayedGraphic = Graphic = 0xFFFF;
             Hue = Hue.INVALID;
             OnGround = false;
             Amount = 0;

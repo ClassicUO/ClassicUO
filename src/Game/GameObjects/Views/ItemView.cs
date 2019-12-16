@@ -38,7 +38,7 @@ namespace ClassicUO.Game.GameObjects
     internal partial class Item
     {
         private bool _force;
-        private Graphic _originalGraphic;
+        private ushort _originalGraphic;
 
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
@@ -68,7 +68,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (animData->FrameCount != 0)
                         {
-                            _originalGraphic = (Graphic) (Graphic + animData->FrameData[animData->FrameCount >> 1]);
+                            _originalGraphic = (ushort) (Graphic + animData->FrameData[animData->FrameCount >> 1]);
                         }
                     }
                 }

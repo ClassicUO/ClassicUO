@@ -186,7 +186,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        protected Graphic GetStatLockGraphic(Lock lockStatus)
+        protected ushort GetStatLockGraphic(Lock lockStatus)
         {
             switch (lockStatus)
             {
@@ -204,7 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 default:
 
-                    return Graphic.INVALID;
+                    return 0xFFFF;
             }
         }
 
@@ -813,7 +813,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(new Label("Buffs", false, 0x0386, 60, 1) { X = 174, Y = 40 });
             }
 
-            Graphic gumpIdHp = 0x0806;
+            ushort gumpIdHp = 0x0806;
 
             if (World.Player.IsPoisoned)
                 gumpIdHp = 0x0808;
@@ -1096,7 +1096,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void UpdateStatusFillBar(FillStats id, int current, int max)
         {
-            Graphic gumpId = 0x0806;
+            ushort gumpId = 0x0806;
 
             if (id == FillStats.Hits)
             {

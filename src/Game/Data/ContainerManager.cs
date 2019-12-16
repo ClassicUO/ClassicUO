@@ -33,7 +33,7 @@ namespace ClassicUO.Game.Data
 {
     internal static class ContainerManager
     {
-        private static readonly Dictionary<Graphic, ContainerData> _data = new Dictionary<Graphic, ContainerData>
+        private static readonly Dictionary<ushort, ContainerData> _data = new Dictionary<ushort, ContainerData>
         {
             {
                 0x9, new ContainerData(0x0009, 0x0000, 0x0000, 20, 85, 124, 196)
@@ -169,7 +169,7 @@ namespace ClassicUO.Game.Data
         public static int X { get; private set; } = 40;
         public static int Y { get; private set; } = 40;
 
-        public static ContainerData Get(Graphic graphic)
+        public static ContainerData Get(ushort graphic)
         {
             //if the server requests for a non present gump in container data dictionary, create it, but without any particular sound.
             if (!_data.TryGetValue(graphic, out ContainerData value))
@@ -178,7 +178,7 @@ namespace ClassicUO.Game.Data
         }
 
 
-        public static void CalculateContainerPosition(Graphic g)
+        public static void CalculateContainerPosition(ushort g)
         {
             UOTexture texture = UOFileManager.Gumps.GetTexture(g);
 
@@ -223,7 +223,7 @@ namespace ClassicUO.Game.Data
 
     internal readonly struct ContainerData
     {
-        public ContainerData(Graphic graphic, ushort sound, ushort closed, int x, int y, int w, int h, ushort iconizedgraphic = 0, int minimizerX = 0, int minimizerY = 0)
+        public ContainerData(ushort graphic, ushort sound, ushort closed, int x, int y, int w, int h, ushort iconizedgraphic = 0, int minimizerX = 0, int minimizerY = 0)
         {
             Graphic = graphic;
             Bounds = new Rectangle(x, y, w, h);
@@ -233,7 +233,7 @@ namespace ClassicUO.Game.Data
             IconizedGraphic = iconizedgraphic;
         }
 
-        public readonly Graphic Graphic;
+        public readonly ushort Graphic;
         public readonly Rectangle Bounds;
         public readonly ushort OpenSound;
         public readonly ushort ClosedSound;

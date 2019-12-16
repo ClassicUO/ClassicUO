@@ -66,7 +66,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _isMinimized = value;
 
-                    GetBookInfo(_spellBookType, out Graphic bookGraphic, out Graphic minimizedGraphic, out Graphic iconStartGraphic, out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount);
+                    GetBookInfo(_spellBookType, out ushort bookGraphic, out ushort minimizedGraphic, out ushort iconStartGraphic, out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount);
 
 
                     _picBase.Graphic = value ? minimizedGraphic : bookGraphic;
@@ -133,7 +133,7 @@ namespace ClassicUO.Game.UI.Gumps
             item.Items.Removed += ItemsOnRemoved;
 
             AssignGraphic(item);
-            GetBookInfo(_spellBookType, out Graphic bookGraphic, out Graphic minimizedGraphic, out Graphic iconStartGraphic, out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount);
+            GetBookInfo(_spellBookType, out ushort bookGraphic, out ushort minimizedGraphic, out ushort iconStartGraphic, out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount);
             Add(_picBase = new GumpPic(0, 0, bookGraphic, 0));
             _picBase.MouseDoubleClick += _picBase_MouseDoubleClick;
 
@@ -217,7 +217,7 @@ namespace ClassicUO.Game.UI.Gumps
             _dataBox.Clear();
             _dataBox.WantUpdateSize = true;
 
-            GetBookInfo(_spellBookType, out Graphic bookGraphic, out Graphic minimizedGraphic, out Graphic iconStartGraphic, out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount);
+            GetBookInfo(_spellBookType, out ushort bookGraphic, out ushort minimizedGraphic, out ushort iconStartGraphic, out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount);
 
             int totalSpells = 0;
 
@@ -562,7 +562,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    iconGraphic = (Graphic) (iconStartGraphic + i);
+                    iconGraphic = (ushort) (iconStartGraphic + i);
                     GetSpellToolTip(out toolTipCliloc);
                 }
 
@@ -701,7 +701,7 @@ namespace ClassicUO.Game.UI.Gumps
             return def;
         }
 
-        private void GetBookInfo(SpellBookType type, out Graphic bookGraphic, out Graphic minimizedGraphic, out Graphic iconStartGraphic, out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount)
+        private void GetBookInfo(SpellBookType type, out ushort bookGraphic, out ushort minimizedGraphic, out ushort iconStartGraphic, out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount)
         {
             switch (type)
             {

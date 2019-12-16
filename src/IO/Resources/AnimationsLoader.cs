@@ -42,7 +42,7 @@ namespace ClassicUO.IO.Resources
     internal class AnimationsLoader : UOFileLoader<AnimationFrameTexture>
     {
         private readonly Dictionary<ushort, byte> _animationSequenceReplacing = new Dictionary<ushort, byte>();
-        private readonly Dictionary<Graphic, Rectangle> _animDimensionCache = new Dictionary<Graphic, Rectangle>();
+        private readonly Dictionary<ushort, Rectangle> _animDimensionCache = new Dictionary<ushort, Rectangle>();
         private readonly AnimationGroup _empty = new AnimationGroup
         {
             Direction = new AnimationDirection[5]

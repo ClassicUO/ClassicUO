@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Controls
         private const int OVER = 2;
         private readonly string _caption;
         private readonly RenderedText[] _fontTexture = new RenderedText[2];
-        private readonly Graphic[] _gumpGraphics = new Graphic[3];
+        private readonly ushort[] _gumpGraphics = new ushort[3];
         private readonly UOTexture[] _textures = new UOTexture[3];
 
         private bool _entered;
@@ -92,7 +92,7 @@ namespace ClassicUO.Game.UI.Controls
             CanCloseWithEsc = false;
         }
 
-        public Button(List<string> parts) : this(parts.Count >= 8 ? int.Parse(parts[7]) : 0, Graphic.Parse(parts[3]), Graphic.Parse(parts[4]))
+        public Button(List<string> parts) : this(parts.Count >= 8 ? int.Parse(parts[7]) : 0, GraphicHelper.Parse(parts[3]), GraphicHelper.Parse(parts[4]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -255,7 +255,7 @@ namespace ClassicUO.Game.UI.Controls
             return _textures[NORMAL];
         }
 
-        private Graphic GetGraphicByState()
+        private ushort GetGraphicByState()
         {
             if (_entered)
             {

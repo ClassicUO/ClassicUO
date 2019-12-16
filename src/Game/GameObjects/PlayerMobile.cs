@@ -42,7 +42,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal class PlayerMobile : Mobile
     {
-        private readonly Dictionary<Graphic, BuffIcon> _buffIcons = new Dictionary<Graphic, BuffIcon>();
+        private readonly Dictionary<ushort, BuffIcon> _buffIcons = new Dictionary<ushort, BuffIcon>();
 
         public PlayerMobile(Serial serial) : base(serial)
         {
@@ -63,7 +63,7 @@ namespace ClassicUO.Game.GameObjects
         public Deque<Step> RequestedSteps { get; } = new Deque<Step>();
 #endif
 
-        public IReadOnlyDictionary<Graphic, BuffIcon> BuffIcons => _buffIcons;
+        public IReadOnlyDictionary<ushort, BuffIcon> BuffIcons => _buffIcons;
 
         public ushort Strength;
 
@@ -229,18 +229,18 @@ namespace ClassicUO.Game.GameObjects
             return found;
         }
 
-        public void AddBuff(Graphic graphic, uint time, string text)
+        public void AddBuff(ushort graphic, uint time, string text)
         {
             _buffIcons[graphic] = new BuffIcon(graphic, time, text);
         }
 
 
-        public bool IsBuffIconExists(Graphic graphic)
+        public bool IsBuffIconExists(ushort graphic)
         {
             return _buffIcons.ContainsKey(graphic);
         }
 
-        public void RemoveBuff(Graphic graphic)
+        public void RemoveBuff(ushort graphic)
         {
             _buffIcons.Remove(graphic);
         }
@@ -324,7 +324,7 @@ namespace ClassicUO.Game.GameObjects
 
                     for (int i = 0; i < count; i++)
                     {
-                        Graphic g = graphics[i];
+                        ushort g = graphics[i];
 
                         switch (g)
                         {

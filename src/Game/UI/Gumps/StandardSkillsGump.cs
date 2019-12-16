@@ -120,7 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _isMinimized = value;
 
-                    _gumpPic.Graphic = value ? (Graphic)0x839 : (Graphic)0x82D;
+                    _gumpPic.Graphic = value ? (ushort)0x839 : (ushort) 0x82D;
 
                     if (value)
                     {
@@ -430,7 +430,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     default:
 
-                        return Graphic.INVALID;
+                        return 0xFFFF;
                 }
             }
 

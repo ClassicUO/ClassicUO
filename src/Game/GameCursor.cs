@@ -66,7 +66,7 @@ namespace ClassicUO.Game
 
         private IntPtr _cursor, _surface;
         private UOTexture _draggedItemTexture;
-        private Graphic _graphic = 0x2073;
+        private ushort _graphic = 0x2073;
 
         private ItemHold _itemHold;
         private bool _needGraphicUpdate = true;
@@ -232,7 +232,7 @@ namespace ClassicUO.Game
             }
         }
 
-        public Graphic Graphic
+        public ushort Graphic
         {
             get => _graphic;
             set

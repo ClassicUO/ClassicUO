@@ -92,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _isMinimized = value;
 
-                    _gumpPic.Graphic = value ? (Graphic)0x9D4 : (Graphic)0x82D;
+                    _gumpPic.Graphic = value ? (ushort) 0x9D4 : (ushort) 0x82D;
 
                     if (value)
                     {
@@ -164,19 +164,19 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        private void AddHorizontalBar(ScrollArea area, Graphic start, int x, int width)
+        private void AddHorizontalBar(ScrollArea area, ushort start, int x, int width)
         {
             var startBounds = UOFileManager.Gumps.GetTexture(start);
-            var middleBounds = UOFileManager.Gumps.GetTexture((Graphic) (start + 1));
-            var endBounds = UOFileManager.Gumps.GetTexture((Graphic) (start + 2));
+            var middleBounds = UOFileManager.Gumps.GetTexture((ushort) (start + 1));
+            var endBounds = UOFileManager.Gumps.GetTexture((ushort) (start + 2));
 
             PrivateContainer container = new PrivateContainer();
 
             Control c = new GumpPic(x, 0, start, 0);
             
             container.Add(c);
-            container.Add(new GumpPicWithWidth(x + startBounds.Width, (startBounds.Height - middleBounds.Height) >> 1, (Graphic) (start + 1), 0, width - startBounds.Width - endBounds.Width));
-            container.Add(new GumpPic(x + width - endBounds.Width, 0, (Graphic) (start + 2), 0));
+            container.Add(new GumpPicWithWidth(x + startBounds.Width, (startBounds.Height - middleBounds.Height) >> 1, (ushort) (start + 1), 0, width - startBounds.Width - endBounds.Width));
+            container.Add(new GumpPic(x + width - endBounds.Width, 0, (ushort) (start + 2), 0));
 
             area.Add(container);
         }

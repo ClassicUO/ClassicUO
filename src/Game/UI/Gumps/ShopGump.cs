@@ -182,40 +182,40 @@ namespace ClassicUO.Game.UI.Gumps
             UOTexture t = UOFileManager.Gumps.GetTexture(0x0870);
             UOTexture[][] splits = new UOTexture[4][];
 
-            splits[0] = GraphicHelper.SplitTexture16(t,
-                                                     new int[3, 4]
-                                                     {
-                                                         {0, 0, t.Width, 64},
-                                                         {0, 64, t.Width, 124},
-                                                         {0, 124, t.Width, t.Height - 124}
-                                                     });
+            splits[0] = Utility.GraphicHelper.SplitTexture16(t,
+                                                             new int[3, 4]
+                                                             {
+                                                                 {0, 0, t.Width, 64},
+                                                                 {0, 64, t.Width, 124},
+                                                                 {0, 124, t.Width, t.Height - 124}
+                                                             });
             t = UOFileManager.Gumps.GetTexture(0x0871);
 
-            splits[1] = GraphicHelper.SplitTexture16(t,
-                                                     new int[3, 4]
-                                                     {
-                                                         {0, 0, t.Width, 64},
-                                                         {0, 64, t.Width, 94},
-                                                         {0, 94, t.Width, t.Height - 94}
-                                                     });
+            splits[1] = Utility.GraphicHelper.SplitTexture16(t,
+                                                             new int[3, 4]
+                                                             {
+                                                                 {0, 0, t.Width, 64},
+                                                                 {0, 64, t.Width, 94},
+                                                                 {0, 94, t.Width, t.Height - 94}
+                                                             });
             t = UOFileManager.Gumps.GetTexture(0x0872);
 
-            splits[2] = GraphicHelper.SplitTexture16(t,
-                                                     new int[3, 4]
-                                                     {
-                                                         {0, 0, t.Width, 64},
-                                                         {0, 64, t.Width, 124},
-                                                         {0, 124, t.Width, t.Height - 124}
-                                                     });
+            splits[2] = Utility.GraphicHelper.SplitTexture16(t,
+                                                             new int[3, 4]
+                                                             {
+                                                                 {0, 0, t.Width, 64},
+                                                                 {0, 64, t.Width, 124},
+                                                                 {0, 124, t.Width, t.Height - 124}
+                                                             });
             t = UOFileManager.Gumps.GetTexture(0x0873);
 
-            splits[3] = GraphicHelper.SplitTexture16(t,
-                                                     new int[3, 4]
-                                                     {
-                                                         {0, 0, t.Width, 64},
-                                                         {0, 64, t.Width, 94},
-                                                         {0, 94, t.Width, t.Height - 94}
-                                                     });
+            splits[3] = Utility.GraphicHelper.SplitTexture16(t,
+                                                             new int[3, 4]
+                                                             {
+                                                                 {0, 0, t.Width, 64},
+                                                                 {0, 64, t.Width, 94},
+                                                                 {0, 94, t.Width, t.Height - 94}
+                                                             });
 
             for (int i = 0, idx = 0; i < splits.Length; i++)
             {
@@ -724,10 +724,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class ResizePicLine : Control
         {
-            private readonly Graphic _graphic;
+            private readonly ushort _graphic;
             private readonly UOTexture[] _gumpTexture = new UOTexture[3];
 
-            public ResizePicLine(Graphic graphic)
+            public ResizePicLine(ushort graphic)
             {
                 _graphic = graphic;
                 CanMove = true;
@@ -736,7 +736,7 @@ namespace ClassicUO.Game.UI.Gumps
                 for (int i = 0; i < _gumpTexture.Length; i++)
                 {
                     if (_gumpTexture[i] == null)
-                        _gumpTexture[i] = UOFileManager.Gumps.GetTexture((Graphic) (_graphic + i));
+                        _gumpTexture[i] = UOFileManager.Gumps.GetTexture((ushort) (_graphic + i));
                 }
 
                 Height = _gumpTexture.Max(o => o.Height);

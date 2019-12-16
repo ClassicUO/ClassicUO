@@ -35,14 +35,14 @@ namespace ClassicUO.Game.GameObjects
         private int _distance;
         //private Vector2 _velocity;
 
-        private MovingEffect(Graphic graphic, Hue hue)
+        private MovingEffect(ushort graphic, Hue hue)
         {
             Hue = hue;
             Graphic = graphic;
             Load();
         }
 
-        public MovingEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, Graphic graphic, Hue hue, bool fixedDir, byte speed) : this(graphic, hue)
+        public MovingEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, ushort graphic, Hue hue, bool fixedDir, byte speed) : this(graphic, hue)
         {
             FixedDir = fixedDir;
 

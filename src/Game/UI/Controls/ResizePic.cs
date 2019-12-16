@@ -37,14 +37,14 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly UOTexture[] _gumpTexture = new UOTexture[9];
 
-        public ResizePic(Graphic graphic)
+        public ResizePic(ushort graphic)
         {
             CanMove = true;
             CanCloseWithRightClick = true;
 
             for (int i = 0; i < _gumpTexture.Length; i++)
             {
-                UOTexture t = UOFileManager.Gumps.GetTexture((Graphic) (graphic + i));
+                UOTexture t = UOFileManager.Gumps.GetTexture((ushort) (graphic + i));
 
                 if (t == null)
                 {
@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Controls
             Graphic = graphic;
         }
 
-        public ResizePic(List<string> parts) : this(Graphic.Parse(parts[3]))
+        public ResizePic(List<string> parts) : this(GraphicHelper.Parse(parts[3]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -72,7 +72,7 @@ namespace ClassicUO.Game.UI.Controls
             Height = int.Parse(parts[5]);
         }
 
-        public Graphic Graphic { get; }
+        public ushort Graphic { get; }
 
         public bool OnlyCenterTransparent { get; set; }
 

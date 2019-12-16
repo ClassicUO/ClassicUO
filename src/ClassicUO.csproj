@@ -384,7 +384,7 @@
     <Compile Include="Game\GameObjects\Multi.cs" />
     <Compile Include="Game\GameObjects\PlayerMobile.cs" />
     <Compile Include="Game\GameObjects\Static.cs" />
-    <Compile Include="Game\Graphic.cs" />
+    <Compile Include="Game\GraphicHelper.cs" />
     <Compile Include="Game\UI\Controls\Button.cs" />
     <Compile Include="Game\UI\Controls\Checkbox.cs" />
     <Compile Include="Game\UI\Controls\CheckerTrans.cs" />

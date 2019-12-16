@@ -51,7 +51,7 @@ namespace ClassicUO.Game.GameObjects
 
         }
 
-        public Static(Graphic graphic, Hue hue, int index)
+        public Static(ushort graphic, Hue hue, int index)
         {
             Graphic = OriginalGraphic = graphic;
             Hue = hue;
@@ -68,7 +68,7 @@ namespace ClassicUO.Game.GameObjects
                 _canBeTransparent = 0;
         }
 
-        public static Static Create(Graphic graphic, Hue hue, int index)
+        public static Static Create(ushort graphic, Hue hue, int index)
         {
             if (_pool.Count != 0)
             {
@@ -97,13 +97,13 @@ namespace ClassicUO.Game.GameObjects
 
         public string Name => ItemData.Name;
 
-        public Graphic OriginalGraphic { get; private set; }
+        public ushort OriginalGraphic { get; private set; }
 
         public bool IsVegetation;
 
         public ref readonly StaticTiles ItemData => ref UOFileManager.TileData.StaticData[Graphic];
 
-        public void SetGraphic(Graphic g)
+        public void SetGraphic(ushort g)
         {
             Graphic = g;
             SetTextureByGraphic(g);

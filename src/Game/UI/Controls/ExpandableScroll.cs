@@ -196,7 +196,7 @@ namespace ClassicUO.Game.UI.Controls
                 _gumplingTitleGumpIDDelta = false;
 
                 _gumplingTitle?.Dispose();
-                Add(_gumplingTitle = new GumpPic(0, 0, (Graphic) _gumplingTitleGumpID, 0));
+                Add(_gumplingTitle = new GumpPic(0, 0, (ushort) _gumplingTitleGumpID, 0));
             }
 
             if (!_gumpTop.IsInitialized)

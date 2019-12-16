@@ -80,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
             _direction = GumpDirection.LEFT_HORIZONTAL;
 
 
-            foreach (KeyValuePair<Graphic, BuffIcon> k in World.Player.BuffIcons)
+            foreach (KeyValuePair<ushort, BuffIcon> k in World.Player.BuffIcons)
                 Add(new BuffControlEntry(World.Player.BuffIcons[k.Key]));
 
             Change();
@@ -107,13 +107,13 @@ namespace ClassicUO.Game.UI.Gumps
         //    return Bounds.Contains(X + x, Y + y);
         //}
 
-        public void AddBuff(Graphic graphic)
+        public void AddBuff(ushort graphic)
         {
             Add(new BuffControlEntry(World.Player.BuffIcons[graphic]));
             UpdateElements();
         }
 
-        public void RemoveBuff(Graphic graphic)
+        public void RemoveBuff(ushort graphic)
         {
             foreach (BuffControlEntry entry in Children.OfType<BuffControlEntry>().Where(s => s.Icon.Graphic == graphic))
             {

@@ -32,9 +32,9 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class GumpPicTiled : Control
     {
-        private Graphic _lastGraphic;
+        private ushort _lastGraphic;
 
-        public GumpPicTiled(Graphic graphic)
+        public GumpPicTiled(ushort graphic)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Controls
             Graphic = _lastGraphic = graphic;
         }
 
-        public GumpPicTiled(int x, int y, int width, int heigth, Graphic graphic) : this(graphic)
+        public GumpPicTiled(int x, int y, int width, int heigth, ushort graphic) : this(graphic)
         {
             X = x;
             Y = y;
@@ -50,7 +50,7 @@ namespace ClassicUO.Game.UI.Controls
             Height = heigth;
         }
 
-        public GumpPicTiled(List<string> parts) : this(Graphic.Parse(parts[5]))
+        public GumpPicTiled(List<string> parts) : this(GraphicHelper.Parse(parts[5]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -66,11 +66,11 @@ namespace ClassicUO.Game.UI.Controls
             Y = y;
             Width = width;
             Height = heigth;
-            Graphic = _lastGraphic = Graphic.INVALID;
+            Graphic = _lastGraphic = 0xFFFF;
             Texture = texture;
         }
 
-        public Graphic Graphic { get; set; }
+        public ushort Graphic { get; set; }
 
         public Hue Hue { get; set; }
 

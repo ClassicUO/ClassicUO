@@ -77,7 +77,7 @@ namespace ClassicUO.Game.Managers
     {
         private static Serial _targetCursorId;
 
-        private static Action<Serial, Graphic, ushort, ushort, sbyte, bool> _enqueuedAction;
+        private static Action<Serial, ushort, ushort, ushort, sbyte, bool> _enqueuedAction;
 
         public static MultiTargetInfo MultiTargetInfo { get; private set; }
 
@@ -125,7 +125,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void EnqueueAction(Action<Serial, Graphic, ushort, ushort, sbyte, bool> action)
+        public static void EnqueueAction(Action<Serial, ushort, ushort, ushort, sbyte, bool> action)
         {
             _enqueuedAction = action;
         }
@@ -230,7 +230,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void Target(Graphic graphic, ushort x, ushort y, short z)
+        public static void Target(ushort graphic, ushort x, ushort y, short z)
         {
             if (!IsTargeting || TargeringType != TargetType.Neutral || graphic >= UOFileManager.TileData.StaticData.Length)
                 return;
