@@ -130,19 +130,19 @@ namespace ClassicUO.Game.Scenes
 
             while (!IsDestroyed)
             {
-                UOFileManager.Art.CleaUnusedResources();
+                UOFileManager.Art.CleaUnusedResources(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
 
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
 
-                UOFileManager.Gumps.CleaUnusedResources();
+                UOFileManager.Gumps.CleaUnusedResources(Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
 
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
 
-                UOFileManager.Textmaps.CleaUnusedResources();
+                UOFileManager.Textmaps.CleaUnusedResources(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
 
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
 
-                UOFileManager.Animations.CleaUnusedResources();
+                UOFileManager.Animations.CleaUnusedResources(Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
 
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
 
@@ -150,7 +150,7 @@ namespace ClassicUO.Game.Scenes
 
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
 
-                UOFileManager.Lights.CleaUnusedResources();
+                UOFileManager.Lights.CleaUnusedResources(20);
 
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
             }

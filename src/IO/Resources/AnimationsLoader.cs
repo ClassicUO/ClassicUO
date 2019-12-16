@@ -1664,7 +1664,7 @@ namespace ClassicUO.IO.Resources
                 x = y = w = h = 0;
         }
 
-        public override void CleaUnusedResources()
+        public override void CleaUnusedResources(int maxCount)
         {
             int count = 0;
             long ticks = Time.Ticks - Constants.CLEAR_TEXTURES_DELAY;
@@ -1694,7 +1694,7 @@ namespace ClassicUO.IO.Resources
 
                     _usedTextures.RemoveAt(i--);
 
-                    if (++count >= Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
+                    if (++count >= maxCount)
                         break;
                 }
             }

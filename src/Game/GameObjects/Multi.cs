@@ -111,12 +111,14 @@ namespace ClassicUO.Game.GameObjects
         public int MultiOffsetZ;
         public CUSTOM_HOUSE_MULTI_OBJECT_FLAGS State = 0;
         public bool IsCustom;
+        public bool IsVegetation;
 
         public ref readonly StaticTiles ItemData => ref UOFileManager.TileData.StaticData[Graphic];
 
         public override void UpdateGraphicBySeason()
         {
             Graphic = Season.GetSeasonGraphic(World.Season, _originalGraphic);
+            IsVegetation = StaticFilters.IsVegetation(Graphic);
         }
 
         public override void UpdateTextCoordsV()

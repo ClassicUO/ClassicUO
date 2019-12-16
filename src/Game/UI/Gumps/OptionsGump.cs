@@ -27,6 +27,7 @@ using System.IO;
 using System.Linq;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -1628,11 +1629,30 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (ProfileManager.Current.EnableCaveBorder != _enableCaveBorder.IsChecked)
             {
+                foreach (ushort graphic in StaticFilters.CaveTiles)
+                {
+                    var texture = UOFileManager.Art.GetTexture(graphic);
+                    if (texture != null)
+                        texture.Ticks = 0;
+                }
+
+                UOFileManager.Art.CleaUnusedResources(short.MaxValue);
                 ProfileManager.Current.EnableCaveBorder = _enableCaveBorder.IsChecked;
-                UOFileManager.Art.ClearCaveTextures();
             }
 
-            ProfileManager.Current.TreeToStumps = _treeToStumps.IsChecked;
+            if (ProfileManager.Current.TreeToStumps != _treeToStumps.IsChecked)
+            {
+                foreach(var g in StaticFilters.StumpTiles)
+                {
+                    var texture = UOFileManager.Art.GetTexture(g);
+                    if (texture != null)
+                        texture.Ticks = 0;
+                }
+
+                UOFileManager.Art.CleaUnusedResources(short.MaxValue);
+                ProfileManager.Current.TreeToStumps = _treeToStumps.IsChecked;
+            }
+
             ProfileManager.Current.FieldsType = _fieldsType.SelectedIndex;
             ProfileManager.Current.HideVegetation = _hideVegetation.IsChecked;
             ProfileManager.Current.NoColorObjectsOutOfRange = _noColorOutOfRangeObjects.IsChecked;

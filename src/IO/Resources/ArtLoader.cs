@@ -76,9 +76,6 @@ namespace ClassicUO.IO.Resources
                 ReadStaticArt(ref texture, (ushort) g);
                 ResourceDictionary.Add(g, texture);
             }
-
-            //else
-            //    texture.Ticks = Time.Ticks + 3000;
             return texture;
         }
 
@@ -89,9 +86,6 @@ namespace ClassicUO.IO.Resources
                 ReadLandArt(ref texture, (ushort) g);
                 _landDictionary.Add(g, texture);
             }
-
-            //else
-            //    texture.Ticks = Time.Ticks + 3000;
             return texture;
         }
 
@@ -128,10 +122,10 @@ namespace ClassicUO.IO.Resources
             });
         }
 
-        public override void CleaUnusedResources()
+        public override void CleaUnusedResources(int count)
         {
-            base.CleaUnusedResources();
-            ClearUnusedResources(_landDictionary, Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
+            base.CleaUnusedResources(count);
+            ClearUnusedResources(_landDictionary, count);
         }
 
         public unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height, out Rectangle imageRectangle)
@@ -218,7 +212,7 @@ namespace ClassicUO.IO.Resources
                     pixels[i * width + width - 1] = 0;
                 }
             }
-            else if (StaticsHelper.IsCave(graphic) && ProfileManager.Current != null && ProfileManager.Current.EnableCaveBorder)
+            else if (StaticFilters.IsCave(graphic) && ProfileManager.Current != null && ProfileManager.Current.EnableCaveBorder)
             {
                 for (int yy = 0; yy < height; yy++)
                 {
@@ -280,6 +274,11 @@ namespace ClassicUO.IO.Resources
         private unsafe void ReadStaticArt(ref ArtTexture texture, ushort graphic)
         {
             Rectangle imageRectangle = new Rectangle();
+
+            if (StaticFilters.IsTree(graphic, out int stumpidx))
+            {
+                graphic = Constants.TREE_REPLACE_GRAPHIC;
+            }
 
             ref readonly var entry = ref GetValidRefEntry(graphic + 0x4000);
 
@@ -361,7 +360,7 @@ namespace ClassicUO.IO.Resources
                     pixels[i * width + width - 1] = 0;
                 }
             }
-            else if (StaticsHelper.IsCave(graphic) && ProfileManager.Current != null && ProfileManager.Current.EnableCaveBorder)
+            else if (StaticFilters.IsCave(graphic) && ProfileManager.Current != null && ProfileManager.Current.EnableCaveBorder)
             {
                 for (int yy = 0; yy < height; yy++)
                 {
@@ -419,21 +418,7 @@ namespace ClassicUO.IO.Resources
             texture = new ArtTexture(imageRectangle, width, height);
             texture.PushData(pixels);
         }
-
-        public void ClearCaveTextures()
-        {
-            for (ushort index = 0x053B; index <= 0x0554; index++)
-            {
-                if (index == 0x0550)
-                    continue;
-
-                if (ResourceDictionary.TryGetValue(index, out ArtTexture texture))
-                    texture.Ticks = 0;
-            }
-
-            CleaUnusedResources();
-        }
-
+        
         private void ReadLandArt(ref UOTexture16 texture, ushort graphic)
         {
             const int SIZE = 44 * 44;
