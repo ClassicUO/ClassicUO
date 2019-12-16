@@ -2052,7 +2052,7 @@ namespace ClassicUO.IO.Resources
         public uint Size;
     }
 
-    internal readonly struct EquipConvData
+    internal readonly struct EquipConvData : IEquatable<EquipConvData>
     {
         public EquipConvData(ushort graphic, ushort gump, ushort color)
         {
@@ -2064,5 +2064,21 @@ namespace ClassicUO.IO.Resources
         public readonly ushort Graphic;
         public readonly ushort Gump;
         public readonly ushort Color;
+
+
+        public override int GetHashCode()
+        {
+            return (Graphic, Gump, Color).GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is EquipConvData v && Equals(v);
+        }
+
+        public bool Equals(EquipConvData other)
+        {
+            return (Graphic, Gump, Color) == (other.Graphic, other.Gump, other.Color);
+        }
     }
 }
