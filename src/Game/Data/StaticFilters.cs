@@ -46,7 +46,7 @@ namespace ClassicUO.Game.Data
         private static readonly STATIC_TILES_FILTER_FLAGS[] _filteredTiles = new STATIC_TILES_FILTER_FLAGS[Constants.MAX_STATIC_DATA_INDEX_COUNT];
 
         public static readonly List<ushort> CaveTiles = new List<ushort>();
-        public static readonly List<ushort> StumpTiles = new List<ushort>();
+        public static readonly List<ushort> TreeTiles = new List<ushort>();
 
         public static void Load()
         {
@@ -57,7 +57,7 @@ namespace ClassicUO.Game.Data
 
             string cave = Path.Combine(path, "cave.txt");
             string vegetation = Path.Combine(path, "vegetation.txt");
-            string stumps = Path.Combine(path, "stumps.txt");
+            string trees = Path.Combine(path, "tree.txt");
 
 
             if (!File.Exists(cave))
@@ -113,9 +113,9 @@ namespace ClassicUO.Game.Data
                 }
             }
 
-            if (!File.Exists(stumps))
+            if (!File.Exists(trees))
             {
-                using (StreamWriter writer = new StreamWriter(stumps))
+                using (StreamWriter writer = new StreamWriter(trees))
                 using (StreamWriter writerveg = new StreamWriter(vegetation, true))
                 {
                     ushort[] treeTiles = {
@@ -181,7 +181,7 @@ namespace ClassicUO.Game.Data
             }
 
 
-            TextFileParser stumpsParser = new TextFileParser(File.ReadAllText(stumps), new[] { ' ', '\t', ',', '=' }, new[] { '#', ';' }, new[] { '"', '"' });
+            TextFileParser stumpsParser = new TextFileParser(File.ReadAllText(trees), new[] { ' ', '\t', ',', '=' }, new[] { '#', ';' }, new[] { '"', '"' });
 
             while (!stumpsParser.IsEOF())
             {
@@ -198,7 +198,7 @@ namespace ClassicUO.Game.Data
                     if (ushort.TryParse(ss[0], out ushort graphic))
                     {
                         _filteredTiles[graphic] |= flag;
-                        StumpTiles.Add(graphic);
+                        TreeTiles.Add(graphic);
                     }
                 }
             }
@@ -217,7 +217,6 @@ namespace ClassicUO.Game.Data
                     }
                 }
             }
-         
         }
 
         [MethodImpl(256)]

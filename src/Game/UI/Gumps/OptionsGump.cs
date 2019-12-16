@@ -1642,7 +1642,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (ProfileManager.Current.TreeToStumps != _treeToStumps.IsChecked)
             {
-                foreach(var g in StaticFilters.StumpTiles)
+                foreach(var g in StaticFilters.TreeTiles)
                 {
                     var texture = UOFileManager.Art.GetTexture(g);
                     if (texture != null)
