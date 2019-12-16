@@ -51,7 +51,7 @@ namespace ClassicUO.Game.GameObjects
 
         }
 
-        public Static(ushort graphic, Hue hue, int index)
+        public Static(ushort graphic, ushort hue, int index)
         {
             Graphic = OriginalGraphic = graphic;
             Hue = hue;
@@ -68,7 +68,7 @@ namespace ClassicUO.Game.GameObjects
                 _canBeTransparent = 0;
         }
 
-        public static Static Create(ushort graphic, Hue hue, int index)
+        public static Static Create(ushort graphic, ushort hue, int index)
         {
             if (_pool.Count != 0)
             {

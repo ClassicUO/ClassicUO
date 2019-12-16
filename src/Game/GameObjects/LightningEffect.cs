@@ -25,7 +25,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class LightningEffect : GameEffect
     {
-        public LightningEffect(Hue hue)
+        public LightningEffect(ushort hue)
         {
             Graphic = 0x4E20;
             Hue = hue;
@@ -34,17 +34,17 @@ namespace ClassicUO.Game.GameObjects
             AnimIndex = 0;
         }
 
-        public LightningEffect(GameObject source, Hue hue) : this(hue)
+        public LightningEffect(GameObject source, ushort hue) : this(hue)
         {
             SetSource(source);
         }
 
-        public LightningEffect(int x, int y, int z, Hue hue) : this(hue)
+        public LightningEffect(int x, int y, int z, ushort hue) : this(hue)
         {
             SetSource(x, y, z);
         }
 
-        public LightningEffect(Serial src, int x, int y, int z, Hue hue) : this(hue)
+        public LightningEffect(Serial src, int x, int y, int z, ushort hue) : this(hue)
         {
             Entity source = World.Get(src);
 

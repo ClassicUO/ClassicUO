@@ -87,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
         public bool Exists => World.Contains(Serial);
 
 
-        public void FixHue(Hue hue)
+        public void FixHue(ushort hue)
         {
             ushort fixedColor = (ushort)(hue & 0x3FFF);
 

@@ -37,7 +37,7 @@ namespace ClassicUO.Game.Managers
 
         public event EventHandler<JournalEntry> EntryAdded;
 
-        public void Add(string text, Hue hue, string name, bool isunicode = true)
+        public void Add(string text, ushort hue, string name, bool isunicode = true)
         {
             if (Entries.Count >= 100)
                 Entries.RemoveFromFront();
@@ -90,14 +90,14 @@ namespace ClassicUO.Game.Managers
     internal class JournalEntry
     {
         public readonly byte Font;
-        public readonly Hue Hue;
+        public readonly ushort Hue;
 
         public readonly bool IsUnicode;
         public readonly string Name;
         public readonly string Text;
         public readonly DateTime Time;
 
-        public JournalEntry(string text, byte font, Hue hue, string name, bool isunicode, DateTime time)
+        public JournalEntry(string text, byte font, ushort hue, string name, bool isunicode, DateTime time)
         {
             IsUnicode = isunicode;
             Font = font;

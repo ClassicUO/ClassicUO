@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Data
 
     internal static class Notoriety
     {
-        public static Hue GetHue(NotorietyFlag flag)
+        public static ushort GetHue(NotorietyFlag flag)
         {
             switch (flag)
             {

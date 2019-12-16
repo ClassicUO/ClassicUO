@@ -92,7 +92,7 @@ namespace ClassicUO.Game
         public static event EventHandler<UOMessageEventArgs> LocalizedMessageReceived;
 
 
-        public static void HandleMessage(Entity parent, string text, string name, Hue hue, MessageType type, byte font, bool unicode = false, string lang = null)
+        public static void HandleMessage(Entity parent, string text, string name, ushort hue, MessageType type, byte font, bool unicode = false, string lang = null)
         {
             if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
             {
@@ -293,7 +293,7 @@ namespace ClassicUO.Game
 
     internal class UOMessageEventArgs : EventArgs
     {
-        public UOMessageEventArgs(Entity parent, string text, string name, Hue hue, MessageType type, byte font, bool unicode = false, string lang = null)
+        public UOMessageEventArgs(Entity parent, string text, string name, ushort hue, MessageType type, byte font, bool unicode = false, string lang = null)
         {
             Parent = parent;
             Text = text;
@@ -306,7 +306,7 @@ namespace ClassicUO.Game
             IsUnicode = unicode;
         }
 
-        public UOMessageEventArgs(Entity parent, string text, Hue hue, MessageType type, byte font, uint cliloc, bool unicode = false, AffixType affixType = AffixType.None, string affix = null)
+        public UOMessageEventArgs(Entity parent, string text, ushort hue, MessageType type, byte font, uint cliloc, bool unicode = false, AffixType affixType = AffixType.None, string affix = null)
         {
             Parent = parent;
             Text = text;
@@ -325,7 +325,7 @@ namespace ClassicUO.Game
 
         public string Name { get; }
 
-        public Hue Hue { get; }
+        public ushort Hue { get; }
 
         public MessageType Type { get; }
 

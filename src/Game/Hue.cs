@@ -26,80 +26,80 @@ using System.Globalization;
 
 namespace ClassicUO.Game
 {
-    internal readonly struct Hue : IEquatable<ushort>, IEquatable<Hue>
+    internal static class HueHelper
     {
-        public const ushort INVALID = 0xFFFF;
+        //public const ushort INVALID = 0xFFFF;
 
-        public const ushort ZERO = 0;
+        //public const ushort ZERO = 0;
 
-        private readonly ushort _value;
+        //private readonly ushort _value;
 
-        public Hue(ushort hue)
-        {
-            _value = hue;
-        }
+        //public Hue(ushort hue)
+        //{
+        //    _value = hue;
+        //}
 
-        public static implicit operator Hue(ushort value)
-        {
-            return new Hue(value);
-        }
+        //public static implicit operator Hue(ushort value)
+        //{
+        //    return new Hue(value);
+        //}
 
-        public static implicit operator ushort(Hue color)
-        {
-            return color._value;
-        }
+        //public static implicit operator ushort(Hue color)
+        //{
+        //    return color._value;
+        //}
 
-        public static bool operator ==(Hue h1, Hue h2)
-        {
-            return Equals(h1, h2);
-        }
+        //public static bool operator ==(Hue h1, Hue h2)
+        //{
+        //    return Equals(h1, h2);
+        //}
 
-        public static bool operator !=(Hue h1, Hue h2)
-        {
-            return !Equals(h1, h2);
-        }
+        //public static bool operator !=(Hue h1, Hue h2)
+        //{
+        //    return !Equals(h1, h2);
+        //}
 
-        public static bool operator <(Hue h1, Hue h2)
-        {
-            return h1._value < h2._value;
-        }
+        //public static bool operator <(Hue h1, Hue h2)
+        //{
+        //    return h1._value < h2._value;
+        //}
 
-        public static bool operator >(Hue h1, Hue h2)
-        {
-            return h1._value > h2._value;
-        }
+        //public static bool operator >(Hue h1, Hue h2)
+        //{
+        //    return h1._value > h2._value;
+        //}
 
-        public int CompareTo(ushort other)
-        {
-            return _value.CompareTo(other);
-        }
+        //public int CompareTo(ushort other)
+        //{
+        //    return _value.CompareTo(other);
+        //}
 
-        public bool Equals(ushort other)
-        {
-            return _value == other;
-        }
+        //public bool Equals(ushort other)
+        //{
+        //    return _value == other;
+        //}
 
-        public bool Equals(Hue hue)
-        {
-            return _value == hue._value;
-        }
+        //public bool Equals(Hue hue)
+        //{
+        //    return _value == hue._value;
+        //}
 
-        public override bool Equals(object obj)
-        {
-            return obj is Hue other && Equals(other);
-        }
+        //public override bool Equals(object obj)
+        //{
+        //    return obj is Hue other && Equals(other);
+        //}
 
-        public override string ToString()
-        {
-            return $"{_value} (0x{_value:X4})";
-        }
+        //public override string ToString()
+        //{
+        //    return $"{_value} (0x{_value:X4})";
+        //}
 
-        public override int GetHashCode()
-        {
-            return _value.GetHashCode();
-        }
+        //public override int GetHashCode()
+        //{
+        //    return _value.GetHashCode();
+        //}
 
-        public static Hue Parse(string str)
+        public static ushort Parse(string str)
         {
             if (str.StartsWith("0x"))
                 return ushort.Parse(str.Remove(0, 2), NumberStyles.HexNumber);

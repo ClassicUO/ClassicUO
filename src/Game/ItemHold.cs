@@ -37,7 +37,7 @@ namespace ClassicUO.Game
         public Serial Serial { get; private set; }
         public ushort Graphic { get; private set; }
         public ushort DisplayedGraphic { get; private set; }
-        public Hue Hue { get; private set; }
+        public ushort Hue { get; private set; }
         public ushort Amount { get; private set; }
         public bool IsStackable { get; private set; }
         public bool IsPartialHue { get; private set; }

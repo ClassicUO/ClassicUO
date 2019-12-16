@@ -89,7 +89,7 @@ namespace ClassicUO.Game.GameObjects
             //set => Position = new Position(Position.X, Position.Y, value);
         }
 
-        public Hue Hue;
+        public ushort Hue;
         public ushort Graphic;
         public sbyte AnimIndex;
         public int CurrentRenderIndex;
@@ -263,7 +263,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void AddMessage(MessageType type, string text, byte font, Hue hue, bool isunicode)
+        public void AddMessage(MessageType type, string text, byte font, ushort hue, bool isunicode)
         {
             if (string.IsNullOrEmpty(text))
                 return;

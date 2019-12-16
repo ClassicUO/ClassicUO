@@ -54,7 +54,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void Add(GraphicEffectType type, Serial source, Serial target, ushort graphic, Hue hue, Position srcPos, Position targPos, byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode)
+        public void Add(GraphicEffectType type, Serial source, Serial target, ushort graphic, ushort hue, Position srcPos, Position targPos, byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode)
         {
             if (hasparticles) Log.Warn( "Unhandled particles in an effects packet.");
             GameEffect effect = null;

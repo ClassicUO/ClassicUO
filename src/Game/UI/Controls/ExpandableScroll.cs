@@ -132,7 +132,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public int SpecialHeight { get; set; }
 
-        public Hue Hue
+        public ushort Hue
         {
             get => _gumpTop.Hue;
             set => _gumpTop.Hue = _gumpBottom.Hue = _gumpMiddle.Hue = _gumpRight.Hue = value;

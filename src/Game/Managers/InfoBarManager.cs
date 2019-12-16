@@ -139,7 +139,7 @@ namespace ClassicUO.Game.Managers
         [JsonProperty] public ushort hue;
 
         [JsonConstructor]
-        public InfoBarItem(string _label, InfoBarVars _var, Hue _labelColor)
+        public InfoBarItem(string _label, InfoBarVars _var, ushort _labelColor)
         {
             label = _label;
             var = _var;

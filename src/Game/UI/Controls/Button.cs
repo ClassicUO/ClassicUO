@@ -149,9 +149,9 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public Hue FontHue { get; }
+        public ushort FontHue { get; }
 
-        public Hue HueHover { get; }
+        public ushort HueHover { get; }
 
         public bool FontCenter { get; set; }
 
