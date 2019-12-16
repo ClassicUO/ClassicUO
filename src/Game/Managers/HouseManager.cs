@@ -104,13 +104,13 @@ namespace ClassicUO.Game.Managers
             {
                 Item found = World.Items.Get(house);
 
-                if (found == null)
+                if (found == null || !found.MultiInfo.HasValue)
                     return true;
 
-                int minX = found.X + found.MultiInfo.MinX;
-                int maxX = found.X + found.MultiInfo.MaxX;
-                int minY = found.Y + found.MultiInfo.MinY;
-                int maxY = found.Y + found.MultiInfo.MaxY;
+                int minX = found.X + found.MultiInfo.Value.X;
+                int maxX = found.X + found.MultiInfo.Value.Y;
+                int minY = found.Y + found.MultiInfo.Value.Width;
+                int maxY = found.Y + found.MultiInfo.Value.Height;
 
                 return obj.X >= minX &&
                        obj.X <= maxX &&

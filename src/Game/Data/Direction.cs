@@ -28,7 +28,7 @@ using Microsoft.Xna.Framework;
 namespace ClassicUO.Game.Data
 {
     [Flags]
-    public enum Direction : byte
+    enum Direction : byte
     {
         North = 0x00,
         Right = 0x01,

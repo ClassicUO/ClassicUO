@@ -87,14 +87,14 @@ namespace ClassicUO.Game.Managers
             {
                 MinHouseZ = foundation.Z + 7;
 
-                MultiInfo multi = foundation.MultiInfo;
+                var multi = foundation.MultiInfo;
 
                 if (multi != null)
                 {
-                    StartPos.X = foundation.X + multi.MinX;
-                    StartPos.Y = foundation.Y + multi.MinY;
-                    EndPos.X = foundation.X + multi.MaxX + 1;
-                    EndPos.Y = foundation.Y + multi.MaxY + 1;
+                    StartPos.X = foundation.X + multi.Value.X;
+                    StartPos.Y = foundation.Y + multi.Value.Y;
+                    EndPos.X = foundation.X + multi.Value.Width + 1;
+                    EndPos.Y = foundation.Y + multi.Value.Height + 1;
                 }
 
                 int width = Math.Abs(EndPos.X - StartPos.X);

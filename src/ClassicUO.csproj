@@ -123,7 +123,6 @@
     <Compile Include="Game\Data\Layers.cs" />
     <Compile Include="Game\Data\LightColors.cs" />
     <Compile Include="Game\Data\MapMessageType.cs" />
-    <Compile Include="Game\Data\MultiInfo.cs" />
     <Compile Include="Game\Data\NotorietyFlag.cs" />
     <Compile Include="Game\Data\PopupMenuData.cs" />
     <Compile Include="Game\Data\PopupMenuItem.cs" />
@@ -369,7 +368,6 @@
     <Compile Include="Game\Data\MovementSpeed.cs" />
     <Compile Include="Game\Data\Reagents.cs" />
     <Compile Include="Game\Data\Skill.cs" />
-    <Compile Include="Game\Data\SpellbookData.cs" />
     <Compile Include="Game\Data\SpellbookTypes.cs" />
     <Compile Include="Game\Data\SpellDefinition.cs" />
     <Compile Include="Game\Data\SpellsMagery.cs" />

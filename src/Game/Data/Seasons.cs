@@ -17,6 +17,43 @@ namespace ClassicUO.Game.Data
 
     static class Season
     {
+        private readonly static ushort[] _winterGraphic = new ushort[Constants.MAX_LAND_DATA_INDEX_COUNT];
+
+        static Season()
+        {
+            _winterGraphic[196] = 0x011A;
+            _winterGraphic[197] = 0x011B;
+            _winterGraphic[198] = 0x011C;
+            _winterGraphic[199] = 0x011D;
+            _winterGraphic[206] = 0x05C0;
+            _winterGraphic[248] = 0x011A;
+            _winterGraphic[249] = 0x011B;
+            _winterGraphic[250] = 0x011C;
+            _winterGraphic[251] = 0x011D;
+            _winterGraphic[804] = 0x0391;
+            _winterGraphic[805] = 0x0392;
+            _winterGraphic[806] = 0x0393;
+            _winterGraphic[807] = 0x0394;
+            _winterGraphic[808] = 0x0395;
+            _winterGraphic[809] = 0x0396;
+            _winterGraphic[1521] = 0x011A;
+            _winterGraphic[1522] = 0x011B;
+            _winterGraphic[1523] = 0x011C;
+            _winterGraphic[1524] = 0x011D;
+            _winterGraphic[1529] = 0x011A;
+            _winterGraphic[1530] = 0x011B;
+            _winterGraphic[1531] = 0x011C;
+            _winterGraphic[1532] = 0x011D;
+            _winterGraphic[1533] = 0x011B;
+            _winterGraphic[1534] = 0x011C;
+            _winterGraphic[1535] = 0x011D;
+            _winterGraphic[1536] = 0x011B;
+            _winterGraphic[1537] = 0x011C;
+            _winterGraphic[1538] = 0x011D;
+            _winterGraphic[1539] = 0x011C;
+            _winterGraphic[1540] = 0x011D;
+        }
+
         public static ushort GetSeasonGraphic(Seasons season, ushort graphic)
         {
             switch (season)
@@ -24,6 +61,21 @@ namespace ClassicUO.Game.Data
                 case Seasons.Spring: return GetSpringGraphic(graphic);
                 case Seasons.Fall: return GetFallGraphic(graphic);
                 case Seasons.Desolation: return GetDesolationGraphic(graphic);
+            }
+
+            return graphic;
+        }
+
+        public static ushort GetLandSeasonGraphic(Seasons season, ushort graphic)
+        {
+            if (season != Seasons.Winter)
+                return graphic;
+
+            ushort buf = _winterGraphic[graphic];
+
+            if (buf != 0)
+            {
+                graphic = buf;
             }
 
             return graphic;

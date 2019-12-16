@@ -23,7 +23,7 @@
 
 namespace ClassicUO.Game.Data
 {
-    public enum Reagents
+    enum Reagents
     {
         // britannia reagents
         BlackPearl,

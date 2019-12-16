@@ -26,7 +26,7 @@ using System;
 namespace ClassicUO.Game.Data
 {
     [Flags]
-    public enum ClientFlags : uint
+    enum ClientFlags : uint
     {
         CF_T2A = 0x00,
         CF_RE = 0x01,
@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Data
     }
 
     [Flags]
-    public enum LockedFeatureFlags : uint
+    enum LockedFeatureFlags : uint
     {
         TheSecondAge = 0x1,
         Renaissance = 0x2,
@@ -67,7 +67,7 @@ namespace ClassicUO.Game.Data
     }
 
     [Flags]
-    public enum CharacterListFlags
+    enum CharacterListFlags
     {
         CLF_UNKNOWN = 0x01,
         CLF_OWERWRITE_CONFIGURATION_BUTTON = 0x02,

@@ -36,6 +36,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Platforms;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -163,7 +164,7 @@ namespace ClassicUO.Game.GameObjects
         public byte LightID;
         public bool WantUpdateMulti = true;
 
-        public MultiInfo MultiInfo { get; private set; }
+        public Rectangle? MultiInfo;
 
         public int MultiDistanceBonus { get; private set; }
 
@@ -258,12 +259,12 @@ namespace ClassicUO.Game.GameObjects
 
             UOFileManager.Multi.ReleaseLastMultiDataRead();
 
-            MultiInfo = new MultiInfo((short) X, (short) Y)
+            MultiInfo = new Rectangle()
             {
-                MinX = minX,
-                MaxX = maxX,
-                MinY = minY,
-                MaxY = maxY
+                X = minX,
+                Y = maxX,
+                Width = minY,
+                Height = maxY
             };
 
             MultiDistanceBonus = Math.Max(Math.Max(Math.Abs(minX), maxX), Math.Max(Math.Abs(minY), maxY));

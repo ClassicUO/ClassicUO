@@ -3470,7 +3470,7 @@ namespace ClassicUO.Network
             if (foundation == null)
                 return;
 
-            MultiInfo multi = foundation.MultiInfo;
+            var multi = foundation.MultiInfo;
 
             if (!foundation.IsMulti || multi == null)
                 return;
@@ -3489,11 +3489,11 @@ namespace ClassicUO.Network
                 house.IsCustom = true;
             }
 
-            short minX = multi.MinX;
-            short minY = multi.MinY;
-            short maxY = multi.MaxY;
+            short minX = (short) multi.Value.X;
+            short minY = (short) multi.Value.Y;
+            short maxY = (short) multi.Value.Height;
 
-            if (multi.MinX <= 0 && multi.MinY <= 0 && multi.MaxX <= 0 && multi.MaxY <= 0)
+            if (minX == 0 && minY == 0 && maxY == 0 && multi.Value.Width == 0)
             {
                 Log.Warn( "[CustomHouse (0xD8) - Invalid multi dimentions. Maybe missing some installation required files");
                 return;

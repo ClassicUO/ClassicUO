@@ -24,7 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -47,9 +47,11 @@ namespace ClassicUO.Game.GameObjects
 
         }
 
+        public Graphic OriginalGraphic;
+
         public Land(Graphic graphic)
         {
-            Graphic = graphic;
+            OriginalGraphic = Graphic = graphic;
             IsStretched = TileData.TexID == 0 && TileData.IsWet;
 
             AllowedToDraw = Graphic > 2;
@@ -63,6 +65,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 var l = _pool.Dequeue();
                 l.Graphic = graphic;
+                l.OriginalGraphic = graphic;
                 l.IsDestroyed = false;
                 l.AlphaHue = 255;
                 l.IsStretched = l.TileData.TexID == 0 && l.TileData.IsWet;
@@ -94,6 +97,13 @@ namespace ClassicUO.Game.GameObjects
         public sbyte MinZ;
         public sbyte AverageZ;
         public bool IsStretched;
+
+
+        public override void UpdateGraphicBySeason()
+        {
+            Graphic = Season.GetLandSeasonGraphic(World.Season, OriginalGraphic);
+            AllowedToDraw = Graphic > 2;
+        }
 
         public void UpdateZ(int zTop, int zRight, int zBottom, sbyte currentZ)
         {
