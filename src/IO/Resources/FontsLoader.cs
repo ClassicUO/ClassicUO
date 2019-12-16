@@ -1342,7 +1342,6 @@ namespace ClassicUO.IO.Resources
                             byte* scanlines = data;
                             data += scanlineCount;
 
-                            //data = (byte*) ((IntPtr) data + scanlineCount);
                             int italicOffset = 0;
 
                             if (isItalic)
@@ -1351,9 +1350,11 @@ namespace ClassicUO.IO.Resources
 
                             for (int c = 0; c < scanlineCount; c++)
                             {
+                                int coff = c << 3;
+
                                 for (int j = 0; j < 8; j++)
                                 {
-                                    int x = (c << 3) + j;
+                                    int x = coff + j;
 
                                     if (x >= dw)
                                         break;
