@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -243,6 +244,7 @@ namespace ClassicUO
             Log.Trace( "Loading files...");
             Log.PushIndent();
             UOFileManager.LoadFiles();
+            StaticFilters.Load();
             Log.PopIndent();
 
             uint[] hues = UOFileManager.Hues.CreateShaderColors();

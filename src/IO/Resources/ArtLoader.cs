@@ -218,7 +218,7 @@ namespace ClassicUO.IO.Resources
                     pixels[i * width + width - 1] = 0;
                 }
             }
-            else if (StaticsHelper.IsCave(graphic) && ProfileManager.Current != null && ProfileManager.Current.EnableCaveBorder)
+            else if (StaticFilters.IsCave(graphic) && ProfileManager.Current != null && ProfileManager.Current.EnableCaveBorder)
             {
                 for (int yy = 0; yy < height; yy++)
                 {
@@ -280,6 +280,11 @@ namespace ClassicUO.IO.Resources
         private unsafe void ReadStaticArt(ref ArtTexture texture, ushort graphic)
         {
             Rectangle imageRectangle = new Rectangle();
+
+            if (StaticFilters.IsTree(graphic, out int stumpidx))
+            {
+                graphic = Constants.TREE_REPLACE_GRAPHIC;
+            }
 
             ref readonly var entry = ref GetValidRefEntry(graphic + 0x4000);
 
@@ -361,7 +366,7 @@ namespace ClassicUO.IO.Resources
                     pixels[i * width + width - 1] = 0;
                 }
             }
-            else if (StaticsHelper.IsCave(graphic) && ProfileManager.Current != null && ProfileManager.Current.EnableCaveBorder)
+            else if (StaticFilters.IsCave(graphic) && ProfileManager.Current != null && ProfileManager.Current.EnableCaveBorder)
             {
                 for (int yy = 0; yy < height; yy++)
                 {

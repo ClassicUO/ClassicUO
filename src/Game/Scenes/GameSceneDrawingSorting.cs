@@ -332,20 +332,20 @@ namespace ClassicUO.Game.Scenes
                                 continue;
                             }
 
-                            if (obj is Static st)
-                            {
-                                if (StaticsHelper.IsTree(st.OriginalGraphic))
-                                {
-                                    if (ProfileManager.Current.TreeToStumps && st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
-                                    {
-                                        if (!itemData.IsImpassable)
-                                            continue;
-                                        st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC);
-                                    }
-                                    else if (st.OriginalGraphic != st.Graphic && !ProfileManager.Current.TreeToStumps)
-                                        st.RestoreOriginalGraphic();
-                                }
-                            }
+                            //if (obj is Static st)
+                            //{
+                            //    if (StaticFilters.IsTree(st.OriginalGraphic))
+                            //    {
+                            //        if (ProfileManager.Current.TreeToStumps && st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
+                            //        {
+                            //            if (!itemData.IsImpassable)
+                            //                continue;
+                            //            st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC);
+                            //        }
+                            //        else if (st.OriginalGraphic != st.Graphic && !ProfileManager.Current.TreeToStumps)
+                            //            st.RestoreOriginalGraphic();
+                            //    }
+                            //}
 
                             if (_noDrawRoofs && itemData.IsRoof)
                             {
@@ -359,7 +359,8 @@ namespace ClassicUO.Game.Scenes
                             }
 
                             //we avoid to hide impassable foliage or bushes, if present...
-                            if ((ProfileManager.Current.TreeToStumps && itemData.IsFoliage) || (ProfileManager.Current.HideVegetation && !itemData.IsImpassable && StaticsHelper.IsVegetation(obj.Graphic)))
+                            if ((ProfileManager.Current.TreeToStumps && itemData.IsFoliage) || 
+                                (ProfileManager.Current.HideVegetation && ((obj is Multi mm && mm.IsVegetation) || (obj is Static st && st.IsVegetation))))
                                 continue;
 
                             //if (HeightChecks <= 0 && (!itemData.IsBridge || ((itemData.Flags & TileFlag.StairBack | TileFlag.StairRight) != 0) || itemData.IsWall))
