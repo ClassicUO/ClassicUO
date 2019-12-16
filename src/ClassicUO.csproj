@@ -362,7 +362,6 @@
     <Compile Include="Configuration\Settings.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="Game\Chat.cs" />
-    <Compile Include="Game\Data\AssistantFeatures.cs" />
     <Compile Include="Game\Data\ContainerManager.cs" />
     <Compile Include="Game\Data\Direction.cs" />
     <Compile Include="Game\Data\LockedFeatures.cs" />

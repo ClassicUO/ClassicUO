@@ -79,7 +79,7 @@ namespace ClassicUO.Game.Data
 
     internal static class AbilityData
     {
-        public static AbilityDefinition[] Abilities { get; } = new AbilityDefinition[Constants.MAX_ABILITIES_COUNT]
+        public static readonly AbilityDefinition[] Abilities = new AbilityDefinition[Constants.MAX_ABILITIES_COUNT]
         {
             new AbilityDefinition(1, "Armor Ignore", 0x5200),
             new AbilityDefinition(2, "Bleed Attack", 0x5201),
