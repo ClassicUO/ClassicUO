@@ -332,21 +332,6 @@ namespace ClassicUO.Game.Scenes
                                 continue;
                             }
 
-                            //if (obj is Static st)
-                            //{
-                            //    if (StaticFilters.IsTree(st.OriginalGraphic))
-                            //    {
-                            //        if (ProfileManager.Current.TreeToStumps && st.Graphic != Constants.TREE_REPLACE_GRAPHIC)
-                            //        {
-                            //            if (!itemData.IsImpassable)
-                            //                continue;
-                            //            st.SetGraphic(Constants.TREE_REPLACE_GRAPHIC);
-                            //        }
-                            //        else if (st.OriginalGraphic != st.Graphic && !ProfileManager.Current.TreeToStumps)
-                            //            st.RestoreOriginalGraphic();
-                            //    }
-                            //}
-
                             if (_noDrawRoofs && itemData.IsRoof)
                             {
                                 if (_alphaChanged)

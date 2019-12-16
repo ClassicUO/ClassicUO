@@ -74,9 +74,9 @@ namespace ClassicUO.IO
         public abstract T GetTexture(uint id);
 
 
-        public virtual void CleaUnusedResources()
+        public virtual void CleaUnusedResources(int count)
         {
-            ClearUnusedResources(ResourceDictionary, Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
+            ClearUnusedResources(ResourceDictionary, count);
         }
 
         public void ClearUnusedResources<T1>(Dictionary<uint, T1> dict, int maxCount) where T1 : UOTexture

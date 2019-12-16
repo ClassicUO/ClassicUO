@@ -116,7 +116,7 @@ namespace ClassicUO.Game.Data
             if (!File.Exists(stumps))
             {
                 using (StreamWriter writer = new StreamWriter(stumps))
-                using (StreamWriter writerveg = new StreamWriter(vegetation))
+                using (StreamWriter writerveg = new StreamWriter(vegetation, true))
                 {
                     ushort[] treeTiles = {
                         0x0CCA, 0x0CCB, 0x0CCC, 0x0CCD, 0x0CD0, 0x0CD3, 0x0CD6, 0x0CD8, 0x0CDA, 0x0CDD, 0x0CE0,
