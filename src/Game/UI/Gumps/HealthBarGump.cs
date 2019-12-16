@@ -461,6 +461,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _outOfRange = false;
 
+
+                    _canChangeName = mobile != null && mobile.IsRenamable;
+
+                    if (_canChangeName)
+                    {
+                        textColor = 0x000E;
+                        if (_textBox != null)
+                            _textBox.MouseUp += TextBoxOnMouseUp;
+                    }
+
                     if (inparty && _bars[1] != null)
                     {
                         _bars[1].IsVisible = true;
@@ -479,22 +489,11 @@ namespace ClassicUO.Game.UI.Gumps
                     _bars[0].IsVisible = true;
                 }
 
-                //textColor = Notoriety.GetHue(mobile.NotorietyFlag);
 
-                if (inparty && mobile != null)
+
+                if (mobile != null)
                 {
                     textColor = Notoriety.GetHue(mobile.NotorietyFlag);
-                }
-                else
-                {
-                    _canChangeName = mobile != null && mobile.IsRenamable;
-
-                    if (_canChangeName)
-                    {
-                        textColor = 0x000E;
-                        if (_textBox != null)
-                            _textBox.MouseUp += TextBoxOnMouseUp;
-                    }
                 }
 
                 if (_textBox != null && _textBox.Hue != textColor)
@@ -1095,6 +1094,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _outOfRange = false;
 
+                    _canChangeName = !inparty && mobile != null && mobile.IsRenamable;
+
+                    if (_canChangeName)
+                    {
+                        if (_textBox != null)
+                        {
+                            _textBox.MouseUp -= TextBoxOnMouseUp;
+                            _textBox.MouseUp += TextBoxOnMouseUp;
+                        }
+                    }
+
                     hitsColor = 0;
 
                     if (inparty)
@@ -1120,18 +1130,15 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 if (inparty && mobile != null)
-                    textColor = Notoriety.GetHue(mobile.NotorietyFlag); //  _barColor;
+                    textColor = Notoriety.GetHue(mobile.NotorietyFlag);
                 else
                 {
-                    _canChangeName = mobile != null && mobile.IsRenamable;
-
                     if (_canChangeName)
                     {
                         textColor = 0x000E;
-                        if (_textBox != null)
-                            _textBox.MouseUp += TextBoxOnMouseUp;
                     }
                 }
+
 
                 if (_textBox != null && _textBox.Hue != textColor)
                     _textBox.Hue = textColor;
