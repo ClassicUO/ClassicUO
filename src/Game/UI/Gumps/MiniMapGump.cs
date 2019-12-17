@@ -190,8 +190,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (_gumpTexture == null || _gumpTexture.IsDisposed)
                 return;
 
-            ushort lastX = World.Player.Position.X;
-            ushort lastY = World.Player.Position.Y;
+            ushort lastX = World.Player.X;
+            ushort lastY = World.Player.Y;
 
 
             if (_x != lastX || _y != lastY)

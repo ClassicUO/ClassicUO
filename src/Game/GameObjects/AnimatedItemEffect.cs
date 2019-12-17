@@ -70,7 +70,10 @@ namespace ClassicUO.Game.GameObjects
 
                 if (X != x || Y != y || Z != z)
                 {
-                    Position = new Position((ushort) x, (ushort) y, (sbyte) z);
+                    X = (ushort) x;
+                    Y = (ushort) y;
+                    Z = (sbyte) z;
+                    UpdateScreenPosition();
                     AddToTile();
                 }
             }

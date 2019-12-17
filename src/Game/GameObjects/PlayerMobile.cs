@@ -1295,7 +1295,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (World.Items.Any(s =>
                                         s.ItemData.IsDoor && s.X == x && s.Y == y && s.Z - 15 <= z &&
-                                        s.Position.Z + 15 >= z))
+                                        s.Z + 15 >= z))
                     GameActions.OpenDoor();
             }
         }

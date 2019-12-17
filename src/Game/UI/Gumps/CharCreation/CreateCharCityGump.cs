@@ -321,8 +321,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 {
                     var city = cities[i];
 
-                    var buttonX = city.IsNewCity ? (city.Position.X - _mapInfo.WidthOffset) * width / mapWidth : city.Position.X - 62;
-                    var buttonY = city.IsNewCity ? (city.Position.Y - _mapInfo.HeightOffset) * height / mapHeight : city.Position.Y - 54;
+                    var buttonX = city.IsNewCity ? (city.X - _mapInfo.WidthOffset) * width / mapWidth : city.X - 62;
+                    var buttonY = city.IsNewCity ? (city.Y - _mapInfo.HeightOffset) * height / mapHeight : city.Y - 54;
 
                     var button = new Button(city.Index, 1209, 1210, 1210)
                     {

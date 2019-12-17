@@ -230,7 +230,10 @@ namespace ClassicUO.Game.GameObjects
                 if (add)
                 {
                     Multi m = Multi.Create(graphic);
-                    m.Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z));
+                    m.X = (ushort) (X + x);
+                    m.Y = (ushort) (Y + y);
+                    m.Z = (sbyte) (Z + z);
+                    m.UpdateScreenPosition();
                     m.MultiOffsetX = x;
                     m.MultiOffsetY = y;
                     m.MultiOffsetZ = z;
@@ -328,7 +331,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (WantUpdateMulti)
             {
-                UoAssist.SignalAddMulti((ushort) (Graphic | 0x4000), Position);
+                UoAssist.SignalAddMulti((ushort) (Graphic | 0x4000), X, Y);
 
                 if (MultiDistanceBonus == 0 || World.HouseManager.IsHouseInRange(Serial, World.ClientViewRange))
                 {

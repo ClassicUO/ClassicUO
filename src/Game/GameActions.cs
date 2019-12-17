@@ -219,9 +219,9 @@ namespace ClassicUO.Game
                 Socket.Send(new PDropRequestOld(serial, (ushort) x, (ushort) y, (sbyte) z, container));
         }
 
-        public static void DropItem(uint serial, Position position, uint container)
+        public static void DropItem(uint serial, ushort x, ushort y, sbyte z, uint container)
         {
-            DropItem(serial, position.X, position.Y, position.Z, container);
+            DropItem(serial, x, y, z, container);
         }
 
         public static void Equip(uint serial, Layer layer, uint target)
@@ -412,7 +412,7 @@ namespace ClassicUO.Game
                 ProfileManager.Current.GrabBagSerial = 0;
                 bag = World.Player.Equipment[(int) Layer.Backpack].Serial;
             }
-            DropItem(serial, Position.INVALID, bag);
+            DropItem(serial, 0xFFFF, 0xFFFF, 0, bag);
         }
     }
 }

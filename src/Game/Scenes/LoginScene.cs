@@ -600,30 +600,32 @@ namespace ClassicUO.Game.Scenes
             if (!isNew)
                 descriptions = ReadCityTextFile(count);
 
-            Position[] oldtowns =
+            Point[] oldtowns =
             {
-                new Position(105, 130), new Position(245, 90),
-                new Position(165, 200), new Position(395, 160),
-                new Position(200, 305), new Position(335, 250),
-                new Position(160, 395), new Position(100, 250),
-                new Position(270, 130), new Position(0xFFFF, 0xFFFF)
+                new Point(105, 130), new Point(245, 90),
+                new Point(165, 200), new Point(395, 160),
+                new Point(200, 305), new Point(335, 250),
+                new Point(160, 395), new Point(100, 250),
+                new Point(270, 130), new Point(0xFFFF, 0xFFFF)
             };
 
             for (int i = 0; i < count; i++)
             {
-                var cityInfo = default(CityInfo);
+                CityInfo cityInfo = null;
 
                 if (isNew)
                 {
                     var cityIndex = p.ReadByte();
                     var cityName = p.ReadASCII(32);
                     var cityBuilding = p.ReadASCII(32);
-                    var cityPosition = new Position((ushort) p.ReadUInt(), (ushort) p.ReadUInt(), (sbyte) p.ReadUInt());
+                    ushort cityX = (ushort) p.ReadUInt();
+                    ushort cityY = (ushort) p.ReadUInt();
+                    sbyte cityZ = (sbyte) p.ReadUInt();
                     var cityMapIndex = p.ReadUInt();
                     var cityDescription = p.ReadUInt();
                     p.ReadUInt();
 
-                    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, UOFileManager.Cliloc.GetString((int) cityDescription), cityPosition, cityMapIndex, isNew);
+                    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, UOFileManager.Cliloc.GetString((int) cityDescription), cityX, cityY, cityZ, cityMapIndex, isNew);
                 }
                 else
                 {
@@ -631,7 +633,7 @@ namespace ClassicUO.Game.Scenes
                     var cityName = p.ReadASCII(31);
                     var cityBuilding = p.ReadASCII(31);
 
-                    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, descriptions != null ? descriptions[i] : string.Empty, oldtowns[i], 0, isNew);
+                    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, descriptions != null ? descriptions[i] : string.Empty, (ushort) oldtowns[i].X, (ushort) oldtowns[i].Y, 0, 0, isNew);
                 }
 
                 cities[i] = cityInfo;
@@ -764,15 +766,18 @@ namespace ClassicUO.Game.Scenes
         public readonly int Index;
         public readonly bool IsNewCity;
         public readonly uint Map;
-        public readonly Position Position;
+        public readonly ushort X, Y;
+        public readonly sbyte Z;
 
-        public CityInfo(int index, string city, string building, string description, Position position, uint map, bool isNew)
+        public CityInfo(int index, string city, string building, string description, ushort x, ushort y, sbyte z, uint map, bool isNew)
         {
             Index = index;
             City = city;
             Building = building;
             Description = description;
-            Position = position;
+            X = x;
+            Y = y;
+            Z = z;
             Map = map;
             IsNewCity = isNew;
         }

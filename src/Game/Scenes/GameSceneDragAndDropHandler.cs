@@ -51,7 +51,7 @@ namespace ClassicUO.Game.Scenes
                 if (SerialHelper.IsMobile(container.Serial))
                     GameActions.DropItem(HeldItem.Serial, 0xFFFF, 0xFFFF, 0, container.Serial);
                 else if (SerialHelper.IsItem(container.Serial))
-                    GameActions.DropItem(HeldItem.Serial, container.Position.X, container.Position.Y, container.Position.Z, container.Serial);
+                    GameActions.DropItem(HeldItem.Serial, container.X, container.Y, container.Z, container.Serial);
 
                 HeldItem.Enabled = false;
                 HeldItem.Dropped = true;
@@ -128,11 +128,6 @@ namespace ClassicUO.Game.Scenes
                 foreach (Item i in item.Items)
                     CloseItemGumps(i);
             }
-        }
-
-        public void DropHeldItemToWorld(Position position)
-        {
-            DropHeldItemToWorld(position.X, position.Y, position.Z);
         }
 
         public void DropHeldItemToWorld(int x, int y, sbyte z)

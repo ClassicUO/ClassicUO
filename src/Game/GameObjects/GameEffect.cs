@@ -148,14 +148,20 @@ namespace ClassicUO.Game.GameObjects
         public void SetSource(GameObject source)
         {
             Source = source;
-            Position = source.Position;
+            X = source.X;
+            Y = source.Y;
+            Z = source.Z;
+            UpdateScreenPosition();
             AddToTile();
         }
 
         public void SetSource(int x, int y, int z)
         {
             Source = null;
-            Position = new Position((ushort) x, (ushort) y, (sbyte) z);
+            X = (ushort) x;
+            Y = (ushort) y;
+            Z = (sbyte) z;
+            UpdateScreenPosition();
             AddToTile();
         }
 

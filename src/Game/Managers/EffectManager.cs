@@ -54,7 +54,13 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void Add(GraphicEffectType type, uint source, uint target, ushort graphic, ushort hue, Position srcPos, Position targPos, byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode)
+        public void Add(GraphicEffectType type, 
+                        uint source, uint target, 
+                        ushort graphic, 
+                        ushort hue, 
+                        ushort srcX, ushort srcY, sbyte srcZ,
+                        ushort targetX, ushort targetY, sbyte targetZ,
+                        byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode)
         {
             if (hasparticles) Log.Warn( "Unhandled particles in an effects packet.");
             GameEffect effect = null;
@@ -73,18 +79,18 @@ namespace ClassicUO.Game.Managers
                     if (speed == 0)
                         speed++;
                     
-                    effect = new MovingEffect(source, target, srcPos.X, srcPos.Y, srcPos.Z, targPos.X, targPos.Y, targPos.Z, graphic, hue, fixedDir, speed)
+                    effect = new MovingEffect(source, target, srcX, srcY, srcZ, targetX, targetY, targetZ, graphic, hue, fixedDir, speed)
                     {
                         Blend = blendmode,
                     };
 
                     if (doesExplode)
-                        effect.AddChildEffect(new AnimatedItemEffect(target, targPos.X, targPos.Y, targPos.Z, 0x36Cb, hue, 9, speed));
+                        effect.AddChildEffect(new AnimatedItemEffect(target, targetX, targetY, targetZ, 0x36Cb, hue, 9, speed));
 
                     break;
 
                 case GraphicEffectType.Lightning:
-                    effect = new LightningEffect(source, srcPos.X, srcPos.Y, srcPos.Z, hue);
+                    effect = new LightningEffect(source, srcX, srcY, srcZ, hue);
 
                     break;
 
@@ -93,7 +99,7 @@ namespace ClassicUO.Game.Managers
                     if (graphic <= 0)
                         return;
 
-                    effect = new AnimatedItemEffect(srcPos.X, srcPos.Y, srcPos.Z, graphic, hue, duration, speed)
+                    effect = new AnimatedItemEffect(srcX, srcY, srcZ, graphic, hue, duration, speed)
                     {
                         Blend = blendmode
                     };
@@ -105,7 +111,7 @@ namespace ClassicUO.Game.Managers
                     if (graphic <= 0)
                         return;
 
-                    effect = new AnimatedItemEffect(source, srcPos.X, srcPos.Y, srcPos.Z, graphic, hue, duration, speed)
+                    effect = new AnimatedItemEffect(source, srcX, srcY, srcZ, graphic, hue, duration, speed)
                     {
                         Blend = blendmode,
                     };

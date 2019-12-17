@@ -75,7 +75,14 @@ namespace ClassicUO.Game.GameObjects
 
                     (int x, int y, int z) = GetSource();
 
-                    if (Position.X != x || Position.Y != y || Position.Z != z) Position = new Position((ushort) x, (ushort) y, (sbyte) z);
+                    if (X != x || Y != y || Z != z)
+                    {
+                        X = (ushort) x;
+                        Y = (ushort) y;
+                        Z = (sbyte) z;
+                        UpdateScreenPosition();
+                        AddToTile();
+                    }
                 }
             }
         }

@@ -108,7 +108,10 @@ namespace ClassicUO.Game.Managers
 
             if (x != -1)
             {
-                World.Player.Position = new Position((ushort) x, (ushort) y, z);
+                World.Player.X = (ushort) x;
+                World.Player.Y = (ushort) y;
+                World.Player.Z = z;
+                World.Player.UpdateScreenPosition();
 
                 World.RangeSize.X = x;
                 World.RangeSize.Y = y;

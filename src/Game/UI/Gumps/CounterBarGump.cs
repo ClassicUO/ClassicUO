@@ -292,7 +292,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     SetGraphic(gs.HeldItem.Graphic, gs.HeldItem.Hue);
 
-                    gs.DropHeldItemToContainer(item, gs.HeldItem.Position.X, gs.HeldItem.Position.Y);
+                    gs.DropHeldItemToContainer(item, gs.HeldItem.X, gs.HeldItem.Y);
                 }
                 else if (button == MouseButton.Right && Keyboard.Alt && _graphic != 0)
                 {

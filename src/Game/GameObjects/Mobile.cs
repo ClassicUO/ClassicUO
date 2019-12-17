@@ -731,7 +731,10 @@ namespace ClassicUO.Game.GameObjects
 #endif
                         }
 
-                        Position = new Position((ushort) step.X, (ushort) step.Y, step.Z);
+                        X = (ushort) step.X;
+                        Y = (ushort) step.Y;
+                        Z = step.Z;
+                        UpdateScreenPosition();
 
                         if (World.InGame && Serial == World.Player)
                         {

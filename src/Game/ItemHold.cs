@@ -32,7 +32,8 @@ namespace ClassicUO.Game
     internal class ItemHold
     {
         public bool OnGround { get; private set; }
-        public Position Position { get; private set; }
+        public ushort X, Y;
+        public sbyte Z;
         public uint Container { get; private set; }
         public uint Serial { get; private set; }
         public ushort Graphic { get; private set; }
@@ -56,7 +57,9 @@ namespace ClassicUO.Game
             Serial = item.Serial;
             Graphic = item.Graphic;
             DisplayedGraphic = item.IsCoin && amount == 1 ? item.Graphic : item.DisplayedGraphic;
-            Position = item.Position;
+            X = item.X;
+            Y = item.Y;
+            Z = item.Z;
             OnGround = item.OnGround;
             Container = item.Container;
             Hue = item.Hue;
@@ -72,7 +75,9 @@ namespace ClassicUO.Game
         public void Clear()
         {
             Serial = 0;
-            Position = Position.INVALID;
+            X = 0xFFFF;
+            Y = 0xFFFF;
+            Z = 0;
             Container = 0;
             DisplayedGraphic = Graphic = 0xFFFF;
             Hue = 0xFFFF;

@@ -111,16 +111,22 @@ namespace ClassicUO.Game
                     {
                         if (MapIndex >= 0) Map.Destroy();
 
-                        Position position = Player.Position;
+                        ushort x = Player.X;
+                        ushort y = Player.Y;
+                        sbyte z = Player.Z;
+
                         Map = null;
 
                         Map = new Map.Map(value)
                         {
-                            Center = new Point(position.X, position.Y)
+                            Center = new Point(x, y)
                         };
                         Map.Initialize();
 
-                        Player.Position = position;
+                        Player.X = x;
+                        Player.Y = y;
+                        Player.Z = z;
+                        Player.UpdateScreenPosition();
                         Player.AddToTile();
 
                         Player.ClearSteps();
@@ -337,9 +343,13 @@ namespace ClassicUO.Game
             _effectManager.Add(effect);
         }
 
-        public static void AddEffect(GraphicEffectType type, uint source, uint target, ushort graphic, ushort hue, Position srcPos, Position targPos, byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode)
+        public static void AddEffect(GraphicEffectType type, uint source, uint target,
+                                     ushort graphic, ushort hue, 
+                                     ushort srcX, ushort srcY, sbyte srcZ,
+                                     ushort targetX, ushort targetY, sbyte targetZ,
+                                     byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode)
         {
-            _effectManager.Add(type, source, target, graphic, hue, srcPos, targPos, speed, duration, fixedDir, doesExplode, hasparticles, blendmode);
+            _effectManager.Add(type, source, target, graphic, hue, srcX, srcY, srcZ, targetX, targetY, targetZ, speed, duration, fixedDir, doesExplode, hasparticles, blendmode);
         }
 
         public static uint SearchObject(SCAN_TYPE_OBJECT scanType, SCAN_MODE_OBJECT scanMode)

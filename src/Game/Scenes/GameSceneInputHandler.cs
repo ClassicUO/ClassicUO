@@ -380,23 +380,23 @@ namespace ClassicUO.Game.Scenes
                                 if (item.Graphic == HeldItem.Graphic && HeldItem.IsStackable)
                                     MergeHeldItem(item);
                                 else
-                                    DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + item.ItemData.Height));
+                                    DropHeldItemToWorld(obj.X, obj.Y, (sbyte)(obj.Z + item.ItemData.Height));
                             }
 
                             break;
 
                         case Multi multi:
-                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + multi.ItemData.Height));
+                            DropHeldItemToWorld(obj.X, obj.Y, (sbyte)(obj.Z + multi.ItemData.Height));
 
                             break;
 
                         case Static st:
-                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + st.ItemData.Height));
+                            DropHeldItemToWorld(obj.X, obj.Y, (sbyte)(obj.Z + st.ItemData.Height));
 
                             break;
 
                         case Land _:
-                            DropHeldItemToWorld(obj.Position);
+                            DropHeldItemToWorld(obj.X, obj.Y, obj.Z);
 
                             break;
 

@@ -45,50 +45,10 @@ namespace ClassicUO.Game.GameObjects
 
     internal abstract partial class GameObject : BaseGameObject, IUpdateable
     {
-        private Position _position = Position.INVALID;
         private Point _screenPosition;
 
-
-
-        public bool IsPositionChanged { get; protected set; }
-
-        public TextContainer TextContainer { get; private set; }
-
-        public Position Position
-        {
-            get => _position;
-            [MethodImpl(256)]
-            set
-            {
-                if (_position != value)
-                {
-                    _position = value;
-                    _screenPosition.X = (_position.X - _position.Y) * 22;
-                    _screenPosition.Y = (_position.X + _position.Y) * 22 - (_position.Z << 2);
-                    IsPositionChanged = true;
-                    OnPositionChanged();
-                }
-            }
-        }
-
-        public ushort X
-        {
-            get => Position.X;
-            //set => Position = new Position(value, Position.Y, Position.Z);
-        }
-
-        public ushort Y
-        {
-            get => Position.Y;
-            //set => Position = new Position(Position.X, value, Position.Z);
-        }
-
-        public sbyte Z
-        {
-            get => Position.Z;
-            //set => Position = new Position(Position.X, Position.Y, value);
-        }
-
+        public ushort X, Y;
+        public sbyte Z;
         public ushort Hue;
         public ushort Graphic;
         public sbyte AnimIndex;
@@ -98,12 +58,12 @@ namespace ClassicUO.Game.GameObjects
         public GameObject Left;
         public GameObject Right;
         public Vector3 Offset;
-
         // FIXME: remove it
         public sbyte FoliageIndex = -1;
 
         public bool IsDestroyed { get; protected set; }
-
+        public bool IsPositionChanged { get; protected set; }
+        public TextContainer TextContainer { get; private set; }
         public int Distance
         {
             [MethodImpl(256)]
@@ -135,7 +95,6 @@ namespace ClassicUO.Game.GameObjects
                 return Math.Max(Math.Abs(x - fx), Math.Abs(y - fy));
             }
         }
-
         public Tile Tile { get; private set; }
     
 
@@ -148,8 +107,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (World.Map != null)
             {
-                if (Position != Position.INVALID)
-                    Tile?.RemoveGameObject(this);
+                Tile?.RemoveGameObject(this);
 
                 if (!IsDestroyed)
                 {
@@ -170,8 +128,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (World.Map != null)
             {
-                if (Position != Position.INVALID)
-                    Tile?.RemoveGameObject(this);
+                Tile?.RemoveGameObject(this);
 
                 if (!IsDestroyed)
                 {
@@ -197,6 +154,15 @@ namespace ClassicUO.Game.GameObjects
         }
 
         [MethodImpl(256)]
+        public void UpdateScreenPosition()
+        {
+            _screenPosition.X = (X - Y) * 22;
+            _screenPosition.Y = (X + Y) * 22 - (Z << 2);
+            IsPositionChanged = true;
+            OnPositionChanged();
+        }
+
+        [MethodImpl(256)]
         public void UpdateRealScreenPosition(int offsetX, int offsetY)
         {
             RealScreenPosition.X = _screenPosition.X - offsetX - 22;
@@ -206,10 +172,6 @@ namespace ClassicUO.Game.GameObjects
             UpdateTextCoordsV();
         }
 
-        public int DistanceTo(GameObject entity)
-        {
-            return Position.DistanceTo(entity.Position);
-        }
 
         public void AddMessage(MessageType type, string message)
         {
@@ -371,7 +333,6 @@ namespace ClassicUO.Game.GameObjects
             UseInRender = 0;
             RealScreenPosition = Point.Zero;
             _screenPosition = Point.Zero;
-            _position = Position.INVALID;
             IsFlipped = false;
             Graphic = 0;
             UseObjectHandles = ClosedObjectHandles = ObjectHandlesOpened = false;

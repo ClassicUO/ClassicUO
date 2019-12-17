@@ -273,10 +273,6 @@ namespace ClassicUO.Network
             WriteSByte(z);
             WriteUInt(container);
         }
-
-        public PDropRequestOld(uint serial, Position position, uint container) : this(serial, position.X, position.Y, position.Z, container)
-        {
-        }
     }
 
     internal sealed class PDropRequestNew : PacketWriter
@@ -289,10 +285,6 @@ namespace ClassicUO.Network
             WriteSByte(z);
             WriteByte(slot);
             WriteUInt(container);
-        }
-
-        public PDropRequestNew(uint serial, Position position, byte slot, uint container) : this(serial, position.X, position.Y, position.Z, slot, container)
-        {
         }
     }
 

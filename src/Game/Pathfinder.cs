@@ -132,7 +132,7 @@ namespace ClassicUO.Game
 
                             {
                                 if (!ignoreGameCharacters && !mobile.IsDead && !mobile.IgnoreCharacters)
-                                    list.Add(new PathObject((uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, mobile.Position.Z, mobile.Position.Z + Constants.DEFAULT_CHARACTER_HEIGHT, Constants.DEFAULT_CHARACTER_HEIGHT, mobile));
+                                    list.Add(new PathObject((uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, mobile.Z, mobile.Z + Constants.DEFAULT_CHARACTER_HEIGHT, Constants.DEFAULT_CHARACTER_HEIGHT, mobile));
                                 canBeAdd = false;
 
                                 break;
@@ -211,7 +211,7 @@ namespace ClassicUO.Game
 
                                 if (flags != 0)
                                 {
-                                    int objZ = obj.Position.Z;
+                                    int objZ = obj.Z;
                                     int staticHeight = itemdata.Height;
                                     int staticAverageZ = staticHeight;
 
@@ -709,7 +709,7 @@ namespace ClassicUO.Game
             _closedList[0].Used = true;
             _closedList[0].X = _startPoint.X;
             _closedList[0].Y = _startPoint.Y;
-            _closedList[0].Z = World.Player.Position.Z;
+            _closedList[0].Z = World.Player.Z;
             _closedList[0].Parent = null;
             _closedList[0].DistFromGoalCost = GetGoalDistCost(_startPoint, 0);
             _closedList[0].Cost = _closedList[0].DistFromGoalCost;

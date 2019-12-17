@@ -117,8 +117,10 @@ namespace ClassicUO.Game.Map
                         ushort tileY = (ushort) (by + y);
 
                         land.ApplyStrech(tileX, tileY, z);
-                        land.Position = new Position(tileX, tileY, z);
-
+                        land.X = tileX;
+                        land.Y = tileY;
+                        land.Z = z;
+                        land.UpdateScreenPosition();
                         land.AddToTile(Tiles[x, y]);
                     }
                 }
@@ -148,7 +150,10 @@ namespace ClassicUO.Game.Map
                                 ushort staticY = (ushort) (by + y);
 
                                 Static staticObject = Static.Create(sb->Color, sb->Hue, pos);
-                                staticObject.Position = new Position(staticX, staticY, z);
+                                staticObject.X = staticX;
+                                staticObject.Y = staticY;
+                                staticObject.Z = z;
+                                staticObject.UpdateScreenPosition();
                                 staticObject.AddToTile(Tiles[x, y]);
                             }
                         }
@@ -192,7 +197,10 @@ namespace ClassicUO.Game.Map
                                 ushort staticY = (ushort) (by + y);
 
                                 Static staticObject = Static.Create(sb->Color, sb->Hue, pos);
-                                staticObject.Position = new Position(staticX, staticY, z);
+                                staticObject.X = staticX;
+                                staticObject.Y = staticY;
+                                staticObject.Z = z;
+                                staticObject.UpdateScreenPosition();
                                 staticObject.AddToTile(Tiles[x, y]);
                             }
                         }
@@ -229,8 +237,10 @@ namespace ClassicUO.Game.Map
                         ushort tileY = (ushort) (by + y);
 
                         land.ApplyStrech(tileX, tileY, z);
-                        land.Position = new Position(tileX, tileY, z);
-
+                        land.X = tileX;
+                        land.Y = tileY;
+                        land.Z = z;
+                        land.UpdateScreenPosition();
                         land.AddToTile(Tiles[x, y]);
                     }
                 }

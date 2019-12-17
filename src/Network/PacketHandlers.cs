@@ -567,7 +567,10 @@ namespace ClassicUO.Network
             if (graphic != 0x2006) graphic += graphicInc;
             item.Graphic = graphic;
             item.Amount = count;
-            item.Position = new Position(x, y, z);
+            item.X = x;
+            item.Y = y;
+            item.Z = z;
+            item.UpdateScreenPosition();
             item.FixHue(hue);
             item.Flags = (Flags) flags;
             item.Direction = (Direction) direction;
@@ -630,7 +633,10 @@ namespace ClassicUO.Network
             Direction direction = (Direction) (p.ReadByte() & 0x7);
             //World.Player.ForcePosition(x, y, z, direction);
 
-            World.Player.Position = new Position(x, y, z);
+            World.Player.X = x;
+            World.Player.Y = y;
+            World.Player.Z = z;
+            World.Player.UpdateScreenPosition();
             World.Player.Direction = direction;
             World.Player.AddToTile();
 
@@ -819,7 +825,10 @@ namespace ClassicUO.Network
             World.Player.CloseBank();
 
             World.Player.Walker.WalkingFailed = false;
-            World.Player.Position = new Position(x, y, z);
+            World.Player.X = x;
+            World.Player.Y = y;
+            World.Player.Z = z;
+            World.Player.UpdateScreenPosition();
             World.RangeSize.X = x;
             World.RangeSize.Y = y;
             World.Player.Direction = dir;
@@ -922,9 +931,9 @@ namespace ClassicUO.Network
                 source = 0;
             else
             {
-                sourceX = entity.Position.X;
-                sourceY = entity.Position.Y;
-                sourceZ = entity.Position.Z;
+                sourceX = entity.X;
+                sourceY = entity.Y;
+                sourceZ = entity.Z;
             }
 
             Mobile destEntity = World.Mobiles.Get(dest);
@@ -933,9 +942,9 @@ namespace ClassicUO.Network
                 dest = 0;
             else
             {
-                destX = destEntity.Position.X;
-                destY = destEntity.Position.Y;
-                destZ = destEntity.Position.Z;
+                destX = destEntity.X;
+                destY = destEntity.Y;
+                destZ = destEntity.Z;
             }
 
             GameEffect effect;
@@ -1125,7 +1134,10 @@ namespace ClassicUO.Network
                         item.Flags = hold.Flags;
                         item.Layer = hold.Layer;
                         item.Container = hold.Container;
-                        item.Position = hold.Position;
+                        item.X = hold.X;
+                        item.Y = hold.Y;
+                        item.Z = hold.Z;
+                        item.UpdateScreenPosition();
 
                         container.Items.Add(item);
 
@@ -1147,7 +1159,10 @@ namespace ClassicUO.Network
                         item.Flags = hold.Flags;
                         item.Layer = hold.Layer;
                         item.Container = hold.Container;
-                        item.Position = hold.Position;
+                        item.X = hold.X;
+                        item.Y = hold.Y;
+                        item.Z = hold.Z;
+                        item.UpdateScreenPosition();
 
 
                         Entity container = null;
@@ -1765,8 +1780,12 @@ namespace ClassicUO.Network
             uint source = p.ReadUInt();
             uint target = p.ReadUInt();
             ushort graphic = p.ReadUShort();
-            Position srcPos = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
-            Position targPos = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
+            ushort srcX = p.ReadUShort();
+            ushort srcY = p.ReadUShort();
+            sbyte srcZ = p.ReadSByte();
+            ushort targetX = p.ReadUShort();
+            ushort targetY = p.ReadUShort();
+            sbyte targetZ = p.ReadSByte();
             byte speed = p.ReadByte();
             ushort duration = p.ReadByte();
             p.Skip(2);
@@ -1781,7 +1800,7 @@ namespace ClassicUO.Network
                 blendmode = (GraphicEffectBlendMode) (p.ReadUInt() % 7);
             }
 
-            World.AddEffect(type, source, target, graphic, hue, srcPos, targPos, speed, duration, fixedDirection, doesExplode, false, blendmode);
+            World.AddEffect(type, source, target, graphic, hue, srcX, srcY, srcZ, targetX, targetY, targetZ, speed, duration, fixedDirection, doesExplode, false, blendmode);
         }
 
         private static void ClientViewRange(Packet p)
@@ -2027,7 +2046,10 @@ namespace ClassicUO.Network
 
                 if (!mobile.EnqueueStep(x, y, z, dir, isrun))
                 {
-                    mobile.Position = new Position(x, y, z);
+                    mobile.X = x;
+                    mobile.Y = y;
+                    mobile.Z = z;
+                    mobile.UpdateScreenPosition();
                     mobile.Direction = dir;
                     mobile.IsRunning = isrun;
                     mobile.ClearSteps();
@@ -2133,7 +2155,10 @@ namespace ClassicUO.Network
 
                 if (World.Get(mobile) == null)
                 {
-                    mobile.Position = new Position(x, y, z);
+                    mobile.X = x;
+                    mobile.Y = y;
+                    mobile.Z = z;
+                    mobile.UpdateScreenPosition();
                     mobile.Direction = dir;
                     mobile.IsRunning = isrun;
                     mobile.AddToTile();
@@ -2141,7 +2166,10 @@ namespace ClassicUO.Network
 
                 if (!mobile.EnqueueStep(x, y, z, dir, isrun))
                 {
-                    mobile.Position = new Position(x, y, z);
+                    mobile.X = x;
+                    mobile.Y = y;
+                    mobile.Z = z;
+                    mobile.UpdateScreenPosition();
                     mobile.Direction = dir;
                     mobile.IsRunning = isrun;
                     mobile.ClearSteps();
@@ -3182,7 +3210,9 @@ namespace ClassicUO.Network
                     serial = p.ReadUInt();
                     type = p.ReadByte();
                     ushort graphic = p.ReadUShort();
-                    Position position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
+                    ushort x = p.ReadUShort();
+                    ushort y = p.ReadUShort();
+                    sbyte z = p.ReadSByte();
 
                     switch (type)
                     {
@@ -3850,7 +3880,6 @@ namespace ClassicUO.Network
                 {
                     Item item = World.GetOrCreateItem(serial);
                     item.Amount = amount;
-                    Position position = new Position(x, y, z);
                     item.Direction = dir;
                     item.LightID = (byte) dir;
                     item.FixHue(hue);
@@ -3866,7 +3895,7 @@ namespace ClassicUO.Network
                     if (type == 0x02)
                     {
                         item.IsMulti = true;
-                        item.WantUpdateMulti = (graphic & 0x3FFF) != item.Graphic || item.Position != position;
+                        item.WantUpdateMulti = (graphic & 0x3FFF) != item.Graphic || (item.X != x || item.Y != y || item.Z != z);
                         item.Graphic = (ushort) (graphic & 0x3FFF);
                     }
                     else
@@ -3876,7 +3905,10 @@ namespace ClassicUO.Network
                         item.Graphic = graphic;
                     }
 
-                    item.Position = position;
+                    item.X = x;
+                    item.Y = y;
+                    item.Z = z;
+                    item.UpdateScreenPosition();
                     item.ProcessDelta();
 
                     if (World.Items.Add(item))
@@ -3905,9 +3937,12 @@ namespace ClassicUO.Network
                     Direction direction = dir & Direction.Up;
                     bool isrun = (dir & Direction.Running) != 0;
 
-                    if (World.Get(mobile) == null || mobile.Position == Position.INVALID)
+                    if (World.Get(mobile) == null || (mobile.X == 0xFFFF && mobile.Y == 0xFFFF))
                     {
-                        mobile.Position = new Position(x, y, z);
+                        mobile.X = x;
+                        mobile.Y = y;
+                        mobile.Z = z;
+                        mobile.UpdateScreenPosition();
                         mobile.Direction = direction;
                         mobile.IsRunning = isrun;
                         mobile.AddToTile();
@@ -3915,7 +3950,10 @@ namespace ClassicUO.Network
 
                     if (!mobile.EnqueueStep(x, y, z, direction, isrun))
                     {
-                        mobile.Position = new Position(x, y, z);
+                        mobile.X = x;
+                        mobile.Y = y;
+                        mobile.Z = z;
+                        mobile.UpdateScreenPosition();
                         mobile.Direction = direction;
                         mobile.IsRunning = isrun;
                         mobile.ClearSteps();
@@ -3929,7 +3967,10 @@ namespace ClassicUO.Network
                 ushort oldGraphic = World.Player.Graphic;
                 bool oldDead = World.Player.IsDead;
 
-                World.Player.Position = new Position(x, y, z);
+                World.Player.X = x;
+                World.Player.Y = y;
+                World.Player.Z = z;
+                World.Player.UpdateScreenPosition();
                 World.RangeSize.X = x;
                 World.RangeSize.Y = y;
                 World.Player.Graphic = graphic;
@@ -3959,7 +4000,10 @@ namespace ClassicUO.Network
 #else
                 World.Player.CloseBank();
                 World.Player.Walker.WalkingFailed = false;
-                World.Player.Position = new Position(x, y, z);
+                World.Player.X = x;
+                World.Player.Y = y;
+                World.Player.Z = z;
+                World.Player.UpdateScreenPosition();
                 World.RangeSize.X = x;
                 World.RangeSize.Y = y;
                 World.Player.Direction = dir;
@@ -4013,7 +4057,10 @@ namespace ClassicUO.Network
             if (item == null)
                 return;
 
-            item.Position = new Position(x, y, (sbyte) z);
+            item.X = x;
+            item.Y = y;
+            item.Z = (sbyte) z;
+            item.UpdateScreenPosition();
             item.AddToTile();
             //item.Graphic += (byte) facingDirection;
             //item.WantUpdateMulti = true;
@@ -4041,7 +4088,10 @@ namespace ClassicUO.Network
                         World.RangeSize.Y = cy;
                     }
 
-                    entity.Position = new Position(cx, cy, (sbyte) cz);
+                    entity.X = cx;
+                    entity.Y = cy;
+                    entity.Z = (sbyte) cz;
+                    entity.UpdateScreenPosition();
                     entity.AddToTile();
                 }
             }
@@ -4116,7 +4166,13 @@ namespace ClassicUO.Network
             item.Graphic = graphic;
             item.Amount = amount;
             item.FixHue(hue);
-            item.Position = new Position(x, y);
+            item.X = x;
+            item.Y = y;
+            item.Z = 0;
+
+            // FIXME: not really needed here
+            //item.UpdateScreenPosition(); 
+
             item.Container = containerSerial;
 
             container.Items.Add(item);

@@ -54,9 +54,9 @@ namespace ClassicUO.Utility.Platforms
             _customWindow?.SignalManaUpdate();
         }
 
-        public static void SignalAddMulti(ushort graphic, Position position)
+        public static void SignalAddMulti(ushort graphic, ushort x, ushort y)
         {
-            _customWindow?.SignalAddMulti(graphic, position);
+            _customWindow?.SignalAddMulti(graphic, x, y);
         }
 
         private class CustomWindow : IDisposable
@@ -412,9 +412,9 @@ namespace ClassicUO.Utility.Platforms
                     PostMessage((uint) UOAMessage.INT_STATUS, (IntPtr) World.Player.HitsMax, (IntPtr) World.Player.Hits);
             }
 
-            public void SignalAddMulti(ushort graphic, Position position)
+            public void SignalAddMulti(ushort graphic, ushort x, ushort y)
             {
-                IntPtr pos = (IntPtr) ((position.X & 0xFFFF) | ((position.Y & 0xFFFF) << 16));
+                IntPtr pos = (IntPtr) ((x & 0xFFFF) | ((y & 0xFFFF) << 16));
 
                 if (pos == IntPtr.Zero)
                     return;
