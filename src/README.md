@@ -4,10 +4,17 @@
 
 An open source implementation of the Ultima Online Classic Client.
 
+Individuals/hobbyists: support continued maintenance and development via the monthly Patreon:
+<br>&nbsp;&nbsp;[![Patreon](https://raw.githubusercontent.com/wiki/ocornut/imgui/web/patreon_02.png)](http://www.patreon.com/classicuo)
 
-[![PayPal](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://www.paypal.me/muskara) [![Patreon](https://img.shields.io/badge/patreon-donate-green.svg)](https://www.patreon.com/join/3228816?)   <a href="https://discord.gg/VdyCpjQ">
-        <img src="https://img.shields.io/discord/458277173208547350.svg?logo=discord"
-            alt="chat on Discord"></a>  [![Build status](https://ci.appveyor.com/api/projects/status/qvqctcf8oss5bqh8?svg=true)](https://ci.appveyor.com/project/andreakarasho/classicuo)
+Individuals/hobbyists: support continued maintenance and development via PayPal:
+<br>&nbsp;&nbsp;[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9ZWJBY6MS99D8)
+
+<a href="https://discord.gg/VdyCpjQ">
+<img src="https://img.shields.io/discord/458277173208547350.svg?logo=discord"
+alt="chat on Discord"></a>
+
+[![Build status](https://ci.appveyor.com/api/projects/status/qvqctcf8oss5bqh8?svg=true)](https://ci.appveyor.com/project/andreakarasho/classicuo)
 
 
 # Introduction
