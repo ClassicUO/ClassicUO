@@ -79,6 +79,7 @@ namespace ClassicUO.Game
         public const int SPELLBOOK_5_SPELLS_COUNT = 8;
         public const int SPELLBOOK_6_SPELLS_COUNT = 16;
         public const int SPELLBOOK_7_SPELLS_COUNT = 30;
+        public const int SPELLBOOK_8_SPELLS_COUNT = 45;
 
         public const int WAIT_FOR_TARGET_DELAY = 5000;
 
