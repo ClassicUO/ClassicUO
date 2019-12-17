@@ -23,107 +23,23 @@
 
 using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Game
 {
     static class SerialHelper
     {
-        //public const uint INVALID = 0;
-        //public const uint MINUS_ONE = 0xFFFF_FFFF;
-
-        //public Serial(uint serial)
-        //{
-        //    Value = serial;
-        //}
-
+        [MethodImpl(256)]
         public static bool IsValid(uint serial) => serial > 0 && serial < 0x80000000;
+
+        [MethodImpl(256)]
         public static bool IsMobile(uint serial) => serial > 0 && serial < 0x40000000;
+
+        [MethodImpl(256)]
         public static bool IsItem(uint serial) => serial >= 0x40000000 && serial < 0x80000000;
+
+        [MethodImpl(256)]
         public static bool IsValidLocalGumpSerial(uint serial) => serial >= Constants.JOURNAL_LOCALSERIAL && serial < 0xFFFF_FFFF;
-
-        //public bool IsMobile => Value > 0 && Value < 0x40000000;
-
-        //public bool IsItem => Value >= 0x40000000 && Value < 0x80000000;
-
-        //public bool IsValid => Value > 0 && Value < 0x80000000;
-
-        //public bool IsValidLocalGumpSerial => Value >= Constants.JOURNAL_LOCALSERIAL && Value < MINUS_ONE;
-
-        //public readonly uint Value;
-
-        //public static implicit operator Serial(uint value)
-        //{
-        //    return new Serial(value);
-        //}
-
-        //public static implicit operator uint(Serial serial)
-        //{
-        //    return serial.Value;
-        //}
-
-        //public static bool operator ==(Serial s1, Serial s2)
-        //{
-        //    return Equals(s1, s2);
-        //}
-
-        //public static bool operator !=(Serial s1, Serial s2)
-        //{
-        //    return !Equals(s1, s2);
-        //}
-
-        //public static bool operator <(Serial s1, Serial s2)
-        //{
-        //    return s1.Value < s2.Value;
-        //}
-
-        //public static bool operator >(Serial s1, Serial s2)
-        //{
-        //    return s1.Value > s2.Value;
-        //}
-
-        //public static bool operator <=(Serial s1, Serial s2)
-        //{
-        //    return s1.Value <= s2.Value;
-        //}
-
-        //public static bool operator >=(Serial s1, Serial s2)
-        //{
-        //    return s1.Value >= s2.Value;
-        //}
-
-        //public int CompareTo(uint other)
-        //{
-        //    return Value.CompareTo(other);
-        //}
-        //public int CompareTo(Serial other)
-        //{
-        //    return Value.CompareTo(other.Value);
-        //}
-
-        //public override string ToString()
-        //{
-        //    return $"0x{Value:X8}";
-        //}
-
-        //public override int GetHashCode()
-        //{
-        //    return (int)Value;
-        //}
-
-        //public override bool Equals(object obj)
-        //{
-        //    return obj is Serial other && Equals(other);
-        //}
-
-        //public bool Equals(uint other)
-        //{
-        //    return Value == other;
-        //}
-
-        //public bool Equals(Serial other)
-        //{
-        //    return Value == other.Value;
-        //}
 
         public static uint Parse(string str)
         {
