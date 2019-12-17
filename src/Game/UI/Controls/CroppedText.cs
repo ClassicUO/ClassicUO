@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = false;
         }
 
-        public CroppedText(List<string> parts, string[] lines) : this(int.TryParse(parts[6], out int lineIndex) && lineIndex >= 0 && lineIndex < lines.Length ? lines[lineIndex] : string.Empty, (ushort) (HueHelper.Parse(parts[5]) + 1), int.Parse(parts[3]))
+        public CroppedText(List<string> parts, string[] lines) : this(int.TryParse(parts[6], out int lineIndex) && lineIndex >= 0 && lineIndex < lines.Length ? lines[lineIndex] : string.Empty, (ushort) (UInt16Converter.Parse(parts[5]) + 1), int.Parse(parts[3]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);

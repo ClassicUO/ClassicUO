@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Controls
             Graphic = graphic;
         }
 
-        public ResizePic(List<string> parts) : this(GraphicHelper.Parse(parts[3]))
+        public ResizePic(List<string> parts) : this(UInt16Converter.Parse(parts[3]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);

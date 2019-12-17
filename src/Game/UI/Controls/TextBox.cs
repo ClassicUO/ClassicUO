@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Controls
             Font = font;
         }
 
-        public TextBox(List<string> parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : byte.MaxValue, 0, int.Parse(parts[3]), style: FontStyle.BlackBorder | FontStyle.CropTexture, hue: (ushort) (HueHelper.Parse(parts[5]) + 1))
+        public TextBox(List<string> parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : byte.MaxValue, 0, int.Parse(parts[3]), style: FontStyle.BlackBorder | FontStyle.CropTexture, hue: (ushort) (UInt16Converter.Parse(parts[5]) + 1))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);

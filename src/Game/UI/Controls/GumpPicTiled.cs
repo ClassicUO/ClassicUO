@@ -50,7 +50,7 @@ namespace ClassicUO.Game.UI.Controls
             Height = heigth;
         }
 
-        public GumpPicTiled(List<string> parts) : this(GraphicHelper.Parse(parts[5]))
+        public GumpPicTiled(List<string> parts) : this(UInt16Converter.Parse(parts[5]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);

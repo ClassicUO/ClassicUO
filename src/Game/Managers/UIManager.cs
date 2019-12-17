@@ -374,7 +374,7 @@ namespace ClassicUO.Game.Managers
                             ContainsByBounds = true
                         }, page);
 
-                        gump.Add(new StaticPic(GraphicHelper.Parse(gparams[8]), HueHelper.Parse(gparams[9]))
+                        gump.Add(new StaticPic(UInt16Converter.Parse(gparams[8]), UInt16Converter.Parse(gparams[9]))
                         {
                             X = int.Parse(gparams[1]) + int.Parse(gparams[10]),
                             Y = int.Parse(gparams[2]) + int.Parse(gparams[11]),

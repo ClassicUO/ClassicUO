@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Controls
             Height = _gText.Height;
         }
 
-        public Label(List<string> parts, string[] lines) : this(int.TryParse(parts[4], out int lineIndex) && lineIndex >= 0 && lineIndex < lines.Length ? lines[lineIndex] : string.Empty, true, (ushort) (HueHelper.Parse(parts[3]) + 1), 0, style: FontStyle.BlackBorder)
+        public Label(List<string> parts, string[] lines) : this(int.TryParse(parts[4], out int lineIndex) && lineIndex >= 0 && lineIndex < lines.Length ? lines[lineIndex] : string.Empty, true, (ushort) (UInt16Converter.Parse(parts[3]) + 1), 0, style: FontStyle.BlackBorder)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);

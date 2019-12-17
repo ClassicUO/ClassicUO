@@ -47,7 +47,7 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
         }
 
-        public StaticPic(List<string> parts) : this(GraphicHelper.Parse(parts[3]), parts.Count > 4 ? HueHelper.Parse(parts[4]) : (ushort) 0)
+        public StaticPic(List<string> parts) : this(UInt16Converter.Parse(parts[3]), parts.Count > 4 ? UInt16Converter.Parse(parts[4]) : (ushort) 0)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
