@@ -911,8 +911,12 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(item);
 
             _saveJournalCheckBox = CreateCheckBox(rightArea, "Save Journal to file in game folder", false, 0, 0);
-            _saveJournalCheckBox.ValueChanged += (o, e) => { World.Journal.CreateWriter(_saveJournalCheckBox.IsChecked); };
             _saveJournalCheckBox.IsChecked = ProfileManager.Current.SaveJournalToFile;
+
+            if (!ProfileManager.Current.SaveJournalToFile)
+            {
+                World.Journal.CloseWriter();
+            }
 
             // [BLOCK] activate chat
             {
