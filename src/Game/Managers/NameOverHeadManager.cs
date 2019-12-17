@@ -62,13 +62,13 @@ namespace ClassicUO.Game.Managers
             if (TypeAllowed == NameOverheadTypeAllowed.All)
                 return true;
 
-            if (serial.Serial.IsItem && TypeAllowed == NameOverheadTypeAllowed.Items)
+            if (SerialHelper.IsItem(serial.Serial) && TypeAllowed == NameOverheadTypeAllowed.Items)
                 return true;
 
-            if (serial.Serial.IsMobile && TypeAllowed.HasFlag(NameOverheadTypeAllowed.Mobiles))
+            if (SerialHelper.IsMobile(serial.Serial) && TypeAllowed.HasFlag(NameOverheadTypeAllowed.Mobiles))
                 return true;
 
-            if (TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses) && serial.Serial.IsItem && World.Items.Get(serial)?.IsCorpse == true)
+            if (TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses) && SerialHelper.IsItem(serial.Serial) && World.Items.Get(serial)?.IsCorpse == true)
                 return true;
 
             return false;

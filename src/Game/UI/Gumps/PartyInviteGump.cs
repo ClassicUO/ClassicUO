@@ -7,7 +7,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     class PartyInviteGump : Gump
     {
-        public PartyInviteGump(Serial inviter) : base(0, 0)
+        public PartyInviteGump(uint inviter) : base(0, 0)
         {
             var partyGumpBackground = new AlphaBlendControl()
             {

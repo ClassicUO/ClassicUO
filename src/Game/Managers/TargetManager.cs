@@ -48,7 +48,7 @@ namespace ClassicUO.Game.Managers
 
     internal class CursorType
     {
-        public static readonly Serial Target = new Serial(6983686);
+        public static readonly uint Target = 6983686;
     }
 
     public enum TargetType
@@ -75,15 +75,15 @@ namespace ClassicUO.Game.Managers
 
     internal static class TargetManager
     {
-        private static Serial _targetCursorId;
+        private static uint _targetCursorId;
 
-        private static Action<Serial, ushort, ushort, ushort, sbyte, bool> _enqueuedAction;
+        private static Action<uint, ushort, ushort, ushort, sbyte, bool> _enqueuedAction;
 
         public static MultiTargetInfo MultiTargetInfo { get; private set; }
 
         public static CursorTarget TargetingState { get; private set; } = CursorTarget.Invalid;
 
-        public static Serial LastTarget, LastAttack, SelectedTarget;
+        public static uint LastTarget, LastAttack, SelectedTarget;
 
         public static bool IsTargeting { get; private set; }
 
@@ -91,7 +91,7 @@ namespace ClassicUO.Game.Managers
 
         public static void ClearTargetingWithoutTargetCancelPacket()
         {
-            if (TargetingState == CursorTarget.MultiPlacement) World.HouseManager.Remove(Serial.INVALID);
+            if (TargetingState == CursorTarget.MultiPlacement) World.HouseManager.Remove(0);
             IsTargeting = false;
         }
 
@@ -105,7 +105,7 @@ namespace ClassicUO.Game.Managers
             TargeringType = 0;
         }
 
-        public static void SetTargeting(CursorTarget targeting, Serial cursorID, TargetType cursorType)
+        public static void SetTargeting(CursorTarget targeting, uint cursorID, TargetType cursorType)
         {
             if (targeting == CursorTarget.Invalid)
                 return;
@@ -125,19 +125,19 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void EnqueueAction(Action<Serial, ushort, ushort, ushort, sbyte, bool> action)
+        public static void EnqueueAction(Action<uint, ushort, ushort, ushort, sbyte, bool> action)
         {
             _enqueuedAction = action;
         }
 
         public static void CancelTarget()
         {
-            if (TargetingState == CursorTarget.MultiPlacement) World.HouseManager.Remove(Serial.INVALID);
+            if (TargetingState == CursorTarget.MultiPlacement) World.HouseManager.Remove(0);
             NetClient.Socket.Send(new PTargetCancel(TargetingState, _targetCursorId, (byte) TargeringType));
             IsTargeting = false;
         }
 
-        public static void SetTargetingMulti(Serial deedSerial, ushort model, ushort x, ushort y, ushort z, ushort hue)
+        public static void SetTargetingMulti(uint deedSerial, ushort model, ushort x, ushort y, ushort z, ushort hue)
         {
             SetTargeting(CursorTarget.MultiPlacement, deedSerial, TargetType.Neutral);
 
@@ -146,7 +146,7 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public static void Target(Serial serial)
+        public static void Target(uint serial)
         {
             if (!IsTargeting)
                 return;
@@ -173,10 +173,10 @@ namespace ClassicUO.Game.Managers
                         }
 
                         if (_enqueuedAction != null)
-                            _enqueuedAction(entity.Serial, entity.Graphic, entity.X, entity.Y, entity.Z, entity is Item it && it.OnGround || entity.Serial.IsMobile);
+                            _enqueuedAction(entity.Serial, entity.Graphic, entity.X, entity.Y, entity.Z, entity is Item it && it.OnGround || SerialHelper.IsMobile(entity.Serial));
                         else
                         {
-                            if (TargeringType == TargetType.Harmful && serial.IsMobile &&                   
+                            if (TargeringType == TargetType.Harmful && SerialHelper.IsMobile(serial) &&                   
                                 ProfileManager.Current.EnabledCriminalActionQuery)
                             {
                                 Mobile mobile = entity as Mobile;
@@ -207,7 +207,7 @@ namespace ClassicUO.Game.Managers
                         break;
                     case CursorTarget.Grab:
 
-                        if (serial.IsItem)
+                        if (SerialHelper.IsItem(serial))
                         {
                             GameActions.GrabItem(serial, ((Item) entity).Amount);
                         }
@@ -217,7 +217,7 @@ namespace ClassicUO.Game.Managers
                         return;
                     case CursorTarget.SetGrabBag:
 
-                        if (serial.IsItem)
+                        if (SerialHelper.IsItem(serial))
                         {
                             ProfileManager.Current.GrabBagSerial = serial;
                             GameActions.Print($"Grab Bag set: {serial}");
@@ -387,7 +387,7 @@ namespace ClassicUO.Game.Managers
             SMO_NEAREST
         }
 
-        public static bool IsMobileSelectableAsTarget(Serial serial, int type)
+        public static bool IsMobileSelectableAsTarget(uint serial, int type)
         {
             Mobile mobile = World.Mobiles.Get(serial);
 
@@ -435,11 +435,11 @@ namespace ClassicUO.Game.Managers
             return true;
         }
 
-        private static bool CanBeSelectedAsTarget(Serial serial, SCAN_TYPE_OBJECT scanType)
+        private static bool CanBeSelectedAsTarget(uint serial, SCAN_TYPE_OBJECT scanType)
         {
             if (scanType == SCAN_TYPE_OBJECT.STO_OBJECTS)
             {
-                if (serial.IsItem)
+                if (SerialHelper.IsItem(serial))
                 {
                     return true;
                 }

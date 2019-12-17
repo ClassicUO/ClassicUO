@@ -44,11 +44,11 @@ namespace ClassicUO.Game.GameObjects
             SetSource(x, y, z);
         }
 
-        public LightningEffect(Serial src, int x, int y, int z, ushort hue) : this(hue)
+        public LightningEffect(uint src, int x, int y, int z, ushort hue) : this(hue)
         {
             Entity source = World.Get(src);
 
-            if (src.IsValid && source != null)
+            if (SerialHelper.IsValid(src) && source != null)
                 SetSource(source);
             else
                 SetSource(x, y, z);

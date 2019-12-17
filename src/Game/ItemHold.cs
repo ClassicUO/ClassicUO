@@ -33,8 +33,8 @@ namespace ClassicUO.Game
     {
         public bool OnGround { get; private set; }
         public Position Position { get; private set; }
-        public Serial Container { get; private set; }
-        public Serial Serial { get; private set; }
+        public uint Container { get; private set; }
+        public uint Serial { get; private set; }
         public ushort Graphic { get; private set; }
         public ushort DisplayedGraphic { get; private set; }
         public ushort Hue { get; private set; }
@@ -71,9 +71,9 @@ namespace ClassicUO.Game
 
         public void Clear()
         {
-            Serial = Serial.INVALID;
+            Serial = 0;
             Position = Position.INVALID;
-            Container = Serial.INVALID;
+            Container = 0;
             DisplayedGraphic = Graphic = 0xFFFF;
             Hue = 0xFFFF;
             OnGround = false;

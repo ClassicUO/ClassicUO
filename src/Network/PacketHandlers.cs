@@ -51,7 +51,7 @@ namespace ClassicUO.Network
 {
     internal class PacketHandlers
     {
-        private static Serial _requestedGridLoot;
+        private static uint _requestedGridLoot;
 
         private readonly Action<Packet>[] _handlers = new Action<Packet>[0x100];
 
@@ -82,7 +82,7 @@ namespace ClassicUO.Network
             }
         }
 
-        private List<Serial> _clilocRequests = new List<Serial>();
+        private List<uint> _clilocRequests = new List<uint>();
 
         public static void Load()
         {
@@ -205,7 +205,7 @@ namespace ClassicUO.Network
                 }
                 else
                 {
-                    foreach (Serial serial in ToClient._clilocRequests)
+                    foreach (uint serial in ToClient._clilocRequests)
                     {
                         NetClient.Socket.Send(new PMegaClilocRequestOld(serial));
                     }
@@ -215,9 +215,9 @@ namespace ClassicUO.Network
             }
         }
 
-        private static void AddMegaClilocRequest(Serial serial)
+        private static void AddMegaClilocRequest(uint serial)
         {
-            foreach (Serial s in ToClient._clilocRequests)
+            foreach (uint s in ToClient._clilocRequests)
             {
                 if (s == serial)
                     return;
@@ -244,12 +244,12 @@ namespace ClassicUO.Network
                 return;
 
             byte type = p.ReadByte();
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
 
             if (type == 0)
             {
-                Serial id1 = p.ReadUInt();
-                Serial id2 = p.ReadUInt();
+                uint id1 = p.ReadUInt();
+                uint id2 = p.ReadUInt();
 
                 // standard client doesn't allow the trading system if one of the traders is invisible (=not sent by server)
                 if (World.Get(id1) == null || World.Get(id2) == null)
@@ -267,8 +267,8 @@ namespace ClassicUO.Network
                 UIManager.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == serial || s.ID2 == serial)?.Dispose();
             else if (type == 2)
             {
-                Serial id1 = p.ReadUInt();
-                Serial id2 = p.ReadUInt();
+                uint id1 = p.ReadUInt();
+                uint id2 = p.ReadUInt();
 
                 TradingGump trading = UIManager.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == serial || s.ID2 == serial);
 
@@ -450,8 +450,8 @@ namespace ClassicUO.Network
 
         private static void FollowR(Packet p)
         {
-            Serial tofollow = p.ReadUInt();
-            Serial isfollowing = p.ReadUInt();
+            uint tofollow = p.ReadUInt();
+            uint isfollowing = p.ReadUInt();
         }
 
         private static void NewHealthbarUpdate(Packet p)
@@ -591,13 +591,13 @@ namespace ClassicUO.Network
             }
 
             item.LightID = direction;
-            if (item.Container.IsValid)
+            if (SerialHelper.IsValid(item.Container))
             {
                 var cont = World.Get(item.Container);
                 cont.Items.Remove(item.Serial);
                 cont.ProcessDelta();
             }
-            item.Container = Serial.INVALID;
+            item.Container = 0;
             item.CheckGraphicChange();
             item.ProcessDelta();
 
@@ -659,7 +659,7 @@ namespace ClassicUO.Network
 
         private static void Talk(Packet p)
         {
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             Entity entity = World.Get(serial);
             ushort graphic = p.ReadUShort();
             MessageType type = (MessageType) p.ReadByte();
@@ -690,7 +690,7 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
 
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
 
             if (World.Player == serial)
                 return;
@@ -702,12 +702,12 @@ namespace ClassicUO.Network
 
             bool updateAbilities = false;
 
-            if (serial.IsItem)
+            if (SerialHelper.IsItem(serial))
             {
                 Item it = (Item)entity;
                 uint cont = it.Container & 0x7FFFFFFF;
 
-                if (it.Container.IsValid)
+                if (SerialHelper.IsValid(it.Container))
                 {
                     Entity top = World.Get(it.RootContainer);
 
@@ -735,7 +735,7 @@ namespace ClassicUO.Network
             if (World.CorpseManager.Exists(0, serial))
                 return;
 
-            if (serial.IsMobile)
+            if (SerialHelper.IsMobile(serial))
             {
                 Mobile m = (Mobile)entity;
 
@@ -751,7 +751,7 @@ namespace ClassicUO.Network
                     World.Mobiles.ProcessDelta();
                 }
             }
-            else if (serial.IsItem)
+            else if (SerialHelper.IsItem(serial))
             {
                 Item it = (Item)entity;
 
@@ -901,11 +901,11 @@ namespace ClassicUO.Network
             graphic += p.ReadByte();
             ushort hue = p.ReadUShort();
             ushort count = p.ReadUShort();
-            Serial source = p.ReadUInt();
+            uint source = p.ReadUInt();
             ushort sourceX = p.ReadUShort();
             ushort sourceY = p.ReadUShort();
             sbyte sourceZ = p.ReadSByte();
-            Serial dest = p.ReadUInt();
+            uint dest = p.ReadUInt();
             ushort destX = p.ReadUShort();
             ushort destY = p.ReadUShort();
             sbyte destZ = p.ReadSByte();
@@ -941,7 +941,7 @@ namespace ClassicUO.Network
             GameEffect effect;
 
 
-            if (!source.IsValid || !dest.IsValid)
+            if (!SerialHelper.IsValid(source) || !SerialHelper.IsValid(dest))
             {
                 effect = new MovingEffect(source, dest, sourceX, sourceY, sourceZ,
                                           destX, destY, destZ, graphic, hue, true, 5)
@@ -975,7 +975,7 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
 
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             ushort graphic = p.ReadUShort();
 
 
@@ -1062,7 +1062,7 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             ushort graphic = (ushort) (p.ReadUShort() + p.ReadByte());
             ushort amount = Math.Max((ushort) 1, p.ReadUShort());
             ushort x = p.ReadUShort();
@@ -1071,7 +1071,7 @@ namespace ClassicUO.Network
             if (UOFileManager.ClientVersion >= ClientVersions.CV_6017)
                 p.Skip(1);
 
-            Serial containerSerial = p.ReadUInt();
+            uint containerSerial = p.ReadUInt();
             ushort hue = p.ReadUShort();
 
             AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
@@ -1080,7 +1080,7 @@ namespace ClassicUO.Network
             World.Items.ProcessDelta();
 
 
-            if (containerSerial.IsMobile)
+            if (SerialHelper.IsMobile(containerSerial))
             {
                 Mobile m = World.Mobiles.Get(containerSerial);
                 Item secureBox = m?.GetSecureTradeBox();
@@ -1091,7 +1091,7 @@ namespace ClassicUO.Network
                     if (gump != null) gump.UpdateContent();
                 }
             }
-            else if (containerSerial.IsItem)
+            else if (SerialHelper.IsItem(containerSerial))
             {
                 var gump = UIManager.Gumps.OfType<TradingGump>().SingleOrDefault(s => s.LocalSerial == containerSerial || s.ID1 == containerSerial || s.ID2 == containerSerial);
 
@@ -1112,7 +1112,7 @@ namespace ClassicUO.Network
 
             if (hold.Enabled || hold.Dropped && item == null)
             {
-                if (hold.Layer == Layer.Invalid && hold.Container.IsValid)
+                if (hold.Layer == Layer.Invalid && SerialHelper.IsValid(hold.Container))
                 {
                     Entity container = World.Get(hold.Container);
 
@@ -1157,7 +1157,7 @@ namespace ClassicUO.Network
 
                             if (container != null)
                             {
-                                if (container.Serial.IsMobile)
+                                if (SerialHelper.IsMobile(container.Serial))
                                 {
                                     Mobile mob = (Mobile) container;
 
@@ -1262,7 +1262,7 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
 
             Item item = World.GetOrCreateItem(serial);
 
@@ -1286,7 +1286,7 @@ namespace ClassicUO.Network
                     }
                 }
 
-                item.Container = Serial.INVALID;
+                item.Container = 0;
             }
 
             item.RemoveFromTile();
@@ -1423,7 +1423,7 @@ namespace ClassicUO.Network
 
             for (int i = 0; i < count; i++)
             {
-                Serial serial = p.ReadUInt();
+                uint serial = p.ReadUInt();
                 ushort graphic = (ushort) (p.ReadUShort() + p.ReadByte());
                 ushort amount = Math.Max(p.ReadUShort(), (ushort) 1);
                 ushort x = p.ReadUShort();
@@ -1431,7 +1431,7 @@ namespace ClassicUO.Network
 
                 if (UOFileManager.ClientVersion >= ClientVersions.CV_6017)
                     p.Skip(1);
-                Serial containerSerial = p.ReadUInt();
+                uint containerSerial = p.ReadUInt();
                 ushort hue = p.ReadUShort();
 
                 if (i == 0)
@@ -1447,7 +1447,7 @@ namespace ClassicUO.Network
                                      .ToList()
                                      .ForEach(s =>
                                       {
-                                          s.Container = Serial.INVALID;
+                                          s.Container = 0;
                                           container.Items.Remove(s);
                                           World.Items.Remove(s);
                                       });
@@ -1458,7 +1458,7 @@ namespace ClassicUO.Network
                                      .ToList()
                                      .ForEach(s =>
                                       {
-                                          s.Container = Serial.INVALID;
+                                          s.Container = 0;
                                           container.Items.Remove(s);
                                           World.Items.Remove(s);
                                       });
@@ -1487,7 +1487,7 @@ namespace ClassicUO.Network
 
             container?.Items.ProcessDelta();
 
-            if (container != null && container.Serial.IsItem)
+            if (container != null && SerialHelper.IsItem(container.Serial))
             {
                 UIManager.GetGump<SpellbookGump>(container)?.Update();
             }
@@ -1592,7 +1592,7 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
 
             MapGump gump = UIManager.GetGump<MapGump>(serial);
 
@@ -1762,8 +1762,8 @@ namespace ClassicUO.Network
                 return;
             }
 
-            Serial source = p.ReadUInt();
-            Serial target = p.ReadUInt();
+            uint source = p.ReadUInt();
+            uint target = p.ReadUInt();
             ushort graphic = p.ReadUShort();
             Position srcPos = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
             Position targPos = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
@@ -1799,7 +1799,7 @@ namespace ClassicUO.Network
                 case 0: // open
 
                 {
-                    Serial serial = p.ReadUInt();
+                    uint serial = p.ReadUInt();
                     Item item = World.Items.Get(serial);
 
                     if (item != null)
@@ -1820,13 +1820,13 @@ namespace ClassicUO.Network
                 case 1: // summary msg
 
                 {
-                    Serial boardSerial = p.ReadUInt();
+                    uint boardSerial = p.ReadUInt();
                     BulletinBoardGump bulletinBoard = UIManager.GetGump<BulletinBoardGump>(boardSerial);
 
                     if (bulletinBoard != null)
                     {
-                        Serial serial = p.ReadUInt();
-                        Serial parendID = p.ReadUInt();
+                        uint serial = p.ReadUInt();
+                        uint parendID = p.ReadUInt();
 
                         int len = p.ReadByte();
                         string text = len > 0 ? p.ReadASCII(len) : string.Empty;
@@ -1845,12 +1845,12 @@ namespace ClassicUO.Network
                 case 2: // message
 
                 {
-                    Serial boardSerial = p.ReadUInt();
+                    uint boardSerial = p.ReadUInt();
                     BulletinBoardGump bulletinBoard = UIManager.GetGump<BulletinBoardGump>(boardSerial);
 
                     if (bulletinBoard != null)
                     {
-                        Serial serial = p.ReadUInt();
+                        uint serial = p.ReadUInt();
 
                         int len = p.ReadByte();
                         string poster = len > 0 ? p.ReadASCII(len) : string.Empty;
@@ -1987,7 +1987,7 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
 
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             Mobile mobile = World.Mobiles.Get(serial);
             if (mobile == null)
                 return;
@@ -2052,7 +2052,7 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
 
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             ushort graphic = p.ReadUShort();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
@@ -2177,7 +2177,7 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             ushort id = p.ReadUShort();
             string name = p.ReadASCII(p.ReadByte());
             int count = p.ReadByte();
@@ -2322,7 +2322,7 @@ namespace ClassicUO.Network
 
         private static void DisplayMap(Packet p)
         {
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             ushort gumpid = p.ReadUShort();
             ushort startX = p.ReadUShort();
             ushort startY = p.ReadUShort();
@@ -2408,7 +2408,7 @@ namespace ClassicUO.Network
 
         private static void DyeData(Packet p)
         {
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             p.Skip(2);
             ushort graphic = p.ReadUShort();
 
@@ -2608,7 +2608,7 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             byte parentID = p.ReadByte();
             byte buttonID = p.ReadByte();
 
@@ -2660,7 +2660,7 @@ namespace ClassicUO.Network
             }
 
 
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             Entity entity = World.Get(serial);
             ushort graphic = p.ReadUShort();
             MessageType type = (MessageType) p.ReadByte();
@@ -2707,9 +2707,9 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            Serial serial = p.ReadUInt();
-            Serial corpseSerial = p.ReadUInt();
-            Serial running = p.ReadUInt();
+            uint serial = p.ReadUInt();
+            uint corpseSerial = p.ReadUInt();
+            uint running = p.ReadUInt();
 
             Mobile owner = World.Mobiles.Get(serial);
 
@@ -2720,7 +2720,7 @@ namespace ClassicUO.Network
 
             World.Mobiles.Replace(owner, serial);
 
-            if (corpseSerial.IsValid)
+            if (SerialHelper.IsValid(corpseSerial))
                 World.CorpseManager.Add(corpseSerial, serial, owner.Direction, running != 0);
 
 
@@ -2736,8 +2736,8 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
 
-            Serial sender = p.ReadUInt();
-            Serial gumpID = p.ReadUInt();
+            uint sender = p.ReadUInt();
+            uint gumpID = p.ReadUInt();
             int x = (int) p.ReadUInt();
             int y = (int) p.ReadUInt();
 
@@ -2773,7 +2773,7 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             string header = p.ReadASCII();
             string footer = p.ReadUnicode();
 
@@ -2802,7 +2802,7 @@ namespace ClassicUO.Network
             var mx = p.ReadUShort();
             var my = p.ReadUShort();
 
-            var serial = default(Serial);
+            uint serial = 0;
 
             if (UOFileManager.ClientVersion >= ClientVersions.CV_7090)
                 serial = p.ReadUInt();
@@ -2898,7 +2898,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 4: // close generic gump 
-                    Serial ser = p.ReadUInt();
+                    uint ser = p.ReadUInt();
                     int button = (int) p.ReadUInt();
 
                     var gumpToClose = UIManager.Gumps.OfType<Gump>()
@@ -3036,7 +3036,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 case 0x16: // close user interface windows
                     uint id = p.ReadUInt();
-                    Serial serial = p.ReadUInt();
+                    uint serial = p.ReadUInt();
 
                     switch (id)
                     {
@@ -3251,7 +3251,7 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
 
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             Entity entity = World.Get(serial);
             ushort graphic = p.ReadUShort();
             MessageType type = (MessageType) p.ReadByte();
@@ -3356,7 +3356,7 @@ namespace ClassicUO.Network
             if (unknown > 1)
                 return;
 
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
 
             p.Skip(2);
             uint revision = p.ReadUInt();
@@ -3365,7 +3365,7 @@ namespace ClassicUO.Network
 
             if (entity == null)
             {
-                if (serial.IsMobile)
+                if (SerialHelper.IsMobile(serial))
                     Log.Warn( "Searching a mobile into World.Items from MegaCliloc packet");
                 entity = World.Items.Get(serial);
             }
@@ -3400,7 +3400,7 @@ namespace ClassicUO.Network
 
                 Item container = null;
 
-                if (entity is Item it && it.Container.IsValid)
+                if (entity is Item it && SerialHelper.IsValid(it.Container))
                 {
                     container = World.Items.Get(it.Container);
                 }
@@ -3428,7 +3428,7 @@ namespace ClassicUO.Network
                         {
                             name = str;
 
-                            if (entity != null && !entity.Serial.IsMobile)
+                            if (entity != null && !SerialHelper.IsMobile(entity.Serial))
                             {
                                 entity.Name = str;
                             }
@@ -3447,7 +3447,7 @@ namespace ClassicUO.Network
 
                 World.OPL.Add(serial, revision, name, data);
 
-                if (inBuyList && container.Serial.IsValid)
+                if (inBuyList && SerialHelper.IsValid(container.Serial))
                 {
                     UIManager.GetGump<ShopGump>(container.RootContainer)?.SetNameTo((Item)entity, name);
                 }
@@ -3463,7 +3463,7 @@ namespace ClassicUO.Network
         {
             bool compressed = p.ReadByte() == 0x03;
             bool enableReponse = p.ReadBool();
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             Item foundation = World.Items.Get(serial);
             uint revision = p.ReadUInt();
 
@@ -3639,7 +3639,7 @@ namespace ClassicUO.Network
         {
             if (World.ClientFeatures.TooltipsEnabled)
             {
-                Serial serial = p.ReadUInt();
+                uint serial = p.ReadUInt();
                 uint revision = p.ReadUInt();
 
                 if (!World.OPL.IsRevisionEqual(serial, revision))
@@ -3649,8 +3649,8 @@ namespace ClassicUO.Network
 
         private static void OpenCompressedGump(Packet p)
         {
-            Serial sender = p.ReadUInt();
-            Serial gumpID = p.ReadUInt();
+            uint sender = p.ReadUInt();
+            uint gumpID = p.ReadUInt();
             uint x = p.ReadUInt();
             uint y = p.ReadUInt();
             uint clen = p.ReadUInt() - 4;
@@ -3711,7 +3711,7 @@ namespace ClassicUO.Network
         {
             const int TABLE_COUNT = 126;
             const ushort BUFF_ICON_START = 0x03E9;
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             ushort iconID = (ushort) (p.ReadUShort() - BUFF_ICON_START);
 
             if (iconID < TABLE_COUNT)
@@ -3831,7 +3831,7 @@ namespace ClassicUO.Network
 
             p.Skip(2);
             byte type = p.ReadByte();
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             ushort graphic = p.ReadUShort();
             byte graphicInc = p.ReadByte();
             ushort amount = p.ReadUShort();
@@ -3846,7 +3846,7 @@ namespace ClassicUO.Network
 
             if (serial != World.Player)
             {
-                if (serial.IsItem)
+                if (SerialHelper.IsItem(serial))
                 {
                     Item item = World.GetOrCreateItem(serial);
                     item.Amount = amount;
@@ -3855,7 +3855,7 @@ namespace ClassicUO.Network
                     item.LightID = (byte) dir;
                     item.FixHue(hue);
                     item.Flags = flags;
-                    item.Container = Serial.INVALID;
+                    item.Container = 0;
 
                     if (graphic != 0x2006)
                         graphic += graphicInc;
@@ -4000,7 +4000,7 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             byte boatSpeed = p.ReadByte();
             Direction movingDirection = (Direction) p.ReadByte();
             Direction facingDirection = (Direction) p.ReadByte();
@@ -4026,7 +4026,7 @@ namespace ClassicUO.Network
 
             for (int i = 0; i < count; i++)
             {
-                Serial cSerial = p.ReadUInt();
+                uint cSerial = p.ReadUInt();
                 ushort cx = p.ReadUShort();
                 ushort cy = p.ReadUShort();
                 ushort cz = p.ReadUShort();
@@ -4071,7 +4071,7 @@ namespace ClassicUO.Network
             }
         }
 
-        private static void AddItemToContainer(Serial serial, ushort graphic, ushort amount, ushort x, ushort y, ushort hue, Serial containerSerial)
+        private static void AddItemToContainer(uint serial, ushort graphic, ushort amount, ushort x, ushort y, ushort hue, uint containerSerial)
         {
             GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
 
@@ -4089,7 +4089,7 @@ namespace ClassicUO.Network
 
             Item item = World.Items.Get(serial);
 
-            if (serial.IsMobile) Log.Warn( "AddItemToContainer function adds mobile as Item");
+            if (SerialHelper.IsMobile(serial)) Log.Warn( "AddItemToContainer function adds mobile as Item");
 
             if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
             {
@@ -4101,11 +4101,11 @@ namespace ClassicUO.Network
 
                 if (initcontainer != null)
                 {
-                    item.Container = Serial.INVALID;
+                    item.Container = 0;
                     initcontainer.Items.Remove(item);
                     initcontainer.ProcessDelta();
                 }
-                else if (item.Container.IsValid) 
+                else if (SerialHelper.IsValid(item.Container)) 
                     Log.Warn( $"This item ({item.Serial}) has a container ({item.Container}), but cannot be found. :|");
 
                 World.Items.Remove(item);

@@ -77,18 +77,18 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_area);
         }
 
-        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Serial> e)
+        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<uint> e)
         {
             foreach (BulletinBoardObject v in Children.OfType<BulletinBoardObject>().Where(s => e.Contains(s.Item)))
                 v.Dispose();
         }
 
-        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Serial> e)
+        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<uint> e)
         {
             foreach (BulletinBoardObject v in Children.OfType<BulletinBoardObject>().Where(s => e.Contains(s.Item)))
                 v.Dispose();
 
-            foreach (Serial item in e) NetClient.Socket.Send(new PBulletinBoardRequestMessageSummary(LocalSerial, item));
+            foreach (uint item in e) NetClient.Socket.Send(new PBulletinBoardRequestMessageSummary(LocalSerial, item));
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -124,12 +124,12 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Button _buttonRemove;
         private readonly Button _buttonReply;
 
-        private readonly Serial _msgSerial;
+        private readonly uint _msgSerial;
         private readonly ScrollFlag _scrollBar;
         private readonly TextBox _subjectTextbox;
         private readonly MultiLineBox _textBox;
 
-        public BulletinBoardItem(Serial serial, Serial msgSerial, string poster, string subject, string datatime, string data, byte variant) : base(serial, 0)
+        public BulletinBoardItem(uint serial, uint msgSerial, string poster, string subject, string datatime, string data, byte variant) : base(serial, 0)
         {
             _msgSerial = msgSerial;
             AcceptKeyboardInput = true;
@@ -342,7 +342,7 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class BulletinBoardObject : ScrollAreaItem
     {
-        public BulletinBoardObject(Serial parent, Item serial, string text)
+        public BulletinBoardObject(uint parent, Item serial, string text)
         {
             LocalSerial = parent;
             Item = serial;

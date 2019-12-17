@@ -70,7 +70,7 @@ namespace ClassicUO.Game.Scenes
         private double _dequeueAt;
 
         private bool _followingMode;
-        private Serial _followingTarget;
+        private uint _followingTarget;
         private bool _inqueue;
         private bool _isCtrlDown;
         private bool _isSelectionActive;
@@ -611,7 +611,7 @@ namespace ClassicUO.Game.Scenes
             if (_followingMode)
             {
                 _followingMode = false;
-                _followingTarget = Serial.INVALID;
+                _followingTarget = 0;
                 Pathfinder.StopAutoWalk();
                 World.Player.AddMessage(MessageType.Regular, "Stopped following.", 3, 1001, false);
             }
@@ -715,7 +715,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (obj != null)
                     {
-                        if (obj.Serial.IsMobile || obj is Item it && it.IsDamageable)
+                        if (SerialHelper.IsMobile(obj.Serial) || obj is Item it && it.IsDamageable)
                         {
                             GameActions.RequestMobileStatus(obj);
                             var customgump = UIManager.GetGump<BaseHealthBarGump>(obj);

@@ -64,12 +64,12 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        protected BaseHealthBarGump(Serial serial) : this(World.Get(serial))
+        protected BaseHealthBarGump(uint serial) : this(World.Get(serial))
         {
 
         }
 
-        protected BaseHealthBarGump(Serial local, Serial server) : base(local, server)
+        protected BaseHealthBarGump(uint local, uint server) : base(local, server)
         {
             CanMove = true;
             AnchorGroupName = "healthbar";
@@ -214,7 +214,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             var entity = World.Get(LocalSerial);
 
-            if (entity == null || entity.Serial.IsItem)
+            if (entity == null || SerialHelper.IsItem(entity.Serial))
                 return;
 
             if ((key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER) && _textBox.IsEditable)
@@ -311,7 +311,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         }
 
-        public HealthBarGumpCustom(Serial serial) : base(serial)
+        public HealthBarGumpCustom(uint serial) : base(serial)
         {
         }
 
@@ -415,7 +415,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity != null && !entity.IsDestroyed)
             {
-                Mobile mobile = entity.Serial.IsMobile ? (Mobile) entity : null;
+                Mobile mobile = SerialHelper.IsMobile(entity.Serial) ? (Mobile) entity : null;
 
                 if (!_isDead && entity != World.Player && (mobile != null && mobile.IsDead) && ProfileManager.Current.CloseHealthBarType == 2) // is dead
                 {
@@ -679,7 +679,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    Mobile mobile = entity != null && entity.Serial.IsMobile ? (Mobile) entity : null;
+                    Mobile mobile = entity != null && SerialHelper.IsMobile(entity.Serial) ? (Mobile) entity : null;
 
                     if (entity != null)
                     {
@@ -811,13 +811,13 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             _name = entity.Name;
-            _isDead = entity.Serial.IsMobile && ((Mobile) entity).IsDead;
+            _isDead = SerialHelper.IsMobile(entity.Serial) && ((Mobile) entity).IsDead;
             LocalSerial = entity.Serial;
 
             BuildGump();
         }
 
-        public HealthBarGump(Serial serial) : base(serial)
+        public HealthBarGump(uint serial) : base(serial)
         {
         }
 
@@ -929,7 +929,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ushort textColor = 0x0386;
                     ushort hitsColor = 0x0386;
 
-                    Mobile mobile = entity != null && entity.Serial.IsMobile ? (Mobile) entity : null;
+                    Mobile mobile = entity != null && SerialHelper.IsMobile(entity.Serial) ? (Mobile) entity : null;
 
                     if (entity != null)
                     {
@@ -1051,7 +1051,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity != null && !entity.IsDestroyed)
             {
-                Mobile mobile = entity.Serial.IsMobile ? (Mobile) entity : null;
+                Mobile mobile = SerialHelper.IsMobile(entity.Serial) ? (Mobile) entity : null;
 
                 if (!_isDead && entity != World.Player && (mobile != null && mobile.IsDead) && ProfileManager.Current.CloseHealthBarType == 2) // is dead
                 {

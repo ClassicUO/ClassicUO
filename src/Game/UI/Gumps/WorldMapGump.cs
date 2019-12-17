@@ -205,7 +205,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     foreach (var e in World.Party.Members)
                     {
-                        if (e != null && e.Serial.IsValid)
+                        if (e != null && SerialHelper.IsValid(e.Serial))
                         {
                             var mob = World.Mobiles.Get(e.Serial);
 
@@ -484,7 +484,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     var partyMember = World.Party.Members[i];
 
-                    if (partyMember != null && partyMember.Serial.IsValid)
+                    if (partyMember != null && SerialHelper.IsValid(partyMember.Serial))
                     {
                         var mob = World.Mobiles.Get(partyMember.Serial);
 

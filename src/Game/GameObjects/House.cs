@@ -30,16 +30,16 @@ using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal sealed class House : IEquatable<Serial>
+    internal sealed class House : IEquatable<uint>
     {
-        public House(Serial serial, uint revision, bool isCustom)
+        public House(uint serial, uint revision, bool isCustom)
         {
             Serial = serial;
             Revision = revision;
             IsCustom = isCustom;
         }
 
-        public Serial Serial { get; }
+        public uint Serial { get; }
         public uint Revision;
         public List<Multi> Components { get; } = new List<Multi>();
         public bool IsCustom;
@@ -111,7 +111,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public bool Equals(Serial other)
+        public bool Equals(uint other)
         {
             return Serial == other;
         }

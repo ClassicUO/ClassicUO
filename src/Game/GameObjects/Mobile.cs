@@ -47,7 +47,7 @@ namespace ClassicUO.Game.GameObjects
         private bool _isSA_Poisoned;
         private long _lastAnimationIdleDelay;
 
-        public Mobile(Serial serial) : base(serial)
+        public Mobile(uint serial) : base(serial)
         {
             LastAnimationChangeTime = Time.Ticks;
             CalculateRandomIdleTime();

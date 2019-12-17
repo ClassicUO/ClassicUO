@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
         private DataBox _myBox, _hisBox;
         private Checkbox _myCheckbox;
 
-        public TradingGump(Serial local, string name, Serial id1, Serial id2) : base(local, 0)
+        public TradingGump(uint local, string name, uint id1, uint id2) : base(local, 0)
         {
             CanMove = true;
             CanCloseWithRightClick = true;
@@ -60,8 +60,8 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        public Serial ID1 { get; }
-        public Serial ID2 { get; }
+        public uint ID1 { get; }
+        public uint ID2 { get; }
 
         public bool ImAccepting
         {

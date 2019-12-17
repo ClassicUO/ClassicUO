@@ -86,9 +86,9 @@ namespace ClassicUO.Game.UI.Controls
             base.Dispose();
         }
 
-        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Serial> e)
+        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<uint> e)
         {
-            foreach (Serial serial in e)
+            foreach (uint serial in e)
             {
                 Item item = World.Items.Get(serial);
 
@@ -112,11 +112,11 @@ namespace ClassicUO.Game.UI.Controls
             UpdateEntity();
         }
 
-        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Serial> e)
+        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<uint> e)
         {
             if (_fakeItem != null)
             {
-                foreach (Serial item in e)
+                foreach (uint item in e)
                 {
                     if (item == _fakeItem.Serial)
                     {

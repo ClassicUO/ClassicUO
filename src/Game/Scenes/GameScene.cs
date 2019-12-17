@@ -117,7 +117,7 @@ namespace ClassicUO.Game.Scenes
         public bool UseLights => ProfileManager.Current != null && ProfileManager.Current.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
         public bool UseAltLights => ProfileManager.Current != null && ProfileManager.Current.UseAlternativeLights;
        
-        public void DoubleClickDelayed(Serial serial)
+        public void DoubleClickDelayed(uint serial)
         {
             _useItemQueue.Add(serial);
         }
@@ -217,7 +217,7 @@ namespace ClassicUO.Game.Scenes
             {
                 case MessageType.Regular:
 
-                    if (e.Parent == null || e.Parent.Serial == Serial.INVALID)
+                    if (e.Parent == null || !SerialHelper.IsValid(e.Parent.Serial))
                         name = "System";
                     else
                         name = e.Name;
@@ -594,7 +594,7 @@ namespace ClassicUO.Game.Scenes
                     MoveCharacterByKeyboardInput(true);
             }
 
-            if (_followingMode && _followingTarget.IsMobile && !Pathfinder.AutoWalking)
+            if (_followingMode && SerialHelper.IsMobile(_followingTarget) && !Pathfinder.AutoWalking)
             {
                 Mobile follow = World.Mobiles.Get(_followingTarget);
 
@@ -637,7 +637,7 @@ namespace ClassicUO.Game.Scenes
             if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement && World.CustomHouseManager == null && TargetManager.MultiTargetInfo != null)
             {
                 if (_multi == null)
-                    _multi = new Item(Serial.INVALID)
+                    _multi = new Item(0)
                     {
                         Graphic = TargetManager.MultiTargetInfo.Model,
                         Hue = TargetManager.MultiTargetInfo.Hue,

@@ -8,10 +8,10 @@ namespace ClassicUO.Game.Managers
 {
     sealed class ObjectPropertiesListManager
     {
-        private readonly Dictionary<Serial, ItemProperty> _itemsProperties = new Dictionary<Serial, ItemProperty>();
+        private readonly Dictionary<uint, ItemProperty> _itemsProperties = new Dictionary<uint, ItemProperty>();
 
 
-        public void Add(Serial serial, uint revision, string name, string data)
+        public void Add(uint serial, uint revision, string name, string data)
             => _itemsProperties[serial] = new ItemProperty()
             {
                 Serial = serial,
@@ -21,7 +21,7 @@ namespace ClassicUO.Game.Managers
             };
 
 
-        public bool Contains(Serial serial)
+        public bool Contains(uint serial)
         {
             if (_itemsProperties.TryGetValue(serial, out var p))
             {
@@ -31,7 +31,7 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public bool IsRevisionEqual(Serial serial, uint revision)
+        public bool IsRevisionEqual(uint serial, uint revision)
         {
             if (_itemsProperties.TryGetValue(serial, out var prop))
             {
@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public bool TryGetRevision(Serial serial, out uint revision)
+        public bool TryGetRevision(uint serial, out uint revision)
         {
             if (_itemsProperties.TryGetValue(serial, out var p))
             {
@@ -54,7 +54,7 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public bool TryGetNameAndData(Serial serial, out string name, out string data)
+        public bool TryGetNameAndData(uint serial, out string name, out string data)
         {
             if (_itemsProperties.TryGetValue(serial, out var p))
             {
@@ -76,7 +76,7 @@ namespace ClassicUO.Game.Managers
 
     class ItemProperty
     {
-        public Serial Serial;
+        public uint Serial;
         public uint Revision;
         public string Name;
         public string Data;

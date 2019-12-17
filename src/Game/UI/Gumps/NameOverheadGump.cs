@@ -277,9 +277,9 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (Entity.Distance < Constants.DRAG_ITEMS_DISTANCE)
                         {
-                            if (Entity.Serial.IsItem)
+                            if (SerialHelper.IsItem(Entity.Serial))
                                 scene.DropHeldItemToContainer(World.Items.Get(Entity));
-                            else if (Entity.Serial.IsMobile)
+                            else if (SerialHelper.IsMobile(Entity.Serial))
                                 scene.MergeHeldItem(World.Mobiles.Get(Entity));
                         }
                         else

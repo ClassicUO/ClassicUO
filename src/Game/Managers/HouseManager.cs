@@ -30,21 +30,21 @@ namespace ClassicUO.Game.Managers
 {
     internal class HouseManager
     {
-        private readonly Dictionary<Serial, House> _houses = new Dictionary<Serial, House>();
+        private readonly Dictionary<uint, House> _houses = new Dictionary<uint, House>();
 
         public IReadOnlyCollection<House> Houses => _houses.Values;
 
-        public void Add(Serial serial, House revision)
+        public void Add(uint serial, House revision)
         {
             _houses[serial] = revision;
         }
 
-        public bool TryGetHouse(Serial serial, out House house)
+        public bool TryGetHouse(uint serial, out House house)
         {
             return _houses.TryGetValue(serial, out house);
         }
 
-        public bool TryToRemove(Serial serial, int distance)
+        public bool TryToRemove(uint serial, int distance)
         {
             if (!IsHouseInRange(serial, distance))
             {
@@ -65,7 +65,7 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public bool IsHouseInRange(Serial serial, int distance)
+        public bool IsHouseInRange(uint serial, int distance)
         {
             if (TryGetHouse(serial, out _))
             {
@@ -98,7 +98,7 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public bool EntityIntoHouse(Serial house, GameObject obj)
+        public bool EntityIntoHouse(uint house, GameObject obj)
         {
             if (obj != null && TryGetHouse(house, out _))
             {
@@ -121,7 +121,7 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public void Remove(Serial serial)
+        public void Remove(uint serial)
         {
             if (TryGetHouse(serial, out House house))
             {
@@ -139,14 +139,14 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public bool Exists(Serial serial)
+        public bool Exists(uint serial)
         {
             return _houses.ContainsKey(serial);
         }
 
         public void Clear()
         {
-            foreach (KeyValuePair<Serial, House> house in _houses) house.Value.ClearComponents();
+            foreach (KeyValuePair<uint, House> house in _houses) house.Value.ClearComponents();
             _houses.Clear();
         }
     }

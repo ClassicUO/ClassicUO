@@ -18,11 +18,11 @@ namespace ClassicUO.Game.GameObjects
         private uint _lastMoveTime;
 
 
-        public DragEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, ushort graphic, ushort hue)
+        public DragEffect(uint src, uint trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, ushort graphic, ushort hue)
         {
             Entity source = World.Get(src);
 
-            if (src.IsValid && source != null)
+            if (SerialHelper.IsValid(src) && source != null)
                 SetSource(source);
             else
                 SetSource(xSource, ySource, zSource);
@@ -30,7 +30,7 @@ namespace ClassicUO.Game.GameObjects
 
             Entity target = World.Get(trg);
 
-            if (trg.IsValid && target != null)
+            if (SerialHelper.IsValid(trg) && target != null)
                 SetTarget(target);
             else
                 SetTarget(xTarget, yTarget, zTarget);

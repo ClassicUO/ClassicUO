@@ -84,9 +84,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public virtual ClickPriority Priority { get; set; } = ClickPriority.Default;
 
-        public Serial ServerSerial { get; set; }
+        public uint ServerSerial { get; set; }
 
-        public Serial LocalSerial { get; set; }
+        public uint LocalSerial { get; set; }
 
         public int Page { get; set; }
 

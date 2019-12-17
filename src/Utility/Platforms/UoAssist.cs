@@ -342,7 +342,7 @@ namespace ClassicUO.Utility.Platforms
                         return (int) _cmdID++;
                     }
 
-                    case UOAMessage.GET_UID: return World.Player != null ? (int) World.Player.Serial.Value : 0;
+                    case UOAMessage.GET_UID: return World.Player != null ? (int) World.Player.Serial : 0;
                     case UOAMessage.GET_SHARDNAME: break;
                     case UOAMessage.ADD_USER_2_PARTY: break;
 

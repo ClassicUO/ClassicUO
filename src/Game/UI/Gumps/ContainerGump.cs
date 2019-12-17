@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
         }
 
-        public ContainerGump(Serial serial, ushort gumpid) : this()
+        public ContainerGump(uint serial, ushort gumpid) : this()
         {
             LocalSerial = serial;
             Item item = World.Items.Get(serial);
@@ -275,7 +275,7 @@ namespace ClassicUO.Game.UI.Gumps
         public void ForceUpdate()
         {
             BuildGump();
-            ItemsOnAdded(null, new CollectionChangedEventArgs<Serial>(FindControls<ItemGump>().Select(s => s.LocalSerial)));
+            ItemsOnAdded(null, new CollectionChangedEventArgs<uint>(FindControls<ItemGump>().Select(s => s.LocalSerial)));
         }
         
         public override void Save(BinaryWriter writer)
@@ -308,18 +308,18 @@ namespace ClassicUO.Game.UI.Gumps
             Dispose();
         }
 
-        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Serial> e)
+        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<uint> e)
         {
             foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.LocalSerial)))
                 v.Dispose();
         }
 
-        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Serial> e)
+        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<uint> e)
         {
             foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.LocalSerial)))
                 v.Dispose();
 
-            foreach (Serial s in e)
+            foreach (uint s in e)
             {
                 var item = World.Items.Get(s);
 
@@ -426,7 +426,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = item.RealScreenPosition.X + ProfileManager.Current.GameWindowPosition.X + 40;
                 Y = item.RealScreenPosition.Y + ProfileManager.Current.GameWindowPosition.Y - (Height >> 1);
             }
-            else if (item.Container.IsMobile)
+            else if (SerialHelper.IsMobile(item.Container))
             {
                 // pack animal, snooped player, npc vendor
                 Mobile mobile = World.Mobiles.Get(item.Container);

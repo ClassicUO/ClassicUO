@@ -29,7 +29,7 @@ namespace ClassicUO.Game.Managers
 {
     internal class UseItemQueue : IUpdateable
     {
-        private readonly Deque<Serial> _actions = new Deque<Serial>();
+        private readonly Deque<uint> _actions = new Deque<uint>();
         private long _timer;
 
         public UseItemQueue()
@@ -46,11 +46,11 @@ namespace ClassicUO.Game.Managers
                 if (_actions.Count == 0)
                     return;
 
-                Serial serial = _actions.RemoveFromFront();
+                uint serial = _actions.RemoveFromFront();
 
                 if (World.Get(serial) != null)
                 {
-                    if (serial.IsMobile)
+                    if (SerialHelper.IsMobile(serial))
                         GameActions.OpenPaperdoll(serial);
                     else
                         GameActions.DoubleClick(serial);
@@ -58,7 +58,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void Add(Serial action)
+        public void Add(uint action)
         {
             _actions.AddToBack(action);
         }

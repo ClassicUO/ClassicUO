@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private readonly CustomHouseManager _customHouseManager;
 
-        public HouseCustomizationGump(Serial serial, int x, int y) : base(serial, 0)
+        public HouseCustomizationGump(uint serial, int x, int y) : base(serial, 0)
         {
             X = x;
             Y = y;
@@ -630,7 +630,7 @@ namespace ClassicUO.Game.UI.Gumps
                     };
                     pic.MouseUp += (sender, e) =>
                     {
-                        OnButtonClick((int) pic.LocalSerial.Value);
+                        OnButtonClick((int) pic.LocalSerial);
                     };
                     _dataBox.Add(pic);
 
@@ -684,7 +684,7 @@ namespace ClassicUO.Game.UI.Gumps
                             };
                             pic.MouseUp += (sender, e) =>
                             {
-                                OnButtonClick((int) pic.LocalSerial.Value);
+                                OnButtonClick((int) pic.LocalSerial);
                             };
                             _dataBox.Add(pic);
                             //_dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
@@ -772,7 +772,7 @@ namespace ClassicUO.Game.UI.Gumps
                             CanMove = false,
                             LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
                         };
-                        pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial.Value); };
+                        pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial); };
                         _dataBox.Add(pic);
                         //_dataBox.Add(new StaticPic(graphic, 0)
                         //{
@@ -910,7 +910,7 @@ namespace ClassicUO.Game.UI.Gumps
                             };
                             pic.MouseUp += (sender, e) =>
                             {
-                                OnButtonClick((int) pic.LocalSerial.Value);
+                                OnButtonClick((int) pic.LocalSerial);
                             };
                             _dataBox.Add(pic);
                         }
@@ -971,7 +971,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 CanMove = false,
                                 LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i + combinedStair)
                             };
-                            pic.MouseUp += (sender, e) => { OnButtonClick((int) pic.LocalSerial.Value);};
+                            pic.MouseUp += (sender, e) => { OnButtonClick((int) pic.LocalSerial);};
                             _dataBox.Add(pic);
                             //_dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
                             //{
@@ -1027,7 +1027,7 @@ namespace ClassicUO.Game.UI.Gumps
                         CanMove = false,
                         LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
                     };
-                    pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial.Value); };
+                    pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial); };
                     _dataBox.Add(pic);
 
                     //_dataBox.Add(new StaticPic((ushort)vec[0].NSCrosspiece, 0)
@@ -1092,7 +1092,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     CanMove = false,
                                     LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + index)
                                 };
-                                pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial.Value); };
+                                pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial); };
                                 _dataBox.Add(pic);
 
                                 //_dataBox.Add(new StaticPic(graphic, 0)
@@ -1202,7 +1202,7 @@ namespace ClassicUO.Game.UI.Gumps
                         CanMove = false,
                         LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
                     };
-                    pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial.Value); };
+                    pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial); };
                     _dataBox.Add(pic);
 
                     x += 48;
@@ -1251,7 +1251,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 CanMove = false,
                                 LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
                             };
-                            pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial.Value); };
+                            pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial); };
                             _dataBox.Add(pic);
 
                             //_dataBox.Add(new StaticPic(graphic, 0)

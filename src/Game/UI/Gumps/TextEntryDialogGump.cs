@@ -30,7 +30,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly TextBox _textBox;
 
-        public TextEntryDialogGump(Serial serial, int x, int y, byte variant, int maxlen, string text, string description, byte buttonid, byte parentid) : base(serial, 0)
+        public TextEntryDialogGump(uint serial, int x, int y, byte variant, int maxlen, string text, string description, byte buttonid, byte parentid) : base(serial, 0)
         {
             CanMove = false;
 

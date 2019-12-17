@@ -19,7 +19,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     abstract class TextContainerGump : Gump
     {
-        protected TextContainerGump(Serial local, Serial server) : base(local, server)
+        protected TextContainerGump(uint local, uint server) : base(local, server)
         {
 
         }

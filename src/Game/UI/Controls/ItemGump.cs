@@ -205,7 +205,7 @@ namespace ClassicUO.Game.UI.Controls
                             gs.MergeHeldItem(Item);
                         else
                         {
-                            if (Item.Container.IsItem)
+                            if (SerialHelper.IsItem(Item.Container))
                                 gs.DropHeldItemToContainer(World.Items.Get(Item.Container), X + (Mouse.Position.X - ScreenCoordinateX), Y + (Mouse.Position.Y - ScreenCoordinateY));
                         }
 
@@ -275,7 +275,7 @@ namespace ClassicUO.Game.UI.Controls
                             gs.MergeHeldItem(Item);
                         else
                         {
-                            if (Item.Container.IsItem)
+                            if (SerialHelper.IsItem(Item.Container))
                                 gs.DropHeldItemToContainer(World.Items.Get(Item.Container), X + (Mouse.Position.X - ScreenCoordinateX), Y + (Mouse.Position.Y - ScreenCoordinateY));
                         }
                     }

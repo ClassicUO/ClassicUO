@@ -27,7 +27,7 @@ namespace ClassicUO.Game.Data
 {
     internal class PopupMenuData
     {
-        public PopupMenuData(Serial serial, PopupMenuItem[] items)
+        public PopupMenuData(uint serial, PopupMenuItem[] items)
         {
             Serial = serial;
             Items = items;
@@ -35,7 +35,7 @@ namespace ClassicUO.Game.Data
 
         public PopupMenuItem[] Items { get; }
 
-        public Serial Serial { get; }
+        public uint Serial { get; }
 
         public PopupMenuItem this[int i] => Items[i];
 
@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Data
         {
             ushort mode = p.ReadUShort();
             bool isNewCliloc = mode >= 2;
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             byte count = p.ReadByte();
             PopupMenuItem[] items = new PopupMenuItem[count];
 

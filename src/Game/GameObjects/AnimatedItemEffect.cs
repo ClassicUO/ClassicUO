@@ -39,7 +39,7 @@ namespace ClassicUO.Game.GameObjects
             SetSource(source);
         }
 
-        public AnimatedItemEffect(Serial source, ushort graphic, ushort hue, int duration, int speed) : this(source, 0, 0, 0, graphic, hue, duration, speed)
+        public AnimatedItemEffect(uint source, ushort graphic, ushort hue, int duration, int speed) : this(source, 0, 0, 0, graphic, hue, duration, speed)
         {
         }
 
@@ -48,11 +48,11 @@ namespace ClassicUO.Game.GameObjects
             SetSource(sourceX, sourceY, sourceZ);
         }
 
-        public AnimatedItemEffect(Serial sourceSerial, int sourceX, int sourceY, int sourceZ, ushort graphic, ushort hue, int duration, int speed) : this(graphic, hue, duration, speed)
+        public AnimatedItemEffect(uint sourceSerial, int sourceX, int sourceY, int sourceZ, ushort graphic, ushort hue, int duration, int speed) : this(graphic, hue, duration, speed)
         {
             Entity source = World.Get(sourceSerial);
 
-            if (source != null && sourceSerial.IsValid)
+            if (source != null && SerialHelper.IsValid(sourceSerial))
                 SetSource(source);
             else
                 SetSource(sourceX, sourceY, sourceZ);

@@ -21,7 +21,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-        protected ResizableGump(int width, int height, int minW, int minH, Serial local, Serial server) : base(local, server)
+        protected ResizableGump(int width, int height, int minW, int minH, uint local, uint server) : base(local, server)
         {
             _border = new GameBorder(0, 0, Width, Height, 4);
             _border.Hue = 0x01EC;

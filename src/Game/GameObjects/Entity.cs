@@ -37,7 +37,7 @@ namespace ClassicUO.Game.GameObjects
         private Direction _direction;
         private Item[] _equipment;
 
-        protected Entity(Serial serial)
+        protected Entity(uint serial)
         {
             Serial = serial;
             Items = new EntityCollection<Item>();
@@ -58,7 +58,7 @@ namespace ClassicUO.Game.GameObjects
             set => _equipment = value;
         }
 
-        public Serial Serial;
+        public uint Serial;
         public bool IsClicked;
 
         public ushort Hits;
@@ -138,7 +138,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    if (i.Container.IsValid)
+                    if (SerialHelper.IsValid(i.Container))
                     {
                         Item found = i.FindItem(graphic, hue);
 
@@ -157,7 +157,7 @@ namespace ClassicUO.Game.GameObjects
                     if (i.Graphic == graphic && i.Hue == hue)
                         item = i;
 
-                    if (i.Container.IsValid)
+                    if (SerialHelper.IsValid(i.Container))
                     {
                         Item found = i.FindItem(graphic, hue);
 
@@ -193,11 +193,6 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public static implicit operator Serial(Entity entity)
-        {
-            return entity.Serial;
-        }
-
         public static implicit operator uint(Entity entity)
         {
             return entity.Serial;
@@ -205,7 +200,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override int GetHashCode()
         {
-            return (int) Serial.Value;
+            return (int) Serial;
         }
 
         public abstract void ProcessAnimation(out byte dir, bool evalutate = false);

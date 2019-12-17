@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Controls
             Y = int.Parse(parts[2]);
             Width = int.Parse(parts[3]);
             Height = int.Parse(parts[4]);
-            LocalSerial = Serial.Parse(parts[6]);
+            LocalSerial = SerialHelper.Parse(parts[6]);
             TxEntry.SetHeight(Height);
 
             int index = int.Parse(parts[7]);

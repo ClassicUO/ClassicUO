@@ -49,19 +49,19 @@ namespace ClassicUO.Game.GameObjects
 
         //private static readonly Queue<Item> _pool = new Queue<Item>();
 
-        public Item(Serial serial) : base(serial)
+        public Item(uint serial) : base(serial)
         {
         }
 
 
-        public static Item Create(Serial serial)
+        public static Item Create(uint serial)
         {
             //if (_pool.Count != 0)
             //{
             //    var i = _pool.Dequeue();
             //    i.IsDestroyed = false;
             //    i.Graphic = 0;
-            //    i.Serial = serial;
+            //    i.uint = serial;
             //    i._amount = 0;
             //    i._animDataFrame = default;
             //    i._animSpeed = 0;
@@ -115,7 +115,7 @@ namespace ClassicUO.Game.GameObjects
 
         public uint Price;
         public ushort Amount;
-        public Serial Container;
+        public uint Container;
         public Layer Layer;
         public bool UsedLayer;
 
@@ -170,23 +170,23 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsCorpse => /*MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) ||*/ Graphic == 0x2006;
 
-        public bool OnGround => !Container.IsValid;
+        public bool OnGround => !SerialHelper.IsValid(Container);
 
-        public Serial RootContainer
+        public uint RootContainer
         {
             get
             {
                 Item item = this;
 
-                while (item.Container.IsItem)
+                while (SerialHelper.IsItem(item.Container))
                 {
                     item = World.Items.Get(item.Container);
 
                     if (item == null)
-                        return Serial.INVALID;
+                        return 0;
                 }
 
-                return item.Container.IsMobile ? item.Container : item;
+                return  SerialHelper.IsMobile( item.Container) ? item.Container : item;
             }
         }
 

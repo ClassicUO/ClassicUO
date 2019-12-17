@@ -434,7 +434,7 @@
     <Compile Include="Game\Scenes\GameScene.cs" />
     <Compile Include="Game\Scenes\LoginScene.cs" />
     <Compile Include="Game\Scenes\Scene.cs" />
-    <Compile Include="Game\Serial.cs" />
+    <Compile Include="Game\SerialHelper.cs" />
     <Compile Include="Game\GameObjects\Views\AnimatedEffectView.cs" />
     <Compile Include="Game\GameObjects\Views\ItemView.cs" />
     <Compile Include="Game\Data\LayerOrder.cs" />

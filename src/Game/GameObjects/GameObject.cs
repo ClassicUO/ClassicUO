@@ -223,7 +223,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected void FixTextCoordinatesInScreen()
         {
-            if (this is Item it && it.Container.IsValid)
+            if (this is Item it && SerialHelper.IsValid(it.Container))
                 return;
 
             int offsetY = 0;
@@ -280,7 +280,7 @@ namespace ClassicUO.Game.GameObjects
             msg.Owner = this;
             TextContainer.Add(msg);
 
-            if (this is Item it && it.Container.IsValid)
+            if (this is Item it && SerialHelper.IsValid(it.Container))
             {
                 UpdateTextCoordsV();
             }

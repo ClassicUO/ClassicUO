@@ -33,15 +33,15 @@ namespace ClassicUO.Game.Managers
     {
         private const int PARTY_SIZE = 10;
 
-        public Serial Leader { get; set; }
-        public Serial Inviter { get; set; }
+        public uint Leader { get; set; }
+        public uint Inviter { get; set; }
         public bool CanLoot { get; set; }
 
         public PartyMember[] Members { get; } = new PartyMember[PARTY_SIZE];
 
 
         public long PartyHealTimer { get; set; }
-        public Serial PartyHealTarget { get; set; }
+        public uint PartyHealTarget { get; set; }
 
         public void ParsePacket(Packet p)
         {
@@ -94,7 +94,7 @@ namespace ClassicUO.Game.Managers
 
                     for (int i = 0; i < count; i++)
                     {
-                        Serial serial = p.ReadUInt();
+                        uint serial = p.ReadUInt();
                         Members[i] = new PartyMember(serial);
 
                         if (i == 0)
@@ -121,7 +121,7 @@ namespace ClassicUO.Game.Managers
                 
                 case 3:
                 case 4:
-                    Serial ser = p.ReadUInt();
+                    uint ser = p.ReadUInt();
                     string name = p.ReadUnicode();
 
                     for (int i = 0; i < PARTY_SIZE; i++)
@@ -146,7 +146,7 @@ namespace ClassicUO.Game.Managers
                     break;
             }
         }
-        public bool Contains(Serial serial)
+        public bool Contains(uint serial)
         {
             for (int i = 0; i < PARTY_SIZE; i++)
             {
@@ -168,9 +168,9 @@ namespace ClassicUO.Game.Managers
     internal class PartyMember : IEquatable<PartyMember>
     {
         private string _name;
-        public Serial Serial;
+        public uint Serial;
 
-        public PartyMember(Serial serial)
+        public PartyMember(uint serial)
         {
             Serial = serial;
             _name = Name;

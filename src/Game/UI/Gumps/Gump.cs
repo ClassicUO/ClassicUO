@@ -37,7 +37,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class Gump : Control
     {
-        public Gump(Serial local, Serial server)
+        public Gump(uint local, uint server)
         {
             LocalSerial = local;
             ServerSerial = server;
@@ -117,9 +117,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            if (!IsDisposed && LocalSerial != 0 && !LocalSerial.IsValidLocalGumpSerial)
+            if (!IsDisposed && LocalSerial != 0 && !SerialHelper.IsValidLocalGumpSerial(LocalSerial))
             {
-                List<Serial> switches = new List<Serial>();
+                List<uint> switches = new List<uint>();
                 List<Tuple<ushort, string>> entries = new List<Tuple<ushort, string>>();
 
                 foreach (Control control in Children)

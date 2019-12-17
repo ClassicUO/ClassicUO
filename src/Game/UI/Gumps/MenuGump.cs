@@ -37,7 +37,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly HSliderBar _slider;
         private bool _isDown, _isLeft;
 
-        public MenuGump(Serial serial, Serial serv, string name) : base(serial, serv)
+        public MenuGump(uint serial, uint serv, string name) : base(serial, serv)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -123,7 +123,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             pic.MouseDoubleClick += (sender, e) =>
             {
-                NetClient.Socket.Send(new PMenuResponse(LocalSerial, (ushort) ServerSerial.Value, index, graphic, hue));
+                NetClient.Socket.Send(new PMenuResponse(LocalSerial, (ushort) ServerSerial, index, graphic, hue));
                 Dispose();
                 e.Result = true;
             };
@@ -215,7 +215,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly ResizePic _resizePic;
 
-        public GrayMenuGump(Serial local, Serial serv, string name) : base(local, serv)
+        public GrayMenuGump(uint local, uint serv, string name) : base(local, serv)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -265,7 +265,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch (buttonID)
             {
                 case 0: // cancel
-                    NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (ushort) ServerSerial.Value, 0));
+                    NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (ushort) ServerSerial, 0));
 
                     Dispose();
 
@@ -279,7 +279,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (radioButton.IsChecked)
                         {
-                            NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (ushort) ServerSerial.Value, index));
+                            NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (ushort) ServerSerial, index));
 
                             break;
                         }

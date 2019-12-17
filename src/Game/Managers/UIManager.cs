@@ -48,11 +48,11 @@ namespace ClassicUO.Game.Managers
     {
         private static readonly TextFileParser _parser = new TextFileParser(string.Empty, new[] {' '}, new char[] { }, new[] {'{', '}'});
         private static readonly TextFileParser _cmdparser = new TextFileParser(string.Empty, new[] {' '}, new char[] { }, new char[] { });
-        private static readonly Dictionary<Serial, Point> _gumpPositionCache = new Dictionary<Serial, Point>();
+        private static readonly Dictionary<uint, Point> _gumpPositionCache = new Dictionary<uint, Point>();
         private static readonly Control[] _mouseDownControls = new Control[5];
 
 
-        private static readonly Dictionary<Serial, TargetLineGump> _targetLineGumps = new Dictionary<Serial, TargetLineGump>();
+        private static readonly Dictionary<uint, TargetLineGump> _targetLineGumps = new Dictionary<uint, TargetLineGump>();
         private static int _dragOriginX, _dragOriginY;
         private static bool _isDraggingControl;
         private static Control _keyboardFocusControl,  _validForDClick;
@@ -319,17 +319,17 @@ namespace ClassicUO.Game.Managers
             foreach (Gump gump in Gumps.OfType<Gump>().Where(s => s.CloseIfClickOutside)) gump.Dispose();
         }
 
-        public static void SavePosition(Serial serverSerial, Point point)
+        public static void SavePosition(uint serverSerial, Point point)
         {
             _gumpPositionCache[serverSerial] = point;
         }
 
-        public static bool GetGumpCachePosition(Serial id, out Point pos)
+        public static bool GetGumpCachePosition(uint id, out Point pos)
         {
             return _gumpPositionCache.TryGetValue(id, out pos);
         }
 
-        public static Control Create(Serial sender, Serial gumpID, int x, int y, string layout, string[] lines)
+        public static Control Create(uint sender, uint gumpID, int x, int y, string layout, string[] lines)
         {
             if (GetGumpCachePosition(gumpID, out Point pos))
             {
@@ -743,7 +743,7 @@ namespace ClassicUO.Game.Managers
 
                         if (World.ClientFeatures.TooltipsEnabled)
                         {
-                            var entity = World.Get(Serial.Parse(gparams[1]));
+                            var entity = World.Get(SerialHelper.Parse(gparams[1]));
                             var lastControl = gump.Children.LastOrDefault();
 
                             if (lastControl != default(Control) && entity != default(Entity))
@@ -818,7 +818,7 @@ namespace ClassicUO.Game.Managers
             return gump;
         }
 
-        public static void SetTargetLineGump(Serial mob)
+        public static void SetTargetLineGump(uint mob)
         {
             if (TargetLine != null && !TargetLine.IsDisposed && TargetLine.Mobile == mob)
                 return;
@@ -850,7 +850,7 @@ namespace ClassicUO.Game.Managers
             //}
         }
 
-        public static void RemoveTargetLineGump(Serial serial)
+        public static void RemoveTargetLineGump(uint serial)
         {
             TargetLine?.Dispose();
             Remove<TargetLineGump>();
@@ -864,7 +864,7 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public static ChildType GetChildByLocalSerial<ParentType, ChildType>(Serial parentSerial, Serial childSerial)
+        public static ChildType GetChildByLocalSerial<ParentType, ChildType>(uint parentSerial, uint childSerial)
             where ParentType : Control
             where ChildType : Control
         {
@@ -873,7 +873,7 @@ namespace ClassicUO.Game.Managers
             return parent?.Children.OfType<ChildType>().FirstOrDefault(s => !s.IsDisposed && s.LocalSerial == childSerial);
         }
 
-        public static T GetGump<T>(Serial? serial = null) where T : Control
+        public static T GetGump<T>(uint? serial = null) where T : Control
         {
             foreach (Control c in Gumps)
             {
@@ -886,7 +886,7 @@ namespace ClassicUO.Game.Managers
             return null;
         }
 
-        public static Gump GetGump(Serial serial)
+        public static Gump GetGump(uint serial)
         {
             foreach (Control c in Gumps)
             {
@@ -951,7 +951,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void Remove<T>(Serial? local = null) where T : Control
+        public static void Remove<T>(uint? local = null) where T : Control
         {
             Gumps.OfType<T>().FirstOrDefault(s => (!local.HasValue || s.LocalSerial == local) && !s.IsDisposed)?.Dispose();
         }

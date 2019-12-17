@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
         private SpellBookType _spellBookType;
         private DataBox _dataBox;
 
-        public SpellbookGump(Serial item) : this()
+        public SpellbookGump(uint item) : this()
         {
             LocalSerial = item;
           
@@ -202,12 +202,12 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
-        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Serial> e)
+        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<uint> e)
         {
             Update();
         }
 
-        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Serial> e)
+        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<uint> e)
         {
             Update();
         }
@@ -646,7 +646,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private SpellDefinition GetSpellDefinition(Control ctrl)
         {
-            int idx = (int) (ctrl.LocalSerial > 1000 ? ctrl.LocalSerial - 1000 : ctrl.LocalSerial >= 100 ? ctrl.LocalSerial - 100 : ctrl.LocalSerial.Value) + 1;
+            int idx = (int) (ctrl.LocalSerial > 1000 ? ctrl.LocalSerial - 1000 : ctrl.LocalSerial >= 100 ? ctrl.LocalSerial - 100 : ctrl.LocalSerial) + 1;
 
             return GetSpellDefinition(idx);
         }
@@ -1019,7 +1019,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_clickTiming <= 0)
                 {
                     _clickTiming = 0;
-                    SetActivePage((int) _lastPressed.LocalSerial.Value);
+                    SetActivePage((int) _lastPressed.LocalSerial);
                     _lastPressed = null;
                 }
             }

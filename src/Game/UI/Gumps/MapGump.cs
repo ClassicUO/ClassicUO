@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Point _lastPoint;
 
 
-        public MapGump(Serial serial, ushort gumpid, int width, int height) : base(serial, 0)
+        public MapGump(uint serial, ushort gumpid, int width, int height) : base(serial, 0)
         {
             AcceptMouseInput = false;
             CanMove = true;

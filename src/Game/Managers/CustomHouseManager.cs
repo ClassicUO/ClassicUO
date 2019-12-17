@@ -70,9 +70,9 @@ namespace ClassicUO.Game.Managers
         public Point StartPos, EndPos;
         public CUSTOM_HOUSE_GUMP_STATE State = CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL;
 
-        public readonly Serial Serial;
+        public readonly uint Serial;
 
-        public CustomHouseManager(Serial serial)
+        public CustomHouseManager(uint serial)
         {
             Serial = serial;
 

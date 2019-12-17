@@ -11,7 +11,7 @@ namespace ClassicUO.Game.Managers
 {
     class WMapEntity
     {
-        public WMapEntity(Serial serial)
+        public WMapEntity(uint serial)
         {
             Serial = serial;
 
@@ -21,7 +21,7 @@ namespace ClassicUO.Game.Managers
             //    GetName();
         } 
 
-        public readonly Serial Serial;
+        public readonly uint Serial;
         public int X, Y, HP, Map;
         public uint LastUpdate;
         public bool IsGuild;
@@ -42,13 +42,13 @@ namespace ClassicUO.Game.Managers
 
     class WorldMapEntityManager
     {
-        public readonly Dictionary<Serial, WMapEntity> Entities = new Dictionary<Serial, WMapEntity>();
+        public readonly Dictionary<uint, WMapEntity> Entities = new Dictionary<uint, WMapEntity>();
 
         private readonly List<WMapEntity> _toRemove = new List<WMapEntity>();
 
         private uint _lastUpdate;
  
-        public void AddOrUpdate(Serial serial, int x, int y, int hp, int map, bool isguild)
+        public void AddOrUpdate(uint serial, int x, int y, int hp, int map, bool isguild)
         {
             if (!Entities.TryGetValue(serial, out var entity) || entity == null)
             {
@@ -72,7 +72,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void Remove(Serial serial)
+        public void Remove(uint serial)
         {
             if (Entities.ContainsKey(serial))
             {
@@ -106,7 +106,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public WMapEntity GetEntity(Serial serial)
+        public WMapEntity GetEntity(uint serial)
         {
             Entities.TryGetValue(serial, out var entity);
 

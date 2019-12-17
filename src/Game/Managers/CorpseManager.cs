@@ -31,14 +31,14 @@ namespace ClassicUO.Game.Managers
 {
     internal class CorpseManager
     {
-        private readonly Dictionary<Serial, CorpseInfo?> _corpses = new Dictionary<Serial, CorpseInfo?>();
+        private readonly Dictionary<uint, CorpseInfo?> _corpses = new Dictionary<uint, CorpseInfo?>();
 
-        public void Add(Serial corpse, Serial obj, Direction dir, bool run)
+        public void Add(uint corpse, uint obj, Direction dir, bool run)
         {
             if (!_corpses.ContainsKey(corpse)) _corpses[corpse] = new CorpseInfo(corpse, obj, dir, run);
         }
 
-        public void Remove(Serial corpse, Serial obj)
+        public void Remove(uint corpse, uint obj)
         {
             CorpseInfo? c = _corpses.Values.FirstOrDefault(s => s.HasValue && (s.Value.CorpseSerial == corpse || s.Value.ObjectSerial == obj));
 
@@ -51,12 +51,12 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public bool Exists(Serial corpse, Serial obj)
+        public bool Exists(uint corpse, uint obj)
         {
             return _corpses.Values.Any(s => s.HasValue && (s.Value.CorpseSerial == corpse || s.Value.ObjectSerial == obj));
         }
 
-        public Item GetCorpseObject(Serial serial)
+        public Item GetCorpseObject(uint serial)
         {
             CorpseInfo? c = _corpses.Values.FirstOrDefault(s => s.HasValue && s.Value.ObjectSerial == serial);
 
@@ -71,7 +71,7 @@ namespace ClassicUO.Game.Managers
 
     internal readonly struct CorpseInfo
     {
-        public CorpseInfo(Serial corpseSerial, Serial objectSerial, Direction direction, bool isRunning)
+        public CorpseInfo(uint corpseSerial, uint objectSerial, Direction direction, bool isRunning)
         {
             CorpseSerial = corpseSerial;
             ObjectSerial = objectSerial;
@@ -79,7 +79,7 @@ namespace ClassicUO.Game.Managers
             IsRunning = isRunning;
         }
 
-        public readonly Serial CorpseSerial, ObjectSerial;
+        public readonly uint CorpseSerial, ObjectSerial;
         public readonly Direction Direction;
         public readonly bool IsRunning;
     }

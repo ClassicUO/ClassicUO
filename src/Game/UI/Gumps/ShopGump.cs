@@ -56,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _shiftPressed;
         private bool _updateTotal;
 
-        public ShopGump(Serial serial, bool isBuyGump, int x, int y) : base(serial, 0) //60 is the base height, original size
+        public ShopGump(uint serial, bool isBuyGump, int x, int y) : base(serial, 0) //60 is the base height, original size
         {
             int height = ProfileManager.Current.VendorGumpHeight;
             if (_shopGumpParts == null) GenerateVirtualTextures();
@@ -400,7 +400,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 TextureControl control;
 
-                if (item.Serial.IsMobile)
+                if (SerialHelper.IsMobile(item.Serial))
                 {
                     byte group = 0;
 
@@ -452,7 +452,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (control.Height > 35)
                         control.Height = 35;
                 }
-                else if (item.Serial.IsItem)
+                else if (SerialHelper.IsItem(item.Serial))
                 {
                     var texture = UOFileManager.Art.GetTexture(item.Graphic);
 
@@ -536,7 +536,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (Item != null)
                 {
-                    if (Item.Serial.IsMobile)
+                    if (SerialHelper.IsMobile(Item.Serial))
                     {
                         byte group = 0;
 

@@ -27,7 +27,7 @@ namespace ClassicUO.Game.UI.Gumps
         private static int _lastX = ProfileManager.Current.GridLootType == 2 ? 200 : 100;
         private static int _lastY = 100;
 
-        public GridLootGump(Serial local) : base(local, 0)
+        public GridLootGump(uint local) : base(local, 0)
         {
             _corpse = World.Items.Get(local);
 
@@ -75,12 +75,12 @@ namespace ClassicUO.Game.UI.Gumps
             _corpse.Items.Removed += Items_Removed;      
         }
 
-        private void Items_Removed(object sender, CollectionChangedEventArgs<Serial> e)
+        private void Items_Removed(object sender, CollectionChangedEventArgs<uint> e)
         {
             RedrawItems();
         }
 
-        private void Items_Added(object sender, CollectionChangedEventArgs<Serial> e)
+        private void Items_Added(object sender, CollectionChangedEventArgs<uint> e)
         {
             RedrawItems();
         }
@@ -122,7 +122,7 @@ namespace ClassicUO.Game.UI.Gumps
             else if (buttonID == 2)
             {
                 GameActions.Print("Target the container to Grab items into.");
-                TargetManager.SetTargeting(CursorTarget.SetGrabBag, Serial.INVALID, TargetType.Neutral);
+                TargetManager.SetTargeting(CursorTarget.SetGrabBag, 0, TargetType.Neutral);
             }
             else
                 base.OnButtonClick(buttonID);
@@ -249,7 +249,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private readonly TextureControl _texture;
 
-            public GridLootItem(Serial serial)
+            public GridLootItem(uint serial)
             {
                 LocalSerial = serial;
 

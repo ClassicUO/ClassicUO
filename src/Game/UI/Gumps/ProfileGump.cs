@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _isMinimized;
         private const int _diffY = 22;
 
-        public ProfileGump(Serial serial, string header, string footer, string body, bool canEdit) : base(serial == World.Player.Serial ? serial = Constants.PROFILE_LOCALSERIAL : serial, serial)
+        public ProfileGump(uint serial, string header, string footer, string body, bool canEdit) : base(serial == World.Player.Serial ? serial = Constants.PROFILE_LOCALSERIAL : serial, serial)
         {
             Height = 300 + _diffY;
             CanMove = true;

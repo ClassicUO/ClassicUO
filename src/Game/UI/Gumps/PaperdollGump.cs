@@ -66,7 +66,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
         }
 
-        public PaperDollGump(Serial serial, string mobileTitle) : this()
+        public PaperDollGump(uint serial, string mobileTitle) : this()
         {
             Mobile mobile = World.Mobiles.Get(serial);
 

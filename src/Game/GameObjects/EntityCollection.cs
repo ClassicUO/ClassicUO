@@ -32,8 +32,8 @@ namespace ClassicUO.Game.GameObjects
 {
     internal class EntityCollection<T> : IEnumerable<T> where T : Entity
     {
-        private readonly List<Serial> _added = new List<Serial>(), _removed = new List<Serial>();
-        private readonly Dictionary<Serial, T> _entities = new Dictionary<Serial, T>();
+        private readonly List<uint> _added = new List<uint>(), _removed = new List<uint>();
+        private readonly Dictionary<uint, T> _entities = new Dictionary<uint, T>();
 
         public int Count => _entities.Count;
 
@@ -47,31 +47,31 @@ namespace ClassicUO.Game.GameObjects
             return _entities.Values.GetEnumerator();
         }
 
-        public event EventHandler<CollectionChangedEventArgs<Serial>> Added, Removed;
+        public event EventHandler<CollectionChangedEventArgs<uint>> Added, Removed;
 
         public void ProcessDelta()
         {
             if (_added.Count != 0)
             {
-                CollectionChangedEventArgs<Serial> list = new CollectionChangedEventArgs<Serial>(_added);
+                CollectionChangedEventArgs<uint> list = new CollectionChangedEventArgs<uint>(_added);
                 _added.Clear();
                 Added.Raise(list);
             }
 
             if (_removed.Count != 0)
             {
-                CollectionChangedEventArgs<Serial> list = new CollectionChangedEventArgs<Serial>(_removed);
+                CollectionChangedEventArgs<uint> list = new CollectionChangedEventArgs<uint>(_removed);
                 _removed.Clear();
                 Removed.Raise(list);
             }
         }
 
-        public bool Contains(Serial serial)
+        public bool Contains(uint serial)
         {
             return _entities.ContainsKey(serial);
         }
 
-        public T Get(Serial serial)
+        public T Get(uint serial)
         {
             _entities.TryGetValue(serial, out T entity);
 
@@ -89,12 +89,12 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        public void Remove(Serial serial)
+        public void Remove(uint serial)
         {
             if (_entities.Remove(serial)) _removed.Add(serial);
         }
 
-        public void Replace(T entity, Serial newSerial)
+        public void Replace(T entity, uint newSerial)
         {
             if (_entities.Remove(entity.Serial))
             {

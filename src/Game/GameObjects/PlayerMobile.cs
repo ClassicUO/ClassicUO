@@ -44,7 +44,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private readonly Dictionary<ushort, BuffIcon> _buffIcons = new Dictionary<ushort, BuffIcon>();
 
-        public PlayerMobile(Serial serial) : base(serial)
+        public PlayerMobile(uint serial) : base(serial)
         {
             Skills = new Skill[UOFileManager.Skills.SkillsCount];
 
@@ -1337,7 +1337,7 @@ namespace ClassicUO.Game.GameObjects
                         int distance = int.MaxValue;
                         if (ent != null)
                         {
-                            if (ent.Serial.IsItem)
+                            if (SerialHelper.IsItem(ent.Serial))
                             {
                                 var top = World.Get(((Item)ent).RootContainer);
 
@@ -1358,7 +1358,7 @@ namespace ClassicUO.Game.GameObjects
                         distance = int.MaxValue;
                         if (ent != null)
                         {
-                            if (ent.Serial.IsItem)
+                            if (SerialHelper.IsItem(ent.Serial))
                             {
                                 var top = World.Get(((Item) ent).RootContainer);
 
@@ -1842,8 +1842,8 @@ namespace ClassicUO.Game.GameObjects
 #endif
         }
 
-        public readonly HashSet<Serial> AutoOpenedCorpses = new HashSet<Serial>();
-        public readonly HashSet<Serial> ManualOpenedCorpses = new HashSet<Serial>();
+        public readonly HashSet<uint> AutoOpenedCorpses = new HashSet<uint>();
+        public readonly HashSet<uint> ManualOpenedCorpses = new HashSet<uint>();
 #if JAEDAN_MOVEMENT_PATCH
         public override void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
         {

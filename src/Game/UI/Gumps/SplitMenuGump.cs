@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _firstChange;
         private int _lastValue;
 
-        public SplitMenuGump(Serial serial, Point offset) : base(serial, 0)
+        public SplitMenuGump(uint serial, Point offset) : base(serial, 0)
         {
             Item item = World.Items.Get(serial);
 

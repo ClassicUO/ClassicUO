@@ -863,7 +863,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.TargetNext:
 
-                    if (TargetManager.LastTarget.IsMobile)
+                    if (SerialHelper.IsMobile(TargetManager.LastTarget))
                     {
                         Mobile mob = World.Mobiles.Get(TargetManager.LastTarget);
 
@@ -934,7 +934,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.AttackSelectedTarget:
 
-                    if (TargetManager.SelectedTarget.IsMobile)
+                    if (SerialHelper.IsMobile(TargetManager.SelectedTarget))
                         GameActions.Attack(TargetManager.SelectedTarget);
                     break;
 
@@ -1014,7 +1014,7 @@ namespace ClassicUO.Game.Managers
                             {
                                 NetClient.Socket.Send(new PTargetSelectedObject(bandage.Serial, World.Player.Serial));
                             }
-                            else if (TargetManager.SelectedTarget.IsMobile)
+                            else if (SerialHelper.IsMobile(TargetManager.SelectedTarget))
                             {
                                 NetClient.Socket.Send(new PTargetSelectedObject(bandage.Serial, TargetManager.SelectedTarget));
                             }
@@ -1180,13 +1180,13 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.Grab:
                     GameActions.Print("Target an Item to grab it.");
-                    TargetManager.SetTargeting(CursorTarget.Grab, Serial.INVALID, TargetType.Neutral);
+                    TargetManager.SetTargeting(CursorTarget.Grab, 0, TargetType.Neutral);
 
                     break;
 
                 case MacroType.SetGrabBag:
                     GameActions.Print("Target the container to Grab items into.");
-                    TargetManager.SetTargeting(CursorTarget.SetGrabBag, Serial.INVALID, TargetType.Neutral);
+                    TargetManager.SetTargeting(CursorTarget.SetGrabBag, 0, TargetType.Neutral);
 
                     break;
 
@@ -1225,13 +1225,13 @@ namespace ClassicUO.Game.Managers
             return result;
         }
 
-        private static void SetLastTarget(Serial serial)
+        private static void SetLastTarget(uint serial)
         {
-            if (serial.IsValid)
+            if (SerialHelper.IsValid(serial))
             {
                 Entity ent = World.Get(serial);
 
-                if (serial.IsMobile)
+                if (SerialHelper.IsMobile(serial))
                 {
                     if (ent != null)
                     {
@@ -1244,7 +1244,7 @@ namespace ClassicUO.Game.Managers
                         return;
                     }
                 }
-                else if (serial.IsItem)
+                else
                 {
                     if (ent != null)
                     {

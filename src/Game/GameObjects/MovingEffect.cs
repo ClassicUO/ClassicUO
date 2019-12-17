@@ -42,7 +42,7 @@ namespace ClassicUO.Game.GameObjects
             Load();
         }
 
-        public MovingEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, ushort graphic, ushort hue, bool fixedDir, byte speed) : this(graphic, hue)
+        public MovingEffect(uint src, uint trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, ushort graphic, ushort hue, bool fixedDir, byte speed) : this(graphic, hue)
         {
             FixedDir = fixedDir;
 
@@ -53,7 +53,7 @@ namespace ClassicUO.Game.GameObjects
 
             Entity source = World.Get(src);
 
-            if (src.IsValid && source != null)
+            if (SerialHelper.IsValid(src) && source != null)
                 SetSource(source);
             else
                 SetSource(xSource, ySource, zSource);
@@ -61,7 +61,7 @@ namespace ClassicUO.Game.GameObjects
 
             Entity target = World.Get(trg);
 
-            if (trg.IsValid && target != null)
+            if (SerialHelper.IsValid(trg) && target != null)
                 SetTarget(target);
             else
                 SetTarget(xTarget, yTarget, zTarget);

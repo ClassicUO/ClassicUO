@@ -245,7 +245,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             switch (e.Type)
             {
-                case MessageType.Regular when e.Parent == null || !e.Parent.Serial.IsValid:
+                case MessageType.Regular when e.Parent == null || ! SerialHelper.IsValid(e.Parent.Serial):
                 case MessageType.System:
                     AddLine(e.Text, e.Font, e.Hue, e.IsUnicode);
 

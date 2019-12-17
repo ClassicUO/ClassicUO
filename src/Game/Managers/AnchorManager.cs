@@ -304,7 +304,7 @@ namespace ClassicUO.Game.Managers
                         if (controlMatrix[x, y] != null)
                             writer.Write(controlMatrix[x, y].LocalSerial);
                         else
-                            writer.Write(Serial.INVALID);
+                            writer.Write(0);
                     }
                 }
             }
@@ -346,9 +346,9 @@ namespace ClassicUO.Game.Managers
                 {
                     for (int y = 0; y < controlMatrix.GetLength(1); y++)
                     {
-                        var serial = (Serial) reader.ReadUInt32();
+                        uint serial = reader.ReadUInt32();
 
-                        if (serial != Serial.INVALID)
+                        if (serial != 0)
                         {
                             var gump = gumps.Where(o => o.LocalSerial == serial)
                                             .OfType<AnchorableGump>().SingleOrDefault();

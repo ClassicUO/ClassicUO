@@ -37,7 +37,7 @@ namespace ClassicUO.Game.UI.Gumps
         private int _prevX, _prevY;
         private AnchorableGump _anchorCandidate;
 
-        public AnchorableGump(Serial local, Serial server) : base(local, server)
+        public AnchorableGump(uint local, uint server) : base(local, server)
         {
         }
 
