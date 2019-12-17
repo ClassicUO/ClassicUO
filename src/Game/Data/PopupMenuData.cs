@@ -49,7 +49,7 @@ namespace ClassicUO.Game.Data
 
             for (int i = 0; i < count; i++)
             {
-                Hue hue = 0xFFFF, replaced = 0;
+                ushort hue = 0xFFFF, replaced = 0;
                 int cliloc;
                 ushort index, flags;
 
@@ -72,7 +72,7 @@ namespace ClassicUO.Game.Data
                         p.Skip(2);
 
                     if ((flags & 0x20) != 0)
-                        replaced = (Hue) (p.ReadUShort() & 0x3FFF);
+                        replaced = (ushort) (p.ReadUShort() & 0x3FFF);
                 }
 
                 if ((flags & 0x01) != 0)

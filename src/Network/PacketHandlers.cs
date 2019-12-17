@@ -663,7 +663,7 @@ namespace ClassicUO.Network
             Entity entity = World.Get(serial);
             ushort graphic = p.ReadUShort();
             MessageType type = (MessageType) p.ReadByte();
-            Hue hue = p.ReadUShort();
+            ushort hue = p.ReadUShort();
             ushort font = p.ReadUShort();
             string name = p.ReadASCII(30);
             string text = p.ReadASCII();
@@ -899,7 +899,7 @@ namespace ClassicUO.Network
         {
             ushort graphic = p.ReadUShort();
             graphic += p.ReadByte();
-            Hue hue = p.ReadUShort();
+            ushort hue = p.ReadUShort();
             ushort count = p.ReadUShort();
             Serial source = p.ReadUInt();
             ushort sourceX = p.ReadUShort();
@@ -1072,7 +1072,7 @@ namespace ClassicUO.Network
                 p.Skip(1);
 
             Serial containerSerial = p.ReadUInt();
-            Hue hue = p.ReadUShort();
+            ushort hue = p.ReadUShort();
 
             AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
 
@@ -1432,7 +1432,7 @@ namespace ClassicUO.Network
                 if (UOFileManager.ClientVersion >= ClientVersions.CV_6017)
                     p.Skip(1);
                 Serial containerSerial = p.ReadUInt();
-                Hue hue = p.ReadUShort();
+                ushort hue = p.ReadUShort();
 
                 if (i == 0)
                 {
@@ -1772,7 +1772,7 @@ namespace ClassicUO.Network
             p.Skip(2);
             bool fixedDirection = p.ReadBool();
             bool doesExplode = p.ReadBool();
-            Hue hue = 0;
+            ushort hue = 0;
             GraphicEffectBlendMode blendmode = 0;
 
             if (p.ID != 0x70)
@@ -2058,7 +2058,7 @@ namespace ClassicUO.Network
             ushort y = p.ReadUShort();
             sbyte z = p.ReadSByte();
             Direction direction = (Direction) p.ReadByte();
-            Hue hue = p.ReadUShort();
+            ushort hue = p.ReadUShort();
             Flags flags = (Flags) p.ReadByte();
             NotorietyFlag notoriety = (NotorietyFlag) p.ReadByte();
 
@@ -2198,7 +2198,7 @@ namespace ClassicUO.Network
                 for (int i = 0; i < count; i++)
                 {
                     ushort graphic = p.ReadUShort();
-                    Hue hue = p.ReadUShort();
+                    ushort hue = p.ReadUShort();
                     name = p.ReadASCII(p.ReadByte());
 
                     Rectangle rect = UOFileManager.Art.GetTexture(graphic).Bounds;
@@ -2444,7 +2444,7 @@ namespace ClassicUO.Network
             var xOff = p.ReadUShort();
             var yOff = p.ReadUShort();
             var zOff = p.ReadUShort();
-            Hue hue = p.ReadUShort();
+            ushort hue = p.ReadUShort();
             TargetManager.SetTargetingMulti(targID, multiID, xOff, yOff, zOff, hue);
         }
 
@@ -2664,7 +2664,7 @@ namespace ClassicUO.Network
             Entity entity = World.Get(serial);
             ushort graphic = p.ReadUShort();
             MessageType type = (MessageType) p.ReadByte();
-            Hue hue = p.ReadUShort();
+            ushort hue = p.ReadUShort();
             ushort font = p.ReadUShort();
             string lang = p.ReadASCII(4);
             string name = p.ReadASCII();
@@ -3255,7 +3255,7 @@ namespace ClassicUO.Network
             Entity entity = World.Get(serial);
             ushort graphic = p.ReadUShort();
             MessageType type = (MessageType) p.ReadByte();
-            Hue hue = p.ReadUShort();
+            ushort hue = p.ReadUShort();
             ushort font = p.ReadUShort();
             uint cliloc = p.ReadUInt();
             AffixType flags = p.ID == 0xCC ? (AffixType) p.ReadByte() : 0x00;
@@ -3840,7 +3840,7 @@ namespace ClassicUO.Network
             ushort y = p.ReadUShort();
             sbyte z = p.ReadSByte();
             Direction dir = (Direction) p.ReadByte();
-            Hue hue = p.ReadUShort();
+            ushort hue = p.ReadUShort();
             Flags flags = (Flags) p.ReadByte();
             p.Skip(2);
 
@@ -4071,7 +4071,7 @@ namespace ClassicUO.Network
             }
         }
 
-        private static void AddItemToContainer(Serial serial, ushort graphic, ushort amount, ushort x, ushort y, Hue hue, Serial containerSerial)
+        private static void AddItemToContainer(Serial serial, ushort graphic, ushort amount, ushort x, ushort y, ushort hue, Serial containerSerial)
         {
             GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
 

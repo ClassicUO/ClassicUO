@@ -211,7 +211,7 @@ namespace ClassicUO.Game.Scenes
             string name;
             string text;
 
-            Hue hue = e.Hue;
+            ushort hue = e.Hue;
 
             switch (e.Type)
             {

@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _needHue = !_needHue;
             }
 
-            _arrow.Hue = (Hue) (_needHue ? 0 : 0x21);
+            _arrow.Hue = (ushort) (_needHue ? 0 : 0x21);
         }
 
 

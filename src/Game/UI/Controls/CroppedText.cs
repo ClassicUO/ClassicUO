@@ -32,14 +32,14 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly RenderedText _gameText;
 
-        public CroppedText(string text, Hue hue, int maxWidth = 0)
+        public CroppedText(string text, ushort hue, int maxWidth = 0)
         {
             _gameText = RenderedText.Create(text, hue, (byte)(UOFileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0), true, maxWidth > 0 ? FontStyle.BlackBorder | FontStyle.Cropped : FontStyle.BlackBorder,
                                             maxWidth: maxWidth);
             AcceptMouseInput = false;
         }
 
-        public CroppedText(List<string> parts, string[] lines) : this(int.TryParse(parts[6], out int lineIndex) && lineIndex >= 0 && lineIndex < lines.Length ? lines[lineIndex] : string.Empty, (Hue) (Hue.Parse(parts[5]) + 1), int.Parse(parts[3]))
+        public CroppedText(List<string> parts, string[] lines) : this(int.TryParse(parts[6], out int lineIndex) && lineIndex >= 0 && lineIndex < lines.Length ? lines[lineIndex] : string.Empty, (ushort) (HueHelper.Parse(parts[5]) + 1), int.Parse(parts[3]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);

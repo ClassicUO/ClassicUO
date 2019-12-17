@@ -75,7 +75,7 @@ namespace ClassicUO.Game
             Position = Position.INVALID;
             Container = Serial.INVALID;
             DisplayedGraphic = Graphic = 0xFFFF;
-            Hue = Hue.INVALID;
+            Hue = 0xFFFF;
             OnGround = false;
             Amount = 0;
             IsWearable = IsStackable = IsPartialHue = HasAlpha = false;

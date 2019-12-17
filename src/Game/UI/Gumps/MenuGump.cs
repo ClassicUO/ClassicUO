@@ -111,7 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public void AddItem(ushort graphic, Hue hue, string name, int x, int y, int index)
+        public void AddItem(ushort graphic, ushort hue, string name, int x, int y, int index)
         {
             StaticPic pic = new StaticPic(graphic, hue)
             {

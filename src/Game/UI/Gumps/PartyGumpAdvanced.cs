@@ -290,7 +290,7 @@ namespace ClassicUO.Game.UI.Gumps
                     //World.Party.QuitParty();
 
                     if (World.Party.Leader == 0)
-                        Chat.HandleMessage(null, "You are not in a party.", "System", Hue.INVALID, MessageType.Regular, 3);
+                        Chat.HandleMessage(null, "You are not in a party.", "System", 0xFFFF, MessageType.Regular, 3);
                     else
                     {
                         for (int i = 0; i < World.Party.Members.Length; i++)
@@ -367,7 +367,7 @@ namespace ClassicUO.Game.UI.Gumps
             Mobile mobile = World.Mobiles.Get(member.Serial);
 
             //======================================================
-            Add(_status = new GumpPic(240, 0, 0x29F6, (Hue)(mobile != null && mobile.IsDead ? 0 : 0x43)));
+            Add(_status = new GumpPic(240, 0, 0x29F6, (ushort) (mobile != null && mobile.IsDead ? 0 : 0x43)));
 
             //======================================================
             Button pmButton = new Button((int)Buttons.GetBar, 0xFAE, 0xFAF, 0xFB0)

@@ -109,7 +109,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Label _label;
         private Label _data;
         private InfoBarVars _var;
-        private Hue _warningLinesHue;
+        private ushort _warningLinesHue;
         protected long _refreshTime;
 
         public InfoBarControl(string label, InfoBarVars var, ushort hue)

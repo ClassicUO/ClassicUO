@@ -38,7 +38,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool ScaleTexture { get; set; }
 
-        public Hue Hue { get; set; }
+        public ushort Hue { get; set; }
         public bool IsPartial { get; set; }
 
         public override void Update(double totalMS, double frameMS)

@@ -274,7 +274,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
-        private void AppendChatModePrefix(string labelText, Hue hue)
+        private void AppendChatModePrefix(string labelText, ushort hue)
         {
             if (!_currentChatModeLabel.IsVisible)
             {
@@ -298,7 +298,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public void AddLine(string text, byte font, Hue hue, bool isunicode)
+        public void AddLine(string text, byte font, ushort hue, bool isunicode)
         {
             if (_textEntries.Count >= 30)
                 _textEntries.RemoveFromFront().Destroy();
@@ -565,7 +565,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (World.Party.Leader == 0 || World.Party.Leader == World.Player)
                                     GameActions.RequestPartyInviteByTarget();
                                 else
-                                    Chat.HandleMessage(null, "You are not party leader.", "System", Hue.INVALID, MessageType.Regular, 3);
+                                    Chat.HandleMessage(null, "You are not party leader.", "System", 0xFFFF, MessageType.Regular, 3);
 
                                 break;
 
@@ -574,7 +574,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (World.Party.Leader != 0)
                                     World.Party.CanLoot = !World.Party.CanLoot;
                                 else
-                                    Chat.HandleMessage(null, "You are not in a party.", "System", Hue.INVALID, MessageType.Regular, 3);
+                                    Chat.HandleMessage(null, "You are not in a party.", "System", 0xFFFF, MessageType.Regular, 3);
 
 
                                 break;
@@ -582,7 +582,7 @@ namespace ClassicUO.Game.UI.Gumps
                             case "quit":
 
                                 if (World.Party.Leader == 0)
-                                    Chat.HandleMessage(null, "You are not in a party.", "System", Hue.INVALID, MessageType.Regular, 3);
+                                    Chat.HandleMessage(null, "You are not in a party.", "System", 0xFFFF, MessageType.Regular, 3);
                                 else
                                 {
                                     for (int i = 0; i < World.Party.Members.Length; i++)
@@ -603,7 +603,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     World.Party.Inviter = 0;
                                 }
                                 else
-                                    Chat.HandleMessage(null, "No one has invited you to be in a party.", "System", Hue.INVALID, MessageType.Regular, 3);
+                                    Chat.HandleMessage(null, "No one has invited you to be in a party.", "System", 0xFFFF, MessageType.Regular, 3);
 
                                 break;
 
@@ -616,7 +616,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     World.Party.Inviter = 0;
                                 }
                                 else
-                                    Chat.HandleMessage(null, "No one has invited you to be in a party.", "System", Hue.INVALID, MessageType.Regular, 3);
+                                    Chat.HandleMessage(null, "No one has invited you to be in a party.", "System", 0xFFFF, MessageType.Regular, 3);
 
 
                                 break;
@@ -667,7 +667,7 @@ namespace ClassicUO.Game.UI.Gumps
             private float _alpha;
             private float _createdTime;
 
-            public ChatLineTime(string text, byte font, bool isunicode, Hue hue)
+            public ChatLineTime(string text, byte font, bool isunicode, ushort hue)
             {
                 _renderedText = RenderedText.Create(text, hue, font, isunicode, FontStyle.BlackBorder, maxWidth: 320);
                 _createdTime = Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT;

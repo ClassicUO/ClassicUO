@@ -144,7 +144,7 @@ namespace ClassicUO.Game.GameObjects
         {
             _messages.AddToFront(new TextOverhead
             {
-                RenderedText = RenderedText.Create(damage.ToString(), (Hue)(Parent == World.Player ? 0x0034 : 0x0021), 3, false),
+                RenderedText = RenderedText.Create(damage.ToString(), (ushort) (Parent == World.Player ? 0x0034 : 0x0021), 3, false),
                 Time = Time.Ticks + 1500
             });
 

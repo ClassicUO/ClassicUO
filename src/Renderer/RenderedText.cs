@@ -130,7 +130,7 @@ namespace ClassicUO.Renderer
 
         public List<WebLinkRect> Links { get; set; } = new List<WebLinkRect>();
 
-        public Hue Hue { get; set; }
+        public ushort Hue { get; set; }
 
         public uint HTMLColor { get; set; } = 0xFFFFFFFF;
 

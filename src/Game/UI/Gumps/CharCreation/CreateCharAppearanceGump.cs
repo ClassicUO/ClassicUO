@@ -43,7 +43,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private readonly RadioButton _humanRadio;
         private readonly RadioButton _maleRadio;
         private readonly TextBox _nameTextBox;
-        private readonly Dictionary<Layer, Tuple<int, Hue>> CurrentColorOption = new Dictionary<Layer, Tuple<int, Hue>>();
+        private readonly Dictionary<Layer, Tuple<int, ushort>> CurrentColorOption = new Dictionary<Layer, Tuple<int, ushort>>();
         private readonly Dictionary<Layer, int> CurrentOption = new Dictionary<Layer, int>
         {
             {
@@ -344,7 +344,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }, 1);
 
             if (!CurrentColorOption.ContainsKey(layer))
-                CurrentColorOption[layer] = new Tuple<int, Hue>(0, colorPicker.HueSelected);
+                CurrentColorOption[layer] = new Tuple<int, ushort>(0, colorPicker.HueSelected);
             else
                 colorPicker.SetSelectedIndex(CurrentColorOption[layer].Item1);
             colorPicker.ColorSelected += ColorPicker_ColorSelected;
@@ -352,7 +352,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private void ColorPicker_ColorSelected(object sender, ColorSelectedEventArgs e)
         {
-            CurrentColorOption[e.Layer] = new Tuple<int, Hue>(e.SelectedIndex, e.SelectedHue);
+            CurrentColorOption[e.Layer] = new Tuple<int, ushort>(e.SelectedIndex, e.SelectedHue);
 
             if (e.Layer != Layer.Invalid)
             {
@@ -460,7 +460,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             return RaceType.HUMAN;
         }
 
-        private Item CreateItem(int id, Hue hue, Layer layer)
+        private Item CreateItem(int id, ushort hue, Layer layer)
         {
             if (id == 0)
                 return null;
@@ -551,7 +551,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 _colorPickerBox.MouseUp += ColorPickerBoxOnMouseUp;
             }
 
-            public Hue HueSelected => (ushort) (_colorPickerBox.SelectedHue + 1);
+            public ushort HueSelected => (ushort) (_colorPickerBox.SelectedHue + 1);
 
             private void ColorPickerBoxOnMouseUp(object sender, MouseEventArgs e)
             {

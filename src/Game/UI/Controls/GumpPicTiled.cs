@@ -72,7 +72,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public ushort Graphic { get; set; }
 
-        public Hue Hue { get; set; }
+        public ushort Hue { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {

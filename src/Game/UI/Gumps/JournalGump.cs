@@ -92,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps
 
        
 
-        public Hue Hue
+        public ushort Hue
         {
             get => _background.Hue;
             set => _background.Hue = value;
@@ -340,7 +340,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            public void AddEntry(string text, int font, Hue hue, bool isUnicode, DateTime time)
+            public void AddEntry(string text, int font, ushort hue, bool isUnicode, DateTime time)
             {
                 bool maxScroll = _scrollBar.Value == _scrollBar.MaxValue;
 

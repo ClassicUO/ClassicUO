@@ -242,7 +242,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
         }
 
-        public Hue Hue { get; set; }
+        public ushort Hue { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {

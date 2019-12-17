@@ -439,7 +439,7 @@ namespace ClassicUO.Game.UI.Gumps
                         X = 5,
                         Y = 5,
                         AcceptMouseInput = false,
-                        Hue = item.Hue == 0 ? (Hue) hue2 : item.Hue,
+                        Hue = item.Hue == 0 ? (ushort) hue2 : item.Hue,
                         IsPartial = item.ItemData.IsPartialHue
                     });
 
@@ -513,7 +513,7 @@ namespace ClassicUO.Game.UI.Gumps
                 set
                 {
                     foreach (var label in Children.OfType<Label>())
-                        label.Hue = (Hue) (value ? 0x0021 : 0x0219);
+                        label.Hue = (ushort) (value ? 0x0021 : 0x0219);
                 }
             }
 

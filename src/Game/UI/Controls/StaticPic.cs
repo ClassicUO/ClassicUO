@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly bool _isPartial;
 
-        public StaticPic(ushort graphic, Hue hue)
+        public StaticPic(ushort graphic, ushort hue)
         {
             Hue = hue;
             _isPartial = UOFileManager.TileData.StaticData[graphic].IsPartialHue;
@@ -47,13 +47,13 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
         }
 
-        public StaticPic(List<string> parts) : this(GraphicHelper.Parse(parts[3]), parts.Count > 4 ? Hue.Parse(parts[4]) : (Hue) 0)
+        public StaticPic(List<string> parts) : this(GraphicHelper.Parse(parts[3]), parts.Count > 4 ? HueHelper.Parse(parts[4]) : (ushort) 0)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
         }
 
-        public Hue Hue { get; set; }
+        public ushort Hue { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {

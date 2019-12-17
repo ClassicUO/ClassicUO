@@ -345,7 +345,7 @@ namespace ClassicUO.Game.UI.Gumps
             bool inparty = World.Party.Contains(LocalSerial);
 
 
-            Hue textColor = 0x0386;
+            ushort textColor = 0x0386;
 
             Entity entity = World.Get(LocalSerial);
 
@@ -499,7 +499,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_textBox != null && _textBox.Hue != textColor)
                     _textBox.Hue = textColor;
 
-                Hue barColor = mobile != null ? Notoriety.GetHue(mobile.NotorietyFlag) : (Hue) 912;
+                ushort barColor = mobile != null ? Notoriety.GetHue(mobile.NotorietyFlag) : (ushort) 912;
 
                 if (_background.Hue != barColor)
                 {
@@ -926,8 +926,8 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    Hue textColor = 0x0386;
-                    Hue hitsColor = 0x0386;
+                    ushort textColor = 0x0386;
+                    ushort hitsColor = 0x0386;
 
                     Mobile mobile = entity != null && entity.Serial.IsMobile ? (Mobile) entity : null;
 
@@ -940,7 +940,7 @@ namespace ClassicUO.Game.UI.Gumps
                             textColor = 0x000E;
                     }
 
-                    Hue barColor = entity == null || entity == World.Player || mobile == null || mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray ? (Hue) 0 : Notoriety.GetHue(mobile.NotorietyFlag);
+                    ushort barColor = entity == null || entity == World.Player || mobile == null || mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray ? (ushort) 0 : Notoriety.GetHue(mobile.NotorietyFlag);
 
                     Add(_background = new GumpPic(0, 0, 0x0804, barColor));
                     Add(_hpLineRed = new GumpPic(34, 38, LINE_RED, hitsColor));
@@ -980,8 +980,8 @@ namespace ClassicUO.Game.UI.Gumps
             bool inparty = World.Party.Contains(LocalSerial);
 
 
-            Hue textColor = 0x0386;
-            Hue hitsColor = 0x0386;
+            ushort textColor = 0x0386;
+            ushort hitsColor = 0x0386;
 
             Entity entity = World.Get(LocalSerial);
 
@@ -1143,7 +1143,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_textBox != null && _textBox.Hue != textColor)
                     _textBox.Hue = textColor;
 
-                Hue barColor = entity == World.Player || mobile == null || mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray ? (Hue) 0 : Notoriety.GetHue(mobile.NotorietyFlag);
+                ushort barColor = entity == World.Player || mobile == null || mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray ? (ushort) 0 : Notoriety.GetHue(mobile.NotorietyFlag);
 
                 if (_background.Hue != barColor)
                     _background.Hue = barColor;

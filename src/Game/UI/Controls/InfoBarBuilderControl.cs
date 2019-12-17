@@ -33,7 +33,7 @@ namespace ClassicUO.Game.UI.Controls
     {
         public string LabelText { get { return infoLabel.Text; } }
         public InfoBarVars Var { get { return (InfoBarVars) varStat.SelectedIndex; } }
-        public Hue Hue { get { return labelColor.Hue; } }
+        public ushort Hue { get { return labelColor.Hue; } }
 
         private TextBox infoLabel;
         private Combobox varStat;

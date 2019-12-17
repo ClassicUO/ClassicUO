@@ -242,7 +242,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private int _amount;
             private ushort _graphic;
-            private Hue _hue;
+            private ushort _hue;
             private uint _time;
 
             private ImageWithText _image;
@@ -346,7 +346,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            private static void GetAmount(Item parent, ushort graphic, Hue hue, ref int amount)
+            private static void GetAmount(Item parent, ushort graphic, ushort hue, ref int amount)
             {
                 if (parent == null)
                     return;

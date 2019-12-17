@@ -394,7 +394,7 @@ namespace ClassicUO.Network
 
     internal sealed class PASCIISpeechRequest : PacketWriter
     {
-        public PASCIISpeechRequest(string text, MessageType type, byte font, Hue hue) : base(0x03)
+        public PASCIISpeechRequest(string text, MessageType type, byte font, ushort hue) : base(0x03)
         {
             WriteByte((byte) type);
             WriteUShort(hue);
@@ -405,7 +405,7 @@ namespace ClassicUO.Network
 
     internal sealed class PUnicodeSpeechRequest : PacketWriter
     {
-        public PUnicodeSpeechRequest(string text, MessageType type, byte font, Hue hue, string lang) : base(0xAD)
+        public PUnicodeSpeechRequest(string text, MessageType type, byte font, ushort hue, string lang) : base(0xAD)
         {
             var entries = UOFileManager.Speeches.GetKeywords(text);
 
@@ -564,7 +564,7 @@ namespace ClassicUO.Network
 
     internal sealed class PMenuResponse : PacketWriter
     {
-        public PMenuResponse(Serial serial, ushort graphic, int code, ushort itemGraphic, Hue itemHue) : base(0x7D)
+        public PMenuResponse(Serial serial, ushort graphic, int code, ushort itemGraphic, ushort itemHue) : base(0x7D)
         {
             WriteUInt(serial);
             WriteUShort(graphic);
@@ -717,7 +717,7 @@ namespace ClassicUO.Network
 
     internal sealed class PDyeDataResponse : PacketWriter
     {
-        public PDyeDataResponse(Serial serial, ushort graphic, Hue hue) : base(0x95)
+        public PDyeDataResponse(Serial serial, ushort graphic, ushort hue) : base(0x95)
         {
             WriteUInt(serial);
             WriteUShort(graphic);
