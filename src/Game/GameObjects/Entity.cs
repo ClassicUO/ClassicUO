@@ -32,7 +32,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal abstract class Entity : GameObject
+    internal abstract class Entity : GameObject, IEquatable<Entity>
     {
         private Direction _direction;
         private Item[] _equipment;
@@ -89,20 +89,20 @@ namespace ClassicUO.Game.GameObjects
 
         public void FixHue(ushort hue)
         {
-            ushort fixedColor = (ushort)(hue & 0x3FFF);
+            ushort fixedColor = (ushort) (hue & 0x3FFF);
 
             if (fixedColor != 0)
             {
                 if (fixedColor >= 0x0BB8)
                     fixedColor = 1;
-                fixedColor |= (ushort)(hue & 0xC000);
+                fixedColor |= (ushort) (hue & 0xC000);
             }
             else
-                fixedColor = (ushort)(hue & 0x8000);
+                fixedColor = (ushort) (hue & 0x8000);
 
             Hue = fixedColor;
         }
-      
+
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
@@ -196,6 +196,26 @@ namespace ClassicUO.Game.GameObjects
         public static implicit operator uint(Entity entity)
         {
             return entity.Serial;
+        }
+
+        public static bool operator ==(Entity e, Entity s)
+        {
+            return Equals(e, s);
+        }
+
+        public static bool operator !=(Entity e, Entity s)
+        {
+            return !Equals(e, s);
+        }
+
+        public bool Equals(Entity e)
+        {
+            return Serial == e.Serial;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Entity ent && Equals(ent);
         }
 
         public override int GetHashCode()
