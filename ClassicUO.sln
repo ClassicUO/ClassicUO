@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29609.76
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{36371756-8DDA-41A4-BB9A-B7651459ADC1}"
 	ProjectSection(SolutionItems) = preProject
-		src\README.md = src\README.md
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassicUO", "src\ClassicUO.csproj", "{71F289FA-0EF8-4F72-A26E-A8280C0931C5}"
