@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define DEV_BUILD
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
