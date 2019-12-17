@@ -138,7 +138,15 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static bool IsModalControlOpen => Gumps.Any(s => s.ControlInfo.IsModal);
+        public static bool IsModalControlOpen()
+        {
+            foreach (var g in Gumps)
+            {
+                if (g.ControlInfo.IsModal)
+                    return true;
+            }
+            return false;
+        }
 
         public static bool IsDragging => _isDraggingControl && DraggingControl != null;
 
@@ -183,7 +191,7 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                if (IsModalControlOpen)
+                if (IsModalControlOpen())
                 {
                     foreach (Control s in Gumps)
                     {
@@ -245,7 +253,7 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                if (IsModalControlOpen)
+                if (IsModalControlOpen())
                 {
                     foreach (Control s in Gumps)
                     {
@@ -1026,7 +1034,7 @@ namespace ClassicUO.Game.Managers
 
             Control control = null;
 
-            bool ismodal = IsModalControlOpen;
+            bool ismodal = IsModalControlOpen();
 
             foreach (Control c in Gumps)
             {
