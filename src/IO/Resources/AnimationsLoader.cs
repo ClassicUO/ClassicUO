@@ -1412,6 +1412,7 @@ namespace ClassicUO.IO.Resources
                         {
                             ushort val = palette[reader.ReadByte()];
 
+                            // FIXME: same of MUL ? Keep it as original for the moment
                             if (val != 0)
                                 data[block] = (ushort) (0x8000 | val);
                             else
@@ -1502,13 +1503,7 @@ namespace ClassicUO.IO.Resources
 
                     for (int k = 0; k < runLength; k++)
                     {
-                        ushort val = palette[reader.ReadByte()];
-
-                        if (val != 0)
-                            data[block] = (ushort) (0x8000 | val);
-                        else
-                            data[block] = 0;
-                        block++;
+                        data[block++] = (ushort) (0x8000 | palette[reader.ReadByte()]);
                     }
 
                     header = reader.ReadUInt();
