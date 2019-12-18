@@ -372,7 +372,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _mapTexture.SetData(buffer);
 
                 GameActions.Print("WorldMap loaded!", 0x48);
-            });
+            }
+            );
         }
 
         protected override void OnMouseWheel(MouseEvent delta)
