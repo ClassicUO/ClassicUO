@@ -219,11 +219,6 @@ namespace ClassicUO.Game
                 Socket.Send(new PDropRequestOld(serial, (ushort) x, (ushort) y, (sbyte) z, container));
         }
 
-        public static void DropItem(uint serial, ushort x, ushort y, sbyte z, uint container)
-        {
-            DropItem(serial, x, y, z, container);
-        }
-
         public static void Equip(uint serial, Layer layer, uint target)
         {
             Socket.Send(new PEquipRequest(serial, layer, target));
