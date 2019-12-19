@@ -1190,10 +1190,30 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
                 {
                     int abv = is_1d[j];
 
-                    if (is_1d[j] > 0)
-                        xr_1d[quotien][reste] = g_gain * t_43[abv];
+                    double d43 = (4.0 / 3.0);
+                    if (abv < t_43.Length)
+                    {
+                        if (is_1d[j] > 0)
+                        {
+                            xr_1d[quotien][reste] = g_gain * t_43[abv];
+                        }
+                        else if (-abv < t_43.Length)
+                        {
+                            xr_1d[quotien][reste] = -g_gain * t_43[-abv];
+                        }
+                        else
+                        {
+                            xr_1d[quotien][reste] = -g_gain * (float) Math.Pow(-abv, d43);
+                        }
+                    }
+                    else if (is_1d[j] > 0)
+                    {
+                        xr_1d[quotien][reste] = g_gain * (float) Math.Pow(abv, d43);
+                    }
                     else
-                        xr_1d[quotien][reste] = -g_gain * t_43[-abv];
+                    {
+                        xr_1d[quotien][reste] = -g_gain * (float) Math.Pow(-abv, d43);
+                    }
                 }
             }
 
