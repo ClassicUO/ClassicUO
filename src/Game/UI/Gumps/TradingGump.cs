@@ -233,6 +233,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
+            int mydbX, mydbY, opdbX, opdbY;
+
             if (UOFileManager.ClientVersion >= ClientVersions.CV_704565)
             {
                 Add(new GumpPic(0, 0, 0x088A, 0));
@@ -242,6 +244,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(new Label(_name, false, 0x0481, font: 3)
                         { X = fontWidth, Y = 244 });
+
+                mydbX = 30;
+                mydbY = 110;
+                opdbX = 192;
+                opdbY = 110;
             }
             else
             {
@@ -252,6 +259,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(new Label(_name, false, 0x0386, font: 1)
                         { X = fontWidth, Y = 170 });
+
+                mydbX = 45;
+                mydbY = 70;
+                opdbX = 192;
+                opdbY = 70;
             }
 
 
@@ -268,14 +280,20 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            Add(_myBox = new DataBox(45, 70, 110, 80)
+            Add(_myBox = new DataBox(mydbX, mydbY, 110, 80)
             {
-                WantUpdateSize = false
+                WantUpdateSize = false,
+                ContainsByBounds = true,
+                AcceptMouseInput = true,
+                CanMove = true
             });
 
-            Add(_hisBox = new DataBox(192, 70, 110, 80)
+            Add(_hisBox = new DataBox(opdbX, opdbY, 110, 80)
             {
-                WantUpdateSize = false
+                WantUpdateSize = false,
+                ContainsByBounds = true,
+                AcceptMouseInput = true,
+                CanMove = true
             });
 
             SetCheckboxes();

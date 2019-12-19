@@ -40,9 +40,14 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = false;
         }
 
+        public bool ContainsByBounds;
+
 
         public override bool Contains(int x, int y)
         {
+            if (ContainsByBounds)
+                return true;
+
             Control t = null;
             x += ScreenCoordinateX;
             y += ScreenCoordinateY;
