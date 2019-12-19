@@ -736,6 +736,35 @@ namespace ClassicUO.Game.GameObjects
                         graphic = 0x0582;
                         break;
                     }
+                        
+                    case 0x3ED1: // CoconutCrab
+                    {
+                        graphic = 0x05A0;
+                        break;
+                    }
+
+                    case 0x3ECB: // Lasher
+                    {
+                        graphic = 0x05A1;
+                        break;
+                    }
+
+                    case 0x3ED0: //SkeletalCat
+                    {
+                        graphic = 0x05E6;
+                        break;
+                    }
+
+                    case 0x3ECD: //Palomino
+                    {
+                        graphic = 0x057F;
+                        break;
+                    }
+                    case 0x3ECF: //Eowmu
+                    {
+                        graphic = 0x0580;
+                        break;
+                    }
                 }
 
                 if (ItemData.AnimID != 0)
