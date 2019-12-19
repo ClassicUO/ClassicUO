@@ -210,7 +210,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Equals(Entity e)
         {
-            return Serial == e.Serial;
+            return e != null && Serial == e.Serial;
         }
 
         public override bool Equals(object obj)
