@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Controls
             HasScrollbar = parts[7] != "0";
             UseFlagScrollbar = HasScrollbar && parts[7] == "2";
             _gameText.IsHTML = true;
-            _gameText.MaxWidth = Width - (HasScrollbar ? 15 : 0) - (HasBackground ? 8 : 0);
+            _gameText.MaxWidth = Width - (HasScrollbar ? 16 : 0) - (HasBackground ? 8 : 0);
 
             if (textIndex >= 0 && textIndex < lines.Length)
                 InternalBuild(lines[textIndex], 0);
@@ -127,13 +127,18 @@ namespace ClassicUO.Game.UI.Controls
                             htmlColor = 0x010101FF;
                     }
                     else
+                    {
+                        _gameText.MaxWidth -= 9;
                         htmlColor = 0x010101FF;
+                    }
 
                     _gameText.HTMLColor = htmlColor;
                     _gameText.Hue = color;
                 }
                 else
+                {
                     _gameText.Hue = (ushort) hue;
+                }
 
                 _gameText.HasBackgroundColor = !HasBackground;
                 _gameText.Text = text;
@@ -143,7 +148,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Add(new ResizePic(0x2486)
                 {
-                    Width = Width - (HasScrollbar ? 15 : 0), Height = Height, AcceptMouseInput = false
+                    Width = Width - (HasScrollbar ? 16 : 0), Height = Height, AcceptMouseInput = false
                 });
             }
 
