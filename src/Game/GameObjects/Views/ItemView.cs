@@ -148,7 +148,7 @@ namespace ClassicUO.Game.GameObjects
                 ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, ItemData.IsTranslucent ? .5f : 0);
             }
 
-            if (!IsCorpse && !IsMulti && Amount > 1 && ItemData.IsStackable && DisplayedGraphic == Graphic && _originalGraphic == Graphic)
+            if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
             {
                 base.Draw(batcher, posX - 5, posY - 5);
             }
