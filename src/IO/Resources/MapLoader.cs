@@ -35,7 +35,7 @@ namespace ClassicUO.IO.Resources
 {
     internal class MapLoader : UOFileLoader
     {
-        internal const int MAPS_COUNT = 6;
+        internal static int MAPS_COUNT = 7;
         private protected readonly UOFileMul[] _filesIdxStatics = new UOFileMul[MAPS_COUNT];
         private protected readonly UOFile[] _filesMap = new UOFile[MAPS_COUNT];
         private protected readonly UOFileMul[] _filesStatics = new UOFileMul[MAPS_COUNT];
@@ -45,13 +45,13 @@ namespace ClassicUO.IO.Resources
         private readonly UOFileMul[] _staDifi = new UOFileMul[MAPS_COUNT];
         private readonly UOFileMul[] _staDifl = new UOFileMul[MAPS_COUNT];
 
-        public new UOFileIndex[][] Entries = new UOFileIndex[6][]; 
+        public new UOFileIndex[][] Entries = new UOFileIndex[MAPS_COUNT][]; 
 
-        public IndexMap[][] BlockData { get; private protected set; } = new IndexMap[MAPS_COUNT][];
+        public IndexMap[][] BlockData { get; private set; } = new IndexMap[MAPS_COUNT][];
 
-        public int[,] MapBlocksSize { get; private protected set; } = new int[MAPS_COUNT, 2];
+        public int[,] MapBlocksSize { get; private set; } = new int[MAPS_COUNT, 2];
 
-        public int[,] MapsDefaultSize { get; private protected set; } = new int[MAPS_COUNT, 2]
+        public int[,] MapsDefaultSize { get; private protected set; } = new int[7, 2]
         {
             {
                 7168, 4096
@@ -70,13 +70,16 @@ namespace ClassicUO.IO.Resources
             },
             {
                 1280, 4096
+            },
+            {
+                7168, 4096
             }
         };
 
         public int PatchesCount { get; private set; }
 
-        public int[] MapPatchCount { get; } = new int[6];
-        public int[] StaticPatchCount { get; } = new int[6];
+        public int[] MapPatchCount { get; } = new int[MAPS_COUNT];
+        public int[] StaticPatchCount { get; } = new int[MAPS_COUNT];
 
         protected static UOFile GetMapFile(int map)
         {
@@ -160,7 +163,7 @@ namespace ClassicUO.IO.Resources
 
         internal unsafe void LoadMap(int i)
         {
-            if (i < 0 || i > 5 || _filesMap[i] == null)
+            if (i < 0 || i + 1 > MAPS_COUNT || _filesMap[i] == null)
                 i = 0;
 
             if (BlockData[i] != null || _filesMap[i] == null)

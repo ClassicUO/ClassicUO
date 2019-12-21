@@ -308,6 +308,7 @@ namespace ClassicUO.IO
                     //previously there were a minor amount of maps
                     if (oldlen == 0 || maps > oldlen)
                     {
+                        MapLoader.MAPS_COUNT = (int)maps;
                         ULMapLoader loader = new ULMapLoader(maps);
                         for (int i = 0; i < maps; i++)
                             loader.CheckForShardMapFile(i);
@@ -596,14 +597,11 @@ namespace ClassicUO.IO
                 NumMaps = maps;
                 int[,] old = MapsDefaultSize;
                 MapsDefaultSize = new int[NumMaps, 2];
-                MapBlocksSize = new int[NumMaps, 2];
-                BlockData = new IndexMap[NumMaps][];
-                Entries = new UOFileIndex[NumMaps][];
 
                 for (int i = 0; i < NumMaps; i++)
                 {
                     for (int x = 0; x < 2; x++)
-                        MapsDefaultSize[i, x] = i < old.Length ? old[i, x] : old[0, x];
+                        MapsDefaultSize[i, x] = i < old.GetLength(0) ? old[i, x] : old[0, x];
                 }
 
                 _writer = new AsyncWriterTasked(this, feedCancel);
@@ -698,6 +696,8 @@ namespace ClassicUO.IO
 
             internal void CheckForShardMapFile(int mapID)
             {
+                if (Entries == null)
+                    Entries = new UOFileIndex[MapLoader.MAPS_COUNT][];
                 string oldmap = UOFileManager.GetUOFilePath($"map{mapID}.mul");
                 string oldstaidx = UOFileManager.GetUOFilePath($"staidx{mapID}.mul");
                 string oldstatics = UOFileManager.GetUOFilePath($"statics{mapID}.mul");
@@ -746,8 +746,8 @@ namespace ClassicUO.IO
 
             private static void CreateNewPersistantMap(int mapID, string mapPath, string staidxPath, string staticsPath)
             {
-                int mapWidthInBlocks = UOFileManager.Map.MapBlocksSize[mapID, 0]; //orizontal
-                int mapHeightInBlocks = UOFileManager.Map.MapBlocksSize[mapID, 1]; //vertical
+                int mapWidthInBlocks = UOFileManager.Map.MapBlocksSize[UOFileManager.Map.MapBlocksSize.GetLength(0) > mapID ? mapID : 0, 0]; //orizontal
+                int mapHeightInBlocks = UOFileManager.Map.MapBlocksSize[UOFileManager.Map.MapBlocksSize.GetLength(0) > mapID ? mapID : 0, 1]; //vertical
                 int numberOfBytesInStrip = 196 * mapHeightInBlocks;
                 byte[] pVerticalBlockStrip = new byte[numberOfBytesInStrip];
 
