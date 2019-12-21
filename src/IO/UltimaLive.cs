@@ -46,6 +46,7 @@ namespace ClassicUO.IO
         private const int STATICS_MEMORY_SIZE = 200000000;
         private const int CRCLength = 25;
         private const int LandBlockLenght = 192;
+        private uint _SentWarning = 0;
 
         private static UltimaLive _UL;
 
@@ -90,7 +91,16 @@ namespace ClassicUO.IO
                     p.Seek(14);
                     int mapID = p.ReadByte();
 
-                    if (World.Map == null || mapID != World.Map.Index) return;
+                    if (mapID >= _UL._filesMap.Length)
+                    {
+                        if (Time.Ticks >= _UL._SentWarning)
+                        {
+                            Log.Trace($"The server is requesting access to MAP: {mapID} but we only have {_UL._filesMap.Length} maps!", ConsoleColor.Red);
+                            _UL._SentWarning = Time.Ticks + 100000;
+                        }
+                        return;
+                    }
+                    else if (World.Map == null || mapID != World.Map.Index) return;
 
                     int mapWidthInBlocks = UOFileManager.Map.MapBlocksSize[mapID, 0];
                     int mapHeightInBlocks = UOFileManager.Map.MapBlocksSize[mapID, 1];
@@ -162,8 +172,16 @@ namespace ClassicUO.IO
 
                     p.Seek(14);
                     int mapID = p.ReadByte();
-
-                    if (World.Map == null || mapID != World.Map.Index) return;
+                    if (mapID >= _UL._filesMap.Length)
+                    {
+                        if (Time.Ticks >= _UL._SentWarning)
+                        {
+                            Log.Trace($"The server is requesting access to MAP: {mapID} but we only have {_UL._filesMap.Length} maps!", ConsoleColor.Red);
+                            _UL._SentWarning = Time.Ticks + 100000;
+                        }
+                        return;
+                    }
+                    else if (World.Map == null || mapID != World.Map.Index) return;
 
                     byte[] staticsData = new byte[totallen];
                     for (int i = 0; i < totallen; i++) staticsData[i] = p.ReadByte();
