@@ -242,7 +242,12 @@ namespace ClassicUO.IO.Resources
         }
 
         [MethodImpl(256)]
-        public ushort GetRadarColorData(int c) => c >= 0 && c < RadarCol.Length ? RadarCol[c] : (ushort) 0;
+        public ushort GetRadarColorData(int c)
+        {
+            if (c >= 0 && c < RadarCol.Length)
+                return RadarCol[c];
+            return 0;
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
