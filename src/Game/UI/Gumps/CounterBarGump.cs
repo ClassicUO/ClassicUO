@@ -355,7 +355,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     GetAmount(item, graphic, hue, ref amount);
 
-                    if (item.Graphic == graphic && item.Hue == hue)
+                    if (item.Graphic == graphic && item.Hue == hue && item.Exists)
                         amount += item.Amount;
                 }
             }
