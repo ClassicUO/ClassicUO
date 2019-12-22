@@ -20,12 +20,16 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly NiceButton _buttonPrev, _buttonNext;
         private readonly Item _corpse;
         private readonly Label _currentPageLabel;
+        private readonly bool _hideIfEmpty;
 
         private int _currentPage = 1;
         private int _pagesCount;
 
         private static int _lastX = ProfileManager.Current.GridLootType == 2 ? 200 : 100;
         private static int _lastY = 100;
+
+        private const int MAX_WIDTH = 300;
+        private const int MAX_HEIGHT = 400;
 
         public GridLootGump(uint local) : base(local, 0)
         {
@@ -36,6 +40,15 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
 
                 return;
+            }
+
+            if (World.Player.ManualOpenedCorpses.Contains(LocalSerial))
+                World.Player.ManualOpenedCorpses.Remove(LocalSerial);
+            else if (World.Player.AutoOpenedCorpses.Contains(LocalSerial) &&
+                     ProfileManager.Current != null && ProfileManager.Current.SkipEmptyCorpse)
+            {
+                IsVisible = false;
+                _hideIfEmpty = true;
             }
 
             X = _lastX;
@@ -186,6 +199,10 @@ namespace ClassicUO.Game.UI.Gumps
                 GameActions.Print("[GridLoot]: Corpse is empty!");
                 Dispose();
             }
+            else if ((_hideIfEmpty && !IsVisible))
+            {
+                IsVisible = true;
+            }
         }
 
         public override void Dispose()
@@ -207,6 +224,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            if (!IsVisible || IsDisposed)
+                return false;
+
             ResetHueVector();
             base.Draw(batcher, x, y);
             ResetHueVector();
@@ -224,7 +244,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 return;
             }
-
 
             base.Update(totalMS, frameMS);
 
