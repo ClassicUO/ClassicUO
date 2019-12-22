@@ -238,40 +238,48 @@ namespace ClassicUO.Game.UI.Gumps
                 int fixedHeight = UOFileManager.Map.MapBlocksSize[World.MapIndex, 1];
 
                 int size = (realWidth + OFFSET_PIX) * (realHeight + OFFSET_PIX);
-                uint[] buffer = new uint[size];
-                int maxBlock = size - 1;
-                bool[] colored = new bool[64];
+                Color[] buffer = new Color[size];
+                sbyte[] allZ = new sbyte[size];
 
+                
                 for (int bx = 0; bx < fixedWidth; bx++)
                 {
                     int mapX = bx << 3;
 
                     for (int by = 0; by < fixedHeight; by++)
                     {
+                        int mapY = by << 3;
+
                         ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
 
                         if (indexMap.MapAddress == 0)
                             continue;
 
-                        int mapY = by << 3;
-                        MapBlock info = new MapBlock();
-                        MapCells* infoCells = (MapCells*) &info.Cells;
                         MapBlock* mapBlock = (MapBlock*) indexMap.MapAddress;
                         MapCells* cells = (MapCells*) &mapBlock->Cells;
+
                         int pos = 0;
 
                         for (int y = 0; y < 8; y++)
                         {
+                            int block = (mapY + y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
+
                             for (int x = 0; x < 8; x++)
                             {
                                 ref MapCells cell = ref cells[pos];
-                                ref MapCells infoCell = ref infoCells[pos];
-                                infoCell.TileID = cell.TileID;
-                                infoCell.Z = cell.Z;
-                                colored[pos] = false;
+
+                                var color = (ushort) (0x8000 | UOFileManager.Hues.GetRadarColorData(cell.TileID));
+
+                                buffer[block] = new Color((((color >> 10) & 31) / 31f),
+                                                          (((color >> 5) & 31) / 31f),
+                                                          ((color & 31) / 31f));
+                                allZ[block] = cell.Z;
+
+                                block++;
                                 pos++;
                             }
                         }
+
 
                         StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
                         if (sb != null)
@@ -285,67 +293,53 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (staticBlock.Color != 0 && staticBlock.Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(staticBlock.Color))
                                 {
                                     pos = (staticBlock.Y << 3) + staticBlock.X;
-                                    ref MapCells cell = ref infoCells[pos];
+                                    ref MapCells cell = ref cells[pos];
 
                                     if (cell.Z <= staticBlock.Z)
                                     {
-                                        colored[pos] = staticBlock.Hue > 0;
-                                        cell.TileID = (ushort) (colored[pos] ? staticBlock.Hue : staticBlock.Color + 0x4000);
-                                        cell.Z = staticBlock.Z;
+                                        var color = (ushort) (0x8000 | (staticBlock.Hue > 0 ? 
+                                                                            UOFileManager.Hues.GetColor16(16384, staticBlock.Hue) :
+                                                                            UOFileManager.Hues.GetRadarColorData(staticBlock.Color + 0x4000)));
+
+                                        int block = (mapY + staticBlock.Y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + (mapX + staticBlock.X) + OFFSET_PIX_HALF;
+                                        buffer[block] = new Color((((color >> 10) & 31) / 31f),
+                                                                  (((color >> 5) & 31) / 31f),
+                                                                  ((color & 31) / 31f));
+                                        allZ[block] = staticBlock.Z;
+
                                     }
                                 }
                             }
                         }
+                    }
+                }
 
-                        pos = 0;
-                        for (int y = 0; y < 8; y++)
+
+                for (int mapY = 1; mapY < realHeight - 1; mapY++)
+                {
+                    for (int mapX = 1; mapX < realWidth - 1; mapX++)
+                    {
+                        int blockCurrent = ((mapY) + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + (mapX) + OFFSET_PIX_HALF;
+                        int blockNext = ((mapY + 1) + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + (mapX - 1) + OFFSET_PIX_HALF;
+
+                        sbyte z0 = allZ[blockCurrent];
+                        sbyte z1 = allZ[blockNext];
+
+                        int block = ((mapY + 1) + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + (mapX + 1) + OFFSET_PIX_HALF;
+                        ref Color cc = ref buffer[block];
+
+                        if (z0 < z1)
                         {
-                            int block = (mapY + y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
+                            cc.R = (byte) (cc.R * 80 / 100);
+                            cc.G = (byte) (cc.G * 80 / 100);
+                            cc.B = (byte) (cc.B * 80 / 100);
 
-                            for (int x = 0; x < 8; x++)
-                            {
-                                ref var c = ref infoCells[pos];
-
-                                ushort color = (ushort)(0x8000 | (colored[pos] ? UOFileManager.Hues.GetColor16(16384, c.TileID) : UOFileManager.Hues.GetRadarColorData(c.TileID)));
-                                Color cc;
-
-                                if (x > 0)
-                                {
-                                    int index = (y << 3) + (x - 1);
-
-                                    if (c.Z < infoCells[index].Z)
-                                    {
-                                        cc = new Color((((color >> 10) & 31) / 31f) * 80 / 100,
-                                                       (((color >> 5) & 31) / 31f) * 80 / 100,
-                                                       ((color & 31) / 31f) * 80 / 100);
-
-                                    }
-                                    else if (c.Z > infoCells[index].Z)
-                                    {
-                                        cc = new Color((((color >> 10) & 31) / 31f) * 100 / 80,
-                                                       (((color >> 5) & 31) / 31f) * 100 / 80,
-                                                       ((color & 31) / 31f) * 100 / 80);
-                                    }
-                                    else
-                                        cc = new Color((((color >> 10) & 31) / 31f),
-                                                       (((color >> 5) & 31) / 31f),
-                                                       ((color & 31) / 31f));
-                                }
-                                else
-                                {
-                                    cc = new Color((((color >> 10) & 31) / 31f),
-                                                   (((color >> 5) & 31) / 31f),
-                                                   ((color & 31) / 31f));
-                                }
-
-                                buffer[block] = cc.PackedValue;
-
-                                if (y < 7 && x < 7 && block < maxBlock)
-                                    buffer[block + 1] = cc.PackedValue;
-
-                                block++;
-                                pos++;
-                            }
+                        }
+                        else if (z0 > z1)
+                        {
+                            cc.R = (byte) (cc.R * 100 / 80);
+                            cc.G = (byte) (cc.G * 100 / 80);
+                            cc.B = (byte) (cc.B * 100 / 80);
                         }
                     }
                 }
@@ -354,18 +348,6 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     realWidth += OFFSET_PIX;
                     realHeight += OFFSET_PIX;
-
-                    for (int i = 0; i < realWidth; i++)
-                    {
-                        buffer[i] = 0xFF000000;
-                        buffer[(realHeight - 1) * realWidth + i] = 0xFF000000;
-                    }
-
-                    for (int i = 0; i < realHeight; i++)
-                    {
-                        buffer[i * realWidth] = 0xFF000000;
-                        buffer[i * realWidth + realWidth - 1] = 0xFF000000;
-                    }
                 }
 
                 _mapTexture = new UOTexture32(realWidth, realHeight);
