@@ -21,6 +21,9 @@
 
 #endregion
 
+using System;
+using System.Collections.Generic;
+
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -44,50 +47,50 @@ namespace ClassicUO.Game.UI.Gumps
             // maximized view
             Add(new ResizePic(9200)
             {
-                X = 0, Y = 0, Width = 610 + 63, Height = 27
+                X = 0, Y = 0, Width = 610 + 63 + 50, Height = 27
             }, 1);
 
-            Add(new Button(0, 5540, 5542, 5541)
+            Add(new RighClickableButton(0, 5540, 5542, 5541)
             {
                 ButtonAction = ButtonAction.SwitchPage, ToPage = 2, X = 5, Y = 3
             }, 1);
 
-            Add(new Button((int) Buttons.Map, 2443, 2443, 0, "Map", 1, true, 0, 0x36)
+            Add(new RighClickableButton((int) Buttons.Map, 2443, 2443, 0, "Map", 1, true, 0, 0x36)
             {
                 ButtonAction = ButtonAction.Activate, X = 30, Y = 3, FontCenter = true
             }, 1);
 
-            Add(new Button((int) Buttons.Paperdoll, 2445, 2445, 0, "Paperdoll", 1, true, 0, 0x36)
+            Add(new RighClickableButton((int) Buttons.Paperdoll, 2445, 2445, 0, "Paperdoll", 1, true, 0, 0x36)
             {
                 ButtonAction = ButtonAction.Activate, X = 93, Y = 3, FontCenter = true
             }, 1);
 
-            Add(new Button((int) Buttons.Inventory, 2445, 2445, 0, "Inventory", 1, true, 0, 0x36)
+            Add(new RighClickableButton((int) Buttons.Inventory, 2445, 2445, 0, "Inventory", 1, true, 0, 0x36)
             {
                 ButtonAction = ButtonAction.Activate, X = 201, Y = 3, FontCenter = true
             }, 1);
 
-            Add(new Button((int) Buttons.Journal, 2445, 2445, 0, "Journal", 1, true, 0, 0x36)
+            Add(new RighClickableButton((int) Buttons.Journal, 2445, 2445, 0, "Journal", 1, true, 0, 0x36)
             {
                 ButtonAction = ButtonAction.Activate, X = 309, Y = 3, FontCenter = true
             }, 1);
 
-            Add(new Button((int) Buttons.Chat, 2443, 2443, 0, "Chat", 1, true, 0, 0x36)
+            Add(new RighClickableButton((int) Buttons.Chat, 2443, 2443, 0, "Chat", 1, true, 0, 0x36)
             {
                 ButtonAction = ButtonAction.Activate, X = 417, Y = 3, FontCenter = true
             }, 1);
 
-            Add(new Button((int) Buttons.Help, 2443, 2443, 0, "Help", 1, true, 0, 0x36)
+            Add(new RighClickableButton((int) Buttons.Help, 2443, 2443, 0, "Help", 1, true, 0, 0x36)
             {
                 ButtonAction = ButtonAction.Activate, X = 480, Y = 3, FontCenter = true
             }, 1);
 
-            Add(new Button((int) Buttons.Debug, 2443, 2443, 0, "Debug", 1, true, 0, 0x36)
+            Add(new RighClickableButton((int) Buttons.Debug, 2443, 2443, 0, "Debug", 1, true, 0, 0x36)
             {
                 ButtonAction = ButtonAction.Activate, X = 543, Y = 3, FontCenter = true
             }, 1);
 
-            Add(new Button((int)Buttons.WorldMap, 2443, 2443, 0, "WorldMap", 1, true, 0, 0x36)
+            Add(new RighClickableButton((int)Buttons.WorldMap, 2445, 2445, 0, "WorldMap", 1, true, 0, 0x36)
             {
                 ButtonAction = ButtonAction.Activate,
                 X = 607,
@@ -287,6 +290,23 @@ namespace ClassicUO.Game.UI.Gumps
             Help,
             Debug,
             WorldMap,
+        }
+
+        class RighClickableButton : Button
+        {
+            public RighClickableButton(int buttonID, ushort normal, ushort pressed, ushort over = 0, string caption = "", byte font = 0, bool isunicode = true, ushort normalHue = UInt16.MaxValue, ushort hoverHue = UInt16.MaxValue) : base(buttonID, normal, pressed, over, caption, font, isunicode, normalHue, hoverHue)
+            {
+            }
+
+            public RighClickableButton(List<string> parts) : base(parts)
+            {
+            }
+
+            protected override void OnMouseUp(int x, int y, MouseButton button)
+            {
+                base.OnMouseUp(x, y, button);
+                Parent?.InvokeMouseUp(new Point(x, y), button);
+            }
         }
     }
 }
