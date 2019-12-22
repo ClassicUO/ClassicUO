@@ -121,8 +121,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool IsMinimized { get; private set; }
 
-        //private static TopBarGump _gump;
-
         public static void Create()
         {
             TopBarGump gump = UIManager.GetGump<TopBarGump>();
