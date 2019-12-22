@@ -1612,7 +1612,7 @@ namespace ClassicUO.Renderer
             if (_numSprites == 0)
                 return;
 
-            //int start = UpdateVerteBuffer(_handle.AddrOfPinnedObject(), _numSprites);
+            //int start = UpdateVerteBuffer(_handlePtr, _numSprites);
 
             int start = 0;
             _vertexBuffer.SetDataPointerEXT(0,
@@ -1637,7 +1637,7 @@ namespace ClassicUO.Renderer
                 {
                     InternalDraw(current, start + offset, i - offset);
                     current = _textureInfo[i];
-                    offset = i;
+                    offset = i + start;
                 }
             }
 
@@ -1650,7 +1650,12 @@ namespace ClassicUO.Renderer
         private void InternalDraw(Texture2D texture, int baseSprite, int batchSize)
         {
             GraphicsDevice.Textures[0] = texture;
-            GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, baseSprite << 2, 0, batchSize << 2, 0, batchSize << 1);
+            GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList,
+                                                 baseSprite << 2,
+                                                 0,
+                                                 batchSize << 2,
+                                                 0,
+                                                 batchSize << 1);
         }
 
         [MethodImpl(256)]
