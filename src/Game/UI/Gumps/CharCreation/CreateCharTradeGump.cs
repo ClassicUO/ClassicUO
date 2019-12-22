@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.Linq;
 
 using ClassicUO.Game.Data;
@@ -86,6 +87,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(_attributeSliders[2] = new HSliderBar(164, 356, 93, 10, 60, ProfessionInfo._VoidStats[2], HSliderBarStyle.MetalWidgetRecessedBar, true));
 
             string[] skillList = UOFileManager.Skills.SkillNames;
+            Array.Sort(skillList);
             int y = 172;
             _skillSliders = new HSliderBar[CharCreationGump._skillsCount];
             _skills = new Combobox[CharCreationGump._skillsCount];
