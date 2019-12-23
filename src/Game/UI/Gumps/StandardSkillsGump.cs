@@ -336,10 +336,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             public int Compare(int x, int y)
             {
-                if (x >= UOFileManager.Skills.SkillNames.Length || y >= UOFileManager.Skills.SkillNames.Length)
+                if (x >= UOFileManager.Skills.Skills.Count || y >= UOFileManager.Skills.Skills.Count)
                     return 0;
 
-                return UOFileManager.Skills.SkillNames[x].CompareTo(UOFileManager.Skills.SkillNames[y]);
+                return UOFileManager.Skills.Skills[x].Name.CompareTo(UOFileManager.Skills.Skills[y].Name);
             }
         }
 

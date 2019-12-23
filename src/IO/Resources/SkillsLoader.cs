@@ -23,6 +23,7 @@
 
 using ClassicUO.Utility;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -32,12 +33,12 @@ namespace ClassicUO.IO.Resources
 {
     internal class SkillsLoader : UOFileLoader
     {
-        private readonly Dictionary<int, SkillEntry> _skills = new Dictionary<int, SkillEntry>();
+        public readonly List<SkillEntry> Skills = new List<SkillEntry>();
+        public readonly List<SkillEntry> SortedSkills = new List<SkillEntry>();
+
         private UOFileMul _file;
 
-        public int SkillsCount => _skills.Count;
-
-        public string[] SkillNames { get; private set; }
+        public int SkillsCount => Skills.Count;
 
         public override Task Load()
         {
@@ -55,9 +56,23 @@ namespace ClassicUO.IO.Resources
                 _file = new UOFileMul(path, pathidx, 0, 16);
                 _file.FillEntries(ref Entries);
 
-                for (int i = 0; i < Entries.Length; i++) GetSkill(i);
+                for (int i = 0, count = 0; i < Entries.Length; i++)
+                { 
+                    ref readonly var entry = ref GetValidRefEntry(i);
 
-                SkillNames = _skills.Select(o => o.Value.Name).ToArray();
+                    if (entry.Length > 0)
+                    {
+                        _file.Seek(entry.Offset);
+                        var hasAction = _file.ReadBool();
+                        var name = Encoding.UTF8.GetString(_file.ReadArray<byte>(entry.Length - 1)).TrimEnd('\0');
+                        var skill = new SkillEntry(count++, name, hasAction);
+
+                        Skills.Add(skill);
+                    }
+                }
+
+                SortedSkills.AddRange(Skills);
+                SortedSkills.Sort((a, b) => a.Name.CompareTo(b.Name));
             });
         }
 
@@ -65,35 +80,9 @@ namespace ClassicUO.IO.Resources
         {
             //
         }
-
-        public SkillEntry GetSkill(int index)
-        {
-            if (!_skills.TryGetValue(index, out SkillEntry value))
-            {
-
-                ref readonly var entry = ref GetValidRefEntry(index);
-
-                if (entry.Length == 0)
-                    return default;
-
-                _file.Seek(entry.Offset);
-                var hasAction = _file.ReadBool();
-                var name = Encoding.UTF8.GetString(_file.ReadArray<byte>(entry.Length - 1)).TrimEnd('\0');
-                _skills[index] = new SkillEntry(index, name, hasAction);
-            }
-
-            return value;
-        }
-
-        internal void SetAllSkills(List<SkillEntry> arr)
-        {
-            _skills.Clear();
-            for (int i = 0; i < arr.Count; i++) _skills[i] = arr[i];
-            SkillNames = _skills.Select(o => o.Value.Name).ToArray();
-        }
     }
 
-    internal readonly struct SkillEntry
+    internal class SkillEntry
     {
         public SkillEntry(int index, string name, bool hasAction)
         {

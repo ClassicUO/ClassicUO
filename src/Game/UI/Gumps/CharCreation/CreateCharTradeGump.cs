@@ -86,8 +86,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(_attributeSliders[1] = new HSliderBar(164, 276, 93, 10, 60, ProfessionInfo._VoidStats[1], HSliderBarStyle.MetalWidgetRecessedBar, true));
             Add(_attributeSliders[2] = new HSliderBar(164, 356, 93, 10, 60, ProfessionInfo._VoidStats[2], HSliderBarStyle.MetalWidgetRecessedBar, true));
 
-            string[] skillList = UOFileManager.Skills.SkillNames;
-            Array.Sort(skillList);
+            string[] skillList = UOFileManager.Skills.SortedSkills.Select(s => s.Name).ToArray();
+
             int y = 172;
             _skillSliders = new HSliderBar[CharCreationGump._skillsCount];
             _skills = new Combobox[CharCreationGump._skillsCount];
@@ -146,7 +146,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         for (int i = 0; i < _skills.Length; i++)
                         {
                             if (_skills[i].SelectedIndex != -1)
-                                _character.UpdateSkill(_skills[i].SelectedIndex, (ushort) _skillSliders[i].Value, 0, Lock.Locked, 0);
+                                _character.UpdateSkill(UOFileManager.Skills.SortedSkills[_skills[i].SelectedIndex].Index, (ushort) _skillSliders[i].Value, 0, Lock.Locked, 0);
                         }
 
                         _character.Strength = (ushort) _attributeSliders[0].Value;

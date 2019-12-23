@@ -50,7 +50,7 @@ namespace ClassicUO.Game.GameObjects
 
             for (int i = 0; i < Skills.Length; i++)
             {
-                SkillEntry skill = UOFileManager.Skills.GetSkill(i);
+                SkillEntry skill = UOFileManager.Skills.Skills[i];
                 Skills[i] = new Skill(skill.Name, skill.Index, skill.HasAction);
             }
         }

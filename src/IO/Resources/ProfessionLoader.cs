@@ -226,7 +226,7 @@ namespace ClassicUO.IO.Resources
 
                             for (int j = 0; j < UOFileManager.Skills.SkillsCount; j++)
                             {
-                                SkillEntry skill = UOFileManager.Skills.GetSkill(j);
+                                SkillEntry skill = UOFileManager.Skills.Skills[j];
 
                                 if (strings[1] == skill.Name)
                                 {
