@@ -882,6 +882,8 @@ namespace ClassicUO.Network
             World.Player.NotorietyFlag = (NotorietyFlag) noto;
             World.Player.Walker.ConfirmWalk(seq);
             World.Player.ProcessDelta();
+
+            World.Player.AddToTile();
         }
 
         private static void DragAnimation(Packet p)

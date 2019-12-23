@@ -1527,6 +1527,7 @@ namespace ClassicUO.Game.GameObjects
 
             Walker.UnacceptedPacketsCount++;
 
+            AddToTile();
 
             int nowDelta = 0;
 

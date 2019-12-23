@@ -611,14 +611,10 @@ namespace ClassicUO.Game.Scenes
         {
             _rightMousePressed = false;
 
-
             if (_boatIsMoving)
             {
                 _boatIsMoving = false;
                 NetClient.Socket.Send(new PMultiBoatMoveRequest(World.Player, World.Player.Direction, 0x00));
-            }
-            else if (World.Player.Steps.Count != 0)
-            {
             }
         }
 
