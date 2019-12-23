@@ -484,10 +484,6 @@ namespace ClassicUO
 
                     switch (e.window.windowEvent)
                     {
-                        case SDL_WindowEventID.SDL_WINDOWEVENT_MOVED:
-
-                           
-                            break;
                         case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_ENTER:
                             Mouse.MouseInWindow = true;
 
@@ -501,33 +497,16 @@ namespace ClassicUO
                         case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED:
                             Plugin.OnFocusGained();
 
-                            // SDL_CaptureMouse(SDL_bool.SDL_TRUE);
-                            //Log.Debug("FOCUS");
                             break;
 
                         case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST:
                             Plugin.OnFocusLost();
-                            //Log.Debug("NO FOCUS");
-                            //SDL_CaptureMouse(SDL_bool.SDL_FALSE);
-
-                            break;
-
-                        case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_TAKE_FOCUS:
-
-                            //Log.Debug("TAKE FOCUS");
-                            break;
-
-                        case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_HIT_TEST:
 
                             break;
                     }
 
                     break;
-
-                case SDL.SDL_EventType.SDL_SYSWMEVENT:
-
-                    break;
-
+                
                 case SDL.SDL_EventType.SDL_KEYDOWN:
                     
                     Keyboard.OnKeyDown(e.key);
@@ -535,9 +514,6 @@ namespace ClassicUO
                     if (Plugin.ProcessHotkeys((int) e.key.keysym.sym, (int) e.key.keysym.mod, true))
                     {
                         _ignoreNextTextInput = false;
-
-                        //UIManager.MouseOverControl?.InvokeKeyDown(e.key.keysym.sym, e.key.keysym.mod);
-                        //if (UIManager.MouseOverControl != UIManager.KeyboardFocusControl)
                         UIManager.KeyboardFocusControl?.InvokeKeyDown(e.key.keysym.sym, e.key.keysym.mod);
 
                         _scene.OnKeyDown(e.key);
@@ -550,38 +526,7 @@ namespace ClassicUO
                 case SDL.SDL_EventType.SDL_KEYUP:
                     
                     Keyboard.OnKeyUp(e.key);
-
-                    //if (e.key.keysym.sym == SDL_Keycode.SDLK_0)
-                    //{
-
-                       
-                    //    byte[] firebreathcode = {
-
-                    //   0xC0, 
-                    //  0x00, 0x00, 0x00, 0x00 , // source serial
-                    //  0x00 ,0x00 ,0x00 , 0x00,  // target serial
-                    //    0x00, 0xAA,  // graphic
-                    //    0xAC, 0x06, // src X
-                    //    0x74, 0x06,  // src Y
-                    //    0x28,       // src Z
-                    //   0x3F, 0x06, // targ X
-                    //    0x74, 0x06, // targY
-                    //        0x2B,   // targZ
-                    //        0x3F, 0x01, 0xF0 , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ,0x00, 0x00,
-                    //   0x00, 0x00, 0x00, 0x00, 
-                    //    };
-                    //    int xx =  (0x06 << 8) | (0xAC ) ;
-                    //    int yy =  (0x06 << 8) | (0x74 ) ;
-                    //    int txx = (0x06 << 8) |  (0x3F);
-                    //    int tyy = (0x06 << 8) | (0x74 );
-
-                    //    NetClient.EnqueuePacketFromPlugin(firebreathcode, 36);
-                    //}
-
-                    //UIManager.MouseOverControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
-                    //if (UIManager.MouseOverControl != UIManager.KeyboardFocusControl)
                     UIManager.KeyboardFocusControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
-
                     _scene.OnKeyUp(e.key);
 
                     break;
@@ -591,7 +536,7 @@ namespace ClassicUO
                     if (_ignoreNextTextInput)
                         break;
 
-                    fixed (SDL.SDL_Event* ev = &e)
+                    fixed (SDL_Event* ev = &e)
                     {
                         string s = StringHelper.ReadUTF8(ev->text.text);
 
@@ -660,26 +605,18 @@ namespace ClassicUO
                                 if (Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
                                 {
                                     Mouse.LastLeftButtonClickTime = 0;
-                                    bool res;
 
-                                    if (UIManager.ValidForDClick())
-                                    {
-                                        res = UIManager.OnLeftMouseDoubleClick();
-                                    }
-                                    else
-                                        res = _scene.OnLeftMouseDoubleClick();
+                                    bool res = UIManager.ValidForDClick() ? UIManager.OnLeftMouseDoubleClick() : _scene.OnLeftMouseDoubleClick();
 
-                                    //bool res = _scene.OnLeftMouseDoubleClick() || UIManager.OnLeftMouseDoubleClick();
-
-                                    MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Left);
-
-                                    if (!arg.Result && !res)
+                                    if (!res)
                                     {
                                         _scene.OnLeftMouseDown();
                                         UIManager.OnLeftMouseButtonDown();
                                     }
                                     else
+                                    {
                                         Mouse.LastLeftButtonClickTime = 0xFFFF_FFFF;
+                                    }
 
                                     break;
                                 }
@@ -720,11 +657,8 @@ namespace ClassicUO
                                 if (Mouse.LastMidButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
                                 {
                                     Mouse.LastMidButtonClickTime = 0;
-                                    var res = _scene.OnMiddleMouseDoubleClick();
 
-                                    MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Middle);
-
-                                    if (!arg.Result && !res)
+                                    if (!_scene.OnMiddleMouseDoubleClick())
                                     {
                                         _scene.OnMiddleMouseDown();
                                     }
@@ -759,17 +693,17 @@ namespace ClassicUO
                                 {
                                     Mouse.LastRightButtonClickTime = 0;
 
-                                    var res = _scene.OnRightMouseDoubleClick() || UIManager.OnRightMouseDoubleClick();
+                                    bool res = _scene.OnRightMouseDoubleClick() || UIManager.OnRightMouseDoubleClick();
 
-                                    MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Right);
-
-                                    if (!arg.Result && !res)
+                                    if (!res)
                                     {
                                         _scene.OnRightMouseDown();
                                         UIManager.OnRightMouseButtonDown();
                                     }
                                     else
+                                    {
                                         Mouse.LastRightButtonClickTime = 0xFFFF_FFFF;
+                                    }
 
                                     break;
                                 }
