@@ -155,7 +155,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     if (existing != null)
                         Remove(existing);
 
-                    Add(new CreateCharCityGump((byte) _selectedProfession.DescriptionIndex, loginScene), 4);
+                    Add(new CreateCharSelectionCityGump((byte) _selectedProfession.DescriptionIndex, loginScene), 4);
+                    //Add(new CreateCharCityGump((byte) _selectedProfession.DescriptionIndex, loginScene), 4);
 
                     ChangePage(4);
 

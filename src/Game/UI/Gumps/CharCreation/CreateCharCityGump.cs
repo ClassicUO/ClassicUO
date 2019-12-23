@@ -31,9 +31,271 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
+    class CreateCharSelectionCityGump : Gump
+    {
+        private enum Buttons
+        {
+            PreviousScreen,
+            Finish,
+
+            PreviousMap,
+            NextMap
+        }
+
+        private readonly Point[] _townButtonsText =
+        {
+            new Point(105, 130),
+            new Point(245, 90),
+            new Point(165, 200),
+            new Point(395, 160),
+            new Point(200, 305),
+            new Point(335, 250),
+            new Point(160, 395),
+            new Point(100, 250),
+            new Point(270, 130),
+        };
+        private readonly string[] _cityNames = { "Felucca", "Trammel", "Ilshenar", "Malas", "Tokuno", "Ter Mur" };
+        private int _selectedCityIndex;
+        private readonly Label _facetName;
+        private readonly HtmlControl _htmlControl;
+        private readonly LoginScene _scene;
+        private readonly List<CityControl>[] _cityTable;
+
+        public CreateCharSelectionCityGump(byte profession, LoginScene scene) : base(0, 0)
+        {
+            CanMove = false;
+            CanCloseWithRightClick = false;
+            CanCloseWithEsc = false;
+
+            _scene = scene;
+
+
+            CityInfo city;
+
+            if (UOFileManager.ClientVersion >= ClientVersions.CV_70130)
+            {
+                city = scene.GetCity(0);
+            }
+            else
+            {
+                city = scene.GetCity(3);
+
+                if (city == null)
+                {
+                    city = scene.GetCity(0);
+                }
+            }
+
+            if (city == null)
+            {
+                Log.Error("No city found. Something wrong with the received cities.");
+                Dispose();
+                return;
+            }
+
+            uint map = 0;
+
+            if (city.IsNewCity)
+            {
+                map = city.Map;
+            }
+
+            _facetName = new Label("", true, 0x0481, font: 0, style: FontStyle.BlackBorder, align: TEXT_ALIGN_TYPE.TS_LEFT)
+            {
+                X = 240,
+                Y = 440
+            };
+
+            int totalMaps = 1;
+
+            if (UOFileManager.ClientVersion >= ClientVersions.CV_70130)
+            {
+                Add(new GumpPic(62, 54, (ushort) (0x15D9 + map), 0));
+                Add(new GumpPic(57, 49, 0x15DF, 0));
+                _facetName.Text = _cityNames[map];
+                totalMaps = _cityNames.Length;
+            }
+            else
+            {
+                Add(new GumpPic(57, 49, 0x1598, 0));
+                _facetName.IsVisible = false;
+            }
+
+            Add(_facetName);
+
+
+            Add(new Button((int) Buttons.PreviousScreen, 0x15A1, 0x15A3, 0x15A2)
+            {
+                X = 586,
+                Y = 445,
+                ButtonAction = ButtonAction.Activate
+            });
+
+            Add(new Button((int) Buttons.Finish, 0x15A4, 0x15A6, 0x15A5)
+            {
+                X = 610,
+                Y = 445,
+                ButtonAction = ButtonAction.Activate
+            });
+
+            Add(new Button((int) Buttons.PreviousMap, 0x15A1, 0x15A3, 0x15A2)
+            {
+                X = 586,
+                Y = 435,
+                ButtonAction = ButtonAction.Activate
+            });
+
+            Add(new Button((int) Buttons.NextMap, 0x15A4, 0x15A6, 0x15A5)
+            {
+                X = 610,
+                Y = 435,
+                ButtonAction = ButtonAction.Activate
+            });
+
+
+            _htmlControl = new HtmlControl(452, 60, 175, 367, true, true, ishtml: true);
+            Add(_htmlControl);
+
+
+
+            _cityTable = new List<CityControl>[totalMaps];
+
+            for (int i = 0; i < scene.Cities.Length; i++)
+            {
+                var c = scene.GetCity( UOFileManager.ClientVersion >= ClientVersions.CV_70130 ? i : i + 1);
+
+                if (c == null)
+                    continue;
+
+                uint cityFacet = 0;
+
+                int x = 0;
+                int y = 0;
+
+                if (c.IsNewCity)
+                {
+                    x = 62 + Utility.MathHelper.PercetangeOf(UOFileManager.Map.MapsDefaultSize[map, 0] - 2048, c.X, 383);
+                    y = 54 + Utility.MathHelper.PercetangeOf(UOFileManager.Map.MapsDefaultSize[map, 1], c.Y, 384);
+                    cityFacet = c.Map;
+                }
+                else if ( i < _townButtonsText.Length)
+                {
+                    x = _townButtonsText[i].X;
+                    y = _townButtonsText[i].Y;
+                }
+
+                if (cityFacet > 5)
+                    cityFacet = 5;
+
+                if (_cityTable[cityFacet] == null)
+                {
+                    _cityTable[cityFacet] = new List<CityControl>();
+                }
+
+                var control = new CityControl(cityFacet, c, x, y);
+                _cityTable[cityFacet].Add(control);
+            }
+
+        }
+
+
+        private void SetCity(int index)
+        {
+            SetCity(_scene.GetCity(index));
+        }
+
+        private void SetCity(CityInfo city)
+        {
+            if (city == null)
+                return;
+
+            _htmlControl.Text = city.Description;
+        }
+
+        private void SetFacet(int index)
+        {
+            if (UOFileManager.ClientVersion < ClientVersions.CV_70130)
+                return;
+
+            if (index < 0)
+                index = 0;
+            else if (index >= _cityNames.Length)
+                index = _cityNames.Length - 1;
+
+            _facetName.Text = _cityNames[index];
+        }
+
+
+        public override void OnButtonClick(int buttonID)
+        {
+            switch ((Buttons) buttonID)
+            {
+                case Buttons.PreviousScreen:
+                    break;
+                case Buttons.Finish:
+                    break;
+                case Buttons.PreviousMap:
+                    break;
+                case Buttons.NextMap: 
+                    break;
+            }
+        }
+
+
+        class CityControl : Control
+        {
+            private readonly Label _label;
+            
+            public CityControl(uint facet, CityInfo city, int x, int y)
+            {
+                CanMove = false;
+
+                Facet = facet;
+                City = city;
+
+                Add(new Button(0, 0x04B9, 0x04BA, 0x04BA)
+                {
+                    ButtonAction = ButtonAction.Activate,
+                    X = x,
+                    Y = y
+                });
+                x -= 20;
+
+                if (city.Index == 3)
+                {
+                    x -= 60;
+                }
+
+                _label = new HoveredLabel(city.City, false, 0x0058, 0x0481, font: 3)
+                {
+                    X = x, Y = y
+                };
+
+                Add(_label);
+            }
+
+            public readonly uint Facet;
+            public readonly CityInfo City;
+
+
+            public override void OnButtonClick(int buttonID)
+            {
+                if (buttonID == 0)
+                {
+                    // TODO:
+                }
+            }
+        }
+    }
+
     internal class CreateCharCityGump : Gump
     {
         private readonly MapInfo[] _mapInfo =

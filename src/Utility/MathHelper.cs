@@ -67,6 +67,23 @@ namespace ClassicUO.Utility
         }
 
         [MethodImpl(256)]
+        public static int PercetangeOf(int current, int max, int maxValue)
+        {
+            if (max > 0)
+            {
+                max = (current * 100) / max;
+
+                if (max > 100)
+                    max = 100;
+
+                if (max > 1)
+                    max = (maxValue * max) / 100;
+            }
+
+            return max;
+        }
+
+        [MethodImpl(256)]
         public static double Hypotenuse(float a, float b)
         {
             return Math.Sqrt(Math.Pow(a, 2) + Math.Pow(b, 2));

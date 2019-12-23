@@ -394,6 +394,17 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
+        public CityInfo GetCity(int index)
+        {
+            for (int i = 0; Cities != null && i < Cities.Length; i++)
+            {
+                if (Cities[i] != null && Cities[i].Index == index)
+                    return Cities[i];
+            }
+
+            return null;
+        }
+
         private void NetClient_Connected(object sender, EventArgs e)
         {
             Log.Info("Connected!");
