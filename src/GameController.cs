@@ -444,7 +444,8 @@ namespace ClassicUO
 
             if (CUOEnviroment.IsHighDPI)
             {
-                //TODO:
+                //TODO
+                Log.Warn("HighDPI not supported yet.");
             }
 
             if (!IsWindowMaximized())
