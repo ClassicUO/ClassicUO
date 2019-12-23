@@ -52,9 +52,9 @@ namespace ClassicUO.Game.GameObjects
 
         protected int TargetZ;
 
-        public int Speed;
+        public int IntervalInMs;
 
-        public long LastChangeFrameTime;
+        public long NextChangeFrameTime;
 
         public bool IsEnabled;
 
@@ -71,7 +71,7 @@ namespace ClassicUO.Game.GameObjects
             AnimDataFrame = UOFileManager.AnimData.CalculateCurrentGraphic(Graphic);
             IsEnabled = true;
             AnimIndex = 0;
-            Speed += AnimDataFrame.FrameInterval != 0 ? AnimDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
+            IntervalInMs = (AnimDataFrame.FrameInterval + 1) * Constants.ITEM_EFFECT_ANIMATION_DELAY;
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -107,7 +107,7 @@ namespace ClassicUO.Game.GameObjects
                 //    _start += frameMS;
                 //}
 
-                else if (LastChangeFrameTime < totalMS)
+                else if (NextChangeFrameTime < totalMS)
                 {
 
                     if (AnimDataFrame.FrameCount != 0)
@@ -128,7 +128,7 @@ namespace ClassicUO.Game.GameObjects
                             AnimationGraphic = Graphic;
                     }
 
-                    LastChangeFrameTime = (long) totalMS + Speed;
+                    NextChangeFrameTime = (long) totalMS + IntervalInMs;
                 }
             }
             else if (Graphic != AnimationGraphic)

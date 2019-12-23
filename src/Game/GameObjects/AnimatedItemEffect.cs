@@ -3,9 +3,9 @@
 //  Copyright (C) 2019 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+//	The goal of this is to develop a lightweight client considering
+//	new technologies.
+//
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -30,17 +30,8 @@ namespace ClassicUO.Game.GameObjects
             Graphic = graphic;
             Hue = hue;
             Duration = duration > 0 ? Time.Ticks + duration : -1;
-            Speed = speed;
             Load();
-        }
-
-        public AnimatedItemEffect(GameObject source, ushort graphic, ushort hue, int duration, int speed) : this(graphic, hue, duration, speed)
-        {
-            SetSource(source);
-        }
-
-        public AnimatedItemEffect(uint source, ushort graphic, ushort hue, int duration, int speed) : this(source, 0, 0, 0, graphic, hue, duration, speed)
-        {
+            IntervalInMs = (speed + 1) * Constants.ITEM_EFFECT_ANIMATION_DELAY;
         }
 
         public AnimatedItemEffect(int sourceX, int sourceY, int sourceZ, ushort graphic, ushort hue, int duration, int speed) : this(graphic, hue, duration, speed)

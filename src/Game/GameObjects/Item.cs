@@ -302,7 +302,7 @@ namespace ClassicUO.Game.GameObjects
 
                                 if (animData->FrameCount != 0)
                                 {
-                                    _animSpeed = animData->FrameInterval != 0 ? animData->FrameInterval * 25 + Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
+                                    _animSpeed = (animData->FrameInterval + 1) * Constants.ITEM_EFFECT_ANIMATION_DELAY;
                                 }
                             }
                         }
