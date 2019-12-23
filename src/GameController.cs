@@ -40,6 +40,12 @@ namespace ClassicUO
         private UltimaBatcher2D _uoSpriteBatch;
         private readonly float[] _intervalFixedUpdate = new float[2];
         private double _statisticsTimer;
+        private RenderTarget2D _buffer;
+        private double _totalElapsed, _currentFpsTime;
+        private uint _totalFrames;
+        private Vector3 _hueVector;
+
+
 
         public GameController()
         {
@@ -47,12 +53,7 @@ namespace ClassicUO
         }
 
         public Scene Scene => _scene;
-        public uint[] FrameDelay { get; } = new uint[2];
-
-        public T GetScene<T>() where T : Scene
-        {
-            return _scene as T;
-        }
+        public readonly uint[] FrameDelay = new uint[2];
 
 
         protected override void Initialize()
@@ -99,6 +100,11 @@ namespace ClassicUO
             Settings.GlobalSettings.Save();
             Plugin.OnClosing();
             base.UnloadContent();
+        }
+
+        public T GetScene<T>() where T : Scene
+        {
+            return _scene as T;
         }
 
         public void SetScene(Scene scene)
@@ -284,9 +290,6 @@ namespace ClassicUO
         }
 
 
-        private float _totalElapsed, _currentFpsTime;
-        private uint _totalFrames;
-
         protected override void Update(GameTime gameTime)
         {
             if (Profiler.InContext("OutOfContext"))
@@ -306,8 +309,8 @@ namespace ClassicUO
                 Profiler.ExitContext("Update");
             }
 
-            _totalElapsed += (float) gameTime.ElapsedGameTime.TotalMilliseconds;
-            _currentFpsTime += (float) gameTime.ElapsedGameTime.TotalMilliseconds;
+            _totalElapsed += gameTime.ElapsedGameTime.TotalMilliseconds;
+            _currentFpsTime += gameTime.ElapsedGameTime.TotalMilliseconds;
 
             if (_currentFpsTime >= 1000)
             {
@@ -317,7 +320,7 @@ namespace ClassicUO
                 _currentFpsTime = 0;
             }
 
-            float x = _intervalFixedUpdate[!IsActive && ProfileManager.Current != null && ProfileManager.Current.ReduceFPSWhenInactive ? 1 : 0];
+            double x = _intervalFixedUpdate[!IsActive && ProfileManager.Current != null && ProfileManager.Current.ReduceFPSWhenInactive ? 1 : 0];
 
             if (_totalElapsed > x)
             {
@@ -343,7 +346,6 @@ namespace ClassicUO
             base.Update(gameTime);
         }
 
-        private RenderTarget2D _buffer;
 
         protected override void Draw(GameTime gameTime)
         {
@@ -384,7 +386,6 @@ namespace ClassicUO
             UpdateWindowCaption(gameTime);
         }
 
-        private Vector3 _hueVector;
 
         private void UpdateWindowCaption(GameTime gameTime)
         {
