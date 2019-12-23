@@ -1762,7 +1762,7 @@ namespace ClassicUO.Renderer
 
             public override void ApplyStates()
             {
-                WorldMatrix.SetValueRef(ref _matrix);
+                WorldMatrix.SetValue(_matrix);
 
                 _viewPort.X = GraphicsDevice.Viewport.Width;
                 _viewPort.Y = GraphicsDevice.Viewport.Height;

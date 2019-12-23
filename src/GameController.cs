@@ -37,14 +37,13 @@ namespace ClassicUO
         private bool _dragStarted;
         private bool _ignoreNextTextInput;
         private readonly GraphicsDeviceManager _graphicDeviceManager;
-        private readonly UltimaBatcher2D _uoSpriteBatch;
+        private UltimaBatcher2D _uoSpriteBatch;
         private readonly float[] _intervalFixedUpdate = new float[2];
         private double _statisticsTimer;
 
         public GameController()
         {
             _graphicDeviceManager = new GraphicsDeviceManager(this);
-            _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice);
         }
 
         public Scene Scene => _scene;
@@ -77,6 +76,7 @@ namespace ClassicUO
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0f / 250);
 
             SetRefreshRate(Settings.GlobalSettings.FPS);
+            _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice);
 
             base.Initialize();
         }

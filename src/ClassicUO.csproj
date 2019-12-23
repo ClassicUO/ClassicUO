@@ -88,7 +88,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\api\cuoapi.dll</HintPath>
     </Reference>
-    <Reference Include="FNA, Version=18.12.0.0, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="FNA, Version=19.12.1.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\FNA\FNA.dll</HintPath>
     </Reference>
