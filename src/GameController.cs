@@ -537,6 +537,8 @@ namespace ClassicUO
                         using (Stream stream = File.Create(path))
                         {
                             _buffer.SaveAsPng(stream, _buffer.Width, _buffer.Height);
+
+                            GameActions.Print($"Screenshot stored in: {path}", 0x44, MessageType.System);
                         }
                     }
 
