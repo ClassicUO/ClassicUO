@@ -1637,7 +1637,7 @@ namespace ClassicUO.Renderer
                 {
                     InternalDraw(current, start + offset, i - offset);
                     current = _textureInfo[i];
-                    offset = i + start;
+                    offset = i;
                 }
             }
 
