@@ -939,11 +939,11 @@ namespace ClassicUO.Network
 
             if (effect.AnimDataFrame.FrameCount != 0)
             {
-                effect.Speed = effect.AnimDataFrame.FrameInterval * 45;
+                effect.IntervalInMs = effect.AnimDataFrame.FrameInterval * 45;
             }
             else
             {
-                effect.Speed = 13;
+                effect.IntervalInMs = 13;
             }
 
             World.AddEffect(effect);

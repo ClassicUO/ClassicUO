@@ -30,7 +30,7 @@ namespace ClassicUO.Game.GameObjects
             Graphic = 0x4E20;
             Hue = hue;
             IsEnabled = true;
-            Speed = Constants.ITEM_EFFECT_ANIMATION_DELAY;
+            IntervalInMs = Constants.ITEM_EFFECT_ANIMATION_DELAY;
             AnimIndex = 0;
         }
 
@@ -67,10 +67,10 @@ namespace ClassicUO.Game.GameObjects
                 {
                     AnimationGraphic = (ushort) (Graphic + AnimIndex);
 
-                    if (LastChangeFrameTime < totalMS)
+                    if (NextChangeFrameTime < totalMS)
                     {
                         AnimIndex++;
-                        LastChangeFrameTime = (long) totalMS + Speed;
+                        NextChangeFrameTime = (long) totalMS + IntervalInMs;
                     }
 
                     (int x, int y, int z) = GetSource();
