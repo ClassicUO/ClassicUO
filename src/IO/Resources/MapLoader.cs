@@ -35,7 +35,7 @@ namespace ClassicUO.IO.Resources
 {
     internal class MapLoader : UOFileLoader
     {
-        internal static int MAPS_COUNT = 7;
+        internal static int MAPS_COUNT = 6;
         private protected readonly UOFileMul[] _filesIdxStatics = new UOFileMul[MAPS_COUNT];
         private protected readonly UOFile[] _filesMap = new UOFile[MAPS_COUNT];
         private protected readonly UOFileMul[] _filesStatics = new UOFileMul[MAPS_COUNT];
@@ -51,7 +51,7 @@ namespace ClassicUO.IO.Resources
 
         public int[,] MapBlocksSize { get; private set; } = new int[MAPS_COUNT, 2];
 
-        public int[,] MapsDefaultSize { get; private protected set; } = new int[7, 2]
+        public int[,] MapsDefaultSize { get; private protected set; } = new int[6, 2]
         {
             {
                 7168, 4096
@@ -70,9 +70,6 @@ namespace ClassicUO.IO.Resources
             },
             {
                 1280, 4096
-            },
-            {
-                7168, 4096
             }
         };
 

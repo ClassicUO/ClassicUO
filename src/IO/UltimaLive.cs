@@ -539,14 +539,14 @@ namespace ClassicUO.IO
                     {
                         using (FileStream stream = File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                         {
-                            _file = MemoryMappedFile.CreateNew(null, STATICS_MEMORY_SIZE, MemoryMappedFileAccess.ReadWrite);
+                            _file = MemoryMappedFile.CreateNew(fileInfo.Name, STATICS_MEMORY_SIZE, MemoryMappedFileAccess.ReadWrite);
 
                             using (Stream s = _file.CreateViewStream(0, stream.Length, MemoryMappedFileAccess.Write))
                                 stream.CopyTo(s);
                         }
                     }
                     else
-                        _file = MemoryMappedFile.CreateFromFile(File.Open(FilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite), null, size, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, false);
+                        _file = MemoryMappedFile.CreateFromFile(File.Open(FilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite), fileInfo.Name, size, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, false);
 
                     _accessor = _file.CreateViewAccessor(0, isstaticmul ? STATICS_MEMORY_SIZE : size, MemoryMappedFileAccess.ReadWrite);
                     byte* ptr = null;
