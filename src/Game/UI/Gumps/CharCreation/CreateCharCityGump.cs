@@ -36,9 +36,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
     internal class CreateCharCityGump : Gump
     {
-        private static readonly MapInfo[] _mapInfo =
+        private readonly MapInfo[] _mapInfo =
         {
-            new MapInfo(0, "Felucca", 5593, 0x1400, 0x0000, 0x1000, 0x0000),
+            new MapInfo(0, "Felucca", (ushort) (UOFileManager.ClientVersion >= ClientVersions.CV_70130 ? 5593 : 0x1598), 0x1400, 0x0000, 0x1000, 0x0000),
             new MapInfo(1, "Trammel", 5594, 0x1400, 0x0000, 0x1000, 0x0000),
             new MapInfo(2, "Ilshenar", 5595, 0x0900, 0x0200, 0x0640, 0x0000),
             new MapInfo(3, "Malas", 5596, 0x0A00, 0x0000, 0x0800, 0x0000),
@@ -57,20 +57,19 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private int _selectedMapIndex;
 
-        public CreateCharCityGump(byte profession) : base(0, 0)
+        public CreateCharCityGump(byte profession, LoginScene scene) : base(0, 0)
         {
             _selectedProfession = profession;
-            var loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
 
-            _maps = loginScene.Cities.GroupBy(city => city.Map)
-                              .ToDictionary(group => group.Key,
-                                            group => new CityCollection(_mapInfo[group.Key], group.ToArray())
-                                            {
-                                                X = 57,
-                                                Y = 49,
-                                                OnSelect = SelectCity
-                                            }
-                                           );
+            _maps = scene.Cities.GroupBy(city => city.Map)
+                         .ToDictionary(group => group.Key,
+                                       group => new CityCollection(_mapInfo[group.Key], group.ToArray())
+                                       {
+                                           X = 57,
+                                           Y = 49,
+                                           OnSelect = SelectCity
+                                       }
+                                      );
 
             SelectedMapIndex = UOFileManager.ClientVersion >= ClientVersions.CV_70130 ? 0 : 3;
 
@@ -386,6 +385,16 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 Add(_label = label);
                 _label.AcceptMouseInput = true;
                 _label.MouseUp += LabelOnMouseUp;
+                button.MouseDoubleClick += ButtonOnMouseDoubleClick;
+            }
+
+            private void ButtonOnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
+            {
+                if (e.Button == MouseButton.Left)
+                {
+                    
+                    e.Result = true;
+                }
             }
 
             public int ButtonID => _button.ButtonID;
