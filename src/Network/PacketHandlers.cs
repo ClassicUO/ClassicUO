@@ -810,25 +810,6 @@ namespace ClassicUO.Network
             sbyte z = p.ReadSByte();
             Direction dir = direction & Direction.Mask;
 
-#if JAEDAN_MOVEMENT_PATCH
-            World.Player.ForcePosition(x, y, z, dir);
-#elif MOVEMENT2
-            World.Player.ResetSteps();
-
-            World.Player.GetEndPosition(out int endX, out int endY, out sbyte endZ, out Direction endDir);
-
-            if (endX == x && endY == y && endZ == z)
-            {
-                if (endDir != dir)
-                {
-                    World.Player.EnqueueStep(x, y, z, dir, false);
-                }
-            }
-            else
-            {
-                World.Player.ForcePosition(x, y, z , dir);
-            }
-#else
             World.Player.CloseBank();
 
             World.Player.Walker.WalkingFailed = false;
@@ -859,7 +840,6 @@ namespace ClassicUO.Network
 
             World.Player.Walker.ResendPacketSended = false;
             World.Player.AddToTile();
-#endif
             World.Player.ProcessDelta();
 
             var scene = CUOEnviroment.Client.GetScene<GameScene>();
@@ -883,15 +863,8 @@ namespace ClassicUO.Network
             direction &= Direction.Up;
             sbyte z = p.ReadSByte();
 
-
-#if JAEDAN_MOVEMENT_PATCH
-            World.Player.ForcePosition(x, y , z, direction);
-#elif MOVEMENT2
-            World.Player.DenyWalk(seq, direction, x, y , z);
-#else
             World.Player.Walker.DenyWalk(seq, x, y, z);
             World.Player.Direction = direction;
-#endif
             World.Player.ProcessDelta();
         }
 
@@ -907,7 +880,7 @@ namespace ClassicUO.Network
                 noto = 0x01;
 
             World.Player.NotorietyFlag = (NotorietyFlag) noto;
-            World.Player.ConfirmWalk(seq);
+            World.Player.Walker.ConfirmWalk(seq);
             World.Player.ProcessDelta();
         }
 
@@ -2915,19 +2888,15 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 1: // fast walk prevention
-
-#if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
-
-                    for (int i = 0; i < 6; i++) World.Player.Walker.FastWalkStack.SetValue(i, p.ReadUInt());
-#endif
+                    for (int i = 0; i < 6; i++) 
+                        World.Player.Walker.FastWalkStack.SetValue(i, p.ReadUInt());
                     break;
 
                 //===========================================================================================
                 //===========================================================================================
                 case 2: // add key to fast walk stack
-#if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
                     World.Player.Walker.FastWalkStack.AddValue(p.ReadUInt());
-#endif
+
                     break;
 
                 //===========================================================================================
@@ -3985,26 +3954,6 @@ namespace ClassicUO.Network
                 World.Player.FixHue(hue);
                 World.Player.Flags = flags;
 
-
-#if JAEDAN_MOVEMENT_PATCH
-            World.Player.ForcePosition(x, y, z, dir);
-#elif MOVEMENT2
-            World.Player.ResetSteps();
-
-            World.Player.GetEndPosition(out int endX, out int endY, out sbyte endZ, out Direction endDir);
-
-            if (endX == x && endY == y && endZ == z)
-            {
-                if (endDir != dir)
-                {
-                    World.Player.EnqueueStep(x, y, z, dir, false);
-                }
-            }
-            else
-            {
-                World.Player.ForcePosition(x, y, z , dir);
-            }
-#else
                 World.Player.CloseBank();
                 World.Player.Walker.WalkingFailed = false;
                 World.Player.X = x;
@@ -4034,7 +3983,6 @@ namespace ClassicUO.Network
 
                 World.Player.Walker.ResendPacketSended = false;
                 World.Player.AddToTile();
-#endif
                 World.Player.ProcessDelta();
 
                 var scene = CUOEnviroment.Client.GetScene<GameScene>();

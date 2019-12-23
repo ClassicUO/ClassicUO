@@ -350,7 +350,8 @@ namespace ClassicUO.Game.Scenes
                 return;
             }
 
-            if (_rightMousePressed) _continueRunning = true;
+            if (_rightMousePressed) 
+                _continueRunning = true;
 
             if (_dragginObject != null)
                 _dragginObject = null;
@@ -605,19 +606,7 @@ namespace ClassicUO.Game.Scenes
             StopFollowing();
         }
 
-
-        private void StopFollowing()
-        {
-            if (_followingMode)
-            {
-                _followingMode = false;
-                _followingTarget = 0;
-                Pathfinder.StopAutoWalk();
-                World.Player.AddMessage(MessageType.Regular, "Stopped following.", 3, 1001, false);
-            }
-        }
-
-
+      
         internal override void OnRightMouseUp()
         {
             _rightMousePressed = false;
@@ -627,6 +616,9 @@ namespace ClassicUO.Game.Scenes
             {
                 _boatIsMoving = false;
                 NetClient.Socket.Send(new PMultiBoatMoveRequest(World.Player, World.Player.Direction, 0x00));
+            }
+            else if (World.Player.Steps.Count != 0)
+            {
             }
         }
 

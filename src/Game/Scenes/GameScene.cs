@@ -888,6 +888,17 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
+        private void StopFollowing()
+        {
+            if (_followingMode)
+            {
+                _followingMode = false;
+                _followingTarget = 0;
+                Pathfinder.StopAutoWalk();
+                World.Player.AddMessage(MessageType.Regular, "Stopped following.", 3, 1001, false);
+            }
+        }
+
 
         private struct LightData
         {

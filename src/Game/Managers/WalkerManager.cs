@@ -25,7 +25,6 @@ using ClassicUO.Network;
 
 namespace ClassicUO.Game.Managers
 {
-#if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
     internal struct StepInfo
     {
         public byte Direction;
@@ -187,5 +186,4 @@ namespace ClassicUO.Game.Managers
             LastStepRequestTime = 0;
         }
     }
-#endif
 }
