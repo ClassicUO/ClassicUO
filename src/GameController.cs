@@ -530,6 +530,16 @@ namespace ClassicUO
                     UIManager.KeyboardFocusControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
                     _scene.OnKeyUp(e.key);
 
+                    if (e.key.keysym.sym == SDL_Keycode.SDLK_PRINTSCREEN)
+                    {
+                        string path = Path.Combine(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Data", "Client", "Screenshots"), $"screenshot_{DateTime.Now:yyyy-MM-dd_hh-mm-ss}.png");
+
+                        using (Stream stream = File.Create(path))
+                        {
+                            _buffer.SaveAsPng(stream, _buffer.Width, _buffer.Height);
+                        }
+                    }
+
                     break;
 
                 case SDL.SDL_EventType.SDL_TEXTINPUT:
