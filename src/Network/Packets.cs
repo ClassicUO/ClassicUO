@@ -1409,4 +1409,12 @@ namespace ClassicUO.Network
             WriteByte(range);
         }
     }
+
+    internal sealed class PShowPublicHouseContent : PacketWriter
+    {
+        public PShowPublicHouseContent(bool show) : base(0xFB)
+        {
+            WriteBool(show);
+        }
+    }
 }

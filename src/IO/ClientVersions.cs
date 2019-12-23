@@ -57,5 +57,6 @@ namespace ClassicUO.IO
         CV_70331 = (7 << 24) | (0 << 16) | (33 << 8) | 1, //
         CV_704565 = (7 << 24) | (0 << 16) | (45 << 8) | 65, //
         CV_706400 = (7 << 24) | (0 << 16) | (64 << 8) | 0, // Endless Journey background
+        CV_70796 = (7 << 24) | (0 << 16) | (79 << 8) | 6 // Display houses content option
     }
 }

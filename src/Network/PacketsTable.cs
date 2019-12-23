@@ -214,7 +214,7 @@ namespace ClassicUO.Network
             0x0009, // 0xB6
             -1, // 0xB7
             -1, // 0xB8
-            0x0003, // 0xB9 //aggiornato da 3 a 5
+            0x0003, // 0xB9
             0x0006, // 0xBA
             0x0009, // 0xBB
             0x0003, // 0xBC
@@ -268,11 +268,11 @@ namespace ClassicUO.Network
             -1, // ec
             -1, // ed
             0x0A, // ee
-            0x0015, // ef -> mortacci tua
+            0x0015, // ef
             -1, // f0
             0x09, // f1
             0x19, // f2
-            0x1A, // f3 -> altro mortacci tua
+            0x1A, // f3
             -1, // f4
             0x15, // f5
             -1, // f6
@@ -280,7 +280,7 @@ namespace ClassicUO.Network
             0x6A, // f8
             -1, // f9
             -1, // fa
-            -1, // fb
+            0x02, // fb -> public house content
             -1, // fc
             -1, // fd
             -1 // ff

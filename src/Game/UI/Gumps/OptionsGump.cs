@@ -34,6 +34,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -120,6 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _spellFormatBox;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
         private Checkbox _holdShiftForContext, _holdShiftToSplitStack, _reduceFPSWhenInactive, _sallosEasyGrab, _partyInviteGump, _objectsFading, _holdAltToMoveGumps;
+        private Checkbox _showHouseContent;
 
         //VendorGump Size Option
         private ArrowNumbersTextBox _vendorGumpSize;
@@ -163,7 +165,7 @@ namespace ClassicUO.Game.UI.Gumps
             //Add(new NiceButton(10, 10 + 30 * 4, 140, 25, ButtonAction.SwitchPage, "Tooltip") {ButtonParameter = 5});
             Add(new NiceButton(10, 10 + 30 * 4, 140, 25, ButtonAction.SwitchPage, "Fonts") {ButtonParameter = 6});
             Add(new NiceButton(10, 10 + 30 * 5, 140, 25, ButtonAction.SwitchPage, "Speech") {ButtonParameter = 7});
-            Add(new NiceButton(10, 10 + 30 * 6, 140, 25, ButtonAction.SwitchPage, "Combat / Spells") {ButtonParameter = 8});
+            Add(new NiceButton(10, 10 + 30 * 6, 140, 25, ButtonAction.SwitchPage, "Combat-Spells") {ButtonParameter = 8});
             Add(new NiceButton(10, 10 + 30 * 7, 140, 25, ButtonAction.SwitchPage, "Counters") {ButtonParameter = 9});
             Add(new NiceButton(10, 10 + 30 * 8, 140, 25, ButtonAction.SwitchPage, "Experimental") {ButtonParameter = 10});
             Add(new NiceButton(10, 10 + 30 * 9, 140, 25, ButtonAction.SwitchPage, "Network") {ButtonParameter = 11});
@@ -291,7 +293,9 @@ namespace ClassicUO.Game.UI.Gumps
             _showMobileNameIncoming = CreateCheckBox(rightArea, "Show incoming new mobiles", ProfileManager.Current.ShowNewMobileNameIncoming, 0, 0);
             _showCorpseNameIncoming = CreateCheckBox(rightArea, "Show incoming new corpses", ProfileManager.Current.ShowNewCorpseNameIncoming, 0, 0);
             _sallosEasyGrab = CreateCheckBox(rightArea, "Sallos easy grab", ProfileManager.Current.SallosEasyGrab, 0, 0);
-            _partyInviteGump = CreateCheckBox(rightArea, "Show gump for party invites", ProfileManager.Current.PartyInviteGump, 0, 0);
+            _partyInviteGump = CreateCheckBox(rightArea, "Show gump for party invites", ProfileManager.Current.PartyInviteGump, 0, 0);          
+            _showHouseContent = CreateCheckBox(rightArea, "Show houses content", ProfileManager.Current.ShowHouseContent, 0, 0);
+            _showHouseContent.IsVisible = UOFileManager.ClientVersion >= ClientVersions.CV_70796;
 
             fpsItem = new ScrollAreaItem();
 
@@ -1429,6 +1433,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _gridLoot.SelectedIndex = 0;
                     _sallosEasyGrab.IsChecked = false;
                     _partyInviteGump.IsChecked = false;
+                    _showHouseContent.IsChecked = false;
                     _objectsFading.IsChecked = true;
 
                     break;
@@ -1695,6 +1700,12 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.SallosEasyGrab = _sallosEasyGrab.IsChecked;
             ProfileManager.Current.PartyInviteGump = _partyInviteGump.IsChecked;
             ProfileManager.Current.UseObjectsFading = _objectsFading.IsChecked;
+
+            if (ProfileManager.Current.ShowHouseContent != _showHouseContent.IsChecked)
+            {
+                ProfileManager.Current.ShowHouseContent = _showHouseContent.IsChecked;
+                NetClient.Socket.Send(new PShowPublicHouseContent(ProfileManager.Current.ShowHouseContent));
+            }
 
 
             // sounds
