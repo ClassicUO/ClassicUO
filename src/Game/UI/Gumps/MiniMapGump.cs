@@ -221,7 +221,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (minBlockY < 0)
                 minBlockY = 0;
-            int maxBlockIndex = World.Map.MapBlockIndex;
+            int maxBlockIndex = World.Map.BlocksCount;
             int mapBlockHeight = UOFileManager.Map.MapBlocksSize[World.MapIndex, 1];
             ushort[] data = UOFileManager.Gumps.GetGumpPixels(_useLargeMap ? (uint) 5011 : 5010, out _, out _);
 

@@ -33,7 +33,37 @@ namespace ClassicUO.Game.Map
 {
     internal sealed class Chunk 
     {
-        public Chunk(ushort x, ushort y)
+        private static readonly Queue<Chunk> _pool = new Queue<Chunk>();
+
+        public static Chunk Create(ushort x, ushort y)
+        {
+            if (_pool.Count != 0)
+            {
+                Chunk c = _pool.Dequeue();
+                c.X = x;
+                c.Y = y;
+                c.LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
+
+                x <<= 3;
+                y <<= 3;
+
+                for (int i = 0; i < 8; i++)
+                {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        Tile t = Tile.Create((ushort) (i + x), (ushort) (j + y));
+                        c.Tiles[i, j] = t;
+                    }
+                }
+
+                return c;
+            }
+            return new Chunk(x, y);
+        }
+
+
+
+        private Chunk(ushort x, ushort y)
         {
             X = x;
             Y = y;
@@ -52,33 +82,6 @@ namespace ClassicUO.Game.Map
             }
 
             LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
-        }
-
-        private static readonly Queue<Chunk> _pool = new Queue<Chunk>();
-        public static Chunk Create(ushort x, ushort y)
-        {
-            if (_pool.Count != 0)
-            {
-                var c = _pool.Dequeue();
-                c.X = x;
-                c.Y = y;
-                c.LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
-
-                x <<= 3;
-                y <<= 3;
-
-                for (int i = 0; i < 8; i++)
-                {
-                    for (int j = 0; j < 8; j++)
-                    {
-                        var t = Tile.Create((ushort) (i + x), (ushort) (j + y));
-                        c.Tiles[i, j] = t;
-                    }
-                }
-
-                return c;
-            }
-            return new Chunk(x, y);
         }
 
         public ushort X { get; private set; }

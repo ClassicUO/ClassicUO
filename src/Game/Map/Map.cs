@@ -38,24 +38,19 @@ namespace ClassicUO.Game.Map
     internal sealed class Map
     {
         private readonly bool[] _blockAccessList = new bool[0x1000];
-        //private const int CHUNKS_NUM = 5;
-        //private const int MAX_CHUNKS = CHUNKS_NUM * 2 + 1;
         private readonly List<int> _usedIndices = new List<int>();
 
         public Map(int index)
         {
             Index = index;
-            MapBlockIndex = UOFileManager.Map.MapBlocksSize[Index, 0] * UOFileManager.Map.MapBlocksSize[Index, 1];
-            Chunks = new Chunk[MapBlockIndex];
+            BlocksCount = UOFileManager.Map.MapBlocksSize[Index, 0] * UOFileManager.Map.MapBlocksSize[Index, 1];
+            Chunks = new Chunk[BlocksCount];
         }
 
-        public int Index { get; }
-
-        public Chunk[] Chunks { get; private set; }
-
-        public int MapBlockIndex { get; set; }
-
-        public Point Center { get; set; }
+        public readonly int Index;
+        public Chunk[] Chunks;
+        public readonly int BlocksCount;
+        public Point Center;
 
         
         public Tile GetTile(short x, short y, bool load = true)
@@ -168,13 +163,8 @@ namespace ClassicUO.Game.Map
                     if (obj.Graphic >= UOFileManager.TileData.StaticData.Length)
                         continue;
 
-                    ref readonly var itemdata = ref UOFileManager.TileData.StaticData[obj.Graphic];
-
-                    if (!itemdata.IsRoof || Math.Abs(z - obj.Z) > 6)
+                    if (!UOFileManager.TileData.StaticData[obj.Graphic].IsRoof || Math.Abs(z - obj.Z) > 6)
                         continue;
-
-                    //if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && (!itemdata.IsRoof || Math.Abs(z - obj.Z) > 6))
-                    //    continue;
 
                     break;
                 }
@@ -251,7 +241,6 @@ namespace ClassicUO.Game.Map
             }
 
             _usedIndices.Clear();
-            //FileManager.Map.UnloadMap(Index);
             Chunks = null;
         }
 

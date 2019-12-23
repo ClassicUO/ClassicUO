@@ -32,6 +32,23 @@ namespace ClassicUO.Game.Map
 {
     internal sealed class Tile
     {
+        private static readonly Queue<Tile> _pool = new Queue<Tile>();
+
+        public static Tile Create(ushort x, ushort y)
+        {
+            if (_pool.Count != 0)
+            {
+                Tile t = _pool.Dequeue();
+                t.X = x;
+                t.Y = y;
+                t._isDestroyed = false;
+
+                return t;
+            }
+            return new Tile(x, y);
+        }
+
+
         private bool _isDestroyed;
 
         public Tile(ushort x, ushort y)
@@ -40,25 +57,9 @@ namespace ClassicUO.Game.Map
             Y = y;
         }
 
-        private static readonly Queue<Tile> _pool = new Queue<Tile>();
-
-        public static Tile Create(ushort x, ushort y)
-        {
-            if (_pool.Count != 0)
-            {
-                var t = _pool.Dequeue();
-                t.X = x;
-                t.Y = y;
-                t._isDestroyed = false;
-                
-                return t;
-            }
-            return new Tile(x, y);
-        }
-
+      
         public ushort X { get; private set; }
         public ushort Y { get; private set;  }
-
         public GameObject FirstNode { get; private set; }
 
         public void AddGameObject(GameObject obj)
@@ -86,7 +87,7 @@ namespace ClassicUO.Game.Map
 
                     break;
 
-                case GameEffect _ /*when effect.Source == null*/:
+                case GameEffect _:
                     priorityZ += 2;
 
                     break;
