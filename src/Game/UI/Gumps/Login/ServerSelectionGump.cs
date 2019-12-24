@@ -139,7 +139,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             foreach (ServerListEntry server in loginScene.Servers)
             {
                 HoveredLabel label;
-                scrollArea.Add(label = new HoveredLabel($"{server.Name}                         -           -", false, NORMAL_COLOR, SELECTED_COLOR, font: 5)
+                scrollArea.Add(label = new HoveredLabel($"{server.Name}                         -           -", false, NORMAL_COLOR, SELECTED_COLOR, NORMAL_COLOR,font: 5)
                 {
                     X = 74,
                     //Y = 250
@@ -255,7 +255,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 _buttonId = entry.Index;
 
-                Add(_serverName = new HoveredLabel($"{entry.Name}     -      -" , false, NORMAL_COLOR, SELECTED_COLOR, font: 5));
+                Add(_serverName = new HoveredLabel($"{entry.Name}     -      -" , false, NORMAL_COLOR, SELECTED_COLOR, NORMAL_COLOR,font: 5));
                 _serverName.X = 74;
                 _serverName.Y = 250;
 

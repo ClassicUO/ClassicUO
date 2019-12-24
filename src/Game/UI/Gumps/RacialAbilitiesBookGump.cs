@@ -105,7 +105,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         bool passive = true;
 
-                        text = new HoveredLabel(GetAbilityName(offs, ref passive), false, 0x0288, 0x33, font: 9)
+                        text = new HoveredLabel(GetAbilityName(offs, ref passive), false, 0x0288, 0x33, 0x0288, font: 9)
                         {
                             X = dataX,
                             Y = 52 + y,

@@ -330,7 +330,7 @@ namespace ClassicUO.Game.Scenes
                 CurrentLoginStep = LoginStep.CharCreation;
         }
 
-        public void CreateCharacter(PlayerMobile character, CityInfo startingCity, byte profession)
+        public void CreateCharacter(PlayerMobile character, int cityIndex, byte profession)
         {
             int i = 0;
 
@@ -341,7 +341,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             Settings.GlobalSettings.LastCharacterName = character.Name;
-            NetClient.Socket.Send(new PCreateCharacter(character, startingCity, NetClient.Socket.ClientAddress, ServerIndex, (uint) i, profession));
+            NetClient.Socket.Send(new PCreateCharacter(character, cityIndex, NetClient.Socket.ClientAddress, ServerIndex, (uint) i, profession));
         }
 
         public void DeleteCharacter(uint index)
