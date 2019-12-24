@@ -2824,7 +2824,17 @@ namespace ClassicUO.Network
                     UOChatManager.CurrentChannelName = channelName;
                     UIManager.GetGump<UOChatGump>()?.UpdateConference();
                     break;
+                default:
+                    if ((cmd >= 0x0001 && cmd <= 0x0024) ||
+                        (cmd >= 0x0028 && cmd <= 0x002C))
+                    {
+                        // TODO: read Chat.enu ?
+                        // http://docs.polserver.com/packets/index.php?Packet=0xB2
+                    }
+                    break;
             }
+
+           
         }
 
         private static void Help(Packet p)
