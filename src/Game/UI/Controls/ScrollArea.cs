@@ -30,6 +30,12 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
+    enum ScrollbarBehaviour
+    {
+        ShowWhenDataExceedFromView,
+        ShowAlways,
+    }
+
     internal class ScrollArea : Control
     {
         private readonly IScrollBar _scrollBar;
@@ -70,15 +76,26 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = true;
             WantUpdateSize = false;
             CanMove = true;
+            ScrollbarBehaviour = ScrollbarBehaviour.ShowWhenDataExceedFromView;
         }
 
+        public ScrollbarBehaviour ScrollbarBehaviour;
 
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
 
             CalculateScrollBarMaxValue();
-            _scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
+
+            if (ScrollbarBehaviour == ScrollbarBehaviour.ShowAlways)
+            {
+                _scrollBar.IsVisible = true;
+            }
+            else if (ScrollbarBehaviour == ScrollbarBehaviour.ShowWhenDataExceedFromView)
+            {
+                _scrollBar.IsVisible =_scrollBar.MaxValue > _scrollBar.MinValue;
+            }
+
         }
 
 

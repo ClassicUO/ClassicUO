@@ -157,6 +157,7 @@
     <Compile Include="Game\Managers\ObjectPropertiesListManager.cs" />
     <Compile Include="Game\Managers\PoolsManager.cs" />
     <Compile Include="Game\Managers\SkillsGroupManager.cs" />
+    <Compile Include="Game\Managers\UOChatManager.cs" />
     <Compile Include="Game\Managers\WorldMapEntityManager.cs" />
     <Compile Include="Game\Scenes\SceneID.cs" />
     <Compile Include="Game\SelectedObject.cs" />

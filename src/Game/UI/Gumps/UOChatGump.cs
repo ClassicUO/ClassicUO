@@ -4,14 +4,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     class UOChatGump : Gump
     {
+        private readonly ScrollArea _area;
+
         public UOChatGump() : base(0, 0)
         {
             CanMove = true;
@@ -37,9 +42,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += 40;
 
-            HtmlControl html = new HtmlControl(64, startY, 220, 200, true, true, false, isunicode: false);
+            Add(new AlphaBlendControl(0){ X = 64, Y = startY, Width = 220, Height = 200});
+            _area = new ScrollArea(64, startY, 220, 200, true)
+            {
+                ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways
+            };
 
-            Add(html);
+            foreach (var k in UOChatManager.Channels)
+            {
+                _area.Add(new ChannelListItemControl(k.Key, 195));
+            }
+
+            Add(_area);
 
             startY = 275;
 
@@ -51,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += 25;
 
-            text = new Label("{CHANNEL_NAME}", false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+            text = new Label(UOChatManager.CurrentChannelName, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 Y = startY
             };
@@ -116,6 +130,34 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
                 case 2: // create
                     break;
+            }
+        }
+
+
+        class ChannelListItemControl : Control
+        {
+            public ChannelListItemControl(string text, int width)
+            {
+                Text = text;
+                Width = width;
+                Add(new Label(text, false, 0x49, Width, font: 3)
+                {
+                    X = 3
+                });
+            }
+
+            public readonly string Text;
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                ResetHueVector();
+
+                if (MouseIsOver)
+                {
+                    batcher.Draw2D(Textures.GetTexture(Color.Cyan), x, y, Width, Height, ref _hueVector);
+                }
+
+                return base.Draw(batcher, x, y);
             }
         }
     }

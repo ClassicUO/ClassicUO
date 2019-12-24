@@ -319,7 +319,7 @@ namespace ClassicUO.Game.Scenes
 
             UIManager.Clear();
             World.Clear();
-
+            UOChatManager.Clear();
           
             _useItemQueue?.Clear();
             _useItemQueue = null;

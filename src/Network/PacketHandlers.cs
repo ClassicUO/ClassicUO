@@ -2783,18 +2783,24 @@ namespace ClassicUO.Network
                     p.Skip(4);
                     string channelName = p.ReadUnicode();
                     bool hasPassword = p.ReadUShort() == 0x31;
+                    UOChatManager.CurrentChannelName = channelName;
+                    UOChatManager.AddChannel(channelName, hasPassword);
                     break;
                 case 0x03E9: // destroy conference
                     p.Skip(4);
                     channelName = p.ReadUnicode();
+                    UOChatManager.RemoveChannel(channelName);
                     break;
                 case 0x03EB: // display enter username window
                     break;
                 case 0x03EC: // close chat
+                    //TODO: clear chat?
+                    UOChatManager.ChatIsEnabled = false;
                     break;
                 case 0x03ED: // username accepted, display chat
                     p.Skip(4);
                     string username = p.ReadUnicode();
+                    UOChatManager.ChatIsEnabled = true;
                     break;
                 case 0x03EE: // add user
                     p.Skip(4);
@@ -2810,6 +2816,7 @@ namespace ClassicUO.Network
                 case 0x03F1: // you have joined a conference
                     p.Skip(4);
                     channelName = p.ReadUnicode();
+                    UOChatManager.CurrentChannelName = channelName;
                     break;
             }
         }

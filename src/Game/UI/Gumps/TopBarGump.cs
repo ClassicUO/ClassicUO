@@ -239,8 +239,20 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Chat:
-                    //NetClient.Socket.Send(new POpenChat(""));
-                    UIManager.Add(new UOChatGump());
+                    if (UOChatManager.ChatIsEnabled)
+                    {
+                        UOChatGump chatGump = UIManager.GetGump<UOChatGump>();
+
+                        if (chatGump == null)
+                        {
+                            UIManager.Add(new UOChatGump());
+                        }
+                        else
+                        {
+                            chatGump.SetInScreen();
+                            chatGump.BringOnTop();
+                        }
+                    }
                     break;
 
                 case Buttons.GlobalChat:
