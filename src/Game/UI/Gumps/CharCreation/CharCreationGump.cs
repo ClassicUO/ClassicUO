@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             ChooseCity = 3
         }
 
-        private readonly LoginScene loginScene;
+        private readonly LoginScene _loginScene;
 
         private PlayerMobile _character;
         private CharCreationStep _currentStep;
@@ -49,9 +49,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private ProfessionInfo _selectedProfession;
         private int _cityIndex;
 
-        public CharCreationGump() : base(0, 0)
+        public CharCreationGump(LoginScene scene) : base(0, 0)
         {
-            loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
+            _loginScene = scene;
             Add(new CreateCharAppearanceGump(), 1);
             SetStep(CharCreationStep.Appearence);
             CanCloseWithRightClick = false;
@@ -92,13 +92,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public void CreateCharacter(byte profession)
         {
-            loginScene.CreateCharacter(_character, _cityIndex, profession);
+            _loginScene.CreateCharacter(_character, _cityIndex, profession);
         }
 
         public void StepBack(int steps = 1)
         {
             if (_currentStep == CharCreationStep.Appearence)
-                loginScene.StepBack();
+                _loginScene.StepBack();
             else
                 SetStep(_currentStep - steps);
         }
@@ -154,8 +154,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     if (existing != null)
                         Remove(existing);
 
-                    Add(new CreateCharSelectionCityGump((byte) _selectedProfession.DescriptionIndex, loginScene), 4);
-                    //Add(new CreateCharCityGump((byte) _selectedProfession.DescriptionIndex, loginScene), 4);
+                    Add(new CreateCharSelectionCityGump((byte) _selectedProfession.DescriptionIndex, _loginScene), 4);
 
                     ChangePage(4);
 

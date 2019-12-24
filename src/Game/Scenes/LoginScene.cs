@@ -212,7 +212,7 @@ namespace ClassicUO.Game.Scenes
                     return new ServerSelectionGump();
 
                 case LoginStep.CharCreation:
-                    return new CharCreationGump();
+                    return new CharCreationGump(this);
             }
 
             return null;
