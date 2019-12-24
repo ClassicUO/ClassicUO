@@ -26,6 +26,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -106,7 +107,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 map = city.Map;
             }
 
-            _facetName = new Label("", true, 0x0481, font: 0, style: FontStyle.BlackBorder, align: TEXT_ALIGN_TYPE.TS_LEFT)
+            _facetName = new Label("", true, 0x0481, font: 0, style: FontStyle.BlackBorder)
             {
                 X = 240,
                 Y = 440
@@ -124,6 +125,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 Add(new GumpPic(57, 49, 0x1598, 0));
                 _facetName.IsVisible = false;
             }
+
+            if (Settings.GlobalSettings.ShardType != 2)
+                _facetName.IsVisible = false;
 
             Add(_facetName);
 
@@ -146,6 +150,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             _htmlControl = new HtmlControl(452, 60, 175, 367, true, true, ishtml: true, text: city.Description);
             Add(_htmlControl);
 
+            if (Settings.GlobalSettings.ShardType != 2)
+                _htmlControl.IsVisible = false;
 
             for (int i = 0; i < scene.Cities.Length; i++)
             {
@@ -176,6 +182,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 CityControl control = new CityControl(this, c, x, y, i);
                 Add(control);
                 _cityControls.Add(control);
+
+                if (Settings.GlobalSettings.ShardType != 2)
+                    control.IsVisible = false;
             }
 
             SetCity(city);
