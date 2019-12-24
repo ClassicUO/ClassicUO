@@ -219,6 +219,30 @@ namespace ClassicUO.Game.Data
             }
         }
 
+        public static void CleanCaveTextures()
+        {
+            foreach (ushort graphic in CaveTiles)
+            {
+                var texture = UOFileManager.Art.GetTexture(graphic);
+                if (texture != null)
+                    texture.Ticks = 0;
+            }
+
+            UOFileManager.Art.CleaUnusedResources(short.MaxValue);
+        }
+
+        public static void CleanTreeTextures()
+        {
+            foreach (ushort graphic in TreeTiles)
+            {
+                var texture = UOFileManager.Art.GetTexture(graphic);
+                if (texture != null)
+                    texture.Ticks = 0;
+            }
+
+            UOFileManager.Art.CleaUnusedResources(short.MaxValue);
+        }
+
         [MethodImpl(256)]
         public static bool IsTree(ushort g, out int index)
         {

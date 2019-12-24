@@ -1638,27 +1638,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (ProfileManager.Current.EnableCaveBorder != _enableCaveBorder.IsChecked)
             {
-                foreach (ushort graphic in StaticFilters.CaveTiles)
-                {
-                    var texture = UOFileManager.Art.GetTexture(graphic);
-                    if (texture != null)
-                        texture.Ticks = 0;
-                }
-
-                UOFileManager.Art.CleaUnusedResources(short.MaxValue);
+                StaticFilters.CleanCaveTextures();
                 ProfileManager.Current.EnableCaveBorder = _enableCaveBorder.IsChecked;
             }
 
             if (ProfileManager.Current.TreeToStumps != _treeToStumps.IsChecked)
             {
-                foreach(var g in StaticFilters.TreeTiles)
-                {
-                    var texture = UOFileManager.Art.GetTexture(g);
-                    if (texture != null)
-                        texture.Ticks = 0;
-                }
-
-                UOFileManager.Art.CleaUnusedResources(short.MaxValue);
+                StaticFilters.CleanTreeTextures();
                 ProfileManager.Current.TreeToStumps = _treeToStumps.IsChecked;
             }
 

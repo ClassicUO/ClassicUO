@@ -304,6 +304,10 @@ namespace ClassicUO.Game.Scenes
             TargetManager.ClearTargetingWithoutTargetCancelPacket();
 
             ProfileManager.Current?.Save(UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
+
+            StaticFilters.CleanCaveTextures();
+            StaticFilters.CleanTreeTextures();
+
             ProfileManager.UnLoadProfile();
 
             NetClient.Socket.Disconnected -= SocketOnDisconnected;
