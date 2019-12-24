@@ -60,6 +60,30 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY = 337;
 
+            Button button = new Button(0, 0x0845, 0x0846, 0x0845)
+            {
+                X = 48,
+                Y = startY + 5,
+                ButtonAction = ButtonAction.Activate
+            };
+            Add(button);
+
+            button = new Button(1, 0x0845, 0x0846, 0x0845)
+            {
+                X = 123,
+                Y = startY + 5,
+                ButtonAction = ButtonAction.Activate
+            };
+            Add(button);
+
+            button = new Button(2, 0x0845, 0x0846, 0x0845)
+            {
+                X = 216,
+                Y = startY + 5,
+                ButtonAction = ButtonAction.Activate
+            };
+            Add(button);
+
             text = new Label("Join", false, 0x0386, 0, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_LEFT)
             {
                 X = 65,
@@ -80,6 +104,19 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = startY
             };
             Add(text);
+        }
+
+        public override void OnButtonClick(int buttonID)
+        {
+            switch (buttonID)
+            {
+                case 0: // join
+                    break;
+                case 1: // leave
+                    break;
+                case 2: // create
+                    break;
+            }
         }
     }
 }
