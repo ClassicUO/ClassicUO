@@ -179,7 +179,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     y = _townButtonsText[i].Y;
                 }
 
-                CityControl control = new CityControl(this, c, x, y, i);
+                CityControl control = new CityControl(c, x, y, i);
                 Add(control);
                 _cityControls.Add(control);
 
@@ -262,7 +262,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             private readonly Button _button;
             private bool _isSelected;
 
-            public CityControl(CreateCharSelectionCityGump parent, CityInfo c, int x, int y, int index)
+            public CityControl(CityInfo c, int x, int y, int index)
             {
                 CanMove = false;
 
