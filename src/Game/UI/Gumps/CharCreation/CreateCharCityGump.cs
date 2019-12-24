@@ -149,7 +149,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             for (int i = 0; i < scene.Cities.Length; i++)
             {
-                CityInfo c = scene.GetCity(UOFileManager.ClientVersion >= ClientVersions.CV_70130 ? i : i + 1);
+                CityInfo c = scene.GetCity(i);
 
                 if (c == null)
                     continue;
