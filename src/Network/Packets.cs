@@ -972,7 +972,14 @@ namespace ClassicUO.Network
     {
         public POpenChat(string name) : base(0xB5)
         {
-            WriteUnicode(name, 30);
+            int len = name.Length;
+
+            if (len > 0)
+            {
+                if (len > 30)
+                    len = 30;
+                WriteUnicode(name, len);
+            }
         }
     }
 

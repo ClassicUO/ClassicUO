@@ -84,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
                 new [] {0, (int) Buttons.Info },
                 new [] {0, (int) Buttons.Debug },
 
-                new [] {0, (int) Buttons.UOStore },
+                new [] {1, (int) Buttons.UOStore },
                 new [] {1, (int) Buttons.GlobalChat },
             };
 
@@ -239,9 +239,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Chat:
-                    Log.Warn( "Chat button pushed! Not implemented yet!");
-                    GameActions.Print("Chat not implemented yet.", 0x23, MessageType.System);
-
+                    NetClient.Socket.Send(new POpenChat(""));
                     break;
 
                 case Buttons.GlobalChat:
