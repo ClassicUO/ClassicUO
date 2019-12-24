@@ -63,10 +63,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             new Point(270, 130),
         };
         private readonly string[] _cityNames = { "Felucca", "Trammel", "Ilshenar", "Malas", "Tokuno", "Ter Mur" };
-        private int _selectedCityIndex;
         private readonly Label _facetName;
         private readonly HtmlControl _htmlControl;
         private readonly LoginScene _scene;
+        private readonly byte _selectedProfession;
+        private CityInfo _selectedCity;
 
         public CreateCharSelectionCityGump(byte profession, LoginScene scene) : base(0, 0)
         {
@@ -75,7 +76,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             CanCloseWithEsc = false;
 
             _scene = scene;
-
+            _selectedProfession = profession;
 
             CityInfo city;
 
@@ -158,36 +159,35 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             //});
 
 
-            _htmlControl = new HtmlControl(452, 60, 175, 367, true, true, ishtml: true);
+            _htmlControl = new HtmlControl(452, 60, 175, 367, true, true, ishtml: true, text: city.Description);
             Add(_htmlControl);
 
 
             for (int i = 0; i < scene.Cities.Length; i++)
             {
-                var c = scene.GetCity( UOFileManager.ClientVersion >= ClientVersions.CV_70130 ? i : i + 1);
+                CityInfo c = scene.GetCity(UOFileManager.ClientVersion >= ClientVersions.CV_70130 ? i : i + 1);
 
                 if (c == null)
                     continue;
-
-                uint cityFacet = 0;
 
                 int x = 0;
                 int y = 0;
 
                 if (c.IsNewCity)
                 {
-                    x = 62 + Utility.MathHelper.PercetangeOf(UOFileManager.Map.MapsDefaultSize[map, 0] - 2048, c.X, 383);
-                    y = 54 + Utility.MathHelper.PercetangeOf(UOFileManager.Map.MapsDefaultSize[map, 1], c.Y, 384);
-                    cityFacet = c.Map;
+                    uint cityFacet = c.Map;
+
+                    if (cityFacet > 5)
+                        cityFacet = 5;
+
+                    x = 62 + Utility.MathHelper.PercetangeOf(UOFileManager.Map.MapsDefaultSize[cityFacet, 0] - 2048, c.X, 383);
+                    y = 54 + Utility.MathHelper.PercetangeOf(UOFileManager.Map.MapsDefaultSize[cityFacet, 1], c.Y, 384);
                 }
                 else if ( i < _townButtonsText.Length)
                 {
                     x = _townButtonsText[i].X;
                     y = _townButtonsText[i].Y;
                 }
-
-                if (cityFacet > 5)
-                    cityFacet = 5;
 
 
                 Add(new Button(2 + i, 0x04B9, 0x04BA, 0x04BA)
@@ -196,21 +196,32 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     X = x,
                     Y = y
                 });
-                x -= 20;
 
-                if (city.Index == 3)
-                {
-                    x -= 60;
-                }
+                y -= 20;
 
-                var label = new HoveredLabel(city.City, false, 0x0058, 0x0481, font: 3)
+                var label = new HoveredLabel(c.City, false, 0x0058, 0x0481, font: 3)
                 {
                     X = x,
-                    Y = y
+                    Y = y,
+                    Tag = c
+                };
+
+                if (label.X + label.Width >= 383)
+                {
+                    label.X -= 60;
+                }
+
+                label.MouseUp += (sender, e) =>
+                {
+                    if (sender is Label l && l.Tag is CityInfo cityInfo)
+                    {
+                        SetCity(cityInfo);
+                    }
                 };
                 Add(label);
             }
 
+            SetCity(city);
         }
 
 
@@ -224,6 +235,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             if (city == null)
                 return;
 
+            _selectedCity = city;
             _htmlControl.Text = city.Description;
             SetFacet(city.Map);
         }
@@ -242,16 +254,28 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
+            var charCreationGump = UIManager.GetGump<CharCreationGump>();
+
             switch ((Buttons) buttonID)
             {
                 case Buttons.PreviousScreen:
-                    break;
+                    charCreationGump?.StepBack(_selectedProfession > 0 ? 2 : 1);
+                    return;
                 case Buttons.Finish:
-                    break;
-                case Buttons.PreviousMap:
-                    break;
-                case Buttons.NextMap: 
-                    break;
+                    if (_selectedCity != null)
+                        charCreationGump?.SetCity(_selectedCity);
+
+                    charCreationGump?.CreateCharacter(_selectedProfession);
+                    return;
+                //case Buttons.PreviousMap:
+                //    break;
+                //case Buttons.NextMap: 
+                //    break;
+            }
+
+            if (buttonID >= 2)
+            {
+                //SetCity();
             }
         }
 

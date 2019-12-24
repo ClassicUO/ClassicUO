@@ -396,11 +396,8 @@ namespace ClassicUO.Game.Scenes
 
         public CityInfo GetCity(int index)
         {
-            for (int i = 0; Cities != null && i < Cities.Length; i++)
-            {
-                if (Cities[i] != null && Cities[i].Index == index)
-                    return Cities[i];
-            }
+            if (index < Cities.Length)
+                return Cities[index];
 
             return null;
         }
@@ -603,7 +600,7 @@ namespace ClassicUO.Game.Scenes
         private void ParseCities(Packet p)
         {
             var count = p.ReadByte();
-            var cities = new CityInfo[count];
+            Cities = new CityInfo[count];
 
             bool isNew = UOFileManager.ClientVersion >= ClientVersions.CV_70130;
             string[] descriptions = null;
@@ -622,35 +619,33 @@ namespace ClassicUO.Game.Scenes
 
             for (int i = 0; i < count; i++)
             {
-                CityInfo cityInfo = null;
+                CityInfo cityInfo;
 
                 if (isNew)
                 {
-                    var cityIndex = p.ReadByte();
-                    var cityName = p.ReadASCII(32);
-                    var cityBuilding = p.ReadASCII(32);
+                    byte cityIndex = p.ReadByte();
+                    string cityName = p.ReadASCII(32);
+                    string cityBuilding = p.ReadASCII(32);
                     ushort cityX = (ushort) p.ReadUInt();
                     ushort cityY = (ushort) p.ReadUInt();
                     sbyte cityZ = (sbyte) p.ReadUInt();
-                    var cityMapIndex = p.ReadUInt();
-                    var cityDescription = p.ReadUInt();
-                    p.ReadUInt();
+                    uint cityMapIndex = p.ReadUInt();
+                    uint cityDescription = p.ReadUInt();
+                    p.Skip(4);
 
                     cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, UOFileManager.Cliloc.GetString((int) cityDescription), cityX, cityY, cityZ, cityMapIndex, isNew);
                 }
                 else
                 {
-                    var cityIndex = p.ReadByte();
-                    var cityName = p.ReadASCII(31);
-                    var cityBuilding = p.ReadASCII(31);
+                    byte cityIndex = p.ReadByte();
+                    string cityName = p.ReadASCII(31);
+                    string cityBuilding = p.ReadASCII(31);
 
                     cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, descriptions != null ? descriptions[i] : string.Empty, (ushort) oldtowns[i].X, (ushort) oldtowns[i].Y, 0, 0, isNew);
                 }
 
-                cities[i] = cityInfo;
+                Cities[i] = cityInfo;
             }
-
-            Cities = cities;
         }
 
         private string[] ReadCityTextFile(int count)

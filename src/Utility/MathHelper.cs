@@ -67,7 +67,7 @@ namespace ClassicUO.Utility
         }
 
         [MethodImpl(256)]
-        public static int PercetangeOf(int current, int max, int maxValue)
+        public static int PercetangeOf(int max, int current, int maxValue)
         {
             if (max > 0)
             {
