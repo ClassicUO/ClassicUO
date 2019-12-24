@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -16,6 +17,9 @@ namespace ClassicUO.Game.UI.Gumps
     class UOChatGump : Gump
     {
         private readonly ScrollArea _area;
+        private readonly Label _currentChannelLabel;
+
+        private readonly List<ChannelListItemControl> _channelList = new List<ChannelListItemControl>();
 
         public UOChatGump() : base(0, 0)
         {
@@ -50,7 +54,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (var k in UOChatManager.Channels)
             {
-                _area.Add(new ChannelListItemControl(k.Key, 195));
+                var chan = new ChannelListItemControl(k.Key, 195);
+                _area.Add(chan);
+                _channelList.Add(chan);
             }
 
             Add(_area);
@@ -65,11 +71,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += 25;
 
-            text = new Label(UOChatManager.CurrentChannelName, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+            _currentChannelLabel = new Label(UOChatManager.CurrentChannelName, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 Y = startY
             };
-            Add(text);
+            Add(_currentChannelLabel);
 
 
             startY = 337;
@@ -125,6 +131,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch (buttonID)
             {
                 case 0: // join
+                    NetClient.Socket.Send(new PChatJoinCommand("General"));
                     break;
                 case 1: // leave
                     break;
@@ -133,6 +140,28 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public void UpdateConference()
+        {
+            if (_currentChannelLabel.Text != UOChatManager.CurrentChannelName)
+                _currentChannelLabel.Text = UOChatManager.CurrentChannelName;
+        }
+
+        public void Update()
+        {
+            foreach (ChannelListItemControl control in _channelList)
+            {
+                control.Dispose();
+            }
+
+            _channelList.Clear();
+
+            foreach (var k in UOChatManager.Channels)
+            {
+                var c = new ChannelListItemControl(k.Key, 195);
+                _channelList.Add(c);
+                _channelList.Add(c);
+            }
+        }
 
         class ChannelListItemControl : Control
         {

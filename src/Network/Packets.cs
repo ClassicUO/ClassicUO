@@ -968,6 +968,25 @@ namespace ClassicUO.Network
         }
     }
 
+    internal sealed class PChatJoinCommand : PacketWriter
+    {
+        public PChatJoinCommand(string name, string password = null) : base(0xB3)
+        {
+            WriteASCII("ENU", 4);
+            WriteUShort(0x0062);
+
+            //WriteUShort(0x0022);
+            WriteUnicode(name);
+           // WriteUShort(0x0022);
+            //WriteUShort(0x0020);
+
+            if (!string.IsNullOrEmpty(password))
+            {
+                WriteUnicode(password);
+            }
+        }
+    }
+
     internal sealed class POpenChat : PacketWriter
     {
         public POpenChat(string name) : base(0xB5)
@@ -982,7 +1001,7 @@ namespace ClassicUO.Network
             }
         }
     }
-
+    
     internal sealed class PMapMessage : PacketWriter
     {
         public PMapMessage(uint serial, byte action, byte pin, ushort x, ushort y) : base(0x56)

@@ -2785,17 +2785,22 @@ namespace ClassicUO.Network
                     bool hasPassword = p.ReadUShort() == 0x31;
                     UOChatManager.CurrentChannelName = channelName;
                     UOChatManager.AddChannel(channelName, hasPassword);
+
+                    UIManager.GetGump<UOChatGump>()?.Update();
                     break;
                 case 0x03E9: // destroy conference
                     p.Skip(4);
                     channelName = p.ReadUnicode();
                     UOChatManager.RemoveChannel(channelName);
+
+                    UIManager.GetGump<UOChatGump>()?.Update();
                     break;
                 case 0x03EB: // display enter username window
                     break;
                 case 0x03EC: // close chat
-                    //TODO: clear chat?
+                    UOChatManager.Clear();
                     UOChatManager.ChatIsEnabled = false;
+                    UIManager.GetGump<UOChatGump>()?.Dispose();
                     break;
                 case 0x03ED: // username accepted, display chat
                     p.Skip(4);
@@ -2817,6 +2822,7 @@ namespace ClassicUO.Network
                     p.Skip(4);
                     channelName = p.ReadUnicode();
                     UOChatManager.CurrentChannelName = channelName;
+                    UIManager.GetGump<UOChatGump>()?.UpdateConference();
                     break;
             }
         }
