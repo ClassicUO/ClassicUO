@@ -279,8 +279,8 @@ namespace ClassicUO.Network
             -1, // f7
             0x6A, // f8
             -1, // f9
-            -1, // fa
-            0x02, // fb -> public house content
+            -1, // fa -> UOStore
+            -1, // fb -> public house content
             -1, // fc
             -1, // fd
             -1 // ff
@@ -393,6 +393,12 @@ namespace ClassicUO.Network
                 _packetsTable[0x00] = 0x6A;
             else
                 _packetsTable[0x00] = 0x68;
+
+            if (version >= ClientVersions.CV_706400)
+            {
+                _packetsTable[0xFA] = 0x01;
+                _packetsTable[0xFB] = 0x02;
+            }
         }
     }
 }

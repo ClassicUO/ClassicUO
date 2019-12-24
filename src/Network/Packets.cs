@@ -1408,6 +1408,13 @@ namespace ClassicUO.Network
         }
     }
 
+    internal sealed class POpenUOStore : PacketWriter
+    {
+        public POpenUOStore() : base(0xFA)
+        {
+        }
+    }
+
     internal sealed class PShowPublicHouseContent : PacketWriter
     {
         public PShowPublicHouseContent(bool show) : base(0xFB)

@@ -192,7 +192,6 @@ namespace ClassicUO.Network
             ToClient.Add(0xF5, DisplayMap);
             ToClient.Add(0xF6, BoatMoving);
             ToClient.Add(0xF7, PacketList);
-            ToClient.Add(0xFA, UOStore);
         }
 
        
@@ -4134,11 +4133,6 @@ namespace ClassicUO.Network
 
             container.Items.Add(item);
             World.Items.Add(item);
-        }
-
-        private static void UOStore(Packet p)
-        {
-            Log.Debug($"UOStore packet received: {p.ID:X2} - {p.Length}");
         }
 
 

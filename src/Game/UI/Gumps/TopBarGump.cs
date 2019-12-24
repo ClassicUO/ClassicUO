@@ -30,6 +30,9 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.IO;
+using ClassicUO.Network;
+using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -44,76 +47,84 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             CanCloseWithRightClick = false;
 
-            // maximized view
-            Add(new ResizePic(9200)
+            // little
+            Add(new ResizePic(0x13BE)
             {
-                X = 0, Y = 0, Width = 610 + 63 + 50, Height = 27
-            }, 1);
+                Width = 30, Height = 27
+            }, 2);
+            Add(new Button(0, 0x15A1, 0x15A1, 0x15A1)
+            {
+                X = 5, Y = 3, ToPage = 1
+            }, 2);
 
-            Add(new RighClickableButton(0, 5540, 5542, 5541)
-            {
-                ButtonAction = ButtonAction.SwitchPage, ToPage = 2, X = 5, Y = 3
-            }, 1);
 
-            Add(new RighClickableButton((int) Buttons.Map, 2443, 2443, 0, "Map", 1, true, 0, 0x36)
-            {
-                ButtonAction = ButtonAction.Activate, X = 30, Y = 3, FontCenter = true
-            }, 1);
+            // big
+            UOTexture16 th1 = UOFileManager.Gumps.GetTexture(0x098B);
+            UOTexture16 th2 = UOFileManager.Gumps.GetTexture(0x098D);
 
-            Add(new RighClickableButton((int) Buttons.Paperdoll, 2445, 2445, 0, "Paperdoll", 1, true, 0, 0x36)
-            {
-                ButtonAction = ButtonAction.Activate, X = 93, Y = 3, FontCenter = true
-            }, 1);
+            int smallWidth = 50;
 
-            Add(new RighClickableButton((int) Buttons.Inventory, 2445, 2445, 0, "Inventory", 1, true, 0, 0x36)
-            {
-                ButtonAction = ButtonAction.Activate, X = 201, Y = 3, FontCenter = true
-            }, 1);
+            if (th1 != null)
+                smallWidth = th1.Width;
 
-            Add(new RighClickableButton((int) Buttons.Journal, 2445, 2445, 0, "Journal", 1, true, 0, 0x36)
-            {
-                ButtonAction = ButtonAction.Activate, X = 309, Y = 3, FontCenter = true
-            }, 1);
+            int largeWidth = 100;
 
-            Add(new RighClickableButton((int) Buttons.Chat, 2443, 2443, 0, "Chat", 1, true, 0, 0x36)
+            if (th2 != null)
+                largeWidth = th2.Width;
+            
+            int[][] textTable =
             {
-                ButtonAction = ButtonAction.Activate, X = 417, Y = 3, FontCenter = true
-            }, 1);
+                new [] {0, (int) Buttons.Map },
+                new [] {1, (int) Buttons.Paperdoll },
+                new [] {1, (int) Buttons.Inventory },
+                new [] {1, (int) Buttons.Journal },
+                new [] {0, (int) Buttons.Chat },
+                new [] {0, (int) Buttons.Help },
+                new [] {1, (int) Buttons.WorldMap },
+                new [] {0, (int) Buttons.Info },
+                new [] {0, (int) Buttons.Debug },
 
-            Add(new RighClickableButton((int) Buttons.Help, 2443, 2443, 0, "Help", 1, true, 0, 0x36)
-            {
-                ButtonAction = ButtonAction.Activate, X = 480, Y = 3, FontCenter = true
-            }, 1);
+                new [] {0, (int) Buttons.UOStore },
+                new [] {1, (int) Buttons.GlobalChat },
+            };
 
-            Add(new RighClickableButton((int) Buttons.Debug, 2443, 2443, 0, "Debug", 1, true, 0, 0x36)
-            {
-                ButtonAction = ButtonAction.Activate, X = 543, Y = 3, FontCenter = true
-            }, 1);
+            string[] texts = {"Map", "Paperdoll", "Inventory", "Journal", "Chat", "Help", "World Map", "< ? >", "Debug", "UOStore", "Global Chat"};
 
-            Add(new RighClickableButton((int)Buttons.WorldMap, 2445, 2445, 0, "WorldMap", 1, true, 0, 0x36)
-            {
-                ButtonAction = ButtonAction.Activate,
-                X = 607,
-                Y = 3,
-                FontCenter = true
-            }, 1);
+            bool hasUOStore = UOFileManager.ClientVersion >= ClientVersions.CV_706400;
 
-            //minimized view
-            Add(new ResizePic(9200)
+            ResizePic background;
+            Add(background = new ResizePic(0x13BE)
             {
-                X = 0,
-                Y = 0,
-                Width = 30,
                 Height = 27
-            }, 2);
+            }, 1);
 
-            Add(new Button(0, 5537, 5539, 5538)
+            Add(new Button(0, 0x15A4, 0x15A4, 0x15A4)
             {
-                ButtonAction = ButtonAction.SwitchPage,
-                ToPage = 1,
-                X = 5,
-                Y = 3
-            }, 2);
+                X = 5, Y = 3, ToPage = 2
+            }, 1);
+
+            int startX = 30;
+
+            for (int i = 0; i < textTable.Length; i++)
+            {
+                ushort graphic = (ushort) (textTable[i][0] != 0 ? 0x098D : 0x098B);
+
+                Add(new RighClickableButton(textTable[i][1], graphic, graphic, graphic, texts[i], 1, true, 0, 0x0036)
+                {
+                    ButtonAction = ButtonAction.Activate,
+                    X = startX,
+                    Y = 1,
+                    FontCenter = true
+                }, 1);
+
+                startX += (textTable[i][0] != 0 ? largeWidth : smallWidth) + 1;
+                background.Width = startX;
+
+                if (!hasUOStore && i >= 8)
+                    break;
+            }
+
+            background.Width = startX + 1;
 
             //layer
             ControlInfo.Layer = UILayer.Over;
@@ -229,7 +240,20 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case Buttons.Chat:
                     Log.Warn( "Chat button pushed! Not implemented yet!");
+                    GameActions.Print("Chat not implemented yet.", 0x23, MessageType.System);
 
+                    break;
+
+                case Buttons.GlobalChat:
+                    Log.Warn("Chat button pushed! Not implemented yet!");
+                    GameActions.Print("GlobalChat not implemented yet.", 0x23, MessageType.System);
+                    break;
+
+                case Buttons.UOStore:
+                    if (UOFileManager.ClientVersion >= ClientVersions.CV_706400)
+                    {
+                        NetClient.Socket.Send(new POpenUOStore());
+                    }
                     break;
 
                 case Buttons.Help:
@@ -286,8 +310,11 @@ namespace ClassicUO.Game.UI.Gumps
             Journal,
             Chat,
             Help,
-            Debug,
             WorldMap,
+            Info,
+            Debug,
+            UOStore,
+            GlobalChat,
         }
 
         class RighClickableButton : Button
