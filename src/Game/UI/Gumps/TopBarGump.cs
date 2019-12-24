@@ -239,7 +239,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Chat:
-                    NetClient.Socket.Send(new POpenChat(""));
+                    //NetClient.Socket.Send(new POpenChat(""));
                     break;
 
                 case Buttons.GlobalChat:

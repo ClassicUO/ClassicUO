@@ -1569,6 +1569,10 @@ namespace ClassicUO.Network
             {
                 CUOEnviroment.Client.SetScene(new GameScene());
 
+                NetClient.Socket.Send(new PStatusRequest(World.Player));
+
+                NetClient.Socket.Send(new POpenChat(""));
+
                 NetClient.Socket.Send(new PSkillsRequest(World.Player));
 
                 if (UOFileManager.ClientVersion >= ClientVersions.CV_306E)
@@ -2771,6 +2775,43 @@ namespace ClassicUO.Network
 
         private static void ChatMessage(Packet p)
         {
+            ushort cmd = p.ReadUShort();
+
+            switch (cmd)
+            {
+                case 0x03E8: // create conference
+                    p.Skip(4);
+                    string channelName = p.ReadUnicode();
+                    bool hasPassword = p.ReadUShort() == 0x31;
+                    break;
+                case 0x03E9: // destroy conference
+                    p.Skip(4);
+                    channelName = p.ReadUnicode();
+                    break;
+                case 0x03EB: // display enter username window
+                    break;
+                case 0x03EC: // close chat
+                    break;
+                case 0x03ED: // username accepted, display chat
+                    p.Skip(4);
+                    string username = p.ReadUnicode();
+                    break;
+                case 0x03EE: // add user
+                    p.Skip(4);
+                    ushort userType = p.ReadUShort();
+                    username = p.ReadUnicode();
+                    break;
+                case 0x03EF: // remove user
+                    p.Skip(4);
+                    username = p.ReadUnicode();
+                    break;
+                case 0x03F0: // clear all players
+                    break;
+                case 0x03F1: // you have joined a conference
+                    p.Skip(4);
+                    channelName = p.ReadUnicode();
+                    break;
+            }
         }
 
         private static void Help(Packet p)
