@@ -109,7 +109,7 @@ namespace ClassicUO.Game.UI.Controls
             ContainsByBounds = true;
         }
 
-        public bool IsClicked { get; private set; }
+        public bool IsClicked { get; set; }
 
         public int ButtonID { get; }
 

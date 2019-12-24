@@ -47,8 +47,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private CharCreationStep _currentStep;
         private LoadingGump _loadingGump;
         private ProfessionInfo _selectedProfession;
-
-        private CityInfo _startingCity;
+        private int _cityIndex;
 
         public CharCreationGump() : base(0, 0)
         {
@@ -71,9 +70,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             SetStep(_selectedProfession.DescriptionIndex >= 0 || force ? CharCreationStep.ChooseCity : CharCreationStep.ChooseTrade);
         }
 
-        public void SetCity(CityInfo city)
+        public void SetCity(int cityIndex)
         {
-            _startingCity = city;
+            _cityIndex = cityIndex;
         }
 
         public void SetProfession(ProfessionInfo info)
@@ -93,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public void CreateCharacter(byte profession)
         {
-            loginScene.CreateCharacter(_character, _startingCity, profession);
+            loginScene.CreateCharacter(_character, _cityIndex, profession);
         }
 
         public void StepBack(int steps = 1)
@@ -155,7 +154,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     if (existing != null)
                         Remove(existing);
 
-                    Add(new CreateCharCityGump((byte) _selectedProfession.DescriptionIndex, loginScene), 4);
+                    Add(new CreateCharSelectionCityGump((byte) _selectedProfession.DescriptionIndex, loginScene), 4);
+                    //Add(new CreateCharCityGump((byte) _selectedProfession.DescriptionIndex, loginScene), 4);
 
                     ChangePage(4);
 

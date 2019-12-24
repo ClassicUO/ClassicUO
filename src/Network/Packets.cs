@@ -130,7 +130,7 @@ namespace ClassicUO.Network
 
     internal sealed class PCreateCharacter : PacketWriter
     {
-        public PCreateCharacter(PlayerMobile character, CityInfo startingCity, uint clientIP, int serverIndex, uint slot, byte profession) : base(0x00)
+        public PCreateCharacter(PlayerMobile character, int cityIndex, uint clientIP, int serverIndex, uint slot, byte profession) : base(0x00)
         {
             int skillcount = 3;
 
@@ -207,12 +207,10 @@ namespace ClassicUO.Network
 
             WriteByte((byte) serverIndex);
 
-            var location = startingCity.Index; // City
+            if (UOFileManager.ClientVersion < ClientVersions.CV_70130 && cityIndex > 0)
+                cityIndex--;
 
-            if (UOFileManager.ClientVersion < ClientVersions.CV_70130 && location > 0)
-                location--;
-
-            WriteByte((byte) location);
+            WriteByte((byte) cityIndex);
 
             WriteUInt(slot);
             WriteUInt(clientIP);

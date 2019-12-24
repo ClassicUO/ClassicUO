@@ -379,7 +379,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 spellDone++;
 
-                                text = new HoveredLabel(name, false, 0x0288, 0x33, font: 9, maxwidth: 130, style: FontStyle.Cropped)
+                                text = new HoveredLabel(name, false, 0x0288, 0x33, 0x0288, font: 9, maxwidth: 130, style: FontStyle.Cropped)
                                 {
                                     X = dataX,
                                     Y = 52 + y,
@@ -408,7 +408,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 spellDone++;
 
-                                text = new HoveredLabel(name, false, 0x0288, 0x33, font: 9, maxwidth: 130, style: FontStyle.Cropped)
+                                text = new HoveredLabel(name, false, 0x0288, 0x33, 0x0288, font: 9, maxwidth: 130, style: FontStyle.Cropped)
                                 {
                                     X = dataX,
                                     Y = 52 + y,

@@ -330,7 +330,7 @@ namespace ClassicUO.Game.Scenes
                 CurrentLoginStep = LoginStep.CharCreation;
         }
 
-        public void CreateCharacter(PlayerMobile character, CityInfo startingCity, byte profession)
+        public void CreateCharacter(PlayerMobile character, int cityIndex, byte profession)
         {
             int i = 0;
 
@@ -341,7 +341,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             Settings.GlobalSettings.LastCharacterName = character.Name;
-            NetClient.Socket.Send(new PCreateCharacter(character, startingCity, NetClient.Socket.ClientAddress, ServerIndex, (uint) i, profession));
+            NetClient.Socket.Send(new PCreateCharacter(character, cityIndex, NetClient.Socket.ClientAddress, ServerIndex, (uint) i, profession));
         }
 
         public void DeleteCharacter(uint index)
@@ -392,6 +392,14 @@ namespace ClassicUO.Game.Scenes
 
                     break;
             }
+        }
+
+        public CityInfo GetCity(int index)
+        {
+            if (index < Cities.Length)
+                return Cities[index];
+
+            return null;
         }
 
         private void NetClient_Connected(object sender, EventArgs e)
@@ -592,7 +600,7 @@ namespace ClassicUO.Game.Scenes
         private void ParseCities(Packet p)
         {
             var count = p.ReadByte();
-            var cities = new CityInfo[count];
+            Cities = new CityInfo[count];
 
             bool isNew = UOFileManager.ClientVersion >= ClientVersions.CV_70130;
             string[] descriptions = null;
@@ -611,35 +619,33 @@ namespace ClassicUO.Game.Scenes
 
             for (int i = 0; i < count; i++)
             {
-                CityInfo cityInfo = null;
+                CityInfo cityInfo;
 
                 if (isNew)
                 {
-                    var cityIndex = p.ReadByte();
-                    var cityName = p.ReadASCII(32);
-                    var cityBuilding = p.ReadASCII(32);
+                    byte cityIndex = p.ReadByte();
+                    string cityName = p.ReadASCII(32);
+                    string cityBuilding = p.ReadASCII(32);
                     ushort cityX = (ushort) p.ReadUInt();
                     ushort cityY = (ushort) p.ReadUInt();
                     sbyte cityZ = (sbyte) p.ReadUInt();
-                    var cityMapIndex = p.ReadUInt();
-                    var cityDescription = p.ReadUInt();
-                    p.ReadUInt();
+                    uint cityMapIndex = p.ReadUInt();
+                    uint cityDescription = p.ReadUInt();
+                    p.Skip(4);
 
                     cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, UOFileManager.Cliloc.GetString((int) cityDescription), cityX, cityY, cityZ, cityMapIndex, isNew);
                 }
                 else
                 {
-                    var cityIndex = p.ReadByte();
-                    var cityName = p.ReadASCII(31);
-                    var cityBuilding = p.ReadASCII(31);
+                    byte cityIndex = p.ReadByte();
+                    string cityName = p.ReadASCII(31);
+                    string cityBuilding = p.ReadASCII(31);
 
                     cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, descriptions != null ? descriptions[i] : string.Empty, (ushort) oldtowns[i].X, (ushort) oldtowns[i].Y, 0, 0, isNew);
                 }
 
-                cities[i] = cityInfo;
+                Cities[i] = cityInfo;
             }
-
-            Cities = cities;
         }
 
         private string[] ReadCityTextFile(int count)

@@ -99,7 +99,7 @@ namespace ClassicUO.Game.UI.Gumps
                         if (offs >= _abilityCount)
                             break;
 
-                        text = new HoveredLabel(AbilityData.Abilities[offs].Name, false, 0x0288, 0x33, font: 9)
+                        text = new HoveredLabel(AbilityData.Abilities[offs].Name, false, 0x0288, 0x33, 0x0288, font: 9)
                         {
                             X = dataX, Y = 42 + y, AcceptMouseInput = true
                         };

@@ -140,7 +140,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 foreach (var item in items)
                 {
-                    var label = new HoveredLabel(item, false, 0x0453, 0x0453, font: _box._font)
+                    var label = new HoveredLabel(item, false, 0x0453, 0x0453, 0x0453, font: _box._font)
                     {
                         X = 2,
                         Y = index * 15,
