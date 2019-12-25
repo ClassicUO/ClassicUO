@@ -557,7 +557,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x13F8: // Gnarled Staves
                                 Abilities[0] = Ability.ConcussionBlow;
-                                Abilities[1] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.ForceOfNature;
 
                                 goto done;
 
