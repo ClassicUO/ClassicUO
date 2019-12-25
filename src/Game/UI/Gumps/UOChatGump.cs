@@ -51,6 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += 40;
 
+            Add(new BorderControl(61, startY - 3, 220 + 8, 200 + 6,3));
             Add(new AlphaBlendControl(0){ X = 64, Y = startY, Width = 220, Height = 200});
             _area = new ScrollArea(64, startY, 220, 200, true)
             {
