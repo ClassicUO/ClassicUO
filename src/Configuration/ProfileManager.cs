@@ -41,29 +41,7 @@ namespace ClassicUO.Configuration
 
 
 
-            // FIXME: this is a temporary patch to change the profile settings name safety
-            string fileToLoad = Path.Combine(path, "settings.json");
-            string newPath = Path.Combine(path, "profile.json");
-
-            if (File.Exists(newPath))
-            {
-                if (File.Exists(fileToLoad))
-                {
-                    try
-                    {
-                        File.Delete(fileToLoad);
-                    }
-                    catch (Exception)
-                    {
-                        Log.Warn( $"Failed to delete file: '{fileToLoad}'");
-                    }
-                }
-
-                fileToLoad = newPath;
-            }
-            //
-
-
+            string fileToLoad = Path.Combine(path, "profile.json");
 
             if (!File.Exists(fileToLoad))
                 Current = new Profile(username, servername, charactername);
