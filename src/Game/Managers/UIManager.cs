@@ -82,7 +82,7 @@ namespace ClassicUO.Game.Managers
         {
             get
             {
-                if (_keyboardFocusControl == null)
+                if (_keyboardFocusControl == null || !_keyboardFocusControl.IsVisible || !_keyboardFocusControl.IsEnabled)
                 {
                     foreach (Control c in Gumps)
                     {
@@ -103,10 +103,11 @@ namespace ClassicUO.Game.Managers
             }
             set
             {
+                _keyboardFocusControl?.OnFocusLeft();
+                _keyboardFocusControl = value;
+
                 if (value != null && value.AcceptKeyboardInput)
                 {
-                    _keyboardFocusControl?.OnFocusLeft();
-                    _keyboardFocusControl = value;
                     value.OnFocusEnter();
                 }
             }

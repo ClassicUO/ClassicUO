@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
@@ -20,6 +21,8 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly ScrollArea _area;
         private readonly Label _currentChannelLabel;
         private string _selectedChannelText;
+        private ChannelCreationBox _channelCreationBox;
+        
 
         private readonly List<ChannelListItemControl> _channelList = new List<ChannelListItemControl>();
 
@@ -140,6 +143,11 @@ namespace ClassicUO.Game.UI.Gumps
                     NetClient.Socket.Send(new PChatLeaveChannelCommand());
                     break;
                 case 2: // create
+                    if (_channelCreationBox == null || _channelCreationBox.IsDisposed)
+                    {
+                        _channelCreationBox = new ChannelCreationBox(Width / 2, Height / 2);
+                        Add(_channelCreationBox);
+                    }
                     break;
             }
         }
@@ -173,6 +181,78 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (ChannelListItemControl control in _channelList)
             {
                 control.IsSelected = control.Text == text;
+            }
+        }
+
+        class ChannelCreationBox : Control
+        {
+            private readonly TextBox _textBox;
+
+            public ChannelCreationBox(int x, int y)
+            {
+                CanMove = true;
+                AcceptMouseInput = true;
+                AcceptKeyboardInput = false;
+
+                Width = 200;
+                Height = 60;
+                X = x - Width / 2;
+                Y = y - Height / 2;
+
+             
+                Add(new AlphaBlendControl(0){ Width = Width, Height = Height});
+
+                Label text = new Label("Create a channel:", true, 0x23, Width - 4, 1)
+                {
+                    X = 2
+                };
+                Add(text);
+
+                text = new Label("Name:", true, 0x23, Width - 4, 1)
+                {
+                    X = 2,
+                    Y = 20
+                };
+                Add(text);
+
+                _textBox = new TextBox(1, -1, 0, Width - 45, hue: 0x0481, style: FontStyle.Fixed)
+                {
+                    X = 41, Y = 20,
+                    Width = Width - 45,
+                    Height = 20
+                };
+                Add(_textBox);
+
+                // close
+                Add(new Button(0, 0x0A94, 0x0A95, 0x0A94)
+                {
+                    X = Width - 19,
+                    Y = Height - 19,
+                    ButtonAction = ButtonAction.Activate
+                });
+
+                // ok
+                Add(new Button(1, 0x0A9A, 0x0A9B, 0x0A9A)
+                {
+                    X = Width - 19 * 2,
+                    Y = Height - 19,
+                    ButtonAction = ButtonAction.Activate
+                });
+            }
+
+
+            public override void OnButtonClick(int buttonID)
+            {
+                if (buttonID == 0) // close
+                {
+                   
+                }
+                else if (buttonID == 1) // ok
+                {
+                    NetClient.Socket.Send(new PChatCreateChannelCommand(_textBox.Text));
+                }
+
+                Dispose();
             }
         }
 
