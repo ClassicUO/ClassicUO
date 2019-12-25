@@ -76,6 +76,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public ushort PartyMessageHue { get; set; } = 0x0044;
         [JsonProperty] public ushort GuildMessageHue { get; set; } = 0x0044;
         [JsonProperty] public ushort AllyMessageHue { get; set; } = 0x0057;
+        [JsonProperty] public ushort ChatMessageHue { get; set; } = 0x0256;
         [JsonProperty] public ushort InnocentHue { get; set; } = 0x005A;
         [JsonProperty] public ushort PartyAuraHue { get; set; } = 0x0044;
         [JsonProperty] public ushort FriendHue { get; set; } = 0x0044;

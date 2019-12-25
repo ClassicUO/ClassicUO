@@ -2825,12 +2825,12 @@ namespace ClassicUO.Network
                     UOChatManager.CurrentChannelName = channelName;
                     UIManager.GetGump<UOChatGump>()?.UpdateConference();
 
-                    GameActions.Print($"You have joined the '{channelName}' channel.", 0x0256, MessageType.System, 1, true);
+                    GameActions.Print($"You have joined the '{channelName}' channel.", ProfileManager.Current.ChatMessageHue, MessageType.Regular, 1, true);
                     break;
                 case 0x03F4:
                     p.Skip(4);
                     channelName = p.ReadUnicode();
-                    GameActions.Print($"You have left the '{channelName}' channel.", 0x0256, MessageType.System, 1, true);
+                    GameActions.Print($"You have left the '{channelName}' channel.", ProfileManager.Current.ChatMessageHue, MessageType.Regular, 1, true);
                     break;
                 case 0x0025:
                 case 0x0026:
@@ -2849,7 +2849,7 @@ namespace ClassicUO.Network
                     }
 
                     //Color c = new Color(49, 82, 156, 0);
-                    GameActions.Print($"{username}: {msgSent}", 0x0256, MessageType.Regular, 1);
+                    GameActions.Print($"{username}: {msgSent}", ProfileManager.Current.ChatMessageHue, MessageType.Regular, 1);
 
                     break;
                 default:
@@ -2887,7 +2887,7 @@ namespace ClassicUO.Network
                             }
                         }
                         
-                        GameActions.Print( msg, 0x0256, MessageType.Regular, 1, true);
+                        GameActions.Print(msg, ProfileManager.Current.ChatMessageHue, MessageType.Regular, 1, true);
                     }
                     break;
             }

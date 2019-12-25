@@ -217,7 +217,7 @@ namespace ClassicUO.Game.UI.Gumps
                             break;
                         case ChatMode.UOChat:
                             DisposeChatModePrefix();
-                            AppendChatModePrefix("Chat: ", 8);
+                            AppendChatModePrefix("Chat: ", ProfileManager.Current.ChatMessageHue);
                             break;
                     }
                 }

@@ -116,7 +116,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _sliderFPS, _circleOfTranspRadius;
         private HSliderBar _sliderSpeechDelay;
         private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
-        private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox, _partyAuraColorPickerBox;
+        private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox, _chatMessageColorPickerBox, _partyAuraColorPickerBox;
         private ColorBox _poisonColorPickerBox, _paralyzedColorPickerBox, _invulnerableColorPickerBox;
         private TextBox _spellFormatBox;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
@@ -962,6 +962,7 @@ namespace ClassicUO.Game.UI.Gumps
             _partyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.PartyMessageHue, "Party Message Color", 20, 0);
             _guildMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.GuildMessageHue, "Guild Message Color", 20, 0);
             _allyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.AllyMessageHue, "Alliance Message Color", 20, 0);
+            _chatMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.ChatMessageHue, "Chat Message Color", 20, 0);
 
             _sliderSpeechDelay.IsVisible = _scaleSpeechDelay.IsChecked;
 
@@ -1511,6 +1512,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _partyMessageColorPickerBox.SetColor(0x0044, UOFileManager.Hues.GetPolygoneColor(12, 0x0044));
                     _guildMessageColorPickerBox.SetColor(0x0044, UOFileManager.Hues.GetPolygoneColor(12, 0x0044));
                     _allyMessageColorPickerBox.SetColor(0x0057, UOFileManager.Hues.GetPolygoneColor(12, 0x0057));
+                    _chatMessageColorPickerBox.SetColor(0x0256, UOFileManager.Hues.GetPolygoneColor(12, 0x0256));
                     _chatAfterEnter.IsChecked = false;
                     UIManager.SystemChat.IsActive = !_chatAfterEnter.IsChecked;
                     _chatAdditionalButtonsCheckbox.IsChecked = true;
@@ -1724,6 +1726,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.PartyMessageHue = _partyMessageColorPickerBox.Hue;
             ProfileManager.Current.GuildMessageHue = _guildMessageColorPickerBox.Hue;
             ProfileManager.Current.AllyMessageHue = _allyMessageColorPickerBox.Hue;
+            ProfileManager.Current.ChatMessageHue = _chatMessageColorPickerBox.Hue;
 
             if (ProfileManager.Current.ActivateChatAfterEnter != _chatAfterEnter.IsChecked)
             {
