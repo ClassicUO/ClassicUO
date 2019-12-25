@@ -199,43 +199,54 @@ namespace ClassicUO.Game.UI.Gumps
                 X = x - Width / 2;
                 Y = y - Height / 2;
 
-             
+
+                const int BORDER_SIZE = 3;
+                const int ROW_HEIGHT = 25;
+
                 Add(new AlphaBlendControl(0){ Width = Width, Height = Height});
+
+                Add(new BorderControl(0, 0, Width, ROW_HEIGHT, BORDER_SIZE));
 
                 Label text = new Label("Create a channel:", true, 0x23, Width - 4, 1)
                 {
-                    X = 2
+                    X = 6,
+                    Y = BORDER_SIZE
                 };
                 Add(text);
+
+                Add(new BorderControl(0, ROW_HEIGHT - BORDER_SIZE, Width, ROW_HEIGHT, BORDER_SIZE));
 
                 text = new Label("Name:", true, 0x23, Width - 4, 1)
                 {
-                    X = 2,
-                    Y = 20
+                    X = 6,
+                    Y = ROW_HEIGHT
                 };
                 Add(text);
 
-                _textBox = new TextBox(1, -1, 0, Width - 45, hue: 0x0481, style: FontStyle.Fixed)
+                _textBox = new TextBox(1, -1, 0, Width - 50, hue: 0x0481, style: FontStyle.Fixed)
                 {
-                    X = 41, Y = 20,
-                    Width = Width - 45,
-                    Height = 20
+                    X = 45, 
+                    Y = ROW_HEIGHT,
+                    Width = Width - 50,
+                    Height = ROW_HEIGHT - BORDER_SIZE * 2
                 };
                 Add(_textBox);
+
+                Add(new BorderControl(0, ROW_HEIGHT * 2 - BORDER_SIZE * 2, Width, ROW_HEIGHT, BORDER_SIZE));
 
                 // close
                 Add(new Button(0, 0x0A94, 0x0A95, 0x0A94)
                 {
-                    X = Width - 19,
-                    Y = Height - 19,
+                    X = (Width - 19) - BORDER_SIZE ,
+                    Y = Height - 19 + BORDER_SIZE * 2,
                     ButtonAction = ButtonAction.Activate
                 });
 
                 // ok
                 Add(new Button(1, 0x0A9A, 0x0A9B, 0x0A9A)
                 {
-                    X = Width - 19 * 2,
-                    Y = Height - 19,
+                    X = (Width - 19 * 2) - BORDER_SIZE,
+                    Y = Height - 19 + BORDER_SIZE * 2,
                     ButtonAction = ButtonAction.Activate
                 });
             }
