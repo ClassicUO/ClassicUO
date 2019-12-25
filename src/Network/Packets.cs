@@ -1014,6 +1014,16 @@ namespace ClassicUO.Network
         }
     }
 
+    internal sealed class PChatMessageCommand : PacketWriter
+    {
+        public PChatMessageCommand(string msg) : base(0xB3)
+        {
+            WriteASCII("ENU", 4);
+            WriteUShort(0x0061);
+            WriteUnicode(msg);
+        }
+    }
+
     internal sealed class POpenChat : PacketWriter
     {
         public POpenChat(string name) : base(0xB5)

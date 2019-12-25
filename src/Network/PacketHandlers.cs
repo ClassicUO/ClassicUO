@@ -2832,6 +2832,25 @@ namespace ClassicUO.Network
                     channelName = p.ReadUnicode();
                     GameActions.Print($"You have left the '{channelName}' channel.", 8, MessageType.System, 1, true);
                     break;
+                case 0x0025:
+                case 0x0026:
+                case 0x0027:
+                    p.Skip(4);
+                    ushort msgType = p.ReadUShort();
+                    username = p.ReadUnicode();
+                    string msgSent = p.ReadUnicode();
+
+                    if (!string.IsNullOrEmpty(msgSent))
+                    {
+                        int idx = msgSent.IndexOf('{');
+                        int idxLast = msgSent.IndexOf('}') + 1;
+
+                        msgSent = msgSent.Remove(idx, idxLast - idx);
+                    }
+
+                    GameActions.Print($"{username}: {msgSent}", 8, MessageType.System, 1);
+
+                    break;
                 default:
                     if ((cmd >= 0x0001 && cmd <= 0x0024) ||
                         (cmd >= 0x0028 && cmd <= 0x002C))

@@ -54,7 +54,8 @@ namespace ClassicUO.Game.UI.Gumps
         Alliance,
         ClientCommand,
         UOAMChat,
-        Prompt
+        Prompt,
+        UOChat,
     }
 
     internal class SystemChatControl : Control
@@ -214,6 +215,10 @@ namespace ClassicUO.Game.UI.Gumps
                             AppendChatModePrefix("[UOAM]: ", 83);
 
                             break;
+                        case ChatMode.UOChat:
+                            DisposeChatModePrefix();
+                            AppendChatModePrefix("Chat: ", 8);
+                            break;
                     }
                 }
             }
@@ -357,6 +362,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                         case '-':
                             Mode = ChatMode.ClientCommand;
+                            break;
+
+                        case ',' when UOChatManager.ChatIsEnabled:
+                            Mode = ChatMode.UOChat;
                             break;
                     }
                 }
@@ -654,6 +663,10 @@ namespace ClassicUO.Game.UI.Gumps
                     case ChatMode.UOAMChat:
                         UoAssist.SignalMessage(text);
 
+                        break;
+
+                    case ChatMode.UOChat:
+                        NetClient.Socket.Send(new PChatMessageCommand(text));
                         break;
                 }
             }
