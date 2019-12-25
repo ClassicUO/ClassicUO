@@ -2830,6 +2830,36 @@ namespace ClassicUO.Network
                     {
                         // TODO: read Chat.enu ?
                         // http://docs.polserver.com/packets/index.php?Packet=0xB2
+
+                        string msg = UOChatManager.GetMessage(cmd - 1);
+
+                        if (string.IsNullOrEmpty(msg))
+                            return;
+
+                        p.Skip(4);
+                        string text = p.ReadUnicode();
+
+                        if (!string.IsNullOrEmpty(msg))
+                        {
+                            int idx = msg.IndexOf("%1");
+
+                            if (idx >= 0)
+                            {
+                                msg = msg.Replace("%1", text);
+                            }
+
+                            if (cmd - 1 == 0x000A || cmd - 1 == 0x0017)
+                            {
+                                idx = msg.IndexOf("%2");
+
+                                if (idx >= 0)
+                                {
+                                    msg = msg.Replace("%2", text);
+                                }
+                            }
+                        }
+                        
+                        GameActions.Print(msg, 1, MessageType.System, 3, false);
                     }
                     break;
             }

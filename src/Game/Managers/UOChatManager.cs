@@ -72,6 +72,15 @@ namespace ClassicUO.Game.Managers
             "You have been banned from this conference.",
         };
 
+
+        public static string GetMessage(int index)
+        {
+            if (index < _messages.Length)
+                return _messages[index];
+
+            return string.Empty;
+        }
+
         public static void AddChannel(string text, bool haspassword)
         {
             if (!Channels.TryGetValue(text, out var channel))
