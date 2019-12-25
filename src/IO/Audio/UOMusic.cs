@@ -24,6 +24,7 @@
 using System;
 
 using ClassicUO.IO.Audio.MP3Sharp;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework.Audio;
 
@@ -55,26 +56,34 @@ namespace ClassicUO.IO.Audio
 
         protected override byte[] GetBuffer()
         {
-            if (m_Playing)
+            try
             {
-                int bytesReturned = m_Stream.Read(m_WaveBuffer, 0, m_WaveBuffer.Length);
-
-                if (bytesReturned != NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK)
+                if (m_Playing)
                 {
-                    if (m_Repeat)
+                    int bytesReturned = m_Stream.Read(m_WaveBuffer, 0, m_WaveBuffer.Length);
+
+                    if (bytesReturned != NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK)
                     {
-                        m_Stream.Position = 0;
-                        m_Stream.Read(m_WaveBuffer, bytesReturned, m_WaveBuffer.Length - bytesReturned);
+                        if (m_Repeat)
+                        {
+                            m_Stream.Position = 0;
+                            m_Stream.Read(m_WaveBuffer, bytesReturned, m_WaveBuffer.Length - bytesReturned);
+                        }
+                        else
+                        {
+                            if (bytesReturned == 0)
+                                Stop();
+                        }
                     }
-                    else
-                    {
-                        if (bytesReturned == 0) Stop();
-                    }
+
+                    return m_WaveBuffer;
                 }
-
-                return m_WaveBuffer;
             }
-
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+            
             Stop();
 
             return null;
