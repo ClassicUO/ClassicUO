@@ -14,7 +14,7 @@ namespace ClassicUO.Game.UI.Gumps
     abstract class ResizableGump : Gump
     {
         private readonly Button _button;
-        private readonly GameBorder _border;
+        private readonly BorderControl _borderControl;
         private Point _lastSize, _savedSize;
         private bool _clicked;
         private int _minW, _minH;
@@ -23,9 +23,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected ResizableGump(int width, int height, int minW, int minH, uint local, uint server) : base(local, server)
         {
-            _border = new GameBorder(0, 0, Width, Height, 4);
-            _border.Hue = 0x01EC;
-            Add(_border);
+            _borderControl = new BorderControl(0, 0, Width, Height, 4);
+            _borderControl.Hue = 0x01EC;
+            Add(_borderControl);
             _button = new Button(0, 0x837, 0x838, 0x838);
             Add(_button);
 
@@ -50,8 +50,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool ShowBorder
         {
-            get => _border.IsVisible;
-            set => _border.IsVisible = _button.IsVisible = value;
+            get => _borderControl.IsVisible;
+            set => _borderControl.IsVisible = _button.IsVisible = value;
         }
 
 
@@ -111,8 +111,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public virtual void OnResize()
         {
-            _border.Width = Width;
-            _border.Height = Height;
+            _borderControl.Width = Width;
+            _borderControl.Height = Height;
             _button.X = Width - (_button.Width >> 0) + 2;
             _button.Y = Height - (_button.Height >> 0) + 2;
         }

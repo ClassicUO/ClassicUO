@@ -38,7 +38,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private const int BORDER_WIDTH = 5;
         private const int BORDER_HEIGHT = 5;
-        private readonly GameBorder _border;
+        private readonly BorderControl _borderControl;
         private readonly Button _button;
         private readonly WorldViewport _viewport;
         private bool _clicked;
@@ -84,8 +84,8 @@ namespace ClassicUO.Game.UI.Gumps
             _button.SetTooltip("Resize game window");
             Width = _worldWidth + BORDER_WIDTH * 2;
             Height = _worldHeight + BORDER_HEIGHT * 2;
-            _border = new GameBorder(0, 0, Width, Height, 4);
-            _border.DragEnd += (sender, e) => 
+            _borderControl = new BorderControl(0, 0, Width, Height, 4);
+            _borderControl.DragEnd += (sender, e) => 
             {
                 UIManager.GetGump<OptionsGump>()?.UpdateVideo();
             };
@@ -93,7 +93,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             UIManager.SystemChat = _systemChatControl = new SystemChatControl(BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
 
-            Add(_border);
+            Add(_borderControl);
             Add(_button);
             Add(_viewport);
             Add(_systemChatControl);
@@ -177,8 +177,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void Resize()
         {
-            _border.Width = Width;
-            _border.Height = Height;
+            _borderControl.Width = Width;
+            _borderControl.Height = Height;
             _button.X = Width - (_button.Width >> 1);
             _button.Y = Height - (_button.Height >> 1);
             _worldWidth = Width - BORDER_WIDTH * 2;
@@ -224,12 +224,12 @@ namespace ClassicUO.Game.UI.Gumps
         }
     }
 
-    internal class GameBorder : Control
+    internal class BorderControl : Control
     {
         private readonly UOTexture[] _borders = new UOTexture[2];
         private readonly int _borderSize;
 
-        public GameBorder(int x, int y, int w, int h, int borderSize)
+        public BorderControl(int x, int y, int w, int h, int borderSize)
         {
             X = x;
             Y = y;

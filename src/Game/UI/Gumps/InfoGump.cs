@@ -45,7 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
             Y = 100;
             CanMove = true;
             AcceptMouseInput = false;
-            Add(new GameBorder(0, 0, WIDTH, HEIGHT, 4));
+            Add(new BorderControl(0, 0, WIDTH, HEIGHT, 4));
 
             Add(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
             {
