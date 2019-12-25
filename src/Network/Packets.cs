@@ -975,15 +975,42 @@ namespace ClassicUO.Network
             WriteASCII("ENU", 4);
             WriteUShort(0x0062);
 
-            //WriteUShort(0x0022);
+            WriteUShort(0x0022);
             WriteUnicode(name);
-           // WriteUShort(0x0022);
-            //WriteUShort(0x0020);
+            WriteUShort(0x0022);
+            WriteUShort(0x0020);
 
             if (!string.IsNullOrEmpty(password))
             {
                 WriteUnicode(password);
             }
+        }
+    }
+
+    internal sealed class PChatCreateChannelCommand : PacketWriter
+    {
+        public PChatCreateChannelCommand(string name, string password = null) : base(0xB3)
+        {
+            WriteASCII("ENU", 4);
+            WriteUShort(0x0063);
+
+            WriteUnicode(name);
+
+            if (!string.IsNullOrEmpty(password))
+            {
+                WriteUShort(0x007B);
+                WriteUnicode(password);
+                WriteUShort(0x007D);
+            }
+        }
+    }
+
+    internal sealed class PChatLeaveChannelCommand : PacketWriter
+    {
+        public PChatLeaveChannelCommand() : base(0xB3)
+        {
+            WriteASCII("ENU", 4);
+            WriteUShort(0x0043);
         }
     }
 

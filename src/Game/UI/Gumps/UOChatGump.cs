@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
@@ -18,6 +19,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly ScrollArea _area;
         private readonly Label _currentChannelLabel;
+        private string _selectedChannelText;
 
         private readonly List<ChannelListItemControl> _channelList = new List<ChannelListItemControl>();
 
@@ -131,9 +133,11 @@ namespace ClassicUO.Game.UI.Gumps
             switch (buttonID)
             {
                 case 0: // join
-                    NetClient.Socket.Send(new PChatJoinCommand("General"));
+                    if (!string.IsNullOrEmpty(_selectedChannelText))
+                        NetClient.Socket.Send(new PChatJoinCommand(_selectedChannelText));
                     break;
                 case 1: // leave
+                    NetClient.Socket.Send(new PChatLeaveChannelCommand());
                     break;
                 case 2: // create
                     break;
@@ -158,24 +162,59 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (var k in UOChatManager.Channels)
             {
                 var c = new ChannelListItemControl(k.Key, 195);
+                _area.Add(c);
                 _channelList.Add(c);
-                _channelList.Add(c);
+            }
+        }
+
+        private void OnChannelSelected(string text)
+        {
+            _selectedChannelText = text;
+            foreach (ChannelListItemControl control in _channelList)
+            {
+                control.IsSelected = control.Text == text;
             }
         }
 
         class ChannelListItemControl : Control
         {
+            private readonly Label _label;
+            private bool _isSelected;
+
             public ChannelListItemControl(string text, int width)
             {
                 Text = text;
                 Width = width;
-                Add(new Label(text, false, 0x49, Width, font: 3)
+                Add(_label = new Label(text, false, 0x49, Width, font: 3)
                 {
                     X = 3
                 });
             }
 
             public readonly string Text;
+
+            public bool IsSelected
+            {
+                get => _isSelected;
+                set
+                {
+                    if (_isSelected != value)
+                    {
+                        _isSelected = value;
+                        _label.Hue = (ushort) (value ? 0x22 : 0x49);
+                    }
+                }
+            }
+
+            protected override void OnMouseUp(int x, int y, MouseButton button)
+            {
+                base.OnMouseUp(x, y, button);
+
+                if (RootParent is UOChatGump g)
+                {
+                    g.OnChannelSelected(Text);
+                }
+            }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {

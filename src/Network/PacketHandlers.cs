@@ -2806,6 +2806,7 @@ namespace ClassicUO.Network
                     p.Skip(4);
                     string username = p.ReadUnicode();
                     UOChatManager.ChatIsEnabled = true;
+                    NetClient.Socket.Send(new PChatJoinCommand("General"));
                     break;
                 case 0x03EE: // add user
                     p.Skip(4);
@@ -2823,6 +2824,13 @@ namespace ClassicUO.Network
                     channelName = p.ReadUnicode();
                     UOChatManager.CurrentChannelName = channelName;
                     UIManager.GetGump<UOChatGump>()?.UpdateConference();
+
+                    GameActions.Print($"You have joined the '{channelName}' channel.", 8, MessageType.System, 1, true);
+                    break;
+                case 0x03F4:
+                    p.Skip(4);
+                    channelName = p.ReadUnicode();
+                    GameActions.Print($"You have left the '{channelName}' channel.", 8, MessageType.System, 1, true);
                     break;
                 default:
                     if ((cmd >= 0x0001 && cmd <= 0x0024) ||
@@ -2859,7 +2867,7 @@ namespace ClassicUO.Network
                             }
                         }
                         
-                        GameActions.Print(msg, 1, MessageType.System, 3, false);
+                        GameActions.Print(msg, 8, MessageType.System, 1, true);
                     }
                     break;
             }
