@@ -23,8 +23,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-
+using System.Text;
+using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -74,6 +76,53 @@ namespace ClassicUO.Game.Managers
             if (macros != null)
                 for (int i = 0; i < macros.Length; i++)
                     AppendMacro(macros[i]);
+        }
+
+        public void Load(string path)
+        {
+            if (!File.Exists(path))
+            {
+                Log.Warn("No macros.xml file");
+                return;
+            }
+
+            XmlDocument doc = new XmlDocument();
+            try
+            {
+                doc.Load(path);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+                return;
+            }
+
+            XmlElement root = doc["macros"];
+
+            
+        }
+
+        public void Save(string path)
+        {
+            var list = GetAllMacros();
+
+            XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
+            {
+                Formatting = System.Xml.Formatting.Indented,
+                IndentChar = '\t',
+                Indentation = 1
+            };
+
+            xml.WriteStartDocument(true);
+            xml.WriteStartElement("macros");
+
+            foreach (var macro in list)
+            {
+                macro.Save(xml);
+            }
+
+            xml.WriteEndElement();
+            xml.WriteEndDocument();            
         }
 
         public long WaitForTargetTimer { get; set; }
@@ -1267,14 +1316,17 @@ namespace ClassicUO.Game.Managers
     [JsonObject]
     internal class Macro : IEquatable<Macro>, INode<Macro>
     {
-        public Macro(string name, SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift)
+        public Macro(string name, SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift) : this(name)
         {
-            Name = name;
-
             Key = key;
             Alt = alt;
             Ctrl = ctrl;
             Shift = shift;
+        }
+
+        public Macro(string name)
+        {
+            Name = name;
         }
 
         public string Name { get; }
@@ -1407,6 +1459,60 @@ namespace ClassicUO.Game.Managers
                     offset = (int) MacroSubType.ConfusionBlastPotion;
                     count = MacroSubType.ExplosionPotion - MacroSubType.ConfusionBlastPotion;
                     break;
+            }
+        }
+
+        public void Save(XmlTextWriter writer)
+        {
+            writer.WriteStartElement("macro");
+            writer.WriteAttributeString("name", Name);
+            writer.WriteAttributeString("key", Key.ToString());
+            writer.WriteAttributeString("alt", Alt.ToString());
+            writer.WriteAttributeString("ctrl", Ctrl.ToString());
+            writer.WriteAttributeString("shift", Shift.ToString());
+
+            writer.WriteStartElement("actions");
+            for (MacroObject action = FirstNode; action != null; action = action.Right)
+            {
+                writer.WriteAttributeString("code", action.Code.ToString());
+                writer.WriteAttributeString("subcode", action.SubCode.ToString());
+                writer.WriteAttributeString("hassubcode", action.HasSubMenu.ToString());
+
+                if (action.HasString())
+                    writer.WriteAttributeString("text", ((MacroObjectString) action).Text);
+            }
+            writer.WriteEndElement();
+
+            writer.WriteEndElement();
+        }
+
+        public void Load(XmlElement xml)
+        {
+            if (xml == null)
+                return;
+
+            Key = (SDL.SDL_Keycode) int.Parse(xml.GetAttribute("key"));
+            Alt = bool.Parse(xml.GetAttribute("alt"));
+            Ctrl = bool.Parse(xml.GetAttribute("ctrl"));
+            Shift = bool.Parse(xml.GetAttribute("shift"));
+
+            foreach (XmlElement xmlAction in xml.GetElementsByTagName("actions"))
+            {
+                MacroType code = (MacroType) int.Parse(xmlAction.GetAttribute("code"));
+                MacroSubType sub = (MacroSubType) int.Parse(xmlAction.GetAttribute("subcode"));
+                bool hassubcode = bool.Parse(xmlAction.GetAttribute("hassubcode"));
+
+                MacroObject m;
+                if (xmlAction.HasAttribute("text"))
+                {
+                    m = new MacroObjectString(code, sub, xmlAction.GetAttribute("text"));
+                }
+                else
+                {
+                    m = new MacroObject(code, sub);
+                }
+
+
             }
         }
     }
