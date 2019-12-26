@@ -158,27 +158,9 @@ namespace ClassicUO.Game.UI.Gumps
         private void AddJournalEntry(object sender, JournalEntry entry)
         {
             string text = $"{(entry.Name != string.Empty ? $"{entry.Name}: " : string.Empty)}{entry.Text}";
-            //TransformFont(ref font, ref asUnicode);
+            
             _journalEntries.AddEntry(text, entry.Font, entry.Hue, entry.IsUnicode, entry.Time);
         }
-
-        //private void TransformFont(ref byte font, ref bool asUnicode)
-        //{
-        //    if (asUnicode)
-        //        return;
-
-        //    switch (font)
-        //    {
-        //        case 3:
-
-        //        {
-        //            font = 1;
-        //            asUnicode = true;
-
-        //            break;
-        //        }
-        //    }
-        //}
 
         public override void Save(BinaryWriter writer)
         {

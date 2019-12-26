@@ -67,6 +67,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public int SpeechDelay { get; set; } = 100;
         [JsonProperty] public bool ScaleSpeechDelay { get; set; } = true;
         [JsonProperty] public bool SaveJournalToFile { get; set; }
+        [JsonProperty] public bool UnicodeJournal { get; set; }
 
         // hues
         [JsonProperty] public ushort SpeechHue { get; set; } = 0x02B2;
