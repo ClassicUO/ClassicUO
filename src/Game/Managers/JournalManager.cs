@@ -53,8 +53,21 @@ namespace ClassicUO.Game.Managers
                 isunicode = ProfileManager.Current.OverrideAllFontsIsUnicode;
             }
 
-            var n = DateTime.Now;
-            JournalEntry entry = new JournalEntry(text, font, hue, name, isunicode, n);
+            var timeNow = DateTime.Now;
+
+            JournalEntry entry = new JournalEntry(text, font, hue, name, isunicode, timeNow);
+
+            if (!ProfileManager.Current.UnicodeJournal)
+            {
+                entry.Font = font;
+                entry.IsUnicode = isunicode;
+            }
+            else
+            {
+                entry.Font = 0;
+                entry.IsUnicode = true;
+            }
+
             Entries.AddToBack(entry);
             EntryAdded.Raise(entry);
 
@@ -63,7 +76,7 @@ namespace ClassicUO.Game.Managers
                 CreateWriter();
             }
 
-            _fileWriter?.WriteLine($"[{n:g}]  {name}: {text}");
+            _fileWriter?.WriteLine($"[{timeNow:g}]  {name}: {text}");
         }
 
         private void CreateWriter()
@@ -105,13 +118,13 @@ namespace ClassicUO.Game.Managers
 
     internal class JournalEntry
     {
-        public readonly byte Font;
-        public readonly ushort Hue;
+        public byte Font;
+        public ushort Hue;
 
-        public readonly bool IsUnicode;
-        public readonly string Name;
-        public readonly string Text;
-        public readonly DateTime Time;
+        public bool IsUnicode;
+        public string Name;
+        public string Text;
+        public DateTime Time;
 
         public JournalEntry(string text, byte font, ushort hue, string name, bool isunicode, DateTime time)
         {
