@@ -129,10 +129,7 @@ namespace ClassicUO.Game.Managers
 
         public bool WaitingBandageTarget { get; set; }
 
-        public void InitMacro(Macro first)
-        {
-            _firstNode = first;
-        }
+
 
         public void AppendMacro(Macro macro)
         {
