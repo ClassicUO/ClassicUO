@@ -152,7 +152,7 @@ namespace ClassicUO.Game.Scenes
             Macros = new MacroManager();
 
             // #########################################################
-            // [MACRO_FIX]
+            // [FILE_FIX]
             // TODO: this code is a workaround to port old macros to the new xml system.
             if (ProfileManager.Current.Macros != null)
             {
@@ -166,6 +166,7 @@ namespace ClassicUO.Game.Scenes
             // #########################################################
 
             Macros.Load();
+
             InfoBars = new InfoBarManager();
             _healthLinesManager = new HealthLinesManager();
             _weather = new Weather();

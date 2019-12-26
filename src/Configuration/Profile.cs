@@ -28,6 +28,7 @@ using System.IO;
 using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -208,7 +209,7 @@ namespace ClassicUO.Configuration
         };
 
         [JsonProperty]
-        public Macro[] Macros { get; set; } // [MACRO_FIX] TODO: REMOVE IT
+        public Macro[] Macros { get; set; } // [FILE_FIX] TODO: REMOVE IT
 
         [JsonProperty] public bool CounterBarEnabled { get; set; }
         [JsonProperty] public bool CounterBarHighlightOnUse { get; set; }
@@ -327,11 +328,12 @@ namespace ClassicUO.Configuration
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin"))))
                 UIManager.AnchorManager.Save(writer);
 
-            using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "skillsgroups.bin"))))
-                SkillsGroupManager.Save(writer);
+            //using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "skillsgroups.bin"))))
+            SkillsGroupManager.Save();
         }
 
         public static uint GumpsVersion { get; private set; }
+
         public List<Gump> ReadGumps()
         {
             string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username.Trim(), ServerName.Trim(), CharacterName.Trim());
@@ -341,7 +343,9 @@ namespace ClassicUO.Configuration
             if (!File.Exists(binpath))
                 return null;
 
-
+            // #########################################################
+            // [FILE_FIX]
+            // TODO: this code is a workaround to port old macros to the new xml system.
             string skillsGroupsPath = Path.Combine(path, "skillsgroups.bin");
 
             if (File.Exists(skillsGroupsPath))
@@ -349,14 +353,58 @@ namespace ClassicUO.Configuration
                 try
                 {
                     using (BinaryReader reader = new BinaryReader(File.OpenRead(skillsGroupsPath)))
-                        SkillsGroupManager.Load(reader);
+                    {
+                        try
+                        {
+                            int version = reader.ReadInt32();
+
+                            int groupCount = reader.ReadInt32();
+
+                            for (int i = 0; i < groupCount; i++)
+                            {
+                                int entriesCount = reader.ReadInt32();
+                                string groupName = reader.ReadUTF8String(reader.ReadInt32());
+
+                                if (!SkillsGroupManager.Groups.TryGetValue(groupName, out var list) || list == null)
+                                {
+                                    list = new List<int>();
+                                    SkillsGroupManager.Groups[groupName] = list;
+                                }
+
+                                for (int j = 0; j < entriesCount; j++)
+                                {
+                                    int skillIndex = reader.ReadInt32();
+                                    if (skillIndex < UOFileManager.Skills.SkillsCount)
+                                        list.Add(skillIndex);
+                                }
+                            }
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+
                 }
                 catch (Exception e)
                 {
                     SkillsGroupManager.LoadDefault();
                     Log.Error( e.StackTrace);
                 }
+
+               
+                SkillsGroupManager.Save();
             }
+            try
+            {
+                File.Delete(skillsGroupsPath);
+            }
+            catch { }
+            // #########################################################
+
+
+            SkillsGroupManager.Load();
+
 
             List<Gump> gumps = new List<Gump>();
 
