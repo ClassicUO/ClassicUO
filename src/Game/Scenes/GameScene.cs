@@ -149,7 +149,22 @@ namespace ClassicUO.Game.Scenes
 
             HeldItem = new ItemHold();
             Hotkeys = new HotkeysManager();
-            Macros = new MacroManager(ProfileManager.Current.Macros);
+            Macros = new MacroManager();
+
+            // #########################################################
+            // TODO: this code is a workaround to port old macros to the new xml system.
+            // Must be REMOVED.
+            if (ProfileManager.Current.Macros != null)
+            {
+                for (int i = 0; i < ProfileManager.Current.Macros.Length; i++)
+                    Macros.AppendMacro(ProfileManager.Current.Macros[i]);
+
+                Macros.Save();
+
+                ProfileManager.Current.Macros = null;
+            }
+            // #########################################################
+
             Macros.Load();
             InfoBars = new InfoBarManager();
             _healthLinesManager = new HealthLinesManager();

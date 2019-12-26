@@ -1904,7 +1904,9 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.SpellDisplayFormat = _spellFormatBox.Text;
 
             // macros
-            ProfileManager.Current.Macros = CUOEnviroment.Client.GetScene<GameScene>().Macros.GetAllMacros().ToArray();
+            CUOEnviroment.Client.GetScene<GameScene>().Macros.Save();
+            //ProfileManager.Current.Macros = CUOEnviroment.Client.GetScene<GameScene>().Macros.GetAllMacros().ToArray();
+
 
             // counters
 

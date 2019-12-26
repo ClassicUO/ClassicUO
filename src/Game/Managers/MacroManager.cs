@@ -71,12 +71,6 @@ namespace ClassicUO.Game.Managers
         private MacroObject _lastMacro;
         private long _nextTimer;
 
-        public MacroManager(Macro[] macros)
-        {
-            if (macros != null)
-                for (int i = 0; i < macros.Length; i++)
-                    AppendMacro(macros[i]);
-        }
 
         public long WaitForTargetTimer { get; set; }
 
