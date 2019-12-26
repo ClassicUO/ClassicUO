@@ -52,8 +52,9 @@ namespace ClassicUO.Game.UI.Gumps
             UIManager.GetGump<HealthBarGump>(World.Player)?.Dispose();
 
             CanMove = true;
-            CanBeSaved = true;
         }
+
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_STATUSGUMP;
 
         public override void OnButtonClick(int buttonID)
         {

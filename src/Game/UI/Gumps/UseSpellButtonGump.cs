@@ -44,7 +44,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             AcceptMouseInput = true;
-            CanBeSaved = true;
         }
 
         public UseSpellButtonGump(SpellDefinition spell) : this()
@@ -53,6 +52,8 @@ namespace ClassicUO.Game.UI.Gumps
             _spell = spell;
             BuildGump();
         }
+
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SPELLBUTTON;
 
         private void BuildGump()
         {

@@ -63,7 +63,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _totalReal = 0;
             _totalValue = 0;
-            CanBeSaved = true;
             CanMove = true;
             AcceptMouseInput = true;
             WantUpdateSize = false;
@@ -120,6 +119,8 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_sortOrderIndicator = new GumpPic(0, 0, 0x985, 0));
             OnButtonClick((int) Buttons.SortName);
         }
+
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SKILLMENU;
 
         public override void OnButtonClick(int buttonID)
         {

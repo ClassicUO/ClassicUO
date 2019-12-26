@@ -74,6 +74,8 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_COUNTERBAR;
+
         private void BuildGump()
         {
             CanMove = true;
@@ -81,7 +83,6 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptKeyboardInput = false;
             CanCloseWithRightClick = false;
             WantUpdateSize = false;
-            CanBeSaved = true;
 
             Width = _rectSize * _columns + 1;
             Height = _rectSize * _rows + 1;

@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml;
 
 using ClassicUO.Game;
 using ClassicUO.Game.Managers;
@@ -447,6 +448,43 @@ namespace ClassicUO.Configuration
                     }
                 }
             }
+
+
+            string gumpsXmlPath = Path.Combine(path, "gumps.xml");
+
+            if (File.Exists(gumpsXmlPath))
+            {
+                XmlDocument doc = new XmlDocument();
+                try
+                {
+                    doc.Load(gumpsXmlPath);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+
+                    return gumps;
+                }
+
+                XmlElement root = doc["gumps"];
+
+                if (root != null)
+                {
+                    foreach (XmlElement xml in root.GetElementsByTagName("gump"))
+                    {
+                        int type = int.Parse(xml.GetAttribute("type"));
+                        int x = int.Parse(xml.GetAttribute("x"));
+                        int y = int.Parse(xml.GetAttribute("y"));
+                        uint serial = uint.Parse(xml.GetAttribute("serial"));
+
+                        switch (type)
+                        {
+
+                        }
+                    }
+                }
+            }
+
 
 
             string anchorsPath = Path.Combine(path, "anchors.bin");

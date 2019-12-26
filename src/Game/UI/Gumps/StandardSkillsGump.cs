@@ -62,7 +62,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public StandardSkillsGump() : base(Constants.SKILLSTD_LOCALSERIAL, 0)
         {
-            CanBeSaved = true;
             AcceptMouseInput = false;
             CanMove = true;
             Height = 200 + _diffY;
@@ -110,7 +109,8 @@ namespace ClassicUO.Game.UI.Gumps
             _hitBox.MouseUp += _hitBox_MouseUp;
         }
 
-      
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SKILLMENU;
+
         public bool IsMinimized
         {
             get => _isMinimized;

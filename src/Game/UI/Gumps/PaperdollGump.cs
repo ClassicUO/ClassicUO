@@ -80,6 +80,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
         }
 
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_PAPERDOLL;
+
         public bool IsMinimized
         {
             get => _isMinimized;
@@ -155,8 +157,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            //AcceptMouseInput = true;
-            CanBeSaved = true;
             CanMove = true;
             LocalSerial = Mobile.Serial;
 

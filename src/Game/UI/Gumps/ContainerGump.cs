@@ -84,6 +84,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public ushort Graphic { get; }
 
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_CONTAINER;
+
         public TextContainer TextContainer { get; } = new TextContainer();
 
         public bool IsMinimized
@@ -117,7 +119,6 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGump()
         {
             CanMove = true;
-            CanBeSaved = true;
             WantUpdateSize = false;
             _isCorspeContainer = Graphic == 0x0009;
 

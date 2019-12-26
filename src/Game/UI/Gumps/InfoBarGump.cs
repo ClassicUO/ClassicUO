@@ -36,10 +36,8 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class InfoBarGump : Gump
     {
-
         private readonly AlphaBlendControl _background;
         private long _refreshTime;
-        //private Label _name;
 
         public InfoBarGump() : base(0, 0)
         {
@@ -47,13 +45,14 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             AcceptKeyboardInput = false;
             CanCloseWithRightClick = false;
-            CanBeSaved = true;
             Height = 20;
 
             Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height });
 
             ResetItems();
         }
+
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_INFOBAR;
 
         public void ResetItems()
         {

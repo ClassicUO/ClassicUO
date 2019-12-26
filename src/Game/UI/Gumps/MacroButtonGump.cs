@@ -59,7 +59,6 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
-            CanBeSaved = true;
             WantUpdateSize = false;
             AnchorGroupName = "spell";
             WidthMultiplier = 2;
@@ -67,6 +66,8 @@ namespace ClassicUO.Game.UI.Gumps
             GroupMatrixWidth = 44;
             GroupMatrixHeight = 44;
         }
+
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_MACROBUTTON;
 
         private void BuildGump()
         {

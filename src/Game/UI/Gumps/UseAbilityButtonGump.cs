@@ -42,7 +42,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             AcceptMouseInput = true;
-            CanBeSaved = true;
         }
 
         public UseAbilityButtonGump(AbilityDefinition def, bool primary) : this()
@@ -52,6 +51,8 @@ namespace ClassicUO.Game.UI.Gumps
             _definition = def;
             BuildGump();
         }
+
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_ABILITYBUTTON;
 
         private void BuildGump()
         {

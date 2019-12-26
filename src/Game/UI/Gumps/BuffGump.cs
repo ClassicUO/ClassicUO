@@ -48,8 +48,9 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanCloseWithRightClick = true;
             AcceptMouseInput = true;
-            CanBeSaved = true;
         }
+
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_BUFF;
 
         public BuffGump(int x, int y) : this()
         {
