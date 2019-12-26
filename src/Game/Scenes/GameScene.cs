@@ -150,6 +150,7 @@ namespace ClassicUO.Game.Scenes
             HeldItem = new ItemHold();
             Hotkeys = new HotkeysManager();
             Macros = new MacroManager(ProfileManager.Current.Macros);
+            Macros.Load();
             InfoBars = new InfoBarManager();
             _healthLinesManager = new HealthLinesManager();
             _weather = new Weather();
@@ -304,6 +305,7 @@ namespace ClassicUO.Game.Scenes
             TargetManager.ClearTargetingWithoutTargetCancelPacket();
 
             ProfileManager.Current?.Save(UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
+            Macros.Save();
             ProfileManager.UnLoadProfile();
 
             StaticFilters.CleanCaveTextures();

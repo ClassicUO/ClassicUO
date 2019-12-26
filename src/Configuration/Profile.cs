@@ -214,7 +214,7 @@ namespace ClassicUO.Configuration
             {
                 FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 10)
                 {
-                    HasSubMenu = 1
+                    SubMenuType = 1
                 }
             },
 
@@ -222,7 +222,7 @@ namespace ClassicUO.Configuration
             {
                 FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 9)
                 {
-                    HasSubMenu = 1
+                    SubMenuType = 1
                 }
             },
 
@@ -230,7 +230,7 @@ namespace ClassicUO.Configuration
             {
                 FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 12)
                 {
-                    HasSubMenu = 1
+                    SubMenuType = 1
                 }
             },
 
@@ -238,7 +238,7 @@ namespace ClassicUO.Configuration
             {
                 FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 16)
                 {
-                    HasSubMenu = 1
+                    SubMenuType = 1
                 }
             },
 
@@ -246,7 +246,7 @@ namespace ClassicUO.Configuration
             {
                 FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 17)
                 {
-                    HasSubMenu = 1
+                    SubMenuType = 1
                 }
             },
 
@@ -254,7 +254,7 @@ namespace ClassicUO.Configuration
             {
                 FirstNode = new MacroObject((MacroType) 18, 0)
                 {
-                    HasSubMenu = 0
+                    SubMenuType = 0
                 }
             },
 
@@ -262,7 +262,7 @@ namespace ClassicUO.Configuration
             {
                 FirstNode = new MacroObject((MacroType) 19, 0)
                 {
-                    HasSubMenu = 0
+                    SubMenuType = 0
                 }
             }
         };
