@@ -152,8 +152,8 @@ namespace ClassicUO.Game.Scenes
             Macros = new MacroManager();
 
             // #########################################################
+            // [MACRO_FIX]
             // TODO: this code is a workaround to port old macros to the new xml system.
-            // Must be REMOVED.
             if (ProfileManager.Current.Macros != null)
             {
                 for (int i = 0; i < ProfileManager.Current.Macros.Length; i++)

@@ -208,64 +208,7 @@ namespace ClassicUO.Configuration
         };
 
         [JsonProperty]
-        public Macro[] Macros { get; set; } =
-        {
-            new Macro("Paperdoll", (SDL.SDL_Keycode) 112, true, false, false)
-            {
-                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 10)
-                {
-                    SubMenuType = 1
-                }
-            },
-
-            new Macro("Options", (SDL.SDL_Keycode) 111, true, false, false)
-            {
-                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 9)
-                {
-                    SubMenuType = 1
-                }
-            },
-
-            new Macro("Journal", (SDL.SDL_Keycode) 106, true, false, false)
-            {
-                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 12)
-                {
-                    SubMenuType = 1
-                }
-            },
-
-            new Macro("Backpack", (SDL.SDL_Keycode) 105, true, false, false)
-            {
-                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 16)
-                {
-                    SubMenuType = 1
-                }
-            },
-
-            new Macro("Radar", (SDL.SDL_Keycode) 114, true, false, false)
-            {
-                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 17)
-                {
-                    SubMenuType = 1
-                }
-            },
-
-            new Macro("Bow", (SDL.SDL_Keycode) 98, false, true, false)
-            {
-                FirstNode = new MacroObject((MacroType) 18, 0)
-                {
-                    SubMenuType = 0
-                }
-            },
-
-            new Macro("Salute", (SDL.SDL_Keycode) 115, false, true, false)
-            {
-                FirstNode = new MacroObject((MacroType) 19, 0)
-                {
-                    SubMenuType = 0
-                }
-            }
-        };
+        public Macro[] Macros { get; set; } // [MACRO_FIX] TODO: REMOVE IT
 
         [JsonProperty] public bool CounterBarEnabled { get; set; }
         [JsonProperty] public bool CounterBarHighlightOnUse { get; set; }

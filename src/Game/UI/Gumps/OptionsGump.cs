@@ -1905,8 +1905,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             // macros
             CUOEnviroment.Client.GetScene<GameScene>().Macros.Save();
-            //ProfileManager.Current.Macros = CUOEnviroment.Client.GetScene<GameScene>().Macros.GetAllMacros().ToArray();
-
 
             // counters
 
