@@ -23,6 +23,7 @@
 
 using System.IO;
 using System.Linq;
+using System.Xml;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -33,6 +34,7 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -237,6 +239,60 @@ namespace ClassicUO.Game.UI.Gumps
             IsEnabled = IsVisible = ProfileManager.Current.CounterBarEnabled;
         }
 
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+
+            writer.WriteElementString("rows", _rows.ToString());
+            writer.WriteElementString("columns", _columns.ToString());
+            writer.WriteElementString("rectsize", _rectSize.ToString());
+
+            var controls = FindControls<CounterItem>();
+
+            writer.WriteStartElement("controls");
+            foreach (CounterItem control in controls)
+            {
+                writer.WriteStartElement("control");
+                writer.WriteAttributeString("graphic", control.Graphic.ToString());
+                writer.WriteAttributeString("hue", control.Hue.ToString());
+                writer.WriteEndElement();
+            }
+            writer.WriteEndElement();
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+
+            _rows = int.Parse(xml.GetAttribute("rows"));
+            _columns = int.Parse(xml.GetAttribute("columns"));
+            _rectSize = int.Parse(xml.GetAttribute("rectsize"));
+
+            BuildGump();
+
+            XmlElement controlsXml = xml["controls"];
+
+            if (controlsXml != null)
+            {
+                var items = GetControls<CounterItem>();
+                int index = 0;
+
+                foreach (XmlElement controlXml in controlsXml.GetElementsByTagName("control"))
+                {
+                    if (index < items.Length)
+                    {
+                        items[index++]?.SetGraphic(ushort.Parse(controlXml.GetAttribute("graphic")), ushort.Parse(controlXml.GetAttribute("hue")));
+                    }
+                    else
+                    {
+                        Log.Error("Index outbounds when parsing counter bar items");
+                    }
+                }
+            }
+
+            IsEnabled = IsVisible = ProfileManager.Current.CounterBarEnabled;
+        }
 
 
         private class CounterItem : Control

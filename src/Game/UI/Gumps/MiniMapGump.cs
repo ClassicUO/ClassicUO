@@ -23,6 +23,7 @@
 
 using System.IO;
 using System.Linq;
+using System.Xml;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -67,6 +68,19 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(reader);
             _useLargeMap = reader.ReadBoolean();
+            CreateMap();
+        }
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            writer.WriteAttributeString("isminimized", _useLargeMap.ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+            _useLargeMap = bool.Parse(xml.GetAttribute("isminimized"));
             CreateMap();
         }
 

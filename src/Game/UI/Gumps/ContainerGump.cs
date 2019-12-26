@@ -23,6 +23,7 @@
 
 using System.IO;
 using System.Linq;
+using System.Xml;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -309,6 +310,23 @@ namespace ClassicUO.Game.UI.Gumps
             Dispose();
         }
 
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            writer.WriteAttributeString("graphic", Graphic.ToString());
+            writer.WriteAttributeString("isminimized", IsMinimized.ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+            // skip loading
+
+            CUOEnviroment.Client.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
+            Dispose();
+        }
+
+      
         private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<uint> e)
         {
             foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.LocalSerial)))

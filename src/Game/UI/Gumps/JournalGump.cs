@@ -23,6 +23,7 @@
 
 using System;
 using System.IO;
+using System.Xml;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -200,6 +201,21 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _isMinimized = reader.ReadBoolean();
             }
+        }
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            writer.WriteAttributeString("height", _background.SpecialHeight.ToString());
+            writer.WriteAttributeString("isminimized", IsMinimized.ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+
+            _background.Height = _background.SpecialHeight = int.Parse(xml.GetAttribute("height"));
+            _isMinimized = bool.Parse(xml.GetAttribute("isminimized"));
         }
 
         private void InitializeJournalEntries()

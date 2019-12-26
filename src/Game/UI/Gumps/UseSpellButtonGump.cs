@@ -23,6 +23,7 @@
 
 using System;
 using System.IO;
+using System.Xml;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -155,9 +156,18 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        public override void Dispose()
+
+        public override void Save(XmlTextWriter writer)
         {
-            base.Dispose();
+            base.Save(writer);
+            writer.WriteAttributeString("id", _spell.ID.ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+            _spell = SpellDefinition.FullIndexGetSpell(int.Parse(xml.GetAttribute("id")));
+            BuildGump();
         }
     }
 }

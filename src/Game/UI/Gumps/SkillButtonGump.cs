@@ -22,6 +22,7 @@
 #endregion
 
 using System.IO;
+using System.Xml;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -121,6 +122,25 @@ namespace ClassicUO.Game.UI.Gumps
             _skill = World.Player.Skills[skillIndex];
 
             BuildGump();
+        }
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            writer.WriteAttributeString("id", _skill.Index.ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+            int index = int.Parse(xml.GetAttribute("id"));
+
+            if (index >= 0 && index < World.Player.Skills.Length)
+            {
+                _skill = World.Player.Skills[index];
+            }
+            else 
+                Dispose();
         }
     }
 }

@@ -84,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _background.TitleGumpID = 0x9D2;
         }
 
-        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_TIPNOTICE;
+        //public override GUMP_TYPE GumpType => GUMP_TYPE.GT_TIPNOTICE;
 
         public override void OnButtonClick(int buttonID)
         {

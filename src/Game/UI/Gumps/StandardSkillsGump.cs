@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -300,7 +301,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             writer.Write(_boxes.Count);
 
-            for (int i = 0; i < _boxes.Count; i++) writer.Write(_boxes[i].Opened);
+            for (int i = 0; i < _boxes.Count; i++) 
+                writer.Write(_boxes[i].Opened);
             writer.Write(IsMinimized);
         }
 
@@ -330,6 +332,25 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _isMinimized = reader.ReadBoolean();
             }
+        }
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            writer.WriteAttributeString("isminimized", IsMinimized.ToString());
+            writer.WriteAttributeString("height", _scrollArea.SpecialHeight.ToString());
+
+            writer.WriteStartElement("groups");
+
+            for (int i = 0; i < _boxes.Count; i++)
+                writer.WriteAttributeString("isopen", _boxes[i].Opened.ToString());
+
+            writer.WriteEndElement();
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
         }
 
         private class SkillNameComparer : IComparer<int>

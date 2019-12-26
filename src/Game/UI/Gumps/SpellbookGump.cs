@@ -23,6 +23,7 @@
 
 using System;
 using System.IO;
+using System.Xml;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -116,6 +117,19 @@ namespace ClassicUO.Game.UI.Gumps
                 reader.ReadBoolean();
             }
 
+            Dispose();
+        }
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            writer.WriteAttributeString("isminimized", IsMinimized.ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+            CUOEnviroment.Client.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
             Dispose();
         }
 

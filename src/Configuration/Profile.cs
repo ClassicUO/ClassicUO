@@ -472,14 +472,107 @@ namespace ClassicUO.Configuration
                 {
                     foreach (XmlElement xml in root.GetElementsByTagName("gump"))
                     {
-                        int type = int.Parse(xml.GetAttribute("type"));
+                        GUMP_TYPE type = (GUMP_TYPE) int.Parse(xml.GetAttribute("type"));
                         int x = int.Parse(xml.GetAttribute("x"));
                         int y = int.Parse(xml.GetAttribute("y"));
                         uint serial = uint.Parse(xml.GetAttribute("serial"));
 
+                        Gump gump = null;
                         switch (type)
                         {
+                            case GUMP_TYPE.GT_BUFF:
+                                gump = new BuffGump();
+                                break;
+                            case GUMP_TYPE.GT_CONTAINER: 
+                                gump = new ContainerGump();
+                                break;
+                            case GUMP_TYPE.GT_COUNTERBAR:
+                                gump = new CounterBarGump();
+                                break;
+                            case GUMP_TYPE.GT_HEALTHBAR:
+                                if (CustomBarsToggled)
+                                    gump = new HealthBarGumpCustom();
+                                else 
+                                    gump = new HealthBarGump();
+                                break;
+                            case GUMP_TYPE.GT_INFOBAR: 
+                                gump = new InfoBarGump();
+                                break;
+                            case GUMP_TYPE.GT_JOURNAL: 
+                                gump = new JournalGump();
+                                break;
+                            case GUMP_TYPE.GT_MACROBUTTON:
+                                gump = new MacroButtonGump();
+                                break;
+                            case GUMP_TYPE.GT_MINIMAP:
+                                gump = new MiniMapGump();
+                                break;
+                            case GUMP_TYPE.GT_PAPERDOLL:
+                                gump = new PaperDollGump();
+                                break;
+                            case GUMP_TYPE.GT_SKILLMENU:
+                                if (StandardSkillsGump)
+                                    gump = new StandardSkillsGump();
+                                else 
+                                    gump = new SkillGumpAdvanced();
+                                break;
+                            case GUMP_TYPE.GT_SPELLBOOK: 
+                                gump = new SpellbookGump();
+                                break;
+                            case GUMP_TYPE.GT_STATUSGUMP:
+                                switch (Settings.GlobalSettings.ShardType)
+                                {
+                                    default:
+                                    case 0: // modern
 
+                                        gump = new StatusGumpModern();
+
+                                        break;
+
+                                    case 1: // old
+
+                                        gump = new StatusGumpOld();
+
+                                        break;
+
+                                    case 2: // outlands
+
+                                        gump = new StatusGumpOutlands();
+
+                                        break;
+                                }
+                                break;
+                            //case GUMP_TYPE.GT_TIPNOTICE: 
+                            //    gump = new TipNoticeGump();
+                            //    break;
+                            case GUMP_TYPE.GT_ABILITYBUTTON: 
+                                gump = new UseAbilityButtonGump();
+                                break;
+                            case GUMP_TYPE.GT_SPELLBUTTON: 
+                                gump = new UseSpellButtonGump();
+                                break;
+                            case GUMP_TYPE.GT_SKILLBUTTON: 
+                                gump = new SkillButtonGump();
+                                break;
+                        }
+
+                        if (gump == null)
+                            continue;
+
+                        gump.LocalSerial = serial;
+                        gump.Initialize();
+                        gump.Restore(xml);
+                        gump.X = x;
+                        gump.Y = y;
+
+                        if (gump.LocalSerial != 0)
+                        {
+                            UIManager.SavePosition(gump.LocalSerial, new Point(x, y));
+                        }
+
+                        if (!gump.IsDisposed)
+                        {
+                            gumps.Add(gump);
                         }
                     }
                 }

@@ -100,6 +100,11 @@ namespace ClassicUO.Game.UI.Gumps
             writer.Write(Y);
         }
 
+        public virtual void Save(XmlTextWriter writer)
+        {
+
+        }
+
         public void SetInScreen()
         {
             Rectangle rect = new Rectangle(0, 0, CUOEnviroment.Client.Window.ClientBounds.Width, CUOEnviroment.Client.Window.ClientBounds.Height);

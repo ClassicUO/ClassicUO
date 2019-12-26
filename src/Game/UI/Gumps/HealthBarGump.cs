@@ -127,18 +127,24 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
         }
 
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+        }
+
+
         public override void Restore(XmlElement xml)
         {
             base.Restore(xml);
 
-            if (xml == null)
+            if (LocalSerial == World.Player)
             {
+                _name = World.Player.Name;
+                BuildGump();
+            }
+            else 
                 Dispose();
-            }
-            else
-            {
-                LocalSerial = uint.Parse(xml.GetAttribute("serial"));
-            }
         }
 
         protected void TextBoxOnMouseUp(object sender, MouseEventArgs e)

@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -103,10 +104,22 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        //protected override bool Contains(int x, int y)
-        //{
-        //    return Bounds.Contains(X + x, Y + y);
-        //}
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            writer.WriteAttributeString("graphic", _graphic.ToString());
+            writer.WriteAttributeString("direction", ((int) _direction).ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+
+            _graphic = ushort.Parse(xml.GetAttribute("graphic"));
+            _direction = (GumpDirection) byte.Parse(xml.GetAttribute("direction"));
+        }
+
 
         public void AddBuff(ushort graphic)
         {
