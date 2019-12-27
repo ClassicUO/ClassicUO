@@ -57,7 +57,7 @@ namespace ClassicUO.Game.Managers
 
             JournalEntry entry = new JournalEntry(text, font, hue, name, isunicode, timeNow);
 
-            if (ProfileManager.Current.UnicodeJournal)
+            if (ProfileManager.Current.ForceUnicodeJournal)
             {
                 entry.Font = 0;
                 entry.IsUnicode = true;

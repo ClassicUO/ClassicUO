@@ -80,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _gameWindowHeight;
         private Checkbox _overrideAllFonts;
         private Combobox _overrideAllFontsIsUnicodeCheckbox;
-        private Checkbox _unicodeJournal;
+        private Checkbox _forceUnicodeJournal;
 
         private Checkbox _gameWindowLock, _gameWindowFullsize;
         // GameWindowPosition
@@ -886,7 +886,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(item);
 
-            _unicodeJournal = CreateCheckBox(rightArea, "Force Unicode in journal", ProfileManager.Current.UnicodeJournal, 0, 0);
+            _forceUnicodeJournal = CreateCheckBox(rightArea, "Force Unicode in journal", ProfileManager.Current.ForceUnicodeJournal, 0, 0);
 
 
             Label text = new Label("Speech font:", true, HUE_FONT)
@@ -1881,7 +1881,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.HideChatGradient = _hideChatGradient.IsChecked;
 
             // fonts
-            ProfileManager.Current.UnicodeJournal = _unicodeJournal.IsChecked;
+            ProfileManager.Current.ForceUnicodeJournal = _forceUnicodeJournal.IsChecked;
             var _fontValue = _fontSelectorChat.GetSelectedFont();
             ProfileManager.Current.OverrideAllFonts = _overrideAllFonts.IsChecked;
             ProfileManager.Current.OverrideAllFontsIsUnicode = _overrideAllFontsIsUnicodeCheckbox.SelectedIndex == 1;
