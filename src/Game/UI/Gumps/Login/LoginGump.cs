@@ -247,13 +247,21 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Add(new HtmlControl(htmlX, htmlY, 300, 100,
                                 false, false,
                                 false,
-                                text: "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.paypal.me/muskara\">> Instant donation",
+                                text: "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.paypal.me/muskara\">> Support ClassicUO",
                                 0x32, true, isunicode: true, style: FontStyle.BlackBorder));
             Add(new HtmlControl(htmlX, htmlY + 20, 300, 100,
                                 false, false,
                                 false,
                                 text: "<body link=\"#ad9413\" vlink=\"#00FF00\" ><a href=\"https://www.patreon.com/user?u=21694183\">> Become a Patreon!",
                                 0x32, true, isunicode: true, style: FontStyle.BlackBorder));
+
+
+            Add(new HtmlControl(480, htmlY + 19, 300, 100,
+                                           false, false,
+                                           false,
+                                           text: "<body link=\"#6a6a62\" vlink=\"#00FF00\" ><a href=\"https://discord.gg/VdyCpjQ\">CUO Discord",
+                                           0x32, true, isunicode: true, style: FontStyle.Cropped));
+
         }
 
 
