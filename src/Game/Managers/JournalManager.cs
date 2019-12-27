@@ -36,13 +36,14 @@ namespace ClassicUO.Game.Managers
         private StreamWriter _fileWriter;
         private bool _writerHasException;
 
-        public Deque<JournalEntry> Entries { get; } = new Deque<JournalEntry>();
+        public static Deque<JournalEntry> Entries { get; } = new Deque<JournalEntry>(Constants.MAX_JOURNAL_HISTORY_COUNT);
 
         public event EventHandler<JournalEntry> EntryAdded;
 
+
         public void Add(string text, ushort hue, string name, bool isunicode = true)
         {
-            if (Entries.Count >= 100)
+            if (Entries.Count >= Constants.MAX_JOURNAL_HISTORY_COUNT)
                 Entries.RemoveFromFront();
 
             byte font = (byte) (isunicode ? 0 : 9);
@@ -53,11 +54,11 @@ namespace ClassicUO.Game.Managers
                 isunicode = ProfileManager.Current.OverrideAllFontsIsUnicode;
             }
 
-            var timeNow = DateTime.Now;
+            DateTime timeNow = DateTime.Now;
 
             JournalEntry entry = new JournalEntry(text, font, hue, name, isunicode, timeNow);
 
-            if (ProfileManager.Current.ForceUnicodeJournal)
+            if (ProfileManager.Current != null && ProfileManager.Current.ForceUnicodeJournal)
             {
                 entry.Font = 0;
                 entry.IsUnicode = true;
@@ -106,7 +107,7 @@ namespace ClassicUO.Game.Managers
 
         public void Clear()
         {
-            Entries.Clear();
+            //Entries.Clear();
             CloseWriter();
         }
     }

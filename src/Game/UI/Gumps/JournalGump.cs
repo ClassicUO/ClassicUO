@@ -202,7 +202,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void InitializeJournalEntries()
         {
-            foreach (JournalEntry t in World.Journal.Entries)
+            foreach (JournalEntry t in JournalManager.Entries)
                 AddJournalEntry(null, t);
 
             _scrollBar.MinValue = 0;
