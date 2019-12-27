@@ -579,17 +579,6 @@ namespace ClassicUO.Network
             if (graphic >= 0x4000)
             {
                 item.Graphic -= 0x4000;
-
-                //if (item.IsMulti)
-                //    item.IsMulti = false;
-
-                //if (item.IsMulti)
-                //{
-                //    if (World.HouseManager.TryGetHouse(item, out var house))
-                //    {
-                //        house.Generate(true);
-                //    }
-                //}
                 item.WantUpdateMulti = true;
                 item.IsMulti = true;
             }
@@ -2045,7 +2034,6 @@ namespace ClassicUO.Network
 
                 if (World.Mobiles.Add(mobile))
                     World.Mobiles.ProcessDelta();
-
             }
             else
             {

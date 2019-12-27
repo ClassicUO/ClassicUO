@@ -1531,21 +1531,21 @@ namespace ClassicUO.Game.GameObjects
 
             int nowDelta = 0;
 
-            if (_lastDir == (int) direction && _lastMount == IsMounted && _lastRun == run)
-            {
-                nowDelta = (int) (Time.Ticks - _lastStepTime - walkTime + _lastDelta);
+            //if (_lastDir == (int) direction && _lastMount == IsMounted && _lastRun == run)
+            //{
+            //    nowDelta = (int) (Time.Ticks - _lastStepTime - walkTime + _lastDelta);
 
-                if (Math.Abs(nowDelta) > 70)
-                    nowDelta = 0;
-                _lastDelta = nowDelta;
-            }
-            else
-                _lastDelta = 0;
+            //    if (Math.Abs(nowDelta) > 70)
+            //        nowDelta = 0;
+            //    _lastDelta = nowDelta;
+            //}
+            //else
+            //    _lastDelta = 0;
 
-            _lastStepTime = (int) Time.Ticks;
-            _lastRun = run;
-            _lastMount = IsMounted;
-            _lastDir = (int) direction;
+            //_lastStepTime = (int) Time.Ticks;
+            //_lastRun = run;
+            //_lastMount = IsMounted;
+            //_lastDir = (int) direction;
 
 
             Walker.LastStepRequestTime = Time.Ticks + walkTime - nowDelta;
@@ -1554,8 +1554,8 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private bool _lastRun, _lastMount;
-        private int _lastDir = -1, _lastDelta, _lastStepTime;
+        //private bool _lastRun, _lastMount;
+        //private int _lastDir = -1, _lastDelta, _lastStepTime;
 
         
         public readonly HashSet<uint> AutoOpenedCorpses = new HashSet<uint>();
