@@ -343,7 +343,11 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteStartElement("groups");
 
             for (int i = 0; i < _boxes.Count; i++)
+            {
+                writer.WriteStartElement("group");
                 writer.WriteAttributeString("isopen", _boxes[i].Opened.ToString());
+                writer.WriteEndElement();
+            }
 
             writer.WriteEndElement();
         }
@@ -351,6 +355,19 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Restore(XmlElement xml)
         {
             base.Restore(xml);
+            _scrollArea.Height = _scrollArea.SpecialHeight = int.Parse(xml.GetAttribute("height"));
+
+            XmlElement groupsXml = xml["groups"];
+
+            if (groupsXml != null)
+            {
+                int index = 0;
+                foreach (XmlElement groupXml in groupsXml.GetElementsByTagName("group"))
+                {
+                    if (index >= 0 && index < _boxes.Count)
+                        _boxes[index++].Opened = bool.Parse(groupXml.GetAttribute("isopen"));
+                }
+            }
         }
 
         private class SkillNameComparer : IComparer<int>

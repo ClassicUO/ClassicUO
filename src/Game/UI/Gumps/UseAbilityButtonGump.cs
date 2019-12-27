@@ -162,6 +162,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                 xml.GetAttribute("name"),
                                                 ushort.Parse(xml.GetAttribute("graphic")));
             _isPrimary = bool.Parse(xml.GetAttribute("isprimary"));
+            BuildGump();
         }
     }
 }

@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Xml;
 
 using ClassicUO.Game;
@@ -297,34 +298,57 @@ namespace ClassicUO.Configuration
 
         private void SaveGumps(string path, List<Gump> gumps)
         {
-            using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "gumps.bin"))))
+            string gumpsXmlPath = Path.Combine(path, "gumps.xml");
+
+            using (XmlTextWriter xml = new XmlTextWriter(gumpsXmlPath, Encoding.UTF8)
             {
-                const uint VERSION = 3;
+                Formatting = System.Xml.Formatting.Indented,
+                IndentChar = '\t',
+                Indentation = 1
+            })
+            {
+                xml.WriteStartDocument(true);
+                xml.WriteStartElement("gumps");
 
-                writer.Write(VERSION);
-                writer.Write(0);
-
-                /*
-                 * int gumpsCount
-                 * loop:
-                 *      ushort typeLen
-                 *      string type
-                 *      int x
-                 *      int y
-                 *      undefinited data
-                 * endloop.
-                 */
-
-
-                if (gumps != null)
+                foreach (Gump gump in gumps)
                 {
-                    writer.Write(gumps.Count);
-
-                    foreach (Gump gump in gumps) gump.Save(writer);
+                    xml.WriteStartElement("gump");
+                    gump.Save(xml);
+                    xml.WriteEndElement();
                 }
-                else
-                    writer.Write(0);
+
+                xml.WriteEndElement();
+                xml.WriteEndDocument();
             }
+
+            //using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "gumps.bin"))))
+            //{
+            //    const uint VERSION = 3;
+
+            //    writer.Write(VERSION);
+            //    writer.Write(0);
+
+            //    /*
+            //     * int gumpsCount
+            //     * loop:
+            //     *      ushort typeLen
+            //     *      string type
+            //     *      int x
+            //     *      int y
+            //     *      undefinited data
+            //     * endloop.
+            //     */
+
+
+            //    if (gumps != null)
+            //    {
+            //        writer.Write(gumps.Count);
+
+            //        foreach (Gump gump in gumps) gump.Save(writer);
+            //    }
+            //    else
+            //        writer.Write(0);
+            //}
 
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin"))))
                 UIManager.AnchorManager.Save(writer);
@@ -338,11 +362,9 @@ namespace ClassicUO.Configuration
         public List<Gump> ReadGumps()
         {
             string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username.Trim(), ServerName.Trim(), CharacterName.Trim());
+            List<Gump> gumps = new List<Gump>();
 
-            string binpath = Path.Combine(path, "gumps.bin");
 
-            if (!File.Exists(binpath))
-                return null;
 
             // #########################################################
             // [FILE_FIX]
@@ -401,55 +423,72 @@ namespace ClassicUO.Configuration
                 File.Delete(skillsGroupsPath);
             }
             catch { }
-            // #########################################################
 
 
-            SkillsGroupManager.Load();
+            string binpath = Path.Combine(path, "gumps.bin");
 
-
-            List<Gump> gumps = new List<Gump>();
-
-            using (BinaryReader reader = new BinaryReader(File.OpenRead(binpath)))
+            if (File.Exists(binpath))
             {
-                if (reader.BaseStream.Position + 12 < reader.BaseStream.Length)
+                using (BinaryReader reader = new BinaryReader(File.OpenRead(binpath)))
                 {
-                    GumpsVersion = reader.ReadUInt32();
-                    uint empty = reader.ReadUInt32();
-
-                    int count = reader.ReadInt32();
-
-                    for (int i = 0; i < count; i++)
+                    if (reader.BaseStream.Position + 12 < reader.BaseStream.Length)
                     {
-                        try
+                        GumpsVersion = reader.ReadUInt32();
+                        uint empty = reader.ReadUInt32();
+
+                        int count = reader.ReadInt32();
+
+                        for (int i = 0; i < count; i++)
                         {
-                            int typeLen = reader.ReadUInt16();
-                            string typeName = reader.ReadUTF8String(typeLen);
-                            int x = reader.ReadInt32();
-                            int y = reader.ReadInt32();
+                            try
+                            {
+                                int typeLen = reader.ReadUInt16();
+                                string typeName = reader.ReadUTF8String(typeLen);
+                                int x = reader.ReadInt32();
+                                int y = reader.ReadInt32();
 
-                            Type type = Type.GetType(typeName, true);
-                            Gump gump = (Gump) Activator.CreateInstance(type);
-                            gump.Initialize();
-                            gump.Restore(reader);
-                            gump.X = x;
-                            gump.Y = y;
+                                Type type = Type.GetType(typeName, true);
+                                Gump gump = (Gump) Activator.CreateInstance(type);
+                                gump.Initialize();
+                                gump.Restore(reader);
+                                gump.X = x;
+                                gump.Y = y;
 
-                            //gump.SetInScreen();
+                                //gump.SetInScreen();
 
-                            if (gump.LocalSerial != 0)
-                                UIManager.SavePosition(gump.LocalSerial, new Point(x, y));
+                                if (gump.LocalSerial != 0)
+                                    UIManager.SavePosition(gump.LocalSerial, new Point(x, y));
 
-                            if (!gump.IsDisposed) gumps.Add(gump);
-                        }
-                        catch (Exception e)
-                        {
-                            Log.Error( e.StackTrace);
+                                if (!gump.IsDisposed)
+                                    gumps.Add(gump);
+                            }
+                            catch (Exception e)
+                            {
+                                Log.Error(e.StackTrace);
+                            }
                         }
                     }
                 }
+
+                SaveGumps(path, gumps);
+
+                gumps.Clear();
+
+                try
+                {
+                    File.Delete(binpath);
+                }
+                catch
+                {
+
+                }
             }
+            // #########################################################
 
 
+
+
+            // load gumps
             string gumpsXmlPath = Path.Combine(path, "gumps.xml");
 
             if (File.Exists(gumpsXmlPath))
@@ -578,8 +617,11 @@ namespace ClassicUO.Configuration
                 }
             }
 
+            // load skillsgroup
+            SkillsGroupManager.Load();
 
 
+            // load anchors
             string anchorsPath = Path.Combine(path, "anchors.bin");
 
             if (File.Exists(anchorsPath))

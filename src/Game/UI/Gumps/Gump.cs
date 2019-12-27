@@ -102,7 +102,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         public virtual void Save(XmlTextWriter writer)
         {
-
+            writer.WriteAttributeString("type", ((int)GumpType).ToString());
+            writer.WriteAttributeString("x", X.ToString());
+            writer.WriteAttributeString("y", Y.ToString());
+            writer.WriteAttributeString("serial", LocalSerial.ToString());
         }
 
         public void SetInScreen()

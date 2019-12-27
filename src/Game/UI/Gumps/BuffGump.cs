@@ -118,6 +118,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _graphic = ushort.Parse(xml.GetAttribute("graphic"));
             _direction = (GumpDirection) byte.Parse(xml.GetAttribute("direction"));
+            BuildGump();
         }
 
 

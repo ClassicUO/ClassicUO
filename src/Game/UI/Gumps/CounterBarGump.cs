@@ -244,9 +244,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Save(writer);
 
-            writer.WriteElementString("rows", _rows.ToString());
-            writer.WriteElementString("columns", _columns.ToString());
-            writer.WriteElementString("rectsize", _rectSize.ToString());
+            writer.WriteAttributeString("rows", _rows.ToString());
+            writer.WriteAttributeString("columns", _columns.ToString());
+            writer.WriteAttributeString("rectsize", _rectSize.ToString());
 
             var controls = FindControls<CounterItem>();
 
