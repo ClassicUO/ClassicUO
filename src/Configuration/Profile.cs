@@ -316,39 +316,9 @@ namespace ClassicUO.Configuration
                 xml.WriteEndDocument();
             }
 
-            //using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "gumps.bin"))))
-            //{
-            //    const uint VERSION = 3;
-
-            //    writer.Write(VERSION);
-            //    writer.Write(0);
-
-            //    /*
-            //     * int gumpsCount
-            //     * loop:
-            //     *      ushort typeLen
-            //     *      string type
-            //     *      int x
-            //     *      int y
-            //     *      undefinited data
-            //     * endloop.
-            //     */
-
-
-            //    if (gumps != null)
-            //    {
-            //        writer.Write(gumps.Count);
-
-            //        foreach (Gump gump in gumps) gump.Save(writer);
-            //    }
-            //    else
-            //        writer.Write(0);
-            //}
-
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin"))))
                 UIManager.AnchorManager.Save(writer);
 
-            //using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "skillsgroups.bin"))))
             SkillsGroupManager.Save();
         }
 
