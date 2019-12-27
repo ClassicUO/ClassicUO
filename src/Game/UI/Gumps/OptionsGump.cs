@@ -2049,8 +2049,6 @@ namespace ClassicUO.Game.UI.Gumps
                     ibmanager.AddItem(new InfoBarItem(_infoBarBuilderControls[i].LabelText, _infoBarBuilderControls[i].Var, _infoBarBuilderControls[i].Hue));
             }
 
-            ProfileManager.Current.InfoBarItems = ibmanager.GetInfoBars().ToArray();
-
 
             InfoBarGump infoBarGump = UIManager.GetGump<InfoBarGump>();
 

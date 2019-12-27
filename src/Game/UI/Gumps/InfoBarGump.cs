@@ -23,6 +23,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -38,6 +39,8 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly AlphaBlendControl _background;
         private long _refreshTime;
+
+        private readonly List<InfoBarControl> _infobarControls = new List<InfoBarControl>();
 
         public InfoBarGump() : base(0, 0)
         {
@@ -56,17 +59,58 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void ResetItems()
         {
-            foreach (InfoBarControl c in Children.OfType<InfoBarControl>())
+            foreach (InfoBarControl c in _infobarControls)
             {
                 c.Dispose();
             }
+
+            _infobarControls.Clear();
 
             List<InfoBarItem> infoBarItems = CUOEnviroment.Client.GetScene<GameScene>().InfoBars.GetInfoBars();
 
             for (int i = 0; i < infoBarItems.Count; i++)
             {
-                Add(new InfoBarControl(infoBarItems[i].label, infoBarItems[i].var, infoBarItems[i].hue));
+                var info = new InfoBarControl(infoBarItems[i].label, infoBarItems[i].var, infoBarItems[i].hue);
+                _infobarControls.Add(info);
+                Add(info);
             }
+        }
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            //writer.WriteStartElement("controls");
+
+            //foreach (InfoBarControl co in _infobarControls)
+            //{
+            //    writer.WriteStartElement("control");
+            //    writer.WriteAttributeString("label", co.Text);
+            //    writer.WriteAttributeString("var", ((int) co.Var).ToString());
+            //    writer.WriteAttributeString("hue", co.Hue.ToString());
+            //    writer.WriteEndElement();
+            //}
+            //writer.WriteEndElement();
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+
+            //XmlElement controlsXml = xml["controls"];
+            //_infobarControls.Clear();
+
+            //if (controlsXml != null)
+            //{
+            //    foreach (XmlElement controlXml in controlsXml.GetElementsByTagName("control"))
+            //    {
+            //        InfoBarControl control = new InfoBarControl(controlXml.GetAttribute("label"),
+            //                                                    (InfoBarVars) int.Parse(controlXml.GetAttribute("var")),
+            //                                                    ushort.Parse(controlXml.GetAttribute("hue")));
+
+            //        Add(control);
+            //        _infobarControls.Add(control);
+            //    }
+            //}
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -80,7 +124,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int x = 5;
 
-                foreach (InfoBarControl c in Children.OfType<InfoBarControl>())
+                foreach (InfoBarControl c in _infobarControls)
                 {
                     c.X = x;
                     x += c.Width + 5;
@@ -98,8 +142,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             _background.Width = Width;
         }
-
-
     }
 
 
@@ -124,6 +166,10 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_label);
             Add(_data);
         }
+
+        public string Text => _label.Text;
+        public InfoBarVars Var => _var;
+        public ushort Hue => _label.Hue;
 
         public override void Update(double totalMS, double frameMS)
         {

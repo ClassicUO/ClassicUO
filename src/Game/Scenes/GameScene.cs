@@ -168,6 +168,7 @@ namespace ClassicUO.Game.Scenes
             Macros.Load();
 
             InfoBars = new InfoBarManager();
+            InfoBars.Load();
             _healthLinesManager = new HealthLinesManager();
             _weather = new Weather();
 
@@ -322,6 +323,7 @@ namespace ClassicUO.Game.Scenes
 
             ProfileManager.Current?.Save(UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
             Macros.Save();
+            InfoBars.Save();
             ProfileManager.UnLoadProfile();
 
             StaticFilters.CleanCaveTextures();

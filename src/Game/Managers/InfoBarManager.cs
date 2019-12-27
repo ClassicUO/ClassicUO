@@ -23,11 +23,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Xml;
 
 using ClassicUO.Configuration;
+using ClassicUO.Utility.Logging;
 
 using Newtonsoft.Json;
+
+
 
 namespace ClassicUO.Game.Managers
 {
@@ -41,7 +47,10 @@ namespace ClassicUO.Game.Managers
 
             if (ProfileManager.Current.InfoBarItems != null)
             {
-                infoBarItems = ProfileManager.Current.InfoBarItems?.ToList<InfoBarItem>();
+                infoBarItems.AddRange(ProfileManager.Current.InfoBarItems);
+
+                ProfileManager.Current.InfoBarItems = null;
+                Save();
             }
         }
 
@@ -52,7 +61,7 @@ namespace ClassicUO.Game.Managers
 
         public static string[] GetVars(int shardtype)
         {
-            if(shardtype != 2)
+            if (shardtype != 2)
                 return Enum.GetNames(typeof(InfoBarVars));
             else
                 return Enum.GetNames(typeof(InfoBarVarsOutlands));
@@ -73,6 +82,76 @@ namespace ClassicUO.Game.Managers
             infoBarItems.Clear();
         }
 
+        public void Save()
+        {
+            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "infobar.xml");
+            
+            using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
+            {
+                Formatting = System.Xml.Formatting.Indented,
+                IndentChar = '\t',
+                Indentation = 1
+            })
+            {
+                xml.WriteStartDocument(true);
+                xml.WriteStartElement("infos");
+
+                foreach (InfoBarItem info in infoBarItems)
+                {
+                    info.Save(xml);
+                }
+
+                xml.WriteEndElement();
+                xml.WriteEndDocument();
+            }
+        }
+
+        public void Load()
+        {
+            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "infobar.xml");
+
+            if (!File.Exists(path))
+            {
+                CreateDefault();
+                Save();
+                return;
+            }
+
+            XmlDocument doc = new XmlDocument();
+            try
+            {
+                doc.Load(path);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+                return;
+            }
+
+            infoBarItems.Clear();
+
+            XmlElement root = doc["infos"];
+
+            if (root != null)
+            {
+                foreach (XmlElement xml in root.GetElementsByTagName("info"))
+                {
+                   InfoBarItem item = new InfoBarItem(xml);
+                   infoBarItems.Add(item);
+                }
+            }
+        }
+
+        public void CreateDefault()
+        {
+            infoBarItems.Clear();
+
+            infoBarItems.Add(new InfoBarItem("", InfoBarVars.NameNotoriety, 0x3D2));
+            infoBarItems.Add(new InfoBarItem("Hits", InfoBarVars.HP, 0x1B6));
+            infoBarItems.Add(new InfoBarItem("Mana", InfoBarVars.Mana, 0x1ED));
+            infoBarItems.Add(new InfoBarItem("Stam", InfoBarVars.Stamina, 0x22E));
+            infoBarItems.Add(new InfoBarItem("Weight", InfoBarVars.Weight, 0x3D2));
+        }
     }
 
     internal enum InfoBarVars
@@ -134,16 +213,35 @@ namespace ClassicUO.Game.Managers
     [JsonObject]
     internal class InfoBarItem
     {
+        [JsonConstructor]
+        public InfoBarItem(string label, InfoBarVars var, ushort labelColor)
+        {
+            this.label = label;
+            this.var = var;
+            hue = labelColor;
+        }
+
+        
+        public InfoBarItem(XmlElement xml)
+        {
+            if (xml == null)
+                return;
+            label = xml.GetAttribute("text");
+            var = (InfoBarVars) int.Parse(xml.GetAttribute("var"));
+            hue = ushort.Parse(xml.GetAttribute("hue"));
+        }
+
         [JsonProperty] public string label;
         [JsonProperty] public InfoBarVars var;
         [JsonProperty] public ushort hue;
 
-        [JsonConstructor]
-        public InfoBarItem(string _label, InfoBarVars _var, ushort _labelColor)
+        public void Save(XmlTextWriter writer)
         {
-            label = _label;
-            var = _var;
-            hue = _labelColor;
+            writer.WriteStartElement("info");
+            writer.WriteAttributeString("text", label);
+            writer.WriteAttributeString("var", ((int) var).ToString());
+            writer.WriteAttributeString("hue", hue.ToString());
+            writer.WriteEndElement();
         }
     }
 }
