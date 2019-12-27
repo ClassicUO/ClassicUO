@@ -335,7 +335,7 @@ namespace ClassicUO.Game.Managers
 
             public List<AnchorableGump> Restore(BinaryReader reader, List<Gump> gumps)
             {
-                List<AnchorableGump> groupGumps = new List<AnchorableGump>();
+                HashSet<AnchorableGump> groupGumps = new HashSet<AnchorableGump>();
 
                 uint xCount = reader.ReadUInt32();
                 uint yCount = reader.ReadUInt32();
@@ -362,7 +362,7 @@ namespace ClassicUO.Game.Managers
                     }
                 }
 
-                return groupGumps;
+                return groupGumps.ToList();
             }
 
             public void UpdateLocation(Control control, int deltaX, int deltaY)

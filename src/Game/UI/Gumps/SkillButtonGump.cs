@@ -138,6 +138,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (index >= 0 && index < World.Player.Skills.Length)
             {
                 _skill = World.Player.Skills[index];
+                BuildGump();
             }
             else 
                 Dispose();
