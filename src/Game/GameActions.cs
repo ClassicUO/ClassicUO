@@ -165,9 +165,9 @@ namespace ClassicUO.Game
             Chat.HandleMessage(entity, message, entity != null ? entity.Name : "System", hue, type, font, unicode, "ENU");
         }
 
-        public static void SayParty(string message)
+        public static void SayParty(string message, uint serial = 0)
         {
-            Socket.Send(new PPartyMessage(message, 0));
+            Socket.Send(new PPartyMessage(message, serial));
         }
 
         public static void RequestPartyAccept(uint serial)

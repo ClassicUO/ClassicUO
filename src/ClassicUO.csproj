@@ -185,6 +185,7 @@
     <Compile Include="Game\UI\Gumps\InfoBarGump.cs" />
     <Compile Include="Game\UI\Gumps\MacroButtonGump.cs" />
     <Compile Include="Game\UI\Gumps\NameOverHeadHandlerGump.cs" />
+    <Compile Include="Game\UI\Gumps\PartyGump.cs" />
     <Compile Include="Game\UI\Gumps\PartyInviteGump.cs" />
     <Compile Include="Game\UI\Gumps\ResizableGump.cs" />
     <Compile Include="Game\UI\Gumps\StandardSkillsGump.cs" />

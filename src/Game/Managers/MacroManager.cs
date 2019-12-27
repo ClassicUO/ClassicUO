@@ -587,10 +587,14 @@ namespace ClassicUO.Game.Managers
 
                                 case MacroSubType.Mail:
                                 case MacroSubType.PartyManifest:
-                                    var party = UIManager.GetGump<PartyGumpAdvanced>();
+                                    var party = UIManager.GetGump<PartyGump>();
 
                                     if (party == null)
-                                        UIManager.Add(new PartyGumpAdvanced());
+                                    {
+                                        int x = CUOEnviroment.Client.Window.ClientBounds.Width / 2 - 272;
+                                        int y = CUOEnviroment.Client.Window.ClientBounds.Height / 2 - 240;
+                                        UIManager.Add(new PartyGump(x, y, World.Party.CanLoot));
+                                    }
                                     else
                                         party.BringOnTop();
 
@@ -782,7 +786,7 @@ namespace ClassicUO.Game.Managers
                                 case MacroSubType.PartyManifest:
 
                                     if (macro.Code == MacroType.Close)
-                                        UIManager.GetGump<PartyGumpAdvanced>()?.Dispose();
+                                        UIManager.GetGump<PartyGump>()?.Dispose();
 
                                     break;
 

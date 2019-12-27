@@ -80,7 +80,7 @@ namespace ClassicUO.Game.Managers
                         }
 
                         Clear();
-                        UIManager.GetGump<PartyGumpAdvanced>()?.Update();
+                        UIManager.GetGump<PartyGump>()?.Update();
 
                         break;
                     }
@@ -115,7 +115,7 @@ namespace ClassicUO.Game.Managers
                         }
                     }
 
-                    UIManager.GetGump<PartyGumpAdvanced>()?.Update();
+                    UIManager.GetGump<PartyGump>()?.Update();
 
                     break;
                 

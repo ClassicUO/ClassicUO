@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
         Emote,
         Yell,
         Party,
-        PartyPrivate,
+        //PartyPrivate,
         Guild,
         Alliance,
         ClientCommand,
@@ -152,7 +152,7 @@ namespace ClassicUO.Game.UI.Gumps
             get => _isFocused;
         }
 
-        private ChatMode Mode
+        public ChatMode Mode
         {
             get => _mode;
             set
@@ -189,12 +189,7 @@ namespace ClassicUO.Game.UI.Gumps
                             AppendChatModePrefix("[Party]: ", ProfileManager.Current.PartyMessageHue);
 
                             break;
-
-                        case ChatMode.PartyPrivate:
-                            AppendChatModePrefix("[Private Party Message]: ", ProfileManager.Current.PartyMessageHue);
-
-                            break;
-
+                        
                         case ChatMode.Guild:
                             AppendChatModePrefix("[Guild]: ", ProfileManager.Current.GuildMessageHue);
 
@@ -369,21 +364,47 @@ namespace ClassicUO.Game.UI.Gumps
                             break;
                     }
                 }
-                else if (textBox.Text.Length == 2 && textBox.Text[1] == ' ')
+                else if (textBox.Text.Length > 0)
                 {
-                    switch (textBox.Text[0])
+                    if (textBox.Text[0] == '/')
                     {
-                        case ':':
-                            Mode = ChatMode.Emote;
-                            break;
-                        case ';':
-                            Mode = ChatMode.Whisper;
-                            break;
+                        int pos = 1;
 
-                        case '!':
-                            Mode = ChatMode.Yell;
-                            break;
+                        while (pos < textBox.Text.Length && textBox.Text[pos] != ' ')
+                        {
+                            pos++;
+                        }
 
+                        if (pos < textBox.Text.Length && int.TryParse(textBox.Text.Substring(1, pos), out int index) && index > 0 && index < 11)
+                        {
+                            if (World.Party.Members[index - 1] != null && World.Party.Members[index - 1].Serial != 0)
+                            {
+                                AppendChatModePrefix($"[Tell] [{World.Party.Members[index - 1].Name}]: ", ProfileManager.Current.PartyMessageHue);
+                            }
+                            else
+                            {
+                                AppendChatModePrefix("[Tell] []: ", ProfileManager.Current.PartyMessageHue);
+                            }
+
+                            Mode = ChatMode.Party;
+                            textBox.Text = $"{index} ";
+                        }
+                    }
+                    else if (textBox.Text.Length == 2 && textBox.Text[1] == ' ')
+                    {
+                        switch (textBox.Text[0])
+                        {
+                            case ':':
+                                Mode = ChatMode.Emote;
+                                break;
+                            case ';':
+                                Mode = ChatMode.Whisper;
+                                break;
+
+                            case '!':
+                                Mode = ChatMode.Yell;
+                                break;
+                        }
                     }
                 }
             }
@@ -566,9 +587,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     case ChatMode.Party:
 
-                        text = text.ToLower();
-
-                        switch (text)
+                        switch (text.ToLower())
                         {
                             case "add":
                                 if (World.Party.Leader == 0 || World.Party.Leader == World.Player)
@@ -633,18 +652,34 @@ namespace ClassicUO.Game.UI.Gumps
                             default:
 
                                 if (World.Party.Leader != 0)
-                                    GameActions.SayParty(text);
+                                {
+                                    uint serial = 0;
+
+                                    int pos = 0;
+
+                                    while (pos < text.Length && text[pos] != ' ')
+                                    {
+                                        pos++;
+                                    }
+
+                                    if (pos < text.Length)
+                                    {
+                                        if (int.TryParse(text.Substring(0, pos), out int index) && index > 0 && index < 11 && World.Party.Members[index - 1] != null && World.Party.Members[index - 1].Serial != 0)
+                                            serial = World.Party.Members[index - 1].Serial;
+                                    }
+
+                                    GameActions.SayParty(text, serial);
+                                }
+                                else
+                                {
+                                    GameActions.Print($"Note to self: {text}", 0, MessageType.System, 3, false);
+                                }
 
                                 break;
                         }
 
                         break;
-
-                    case ChatMode.PartyPrivate:
-
-                        //GameActions.Say(text, hue, speechType);
-                        break;
-
+                    
                     case ChatMode.Guild:
                         GameActions.Say(text, ProfileManager.Current.GuildMessageHue, MessageType.Guild);
 
