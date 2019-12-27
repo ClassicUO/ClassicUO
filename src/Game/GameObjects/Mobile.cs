@@ -154,6 +154,8 @@ namespace ClassicUO.Game.GameObjects
 
         public int StepSoundOffset;
 
+        public string Title = string.Empty;
+
         protected virtual bool IsWalking => LastStepTime > Time.Ticks - Constants.WALKING_DELAY;
 
         public byte AnimationGroup = 0xFF;

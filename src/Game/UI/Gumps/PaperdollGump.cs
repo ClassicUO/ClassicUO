@@ -61,20 +61,22 @@ namespace ClassicUO.Game.UI.Gumps
 
         private GumpPic _picBase;
         private HitBox _hitBox;
+        private Label _titleLabel;
 
 
         public PaperDollGump() : base(0, 0)
         {
+            CanMove = true;
         }
 
-        public PaperDollGump(uint serial, string mobileTitle) : this()
+        public PaperDollGump(uint serial) : this()
         {
+            LocalSerial = serial;
             Mobile mobile = World.Mobiles.Get(serial);
 
             if (mobile != null)
             {
                 Mobile = mobile;
-                Title = mobileTitle;           
                 BuildGump();
             }
             else
@@ -106,8 +108,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
         }
-
-        public string Title { get; }
 
         public Mobile Mobile { get; set; }
 
@@ -158,14 +158,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            CanMove = true;
-            LocalSerial = Mobile.Serial;
-
             _picBase?.Dispose();
             _hitBox?.Dispose();
 
 
-            if (Mobile == World.Player)
+            if (LocalSerial == World.Player)
             {
                 Add(_picBase = new GumpPic(0, 0, 0x07d0, 0));
                 _picBase.MouseDoubleClick += _picBase_MouseDoubleClick;
@@ -298,12 +295,12 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_paperDollInteractable);
 
             // Name and title
-            Label titleLabel = new Label(Title, false, 0x0386, 185)
+            _titleLabel = new Label(Mobile.Title, false, 0x0386, 185)
             {
                 X = 39,
                 Y = 262
             };
-            Add(titleLabel);
+            Add(_titleLabel);
         }
 
         private void _picBase_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
@@ -312,6 +309,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 IsMinimized = false;
             }
+        }
+
+        public void UpdateTitle(string text)
+        {
+            _titleLabel.Text = text;
         }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
@@ -377,7 +379,6 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-
             // This is to update the state of the war mode button.
             if (_isWarMode != Mobile.InWarMode && Mobile == World.Player)
             {
@@ -393,23 +394,6 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-
-        //public override bool Contains(int x, int y)
-        //{
-        //    //x = Mouse.Position.X - ScreenCoordinateX;
-        //    //y = Mouse.Position.Y - ScreenCoordinateY;
-
-
-        //    for (int i = 0; i < Children.Count; i++)
-        //    {
-        //        var c = Children[i];
-
-        //        if (c.Contains(x, y))
-        //            return true;
-        //    }
-
-        //    return false;
-        //}
 
 
         public override void Save(BinaryWriter writer)
@@ -446,8 +430,19 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Restore(XmlElement xml)
         {
             base.Restore(xml);
-            CUOEnviroment.Client.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
-            Dispose();
+
+
+            if (LocalSerial == World.Player)
+            {
+                Mobile = World.Player;
+                BuildGump();
+                Update();
+
+                GameActions.OpenPaperdoll(World.Player);
+                IsMinimized = bool.Parse(xml.GetAttribute("isminimized"));
+            }
+            else 
+                Dispose();
         }
 
         public void Update()

@@ -2279,15 +2279,19 @@ namespace ClassicUO.Network
             string text = p.ReadASCII(60);
             byte flags = p.ReadByte();
 
+            mobile.Title = text;
+
             var paperdoll = UIManager.GetGump<PaperDollGump>(mobile);
 
             if (paperdoll == null)
             {
-                if (!UIManager.GetGumpCachePosition(mobile, out Point location)) location = new Point(100, 100);
-                UIManager.Add(paperdoll = new PaperDollGump(mobile, text) {Location = location});
+                if (!UIManager.GetGumpCachePosition(mobile, out Point location))
+                    location = new Point(100, 100);
+                UIManager.Add(paperdoll = new PaperDollGump(mobile) {Location = location});
             }
             else
             {
+                paperdoll.UpdateTitle(text);
                 paperdoll.SetInScreen();
                 paperdoll.BringOnTop();
             }
