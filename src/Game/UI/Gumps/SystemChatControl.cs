@@ -62,7 +62,9 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private const int MAX_MESSAGE_LENGHT = 100;
         private readonly Label _currentChatModeLabel;
-        private readonly List<Tuple<ChatMode, string>> _messageHistory;
+        private static readonly List<Tuple<ChatMode, string>> _messageHistory = new List<Tuple<ChatMode, string>>();
+        private static int _messageHistoryIndex = -1;
+
         private readonly Deque<ChatLineTime> _textEntries;
         private readonly AlphaBlendControl _trans;
 
@@ -70,7 +72,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         private bool _isActive;
         private bool _isFocused = false;
-        private int _messageHistoryIndex = -1;
         private ChatMode _mode = ChatMode.Default;
 
         public SystemChatControl(int x, int y, int w, int h)
@@ -80,7 +81,6 @@ namespace ClassicUO.Game.UI.Gumps
             Width = w;
             Height = h;
             _textEntries = new Deque<ChatLineTime>();
-            _messageHistory = new List<Tuple<ChatMode, string>>();
             CanCloseWithRightClick = false;
             AcceptMouseInput = false;
             AcceptKeyboardInput = false;
