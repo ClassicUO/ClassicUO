@@ -453,6 +453,9 @@ namespace ClassicUO.Configuration
 
 
 
+            // load skillsgroup
+            SkillsGroupManager.Load();
+
 
             // load gumps
             string gumpsXmlPath = Path.Combine(path, "gumps.xml");
@@ -583,10 +586,7 @@ namespace ClassicUO.Configuration
                 }
             }
 
-            // load skillsgroup
-            SkillsGroupManager.Load();
-
-
+          
             // load anchors
             string anchorsPath = Path.Combine(path, "anchors.bin");
 
