@@ -63,13 +63,6 @@ namespace ClassicUO.Game.UI.Controls
             base.Update(totalMS, frameMS);
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
-        {
-            base.OnMouseUp(x, y, button);
-
-            IsSelected = true;
-        }
-
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             if (DrawBackgroundCurrentIndex && MouseIsOver && !string.IsNullOrWhiteSpace(Text))

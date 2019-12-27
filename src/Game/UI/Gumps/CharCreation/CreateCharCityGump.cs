@@ -290,6 +290,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 _label.MouseUp += (sender, e) =>
                 {
+                    _label.IsSelected = true;
                     int idx = (int) _label.Tag;
                     OnButtonClick(idx + 2);
                 };

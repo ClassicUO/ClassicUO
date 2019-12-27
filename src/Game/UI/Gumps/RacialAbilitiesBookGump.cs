@@ -23,6 +23,7 @@
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -44,6 +45,8 @@ namespace ClassicUO.Game.UI.Gumps
         private GumpPic _pageCornerLeft, _pageCornerRight;
         private int _pagesCount = 3;
         private int _tooltipOffset = 1112198;
+        private float _clickTiming;
+        private Control _lastPressed;
 
         public RacialAbilitiesBookGump(int x, int y) : base(0, 0)
         {
@@ -76,11 +79,10 @@ namespace ClassicUO.Game.UI.Gumps
             GetSummaryBookInfo(ref abilityOnPage, ref iconStartGraphic);
 
             _pagesCount = _dictionaryPagesCount + (_abilityCount >> 1);
-            //_pagesCount >>= 1;
 
             int offs = 0;
 
-            for (int page = 1; page <= _dictionaryPagesCount; page++)
+            for (int page = 1, topage = _dictionaryPagesCount - 1; page <= _dictionaryPagesCount; page++)
             {
                 for (int j = 0; j < 2; j++)
                 {
@@ -103,15 +105,19 @@ namespace ClassicUO.Game.UI.Gumps
                         if (offs >= _abilityCount)
                             break;
 
+                        if (offs % 2 == 0)
+                            topage++;
+
                         bool passive = true;
 
                         text = new HoveredLabel(GetAbilityName(offs, ref passive), false, 0x0288, 0x33, 0x0288, font: 9)
                         {
                             X = dataX,
                             Y = 52 + y,
-                            AcceptMouseInput = true
+                            AcceptMouseInput = true,
+                            LocalSerial = (uint) (topage)
                         };
-
+                        text.MouseUp += OnClicked;
                         Add(text, page);
 
                         y += 15;
@@ -120,7 +126,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            int page1 = _dictionaryPagesCount;
+            int page1 = _dictionaryPagesCount - 1;
 
             for (int i = 0; i < _abilityCount; i++)
             {
@@ -153,8 +159,29 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(text, page1);
                 }
 
+                ushort graphic = (ushort) (iconStartGraphic + i);
+                GumpPic pic = new GumpPic(iconX, 40, graphic, 0)
+                {
+                    LocalSerial = graphic
+                };
 
-                GumpPic pic = new GumpPic(iconX, 40, iconStartGraphic, 0);
+                if (!passive)
+                {
+                    pic.DragBegin += (sender, e) =>
+                    {
+                        if (UIManager.IsDragging)
+                            return;
+
+                        RacialAbilityButton gump = new RacialAbilityButton((ushort) ((GumpPic) sender).LocalSerial)
+                        {
+                            X = Mouse.Position.X - 20,
+                            Y = Mouse.Position.Y - 20
+                        };
+
+                        UIManager.Add(gump);
+                        UIManager.AttemptDragControl(gump, Mouse.Position, true);
+                    };
+                }
 
                 Add(pic, page1);
                 pic.SetTooltip(UOFileManager.Cliloc.GetString(_tooltipOffset + i), 150);
@@ -164,7 +191,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void GetSummaryBookInfo(ref int abilityOnPage, ref ushort iconStartGraphic)
         {
-            _dictionaryPagesCount = 1;
+            _dictionaryPagesCount = 2;
             abilityOnPage = 3;
 
             switch (World.Player.Race)
@@ -215,6 +242,18 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        private void OnClicked(object sender, MouseEventArgs e)
+        {
+            if (sender is HoveredLabel l && e.Button == MouseButton.Left)
+            {
+                _clickTiming += Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+
+                if (_clickTiming > 0)
+                    _lastPressed = l;
+            }
+        }
+
+
         private void PageCornerOnMouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? ActivePage - 1 : ActivePage + 1);
@@ -237,6 +276,26 @@ namespace ClassicUO.Game.UI.Gumps
             _pageCornerRight.Page = ActivePage != _pagesCount ? 0 : int.MaxValue;
 
             CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
+        }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (IsDisposed)
+                return;
+
+            if (_lastPressed != null)
+            {
+                _clickTiming -= (float) frameMS;
+
+                if (_clickTiming <= 0)
+                {
+                    _clickTiming = 0;
+                    SetActivePage((int) _lastPressed.LocalSerial);
+                    _lastPressed = null;
+                }
+            }
         }
     }
 }

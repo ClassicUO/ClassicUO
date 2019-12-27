@@ -56,6 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
         GT_ABILITYBUTTON,
         GT_SPELLBUTTON,
         GT_SKILLBUTTON,
+        GT_RACIALBUTTON,
     }
 
     internal class Gump : Control

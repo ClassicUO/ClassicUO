@@ -187,6 +187,7 @@
     <Compile Include="Game\UI\Gumps\NameOverHeadHandlerGump.cs" />
     <Compile Include="Game\UI\Gumps\PartyGump.cs" />
     <Compile Include="Game\UI\Gumps\PartyInviteGump.cs" />
+    <Compile Include="Game\UI\Gumps\RacialAbilityButton.cs" />
     <Compile Include="Game\UI\Gumps\ResizableGump.cs" />
     <Compile Include="Game\UI\Gumps\StandardSkillsGump.cs" />
     <Compile Include="Game\UI\Gumps\TextContainerGump.cs" />
