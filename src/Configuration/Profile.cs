@@ -417,13 +417,13 @@ namespace ClassicUO.Configuration
 
                
                 SkillsGroupManager.Save();
-            }
-            try
-            {
-                File.Delete(skillsGroupsPath);
-            }
-            catch { }
 
+                try
+                {
+                    File.Delete(skillsGroupsPath);
+                }
+                catch { }
+            }
 
             string binpath = Path.Combine(path, "gumps.bin");
 
