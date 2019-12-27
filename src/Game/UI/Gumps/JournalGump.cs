@@ -197,7 +197,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Restore(xml);
 
             _background.Height = _background.SpecialHeight = int.Parse(xml.GetAttribute("height"));
-            _isMinimized = bool.Parse(xml.GetAttribute("isminimized"));
+            IsMinimized = bool.Parse(xml.GetAttribute("isminimized"));
         }
 
         private void InitializeJournalEntries()
