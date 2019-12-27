@@ -23,6 +23,7 @@
 
 using System;
 using System.IO;
+using System.Xml;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -88,8 +89,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             AcceptMouseInput = false;
-            CanBeSaved = true;
         }
+
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SPELLBOOK;
 
         public override void Save(BinaryWriter writer)
         {
@@ -115,6 +117,19 @@ namespace ClassicUO.Game.UI.Gumps
                 reader.ReadBoolean();
             }
 
+            Dispose();
+        }
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            writer.WriteAttributeString("isminimized", IsMinimized.ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+            CUOEnviroment.Client.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
             Dispose();
         }
 

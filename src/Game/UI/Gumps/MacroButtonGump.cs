@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
@@ -59,7 +60,6 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
-            CanBeSaved = true;
             WantUpdateSize = false;
             AnchorGroupName = "spell";
             WidthMultiplier = 2;
@@ -67,6 +67,8 @@ namespace ClassicUO.Game.UI.Gumps
             GroupMatrixWidth = 44;
             GroupMatrixHeight = 44;
         }
+
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_MACROBUTTON;
 
         private void BuildGump()
         {
@@ -175,6 +177,31 @@ namespace ClassicUO.Game.UI.Gumps
                 BuildGump();
             }
 
+        }
+
+        public override void Save(XmlTextWriter writer)
+        {
+            if (_macro != null)
+            {
+                base.Save(writer);
+
+                writer.WriteAttributeString("name", _macro.Name);
+            }
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+
+            Macro macro = CUOEnviroment.Client.GetScene<GameScene>()
+                                       .Macros
+                                       .FindMacro(xml.GetAttribute("name"));
+
+            if (macro != null)
+            {
+                _macro = macro;
+                BuildGump();
+            }
         }
     }
 }

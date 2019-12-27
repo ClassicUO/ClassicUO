@@ -45,7 +45,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             Height = 300;
             CanMove = true;
-            CanBeSaved = true;
 
             _scrollArea = new ScrollArea(0, 32, 272, Height - 96, false);
 
@@ -84,6 +83,8 @@ namespace ClassicUO.Game.UI.Gumps
             else
                 _background.TitleGumpID = 0x9D2;
         }
+
+        //public override GUMP_TYPE GumpType => GUMP_TYPE.GT_TIPNOTICE;
 
         public override void OnButtonClick(int buttonID)
         {

@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -62,7 +63,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public StandardSkillsGump() : base(Constants.SKILLSTD_LOCALSERIAL, 0)
         {
-            CanBeSaved = true;
             AcceptMouseInput = false;
             CanMove = true;
             Height = 200 + _diffY;
@@ -110,7 +110,8 @@ namespace ClassicUO.Game.UI.Gumps
             _hitBox.MouseUp += _hitBox_MouseUp;
         }
 
-      
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SKILLMENU;
+
         public bool IsMinimized
         {
             get => _isMinimized;
@@ -300,7 +301,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             writer.Write(_boxes.Count);
 
-            for (int i = 0; i < _boxes.Count; i++) writer.Write(_boxes[i].Opened);
+            for (int i = 0; i < _boxes.Count; i++) 
+                writer.Write(_boxes[i].Opened);
             writer.Write(IsMinimized);
         }
 
@@ -329,6 +331,42 @@ namespace ClassicUO.Game.UI.Gumps
             if (Profile.GumpsVersion >= 3)
             {
                 _isMinimized = reader.ReadBoolean();
+            }
+        }
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            writer.WriteAttributeString("isminimized", IsMinimized.ToString());
+            writer.WriteAttributeString("height", _scrollArea.SpecialHeight.ToString());
+
+            writer.WriteStartElement("groups");
+
+            for (int i = 0; i < _boxes.Count; i++)
+            {
+                writer.WriteStartElement("group");
+                writer.WriteAttributeString("isopen", _boxes[i].Opened.ToString());
+                writer.WriteEndElement();
+            }
+
+            writer.WriteEndElement();
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+            _scrollArea.Height = _scrollArea.SpecialHeight = int.Parse(xml.GetAttribute("height"));
+
+            XmlElement groupsXml = xml["groups"];
+
+            if (groupsXml != null)
+            {
+                int index = 0;
+                foreach (XmlElement groupXml in groupsXml.GetElementsByTagName("group"))
+                {
+                    if (index >= 0 && index < _boxes.Count)
+                        _boxes[index++].Opened = bool.Parse(groupXml.GetAttribute("isopen"));
+                }
             }
         }
 

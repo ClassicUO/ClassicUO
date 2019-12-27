@@ -23,6 +23,7 @@
 
 using System.IO;
 using System.Linq;
+using System.Xml;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -52,9 +53,11 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             AcceptMouseInput = true;
-            CanBeSaved = true;
         }
-        
+
+
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_MINIMAP;
+
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);
@@ -65,6 +68,19 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(reader);
             _useLargeMap = reader.ReadBoolean();
+            CreateMap();
+        }
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            writer.WriteAttributeString("isminimized", _useLargeMap.ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+            _useLargeMap = bool.Parse(xml.GetAttribute("isminimized"));
             CreateMap();
         }
 

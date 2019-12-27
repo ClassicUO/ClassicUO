@@ -23,6 +23,7 @@
 
 using System;
 using System.IO;
+using System.Xml;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -87,6 +88,8 @@ namespace ClassicUO.Game.UI.Gumps
             protected set { }
         }
 
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_HEALTHBAR;
+
         protected abstract void BuildGump();
 
         public abstract void Update();
@@ -121,6 +124,26 @@ namespace ClassicUO.Game.UI.Gumps
                 BuildGump();
             }
             else
+                Dispose();
+        }
+
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+        }
+
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+
+            if (LocalSerial == World.Player)
+            {
+                _name = World.Player.Name;
+                BuildGump();
+            }
+            else 
                 Dispose();
         }
 
@@ -554,7 +577,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _bars[0].LineWidth = hits;
                 }
 
-                if ((inparty || CanBeSaved) && mobile != null && _bars != null)
+                if ((inparty || LocalSerial == World.Player) && mobile != null && _bars != null)
                 {
                     int mana = CalculatePercents(mobile.ManaMax, mobile.Mana, HPB_BAR_WIDTH);
                     int stam = CalculatePercents(mobile.StaminaMax, mobile.Stamina, HPB_BAR_WIDTH);
@@ -578,7 +601,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if (CanBeSaved)
+            if (LocalSerial == World.Player)
             {
                 if (World.Player.InWarMode != _oldWarMode)
                 {
@@ -591,8 +614,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void BuildGump()
         {
-            CanBeSaved = LocalSerial == World.Player;
-
             WantUpdateSize = false;
 
             var entity = World.Get(LocalSerial);
@@ -605,7 +626,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height, AcceptMouseInput = true, CanMove = true });
 
 
-                if (CanBeSaved)
+                if (LocalSerial == World.Player)
                 {
                     Add(_textBox = new TextBoxCHB(1, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue(World.Player.NotorietyFlag))
                     {
@@ -645,7 +666,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                if (CanBeSaved)
+                if (LocalSerial == World.Player)
                 {
                     _oldWarMode = World.Player.InWarMode;
                     Height = HPB_HEIGHT_MULTILINE;
@@ -854,10 +875,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void BuildGump()
         {
-            CanBeSaved = LocalSerial == World.Player;
-
             WantUpdateSize = false;
-
 
             var entity = World.Get(LocalSerial);
 
@@ -870,7 +888,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = 115;
                 Height = 55;
 
-                if (CanBeSaved)
+                if (LocalSerial == World.Player)
                 {
                     Add(_textBox = new TextBox(3, width: 120, isunicode: false, style: FontStyle.Fixed, hue: Notoriety.GetHue(World.Player.NotorietyFlag))
                     {
@@ -906,7 +924,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                if (CanBeSaved)
+                if (LocalSerial == World.Player)
                 {
                     _oldWarMode = World.Player.InWarMode;
                     Add(_background = new GumpPic(0, 0, _oldWarMode ? BACKGROUND_WAR : BACKGROUND_NORMAL, 0));
@@ -1190,7 +1208,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
 
-                if ((inparty || CanBeSaved) && mobile != null)
+                if ((inparty || LocalSerial == World.Player) && mobile != null)
                 {
                     int mana = CalculatePercents(mobile.ManaMax, mobile.Mana, barW);
                     int stam = CalculatePercents(mobile.StaminaMax, mobile.Stamina, barW);
@@ -1218,7 +1236,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            if (CanBeSaved)
+            if (LocalSerial == World.Player)
             {
                 if (World.Player.InWarMode != _oldWarMode)
                 {

@@ -22,6 +22,7 @@
 #endregion
 
 using System.IO;
+using System.Xml;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -42,7 +43,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             AcceptMouseInput = true;
-            CanBeSaved = true;
         }
 
         public UseAbilityButtonGump(AbilityDefinition def, bool primary) : this()
@@ -52,6 +52,8 @@ namespace ClassicUO.Game.UI.Gumps
             _definition = def;
             BuildGump();
         }
+
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_ABILITYBUTTON;
 
         private void BuildGump()
         {
@@ -140,6 +142,26 @@ namespace ClassicUO.Game.UI.Gumps
             _definition = new AbilityDefinition(index, name, (ushort) graphic);
             _isPrimary = reader.ReadBoolean();
 
+            BuildGump();
+        }
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            writer.WriteAttributeString("id", _definition.Index.ToString());
+            writer.WriteAttributeString("name", _definition.Name);
+            writer.WriteAttributeString("graphic", _definition.Icon.ToString());
+            writer.WriteAttributeString("isprimary", _isPrimary.ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+
+            _definition = new AbilityDefinition(ushort.Parse(xml.GetAttribute("id")),
+                                                xml.GetAttribute("name"),
+                                                ushort.Parse(xml.GetAttribute("graphic")));
+            _isPrimary = bool.Parse(xml.GetAttribute("isprimary"));
             BuildGump();
         }
     }

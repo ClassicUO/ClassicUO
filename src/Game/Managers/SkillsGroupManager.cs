@@ -26,7 +26,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml;
 
+using ClassicUO.Configuration;
 using ClassicUO.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -117,6 +119,8 @@ namespace ClassicUO.Game.Managers
                            15, 29, 9, 22
                        }
                       );
+
+            Save();
         }
 
         public static void LoadDefault()
@@ -190,8 +194,9 @@ namespace ClassicUO.Game.Managers
                         if (grp < groups.Count && skillidx + 1 < UOFileManager.Skills.SkillsCount)
                             Groups[groups[grp]].Add(skillidx++);
                     }
-                }
 
+                    Save();
+                }
             }
             catch (Exception e)
             {
@@ -254,48 +259,90 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void Load(BinaryReader reader)
+        public static void Load()
         {
             Groups.Clear();
 
-            int version = reader.ReadInt32();
+            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "skillsgroups.xml");
 
-            int groupCount = reader.ReadInt32();
-
-            for (int i = 0; i < groupCount; i++)
+            if (!File.Exists(path))
             {
-                int entriesCount = reader.ReadInt32();
-                string groupName = reader.ReadUTF8String(reader.ReadInt32());
+                Log.Trace("No skillsgroups.xml file. Creating a default file.");
+                LoadDefault();
+            }
 
-                if (!Groups.TryGetValue(groupName, out var list) || list == null)
-                {
-                    list = new List<int>();
-                    Groups[groupName] = list;
-                }
+            XmlDocument doc = new XmlDocument();
+            try
+            {
+                doc.Load(path);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+                return;
+            }
 
-                for (int j = 0; j < entriesCount; j++)
+            XmlElement root = doc["skillsgroups"];
+
+            if (root != null)
+            {
+                foreach (XmlElement xml in root.GetElementsByTagName("group"))
                 {
-                    int skillIndex = reader.ReadInt32();
-                    if (skillIndex < UOFileManager.Skills.SkillsCount)
-                        list.Add(skillIndex);
+                    List<int> list = new List<int>();
+
+                    string name = xml.GetAttribute("name");
+
+                    XmlElement xmlIdsRoot = xml["skillids"];
+
+                    if (xmlIdsRoot != null)
+                    {
+                        foreach (XmlElement xmlIds in xmlIdsRoot.GetElementsByTagName("skill"))
+                        {
+                            int id = int.Parse(xmlIds.GetAttribute("id"));
+                            list.Add(id);
+                        }
+                    }
+
+                    Groups[name] = list;
                 }
             }
         }
 
-        public static void Save(BinaryWriter writer)
+
+        public static void Save()
         {
-            // version
-            writer.Write(1);
+            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "skillsgroups.xml");
 
-            writer.Write(Groups.Count);
-
-            foreach (KeyValuePair<string, List<int>> k in Groups)
+            using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
             {
-                writer.Write(k.Value.Count);
+                Formatting = System.Xml.Formatting.Indented,
+                IndentChar = '\t',
+                Indentation = 1
+            })
+            {
+                xml.WriteStartDocument(true);
+                xml.WriteStartElement("skillsgroups");
 
-                writer.Write(k.Key.Length);
-                writer.WriteUTF8String(k.Key);
-                foreach (int i in k.Value) writer.Write(i);
+                foreach (KeyValuePair<string, List<int>> k in Groups)
+                {
+                    xml.WriteStartElement("group");
+
+                    xml.WriteAttributeString("name", k.Key);
+
+                    xml.WriteStartElement("skillids");
+                    foreach (int skillID in k.Value)
+                    {
+                        xml.WriteStartElement("skill");
+                        xml.WriteAttributeString("id", skillID.ToString());
+                        xml.WriteEndElement();
+                    }
+                    xml.WriteEndElement();
+
+                    xml.WriteEndElement();
+                }
+                
+                xml.WriteEndElement();
+                xml.WriteEndDocument();
             }
         }
     }

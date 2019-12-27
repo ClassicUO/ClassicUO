@@ -23,8 +23,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-
+using System.Text;
+using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -69,21 +71,148 @@ namespace ClassicUO.Game.Managers
         private MacroObject _lastMacro;
         private long _nextTimer;
 
-        public MacroManager(Macro[] macros)
-        {
-            if (macros != null)
-                for (int i = 0; i < macros.Length; i++)
-                    AppendMacro(macros[i]);
-        }
 
         public long WaitForTargetTimer { get; set; }
 
         public bool WaitingBandageTarget { get; set; }
 
-        public void InitMacro(Macro first)
+
+
+
+        public void Load()
         {
-            _firstNode = first;
+            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "macros.xml");
+
+            if (!File.Exists(path))
+            {
+                Log.Trace("No macros.xml file. Creating a default file.");
+
+                Clear();
+                CreateDefaultMacros();
+                Save();
+
+                return;
+            }
+
+            XmlDocument doc = new XmlDocument();
+            try
+            {
+                doc.Load(path);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+                return;
+            }
+
+            
+            Clear();
+
+            XmlElement root = doc["macros"];
+
+            if (root != null)
+            {
+                foreach (XmlElement xml in root.GetElementsByTagName("macro"))
+                {
+                    Macro macro = new Macro(xml.GetAttribute("name"));
+                    macro.Load(xml);
+                    AppendMacro(macro);
+                }
+            }
         }
+
+        public void Save()
+        {
+            var list = GetAllMacros();
+
+            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", ProfileManager.Current.Username, ProfileManager.Current.ServerName, ProfileManager.Current.CharacterName, "macros.xml");
+
+            using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
+            {
+                Formatting = System.Xml.Formatting.Indented,
+                IndentChar = '\t',
+                Indentation = 1
+            })
+            {
+                xml.WriteStartDocument(true);
+                xml.WriteStartElement("macros");
+
+                foreach (var macro in list)
+                {
+                    macro.Save(xml);
+                }
+
+                xml.WriteEndElement();
+                xml.WriteEndDocument();
+            }
+        }
+
+        private void CreateDefaultMacros()
+        {
+            AppendMacro(new Macro("Paperdoll", (SDL.SDL_Keycode) 112, true, false, false)
+            {
+                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 10)
+                {
+                    SubMenuType = 1
+                }
+            });
+
+            AppendMacro(new Macro("Options", (SDL.SDL_Keycode) 111, true, false, false)
+            {
+                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 9)
+                {
+                    SubMenuType = 1
+                }
+            });
+
+            AppendMacro(new Macro("Journal", (SDL.SDL_Keycode) 106, true, false, false)
+            {
+                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 12)
+                {
+                    SubMenuType = 1
+                }
+            });
+
+            AppendMacro(new Macro("Backpack", (SDL.SDL_Keycode) 105, true, false, false)
+            {
+                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 16)
+                {
+                    SubMenuType = 1
+                }
+            });
+
+            AppendMacro(new Macro("Radar", (SDL.SDL_Keycode) 114, true, false, false)
+            {
+                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 17)
+                {
+                    SubMenuType = 1
+                }
+            });
+
+            AppendMacro(new Macro("Bow", (SDL.SDL_Keycode) 98, false, true, false)
+            {
+                FirstNode = new MacroObject((MacroType) 18, 0)
+                {
+                    SubMenuType = 0
+                }
+            });
+
+            AppendMacro(new Macro("Salute", (SDL.SDL_Keycode) 115, false, true, false)
+            {
+                FirstNode = new MacroObject((MacroType) 19, 0)
+                {
+                    SubMenuType = 0
+                }
+            });
+        }
+
+
+        public void Clear()
+        {
+            while (_firstNode != null)
+                RemoveMacro(_firstNode);
+        }
+
 
         public void AppendMacro(Macro macro)
         {
@@ -1267,24 +1396,28 @@ namespace ClassicUO.Game.Managers
     [JsonObject]
     internal class Macro : IEquatable<Macro>, INode<Macro>
     {
-        public Macro(string name, SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift)
+        [JsonConstructor]
+        public Macro(string name, SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift) : this(name)
         {
-            Name = name;
-
             Key = key;
             Alt = alt;
             Ctrl = ctrl;
             Shift = shift;
         }
 
-        public string Name { get; }
+        public Macro(string name)
+        {
+            Name = name;
+        }
 
-        public SDL.SDL_Keycode Key { get; set; }
-        public bool Alt { get; set; }
-        public bool Ctrl { get; set; }
-        public bool Shift { get; set; }
+        [JsonProperty] public string Name { get; }
 
-        public MacroObject FirstNode { get; set; }
+        [JsonProperty] public SDL.SDL_Keycode Key { get; set; }
+        [JsonProperty] public bool Alt { get; set; }
+        [JsonProperty] public bool Ctrl { get; set; }
+        [JsonProperty] public bool Shift { get; set; }
+
+        [JsonProperty] public MacroObject FirstNode { get; set; }
 
         public bool Equals(Macro other)
         {
@@ -1296,6 +1429,86 @@ namespace ClassicUO.Game.Managers
 
         [JsonIgnore] public Macro Left { get; set; }
         [JsonIgnore] public Macro Right { get; set; }
+
+        private void AppendMacro(MacroObject item)
+        {
+            if (FirstNode == null)
+                FirstNode = item;
+            else
+            {
+                MacroObject o = FirstNode;
+
+                while (o.Right != null)
+                    o = o.Right;
+
+                o.Right = item;
+                item.Left = o;
+            }
+        }
+
+      
+        public void Save(XmlTextWriter writer)
+        {
+            writer.WriteStartElement("macro");
+            writer.WriteAttributeString("name", Name);
+            writer.WriteAttributeString("key", ((int) Key).ToString());
+            writer.WriteAttributeString("alt", Alt.ToString());
+            writer.WriteAttributeString("ctrl", Ctrl.ToString());
+            writer.WriteAttributeString("shift", Shift.ToString());
+
+            writer.WriteStartElement("actions");
+            for (MacroObject action = FirstNode; action != null; action = action.Right)
+            {
+                writer.WriteStartElement("action");
+                writer.WriteAttributeString("code", ((int) action.Code).ToString());
+                writer.WriteAttributeString("subcode", ((int) action.SubCode).ToString());
+                writer.WriteAttributeString("submenutype", action.SubMenuType.ToString());
+
+                if (action.HasString())
+                    writer.WriteAttributeString("text", ((MacroObjectString) action).Text);
+                writer.WriteEndElement();
+            }
+            writer.WriteEndElement();
+
+            writer.WriteEndElement();
+        }
+
+        public void Load(XmlElement xml)
+        {
+            if (xml == null)
+                return;
+
+            Key = (SDL.SDL_Keycode) int.Parse(xml.GetAttribute("key"));
+            Alt = bool.Parse(xml.GetAttribute("alt"));
+            Ctrl = bool.Parse(xml.GetAttribute("ctrl"));
+            Shift = bool.Parse(xml.GetAttribute("shift"));
+
+            var actions = xml["actions"];
+
+            if (actions != null)
+            {
+                foreach (XmlElement xmlAction in actions.GetElementsByTagName("action"))
+                {
+                    MacroType code = (MacroType) int.Parse(xmlAction.GetAttribute("code"));
+                    MacroSubType sub = (MacroSubType) int.Parse(xmlAction.GetAttribute("subcode"));
+                    sbyte subMenuType = sbyte.Parse(xmlAction.GetAttribute("submenutype"));
+
+                    MacroObject m;
+                    if (xmlAction.HasAttribute("text"))
+                    {
+                        m = new MacroObjectString(code, sub, xmlAction.GetAttribute("text"));
+                    }
+                    else
+                    {
+                        m = new MacroObject(code, sub);
+                    }
+
+                    m.SubMenuType = subMenuType;
+                    AppendMacro(m);
+                }
+            }
+        }
+
 
         public static MacroObject Create(MacroType code)
         {
@@ -1329,19 +1542,7 @@ namespace ClassicUO.Game.Managers
             Macro macro = new Macro(name, 0, false, false, false);
             MacroObject item = new MacroObject(MacroType.None, MacroSubType.MSC_NONE);
 
-
-            if (macro.FirstNode == null)
-                macro.FirstNode = item;
-            else
-            {
-                MacroObject o = macro.FirstNode;
-
-                while (o.Right != null)
-                    o = o.Right;
-
-                o.Right = item;
-                item.Left = o;
-            }
+            macro.AppendMacro(item);
 
             return macro;
         }
@@ -1411,6 +1612,7 @@ namespace ClassicUO.Game.Managers
         }
     }
 
+
     [JsonObject]
     internal class MacroObject : INode<MacroObject>
     {
@@ -1445,7 +1647,7 @@ namespace ClassicUO.Game.Managers
                         SubCode = (MacroSubType) offset;
                     }
 
-                    HasSubMenu = 1;
+                    SubMenuType = 1;
 
                     break;
 
@@ -1457,12 +1659,12 @@ namespace ClassicUO.Game.Managers
                 case MacroType.SetUpdateRange:
                 case MacroType.ModifyUpdateRange:
                 case MacroType.RazorMacro:
-                    HasSubMenu = 2;
+                    SubMenuType = 2;
 
                     break;
 
                 default:
-                    HasSubMenu = 0;
+                    SubMenuType = 0;
 
                     break;
             }
@@ -1470,17 +1672,17 @@ namespace ClassicUO.Game.Managers
 
         [JsonProperty] public MacroType Code { get; set; }
         [JsonProperty] public MacroSubType SubCode { get; set; }
-        [JsonProperty] public sbyte HasSubMenu { get; set; }
+        [JsonProperty] public sbyte SubMenuType { get; set; }
 
         [JsonIgnore] public MacroObject Left { get; set; }
-        [JsonProperty] public MacroObject Right { get; set; }
+        [JsonIgnore] public MacroObject Right { get; set; }
 
         public virtual bool HasString()
         {
             return false;
         }
     }
-
+    
     [JsonObject]
     internal class MacroObjectString : MacroObject
     {

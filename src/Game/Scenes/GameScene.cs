@@ -149,8 +149,26 @@ namespace ClassicUO.Game.Scenes
 
             HeldItem = new ItemHold();
             Hotkeys = new HotkeysManager();
-            Macros = new MacroManager(ProfileManager.Current.Macros);
+            Macros = new MacroManager();
+
+            // #########################################################
+            // [FILE_FIX]
+            // TODO: this code is a workaround to port old macros to the new xml system.
+            if (ProfileManager.Current.Macros != null)
+            {
+                for (int i = 0; i < ProfileManager.Current.Macros.Length; i++)
+                    Macros.AppendMacro(ProfileManager.Current.Macros[i]);
+
+                Macros.Save();
+
+                ProfileManager.Current.Macros = null;
+            }
+            // #########################################################
+
+            Macros.Load();
+
             InfoBars = new InfoBarManager();
+            InfoBars.Load();
             _healthLinesManager = new HealthLinesManager();
             _weather = new Weather();
 
@@ -304,6 +322,8 @@ namespace ClassicUO.Game.Scenes
             TargetManager.ClearTargetingWithoutTargetCancelPacket();
 
             ProfileManager.Current?.Save(UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
+            Macros.Save();
+            InfoBars.Save();
             ProfileManager.UnLoadProfile();
 
             StaticFilters.CleanCaveTextures();

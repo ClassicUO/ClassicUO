@@ -22,6 +22,7 @@
 #endregion
 
 using System.IO;
+using System.Xml;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -51,7 +52,6 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
-            CanBeSaved = true;
             WantUpdateSize = false;
             AnchorGroupName = "spell";
             WidthMultiplier = 2;
@@ -59,6 +59,9 @@ namespace ClassicUO.Game.UI.Gumps
             GroupMatrixWidth = 44;
             GroupMatrixHeight = 44;
         }
+
+
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SKILLBUTTON;
 
         private void BuildGump()
         {
@@ -119,6 +122,25 @@ namespace ClassicUO.Game.UI.Gumps
             _skill = World.Player.Skills[skillIndex];
 
             BuildGump();
+        }
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            writer.WriteAttributeString("id", _skill.Index.ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+            int index = int.Parse(xml.GetAttribute("id"));
+
+            if (index >= 0 && index < World.Player.Skills.Length)
+            {
+                _skill = World.Player.Skills[index];
+            }
+            else 
+                Dispose();
         }
     }
 }

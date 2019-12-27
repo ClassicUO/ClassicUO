@@ -1911,7 +1911,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.SpellDisplayFormat = _spellFormatBox.Text;
 
             // macros
-            ProfileManager.Current.Macros = CUOEnviroment.Client.GetScene<GameScene>().Macros.GetAllMacros().ToArray();
+            CUOEnviroment.Client.GetScene<GameScene>().Macros.Save();
 
             // counters
 
@@ -2055,9 +2055,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!_infoBarBuilderControls[i].IsDisposed)
                     ibmanager.AddItem(new InfoBarItem(_infoBarBuilderControls[i].LabelText, _infoBarBuilderControls[i].Var, _infoBarBuilderControls[i].Hue));
             }
-
-            ProfileManager.Current.InfoBarItems = ibmanager.GetInfoBars().ToArray();
-
+            ibmanager.Save();
 
             InfoBarGump infoBarGump = UIManager.GetGump<InfoBarGump>();
 

@@ -280,8 +280,6 @@ namespace ClassicUO.IO
                 }
             }
 
-            SkillsGroupManager.LoadDefault();
-
             Log.Trace( $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();
         }

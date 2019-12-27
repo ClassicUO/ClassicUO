@@ -262,7 +262,7 @@ namespace ClassicUO.Game.UI.Controls
                      .ToList()
                      .ForEach(s => s.Dispose());
 
-                    switch (newmacro.HasSubMenu)
+                    switch (newmacro.SubMenuType)
                     {
                         case 1: // another combo
                             int count = 0;
@@ -327,7 +327,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (obj.Code != MacroType.None)
             {
-                switch (obj.HasSubMenu)
+                switch (obj.SubMenuType)
                 {
                     case 1:
                         int count = 0;

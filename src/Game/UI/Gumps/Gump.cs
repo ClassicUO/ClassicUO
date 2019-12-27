@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml;
 
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -35,6 +36,28 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
+    enum GUMP_TYPE
+    {
+        NONE,
+
+        GT_BUFF,
+        GT_CONTAINER,
+        GT_COUNTERBAR,
+        GT_HEALTHBAR,
+        GT_INFOBAR,
+        GT_JOURNAL,
+        GT_MACROBUTTON,
+        GT_MINIMAP,
+        GT_PAPERDOLL,
+        GT_SKILLMENU,
+        GT_SPELLBOOK,
+        GT_STATUSGUMP,
+        GT_TIPNOTICE,
+        GT_ABILITYBUTTON,
+        GT_SPELLBUTTON,
+        GT_SKILLBUTTON,
+    }
+
     internal class Gump : Control
     {
         public Gump(uint local, uint server)
@@ -49,7 +72,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool CloseIfClickOutside { get; set; }
 
-        public bool CanBeSaved { get; protected set; }
+        public bool CanBeSaved => GumpType != GUMP_TYPE.NONE;
+
+        public virtual GUMP_TYPE GumpType { get; }
 
         public override bool CanMove
         {
@@ -75,6 +100,14 @@ namespace ClassicUO.Game.UI.Gumps
             writer.Write(Y);
         }
 
+        public virtual void Save(XmlTextWriter writer)
+        {
+            writer.WriteAttributeString("type", ((int)GumpType).ToString());
+            writer.WriteAttributeString("x", X.ToString());
+            writer.WriteAttributeString("y", Y.ToString());
+            writer.WriteAttributeString("serial", LocalSerial.ToString());
+        }
+
         public void SetInScreen()
         {
             Rectangle rect = new Rectangle(0, 0, CUOEnviroment.Client.Window.ClientBounds.Width, CUOEnviroment.Client.Window.ClientBounds.Height);
@@ -88,6 +121,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         public virtual void Restore(BinaryReader reader)
         {
+        }
+
+        public virtual void Restore(XmlElement xml)
+        {
+
         }
 
         protected override void OnDragEnd(int x, int y)
