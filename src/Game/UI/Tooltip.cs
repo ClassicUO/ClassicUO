@@ -113,6 +113,7 @@ namespace ClassicUO.Game.UI
             ShaderHuesTraslator.GetHueVector(ref hue, 0, false, 0.3f, true);
 
             batcher.Draw2D(Textures.GetTexture(Color.Black), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue);
+            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue);
 
             return _renderedText.Draw(batcher, x, y);
         }
