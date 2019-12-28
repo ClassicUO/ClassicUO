@@ -149,7 +149,6 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly Label _label;
         private readonly GumpPic _selectedPic;
-        private uint _timeHover;
         private readonly ContextMenuItemEntry _entry;
 
 
@@ -212,24 +211,6 @@ namespace ClassicUO.Game.UI.Controls
                 Mouse.LastLeftButtonClickTime = 0;
             }
             base.OnMouseUp(x, y, button);
-        }
-
-
-        protected override void OnMouseOver(int x, int y)
-        {
-            if (_timeHover < Time.Ticks)
-            {
-
-            }
-
-            base.OnMouseOver(x, y);
-        }
-
-
-        protected override void OnMouseEnter(int x, int y)
-        {
-            _timeHover = Time.Ticks + 500;
-            base.OnMouseEnter(x, y);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
