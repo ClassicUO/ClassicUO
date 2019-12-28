@@ -235,7 +235,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case InfoBarVars.Damage:
                     return World.Player.DamageMin + "-" + World.Player.DamageMax;
                 case InfoBarVars.Armor:
-                    return World.Player.PhysicalResistence.ToString();
+                    return World.Player.PhysicalResistance.ToString();
                 case InfoBarVars.Luck:
                     return World.Player.Luck.ToString();
                 case InfoBarVars.FireResist:

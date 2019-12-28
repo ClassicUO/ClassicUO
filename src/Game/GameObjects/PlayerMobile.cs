@@ -73,15 +73,15 @@ namespace ClassicUO.Game.GameObjects
 
         public uint Gold;
 
-        public ushort PhysicalResistence;
+        public short PhysicalResistance;
 
-        public ushort FireResistance;
+        public short FireResistance;
 
-        public ushort ColdResistance;
+        public short ColdResistance;
 
-        public ushort PoisonResistance;
+        public short PoisonResistance;
 
-        public ushort EnergyResistance;
+        public short EnergyResistance;
 
         public byte Followers;
 

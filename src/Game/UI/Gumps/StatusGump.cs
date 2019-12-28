@@ -302,7 +302,7 @@ namespace ClassicUO.Game.UI.Gumps
             _labels[(int)MobileStats.Sex] = text;
             Add(text);
 
-            text = new Label(World.Player.PhysicalResistence.ToString(), false, 0x0386, font: 1)
+            text = new Label(World.Player.PhysicalResistance.ToString(), false, 0x0386, font: 1)
             {
                 X = 86,
                 Y = 109
@@ -367,7 +367,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _labels[(int)MobileStats.Dexterity].Text = World.Player.Dexterity.ToString();
                 _labels[(int)MobileStats.Intelligence].Text = World.Player.Intelligence.ToString();
                 _labels[(int)MobileStats.Sex].Text = !World.Player.IsMale ? "F" : "M";
-                _labels[(int)MobileStats.AR].Text = World.Player.PhysicalResistence.ToString();
+                _labels[(int)MobileStats.AR].Text = World.Player.PhysicalResistance.ToString();
                 _labels[(int)MobileStats.HealthCurrent].Text = $"{World.Player.Hits}/{World.Player.HitsMax}";
                 _labels[(int)MobileStats.ManaCurrent].Text = $"{World.Player.Mana}/{World.Player.ManaMax}";
                 _labels[(int)MobileStats.StaminaCurrent].Text = $"{World.Player.Stamina}/{World.Player.StaminaMax}";
@@ -632,7 +632,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     xOffset = 475;
 
-                    AddStatTextLabel($"{World.Player.PhysicalResistence}/{World.Player.MaxPhysicResistence}", MobileStats.AR, xOffset, 74);
+                    AddStatTextLabel($"{World.Player.PhysicalResistance}/{World.Player.MaxPhysicResistence}", MobileStats.AR, xOffset, 74);
                     AddStatTextLabel($"{World.Player.FireResistance}/{World.Player.MaxFireResistence}", MobileStats.RF, xOffset, 92);
                     AddStatTextLabel($"{World.Player.ColdResistance}/{World.Player.MaxColdResistence}", MobileStats.RC, xOffset, 106);
                     AddStatTextLabel($"{World.Player.PoisonResistance}/{World.Player.MaxPoisonResistence}", MobileStats.RP, xOffset, 120);
@@ -642,7 +642,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     xOffset = 354;
 
-                    AddStatTextLabel(World.Player.PhysicalResistence.ToString(), MobileStats.AR, xOffset, 76);
+                    AddStatTextLabel(World.Player.PhysicalResistance.ToString(), MobileStats.AR, xOffset, 76);
                     AddStatTextLabel(World.Player.FireResistance.ToString(), MobileStats.RF, xOffset, 92);
                     AddStatTextLabel(World.Player.ColdResistance.ToString(), MobileStats.RC, xOffset, 106);
                     AddStatTextLabel(World.Player.PoisonResistance.ToString(), MobileStats.RP, xOffset, 120);
@@ -733,7 +733,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _labels[(int)MobileStats.SpellDamageInc].Text = World.Player.SpellDamageIncrease.ToString();
                     _labels[(int)MobileStats.FasterCasting].Text = World.Player.FasterCasting.ToString();
                     _labels[(int)MobileStats.FasterCastRecovery].Text = World.Player.FasterCastRecovery.ToString();
-                    _labels[(int)MobileStats.AR].Text = $"{World.Player.PhysicalResistence}/{World.Player.MaxPhysicResistence}";
+                    _labels[(int)MobileStats.AR].Text = $"{World.Player.PhysicalResistance}/{World.Player.MaxPhysicResistence}";
                     _labels[(int)MobileStats.RF].Text = $"{World.Player.FireResistance}/{World.Player.MaxFireResistence}";
                     _labels[(int)MobileStats.RC].Text = $"{World.Player.ColdResistance}/{World.Player.MaxColdResistence}";
                     _labels[(int)MobileStats.RP].Text = $"{World.Player.PoisonResistance}/{World.Player.MaxPoisonResistence}";
@@ -741,7 +741,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    _labels[(int)MobileStats.AR].Text = World.Player.PhysicalResistence.ToString();
+                    _labels[(int)MobileStats.AR].Text = World.Player.PhysicalResistance.ToString();
                     _labels[(int)MobileStats.RF].Text = World.Player.FireResistance.ToString();
                     _labels[(int)MobileStats.RC].Text = World.Player.ColdResistance.ToString();
                     _labels[(int)MobileStats.RP].Text = World.Player.PoisonResistance.ToString();
@@ -958,7 +958,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             // Armor, weight / max weight
             AddStatTextLabel(
-                             World.Player.PhysicalResistence.ToString(),
+                             World.Player.PhysicalResistance.ToString(),
                              MobileStats.AR,
                              196, 102,
                              alignment: TEXT_ALIGN_TYPE.TS_CENTER);
@@ -1047,7 +1047,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _labels[(int)MobileStats.ManaCurrent].Text = World.Player.Mana.ToString();
                 _labels[(int)MobileStats.ManaMax].Text = World.Player.ManaMax.ToString();
                 _labels[(int)MobileStats.Followers].Text = $"{World.Player.Followers}/{World.Player.FollowersMax}";
-                _labels[(int)MobileStats.AR].Text = World.Player.PhysicalResistence.ToString();
+                _labels[(int)MobileStats.AR].Text = World.Player.PhysicalResistance.ToString();
                 _labels[(int)MobileStats.WeightCurrent].Text = World.Player.Weight.ToString();
                 _labels[(int)MobileStats.WeightMax].Text = World.Player.WeightMax.ToString();
                 _labels[(int)MobileStats.Damage].Text = $"{World.Player.DamageMin}-{World.Player.DamageMax}";
