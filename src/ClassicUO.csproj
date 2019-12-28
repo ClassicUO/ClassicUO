@@ -363,7 +363,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Configuration\ConfigurationResolver.cs" />
     <Compile Include="Configuration\Settings.cs" />
-    <Compile Include="Engine.cs" />
     <Compile Include="Game\Chat.cs" />
     <Compile Include="Game\Data\ContainerManager.cs" />
     <Compile Include="Game\Data\Direction.cs" />
