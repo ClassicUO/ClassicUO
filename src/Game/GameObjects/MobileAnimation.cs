@@ -1050,10 +1050,23 @@ namespace ClassicUO.Game.GameObjects
                                 {
                                     if (hand2 != null)
                                     {
-                                        result = handAnimIDs.Where(handAnimID => handAnimID >= 0x0263 && handAnimID <= 0x028B)
-                                                            .Any(handBaseGraphic => HANDS_BASE_ANIMID.Any(s => s == handBaseGraphic))
-                                                     ? (byte) 8
-                                                     : (byte) 7;
+                                        result = 7;
+
+                                        for (int i = 0; i < handAnimIDs.Length; i++)
+                                        {
+                                            if (handAnimIDs[i] >= 0x0263 && handAnimIDs[i] <= 0x028B)
+                                            {
+                                                for (int k = 0; k < HANDS_BASE_ANIMID.Length; k++)
+                                                {
+                                                    if (handAnimIDs[i] == HANDS_BASE_ANIMID[k])
+                                                    {
+                                                        result = 8;
+                                                        i = handAnimIDs.Length;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                     else
                                         result = 7;
@@ -1091,7 +1104,18 @@ namespace ClassicUO.Game.GameObjects
                                 result = (byte) (isRun ? 3 : 1);
                             else
                             {
-                                if (HAND2_BASE_ANIMID.Any(s => s == hand2Graphic)) result = (byte) (isRun ? 3 : 1);
+                                for (int i = 0; i < HAND2_BASE_ANIMID.Length; i++)
+                                {
+                                    if (HAND2_BASE_ANIMID[i] == hand2Graphic)
+                                    {
+                                        if (isRun)
+                                            result = 3;
+                                        else
+                                            result = 1;
+
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
