@@ -103,7 +103,7 @@ namespace ClassicUO.Game.GameObjects
                             if (AnimIndex >= animData->FrameCount)
                                 AnimIndex = 0;
 
-                            _lastAnimationFrameTime = Time.Ticks + (uint)((animData->FrameInterval + 1) * Constants.ITEM_EFFECT_ANIMATION_DELAY);
+                            _lastAnimationFrameTime = Time.Ticks + (uint)(animData->FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY);
                         }
                     }
                 }

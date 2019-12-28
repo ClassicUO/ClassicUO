@@ -31,7 +31,6 @@ namespace ClassicUO.Game.GameObjects
             Hue = hue;
             Duration = duration > 0 ? Time.Ticks + duration : -1;
             Load();
-            IntervalInMs = (speed + 1) * Constants.ITEM_EFFECT_ANIMATION_DELAY;
         }
 
         public AnimatedItemEffect(int sourceX, int sourceY, int sourceZ, ushort graphic, ushort hue, int duration, int speed) : this(graphic, hue, duration, speed)

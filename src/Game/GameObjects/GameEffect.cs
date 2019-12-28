@@ -71,7 +71,15 @@ namespace ClassicUO.Game.GameObjects
             AnimDataFrame = UOFileManager.AnimData.CalculateCurrentGraphic(Graphic);
             IsEnabled = true;
             AnimIndex = 0;
-            IntervalInMs = (AnimDataFrame.FrameInterval + 1) * Constants.ITEM_EFFECT_ANIMATION_DELAY;
+
+            if (AnimDataFrame.FrameInterval == 0)
+            {
+                IntervalInMs = Constants.ITEM_EFFECT_ANIMATION_DELAY;
+            }
+            else
+            {
+                IntervalInMs = AnimDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY;
+            }
         }
 
         public override void Update(double totalMS, double frameMS)
