@@ -256,7 +256,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                                 0x32, true, isunicode: true, style: FontStyle.BlackBorder));
 
 
-            Add(new HtmlControl(480, htmlY + 19, 300, 100,
+            Add(new HtmlControl(505, htmlY + 19, 300, 100,
                                            false, false,
                                            false,
                                            text: "<body link=\"#6a6a62\" vlink=\"#00FF00\" ><a href=\"https://discord.gg/VdyCpjQ\">CUO Discord",
