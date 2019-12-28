@@ -126,7 +126,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 _facetName.IsVisible = false;
             }
 
-            if (Settings.GlobalSettings.ShardType != 2)
+            if (Settings.GlobalSettings.ShardType == 2)
                 _facetName.IsVisible = false;
 
             Add(_facetName);
@@ -150,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             _htmlControl = new HtmlControl(452, 60, 175, 367, true, true, ishtml: true, text: city.Description);
             Add(_htmlControl);
 
-            if (Settings.GlobalSettings.ShardType != 2)
+            if (Settings.GlobalSettings.ShardType == 2)
                 _htmlControl.IsVisible = false;
 
             for (int i = 0; i < scene.Cities.Length; i++)
@@ -183,7 +183,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 Add(control);
                 _cityControls.Add(control);
 
-                if (Settings.GlobalSettings.ShardType != 2)
+                if (Settings.GlobalSettings.ShardType == 2)
                     control.IsVisible = false;
             }
 
