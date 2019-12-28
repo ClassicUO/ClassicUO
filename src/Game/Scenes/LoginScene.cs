@@ -55,6 +55,7 @@ namespace ClassicUO.Game.Scenes
             CharacterSelection,
             EnteringBritania,
             CharCreation,
+            CreatingCharacter,
             PopUpMessage
         }
 
@@ -199,6 +200,7 @@ namespace ClassicUO.Game.Scenes
                 case LoginStep.LoginInToServer:
                 case LoginStep.EnteringBritania:
                 case LoginStep.PopUpMessage:
+                case LoginStep.CreatingCharacter:
                     UIManager.GameCursor.IsLoading = CurrentLoginStep != LoginStep.PopUpMessage;
 
                     return GetLoadingScreen();
@@ -251,6 +253,9 @@ namespace ClassicUO.Game.Scenes
                     case LoginStep.EnteringBritania:
                         labelText = UOFileManager.Cliloc.GetString(3000001); // Entering Britania...
 
+                        break;
+                    case LoginStep.CreatingCharacter:
+                        labelText = "Creating character...";
                         break;
                 }
             }
@@ -342,6 +347,7 @@ namespace ClassicUO.Game.Scenes
 
             Settings.GlobalSettings.LastCharacterName = character.Name;
             NetClient.Socket.Send(new PCreateCharacter(character, cityIndex, NetClient.Socket.ClientAddress, ServerIndex, (uint) i, profession));
+            CurrentLoginStep = LoginStep.CreatingCharacter;
         }
 
         public void DeleteCharacter(uint index)

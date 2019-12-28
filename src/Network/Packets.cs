@@ -174,6 +174,7 @@ namespace ClassicUO.Network
             WriteByte((byte) character.Strength);
             WriteByte((byte) character.Dexterity);
             WriteByte((byte) character.Intelligence);
+
             var skills = character.Skills.OrderByDescending(o => o.Value).Take(skillcount).ToList();
 
             foreach (var skill in skills)
@@ -205,14 +206,25 @@ namespace ClassicUO.Network
                 WriteUShort(0x00);
             }
 
-            WriteByte((byte) serverIndex);
+            if (UOFileManager.ClientVersion >= ClientVersions.CV_70160)
+            {
+                ushort location = (ushort) cityIndex;
 
-            if (UOFileManager.ClientVersion < ClientVersions.CV_70130 && cityIndex > 0)
-                cityIndex--;
+                WriteUShort(location);
+                WriteUShort(0x0000);
+                WriteUShort((ushort) slot);
+            }
+            else
+            {
+                WriteByte((byte) serverIndex);
+                if (UOFileManager.ClientVersion < ClientVersions.CV_70130 && cityIndex > 0)
+                    cityIndex--;
 
-            WriteByte((byte) cityIndex);
+                WriteByte((byte) cityIndex);
+                WriteUInt(slot);
 
-            WriteUInt(slot);
+            }
+
             WriteUInt(clientIP);
 
             if (character.Equipment[(int) Layer.Shirt] != null)
