@@ -82,8 +82,10 @@ namespace ClassicUO.Game.Managers
         {
             get
             {
-                if (_keyboardFocusControl == null || !_keyboardFocusControl.IsVisible || !_keyboardFocusControl.IsEnabled)
+                if (_keyboardFocusControl == null || _keyboardFocusControl.IsDisposed || !_keyboardFocusControl.IsVisible || !_keyboardFocusControl.IsEnabled)
                 {
+                    _keyboardFocusControl = null;
+
                     foreach (Control c in Gumps)
                     {
                         if (!c.IsDisposed && c.IsVisible && c.IsEnabled)
