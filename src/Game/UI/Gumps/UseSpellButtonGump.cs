@@ -62,11 +62,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPic(0, 0, (ushort) _spell.GumpIconSmallID, 0) {AcceptMouseInput = false});
 
-            (int cliloc, int spl) = GetSpellTooltip(_spell.ID);
+            int cliloc = GetSpellTooltip(_spell.ID);
 
-            if (cliloc != 0 || spl != 0)
+            if (cliloc != 0)
             {
-                SetTooltip(UOFileManager.Cliloc.GetString(cliloc - spl + _spell.ID));
+                SetTooltip(UOFileManager.Cliloc.GetString(cliloc), 80);
             }
 
             WantUpdateSize = true;
@@ -76,30 +76,39 @@ namespace ClassicUO.Game.UI.Gumps
             GroupMatrixHeight = 44;
         }
 
-        private static (int, int) GetSpellTooltip(int id)
+        private static int GetSpellTooltip(int id)
         {
             if (id >= 1 && id < 64) // Magery
-                return (3002010, 0);
-            
+                return 3002011 + (id - 1);
+
             if (id >= 101 && id <= 117) // necro
-                return (1060508, 64);
+                return 1060509 + (id - 101);
 
             if (id >= 201 && id <= 210)
-                return (1060584, 81);
+                return 1060585 + (id - 201);
 
             if (id >= 401 && id <= 406)
-                return (1060594, 91);
+                return 1060595 + (id - 401);
 
             if (id >= 501 && id <= 508)
-                return (1060609, 97);
+                return 1060610 + (id - 501);
 
             if (id >= 601 && id <= 616)
-                return (1071025, 15);
+                return 1071026 + (id - 601);
 
             if (id >= 678 && id <= 693)
-                return (0, 0);
+                return 1031678 + (id - 678);
 
-            return (0, 0);
+            if (id >= 701 && id <= 745)
+            {
+                if (id <= 706)
+                    return 1115612 + (id - 701);
+
+                if (id <= 745)
+                    return 1155896 + (id - 707);
+            }
+
+            return 0;
         }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
