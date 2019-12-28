@@ -627,7 +627,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!string.IsNullOrEmpty(reagents))
                 {
-                    _dataBox.Add(new GumpPicTiled(iconX, 88, 120, 5, 0x0835), page1);
+                    if (_spellBookType != SpellBookType.Mastery)
+                        _dataBox.Add(new GumpPicTiled(iconX, 88, 120, 5, 0x0835), page1);
 
                     Label text = new Label("Reagents:", false, 0x0288, font: 6)
                     {
