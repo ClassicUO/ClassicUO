@@ -21,10 +21,12 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-        protected ResizableGump(int width, int height, int minW, int minH, uint local, uint server) : base(local, server)
+        protected ResizableGump(int width, int height, int minW, int minH, uint local, uint server, ushort borderHue = 0) : base(local, server)
         {
-            _borderControl = new BorderControl(0, 0, Width, Height, 4);
-            _borderControl.Hue = 0x01EC;
+            _borderControl = new BorderControl(0, 0, Width, Height, 4)
+            {
+                Hue = borderHue
+            };
             Add(_borderControl);
             _button = new Button(0, 0x837, 0x838, 0x838);
             Add(_button);

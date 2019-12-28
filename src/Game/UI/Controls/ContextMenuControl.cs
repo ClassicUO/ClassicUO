@@ -207,6 +207,9 @@ namespace ClassicUO.Game.UI.Controls
                     _entry.IsSelected = !_entry.IsSelected;
                     _selectedPic.IsVisible = _entry.IsSelected;
                 }
+
+                Mouse.CancelDoubleClick = true;
+                Mouse.LastLeftButtonClickTime = 0;
             }
             base.OnMouseUp(x, y, button);
         }
