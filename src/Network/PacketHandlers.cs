@@ -1556,13 +1556,15 @@ namespace ClassicUO.Network
         {
             if (World.Player != null && CUOEnviroment.Client.Scene is LoginScene)
             {
-                CUOEnviroment.Client.SetScene(new GameScene());
+                GameScene scene = new GameScene();
+                CUOEnviroment.Client.SetScene(scene);
 
                 NetClient.Socket.Send(new PStatusRequest(World.Player));
 
                 NetClient.Socket.Send(new POpenChat(""));
 
                 NetClient.Socket.Send(new PSkillsRequest(World.Player));
+                scene.DoubleClickDelayed(World.Player);
 
                 if (UOFileManager.ClientVersion >= ClientVersions.CV_306E)
                     NetClient.Socket.Send(new PClientType());
