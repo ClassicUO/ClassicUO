@@ -397,6 +397,20 @@ namespace ClassicUO.Game.GameObjects
 
                         return;
                     }
+
+                    if (IsFlying)
+                    {
+                        if (RandomHelper.GetValue(0, 2) != 0)
+                        {
+                            AnimationGroup = 66;
+                        }
+                        else
+                        {
+                            AnimationGroup = 67;
+                        }
+
+                        return;
+                    }
                 }
 
                 AnimationGroup = _animationIdle[(byte)animGroup - 1, RandomHelper.GetValue(0, 2)];
@@ -491,11 +505,11 @@ namespace ClassicUO.Game.GameObjects
                 ushort id = GetGraphicForAnimation();
                 byte animGroup = GetGroupForAnimation(this, id, true);
 
-                if (animGroup == 64 || animGroup == 65)
-                {
-                    animGroup = (byte) (InWarMode ? 65 : 64);
-                    AnimationGroup = animGroup;
-                }
+                //if (animGroup == 64 || animGroup == 65)
+                //{
+                //    animGroup = (byte) (InWarMode ? 65 : 64);
+                //    AnimationGroup = animGroup;
+                //}
 
                 //Item mount = HasEquipment ? Equipment[(int) Layer.Mount] : null;
 
@@ -940,7 +954,9 @@ namespace ClassicUO.Game.GameObjects
             if (ObjectHandlesOpened)
                 y -= 22;
 
-            if (!IsMounted)
+            if (IsFlying)
+                y -= 22;
+            else if (!IsMounted)
                 y += 22;
 
             UOFileManager.Animations.GetAnimationDimensions(AnimIndex,

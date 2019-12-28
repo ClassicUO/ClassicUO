@@ -110,7 +110,9 @@ namespace ClassicUO.Game.Managers
                         int xx = x;
                         int yy = y;
 
-                        if (!mobile.IsMounted)
+                        if (mobile.IsFlying)
+                            yy -= (int) (22 / scale);
+                        else if (!mobile.IsMounted)
                             yy += (int) (22 / scale);
 
 

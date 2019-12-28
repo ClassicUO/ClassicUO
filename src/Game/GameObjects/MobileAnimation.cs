@@ -277,10 +277,8 @@ namespace ClassicUO.Game.GameObjects
             LABEL_243:
             v13 = (ushort) (v13 & 0x7F);
 
-            if (v13 > 34)
-                v13 = 0;
-
-            //return (byte)v13;
+            //if (v13 > 34)
+            //    v13 = 0;
         }
 
         private static void LABEL_190(ANIMATION_FLAGS flags, ref ushort v13)
@@ -1030,6 +1028,13 @@ namespace ClassicUO.Game.GameObjects
 
                             if (mobile.IsMounted)
                                 result = !haveLightAtHand2 ? (byte) 25 : (byte) 28;
+                            else if (mobile.IsFlying) // TODO: what's up when it is dead?
+                            {
+                                if (mobile.InWarMode)
+                                    result = 65;
+                                else
+                                    result = 64;
+                            }
                             else if (!mobile.InWarMode || mobile.IsDead)
                                 result = !haveLightAtHand2 ? (byte) 4 : (byte) 0;
                             else if (haveLightAtHand2)
@@ -1068,6 +1073,8 @@ namespace ClassicUO.Game.GameObjects
                                             }
                                         }
                                     }
+                                    else if (mobile.IsFlying)
+                                        result = 64;
                                     else
                                         result = 7;
                                 }
@@ -1089,12 +1096,49 @@ namespace ClassicUO.Game.GameObjects
                     //}
                     else if (isRun || !mobile.InWarMode || mobile.IsDead)
                     {
-                        if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0 && isRun && UOFileManager.Animations.AnimationExists(graphic, 24))
+                        if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
                         {
-                            result = 24;
+                            if (mobile.IsFlying)
+                            {
+                                if (isRun)
+                                {
+                                    result = 63;
+                                }
+                                else
+                                {
+                                    result = 62;
+                                }
+                            }
+                            else
+                            {
+                                if (isRun && UOFileManager.Animations.AnimationExists(graphic, 24))
+                                {
+                                    result = 24;
+                                }
+                                else
+                                {
+                                    if (isRun)
+                                    {
+                                        result = 2;
+                                    }
+                                    else
+                                    {
+                                        result = 0;
+                                    }
+                                }
+                            }
                         }
                         else
-                            result = (byte) (isRun ? 2 : 0);
+                        {
+                            if (isRun)
+                            {
+                                result = 2;
+                            }
+                            else
+                            {
+                                result = 0;
+                            }
+                        }
 
                         if (hand2 != null)
                         {
@@ -1118,6 +1162,10 @@ namespace ClassicUO.Game.GameObjects
                                 }
                             }
                         }
+                    }
+                    else if (mobile.IsFlying)
+                    {
+                        result = 62;
                     }
                     else
                         result = 15;
@@ -1531,7 +1579,26 @@ namespace ClassicUO.Game.GameObjects
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
             if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 
-            return type != ANIMATION_GROUPS_TYPE.MONSTER ? (byte) 0xFF : (byte) 20;
+            if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+            {
+                if (mobile.Race == RaceType.GARGOYLE)
+                {
+                    if (mobile.IsFlying)
+                    {
+                        if (action == 0)
+                            return 60;
+                    }
+                    else
+                    {
+                        if (action == 0)
+                            return 61;
+                    }
+                }
+
+                return 0xFF;
+            }
+
+            return 20;
         }
 
         [MethodImpl(256)]
@@ -1551,8 +1618,16 @@ namespace ClassicUO.Game.GameObjects
                     {
                         case 1:
                         case 2:
-
+                            if (mobile.IsFlying)
+                            {
+                                return 76;
+                            }
                             return 17;
+                    }
+
+                    if (mobile.IsFlying)
+                    {
+                        return 75;
                     }
 
                     return 16;
