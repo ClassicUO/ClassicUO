@@ -1570,8 +1570,6 @@ namespace ClassicUO.Network
                 if (UOFileManager.ClientVersion >= ClientVersions.CV_305D)
                     NetClient.Socket.Send(new PClientViewRange(World.ClientViewRange));
 
-                //Engine.FpsLimit = ProfileManager.Current.MaxFPS;
-
                 ProfileManager.Current.ReadGumps()?.ForEach(UIManager.Add);
             }
         }
