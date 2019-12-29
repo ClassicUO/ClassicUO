@@ -146,13 +146,8 @@ namespace ClassicUO.Network
             WriteByte(0x00);
             WriteASCII(character.Name, 30);
             WriteUShort(0x00);
-            uint clientflag = 0;
-            uint flags = (uint) UOFileManager.ClientFlags;
 
-            for (ushort i = 0; i < flags; i++)
-                clientflag |= (uint) (1 << i);
-
-            WriteUInt(clientflag);
+            WriteUInt((uint) UOFileManager.ClientFlags);
             WriteUInt(0x01);
             WriteUInt(0x0);
             WriteByte(profession); // Profession
@@ -260,11 +255,6 @@ namespace ClassicUO.Network
             WriteUInt(0xEDEDEDED);
             WriteASCII(name, 30);
             Skip(2);
-            uint clientFlag = 0;
-
-            for (int i = 0; i < (uint) UOFileManager.ClientFlags; i++)
-                clientFlag |= (uint) (1 << i);
-
             WriteUInt((uint) UOFileManager.ClientFlags);
             Skip(24);
             WriteUInt(index);
