@@ -308,6 +308,12 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+            {
+                base.OnButtonClick(0);
+                return true;
+            }
+
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 ResetHueVector();
