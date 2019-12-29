@@ -833,7 +833,10 @@ namespace ClassicUO.Network
             var scene = CUOEnviroment.Client.GetScene<GameScene>();
 
             if (scene != null)
+            {
+                scene.Weather?.Reset();
                 scene.UpdateDrawPosition = true;
+            }
 
 
             World.Player.CloseRangedGumps();
@@ -854,6 +857,8 @@ namespace ClassicUO.Network
             World.Player.Walker.DenyWalk(seq, x, y, z);
             World.Player.Direction = direction;
             World.Player.ProcessDelta();
+
+            CUOEnviroment.Client.GetScene<GameScene>()?.Weather?.Reset();
         }
 
         private static void ConfirmWalk(Packet p)
