@@ -645,7 +645,7 @@ namespace ClassicUO.Network
             NetClient.Socket.Send(new PClientVersion(Settings.GlobalSettings.ClientVersion));
 
             GameActions.SingleClick(World.Player);
-            NetClient.Socket.Send(new PStatusRequest(World.Player));
+            NetClient.Socket.Send(new PSkillsRequest(World.Player));
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
 
@@ -1559,12 +1559,13 @@ namespace ClassicUO.Network
                 GameScene scene = new GameScene();
                 CUOEnviroment.Client.SetScene(scene);
 
+                GameActions.OpenPaperdoll(World.Player);
                 NetClient.Socket.Send(new PStatusRequest(World.Player));
-
                 NetClient.Socket.Send(new POpenChat(""));
 
-                NetClient.Socket.Send(new PSkillsRequest(World.Player));
-                scene.DoubleClickDelayed(World.Player);
+
+                //NetClient.Socket.Send(new PSkillsRequest(World.Player));
+                //scene.DoubleClickDelayed(World.Player);
 
                 if (UOFileManager.ClientVersion >= ClientVersions.CV_306E)
                     NetClient.Socket.Send(new PClientType());

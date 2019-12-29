@@ -437,7 +437,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Mobile = World.Player;
                 BuildGump();
 
-                GameActions.OpenPaperdoll(World.Player);
+                //GameActions.OpenPaperdoll(World.Player);
                 IsMinimized = bool.Parse(xml.GetAttribute("isminimized"));
             }
             else 
