@@ -132,34 +132,30 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     case Mobile mob:
 
-                        return $"Mobile ({mob.Serial})  graphic: {mob.Graphic}  flags: {mob.Flags}  noto: {mob.NotorietyFlag}";
+                        return $"Mobile (0x{mob.Serial:X8})  graphic: 0x{mob.Graphic:X4}  flags: {mob.Flags}  noto: {mob.NotorietyFlag}";
 
                     case Item item:
 
-                        return $"Item ({item.Serial})  graphic: {item.Graphic}  flags: {item.Flags}  amount: {item.Amount}";
+                        return $"Item (0x{item.Serial:X8})  graphic: 0x{item.Graphic:X4}  flags: {item.Flags}  amount: {item.Amount} itemdata: {item.ItemData.Flags}";
 
                     case Static st:
 
-                        return $"Static ({st.Graphic})  height: {st.ItemData.Height}  flags: {st.ItemData.Flags}  Alpha: {st.AlphaHue}";
+                        return $"Static (0x{st.Graphic:X4})  height: {st.ItemData.Height}  flags: {st.ItemData.Flags}  Alpha: {st.AlphaHue}";
 
                     case Multi multi:
 
-                        return $"Multi ({multi.Graphic})  height: {multi.ItemData.Height}  flags: {multi.ItemData.Flags}";
+                        return $"Multi (0x{multi.Graphic:X4})  height: {multi.ItemData.Height}  flags: {multi.ItemData.Flags}";
 
                     case GameEffect effect:
-
-                        if (effect.Source is Static s)
-                            return $"Static ({s.Graphic})  height: {s.ItemData.Height}  flags: {s.ItemData.Flags}";
-
                         return "GameEffect";
 
                     case TextOverhead overhead:
 
-                        return $"TextOverhead type: {overhead.Type}";
+                        return $"TextOverhead type: {overhead.Type}  hue: 0x{overhead.Hue:X4}";
 
                     case Land land:
 
-                        return $"Land ({land.Graphic})  flags: {land.TileData.Flags}";
+                        return $"Land (0x{land.Graphic:X4})  flags: {land.TileData.Flags}";
                 }
             }
 
