@@ -466,7 +466,7 @@ namespace ClassicUO.Game
         {
             if (CUOEnviroment.Client.Scene is GameScene gs)
             {
-                if (!World.ClientFeatures.TooltipsEnabled || gs.IsHoldingItem)
+                if (!World.ClientFeatures.TooltipsEnabled || (SelectedObject.Object is Item selectedItem && selectedItem.IsLocked && selectedItem.ItemData.Weight == 255 && !selectedItem.ItemData.IsContainer) || gs.IsHoldingItem)
                 {
                     if (!_tooltip.IsEmpty)
                         _tooltip.Clear();

@@ -151,11 +151,12 @@ namespace ClassicUO.Game.UI
             bool hasStartColor = false;
 
 
-            if (obj != null && World.OPL.TryGetNameAndData(obj, out string name, out string data))
+            if (obj != null && 
+                World.OPL.TryGetNameAndData(obj, out string name, out string data))
             {
                 if (!string.IsNullOrEmpty(name))
                 {
-                    if (obj is Item)
+                    if (SerialHelper.IsItem(obj.Serial))
                     {
                         _sbHTML.Append("<basefont color=\"yellow\">");
                         hasStartColor = true;

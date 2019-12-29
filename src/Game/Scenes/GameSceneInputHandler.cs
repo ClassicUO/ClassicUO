@@ -538,7 +538,8 @@ namespace ClassicUO.Game.Scenes
 
                             _queuedAction = () =>
                             {
-                                if (!World.ClientFeatures.TooltipsEnabled)
+                                if (!World.ClientFeatures.TooltipsEnabled || 
+                                    (ent is Item it && it.IsLocked && it.ItemData.Weight == 255 && !it.ItemData.IsContainer ))
                                     GameActions.SingleClick(_queuedObject);
                                 GameActions.OpenPopupMenu(_queuedObject, _wasShiftDown);
                             };
