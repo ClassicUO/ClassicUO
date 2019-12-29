@@ -717,7 +717,7 @@ namespace ClassicUO.Game.UI.Gumps
             return def;
         }
 
-        private void GetBookInfo(SpellBookType type, out ushort bookGraphic, out ushort minimizedGraphic, out ushort iconStartGraphic, out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount)
+        private static void GetBookInfo(SpellBookType type, out ushort bookGraphic, out ushort minimizedGraphic, out ushort iconStartGraphic, out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount)
         {
             switch (type)
             {
@@ -1077,12 +1077,20 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case 0x238C:
-                    _spellBookType = SpellBookType.Bushido;
+
+                    if ((World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) != 0)
+                    {
+                        _spellBookType = SpellBookType.Bushido;
+                    }
 
                     break;
 
                 case 0x23A0:
-                    _spellBookType = SpellBookType.Ninjitsu;
+
+                    if ((World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) != 0)
+                    {
+                        _spellBookType = SpellBookType.Ninjitsu;
+                    }
 
                     break;
 
