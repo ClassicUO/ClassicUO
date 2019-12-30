@@ -1027,7 +1027,16 @@ namespace ClassicUO.Game.GameObjects
                             bool haveLightAtHand2 = hand2 != null && hand2.ItemData.IsLight && hand2.ItemData.AnimID == graphic;
 
                             if (mobile.IsMounted)
-                                result = !haveLightAtHand2 ? (byte) 25 : (byte) 28;
+                            {
+                                if (haveLightAtHand2)
+                                {
+                                    result = 28;
+                                }
+                                else
+                                {
+                                    result = 25;
+                                }
+                            }
                             else if (mobile.IsFlying) // TODO: what's up when it is dead?
                             {
                                 if (mobile.InWarMode)
@@ -1036,7 +1045,16 @@ namespace ClassicUO.Game.GameObjects
                                     result = 64;
                             }
                             else if (!mobile.InWarMode || mobile.IsDead)
-                                result = !haveLightAtHand2 ? (byte) 4 : (byte) 0;
+                            {
+                                if (haveLightAtHand2)
+                                {
+                                    result = 0;
+                                }
+                                else
+                                {
+                                    result = 4;
+                                }
+                            }
                             else if (haveLightAtHand2)
                                 result = 2;
                             else
