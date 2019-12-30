@@ -69,8 +69,8 @@ namespace ClassicUO.IO
         internal static void Enable()
         {
             Log.Trace( "Setup packet for UltimaLive");
-            PacketHandlers.ToClient.Add(0x3F, OnUltimaLivePacket);
-            PacketHandlers.ToClient.Add(0x40, OnUpdateTerrainPacket);
+            PacketHandlers.Handlers.Add(0x3F, OnUltimaLivePacket);
+            PacketHandlers.Handlers.Add(0x40, OnUpdateTerrainPacket);
         }
 
         //The UltimaLive packets could be also used for other things than maps and statics

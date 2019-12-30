@@ -57,12 +57,12 @@ namespace ClassicUO.Network
 
         static PacketHandlers()
         {
-            ToClient = new PacketHandlers();
-            NetClient.PacketReceived += ToClient.OnPacket;
+            Handlers = new PacketHandlers();
+            NetClient.PacketReceived += Handlers.OnPacket;
         }
 
 
-        public static PacketHandlers ToClient { get; }
+        public static PacketHandlers Handlers { get; }
 
 
         public void Add(byte id, Action<Packet> handler)
@@ -86,145 +86,145 @@ namespace ClassicUO.Network
 
         public static void Load()
         {
-            ToClient.Add(0x1B, EnterWorld);
-            ToClient.Add(0x55, LoginComplete);
-            ToClient.Add(0xBD, ClientVersion);
-            ToClient.Add(0x03, ClientTalk);
-            ToClient.Add(0x0B, Damage);
-            ToClient.Add(0x11, CharacterStatus);
-            ToClient.Add(0x15, FollowR);
-            ToClient.Add(0x16, NewHealthbarUpdate);
-            ToClient.Add(0x17, NewHealthbarUpdate);
-            ToClient.Add(0x1A, UpdateItem);
-            ToClient.Add(0x1C, Talk);
-            ToClient.Add(0x1D, DeleteObject);
-            ToClient.Add(0x20, UpdatePlayer);
-            ToClient.Add(0x21, DenyWalk);
-            ToClient.Add(0x22, ConfirmWalk);
-            ToClient.Add(0x23, DragAnimation);
-            ToClient.Add(0x24, OpenContainer);
-            ToClient.Add(0x25, UpdateContainedItem);
-            ToClient.Add(0x27, DenyMoveItem);
-            ToClient.Add(0x28, EndDraggingItem);
-            ToClient.Add(0x29, DropItemAccepted);
-            ToClient.Add(0x2C, DeathScreen);
-            ToClient.Add(0x2D, MobileAttributes);
-            ToClient.Add(0x2E, EquipItem);
-            ToClient.Add(0x32, p => { }); // unknown
-            ToClient.Add(0x38, Pathfinding);
-            ToClient.Add(0x3A, UpdateSkills);
-            ToClient.Add(0x3C, UpdateContainedItems);
-            ToClient.Add(0x4E, PersonalLightLevel);
-            ToClient.Add(0x4F, LightLevel);
-            ToClient.Add(0x54, PlaySoundEffect);
-            ToClient.Add(0x56, MapData);
-            ToClient.Add(0x5B, SetTime);
-            ToClient.Add(0x65, SetWeather);
-            ToClient.Add(0x66, BookData);
-            ToClient.Add(0x6C, TargetCursor);
-            ToClient.Add(0x6D, PlayMusic);
-            ToClient.Add(0x6F, SecureTrading);
-            ToClient.Add(0x6E, CharacterAnimation);
-            ToClient.Add(0x70, GraphicEffect);
-            ToClient.Add(0x71, BulletinBoardData);
-            ToClient.Add(0x72, Warmode);
-            ToClient.Add(0x73, Ping);
-            ToClient.Add(0x74, BuyList);
-            ToClient.Add(0x77, UpdateCharacter);
-            ToClient.Add(0x78, UpdateObject);
-            ToClient.Add(0x7C, OpenMenu);
-            ToClient.Add(0x88, OpenPaperdoll);
-            ToClient.Add(0x89, CorpseEquipment);
-            ToClient.Add(0x90, DisplayMap);
-            ToClient.Add(0x93, OpenBook);
-            ToClient.Add(0x95, DyeData);
-            ToClient.Add(0x97, MovePlayer);
-            ToClient.Add(0x99, MultiPlacement);
-            ToClient.Add(0x9A, ASCIIPrompt);
-            ToClient.Add(0x9E, SellList);
-            ToClient.Add(0xA1, UpdateHitpoints);
-            ToClient.Add(0xA2, UpdateMana);
-            ToClient.Add(0xA3, UpdateStamina);
-            ToClient.Add(0xA5, OpenUrl);
-            ToClient.Add(0xA6, TipWindow);
-            ToClient.Add(0xAA, AttackCharacter);
-            ToClient.Add(0xAB, TextEntryDialog);
-            ToClient.Add(0xAF, DisplayDeath);
-            ToClient.Add(0xAE, UnicodeTalk);
-            ToClient.Add(0xB0, OpenGump);
-            ToClient.Add(0xB2, ChatMessage);
-            ToClient.Add(0xB7, Help);
-            ToClient.Add(0xB8, CharacterProfile);
-            ToClient.Add(0xB9, EnableLockedFeatures);
-            ToClient.Add(0xBA, DisplayQuestArrow);
-            ToClient.Add(0xBB, UltimaMessengerR);
-            ToClient.Add(0xBC, Season);
-            ToClient.Add(0xBE, AssistVersion);
-            ToClient.Add(0xBF, ExtendedCommand);
-            ToClient.Add(0xC0, GraphicEffect);
-            ToClient.Add(0xC1, DisplayClilocString);
-            ToClient.Add(0xC2, UnicodePrompt);
-            ToClient.Add(0xC4, Semivisible);
-            ToClient.Add(0xC6, InvalidMapEnable);
-            ToClient.Add(0xC7, GraphicEffect);
-            ToClient.Add(0xC8, ClientViewRange);
-            ToClient.Add(0xCA, GetUserServerPingGodClientR);
-            ToClient.Add(0xCB, GlobalQueCount);
-            ToClient.Add(0xCC, DisplayClilocString);
-            ToClient.Add(0xD0, ConfigurationFileR);
-            ToClient.Add(0xD1, Logout);
-            ToClient.Add(0xD2, UpdateCharacter);
-            ToClient.Add(0xD3, UpdateObject);
-            ToClient.Add(0xD4, OpenBook);
-            ToClient.Add(0xD6, MegaCliloc);
-            ToClient.Add(0xD7, GenericAOSCommandsR);
-            ToClient.Add(0xD8, CustomHouse);
-            ToClient.Add(0xDB, CharacterTransferLog);
-            ToClient.Add(0xDC, OPLInfo);
-            ToClient.Add(0xDD, OpenCompressedGump);
-            ToClient.Add(0xDE, UpdateMobileStatus);
-            ToClient.Add(0xDF, BuffDebuff);
-            ToClient.Add(0xE2, NewCharacterAnimation);
-            ToClient.Add(0xE3, KREncryptionResponse);
-            ToClient.Add(0xF0, KrriosClientSpecial);
-            ToClient.Add(0xF1, FreeshardListR);
-            ToClient.Add(0xF3, UpdateItemSA);
-            ToClient.Add(0xF5, DisplayMap);
-            ToClient.Add(0xF6, BoatMoving);
-            ToClient.Add(0xF7, PacketList);
+            Handlers.Add(0x1B, EnterWorld);
+            Handlers.Add(0x55, LoginComplete);
+            Handlers.Add(0xBD, ClientVersion);
+            Handlers.Add(0x03, ClientTalk);
+            Handlers.Add(0x0B, Damage);
+            Handlers.Add(0x11, CharacterStatus);
+            Handlers.Add(0x15, FollowR);
+            Handlers.Add(0x16, NewHealthbarUpdate);
+            Handlers.Add(0x17, NewHealthbarUpdate);
+            Handlers.Add(0x1A, UpdateItem);
+            Handlers.Add(0x1C, Talk);
+            Handlers.Add(0x1D, DeleteObject);
+            Handlers.Add(0x20, UpdatePlayer);
+            Handlers.Add(0x21, DenyWalk);
+            Handlers.Add(0x22, ConfirmWalk);
+            Handlers.Add(0x23, DragAnimation);
+            Handlers.Add(0x24, OpenContainer);
+            Handlers.Add(0x25, UpdateContainedItem);
+            Handlers.Add(0x27, DenyMoveItem);
+            Handlers.Add(0x28, EndDraggingItem);
+            Handlers.Add(0x29, DropItemAccepted);
+            Handlers.Add(0x2C, DeathScreen);
+            Handlers.Add(0x2D, MobileAttributes);
+            Handlers.Add(0x2E, EquipItem);
+            Handlers.Add(0x32, p => { }); // unknown
+            Handlers.Add(0x38, Pathfinding);
+            Handlers.Add(0x3A, UpdateSkills);
+            Handlers.Add(0x3C, UpdateContainedItems);
+            Handlers.Add(0x4E, PersonalLightLevel);
+            Handlers.Add(0x4F, LightLevel);
+            Handlers.Add(0x54, PlaySoundEffect);
+            Handlers.Add(0x56, MapData);
+            Handlers.Add(0x5B, SetTime);
+            Handlers.Add(0x65, SetWeather);
+            Handlers.Add(0x66, BookData);
+            Handlers.Add(0x6C, TargetCursor);
+            Handlers.Add(0x6D, PlayMusic);
+            Handlers.Add(0x6F, SecureTrading);
+            Handlers.Add(0x6E, CharacterAnimation);
+            Handlers.Add(0x70, GraphicEffect);
+            Handlers.Add(0x71, BulletinBoardData);
+            Handlers.Add(0x72, Warmode);
+            Handlers.Add(0x73, Ping);
+            Handlers.Add(0x74, BuyList);
+            Handlers.Add(0x77, UpdateCharacter);
+            Handlers.Add(0x78, UpdateObject);
+            Handlers.Add(0x7C, OpenMenu);
+            Handlers.Add(0x88, OpenPaperdoll);
+            Handlers.Add(0x89, CorpseEquipment);
+            Handlers.Add(0x90, DisplayMap);
+            Handlers.Add(0x93, OpenBook);
+            Handlers.Add(0x95, DyeData);
+            Handlers.Add(0x97, MovePlayer);
+            Handlers.Add(0x99, MultiPlacement);
+            Handlers.Add(0x9A, ASCIIPrompt);
+            Handlers.Add(0x9E, SellList);
+            Handlers.Add(0xA1, UpdateHitpoints);
+            Handlers.Add(0xA2, UpdateMana);
+            Handlers.Add(0xA3, UpdateStamina);
+            Handlers.Add(0xA5, OpenUrl);
+            Handlers.Add(0xA6, TipWindow);
+            Handlers.Add(0xAA, AttackCharacter);
+            Handlers.Add(0xAB, TextEntryDialog);
+            Handlers.Add(0xAF, DisplayDeath);
+            Handlers.Add(0xAE, UnicodeTalk);
+            Handlers.Add(0xB0, OpenGump);
+            Handlers.Add(0xB2, ChatMessage);
+            Handlers.Add(0xB7, Help);
+            Handlers.Add(0xB8, CharacterProfile);
+            Handlers.Add(0xB9, EnableLockedFeatures);
+            Handlers.Add(0xBA, DisplayQuestArrow);
+            Handlers.Add(0xBB, UltimaMessengerR);
+            Handlers.Add(0xBC, Season);
+            Handlers.Add(0xBE, AssistVersion);
+            Handlers.Add(0xBF, ExtendedCommand);
+            Handlers.Add(0xC0, GraphicEffect);
+            Handlers.Add(0xC1, DisplayClilocString);
+            Handlers.Add(0xC2, UnicodePrompt);
+            Handlers.Add(0xC4, Semivisible);
+            Handlers.Add(0xC6, InvalidMapEnable);
+            Handlers.Add(0xC7, GraphicEffect);
+            Handlers.Add(0xC8, ClientViewRange);
+            Handlers.Add(0xCA, GetUserServerPingGodClientR);
+            Handlers.Add(0xCB, GlobalQueCount);
+            Handlers.Add(0xCC, DisplayClilocString);
+            Handlers.Add(0xD0, ConfigurationFileR);
+            Handlers.Add(0xD1, Logout);
+            Handlers.Add(0xD2, UpdateCharacter);
+            Handlers.Add(0xD3, UpdateObject);
+            Handlers.Add(0xD4, OpenBook);
+            Handlers.Add(0xD6, MegaCliloc);
+            Handlers.Add(0xD7, GenericAOSCommandsR);
+            Handlers.Add(0xD8, CustomHouse);
+            Handlers.Add(0xDB, CharacterTransferLog);
+            Handlers.Add(0xDC, OPLInfo);
+            Handlers.Add(0xDD, OpenCompressedGump);
+            Handlers.Add(0xDE, UpdateMobileStatus);
+            Handlers.Add(0xDF, BuffDebuff);
+            Handlers.Add(0xE2, NewCharacterAnimation);
+            Handlers.Add(0xE3, KREncryptionResponse);
+            Handlers.Add(0xF0, KrriosClientSpecial);
+            Handlers.Add(0xF1, FreeshardListR);
+            Handlers.Add(0xF3, UpdateItemSA);
+            Handlers.Add(0xF5, DisplayMap);
+            Handlers.Add(0xF6, BoatMoving);
+            Handlers.Add(0xF7, PacketList);
         }
 
        
         public static void SendMegaClilocRequests()
         {
-            if (World.ClientFeatures.TooltipsEnabled && ToClient._clilocRequests.Count != 0)
+            if (World.ClientFeatures.TooltipsEnabled && Handlers._clilocRequests.Count != 0)
             {
                 if (UOFileManager.ClientVersion >= ClientVersions.CV_500A)
                 {
-                    while (ToClient._clilocRequests.Count != 0)
-                        NetClient.Socket.Send(new PMegaClilocRequest(ref ToClient._clilocRequests));
+                    while (Handlers._clilocRequests.Count != 0)
+                        NetClient.Socket.Send(new PMegaClilocRequest(ref Handlers._clilocRequests));
                 }
                 else
                 {
-                    foreach (uint serial in ToClient._clilocRequests)
+                    foreach (uint serial in Handlers._clilocRequests)
                     {
                         NetClient.Socket.Send(new PMegaClilocRequestOld(serial));
                     }
 
-                    ToClient._clilocRequests.Clear();
+                    Handlers._clilocRequests.Clear();
                 }
             }
         }
 
         private static void AddMegaClilocRequest(uint serial)
         {
-            foreach (uint s in ToClient._clilocRequests)
+            foreach (uint s in Handlers._clilocRequests)
             {
                 if (s == serial)
                     return;
             }
 
-            ToClient._clilocRequests.Add(serial);
+            Handlers._clilocRequests.Add(serial);
         }
 
         private static void TargetCursor(Packet p)
