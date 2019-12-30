@@ -188,5 +188,23 @@ namespace ClassicUO.Utility
                 file.ExtractToFile(completeFileName, true);
             }
         }
+
+        [MethodImpl(256)]
+        public static string ToHex(this uint serial)
+        {
+            return $"0x{serial:X8}";
+        }
+
+        [MethodImpl(256)]
+        public static string ToHex(this ushort s)
+        {
+            return $"0x{s:X4}";
+        }
+
+        [MethodImpl(256)]
+        public static string ToHex(this byte b)
+        {
+            return $"0x{b:X2}";
+        }
     }
 }

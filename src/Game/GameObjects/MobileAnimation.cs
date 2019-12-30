@@ -56,12 +56,17 @@ namespace ClassicUO.Game.GameObjects
             {
                 case 0x0192:
                 case 0x0193:
-
                 {
                     g -= 2;
 
                     break;
                 }
+                case 0x02B6:
+                    g = 667;
+                    break;
+                case 0x02B7:
+                    g = 666;
+                    break;
             }
 
             return g;

@@ -32,6 +32,7 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -114,8 +115,15 @@ namespace ClassicUO.Game.UI.Controls
             int offset = !Mobile.IsMale ? FEMALE_OFFSET : MALE_OFFSET;
 
             ushort id = Item.ItemData.AnimID;
-
             ushort mobGraphic = Mobile.Graphic;
+
+            if (UOFileManager.ClientVersion >= ClientVersions.CV_7000 &&
+                id == 0x03CA       // graphic for dead shroud
+                && Mobile != null && (Mobile.Graphic == 0x02B7 || Mobile.Graphic == 0x02B6)) // dead gargoyle graphics
+            {
+                id = 0x0223;
+            }
+
             UOFileManager.Animations.ConvertBodyIfNeeded(ref mobGraphic);
 
             if (UOFileManager.Animations.EquipConversions.TryGetValue(mobGraphic, out var dict))
@@ -137,7 +145,7 @@ namespace ClassicUO.Game.UI.Controls
             if (Texture == null)
             {
                 if (item.Layer != Layer.Face)
-                    Log.Error( $"No texture found for Item ({item.Serial}) {item.Graphic} {item.ItemData.Name} {item.Layer}");
+                    Log.Error( $"No texture found for Item ({item.Serial.ToHex()}) {item.Graphic.ToHex()} {item.ItemData.Name} {item.Layer}");
                 Dispose();
 
                 return;

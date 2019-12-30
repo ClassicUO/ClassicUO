@@ -119,7 +119,7 @@ namespace ClassicUO.Game.UI.Controls
 
             batcher.Draw2D(Texture, x, y, Width, Height, ref _hueVector);
 
-            if (Item.Amount > 1 && Item.ItemData.IsStackable && Item.DisplayedGraphic == Item.Graphic)
+            if (!Item.IsMulti && !Item.IsCoin && Item.Amount > 1 && Item.ItemData.IsStackable)
                 batcher.Draw2D(Texture, x + 5, y + 5, Width, Height, ref _hueVector);
 
             return base.Draw(batcher, x, y);

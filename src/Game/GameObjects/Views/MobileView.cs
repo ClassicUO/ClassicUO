@@ -306,8 +306,18 @@ namespace ClassicUO.Game.GameObjects
 
             ushort hueFromFile = _viewHue;
             byte animGroup = UOFileManager.Animations.AnimGroup;
+
+            // NOTE: i'm not sure this is the right way. This code patch the dead shroud for gargoyles.
+            if (UOFileManager.ClientVersion >= ClientVersions.CV_7000 &&
+                id == 0x03CA       // graphic for dead shroud
+                && owner != null && (owner.Graphic == 0x02B7 || owner.Graphic == 0x02B6)) // dead gargoyle graphics
+            {
+                id = 0x0223;
+            }
+
             ref var direction = ref UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hueFromFile, isParent).Direction[UOFileManager.Animations.Direction];
             UOFileManager.Animations.AnimID = id;
+
 
             if (direction == null || direction.Address == -1 || direction.FileIndex == -1)
             {
