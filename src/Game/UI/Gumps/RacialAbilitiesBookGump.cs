@@ -27,6 +27,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -180,6 +181,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                         UIManager.Add(gump);
                         UIManager.AttemptDragControl(gump, Mouse.Position, true);
+                    };
+
+                    pic.MouseDoubleClick += (sender, e) =>
+                    {
+                        if ((ushort) ((GumpPic) sender).LocalSerial == 0x5DDA && World.Player.Race == RaceType.GARGOYLE)
+                        {
+                            NetClient.Socket.Send(new PToggleGargoyleFlying());
+                            e.Result = true;
+                        }
                     };
                 }
 
