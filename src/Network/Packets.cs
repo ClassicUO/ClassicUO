@@ -607,6 +607,14 @@ namespace ClassicUO.Network
         }
     }
 
+    internal sealed class PLogoutNotification : PacketWriter
+    {
+        public PLogoutNotification() : base(0x05)
+        {
+            WriteUInt(0xFFFF_FFFF);
+        }
+    }
+
     internal sealed class PTextEntryDialogResponse : PacketWriter
     {
         public PTextEntryDialogResponse(uint serial, byte button, string text, bool code) : base(0xAC)

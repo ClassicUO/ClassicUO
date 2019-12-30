@@ -140,29 +140,48 @@ namespace ClassicUO.Network
             _recvEventArgs.SetBuffer(_recvBuffer, 0, _recvBuffer.Length);
             _recvQueue = new ConcurrentQueue<Packet>();
             Statistics.Reset();
-            SocketAsyncEventArgs connectEventArgs = new SocketAsyncEventArgs();
 
-            connectEventArgs.Completed += (sender, e) =>
+            try
             {
-                if (e.SocketError == SocketError.Success)
+                _socket.Connect(endpoint);
+
+                if (_socket.Connected)
                 {
                     Connected.Raise();
                     Statistics.ConnectedFrom = DateTime.Now;
                     StartRecv();
                 }
-                else
-                {
-                    Log.Error( e.SocketError.ToString());
-                    Disconnect(e.SocketError);
-                }
-            };
-            connectEventArgs.RemoteEndPoint = endpoint;
-            _socket.ConnectAsync(connectEventArgs);
+            }
+            catch (SocketException e)
+            {
+                Log.Error(e.ToString());
+                Disconnect(e.SocketErrorCode);
+            }
+
+            
+
+            //SocketAsyncEventArgs connectEventArgs = new SocketAsyncEventArgs();
+
+            //connectEventArgs.Completed += (sender, e) =>
+            //{
+            //    if (e.SocketError == SocketError.Success)
+            //    {
+            //        Connected.Raise();
+            //        Statistics.ConnectedFrom = DateTime.Now;
+            //        StartRecv();
+            //    }
+            //    else
+            //    {
+                   
+            //    }
+            //};
+            //connectEventArgs.RemoteEndPoint = endpoint;
+            //_socket.ConnectAsync(connectEventArgs);
         }
 
         public void Disconnect()
         {
-            Disconnect(SocketError.SocketError);
+            Disconnect(SocketError.Success);
         }
 
         private void Disconnect(SocketError error)
@@ -185,7 +204,14 @@ namespace ClassicUO.Network
             {
             }
 
-            _socket.Close();
+            try
+            {
+                _socket.Close();
+            }
+            catch
+            {
+
+            }
 
             _incompletePacketBuffer = null;
             _incompletePacketLength = 0;
@@ -202,7 +228,8 @@ namespace ClassicUO.Network
             }
 
             _circularBuffer = null;
-            Disconnected.Raise(error);
+            if (error != 0)
+                Disconnected.Raise(error);
             Statistics.Reset();
         }
 
@@ -412,24 +439,34 @@ namespace ClassicUO.Network
                     //LogPacket(data, true);
 #endif
 
-                    lock (_sendLock)
+                    int sent = _socket.Send(data, 0, data.Length, SocketFlags.None);
+                    if (sent > 0 )
                     {
-                        SendQueue.Gram gram;
-
-                        lock (_sendQueue)
-                            gram = _sendQueue.Enqueue(data, 0, data.Length);
-
-                        if (gram != null && !_sending)
-                        {
-                            _sending = true;
-                            _sendEventArgs.SetBuffer(gram.Buffer, 0, gram.Length);
-                            StartSend();
-                        }
+                        Statistics.TotalBytesSended += (uint) sent;
+                        Statistics.TotalPacketsSended++;
                     }
+                    else
+                        Disconnect();
+
+                    //lock (_sendLock)
+                    //{
+                    //    SendQueue.Gram gram;
+
+                        //    lock (_sendQueue)
+                        //        gram = _sendQueue.Enqueue(data, 0, data.Length);
+
+                        //    if (gram != null && !_sending)
+                        //    {
+                        //        _sending = true;
+                        //        _sendEventArgs.SetBuffer(gram.Buffer, 0, gram.Length);
+                        //        StartSend();
+                        //    }
+                        //}
                 }
-                catch (CapacityExceededException)
+                catch (SocketException ex)
+                //catch (CapacityExceededException)
                 {
-                    Disconnect();
+                    Disconnect(ex.SocketErrorCode);
                 }
             }
             else
@@ -447,30 +484,30 @@ namespace ClassicUO.Network
                     break;
 
                 case SocketAsyncOperation.Send:
-                    ProcessSend(e);
+                    //ProcessSend(e);
 
-                    if (IsDisposed) return;
+                    //if (IsDisposed) return;
 
-                    SendQueue.Gram gram;
+                    //SendQueue.Gram gram;
 
-                    lock (_sendQueue)
-                    {
-                        gram = _sendQueue.Dequeue();
-                        if (gram == null && _sendQueue.IsFlushReady) gram = _sendQueue.CheckFlushReady();
-                    }
+                    //lock (_sendQueue)
+                    //{
+                    //    gram = _sendQueue.Dequeue();
+                    //    if (gram == null && _sendQueue.IsFlushReady) gram = _sendQueue.CheckFlushReady();
+                    //}
 
-                    if (gram != null)
-                    {
-                        _sendEventArgs.SetBuffer(gram.Buffer, 0, gram.Length);
-                        StartSend();
-                    }
-                    else
-                    {
-                        lock (_sendLock)
-                            _sending = false;
-                    }
+                    //if (gram != null)
+                    //{
+                    //    _sendEventArgs.SetBuffer(gram.Buffer, 0, gram.Length);
+                    //    StartSend();
+                    //}
+                    //else
+                    //{
+                    //    lock (_sendLock)
+                    //        _sending = false;
+                    //}
 
-                    break;
+                    //break;
 
                 default:
 
@@ -515,10 +552,6 @@ namespace ClassicUO.Network
 
                 if (_isCompressionEnabled)
                 {
-                    //int outSize = 65536;
-                    //Huffman2.Decompress(buffer, _recvBuffer, ref outSize, ref bytesLen);
-                    //bytesLen = outSize;
-
                     DecompressBuffer(ref buffer, ref bytesLen);
                 }
 
@@ -566,8 +599,8 @@ namespace ClassicUO.Network
 
         private void StartSend()
         {
-            if (!_socket.SendAsync(_sendEventArgs))
-                IO_Socket(null, _sendEventArgs);
+            //if (!_socket.SendAsync(_sendEventArgs))
+            //    IO_Socket(null, _sendEventArgs);
         }
 
         private void ProcessSend(SocketAsyncEventArgs e)
@@ -583,28 +616,28 @@ namespace ClassicUO.Network
 
         private void Flush()
         {
-            if (_socket == null) return;
+            //if (_socket == null) return;
 
-            lock (_sendLock)
-            {
-                if (_sending) return;
+            //lock (_sendLock)
+            //{
+            //    if (_sending) return;
 
-                SendQueue.Gram gram;
+            //    SendQueue.Gram gram;
 
-                lock (_sendQueue)
-                {
-                    if (!_sendQueue.IsFlushReady) return;
+            //    lock (_sendQueue)
+            //    {
+            //        if (!_sendQueue.IsFlushReady) return;
 
-                    gram = _sendQueue.CheckFlushReady();
-                }
+            //        gram = _sendQueue.CheckFlushReady();
+            //    }
 
-                if (gram != null)
-                {
-                    _sending = true;
-                    _sendEventArgs.SetBuffer(gram.Buffer, 0, gram.Length);
-                    StartSend();
-                }
-            }
+            //    if (gram != null)
+            //    {
+            //        _sending = true;
+            //        _sendEventArgs.SetBuffer(gram.Buffer, 0, gram.Length);
+            //        StartSend();
+            //    }
+            //}
         }
 
         private static IPAddress ResolveIP(string addr)
