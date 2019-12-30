@@ -36,7 +36,7 @@ namespace ClassicUO.Game
 
         private readonly List<WeatherEffect> _effects = new List<WeatherEffect>();
         private Vector3 _hueVector;
-
+        public sbyte? CurrentWeather { get; set; }
 
         private float SinOscillate(float freq, int range, uint current_tick)
         {
@@ -49,6 +49,7 @@ namespace ClassicUO.Game
             Type = Count = CurrentCount = Temperature = 0;
             Wind = 0;
             WindTimer = Timer = 0;
+            CurrentWeather = null;
 
             _effects.Clear();
         }

@@ -1633,10 +1633,12 @@ namespace ClassicUO.Network
                 return;
 
             var weather = scene.Weather;
-
-            weather.Reset();
-
             byte type = p.ReadByte();
+
+            if (weather.CurrentWeather != type) 
+            {
+            weather.Reset();
+            
             weather.Type = type;
             weather.Count = p.ReadByte();
 
@@ -1653,24 +1655,42 @@ namespace ClassicUO.Network
             {
                 case 0:
                     if (showMessage)
-                        GameActions.Print("It begins to rain.", 0, MessageType.System, 3, false );
+                    { 
+                        GameActions.Print("It begins to rain.", 0, MessageType.System, 3, false);
+                        weather.CurrentWeather = 0;
+                    }
                     break;
+
                 case 1:
                     if (showMessage)
+                    {
                         GameActions.Print("A fierce storm approaches.", 0, MessageType.System, 3, false);
+                        weather.CurrentWeather = 1;
+                    }
                     break;
+
                 case 2:
                     if (showMessage)
+                    {
                         GameActions.Print("It begins to snow.", 0, MessageType.System, 3, false);
+                        weather.CurrentWeather = 2;
+                    }
                     break;
+
                 case 3:
                     if (showMessage)
+                    {
                         GameActions.Print("A storm is brewing.", 0, MessageType.System, 3, false);
+                        weather.CurrentWeather = 3;
+                    }
                     break;
+
                 case 0xFE:
                 case 0xFF:
                     weather.Timer = 0;
+                    weather.CurrentWeather = null;
                     break;
+            }
             }
         }
 
