@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using System.Threading;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -374,7 +375,10 @@ namespace ClassicUO.Game.Scenes
             UIManager.Add(new QuestionGump("Quit\nUltima Online?", s =>
             {
                 if (s)
+                {
+                    NetClient.Socket.Disconnect();
                     CUOEnviroment.Client.SetScene(new LoginScene());
+                }
             }));
         }
 

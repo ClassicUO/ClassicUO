@@ -626,6 +626,16 @@ namespace ClassicUO.Game
 
         public static void Clear()
         {
+            foreach (Mobile mobile in Mobiles)
+            {
+                mobile.Destroy();
+            }
+
+            foreach (Item item in Items)
+            {
+                item.Destroy();
+            }
+
             HouseManager.Clear();
             Items.Clear();
             Mobiles.Clear();
@@ -653,6 +663,9 @@ namespace ClassicUO.Game
 
             Journal.Clear();
             WorldTextManager.Clear();
+
+            SkillsRequested = false;
+
         }
 
         private static void InternalMapChangeClear(bool noplayer)

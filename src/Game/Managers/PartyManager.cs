@@ -160,6 +160,8 @@ namespace ClassicUO.Game.Managers
 
         public void Clear()
         {
+            Leader = 0;
+            Inviter = 0;
             for (int i = 0; i < PARTY_SIZE; i++)
                 Members[i] = null;
         }
