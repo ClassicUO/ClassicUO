@@ -782,7 +782,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 int result = 0;
 
-                if (IsHuman && !IsMounted && !TestStepNoChangeDirection(this, GetGroupForAnimation(this, isParent: true)) && Tile != null)
+                if (IsHuman && !IsMounted && !IsFlying && !TestStepNoChangeDirection(this, GetGroupForAnimation(this, isParent: true)) && Tile != null)
                 {
                     GameObject start = Tile.FirstNode;
 
