@@ -67,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
             ID_GCH_ITEM_IN_LIST
         }
 
-        private readonly CustomHouseManager _customHouseManager;
+        private readonly HouseCustomizationManager _customHouseManager;
 
         public HouseCustomizationGump(uint serial, int x, int y) : base(serial, 0)
         {
@@ -76,7 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             AcceptMouseInput = false;
 
-            _customHouseManager = new CustomHouseManager(serial);
+            _customHouseManager = new HouseCustomizationManager(serial);
             World.CustomHouseManager = _customHouseManager;
 
             Add(new GumpPicTiled(121, 36, 397, 120, 0x0E14));
@@ -535,11 +535,11 @@ namespace ClassicUO.Game.UI.Gumps
                 case CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL:
                     if (_customHouseManager.Category == -1)
                     {
-                        _customHouseManager.MaxPage = (int) Math.Ceiling(CustomHouseManager.Walls.Count / 16.0f);
+                        _customHouseManager.MaxPage = (int) Math.Ceiling(HouseCustomizationManager.Walls.Count / 16.0f);
                     }
                     else
                     {
-                        foreach (CustomHouseWallCategory c in CustomHouseManager.Walls)
+                        foreach (CustomHouseWallCategory c in HouseCustomizationManager.Walls)
                         {
                             if (c.Index == _customHouseManager.Category)
                             {
@@ -550,22 +550,22 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     break;
                 case CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR:
-                    _customHouseManager.MaxPage = CustomHouseManager.Doors.Count;
+                    _customHouseManager.MaxPage = HouseCustomizationManager.Doors.Count;
                     break;
                 case CUSTOM_HOUSE_GUMP_STATE.CHGS_FLOOR:
-                    _customHouseManager.MaxPage = CustomHouseManager.Floors.Count;
+                    _customHouseManager.MaxPage = HouseCustomizationManager.Floors.Count;
                     break;
                 case CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR:
-                    _customHouseManager.MaxPage = CustomHouseManager.Stairs.Count;
+                    _customHouseManager.MaxPage = HouseCustomizationManager.Stairs.Count;
                     break;
                 case CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF:
                     if (_customHouseManager.Category == -1)
                     {
-                        _customHouseManager.MaxPage = (int) Math.Ceiling(CustomHouseManager.Roofs.Count / 16.0f);
+                        _customHouseManager.MaxPage = (int) Math.Ceiling(HouseCustomizationManager.Roofs.Count / 16.0f);
                     }
                     else
                     {
-                        foreach (var c in CustomHouseManager.Roofs)
+                        foreach (var c in HouseCustomizationManager.Roofs)
                         {
                             if (c.Index == _customHouseManager.Category)
                             {
@@ -578,11 +578,11 @@ namespace ClassicUO.Game.UI.Gumps
                 case CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC:
                     if (_customHouseManager.Category == -1)
                     {
-                        _customHouseManager.MaxPage = (int) Math.Ceiling(CustomHouseManager.Miscs.Count / 16.0f);
+                        _customHouseManager.MaxPage = (int) Math.Ceiling(HouseCustomizationManager.Miscs.Count / 16.0f);
                     }
                     else
                     {
-                        foreach (var c in CustomHouseManager.Miscs)
+                        foreach (var c in HouseCustomizationManager.Miscs)
                         {
                             if (c.Index == _customHouseManager.Category)
                             {
@@ -604,14 +604,14 @@ namespace ClassicUO.Game.UI.Gumps
                 int startCategory = Page * 16;
                 int endCategory = startCategory + 16;
 
-                if (endCategory > CustomHouseManager.Walls.Count)
-                    endCategory = CustomHouseManager.Walls.Count;
+                if (endCategory > HouseCustomizationManager.Walls.Count)
+                    endCategory = HouseCustomizationManager.Walls.Count;
 
                 _dataBox.Add(new ScissorControl(true, 121, 36, 384, 60));
 
                 for (int i = startCategory; i < endCategory; i++)
                 {
-                    var vec = CustomHouseManager.Walls[i].Items;
+                    var vec = HouseCustomizationManager.Walls[i].Items;
 
                     if (vec.Count == 0)
                         continue;
@@ -655,9 +655,9 @@ namespace ClassicUO.Game.UI.Gumps
                 // disable scissor
                 _dataBox.Add(new ScissorControl(false));
             }
-            else if (_customHouseManager.Category >= 0 && _customHouseManager.Category <= CustomHouseManager.Walls.Count)
+            else if (_customHouseManager.Category >= 0 && _customHouseManager.Category <= HouseCustomizationManager.Walls.Count)
             {
-                var vec = CustomHouseManager.Walls[_customHouseManager.Category].Items;
+                var vec = HouseCustomizationManager.Walls[_customHouseManager.Category].Items;
                 if (Page >= 0 && Page < vec.Count)
                 {
                     var item = vec[Page];
@@ -740,9 +740,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void AddDoor()
         {
-            if (Page >= 0 && Page < CustomHouseManager.Doors.Count)
+            if (Page >= 0 && Page < HouseCustomizationManager.Doors.Count)
             {
-                var item = CustomHouseManager.Doors[Page];
+                var item = HouseCustomizationManager.Doors[Page];
 
                 int x = 0, y = 0;
 
@@ -877,9 +877,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void AddFloor()
         {
-            if (Page >= 0 && Page < CustomHouseManager.Floors.Count)
+            if (Page >= 0 && Page < HouseCustomizationManager.Floors.Count)
             {
-                var item = CustomHouseManager.Floors[Page];
+                var item = HouseCustomizationManager.Floors[Page];
 
                 int x = 0, y = 0;
 
@@ -930,9 +930,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void AddStair()
         {
-            if (Page >= 0 && Page < CustomHouseManager.Stairs.Count)
+            if (Page >= 0 && Page < HouseCustomizationManager.Stairs.Count)
             {
-                var item = CustomHouseManager.Stairs[Page];
+                var item = HouseCustomizationManager.Stairs[Page];
 
                 for (int j = 0; j < 2; j++)
                 {
@@ -1002,15 +1002,15 @@ namespace ClassicUO.Game.UI.Gumps
                 int startCategory = Page * 16;
                 int endCategory = startCategory + 16;
 
-                if (endCategory > CustomHouseManager.Roofs.Count)
-                    endCategory = CustomHouseManager.Roofs.Count;
+                if (endCategory > HouseCustomizationManager.Roofs.Count)
+                    endCategory = HouseCustomizationManager.Roofs.Count;
 
                 // push scissor
                 _dataBox.Add(new ScissorControl(true, 121, 36, 384, 60));
 
                 for (int i = startCategory; i < endCategory; i++)
                 {
-                    var vec = CustomHouseManager.Roofs[i].Items;
+                    var vec = HouseCustomizationManager.Roofs[i].Items;
 
                     if (vec.Count == 0)
                         continue;
@@ -1059,9 +1059,9 @@ namespace ClassicUO.Game.UI.Gumps
                 // pop scissor
                 _dataBox.Add(new ScissorControl(false));
             }
-            else if (_customHouseManager.Category >= 0 && _customHouseManager.Category < CustomHouseManager.Roofs.Count)
+            else if (_customHouseManager.Category >= 0 && _customHouseManager.Category < HouseCustomizationManager.Roofs.Count)
             {
-                var vec = CustomHouseManager.Roofs[_customHouseManager.Category].Items;
+                var vec = HouseCustomizationManager.Roofs[_customHouseManager.Category].Items;
 
                 if (Page >= 0 && Page < vec.Count)
                 {
@@ -1167,15 +1167,15 @@ namespace ClassicUO.Game.UI.Gumps
                 int startCategory = Page * 16;
                 int endCategory = startCategory + 16;
 
-                if (endCategory > CustomHouseManager.Miscs.Count)
-                    endCategory = CustomHouseManager.Miscs.Count;
+                if (endCategory > HouseCustomizationManager.Miscs.Count)
+                    endCategory = HouseCustomizationManager.Miscs.Count;
 
                 // push scissor
                 _dataBox.Add(new ScissorControl(true, 121, 36, 384, 60));
 
                 for (int i = startCategory; i < endCategory; i++)
                 {
-                    var vec = CustomHouseManager.Miscs[i].Items;
+                    var vec = HouseCustomizationManager.Miscs[i].Items;
 
                     if (vec.Count == 0)
                         continue;
@@ -1222,9 +1222,9 @@ namespace ClassicUO.Game.UI.Gumps
                 // pop scissor
                 _dataBox.Add(new ScissorControl(false));
             }
-            else if (_customHouseManager.Category >= 0 && _customHouseManager.Category < CustomHouseManager.Miscs.Count)
+            else if (_customHouseManager.Category >= 0 && _customHouseManager.Category < HouseCustomizationManager.Miscs.Count)
             {
-                var vec = CustomHouseManager.Miscs[_customHouseManager.Category].Items;
+                var vec = HouseCustomizationManager.Miscs[_customHouseManager.Category].Items;
 
                 if (Page >= 0 && Page < vec.Count)
                 {
@@ -1403,17 +1403,17 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     int newCategory = -1;
 
-                    if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL && index >= 0 && index < CustomHouseManager.Walls.Count)
+                    if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL && index >= 0 && index < HouseCustomizationManager.Walls.Count)
                     {
-                        newCategory = CustomHouseManager.Walls[index].Index;
+                        newCategory = HouseCustomizationManager.Walls[index].Index;
                     }
-                    else if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF && index >= 0 && index < CustomHouseManager.Roofs.Count)
+                    else if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF && index >= 0 && index < HouseCustomizationManager.Roofs.Count)
                     {
-                        newCategory = CustomHouseManager.Roofs[index].Index;
+                        newCategory = HouseCustomizationManager.Roofs[index].Index;
                     }
-                    else if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC && index >= 0 && index < CustomHouseManager.Miscs.Count)
+                    else if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC && index >= 0 && index < HouseCustomizationManager.Miscs.Count)
                     {
-                        newCategory = CustomHouseManager.Miscs[index].Index;
+                        newCategory = HouseCustomizationManager.Miscs[index].Index;
                     }
 
 
@@ -1440,27 +1440,27 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (_customHouseManager.Category >= 0)
                         {
-                            if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL && _customHouseManager.Category < CustomHouseManager.Walls.Count && index < CustomHouseWall.GRAPHICS_COUNT)
+                            if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL && _customHouseManager.Category < HouseCustomizationManager.Walls.Count && index < CustomHouseWall.GRAPHICS_COUNT)
                             {
-                                var list = CustomHouseManager.Walls[_customHouseManager.Category].Items;
+                                var list = HouseCustomizationManager.Walls[_customHouseManager.Category].Items;
 
                                 if (Page < list.Count)
                                 {
                                     graphic = (_customHouseManager.ShowWindow ? list[Page].WindowGraphics[index] : list[Page].Graphics[index]);
                                 }
                             }
-                            else if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF && _customHouseManager.Category < CustomHouseManager.Roofs.Count && index < CustomHouseRoof.GRAPHICS_COUNT)
+                            else if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF && _customHouseManager.Category < HouseCustomizationManager.Roofs.Count && index < CustomHouseRoof.GRAPHICS_COUNT)
                             {
-                                var list = CustomHouseManager.Roofs[_customHouseManager.Category].Items;
+                                var list = HouseCustomizationManager.Roofs[_customHouseManager.Category].Items;
 
                                 if (Page < list.Count)
                                 {
                                     graphic = list[Page].Graphics[index];
                                 }
                             }
-                            else if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC && _customHouseManager.Category < CustomHouseManager.Miscs.Count && index < CustomHouseMisc.GRAPHICS_COUNT)
+                            else if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC && _customHouseManager.Category < HouseCustomizationManager.Miscs.Count && index < CustomHouseMisc.GRAPHICS_COUNT)
                             {
-                                var list = CustomHouseManager.Miscs[_customHouseManager.Category].Items;
+                                var list = HouseCustomizationManager.Miscs[_customHouseManager.Category].Items;
 
                                 if (Page < list.Count)
                                 {
@@ -1471,15 +1471,15 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR && Page < CustomHouseManager.Doors.Count && index < CustomHouseDoor.GRAPHICS_COUNT)
+                        if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR && Page < HouseCustomizationManager.Doors.Count && index < CustomHouseDoor.GRAPHICS_COUNT)
                         {
-                            graphic = CustomHouseManager.Doors[Page].Graphics[index];
+                            graphic = HouseCustomizationManager.Doors[Page].Graphics[index];
                         }
-                        else if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_FLOOR && Page < CustomHouseManager.Floors.Count && index < CustomHouseFloor.GRAPHICS_COUNT)
+                        else if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_FLOOR && Page < HouseCustomizationManager.Floors.Count && index < CustomHouseFloor.GRAPHICS_COUNT)
                         {
-                            graphic = CustomHouseManager.Floors[Page].Graphics[index];
+                            graphic = HouseCustomizationManager.Floors[Page].Graphics[index];
                         }
-                        else if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR && Page < CustomHouseManager.Stairs.Count)
+                        else if (_customHouseManager.State == CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR && Page < HouseCustomizationManager.Stairs.Count)
                         {
                             if (index > 10)
                             {
@@ -1489,7 +1489,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (index < CustomHouseStair.GRAPHICS_COUNT)
                             {
-                                graphic = CustomHouseManager.Stairs[Page].Graphics[index];
+                                graphic = HouseCustomizationManager.Stairs[Page].Graphics[index];
                             }
                         }
                     }

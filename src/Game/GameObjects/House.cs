@@ -23,7 +23,7 @@
 
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility.Collections;
@@ -44,15 +44,9 @@ namespace ClassicUO.Game.GameObjects
         public List<Multi> Components { get; } = new List<Multi>();
         public bool IsCustom;
 
-        public Multi GetMultiAt(int x, int y)
+        public IEnumerable<Multi> GetMultiAt(int x, int y)
         {
-            foreach (Multi component in Components)
-            {
-                if (component.X == x && component.Y == y)
-                    return component;
-            }
-
-            return null;
+            return Components.Where(s => s.X == x && s.Y == y);
         }
 
         public Multi Add(ushort graphic, ushort hue, int x, int y, sbyte z, bool iscustom)
@@ -103,12 +97,16 @@ namespace ClassicUO.Game.GameObjects
                         if (((state == 0) || (component.State & state) != 0))
                         {
                             component.Destroy();
-                            Components.RemoveAt(i--);
                         }
                     }
                     else if (component.Z <= checkZ)
                     {
                         component.State = component.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
+                    }
+
+                    if (component.IsDestroyed)
+                    {
+                        Components.RemoveAt(i--);
                     }
                 }
             }

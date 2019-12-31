@@ -147,7 +147,7 @@
     <Compile Include="Game\Managers\AnchorManager.cs" />
     <Compile Include="Game\Managers\AuraManager.cs" />
     <Compile Include="Game\Managers\CorpseManager.cs" />
-    <Compile Include="Game\Managers\CustomHouseManager.cs" />
+    <Compile Include="Game\Managers\HouseCustomizationManager.cs" />
     <Compile Include="Game\Managers\HealthLinesManager.cs" />
     <Compile Include="Game\Managers\HotkeysManager.cs" />
     <Compile Include="Game\Managers\InfoBarManager.cs" />

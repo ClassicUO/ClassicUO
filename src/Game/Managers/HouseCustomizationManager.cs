@@ -27,9 +27,9 @@ namespace ClassicUO.Game.Managers
         public int X, Y, Z;
     }
 
-    class CustomHouseManager
+    class HouseCustomizationManager
     {
-        static CustomHouseManager()
+        static HouseCustomizationManager()
         {
             ParseFileWithCategory<CustomHouseWall, CustomHouseWallCategory>(Walls, UOFileManager.GetUOFilePath("walls.txt"));
             ParseFile(Floors, UOFileManager.GetUOFilePath("floors.txt"));
@@ -72,7 +72,7 @@ namespace ClassicUO.Game.Managers
 
         public readonly uint Serial;
 
-        public CustomHouseManager(uint serial)
+        public HouseCustomizationManager(uint serial)
         {
             Serial = serial;
 
@@ -302,7 +302,7 @@ namespace ClassicUO.Game.Managers
                                 if (multi == null)
                                     continue;
 
-                                foreach (Multi item in house.Components)
+                                foreach (Multi item in multi)
                                 {
                                     if (!item.IsCustom)
                                         continue;
@@ -351,7 +351,7 @@ namespace ClassicUO.Game.Managers
                                 if (multi == null)
                                     continue;
 
-                                foreach (Multi item in house.Components)
+                                foreach (Multi item in multi)
                                 {
                                     if (item.IsCustom && (((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0) && item.Z >= minZ && item.Z < maxZ))
                                     {
@@ -371,7 +371,7 @@ namespace ClassicUO.Game.Managers
                                     if (multi == null)
                                         continue;
 
-                                    foreach (Multi item in house.Components)
+                                    foreach (Multi item in multi)
                                     {
                                         if (item.IsCustom && ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0) &&
                                             ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0) &&
@@ -395,7 +395,7 @@ namespace ClassicUO.Game.Managers
                                     if (multi == null)
                                         continue;
 
-                                    foreach (Multi item in house.Components)
+                                    foreach (Multi item in multi)
                                     {
                                         if (item.IsCustom && ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0) &&
                                             ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0) &&
@@ -419,7 +419,7 @@ namespace ClassicUO.Game.Managers
                                     if (multi == null)
                                         continue;
 
-                                    foreach (Multi item in house.Components)
+                                    foreach (Multi item in multi)
                                     {
                                         if (item.IsCustom && ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0) &&
                                             ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0) &&
@@ -442,7 +442,7 @@ namespace ClassicUO.Game.Managers
                                     if (multi == null)
                                         continue;
 
-                                    foreach (Multi item in house.Components)
+                                    foreach (Multi item in multi)
                                     {
                                         if (item.IsCustom && ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0) &&
                                             ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0) &&
@@ -466,7 +466,7 @@ namespace ClassicUO.Game.Managers
                                     if (multi == null)
                                         continue;
 
-                                    foreach (Multi item in house.Components)
+                                    foreach (Multi item in multi)
                                     {
                                         if (item.IsCustom && ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0) &&
                                             ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0) &&
@@ -490,7 +490,7 @@ namespace ClassicUO.Game.Managers
                                     if (multi == null)
                                         continue;
 
-                                    foreach (Multi item in house.Components)
+                                    foreach (Multi item in multi)
                                     {
                                         if (item.IsCustom && ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0) &&
                                             ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0) &&
@@ -569,7 +569,7 @@ namespace ClassicUO.Game.Managers
                         {
                             var multi = house.GetMultiAt(place.X, place.Y);
 
-                            if (multi == null)
+                            if (multi == null || !multi.Any())
                                 return;
 
                             int z = 7 + (CurrentFloor - 1) * 20;
@@ -1048,9 +1048,10 @@ namespace ClassicUO.Game.Managers
                         type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF;
                     }
                     else if (place.X >= StartPos.X && place.X <= EndPos.X &&
-                             place.Y >= StartPos.Y && place.Y <= EndPos.Y && place.Z >= MinHouseZ)
+                             place.Y >= StartPos.Y && place.Y <= EndPos.Y && 
+                             place.Z >= MinHouseZ)
                     {
-
+                        // it's into the bounds
                     }
                     else
                     {
@@ -1339,13 +1340,13 @@ namespace ClassicUO.Game.Managers
             return true;
         }
 
-        public bool ValidatePlaceStructure(Item foundationItem, House house, Multi multi, int minZ, int maxZ, int flags)
+        public bool ValidatePlaceStructure(Item foundationItem, House house, IEnumerable<Multi> multi, int minZ, int maxZ, int flags)
         {
-            if (house == null || multi == null)
+            if (house == null)
                 return false;
 
 
-            foreach (Multi item in house.Components)
+            foreach (Multi item in multi)
             {
                 List<Point> validatedFloors = new List<Point>();
 

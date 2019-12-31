@@ -240,7 +240,7 @@ namespace ClassicUO.Game.GameObjects
                     m.Hue = Hue;
                     m.AlphaHue = 255;
                     m.IsCustom = false;
-                    m.State = 0;
+                    m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE;
                     m.AddToTile();
                     house.Components.Add(m);
 

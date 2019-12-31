@@ -86,7 +86,7 @@ namespace ClassicUO.Game
 
         public static JournalManager Journal { get; } = new JournalManager();
 
-        public static CustomHouseManager CustomHouseManager;
+        public static HouseCustomizationManager CustomHouseManager;
 
         public static WorldMapEntityManager WMapManager = new WorldMapEntityManager();
 
