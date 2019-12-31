@@ -568,7 +568,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x13FF: // Katana
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.ArmorIgnore;
 
                                 goto done;
