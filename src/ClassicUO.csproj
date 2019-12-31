@@ -474,7 +474,6 @@
     <Compile Include="Network\Packets.cs" />
     <Compile Include="Network\PacketsTable.cs" />
     <Compile Include="Network\PacketWriter.cs" />
-    <Compile Include="Network\SendQueue.cs" />
     <Compile Include="Game\GameCursor.cs" />
     <Compile Include="Game\GameObjects\IsometricLight.cs" />
     <Compile Include="Game\Managers\WorldTextManager.cs" />

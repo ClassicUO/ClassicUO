@@ -30,7 +30,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Network
 {
-    internal class Huffman
+    internal static class Huffman
     {
         #region Decompression Tree
 
