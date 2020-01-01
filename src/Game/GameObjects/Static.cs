@@ -117,7 +117,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void UpdateGraphicBySeason()
         {
-            SetGraphic(Season.GetSeasonGraphic(World.Season, OriginalGraphic));
+            SetGraphic(SeasonManager.GetSeasonGraphic(World.Season, OriginalGraphic));
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
             SetTextureByGraphic(Graphic);
             IsVegetation = StaticFilters.IsVegetation(Graphic);

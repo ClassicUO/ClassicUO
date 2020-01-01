@@ -117,7 +117,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void UpdateGraphicBySeason()
         {
-            Graphic = Season.GetSeasonGraphic(World.Season, _originalGraphic);
+            Graphic = SeasonManager.GetSeasonGraphic(World.Season, _originalGraphic);
             IsVegetation = StaticFilters.IsVegetation(Graphic);
         }
 

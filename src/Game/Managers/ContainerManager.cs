@@ -28,8 +28,9 @@ using ClassicUO.Renderer;
 using ClassicUO.Game.UI.Controls;
 
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Data;
 
-namespace ClassicUO.Game.Data
+namespace ClassicUO.Game.Managers
 {
     internal static class ContainerManager
     {
