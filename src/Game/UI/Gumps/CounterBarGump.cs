@@ -333,9 +333,9 @@ namespace ClassicUO.Game.UI.Gumps
                 _hue = hue;
             }
 
-            protected override void OnMouseUp(int x, int y, MouseButton button)
+            protected override void OnMouseUp(int x, int y, MouseButtonType button)
             {
-                if (button == MouseButton.Left)
+                if (button == MouseButtonType.Left)
                 {
                     GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
 
@@ -351,7 +351,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     gs.DropHeldItemToContainer(item, gs.HeldItem.X, gs.HeldItem.Y);
                 }
-                else if (button == MouseButton.Right && Keyboard.Alt && _graphic != 0)
+                else if (button == MouseButtonType.Right && Keyboard.Alt && _graphic != 0)
                 {
                     _image.ChangeGraphic(0, 0);
                     _amount = 0;
@@ -359,9 +359,9 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+            protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
             {
-                if (button == MouseButton.Left)
+                if (button == MouseButtonType.Left)
                 {
                     Item backpack = World.Player.Equipment[(int)Layer.Backpack];
                     Item item = backpack.FindItem(_graphic, _hue);

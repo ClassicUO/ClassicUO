@@ -357,7 +357,6 @@
     <Compile Include="Game\GameObjects\Views\MovingEffectView.cs" />
     <Compile Include="Input\Mouse.cs" />
     <Compile Include="Interfaces\INode.cs" />
-    <Compile Include="Interfaces\ISmoothMovable.cs" />
     <Compile Include="IO\UltimaLive.cs" />
     <Compile Include="Network\NetStatistics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -445,16 +444,11 @@
     <Compile Include="Game\GameObjects\Views\TileView.cs" />
     <Compile Include="Game\GameObjects\Views\View.cs" />
     <Compile Include="Game\World.cs" />
-    <Compile Include="Input\EventArgs.cs" />
-    <Compile Include="Input\InputEvent.cs" />
-    <Compile Include="Input\InputKeyboardEvent.cs" />
-    <Compile Include="Input\InputMouseEvent.cs" />
-    <Compile Include="Input\KeyboardEvent.cs" />
+    <Compile Include="Input\InputEventArgs.cs" />
+    <Compile Include="Input\KeyboardEventType.cs" />
     <Compile Include="Input\MouseButtons.cs" />
-    <Compile Include="Input\MouseEvent.cs" />
+    <Compile Include="Input\MouseEventType.cs" />
     <Compile Include="Game\UI\TextEntry.cs" />
-    <Compile Include="Interfaces\IColorable.cs" />
-    <Compile Include="Interfaces\IDebuggable.cs" />
     <Compile Include="Interfaces\IDrawable.cs" />
     <Compile Include="Interfaces\IUpdateable.cs" />
     <Compile Include="IO\ClientVersions.cs" />

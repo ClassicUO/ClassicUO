@@ -97,9 +97,9 @@ namespace ClassicUO.Game.UI.Controls
             return null;
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButton.Left)
+            if (button == MouseButtonType.Left)
             {
                 IsSelected = true;
 

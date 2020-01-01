@@ -132,7 +132,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void _hitBox_MouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButton.Left && !IsMinimized)
+            if (e.Button == MouseButtonType.Left && !IsMinimized)
             {
                 IsMinimized = true;
             }
@@ -305,7 +305,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void _picBase_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            if (e.Button == MouseButton.Left && IsMinimized)
+            if (e.Button == MouseButtonType.Left && IsMinimized)
             {
                 IsMinimized = false;
             }
@@ -316,7 +316,7 @@ namespace ClassicUO.Game.UI.Gumps
             _titleLabel.Text = text;
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
             GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
 
@@ -326,14 +326,14 @@ namespace ClassicUO.Game.UI.Gumps
             gs.WearHeldItem(Mobile);
         }
 
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
             return true;
         }
 
         private void VirtueMenu_MouseDoubleClickEvent(object sender, MouseDoubleClickEventArgs args)
         {
-            if (args.Button == MouseButton.Left)
+            if (args.Button == MouseButtonType.Left)
             {
                 GameActions.ReplyGump(World.Player,
                                       0x000001CD,
@@ -347,12 +347,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void Profile_MouseDoubleClickEvent(object o, MouseDoubleClickEventArgs args)
         {
-            if (args.Button == MouseButton.Left) GameActions.RequestProfile(Mobile.Serial);
+            if (args.Button == MouseButtonType.Left) GameActions.RequestProfile(Mobile.Serial);
         }
 
         private void PartyManifest_MouseDoubleClickEvent(object sender, MouseDoubleClickEventArgs args)
         {
-            if (args.Button == MouseButton.Left)
+            if (args.Button == MouseButtonType.Left)
             {
                 var party = UIManager.GetGump<PartyGump>();
 

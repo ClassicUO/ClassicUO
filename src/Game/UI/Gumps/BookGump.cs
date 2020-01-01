@@ -111,22 +111,22 @@ namespace ClassicUO.Game.UI.Gumps
 
             m_Forward.MouseUp += (sender, e) =>
             {
-                if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(ActivePage + 1);
+                if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(ActivePage + 1);
             };
 
             m_Forward.MouseDoubleClick += (sender, e) =>
             {
-                if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(MaxPage);
+                if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(MaxPage);
             };
 
             m_Backward.MouseUp += (sender, e) =>
             {
-                if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(ActivePage - 1);
+                if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(ActivePage - 1);
             };
 
             m_Backward.MouseDoubleClick += (sender, e) =>
             {
-                if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(1);
+                if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(1);
             };
 
             PageChanged = new bool[BookPageCount + 1];
@@ -166,12 +166,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 tbox.MouseUp += (sender, e) =>
                 {
-                    if (e.Button == MouseButton.Left && sender is Control ctrl) OnLeftClick();
+                    if (e.Button == MouseButtonType.Left && sender is Control ctrl) OnLeftClick();
                 };
 
                 tbox.MouseDoubleClick += (sender, e) =>
                 {
-                    if (e.Button == MouseButton.Left && sender is Control ctrl) OnLeftClick();
+                    if (e.Button == MouseButtonType.Left && sender is Control ctrl) OnLeftClick();
                 };
                 Add(new Label(k.ToString(), true, 1) {X = x + 80, Y = 200}, page);
             }

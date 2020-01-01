@@ -63,7 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnMove();
         }
 
-        protected override void OnMouseDown(int x, int y, MouseButton button)
+        protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
             UIManager.AnchorManager[this]?.MakeTopMost();
 
@@ -163,7 +163,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void _lockGumpPic_MouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButton.Left)
+            if (e.Button == MouseButtonType.Left)
                 UIManager.AnchorManager.DetachControl(this);
         }
 

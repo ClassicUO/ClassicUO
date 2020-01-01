@@ -154,9 +154,9 @@ namespace ClassicUO.Game.UI.Gumps
                 Log.Error( "TopBarGump already exists!!");
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButton.Right && (X != 0 || Y != 0))
+            if (button == MouseButtonType.Right && (X != 0 || Y != 0))
             {
                 X = 0;
                 Y = 0;
@@ -338,7 +338,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
             }
 
-            protected override void OnMouseUp(int x, int y, MouseButton button)
+            protected override void OnMouseUp(int x, int y, MouseButtonType button)
             {
                 base.OnMouseUp(x, y, button);
                 Parent?.InvokeMouseUp(new Point(x, y), button);

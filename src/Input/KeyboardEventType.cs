@@ -21,12 +21,13 @@
 
 #endregion
 
-using Microsoft.Xna.Framework;
-
-namespace ClassicUO.Interfaces
+namespace ClassicUO.Input
 {
-    internal interface ISmoothMovable
+    enum KeyboardEventType
     {
-        Vector3 Offset { get; set; }
+        Down,
+        Up,
+        Press,
+        TextInput
     }
 }

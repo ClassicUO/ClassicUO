@@ -69,14 +69,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _prev.MouseUp += (o, e) =>
                 {
-                    if (e.Button == MouseButton.Left)
+                    if (e.Button == MouseButtonType.Left)
                         SetPage(_idx - 1);
                 };
                 Add(_next = new Button(0, 0x9cd, 0x9cd) {X = 240, ContainsByBounds = true});
 
                 _next.MouseUp += (o, e) =>
                 {
-                    if (e.Button == MouseButton.Left)
+                    if (e.Button == MouseButtonType.Left)
                         SetPage(_idx + 1);
                 };
             }

@@ -549,7 +549,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        public void InvokeMouseDown(Point position, MouseButton button)
+        public void InvokeMouseDown(Point position, MouseButtonType button)
         {
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
@@ -557,7 +557,7 @@ namespace ClassicUO.Game.UI.Controls
             MouseDown.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
         }
 
-        public void InvokeMouseUp(Point position, MouseButton button)
+        public void InvokeMouseUp(Point position, MouseButtonType button)
         {
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
@@ -603,7 +603,7 @@ namespace ClassicUO.Game.UI.Controls
         //    MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
         //}
 
-        public bool InvokeMouseDoubleClick(Point position, MouseButton button)
+        public bool InvokeMouseDoubleClick(Point position, MouseButtonType button)
         {
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
@@ -631,7 +631,7 @@ namespace ClassicUO.Game.UI.Controls
             OnKeyUp(key, mod);
         }
 
-        public void InvokeMouseWheel(MouseEvent delta)
+        public void InvokeMouseWheel(MouseEventType delta)
         {
             OnMouseWheel(delta);
             MouseWheel.Raise(new MouseWheelEventArgs(delta), this);
@@ -642,7 +642,7 @@ namespace ClassicUO.Game.UI.Controls
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnDragBegin(x, y);
-            DragBegin.Raise(new MouseEventArgs(x, y, MouseButton.Left, ButtonState.Pressed), this);
+            DragBegin.Raise(new MouseEventArgs(x, y, MouseButtonType.Left, ButtonState.Pressed), this);
         }
 
         public void InvokeDragEnd(Point position)
@@ -650,16 +650,16 @@ namespace ClassicUO.Game.UI.Controls
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnDragEnd(x, y);
-            DragEnd.Raise(new MouseEventArgs(x, y, MouseButton.Left), this);
+            DragEnd.Raise(new MouseEventArgs(x, y, MouseButtonType.Left), this);
         }
 
-        protected virtual void OnMouseDown(int x, int y, MouseButton button)
+        protected virtual void OnMouseDown(int x, int y, MouseButtonType button)
         {
             _mouseIsDown = true;
             Parent?.OnMouseDown(X + x, Y + y, button);
         }
 
-        protected virtual void OnMouseUp(int x, int y, MouseButton button)
+        protected virtual void OnMouseUp(int x, int y, MouseButtonType button)
         {
             _mouseIsDown = false;
 
@@ -672,7 +672,7 @@ namespace ClassicUO.Game.UI.Controls
             Parent?.OnMouseUp(X + x, Y + y, button);
         }
 
-        protected virtual void OnMouseWheel(MouseEvent delta)
+        protected virtual void OnMouseWheel(MouseEventType delta)
         {
             Parent?.OnMouseWheel(delta);
         }
@@ -717,7 +717,7 @@ namespace ClassicUO.Game.UI.Controls
         //    Parent?.OnMouseClick(X + x, Y + y, button);
         //}
 
-        protected virtual bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected virtual bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
             return Parent?.OnMouseDoubleClick(X + x, Y + y, button) ?? false;
         }

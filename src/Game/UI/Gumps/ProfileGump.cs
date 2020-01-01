@@ -119,7 +119,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void _hitBox_MouseUp(object sender, Input.MouseEventArgs e)
         {
-            if (e.Button == Input.MouseButton.Left && !IsMinimized)
+            if (e.Button == Input.MouseButtonType.Left && !IsMinimized)
             {
                 IsMinimized = true;
             }
@@ -127,7 +127,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void _picBase_MouseDoubleClick(object sender, Input.MouseDoubleClickEventArgs e)
         {
-            if (e.Button == Input.MouseButton.Left && IsMinimized)
+            if (e.Button == Input.MouseButtonType.Left && IsMinimized)
             {
                 IsMinimized = false;
             }

@@ -111,17 +111,17 @@ namespace ClassicUO.Game.UI.Gumps
             return 0;
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
             Point offset = Mouse.LDroppedOffset;
 
-            if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButton.Left && Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
+            if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left && Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
                 GameActions.CastSpell(_spell.ID);
         }
 
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (!ProfileManager.Current.CastSpellsByOneClick && button == MouseButton.Left)
+            if (!ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left)
                 GameActions.CastSpell(_spell.ID);
 
             return true;

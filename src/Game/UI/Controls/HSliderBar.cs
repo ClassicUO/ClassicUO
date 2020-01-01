@@ -193,32 +193,32 @@ namespace ClassicUO.Game.UI.Controls
                 _text.Text = Value.ToString();
         }
 
-        protected override void OnMouseDown(int x, int y, MouseButton button)
+        protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
             _clicked = true;
             _clickPosition.X = x;
             _clickPosition.Y = y;
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
             _clicked = false;
 
-            if (button == MouseButton.Left) CalculateNew(x);
+            if (button == MouseButtonType.Left) CalculateNew(x);
         }
 
        
 
-        protected override void OnMouseWheel(MouseEvent delta)
+        protected override void OnMouseWheel(MouseEventType delta)
         {
             switch (delta)
             {
-                case MouseEvent.WheelScrollUp:
+                case MouseEventType.WheelScrollUp:
                     Value--;
 
                     break;
 
-                case MouseEvent.WheelScrollDown:
+                case MouseEventType.WheelScrollDown:
                     Value++;
 
                     break;

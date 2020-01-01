@@ -23,7 +23,7 @@
 
 namespace ClassicUO.Input
 {
-    public enum MouseButton
+    enum MouseButtonType
     {
         Left = 0,
         Right = 1,

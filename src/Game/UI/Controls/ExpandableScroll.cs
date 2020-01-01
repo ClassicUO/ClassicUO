@@ -251,7 +251,7 @@ namespace ClassicUO.Game.UI.Controls
             int x = args.X;
             y += _gumpExpander.Y + ScreenCoordinateY - Y;
 
-            if (args.Button == MouseButton.Left)
+            if (args.Button == MouseButtonType.Left)
             {
                 _isExpanding = true;
                 _isExpanding_InitialHeight = SpecialHeight;

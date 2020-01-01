@@ -155,9 +155,9 @@ namespace ClassicUO.Game.UI.Controls
             return false;
         }
 
-        protected override void OnMouseDown(int x, int y, MouseButton button)
+        protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            if (button != MouseButton.Left)
+            if (button != MouseButtonType.Left)
                 return;
 
             if (TargetManager.IsTargeting)
@@ -170,11 +170,11 @@ namespace ClassicUO.Game.UI.Controls
             _picUpTime = Time.Ticks + 500f;
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
             base.OnMouseUp(x, y, button);
 
-            if (button == MouseButton.Left)
+            if (button == MouseButtonType.Left)
             {
                 GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
                 if (gs == null)
@@ -309,9 +309,9 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (button != MouseButton.Left)
+            if (button != MouseButtonType.Left)
                 return false;
  
             Item container;

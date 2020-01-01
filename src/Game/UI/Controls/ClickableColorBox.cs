@@ -60,9 +60,9 @@ namespace ClassicUO.Game.UI.Controls
             return base.Draw(batcher, x, y);
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButton.Left)
+            if (button == MouseButtonType.Left)
             {
                 ColorPickerGump pickerGump = new ColorPickerGump(0, 0, 100, 100, s => SetColor(s, UOFileManager.Hues.GetPolygoneColor(CELL, s)));
                 UIManager.Add(pickerGump);

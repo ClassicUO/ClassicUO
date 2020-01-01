@@ -27,13 +27,22 @@ namespace ClassicUO.Input
 {
     internal static class Keyboard
     {
-        public static SDL.SDL_Keymod IgnoreKeyMod { get; } = SDL.SDL_Keymod.KMOD_CAPS | SDL.SDL_Keymod.KMOD_NUM | SDL.SDL_Keymod.KMOD_MODE | SDL.SDL_Keymod.KMOD_RESERVED;
+        private static SDL.SDL_Keycode _code;
 
+
+
+        public static SDL.SDL_Keymod IgnoreKeyMod { get; } = SDL.SDL_Keymod.KMOD_CAPS | SDL.SDL_Keymod.KMOD_NUM | SDL.SDL_Keymod.KMOD_MODE | SDL.SDL_Keymod.KMOD_RESERVED;
         public static bool Alt { get; private set; }
         public static bool Shift { get; private set; }
         public static bool Ctrl { get; private set; }
 
 
+
+        public static bool IsKeyPressed(SDL.SDL_Keycode code)
+        {
+            return code != SDL.SDL_Keycode.SDLK_UNKNOWN && _code == code;
+        }
+     
         public static bool IsModPressed(SDL.SDL_Keymod mod, SDL.SDL_Keymod tocheck)
         {
             mod ^= mod & IgnoreKeyMod;
@@ -41,12 +50,13 @@ namespace ClassicUO.Input
             return tocheck == mod || mod != SDL.SDL_Keymod.KMOD_NONE && (mod & tocheck) != 0;
         }
 
-
         public static void OnKeyUp(SDL.SDL_KeyboardEvent e)
         {
             Shift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
             Alt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
             Ctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+
+            _code = SDL.SDL_Keycode.SDLK_UNKNOWN;
         }
 
         public static void OnKeyDown(SDL.SDL_KeyboardEvent e)
@@ -54,6 +64,9 @@ namespace ClassicUO.Input
             Shift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
             Alt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
             Ctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+
+            if (e.keysym.sym != SDL.SDL_Keycode.SDLK_UNKNOWN)
+                _code = e.keysym.sym;
         }
     }
 }

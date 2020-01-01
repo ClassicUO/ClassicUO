@@ -525,7 +525,7 @@ namespace ClassicUO.Game.UI.Gumps
                 WantUpdateSize = true;
             }
 
-            protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+            protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
             {
                 return true;
             }
@@ -623,7 +623,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 buttonAdd.MouseDown += (sender, e) =>
                 {
-                    if (e.Button != MouseButton.Left)
+                    if (e.Button != MouseButtonType.Left)
                         return;
 
                     pressedAdd = true;
@@ -671,7 +671,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 buttonRemove.MouseDown += (sender, e) =>
                 {
-                    if (e.Button != MouseButton.Left)
+                    if (e.Button != MouseButtonType.Left)
                         return;
 
                     pressedRemove = true;

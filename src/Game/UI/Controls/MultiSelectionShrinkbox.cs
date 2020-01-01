@@ -127,7 +127,7 @@ namespace ClassicUO.Game.UI.Controls
 
             _arrow.MouseUp += (sender, state) =>
             {
-                if (state.Button == MouseButton.Left) Opened = !_opened;
+                if (state.Button == MouseButtonType.Left) Opened = !_opened;
             };
         }
 
@@ -407,9 +407,9 @@ namespace ClassicUO.Game.UI.Controls
         public event EventHandler OnBeforeContextMenu;
         public event EventHandler OnAfterContextMenu;
 
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (_label.Bounds.Contains(Mouse.Position.X - ScreenCoordinateX, Mouse.Position.Y - ScreenCoordinateY) && button == MouseButton.Left)
+            if (_label.Bounds.Contains(Mouse.Position.X - ScreenCoordinateX, Mouse.Position.Y - ScreenCoordinateY) && button == MouseButtonType.Left)
                 Opened = !_opened;
 
             return base.OnMouseDoubleClick(x, y, button);

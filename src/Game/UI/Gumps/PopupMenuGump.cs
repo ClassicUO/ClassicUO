@@ -81,7 +81,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 box.MouseUp += (sender, e) =>
                 {
-                    if (e.Button == MouseButton.Left)
+                    if (e.Button == MouseButtonType.Left)
                     {
                         HitBox l = (HitBox) sender;
                         GameActions.ResponsePopupMenu(data.Serial, (ushort) l.Tag);

@@ -315,7 +315,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _texture.MouseUp += (sender, e) =>
                 {
-                    if (e.Button == MouseButton.Left)
+                    if (e.Button == MouseButtonType.Left)
                     {
                         GameActions.GrabItem(item, (ushort)amount.Value);
                     }

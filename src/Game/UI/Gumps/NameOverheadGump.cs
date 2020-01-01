@@ -210,9 +210,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButton.Left)
+            if (button == MouseButtonType.Left)
             {
                 _isPressed = false;
                 _clickTiming = 0;
@@ -226,9 +226,9 @@ namespace ClassicUO.Game.UI.Gumps
             return true;
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButton.Left)
+            if (button == MouseButtonType.Left)
             {
                 GameScene scene = CUOEnviroment.Client.GetScene<GameScene>();
 

@@ -32,7 +32,7 @@ namespace ClassicUO.Input
 {
     internal sealed class MouseEventArgs : EventArgs
     {
-        public MouseEventArgs(int x, int y, MouseButton button = MouseButton.None, ButtonState state = ButtonState.Released)
+        public MouseEventArgs(int x, int y, MouseButtonType button = MouseButtonType.None, ButtonState state = ButtonState.Released)
         {
             Location = new Point(x, y);
             Button = button;
@@ -45,14 +45,14 @@ namespace ClassicUO.Input
 
         public int Y => Location.Y;
 
-        public MouseButton Button { get; }
+        public MouseButtonType Button { get; }
 
         public ButtonState ButtonState { get; }
     }
 
     internal sealed class MouseDoubleClickEventArgs : EventArgs
     {
-        public MouseDoubleClickEventArgs(int x, int y, MouseButton button)
+        public MouseDoubleClickEventArgs(int x, int y, MouseButtonType button)
         {
             Location = new Point(x, y);
             Button = button;
@@ -64,27 +64,27 @@ namespace ClassicUO.Input
 
         public int Y => Location.Y;
 
-        public MouseButton Button { get; }
+        public MouseButtonType Button { get; }
 
         public bool Result { get; set; }
     }
 
     internal sealed class MouseWheelEventArgs : EventArgs
     {
-        public MouseWheelEventArgs(MouseEvent direction)
+        public MouseWheelEventArgs(MouseEventType direction)
         {
-            if (direction != MouseEvent.WheelScroll && direction != MouseEvent.WheelScrollDown && direction != MouseEvent.WheelScrollUp)
+            if (direction != MouseEventType.WheelScroll && direction != MouseEventType.WheelScrollDown && direction != MouseEventType.WheelScrollUp)
                 throw new Exception("Wrong scroll direction: " + direction);
 
             Direction = direction;
         }
 
-        public MouseEvent Direction { get; }
+        public MouseEventType Direction { get; }
     }
 
     internal sealed class KeyboardEventArgs : EventArgs
     {
-        public KeyboardEventArgs(SDL_Keycode key, SDL_Keymod mod, KeyboardEvent state)
+        public KeyboardEventArgs(SDL_Keycode key, SDL_Keymod mod, KeyboardEventType state)
         {
             Key = key;
             Mod = mod;
@@ -95,6 +95,6 @@ namespace ClassicUO.Input
 
         public SDL_Keymod Mod { get; }
 
-        public KeyboardEvent KeyboardEvent { get; }
+        public KeyboardEventType KeyboardEvent { get; }
     }
 }

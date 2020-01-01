@@ -122,10 +122,10 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            var leftClick = button == MouseButton.Left;
-            var rightClick = button == MouseButton.Right;
+            var leftClick = button == MouseButtonType.Left;
+            var rightClick = button == MouseButtonType.Right;
 
             if (leftClick || rightClick)
                 GameActions.QuestArrow(rightClick);

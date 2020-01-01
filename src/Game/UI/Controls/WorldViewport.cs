@@ -135,7 +135,7 @@ namespace ClassicUO.Game.UI.Controls
             base.Dispose();
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
             if (!UIManager.IsMouseOverWorld && UIManager.MouseOverControl != null)
             {

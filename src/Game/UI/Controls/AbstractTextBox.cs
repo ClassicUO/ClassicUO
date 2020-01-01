@@ -35,18 +35,18 @@ namespace ClassicUO.Game.UI.Controls
         public byte Font { get; protected set; }
         public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
 
-        protected override void OnMouseDown(int x, int y, MouseButton button)
+        protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButton.Left)
+            if (button == MouseButtonType.Left)
             {
                 SetKeyboardFocus();
                 EntryValue?.OnMouseClick(x, y);
             }
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButton.Left) EntryValue?.OnSelectionEnd(x, y);
+            if (button == MouseButtonType.Left) EntryValue?.OnSelectionEnd(x, y);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

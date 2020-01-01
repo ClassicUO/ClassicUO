@@ -188,7 +188,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void _picBase_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            if (e.Button == MouseButton.Left && IsMinimized)
+            if (e.Button == MouseButtonType.Left && IsMinimized)
             {
                 IsMinimized = false;
             }
@@ -196,7 +196,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void _hitBox_MouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButton.Left && !IsMinimized)
+            if (e.Button == MouseButtonType.Left && !IsMinimized)
             {
                 IsMinimized = true;
             }
@@ -595,7 +595,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 icon.MouseDoubleClick += (sender, e) =>
                 {
-                    if (e.Button == MouseButton.Left)
+                    if (e.Button == MouseButtonType.Left)
                     {
                         SpellDefinition def = GetSpellDefinition(sender as Control);
 
@@ -990,7 +990,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OnClicked(object sender, MouseEventArgs e)
         {
-            if (sender is HoveredLabel l && e.Button == MouseButton.Left)
+            if (sender is HoveredLabel l && e.Button == MouseButtonType.Left)
             {
                 _clickTiming += Mouse.MOUSE_DELAY_DOUBLE_CLICK;
 
@@ -1001,7 +1001,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OnDoubleClicked(object sender, MouseDoubleClickEventArgs e)
         {
-            if (_lastPressed != null && e.Button == MouseButton.Left)
+            if (_lastPressed != null && e.Button == MouseButtonType.Left)
             {
                 _clickTiming = -Mouse.MOUSE_DELAY_DOUBLE_CLICK;
                 var def = GetSpellDefinition((int) _lastPressed.Tag);
@@ -1114,12 +1114,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void PageCornerOnMouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? _dataBox.ActivePage - 1 : _dataBox.ActivePage + 1);
+            if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? _dataBox.ActivePage - 1 : _dataBox.ActivePage + 1);
         }
 
         private void PageCornerOnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? 1 : _maxPage);
+            if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? 1 : _maxPage);
         }
 
         public override void OnButtonClick(int buttonID)

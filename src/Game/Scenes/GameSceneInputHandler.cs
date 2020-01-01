@@ -345,7 +345,7 @@ namespace ClassicUO.Game.Scenes
             {
                 if (IsHoldingItem)
                 {
-                    UIManager.MouseOverControl?.InvokeMouseUp(Mouse.Position, MouseButton.Left);
+                    UIManager.MouseOverControl?.InvokeMouseUp(Mouse.Position, MouseButtonType.Left);
                 }
                 return;
             }

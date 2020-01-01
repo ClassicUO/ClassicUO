@@ -38,9 +38,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public Item Item { get; }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button != MouseButton.Left)
+            if (button != MouseButtonType.Left)
                 return;
 
             GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();

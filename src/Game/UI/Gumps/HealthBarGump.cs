@@ -149,7 +149,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected void TextBoxOnMouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button != MouseButton.Left)
+            if (e.Button != MouseButtonType.Left)
                 return;
 
             Point p = Mouse.LDroppedOffset;
@@ -187,9 +187,9 @@ namespace ClassicUO.Game.UI.Gumps
             return max;
         }
 
-        protected override void OnMouseDown(int x, int y, MouseButton button)
+        protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            if (button != MouseButton.Left)
+            if (button != MouseButtonType.Left)
                 return;
 
             if (TargetManager.IsTargeting)
@@ -207,9 +207,9 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnMouseDown(x, y, button);
         }
 
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (button != MouseButton.Left)
+            if (button != MouseButtonType.Left)
                 return false;
 
             var entity = World.Get(LocalSerial);

@@ -148,7 +148,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void _picBase_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            if (e.Button == MouseButton.Left && IsMinimized)
+            if (e.Button == MouseButtonType.Left && IsMinimized)
             {
                 IsMinimized = false;
             }
@@ -156,7 +156,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void _hitBox_MouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButton.Left && !IsMinimized)
+            if (e.Button == MouseButtonType.Left && !IsMinimized)
             {
                 IsMinimized = true;
             }
@@ -473,7 +473,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
            
-            protected override void OnMouseDown(int x, int y, MouseButton button)
+            protected override void OnMouseDown(int x, int y, MouseButtonType button)
             {
                 CanMove = false;
             }
@@ -536,7 +536,7 @@ namespace ClassicUO.Game.UI.Gumps
                 base.OnMouseOver(x, y);
             }
 
-            protected override void OnMouseUp(int x, int y, MouseButton button)
+            protected override void OnMouseUp(int x, int y, MouseButtonType button)
             {
                 CanMove = true;
             }

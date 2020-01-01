@@ -96,9 +96,9 @@ namespace ClassicUO.Game.UI.Gumps
         public float Zoom => _zooms[_zoomIndex];
 
 
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (button != MouseButton.Left || _isScrolling || Keyboard.Alt)
+            if (button != MouseButtonType.Left || _isScrolling || Keyboard.Alt)
                 return base.OnMouseDoubleClick(x, y, button);
 
             TopMost = !TopMost;
@@ -120,9 +120,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButton.Left)
+            if (button == MouseButtonType.Left)
             {
                 _isScrolling = false;
                 CanMove = true;
@@ -133,9 +133,9 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnMouseUp(x, y, button);
         }
 
-        protected override void OnMouseDown(int x, int y, MouseButton button)
+        protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButton.Left && (Keyboard.Alt || _freeView))
+            if (button == MouseButtonType.Left && (Keyboard.Alt || _freeView))
             {
                 if (x > 4 && x < Width - 8 && y > 4 && y < Height - 8)
                 {
@@ -358,9 +358,9 @@ namespace ClassicUO.Game.UI.Gumps
             );
         }
 
-        protected override void OnMouseWheel(MouseEvent delta)
+        protected override void OnMouseWheel(MouseEventType delta)
         {
-            if (delta == MouseEvent.WheelScrollUp)
+            if (delta == MouseEventType.WheelScrollUp)
             {
                 _zoomIndex++;
 

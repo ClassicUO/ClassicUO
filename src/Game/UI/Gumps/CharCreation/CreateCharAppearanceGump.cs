@@ -578,7 +578,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             private void ColorPicker_MouseClick(object sender, MouseEventArgs e)
             {
-                if (e.Button == MouseButton.Left)
+                if (e.Button == MouseButtonType.Left)
                 {
                     //Parent?.Add(_colorPickerBox);
                     _colorPickerBox?.Dispose();

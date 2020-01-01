@@ -142,9 +142,9 @@ namespace ClassicUO.Game.UI.Controls
         public bool ContainsByBounds { get; set; }
         public bool IsVirtue { get; set; }
 
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (IsVirtue && button == MouseButton.Left)
+            if (IsVirtue && button == MouseButtonType.Left)
             {
                 NetClient.Socket.Send(new PVirtueGumpReponse(World.Player, Graphic));
 

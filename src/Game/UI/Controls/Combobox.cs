@@ -112,7 +112,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
             OnBeforeContextMenu?.Invoke(this, null);
 
@@ -189,7 +189,7 @@ namespace ClassicUO.Game.UI.Controls
 
             private void Label_MouseUp(object sender, MouseEventArgs e)
             {
-                if (e.Button == MouseButton.Left)
+                if (e.Button == MouseButtonType.Left)
                     _box.SelectedIndex = (int) ((Label) sender).Tag;
             }
         }

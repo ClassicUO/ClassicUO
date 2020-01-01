@@ -302,7 +302,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _myBox.MouseUp += (sender, e) =>
             {
-                if (e.Button == MouseButton.Left)
+                if (e.Button == MouseButtonType.Left)
                 {
                     GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
 
