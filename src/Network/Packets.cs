@@ -25,7 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -134,7 +134,7 @@ namespace ClassicUO.Network
         {
             int skillcount = 3;
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_70160)
+            if (Client.Version >= ClientVersion.CV_70160)
             {
                 skillcount++;
                 this[0] = 0xF8;
@@ -147,20 +147,20 @@ namespace ClassicUO.Network
             WriteASCII(character.Name, 30);
             WriteUShort(0x00);
 
-            WriteUInt((uint) UOFileManager.ClientFlags);
+            WriteUInt((uint) Client.ProtocolFlags);
             WriteUInt(0x01);
             WriteUInt(0x0);
             WriteByte(profession); // Profession
             Skip(15);
             byte val;
 
-            if (UOFileManager.ClientVersion < ClientVersions.CV_4011D)
+            if (Client.Version < ClientVersion.CV_4011D)
                 val = Convert.ToByte(character.Flags.HasFlag(Flags.Female));
             else
             {
                 val = (byte) character.Race;
 
-                if (UOFileManager.ClientVersion < ClientVersions.CV_7000)
+                if (Client.Version < ClientVersion.CV_7000)
                     val--;
                 val = (byte) (val * 2 + Convert.ToByte(character.Flags.HasFlag(Flags.Female)));
             }
@@ -201,7 +201,7 @@ namespace ClassicUO.Network
                 WriteUShort(0x00);
             }
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_70160)
+            if (Client.Version >= ClientVersion.CV_70160)
             {
                 ushort location = (ushort) cityIndex;
 
@@ -212,7 +212,7 @@ namespace ClassicUO.Network
             else
             {
                 WriteByte((byte) serverIndex);
-                if (UOFileManager.ClientVersion < ClientVersions.CV_70130 && cityIndex > 0)
+                if (Client.Version < ClientVersion.CV_70130 && cityIndex > 0)
                     cityIndex--;
 
                 WriteByte((byte) cityIndex);
@@ -255,7 +255,7 @@ namespace ClassicUO.Network
             WriteUInt(0xEDEDEDED);
             WriteASCII(name, 30);
             Skip(2);
-            WriteUInt((uint) UOFileManager.ClientFlags);
+            WriteUInt((uint) Client.ProtocolFlags);
             Skip(24);
             WriteUInt(index);
             WriteUInt(ipclient);
@@ -466,7 +466,7 @@ namespace ClassicUO.Network
     {
         public PCastSpell(int idx) : base(0xBF)
         {
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_60142)
+            if (Client.Version >= ClientVersion.CV_60142)
             {
                 WriteUShort(0x1C);
                 WriteUShort(0x02);
@@ -960,7 +960,7 @@ namespace ClassicUO.Network
             WriteByte(0x0A);
             uint clientFlag = 0;
 
-            for (int i = 0; i < (uint) UOFileManager.ClientFlags; i++)
+            for (int i = 0; i < (uint) Client.ProtocolFlags; i++)
                 clientFlag |= (uint) (1 << i);
 
             WriteUInt(clientFlag);

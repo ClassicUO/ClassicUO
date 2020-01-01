@@ -28,7 +28,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-
+using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Renderer;
@@ -200,7 +200,7 @@ namespace ClassicUO.IO.Resources
                         _files[i] = new UOFileMul(pathmul, pathidx, un[i], i == 0 ? 6 : -1);
                     }
 
-                    if (i > 0 && UOFileManager.ClientVersion >= ClientVersions.CV_7000)
+                    if (i > 0 && Client.Version >= ClientVersion.CV_7000)
                     {
                         string pathuop = UOFileManager.GetUOFilePath($"AnimationFrame{i}.uop");
 
@@ -229,7 +229,7 @@ namespace ClassicUO.IO.Resources
                 UOFile idxfile5 = _files[4]?.IdxFile;
                 long? maxAddress5 = (long?)idxfile5?.StartAddress + idxfile5?.Length;
 
-                if (UOFileManager.ClientVersion >= ClientVersions.CV_500A)
+                if (Client.Version >= ClientVersion.CV_500A)
                 {
                     string path = UOFileManager.GetUOFilePath("mobtypes.txt");
 
@@ -384,7 +384,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                if (UOFileManager.ClientVersion < ClientVersions.CV_305D)
+                if (Client.Version < ClientVersion.CV_305D)
                     return;
 
                 file = UOFileManager.GetUOFilePath("Equipconv.def");
@@ -510,7 +510,7 @@ namespace ClassicUO.IO.Resources
                             if (realAnimID != 0xFFFF && animFile != 0)
                             {
                                 UOFile currentIdxFile = _files[animFile].IdxFile;
-                                var realType = UOFileManager.ClientVersion < ClientVersions.CV_500A 
+                                var realType = Client.Version < ClientVersion.CV_500A 
                                     ? CalculateTypeByGraphic(realAnimID) : DataIndex[index].Type;
                                 long addressOffset = DataIndex[index].CalculateOffset(realAnimID, realType, out int count);
 
@@ -635,7 +635,7 @@ namespace ClassicUO.IO.Resources
 
         private void LoadUop()
         {
-            if (UOFileManager.ClientVersion <= ClientVersions.CV_60144)
+            if (Client.Version <= ClientVersion.CV_60144)
                 return;
 
             for (ushort animID = 0; animID < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)

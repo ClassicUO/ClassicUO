@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Controls
             _scene = scene;
             AcceptMouseInput = true;
 
-            _xBR = new XBREffect(CUOEnviroment.Client.GraphicsDevice);
+            _xBR = new XBREffect(Client.Game.GraphicsDevice);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

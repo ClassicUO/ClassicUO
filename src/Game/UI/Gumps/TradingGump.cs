@@ -24,7 +24,7 @@
 using System;
 using System.IO;
 using System.Linq;
-
+using ClassicUO.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -184,7 +184,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int myX, myY, otherX, otherY;
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_704565)
+            if (Client.Version >= ClientVersion.CV_704565)
             {
                 myX = 37;
                 myY = 29;
@@ -235,7 +235,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             int mydbX, mydbY, opdbX, opdbY;
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_704565)
+            if (Client.Version >= ClientVersion.CV_704565)
             {
                 Add(new GumpPic(0, 0, 0x088A, 0));
                 Add(new Label(World.Player.Name, false, 0x0481, font: 3)
@@ -267,7 +267,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            if (UOFileManager.ClientVersion < ClientVersions.CV_500A)
+            if (Client.Version < ClientVersion.CV_500A)
             {
                 Add(new ColorBox(110, 60, 0, 0xFF000001)
                 {
@@ -304,7 +304,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (e.Button == MouseButtonType.Left)
                 {
-                    GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+                    GameScene gs = Client.Game.GetScene<GameScene>();
 
                     if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
                         return;

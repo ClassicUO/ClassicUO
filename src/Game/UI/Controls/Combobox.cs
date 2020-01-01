@@ -121,7 +121,7 @@ namespace ClassicUO.Game.UI.Controls
                 X = ScreenCoordinateX,
                 Y = ScreenCoordinateY
             };
-            if (contextMenu.Height + ScreenCoordinateY > CUOEnviroment.Client.Window.ClientBounds.Height) contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - CUOEnviroment.Client.Window.ClientBounds.Height;
+            if (contextMenu.Height + ScreenCoordinateY > Client.Game.Window.ClientBounds.Height) contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - Client.Game.Window.ClientBounds.Height;
             UIManager.Add(contextMenu);
             base.OnMouseUp(x, y, button);
         }

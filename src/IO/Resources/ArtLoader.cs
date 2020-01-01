@@ -423,7 +423,7 @@ namespace ClassicUO.IO.Resources
         {
             const int SIZE = 44 * 44;
 
-            graphic &= UOFileManager.GraphicMask;
+            graphic &= Client.GraphicMask;
             ref readonly var entry = ref GetValidRefEntry(graphic);
 
             if (entry.Length == 0)

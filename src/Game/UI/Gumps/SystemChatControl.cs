@@ -439,7 +439,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case SDL.SDL_Keycode.SDLK_q when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && _messageHistoryIndex > -1 && !ProfileManager.Current.DisableCtrlQWBtn:
 
-                    var scene = CUOEnviroment.Client.GetScene<GameScene>();
+                    var scene = Client.Game.GetScene<GameScene>();
                     if (scene == null)
                         return;
 
@@ -459,7 +459,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case SDL.SDL_Keycode.SDLK_w when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && !ProfileManager.Current.DisableCtrlQWBtn:
 
-                    scene = CUOEnviroment.Client.GetScene<GameScene>();
+                    scene = Client.Game.GetScene<GameScene>();
                     if (scene == null)
                         return;
 

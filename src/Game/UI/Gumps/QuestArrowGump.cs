@@ -63,7 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (!World.InGame) Dispose();
 
-            var scene = CUOEnviroment.Client.GetScene<GameScene>();
+            var scene = Client.Game.GetScene<GameScene>();
 
             if (IsDisposed || ProfileManager.Current == null || scene == null)
                 return;

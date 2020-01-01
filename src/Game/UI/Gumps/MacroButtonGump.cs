@@ -125,7 +125,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_macro != null)
             {
-                GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+                GameScene gs = Client.Game.GetScene<GameScene>();
                 gs.Macros.SetMacroToExecute(_macro.FirstNode);
                 gs.Macros.WaitForTargetTimer = 0;
                 gs.Macros.Update();
@@ -150,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if(_macro != null)
             {
-                int macroid = CUOEnviroment.Client.GetScene<GameScene>().Macros.GetAllMacros().IndexOf(_macro);
+                int macroid = Client.Game.GetScene<GameScene>().Macros.GetAllMacros().IndexOf(_macro);
 
                 LocalSerial = (uint) macroid + 1000;
 
@@ -169,7 +169,7 @@ namespace ClassicUO.Game.UI.Gumps
             string name = reader.ReadString();
             LocalSerial = reader.ReadUInt32();
 
-            Macro macro = CUOEnviroment.Client.GetScene<GameScene>().Macros.FindMacro(name);
+            Macro macro = Client.Game.GetScene<GameScene>().Macros.FindMacro(name);
 
             if (macro != null)
             {
@@ -193,7 +193,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(xml);
 
-            Macro macro = CUOEnviroment.Client.GetScene<GameScene>()
+            Macro macro = Client.Game.GetScene<GameScene>()
                                        .Macros
                                        .FindMacro(xml.GetAttribute("name"));
 

@@ -26,7 +26,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-
+using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.IO.Audio;
 
@@ -124,7 +124,7 @@ namespace ClassicUO.IO.Resources
                         }
                     }
                 }
-                else if (UOFileManager.ClientVersion <= ClientVersions.CV_5090)
+                else if (Client.Version <= ClientVersion.CV_5090)
                 {
                     _mMusicData.Add(0, new Tuple<string, bool>("oldult01", true));
                     _mMusicData.Add(1, new Tuple<string, bool>("create1", false));

@@ -200,11 +200,11 @@ namespace ClassicUO.Game.Scenes
 
             if (ProfileManager.Current.WindowBorderless)
             {
-                CUOEnviroment.Client.SetWindowBorderless(true);
+                Client.Game.SetWindowBorderless(true);
             }
             else if (Settings.GlobalSettings.IsWindowMaximized)
             {
-                CUOEnviroment.Client.MaximizeWindow();
+                Client.Game.MaximizeWindow();
             }
             else if (Settings.GlobalSettings.WindowSize.HasValue)
             {
@@ -214,8 +214,8 @@ namespace ClassicUO.Game.Scenes
                 w = Math.Max(640, w);
                 h = Math.Max(480, h);
 
-                CUOEnviroment.Client.SetWindowSize(w, h);
-                //CUOEnviroment.Client.SetWindowPositionBySettings();
+                Client.Game.SetWindowSize(w, h);
+                //Client.Client.SetWindowPositionBySettings();
             }
 
 
@@ -349,9 +349,9 @@ namespace ClassicUO.Game.Scenes
             Chat.MessageReceived -= ChatOnMessageReceived;
 
 
-            Settings.GlobalSettings.WindowSize = new Point(CUOEnviroment.Client.Window.ClientBounds.Width, CUOEnviroment.Client.Window.ClientBounds.Height);
-            Settings.GlobalSettings.IsWindowMaximized = CUOEnviroment.Client.IsWindowMaximized();
-            CUOEnviroment.Client.SetWindowBorderless(false);
+            Settings.GlobalSettings.WindowSize = new Point(Client.Game.Window.ClientBounds.Width, Client.Game.Window.ClientBounds.Height);
+            Settings.GlobalSettings.IsWindowMaximized = Client.Game.IsWindowMaximized();
+            Client.Game.SetWindowBorderless(false);
 
             base.Unload();
         }
@@ -365,7 +365,7 @@ namespace ClassicUO.Game.Scenes
                 UIManager.Add(new MessageBoxGump(200, 200, $"Connection lost:\n{e}", s =>
                 {
                     if (s)
-                        CUOEnviroment.Client.SetScene(new LoginScene());
+                        Client.Game.SetScene(new LoginScene());
                 }));
             }
         }
@@ -377,7 +377,7 @@ namespace ClassicUO.Game.Scenes
                 if (s)
                 {
                     NetClient.Socket.Disconnect();
-                    CUOEnviroment.Client.SetScene(new LoginScene());
+                    Client.Game.SetScene(new LoginScene());
                 }
             }));
         }
@@ -579,7 +579,7 @@ namespace ClassicUO.Game.Scenes
             if (_forceStopScene)
             {
                 var loginScene = new LoginScene();
-                CUOEnviroment.Client.SetScene(loginScene);
+                Client.Game.SetScene(loginScene);
                 loginScene.Reconnect = true;
 
                 return;
@@ -756,8 +756,8 @@ namespace ClassicUO.Game.Scenes
                     {
                         UIManager.Add(_deathScreenLabel = new Label("You are dead.", false, 999, 200, 3)
                         {
-                            X = (CUOEnviroment.Client.Window.ClientBounds.Width >> 1) - 50,
-                            Y = (CUOEnviroment.Client.Window.ClientBounds.Height >> 1) - 50
+                            X = (Client.Game.Window.ClientBounds.Width >> 1) - 50,
+                            Y = (Client.Game.Window.ClientBounds.Height >> 1) - 50
                         });
                         _deathScreenActive = true;
                     }

@@ -59,7 +59,7 @@ namespace ClassicUO.Renderer
             }
 
             _scissors.Push(scissor);
-            CUOEnviroment.Client.GraphicsDevice.ScissorRectangle = scissor;
+            Client.Game.GraphicsDevice.ScissorRectangle = scissor;
 
             return true;
         }
@@ -67,7 +67,7 @@ namespace ClassicUO.Renderer
         public static Rectangle PopScissors()
         {
             Rectangle scissors = _scissors.Pop();
-            GraphicsDevice gd = CUOEnviroment.Client.GraphicsDevice;
+            GraphicsDevice gd = Client.Game.GraphicsDevice;
 
             if (_scissors.Count == 0)
                 gd.ScissorRectangle = gd.Viewport.Bounds;

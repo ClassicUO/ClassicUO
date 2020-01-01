@@ -58,8 +58,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 45
             });
 
-            X = (CUOEnviroment.Client.Window.ClientBounds.Width - Width) >> 1;
-            Y = (CUOEnviroment.Client.Window.ClientBounds.Height - Height) >> 1;
+            X = (Client.Game.Window.ClientBounds.Width - Width) >> 1;
+            Y = (Client.Game.Window.ClientBounds.Height - Height) >> 1;
 
             // OK
             Button b;
@@ -143,8 +143,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_textBox);
 
-            X = (CUOEnviroment.Client.Window.ClientBounds.Width - Width) >> 1;
-            Y = (CUOEnviroment.Client.Window.ClientBounds.Height - Height) >> 1;
+            X = (Client.Game.Window.ClientBounds.Width - Width) >> 1;
+            Y = (Client.Game.Window.ClientBounds.Height - Height) >> 1;
 
 
             // OK

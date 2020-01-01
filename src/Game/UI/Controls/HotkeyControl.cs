@@ -55,7 +55,7 @@ namespace ClassicUO.Game.UI.Controls
 
             box.HotkeyChanged += (sender, e) =>
             {
-                GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+                GameScene gs = Client.Game.GetScene<GameScene>();
 
                 if (gs == null)
                     return;
@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Controls
 
             box.HotkeyCancelled += (sender, e) =>
             {
-                GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+                GameScene gs = Client.Game.GetScene<GameScene>();
 
                 if (gs == null)
                     return;

@@ -21,6 +21,7 @@
 
 #endregion
 
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -43,9 +44,9 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanCloseWithRightClick = true;
 
-            if (UOFileManager.ClientVersion < ClientVersions.CV_7000)
+            if (Client.Version < ClientVersion.CV_7000)
             {
-                if (UOFileManager.ClientVersion < ClientVersions.CV_500A)
+                if (Client.Version < ClientVersion.CV_500A)
                     _abilityCount = 29;
                 else
                 {
@@ -204,7 +205,7 @@ namespace ClassicUO.Game.UI.Gumps
             _pageCornerLeft.Page = ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = ActivePage != _dictionaryPagesCount ? 0 : int.MaxValue;
 
-            CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
+            Client.Game.Scene.Audio.PlaySound(0x0055);
         }
     }
 }

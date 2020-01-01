@@ -274,7 +274,7 @@ namespace ClassicUO.Game.Managers
 
         public override void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex, bool isGump = false)
         {
-            float scale = CUOEnviroment.Client.GetScene<GameScene>().Scale;
+            float scale = Client.Game.GetScene<GameScene>().Scale;
 
             base.Draw(batcher, 0, 0, renderIndex, isGump);
 

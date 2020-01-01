@@ -25,6 +25,7 @@ using System;
 using System.Linq;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -115,7 +116,7 @@ namespace ClassicUO.Game
 
         public static void DoubleClickQueued(uint serial)
         {
-            CUOEnviroment.Client.GetScene<GameScene>()?.DoubleClickDelayed(serial);
+            Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(serial);
         }
 
         public static void DoubleClick(uint serial)
@@ -148,7 +149,7 @@ namespace ClassicUO.Game
             if (hue == 0xFFFF)
                 hue = ProfileManager.Current.SpeechHue;
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_500A)
+            if (Client.Version >= ClientVersion.CV_500A)
                 Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
             else
                 Socket.Send(new PASCIISpeechRequest(message, type, font, hue));
@@ -213,7 +214,7 @@ namespace ClassicUO.Game
 
         public static void DropItem(uint serial, int x, int y, int z, uint container)
         {
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_6017)
+            if (Client.Version >= ClientVersion.CV_6017)
                 Socket.Send(new PDropRequestNew(serial, (ushort) x, (ushort) y, (sbyte) z, 0, container));
             else
                 Socket.Send(new PDropRequestOld(serial, (ushort) x, (ushort) y, (sbyte) z, container));

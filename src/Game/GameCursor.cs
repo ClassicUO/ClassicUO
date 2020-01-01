@@ -93,7 +93,7 @@ namespace ClassicUO.Game
                 }
             }
 
-            _aura = new Texture2D(CUOEnviroment.Client.GraphicsDevice, ww, hh);
+            _aura = new Texture2D(Client.Game.GraphicsDevice, ww, hh);
             _aura.SetData(data);
 
             _tooltip = new Tooltip();
@@ -349,7 +349,7 @@ namespace ClassicUO.Game
                                 int startX = selectedObj.RealScreenPosition.X + Math.Max(0, ProfileManager.Current.GameWindowPosition.X);
                                 int startY = selectedObj.RealScreenPosition.Y + Math.Max(0, ProfileManager.Current.GameWindowPosition.Y);
 
-                                GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+                                GameScene gs = Client.Game.GetScene<GameScene>();
                                 float scale = gs?.Scale ?? 1;
 
                                 foreach (CustomBuildObject item in list)
@@ -405,7 +405,7 @@ namespace ClassicUO.Game
 
                 if (ProfileManager.Current.ShowTargetRangeIndicator)
                 {
-                    GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+                    GameScene gs = Client.Game.GetScene<GameScene>();
 
                     if (gs != null && gs.IsMouseOverViewport)
                     {
@@ -464,7 +464,7 @@ namespace ClassicUO.Game
 
         private void DrawToolTip(UltimaBatcher2D batcher, Point position)
         {
-            if (CUOEnviroment.Client.Scene is GameScene gs)
+            if (Client.Game.Scene is GameScene gs)
             {
                 if (!World.ClientFeatures.TooltipsEnabled || (SelectedObject.Object is Item selectedItem && selectedItem.IsLocked && selectedItem.ItemData.Weight == 255 && !selectedItem.ItemData.IsContainer) || gs.IsHoldingItem)
                 {
@@ -542,7 +542,7 @@ namespace ClassicUO.Game
 
             if (TargetManager.IsTargeting)
             {
-                GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+                GameScene gs = Client.Game.GetScene<GameScene>();
 
                 if (gs != null && !gs.IsHoldingItem)
                     return _cursorData[war, 12];

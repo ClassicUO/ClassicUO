@@ -28,6 +28,7 @@ using System.Net.Sockets;
 using System.Text;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -108,7 +109,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Connected += NetClient_Connected;
             NetClient.LoginSocket.Disconnected += Login_NetClient_Disconnected;
 
-            int music = UOFileManager.ClientVersion >= ClientVersions.CV_7000 ? 78 : UOFileManager.ClientVersion > ClientVersions.CV_308Z ? 0 : 8;
+            int music = Client.Version >= ClientVersion.CV_7000 ? 78 : Client.Version > ClientVersion.CV_308Z ? 0 : 8;
 
             Audio.PlayMusic(music);
 
@@ -122,10 +123,10 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            if (CUOEnviroment.Client.IsWindowMaximized())
-                CUOEnviroment.Client.RestoreWindow();
-            CUOEnviroment.Client.SetWindowSize(640, 480);
-            //CUOEnviroment.Client.SetWindowPositionBySettings();
+            if (Client.Game.IsWindowMaximized())
+                Client.Game.RestoreWindow();
+            Client.Game.SetWindowSize(640, 480);
+            //Client.Client.SetWindowPositionBySettings();
         }
 
 
@@ -413,9 +414,9 @@ namespace ClassicUO.Game.Scenes
             Log.Info("Connected!");
             CurrentLoginStep = LoginStep.VerifyingAccount;
 
-            if (UOFileManager.ClientVersion > ClientVersions.CV_6040)
+            if (Client.Version > ClientVersion.CV_6040)
             {
-                uint clientVersion = (uint) UOFileManager.ClientVersion;
+                uint clientVersion = (uint) Client.Version;
 
                 byte major = (byte) (clientVersion >> 24);
                 byte minor = (byte) (clientVersion >> 16);
@@ -608,7 +609,7 @@ namespace ClassicUO.Game.Scenes
             var count = p.ReadByte();
             Cities = new CityInfo[count];
 
-            bool isNew = UOFileManager.ClientVersion >= ClientVersions.CV_70130;
+            bool isNew = Client.Version >= ClientVersion.CV_70130;
             string[] descriptions = null;
 
             if (!isNew)

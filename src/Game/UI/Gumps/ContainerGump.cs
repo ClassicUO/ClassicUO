@@ -197,12 +197,12 @@ namespace ClassicUO.Game.UI.Gumps
                                 break;
                         }
 
-                        if ((X + Width) > CUOEnviroment.Client.Window.ClientBounds.Width)
+                        if ((X + Width) > Client.Game.Window.ClientBounds.Width)
                         {
                             X -= Width;
                         }
 
-                        if ((Y + Height) > CUOEnviroment.Client.Window.ClientBounds.Height)
+                        if ((Y + Height) > Client.Game.Window.ClientBounds.Height)
                         {
                             Y -= Height;
                         }
@@ -229,7 +229,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             if (_data.OpenSound != 0)
-                CUOEnviroment.Client.Scene.Audio.PlaySound(_data.OpenSound);
+                Client.Game.Scene.Audio.PlaySound(_data.OpenSound);
         }
 
         private void HitBoxOnMouseUp(object sender, MouseEventArgs e)
@@ -299,7 +299,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             LocalSerial = reader.ReadUInt32();
-            CUOEnviroment.Client.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
+            Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
             reader.ReadUInt16();
 
             if (Profile.GumpsVersion >= 3)
@@ -322,7 +322,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Restore(xml);
             // skip loading
 
-            CUOEnviroment.Client.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
+            Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
             Dispose();
         }
 
@@ -476,7 +476,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void SetPositionTopRight()
         {
-            X = CUOEnviroment.Client.Window.ClientBounds.Width - Width;
+            X = Client.Game.Window.ClientBounds.Width - Width;
             Y = 0;
         }
 
@@ -506,7 +506,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 if (_data.ClosedSound != 0)
-                    CUOEnviroment.Client.Scene.Audio.PlaySound(_data.ClosedSound);
+                    Client.Game.Scene.Audio.PlaySound(_data.ClosedSound);
             }
 
             base.Dispose();

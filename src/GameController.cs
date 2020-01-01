@@ -249,7 +249,15 @@ namespace ClassicUO
 
             Log.Trace( "Loading files...");
             Log.PushIndent();
-            UOFileManager.LoadFiles();
+
+            if (!string.IsNullOrWhiteSpace(Settings.GlobalSettings.ClientVersion))
+            {
+                // sanitize client version
+                Settings.GlobalSettings.ClientVersion = Settings.GlobalSettings.ClientVersion.Replace(",", ".").Replace(" ", "").ToLower();
+            }
+
+            Client.Load(Settings.GlobalSettings.UltimaOnlineDirectory, Settings.GlobalSettings.ClientVersion);
+
             StaticFilters.Load();
             Log.PopIndent();
 
@@ -271,7 +279,7 @@ namespace ClassicUO
             PacketHandlers.Load();
             //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
             UltimaLive.Enable();
-            PacketsTable.AdjustPacketSizeByVersion(UOFileManager.ClientVersion);
+            PacketsTable.AdjustPacketSizeByVersion(Client.Version);
             Log.Trace( "Done!");
             Log.PopIndent();
 

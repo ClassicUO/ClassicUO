@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -266,7 +267,7 @@ namespace ClassicUO.Game.GameObjects
                         else
                         {
                             if (item.ItemData.IsLight)
-                                CUOEnviroment.Client.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
+                                Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
                         }
 
                         _equipConvData = null;
@@ -275,7 +276,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (item.ItemData.IsLight)
                         {
-                            CUOEnviroment.Client.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
+                            Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
                             break;
                         }
                     }
@@ -308,7 +309,7 @@ namespace ClassicUO.Game.GameObjects
             byte animGroup = UOFileManager.Animations.AnimGroup;
 
             // NOTE: i'm not sure this is the right way. This code patch the dead shroud for gargoyles.
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_7000 &&
+            if (Client.Version >= ClientVersion.CV_7000 &&
                 id == 0x03CA       // graphic for dead shroud
                 && owner != null && (owner.Graphic == 0x02B7 || owner.Graphic == 0x02B6)) // dead gargoyle graphics
             {
@@ -498,7 +499,7 @@ namespace ClassicUO.Game.GameObjects
                     owner.Select(mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y);
 
                     if (entity != null && entity.ItemData.IsLight)
-                        CUOEnviroment.Client.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x, y);
+                        Client.Game.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x, y);
                 }
 
                 return UOFileManager.Animations.DataIndex[id].MountedHeightOffset;

@@ -337,7 +337,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (button == MouseButtonType.Left)
                 {
-                    GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+                    GameScene gs = Client.Game.GetScene<GameScene>();
 
                     if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
                         return;

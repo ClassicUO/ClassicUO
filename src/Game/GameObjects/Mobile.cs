@@ -25,6 +25,7 @@ using System;
 using System.Linq;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -90,7 +91,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsYellowHits => ((byte) Flags & 0x08) != 0;
 
-        public bool IsPoisoned => UOFileManager.ClientVersion >= ClientVersions.CV_7000 ? _isSA_Poisoned : ((byte) Flags & 0x04) != 0;
+        public bool IsPoisoned => Client.Version >= ClientVersion.CV_7000 ? _isSA_Poisoned : ((byte) Flags & 0x04) != 0;
 
         public bool IgnoreCharacters => ((byte) Flags & 0x10) != 0;
 
@@ -103,7 +104,7 @@ namespace ClassicUO.Game.GameObjects
             set => _isDead = value;
         }
 
-        public bool IsFlying => UOFileManager.ClientVersion >= ClientVersions.CV_7000 && ((byte) Flags & 0x04) != 0;
+        public bool IsFlying => Client.Version >= ClientVersion.CV_7000 && ((byte) Flags & 0x04) != 0;
 
         public virtual bool InWarMode
         {
@@ -124,7 +125,7 @@ namespace ClassicUO.Game.GameObjects
         {
             get
             {
-                if (UOFileManager.ClientVersion >= ClientVersions.CV_70331 && HasEquipment)
+                if (Client.Version >= ClientVersion.CV_70331 && HasEquipment)
                 {
                     Item m = Equipment[0x19];
                     return m != null && m.Graphic == 0x3E96; // TODO: im not sure if each server sends this value ever
@@ -482,7 +483,7 @@ namespace ClassicUO.Game.GameObjects
                         volume -= volumeByDist * distance;
                     }
 
-                    CUOEnviroment.Client.Scene.Audio.PlaySoundWithDistance(soundID, volume);
+                    Client.Game.Scene.Audio.PlaySoundWithDistance(soundID, volume);
                     LastStepSoundTime = ticks + delaySound;
                 }
             }
@@ -654,7 +655,7 @@ namespace ClassicUO.Game.GameObjects
                     if (AnimationFromServer)
                         SetAnimation(0xFF);
 
-                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (int) CUOEnviroment.Client.FrameDelay[1];
+                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (int) Client.Game.FrameDelay[1];
                     int delay = (int) Time.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
@@ -939,7 +940,7 @@ namespace ClassicUO.Game.GameObjects
 
             int startX = ProfileManager.Current.GameWindowPosition.X + 6;
             int startY = ProfileManager.Current.GameWindowPosition.Y + 6;
-            var scene = CUOEnviroment.Client.GetScene<GameScene>();
+            var scene = Client.Game.GetScene<GameScene>();
             float scale = scene?.Scale ?? 1;
 
             int x = RealScreenPosition.X;

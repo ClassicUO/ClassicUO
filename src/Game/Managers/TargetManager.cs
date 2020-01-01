@@ -24,6 +24,7 @@
 using System;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
@@ -237,7 +238,7 @@ namespace ClassicUO.Game.Managers
 
             ref readonly var itemData = ref UOFileManager.TileData.StaticData[graphic];
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_7090 && itemData.IsSurface)
+            if (Client.Version >= ClientVersion.CV_7090 && itemData.IsSurface)
             {
                 z += itemData.Height;
             }

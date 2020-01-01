@@ -98,7 +98,7 @@ namespace ClassicUO.Renderer
 
     internal abstract class UOTexture : Texture2D
     {
-        protected UOTexture(int width, int height, SurfaceFormat format) : base(CUOEnviroment.Client.GraphicsDevice, width, height, false, format)
+        protected UOTexture(int width, int height, SurfaceFormat format) : base(Client.Game.GraphicsDevice, width, height, false, format)
         {
             Ticks = Time.Ticks + 3000;
         }

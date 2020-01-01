@@ -21,6 +21,7 @@
 
 #endregion
 
+using ClassicUO.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
 
@@ -30,7 +31,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
     {
         public LoginBackground() : base(0, 0)
         {
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_706400)
+            if (Client.Version >= ClientVersion.CV_706400)
             {
                 // Background
                 Add(new GumpPicTiled(0, 0, 640, 480, 0x0150) { AcceptKeyboardInput = false });
@@ -66,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            CUOEnviroment.Client.Exit();
+            Client.Game.Exit();
         }
     }
 }

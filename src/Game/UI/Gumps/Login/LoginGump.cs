@@ -22,6 +22,7 @@
 #endregion
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
@@ -51,13 +52,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             int offsetX, offsetY, offtextY;
 
-            if (UOFileManager.ClientVersion < ClientVersions.CV_706400)
+            if (Client.Version < ClientVersion.CV_706400)
             {
                 _buttonNormal = 0x15A4;
                 _buttonOver = 0x15A5;
                 const ushort HUE = 0x0386;
 
-                if (UOFileManager.ClientVersion >= ClientVersions.CV_500A)
+                if (Client.Version >= ClientVersion.CV_500A)
                     Add(new GumpPic(0, 0, 0x2329, 0));
 
                 // UO Flag
@@ -79,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     Height = 157
                 });
 
-                if (UOFileManager.ClientVersion < ClientVersions.CV_500A)
+                if (Client.Version < ClientVersion.CV_500A)
                     Add(new GumpPic(286, 45, 0x058A, 0));
 
                 Add(new Label("Log in to Ultima Online", false, HUE, font: 2)
@@ -270,7 +271,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         public override void OnKeyboardReturn(int textID, string text)
         {
             SaveCheckboxStatus();
-            LoginScene ls = CUOEnviroment.Client.GetScene<LoginScene>();
+            LoginScene ls = Client.Game.GetScene<LoginScene>();
 
             if (ls.CurrentLoginStep == LoginScene.LoginStep.Main)
                 ls.Connect(_textboxAccount.Text, _textboxPassword.Text);
@@ -319,12 +320,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 case Buttons.NextArrow:
                     SaveCheckboxStatus();
                     if (!_textboxAccount.IsDisposed)
-                        CUOEnviroment.Client.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
+                        Client.Game.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
 
                     break;
 
                 case Buttons.Quit:
-                    CUOEnviroment.Client.Exit();
+                    Client.Game.Exit();
 
                     break;
             }

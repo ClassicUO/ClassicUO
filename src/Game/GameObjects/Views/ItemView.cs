@@ -155,7 +155,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (ItemData.IsLight)
             {
-                CUOEnviroment.Client.GetScene<GameScene>()
+                Client.Game.GetScene<GameScene>()
                       .AddLight(this, this, posX + 22, posY + 22);
             }
 

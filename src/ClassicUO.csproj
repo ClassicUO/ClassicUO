@@ -104,6 +104,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client.cs" />
+    <Compile Include="ClientException.cs" />
     <Compile Include="Configuration\Profile.cs" />
     <Compile Include="Configuration\ProfileManager.cs" />
     <Compile Include="CUOEnviroment.cs" />
@@ -366,7 +368,6 @@
     <Compile Include="Game\Data\ContainerManager.cs" />
     <Compile Include="Game\Data\Direction.cs" />
     <Compile Include="Game\Data\LockedFeatures.cs" />
-    <Compile Include="Game\Data\FeaturesFlags.cs" />
     <Compile Include="Game\Data\MovementSpeed.cs" />
     <Compile Include="Game\Data\Reagents.cs" />
     <Compile Include="Game\Data\Skill.cs" />
@@ -451,7 +452,7 @@
     <Compile Include="Game\UI\TextEntry.cs" />
     <Compile Include="Interfaces\IDrawable.cs" />
     <Compile Include="Interfaces\IUpdateable.cs" />
-    <Compile Include="IO\ClientVersions.cs" />
+    <Compile Include="Game\Data\ClientVersion.cs" />
     <Compile Include="IO\DataReader.cs" />
     <Compile Include="IO\FileManager.cs" />
     <Compile Include="IO\Resources\Verdata.cs" />

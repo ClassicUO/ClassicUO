@@ -176,7 +176,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (button == MouseButtonType.Left)
             {
-                GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+                GameScene gs = Client.Game.GetScene<GameScene>();
                 if (gs == null)
                     return;
 

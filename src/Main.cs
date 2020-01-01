@@ -122,9 +122,7 @@ namespace ClassicUO
             }
 
 
-            CUOEnviroment.Client = new GameController();
-            CUOEnviroment.Client.Run();
-            CUOEnviroment.Client.Dispose();
+            Client.Run();
 
             Log.Trace("Closing...");
         }

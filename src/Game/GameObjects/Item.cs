@@ -277,7 +277,7 @@ namespace ClassicUO.Game.GameObjects
             UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
 
             if (World.HouseManager.EntityIntoHouse(Serial, World.Player))
-                CUOEnviroment.Client.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+                Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
         }
 
         public void CheckGraphicChange(sbyte animIndex = 0)
@@ -802,7 +802,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (OnGround)
             {
-                var scene = CUOEnviroment.Client.GetScene<GameScene>();
+                var scene = Client.Game.GetScene<GameScene>();
                 float scale = scene?.Scale ?? 1;
 
                 if (Texture != null)

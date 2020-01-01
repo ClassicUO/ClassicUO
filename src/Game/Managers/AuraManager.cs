@@ -95,7 +95,7 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            AuraTexture = new Texture2D(CUOEnviroment.Client.GraphicsDevice, w, h);
+            AuraTexture = new Texture2D(Client.Game.GraphicsDevice, w, h);
             AuraTexture.SetData(data);
         }
 

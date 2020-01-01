@@ -21,6 +21,7 @@
 
 #endregion
 
+using ClassicUO.Data;
 using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;
@@ -102,7 +103,7 @@ namespace ClassicUO.IO.Resources
         {
             List<SpeechEntry> list = new List<SpeechEntry>();
 
-            if (UOFileManager.ClientVersion < ClientVersions.CV_305D) return list;
+            if (Client.Version < ClientVersion.CV_305D) return list;
 
             text = text.ToLower().TrimStart(' ').TrimEnd(' ');
 

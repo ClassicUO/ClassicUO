@@ -26,6 +26,7 @@ using System.IO;
 using System.Xml;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -99,7 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             var entity = World.Get(LocalSerial);
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_200 && World.InGame && entity != null)
+            if (Client.Version >= ClientVersion.CV_200 && World.InGame && entity != null)
                 NetClient.Socket.Send(new PCloseStatusBarGump(entity));
 
             if (SelectedObject.HealthbarObject == entity && entity != null)
@@ -1251,7 +1252,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             var entity = World.Get(LocalSerial);
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_200 && World.InGame && entity != null)
+            if (Client.Version >= ClientVersion.CV_200 && World.InGame && entity != null)
                 NetClient.Socket.Send(new PCloseStatusBarGump(entity));
 
             if (SelectedObject.HealthbarObject == entity && entity != null)

@@ -230,7 +230,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left)
             {
-                GameScene scene = CUOEnviroment.Client.GetScene<GameScene>();
+                GameScene scene = Client.Game.GetScene<GameScene>();
 
                 if (!scene.IsHoldingItem)
                 {
@@ -303,7 +303,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_positionLocked)
                 return;
 
-            float scale = CUOEnviroment.Client.GetScene<GameScene>().Scale;
+            float scale = Client.Game.GetScene<GameScene>().Scale;
 
             if (Entity is Mobile m)
             {
@@ -369,7 +369,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (IsDisposed || !SetName())
                 return false;
 
-            float scale = CUOEnviroment.Client.GetScene<GameScene>().Scale;
+            float scale = Client.Game.GetScene<GameScene>().Scale;
 
             int gx = ProfileManager.Current.GameWindowPosition.X;
             int gy = ProfileManager.Current.GameWindowPosition.Y;

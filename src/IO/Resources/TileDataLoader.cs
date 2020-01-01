@@ -26,7 +26,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-
+using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.Utility;
 
@@ -49,7 +49,7 @@ namespace ClassicUO.IO.Resources
                 FileSystemHelper.EnsureFileExists(path);
 
                 UOFileMul tiledata = new UOFileMul(path);
-                bool isold = UOFileManager.ClientVersion < ClientVersions.CV_7090;
+                bool isold = Client.Version < ClientVersion.CV_7090;
                 int staticscount = !isold ? (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupNew>()) / UnsafeMemoryManager.SizeOf<StaticGroupNew>() : (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupOld>()) / UnsafeMemoryManager.SizeOf<StaticGroupOld>();
 
                 if (staticscount > 2048)

@@ -22,6 +22,7 @@
 #endregion
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -74,7 +75,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     UIManager.GetGump<OptionsGump>()?.UpdateVideo();
 
-                    if (UOFileManager.ClientVersion >= ClientVersions.CV_200)
+                    if (Client.Version >= ClientVersion.CV_200)
                         NetClient.Socket.Send(new PGameWindowSize((uint) n.X, (uint) n.Y));
 
                     _clicked = false;
@@ -124,11 +125,11 @@ namespace ClassicUO.Game.UI.Gumps
                     if (h < 480)
                         h = 480;
 
-                    if (w > CUOEnviroment.Client.Window.ClientBounds.Width - BORDER_WIDTH)
-                        w = CUOEnviroment.Client.Window.ClientBounds.Width - BORDER_WIDTH;
+                    if (w > Client.Game.Window.ClientBounds.Width - BORDER_WIDTH)
+                        w = Client.Game.Window.ClientBounds.Width - BORDER_WIDTH;
 
-                    if (h > CUOEnviroment.Client.Window.ClientBounds.Height - BORDER_HEIGHT)
-                        h = CUOEnviroment.Client.Window.ClientBounds.Height - BORDER_HEIGHT;
+                    if (h > Client.Game.Window.ClientBounds.Height - BORDER_HEIGHT)
+                        h = Client.Game.Window.ClientBounds.Height - BORDER_HEIGHT;
 
                     _lastSize.X = w;
                     _lastSize.Y = h;
@@ -153,14 +154,14 @@ namespace ClassicUO.Game.UI.Gumps
         {
             Point position = Location;
 
-            if (position.X + Width - BORDER_WIDTH > CUOEnviroment.Client.Window.ClientBounds.Width)
-                position.X = CUOEnviroment.Client.Window.ClientBounds.Width - (Width - BORDER_WIDTH);
+            if (position.X + Width - BORDER_WIDTH > Client.Game.Window.ClientBounds.Width)
+                position.X = Client.Game.Window.ClientBounds.Width - (Width - BORDER_WIDTH);
 
             if (position.X < -BORDER_WIDTH)
                 position.X = -BORDER_WIDTH;
 
-            if (position.Y + Height - BORDER_HEIGHT > CUOEnviroment.Client.Window.ClientBounds.Height)
-                position.Y = CUOEnviroment.Client.Window.ClientBounds.Height - (Height - BORDER_HEIGHT);
+            if (position.Y + Height - BORDER_HEIGHT > Client.Game.Window.ClientBounds.Height)
+                position.Y = Client.Game.Window.ClientBounds.Height - (Height - BORDER_HEIGHT);
 
             if (position.Y < -BORDER_HEIGHT)
                 position.Y = -BORDER_HEIGHT;
@@ -169,7 +170,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ProfileManager.Current.GameWindowPosition = position;
 
-            var scene = CUOEnviroment.Client.GetScene<GameScene>();
+            var scene = Client.Game.GetScene<GameScene>();
             if (scene != null)
                 scene.UpdateDrawPosition = true;
         }
@@ -210,7 +211,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ProfileManager.Current.GameWindowSize = _lastSize;
                 Resize();
 
-                CUOEnviroment.Client.GetScene<GameScene>().UpdateDrawPosition = true;
+                Client.Game.GetScene<GameScene>().UpdateDrawPosition = true;
             }
             return newSize;
         }
