@@ -29,6 +29,8 @@ using ClassicUO.Game.UI.Controls;
 
 using Microsoft.Xna.Framework;
 using ClassicUO.Game.Data;
+using System.IO;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Managers
 {
@@ -163,6 +165,69 @@ namespace ClassicUO.Game.Managers
                 0x2A63, new ContainerData(0x2A63, 0x0187, 0x01c9, 29, 34, 137, 128)//for this particular gump area is bugged also in original client, as it is similar to the bag, probably this is an unfinished one
             }
         };
+
+        static ContainerManager()
+        {
+            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
+
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            path = Path.Combine(path, "containers.txt");
+
+            if (!File.Exists(path))
+            {
+                using (StreamWriter writer = new StreamWriter(File.Create(path)))
+                {
+                    writer.WriteLine("# FORMAT");
+                    writer.WriteLine("# GRAPHIC OPEN_SOUND_ID CLOSE_SOUND_ID X Y WIDTH HEIGHT ICONIZED_GRAPHIC [0 if not exists] MINIMIZER_AREA_X [0 if not exists] MINIMIZER_AREA_Y [0 if not exists]");
+                    writer.WriteLine();
+                    writer.WriteLine();
+
+                    foreach (var e in _data)
+                    {
+                        writer.WriteLine($"{e.Value.Graphic} {e.Value.OpenSound} {e.Value.ClosedSound} {e.Value.Bounds.X} {e.Value.Bounds.Y} {e.Value.Bounds.Width} {e.Value.Bounds.Height} {e.Value.IconizedGraphic} {e.Value.MinimizerArea.X} {e.Value.MinimizerArea.Y}");
+                    }
+                }
+            }
+
+            _data.Clear();
+
+            TextFileParser containersParser = new TextFileParser(File.ReadAllText(path), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
+
+            while (!containersParser.IsEOF())
+            {
+                var ss = containersParser.ReadTokens();
+                if (ss != null && ss.Count != 0)
+                {
+                    if (ushort.TryParse(ss[0], out ushort graphic) && 
+                        ushort.TryParse(ss[1], out ushort open_sound_id) &&
+                        ushort.TryParse(ss[2], out ushort close_sound_id) &&
+                        int.TryParse(ss[3], out int x) && 
+                        int.TryParse(ss[4], out int y) &&
+                        int.TryParse(ss[5], out int w) && 
+                        int.TryParse(ss[6], out int h))
+                    {
+                        ushort iconized_graphic = 0;
+                        int minimizer_x = 0, minimizer_y = 0;
+
+                        if (ss.Count >= 8 && ushort.TryParse(ss[7], out iconized_graphic))
+                        {
+                            if (ss.Count >= 9 && int.TryParse(ss[8], out minimizer_x))
+                            {
+                                if (ss.Count >= 10 && int.TryParse(ss[9], out minimizer_y))
+                                {
+                                    // nice!
+                                }
+                            }
+                        }
+
+                        _data[graphic] = new ContainerData(graphic, open_sound_id, close_sound_id, x, y, w, h, iconized_graphic, minimizer_x, minimizer_y);
+                    }
+                }
+            }
+        }
+
 
         public static int DefaultX { get; } = 40;
         public static int DefaultY { get; } = 40;
