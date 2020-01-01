@@ -1656,7 +1656,7 @@ namespace ClassicUO.Network
                 case 0:
                     if (showMessage)
                     { 
-                        GameActions.Print("It begins to rain.", 0, MessageType.System, 3, false);
+                        GameActions.Print("It begins to rain.", 1154, MessageType.System, 3, false);
                         weather.CurrentWeather = 0;
                     }
                     break;
@@ -1664,7 +1664,7 @@ namespace ClassicUO.Network
                 case 1:
                     if (showMessage)
                     {
-                        GameActions.Print("A fierce storm approaches.", 0, MessageType.System, 3, false);
+                        GameActions.Print("A fierce storm approaches.", 1154, MessageType.System, 3, false);
                         weather.CurrentWeather = 1;
                     }
                     break;
@@ -1672,7 +1672,7 @@ namespace ClassicUO.Network
                 case 2:
                     if (showMessage)
                     {
-                        GameActions.Print("It begins to snow.", 0, MessageType.System, 3, false);
+                        GameActions.Print("It begins to snow.", 1154, MessageType.System, 3, false);
                         weather.CurrentWeather = 2;
                     }
                     break;
@@ -1680,7 +1680,7 @@ namespace ClassicUO.Network
                 case 3:
                     if (showMessage)
                     {
-                        GameActions.Print("A storm is brewing.", 0, MessageType.System, 3, false);
+                        GameActions.Print("A storm is brewing.", 1154, MessageType.System, 3, false);
                         weather.CurrentWeather = 3;
                     }
                     break;
