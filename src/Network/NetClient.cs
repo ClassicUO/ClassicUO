@@ -415,7 +415,7 @@ namespace ClassicUO.Network
                         Statistics.TotalPacketsSended++;
                     }
                     else
-                        Disconnect();
+                        Disconnect(SocketError.SocketError);
                 }
                 catch (SocketException ex)
                 {
@@ -423,7 +423,7 @@ namespace ClassicUO.Network
                 }
             }
             else
-                Disconnect();
+                Disconnect(SocketError.SocketError);
         }
 
         private void IO_Socket(object sender, SocketAsyncEventArgs e)
@@ -461,9 +461,13 @@ namespace ClassicUO.Network
                         ProcessRecv(_recvEventArgs);
                 } while (ok);
             }
+            catch (SocketException socketEx)
+            {
+                Disconnect(socketEx.SocketErrorCode);
+            }
             catch (Exception e)
             {
-                Disconnect();
+                Disconnect(SocketError.SocketError);
             }
         }
 
@@ -489,7 +493,7 @@ namespace ClassicUO.Network
                 ExtractPackets();
             }
             else
-                Disconnect();
+                Disconnect(SocketError.SocketError);
         }
 
         private void DecompressBuffer(ref byte[] buffer, ref int length)
