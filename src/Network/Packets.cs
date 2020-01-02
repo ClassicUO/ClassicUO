@@ -147,7 +147,7 @@ namespace ClassicUO.Network
             WriteASCII(character.Name, 30);
             WriteUShort(0x00);
 
-            WriteUInt((uint) Client.ProtocolFlags);
+            WriteUInt((uint) Client.Protocol);
             WriteUInt(0x01);
             WriteUInt(0x0);
             WriteByte(profession); // Profession
@@ -255,7 +255,7 @@ namespace ClassicUO.Network
             WriteUInt(0xEDEDEDED);
             WriteASCII(name, 30);
             Skip(2);
-            WriteUInt((uint) Client.ProtocolFlags);
+            WriteUInt((uint) Client.Protocol);
             Skip(24);
             WriteUInt(index);
             WriteUInt(ipclient);
@@ -960,7 +960,7 @@ namespace ClassicUO.Network
             WriteByte(0x0A);
             uint clientFlag = 0;
 
-            for (int i = 0; i < (uint) Client.ProtocolFlags; i++)
+            for (int i = 0; i < (uint) Client.Protocol; i++)
                 clientFlag |= (uint) (1 << i);
 
             WriteUInt(clientFlag);

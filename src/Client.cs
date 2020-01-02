@@ -34,7 +34,7 @@ namespace ClassicUO
     static class Client
     {
         public static ClientVersion Version { get; private set; } 
-        public static ClientFlags ProtocolFlags { get; set; }
+        public static ClientFlags Protocol { get; set; }
         public static string ClientPath { get; private set; }
         public static bool IsUOPInstallation { get; private set; }
         public static bool UseUOPGumps { get; set; }
@@ -45,7 +45,7 @@ namespace ClassicUO
         public static void Load(string clientPath, string clientVersionText)
         {
             Log.Trace("Loading");
-
+            Log.PushIndent();
 
             // check if directory is good
             if (!Directory.Exists(clientPath))
@@ -77,29 +77,30 @@ namespace ClassicUO
             ClientPath = clientPath;
             IsUOPInstallation = Version >= ClientVersion.CV_70240;
             GraphicMask = IsUOPInstallation ? (ushort) 0xFFFF : (ushort) 0x3FFF;
-            ProtocolFlags = ClientFlags.CF_T2A;
+            Protocol = ClientFlags.CF_T2A;
 
             if (Version >= ClientVersion.CV_200)
-                ProtocolFlags |= ClientFlags.CF_RE;
+                Protocol |= ClientFlags.CF_RE;
             if (Version >= ClientVersion.CV_300)
-                ProtocolFlags |= ClientFlags.CF_TD;
+                Protocol |= ClientFlags.CF_TD;
             if (Version >= ClientVersion.CV_308)
-                ProtocolFlags |= ClientFlags.CF_LBR;
+                Protocol |= ClientFlags.CF_LBR;
             if (Version >= ClientVersion.CV_308Z)
-                ProtocolFlags |= ClientFlags.CF_AOS;
+                Protocol |= ClientFlags.CF_AOS;
             if (Version >= ClientVersion.CV_405A)
-                ProtocolFlags |= ClientFlags.CF_SE;
+                Protocol |= ClientFlags.CF_SE;
             if (Version >= ClientVersion.CV_60144)
-                ProtocolFlags |= ClientFlags.CF_SA;
+                Protocol |= ClientFlags.CF_SA;
 
             Log.Trace($"Client path: '{clientPath}'");
             Log.Trace($"Client version: {clientVersion}");
-            Log.Trace($"Protocol: {ProtocolFlags}");
+            Log.Trace($"Protocol: {Protocol}");
             Log.Trace("UOP? " + (IsUOPInstallation ? "yes" : "no"));
 
             // ok now load uo files
             UOFileManager.LoadFiles();
 
+            Log.PopIndent();
             Log.Trace("Loading done");
         }
 

@@ -826,7 +826,7 @@ namespace ClassicUO.Network
                     World.ChangeSeason(World.OldSeason, World.OldMusicIndex);
             }
 
-            World.Player.Walker.ResendPacketSended = false;
+            World.Player.Walker.ResendPacketResync = false;
             World.Player.AddToTile();
             World.Player.ProcessDelta();
 
@@ -3961,7 +3961,7 @@ namespace ClassicUO.Network
                 case 0xF0:
                     break;
                 case 0xFE:
-                    Log.Info("Razor ACK sended");
+                    Log.Info("Razor ACK sent");
                     NetClient.Socket.Send(new PRazorAnswer());
                     break;
             }
@@ -4122,7 +4122,7 @@ namespace ClassicUO.Network
                         World.ChangeSeason(World.OldSeason, World.OldMusicIndex);
                 }
 
-                World.Player.Walker.ResendPacketSended = false;
+                World.Player.Walker.ResendPacketResync = false;
                 World.Player.AddToTile();
                 World.Player.ProcessDelta();
 
