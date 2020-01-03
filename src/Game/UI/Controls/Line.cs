@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Controls
             Y = y;
             Width = w;
             Height = h;
-            _texture = Textures.GetTexture(new Color() { PackedValue = color });
+            _texture = Texture2DCache.GetTexture(new Color() { PackedValue = color });
         }
 
         internal static int CreateRectangleArea(Gump g, int startx, int starty, int width, int height, int topage = 0, uint linecolor = 0xAFAFAF, int linewidth = 1, string toplabel = null, ushort textcolor = 999, byte textfont = 0xFF)

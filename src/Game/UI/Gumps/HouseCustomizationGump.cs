@@ -75,7 +75,7 @@ namespace ClassicUO.Game.UI.Gumps
             Y = y;
             CanMove = true;
             AcceptMouseInput = false;
-
+            CanCloseWithRightClick = true;
             _customHouseManager = new HouseCustomizationManager(serial);
             World.CustomHouseManager = _customHouseManager;
 

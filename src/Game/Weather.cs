@@ -264,7 +264,7 @@ namespace ClassicUO.Game
                         int endX = x + (int) effect.X;
                         int endY = y + (int) effect.Y;
 
-                        batcher.DrawLine(Textures.GetTexture(Color.Gray), startX, startY, endX, endY, startX + (endX - startX) / 2, startY + (endY - startY) / 2);
+                        batcher.DrawLine(Texture2DCache.GetTexture(Color.Gray), startX, startY, endX, endY, startX + (endX - startX) / 2, startY + (endY - startY) / 2);
                         break;
                     case WEATHER_TYPE.WT_SNOW:
                     case WEATHER_TYPE.WT_STORM:
@@ -272,7 +272,7 @@ namespace ClassicUO.Game
                         effect.X += effect.SpeedX * speedOffset;
                         effect.Y += effect.SpeedY * speedOffset;
 
-                        batcher.Draw2D(Textures.GetTexture(Color.White),
+                        batcher.Draw2D(Texture2DCache.GetTexture(Color.White),
                             x + (int)effect.X, y + (int)effect.Y, 2, 2, ref _hueVector);
 
                         break;

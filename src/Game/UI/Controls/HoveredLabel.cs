@@ -68,7 +68,7 @@ namespace ClassicUO.Game.UI.Controls
             if (DrawBackgroundCurrentIndex && MouseIsOver && !string.IsNullOrWhiteSpace(Text))
             {
                 ResetHueVector();
-                batcher.Draw2D(Textures.GetTexture(Color.Gray), x, y + 2, Width - 4, Height - 4, ref _hueVector);
+                batcher.Draw2D(Texture2DCache.GetTexture(Color.Gray), x, y + 2, Width - 4, Height - 4, ref _hueVector);
             }
 
             return base.Draw(batcher, x, y);

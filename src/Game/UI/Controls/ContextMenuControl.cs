@@ -30,34 +30,34 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            base.Update(totalMS, frameMS);
+        //public override void Update(double totalMS, double frameMS)
+        //{
+        //    base.Update(totalMS, frameMS);
 
-            if (Parent != null)
-            {
-                Width = Parent.Width;
-                Height = Parent.Height;
-            }
-        }
+        //    //if (Parent != null)
+        //    //{
+        //    //    Width = Parent.Width;
+        //    //    Height = Parent.Height;
+        //    //}
+        //}
 
-        protected override void OnMouseUp(int x, int y, MouseButtonType button)
-        {
-            if (button != MouseButtonType.Right)
-            {
-                base.OnMouseUp(x, y, button);
-                return;
-            }
+        //protected override void OnMouseUp(int x, int y, MouseButtonType button)
+        //{
+        //    if (button != MouseButtonType.Right)
+        //    {
+        //        base.OnMouseUp(x, y, button);
+        //        return;
+        //    }
 
-            _menu?.Dispose();
+        //    _menu?.Dispose();
 
-            _menu = new ContextMenuShowMenu(_items)
-            {
-                X = Mouse.Position.X,
-                Y = Mouse.Position.Y
-            };
-            UIManager.Add(_menu);
-        }
+        //    _menu = new ContextMenuShowMenu(_items)
+        //    {
+        //        X = Mouse.Position.X,
+        //        Y = Mouse.Position.Y
+        //    };
+        //    UIManager.Add(_menu);
+        //}
 
         public void Add(string text, Action action, bool canBeSelected = false, bool defaultValue = false)
         {
@@ -66,6 +66,21 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Add(Control c, int page = 0)
         {
+        }
+
+        public void Show()
+        {
+            _menu?.Dispose();
+
+            if (_items.Count == 0)
+                return;
+
+            _menu = new ContextMenuShowMenu(_items)
+            {
+                X = Mouse.Position.X,
+                Y = Mouse.Position.Y
+            };
+            UIManager.Add(_menu);
         }
 
         private class ContextMenuShowMenu : Control
@@ -122,7 +137,7 @@ namespace ClassicUO.Game.UI.Controls
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 ResetHueVector();
-                batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x - 1, y - 1, Width + 1, Height + 1, ref _hueVector);
+                batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x - 1, y - 1, Width + 1, Height + 1, ref _hueVector);
                 return base.Draw(batcher, x, y);
             }
         }
@@ -154,6 +169,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public ContextMenuItem(ContextMenuItemEntry entry)
         {
+            CanCloseWithRightClick = false;
             _entry = entry;
 
             _label = new Label(entry.Text, true, 1150, 0, style: FontStyle.BlackBorder)
@@ -177,7 +193,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_selectedPic != null)
             {
-                _label.X = _selectedPic.X + _selectedPic.Width + 5;
+                _label.X = _selectedPic.X + _selectedPic.Width + 6;
                 _selectedPic.Y = (Height >> 1) - (_selectedPic.Height >> 1);
             }
             Width = _label.X + _label.Width + 3;
@@ -209,8 +225,8 @@ namespace ClassicUO.Game.UI.Controls
 
                 Mouse.CancelDoubleClick = true;
                 Mouse.LastLeftButtonClickTime = 0;
+                base.OnMouseUp(x, y, button);
             }
-            base.OnMouseUp(x, y, button);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -218,7 +234,8 @@ namespace ClassicUO.Game.UI.Controls
             if (!string.IsNullOrWhiteSpace(_label.Text) && MouseIsOver)
             {
                 ResetHueVector();
-                batcher.Draw2D(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
+
+                batcher.Draw2D(Texture2DCache.GetTexture(Color.Gray), x + 2, y + 5, Width - 4, Height - 10, ref _hueVector);
             }
 
             return base.Draw(batcher, x, y);

@@ -28,7 +28,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    internal static class Textures
+    internal static class Texture2DCache
     {
         private static readonly Dictionary<Color, Texture2D> _textures = new Dictionary<Color, Texture2D>();
 

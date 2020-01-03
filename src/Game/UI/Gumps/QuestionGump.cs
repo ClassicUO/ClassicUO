@@ -35,6 +35,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public QuestionGump(string message, Action<bool> result) : base(0, 0)
         {
+            CanCloseWithRightClick = true;
             Add(new GumpPic(0, 0, 0x0816, 0));
 
             UOTexture t = UOFileManager.Gumps.GetTexture(0x0816);

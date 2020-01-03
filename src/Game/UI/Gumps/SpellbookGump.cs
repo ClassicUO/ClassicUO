@@ -89,6 +89,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             AcceptMouseInput = false;
+            CanCloseWithRightClick = true;
         }
 
         public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SPELLBOOK;

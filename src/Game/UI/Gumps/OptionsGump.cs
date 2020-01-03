@@ -204,6 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             AcceptMouseInput = true;
             CanMove = true;
+            CanCloseWithRightClick = true;
 
             BuildGeneral();
             BuildSounds();
@@ -2115,7 +2116,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             ResetHueVector();
 
-            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
+            batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
 
             return base.Draw(batcher, x, y);
         }

@@ -236,7 +236,7 @@ namespace ClassicUO.Game.UI.Controls
                             {
                                 TargetManager.Target(Item);
                                 Mouse.LastLeftButtonClickTime = 0;
-                                UIManager.Add(new InfoGump(Item));
+                                UIManager.Add(new InspectorGump(Item));
                             }
 
                             break;

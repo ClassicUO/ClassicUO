@@ -120,6 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGump()
         {
             CanMove = true;
+            CanCloseWithRightClick = true;
             WantUpdateSize = false;
             _isCorspeContainer = Graphic == 0x0009;
 

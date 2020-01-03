@@ -100,6 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump(string[] pages)
         {
+            CanCloseWithRightClick = true;
             Add(new GumpPic(0, 0, 0x1FE, 0)
             {
                 CanMove = true

@@ -45,7 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             Height = 300;
             CanMove = true;
-
+            CanCloseWithRightClick = true;
             _scrollArea = new ScrollArea(0, 32, 272, Height - 96, false);
 
             _textBox = new MultiLineBox(new MultiLineEntry(1, -1, 0, 220, true, hue: 0), false)

@@ -30,7 +30,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             AcceptMouseInput = true;
-
+            CanCloseWithRightClick = true;
             WantUpdateSize = false;
             Width = 345;
             Height = 390;
@@ -320,7 +320,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (MouseIsOver)
                 {
-                    batcher.Draw2D(Textures.GetTexture(Color.Cyan), x, y, Width, Height, ref _hueVector);
+                    batcher.Draw2D(Texture2DCache.GetTexture(Color.Cyan), x, y, Width, Height, ref _hueVector);
                 }
 
                 return base.Draw(batcher, x, y);

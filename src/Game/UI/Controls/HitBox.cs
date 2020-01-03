@@ -37,7 +37,7 @@ namespace ClassicUO.Game.UI.Controls
             CanMove = false;
             AcceptMouseInput = true;
             Alpha = 0.75f;
-            _texture = Textures.GetTexture(Color.White);
+            _texture = Texture2DCache.GetTexture(Color.White);
 
             X = x;
             Y = y;

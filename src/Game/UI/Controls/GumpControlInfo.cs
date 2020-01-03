@@ -21,14 +21,17 @@
 
 #endregion
 
+using System;
+
 namespace ClassicUO.Game.UI.Controls
 {
-    public enum UILayer
+    enum UILayer
     {
         Over,
         Default,
         Under
     }
+
 
     internal class GumpControlInfo
     {

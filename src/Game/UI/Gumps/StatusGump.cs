@@ -53,6 +53,7 @@ namespace ClassicUO.Game.UI.Gumps
             // sanity check
             UIManager.GetGump<HealthBarGump>(World.Player)?.Dispose();
 
+            CanCloseWithRightClick = true;
             CanMove = true;
         }
 

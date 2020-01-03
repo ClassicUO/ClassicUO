@@ -260,7 +260,7 @@ namespace ClassicUO.Game.UI.Gumps
                             if (Entity != null)
                                 TargetManager.Target(Entity);
                             Mouse.LastLeftButtonClickTime = 0;
-                            UIManager.Add(new InfoGump(Entity));
+                            UIManager.Add(new InspectorGump(Entity));
 
                             break;
 
@@ -437,7 +437,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResetHueVector();
 
-            batcher.DrawRectangle(Textures.GetTexture(Color.Black), x - 1, y - 1, Width + 1, Height + 1, ref _hueVector);
+            batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Black), x - 1, y - 1, Width + 1, Height + 1, ref _hueVector);
 
             base.Draw(batcher, x, y);
 

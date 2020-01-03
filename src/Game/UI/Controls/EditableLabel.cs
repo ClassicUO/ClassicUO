@@ -139,7 +139,7 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
 
             if (_label.IsEditable)
-                batcher.Draw2D(Textures.GetTexture(Color.Wheat), x, y, _label.Width, _label.Height, ref _hueVector);
+                batcher.Draw2D(Texture2DCache.GetTexture(Color.Wheat), x, y, _label.Width, _label.Height, ref _hueVector);
 
             return base.Draw(batcher, x, y);
         }

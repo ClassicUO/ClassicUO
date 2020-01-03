@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = false;
             AcceptKeyboardInput = true;
             CanMove = true;
-
+            CanCloseWithRightClick = true;
             IsBuyGump = isBuyGump;
 
             _transactionItems = new Dictionary<Item, TransactionItem>();

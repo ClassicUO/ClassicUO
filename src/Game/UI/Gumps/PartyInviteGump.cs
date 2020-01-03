@@ -9,6 +9,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         public PartyInviteGump(uint inviter) : base(0, 0)
         {
+            CanCloseWithRightClick = true;
             var partyGumpBackground = new AlphaBlendControl()
             {
                 Width = 250,

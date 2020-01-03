@@ -46,6 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
             Height = 300 + _diffY;
             CanMove = true;
             AcceptKeyboardInput = true;
+            CanCloseWithRightClick = true;
 
             Add(_gumpPic = new GumpPic(143, 0, 0x82D, 0));
             _gumpPic.MouseDoubleClick += _picBase_MouseDoubleClick;

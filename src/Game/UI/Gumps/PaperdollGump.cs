@@ -68,6 +68,7 @@ namespace ClassicUO.Game.UI.Gumps
         public PaperDollGump() : base(0, 0)
         {
             CanMove = true;
+            CanCloseWithRightClick = true;
         }
 
         public PaperDollGump(uint serial) : this()

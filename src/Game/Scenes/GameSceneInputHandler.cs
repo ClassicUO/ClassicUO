@@ -461,15 +461,15 @@ namespace ClassicUO.Game.Scenes
                         {
                             case Entity ent:
                                 TargetManager.Target(ent.Serial);
-                                UIManager.Add(new InfoGump(ent));
+                                UIManager.Add(new InspectorGump(ent));
                                 break;
                             case Land land:
                                 TargetManager.Target(land.X, land.Y, land.Z);
-                                UIManager.Add(new InfoGump(land));
+                                UIManager.Add(new InspectorGump(land));
                                 break;
                             case GameObject o:
                                 TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
-                                UIManager.Add(new InfoGump(o));
+                                UIManager.Add(new InspectorGump(o));
                                 break;
                         }
 

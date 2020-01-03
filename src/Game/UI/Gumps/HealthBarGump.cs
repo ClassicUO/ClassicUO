@@ -59,6 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             LocalSerial = entity.Serial;
+            CanCloseWithRightClick = true;
             _name = entity.Name;
             _isDead = entity is Mobile mm && mm.IsDead;
 
@@ -330,12 +331,12 @@ namespace ClassicUO.Game.UI.Gumps
         private static Color HPB_COLOR_DRAW_BLUE = Color.DodgerBlue;
         private static Color HPB_COLOR_DRAW_BLACK = Color.Black;
 
-        private static readonly Texture2D HPB_COLOR_BLUE = Textures.GetTexture(Color.DodgerBlue);
-        private static readonly Texture2D HPB_COLOR_GRAY = Textures.GetTexture(Color.Gray);
-        private static readonly Texture2D HPB_COLOR_RED = Textures.GetTexture(Color.Red);
-        private static readonly Texture2D HPB_COLOR_YELLOW = Textures.GetTexture(Color.Orange);
-        private static readonly Texture2D HPB_COLOR_POISON = Textures.GetTexture(Color.LimeGreen);
-        private static readonly Texture2D HPB_COLOR_BLACK = Textures.GetTexture(Color.Black);
+        private static readonly Texture2D HPB_COLOR_BLUE = Texture2DCache.GetTexture(Color.DodgerBlue);
+        private static readonly Texture2D HPB_COLOR_GRAY = Texture2DCache.GetTexture(Color.Gray);
+        private static readonly Texture2D HPB_COLOR_RED = Texture2DCache.GetTexture(Color.Red);
+        private static readonly Texture2D HPB_COLOR_YELLOW = Texture2DCache.GetTexture(Color.Orange);
+        private static readonly Texture2D HPB_COLOR_POISON = Texture2DCache.GetTexture(Color.LimeGreen);
+        private static readonly Texture2D HPB_COLOR_BLACK = Texture2DCache.GetTexture(Color.Black);
 
         public HealthBarGumpCustom(Entity entity) : base(entity)
         {
@@ -776,7 +777,7 @@ namespace ClassicUO.Game.UI.Gumps
             public LineCHB(int x, int y, int w, int h, uint color) : base(x, y, w, h, color)
             {
                 LineWidth = w;
-                LineColor = Textures.GetTexture(new Color() { PackedValue = color });
+                LineColor = Texture2DCache.GetTexture(new Color() { PackedValue = color });
 
                 CanMove = true;
             }
