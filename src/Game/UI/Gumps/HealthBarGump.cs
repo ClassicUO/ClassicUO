@@ -23,7 +23,6 @@
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Xml;
 
 using ClassicUO.Configuration;
@@ -33,7 +32,6 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
