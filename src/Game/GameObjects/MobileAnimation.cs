@@ -1327,7 +1327,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (action <= 10)
             {
-                ref IndexAnimation ia = ref UOFileManager.Animations.DataIndex[mobile.Graphic];
+                IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
                 ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
                 if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 
@@ -1430,7 +1430,7 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_1_2(Mobile mobile, ushort action, byte mode)
         {
-            ref IndexAnimation ia = ref UOFileManager.Animations.DataIndex[mobile.Graphic];
+            IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
 
             if ((ia.Flags & 0x80000000) != 0)
@@ -1451,7 +1451,7 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_3(Mobile mobile, ushort action, byte mode)
         {
-            ref IndexAnimation ia = ref UOFileManager.Animations.DataIndex[mobile.Graphic];
+            IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
             if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 
@@ -1479,7 +1479,7 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_4(Mobile mobile, ushort action, byte mode)
         {
-            ref IndexAnimation ia = ref UOFileManager.Animations.DataIndex[mobile.Graphic];
+            IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
             if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 
@@ -1501,7 +1501,7 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_5(Mobile mobile, ushort action, byte mode)
         {
-            ref IndexAnimation ia = ref UOFileManager.Animations.DataIndex[mobile.Graphic];
+            IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
             if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 
@@ -1538,7 +1538,7 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_6_14(Mobile mobile, ushort action, byte mode)
         {
-            ref IndexAnimation ia = ref UOFileManager.Animations.DataIndex[mobile.Graphic];
+            IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
             if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 
@@ -1576,7 +1576,7 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_8(Mobile mobile, ushort action, byte mode)
         {
-            ref IndexAnimation ia = ref UOFileManager.Animations.DataIndex[mobile.Graphic];
+            IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
             if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 
@@ -1598,7 +1598,7 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_9_10(Mobile mobile, ushort action, byte mode)
         {
-            ref IndexAnimation ia = ref UOFileManager.Animations.DataIndex[mobile.Graphic];
+            IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
             if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 
@@ -1627,7 +1627,7 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_11(Mobile mobile, ushort action, byte mode)
         {
-            ref IndexAnimation ia = ref UOFileManager.Animations.DataIndex[mobile.Graphic];
+            IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
             if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 

@@ -94,13 +94,13 @@ namespace ClassicUO.Game
                 byte animGroup = Mobile.GetGroupForAnimation(mobile, graphic, layer == Layer.Invalid);
 
                 ushort hue = 0;
-                ref var direction = ref UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, true).Direction[dir];
+                AnimationDirection direction = UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, true).Direction[dir];
 
                 UOFileManager.Animations.AnimID = graphic;
                 UOFileManager.Animations.AnimGroup = animGroup;
                 UOFileManager.Animations.Direction = dir;
 
-                if ((direction.FrameCount == 0 || direction.Frames == null) && !UOFileManager.Animations.LoadDirectionGroup(ref direction))
+                if (direction == null || ((direction.FrameCount == 0 || direction.Frames == null) && !UOFileManager.Animations.LoadDirectionGroup(ref direction)))
                     continue;
 
                 int fc = direction.FrameCount;
@@ -194,13 +194,13 @@ namespace ClassicUO.Game
 
                 byte animGroup = UOFileManager.Animations.AnimGroup;
 
-                var gr = layer == Layer.Invalid
-                             ? UOFileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref color)
-                             : UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref color);
+                AnimationGroup gr = layer == Layer.Invalid
+                                        ? UOFileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref color)
+                                        : UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref color);
 
-                ref var direction = ref gr.Direction[UOFileManager.Animations.Direction];
+                AnimationDirection direction = gr.Direction[UOFileManager.Animations.Direction];
 
-                if ((direction.FrameCount == 0 || direction.Frames == null) && !UOFileManager.Animations.LoadDirectionGroup(ref direction))
+                if (direction == null || ((direction.FrameCount == 0 || direction.Frames == null) && !UOFileManager.Animations.LoadDirectionGroup(ref direction)))
                     continue;
 
                 int fc = direction.FrameCount;
@@ -210,7 +210,7 @@ namespace ClassicUO.Game
 
                 if (animIndex < direction.FrameCount)
                 {
-                    AnimationFrameTexture frame = direction.Frames[animIndex]; // FileManager.Animations.GetTexture(direction.FramesHashes[animIndex]);
+                    AnimationFrameTexture frame = direction.Frames[animIndex];
 
                     if (frame == null || frame.IsDisposed)
                         continue;

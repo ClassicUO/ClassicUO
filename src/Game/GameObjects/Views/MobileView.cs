@@ -316,7 +316,7 @@ namespace ClassicUO.Game.GameObjects
                 id = 0x0223;
             }
 
-            ref var direction = ref UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hueFromFile, isParent).Direction[UOFileManager.Animations.Direction];
+            AnimationDirection direction = UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hueFromFile, isParent).Direction[UOFileManager.Animations.Direction];
             UOFileManager.Animations.AnimID = id;
 
 
@@ -326,11 +326,14 @@ namespace ClassicUO.Game.GameObjects
                     return 0;
             }
 
-            if ((direction.FrameCount == 0 || direction.Frames == null) && !UOFileManager.Animations.LoadDirectionGroup(ref direction))
+            if (direction == null || ((direction.FrameCount == 0 || direction.Frames == null) && !UOFileManager.Animations.LoadDirectionGroup(ref direction)))
             {
                 if (!(_transform && owner != null && entity == null && !hasShadow))
                     return 0;
             }
+
+            if (direction == null)
+                return 0;
 
             direction.LastAccessTime = Time.Ticks;
 

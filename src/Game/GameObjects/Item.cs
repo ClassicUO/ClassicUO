@@ -881,7 +881,7 @@ namespace ClassicUO.Game.GameObjects
                         byte animGroup = UOFileManager.Animations.GetDieGroupIndex(id, UsedLayer);
 
                         ushort hue = 0;
-                        ref var direction = ref UOFileManager.Animations.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
+                        var direction = UOFileManager.Animations.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
                         UOFileManager.Animations.AnimID = id;
                         UOFileManager.Animations.AnimGroup = animGroup;
                         UOFileManager.Animations.Direction = dir;

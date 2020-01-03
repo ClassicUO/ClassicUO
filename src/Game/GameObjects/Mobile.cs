@@ -535,16 +535,16 @@ namespace ClassicUO.Game.GameObjects
                 if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
                     ushort hue = 0;
-                    ref var direction = ref UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
+                    var direction = UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
                     UOFileManager.Animations.AnimID = id;
                     UOFileManager.Animations.AnimGroup = animGroup;
                     UOFileManager.Animations.Direction = dir;
 
 
-                    if (direction.FrameCount == 0 || direction.Frames == null)
+                    if (direction != null && (direction.FrameCount == 0 || direction.Frames == null))
                         UOFileManager.Animations.LoadDirectionGroup(ref direction);
 
-                    if ((direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1) || direction.IsUOP)
+                    if (direction != null && ((direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1) || direction.IsUOP))
                     {
                         direction.LastAccessTime = Time.Ticks;
                         int fc = direction.FrameCount;
