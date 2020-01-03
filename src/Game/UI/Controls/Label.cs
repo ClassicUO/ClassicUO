@@ -25,6 +25,7 @@ using System.Collections.Generic;
 
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.UI.Controls
 {

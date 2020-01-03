@@ -27,6 +27,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 

@@ -21,10 +21,9 @@
 
 #endregion
 
-using System;
 using System.Globalization;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Utility
 {
     static class UInt16Converter
     {     
@@ -36,8 +35,9 @@ namespace ClassicUO.Game
             if (str.Length > 1 && str[0] == '-')
                 return (ushort) short.Parse(str);
 
+            uint.TryParse(str, out uint v);
 
-            return (ushort) uint.Parse(str); // some server send 0xFFFF_FFFF in decimal form. C# doesn't like it. It needs a specific conversion
+            return (ushort) v; // some server send 0xFFFF_FFFF in decimal form. C# doesn't like it. It needs a specific conversion
         }
     }
 }
