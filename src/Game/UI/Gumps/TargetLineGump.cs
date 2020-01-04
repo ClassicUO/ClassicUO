@@ -106,7 +106,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (ProfileManager.Current == null || Mobile == null || Mobile.IsDestroyed)
                 return false;
 
-            float scale = CUOEnviroment.Client.GetScene<GameScene>().Scale;
+            float scale = Client.Game.GetScene<GameScene>().Scale;
 
             int gx = ProfileManager.Current.GameWindowPosition.X;
             int gy = ProfileManager.Current.GameWindowPosition.Y;

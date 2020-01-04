@@ -28,7 +28,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    internal static class Textures
+    internal static class Texture2DCache
     {
         private static readonly Dictionary<Color, Texture2D> _textures = new Dictionary<Color, Texture2D>();
 
@@ -36,7 +36,7 @@ namespace ClassicUO.Renderer
         {
             if (!_textures.TryGetValue(color, out var t))
             {
-                t = new Texture2D(CUOEnviroment.Client.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+                t = new Texture2D(Client.Game.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
                 t.SetData(new[] {color});
                 _textures[color] = t;
             }

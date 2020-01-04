@@ -131,7 +131,7 @@ namespace ClassicUO.Network
 
             PluginHeader header = new PluginHeader
             {
-                ClientVersion = (int) UOFileManager.ClientVersion,
+                ClientVersion = (int) Client.Version,
                 Recv = Marshal.GetFunctionPointerForDelegate(_recv),
                 Send = Marshal.GetFunctionPointerForDelegate(_send),
                 GetPacketLength = Marshal.GetFunctionPointerForDelegate(_getPacketLength),
@@ -255,7 +255,7 @@ namespace ClassicUO.Network
             else
             {
                 CUOEnviroment.DisableUpdateWindowCaption = true;
-                CUOEnviroment.Client.Window.Title = str;
+                Client.Game.Window.Title = str;
             }
         }
 

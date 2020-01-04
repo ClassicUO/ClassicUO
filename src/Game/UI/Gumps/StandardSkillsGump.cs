@@ -65,6 +65,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             AcceptMouseInput = false;
             CanMove = true;
+            CanCloseWithRightClick = true;
+
             Height = 200 + _diffY;
 
             Add(_gumpPic = new GumpPic(160, 0, 0x82D, 0));
@@ -545,7 +547,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ResetHueVector();
 
-                if (!CanMove) batcher.Draw2D(Textures.GetTexture(Color.Wheat), x, y, Width, Height, ref _hueVector);
+                if (!CanMove) batcher.Draw2D(Texture2DCache.GetTexture(Color.Wheat), x, y, Width, Height, ref _hueVector);
 
                 return base.Draw(batcher, x, y);
             }

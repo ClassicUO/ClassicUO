@@ -24,6 +24,7 @@
 using System.Linq;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -54,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 X = 610, Y = 445, ButtonAction = ButtonAction.Activate
             });
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_500A)
+            if (Client.Version >= ClientVersion.CV_500A)
             {
                 ushort textColor = 0xFFFF;
 
@@ -134,7 +135,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             });
             // Sever Scroll Area
             ScrollArea scrollArea = new ScrollArea(150, 100, 383, 271, true);
-            LoginScene loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
+            LoginScene loginScene = Client.Game.GetScene<LoginScene>();
 
             foreach (ServerListEntry server in loginScene.Servers)
             {
@@ -174,7 +175,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            LoginScene loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
+            LoginScene loginScene = Client.Game.GetScene<LoginScene>();
 
             if (buttonID >= (int) Buttons.Server)
             {
@@ -216,7 +217,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             if (key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER)
             {
-                LoginScene loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
+                LoginScene loginScene = Client.Game.GetScene<LoginScene>();
 
                 if (loginScene.Servers.Any())
                 {

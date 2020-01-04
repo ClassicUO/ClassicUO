@@ -111,7 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetInScreen()
         {
-            Rectangle rect = new Rectangle(0, 0, CUOEnviroment.Client.Window.ClientBounds.Width, CUOEnviroment.Client.Window.ClientBounds.Height);
+            Rectangle rect = new Rectangle(0, 0, Client.Game.Window.ClientBounds.Width, Client.Game.Window.ClientBounds.Height);
 
             if (rect.Intersects(Bounds))
                 return;
@@ -141,11 +141,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (Y < -halfHeight)
                 position.Y = -halfHeight;
 
-            if (X > CUOEnviroment.Client.Window.ClientBounds.Width - (Width - halfWidth))
-                position.X = CUOEnviroment.Client.Window.ClientBounds.Width - (Width - halfWidth);
+            if (X > Client.Game.Window.ClientBounds.Width - (Width - halfWidth))
+                position.X = Client.Game.Window.ClientBounds.Width - (Width - halfWidth);
 
-            if (Y > CUOEnviroment.Client.Window.ClientBounds.Height - (Height - halfHeight))
-                position.Y = CUOEnviroment.Client.Window.ClientBounds.Height - (Height - halfHeight);
+            if (Y > Client.Game.Window.ClientBounds.Height - (Height - halfHeight))
+                position.Y = Client.Game.Window.ClientBounds.Height - (Height - halfHeight);
             Location = position;
         }
 

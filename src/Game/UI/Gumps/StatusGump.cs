@@ -27,6 +27,7 @@ using System.Linq;
 using System.Xml;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -41,7 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal abstract class StatusGumpBase : Gump
     {
         protected readonly GumpPic[] _lockers = new GumpPic[3];
-        protected readonly bool _useUOPGumps = UOFileManager.UseUOPGumps;
+        protected readonly bool _useUOPGumps = Client.UseUOPGumps;
 
         protected Label[] _labels;
         protected Point _point;
@@ -52,6 +53,7 @@ namespace ClassicUO.Game.UI.Gumps
             // sanity check
             UIManager.GetGump<HealthBarGump>(World.Player)?.Dispose();
 
+            CanCloseWithRightClick = true;
             CanMove = true;
         }
 
@@ -421,7 +423,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPic(0, 0, 0x2A6C, 0));
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_308Z)
+            if (Client.Version >= ClientVersion.CV_308Z)
             {
                 p.X = 389;
                 p.Y = 152;
@@ -430,7 +432,7 @@ namespace ClassicUO.Game.UI.Gumps
                 AddStatTextLabel(!string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty, MobileStats.Name, _useUOPGumps ? 90 : 58, 50, 320, 0x0386, TEXT_ALIGN_TYPE.TS_CENTER);
 
 
-                if (UOFileManager.ClientVersion >= ClientVersions.CV_5020)
+                if (Client.Version >= ClientVersion.CV_5020)
                 {
                     Add(new Button((int)ButtonType.BuffIcon, 0x7538, 0x7539, 0x7539)
                     {
@@ -651,9 +653,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                if (UOFileManager.ClientVersion == ClientVersions.CV_308D)
+                if (Client.Version == ClientVersion.CV_308D)
                     AddStatTextLabel(World.Player.StatsCap.ToString(), MobileStats.StatCap, 171, 124);
-                else if (UOFileManager.ClientVersion == ClientVersions.CV_308J)
+                else if (Client.Version == ClientVersion.CV_308J)
                 {
                     AddStatTextLabel(World.Player.StatsCap.ToString(), MobileStats.StatCap, 180, 131);
                     AddStatTextLabel($"{World.Player.Followers}/{World.Player.FollowersMax}", MobileStats.Followers, 180, 144);
@@ -820,7 +822,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new GumpPic(34, 25, 0x0805, 0)); // Mana bar
             Add(new GumpPic(34, 38, 0x0805, 0)); // Stamina bar
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_5020)
+            if (Client.Version >= ClientVersion.CV_5020)
             {
                 Add(new Button((int)ButtonType.BuffIcon, 0x837, 0x838, 0x838)
                 {

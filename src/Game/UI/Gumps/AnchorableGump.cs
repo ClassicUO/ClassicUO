@@ -136,7 +136,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (drawLoc != Location)
                 {
-                    Texture2D previewColor = Textures.GetTexture(Color.Silver);
+                    Texture2D previewColor = Texture2DCache.GetTexture(Color.Silver);
                     ResetHueVector();
                     _hueVector.Z = 0.5f;
                     batcher.Draw2D(previewColor, drawLoc.X, drawLoc.Y, Width, Height, ref _hueVector);

@@ -176,7 +176,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (button == MouseButtonType.Left)
             {
-                GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+                GameScene gs = Client.Game.GetScene<GameScene>();
                 if (gs == null)
                     return;
 
@@ -236,7 +236,7 @@ namespace ClassicUO.Game.UI.Controls
                             {
                                 TargetManager.Target(Item);
                                 Mouse.LastLeftButtonClickTime = 0;
-                                UIManager.Add(new InfoGump(Item));
+                                UIManager.Add(new InspectorGump(Item));
                             }
 
                             break;

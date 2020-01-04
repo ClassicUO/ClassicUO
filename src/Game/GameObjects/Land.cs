@@ -101,7 +101,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void UpdateGraphicBySeason()
         {
-            Graphic = Season.GetLandSeasonGraphic(World.Season, OriginalGraphic);
+            Graphic = SeasonManager.GetLandSeasonGraphic(World.Season, OriginalGraphic);
             AllowedToDraw = Graphic > 2;
         }
 

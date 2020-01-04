@@ -26,6 +26,7 @@ using System.IO;
 using System.Xml;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -67,6 +68,7 @@ namespace ClassicUO.Game.UI.Gumps
         public PaperDollGump() : base(0, 0)
         {
             CanMove = true;
+            CanCloseWithRightClick = true;
         }
 
         public PaperDollGump(uint serial) : this()
@@ -146,7 +148,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseEnter(int x, int y)
         {
-            GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+            GameScene gs = Client.Game.GetScene<GameScene>();
 
             if (gs.IsHoldingItem)
             {
@@ -233,7 +235,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(_combatBook = new GumpPic(156, 200, 0x2B34, 0));
                     _combatBook.MouseDoubleClick += (sender, e) => { GameActions.OpenAbilitiesBook(); };
 
-                    if (UOFileManager.ClientVersion >= ClientVersions.CV_7000)
+                    if (Client.Version >= ClientVersion.CV_7000)
                     {
                         Add(_racialAbilitiesBook = new GumpPic(23, 200, 0x2B28, 0));
 
@@ -318,7 +320,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+            GameScene gs = Client.Game.GetScene<GameScene>();
 
             if (!gs.IsHoldingItem || !gs.IsMouseOverUI || _paperDollInteractable.IsOverBackpack)
                 return;
@@ -358,8 +360,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (party == null)
                 {
-                    int x = CUOEnviroment.Client.Window.ClientBounds.Width / 2 - 272;
-                    int y = CUOEnviroment.Client.Window.ClientBounds.Height / 2 - 240;
+                    int x = Client.Game.Window.ClientBounds.Width / 2 - 272;
+                    int y = Client.Game.Window.ClientBounds.Height / 2 - 240;
                     UIManager.Add(new PartyGump(x, y, World.Party.CanLoot));
                 }
                 else
@@ -412,7 +414,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _isMinimized = reader.ReadBoolean();
             }
             LocalSerial = reader.ReadUInt32();
-            CUOEnviroment.Client.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
+            Client.Game.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
             if (Profile.GumpsVersion >= 3)
             {
                 _isMinimized = reader.ReadBoolean();
@@ -466,8 +468,8 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         UIManager.Add(new OptionsGump
                         {
-                            X = (CUOEnviroment.Client.Window.ClientBounds.Width >> 1) - 300,
-                            Y = (CUOEnviroment.Client.Window.ClientBounds.Height >> 1) - 250
+                            X = (Client.Game.Window.ClientBounds.Width >> 1) - 300,
+                            Y = (Client.Game.Window.ClientBounds.Height >> 1) - 250
                         });
                     }
                     else
@@ -480,7 +482,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.LogOut:
-                    CUOEnviroment.Client.GetScene<GameScene>()?.RequestQuitGame();
+                    Client.Game.GetScene<GameScene>()?.RequestQuitGame();
 
                     break;
 

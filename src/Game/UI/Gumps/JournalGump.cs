@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             Height = 300;
             CanMove = true;
-
+            CanCloseWithRightClick = true;
             Add(_gumpPic = new GumpPic(160, 0, 0x82D, 0));
             Add(_background = new ExpandableScroll(0, _diffY, Height - _diffY, 0x1F40)
             {

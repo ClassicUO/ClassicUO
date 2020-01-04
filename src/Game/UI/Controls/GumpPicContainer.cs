@@ -43,7 +43,7 @@ namespace ClassicUO.Game.UI.Controls
             if (button != MouseButtonType.Left)
                 return;
 
-            GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+            GameScene gs = Client.Game.GetScene<GameScene>();
 
             if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
                 return;

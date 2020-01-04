@@ -28,7 +28,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-
+using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Renderer;
@@ -200,7 +200,7 @@ namespace ClassicUO.IO.Resources
                         _files[i] = new UOFileMul(pathmul, pathidx, un[i], i == 0 ? 6 : -1);
                     }
 
-                    if (i > 0 && UOFileManager.ClientVersion >= ClientVersions.CV_7000)
+                    if (i > 0 && Client.Version >= ClientVersion.CV_7000)
                     {
                         string pathuop = UOFileManager.GetUOFilePath($"AnimationFrame{i}.uop");
 
@@ -229,7 +229,7 @@ namespace ClassicUO.IO.Resources
                 UOFile idxfile5 = _files[4]?.IdxFile;
                 long? maxAddress5 = (long?)idxfile5?.StartAddress + idxfile5?.Length;
 
-                if (UOFileManager.ClientVersion >= ClientVersions.CV_500A)
+                if (Client.Version >= ClientVersion.CV_500A)
                 {
                     string path = UOFileManager.GetUOFilePath("mobtypes.txt");
 
@@ -384,7 +384,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                if (UOFileManager.ClientVersion < ClientVersions.CV_305D)
+                if (Client.Version < ClientVersion.CV_305D)
                     return;
 
                 file = UOFileManager.GetUOFilePath("Equipconv.def");
@@ -510,7 +510,7 @@ namespace ClassicUO.IO.Resources
                             if (realAnimID != 0xFFFF && animFile != 0)
                             {
                                 UOFile currentIdxFile = _files[animFile].IdxFile;
-                                var realType = UOFileManager.ClientVersion < ClientVersions.CV_500A 
+                                var realType = Client.Version < ClientVersion.CV_500A 
                                     ? CalculateTypeByGraphic(realAnimID) : DataIndex[index].Type;
                                 long addressOffset = DataIndex[index].CalculateOffset(realAnimID, realType, out int count);
 
@@ -635,7 +635,7 @@ namespace ClassicUO.IO.Resources
 
         private void LoadUop()
         {
-            if (UOFileManager.ClientVersion <= ClientVersions.CV_60144)
+            if (Client.Version <= ClientVersion.CV_60144)
                 return;
 
             for (ushort animID = 0; animID < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)
@@ -849,7 +849,7 @@ namespace ClassicUO.IO.Resources
             if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 return;
 
-            ref var dataIndex = ref DataIndex[graphic];
+            IndexAnimation dataIndex = DataIndex[graphic];
 
             if (dataIndex.IsUOP && (isParent || !dataIndex.IsValidMUL))
             {
@@ -880,7 +880,7 @@ namespace ClassicUO.IO.Resources
         {
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
-                ref var index = ref DataIndex[graphic];
+                IndexAnimation index = DataIndex[graphic];
 
                 if (index.IsUOP && (isParent || !index.IsValidMUL))
                 {
@@ -925,7 +925,7 @@ namespace ClassicUO.IO.Resources
         {
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
-                ref var index = ref DataIndex[graphic];
+                IndexAnimation index = DataIndex[graphic];
 
                 if (index.IsUOP)
                 {
@@ -1283,7 +1283,7 @@ namespace ClassicUO.IO.Resources
 
         private unsafe bool ReadUOPAnimationFrame(ref AnimationDirection animDirection)
         {
-            var animData = DataIndex[AnimID].GetUopGroup(AnimGroup); //ref DataIndex[AnimID].Groups[AnimGroup];
+            var animData = DataIndex[AnimID].GetUopGroup(AnimGroup);
 
             if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 && animData.Offset == 0)
             {
@@ -1555,15 +1555,17 @@ namespace ClassicUO.IO.Resources
                 if (dir < 5)
                 {
                     AnimationDirection direction = UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
-                    int fc = direction.FrameCount;
 
-                    if (fc > 0)
+                    if (direction != null)
                     {
-                        if (frameIndex >= fc) frameIndex = 0;
+                        int fc = direction.FrameCount;
 
-                        if (direction.Frames != null)
+                        if (fc > 0)
                         {
-                            AnimationFrameTexture animationFrameTexture = direction.Frames[frameIndex]; // GetTexture(direction.FramesHashes[frameIndex]);
+                            if (frameIndex >= fc)
+                                frameIndex = 0;
+
+                            AnimationFrameTexture animationFrameTexture = direction.Frames?[frameIndex];
 
                             if (animationFrameTexture != null)
                             {
@@ -1575,59 +1577,61 @@ namespace ClassicUO.IO.Resources
 
                                 return;
                             }
-
                         }
                     }
                 }
 
                 AnimationDirection direction1 = UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[0];
 
-                if (direction1.Address != 0 && direction1.Size != 0)
+                if (direction1 != null)
                 {
-                    if (!direction1.IsVerdata)
+                    if (direction1.Address != 0 && direction1.Size != 0)
                     {
-                        UOFileMul file = _files[direction1.FileIndex];
-                        file.Seek(direction1.Address);
-                        ReadFrameDimensionData(frameIndex, out x, out y, out w, out h, file);
-                        _animDimensionCache[id] = new Rectangle(x, y, w, h);
-
-                        return;
-                    }
-                }
-                else if (direction1.IsUOP && UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true) is AnimationGroupUop animDataStruct)
-                {
-                    if (!(animDataStruct.FileIndex == 0 && animDataStruct.CompressedLength == 0 && animDataStruct.DecompressedLength == 0 && animDataStruct.Offset == 0))
-                    {
-                        int decLen = (int)animDataStruct.DecompressedLength;
-                        var file = _filesUop[animDataStruct.FileIndex];
-                        file.Seek(animDataStruct.Offset);
-                        byte[] decbuffer = file.GetData((int) animDataStruct.CompressedLength, decLen);
-
-                        fixed (byte* ptr = decbuffer)
+                        if (!direction1.IsVerdata)
                         {
-                            DataReader reader = new DataReader();
-                            reader.SetData(ptr, decLen);
-                            reader.Skip(32);
-
-                            int frameCount = reader.ReadInt();
-                            int dataStart = reader.ReadInt();
-                            reader.Seek(dataStart);
-
-                            reader.Skip(2);
-                            short frameID = reader.ReadShort();
-                            reader.Skip(8);
-                            uint pixelOffset = reader.ReadUInt();
-
-                            reader.Seek((int)(dataStart + pixelOffset));
-                            reader.Skip(512);
-                            x = reader.ReadShort();
-                            y = reader.ReadShort();
-                            w = reader.ReadShort();
-                            h = reader.ReadShort();
+                            UOFileMul file = _files[direction1.FileIndex];
+                            file.Seek(direction1.Address);
+                            ReadFrameDimensionData(frameIndex, out x, out y, out w, out h, file);
                             _animDimensionCache[id] = new Rectangle(x, y, w, h);
-                            reader.ReleaseData();
 
                             return;
+                        }
+                    }
+                    else if (direction1.IsUOP && UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true) is AnimationGroupUop animDataStruct)
+                    {
+                        if (!(animDataStruct.FileIndex == 0 && animDataStruct.CompressedLength == 0 && animDataStruct.DecompressedLength == 0 && animDataStruct.Offset == 0))
+                        {
+                            int decLen = (int) animDataStruct.DecompressedLength;
+                            var file = _filesUop[animDataStruct.FileIndex];
+                            file.Seek(animDataStruct.Offset);
+                            byte[] decbuffer = file.GetData((int) animDataStruct.CompressedLength, decLen);
+
+                            fixed (byte* ptr = decbuffer)
+                            {
+                                DataReader reader = new DataReader();
+                                reader.SetData(ptr, decLen);
+                                reader.Skip(32);
+
+                                int frameCount = reader.ReadInt();
+                                int dataStart = reader.ReadInt();
+                                reader.Seek(dataStart);
+
+                                reader.Skip(2);
+                                short frameID = reader.ReadShort();
+                                reader.Skip(8);
+                                uint pixelOffset = reader.ReadUInt();
+
+                                reader.Seek((int) (dataStart + pixelOffset));
+                                reader.Skip(512);
+                                x = reader.ReadShort();
+                                y = reader.ReadShort();
+                                w = reader.ReadShort();
+                                h = reader.ReadShort();
+                                _animDimensionCache[id] = new Rectangle(x, y, w, h);
+                                reader.ReleaseData();
+
+                                return;
+                            }
                         }
                     }
                 }

@@ -85,7 +85,7 @@ namespace ClassicUO.Game.Managers
         public byte CurrentWalkSequence;
         public long LastStepRequestTime;
         public ushort NewPlayerZ;
-        public bool ResendPacketSended;
+        public bool ResendPacketResync;
         public StepInfo[] StepInfos = new StepInfo[Constants.MAX_STEP_COUNT]
         {
             new StepInfo(), new StepInfo(), new StepInfo(),
@@ -163,10 +163,10 @@ namespace ClassicUO.Game.Managers
 
             if (isBadStep)
             {
-                if (!ResendPacketSended)
+                if (!ResendPacketResync)
                 {
                     NetClient.Socket.Send(new PResend());
-                    ResendPacketSended = true;
+                    ResendPacketResync = true;
                 }
 
                 WalkingFailed = true;
@@ -182,7 +182,7 @@ namespace ClassicUO.Game.Managers
             WalkSequence = 0;
             CurrentWalkSequence = 0;
             WalkingFailed = false;
-            ResendPacketSended = false;
+            ResendPacketResync = false;
             LastStepRequestTime = 0;
         }
     }

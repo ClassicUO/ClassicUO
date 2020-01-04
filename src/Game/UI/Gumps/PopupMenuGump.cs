@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Gumps
             //ControlInfo.IsModal = true;
             //ControlInfo.ModalClickOutsideAreaClosesThisControl = true;
             CanMove = false;
-
+            CanCloseWithRightClick = true;
             ResizePic pic = new ResizePic(0x0A3C)
             {
                 Alpha = 0.25f

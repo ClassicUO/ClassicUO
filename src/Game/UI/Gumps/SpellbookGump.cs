@@ -89,6 +89,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             AcceptMouseInput = false;
+            CanCloseWithRightClick = true;
         }
 
         public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SPELLBOOK;
@@ -110,7 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
                 IsMinimized = reader.ReadBoolean();
             }
 
-            CUOEnviroment.Client.GetScene<GameScene>().DoubleClickDelayed(reader.ReadUInt32());
+            Client.Game.GetScene<GameScene>().DoubleClickDelayed(reader.ReadUInt32());
 
             if (Profile.GumpsVersion >= 3)
             {
@@ -129,7 +130,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Restore(XmlElement xml)
         {
             base.Restore(xml);
-            CUOEnviroment.Client.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
+            Client.Game.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
             Dispose();
         }
 
@@ -181,7 +182,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Update();
 
-            CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
+            Client.Game.Scene.Audio.PlaySound(0x0055);
         }
 
 
@@ -212,7 +213,7 @@ namespace ClassicUO.Game.UI.Gumps
                 item.Items.Removed -= ItemsOnRemoved;
             }
 
-            CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
+            Client.Game.Scene.Audio.PlaySound(0x0055);
             UIManager.SavePosition(LocalSerial, Location);
             base.Dispose();
         }
@@ -983,7 +984,7 @@ namespace ClassicUO.Game.UI.Gumps
             _pageCornerLeft.Page = _dataBox.ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = _dataBox.ActivePage != _maxPage ? 0 : int.MaxValue;
 
-            CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
+            Client.Game.Scene.Audio.PlaySound(0x0055);
         }
 
 

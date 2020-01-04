@@ -104,6 +104,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client.cs" />
+    <Compile Include="ClientException.cs" />
     <Compile Include="Configuration\Profile.cs" />
     <Compile Include="Configuration\ProfileManager.cs" />
     <Compile Include="CUOEnviroment.cs" />
@@ -116,6 +118,7 @@
     <Compile Include="Game\Data\CharacterCreationValues.cs" />
     <Compile Include="Game\Data\CharacterSpeedType.cs" />
     <Compile Include="Game\Data\ClientFeatures.cs" />
+    <Compile Include="Game\Data\ContainerData.cs" />
     <Compile Include="Game\Data\CustomHouse.cs" />
     <Compile Include="Game\Data\EntityFlags.cs" />
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
@@ -128,7 +131,7 @@
     <Compile Include="Game\Data\PopupMenuItem.cs" />
     <Compile Include="Game\Data\PromptData.cs" />
     <Compile Include="Game\Data\RaceType.cs" />
-    <Compile Include="Game\Data\Seasons.cs" />
+    <Compile Include="Game\Managers\Seasons.cs" />
     <Compile Include="Game\Data\ServerErrorMessages.cs" />
     <Compile Include="Game\Data\SpellsMastery.cs" />
     <Compile Include="Game\Data\SpellsBushido.cs" />
@@ -305,7 +308,7 @@
     <Compile Include="Renderer\Batcher2D.cs" />
     <Compile Include="Renderer\Fonts.cs" />
     <Compile Include="Renderer\SpriteFont.cs" />
-    <Compile Include="Renderer\Textures.cs" />
+    <Compile Include="Renderer\Texture2DCache.cs" />
     <Compile Include="Utility\Collections\CollectionHelper.cs" />
     <Compile Include="Utility\Coroutines\Coroutine.cs" />
     <Compile Include="Utility\Coroutines\CoroutineManager.cs" />
@@ -327,7 +330,7 @@
     <Compile Include="Game\UI\Gumps\BuffGump.cs" />
     <Compile Include="Game\UI\Controls\Combobox.cs" />
     <Compile Include="Game\UI\Controls\HoveredLabel.cs" />
-    <Compile Include="Game\UI\Gumps\InfoGump.cs" />
+    <Compile Include="Game\UI\Gumps\InspectorGump.cs" />
     <Compile Include="Game\UI\Gumps\MessageBoxGump.cs" />
     <Compile Include="Game\UI\Gumps\ShopGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CharCreationGump.cs" />
@@ -363,10 +366,9 @@
     <Compile Include="Configuration\ConfigurationResolver.cs" />
     <Compile Include="Configuration\Settings.cs" />
     <Compile Include="Game\Chat.cs" />
-    <Compile Include="Game\Data\ContainerManager.cs" />
+    <Compile Include="Game\Managers\ContainerManager.cs" />
     <Compile Include="Game\Data\Direction.cs" />
     <Compile Include="Game\Data\LockedFeatures.cs" />
-    <Compile Include="Game\Data\FeaturesFlags.cs" />
     <Compile Include="Game\Data\MovementSpeed.cs" />
     <Compile Include="Game\Data\Reagents.cs" />
     <Compile Include="Game\Data\Skill.cs" />
@@ -451,7 +453,7 @@
     <Compile Include="Game\UI\TextEntry.cs" />
     <Compile Include="Interfaces\IDrawable.cs" />
     <Compile Include="Interfaces\IUpdateable.cs" />
-    <Compile Include="IO\ClientVersions.cs" />
+    <Compile Include="Game\Data\ClientVersion.cs" />
     <Compile Include="IO\DataReader.cs" />
     <Compile Include="IO\FileManager.cs" />
     <Compile Include="IO\Resources\Verdata.cs" />

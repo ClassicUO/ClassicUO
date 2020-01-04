@@ -26,12 +26,12 @@ using System.IO;
 using System.Xml;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
@@ -59,6 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             LocalSerial = entity.Serial;
+            CanCloseWithRightClick = true;
             _name = entity.Name;
             _isDead = entity is Mobile mm && mm.IsDead;
 
@@ -99,7 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             var entity = World.Get(LocalSerial);
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_200 && World.InGame && entity != null)
+            if (Client.Version >= ClientVersion.CV_200 && World.InGame && entity != null)
                 NetClient.Socket.Send(new PCloseStatusBarGump(entity));
 
             if (SelectedObject.HealthbarObject == entity && entity != null)
@@ -271,6 +272,19 @@ namespace ClassicUO.Game.UI.Gumps
                 SelectedObject.Object = null;
             }
         }
+
+        protected bool CheckIfAnchoredElseDispose()
+        {
+            if (UIManager.AnchorManager[this] == null && (this.LocalSerial != World.Player))
+            {
+                Dispose();
+
+                return true;
+            }
+
+            return false;
+        }
+        
     }
 
     internal class HealthBarGumpCustom : BaseHealthBarGump
@@ -322,12 +336,12 @@ namespace ClassicUO.Game.UI.Gumps
         private static Color HPB_COLOR_DRAW_BLUE = Color.DodgerBlue;
         private static Color HPB_COLOR_DRAW_BLACK = Color.Black;
 
-        private static readonly Texture2D HPB_COLOR_BLUE = Textures.GetTexture(Color.DodgerBlue);
-        private static readonly Texture2D HPB_COLOR_GRAY = Textures.GetTexture(Color.Gray);
-        private static readonly Texture2D HPB_COLOR_RED = Textures.GetTexture(Color.Red);
-        private static readonly Texture2D HPB_COLOR_YELLOW = Textures.GetTexture(Color.Orange);
-        private static readonly Texture2D HPB_COLOR_POISON = Textures.GetTexture(Color.LimeGreen);
-        private static readonly Texture2D HPB_COLOR_BLACK = Textures.GetTexture(Color.Black);
+        private static readonly Texture2D HPB_COLOR_BLUE = Texture2DCache.GetTexture(Color.DodgerBlue);
+        private static readonly Texture2D HPB_COLOR_GRAY = Texture2DCache.GetTexture(Color.Gray);
+        private static readonly Texture2D HPB_COLOR_RED = Texture2DCache.GetTexture(Color.Red);
+        private static readonly Texture2D HPB_COLOR_YELLOW = Texture2DCache.GetTexture(Color.Orange);
+        private static readonly Texture2D HPB_COLOR_POISON = Texture2DCache.GetTexture(Color.LimeGreen);
+        private static readonly Texture2D HPB_COLOR_BLACK = Texture2DCache.GetTexture(Color.Black);
 
         public HealthBarGumpCustom(Entity entity) : base(entity)
         {
@@ -358,6 +372,7 @@ namespace ClassicUO.Game.UI.Gumps
             Initialize();
         }
 
+
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
@@ -378,10 +393,8 @@ namespace ClassicUO.Game.UI.Gumps
                                                     ProfileManager.Current.CloseHealthBarType == 2 && World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
                 {
                     //### KEEPS PARTY BAR ACTIVE WHEN PARTY MEMBER DIES & MOBILEBAR CLOSE SELECTED ###//
-                    if (!inparty)
+                    if (!inparty && CheckIfAnchoredElseDispose())
                     {
-                        Dispose();
-
                         return;
                     }
                     //### KEEPS PARTY BAR ACTIVE WHEN PARTY MEMBER DIES & MOBILEBAR CLOSE SELECTED ###//
@@ -442,10 +455,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!_isDead && entity != World.Player && (mobile != null && mobile.IsDead) && ProfileManager.Current.CloseHealthBarType == 2) // is dead
                 {
-                    if (!inparty)
+                    if (!inparty && CheckIfAnchoredElseDispose())
                     {
-                        Dispose();
-
                         return;
                     }
                 }
@@ -767,7 +778,7 @@ namespace ClassicUO.Game.UI.Gumps
             public LineCHB(int x, int y, int w, int h, uint color) : base(x, y, w, h, color)
             {
                 LineWidth = w;
-                LineColor = Textures.GetTexture(new Color() { PackedValue = color });
+                LineColor = Texture2DCache.GetTexture(new Color() { PackedValue = color });
 
                 CanMove = true;
             }
@@ -824,10 +835,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public HealthBarGump(Entity entity) : this()
         {
-            if (entity == null)
+            if (entity == null && CheckIfAnchoredElseDispose())
             {
-                Dispose();
-
                 return;
             }
 
@@ -1008,9 +1017,8 @@ namespace ClassicUO.Game.UI.Gumps
                 if (LocalSerial != World.Player && (ProfileManager.Current.CloseHealthBarType == 1 ||
                                                     ProfileManager.Current.CloseHealthBarType == 2 && World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
                 {
-                    Dispose();
-
-                    return;
+                    if (CheckIfAnchoredElseDispose())
+                        return;
                 }
 
                 if (_isDead)
@@ -1073,9 +1081,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!_isDead && entity != World.Player && (mobile != null && mobile.IsDead) && ProfileManager.Current.CloseHealthBarType == 2) // is dead
                 {
-                    Dispose();
-
-                    return;
+                    if (CheckIfAnchoredElseDispose())
+                        return;
                 }
 
                 if (entity is Mobile mm && _canChangeName != mm.IsRenamable)
@@ -1251,7 +1258,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             var entity = World.Get(LocalSerial);
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_200 && World.InGame && entity != null)
+            if (Client.Version >= ClientVersion.CV_200 && World.InGame && entity != null)
                 NetClient.Socket.Send(new PCloseStatusBarGump(entity));
 
             if (SelectedObject.HealthbarObject == entity && entity != null)

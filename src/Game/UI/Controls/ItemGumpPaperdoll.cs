@@ -22,7 +22,7 @@
 #endregion
 
 using System;
-
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -117,7 +117,7 @@ namespace ClassicUO.Game.UI.Controls
             ushort id = Item.ItemData.AnimID;
             ushort mobGraphic = Mobile.Graphic;
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_7000 &&
+            if (Client.Version >= ClientVersion.CV_7000 &&
                 id == 0x03CA       // graphic for dead shroud
                 && Mobile != null && (Mobile.Graphic == 0x02B7 || Mobile.Graphic == 0x02B6)) // dead gargoyle graphics
             {
@@ -165,7 +165,7 @@ namespace ClassicUO.Game.UI.Controls
 
         //    if (button == MouseButton.Left)
         //    {
-        //        GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+        //        GameScene gs = Client.Client.GetScene<GameScene>();
 
         //        if (TargetManager.IsTargeting)
         //        {

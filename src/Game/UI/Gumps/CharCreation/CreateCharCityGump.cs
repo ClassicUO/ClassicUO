@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -79,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             CityInfo city;
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_70130)
+            if (Client.Version >= ClientVersion.CV_70130)
             {
                 city = scene.GetCity(0);
             }
@@ -114,7 +115,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             };
 
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_70130)
+            if (Client.Version >= ClientVersion.CV_70130)
             {
                 Add(new GumpPic(62, 54, (ushort) (0x15D9 + map), 0));
                 Add(new GumpPic(57, 49, 0x15DF, 0));
@@ -208,7 +209,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private void SetFacet(uint index)
         {
-            if (UOFileManager.ClientVersion < ClientVersions.CV_70130)
+            if (Client.Version < ClientVersion.CV_70130)
                 return;
 
             if (index >= _cityNames.Length)

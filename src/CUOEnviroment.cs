@@ -25,7 +25,6 @@ namespace ClassicUO
         public static readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version;
         public static readonly string ExecutablePath = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
 
-        public static GameController Client;
         public static bool DisableUpdateWindowCaption;
     }
 }

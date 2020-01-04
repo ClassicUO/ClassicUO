@@ -156,7 +156,7 @@ namespace ClassicUO.Game
 
             Circle.Radius = radius;
 
-            Circle._texture = new Texture2D(CUOEnviroment.Client.GraphicsDevice, Circle._width, Circle.Height);
+            Circle._texture = new Texture2D(Client.Game.GraphicsDevice, Circle._width, Circle.Height);
             Circle._texture.SetData(pixels);
 
             return Circle;

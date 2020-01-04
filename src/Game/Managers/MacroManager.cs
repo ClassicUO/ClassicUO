@@ -28,6 +28,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
@@ -591,8 +592,8 @@ namespace ClassicUO.Game.Managers
 
                                     if (party == null)
                                     {
-                                        int x = CUOEnviroment.Client.Window.ClientBounds.Width / 2 - 272;
-                                        int y = CUOEnviroment.Client.Window.ClientBounds.Height / 2 - 240;
+                                        int x = Client.Game.Window.ClientBounds.Width / 2 - 272;
+                                        int y = Client.Game.Window.ClientBounds.Height / 2 - 240;
                                         UIManager.Add(new PartyGump(x, y, World.Party.CanLoot));
                                     }
                                     else
@@ -874,7 +875,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.QuitGame:
-                    CUOEnviroment.Client.GetScene<GameScene>()?.RequestQuitGame();
+                    Client.Game.GetScene<GameScene>()?.RequestQuitGame();
 
                     break;
 
@@ -945,7 +946,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.ArmDisarm:
                     int handIndex = 1 - (macro.SubCode - MacroSubType.LeftHand);
-                    GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+                    GameScene gs = Client.Game.GetScene<GameScene>();
 
                     if (handIndex < 0 || handIndex > 1 || gs.IsHoldingItem)
                         break;
@@ -1110,7 +1111,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.BandageSelf:
                 case MacroType.BandageTarget:
 
-                    if (UOFileManager.ClientVersion < ClientVersions.CV_5020 || ProfileManager.Current.BandageSelfOld)
+                    if (Client.Version < ClientVersion.CV_5020 || ProfileManager.Current.BandageSelfOld)
                     {
                         if (WaitingBandageTarget)
                         {
@@ -1275,7 +1276,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.DefaultScale:
-                    CUOEnviroment.Client.GetScene<GameScene>().Scale = 1;
+                    Client.Game.GetScene<GameScene>().Scale = 1;
 
                     break;
 

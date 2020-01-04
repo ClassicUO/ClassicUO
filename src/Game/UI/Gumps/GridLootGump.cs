@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             AcceptMouseInput = true;
             WantUpdateSize = false;
-
+            CanCloseWithRightClick = true;
             _background = new AlphaBlendControl();
             _background.Width = 300;
             _background.Height = 400;
@@ -230,7 +230,7 @@ namespace ClassicUO.Game.UI.Gumps
             ResetHueVector();
             base.Draw(batcher, x, y);
             ResetHueVector();
-            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
+            batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
 
             return true;
         }
@@ -333,12 +333,12 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Draw(batcher, x, y);
                 ResetHueVector();
 
-                batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y + 15, Width, Height - 15, ref _hueVector);
+                batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x, y + 15, Width, Height - 15, ref _hueVector);
 
                 if (_texture.MouseIsOver)
                 {
                     _hueVector.Z = 0.7f;
-                    batcher.Draw2D(Textures.GetTexture(Color.Yellow), x + 1, y + 15, Width - 1, Height - 15, ref _hueVector);
+                    batcher.Draw2D(Texture2DCache.GetTexture(Color.Yellow), x + 1, y + 15, Width - 1, Height - 15, ref _hueVector);
                     _hueVector.Z = 0;
                 }
 

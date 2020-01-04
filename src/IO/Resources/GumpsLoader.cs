@@ -45,7 +45,7 @@ namespace ClassicUO.IO.Resources
                 {
                     _file = new UOFileUop(path, "build/gumpartlegacymul/{0:D8}.tga", true);
                     Entries = new UOFileIndex[Constants.MAX_GUMP_DATA_INDEX_COUNT];
-                    UOFileManager.UseUOPGumps = true;
+                    Client.UseUOPGumps = true;
                 }
                 else
                 {
@@ -56,7 +56,7 @@ namespace ClassicUO.IO.Resources
                     {
                         _file = new UOFileMul(path, pathidx, Constants.MAX_GUMP_DATA_INDEX_COUNT, 12);
                     }
-                    UOFileManager.UseUOPGumps = false;
+                    Client.UseUOPGumps = false;
                 }
 
                 _file.FillEntries(ref Entries);

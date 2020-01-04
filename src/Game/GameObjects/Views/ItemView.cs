@@ -155,7 +155,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (ItemData.IsLight)
             {
-                CUOEnviroment.Client.GetScene<GameScene>()
+                Client.Game.GetScene<GameScene>()
                       .AddLight(this, this, posX + 22, posY + 22);
             }
 
@@ -245,16 +245,16 @@ namespace ClassicUO.Game.GameObjects
             byte animGroup = UOFileManager.Animations.AnimGroup;
             ushort newHue = 0;
 
-            var gr = layer == Layer.Invalid
-                         ? UOFileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue)
-                         : UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
+            AnimationGroup gr = layer == Layer.Invalid
+                                    ? UOFileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue)
+                                    : UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
 
             UOFileManager.Animations.AnimID = graphic;
 
             if (color == 0)
                 color = newHue;
 
-            ref var direction = ref gr.Direction[UOFileManager.Animations.Direction];
+            var direction = gr.Direction[UOFileManager.Animations.Direction];
 
             if (direction == null)
                 return;

@@ -42,8 +42,8 @@ namespace ClassicUO.Game.Managers
         private static readonly Texture2D _edge, _back; 
         static HealthLinesManager()
         {
-            _edge = Textures.GetTexture(Color.Black);
-            _back = Textures.GetTexture(Color.Red);
+            _edge = Texture2DCache.GetTexture(Color.Black);
+            _back = Texture2DCache.GetTexture(Color.Red);
         }
 
 
@@ -190,7 +190,7 @@ namespace ClassicUO.Game.Managers
                     else
                         color = Color.CornflowerBlue;
 
-                    batcher.Draw2D(Textures.GetTexture(color), x, y, max, BAR_HEIGHT, ref _vectorHue);
+                    batcher.Draw2D(Texture2DCache.GetTexture(color), x, y, max, BAR_HEIGHT, ref _vectorHue);
                 }
 
                

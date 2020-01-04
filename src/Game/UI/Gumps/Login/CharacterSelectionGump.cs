@@ -25,6 +25,7 @@ using System;
 using System.Linq;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -50,11 +51,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
             int yBonus = 0;
             int listTitleY = 106;
 
-            LoginScene loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
+            LoginScene loginScene = Client.Game.GetScene<LoginScene>();
             var lastSelected = loginScene.Characters.FirstOrDefault(o => o == Settings.GlobalSettings.LastCharacterName);
 
-            if ((UOFileManager.ClientVersion >= ClientVersions.CV_6040) ||
-                (UOFileManager.ClientVersion >= ClientVersions.CV_5020 && loginScene.Characters.Length > 5))
+            if ((Client.Version >= ClientVersion.CV_6040) ||
+                (Client.Version >= ClientVersion.CV_5020 && loginScene.Characters.Length > 5))
             {
                 listTitleY = 96;
                 yOffset = 125;
@@ -127,7 +128,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            LoginScene loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
+            LoginScene loginScene = Client.Game.GetScene<LoginScene>();
 
             switch ((Buttons) buttonID)
             {
@@ -186,7 +187,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         private void LoginCharacter(uint index)
         {
-            LoginScene loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
+            LoginScene loginScene = Client.Game.GetScene<LoginScene>();
 
             if (loginScene.Characters.Length > index && !string.IsNullOrEmpty(loginScene.Characters[index]))
                 loginScene.SelectCharacter(index);

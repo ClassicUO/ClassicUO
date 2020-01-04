@@ -101,19 +101,19 @@ namespace ClassicUO.Game.UI
 
             if (x < 0)
                 x = 0;
-            else if (x > CUOEnviroment.Client.Window.ClientBounds.Width - (_renderedText.Width + 8))
-                x = CUOEnviroment.Client.Window.ClientBounds.Width - (_renderedText.Width + 8);
+            else if (x > Client.Game.Window.ClientBounds.Width - (_renderedText.Width + 8))
+                x = Client.Game.Window.ClientBounds.Width - (_renderedText.Width + 8);
 
             if (y < 0)
                 y = 0;
-            else if (y > CUOEnviroment.Client.Window.ClientBounds.Height - (_renderedText.Height + 8))
-                y = CUOEnviroment.Client.Window.ClientBounds.Height - (_renderedText.Height + 8);
+            else if (y > Client.Game.Window.ClientBounds.Height - (_renderedText.Height + 8))
+                y = Client.Game.Window.ClientBounds.Height - (_renderedText.Height + 8);
 
             Vector3 hue = Vector3.Zero;
             ShaderHuesTraslator.GetHueVector(ref hue, 0, false, 0.3f, true);
 
-            batcher.Draw2D(Textures.GetTexture(Color.Black), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue);
-            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue);
+            batcher.Draw2D(Texture2DCache.GetTexture(Color.Black), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue);
+            batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue);
 
             return _renderedText.Draw(batcher, x, y);
         }

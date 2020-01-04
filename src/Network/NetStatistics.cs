@@ -34,16 +34,16 @@ namespace ClassicUO.Network
 
         private readonly RenderedText _renderedText = RenderedText.Create(String.Empty, style: FontStyle.BlackBorder);
 
-        private uint _currentTotalBytesSended, _currentTotalByteReceived, _currentTotalPacketsSended, _currentTotalPacketsReceived;
-        private uint _lastTotalBytesSended, _lastTotalByteReceived, _lastTotalPacketsSended, _lastTotalPacketsReceived;
+        private uint _currentTotalBytesSent, _currentTotalByteReceived, _currentTotalPacketsSent, _currentTotalPacketsReceived;
+        private uint _lastTotalBytesSent, _lastTotalByteReceived, _lastTotalPacketsSent, _lastTotalPacketsReceived;
 
         public DateTime ConnectedFrom { get; set; }
 
-        public uint TotalBytesSended { get; set; }
+        public uint TotalBytesSent { get; set; }
 
         public uint TotalBytesReceived { get; set; }
 
-        public uint TotalPacketsSended { get; set; }
+        public uint TotalPacketsSent { get; set; }
 
         public uint TotalPacketsReceived { get; set; }
 
@@ -75,21 +75,21 @@ namespace ClassicUO.Network
         public void Reset()
         {
             ConnectedFrom = DateTime.MinValue;
-            _currentTotalBytesSended = _currentTotalByteReceived = _currentTotalPacketsSended = _currentTotalPacketsReceived = 0;
-            _lastTotalBytesSended = _lastTotalByteReceived = _lastTotalPacketsSended = _lastTotalPacketsReceived = 0;
-            TotalBytesReceived = TotalBytesSended = TotalPacketsReceived = TotalPacketsSended = 0;
+            _currentTotalBytesSent = _currentTotalByteReceived = _currentTotalPacketsSent = _currentTotalPacketsReceived = 0;
+            _lastTotalBytesSent = _lastTotalByteReceived = _lastTotalPacketsSent = _lastTotalPacketsReceived = 0;
+            TotalBytesReceived = TotalBytesSent = TotalPacketsReceived = TotalPacketsSent = 0;
         }
 
         public void Update()
         {
             _currentTotalByteReceived = _lastTotalByteReceived;
-            _currentTotalBytesSended = _lastTotalBytesSended;
+            _currentTotalBytesSent = _lastTotalBytesSent;
             _currentTotalPacketsReceived = _lastTotalPacketsReceived;
-            _currentTotalPacketsSended = _lastTotalPacketsSended;
+            _currentTotalPacketsSent = _lastTotalPacketsSent;
             _lastTotalByteReceived = TotalBytesReceived;
-            _lastTotalBytesSended = TotalBytesSended;
+            _lastTotalBytesSent = TotalBytesSent;
             _lastTotalPacketsReceived = TotalPacketsReceived;
-            _lastTotalPacketsSended = TotalPacketsSended;
+            _lastTotalPacketsSent = TotalPacketsSent;
 
             ushort hue;
 
@@ -103,12 +103,12 @@ namespace ClassicUO.Network
                 hue = 0x20; // red
 
             _renderedText.Hue = hue;
-            _renderedText.Text = $"Ping: {Ping} ms\nIn: {GetSizeAdaptive(_lastTotalByteReceived - _currentTotalByteReceived)}   Out: {GetSizeAdaptive(_lastTotalBytesSended - _currentTotalBytesSended)}";
+            _renderedText.Text = $"Ping: {Ping} ms\nIn: {GetSizeAdaptive(_lastTotalByteReceived - _currentTotalByteReceived)}   Out: {GetSizeAdaptive(_lastTotalBytesSent - _currentTotalBytesSent)}";
         }
 
         public override string ToString()
         {
-            return $"Packets:\n >> {_lastTotalPacketsReceived - _currentTotalPacketsReceived}\n << {_lastTotalPacketsSended - _currentTotalPacketsSended}\nBytes:\n >> {GetSizeAdaptive(_lastTotalByteReceived - _currentTotalByteReceived)}\n << {GetSizeAdaptive(_lastTotalBytesSended - _currentTotalBytesSended)}";
+            return $"Packets:\n >> {_lastTotalPacketsReceived - _currentTotalPacketsReceived}\n << {_lastTotalPacketsSent - _currentTotalPacketsSent}\nBytes:\n >> {GetSizeAdaptive(_lastTotalByteReceived - _currentTotalByteReceived)}\n << {GetSizeAdaptive(_lastTotalBytesSent - _currentTotalBytesSent)}";
         }
 
         public static string GetSizeAdaptive(long bytes)

@@ -26,7 +26,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-
+using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -137,7 +137,7 @@ namespace ClassicUO.IO.Resources
 
                 int mapblocksize = UnsafeMemoryManager.SizeOf<MapBlock>();
 
-                if (_filesMap[0].Length / mapblocksize == 393216 || UOFileManager.ClientVersion < ClientVersions.CV_4011D)
+                if (_filesMap[0].Length / mapblocksize == 393216 || Client.Version < ClientVersion.CV_4011D)
                     MapsDefaultSize[0, 0] = MapsDefaultSize[1, 0] = 6144;
 
                 //for (int i = 0; i < MAPS_COUNT; i++)

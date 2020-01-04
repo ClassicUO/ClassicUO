@@ -309,6 +309,7 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = true;
                 WantUpdateSize = false;
                 CanMove = true;
+                CanCloseWithRightClick = false;
 
                 X = x;
                 Y = y;
@@ -317,6 +318,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _image = new ImageWithText();
                 Add(_image);
+
+                ContextMenu = new ContextMenuControl();
+                ContextMenu.Add("Use object (Double click)", Use);
+                ContextMenu.Add("Remove (ALT + Right click)", RemoveItem);
             }
 
             public ushort Graphic => _graphic;
@@ -333,11 +338,30 @@ namespace ClassicUO.Game.UI.Gumps
                 _hue = hue;
             }
 
+            public void RemoveItem()
+            {
+                _image?.ChangeGraphic(0, 0);
+                _amount = 0;
+                _graphic = 0;
+            }
+
+            public void Use()
+            {
+                if (_graphic == 0)
+                    return;
+
+                Item backpack = World.Player.Equipment[(int) Layer.Backpack];
+                Item item = backpack.FindItem(_graphic, _hue);
+
+                if (item != null)
+                    GameActions.DoubleClick(item);
+            }
+
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
             {
                 if (button == MouseButtonType.Left)
                 {
-                    GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+                    GameScene gs = Client.Game.GetScene<GameScene>();
 
                     if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
                         return;
@@ -353,21 +377,17 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (button == MouseButtonType.Right && Keyboard.Alt && _graphic != 0)
                 {
-                    _image.ChangeGraphic(0, 0);
-                    _amount = 0;
-                    _graphic = 0;
+                    RemoveItem();
                 }
+                else if (_graphic != 0)
+                    base.OnMouseUp(x, y, button);
             }
 
             protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
             {
                 if (button == MouseButtonType.Left)
                 {
-                    Item backpack = World.Player.Equipment[(int)Layer.Backpack];
-                    Item item = backpack.FindItem(_graphic, _hue);
-
-                    if (item != null)
-                        GameActions.DoubleClick(item);
+                    Use();
                 }
 
                 return true;
@@ -422,7 +442,7 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Draw(batcher, x, y);
 
 
-                Texture2D color = Textures.GetTexture(ProfileManager.Current.CounterBarHighlightOnAmount &&
+                Texture2D color = Texture2DCache.GetTexture(MouseIsOver ? Color.Yellow : ProfileManager.Current.CounterBarHighlightOnAmount &&
                                                       _amount < ProfileManager.Current.CounterBarHighlightAmount && _graphic != 0 ? Color.Red : Color.Gray);
                 ResetHueVector();
                 batcher.DrawRectangle(color, x, y, Width, Height, ref _hueVector);
@@ -440,7 +460,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     CanMove = true;
                     WantUpdateSize = true;
-
+                    AcceptMouseInput = false;
                     _textureControl = new TextureControl()
                     {
                         ScaleTexture = true,

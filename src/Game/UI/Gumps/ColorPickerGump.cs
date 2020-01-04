@@ -40,6 +40,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public ColorPickerGump(uint serial, ushort graphic, int x, int y, Action<ushort> okClicked) : base(serial, 0)
         {
+            CanCloseWithRightClick = true;
             _graphic = graphic;
             CanMove = true;
             AcceptMouseInput = false;

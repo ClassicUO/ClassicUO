@@ -41,6 +41,7 @@ using Microsoft.Xna.Framework.Input;
 using SDL2;
 
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
+using Keyboard = ClassicUO.Input.Keyboard;
 using Mouse = ClassicUO.Input.Mouse;
 
 namespace ClassicUO.Game.UI.Controls
@@ -200,6 +201,8 @@ namespace ClassicUO.Game.UI.Controls
         public int ScreenCoordinateX => ParentX + X;
 
         public int ScreenCoordinateY => ParentY + Y;
+
+        public ContextMenuControl ContextMenu { get; set; }
 
         public Control Parent
         {
@@ -385,7 +388,7 @@ namespace ClassicUO.Game.UI.Controls
                 ResetHueVector();
 
                 if (Settings.GlobalSettings.Debug) 
-                    batcher.DrawRectangle(Textures.GetTexture(Color.Green), x, y, Width, Height, ref _hueVector);
+                    batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Green), x, y, Width, Height, ref _hueVector);
             }
         }
 
@@ -595,14 +598,6 @@ namespace ClassicUO.Game.UI.Controls
             MouseExit.Raise(new MouseEventArgs(x, y), this);
         }
 
-        //public void InvokeMouseClick(Point position, MouseButton button)
-        //{
-        //    int x = position.X - X - ParentX;
-        //    int y = position.Y - Y - ParentY;
-        //    OnMouseClick(x, y, button);
-        //    MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
-        //}
-
         public bool InvokeMouseDoubleClick(Point position, MouseButtonType button)
         {
             int x = position.X - X - ParentX;
@@ -670,6 +665,11 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             Parent?.OnMouseUp(X + x, Y + y, button);
+
+            if (button == MouseButtonType.Right && !IsDisposed && IsInitialized && !CanCloseWithRightClick && !Keyboard.Alt && !Keyboard.Shift && !Keyboard.Ctrl && ContextMenu != null && !ContextMenu.IsDisposed)
+            {
+                ContextMenu.Show();
+            }
         }
 
         protected virtual void OnMouseWheel(MouseEventType delta)
@@ -679,14 +679,6 @@ namespace ClassicUO.Game.UI.Controls
 
         protected virtual void OnMouseOver(int x, int y)
         {
-            //if (_mouseIsDown && !_attempToDrag 
-            //                 && (Math.Abs(Mouse.LDroppedOffset.X) > _minimumDistanceForDrag 
-            //                     || Math.Abs(Mouse.LDroppedOffset.Y) > _minimumDistanceForDrag))
-            //{
-            //    InvokeDragBegin(new Point(x, y));
-            //    _attempToDrag = true;
-            //}
-
             if (_mouseIsDown && !_attempToDrag)
             {
                 Point offset = Mouse.LDroppedOffset;
@@ -711,11 +703,6 @@ namespace ClassicUO.Game.UI.Controls
         {
             _attempToDrag = false;
         }
-
-        //protected virtual void OnMouseClick(int x, int y, MouseButton button)
-        //{
-        //    Parent?.OnMouseClick(X + x, Y + y, button);
-        //}
 
         protected virtual bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
@@ -852,6 +839,8 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             Children.Clear();
+
+            ContextMenu?.Dispose();
 
             IsDisposed = true;
         }

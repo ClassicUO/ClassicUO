@@ -183,7 +183,7 @@ namespace ClassicUO.Game
             }
 
             if (ProfileManager.Current.EnableCombatMusic)
-                CUOEnviroment.Client.Scene.Audio.PlayMusic(music);
+                Client.Game.Scene.Audio.PlayMusic(music);
         }
 
 

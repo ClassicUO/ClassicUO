@@ -21,6 +21,7 @@
 
 #endregion
 
+using ClassicUO.Data;
 using ClassicUO.IO;
 
 namespace ClassicUO.Network
@@ -291,9 +292,9 @@ namespace ClassicUO.Network
             return _packetsTable[id];
         }
 
-        public static void AdjustPacketSizeByVersion(ClientVersions version)
+        public static void AdjustPacketSizeByVersion(ClientVersion version)
         {
-            if (version >= ClientVersions.CV_500A)
+            if (version >= ClientVersion.CV_500A)
             {
                 _packetsTable[0x0B] = 0x07;
                 _packetsTable[0x16] = -1;
@@ -306,12 +307,12 @@ namespace ClassicUO.Network
                 _packetsTable[0x31] = 0x01;
             }
 
-            if (version >= ClientVersions.CV_5090)
+            if (version >= ClientVersion.CV_5090)
                 _packetsTable[0xE1] = -1;
             else
                 _packetsTable[0xE1] = 0x09;
 
-            if (version >= ClientVersions.CV_6013)
+            if (version >= ClientVersion.CV_6013)
             {
                 _packetsTable[0xE3] = -1;
                 _packetsTable[0xE6] = 0x05;
@@ -330,7 +331,7 @@ namespace ClassicUO.Network
                 _packetsTable[0xEA] = -1;
             }
 
-            if (version >= ClientVersions.CV_6017)
+            if (version >= ClientVersion.CV_6017)
             {
                 _packetsTable[0x08] = 0x0F;
                 _packetsTable[0x25] = 0x15;
@@ -341,7 +342,7 @@ namespace ClassicUO.Network
                 _packetsTable[0x25] = 0x14;
             }
 
-            if (version >= ClientVersions.CV_6060)
+            if (version >= ClientVersion.CV_6060)
             {
                 _packetsTable[0xEE] = 0x2000;
                 _packetsTable[0xEF] = 0x2000;
@@ -354,12 +355,12 @@ namespace ClassicUO.Network
                 _packetsTable[0xF1] = -1;
             }
 
-            if (version >= ClientVersions.CV_60142)
+            if (version >= ClientVersion.CV_60142)
                 _packetsTable[0xB9] = 0x05;
             else
                 _packetsTable[0xB9] = 0x03;
 
-            if (version >= ClientVersions.CV_7000)
+            if (version >= ClientVersion.CV_7000)
             {
                 _packetsTable[0xEE] = 0x0A; //0x2000;
                 _packetsTable[0xEF] = 0x15; //0x2000;
@@ -370,7 +371,7 @@ namespace ClassicUO.Network
                 _packetsTable[0xEF] = 0x15;
             }
 
-            if (version >= ClientVersions.CV_7090)
+            if (version >= ClientVersion.CV_7090)
             {
                 _packetsTable[0x24] = 0x09;
                 _packetsTable[0x99] = 0x1E;
@@ -389,12 +390,12 @@ namespace ClassicUO.Network
                 _packetsTable[0xF2] = -1;
             }
 
-            if (version >= ClientVersions.CV_70180)
+            if (version >= ClientVersion.CV_70180)
                 _packetsTable[0x00] = 0x6A;
             else
                 _packetsTable[0x00] = 0x68;
 
-            if (version >= ClientVersions.CV_706400)
+            if (version >= ClientVersion.CV_706400)
             {
                 _packetsTable[0xFA] = 0x01;
                 _packetsTable[0xFB] = 0x02;

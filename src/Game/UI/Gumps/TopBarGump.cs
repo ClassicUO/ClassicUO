@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -90,7 +91,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             string[] texts = {"Map", "Paperdoll", "Inventory", "Journal", "Chat", "Help", "World Map", "< ? >", "Debug", "UOStore", "Global Chat"};
 
-            bool hasUOStore = UOFileManager.ClientVersion >= ClientVersions.CV_706400;
+            bool hasUOStore = Client.Version >= ClientVersion.CV_706400;
 
             ResizePic background;
             Add(background = new ResizePic(0x13BE)
@@ -261,7 +262,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.UOStore:
-                    if (UOFileManager.ClientVersion >= ClientVersions.CV_706400)
+                    if (Client.Version >= ClientVersion.CV_706400)
                     {
                         NetClient.Socket.Send(new POpenUOStore());
                     }

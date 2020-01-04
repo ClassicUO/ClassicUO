@@ -22,7 +22,7 @@
 #endregion
 
 using System.Linq;
-
+using ClassicUO.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -142,7 +142,7 @@ namespace ClassicUO.Game.UI.Gumps
             });
             _scrollBar = new ScrollFlag(0, 0, Height, true);
             Add(_scrollBar);
-            bool useUnicode = UOFileManager.ClientVersion >= ClientVersions.CV_305D;
+            bool useUnicode = Client.Version >= ClientVersion.CV_305D;
             byte unicodeFontIndex = 1;
             int unicodeFontHeightOffset = 0;
 
@@ -347,7 +347,7 @@ namespace ClassicUO.Game.UI.Gumps
             LocalSerial = parent;
             Item = serial;
             CanMove = false;
-            bool unicode = UOFileManager.ClientVersion >= ClientVersions.CV_305D;
+            bool unicode = Client.Version >= ClientVersion.CV_305D;
 
             Add(new GumpPic(0, 0, 0x1523, 0));
             Add(new Label(text, unicode, (ushort) (unicode ? 0 : 0x0386), font: (byte) (unicode ? 1 : 9)) {X = Children[Children.Count - 1].Texture.Width + 2});

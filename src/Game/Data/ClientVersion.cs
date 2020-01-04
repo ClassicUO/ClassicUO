@@ -21,9 +21,13 @@
 
 #endregion
 
-namespace ClassicUO.IO
+using System;
+using System.Diagnostics;
+using System.IO;
+
+namespace ClassicUO.Data
 {
-    public enum ClientVersions
+    enum ClientVersion
     {
         CV_OLD = (1 << 24) | (0 << 16) | (0 << 8) | 0, // Original game
         CV_200 = (2 << 24) | (0 << 16) | (0 << 8) | 0, // T2A Introduction. Adds screen dimensions packet
@@ -58,5 +62,98 @@ namespace ClassicUO.IO
         CV_704565 = (7 << 24) | (0 << 16) | (45 << 8) | 65, //
         CV_706400 = (7 << 24) | (0 << 16) | (64 << 8) | 0, // Endless Journey background
         CV_70796 = (7 << 24) | (0 << 16) | (79 << 8) | 6 // Display houses content option
+    }
+
+    static class ClientVersionHelper
+    {
+        public static bool TryParse(string versionText, out ClientVersion version)
+        {
+            if (!string.IsNullOrEmpty(versionText))
+            {
+                versionText = versionText.ToLower();
+
+                string[] buff = versionText.ToLower().Split('.');
+
+                if (buff.Length >= 3)
+                {
+                    int major = int.Parse(buff[0]);
+                    int minor = int.Parse(buff[1]);
+                    int extra = 0;
+
+                    if (!int.TryParse(buff[2], out int build))
+                    {
+                        int index = buff[2].IndexOf('.');
+
+                        if (index != -1)
+                        {
+                            build = int.Parse(buff[2].Substring(0, index));
+                        }
+                        else
+                        {
+                            int i = 0;
+
+                            for (; i < buff[2].Length; i++)
+                            {
+                                if (!char.IsNumber(buff[2][i]))
+                                {
+                                    build = int.Parse(buff[2].Substring(0, i));
+                                    break;
+                                }
+                            }
+
+                            if (i < buff[2].Length)
+                            {
+                                extra = (sbyte) buff[2].Substring(i, buff[2].Length - i)[0];
+
+                                char start = 'a';
+                                index = 0;
+                                while (start != extra && start <= 'z')
+                                {
+                                    start++;
+                                    index++;
+                                }
+
+                                extra = index;
+                            }
+                        }
+                    }
+
+                    if (buff.Length > 3)
+                        extra = int.Parse(buff[3]);
+
+                    version = (ClientVersion) (((major & 0xFF) << 24) | ((minor & 0xFF) << 16) | ((build & 0xFF) << 8) | (extra & 0xFF));
+                    return true;
+                }               
+            }
+
+            version = 0;
+            return false;
+        }
+
+        public static bool TryParseFromFile(string clientpath, out string version)
+        {
+            if (File.Exists(clientpath))
+            {
+                FileInfo fileInfo = new FileInfo(clientpath);
+
+                DirectoryInfo dirInfo = new DirectoryInfo(fileInfo.DirectoryName);
+                if (dirInfo.Exists)
+                {
+                    foreach (var clientInfo in dirInfo.GetFiles("client.exe", SearchOption.TopDirectoryOnly))
+                    {
+                        FileVersionInfo versInfo = FileVersionInfo.GetVersionInfo(clientInfo.FullName);
+                        if (versInfo != null && !string.IsNullOrEmpty(versInfo.FileVersion))
+                        {
+                            version = versInfo.FileVersion.Replace(",", ".").Replace(" ", "").ToLower();
+                            return true;
+                        }
+                    }
+                }
+               
+            }
+
+            version = null;
+            return false;
+        }
     }
 }

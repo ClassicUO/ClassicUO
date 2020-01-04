@@ -55,6 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             CanMove = true;
             AcceptMouseInput = false;
+            CanCloseWithRightClick = true;
 
             GumpPic background = new GumpPic(0, 0, 0x085C, 0);
             Add(background);

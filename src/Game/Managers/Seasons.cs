@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ClassicUO.Game.Data
+namespace ClassicUO.Game.Managers
 {
     enum Seasons
     {
@@ -15,11 +15,11 @@ namespace ClassicUO.Game.Data
         Desolation
     }
 
-    static class Season
+    static class SeasonManager
     {
         private readonly static ushort[] _winterGraphic = new ushort[Constants.MAX_LAND_DATA_INDEX_COUNT];
 
-        static Season()
+        static SeasonManager()
         {
             _winterGraphic[196] = 0x011A;
             _winterGraphic[197] = 0x011B;

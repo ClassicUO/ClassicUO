@@ -22,7 +22,7 @@
 #endregion
 
 using System.Linq;
-
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             CanCloseWithRightClick = false;
         }
 
-        internal static int _skillsCount => UOFileManager.ClientVersion >= ClientVersions.CV_70160 ? 4 : 3;
+        internal static int _skillsCount => Client.Version >= ClientVersion.CV_70160 ? 4 : 3;
 
         public void SetCharacter(PlayerMobile character)
         {

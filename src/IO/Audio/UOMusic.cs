@@ -22,7 +22,7 @@
 #endregion
 
 using System;
-
+using ClassicUO.Data;
 using ClassicUO.IO.Audio.MP3Sharp;
 using ClassicUO.Utility.Logging;
 
@@ -46,7 +46,7 @@ namespace ClassicUO.IO.Audio
             Channels = AudioChannels.Stereo;
         }
 
-        private string Path => System.IO.Path.Combine(UOFileManager.UoFolderPath, UOFileManager.ClientVersion <= ClientVersions.CV_5090 ? $"music/{Name}.mp3" : $"Music/Digital/{Name}.mp3");
+        private string Path => System.IO.Path.Combine(UOFileManager.UoFolderPath, Client.Version > ClientVersion.CV_5090 ? $"Music/Digital/{Name}.mp3" : $"music/{Name}.mp3");
 
         public void Update()
         {

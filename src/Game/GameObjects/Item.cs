@@ -277,7 +277,7 @@ namespace ClassicUO.Game.GameObjects
             UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
 
             if (World.HouseManager.EntityIntoHouse(Serial, World.Player))
-                CUOEnviroment.Client.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+                Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
         }
 
         public void CheckGraphicChange(sbyte animIndex = 0)
@@ -802,7 +802,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (OnGround)
             {
-                var scene = CUOEnviroment.Client.GetScene<GameScene>();
+                var scene = Client.Game.GetScene<GameScene>();
                 float scale = scene?.Scale ?? 1;
 
                 if (Texture != null)
@@ -881,7 +881,7 @@ namespace ClassicUO.Game.GameObjects
                         byte animGroup = UOFileManager.Animations.GetDieGroupIndex(id, UsedLayer);
 
                         ushort hue = 0;
-                        ref var direction = ref UOFileManager.Animations.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
+                        var direction = UOFileManager.Animations.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
                         UOFileManager.Animations.AnimID = id;
                         UOFileManager.Animations.AnimGroup = animGroup;
                         UOFileManager.Animations.Direction = dir;

@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             AcceptMouseInput = false;
             CanMove = true;
-
+            CanCloseWithRightClick = true;
             Width = width;
             Height = height;
 
@@ -207,7 +207,7 @@ namespace ClassicUO.Game.UI.Gumps
                 var c0 = _container[i];
                 var c1 = _container[i + 1];
 
-                batcher.DrawLine(Textures.GetTexture(Color.White), 
+                batcher.DrawLine(Texture2DCache.GetTexture(Color.White), 
                                       c0.ScreenCoordinateX, c0.ScreenCoordinateY, 
                                       c1.ScreenCoordinateX, c1.ScreenCoordinateY,
                                       c0.ScreenCoordinateX + (c1.ScreenCoordinateX - c0.ScreenCoordinateX) / 2, c0.ScreenCoordinateY + (c1.ScreenCoordinateY - c0.ScreenCoordinateY) / 2);

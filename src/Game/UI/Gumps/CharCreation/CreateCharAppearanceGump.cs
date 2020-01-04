@@ -24,7 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -128,7 +128,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }, 1);
             _elfRadio.ValueChanged += Race_ValueChanged;
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_60144)
+            if (Client.Version >= ClientVersion.CV_60144)
             {
                 Add(_gargoyleRadio = new RadioButton(1, 0x0768, 0x0767)
                 {

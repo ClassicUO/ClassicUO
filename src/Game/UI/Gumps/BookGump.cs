@@ -25,7 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using ClassicUO.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         public ushort BookPageCount { get; internal set; }
-        public static bool IsNewBookD4 => UOFileManager.ClientVersion > ClientVersions.CV_200;
+        public static bool IsNewBookD4 => Client.Version > ClientVersion.CV_200;
         public static byte DefaultFont => (byte) (IsNewBookD4 ? 1 : 4);
 
         public string[] BookPages
@@ -100,6 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump(string[] pages)
         {
+            CanCloseWithRightClick = true;
             Add(new GumpPic(0, 0, 0x1FE, 0)
             {
                 CanMove = true
@@ -178,7 +179,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _activated = 1;
 
-            CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
+            Client.Game.Scene.Audio.PlaySound(0x0055);
         }
 
         private void SetActivePage(int page)
@@ -201,7 +202,7 @@ namespace ClassicUO.Game.UI.Gumps
                 m_Forward.IsVisible = true;
             }
 
-            CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
+            Client.Game.Scene.Audio.PlaySound(0x0055);
 
             ActivePage = page;
         }

@@ -43,6 +43,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             AcceptMouseInput = true;
+            CanCloseWithRightClick = true;
         }
 
         public UseAbilityButtonGump(AbilityDefinition def, bool primary) : this()

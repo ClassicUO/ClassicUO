@@ -93,7 +93,7 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
             _hueVector.Z = 0.5f;
             //batcher.SetStencil(_checkerStencil.Value);
-            batcher.Draw2D(Textures.GetTexture(Color.Black), x, y, Width, Height, ref _hueVector);
+            batcher.Draw2D(Texture2DCache.GetTexture(Color.Black), x, y, Width, Height, ref _hueVector);
             //batcher.SetStencil(null);
             return true;
         }

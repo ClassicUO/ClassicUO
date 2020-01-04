@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -266,7 +267,7 @@ namespace ClassicUO.Game.GameObjects
                         else
                         {
                             if (item.ItemData.IsLight)
-                                CUOEnviroment.Client.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
+                                Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
                         }
 
                         _equipConvData = null;
@@ -275,7 +276,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (item.ItemData.IsLight)
                         {
-                            CUOEnviroment.Client.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
+                            Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
                             break;
                         }
                     }
@@ -308,14 +309,14 @@ namespace ClassicUO.Game.GameObjects
             byte animGroup = UOFileManager.Animations.AnimGroup;
 
             // NOTE: i'm not sure this is the right way. This code patch the dead shroud for gargoyles.
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_7000 &&
+            if (Client.Version >= ClientVersion.CV_7000 &&
                 id == 0x03CA       // graphic for dead shroud
                 && owner != null && (owner.Graphic == 0x02B7 || owner.Graphic == 0x02B6)) // dead gargoyle graphics
             {
                 id = 0x0223;
             }
 
-            ref var direction = ref UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hueFromFile, isParent).Direction[UOFileManager.Animations.Direction];
+            AnimationDirection direction = UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hueFromFile, isParent).Direction[UOFileManager.Animations.Direction];
             UOFileManager.Animations.AnimID = id;
 
 
@@ -325,11 +326,14 @@ namespace ClassicUO.Game.GameObjects
                     return 0;
             }
 
-            if ((direction.FrameCount == 0 || direction.Frames == null) && !UOFileManager.Animations.LoadDirectionGroup(ref direction))
+            if (direction == null || ((direction.FrameCount == 0 || direction.Frames == null) && !UOFileManager.Animations.LoadDirectionGroup(ref direction)))
             {
                 if (!(_transform && owner != null && entity == null && !hasShadow))
                     return 0;
             }
+
+            if (direction == null)
+                return 0;
 
             direction.LastAccessTime = Time.Ticks;
 
@@ -498,7 +502,7 @@ namespace ClassicUO.Game.GameObjects
                     owner.Select(mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y);
 
                     if (entity != null && entity.ItemData.IsLight)
-                        CUOEnviroment.Client.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x, y);
+                        Client.Game.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x, y);
                 }
 
                 return UOFileManager.Animations.DataIndex[id].MountedHeightOffset;

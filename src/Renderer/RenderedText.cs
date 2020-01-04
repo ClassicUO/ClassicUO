@@ -23,7 +23,7 @@
 
 using System;
 using System.Collections.Generic;
-
+using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
@@ -109,7 +109,7 @@ namespace ClassicUO.Renderer
             set
             {
                 if (value == 0xFF)
-                    value = (byte) (UOFileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
+                    value = (byte) (Client.Version >= ClientVersion.CV_305D ? 1 : 0);
                 _font = value;
             }
         }
