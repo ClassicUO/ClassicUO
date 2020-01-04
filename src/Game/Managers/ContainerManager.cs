@@ -180,7 +180,8 @@ namespace ClassicUO.Game.Managers
                 using (StreamWriter writer = new StreamWriter(File.Create(path)))
                 {
                     writer.WriteLine("# FORMAT");
-                    writer.WriteLine("# GRAPHIC OPEN_SOUND_ID CLOSE_SOUND_ID X Y WIDTH HEIGHT ICONIZED_GRAPHIC [0 if not exists] MINIMIZER_AREA_X [0 if not exists] MINIMIZER_AREA_Y [0 if not exists]");
+                    writer.WriteLine("# GRAPHIC OPEN_SOUND_ID CLOSE_SOUND_ID LEFT TOP RIGHT BOTTOM ICONIZED_GRAPHIC [0 if not exists] MINIMIZER_AREA_X [0 if not exists] MINIMIZER_AREA_Y [0 if not exists]");
+                    writer.WriteLine("# LEFT = X,  TOP = Y,  RIGHT = X + WIDTH,  BOTTOM = Y + HEIGHT");
                     writer.WriteLine();
                     writer.WriteLine();
 
