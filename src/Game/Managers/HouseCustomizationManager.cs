@@ -247,7 +247,7 @@ namespace ClassicUO.Game.Managers
 
                         foreach (Multi item in multi)
                         {
-                            if (item.Z != z || (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) == 0)
+                            if (item.Z != z || (item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) == 0)
                             {
                                 continue;
                             }
@@ -693,7 +693,9 @@ namespace ClassicUO.Game.Managers
                                             }
                                             else
                                             {
-                                                if ((multiObject.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR |
+                                                if ((multiObject.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR | 
+                                                                          CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF | 
+                                                                          CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR |
                                                                           CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE)) == 0)
                                                 {
                                                     multiObject.Destroy();
@@ -883,6 +885,7 @@ namespace ClassicUO.Game.Managers
 
                 if (isFixture)
                 {
+                    type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR;
                     if (Fixtures + 1 > MaxFixtures)
                     {
                         return false;
