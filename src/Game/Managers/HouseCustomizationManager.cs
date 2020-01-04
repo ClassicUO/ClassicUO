@@ -686,7 +686,8 @@ namespace ClassicUO.Game.Managers
                                             }
                                             else if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR)
                                             {
-                                                if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0)
+                                                if ((multiObject.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR |
+                                                                          CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) != 0)
                                                 {
                                                     multiObject.Destroy();
                                                 }
