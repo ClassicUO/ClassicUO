@@ -272,12 +272,17 @@ namespace ClassicUO.Game.UI.Gumps
                 SelectedObject.Object = null;
             }
         }
-        protected void CheckIfAnchoredElseDispose()
+
+        protected bool CheckIfAnchoredElseDispose()
         {
             if (UIManager.AnchorManager[this] == null && (this.LocalSerial != World.Player))
             {
                 Dispose();
+
+                return true;
             }
+
+            return false;
         }
         
     }
@@ -388,10 +393,8 @@ namespace ClassicUO.Game.UI.Gumps
                                                     ProfileManager.Current.CloseHealthBarType == 2 && World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
                 {
                     //### KEEPS PARTY BAR ACTIVE WHEN PARTY MEMBER DIES & MOBILEBAR CLOSE SELECTED ###//
-                    if (!inparty)
+                    if (!inparty && CheckIfAnchoredElseDispose())
                     {
-                        CheckIfAnchoredElseDispose();
-
                         return;
                     }
                     //### KEEPS PARTY BAR ACTIVE WHEN PARTY MEMBER DIES & MOBILEBAR CLOSE SELECTED ###//
@@ -452,10 +455,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!_isDead && entity != World.Player && (mobile != null && mobile.IsDead) && ProfileManager.Current.CloseHealthBarType == 2) // is dead
                 {
-                    if (!inparty)
+                    if (!inparty && CheckIfAnchoredElseDispose())
                     {
-                        CheckIfAnchoredElseDispose();
-
                         return;
                     }
                 }
@@ -834,10 +835,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public HealthBarGump(Entity entity) : this()
         {
-            if (entity == null)
+            if (entity == null && CheckIfAnchoredElseDispose())
             {
-                CheckIfAnchoredElseDispose();
-
                 return;
             }
 
@@ -1018,9 +1017,8 @@ namespace ClassicUO.Game.UI.Gumps
                 if (LocalSerial != World.Player && (ProfileManager.Current.CloseHealthBarType == 1 ||
                                                     ProfileManager.Current.CloseHealthBarType == 2 && World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
                 {
-                    CheckIfAnchoredElseDispose();
-
-                    return;
+                    if (CheckIfAnchoredElseDispose())
+                        return;
                 }
 
                 if (_isDead)
@@ -1083,9 +1081,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!_isDead && entity != World.Player && (mobile != null && mobile.IsDead) && ProfileManager.Current.CloseHealthBarType == 2) // is dead
                 {
-                    CheckIfAnchoredElseDispose();
-
-                    return;
+                    if (CheckIfAnchoredElseDispose())
+                        return;
                 }
 
                 if (entity is Mobile mm && _canChangeName != mm.IsRenamable)
