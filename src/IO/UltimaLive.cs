@@ -64,6 +64,7 @@ namespace ClassicUO.IO
         //       values in index 2 and 3 is for the wrap size of map (virtual size), x and y
         private ushort[,] MapSizeWrapSize;
         protected string ShardName;
+        protected string RealShardName;
         internal static bool UltimaLiveActive => _UL != null && !string.IsNullOrEmpty(_UL.ShardName);
 
         internal static void Enable()
@@ -347,9 +348,11 @@ namespace ClassicUO.IO
                     if (_UL != null && _UL.ShardName == name)
                         return;
 
+                    string[] split = name.Split(_pathSeparatorChars, StringSplitOptions.RemoveEmptyEntries);
                     _UL = new UltimaLive
                     {
-                        ShardName = name
+                        ShardName = name,
+                        RealShardName = split[split.Length - 1]
                     };
 
                     //TODO: create shard directory, copy map and statics to that directory, use that files instead of the original ones
@@ -535,18 +538,36 @@ namespace ClassicUO.IO
 
                 if (size > 0 || isstaticmul) //if new map is generated automatically, staticX.mul size is equal to ZERO, other files should always be major than zero!
                 {
+                    MemoryMappedFile mmf;
                     if (isstaticmul)
                     {
-                        using (FileStream stream = File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        try
                         {
-                            _file = MemoryMappedFile.CreateNew(fileInfo.Name, STATICS_MEMORY_SIZE, MemoryMappedFileAccess.ReadWrite);
-
-                            using (Stream s = _file.CreateViewStream(0, stream.Length, MemoryMappedFileAccess.Write))
-                                stream.CopyTo(s);
+                            mmf = MemoryMappedFile.OpenExisting(_UL.RealShardName + fileInfo.Name);
                         }
+                        catch
+                        {
+                            mmf = MemoryMappedFile.CreateNew(_UL.RealShardName + fileInfo.Name, STATICS_MEMORY_SIZE, MemoryMappedFileAccess.ReadWrite);
+                            using (FileStream stream = File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                            {
+                                using (Stream s = mmf.CreateViewStream(0, stream.Length, MemoryMappedFileAccess.Write))
+                                    stream.CopyTo(s);
+                            }
+                        }
+                        _file = mmf;
                     }
                     else
-                        _file = MemoryMappedFile.CreateFromFile(File.Open(FilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite), fileInfo.Name, size, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, false);
+                    {
+                        try
+                        {
+                            mmf = MemoryMappedFile.OpenExisting(_UL.RealShardName + fileInfo.Name);
+                        }
+                        catch
+                        {
+                            mmf = MemoryMappedFile.CreateFromFile(File.Open(FilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite), _UL.RealShardName + fileInfo.Name, size, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, false);
+                        }
+                        _file = mmf;
+                    }
 
                     _accessor = _file.CreateViewAccessor(0, isstaticmul ? STATICS_MEMORY_SIZE : size, MemoryMappedFileAccess.ReadWrite);
                     byte* ptr = null;
