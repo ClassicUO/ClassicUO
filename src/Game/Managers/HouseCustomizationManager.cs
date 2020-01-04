@@ -787,6 +787,8 @@ namespace ClassicUO.Game.Managers
             if (SelectedGraphic == 0)
                 return false;
 
+            bool result = true;
+
             if (CombinedStair)
             {
                 if (Components + 10 > MaxComponets)
@@ -889,12 +891,12 @@ namespace ClassicUO.Game.Managers
                     type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR;
                     if (Fixtures + 1 > MaxFixtures)
                     {
-                        return false;
+                        result = false;
                     }
                 }
                 else if (Components + 1 > MaxComponets)
                 {
-                    return false;
+                    result = false;
                 }
 
                 if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF)
@@ -1028,7 +1030,7 @@ namespace ClassicUO.Game.Managers
                 return false;
             }
 
-            return true;
+            return result;
         }
         
         public bool CanEraseHere(GameObject place, out CUSTOM_HOUSE_BUILD_TYPE type)
@@ -1111,7 +1113,16 @@ namespace ClassicUO.Game.Managers
                         }
                         else
                         {
-                            state = CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC;
+                            (int res_1, int res_2) = SeekGraphicInCustomHouseObjectList(Teleports, graphic);
+
+                            if (res_1 != -1 && res_2 != -1)
+                            {
+                                state = CUSTOM_HOUSE_GUMP_STATE.CHGS_FIXTURE;
+                                res1 = res_1;
+                                res2 = res_2;
+                            }
+                            else
+                                state = CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC;
                         }
                     }
                     else
@@ -1576,7 +1587,8 @@ namespace ClassicUO.Game.Managers
         CHGS_STAIR,
         CHGS_ROOF,
         CHGS_MISC,
-        CHGS_MENU
+        CHGS_MENU,
+        CHGS_FIXTURE,
     }
 
     enum CUSTOM_HOUSE_FLOOR_VISION_STATE

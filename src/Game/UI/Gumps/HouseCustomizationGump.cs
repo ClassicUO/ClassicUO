@@ -497,7 +497,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (res1 != -1 && res2 != -1)
                             {
-                                if (state == CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR)
+                                if (state == CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR || state == CUSTOM_HOUSE_GUMP_STATE.CHGS_FIXTURE)
                                 {
                                     _customHouseManager.Fixtures++;
                                 }
