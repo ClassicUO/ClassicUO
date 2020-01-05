@@ -67,7 +67,7 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
             ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, _isPartial, 0);
 
-            batcher.Draw2D(Texture, x, y, ref _hueVector);
+            batcher.Draw2D(Texture, x, y, /*Width, Height,*/ ref _hueVector);
 
             return base.Draw(batcher, x, y);
         }
