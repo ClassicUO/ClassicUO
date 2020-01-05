@@ -457,7 +457,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     Reconnect = true;
                     PopupMessage = $"Reconnect, please wait...`{_reconnectTryCounter}`\n`{StringHelper.AddSpaceBeforeCapital(e.ToString())}`";
-                    var c = UIManager.Gumps.OfType<LoadingGump>().FirstOrDefault(s => s._Label.Text.Contains("Reconnect, please wait..."));
+                    var c = UIManager.Gumps.OfType<LoadingGump>().FirstOrDefault();
                     if (c != null)
                         c._Label.Text = PopupMessage;
                 }
