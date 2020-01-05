@@ -440,7 +440,7 @@ namespace ClassicUO.Game.Scenes
 
             Characters = null;
             Servers = null;
-            PopupMessage = $"Connection lost:\n{e}";
+            PopupMessage = $"Connection lost:\n{StringHelper.AddSpaceBeforeCapital(e.ToString())}";
             CurrentLoginStep = LoginStep.PopUpMessage;
         }
 
