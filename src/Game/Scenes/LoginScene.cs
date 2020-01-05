@@ -26,6 +26,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Linq;
 
 using ClassicUO.Configuration;
 using ClassicUO.Data;
@@ -78,7 +79,6 @@ namespace ClassicUO.Game.Scenes
         public bool Reconnect { get; set; }
 
         public LoginStep CurrentLoginStep { get; private set; } = LoginStep.Main;
-
 
         public ServerListEntry[] Servers { get; private set; }
 
@@ -292,8 +292,8 @@ namespace ClassicUO.Game.Scenes
                 PopupMessage = "Check your internet connection and try again";
                 Log.Error( "No Internet Access");
             }
-
-            CurrentLoginStep = LoginStep.Connecting;
+            if(!Reconnect)
+                CurrentLoginStep = LoginStep.Connecting;
         }
 
         public void SelectServer(byte index)
@@ -456,10 +456,13 @@ namespace ClassicUO.Game.Scenes
                 if (Settings.GlobalSettings.Reconnect)
                 {
                     Reconnect = true;
-                    PopupMessage = $"Reconnect, please wait...`{_reconnectTryCounter}`\n`{e}`";
+                    PopupMessage = $"Reconnect, please wait...`{_reconnectTryCounter}`\n`{StringHelper.AddSpaceBeforeCapital(e.ToString())}`";
+                    var c = UIManager.Gumps.OfType<LoadingGump>().FirstOrDefault(s => s._Label.Text.Contains("Reconnect, please wait..."));
+                    if (c != null)
+                        c._Label.Text = PopupMessage;
                 }
                 else
-                    PopupMessage = $"Connection lost:\n`{e}`";
+                    PopupMessage = $"Connection lost:\n`{StringHelper.AddSpaceBeforeCapital(e.ToString())}`";
 
                 CurrentLoginStep = LoginStep.PopUpMessage;
             }

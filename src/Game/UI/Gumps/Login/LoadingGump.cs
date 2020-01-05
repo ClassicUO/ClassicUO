@@ -41,16 +41,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
         }
 
         private readonly Action<int> _buttonClick;
-        private Buttons _showButtons;
+        internal readonly Label _Label;
 
         public LoadingGump(string labelText, Buttons showButtons, Action<int> buttonClick = null) : base(0, 0)
         {
-            _showButtons = showButtons;
             _buttonClick = buttonClick;
             CanCloseWithRightClick = false;
             CanCloseWithEsc = false;
 
-            Label label = new Label(labelText, false, 0x0386, 326, 2, align: TEXT_ALIGN_TYPE.TS_CENTER)
+            _Label = new Label(labelText, false, 0x0386, 326, 2, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 X = 162,
                 Y = 178
@@ -61,7 +60,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 X = 142, Y = 134, Width = 366, Height = 212
             });
 
-            Add(label);
+            Add(_Label);
 
             if (showButtons == Buttons.OK)
             {
