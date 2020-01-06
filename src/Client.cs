@@ -12,6 +12,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using SDL2;
+
 namespace ClassicUO
 {
     [Flags]
@@ -116,5 +118,10 @@ namespace ClassicUO
             Log.Trace("Exiting game...");
         }
 
+        public static void ShowErrorMessage(string msg)
+        {
+            if (Game != null && Game.Window.Handle != IntPtr.Zero)
+                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "ERROR", msg, Game.Window.Handle);
+        }
     }
 }

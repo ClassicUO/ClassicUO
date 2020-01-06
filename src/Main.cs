@@ -108,11 +108,10 @@ namespace ClassicUO
             ReadSettingsFromArgs(args);
 
             // still invalid, cannot load settings
-            if (Settings.GlobalSettings == null || !Settings.GlobalSettings.IsValid())
+            if (Settings.GlobalSettings == null)
             {
-                // TODO: 
-                Settings.GlobalSettings?.Save();
-                return;
+                Settings.GlobalSettings = new Settings();
+                Settings.GlobalSettings.Save();
             }
 
             if (!CUOEnviroment.IsUnix)
@@ -120,6 +119,9 @@ namespace ClassicUO
                 string libsPath = Path.Combine(CUOEnviroment.ExecutablePath, "libs", Environment.Is64BitProcess ? "x64" : "x86");
                 SetDllDirectory(libsPath);
             }
+
+            if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.UltimaOnlineDirectory))
+                Settings.GlobalSettings.UltimaOnlineDirectory = CUOEnviroment.ExecutablePath;
 
 
             Client.Run();

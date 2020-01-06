@@ -186,7 +186,6 @@ namespace ClassicUO.IO.Resources
         {
             return Task.Run(() =>
             {
-
                 bool loaduop = false;
                 int[] un = { 0x40000, 0x10000, 0x20000, 0x20000, 0x20000 };
 

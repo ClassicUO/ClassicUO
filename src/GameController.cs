@@ -231,17 +231,7 @@ namespace ClassicUO
             Log.Trace( "Checking for Ultima Online installation...");
             Log.PushIndent();
 
-
-            try
-            {
-                UOFileManager.UoFolderPath = Settings.GlobalSettings.UltimaOnlineDirectory;
-            }
-            catch (FileNotFoundException)
-            {
-                Log.Error( "Wrong Ultima Online installation folder.");
-
-                throw;
-            }
+            UOFileManager.UoFolderPath = Settings.GlobalSettings.UltimaOnlineDirectory;
 
             Log.Trace( "Done!");
             Log.Trace( $"Ultima Online installation folder: {UOFileManager.UoFolderPath}");
