@@ -608,7 +608,13 @@ namespace ClassicUO.Network
 
         private static void EnterWorld(Packet p)
         {
-            ProfileManager.Load(World.ServerName, LoginScene.Account, Settings.GlobalSettings.LastCharacterName.Trim());
+            if (ProfileManager.Current == null)
+                ProfileManager.Load(World.ServerName, LoginScene.Account, Settings.GlobalSettings.LastCharacterName.Trim());
+
+            if (World.Player != null)
+            {
+                World.Clear();
+            }
 
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
             p.Skip(4);
