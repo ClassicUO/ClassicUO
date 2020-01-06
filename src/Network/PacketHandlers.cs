@@ -3862,6 +3862,9 @@ namespace ClassicUO.Network
 
         private static void BuffDebuff(Packet p)
         {
+            if (World.Player == null)
+                return;
+
             const int TABLE_COUNT = 126;
             const ushort BUFF_ICON_START = 0x03E9;
             uint serial = p.ReadUInt();
