@@ -134,7 +134,7 @@ namespace ClassicUO.Game.Scenes
         {
             Audio.StopMusic();
 
-            UIManager.Remove<LoginBackground>();
+            UIManager.GetGump<LoginBackground>()?.Dispose();
             _currentGump?.Dispose();
 
             // UnRegistering Packet Events           
@@ -508,7 +508,7 @@ namespace ClassicUO.Game.Scenes
                 case 0x86: // UpdateCharacterList
                     ParseCharacterList(e);
 
-                    UIManager.Remove<CharacterSelectionGump>();
+                    UIManager.GetGump<CharacterSelectionGump>()?.Dispose();
 
                     _currentGump?.Dispose();
 

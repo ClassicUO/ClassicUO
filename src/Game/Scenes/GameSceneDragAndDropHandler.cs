@@ -121,12 +121,15 @@ namespace ClassicUO.Game.Scenes
 
         private void CloseItemGumps(Item item)
         {
-            UIManager.Remove<Gump>(item);
-
-            if (SerialHelper.IsValid(item.Container))
+            if (item != null)
             {
-                foreach (Item i in item.Items)
-                    CloseItemGumps(i);
+                UIManager.GetGump<Gump>(item)?.Dispose();
+
+                if (SerialHelper.IsValid(item.Container))
+                {
+                    foreach (Item i in item.Items)
+                        CloseItemGumps(i);
+                }
             }
         }
 

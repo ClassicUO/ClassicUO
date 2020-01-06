@@ -835,7 +835,7 @@ namespace ClassicUO.Game.Managers
                 return;
 
             TargetLine?.Dispose();
-            Remove<TargetLineGump>();
+            GetGump<TargetLineGump>()?.Dispose();
             TargetLine = null;
 
             if (TargetLine == null || TargetLine.IsDisposed)
@@ -864,7 +864,7 @@ namespace ClassicUO.Game.Managers
         public static void RemoveTargetLineGump(uint serial)
         {
             TargetLine?.Dispose();
-            Remove<TargetLineGump>();
+            GetGump<TargetLineGump>()?.Dispose();
             TargetLine = null;
 
             //if (_targetLineGumps.TryGetValue(serial, out TargetLineGump gump))
@@ -953,12 +953,7 @@ namespace ClassicUO.Game.Managers
                 _needSort = true;
             }
         }
-
-        public static void Remove<T>(uint? local = null) where T : Control
-        {
-            Gumps.OfType<T>().FirstOrDefault(s => (!local.HasValue || s.LocalSerial == local) && !s.IsDisposed)?.Dispose();
-        }
-
+        
         public static void Clear()
         {
             foreach (Control s in Gumps)

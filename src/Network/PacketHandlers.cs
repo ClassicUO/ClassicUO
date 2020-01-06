@@ -3085,7 +3085,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 0x0C: // close statusbar gump
-                    UIManager.Remove<HealthBarGump>(p.ReadUInt());
+                    UIManager.GetGump<HealthBarGump>(p.ReadUInt())?.Dispose();
 
                     break;
 
@@ -3194,22 +3194,22 @@ namespace ClassicUO.Network
                     switch (id)
                     {
                         case 1: // paperdoll
-                            UIManager.Remove<PaperDollGump>(serial);
+                            UIManager.GetGump<PaperDollGump>(serial)?.Dispose();
 
                             break;
 
                         case 2: //statusbar
-                            UIManager.Remove<HealthBarGump>(serial);
+                            UIManager.GetGump<HealthBarGump>(serial)?.Dispose();
 
                             break;
 
                         case 8: // char profile
-                            UIManager.Remove<ProfileGump>();
+                            UIManager.GetGump<ProfileGump>()?.Dispose();
 
                             break;
 
                         case 0x0C: //container
-                            UIManager.Remove<ContainerGump>(serial);
+                            UIManager.GetGump<ContainerGump>(serial)?.Dispose();
 
                             break;
                     }

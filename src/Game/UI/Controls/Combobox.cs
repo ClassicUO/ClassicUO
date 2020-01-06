@@ -78,7 +78,7 @@ namespace ClassicUO.Game.UI.Controls
                 if (_items != null)
                 {
                     _label.Text = _items[value];
-                    UIManager.Remove<ComboboxContextMenu>();
+                    UIManager.GetGump<ComboboxContextMenu>()?.Dispose();
                     OnOptionSelected?.Invoke(this, value);
                 }
             }
