@@ -100,4 +100,4 @@ The code itself has been written using the following projects as a reference:
 
 This work is released under the GPLv3 license. This project does not distribute any copyrighted game assets. In order to run this client you'll need to legally obtain a copy of the Ultima Online Classic Client.
 
-Ultima Online(R) © 2019 Electronic Arts Inc. All Rights Reserved.
+Ultima Online(R) © 2020 Electronic Arts Inc. All Rights Reserved.
