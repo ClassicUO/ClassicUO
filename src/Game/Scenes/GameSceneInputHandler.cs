@@ -305,20 +305,34 @@ namespace ClassicUO.Game.Scenes
             if (!IsMouseOverViewport)
                 return;
 
-            _dragginObject = SelectedObject.Object as Entity;
-
-            if (ProfileManager.Current.EnableDragSelect && DragSelectModifierActive())
+            if (World.CustomHouseManager != null)
             {
-                if (CanDragSelectOnObject(SelectedObject.Object as GameObject))
+                _isMouseLeftDown = true;
+
+                if (SelectedObject.LastObject is GameObject obj)
                 {
-                    _selectionStart = (Mouse.Position.X, Mouse.Position.Y);
-                    _isSelectionActive = true;
+                    World.CustomHouseManager.OnTargetWorld(obj);
+                    _lastSelectedMultiPositionInHouseCustomization.X = obj.X;
+                    _lastSelectedMultiPositionInHouseCustomization.Y = obj.Y;
                 }
             }
             else
             {
-                _isMouseLeftDown = true;
-                _holdMouse2secOverItemTime = Time.Ticks;
+                _dragginObject = SelectedObject.Object as Entity;
+
+                if (ProfileManager.Current.EnableDragSelect && DragSelectModifierActive())
+                {
+                    if (CanDragSelectOnObject(SelectedObject.Object as GameObject))
+                    {
+                        _selectionStart = (Mouse.Position.X, Mouse.Position.Y);
+                        _isSelectionActive = true;
+                    }
+                }
+                else
+                {
+                    _isMouseLeftDown = true;
+                    _holdMouse2secOverItemTime = Time.Ticks;
+                }
             }
         }
 
@@ -418,14 +432,8 @@ namespace ClassicUO.Game.Scenes
                     case CursorTarget.SetGrabBag:
                     case CursorTarget.Position:
                     case CursorTarget.Object:
-                    case CursorTarget.MultiPlacement:
-
-                        if (World.CustomHouseManager != null)
-                        {
-                            World.CustomHouseManager.OnTargetWorld(SelectedObject.Object as GameObject);
-                        }
-                        else
-                        {
+                    case CursorTarget.MultiPlacement when World.CustomHouseManager == null:
+                    {
                             var obj = SelectedObject.Object;
                             if (obj is TextOverhead ov)
                                 obj = ov.Owner;

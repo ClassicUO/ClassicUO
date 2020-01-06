@@ -1431,7 +1431,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _treeToStumps.IsChecked = false;
                     _hideVegetation.IsChecked = false;
                     _noColorOutOfRangeObjects.IsChecked = false;
-                    _circleOfTranspRadius.Value = 5;
+                    _circleOfTranspRadius.Value = Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS;
                     _useCircleOfTransparency.IsChecked = false;
                     _healtbarType.SelectedIndex = 0;
                     _fieldsType.SelectedIndex = 0;
@@ -1662,7 +1662,12 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.HideVegetation = _hideVegetation.IsChecked;
             ProfileManager.Current.NoColorObjectsOutOfRange = _noColorOutOfRangeObjects.IsChecked;
             ProfileManager.Current.UseCircleOfTransparency = _useCircleOfTransparency.IsChecked;
-            ProfileManager.Current.CircleOfTransparencyRadius = _circleOfTranspRadius.Value;
+
+            if (ProfileManager.Current.CircleOfTransparencyRadius != _circleOfTranspRadius.Value)
+            {
+                ProfileManager.Current.CircleOfTransparencyRadius = _circleOfTranspRadius.Value;
+                CircleOfTransparency.Create(ProfileManager.Current.CircleOfTransparencyRadius);
+            }
 
             ProfileManager.Current.VendorGumpHeight = (int) _vendorGumpSize.Tag;
             ProfileManager.Current.StandardSkillsGump = _useStandardSkillsGump.IsChecked;

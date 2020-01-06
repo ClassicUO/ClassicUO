@@ -78,7 +78,7 @@ namespace ClassicUO.Game.Managers
 
             short w = 0;
             short h = 0;
-            uint[] data = CircleOfTransparency.CreateTexture(radius, ref w, ref h);
+            uint[] data = CircleOfTransparency.CreateCircleTexture(radius, ref w, ref h);
 
             for (int i = 0; i < data.Length; i++)
             {
