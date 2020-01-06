@@ -286,6 +286,13 @@ namespace ClassicUO
                         CUOEnviroment.SkipLoginScreen = true;
                         break;
 
+                    case "plugins":
+                        if (!string.IsNullOrWhiteSpace(value))
+                        {
+                            Settings.GlobalSettings.Plugins = value.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+                        }
+                        break;
+
                 }
             }
         }
