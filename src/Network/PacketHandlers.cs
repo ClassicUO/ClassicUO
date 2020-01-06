@@ -3175,6 +3175,8 @@ namespace ClassicUO.Network
                 case 0x14: // display popup/context menu
                     PopupMenuData data = PopupMenuData.Parse(p);
 
+                    UIManager.GetGump<PopupMenuGump>()?.Dispose();
+
                     UIManager.Add(new PopupMenuGump(data)
                     {
                         X = Mouse.Position.X,
