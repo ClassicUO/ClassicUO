@@ -153,9 +153,6 @@ namespace ClassicUO.Game.Data
             0x75C5, 
             0x75F6, 
             0x761B,
-            //
-            //0x0000,
-            //0x0000,
             // skill masteries
             0x9BB5,
             0x9BB6,

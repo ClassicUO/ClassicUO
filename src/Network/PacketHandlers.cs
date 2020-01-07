@@ -3902,11 +3902,17 @@ namespace ClassicUO.Network
                     }
 
                     if (wtfCliloc != 0)
-                        wtf = "\n" + UOFileManager.Cliloc.GetString((int) wtfCliloc);
-                    string text = $"<left>{title}{description}{wtf}</left>";
+                    {
+                        wtf = UOFileManager.Cliloc.GetString((int) wtfCliloc);
+                        if (!string.IsNullOrEmpty(wtf))
+                            wtf = $"\n{wtf}";
+                    }
 
+                    string text = $"<left>{title}{description}{wtf}</left>";
+                    bool alreadyExists = World.Player.IsBuffIconExists(BuffTable.Table[iconID]);
                     World.Player.AddBuff(BuffTable.Table[iconID], timer, text);
-                    gump?.AddBuff(BuffTable.Table[iconID]);
+                    if (!alreadyExists)
+                        gump?.AddBuff(BuffTable.Table[iconID]);
                 }
                 else
                 {

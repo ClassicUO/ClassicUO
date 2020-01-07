@@ -370,7 +370,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_updateTooltipTime < totalMS && delta > 0)
                 {
                     TimeSpan span = TimeSpan.FromMilliseconds(delta);
-                    SetTooltip($"{Icon.Text}\nTime left: {span.Hours:00}:{span.Minutes:00}:{span.Seconds:00}");
+                    SetTooltip($"{Icon.Text}\nTime left: {span.Hours:00}:{span.Minutes:00}:{span.Seconds:00}", 200);
                     _updateTooltipTime = (float) totalMS + 1000;
 
                     if (span.Hours > 0)
