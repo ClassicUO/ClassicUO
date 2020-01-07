@@ -328,7 +328,7 @@ namespace ClassicUO.Game.Managers
         public static bool HadMouseDownOnGump(MouseButtonType button)
         {
             var c = _mouseDownControls[(int) button];
-            return c != null && !(c is WorldViewport);
+            return c != null && !(c is WorldViewport) && !(c is ItemGump);
         }
 
 
