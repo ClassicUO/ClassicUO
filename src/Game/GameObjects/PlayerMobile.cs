@@ -421,7 +421,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x0F45:
-                            case 0x0F46: // Double Axes
+                            case 0x0F46: // Executioner Axes
                                 Abilities[0] = Ability.BleedAttack;
                                 Abilities[1] = Ability.MortalStrike;
 
@@ -441,9 +441,9 @@ namespace ClassicUO.Game.GameObjects
 
                                 goto done;
 
-                            case 0x0F4B:
+                            case 0x0F4B: // Double Axe
                             case 0x0F4C:
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.WhirlwindAttack;
 
                                 goto done;
