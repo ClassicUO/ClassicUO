@@ -236,7 +236,13 @@ namespace ClassicUO.Game.Managers
             HandleMouseInput();
 
             if (MouseOverControl != null && IsMouseOverAControl)
-                return MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButtonType.Left);
+            {
+                if (MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButtonType.Left))
+                {
+                    DelayedObjectClickManager.Clear();
+                    return true;
+                }
+            }
 
             return false;
         }
@@ -318,6 +324,12 @@ namespace ClassicUO.Game.Managers
                 MouseOverControl.InvokeMouseWheel(isup ? MouseEventType.WheelScrollUp : MouseEventType.WheelScrollDown);
         }
 
+
+        public static bool HadMouseDownOnGump(MouseButtonType button)
+        {
+            var c = _mouseDownControls[(int) button];
+            return c != null && !(c is WorldViewport);
+        }
 
 
         public static void InitializeGameCursor()

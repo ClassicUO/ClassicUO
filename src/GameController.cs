@@ -591,12 +591,10 @@ namespace ClassicUO
                 case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
                     Mouse.Update();
                     bool isDown = e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN;
-                    bool resetTime = false;
 
                     if (_dragStarted && !isDown)
                     {
                         _dragStarted = false;
-                        resetTime = true;
                     }
 
                     SDL.SDL_MouseButtonEvent mouse = e.button;
@@ -616,7 +614,7 @@ namespace ClassicUO
                                 if (Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
                                 {
                                     Mouse.LastLeftButtonClickTime = 0;
-
+                                 
                                     bool res = UIManager.ValidForDClick() ? UIManager.OnLeftMouseDoubleClick() : _scene.OnLeftMouseDoubleClick();
 
                                     if (!res)
@@ -639,12 +637,10 @@ namespace ClassicUO
                             }
                             else
                             {
-                                if (resetTime)
-                                    Mouse.LastLeftButtonClickTime = 0;
-
                                 if (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF)
                                 {
-                                    _scene.OnLeftMouseUp();
+                                    if (!UIManager.HadMouseDownOnGump(MouseButtonType.Left))
+                                        _scene.OnLeftMouseUp();
                                     UIManager.OnLeftMouseButtonUp();
                                 }
                                 Mouse.LButtonPressed = false;
@@ -726,12 +722,10 @@ namespace ClassicUO
                             }
                             else
                             {
-                                if (resetTime)
-                                    Mouse.LastRightButtonClickTime = 0;
-
                                 if (Mouse.LastRightButtonClickTime != 0xFFFF_FFFF)
                                 {
-                                    _scene.OnRightMouseUp();
+                                    if (!UIManager.HadMouseDownOnGump(MouseButtonType.Right))
+                                        _scene.OnRightMouseUp();
                                     UIManager.OnRightMouseButtonUp();
                                 }
                                 Mouse.RButtonPressed = false;

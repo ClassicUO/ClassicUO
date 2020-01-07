@@ -124,17 +124,6 @@ namespace ClassicUO.Game.Scenes
             _useItemQueue.Add(serial);
         }
 
-        private void ClearDequeued()
-        {
-            if (_inqueue)
-            {
-                _inqueue = false;
-                _queuedObject = null;
-                _queuedAction = null;
-                _dequeueAt = 0;
-            }
-        }
-
         public override void Load()
         {
             base.Load();
@@ -342,6 +331,7 @@ namespace ClassicUO.Game.Scenes
             UIManager.Clear();
             World.Clear();
             UOChatManager.Clear();
+            DelayedObjectClickManager.Clear();
           
             _useItemQueue?.Clear();
             _useItemQueue = null;
@@ -592,25 +582,7 @@ namespace ClassicUO.Game.Scenes
             
             World.Update(totalMS, frameMS);
             Pathfinder.ProcessAutoWalk();
-
-
-            if (_inqueue)
-            {
-                _dequeueAt -= frameMS;
-
-                if (_dequeueAt <= 0)
-                {
-                    _inqueue = false;
-
-                    if (_queuedObject != null && !_queuedObject.IsDestroyed)
-                    {
-                        _queuedAction();
-                        _queuedObject = null;
-                        _queuedAction = null;
-                        _dequeueAt = 0;
-                    }
-                }
-            }
+            DelayedObjectClickManager.Update();
 
             if (_rightMousePressed || _continueRunning)
                 MoveCharacterByMouseInput();

@@ -3179,8 +3179,8 @@ namespace ClassicUO.Network
 
                     UIManager.Add(new PopupMenuGump(data)
                     {
-                        X = Mouse.Position.X,
-                        Y = Mouse.Position.Y
+                        X = DelayedObjectClickManager.X,
+                        Y = DelayedObjectClickManager.Y
                     });
 
                     break;

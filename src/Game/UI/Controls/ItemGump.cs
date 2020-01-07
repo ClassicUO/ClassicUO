@@ -42,8 +42,8 @@ namespace ClassicUO.Game.UI.Controls
         protected bool _clickedCanDrag;
 
         private float _picUpTime;
-        private float _sClickTime;
-        private bool _sendClickIfNotDClick;
+        //private float _sClickTime;
+        //private bool _sendClickIfNotDClick;
 
         public ItemGump(Item item)
         {
@@ -94,12 +94,13 @@ namespace ClassicUO.Game.UI.Controls
                 AttempPickUp();
             }
 
-            if (_sendClickIfNotDClick && totalMS >= _sClickTime)
-            {
-                if (!World.ClientFeatures.TooltipsEnabled) GameActions.SingleClick(LocalSerial);
-                GameActions.OpenPopupMenu(LocalSerial);
-                _sendClickIfNotDClick = false;
-            }
+            //if (_sendClickIfNotDClick && totalMS >= _sClickTime)
+            //{
+            //    if (!World.ClientFeatures.TooltipsEnabled) 
+            //        GameActions.SingleClick(LocalSerial);
+            //    GameActions.OpenPopupMenu(LocalSerial);
+            //    _sendClickIfNotDClick = false;
+            //}
 
             base.Update(totalMS, frameMS);
         }
@@ -257,12 +258,15 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
                     {
-                        if (_clickedCanDrag)
+                        //if (_clickedCanDrag)
+                        //{
+                        //    _clickedCanDrag = false;
+                        //    _sendClickIfNotDClick = true;
+                        //    _sClickTime = Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+                        //}
+                        if (!DelayedObjectClickManager.IsEnabled)
                         {
-                            _clickedCanDrag = false;
-                            _sendClickIfNotDClick = true;
-                            float totalMS = Time.Ticks;
-                            _sClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+                            DelayedObjectClickManager.Set(Item.Serial, Mouse.Position.X, Mouse.Position.Y, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                         }
                     }
                     else
@@ -278,8 +282,7 @@ namespace ClassicUO.Game.UI.Controls
                             if (SerialHelper.IsItem(Item.Container))
                                 gs.DropHeldItemToContainer(World.Items.Get(Item.Container), X + (Mouse.Position.X - ScreenCoordinateX), Y + (Mouse.Position.Y - ScreenCoordinateY));
                         }
-                    }
-                    
+                    }                   
                 }
 
                 _clickedCanDrag = false;
@@ -327,8 +330,10 @@ namespace ClassicUO.Game.UI.Controls
             } else
                 GameActions.DoubleClick(LocalSerial);
  
-            _sendClickIfNotDClick = false;
- 
+            //_sendClickIfNotDClick = false;
+            //_clickedCanDrag = false;
+            //_sClickTime = _picUpTime = Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+
             return true;
         }
 

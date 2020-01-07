@@ -71,15 +71,15 @@ namespace ClassicUO.Game.Scenes
 
         private bool _followingMode;
         private uint _followingTarget;
-        private bool _inqueue;
+        //private bool _inqueue;
         private bool _isCtrlDown;
         private bool _isSelectionActive;
 
         private bool _isShiftDown;
         private bool _isUpDown, _isDownDown, _isLeftDown, _isRightDown, _isMacroMoveDown, _isAuraActive;
         public Direction _numPadDirection;
-        private Action _queuedAction;
-        private Entity _queuedObject;
+        //private Action _queuedAction;
+        //private Entity _queuedObject;
         private bool _wasShiftDown;
 
         private bool _requestedWarMode;
@@ -503,7 +503,7 @@ namespace ClassicUO.Game.Scenes
             }
             else
             {
-                GameObject obj = SelectedObject.Object as GameObject;
+                GameObject obj = SelectedObject.LastObject as GameObject;
 
                 switch (obj)
                 {
@@ -537,20 +537,11 @@ namespace ClassicUO.Game.Scenes
                             _followingMode = true;
                             _followingTarget = ent;
                         }
-                        else if (!_inqueue)
+                        else if (!DelayedObjectClickManager.IsEnabled)
                         {
-                            _inqueue = true;
-                            _queuedObject = ent;
-                            _dequeueAt = Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                            _wasShiftDown = _isShiftDown;
-
-                            _queuedAction = () =>
-                            {
-                                if (!World.ClientFeatures.TooltipsEnabled || 
-                                    (ent is Item it && it.IsLocked && it.ItemData.Weight == 255 && !it.ItemData.IsContainer ))
-                                    GameActions.SingleClick(_queuedObject);
-                                GameActions.OpenPopupMenu(_queuedObject, _wasShiftDown);
-                            };
+                            Console.WriteLine("MOUSE UP: SET");
+                            
+                            DelayedObjectClickManager.Set(ent.Serial, Mouse.Position.X, Mouse.Position.Y, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                         }
 
                         break;
@@ -565,41 +556,44 @@ namespace ClassicUO.Game.Scenes
 
             if (!IsMouseOverViewport)
             {
-                result = _queuedObject != null;
-                ClearDequeued();
-                return result;
+                result = DelayedObjectClickManager.IsEnabled;
             }
-
-            BaseGameObject obj = SelectedObject.Object;
-
-
-            switch (obj)
+            else
             {
-                case Item item:
-                    result = true;
-                    if (!GameActions.OpenCorpse(item))
-                        GameActions.DoubleClick(item);
+                BaseGameObject obj = SelectedObject.LastObject;
 
-                    break;
+                switch (obj)
+                {
+                    case Item item:
+                        result = true;
+                        if (!GameActions.OpenCorpse(item))
+                            GameActions.DoubleClick(item);
 
-                case Mobile mob:
-                    result = true;
+                        break;
 
-                    if (World.Player.InWarMode && World.Player != mob)
-                        GameActions.Attack(mob);
-                    else
-                        GameActions.DoubleClick(mob);
+                    case Mobile mob:
+                        result = true;
 
-                    break;
+                        if (World.Player.InWarMode && World.Player != mob)
+                            GameActions.Attack(mob);
+                        else
+                            GameActions.DoubleClick(mob);
 
-                case TextOverhead msg when msg.Owner is Entity entity:
-                    result = true;
-                    GameActions.DoubleClick(entity);
+                        break;
 
-                    break;
+                    case TextOverhead msg when msg.Owner is Entity entity:
+                        result = true;
+                        GameActions.DoubleClick(entity);
+
+                        break;
+                }
             }
 
-            ClearDequeued();
+            if (result)
+            {
+                Console.WriteLine("DCLICKED: CLEAR");
+                DelayedObjectClickManager.Clear();
+            }
 
             return result;
         }
