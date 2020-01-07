@@ -3867,12 +3867,14 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
 
-            const int TABLE_COUNT = 126;
             const ushort BUFF_ICON_START = 0x03E9;
-            uint serial = p.ReadUInt();
-            ushort iconID = (ushort) (p.ReadUShort() - BUFF_ICON_START);
+            const ushort BUFF_ICON_START_NEW = 0x466 - 126;
 
-            if (iconID < TABLE_COUNT)
+            uint serial = p.ReadUInt();
+            ushort ic = p.ReadUShort();
+            ushort iconID = ic >= 0x466 ? (ushort) (ic - BUFF_ICON_START_NEW) : (ushort) (ic - BUFF_ICON_START);
+
+            if (iconID < BuffTable.Table.Length)
             {
                 BuffGump gump = UIManager.GetGump<BuffGump>();
                 ushort mode = p.ReadUShort();

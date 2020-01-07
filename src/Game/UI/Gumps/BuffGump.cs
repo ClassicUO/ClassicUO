@@ -345,7 +345,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _timer = (uint) (icon.Timer <= 0 ? 0xFFFF_FFFF : Time.Ticks + icon.Timer * 1000);
                 _gText = RenderedText.Create("", 0xFFFF, 2, true, FontStyle.Fixed | FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, Texture.Width);
 
-                SetTooltip(icon.Text);
+                SetTooltip(icon.Text, 200);
             }
 
             public BuffIcon Icon { get; }
