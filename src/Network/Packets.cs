@@ -313,7 +313,6 @@ namespace ClassicUO.Network
             WriteBool(state);
             WriteByte(0x32);
             WriteByte(0);
-            //WriteByte(0);
         }
     }
 
@@ -958,8 +957,9 @@ namespace ClassicUO.Network
         {
             WriteUShort(0x0F);
             WriteByte(0x0A);
-            uint clientFlag = 0;
 
+            // other packets sends Client.Protocol directly without doing this. Why not here?
+            uint clientFlag = 0;
             for (int i = 0; i < (uint) Client.Protocol; i++)
                 clientFlag |= (uint) (1 << i);
 
@@ -1085,7 +1085,6 @@ namespace ClassicUO.Network
         {
             WriteUInt(World.Player);
             WriteUShort(0x32);
-            //WriteByte(0x0A);
             WriteByte(0x00);
         }
     }
@@ -1145,14 +1144,6 @@ namespace ClassicUO.Network
             WriteByte((byte) state);
         }
     }
-
-    /* internal sealed class PBookPageData : PacketWriter
-     {
-         public PBookPageData()
-         {
- 
-         }
-     }*/
 
     internal sealed class PBookPageDataRequest : PacketWriter
     {
@@ -1270,7 +1261,6 @@ namespace ClassicUO.Network
             WriteByte(speed);
         }
     }
-
 
     internal sealed class PResend : PacketWriter
     {
