@@ -1,6 +1,6 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -64,7 +64,8 @@ namespace ClassicUO.Game.Scenes
         private int _scale = 5; // 1.0
         private bool _useObjectHandles;
 
-
+        private uint _timeToPlaceMultiInHouseCustomization;
+        private Point _lastSelectedMultiPositionInHouseCustomization;
         private long _timePing;
         private UseItemQueue _useItemQueue = new UseItemQueue();
         private Vector4 _vectorClear = new Vector4(Vector3.Zero, 1);
@@ -121,17 +122,6 @@ namespace ClassicUO.Game.Scenes
         public void DoubleClickDelayed(uint serial)
         {
             _useItemQueue.Add(serial);
-        }
-
-        private void ClearDequeued()
-        {
-            if (_inqueue)
-            {
-                _inqueue = false;
-                _queuedObject = null;
-                _queuedAction = null;
-                _dequeueAt = 0;
-            }
         }
 
         public override void Load()
@@ -218,7 +208,7 @@ namespace ClassicUO.Game.Scenes
                 //Client.Client.SetWindowPositionBySettings();
             }
 
-
+            CircleOfTransparency.Create(ProfileManager.Current.CircleOfTransparencyRadius);
             Plugin.OnConnected();
         }
 
@@ -341,6 +331,7 @@ namespace ClassicUO.Game.Scenes
             UIManager.Clear();
             World.Clear();
             UOChatManager.Clear();
+            DelayedObjectClickManager.Clear();
           
             _useItemQueue?.Clear();
             _useItemQueue = null;
@@ -591,25 +582,7 @@ namespace ClassicUO.Game.Scenes
             
             World.Update(totalMS, frameMS);
             Pathfinder.ProcessAutoWalk();
-
-
-            if (_inqueue)
-            {
-                _dequeueAt -= frameMS;
-
-                if (_dequeueAt <= 0)
-                {
-                    _inqueue = false;
-
-                    if (_queuedObject != null && !_queuedObject.IsDestroyed)
-                    {
-                        _queuedAction();
-                        _queuedObject = null;
-                        _queuedAction = null;
-                        _dequeueAt = 0;
-                    }
-                }
-            }
+            DelayedObjectClickManager.Update();
 
             if (_rightMousePressed || _continueRunning)
                 MoveCharacterByMouseInput();
@@ -726,12 +699,31 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            if (_isMouseLeftDown && !IsHoldingItem && Time.Ticks - _holdMouse2secOverItemTime >= 1000)
+            if (_isMouseLeftDown && !IsHoldingItem)
             {
-                if (PickupItemBegin(SelectedObject.LastObject as Item, 0, 0))
+                if (World.CustomHouseManager != null && 
+                    World.CustomHouseManager.SelectedGraphic != 0 && 
+                    !World.CustomHouseManager.SeekTile && 
+                    !World.CustomHouseManager.Erasing &&
+                    Time.Ticks > _timeToPlaceMultiInHouseCustomization)
                 {
-                    _isMouseLeftDown = false;
-                    _holdMouse2secOverItemTime = 0;
+                    if (SelectedObject.LastObject is GameObject obj && 
+                        (obj.X != _lastSelectedMultiPositionInHouseCustomization.X || 
+                         obj.Y != _lastSelectedMultiPositionInHouseCustomization.Y))
+                    {
+                        World.CustomHouseManager.OnTargetWorld(obj);
+                        _timeToPlaceMultiInHouseCustomization = Time.Ticks + 50;
+                        _lastSelectedMultiPositionInHouseCustomization.X = obj.X;
+                        _lastSelectedMultiPositionInHouseCustomization.Y = obj.Y;
+                    }
+                }
+                else if (Time.Ticks - _holdMouse2secOverItemTime >= 1000)
+                {
+                    if (PickupItemBegin(SelectedObject.LastObject as Item, 0, 0))
+                    {
+                        _isMouseLeftDown = false;
+                        _holdMouse2secOverItemTime = 0;
+                    }
                 }
             }
         }
@@ -779,31 +771,29 @@ namespace ClassicUO.Game.Scenes
         private void DrawWorld(UltimaBatcher2D batcher)
         {
             SelectedObject.Object = null;
+            bool usecircle = ProfileManager.Current.UseCircleOfTransparency;
 
             batcher.GraphicsDevice.Clear(Color.Black);
             batcher.GraphicsDevice.SetRenderTarget(_viewportRenderTarget);
 
-            //if (CircleOfTransparency.Circle == null)
-            //    CircleOfTransparency.Create(200);
-            //CircleOfTransparency.Circle.Draw(batcher,
-            //                                 ((ProfileManager.Current.GameWindowSize.X / 2)),
-            //                                 ((ProfileManager.Current.GameWindowSize.Y / 2)));
-
-            //batcher.GraphicsDevice.Clear(ClearOptions.Stencil | ClearOptions.Target | ClearOptions.DepthBuffer, Color.Black, 0, 0);
-
+            
 
             batcher.SetBrightlight(ProfileManager.Current.Brighlight);
 
             batcher.Begin();
 
-            //batcher.SetStencil(s2);
+            if (usecircle)
+            {
+                CircleOfTransparency.Draw(batcher,
+                                          (int) ((ProfileManager.Current.GameWindowSize.X / 2f) * Scale),
+                                          (int) (((ProfileManager.Current.GameWindowSize.Y - 22) / 2f) * Scale));
+            }
 
             if (!_deathScreenActive)
             {
                 RenderedObjectsCount = 0;
 
                 int z = World.Player.Z + 5;
-                bool usecircle = ProfileManager.Current.UseCircleOfTransparency;
 
                 for (int i = 0; i < _renderListCount; i++)
                 {
@@ -822,7 +812,6 @@ namespace ClassicUO.Game.Scenes
                     _multi.Draw(batcher, _multi.RealScreenPosition.X, _multi.RealScreenPosition.Y);
             }
 
-            //batcher.SetStencil(null);
 
             // draw weather
             _weather.Draw(batcher, 0, 0 /*ProfileManager.Current.GameWindowPosition.X, ProfileManager.Current.GameWindowPosition.Y*/);

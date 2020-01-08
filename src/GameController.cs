@@ -84,7 +84,20 @@ namespace ClassicUO
 
         protected override void LoadContent()
         {
-            LoadGameFilesFromFileSystem();
+            uint[] hues = UOFileManager.Hues.CreateShaderColors();
+
+            int size = UOFileManager.Hues.HuesCount;
+
+            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size * 2);
+            texture0.SetData(hues, 0, size * 2);
+            Texture2D texture1 = new Texture2D(GraphicsDevice, 32, size);
+            texture1.SetData(hues, size, size);
+            GraphicsDevice.Textures[1] = texture0;
+            GraphicsDevice.Textures[2] = texture1;
+
+            AuraManager.CreateAuraTexture();
+            UIManager.InitializeGameCursor();
+
             base.LoadContent();
 
             SetScene(new LoginScene());
@@ -225,78 +238,6 @@ namespace ClassicUO
                 SetWindowPosition(x, y);
             }
         }
-
-        public void LoadGameFilesFromFileSystem()
-        {
-            Log.Trace( "Checking for Ultima Online installation...");
-            Log.PushIndent();
-
-
-            try
-            {
-                UOFileManager.UoFolderPath = Settings.GlobalSettings.UltimaOnlineDirectory;
-            }
-            catch (FileNotFoundException)
-            {
-                Log.Error( "Wrong Ultima Online installation folder.");
-
-                throw;
-            }
-
-            Log.Trace( "Done!");
-            Log.Trace( $"Ultima Online installation folder: {UOFileManager.UoFolderPath}");
-            Log.PopIndent();
-
-            Log.Trace( "Loading files...");
-            Log.PushIndent();
-
-            if (!string.IsNullOrWhiteSpace(Settings.GlobalSettings.ClientVersion))
-            {
-                // sanitize client version
-                Settings.GlobalSettings.ClientVersion = Settings.GlobalSettings.ClientVersion.Replace(",", ".").Replace(" ", "").ToLower();
-            }
-
-            Client.Load(Settings.GlobalSettings.UltimaOnlineDirectory, Settings.GlobalSettings.ClientVersion);
-
-            StaticFilters.Load();
-            Log.PopIndent();
-
-            uint[] hues = UOFileManager.Hues.CreateShaderColors();
-
-            int size = UOFileManager.Hues.HuesCount;
-
-            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size * 2);
-            texture0.SetData(hues, 0, size * 2);
-            Texture2D texture1 = new Texture2D(GraphicsDevice, 32, size);
-            texture1.SetData(hues, size, size);
-            GraphicsDevice.Textures[1] = texture0;
-            GraphicsDevice.Textures[2] = texture1;
-
-            AuraManager.CreateAuraTexture();
-
-            Log.Trace( "Network calibration...");
-            Log.PushIndent();
-            PacketHandlers.Load();
-            //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
-            UltimaLive.Enable();
-            PacketsTable.AdjustPacketSizeByVersion(Client.Version);
-            Log.Trace( "Done!");
-            Log.PopIndent();
-
-            Log.Trace( "Loading plugins...");
-            Log.PushIndent();
-
-            UIManager.InitializeGameCursor();
-
-            foreach (var p in Settings.GlobalSettings.Plugins)
-                Plugin.Create(p);
-            Log.Trace( "Done!");
-            Log.PopIndent();
-
-
-            UoAssist.Start();
-        }
-
 
         protected override void Update(GameTime gameTime)
         {
@@ -601,12 +542,10 @@ namespace ClassicUO
                 case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
                     Mouse.Update();
                     bool isDown = e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN;
-                    bool resetTime = false;
 
                     if (_dragStarted && !isDown)
                     {
                         _dragStarted = false;
-                        resetTime = true;
                     }
 
                     SDL.SDL_MouseButtonEvent mouse = e.button;
@@ -626,7 +565,7 @@ namespace ClassicUO
                                 if (Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
                                 {
                                     Mouse.LastLeftButtonClickTime = 0;
-
+                                 
                                     bool res = UIManager.ValidForDClick() ? UIManager.OnLeftMouseDoubleClick() : _scene.OnLeftMouseDoubleClick();
 
                                     if (!res)
@@ -649,12 +588,10 @@ namespace ClassicUO
                             }
                             else
                             {
-                                if (resetTime)
-                                    Mouse.LastLeftButtonClickTime = 0;
-
                                 if (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF)
                                 {
-                                    _scene.OnLeftMouseUp();
+                                    if (!UIManager.HadMouseDownOnGump(MouseButtonType.Left))
+                                        _scene.OnLeftMouseUp();
                                     UIManager.OnLeftMouseButtonUp();
                                 }
                                 Mouse.LButtonPressed = false;
@@ -736,12 +673,10 @@ namespace ClassicUO
                             }
                             else
                             {
-                                if (resetTime)
-                                    Mouse.LastRightButtonClickTime = 0;
-
                                 if (Mouse.LastRightButtonClickTime != 0xFFFF_FFFF)
                                 {
-                                    _scene.OnRightMouseUp();
+                                    if (!UIManager.HadMouseDownOnGump(MouseButtonType.Right))
+                                        _scene.OnRightMouseUp();
                                     UIManager.OnRightMouseButtonUp();
                                 }
                                 Mouse.RButtonPressed = false;

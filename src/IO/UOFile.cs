@@ -1,6 +1,6 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -108,7 +108,6 @@ namespace ClassicUO.IO
             {
                 buffer[i] = ptr[i];
             }
-            //fixed (byte* ptr = buffer) Buffer.MemoryCopy((byte*) PositionAddress, ptr, count, count);
 
             Position += count;
         }
@@ -138,32 +137,5 @@ namespace ClassicUO.IO
 
             return s;
         }
-
-        //[MethodImpl(256)]
-        //internal (int, int, bool) SeekByEntryIndex(int entryidx)
-        //{
-        //    if (entryidx < 0 || Entries == null || entryidx >= Entries.Length)
-        //        return (0, 0, false);
-
-        //    ref readonly UOFileIndex3D e = ref Entries[entryidx];
-
-        //    if (e.Offset < 0) return (0, 0, false);
-
-        //    int length = e.Length & 0x7FFFFFFF;
-        //    int extra = e.Extra;
-
-        //    if ((e.Length & (1 << 31)) != 0)
-        //    {
-        //        Verdata.File.Seek(e.Offset);
-
-        //        return (length, extra, true);
-        //    }
-
-        //    if (e.Length < 0) return (0, 0, false);
-
-        //    Seek(e.Offset);
-
-        //    return (length, extra, false);
-        //}
     }
 }

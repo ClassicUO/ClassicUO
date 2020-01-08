@@ -1,6 +1,6 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -51,7 +51,7 @@ namespace ClassicUO.Configuration
         [JsonProperty(PropertyName = "port")] public ushort Port { get; set; } = 2593;
 
         [JsonProperty(PropertyName = "ultimaonlinedirectory")]
-        public string UltimaOnlineDirectory { get; set; } = "path/to/uo/";
+        public string UltimaOnlineDirectory { get; set; } = "";
 
         [JsonProperty(PropertyName = "clientversion")]
         public string ClientVersion { get; set; } = string.Empty;
@@ -144,20 +144,6 @@ namespace ClassicUO.Configuration
             // NOTE: We can do any other settings clean-ups here before we save them
 
             ConfigurationResolver.Save(settingsToSave, GetSettingsFilepath());
-        }
-
-        public bool IsValid()
-        {
-            bool valid = !string.IsNullOrWhiteSpace(UltimaOnlineDirectory);
-
-
-            //if (string.IsNullOrWhiteSpace(ClientVersion) || ClientVersion == "0.0.0.0" || ClientVersion.Split(new [] { '.' }, StringSplitOptions.RemoveEmptyEntries).Length <= 2)
-            //{
-            //    valid = false;
-            //}
-
-
-            return valid;
         }
     }
 }

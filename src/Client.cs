@@ -12,6 +12,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Game.Managers;
+using ClassicUO.Network;
+using ClassicUO.Utility.Platforms;
+
+using SDL2;
+
 namespace ClassicUO
 {
     [Flags]
@@ -42,10 +48,47 @@ namespace ClassicUO
         public static GameController Game { get; private set; }
 
 
-        public static void Load(string clientPath, string clientVersionText)
+
+
+        public static void Run()
+        {
+            Debug.Assert(Game == null);
+
+            Load();
+
+            Log.Trace("Running game...");
+            using (Game = new GameController())
+            {
+                Game.Run();
+            }
+            Log.Trace("Exiting game...");
+        }
+
+        public static void ShowErrorMessage(string msg)
+        {
+            if (Game != null && Game.Window.Handle != IntPtr.Zero)
+                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "ERROR", msg, Game.Window.Handle);
+        }
+
+
+        private static void Load()
         {
             Log.Trace("Loading");
             Log.PushIndent();
+
+            string clientPath = Settings.GlobalSettings.UltimaOnlineDirectory;
+            Log.Trace($"Ultima Online installation folder: {clientPath}");
+
+            Log.Trace("Loading files...");
+            Log.PushIndent();
+
+            if (!string.IsNullOrWhiteSpace(Settings.GlobalSettings.ClientVersion))
+            {
+                // sanitize client version
+                Settings.GlobalSettings.ClientVersion = Settings.GlobalSettings.ClientVersion.Replace(",", ".").Replace(" ", "").ToLower();
+            }
+
+            string clientVersionText = Settings.GlobalSettings.ClientVersion;
 
             // check if directory is good
             if (!Directory.Exists(clientPath))
@@ -53,7 +96,7 @@ namespace ClassicUO
                 Log.Error("Invalid client directory: " + clientPath);
                 throw new InvalidClientDirectory($"'{clientPath}' is not a valid directory");
             }
-           
+
             // try to load the client version
             if (!ClientVersionHelper.TryParse(clientVersionText, out ClientVersion clientVersion))
             {
@@ -70,7 +113,7 @@ namespace ClassicUO
                 Log.Trace($"Found a valid client.exe [{clientVersion}]");
 
                 // update the wrong/missing client version in settings.json
-                Settings.GlobalSettings.ClientVersion = clientVersionText;         
+                Settings.GlobalSettings.ClientVersion = clientVersionText;
             }
 
             Version = clientVersion;
@@ -98,23 +141,27 @@ namespace ClassicUO
             Log.Trace("UOP? " + (IsUOPInstallation ? "yes" : "no"));
 
             // ok now load uo files
-            UOFileManager.LoadFiles();
+            UOFileManager.Load();
+            StaticFilters.Load();
+
+            Log.Trace("Network calibration...");
+            PacketHandlers.Load();
+            //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
+            UltimaLive.Enable();
+            PacketsTable.AdjustPacketSizeByVersion(Client.Version);
+            Log.Trace("Done!");
+
+            Log.Trace("Loading plugins...");
+
+            foreach (var p in Settings.GlobalSettings.Plugins)
+                Plugin.Create(p);
+            Log.Trace("Done!");
+
+
+            UoAssist.Start();
 
             Log.PopIndent();
             Log.Trace("Loading done");
         }
-
-        public static void Run()
-        {
-            Debug.Assert(Game == null);
-
-            Log.Trace("Running game...");
-            using (Game = new GameController())
-            {
-                Game.Run();
-            }
-            Log.Trace("Exiting game...");
-        }
-
     }
 }

@@ -1,6 +1,6 @@
 #region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -608,7 +608,13 @@ namespace ClassicUO.Network
 
         private static void EnterWorld(Packet p)
         {
-            ProfileManager.Load(World.ServerName, LoginScene.Account, Settings.GlobalSettings.LastCharacterName.Trim());
+            if (ProfileManager.Current == null)
+                ProfileManager.Load(World.ServerName, LoginScene.Account, Settings.GlobalSettings.LastCharacterName.Trim());
+
+            if (World.Player != null)
+            {
+                World.Clear();
+            }
 
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
             p.Skip(4);
@@ -3079,7 +3085,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 0x0C: // close statusbar gump
-                    UIManager.Remove<HealthBarGump>(p.ReadUInt());
+                    UIManager.GetGump<HealthBarGump>(p.ReadUInt())?.Dispose();
 
                     break;
 
@@ -3169,10 +3175,12 @@ namespace ClassicUO.Network
                 case 0x14: // display popup/context menu
                     PopupMenuData data = PopupMenuData.Parse(p);
 
+                    UIManager.GetGump<PopupMenuGump>()?.Dispose();
+
                     UIManager.Add(new PopupMenuGump(data)
                     {
-                        X = Mouse.Position.X,
-                        Y = Mouse.Position.Y
+                        X = DelayedObjectClickManager.X,
+                        Y = DelayedObjectClickManager.Y
                     });
 
                     break;
@@ -3186,22 +3194,22 @@ namespace ClassicUO.Network
                     switch (id)
                     {
                         case 1: // paperdoll
-                            UIManager.Remove<PaperDollGump>(serial);
+                            UIManager.GetGump<PaperDollGump>(serial)?.Dispose();
 
                             break;
 
                         case 2: //statusbar
-                            UIManager.Remove<HealthBarGump>(serial);
+                            UIManager.GetGump<HealthBarGump>(serial)?.Dispose();
 
                             break;
 
                         case 8: // char profile
-                            UIManager.Remove<ProfileGump>();
+                            UIManager.GetGump<ProfileGump>()?.Dispose();
 
                             break;
 
                         case 0x0C: //container
-                            UIManager.Remove<ContainerGump>(serial);
+                            UIManager.GetGump<ContainerGump>(serial)?.Dispose();
 
                             break;
                     }
@@ -3805,9 +3813,10 @@ namespace ClassicUO.Network
             byte[] decData = new byte[dlen];
             string layout;
 
+            ref var buffer = ref p.ToArray();
+
             unsafe
             {
-                ref var buffer = ref p.ToArray();
 
                 fixed (byte* srcPtr = &buffer[p.Position], destPtr = decData)
                 {
@@ -3819,7 +3828,7 @@ namespace ClassicUO.Network
             p.Skip((int)clen);
 
             uint linesNum = p.ReadUInt();
-            string[] lines = new string[0];
+            string[] lines = new string[linesNum];
 
             if (linesNum > 0)
             {
@@ -3829,14 +3838,11 @@ namespace ClassicUO.Network
 
                 unsafe
                 {
-                    ref var buffer = ref p.ToArray();
                     fixed (byte* srcPtr = &buffer[p.Position], destPtr = decData)
                         ZLib.Decompress((IntPtr)srcPtr, (int)clen, 0, (IntPtr)destPtr, dlen);
                 }
 
                 p.Skip((int) clen);
-
-                lines = new string[linesNum];
 
                 for (int i = 0, index = 0; i < linesNum; i++)
                 {
@@ -3856,12 +3862,17 @@ namespace ClassicUO.Network
 
         private static void BuffDebuff(Packet p)
         {
-            const int TABLE_COUNT = 126;
-            const ushort BUFF_ICON_START = 0x03E9;
-            uint serial = p.ReadUInt();
-            ushort iconID = (ushort) (p.ReadUShort() - BUFF_ICON_START);
+            if (World.Player == null)
+                return;
 
-            if (iconID < TABLE_COUNT)
+            const ushort BUFF_ICON_START = 0x03E9;
+            const ushort BUFF_ICON_START_NEW = 0x466;
+
+            uint serial = p.ReadUInt();
+            ushort ic = p.ReadUShort();
+            ushort iconID = ic >= BUFF_ICON_START_NEW ? (ushort) (ic - (BUFF_ICON_START_NEW - 125)) : (ushort) (ic - BUFF_ICON_START);
+
+            if (iconID < BuffTable.Table.Length)
             {
                 BuffGump gump = UIManager.GetGump<BuffGump>();
                 ushort mode = p.ReadUShort();
@@ -3889,11 +3900,17 @@ namespace ClassicUO.Network
                     }
 
                     if (wtfCliloc != 0)
-                        wtf = "\n" + UOFileManager.Cliloc.GetString((int) wtfCliloc);
-                    string text = $"<left>{title}{description}{wtf}</left>";
+                    {
+                        wtf = UOFileManager.Cliloc.GetString((int) wtfCliloc);
+                        if (!string.IsNullOrEmpty(wtf))
+                            wtf = $"\n{wtf}";
+                    }
 
+                    string text = $"<left>{title}{description}{wtf}</left>";
+                    bool alreadyExists = World.Player.IsBuffIconExists(BuffTable.Table[iconID]);
                     World.Player.AddBuff(BuffTable.Table[iconID], timer, text);
-                    gump?.AddBuff(BuffTable.Table[iconID]);
+                    if (!alreadyExists)
+                        gump?.AddBuff(BuffTable.Table[iconID]);
                 }
                 else
                 {

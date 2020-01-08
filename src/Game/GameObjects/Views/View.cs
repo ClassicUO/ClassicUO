@@ -1,6 +1,6 @@
 #region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Configuration;
@@ -64,15 +65,43 @@ namespace ClassicUO.Game.GameObjects
                 StencilFunction = CompareFunction.GreaterEqual,
                 StencilPass = StencilOperation.Keep,
                 ReferenceStencil = 0,
-                DepthBufferEnable = false,
+                //DepthBufferEnable = true,
+                //DepthBufferWriteEnable = true,
             };
 
 
             return state;
         });
 
+
         public virtual bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
+            //if (DrawTransparent)
+            //{
+            //    int x = RealScreenPosition.X;
+            //    int y = RealScreenPosition.Y;
+            //    int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
+            //    int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
+
+            //    int dist = Math.Max(Math.Abs(x - fx), Math.Abs(y - fy));
+            //    int maxDist = ProfileManager.Current.CircleOfTransparencyRadius;
+
+            //    if (dist <= maxDist)
+            //    {
+            //        HueVector.Z = MathHelper.Lerp(1f, 1f - dist / (float)maxDist, 0.5f);
+            //        //HueVector.Z = 1f - (dist / (float)maxDist);
+            //    }
+            //    else
+            //        HueVector.Z = 1f - AlphaHue / 255f;
+            //}
+            //else if (AlphaHue != 255)
+            //    HueVector.Z = 1f - AlphaHue / 255f;
+
+            //if (!batcher.DrawSprite(Texture, posX - Bounds.X, posY - Bounds.Y, IsFlipped, ref HueVector))
+            //    return false;
+
+
+
             if (DrawTransparent)
             {
                 int x = RealScreenPosition.X;
@@ -80,58 +109,38 @@ namespace ClassicUO.Game.GameObjects
                 int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
                 int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
 
+                //fx -= x;
+                //fy -= y;
+                //int dist = (int) Math.Sqrt(fx * fx + fy * fy);
+
                 int dist = Math.Max(Math.Abs(x - fx), Math.Abs(y - fy));
                 int maxDist = ProfileManager.Current.CircleOfTransparencyRadius;
 
                 if (dist <= maxDist)
                 {
-                    HueVector.Z = MathHelper.Lerp(1f, 1f - dist / (float)maxDist, 0.5f);
-                    //HueVector.Z = 1f - (dist / (float)maxDist);
+                    HueVector.Z = 0.75f;
+
+                    batcher.DrawSprite(Texture, posX - Bounds.X, posY - Bounds.Y, IsFlipped, ref HueVector);
+
+                    if (AlphaHue != 255)
+                        HueVector.Z = 1f - AlphaHue / 255f;
+                    else
+                        HueVector.Z = 0;
+
+                    batcher.SetStencil(_stencil.Value);
+                    batcher.DrawSprite(Texture, posX - Bounds.X, posY - Bounds.Y, IsFlipped, ref HueVector);
+                    batcher.SetStencil(null);
+                    goto COT;
                 }
-                else
-                    HueVector.Z = 1f - AlphaHue / 255f;
             }
-            else if (AlphaHue != 255)
+
+            if (AlphaHue != 255)
                 HueVector.Z = 1f - AlphaHue / 255f;
 
             if (!batcher.DrawSprite(Texture, posX - Bounds.X, posY - Bounds.Y, IsFlipped, ref HueVector))
                 return false;
 
-            //if (Rotation != 0.0f)
-            //{
-            //    if (!batcher.DrawSpriteRotated(Texture, posX, posY, ref HueVector, Rotation))
-            //        return false;
-            //}
-            //else
-            //{
-            //    //if (DrawTransparent)
-            //    //{
-            //    //    int dist = Distance;
-            //    //    int maxDist = ProfileManager.Current.CircleOfTransparencyRadius + 1;
-
-            //    //    if (dist <= maxDist)
-            //    //    {
-            //    //        HueVector.Z = 0.75f; // MathHelper.Lerp(1f, 1f - dist / (float)maxDist, 0.5f);
-            //    //        //HueVector.Z = 1f - (dist / (float)maxDist);
-            //    //    }
-            //    //    else
-            //    //        HueVector.Z = 1f - AlphaHue / 255f;
-
-            //    //    batcher.DrawSprite(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector);
-
-            //    //    HueVector.Z = 0;
-
-            //    //    batcher.SetStencil(_stencil.Value);
-            //    //    batcher.DrawSprite(Texture, posX, posY, Bounds.Width, Bounds.Height, Bounds.X, Bounds.Y, ref HueVector);
-            //    //    batcher.SetStencil(null);
-            //    //}
-            //    //else
-            //    {
-            //        if (!batcher.DrawSprite(Texture, posX - Bounds.X, posY - Bounds.Y, IsFlipped, ref HueVector))
-            //            return false;
-            //    }
-            //}
-
+            COT:
 
             Select(posX, posY);
 

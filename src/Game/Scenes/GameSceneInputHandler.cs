@@ -1,6 +1,6 @@
 #region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering
@@ -71,15 +71,15 @@ namespace ClassicUO.Game.Scenes
 
         private bool _followingMode;
         private uint _followingTarget;
-        private bool _inqueue;
+        //private bool _inqueue;
         private bool _isCtrlDown;
         private bool _isSelectionActive;
 
         private bool _isShiftDown;
         private bool _isUpDown, _isDownDown, _isLeftDown, _isRightDown, _isMacroMoveDown, _isAuraActive;
         public Direction _numPadDirection;
-        private Action _queuedAction;
-        private Entity _queuedObject;
+        //private Action _queuedAction;
+        //private Entity _queuedObject;
         private bool _wasShiftDown;
 
         private bool _requestedWarMode;
@@ -305,20 +305,34 @@ namespace ClassicUO.Game.Scenes
             if (!IsMouseOverViewport)
                 return;
 
-            _dragginObject = SelectedObject.Object as Entity;
-
-            if (ProfileManager.Current.EnableDragSelect && DragSelectModifierActive())
+            if (World.CustomHouseManager != null)
             {
-                if (CanDragSelectOnObject(SelectedObject.Object as GameObject))
+                _isMouseLeftDown = true;
+
+                if (SelectedObject.LastObject is GameObject obj)
                 {
-                    _selectionStart = (Mouse.Position.X, Mouse.Position.Y);
-                    _isSelectionActive = true;
+                    World.CustomHouseManager.OnTargetWorld(obj);
+                    _lastSelectedMultiPositionInHouseCustomization.X = obj.X;
+                    _lastSelectedMultiPositionInHouseCustomization.Y = obj.Y;
                 }
             }
             else
             {
-                _isMouseLeftDown = true;
-                _holdMouse2secOverItemTime = Time.Ticks;
+                _dragginObject = SelectedObject.Object as Entity;
+
+                if (ProfileManager.Current.EnableDragSelect && DragSelectModifierActive())
+                {
+                    if (CanDragSelectOnObject(SelectedObject.Object as GameObject))
+                    {
+                        _selectionStart = (Mouse.Position.X, Mouse.Position.Y);
+                        _isSelectionActive = true;
+                    }
+                }
+                else
+                {
+                    _isMouseLeftDown = true;
+                    _holdMouse2secOverItemTime = Time.Ticks;
+                }
             }
         }
 
@@ -418,14 +432,8 @@ namespace ClassicUO.Game.Scenes
                     case CursorTarget.SetGrabBag:
                     case CursorTarget.Position:
                     case CursorTarget.Object:
-                    case CursorTarget.MultiPlacement:
-
-                        if (World.CustomHouseManager != null)
-                        {
-                            World.CustomHouseManager.OnTargetWorld(SelectedObject.Object as GameObject);
-                        }
-                        else
-                        {
+                    case CursorTarget.MultiPlacement when World.CustomHouseManager == null:
+                    {
                             var obj = SelectedObject.Object;
                             if (obj is TextOverhead ov)
                                 obj = ov.Owner;
@@ -495,7 +503,7 @@ namespace ClassicUO.Game.Scenes
             }
             else
             {
-                GameObject obj = SelectedObject.Object as GameObject;
+                GameObject obj = SelectedObject.LastObject as GameObject;
 
                 switch (obj)
                 {
@@ -529,20 +537,9 @@ namespace ClassicUO.Game.Scenes
                             _followingMode = true;
                             _followingTarget = ent;
                         }
-                        else if (!_inqueue)
+                        else if (!DelayedObjectClickManager.IsEnabled)
                         {
-                            _inqueue = true;
-                            _queuedObject = ent;
-                            _dequeueAt = Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                            _wasShiftDown = _isShiftDown;
-
-                            _queuedAction = () =>
-                            {
-                                if (!World.ClientFeatures.TooltipsEnabled || 
-                                    (ent is Item it && it.IsLocked && it.ItemData.Weight == 255 && !it.ItemData.IsContainer ))
-                                    GameActions.SingleClick(_queuedObject);
-                                GameActions.OpenPopupMenu(_queuedObject, _wasShiftDown);
-                            };
+                            DelayedObjectClickManager.Set(ent.Serial, Mouse.Position.X, Mouse.Position.Y, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                         }
 
                         break;
@@ -557,41 +554,43 @@ namespace ClassicUO.Game.Scenes
 
             if (!IsMouseOverViewport)
             {
-                result = _queuedObject != null;
-                ClearDequeued();
-                return result;
+                result = DelayedObjectClickManager.IsEnabled;
             }
-
-            BaseGameObject obj = SelectedObject.Object;
-
-
-            switch (obj)
+            else
             {
-                case Item item:
-                    result = true;
-                    if (!GameActions.OpenCorpse(item))
-                        GameActions.DoubleClick(item);
+                BaseGameObject obj = SelectedObject.LastObject;
 
-                    break;
+                switch (obj)
+                {
+                    case Item item:
+                        result = true;
+                        if (!GameActions.OpenCorpse(item))
+                            GameActions.DoubleClick(item);
 
-                case Mobile mob:
-                    result = true;
+                        break;
 
-                    if (World.Player.InWarMode && World.Player != mob)
-                        GameActions.Attack(mob);
-                    else
-                        GameActions.DoubleClick(mob);
+                    case Mobile mob:
+                        result = true;
 
-                    break;
+                        if (World.Player.InWarMode && World.Player != mob)
+                            GameActions.Attack(mob);
+                        else
+                            GameActions.DoubleClick(mob);
 
-                case TextOverhead msg when msg.Owner is Entity entity:
-                    result = true;
-                    GameActions.DoubleClick(entity);
+                        break;
 
-                    break;
+                    case TextOverhead msg when msg.Owner is Entity entity:
+                        result = true;
+                        GameActions.DoubleClick(entity);
+
+                        break;
+                }
             }
 
-            ClearDequeued();
+            if (result)
+            {
+                DelayedObjectClickManager.Clear();
+            }
 
             return result;
         }

@@ -1,6 +1,6 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -228,6 +228,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             return Task.Run(() =>
             {
+                if (World.InGame)
+                {
                 const int OFFSET_PIX = 2;
                 const int OFFSET_PIX_HALF = OFFSET_PIX / 2;
 
@@ -354,6 +356,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _mapTexture.SetData(buffer);
 
                 GameActions.Print("WorldMap loaded!", 0x48);
+                }
             }
             );
         }

@@ -1,6 +1,6 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -32,8 +32,9 @@ namespace ClassicUO.Game
     internal class ItemHold
     {
         public bool OnGround { get; private set; }
-        public ushort X, Y;
-        public sbyte Z;
+        public ushort X { get; private set; }
+        public ushort Y { get; private set; }
+        public sbyte Z { get; private set; }
         public uint Container { get; private set; }
         public uint Serial { get; private set; }
         public ushort Graphic { get; private set; }

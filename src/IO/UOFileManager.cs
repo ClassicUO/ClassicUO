@@ -1,6 +1,6 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -40,22 +40,10 @@ namespace ClassicUO.IO
 {
     internal static class UOFileManager
     {
-        private static string _uofolderpath;
-
-        public static string UoFolderPath
-        {
-            get => _uofolderpath;
-            set
-            {
-                _uofolderpath = value;
-            }
-        }
-
         public static string GetUOFilePath(string file)
         {
-            return Path.Combine(UoFolderPath, file);
+            return Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, file);
         }
-
 
 
         public static AnimationsLoader Animations { get; private set; }
@@ -76,7 +64,7 @@ namespace ClassicUO.IO
         public static MultiMapLoader Multimap { get; private set; }
         public static ProfessionLoader Profession { get; private set; }
 
-        public static void LoadFiles()
+        public static void Load()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 

@@ -626,19 +626,14 @@ namespace ClassicUO.Game.UI.Gumps
                         X = offsetX,
                         Y = offsetY,
                         CanMove = false,
-                        LocalSerial = (uint) (ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
+                        LocalSerial = (uint) (ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i),
+                        Height = 60
                     };
                     pic.MouseUp += (sender, e) =>
                     {
                         OnButtonClick((int) pic.LocalSerial);
                     };
                     _dataBox.Add(pic);
-
-                    //_dataBox.Add(new HitBox(offsetX, offsetY,
-                    //    bounds.Width, bounds.Height)
-                    //{
-                    //    Priority = ClickPriority.Default
-                    //});
 
                     x += 48;
 
@@ -680,17 +675,14 @@ namespace ClassicUO.Game.UI.Gumps
                                 X = offsetX,
                                 Y = offsetY,
                                 CanMove = false,
-                                LocalSerial = (uint) (ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
+                                LocalSerial = (uint) (ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i),
+                                Height = 120
                             };
                             pic.MouseUp += (sender, e) =>
                             {
                                 OnButtonClick((int) pic.LocalSerial);
                             };
                             _dataBox.Add(pic);
-                            //_dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
-                            //{
-                            //    Priority = ClickPriority.Default
-                            //});
                         }
 
                         x += 48;
@@ -770,19 +762,11 @@ namespace ClassicUO.Game.UI.Gumps
                             X = offsetX,
                             Y = offsetY,
                             CanMove = false,
-                            LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
+                            LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i),
+                            Height = 120
                         };
                         pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial); };
                         _dataBox.Add(pic);
-                        //_dataBox.Add(new StaticPic(graphic, 0)
-                        //{
-                        //    X = offsetX,
-                        //    Y = offsetY
-                        //});
-                        //_dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
-                        //{
-                        //    Priority = ClickPriority.Default
-                        //});
                     }
 
                     x += 48;
@@ -906,7 +890,8 @@ namespace ClassicUO.Game.UI.Gumps
                                 X = offsetX,
                                 Y = offsetY,
                                 CanMove = false,
-                                LocalSerial = (uint) (ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + index)
+                                LocalSerial = (uint) (ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + index),
+                                Height = 120
                             };
                             pic.MouseUp += (sender, e) =>
                             {
@@ -969,14 +954,11 @@ namespace ClassicUO.Game.UI.Gumps
                                 X = offsetX,
                                 Y = offsetY,
                                 CanMove = false,
-                                LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i + combinedStair)
+                                LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i + combinedStair),
+                                Height = 60
                             };
                             pic.MouseUp += (sender, e) => { OnButtonClick((int) pic.LocalSerial);};
                             _dataBox.Add(pic);
-                            //_dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
-                            //{
-                            //    Priority = ClickPriority.Default
-                            //});
                         }
 
                         x += 48;
@@ -1025,20 +1007,11 @@ namespace ClassicUO.Game.UI.Gumps
                         X = offsetX,
                         Y = offsetY,
                         CanMove = false,
-                        LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
+                        LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i),
+                        Height = 60
                     };
                     pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial); };
                     _dataBox.Add(pic);
-
-                    //_dataBox.Add(new StaticPic((ushort)vec[0].NSCrosspiece, 0)
-                    //{
-                    //    X = offsetX,
-                    //    Y = offsetY
-                    //});
-                    //_dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
-                    //{
-                    //    Priority = ClickPriority.Default
-                    //});
 
                     x += 48;
 
@@ -1090,20 +1063,11 @@ namespace ClassicUO.Game.UI.Gumps
                                     X = offsetX,
                                     Y = offsetY,
                                     CanMove = false,
-                                    LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + index)
+                                    LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + index),
+                                    Height = 120
                                 };
                                 pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial); };
                                 _dataBox.Add(pic);
-
-                                //_dataBox.Add(new StaticPic(graphic, 0)
-                                //{
-                                //    X = offsetX,
-                                //    Y = offsetY
-                                //});
-                                //_dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
-                                //{
-                                //    Priority = ClickPriority.Default
-                                //});
                             }
 
                             x += 48;
@@ -1185,22 +1149,13 @@ namespace ClassicUO.Game.UI.Gumps
                     int offsetX = x + 121 + (48 - bounds.Width) / 2;
                     int offsetY = y + 36;
 
-                    //_dataBox.Add(new StaticPic((ushort)vec[0].Piece5, 0)
-                    //{
-                    //    X = offsetX,
-                    //    Y = offsetY
-                    //});
-                    //_dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
-                    //{
-                    //    Priority = ClickPriority.Default
-                    //});
-
                     var pic = new StaticPic((ushort) vec[0].Piece5, 0)
                     {
                         X = offsetX,
                         Y = offsetY,
                         CanMove = false,
-                        LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
+                        LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i),
+                        Height = 60
                     };
                     pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial); };
                     _dataBox.Add(pic);
@@ -1249,20 +1204,11 @@ namespace ClassicUO.Game.UI.Gumps
                                 X = offsetX,
                                 Y = offsetY,
                                 CanMove = false,
-                                LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i)
+                                LocalSerial = (uint)(ID_GUMP_CUSTOM_HOUSE.ID_GCH_ITEM_IN_LIST + i),
+                                Height = 120
                             };
                             pic.MouseUp += (sender, e) => { OnButtonClick((int)pic.LocalSerial); };
                             _dataBox.Add(pic);
-
-                            //_dataBox.Add(new StaticPic(graphic, 0)
-                            //{
-                            //    X = offsetX,
-                            //    Y = offsetY
-                            //});
-                            //_dataBox.Add(new HitBox(offsetX, offsetY, bounds.Width, bounds.Height)
-                            //{
-                            //    Priority = ClickPriority.Default
-                            //});
                         }
 
                         x += 48;
@@ -1287,106 +1233,72 @@ namespace ClassicUO.Game.UI.Gumps
             const int TEXT_WIDTH = 108;
 
             var button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_BACKUP,
-                                    0x098D, 0x098D, 0x098D)
+                                    0x098D, 0x098D, 0x098D, "Backup", 0, true, 0, 0x0036)
             {
                 X = 150,
                 Y = 50,
-                ButtonAction = ButtonAction.Activate
+                ButtonAction = ButtonAction.Activate,
+                FontCenter = true
             };
             button.SetTooltip("Store design in progress in a back up buffer, but do not finalize design.");
             _dataBox.Add(button);
 
-            Label entry = new Label("Backup", true, 0x0036, TEXT_WIDTH, font: 0, align: TEXT_ALIGN_TYPE.TS_CENTER)
-            {
-                X = 150,
-                Y = 50
-            };
-            _dataBox.Add(entry);
-
 
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_RESTORE,
-                                0x098D, 0x098D, 0x098D)
+                                0x098D, 0x098D, 0x098D, "Restore", 0, true, 0, 0x0036)
             {
                 X = 150,
                 Y = 90,
-                ButtonAction = ButtonAction.Activate
+                ButtonAction = ButtonAction.Activate,
+                FontCenter = true
             };
             button.SetTooltip("Restore your design in progress to a design you have previously backed up.");
             _dataBox.Add(button);
-            entry = new Label("Restore", true, 0x0036, TEXT_WIDTH, font: 0, align: TEXT_ALIGN_TYPE.TS_CENTER)
-            {
-                X = 150,
-                Y = 90
-            };
-            _dataBox.Add(entry);
-
-
+          
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_SYNCH,
-                                0x098D, 0x098D, 0x098D)
+                                0x098D, 0x098D, 0x098D, "Synch", 0, true, 0, 0x0036)
             {
                 X = 270,
                 Y = 50,
-                ButtonAction = ButtonAction.Activate
+                ButtonAction = ButtonAction.Activate,
+                FontCenter = true
             };
             button.SetTooltip("Synchronize design state with server.");
             _dataBox.Add(button);
-            entry = new Label("Synch", true, 0x0036, TEXT_WIDTH, font: 0, align: TEXT_ALIGN_TYPE.TS_CENTER)
-            {
-                X = 270,
-                Y = 50
-            };
-            _dataBox.Add(entry);
-
-
+         
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_CLEAR,
-                                0x098D, 0x098D, 0x098D)
+                                0x098D, 0x098D, 0x098D, "Clear", 0, true, 0, 0x0036)
             {
                 X = 270,
                 Y = 90,
-                ButtonAction = ButtonAction.Activate
+                ButtonAction = ButtonAction.Activate,
+                FontCenter = true
             };
             button.SetTooltip("Clear all changes, returning your design in progress to a blank foundation.");
             _dataBox.Add(button);
-            entry = new Label("Clear", true, 0x0036, TEXT_WIDTH, font: 0, align: TEXT_ALIGN_TYPE.TS_CENTER)
-            {
-                X = 270,
-                Y = 90
-            };
-            _dataBox.Add(entry);
-
-
+           
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_COMMIT,
-                                0x098D, 0x098D, 0x098D)
+                                0x098D, 0x098D, 0x098D, "Commit", 0, true, 0, 0x0036)
             {
                 X = 390,
                 Y = 50,
-                ButtonAction = ButtonAction.Activate
+                ButtonAction = ButtonAction.Activate,
+                FontCenter = true
             };
             button.SetTooltip("Save existing changes and finalize design.");
             _dataBox.Add(button);
-            entry = new Label("Commit", true, 0x0036, TEXT_WIDTH, font: 0, align: TEXT_ALIGN_TYPE.TS_CENTER)
-            {
-                X = 390,
-                Y = 50
-            };
-            _dataBox.Add(entry);
-
+           
 
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_REVERT,
-                                    0x098D, 0x098D, 0x098D)
+                                    0x098D, 0x098D, 0x098D, "Revert", 0, true, 0, 0x0036)
             {
                 X = 390,
                 Y = 90,
-                ButtonAction = ButtonAction.Activate
+                ButtonAction = ButtonAction.Activate,
+                FontCenter = true
             };
             button.SetTooltip("Revert your design in progress to match your currently visible, finalized design.");
             _dataBox.Add(button);
-            entry = new Label("Revert", true, 0x0036, TEXT_WIDTH, font: 0, align: TEXT_ALIGN_TYPE.TS_CENTER)
-            {
-                X = 390,
-                Y = 90
-            };
-            _dataBox.Add(entry);
         }
 
         public override void OnButtonClick(int buttonID)

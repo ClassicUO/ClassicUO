@@ -1,6 +1,6 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -22,6 +22,8 @@
 #endregion
 
 using System;
+
+using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.IO.Audio.MP3Sharp;
 using ClassicUO.Utility.Logging;
@@ -46,7 +48,7 @@ namespace ClassicUO.IO.Audio
             Channels = AudioChannels.Stereo;
         }
 
-        private string Path => System.IO.Path.Combine(UOFileManager.UoFolderPath, Client.Version > ClientVersion.CV_5090 ? $"Music/Digital/{Name}.mp3" : $"music/{Name}.mp3");
+        private string Path => System.IO.Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, Client.Version > ClientVersion.CV_5090 ? $"Music/Digital/{Name}.mp3" : $"music/{Name}.mp3");
 
         public void Update()
         {

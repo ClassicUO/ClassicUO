@@ -1,6 +1,6 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -186,7 +186,6 @@ namespace ClassicUO.IO.Resources
         {
             return Task.Run(() =>
             {
-
                 bool loaduop = false;
                 int[] un = { 0x40000, 0x10000, 0x20000, 0x20000, 0x20000 };
 

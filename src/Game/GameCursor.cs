@@ -1,6 +1,6 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -76,7 +76,7 @@ namespace ClassicUO.Game
         {
             short ww = 0;
             short hh = 0;
-            uint[] data = CircleOfTransparency.CreateTexture(25, ref ww, ref hh);
+            uint[] data = CircleOfTransparency.CreateCircleTexture(25, ref ww, ref hh);
 
             for (int i = 0; i < data.Length; i++)
             {

@@ -1,6 +1,6 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -33,15 +33,12 @@ namespace ClassicUO.IO
     internal unsafe class DataReader
     {
         private byte* _data;
-
         private GCHandle _handle;
 
+
         internal long Position { get; set; }
-
         internal long Length { get; private set; }
-
         internal IntPtr StartAddress => (IntPtr) _data;
-
         internal IntPtr PositionAddress => (IntPtr) (_data + Position);
 
 

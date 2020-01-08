@@ -1,6 +1,6 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -44,7 +44,7 @@ namespace ClassicUO.Renderer
 
         private readonly IndexBuffer _indexBuffer;
         private readonly RasterizerState _rasterizerState;
-        private readonly VertexBuffer _vertexBuffer;
+        private readonly DynamicVertexBuffer _vertexBuffer;
         private readonly Texture2D[] _textureInfo;
         private PositionNormalTextureColor4[] _vertexInfo;
         private BlendState _blendState;
@@ -54,9 +54,6 @@ namespace ClassicUO.Renderer
         private bool _useScissor;
         private BoundingBox _drawingArea;
         private int _numSprites;
-        //private readonly IntPtr _ptrVertexBufferArray;
-        private GCHandle _handle;
-        private IntPtr _handlePtr;
 
         public UltimaBatcher2D(GraphicsDevice device)
         {
@@ -82,10 +79,6 @@ namespace ClassicUO.Renderer
             _stencil = Stencil;
 
             DefaultEffect = new IsometricEffect(device);
-
-
-            _handle = GCHandle.Alloc(_vertexInfo, GCHandleType.Pinned);
-            _handlePtr = _handle.AddrOfPinnedObject();
         }
 
 
@@ -1612,13 +1605,13 @@ namespace ClassicUO.Renderer
             if (_numSprites == 0)
                 return;
 
-            //int start = UpdateVerteBuffer(_handlePtr, _numSprites);
+            int start = UpdateVertexBuffer(_numSprites);
 
-            int start = 0;
-            _vertexBuffer.SetDataPointerEXT(0,
-                                            _handlePtr,
-                                            PositionNormalTextureColor4.SIZE_IN_BYTES * _numSprites,
-                                            SetDataOptions.None);
+            //int start = 0;
+            //_vertexBuffer.SetDataPointerEXT(0,
+            //                                _handlePtr,
+            //                                PositionNormalTextureColor4.SIZE_IN_BYTES * _numSprites,
+            //                                SetDataOptions.None);
 
             Texture2D current = _textureInfo[0];
             int offset = 0;
@@ -1690,22 +1683,31 @@ namespace ClassicUO.Renderer
 
         private int _currentBufferPosition;
 
-        private int UpdateVerteBuffer(IntPtr p, int len)
+        private unsafe int UpdateVertexBuffer(int len)
         {
-            int pos = _currentBufferPosition;
-            SetDataOptions hint = SetDataOptions.NoOverwrite;
+            int pos;
+            SetDataOptions hint;
 
-            if (pos + len > MAX_SPRITES)
+            if (_currentBufferPosition + len > MAX_SPRITES)
             {
                 pos = 0;
                 hint = SetDataOptions.Discard;
             }
+            else
+            {
+                pos = _currentBufferPosition;
+                hint = SetDataOptions.NoOverwrite;
+            }
 
-            _vertexBuffer.SetDataPointerEXT(
-                                            pos * PositionNormalTextureColor4.SIZE_IN_BYTES, 
-                                            p, 
-                                            len * PositionNormalTextureColor4.SIZE_IN_BYTES,
-                                            hint);
+            fixed (PositionNormalTextureColor4* p = &_vertexInfo[0])
+            {
+                _vertexBuffer.SetDataPointerEXT(
+                                                pos * PositionNormalTextureColor4.SIZE_IN_BYTES,
+                                                (IntPtr) p,
+                                                len * PositionNormalTextureColor4.SIZE_IN_BYTES,
+                                                hint);
+            }
+           
             _currentBufferPosition = pos + len;
             return pos;
         }
@@ -1732,7 +1734,6 @@ namespace ClassicUO.Renderer
             DefaultEffect?.Dispose();
             _vertexBuffer.Dispose();
             _indexBuffer.Dispose();
-            _handle.Free();
         }
 
 

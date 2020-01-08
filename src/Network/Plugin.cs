@@ -1,6 +1,6 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -27,6 +27,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -245,7 +246,7 @@ namespace ClassicUO.Network
 
         private static string GetUOFilePath()
         {
-            return UOFileManager.UoFolderPath;
+            return Settings.GlobalSettings.UltimaOnlineDirectory;
         }
 
         private static void SetWindowTitle(string str)

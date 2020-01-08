@@ -92,12 +92,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\FNA\FNA.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Net.Http" />
@@ -131,6 +129,7 @@
     <Compile Include="Game\Data\PopupMenuItem.cs" />
     <Compile Include="Game\Data\PromptData.cs" />
     <Compile Include="Game\Data\RaceType.cs" />
+    <Compile Include="Game\Managers\DelayedObjectClickManager.cs" />
     <Compile Include="Game\Managers\Seasons.cs" />
     <Compile Include="Game\Data\ServerErrorMessages.cs" />
     <Compile Include="Game\Data\SpellsMastery.cs" />
@@ -455,7 +454,7 @@
     <Compile Include="Interfaces\IUpdateable.cs" />
     <Compile Include="Game\Data\ClientVersion.cs" />
     <Compile Include="IO\DataReader.cs" />
-    <Compile Include="IO\FileManager.cs" />
+    <Compile Include="IO\UOFileManager.cs" />
     <Compile Include="IO\Resources\Verdata.cs" />
     <Compile Include="IO\UOFile.cs" />
     <Compile Include="IO\UOFileIndex.cs" />

@@ -1,6 +1,6 @@
 #region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -236,7 +236,13 @@ namespace ClassicUO.Game.Managers
             HandleMouseInput();
 
             if (MouseOverControl != null && IsMouseOverAControl)
-                return MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButtonType.Left);
+            {
+                if (MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButtonType.Left))
+                {
+                    DelayedObjectClickManager.Clear();
+                    return true;
+                }
+            }
 
             return false;
         }
@@ -318,6 +324,12 @@ namespace ClassicUO.Game.Managers
                 MouseOverControl.InvokeMouseWheel(isup ? MouseEventType.WheelScrollUp : MouseEventType.WheelScrollDown);
         }
 
+
+        public static bool HadMouseDownOnGump(MouseButtonType button)
+        {
+            var c = _mouseDownControls[(int) button];
+            return c != null && !(c is WorldViewport) && !(c is ItemGump);
+        }
 
 
         public static void InitializeGameCursor()
@@ -835,7 +847,7 @@ namespace ClassicUO.Game.Managers
                 return;
 
             TargetLine?.Dispose();
-            Remove<TargetLineGump>();
+            GetGump<TargetLineGump>()?.Dispose();
             TargetLine = null;
 
             if (TargetLine == null || TargetLine.IsDisposed)
@@ -864,7 +876,7 @@ namespace ClassicUO.Game.Managers
         public static void RemoveTargetLineGump(uint serial)
         {
             TargetLine?.Dispose();
-            Remove<TargetLineGump>();
+            GetGump<TargetLineGump>()?.Dispose();
             TargetLine = null;
 
             //if (_targetLineGumps.TryGetValue(serial, out TargetLineGump gump))
@@ -953,12 +965,7 @@ namespace ClassicUO.Game.Managers
                 _needSort = true;
             }
         }
-
-        public static void Remove<T>(uint? local = null) where T : Control
-        {
-            Gumps.OfType<T>().FirstOrDefault(s => (!local.HasValue || s.LocalSerial == local) && !s.IsDisposed)?.Dispose();
-        }
-
+        
         public static void Clear()
         {
             foreach (Control s in Gumps)

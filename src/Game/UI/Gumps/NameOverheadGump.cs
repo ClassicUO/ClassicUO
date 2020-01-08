@@ -1,6 +1,6 @@
 #region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -45,8 +45,6 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly AlphaBlendControl _background;
 
         private readonly RenderedText _renderedText;
-        private float _clickTiming;
-        private bool _isPressed;
         private const int MIN_WIDTH = 60;
         private bool _positionLocked;
         private Point _lockedPosition;
@@ -214,16 +212,15 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left)
             {
-                _isPressed = false;
-                _clickTiming = 0;
-
                 if (World.Player.InWarMode && Entity is Mobile)
                     GameActions.Attack(Entity);
                 else if (!GameActions.OpenCorpse(Entity))
                     GameActions.DoubleClick(Entity);
+
+                return true;
             }
 
-            return true;
+            return false;
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
@@ -287,11 +284,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                         return;
                     }
-
-                    _clickTiming += Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-
-                    if (_clickTiming > 0)
-                        _isPressed = true;
+                    else if (!DelayedObjectClickManager.IsEnabled)
+                    {
+                        DelayedObjectClickManager.Set(Entity.Serial, Mouse.Position.X, Mouse.Position.Y, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                    }
+                    
                 }
             }
 
@@ -338,30 +335,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
-            if (Entity == null || Entity.IsDestroyed || !Entity.UseObjectHandles || Entity.ClosedObjectHandles) Dispose();
-
-            if (_isPressed)
-            {
-                if (UIManager.IsDragging)
-                {
-                    _clickTiming = 0;
-                    _isPressed = false;
-
-                    return;
-                }
-
-                _clickTiming -= (float)frameMS;
-
-                if (_clickTiming <= 0)
-                {
-                    _clickTiming = 0;
-                    _isPressed = false;
-
-                    if (!World.ClientFeatures.TooltipsEnabled)
-                        GameActions.SingleClick(Entity);
-                    GameActions.OpenPopupMenu(Entity);
-                }
-            }
+            if (Entity == null || Entity.IsDestroyed || !Entity.UseObjectHandles || Entity.ClosedObjectHandles)
+                Dispose();
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

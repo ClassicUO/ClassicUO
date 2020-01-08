@@ -197,9 +197,13 @@ namespace ClassicUO.Game.Managers
                                 if (fixtureCheck1 == -1 || fixtureCheck2 == -1)
                                 {
                                     (fixtureCheck1, fixtureCheck2) = SeekGraphicInCustomHouseObjectList(Teleports, item.Graphic);
-                                }
 
-                                if (fixtureCheck1 != -1 && fixtureCheck2 != -1)
+                                    if (fixtureCheck1 != -1 && fixtureCheck2 != -1)
+                                    {
+                                        state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR;
+                                    }
+                                }
+                                else
                                 {
                                     state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE;
                                 }
@@ -247,7 +251,7 @@ namespace ClassicUO.Game.Managers
 
                         foreach (Multi item in multi)
                         {
-                            if (item.Z != z || (item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) == 0)
+                            if (item.Z != z || (item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR /*| CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE*/)) == 0)
                             {
                                 continue;
                             }

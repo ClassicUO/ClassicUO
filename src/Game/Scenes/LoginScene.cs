@@ -1,6 +1,6 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -134,7 +134,7 @@ namespace ClassicUO.Game.Scenes
         {
             Audio.StopMusic();
 
-            UIManager.Remove<LoginBackground>();
+            UIManager.GetGump<LoginBackground>()?.Dispose();
             _currentGump?.Dispose();
 
             // UnRegistering Packet Events           
@@ -508,7 +508,7 @@ namespace ClassicUO.Game.Scenes
                 case 0x86: // UpdateCharacterList
                     ParseCharacterList(e);
 
-                    UIManager.Remove<CharacterSelectionGump>();
+                    UIManager.GetGump<CharacterSelectionGump>()?.Dispose();
 
                     _currentGump?.Dispose();
 

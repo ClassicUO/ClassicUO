@@ -1,6 +1,6 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -78,8 +78,6 @@ namespace ClassicUO.Game.Managers
     {
         private static uint _targetCursorId;
 
-        private static Action<uint, ushort, ushort, ushort, sbyte, bool> _enqueuedAction;
-
         public static MultiTargetInfo MultiTargetInfo { get; private set; }
 
         public static CursorTarget TargetingState { get; private set; } = CursorTarget.Invalid;
@@ -126,10 +124,6 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void EnqueueAction(Action<uint, ushort, ushort, ushort, sbyte, bool> action)
-        {
-            _enqueuedAction = action;
-        }
 
         public static void CancelTarget()
         {
@@ -173,37 +167,33 @@ namespace ClassicUO.Game.Managers
                             LastTarget = entity.Serial;
                         }
 
-                        if (_enqueuedAction != null)
-                            _enqueuedAction(entity.Serial, entity.Graphic, entity.X, entity.Y, entity.Z, entity is Item it && it.OnGround || SerialHelper.IsMobile(entity.Serial));
-                        else
+                        if (TargeringType == TargetType.Harmful && SerialHelper.IsMobile(serial) &&
+                            ProfileManager.Current.EnabledCriminalActionQuery)
                         {
-                            if (TargeringType == TargetType.Harmful && SerialHelper.IsMobile(serial) &&                   
-                                ProfileManager.Current.EnabledCriminalActionQuery)
+                            Mobile mobile = entity as Mobile;
+
+                            if (((World.Player.NotorietyFlag == NotorietyFlag.Innocent ||
+                                  World.Player.NotorietyFlag == NotorietyFlag.Ally) && mobile.NotorietyFlag == NotorietyFlag.Innocent && serial != World.Player))
                             {
-                                Mobile mobile = entity as Mobile;
-
-                                if (((World.Player.NotorietyFlag == NotorietyFlag.Innocent ||
-                                    World.Player.NotorietyFlag == NotorietyFlag.Ally) && mobile.NotorietyFlag == NotorietyFlag.Innocent && serial != World.Player))
-                                {
-                                    QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
-                                                                       s =>
-                                                                       {
-                                                                           if (s)
+                                QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
+                                                                           s =>
                                                                            {
-                                                                               NetClient.Socket.Send(new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargeringType));
-                                                                               ClearTargetingWithoutTargetCancelPacket();
-                                                                           }
-                                                                       });
+                                                                               if (s)
+                                                                               {
+                                                                                   NetClient.Socket.Send(new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargeringType));
+                                                                                   ClearTargetingWithoutTargetCancelPacket();
+                                                                               }
+                                                                           });
 
-                                    UIManager.Add(messageBox);
+                                UIManager.Add(messageBox);
 
-                                    return;
-                                }
+                                return;
                             }
-
-                            NetClient.Socket.Send(new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargeringType));
-                            ClearTargetingWithoutTargetCancelPacket();
                         }
+
+                        NetClient.Socket.Send(new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargeringType));
+                        ClearTargetingWithoutTargetCancelPacket();
+
                         Mouse.CancelDoubleClick = true;
                         break;
                     case CursorTarget.Grab:

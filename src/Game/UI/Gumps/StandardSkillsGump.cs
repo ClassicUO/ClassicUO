@@ -1,6 +1,6 @@
 ﻿#region license
 
-//  Copyright (C) 2019 ClassicUO Development Community on Github
+//  Copyright (C) 2020 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
@@ -526,8 +526,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     uint serial = (uint) (World.Player + _skillIndex + 1);
 
-                    if (UIManager.GetGump<SkillButtonGump>(serial) != null)
-                        UIManager.Remove<SkillButtonGump>(serial);
+                    UIManager.GetGump<SkillButtonGump>(serial)?.Dispose();
 
                     SkillButtonGump skillButtonGump = new SkillButtonGump(World.Player.Skills[_skillIndex], Mouse.Position.X, Mouse.Position.Y);
                     UIManager.Add(skillButtonGump);
