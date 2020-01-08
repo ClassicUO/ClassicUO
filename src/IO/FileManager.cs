@@ -76,7 +76,7 @@ namespace ClassicUO.IO
         public static MultiMapLoader Multimap { get; private set; }
         public static ProfessionLoader Profession { get; private set; }
 
-        public static void LoadFiles()
+        public static void Load()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 

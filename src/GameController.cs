@@ -226,31 +226,8 @@ namespace ClassicUO
             }
         }
 
-        public void LoadGameFilesFromFileSystem()
+        private void LoadGameFilesFromFileSystem()
         {
-            Log.Trace( "Checking for Ultima Online installation...");
-            Log.PushIndent();
-
-            UOFileManager.UoFolderPath = Settings.GlobalSettings.UltimaOnlineDirectory;
-
-            Log.Trace( "Done!");
-            Log.Trace( $"Ultima Online installation folder: {UOFileManager.UoFolderPath}");
-            Log.PopIndent();
-
-            Log.Trace( "Loading files...");
-            Log.PushIndent();
-
-            if (!string.IsNullOrWhiteSpace(Settings.GlobalSettings.ClientVersion))
-            {
-                // sanitize client version
-                Settings.GlobalSettings.ClientVersion = Settings.GlobalSettings.ClientVersion.Replace(",", ".").Replace(" ", "").ToLower();
-            }
-
-            Client.Load(Settings.GlobalSettings.UltimaOnlineDirectory, Settings.GlobalSettings.ClientVersion);
-
-            StaticFilters.Load();
-            Log.PopIndent();
-
             uint[] hues = UOFileManager.Hues.CreateShaderColors();
 
             int size = UOFileManager.Hues.HuesCount;
@@ -265,23 +242,19 @@ namespace ClassicUO
             AuraManager.CreateAuraTexture();
 
             Log.Trace( "Network calibration...");
-            Log.PushIndent();
             PacketHandlers.Load();
             //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
             UltimaLive.Enable();
             PacketsTable.AdjustPacketSizeByVersion(Client.Version);
             Log.Trace( "Done!");
-            Log.PopIndent();
 
             Log.Trace( "Loading plugins...");
-            Log.PushIndent();
 
             UIManager.InitializeGameCursor();
 
             foreach (var p in Settings.GlobalSettings.Plugins)
                 Plugin.Create(p);
             Log.Trace( "Done!");
-            Log.PopIndent();
 
 
             UoAssist.Start();
