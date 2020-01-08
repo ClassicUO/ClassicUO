@@ -3813,9 +3813,10 @@ namespace ClassicUO.Network
             byte[] decData = new byte[dlen];
             string layout;
 
+            ref var buffer = ref p.ToArray();
+
             unsafe
             {
-                ref var buffer = ref p.ToArray();
 
                 fixed (byte* srcPtr = &buffer[p.Position], destPtr = decData)
                 {
@@ -3837,7 +3838,6 @@ namespace ClassicUO.Network
 
                 unsafe
                 {
-                    ref var buffer = ref p.ToArray();
                     fixed (byte* srcPtr = &buffer[p.Position], destPtr = decData)
                         ZLib.Decompress((IntPtr)srcPtr, (int)clen, 0, (IntPtr)destPtr, dlen);
                 }
