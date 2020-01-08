@@ -539,8 +539,6 @@ namespace ClassicUO.Game.Scenes
                         }
                         else if (!DelayedObjectClickManager.IsEnabled)
                         {
-                            Console.WriteLine("MOUSE UP: SET");
-                            
                             DelayedObjectClickManager.Set(ent.Serial, Mouse.Position.X, Mouse.Position.Y, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                         }
 
@@ -591,7 +589,6 @@ namespace ClassicUO.Game.Scenes
 
             if (result)
             {
-                Console.WriteLine("DCLICKED: CLEAR");
                 DelayedObjectClickManager.Clear();
             }
 
