@@ -345,7 +345,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _timer = (uint) (icon.Timer <= 0 ? 0xFFFF_FFFF : Time.Ticks + icon.Timer * 1000);
                 _gText = RenderedText.Create("", 0xFFFF, 2, true, FontStyle.Fixed | FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, Texture.Width);
 
-                SetTooltip(icon.Text, 200);
+                SetTooltip(icon.Text);
             }
 
             public BuffIcon Icon { get; }
@@ -370,7 +370,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_updateTooltipTime < totalMS && delta > 0)
                 {
                     TimeSpan span = TimeSpan.FromMilliseconds(delta);
-                    SetTooltip($"{Icon.Text}\nTime left: {span.Hours:00}:{span.Minutes:00}:{span.Seconds:00}", 200);
+                    SetTooltip($"{Icon.Text}\nTime left: {span.Hours:00}:{span.Minutes:00}:{span.Seconds:00}");
                     _updateTooltipTime = (float) totalMS + 1000;
 
                     if (span.Hours > 0)

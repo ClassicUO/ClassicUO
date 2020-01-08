@@ -3868,11 +3868,11 @@ namespace ClassicUO.Network
                 return;
 
             const ushort BUFF_ICON_START = 0x03E9;
-            const ushort BUFF_ICON_START_NEW = 0x466 - 126;
+            const ushort BUFF_ICON_START_NEW = 0x466;
 
             uint serial = p.ReadUInt();
             ushort ic = p.ReadUShort();
-            ushort iconID = ic >= 0x466 ? (ushort) (ic - BUFF_ICON_START_NEW) : (ushort) (ic - BUFF_ICON_START);
+            ushort iconID = ic >= BUFF_ICON_START_NEW ? (ushort) (ic - (BUFF_ICON_START_NEW - 125)) : (ushort) (ic - BUFF_ICON_START);
 
             if (iconID < BuffTable.Table.Length)
             {
