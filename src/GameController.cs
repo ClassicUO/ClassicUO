@@ -84,7 +84,20 @@ namespace ClassicUO
 
         protected override void LoadContent()
         {
-            LoadGameFilesFromFileSystem();
+            uint[] hues = UOFileManager.Hues.CreateShaderColors();
+
+            int size = UOFileManager.Hues.HuesCount;
+
+            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size * 2);
+            texture0.SetData(hues, 0, size * 2);
+            Texture2D texture1 = new Texture2D(GraphicsDevice, 32, size);
+            texture1.SetData(hues, size, size);
+            GraphicsDevice.Textures[1] = texture0;
+            GraphicsDevice.Textures[2] = texture1;
+
+            AuraManager.CreateAuraTexture();
+            UIManager.InitializeGameCursor();
+
             base.LoadContent();
 
             SetScene(new LoginScene());
@@ -225,41 +238,6 @@ namespace ClassicUO
                 SetWindowPosition(x, y);
             }
         }
-
-        private void LoadGameFilesFromFileSystem()
-        {
-            uint[] hues = UOFileManager.Hues.CreateShaderColors();
-
-            int size = UOFileManager.Hues.HuesCount;
-
-            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size * 2);
-            texture0.SetData(hues, 0, size * 2);
-            Texture2D texture1 = new Texture2D(GraphicsDevice, 32, size);
-            texture1.SetData(hues, size, size);
-            GraphicsDevice.Textures[1] = texture0;
-            GraphicsDevice.Textures[2] = texture1;
-
-            AuraManager.CreateAuraTexture();
-
-            Log.Trace( "Network calibration...");
-            PacketHandlers.Load();
-            //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
-            UltimaLive.Enable();
-            PacketsTable.AdjustPacketSizeByVersion(Client.Version);
-            Log.Trace( "Done!");
-
-            Log.Trace( "Loading plugins...");
-
-            UIManager.InitializeGameCursor();
-
-            foreach (var p in Settings.GlobalSettings.Plugins)
-                Plugin.Create(p);
-            Log.Trace( "Done!");
-
-
-            UoAssist.Start();
-        }
-
 
         protected override void Update(GameTime gameTime)
         {

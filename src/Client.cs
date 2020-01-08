@@ -12,6 +12,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Game.Managers;
+using ClassicUO.Network;
+using ClassicUO.Utility.Platforms;
+
 using SDL2;
 
 namespace ClassicUO
@@ -139,6 +143,22 @@ namespace ClassicUO
             // ok now load uo files
             UOFileManager.Load();
             StaticFilters.Load();
+
+            Log.Trace("Network calibration...");
+            PacketHandlers.Load();
+            //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
+            UltimaLive.Enable();
+            PacketsTable.AdjustPacketSizeByVersion(Client.Version);
+            Log.Trace("Done!");
+
+            Log.Trace("Loading plugins...");
+
+            foreach (var p in Settings.GlobalSettings.Plugins)
+                Plugin.Create(p);
+            Log.Trace("Done!");
+
+
+            UoAssist.Start();
 
             Log.PopIndent();
             Log.Trace("Loading done");
