@@ -3827,7 +3827,7 @@ namespace ClassicUO.Network
             p.Skip((int)clen);
 
             uint linesNum = p.ReadUInt();
-            string[] lines = new string[0];
+            string[] lines = new string[linesNum];
 
             if (linesNum > 0)
             {
@@ -3843,8 +3843,6 @@ namespace ClassicUO.Network
                 }
 
                 p.Skip((int) clen);
-
-                lines = new string[linesNum];
 
                 for (int i = 0, index = 0; i < linesNum; i++)
                 {
