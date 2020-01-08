@@ -76,8 +76,8 @@ namespace ClassicUO
             Log.Trace("Loading");
             Log.PushIndent();
 
-            string clientPath = UOFileManager.UoFolderPath = Settings.GlobalSettings.UltimaOnlineDirectory;
-            Log.Trace($"Ultima Online installation folder: {UOFileManager.UoFolderPath}");
+            string clientPath = Settings.GlobalSettings.UltimaOnlineDirectory;
+            Log.Trace($"Ultima Online installation folder: {clientPath}");
 
             Log.Trace("Loading files...");
             Log.PushIndent();

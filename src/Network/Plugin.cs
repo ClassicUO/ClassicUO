@@ -27,6 +27,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -245,7 +246,7 @@ namespace ClassicUO.Network
 
         private static string GetUOFilePath()
         {
-            return UOFileManager.UoFolderPath;
+            return Settings.GlobalSettings.UltimaOnlineDirectory;
         }
 
         private static void SetWindowTitle(string str)

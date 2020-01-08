@@ -33,15 +33,12 @@ namespace ClassicUO.IO
     internal unsafe class DataReader
     {
         private byte* _data;
-
         private GCHandle _handle;
 
+
         internal long Position { get; set; }
-
         internal long Length { get; private set; }
-
         internal IntPtr StartAddress => (IntPtr) _data;
-
         internal IntPtr PositionAddress => (IntPtr) (_data + Position);
 
 

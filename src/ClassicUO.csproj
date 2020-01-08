@@ -454,7 +454,7 @@
     <Compile Include="Interfaces\IUpdateable.cs" />
     <Compile Include="Game\Data\ClientVersion.cs" />
     <Compile Include="IO\DataReader.cs" />
-    <Compile Include="IO\FileManager.cs" />
+    <Compile Include="IO\UOFileManager.cs" />
     <Compile Include="IO\Resources\Verdata.cs" />
     <Compile Include="IO\UOFile.cs" />
     <Compile Include="IO\UOFileIndex.cs" />

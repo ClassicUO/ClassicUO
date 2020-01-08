@@ -40,22 +40,10 @@ namespace ClassicUO.IO
 {
     internal static class UOFileManager
     {
-        private static string _uofolderpath;
-
-        public static string UoFolderPath
-        {
-            get => _uofolderpath;
-            set
-            {
-                _uofolderpath = value;
-            }
-        }
-
         public static string GetUOFilePath(string file)
         {
-            return Path.Combine(UoFolderPath, file);
+            return Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, file);
         }
-
 
 
         public static AnimationsLoader Animations { get; private set; }
