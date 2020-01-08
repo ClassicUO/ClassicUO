@@ -32,8 +32,9 @@ namespace ClassicUO.Game
     internal class ItemHold
     {
         public bool OnGround { get; private set; }
-        public ushort X, Y;
-        public sbyte Z;
+        public ushort X { get; private set; }
+        public ushort Y { get; private set; }
+        public sbyte Z { get; private set; }
         public uint Container { get; private set; }
         public uint Serial { get; private set; }
         public ushort Graphic { get; private set; }
