@@ -346,8 +346,8 @@ namespace ClassicUO.Game
                                     }
                                 }                           
 
-                                int startX = selectedObj.RealScreenPosition.X + Math.Max(0, ProfileManager.Current.GameWindowPosition.X);
-                                int startY = selectedObj.RealScreenPosition.Y + Math.Max(0, ProfileManager.Current.GameWindowPosition.Y);
+                                int startX = selectedObj.RealScreenPosition.X + Math.Max(0, ProfileManager.Current.GameWindowPosition.X + 5);
+                                int startY = selectedObj.RealScreenPosition.Y + Math.Max(0, ProfileManager.Current.GameWindowPosition.Y + 5);
 
                                 GameScene gs = Client.Game.GetScene<GameScene>();
                                 float scale = gs?.Scale ?? 1;
