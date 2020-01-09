@@ -778,11 +778,6 @@ namespace ClassicUO.Game.Managers
 
                                     break;
 
-                                case MacroSubType.Chat:
-                                    Log.Warn( $"Macro '{macro.SubCode}' not implemented");
-
-                                    break;
-
                                 case MacroSubType.Overview:
 
                                     if (macro.Code == MacroType.Close)
