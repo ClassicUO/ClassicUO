@@ -606,6 +606,17 @@ namespace ClassicUO.Network
         }
     }
 
+    internal sealed class PTradeUpdateGold : PacketWriter
+    {
+        public PTradeUpdateGold(uint serial, uint gold, uint platinum) : base(0x6F)
+        {
+            WriteByte(0x03);
+            WriteUInt(serial);
+            WriteUInt(gold);
+            WriteUInt(platinum);
+        }
+    }
+
     internal sealed class PLogoutNotification : PacketWriter
     {
         public PLogoutNotification() : base(0x05)

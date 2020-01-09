@@ -30,6 +30,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 
 
@@ -132,7 +133,6 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _imAccepting = value;
                     SetCheckboxes();
-                    //BuildGump();
                 }
             }
         }
@@ -146,7 +146,6 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _heIsAccepting = value;
                     SetCheckboxes();
-                    //BuildGump();
                 }
             }
         }
@@ -369,23 +368,27 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             entry.SetText("0");
                         }
-                        else if (int.TryParse(entry.Text, out int value))
+                        else if (uint.TryParse(entry.Text, out uint value))
                         {
-                            if ((int) entry.Tag == 0)
+                            if ((int) entry.Tag == 0) // gold
                             {
                                 if (value > Gold)
                                 {
-                                    entry.SetText(Gold.ToString());
-                                }                                    
+                                    value = Gold;
+                                }
                             }
-                            else
+                            else // platinum
                             {
                                 if (value > Platinum)
                                 {
-                                    entry.SetText(Platinum.ToString());
+                                    value = Platinum;
                                 }
                             }
+
+                            entry.SetText(value.ToString());
                         }
+
+                        NetClient.Socket.Send(new PTradeUpdateGold(ID1, uint.Parse(_myCoinsEntries[0].Text), uint.Parse(_myCoinsEntries[1].Text)));
                     }
                 }
 
