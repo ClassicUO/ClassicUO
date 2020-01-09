@@ -262,6 +262,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (!World.InGame || IsDisposed)
                 return;
 
+            if (_shopItems.Count == 0)
+            {
+                Dispose();
+            }
+
             _shiftPressed = Keyboard.Shift;
 
             if (_isUpDOWN || _isDownDOWN || _isDownDOWN_T || _isUpDOWN_T)
