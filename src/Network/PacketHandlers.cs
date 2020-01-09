@@ -281,6 +281,24 @@ namespace ClassicUO.Network
                     trading.UpdateContent();
                 }
             }
+            else if (type == 3 || type == 4)
+            {           
+                TradingGump trading = UIManager.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == serial || s.ID2 == serial);
+
+                if (trading != null)
+                {
+                    if (type == 4)
+                    {
+                        trading.Gold = p.ReadUInt();
+                        trading.Platinum = p.ReadUInt();
+                    }
+                    else
+                    {
+                        trading.HisGold = p.ReadUInt();
+                        trading.HisPlatinum = p.ReadUInt();
+                    }         
+                }
+            }
         }
 
         private static void ClientTalk(Packet p)
