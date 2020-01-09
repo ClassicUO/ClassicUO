@@ -77,33 +77,13 @@ namespace ClassicUO.Game.UI.Gumps
                 NumericOnly = true
             });
             _textBox.SetText(item.Amount.ToString());
+
+            _textBox.TextChanged += (sender, args) => { UpdateText(); };
+            _slider.ValueChanged += (sender, args) => { UpdateText(); };
         }
 
-     
-        private void OkButtonOnMouseClick(object sender, MouseEventArgs e)
+        private void UpdateText()
         {
-            if (_slider.Value > 0) GameActions.PickUp(LocalSerial, _offsert, _slider.Value);
-            Dispose();
-        }
-
-        public override void OnKeyboardReturn(int textID, string text)
-        {
-            if (_slider.Value > 0) GameActions.PickUp(LocalSerial, _offsert, _slider.Value);
-            Dispose();
-        }
-
-        public override void Update(double totalMS, double frameMS)
-        {
-            Item item = World.Items.Get(LocalSerial);
-
-            if (item == null || item.IsDestroyed)
-                Dispose();
-
-            if (IsDisposed)
-                return;
-
-            base.Update(totalMS, frameMS);
-
             if (_slider.Value != _lastValue)
                 _textBox.SetText(_slider.Value.ToString());
             else
@@ -136,6 +116,32 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             _lastValue = _slider.Value;
+        }
+
+     
+        private void OkButtonOnMouseClick(object sender, MouseEventArgs e)
+        {
+            if (_slider.Value > 0) GameActions.PickUp(LocalSerial, _offsert, _slider.Value);
+            Dispose();
+        }
+
+        public override void OnKeyboardReturn(int textID, string text)
+        {
+            if (_slider.Value > 0) GameActions.PickUp(LocalSerial, _offsert, _slider.Value);
+            Dispose();
+        }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            Item item = World.Items.Get(LocalSerial);
+
+            if (item == null || item.IsDestroyed)
+                Dispose();
+
+            if (IsDisposed)
+                return;
+
+            base.Update(totalMS, frameMS);
         }
 
         public override void Dispose()
