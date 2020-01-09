@@ -136,6 +136,7 @@ namespace ClassicUO.Game.Managers
                     World.CustomHouseManager.Erasing = false;
                     World.CustomHouseManager.SeekTile = false;
                     World.CustomHouseManager.SelectedGraphic = 0;
+                    World.CustomHouseManager.CombinedStair = false;
 
                     UIManager.GetGump<HouseCustomizationGump>()?.Update();
                 }
