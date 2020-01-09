@@ -644,8 +644,7 @@ namespace ClassicUO.Game.Managers
 
                                 int x = placeX - foundationItem.X + item.X;
                                 int y = placeY - foundationItem.Y + item.Y;
-
-                                var multi = house.Components.Where(s => s.X == placeX + item.X && s.Y == placeY + item.Y);
+                                var multi = house.GetMultiAt(placeX + item.X, placeY + item.Y);
 
                                 if (multi.Any() || type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
                                 {
@@ -674,7 +673,7 @@ namespace ClassicUO.Game.Managers
                                                 (multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0 /*|| (multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE) != 0*/)
                                                 continue;
 
-                                            if ( type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
+                                            if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
                                             {
                                                 if ((multiObject.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) != 0)
                                                 {
@@ -884,15 +883,19 @@ namespace ClassicUO.Game.Managers
                     (fixCheck1, fixCheck2) = SeekGraphicInCustomHouseObjectList(Teleports, SelectedGraphic);
 
                     isFixture = fixCheck1 != -1 && fixCheck2 != -1;
+                    if (isFixture)
+                    {
+                        type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR;
+                    }
                 }
                 else
                 {
                     isFixture = true;
+                    type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_NORMAL;
                 }
 
                 if (isFixture)
                 {
-                    type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR;
                     if (Fixtures + 1 > MaxFixtures)
                     {
                         result = false;
