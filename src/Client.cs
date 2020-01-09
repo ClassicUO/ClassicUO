@@ -54,8 +54,6 @@ namespace ClassicUO
         {
             Debug.Assert(Game == null);
 
-            Load();
-
             Log.Trace("Running game...");
             using (Game = new GameController())
             {
@@ -71,7 +69,7 @@ namespace ClassicUO
         }
 
 
-        private static void Load()
+        public static void Load()
         {
             Log.Trace("Loading");
             Log.PushIndent();
