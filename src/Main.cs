@@ -25,6 +25,8 @@ namespace ClassicUO
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
 
+        private static bool _skipUpdates;
+
 
         static void Main(string[] args)
         {
@@ -78,7 +80,7 @@ namespace ClassicUO
 #endif
             ReadSettingsFromArgs(args);
 
-            if (!SkipUpdate)
+            if (!_skipUpdates)
                 if (CheckUpdate(args))
                     return;
 
@@ -129,9 +131,6 @@ namespace ClassicUO
             Log.Trace("Closing...");
         }
 
-        public static bool StartMinimized { get; set; }
-        public static bool StartInLittleWindow { get; set; }
-        public static bool SkipUpdate { get; set; }
 
         private static void ReadSettingsFromArgs(string[] args)
         {
@@ -158,19 +157,9 @@ namespace ClassicUO
                         Settings.CustomSettingsFilepath = value;
                         break;
 
-                    case "minimized":
-                        StartMinimized = true;
-                        break;
-
-                    case "littlewindow":
-                        StartInLittleWindow = true;
-                        break;
-
                     case "skipupdate":
-                        SkipUpdate = true;
+                        _skipUpdates = true;
                         break;
-
-
 
                     case "username":
                         Settings.GlobalSettings.Username = value;
@@ -199,12 +188,12 @@ namespace ClassicUO
 
                     case "ultimaonlinedirectory":
                     case "uopath":
-                        Settings.GlobalSettings.UltimaOnlineDirectory = value; // Required
+                        Settings.GlobalSettings.UltimaOnlineDirectory = value;
 
                         break;
 
                     case "clientversion":
-                        Settings.GlobalSettings.ClientVersion = value; // Required
+                        Settings.GlobalSettings.ClientVersion = value;
 
                         break;
 
