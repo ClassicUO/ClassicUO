@@ -363,7 +363,6 @@ namespace ClassicUO.Game
                                     y -= ((texture.Height - 44));
 
                                     sb.Draw2D(texture, (int)(x / scale), (int)(y / scale), texture.Width / scale, texture.Height / scale, ref hue);
-                                    //sb.DrawSprite(texture, x, y, false, ref hue);
                                 }
                             }                           
                         }
