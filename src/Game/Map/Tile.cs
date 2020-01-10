@@ -92,16 +92,10 @@ namespace ClassicUO.Game.Map
 
                     break;
 
-                case Multi m:
-                    if ((m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0)
+                case Multi m when (m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0:
                         priorityZ--;
-                    else if ((m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW) != 0)
-                        priorityZ++;
-                    else 
-                        goto DEF;
                     break;
                 default:
-                    DEF:
                 {
                     ref readonly StaticTiles data = ref UOFileManager.TileData.StaticData[obj.Graphic];
 
