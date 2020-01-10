@@ -365,8 +365,8 @@ namespace ClassicUO.Game
                                 {
                                     ref readonly CustomBuildObject item = ref list[i];
 
-                                    _temp[i].X = selectedObj.X;
-                                    _temp[i].Y = selectedObj.Y;
+                                    _temp[i].X = (ushort) (selectedObj.X + item.X);
+                                    _temp[i].Y = (ushort) (selectedObj.Y + item.Y);
                                     _temp[i].Z = (sbyte) (selectedObj.Z + z + item.Z);
                                     _temp[i].UpdateRealScreenPosition(gs.ScreenOffset.X, gs.ScreenOffset.Y);
                                     _temp[i].UpdateScreenPosition();

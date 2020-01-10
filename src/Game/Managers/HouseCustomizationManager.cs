@@ -937,7 +937,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (CombinedStair)
                     {
-                        if (gobj.X >= EndPos.X || gobj.Y > EndPos.Y)
+                        if (gobj.X >= EndPos.X || gobj.Y >= EndPos.Y)
                         {
                             return false;
                         }
@@ -1246,12 +1246,16 @@ namespace ClassicUO.Game.Managers
                 return false;
             }
 
+
             if ((item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
                                CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
-                               CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) != 0)
+                               CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) == 0)
             {
-                foreach (Multi temp in house.Components)
+                foreach (Multi temp in house.GetMultiAt(item.X, item.Y))
                 {
+                    if (temp == item)
+                        continue;
+
                     if ((temp.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 &&
                         temp.Z >= minZ && temp.Z < maxZ)
                     {
@@ -1262,8 +1266,6 @@ namespace ClassicUO.Game.Managers
                         }
                     }
                 }
-
-                // TODO ?
 
                 return false;
             }
