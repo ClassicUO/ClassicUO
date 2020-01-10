@@ -57,6 +57,8 @@ namespace ClassicUO.Game.Scenes
         private GameObject[] _foliages = new GameObject[100];
         private int _renderListCount, _foliageCount;
 
+        public Point ScreenOffset => _offset;
+
         public void UpdateMaxDrawZ(bool force = false)
         {
             int playerX = World.Player.X;

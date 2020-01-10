@@ -515,9 +515,9 @@ namespace ClassicUO.Game.Managers
 
                 for (int i = 1; i < CurrentFloor; i++)
                 {
-                    for (int x = StartPos.X + 1; x < EndPos.X; x++)
+                    for (int x = StartPos.X; x < EndPos.X; x++)
                     {
-                        for (int y = StartPos.Y + 1; y < EndPos.Y; y++)
+                        for (int y = StartPos.Y; y < EndPos.Y; y++)
                         {
                             ushort tempColor = color;
 
@@ -528,6 +528,7 @@ namespace ClassicUO.Game.Managers
 
                             var mo = house.Add(0x0496, tempColor, x - foundationItem.X, y - foundationItem.Y, (sbyte)z, true);
 
+                            mo.AlphaHue = 0xFF;
                             mo.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
                             mo.AddToTile();
                         }
@@ -982,7 +983,11 @@ namespace ClassicUO.Game.Managers
                             int sx = gobj.X + item.X;
                             int sy = gobj.Y + item.Y;
 
-                            if ( !(sx > StartPos.X && sx < EndPos.X && sy >= EndPos.Y && sy <= EndPos.Y + 1)  || gobj.Z >= MinHouseZ)
+                            if (sy < EndPos.Y || 
+                                sx == StartPos.X ||
+                                gobj.Z >= MinHouseZ)
+
+                            //if ( !(sx > StartPos.X && sx < EndPos.X && sy >= EndPos.Y && sy <= EndPos.Y + 1)  || gobj.Z >= MinHouseZ)
                             {
                                 return false;
                             }
@@ -1176,7 +1181,6 @@ namespace ClassicUO.Game.Managers
 
         public bool ValidateItemPlace(Item foundationItem, Multi item, int minZ, int maxZ, List<Point> validatedFloors)
         {
-
             if (item == null || !World.HouseManager.TryGetHouse(foundationItem, out var house) || !item.IsCustom)
                 return true;
 
@@ -1631,6 +1635,7 @@ namespace ClassicUO.Game.Managers
         CHMOF_INCORRECT_PLACE = 0x100,
 
         CHMOF_DONT_REMOVE = 0x200,
+        CHMOF_PREVIEW = 0x400
     }
 
     [Flags]

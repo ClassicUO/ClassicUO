@@ -58,19 +58,19 @@ namespace ClassicUO.Game
 
         private readonly Texture2D _aura;
         private readonly int[,] _cursorOffset = new int[2, 16];
-
         private readonly CursorInfo[,] _cursorPixels = new CursorInfo[2, 16];
         private readonly Tooltip _tooltip;
         private Vector3 _auraVector = new Vector3(0, 13, 0);
-        private RenderedText _targetDistanceText = RenderedText.Create(String.Empty, 0x0481, style: FontStyle.BlackBorder);
-
+        private readonly RenderedText _targetDistanceText = RenderedText.Create(String.Empty, 0x0481, style: FontStyle.BlackBorder);
         private IntPtr _cursor, _surface;
         private UOTexture _draggedItemTexture;
         private ushort _graphic = 0x2073;
-
         private ItemHold _itemHold;
         private bool _needGraphicUpdate = true;
         private Point _offset;
+        private static Vector3 _vec = Vector3.Zero;
+        private readonly List<Multi> _temp = new List<Multi>();
+
 
         public GameCursor()
         {
@@ -311,23 +311,36 @@ namespace ClassicUO.Game
                 _draggedItemTexture.Ticks = (long) totalMS;
         }
 
-        private static Vector3 _vec = Vector3.Zero;
+     
         public void Draw(UltimaBatcher2D sb)
         {
-            if (TargetManager.IsTargeting && ProfileManager.Current != null)
+            if (World.InGame && TargetManager.IsTargeting && ProfileManager.Current != null)
             {
                 if (TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 {
                     if (World.CustomHouseManager != null && World.CustomHouseManager.SelectedGraphic != 0)
                     {
-                        Vector3 hue = Vector3.Zero;
-
                         RawList<CustomBuildObject> list = new RawList<CustomBuildObject>();
+                        ushort hue = 0;
 
                         if (!World.CustomHouseManager.CanBuildHere(list, out var type))
                         {
-                            hue.X = 0x0021;
-                            hue.Y = 1;
+                            hue = 0x0021;
+                        }
+
+                        //if (_temp.Count != list.Count)
+                        {
+                            _temp.ForEach(s => s.Destroy());
+                            _temp.Clear();
+
+                            for (int i = 0; i < list.Count; i++)
+                            {
+                                Multi m = Multi.Create(list[i].Graphic);
+                                m.AlphaHue = 0xFF;
+                                m.Hue = hue;
+                                m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW;
+                                _temp.Add(m);
+                            }
                         }
 
                         if (list.Count != 0)
@@ -346,27 +359,32 @@ namespace ClassicUO.Game
                                     }
                                 }                           
 
-                                int startX = selectedObj.RealScreenPosition.X + Math.Max(0, ProfileManager.Current.GameWindowPosition.X + 5);
-                                int startY = selectedObj.RealScreenPosition.Y + Math.Max(0, ProfileManager.Current.GameWindowPosition.Y + 5);
-
                                 GameScene gs = Client.Game.GetScene<GameScene>();
-                                float scale = gs?.Scale ?? 1;
 
-                                foreach (CustomBuildObject item in list)
+                                for (int i = 0; i < list.Count; i++)
                                 {
-                                    int x = startX + (item.X - item.Y) * 22;
-                                    int y = startY + (item.X + item.Y) * 22 - ((item.Z + z) * 4);
+                                    ref readonly CustomBuildObject item = ref list[i];
 
-                                    var texture = UOFileManager.Art.GetTexture(item.Graphic);
-
-                                    x -= ((texture.Width >> 1) - 22);
-                                    y -= ((texture.Height - 44));
-
-                                    sb.Draw2D(texture, (int)(x / scale), (int)(y / scale), texture.Width / scale, texture.Height / scale, ref hue);
+                                    _temp[i].X = selectedObj.X;
+                                    _temp[i].Y = selectedObj.Y;
+                                    _temp[i].Z = (sbyte) (selectedObj.Z + z + item.Z);
+                                    _temp[i].UpdateRealScreenPosition(gs.ScreenOffset.X, gs.ScreenOffset.Y);
+                                    _temp[i].UpdateScreenPosition();
+                                    _temp[i].AddToTile();
                                 }
                             }                           
                         }
                     }
+                    else if (_temp.Count != 0)
+                    {
+                        _temp.ForEach(s => s.Destroy());
+                        _temp.Clear();
+                    }
+                }
+                else if (_temp.Count != 0)
+                {
+                    _temp.ForEach(s => s.Destroy());
+                    _temp.Clear();
                 }
 
                 if (ProfileManager.Current.AuraOnMouse)
@@ -417,8 +435,12 @@ namespace ClassicUO.Game
                     }
                 }
             }
+            else if (_temp.Count != 0)
+            {
+                _temp.ForEach(s => s.Destroy());
+                _temp.Clear();
+            }
 
-           
             if (_itemHold != null && _itemHold.Enabled && !_itemHold.Dropped)
             {
                 float scale = 1;
