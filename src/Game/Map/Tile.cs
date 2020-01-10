@@ -96,7 +96,6 @@ namespace ClassicUO.Game.Map
                         priorityZ--;
                     break;
                 default:
-                {
                     ref readonly StaticTiles data = ref UOFileManager.TileData.StaticData[obj.Graphic];
 
                     if (data.IsBackground)
@@ -104,7 +103,6 @@ namespace ClassicUO.Game.Map
 
                     if (data.Height != 0)
                         priorityZ++;
-                }
 
                     break;
             }
