@@ -86,7 +86,7 @@ namespace ClassicUO.Game.Scenes
 
         public string[] Characters { get; private set; }
 
-        public string PopupMessage { get; private set; }
+        public string PopupMessage { get; set; }
 
         public byte ServerIndex { get; private set; }
 

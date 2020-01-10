@@ -25,7 +25,9 @@ using System.Linq;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps.Login;
 using ClassicUO.IO;
 
@@ -77,10 +79,32 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public void SetProfession(ProfessionInfo info)
         {
+            for (int i = 0; i < _skillsCount; i++)
+            {
+                int skillIndex = info.SkillDefVal[i, 0];
+
+                if ((World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0 && (skillIndex == 52 || skillIndex == 53))
+                {
+                    // reset skills if needed
+                    for (int k = 0; k < i; k++)
+                    {
+                        _character.UpdateSkill(info.SkillDefVal[k, 0], 0, 0, Lock.Locked, 0);
+                    }
+
+                    MessageBoxGump messageBox = new MessageBoxGump(400, 300, UOFileManager.Cliloc.GetString(1063016), null, true)
+                    {
+                        X = (470 / 2 - 400 / 2) + 100,
+                        Y = (372 / 2 - 300 / 2) + 20,
+                        CanMove = false
+                    };
+                    UIManager.Add(messageBox);
+                    return;
+                }
+
+                _character.UpdateSkill(skillIndex, (ushort) info.SkillDefVal[i, 1], 0, Lock.Locked, 0);
+            }
+
             _selectedProfession = info;
-
-            for (int i = 0; i < _skillsCount; i++) _character.UpdateSkill(_selectedProfession.SkillDefVal[i, 0], (ushort) _selectedProfession.SkillDefVal[i, 1], 0, Lock.Locked, 0);
-
             _character.Strength = (ushort) _selectedProfession.StatsVal[0];
             _character.Intelligence = (ushort) _selectedProfession.StatsVal[1];
             _character.Dexterity = (ushort) _selectedProfession.StatsVal[2];

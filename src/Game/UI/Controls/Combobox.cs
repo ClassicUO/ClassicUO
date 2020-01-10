@@ -138,19 +138,23 @@ namespace ClassicUO.Game.UI.Controls
                 HoveredLabel[] labels = new HoveredLabel[items.Length];
                 var index = 0;
 
-                foreach (var item in items)
+                for (int i = 0; i < items.Length; i++)
                 {
+                    string item = items[i];
+
+                    if (item == null)
+                        item = string.Empty;
+
                     var label = new HoveredLabel(item, false, 0x0453, 0x0453, 0x0453, font: _box._font)
                     {
                         X = 2,
                         Y = index * 15,
                         Tag = index,
-                        DrawBackgroundCurrentIndex = true
+                        DrawBackgroundCurrentIndex = true,
+                        IsVisible = item.Length != 0
                     };
                     label.MouseUp += Label_MouseUp;
-                    labels[index] = label;
-
-                    index++;
+                    labels[index++] = label;
                 }
 
                 var totalHeight = labels.Max(o => o.Y + o.Height);
