@@ -1249,7 +1249,7 @@ namespace ClassicUO.Game.Managers
 
             if ((item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
                                CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
-                               CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) == 0)
+                               CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) != 0)
             {
                 foreach (Multi temp in house.GetMultiAt(item.X, item.Y))
                 {

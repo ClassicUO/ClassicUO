@@ -37,7 +37,7 @@ namespace ClassicUO.Network
     {
         private const int BUFF_SIZE = 0x80000;
         private int _incompletePacketLength;
-        private bool _isCompressionEnabled, _sending;
+        private bool _isCompressionEnabled;
         private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer;
         private Socket _socket;
         private CircularBuffer _circularBuffer;
@@ -104,7 +104,7 @@ namespace ClassicUO.Network
 
         public bool Connect(string ip, ushort port)
         {
-            IsDisposed = _sending = false;
+            IsDisposed = false;
             IPAddress address = ResolveIP(ip);
 
             if (address == null)
@@ -118,7 +118,7 @@ namespace ClassicUO.Network
 
         public void Connect(IPAddress address, ushort port)
         {
-            IsDisposed = _sending = false;
+            IsDisposed = false;
             IPEndPoint endpoint = new IPEndPoint(address, port);
             Connect(endpoint);
         }

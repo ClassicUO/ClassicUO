@@ -563,6 +563,17 @@ namespace ClassicUO.Game.Scenes
                     CurrentLoginStep = LoginStep.PopUpMessage;
 
                     break;
+                case 0xB9:
+                    uint flags = 0;
+
+                    if (Client.Version >= ClientVersion.CV_60142)
+                        flags = e.ReadUInt();
+                    else
+                        flags = e.ReadUShort();
+                    World.ClientLockedFeatures.SetFlags((LockedFeatureFlags) flags);
+                    break;
+                default:
+                    break;
             }
         }
 

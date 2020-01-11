@@ -26,6 +26,7 @@ using System.Linq;
 
 using ClassicUO.Configuration;
 using ClassicUO.Data;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -80,6 +81,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
             for (int i = 0; i < loginScene.Characters.Length; i++)
             {
                 string character = loginScene.Characters[i];
+
+                if (i == 5 && (World.ClientLockedFeatures.Flags & LockedFeatureFlags.CharacterSlot6) == 0)
+                    continue;
+
+                if (i == 6 && (World.ClientLockedFeatures.Flags & LockedFeatureFlags.CharacterSlot7) == 0)
+                    continue;
 
                 if (!string.IsNullOrEmpty(character))
                 {
