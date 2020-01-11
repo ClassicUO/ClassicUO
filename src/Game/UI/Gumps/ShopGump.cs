@@ -444,7 +444,7 @@ namespace ClassicUO.Game.UI.Gumps
                         X = 5,
                         Y = 5,
                         AcceptMouseInput = false,
-                        Hue = item.Hue == 0 ? (ushort) hue2 : item.Hue,
+                        Hue = item.Hue == 0 ? hue2 : item.Hue,
                         IsPartial = item.ItemData.IsPartialHue
                     });
 

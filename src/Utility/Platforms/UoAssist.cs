@@ -265,7 +265,7 @@ namespace ClassicUO.Utility.Platforms
                         if (lParam == 1 && World.InGame)
                         {
                             foreach (Item item in World.Items.Where(s => s.IsMulti))
-                                PostMessage((IntPtr) wParam, (uint) UOAMessage.ADD_MULTI, (IntPtr) ((item.X & 0xFFFF) | ((item.Y & 0xFFFF) << 16)), (IntPtr) (int) item.Graphic);
+                                PostMessage((IntPtr) wParam, (uint) UOAMessage.ADD_MULTI, (IntPtr) ((item.X & 0xFFFF) | ((item.Y & 0xFFFF) << 16)), (IntPtr) item.Graphic);
                         }
 
                         return 1;
