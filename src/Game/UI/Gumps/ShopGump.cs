@@ -437,10 +437,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (direction.FrameCount == 0)
                         UOFileManager.Animations.LoadDirectionGroup(ref direction);
-
+                    
                     Add(control = new TextureControl
                     {
-                        Texture = direction.Frames[0],
+                        Texture = direction.FrameCount != 0 ? direction.Frames[0] : null,
                         X = 5,
                         Y = 5,
                         AcceptMouseInput = false,
@@ -448,9 +448,17 @@ namespace ClassicUO.Game.UI.Gumps
                         IsPartial = item.ItemData.IsPartialHue
                     });
 
-                    control.Width = control.Texture.Width;
-                    control.Height = control.Texture.Height;
-
+                    if (control.Texture != null)
+                    {
+                        control.Width = control.Texture.Width;
+                        control.Height = control.Texture.Height;
+                    }
+                    else
+                    {
+                        control.Width = 35;
+                        control.Height = 35;
+                    }
+                   
                     if (control.Width > 35)
                         control.Width = 35;
 
