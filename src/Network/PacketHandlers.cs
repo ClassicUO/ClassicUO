@@ -3384,9 +3384,12 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 0x21:
-                    World.Player.PrimaryAbility = (Ability) ((byte) World.Player.PrimaryAbility & 0x7F);
-                    World.Player.SecondaryAbility = (Ability) ((byte) World.Player.SecondaryAbility & 0x7F);
 
+                    for (int i = 0; i < 2; i++)
+                    {
+                        World.Player.Abilities[i] &= (Ability) 0x7F;
+                    }
+                    
                     break;
 
                 //===========================================================================================
