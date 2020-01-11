@@ -431,7 +431,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ushort hue2 = item.Hue;
 
                     AnimationDirection direction = UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue2, true).Direction[1];
-                    UOFileManager.Animations.AnimID = item.Graphic;
+                    UOFileManager.Animations.AnimID = graphic;
                     UOFileManager.Animations.AnimGroup = group;
                     UOFileManager.Animations.Direction = 1;
 
