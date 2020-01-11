@@ -3409,6 +3409,29 @@ namespace ClassicUO.Network
 
                     break;
 
+                case 0x25:
+
+                    ushort spell = p.ReadUShort();
+                    bool active = p.ReadBool();
+
+                    var g = UIManager.GetGump<UseSpellButtonGump>(spell);
+
+                    if (g != null)
+                    {
+                        if (active)
+                        {
+                            g.Hue = 38;
+                            World.ActiveIcons.Add(spell);
+                        }
+                        else
+                        {
+                            g.Hue = 0;
+                            World.ActiveIcons.Remove(spell);
+                        }
+                    }
+
+                    break;
+
                 //===========================================================================================
                 //===========================================================================================
                 case 0x26:
@@ -3418,6 +3441,9 @@ namespace ClassicUO.Network
                         val = 0;
                     World.Player.SpeedMode = (CharacterSpeedType) val;
 
+                    break;
+                default:
+                    Log.Warn($"Unhandled 0xDF - sub: {p.ID.ToHex()}");
                     break;
             }
         }
@@ -3890,8 +3916,8 @@ namespace ClassicUO.Network
             const ushort BUFF_ICON_START_NEW = 0x466;
 
             uint serial = p.ReadUInt();
-            ushort ic = p.ReadUShort();
-            ushort iconID = ic >= BUFF_ICON_START_NEW ? (ushort) (ic - (BUFF_ICON_START_NEW - 125)) : (ushort) (ic - BUFF_ICON_START);
+            BuffIconType ic = (BuffIconType) p.ReadUShort();
+            ushort iconID = (ushort) ic >= BUFF_ICON_START_NEW ? (ushort) (ic - (BUFF_ICON_START_NEW - 125)) : (ushort) ((ushort) ic - BUFF_ICON_START);
 
             if (iconID < BuffTable.Table.Length)
             {
@@ -3923,20 +3949,20 @@ namespace ClassicUO.Network
                     if (wtfCliloc != 0)
                     {
                         wtf = UOFileManager.Cliloc.GetString((int) wtfCliloc);
-                        if (!string.IsNullOrEmpty(wtf))
+                        if (!string.IsNullOrWhiteSpace(wtf))
                             wtf = $"\n{wtf}";
                     }
 
                     string text = $"<left>{title}{description}{wtf}</left>";
-                    bool alreadyExists = World.Player.IsBuffIconExists(BuffTable.Table[iconID]);
-                    World.Player.AddBuff(BuffTable.Table[iconID], timer, text);
+                    bool alreadyExists = World.Player.IsBuffIconExists(ic);
+                    World.Player.AddBuff(ic, BuffTable.Table[iconID], timer, text);
                     if (!alreadyExists)
-                        gump?.AddBuff(BuffTable.Table[iconID]);
+                        gump?.AddBuff(ic);
                 }
                 else
                 {
-                    World.Player.RemoveBuff(BuffTable.Table[iconID]);
-                    gump?.RemoveBuff(BuffTable.Table[iconID]);
+                    World.Player.RemoveBuff(ic);
+                    gump?.RemoveBuff(ic);
                 }
             }
         }

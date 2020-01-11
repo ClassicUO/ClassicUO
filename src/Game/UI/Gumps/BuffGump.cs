@@ -82,7 +82,7 @@ namespace ClassicUO.Game.UI.Gumps
             _direction = GumpDirection.LEFT_HORIZONTAL;
 
 
-            foreach (KeyValuePair<ushort, BuffIcon> k in World.Player.BuffIcons)
+            foreach (KeyValuePair<BuffIconType, BuffIcon> k in World.Player.BuffIcons)
                 Add(new BuffControlEntry(World.Player.BuffIcons[k.Key]));
 
             Change();
@@ -122,15 +122,15 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public void AddBuff(ushort graphic)
+        public void AddBuff(BuffIconType type)
         {
-            Add(new BuffControlEntry(World.Player.BuffIcons[graphic]));
+            Add(new BuffControlEntry(World.Player.BuffIcons[type]));
             UpdateElements();
         }
 
-        public void RemoveBuff(ushort graphic)
+        public void RemoveBuff(BuffIconType type)
         {
-            foreach (BuffControlEntry entry in Children.OfType<BuffControlEntry>().Where(s => s.Icon.Graphic == graphic))
+            foreach (BuffControlEntry entry in Children.OfType<BuffControlEntry>().Where(s => s.Icon.Type == type))
             {
                 if (Height > _background.Texture.Height)
                 {
@@ -382,7 +382,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_timer != 0xFFFF_FFFF && delta < 10000)
                 {
                     if (delta <= 0)
-                        ((BuffGump) Parent).RemoveBuff(Icon.Graphic);
+                        ((BuffGump) Parent).RemoveBuff(Icon.Type);
                     else
                     {
                         int alpha = _alpha;

@@ -582,7 +582,7 @@ namespace ClassicUO.Game.UI.Gumps
                     GetSpellToolTip(out toolTipCliloc);
                 }
 
-                GumpPic icon = new GumpPic(iconX, 40, iconGraphic, 0)
+                HueGumpPic icon = new HueGumpPic(iconX, 40, iconGraphic, 0,  (ushort) GetSpellDefinition(iconSerial).ID)
                 {
                     X = iconX, Y = 40, LocalSerial = iconSerial
                 };
@@ -598,7 +598,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (e.Button == MouseButtonType.Left)
                     {
-                        SpellDefinition def = GetSpellDefinition(sender as Control);
+                        SpellDefinition def = GetSpellDefinition((sender as Control).LocalSerial);
 
                         if (def != null)
                             GameActions.CastSpell(def.ID);
@@ -610,7 +610,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (UIManager.IsDragging)
                         return;
 
-                    SpellDefinition def = GetSpellDefinition(sender as Control);
+                    SpellDefinition def = GetSpellDefinition((sender as Control).LocalSerial);
 
                     if (def == null)
                         return;
@@ -661,9 +661,9 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        private SpellDefinition GetSpellDefinition(Control ctrl)
+        private SpellDefinition GetSpellDefinition(uint serial)
         {
-            int idx = (int) (ctrl.LocalSerial > 1000 ? ctrl.LocalSerial - 1000 : ctrl.LocalSerial >= 100 ? ctrl.LocalSerial - 100 : ctrl.LocalSerial) + 1;
+            int idx = (int) (serial > 1000 ? serial - 1000 : serial >= 100 ? serial - 100 : serial) + 1;
 
             return GetSpellDefinition(idx);
         }
@@ -1155,6 +1155,30 @@ namespace ClassicUO.Game.UI.Gumps
             Circle_3_4,
             Circle_5_6,
             Circle_7_8
+        }
+
+        private class HueGumpPic : GumpPic
+        {
+            private readonly ushort _spellID;
+
+            public HueGumpPic(int x, int y, ushort graphic, ushort hue, ushort spellID) : base(x, y, graphic, hue)
+            {
+                _spellID = spellID;
+            }
+
+            public override void Update(double totalMS, double frameMS)
+            {
+                base.Update(totalMS, frameMS);
+
+                if (World.ActiveIcons.IsActive(_spellID))
+                {
+                    Hue = 38;
+                }
+                else if (Hue != 0)
+                {
+                    Hue = 0;
+                }
+            }
         }
     }
 }
