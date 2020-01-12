@@ -282,7 +282,7 @@ namespace ClassicUO.IO.Resources
                                             index = new IndexAnimation();
 
                                         index.Type = (ANIMATION_GROUPS_TYPE)i;
-                                        index.Flags = 0x80000000 | number;
+                                        index.Flags = (ANIMATION_FLAGS) (0x80000000 | number);
 
                                         break;
                                     }
@@ -1140,7 +1140,7 @@ namespace ClassicUO.IO.Resources
         [MethodImpl(256)]
         public byte GetDieGroupIndex(ushort id, bool second, bool isRunning = false)
         {
-            ANIMATION_FLAGS flags = (ANIMATION_FLAGS)DataIndex[id].Flags;
+            ANIMATION_FLAGS flags = DataIndex[id].Flags;
 
             switch (DataIndex[id].Type)
             {
@@ -1850,7 +1850,7 @@ namespace ClassicUO.IO.Resources
         public ushort CorpseGraphic;
 
         public byte FileIndex;
-        public uint Flags;
+        public ANIMATION_FLAGS Flags;
 
         public ushort Graphic;
 
@@ -1866,7 +1866,7 @@ namespace ClassicUO.IO.Resources
         public AnimationGroupUop[] UopGroups;
 
 
-        public bool IsUOP => (Flags & (uint)ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0;
+        public bool IsUOP => (Flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0;
 
         public bool HasBodyConversion => (GraphicConversion & 0x8000) == 0 && BodyConvGroups != null;
 
@@ -1903,9 +1903,9 @@ namespace ClassicUO.IO.Resources
             {
                 case ANIMATION_GROUPS_TYPE.MONSTER:
 
-                    if ((Flags & (uint)ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
+                    if ((Flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
                         group = ANIMATION_GROUPS.AG_PEOPLE;
-                    else if ((Flags & (uint)ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
+                    else if ((Flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
                         group = ANIMATION_GROUPS.AG_LOW;
                     else
                         group = ANIMATION_GROUPS.AG_HIGHT;
@@ -1920,11 +1920,11 @@ namespace ClassicUO.IO.Resources
 
                 case ANIMATION_GROUPS_TYPE.ANIMAL:
 
-                    if ((Flags & (uint)ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
+                    if ((Flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
                     {
-                        if ((Flags & (uint)ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
+                        if ((Flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
                             group = ANIMATION_GROUPS.AG_PEOPLE;
-                        else if ((Flags & (uint)ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
+                        else if ((Flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
                             group = ANIMATION_GROUPS.AG_LOW;
                         else
                             group = ANIMATION_GROUPS.AG_HIGHT;

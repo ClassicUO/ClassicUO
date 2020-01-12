@@ -502,7 +502,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
 
-            ANIMATION_FLAGS flags = (ANIMATION_FLAGS) UOFileManager.Animations.DataIndex[graphic].Flags;
+            ANIMATION_FLAGS flags = UOFileManager.Animations.DataIndex[graphic].Flags;
 
             if (mobile.AnimationFromServer && mobile.AnimationGroup != 0xFF)
             {
@@ -1329,7 +1329,8 @@ namespace ClassicUO.Game.GameObjects
             {
                 IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
                 ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-                if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
+                if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0) 
+                    type = ia.Type;
 
                 if (type == ANIMATION_GROUPS_TYPE.MONSTER)
                 {
@@ -1345,7 +1346,8 @@ namespace ClassicUO.Game.GameObjects
 
                         case 3:
 
-                            if ((ia.Flags & 1) != 0) return 12;
+                            if ((ia.Flags & ANIMATION_FLAGS.AF_UNKNOWN_1) != 0) 
+                                return 12;
 
                             goto case 0;
 
@@ -1433,7 +1435,7 @@ namespace ClassicUO.Game.GameObjects
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
 
-            if ((ia.Flags & 0x80000000) != 0)
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0)
                 type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
@@ -1453,7 +1455,8 @@ namespace ClassicUO.Game.GameObjects
         {
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0)
+                type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
@@ -1481,7 +1484,8 @@ namespace ClassicUO.Game.GameObjects
         {
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0)
+                type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
@@ -1503,7 +1507,8 @@ namespace ClassicUO.Game.GameObjects
         {
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0) 
+                type = ia.Type;
 
             if (type <= ANIMATION_GROUPS_TYPE.SEA_MONSTER)
             {
@@ -1540,7 +1545,8 @@ namespace ClassicUO.Game.GameObjects
         {
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0)
+                type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
@@ -1578,7 +1584,8 @@ namespace ClassicUO.Game.GameObjects
         {
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0) 
+                type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
@@ -1600,7 +1607,8 @@ namespace ClassicUO.Game.GameObjects
         {
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0) 
+                type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
@@ -1629,7 +1637,8 @@ namespace ClassicUO.Game.GameObjects
         {
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0) 
+                type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {

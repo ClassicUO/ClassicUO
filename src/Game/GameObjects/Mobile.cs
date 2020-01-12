@@ -347,7 +347,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                ANIMATION_FLAGS flags = (ANIMATION_FLAGS) UOFileManager.Animations.DataIndex[graphic].Flags;
+                ANIMATION_FLAGS flags = UOFileManager.Animations.DataIndex[graphic].Flags;
                 ANIMATION_GROUPS animGroup = ANIMATION_GROUPS.AG_NONE;
 
                 bool isLowExtended = false;
