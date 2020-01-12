@@ -84,6 +84,8 @@ namespace ClassicUO
 
         protected override void LoadContent()
         {
+            Client.Load();
+
             uint[] hues = UOFileManager.Hues.CreateShaderColors();
 
             int size = UOFileManager.Hues.HuesCount;

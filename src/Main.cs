@@ -25,6 +25,8 @@ namespace ClassicUO
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
 
+        private static bool _skipUpdates;
+
 
         static void Main(string[] args)
         {
@@ -44,12 +46,28 @@ namespace ClassicUO
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
                 StringBuilder sb = new StringBuilder();
+                sb.AppendLine("######################## [START LOG] ########################");
+
 #if DEV_BUILD
-                sb.AppendFormat("ClassicUO [dev] - v{0}\nOS: {1} {2}\nThread: {3}\n\n", CUOEnviroment.Version, Environment.OSVersion.Platform, Environment.Is64BitOperatingSystem ? "x64" : "x86", Thread.CurrentThread.Name);
+                sb.AppendLine($"ClassicUO [DEV_BUILD] - {CUOEnviroment.Version}");
 #else
-                sb.AppendFormat("ClassicUO - v{0}\nOS: {1} {2}\nThread: {3}\n\n", CUOEnviroment.Version, Environment.OSVersion.Platform, Environment.Is64BitOperatingSystem ? "x64" : "x86", Thread.CurrentThread.Name);
+                sb.AppendLine($"ClassicUO [STANDARD_BUILD] - {CUOEnviroment.Version}");
 #endif
-                sb.AppendFormat("Exception:\n{0}", e.ExceptionObject);
+
+                sb.AppendLine($"OS: {Environment.OSVersion.Platform} x{(Environment.Is64BitOperatingSystem ? "64" : "86")}");
+                sb.AppendLine($"Thread: {Thread.CurrentThread.Name}");
+                sb.AppendLine();
+
+                sb.AppendLine($"Protocol: {Client.Protocol}");
+                sb.AppendLine($"ClientFeatures: {World.ClientFeatures.Flags}");
+                sb.AppendLine($"ClientLockedFeatures: {World.ClientLockedFeatures.Flags}");
+                sb.AppendLine($"ClientVersion: {Client.Version}");
+
+                sb.AppendLine();
+                sb.AppendFormat("Exception:\n{0}\n", e.ExceptionObject);
+                sb.AppendLine("######################## [END LOG] ########################");
+                sb.AppendLine();
+                sb.AppendLine();
 
                 Log.Panic(e.ExceptionObject.ToString());
                 string path = Path.Combine(CUOEnviroment.ExecutablePath, "Logs");
@@ -60,13 +78,6 @@ namespace ClassicUO
                 using (LogFile crashfile = new LogFile(path, "crash.txt"))
                 {
                     crashfile.WriteAsync(sb.ToString()).RunSynchronously();
-
-                    //SDL.SDL_ShowSimpleMessageBox(
-                    //                             SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
-                    //                             "An error occurred",
-                    //                             $"{crashfile}\ncreated in /Logs.",
-                    //                             SDL.SDL_GL_GetCurrentWindow()
-                    //                            );
                 }
             };
 #endif
@@ -78,7 +89,7 @@ namespace ClassicUO
 #endif
             ReadSettingsFromArgs(args);
 
-            if (!SkipUpdate)
+            if (!_skipUpdates)
                 if (CheckUpdate(args))
                     return;
 
@@ -129,9 +140,6 @@ namespace ClassicUO
             Log.Trace("Closing...");
         }
 
-        public static bool StartMinimized { get; set; }
-        public static bool StartInLittleWindow { get; set; }
-        public static bool SkipUpdate { get; set; }
 
         private static void ReadSettingsFromArgs(string[] args)
         {
@@ -158,19 +166,9 @@ namespace ClassicUO
                         Settings.CustomSettingsFilepath = value;
                         break;
 
-                    case "minimized":
-                        StartMinimized = true;
-                        break;
-
-                    case "littlewindow":
-                        StartInLittleWindow = true;
-                        break;
-
                     case "skipupdate":
-                        SkipUpdate = true;
+                        _skipUpdates = true;
                         break;
-
-
 
                     case "username":
                         Settings.GlobalSettings.Username = value;
@@ -199,12 +197,12 @@ namespace ClassicUO
 
                     case "ultimaonlinedirectory":
                     case "uopath":
-                        Settings.GlobalSettings.UltimaOnlineDirectory = value; // Required
+                        Settings.GlobalSettings.UltimaOnlineDirectory = value;
 
                         break;
 
                     case "clientversion":
-                        Settings.GlobalSettings.ClientVersion = value; // Required
+                        Settings.GlobalSettings.ClientVersion = value;
 
                         break;
 

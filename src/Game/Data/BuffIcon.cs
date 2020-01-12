@@ -25,14 +25,17 @@ using System;
 
 namespace ClassicUO.Game.Data
 {
-    internal readonly struct BuffIcon : IEquatable<BuffIcon>
+    internal class BuffIcon : IEquatable<BuffIcon>
     {
-        public BuffIcon(ushort graphic, long timer, string text)
+        public BuffIcon(BuffIconType type, ushort graphic, long timer, string text)
         {
+            Type = type;
             Graphic = graphic;
             Timer = timer;
             Text = text;
         }
+
+        public readonly BuffIconType Type;
 
         public readonly ushort Graphic;
 
@@ -42,7 +45,7 @@ namespace ClassicUO.Game.Data
 
         public bool Equals(BuffIcon other)
         {
-            return Graphic == other.Graphic;
+            return other != null && Type == other.Type;
         }
     }
 }

@@ -93,12 +93,9 @@ namespace ClassicUO.Game.Map
                     break;
 
                 case Multi m when (m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0:
-                    priorityZ--;
+                        priorityZ--;
                     break;
-
                 default:
-
-                {
                     ref readonly StaticTiles data = ref UOFileManager.TileData.StaticData[obj.Graphic];
 
                     if (data.IsBackground)
@@ -106,7 +103,6 @@ namespace ClassicUO.Game.Map
 
                     if (data.Height != 0)
                         priorityZ++;
-                }
 
                     break;
             }
@@ -133,7 +129,7 @@ namespace ClassicUO.Game.Map
             {
                 int testPriorityZ = o.PriorityZ;
 
-                if (testPriorityZ > priorityZ || testPriorityZ == priorityZ && (obj is Land || obj is Multi m) && !(o is Land))
+                if (testPriorityZ > priorityZ || testPriorityZ == priorityZ && (obj is Land || (obj is Multi m && (m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0)) && !(o is Land))
                     break;
 
                 found = o;

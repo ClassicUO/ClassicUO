@@ -129,6 +129,7 @@
     <Compile Include="Game\Data\PopupMenuItem.cs" />
     <Compile Include="Game\Data\PromptData.cs" />
     <Compile Include="Game\Data\RaceType.cs" />
+    <Compile Include="Game\Managers\ActiveIconsManager.cs" />
     <Compile Include="Game\Managers\DelayedObjectClickManager.cs" />
     <Compile Include="Game\Managers\Seasons.cs" />
     <Compile Include="Game\Data\ServerErrorMessages.cs" />
@@ -299,7 +300,6 @@
     <Compile Include="IO\Resources\SpeechesLoader.cs" />
     <Compile Include="IO\Resources\TexmapsLoader.cs" />
     <Compile Include="IO\Resources\TileDataLoader.cs" />
-    <Compile Include="Network\BufferPool.cs" />
     <Compile Include="Network\Plugin.cs" />
     <Compile Include="Network\Updater.cs" />
     <Compile Include="Utility\Platforms\PlatformHelper.cs" />

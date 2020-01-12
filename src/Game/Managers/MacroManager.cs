@@ -545,7 +545,22 @@ namespace ClassicUO.Game.Managers
                                     break;
 
                                 case MacroSubType.Chat:
-                                    Log.Warn( $"Macro '{macro.SubCode}' not implemented");
+                                    if (!UOChatManager.ChatIsEnabled)
+                                    {
+                                        break;
+                                    }
+
+                                    UOChatGump chatGump = UIManager.GetGump<UOChatGump>();
+
+                                    if (chatGump == null)
+                                    {
+                                        UIManager.Add(new UOChatGump());
+                                    }
+                                    else
+                                    {
+                                        chatGump.SetInScreen();
+                                        chatGump.BringOnTop();
+                                    }
 
                                     break;
 
@@ -760,11 +775,6 @@ namespace ClassicUO.Game.Managers
                                         else if (macro.Code == MacroType.Maximize)
                                             spellbook.IsMinimized = false;
                                     }
-
-                                    break;
-
-                                case MacroSubType.Chat:
-                                    Log.Warn( $"Macro '{macro.SubCode}' not implemented");
 
                                     break;
 

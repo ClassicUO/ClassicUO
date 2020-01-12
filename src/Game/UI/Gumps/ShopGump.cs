@@ -262,6 +262,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (!World.InGame || IsDisposed)
                 return;
 
+            if (_shopItems.Count == 0)
+            {
+                Dispose();
+            }
+
             _shiftPressed = Keyboard.Shift;
 
             if (_isUpDOWN || _isDownDOWN || _isDownDOWN_T || _isUpDOWN_T)
@@ -426,26 +431,34 @@ namespace ClassicUO.Game.UI.Gumps
                     ushort hue2 = item.Hue;
 
                     AnimationDirection direction = UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue2, true).Direction[1];
-                    UOFileManager.Animations.AnimID = item.Graphic;
+                    UOFileManager.Animations.AnimID = graphic;
                     UOFileManager.Animations.AnimGroup = group;
                     UOFileManager.Animations.Direction = 1;
 
                     if (direction.FrameCount == 0)
                         UOFileManager.Animations.LoadDirectionGroup(ref direction);
-
+                    
                     Add(control = new TextureControl
                     {
-                        Texture = direction.Frames[0],
+                        Texture = direction.FrameCount != 0 ? direction.Frames[0] : null,
                         X = 5,
                         Y = 5,
                         AcceptMouseInput = false,
-                        Hue = item.Hue == 0 ? (ushort) hue2 : item.Hue,
+                        Hue = item.Hue == 0 ? hue2 : item.Hue,
                         IsPartial = item.ItemData.IsPartialHue
                     });
 
-                    control.Width = control.Texture.Width;
-                    control.Height = control.Texture.Height;
-
+                    if (control.Texture != null)
+                    {
+                        control.Width = control.Texture.Width;
+                        control.Height = control.Texture.Height;
+                    }
+                    else
+                    {
+                        control.Width = 35;
+                        control.Height = 35;
+                    }
+                   
                     if (control.Width > 35)
                         control.Width = 35;
 

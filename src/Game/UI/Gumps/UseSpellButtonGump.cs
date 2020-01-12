@@ -40,6 +40,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class UseSpellButtonGump : AnchorableGump
     {
         private SpellDefinition _spell;
+        private GumpPic _background;
 
         public UseSpellButtonGump() : base(0, 0)
         {
@@ -57,11 +58,16 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SPELLBUTTON;
 
+        public ushort Hue
+        {
+            set => _background.Hue = value;
+        }
+
         private void BuildGump()
         {
             LocalSerial = (uint) _spell.ID;
 
-            Add(new GumpPic(0, 0, (ushort) _spell.GumpIconSmallID, 0) {AcceptMouseInput = false});
+            Add(_background = new GumpPic(0, 0, (ushort) _spell.GumpIconSmallID, 0) {AcceptMouseInput = false});
 
             int cliloc = GetSpellTooltip(_spell.ID);
 

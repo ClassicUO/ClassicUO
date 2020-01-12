@@ -86,7 +86,7 @@ namespace ClassicUO.Game.Scenes
 
         public string[] Characters { get; private set; }
 
-        public string PopupMessage { get; private set; }
+        public string PopupMessage { get; set; }
 
         public byte ServerIndex { get; private set; }
 
@@ -562,6 +562,17 @@ namespace ClassicUO.Game.Scenes
                     PopupMessage = ServerErrorMessages.GetError(e.ID, code);
                     CurrentLoginStep = LoginStep.PopUpMessage;
 
+                    break;
+                case 0xB9:
+                    uint flags = 0;
+
+                    if (Client.Version >= ClientVersion.CV_60142)
+                        flags = e.ReadUInt();
+                    else
+                        flags = e.ReadUShort();
+                    World.ClientLockedFeatures.SetFlags((LockedFeatureFlags) flags);
+                    break;
+                default:
                     break;
             }
         }

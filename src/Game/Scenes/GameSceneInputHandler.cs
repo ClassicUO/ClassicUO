@@ -309,7 +309,12 @@ namespace ClassicUO.Game.Scenes
             {
                 _isMouseLeftDown = true;
 
-                if (SelectedObject.LastObject is GameObject obj)
+                if (TargetManager.IsTargeting && 
+                    TargetManager.TargetingState == CursorTarget.MultiPlacement && 
+                    (World.CustomHouseManager.SelectedGraphic != 0 || 
+                     World.CustomHouseManager.Erasing || 
+                     World.CustomHouseManager.SeekTile) &&
+                    SelectedObject.LastObject is GameObject obj)
                 {
                     World.CustomHouseManager.OnTargetWorld(obj);
                     _lastSelectedMultiPositionInHouseCustomization.X = obj.X;
@@ -492,11 +497,6 @@ namespace ClassicUO.Game.Scenes
                         {
                             CommandManager.OnHueTarget(selectedEntity);
                         }
-
-                        break;
-
-                    default:
-                        Log.Warn( "Not implemented.");
 
                         break;
                 }

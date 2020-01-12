@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -72,7 +73,10 @@ namespace ClassicUO.Game
 
         public static bool IgnoreStaminaCheck { get; set; }
 
-        private static bool CreateItemList(ref List<PathObject> list, int x, int y, int stepState)
+
+
+
+        private static bool CreateItemList(List<PathObject> list, int x, int y, int stepState)
         {
             Tile tile = World.Map.GetTile(x, y, false);
 
@@ -89,8 +93,10 @@ namespace ClassicUO.Game
 
             for (; obj != null; obj = obj.Right)
             {
-                // TODO: custom house gump
-                var graphicHelper = obj.Graphic;
+                if (World.CustomHouseManager != null && obj.Z < World.Player.Z)
+                    continue;
+                
+                ushort graphicHelper = obj.Graphic;
 
                 switch (obj)
                 {
@@ -129,7 +135,6 @@ namespace ClassicUO.Game
                         switch (obj)
                         {
                             case Mobile mobile:
-
                             {
                                 if (!ignoreGameCharacters && !mobile.IsDead && !mobile.IgnoreCharacters)
                                     list.Add(new PathObject((uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, mobile.Z, mobile.Z + Constants.DEFAULT_CHARACTER_HEIGHT, Constants.DEFAULT_CHARACTER_HEIGHT, mobile));
@@ -139,7 +144,6 @@ namespace ClassicUO.Game
                             }
 
                             case Item item when item.IsMulti || item.ItemData.IsInternal:
-
                             {
                                 canBeAdd = false;
 
@@ -147,10 +151,8 @@ namespace ClassicUO.Game
                             }
 
                             case Item item2:
-
                                 if (stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM && (item2.ItemData.IsDoor || item2.ItemData.Weight <= 0x5A || isGM && !item2.IsLocked))
                                     dropFlags = true;
-
                                 else if (ProfileManager.Current.SmoothDoors && item2.ItemData.IsDoor)
                                 {
                                     dropFlags = true;
@@ -160,6 +162,16 @@ namespace ClassicUO.Game
                                     dropFlags = graphicHelper >= 0x3946 && graphicHelper <= 0x3964 || graphicHelper == 0x0082;
                                 }
                                 break;
+
+                            case Multi m :
+
+                                if (World.CustomHouseManager != null && m.IsCustom && (m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) == 0)
+                                    canBeAdd = false;
+
+                                if ((m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER) != 0)
+                                    dropFlags = true;
+
+                                break;
                         }
 
                         if (canBeAdd)
@@ -168,10 +180,8 @@ namespace ClassicUO.Game
 
                             if (!(obj is Mobile))
                             {
-                                ref readonly var itemdata = ref UOFileManager.TileData.StaticData[obj.Graphic];
+                                ref readonly StaticTiles itemdata = ref UOFileManager.TileData.StaticData[obj.Graphic];
 
-                            //if (GameObjectHelper.TryGetStaticData(obj, out StaticTiles itemdata))
-                            // {
                                 if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
                                 {
                                     if (itemdata.IsWet)
@@ -239,7 +249,7 @@ namespace ClassicUO.Game
             newY += _offsetY[direction];
             List<PathObject> list = new List<PathObject>();
 
-            if (!CreateItemList(ref list, newX, newY, stepState) || list.Count == 0)
+            if (!CreateItemList(list, newX, newY, stepState) || list.Count == 0)
                 return 0;
 
             foreach (PathObject obj in list)
@@ -305,26 +315,22 @@ namespace ClassicUO.Game
             CalculateMinMaxZ(ref minZ, ref maxZ, x, y, z, direction, stepState);
             List<PathObject> list = new List<PathObject>();
 
-            // TODO: custom house gump
+            if (World.CustomHouseManager != null)
+            {
+                Rectangle rect = new Rectangle(World.CustomHouseManager.StartPos.X, 
+                                               World.CustomHouseManager.StartPos.Y, 
+                                               World.CustomHouseManager.EndPos.X,
+                                               World.CustomHouseManager.EndPos.Y);
 
-            if (!CreateItemList(ref list, x, y, stepState) || list.Count == 0)
+                if (!rect.Contains(x, y))
+                    return false;
+            }
+
+            if (!CreateItemList(list, x, y, stepState) || list.Count == 0)
                 return false;
 
-            list.Sort((a, b) =>
-            {
-                int comparision = a.Z - b.Z;
+            list.Sort();
 
-                if (comparision == 0)
-                    comparision = a.Height - b.Height;
-
-                //if (comparision < 0)
-                //    return 1;
-
-                //if (comparision > 0)
-                //    return -1;
-
-                return comparision;
-            });
             list.Add(new PathObject((uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, 128, 128, 128, null));
             int resultZ = -128;
 
@@ -847,7 +853,7 @@ namespace ClassicUO.Game
             POF_NO_DIAGONAL = 0x00000008
         }
 
-        private class PathObject //: IComparable, IComparable<PathObject>
+        private class PathObject : IComparable<PathObject>
         {
             public PathObject(uint flags, int z, int avgZ, int h, GameObject obj)
             {
@@ -867,6 +873,16 @@ namespace ClassicUO.Game
             public int Height { get; }
 
             public GameObject Object { get; }
+
+            public int CompareTo(PathObject other)
+            {
+                int comparision = Z - other.Z;
+
+                if (comparision == 0)
+                    comparision = Height - other.Height;
+
+                return comparision;
+            }
         }
 
         private class PathNode

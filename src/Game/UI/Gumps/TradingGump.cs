@@ -30,14 +30,15 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal sealed class TradingGump : TextContainerGump
     {
+        private uint _gold, _platinum, _hisGold, _hisPlatinum;
         private readonly string _name;
         private GumpPic _hisPic;
 
@@ -45,6 +46,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private DataBox _myBox, _hisBox;
         private Checkbox _myCheckbox;
+        private readonly Label[] _myCoins = new Label[2];
+        private readonly Label[] _hisCoins = new Label[2];
+        private readonly TextBox[] _myCoinsEntries = new TextBox[2];
 
         public TradingGump(uint local, string name, uint id1, uint id2) : base(local, 0)
         {
@@ -63,6 +67,63 @@ namespace ClassicUO.Game.UI.Gumps
         public uint ID1 { get; }
         public uint ID2 { get; }
 
+        public uint Gold
+        {
+            get => _gold;
+            set
+            {
+                if (_gold != value)
+                {
+                    _gold = value;
+
+                    if (Client.Version >= ClientVersion.CV_704565)
+                        _myCoins[0].Text = _gold.ToString();
+                }
+            }
+        }
+        public uint Platinum
+        {
+            get => _platinum;
+            set
+            {
+                if (_platinum != value)
+                {
+                    _platinum = value;
+
+                    if (Client.Version >= ClientVersion.CV_704565)
+                        _myCoins[1].Text = _platinum.ToString();
+                }
+            }
+        }
+        public uint HisGold
+        {
+            get => _hisGold;
+            set
+            {
+                if (_hisGold != value)
+                {
+                    _hisGold = value;
+
+                    if (Client.Version >= ClientVersion.CV_704565)
+                        _hisCoins[0].Text = _hisGold.ToString();
+                }
+            }
+        }
+        public uint HisPlatinum
+        {
+            get => _hisPlatinum;
+            set
+            {
+                if (_hisPlatinum != value)
+                {
+                    _hisPlatinum = value;
+
+                    if (Client.Version >= ClientVersion.CV_704565)
+                        _hisCoins[1].Text = _hisPlatinum.ToString();
+                }
+            }
+        }
+
         public bool ImAccepting
         {
             get => _imAccepting;
@@ -72,7 +133,6 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _imAccepting = value;
                     SetCheckboxes();
-                    //BuildGump();
                 }
             }
         }
@@ -86,7 +146,6 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _heIsAccepting = value;
                     SetCheckboxes();
-                    //BuildGump();
                 }
             }
         }
@@ -244,6 +303,98 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(new Label(_name, false, 0x0481, font: 3)
                         { X = fontWidth, Y = 244 });
+
+
+                _myCoins[0] = new Label("0", false, 0x0481, font: 9)
+                {
+                    X = 43,
+                    Y = 67
+                };
+                Add(_myCoins[0]);
+
+                _myCoins[1] = new Label("0", false, 0x0481, font: 9)
+                {
+                    X = 180,
+                    Y = 67
+                };
+                Add(_myCoins[1]);
+
+                _hisCoins[0] = new Label("0", false, 0x0481, font: 9)
+                {
+                    X = 180,
+                    Y = 190
+                };
+                Add(_hisCoins[0]);
+
+                _hisCoins[1] = new Label("0", false, 0x0481, font: 9)
+                {
+                    X = 180,
+                    Y = 210
+                };
+                Add(_hisCoins[1]);
+
+                _myCoinsEntries[0] = new TextBox(9, -1, 100, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
+                {
+                    X = 43,
+                    Y = 190,
+                    Width = 100,
+                    Height = 20,
+                    NumericOnly = true,
+                    Tag = 0
+                };
+                Add(_myCoinsEntries[0]);
+                _myCoinsEntries[0].SetText("0");
+
+                _myCoinsEntries[1] = new TextBox(9, -1, 100, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
+                {
+                    X = 43,
+                    Y = 210,
+                    Width = 100,
+                    Height = 20,
+                    NumericOnly = true,
+                    Tag = 1
+                };
+                Add(_myCoinsEntries[1]);
+                _myCoinsEntries[1].SetText("0");
+
+
+                void OnTextChanged(object sender, EventArgs e)
+                {
+                    TextBox entry = (TextBox) sender;
+
+                    if (entry != null)
+                    {
+                        if (string.IsNullOrEmpty(entry.Text))
+                        {
+                            entry.SetText("0");
+                        }
+                        else if (uint.TryParse(entry.Text, out uint value))
+                        {
+                            if ((int) entry.Tag == 0) // gold
+                            {
+                                if (value > Gold)
+                                {
+                                    value = Gold;
+                                }
+                            }
+                            else // platinum
+                            {
+                                if (value > Platinum)
+                                {
+                                    value = Platinum;
+                                }
+                            }
+
+                            entry.SetText(value.ToString());
+                        }
+
+                        NetClient.Socket.Send(new PTradeUpdateGold(ID1, uint.Parse(_myCoinsEntries[0].Text), uint.Parse(_myCoinsEntries[1].Text)));
+                    }
+                }
+
+                _myCoinsEntries[0].TextChanged += OnTextChanged;
+                _myCoinsEntries[1].TextChanged += OnTextChanged;
+
 
                 mydbX = 30;
                 mydbY = 110;

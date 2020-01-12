@@ -195,6 +195,9 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
+            if (button != MouseButtonType.Left)
+                return;
+
             _clicked = true;
             _clickPosition.X = x;
             _clickPosition.Y = y;
@@ -202,9 +205,11 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            _clicked = false;
+            if (button != MouseButtonType.Left)
+                return;
 
-            if (button == MouseButtonType.Left) CalculateNew(x);
+            _clicked = false;
+            CalculateNew(x);
         }
 
        
