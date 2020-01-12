@@ -57,8 +57,6 @@ namespace ClassicUO.IO.Resources
         private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUop[] _filesUop = new UOFileUop[4];
-        //private readonly List<ToRemoveInfo> _usedTextures = new List<ToRemoveInfo>(), _usedUopTextures = new List<ToRemoveInfo>();
-
         private readonly List<AnimationDirection> _usedTextures = new List<AnimationDirection>();
 
 
@@ -716,64 +714,7 @@ namespace ClassicUO.IO.Resources
                 uint animID = reader.ReadUInt();
                 reader.Skip(48);
                 int replaces = reader.ReadInt();
-
-
-                //for (byte grpID = 0; grpID < 100; grpID++)
-                //{
-                //    string hashstring = $"build/animationlegacyframe/{animID:D6}/{grpID:D2}.bin";
-                //    ulong hash = UOFileUop.CreateHash(hashstring);
-
-                //    if (hashes.TryGetValue(hash, out var uopData))
-                //    {
-                //        if (DataIndex[animID] == null)
-                //            DataIndex[animID] = new IndexAnimation()
-                //            {
-                //                UopGroups = new AnimationGroupUop[100]
-                //            };
-
-
-                //        if (DataIndex[animID].Type == ANIMATION_GROUPS_TYPE.UNKNOWN)
-                //        {
-                //            switch (replaces)
-                //            {
-                //                case 29:
-                //                    DataIndex[animID].Type = ANIMATION_GROUPS_TYPE.MONSTER;
-
-                //                    break;
-                //                case 31:
-                //                case 32:
-                //                    DataIndex[animID].Type = ANIMATION_GROUPS_TYPE.ANIMAL;
-
-                //                    break;
-                //                case 48:
-                //                case 68:
-                //                    DataIndex[animID].Type = ANIMATION_GROUPS_TYPE.HUMAN;
-
-                //                    break;
-                //            }
-                //        }
-
-
-                //        //ref var g = ref DataIndex[animID].UopGroups[grpID];
-
-                //        //g = new AnimationGroupUop
-                //        //{
-                //        //    Offset = uopData.Offset,
-                //        //    CompressedLength = uopData.CompressedLength,
-                //        //    DecompressedLength = uopData.DecompressedLength,
-                //        //    FileIndex = uopData.FileIndex,
-                //        //    Direction = new AnimationDirection[5]
-                //        //};
-
-
-                //        //for (int d = 0; d < 5; d++)
-                //        //{
-                //        //    g.Direction[d].IsUOP = true;
-                //        //}
-                //    }
-                //}
-
-
+                
                 if (replaces == 48 || replaces == 68)
                     continue;
 
@@ -1171,7 +1112,7 @@ namespace ClassicUO.IO.Resources
 
 
         [MethodImpl(256)]
-        public ANIMATION_GROUPS GetGroupIndex(ushort graphic, bool isequip = false)
+        public ANIMATION_GROUPS GetGroupIndex(ushort graphic)
         {
             if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 return ANIMATION_GROUPS.AG_HIGHT;
