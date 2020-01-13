@@ -335,6 +335,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             public BuffControlEntry(BuffIcon icon) : base(0, 0, icon.Graphic, 0)
             {
+                if (IsDisposed)
+                    return;
+
                 Icon = icon;
                 Width = Texture.Width;
                 Height = Texture.Height;
