@@ -76,23 +76,23 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 X = 267, Y = listTitleY
             }, 1);
 
-            int valid = 0;
-            for (int i = 0; i < loginScene.Characters.Length; i++)
+            for (int i = 0, valid = 0; i < loginScene.Characters.Length; i++)
             {
                 string character = loginScene.Characters[i];
-                //no need to check on char length, as it's the server that sends the list, we only choose one
-                //instead we have to check for capacity to create one
-                /*if (i == 5 && (World.ClientLockedFeatures.Flags & LockedFeatureFlags.CharacterSlot6) == 0)
-                    continue;
-
-                if (i == 6 && (World.ClientLockedFeatures.Flags & LockedFeatureFlags.CharacterSlot7) == 0)
-                    continue;*/
-
+              
                 if (!string.IsNullOrEmpty(character))
                 {
                     valid++;
+
                     if (valid > World.ClientFeatures.MaxChars)
                         break;
+
+                    if (valid == 5 && (World.ClientLockedFeatures.Flags & LockedFeatureFlags.CharacterSlot6) == 0)
+                        continue;
+
+                    if (valid == 6 && (World.ClientLockedFeatures.Flags & LockedFeatureFlags.CharacterSlot7) == 0)
+                        continue;
+
                     Add(new CharacterEntryGump((uint) i, character, SelectCharacter, LoginCharacter)
                     {
                         X = 224,
