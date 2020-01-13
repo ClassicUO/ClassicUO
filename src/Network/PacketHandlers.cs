@@ -643,7 +643,6 @@ namespace ClassicUO.Network
                 World.MapIndex = 0;
 
             Direction direction = (Direction) (p.ReadByte() & 0x7);
-            //World.Player.ForcePosition(x, y, z, direction);
 
             World.Player.X = x;
             World.Player.Y = y;
@@ -1015,19 +1014,7 @@ namespace ClassicUO.Network
                 {
                     Item item = vendor.Equipment[(int)layer];
 
-                    //Item a = item?.Items.FirstOrDefault();
-
-                    //if (a == null)
-                    //    continue;
-
-                    //bool reverse = a.X > 1;
-
-                    //var list = reverse ? 
-                    //               item.Items.OrderBy(s => s.Serial.Value).Reverse() 
-                    //               :
-                    //               item.Items.OrderBy(s => s.Serial.Value);
-
-                    var list = item.Items /*.OrderByDescending(s => s.Serial.Value)*/.ToArray();
+                    var list = item.Items.ToArray();
 
                     if (list.Length == 0)
                         return;
@@ -1035,7 +1022,8 @@ namespace ClassicUO.Network
                     if (list[0].X > 1)
                         list = list.Reverse().ToArray();
 
-                    foreach (var i in list) gump.AddItem(i, false);
+                    foreach (var i in list) 
+                        gump.AddItem(i, false);
                 }
             }
             else
@@ -1060,7 +1048,6 @@ namespace ClassicUO.Network
                 else 
                     Log.Error( "[OpenContainer]: item not found");
             }
-
         }
 
         private static void UpdateContainedItem(Packet p)
@@ -1333,9 +1320,7 @@ namespace ClassicUO.Network
             GameScene gs = Client.Game.GetScene<GameScene>();
 
             if (gs.HeldItem.Serial == item.Serial)
-                gs.HeldItem.Clear();
-
-          
+                gs.HeldItem.Clear();      
         }
 
         private static void UpdateSkills(Packet p)
@@ -1503,7 +1488,6 @@ namespace ClassicUO.Network
             {
                 UIManager.GetGump<SpellbookGump>(container)?.Update();
             }
-
 
             World.Items.ProcessDelta();
         }
@@ -1981,19 +1965,6 @@ namespace ClassicUO.Network
             {
                 byte count = p.ReadByte();
 
-                //Item a = container.Items.FirstOrDefault();
-
-                //if (a == null)
-                //    return;
-
-                //bool reverse = a.X > 1;
-
-                //var list = reverse ? 
-                //               container.Items.OrderBy(s => s.Serial.Value).Reverse()
-                //               :
-                //               container.Items.OrderBy(s => s.Serial.Value);
-
-
                 var list = container.Items /*.OrderBy(s => s.Serial.Value)*/.ToArray();
 
                 if (list.Length == 0)
@@ -2049,17 +2020,6 @@ namespace ClassicUO.Network
 
             if (mobile != World.Player)
             {
-                //if (mobile.IsMoving && (byte) mobile.Direction == mobile.Steps.Back().Direction)
-                //{
-                //    var step = mobile.Steps.Back();
-
-                //    mobile.Position = new Position((ushort) step.X, (ushort) step.Y, step.Z);
-                //    mobile.Direction = (Direction) step.Direction;
-                //    mobile.IsRunning = step.Run;
-                //    mobile.Steps.Clear();
-                //    mobile.AddToTile();
-                //}
-
                 mobile.Graphic = graphic;
                 mobile.FixHue(hue);
 
@@ -2155,8 +2115,6 @@ namespace ClassicUO.Network
                     Log.Warn($"Invalid layer in UpdateObject(). Layer: {layer}");
                 }
 
-                //if (World.OPL.Contains(serial))
-                //    NetClient.Socket.Send(new PMegaClilocRequest(item));
                 item.CheckGraphicChange();
                 item.ProcessDelta();
                 World.Items.Add(item);
@@ -2165,9 +2123,6 @@ namespace ClassicUO.Network
             if (mobile == World.Player) // resync ?
             {
                 World.Player.UpdateAbilities();
-                //World.Player.ResetSteps();
-                //World.Player.Position = new Position(x, y, z);
-                //World.Player.Direction = direction;
             }
             else
             {
@@ -2930,9 +2885,7 @@ namespace ClassicUO.Network
                         GameActions.Print(msg, ProfileManager.Current.ChatMessageHue, MessageType.Regular, 1, true);
                     }
                     break;
-            }
-
-           
+            } 
         }
 
         private static void Help(Packet p)
@@ -3026,7 +2979,6 @@ namespace ClassicUO.Network
 
         private static void ClientVersion(Packet p)
         {
-            //new PClientVersion().SendToServer();
         }
 
         private static void AssistVersion(Packet p)
@@ -3085,8 +3037,6 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 6: //party
-                    //PartyManager.HandlePartyPacket(p);
-
                     World.Party.ParsePacket(p);
 
                     break;
@@ -3238,9 +3188,7 @@ namespace ClassicUO.Network
 
                     if (UOFileManager.Map.ApplyPatches(p))
                     {
-                        //int indx = World.MapIndex;
-                        //World.MapIndex = -1;
-                        //World.MapIndex = indx;
+                        Log.Trace("Map Patches applied.");
                     }
 
                     break;
@@ -3419,12 +3367,12 @@ namespace ClassicUO.Network
                         if (active)
                         {
                             g.Hue = 38;
-                            World.ActiveIcons.Add(spell);
+                            World.ActiveSpellIcons.Add(spell);
                         }
                         else
                         {
                             g.Hue = 0;
-                            World.ActiveIcons.Remove(spell);
+                            World.ActiveSpellIcons.Remove(spell);
                         }
                     }
 
@@ -3572,7 +3520,6 @@ namespace ClassicUO.Network
 
             if (entity != null)
             {
-
                 int cliloc;
 
                 List<string> list = new List<string>();
@@ -3651,7 +3598,6 @@ namespace ClassicUO.Network
                 {
                     UIManager.GetGump<ShopGump>(container.RootContainer)?.SetNameTo((Item)entity, name);
                 }
-
             }
         }
 
@@ -3813,7 +3759,6 @@ namespace ClassicUO.Network
                     }
                 }
                 stream.ReleaseData();
-
             }
             stream.ReleaseData();
 
@@ -3862,7 +3807,6 @@ namespace ClassicUO.Network
 
             unsafe
             {
-
                 fixed (byte* srcPtr = &buffer[p.Position], destPtr = decData)
                 {
                     ZLib.Decompress((IntPtr) srcPtr, (int) clen, 0, (IntPtr) destPtr, dlen);
@@ -3894,7 +3838,6 @@ namespace ClassicUO.Network
                     int length = ((decData[index++] << 8) | decData[index++]) << 1;
                     lines[i] = Encoding.BigEndianUnicode.GetString(decData, index, length);
                     index += length;
-
                 }
             }
 
@@ -4012,8 +3955,6 @@ namespace ClassicUO.Network
                             byte hits = p.ReadByte();
 
                             World.WMapManager.AddOrUpdate(serial, x, y, hits, map, type == 0x02);
-
-                            //Log.Info($"Received custom {(isparty ? "party" : "guild")} member info: X: {x}, Y: {y}, Map: {map}, Hits: {hits}");
                         }
                     }
 
@@ -4142,7 +4083,6 @@ namespace ClassicUO.Network
             }
             else if (p.ID == 0xF7)
             {
-
                 ushort oldGraphic = World.Player.Graphic;
                 bool oldDead = World.Player.IsDead;
 
@@ -4220,9 +4160,7 @@ namespace ClassicUO.Network
             item.Z = (sbyte) z;
             item.UpdateScreenPosition();
             item.AddToTile();
-            //item.Graphic += (byte) facingDirection;
-            //item.WantUpdateMulti = true;
-            //item.CheckGraphicChange();
+
             if (World.HouseManager.TryGetHouse(item, out House house))
                 house.Generate(true);
 
@@ -4327,10 +4265,6 @@ namespace ClassicUO.Network
             item.X = x;
             item.Y = y;
             item.Z = 0;
-
-            // FIXME: not really needed here
-            //item.UpdateScreenPosition(); 
-
             item.Container = containerSerial;
 
             container.Items.Add(item);
