@@ -1,26 +1,43 @@
 ﻿#region license
-
-//  Copyright (C) 2020 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
+// #region license
+// //  Copyright (C) 2020 ClassicUO Development Community on Github
+// //
+// // This project is an alternative client for the game Ultima Online.
+// // The goal of this is to develop a lightweight client considering
+// // new technologies.
+// //
+// //  This program is free software: you can redistribute it and/or modify
+// //  it under the terms of the GNU General Public License as published by
+// //  the Free Software Foundation, either version 3 of the License, or
+// //  (at your option) any later version.
+// //
+// //  This program is distributed in the hope that it will be useful,
+// //  but WITHOUT ANY WARRANTY; without even the implied warranty of
+// //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// //  GNU General Public License for more details.
+// //
+// //  You should have received a copy of the GNU General Public License
+// //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// #endregion
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -296,14 +313,9 @@ namespace ClassicUO.Renderer
             vertex.Hue2 =
             vertex.Hue3 = hue;
 
-            if (CheckInScreen(_numSprites))
-            {
-                PushSprite(texture);
+            PushSprite(texture);
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         [MethodImpl(256)]
@@ -353,14 +365,9 @@ namespace ClassicUO.Renderer
             vertex.Hue2 =
             vertex.Hue3 = hue;
 
-            if (CheckInScreen(_numSprites))
-            {
-                PushSprite(texture);
+            PushSprite(texture);
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         [MethodImpl(256)]
@@ -436,14 +443,9 @@ namespace ClassicUO.Renderer
             vertex.Hue2 =
             vertex.Hue3 = hue;
 
-            if (CheckInScreen(_numSprites))
-            {
-                PushSprite(texture);
+            PushSprite(texture);
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         [MethodImpl(256)]
@@ -553,14 +555,9 @@ namespace ClassicUO.Renderer
             vertex.Hue2.Y =
             vertex.Hue3.Y = ShaderHuesTraslator.SHADER_SHADOW;
 
-            if (CheckInScreen(_numSprites))
-            {
-                PushSprite(texture);
+            PushSprite(texture);
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         [MethodImpl(256)]
@@ -1091,14 +1088,9 @@ namespace ClassicUO.Renderer
 
             vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
-            if (CheckInScreen(_numSprites))
-            {
-                PushSprite(texture);
+            PushSprite(texture);
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         [MethodImpl(256)]
@@ -1151,14 +1143,9 @@ namespace ClassicUO.Renderer
             vertex.TextureCoordinate3.Z = 0;
             vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
-            if (CheckInScreen(_numSprites))
-            {
-                PushSprite(texture);
+            PushSprite(texture);
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
         
         [MethodImpl(256)]
@@ -1348,14 +1335,9 @@ namespace ClassicUO.Renderer
 
             vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
-            if (CheckInScreen(_numSprites))
-            {
-                PushSprite(texture);
+            PushSprite(texture);
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         [MethodImpl(256)]
@@ -1480,36 +1462,8 @@ namespace ClassicUO.Renderer
             vertex.Hue2 =
             vertex.Hue3 = Vector3.Zero;
 
-            if (CheckInScreen(_numSprites))
-            {
-                PushSprite(texture);
-
-                return true;
-            }
-
-            return false;
-        }
-
-
-
-        [MethodImpl(256)]
-        private bool CheckInScreen(int index)
-        {
+            PushSprite(texture);
             return true;
-            //_drawingArea.Contains(ref _vertexInfo[index].Position0, out ContainmentType res);
-            //if (res == ContainmentType.Contains)
-            //    return true;
-            //_drawingArea.Contains(ref _vertexInfo[index].Position1, out res);
-            //if (res == ContainmentType.Contains)
-            //    return true; 
-            //_drawingArea.Contains(ref _vertexInfo[index].Position2, out res);
-            //if (res == ContainmentType.Contains)
-            //    return true; 
-            //_drawingArea.Contains(ref _vertexInfo[index].Position3, out res);
-            //if (res == ContainmentType.Contains)
-            //    return true;
-
-            //return false;
         }
 
         [MethodImpl(256)]

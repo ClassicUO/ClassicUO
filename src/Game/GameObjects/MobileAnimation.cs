@@ -1,26 +1,43 @@
 ﻿#region license
-
-//  Copyright (C) 2020 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
+// #region license
+// //  Copyright (C) 2020 ClassicUO Development Community on Github
+// //
+// // This project is an alternative client for the game Ultima Online.
+// // The goal of this is to develop a lightweight client considering
+// // new technologies.
+// //
+// //  This program is free software: you can redistribute it and/or modify
+// //  it under the terms of the GNU General Public License as published by
+// //  the Free Software Foundation, either version 3 of the License, or
+// //  (at your option) any later version.
+// //
+// //  This program is distributed in the hope that it will be useful,
+// //  but WITHOUT ANY WARRANTY; without even the implied warranty of
+// //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// //  GNU General Public License for more details.
+// //
+// //  You should have received a copy of the GNU General Public License
+// //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// #endregion
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -502,7 +519,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
 
-            ANIMATION_FLAGS flags = (ANIMATION_FLAGS) UOFileManager.Animations.DataIndex[graphic].Flags;
+            ANIMATION_FLAGS flags = UOFileManager.Animations.DataIndex[graphic].Flags;
 
             if (mobile.AnimationFromServer && mobile.AnimationGroup != 0xFF)
             {
@@ -514,10 +531,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (type != ANIMATION_GROUPS_TYPE.MONSTER)
                         {
-                            if (type == ANIMATION_GROUPS_TYPE.HUMAN || type == ANIMATION_GROUPS_TYPE.EQUIPMENT)
-                                v13 = 16;
-                            else
-                                v13 = 5;
+                            v13 = 5;
                         }
                         else
                             v13 = 4;
@@ -1096,10 +1110,7 @@ namespace ClassicUO.Game.GameObjects
                                             }
                                         }
                                     }
-                                    else if (mobile.IsFlying)
-                                        result = 64;
-                                    else
-                                        result = 7;
+                                    result = 7;
                                 }
                                 else
                                     result = 7;
@@ -1329,7 +1340,8 @@ namespace ClassicUO.Game.GameObjects
             {
                 IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
                 ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-                if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
+                if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0) 
+                    type = ia.Type;
 
                 if (type == ANIMATION_GROUPS_TYPE.MONSTER)
                 {
@@ -1345,7 +1357,8 @@ namespace ClassicUO.Game.GameObjects
 
                         case 3:
 
-                            if ((ia.Flags & 1) != 0) return 12;
+                            if ((ia.Flags & ANIMATION_FLAGS.AF_UNKNOWN_1) != 0) 
+                                return 12;
 
                             goto case 0;
 
@@ -1433,7 +1446,7 @@ namespace ClassicUO.Game.GameObjects
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
 
-            if ((ia.Flags & 0x80000000) != 0)
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0)
                 type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
@@ -1453,7 +1466,8 @@ namespace ClassicUO.Game.GameObjects
         {
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0)
+                type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
@@ -1481,7 +1495,8 @@ namespace ClassicUO.Game.GameObjects
         {
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0)
+                type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
@@ -1503,7 +1518,8 @@ namespace ClassicUO.Game.GameObjects
         {
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0) 
+                type = ia.Type;
 
             if (type <= ANIMATION_GROUPS_TYPE.SEA_MONSTER)
             {
@@ -1540,7 +1556,8 @@ namespace ClassicUO.Game.GameObjects
         {
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0)
+                type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
@@ -1578,7 +1595,8 @@ namespace ClassicUO.Game.GameObjects
         {
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0) 
+                type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
@@ -1600,7 +1618,8 @@ namespace ClassicUO.Game.GameObjects
         {
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0) 
+                type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
@@ -1629,7 +1648,8 @@ namespace ClassicUO.Game.GameObjects
         {
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0) 
+                type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {

@@ -1,26 +1,43 @@
 ﻿#region license
-
-//  Copyright (C) 2020 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
+// #region license
+// //  Copyright (C) 2020 ClassicUO Development Community on Github
+// //
+// // This project is an alternative client for the game Ultima Online.
+// // The goal of this is to develop a lightweight client considering
+// // new technologies.
+// //
+// //  This program is free software: you can redistribute it and/or modify
+// //  it under the terms of the GNU General Public License as published by
+// //  the Free Software Foundation, either version 3 of the License, or
+// //  (at your option) any later version.
+// //
+// //  This program is distributed in the hope that it will be useful,
+// //  but WITHOUT ANY WARRANTY; without even the implied warranty of
+// //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// //  GNU General Public License for more details.
+// //
+// //  You should have received a copy of the GNU General Public License
+// //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// #endregion
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -57,8 +74,6 @@ namespace ClassicUO.IO.Resources
         private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUop[] _filesUop = new UOFileUop[4];
-        //private readonly List<ToRemoveInfo> _usedTextures = new List<ToRemoveInfo>(), _usedUopTextures = new List<ToRemoveInfo>();
-
         private readonly List<AnimationDirection> _usedTextures = new List<AnimationDirection>();
 
 
@@ -284,7 +299,7 @@ namespace ClassicUO.IO.Resources
                                             index = new IndexAnimation();
 
                                         index.Type = (ANIMATION_GROUPS_TYPE)i;
-                                        index.Flags = 0x80000000 | number;
+                                        index.Flags = (ANIMATION_FLAGS) (0x80000000 | number);
 
                                         break;
                                     }
@@ -716,64 +731,7 @@ namespace ClassicUO.IO.Resources
                 uint animID = reader.ReadUInt();
                 reader.Skip(48);
                 int replaces = reader.ReadInt();
-
-
-                //for (byte grpID = 0; grpID < 100; grpID++)
-                //{
-                //    string hashstring = $"build/animationlegacyframe/{animID:D6}/{grpID:D2}.bin";
-                //    ulong hash = UOFileUop.CreateHash(hashstring);
-
-                //    if (hashes.TryGetValue(hash, out var uopData))
-                //    {
-                //        if (DataIndex[animID] == null)
-                //            DataIndex[animID] = new IndexAnimation()
-                //            {
-                //                UopGroups = new AnimationGroupUop[100]
-                //            };
-
-
-                //        if (DataIndex[animID].Type == ANIMATION_GROUPS_TYPE.UNKNOWN)
-                //        {
-                //            switch (replaces)
-                //            {
-                //                case 29:
-                //                    DataIndex[animID].Type = ANIMATION_GROUPS_TYPE.MONSTER;
-
-                //                    break;
-                //                case 31:
-                //                case 32:
-                //                    DataIndex[animID].Type = ANIMATION_GROUPS_TYPE.ANIMAL;
-
-                //                    break;
-                //                case 48:
-                //                case 68:
-                //                    DataIndex[animID].Type = ANIMATION_GROUPS_TYPE.HUMAN;
-
-                //                    break;
-                //            }
-                //        }
-
-
-                //        //ref var g = ref DataIndex[animID].UopGroups[grpID];
-
-                //        //g = new AnimationGroupUop
-                //        //{
-                //        //    Offset = uopData.Offset,
-                //        //    CompressedLength = uopData.CompressedLength,
-                //        //    DecompressedLength = uopData.DecompressedLength,
-                //        //    FileIndex = uopData.FileIndex,
-                //        //    Direction = new AnimationDirection[5]
-                //        //};
-
-
-                //        //for (int d = 0; d < 5; d++)
-                //        //{
-                //        //    g.Direction[d].IsUOP = true;
-                //        //}
-                //    }
-                //}
-
-
+                
                 if (replaces == 48 || replaces == 68)
                     continue;
 
@@ -1171,7 +1129,7 @@ namespace ClassicUO.IO.Resources
 
 
         [MethodImpl(256)]
-        public ANIMATION_GROUPS GetGroupIndex(ushort graphic, bool isequip = false)
+        public ANIMATION_GROUPS GetGroupIndex(ushort graphic)
         {
             if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 return ANIMATION_GROUPS.AG_HIGHT;
@@ -1199,7 +1157,7 @@ namespace ClassicUO.IO.Resources
         [MethodImpl(256)]
         public byte GetDieGroupIndex(ushort id, bool second, bool isRunning = false)
         {
-            ANIMATION_FLAGS flags = (ANIMATION_FLAGS)DataIndex[id].Flags;
+            ANIMATION_FLAGS flags = DataIndex[id].Flags;
 
             switch (DataIndex[id].Type)
             {
@@ -1909,7 +1867,7 @@ namespace ClassicUO.IO.Resources
         public ushort CorpseGraphic;
 
         public byte FileIndex;
-        public uint Flags;
+        public ANIMATION_FLAGS Flags;
 
         public ushort Graphic;
 
@@ -1925,7 +1883,7 @@ namespace ClassicUO.IO.Resources
         public AnimationGroupUop[] UopGroups;
 
 
-        public bool IsUOP => (Flags & (uint)ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0;
+        public bool IsUOP => (Flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0;
 
         public bool HasBodyConversion => (GraphicConversion & 0x8000) == 0 && BodyConvGroups != null;
 
@@ -1962,9 +1920,9 @@ namespace ClassicUO.IO.Resources
             {
                 case ANIMATION_GROUPS_TYPE.MONSTER:
 
-                    if ((Flags & (uint)ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
+                    if ((Flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
                         group = ANIMATION_GROUPS.AG_PEOPLE;
-                    else if ((Flags & (uint)ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
+                    else if ((Flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
                         group = ANIMATION_GROUPS.AG_LOW;
                     else
                         group = ANIMATION_GROUPS.AG_HIGHT;
@@ -1979,11 +1937,11 @@ namespace ClassicUO.IO.Resources
 
                 case ANIMATION_GROUPS_TYPE.ANIMAL:
 
-                    if ((Flags & (uint)ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
+                    if ((Flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_LOW_GROUP_EXTENDED) != 0)
                     {
-                        if ((Flags & (uint)ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
+                        if ((Flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_PEOPLE_GROUP) != 0)
                             group = ANIMATION_GROUPS.AG_PEOPLE;
-                        else if ((Flags & (uint)ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
+                        else if ((Flags & ANIMATION_FLAGS.AF_CALCULATE_OFFSET_BY_LOW_GROUP) != 0)
                             group = ANIMATION_GROUPS.AG_LOW;
                         else
                             group = ANIMATION_GROUPS.AG_HIGHT;

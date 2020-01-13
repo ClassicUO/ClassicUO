@@ -1,26 +1,43 @@
 #region license
-
-//  Copyright (C) 2020 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
+// #region license
+// //  Copyright (C) 2020 ClassicUO Development Community on Github
+// //
+// // This project is an alternative client for the game Ultima Online.
+// // The goal of this is to develop a lightweight client considering
+// // new technologies.
+// //
+// //  This program is free software: you can redistribute it and/or modify
+// //  it under the terms of the GNU General Public License as published by
+// //  the Free Software Foundation, either version 3 of the License, or
+// //  (at your option) any later version.
+// //
+// //  This program is distributed in the hope that it will be useful,
+// //  but WITHOUT ANY WARRANTY; without even the implied warranty of
+// //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// //  GNU General Public License for more details.
+// //
+// //  You should have received a copy of the GNU General Public License
+// //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// #endregion
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -71,19 +88,8 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
-        {
-            //if (IsDestroyed)
-            //    return false;
-
-            DrawCharacter(batcher, posX, posY);
-
-            //Engine.DebugInfo.MobilesRendered++;
-
-            return true;
-        }
-
-        private void DrawCharacter(UltimaBatcher2D batcher, int posX, int posY)
         {
             _equipConvData = null;
             _transform = false;
@@ -298,11 +304,24 @@ namespace ClassicUO.Game.GameObjects
             FrameInfo.Y = Math.Abs(FrameInfo.Y);
             FrameInfo.Width = FrameInfo.X + FrameInfo.Width;
             FrameInfo.Height = FrameInfo.Y + FrameInfo.Height;
+
+            return true;
         }
 
-        private static sbyte DrawInternal(UltimaBatcher2D batcher, Mobile owner, Item entity, int x, int y, bool mirror, ref sbyte frameIndex, bool hasShadow, ushort id, bool isHuman, bool isParent = true, bool isMount = false)
+        private static sbyte DrawInternal(UltimaBatcher2D batcher, 
+                                          Mobile owner, 
+                                          Item entity, 
+                                          int x, 
+                                          int y, 
+                                          bool mirror, 
+                                          ref sbyte frameIndex, 
+                                          bool hasShadow, 
+                                          ushort id, 
+                                          bool isHuman, 
+                                          bool isParent = true, 
+                                          bool isMount = false)
         {
-            if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+            if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT || owner == null)
                 return 0;
 
             ushort hueFromFile = _viewHue;
@@ -310,8 +329,7 @@ namespace ClassicUO.Game.GameObjects
 
             // NOTE: i'm not sure this is the right way. This code patch the dead shroud for gargoyles.
             if (Client.Version >= ClientVersion.CV_7000 &&
-                id == 0x03CA       // graphic for dead shroud
-                && owner != null && (owner.Graphic == 0x02B7 || owner.Graphic == 0x02B6)) // dead gargoyle graphics
+                id == 0x03CA && (owner.Graphic == 0x02B7 || owner.Graphic == 0x02B6)) // dead gargoyle graphics
             {
                 id = 0x0223;
             }
@@ -322,13 +340,13 @@ namespace ClassicUO.Game.GameObjects
 
             if (direction == null || direction.Address == -1 || direction.FileIndex == -1)
             {
-                if (!(_transform && owner != null && entity == null && !hasShadow))
+                if (!(_transform && entity == null && !hasShadow))
                     return 0;
             }
 
             if (direction == null || ((direction.FrameCount == 0 || direction.Frames == null) && !UOFileManager.Animations.LoadDirectionGroup(ref direction)))
             {
-                if (!(_transform && owner != null && entity == null && !hasShadow))
+                if (!(_transform && entity == null && !hasShadow))
                     return 0;
             }
 
@@ -347,7 +365,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (frame == null || frame.IsDisposed)
                 {
-                    if (!(_transform && owner != null && entity == null && !hasShadow))
+                    if (!(_transform && entity == null && !hasShadow))
                         return 0;
 
                     goto SKIP;
@@ -475,7 +493,7 @@ namespace ClassicUO.Game.GameObjects
 
                         batcher.DrawCharacterSitted(frame, x, y, mirror, h3mod, h6mod, h9mod, ref HueVector);
                     }
-                    else
+                    else if (frame != null)
                     {
                         batcher.DrawSprite(frame, x, y, mirror, ref HueVector);
 

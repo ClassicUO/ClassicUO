@@ -1,26 +1,43 @@
 ﻿#region license
-
-//  Copyright (C) 2020 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
+// #region license
+// //  Copyright (C) 2020 ClassicUO Development Community on Github
+// //
+// // This project is an alternative client for the game Ultima Online.
+// // The goal of this is to develop a lightweight client considering
+// // new technologies.
+// //
+// //  This program is free software: you can redistribute it and/or modify
+// //  it under the terms of the GNU General Public License as published by
+// //  the Free Software Foundation, either version 3 of the License, or
+// //  (at your option) any later version.
+// //
+// //  This program is distributed in the hope that it will be useful,
+// //  but WITHOUT ANY WARRANTY; without even the implied warranty of
+// //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// //  GNU General Public License for more details.
+// //
+// //  You should have received a copy of the GNU General Public License
+// //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// #endregion
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -398,6 +415,52 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private readonly Label _amountLabel, _name;
 
+            private static byte GetAnimGroup(ushort graphic)
+            {
+                switch (UOFileManager.Animations.GetGroupIndex(graphic))
+                {
+                    case ANIMATION_GROUPS.AG_LOW:
+                        return (byte) LOW_ANIMATION_GROUP.LAG_STAND;
+
+                    case ANIMATION_GROUPS.AG_HIGHT:
+                        return (byte) HIGHT_ANIMATION_GROUP.HAG_STAND;
+
+                    case ANIMATION_GROUPS.AG_PEOPLE:
+                        return (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
+                }
+
+                return 0;
+            }
+
+            private static AnimationDirection GetMobileAnimationDirection(ushort graphic, ref ushort hue, byte dirIndex)
+            {
+                byte group = GetAnimGroup(graphic);
+                var index = UOFileManager.Animations.DataIndex[graphic];
+
+                AnimationDirection direction = index.Groups[group].Direction[dirIndex];
+                UOFileManager.Animations.AnimID = graphic;
+                UOFileManager.Animations.AnimGroup = group;
+                UOFileManager.Animations.Direction = dirIndex;
+
+                for (int i = 0; i < 2 && direction.FrameCount == 0; i++)
+                {
+                    if (!UOFileManager.Animations.LoadDirectionGroup(ref direction))
+                    {
+                        //direction = UOFileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref group, ref hue2).Direction[dirIndex];
+                        //graphic = item.ItemData.AnimID;
+                        //group = GetAnimGroup(graphic);
+                        //index = UOFileManager.Animations.DataIndex[graphic];
+                        //direction = UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue2, true).Direction[dirIndex];
+                        ////direction = index.Groups[group].Direction[1];
+                        //UOFileManager.Animations.AnimID = graphic;
+                        //UOFileManager.Animations.AnimGroup = group;
+                        //UOFileManager.Animations.Direction = dirIndex;
+                    }
+                }
+
+                return direction;
+            }
+
             public ShopItem(Item item)
             {
                 Item = item;
@@ -407,37 +470,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (SerialHelper.IsMobile(item.Serial))
                 {
-                    byte group = 0;
-
-                    switch (UOFileManager.Animations.GetGroupIndex(item.Graphic))
-                    {
-                        case ANIMATION_GROUPS.AG_LOW:
-                            group = (byte) LOW_ANIMATION_GROUP.LAG_STAND;
-
-                            break;
-
-                        case ANIMATION_GROUPS.AG_HIGHT:
-                            group = (byte) HIGHT_ANIMATION_GROUP.HAG_STAND;
-
-                            break;
-
-                        case ANIMATION_GROUPS.AG_PEOPLE:
-                            group = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
-
-                            break;
-                    }
-
-                    ushort graphic = item.Graphic;
                     ushort hue2 = item.Hue;
+                    AnimationDirection direction = GetMobileAnimationDirection(item.Graphic, ref hue2, 1);
 
-                    AnimationDirection direction = UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue2, true).Direction[1];
-                    UOFileManager.Animations.AnimID = graphic;
-                    UOFileManager.Animations.AnimGroup = group;
-                    UOFileManager.Animations.Direction = 1;
-
-                    if (direction.FrameCount == 0)
-                        UOFileManager.Animations.LoadDirectionGroup(ref direction);
-                    
                     Add(control = new TextureControl
                     {
                         Texture = direction.FrameCount != 0 ? direction.Frames[0] : null,
@@ -458,7 +493,7 @@ namespace ClassicUO.Game.UI.Gumps
                         control.Width = 35;
                         control.Height = 35;
                     }
-                   
+
                     if (control.Width > 35)
                         control.Width = 35;
 
@@ -547,36 +582,10 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.Update(totalMS, frameMS);
 
-                if (Item != null)
+                if (Item != null && SerialHelper.IsMobile(Item.Serial))
                 {
-                    if (SerialHelper.IsMobile(Item.Serial))
-                    {
-                        byte group = 0;
-
-                        switch (UOFileManager.Animations.GetGroupIndex(Item.Graphic))
-                        {
-                            case ANIMATION_GROUPS.AG_LOW:
-                                group = (byte) LOW_ANIMATION_GROUP.LAG_STAND;
-
-                                break;
-
-                            case ANIMATION_GROUPS.AG_HIGHT:
-                                group = (byte) HIGHT_ANIMATION_GROUP.HAG_STAND;
-
-                                break;
-
-                            case ANIMATION_GROUPS.AG_PEOPLE:
-                                group = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
-
-                                break;
-                        }
-
-                        ushort graphic = Item.Graphic;
-                        ushort hue2 = Item.Hue;
-
-                        AnimationDirection direction = UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue2, true).Direction[1];
-                        direction.LastAccessTime = Time.Ticks;
-                    }
+                    ushort hue = Item.Hue;
+                    GetMobileAnimationDirection(Item.Graphic, ref hue, 1).LastAccessTime = Time.Ticks;
                 }
             }
         }
