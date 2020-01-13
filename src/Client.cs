@@ -69,8 +69,6 @@ namespace ClassicUO
         public static GameController Game { get; private set; }
 
 
-
-
         public static void Run()
         {
             Debug.Assert(Game == null);

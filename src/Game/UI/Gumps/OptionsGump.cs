@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _cellSize;
 
         // video
-        private Checkbox _windowBorderless, _debugControls, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient;
+        private Checkbox _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient;
         private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
         private Combobox _dragSelectModifierKey;
         private HSliderBar _brighlight;
@@ -480,8 +480,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
             Label text;
-
-            _debugControls = CreateCheckBox(rightArea, "Debugging mode", Settings.GlobalSettings.Debug, 0, 0);
 
             _windowBorderless = CreateCheckBox(rightArea, "Borderless window", ProfileManager.Current.WindowBorderless, 0, 0);
 
@@ -1461,7 +1459,6 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case 3: // video
-                    _debugControls.IsChecked = false;
                     _windowBorderless.IsChecked = false;
                     _zoomCheckbox.IsChecked = false;
                     _savezoomCheckbox.IsChecked = false;
@@ -1752,8 +1749,6 @@ namespace ClassicUO.Game.UI.Gumps
             // video
             ProfileManager.Current.EnableDeathScreen = _enableDeathScreen.IsChecked;
             ProfileManager.Current.EnableBlackWhiteEffect = _enableBlackWhiteEffect.IsChecked;
-
-            Settings.GlobalSettings.Debug = _debugControls.IsChecked;
 
             if (ProfileManager.Current.EnableScaleZoom != _zoomCheckbox.IsChecked)
             {

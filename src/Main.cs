@@ -173,9 +173,15 @@ namespace ClassicUO
                     continue;
 
                 cmd = cmd.Remove(0, 1);
-                string value = (i < args.Length - 1) ? args[i + 1] : null;
+                string value = null;
 
-                Log.Trace( $"ARG: {cmd}, VALUE: {value}");
+                if (i < args.Length - 1)
+                {
+                    if (!string.IsNullOrWhiteSpace(args[i + 1]) && !args[i + 1].StartsWith("-"))
+                        value = args[++i];
+                }
+
+                Log.Trace($"ARG: {cmd}, VALUE: {value}");
 
                 switch (cmd)
                 {
@@ -251,7 +257,7 @@ namespace ClassicUO
                         break;
 
                     case "debug":
-                        CUOEnviroment.Debug = Settings.GlobalSettings.Debug = bool.Parse(value);
+                        CUOEnviroment.Debug = true;
                         
                         break;
 

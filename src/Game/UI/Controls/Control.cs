@@ -381,7 +381,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private void DrawDebug(UltimaBatcher2D batcher, int x, int y)
         {
-            if (IsVisible && (Settings.GlobalSettings.Debug))
+            if (IsVisible && CUOEnviroment.Debug)
             {
                 ResetHueVector();
                 batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Green), x, y, Width, Height, ref _hueVector);
