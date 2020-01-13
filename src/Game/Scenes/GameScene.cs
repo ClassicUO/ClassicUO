@@ -351,7 +351,7 @@ namespace ClassicUO.Game.Scenes
                 _forceStopScene = true;
             else
             {
-                UIManager.Add(new MessageBoxGump(200, 200, $"Connection lost:\n{e}", s =>
+                UIManager.Add(new MessageBoxGump(200, 200, $"Connection lost:\n{StringHelper.AddSpaceBeforeCapital(e.ToString())}", s =>
                 {
                     if (s)
                         Client.Game.SetScene(new LoginScene());
