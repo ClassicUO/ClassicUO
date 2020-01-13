@@ -1251,7 +1251,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.InvokeVirtue:
-                    byte id = (byte) (macro.SubCode - MacroSubType.Honor + 31);
+                    byte id = (byte) (macro.SubCode - MacroSubType.Honor + 1);
                     NetClient.Socket.Send(new PInvokeVirtueRequest(id));
 
                     break;

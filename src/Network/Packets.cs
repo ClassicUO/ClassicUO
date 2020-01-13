@@ -1113,8 +1113,7 @@ namespace ClassicUO.Network
         public PInvokeVirtueRequest(byte id) : base(0x12)
         {
             WriteByte(0xF4);
-            WriteByte(id);
-            WriteByte(0);
+            WriteASCII(id.ToString());
         }
     }
 
