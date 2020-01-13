@@ -27,7 +27,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Game.Managers
 {
-    class ActiveIconsManager
+    class ActiveSpellIconsManager
     {
         private readonly HashSet<ushort> _activeIcons = new HashSet<ushort>();
 

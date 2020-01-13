@@ -1168,7 +1168,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.Update(totalMS, frameMS);
 
-                if (World.ActiveIcons.IsActive(_spellID))
+                if (World.ActiveSpellIcons.IsActive(_spellID))
                 {
                     Hue = 38;
                 }

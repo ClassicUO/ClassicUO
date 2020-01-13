@@ -88,7 +88,7 @@ namespace ClassicUO.Game
 
         public static WorldMapEntityManager WMapManager = new WorldMapEntityManager();
 
-        public static ActiveIconsManager ActiveIcons = new ActiveIconsManager();
+        public static ActiveSpellIconsManager ActiveSpellIcons = new ActiveSpellIconsManager();
 
 
         public static int MapIndex
@@ -664,7 +664,7 @@ namespace ClassicUO.Game
 
             Journal.Clear();
             WorldTextManager.Clear();
-            ActiveIcons.Clear();
+            ActiveSpellIcons.Clear();
 
             SkillsRequested = false;
 
