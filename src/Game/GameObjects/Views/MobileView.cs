@@ -289,20 +289,9 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private static sbyte DrawInternal(UltimaBatcher2D batcher, 
-                                          Mobile owner, 
-                                          Item entity, 
-                                          int x, 
-                                          int y, 
-                                          bool mirror, 
-                                          ref sbyte frameIndex, 
-                                          bool hasShadow, 
-                                          ushort id, 
-                                          bool isHuman, 
-                                          bool isParent = true, 
-                                          bool isMount = false)
+        private static sbyte DrawInternal(UltimaBatcher2D batcher, Mobile owner, Item entity, int x, int y, bool mirror, ref sbyte frameIndex, bool hasShadow, ushort id, bool isHuman, bool isParent = true, bool isMount = false)
         {
-            if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT || owner == null)
+            if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 return 0;
 
             ushort hueFromFile = _viewHue;
@@ -310,7 +299,8 @@ namespace ClassicUO.Game.GameObjects
 
             // NOTE: i'm not sure this is the right way. This code patch the dead shroud for gargoyles.
             if (Client.Version >= ClientVersion.CV_7000 &&
-                id == 0x03CA && (owner.Graphic == 0x02B7 || owner.Graphic == 0x02B6)) // dead gargoyle graphics
+                id == 0x03CA       // graphic for dead shroud
+                && owner != null && (owner.Graphic == 0x02B7 || owner.Graphic == 0x02B6)) // dead gargoyle graphics
             {
                 id = 0x0223;
             }
@@ -321,13 +311,13 @@ namespace ClassicUO.Game.GameObjects
 
             if (direction == null || direction.Address == -1 || direction.FileIndex == -1)
             {
-                if (!(_transform && entity == null && !hasShadow))
+                if (!(_transform && owner != null && entity == null && !hasShadow))
                     return 0;
             }
 
             if (direction == null || ((direction.FrameCount == 0 || direction.Frames == null) && !UOFileManager.Animations.LoadDirectionGroup(ref direction)))
             {
-                if (!(_transform && entity == null && !hasShadow))
+                if (!(_transform && owner != null && entity == null && !hasShadow))
                     return 0;
             }
 
@@ -338,7 +328,8 @@ namespace ClassicUO.Game.GameObjects
 
             int fc = direction.FrameCount;
 
-            if ((fc > 0 && frameIndex >= fc) || frameIndex < 0) frameIndex = 0;
+            if ((fc > 0 && frameIndex >= fc) || frameIndex < 0)
+                frameIndex = 0;
 
             if (frameIndex < direction.FrameCount)
             {
@@ -346,7 +337,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (frame == null || frame.IsDisposed)
                 {
-                    if (!(_transform && entity == null && !hasShadow))
+                    if (!(_transform && owner != null && entity == null && !hasShadow))
                         return 0;
 
                     goto SKIP;
@@ -403,7 +394,7 @@ namespace ClassicUO.Game.GameObjects
                         if (entity == null && isHuman)
                         {
                             int frameHeight = frame?.Height ?? 61;
-                            _characterFrameStartY = y - (frame != null ? 0 : (frameHeight -4));
+                            _characterFrameStartY = y - (frame != null ? 0 : (frameHeight - 4));
                             _characterFrameHeight = frameHeight;
                             _startCharacterWaistY = (int) (frameHeight * UPPER_BODY_RATIO) + _characterFrameStartY;
                             _startCharacterKneesY = (int) (frameHeight * MID_BODY_RATIO) + _characterFrameStartY;
@@ -474,7 +465,7 @@ namespace ClassicUO.Game.GameObjects
 
                         batcher.DrawCharacterSitted(frame, x, y, mirror, h3mod, h6mod, h9mod, ref HueVector);
                     }
-                    else if (frame != null)
+                    else
                     {
                         batcher.DrawSprite(frame, x, y, mirror, ref HueVector);
 
