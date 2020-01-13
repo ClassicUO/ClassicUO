@@ -87,10 +87,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     if (valid > World.ClientFeatures.MaxChars)
                         break;
 
-                    if (valid == 5 && (World.ClientLockedFeatures.Flags & LockedFeatureFlags.CharacterSlot6) == 0)
+                    if (valid == 6 && (World.ClientLockedFeatures.Flags & LockedFeatureFlags.CharacterSlot6) == 0)
                         continue;
 
-                    if (valid == 6 && (World.ClientLockedFeatures.Flags & LockedFeatureFlags.CharacterSlot7) == 0)
+                    if (valid == 7 && (World.ClientLockedFeatures.Flags & LockedFeatureFlags.CharacterSlot7) == 0)
                         continue;
 
                     Add(new CharacterEntryGump((uint) i, character, SelectCharacter, LoginCharacter)
