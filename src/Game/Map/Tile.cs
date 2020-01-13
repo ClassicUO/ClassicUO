@@ -63,6 +63,7 @@ namespace ClassicUO.Game.Map
         public void AddGameObject(GameObject obj)
         {
             short priorityZ = obj.Z;
+            sbyte state = -1;
 
             switch (obj)
             {
@@ -72,6 +73,8 @@ namespace ClassicUO.Game.Map
                         priorityZ = (short) (tile.AverageZ - 1);
                     else
                         priorityZ--;
+
+                    state = 0;
 
                     break;
 
@@ -90,10 +93,26 @@ namespace ClassicUO.Game.Map
 
                     break;
 
-                case Multi m when (m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0:
+                case Multi m :
+
+                    state = 1;
+
+                    if ((m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0)
+                    {
                         priorityZ--;
-                    break;
+                        break;
+                    }
+
+                    if ((m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW) != 0)
+                    {
+                        state = 2;
+                        priorityZ++;
+                    }
+
+                    goto MULTI_DEFAULT;
+
                 default:
+                    MULTI_DEFAULT:
                     ref readonly StaticTiles data = ref UOFileManager.TileData.StaticData[obj.Graphic];
 
                     if (data.IsBackground)
@@ -122,12 +141,14 @@ namespace ClassicUO.Game.Map
 
             GameObject found = null;
             GameObject start = o;
-
+         
             while (o != null)
             {
                 int testPriorityZ = o.PriorityZ;
 
-                if (testPriorityZ > priorityZ || testPriorityZ == priorityZ && (obj is Land || (obj is Multi m && (m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0)) && !(o is Land))
+                if (testPriorityZ > priorityZ || 
+                    (testPriorityZ == priorityZ && 
+                    (state == 0 || (state == 1 && !(o is Land)) ) ))
                     break;
 
                 found = o;
