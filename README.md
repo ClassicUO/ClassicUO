@@ -27,6 +27,9 @@ ClassicUO is natively cross platform and supports:
 * Linux
 * MacOS
 
+# Download & Play!
+Follow the [Wiki](https://github.com/andreakarasho/ClassicUO/wiki) to setup correctly ClassicUO
+
 # Building (Windows)
 The binary produced will work on all supported platforms.
 
@@ -84,9 +87,6 @@ Other useful commands:
 - `msbuild /t:Clean /p:Configuration=Release`
 - `msbuild /t:RestorePackages`
 
-# Running
-Follow the [Wiki](https://github.com/andreakarasho/ClassicUO/wiki) to setup correctly ClassicUO
-
 # Contribute
 Everyone is welcome to contribute! The GitHub issues and project tracker are kept up to date with tasks that need work.
 
@@ -100,4 +100,4 @@ The code itself has been written using the following projects as a reference:
 
 This work is released under the GPLv3 license. This project does not distribute any copyrighted game assets. In order to run this client you'll need to legally obtain a copy of the Ultima Online Classic Client.
 
-Ultima Online(R) © 2020 Electronic Arts Inc. All Rights Reserved.
+Ultima Online(R) Â© 2020 Electronic Arts Inc. All Rights Reserved.
