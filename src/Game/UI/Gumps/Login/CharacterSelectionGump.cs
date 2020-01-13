@@ -95,18 +95,23 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 X = 267, Y = listTitleY
             }, 1);
 
+            int valid = 0;
             for (int i = 0; i < loginScene.Characters.Length; i++)
             {
                 string character = loginScene.Characters[i];
-
-                if (i == 5 && (World.ClientLockedFeatures.Flags & LockedFeatureFlags.CharacterSlot6) == 0)
+                //no need to check on char length, as it's the server that sends the list, we only choose one
+                //instead we have to check for capacity to create one
+                /*if (i == 5 && (World.ClientLockedFeatures.Flags & LockedFeatureFlags.CharacterSlot6) == 0)
                     continue;
 
                 if (i == 6 && (World.ClientLockedFeatures.Flags & LockedFeatureFlags.CharacterSlot7) == 0)
-                    continue;
+                    continue;*/
 
                 if (!string.IsNullOrEmpty(character))
                 {
+                    valid++;
+                    if (valid > World.ClientFeatures.MaxChars)
+                        break;
                     Add(new CharacterEntryGump((uint) i, character, SelectCharacter, LoginCharacter)
                     {
                         X = 224,
@@ -117,7 +122,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 }
             }
 
-            if (!World.ClientFeatures.OnePerson || loginScene.Characters.All(string.IsNullOrEmpty))
+            if(CanCreateChar(loginScene))
             {
                 Add(new Button((int) Buttons.New, 0x159D, 0x159F, 0x159E)
                 {
@@ -125,9 +130,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 }, 1);
             }
 
-            Add(new Button((int) Buttons.Delete, 0x159A, 0x159C, 0x159B)
+            Add(new Button((int)Buttons.Delete, 0x159A, 0x159C, 0x159B)
             {
-                X = 442, Y = 350 + yBonus, ButtonAction = ButtonAction.Activate
+                X = 442,
+                Y = 350 + yBonus,
+                ButtonAction = ButtonAction.Activate
             }, 1);
 
             Add(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
@@ -142,6 +149,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             AcceptKeyboardInput = true;
             ChangePage(1);
+        }
+
+        private bool CanCreateChar(LoginScene scene)
+        {
+            if (scene.Characters != null)
+            {
+                int empty = scene.Characters.Count(string.IsNullOrEmpty);
+                if (empty > 0 && (scene.Characters.Length - empty) < World.ClientFeatures.MaxChars)
+                    return true;
+            }
+            return false;
         }
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
@@ -161,7 +179,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                     break;
 
-                case Buttons.New:
+                case Buttons.New when CanCreateChar(loginScene):
                     loginScene.StartCharCreation();
 
                     break;
