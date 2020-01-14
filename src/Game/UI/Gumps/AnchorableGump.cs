@@ -119,6 +119,7 @@ namespace ClassicUO.Game.UI.Gumps
             else if ((!Keyboard.Alt || UIManager.AnchorManager[this] == null) && _lockGumpPic != null)
             {
                 Remove(_lockGumpPic);
+                _lockGumpPic.MouseUp += _lockGumpPic_MouseClick;
                 _lockGumpPic.Dispose();
                 _lockGumpPic = null;
             }
