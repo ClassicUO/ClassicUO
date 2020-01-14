@@ -87,13 +87,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     if (valid > World.ClientFeatures.MaxChars)
                         break;
 
-                    //in client 6.0.14.2 if server sends sixth flag && seventh flag you can see all the seven characters
-                    //with this mod down below, you won't see them...something is wrong.
-                    /*if (valid == 6 && (World.ClientLockedFeatures.Flags & LockedFeatureFlags.CharacterSlot6) == 0)
-                        continue;
-
-                    if (valid == 7 && (World.ClientLockedFeatures.Flags & LockedFeatureFlags.CharacterSlot7) == 0)
-                        continue;*/
+                    if(!World.ClientLockedFeatures.CharSlots7)
+                    {
+                        if (valid == 6 && !World.ClientLockedFeatures.CharSlots6)
+                            break;
+                    }
 
                     Add(new CharacterEntryGump((uint) i, character, SelectCharacter, LoginCharacter)
                     {
