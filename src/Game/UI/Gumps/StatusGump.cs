@@ -46,6 +46,11 @@ namespace ClassicUO.Game.UI.Gumps
         protected Point _point;
         protected long _refreshTime;
 
+        protected const ushort LOCK_UP_GRAPHIC = 0x0984;
+        protected const ushort LOCK_DOWN_GRAPHIC = 0x0986;
+        protected const ushort LOCK_LOCKED_GRAPHIC = 0x082C;
+
+
         protected StatusGumpBase() : base(0, 0)
         {
             // sanity check
@@ -188,21 +193,21 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        protected ushort GetStatLockGraphic(Lock lockStatus)
+        protected static ushort GetStatLockGraphic(Lock lockStatus)
         {
             switch (lockStatus)
             {
                 case Lock.Up:
 
-                    return 0x0984;
+                    return LOCK_UP_GRAPHIC;
 
                 case Lock.Down:
 
-                    return 0x0986;
+                    return LOCK_DOWN_GRAPHIC;
 
                 case Lock.Locked:
 
-                    return 0x082C;
+                    return LOCK_LOCKED_GRAPHIC;
 
                 default:
 
@@ -217,14 +222,7 @@ namespace ClassicUO.Game.UI.Gumps
                 for (int i = 0; i < 3; i++)
                 {
                     Lock status = i == 0 ? World.Player.StrLock : i == 1 ? World.Player.DexLock : World.Player.IntLock;
-
-                    ushort gumpID = 0x0984; //Up
-
-                    if (status == Lock.Down)
-                        gumpID = 0x0986; //Down
-                    else if (status == Lock.Locked)
-                        gumpID = 0x082C; //Lock
-                    _lockers[i].Graphic = gumpID;
+                    _lockers[i].Graphic = GetStatLockGraphic(status);
                 }
             }
         }
@@ -442,25 +440,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Lock status = World.Player.StrLock;
                 xOffset = _useUOPGumps ? 28 : 40;
-                ushort gumpID = 0x0984; //Up
+                ushort gumpID = GetStatLockGraphic(status);
 
-                if (status == Lock.Down)
-                    gumpID = 0x0986; //Down
-                else if (status == Lock.Locked)
-                    gumpID = 0x082C; //Lock
                 Add(_lockers[0] = new GumpPic(xOffset, 76, gumpID, 0));
 
                 _lockers[0].MouseUp += (sender, e) =>
                 {
                     World.Player.StrLock = (Lock)(((byte)World.Player.StrLock + 1) % 3);
                     GameActions.ChangeStatLock(0, World.Player.StrLock);
-                    Lock st = World.Player.StrLock;
-                    ushort gumpid = 0x0984; //Up
+                    ushort gumpid = GetStatLockGraphic(World.Player.StrLock);
 
-                    if (st == Lock.Down)
-                        gumpid = 0x0986; //Down
-                    else if (st == Lock.Locked)
-                        gumpid = 0x082C; //Lock
                     _lockers[0].Graphic = gumpid;
                     _lockers[0].Texture = UOFileManager.Gumps.GetTexture(gumpid);
                 };
@@ -473,25 +462,16 @@ namespace ClassicUO.Game.UI.Gumps
                 //});
                 status = World.Player.DexLock;
                 xOffset = _useUOPGumps ? 28 : 40;
-                gumpID = 0x0984; //Up
+                gumpID = GetStatLockGraphic(status);
 
-                if (status == Lock.Down)
-                    gumpID = 0x0986; //Down
-                else if (status == Lock.Locked)
-                    gumpID = 0x082C; //Lock
                 Add(_lockers[1] = new GumpPic(xOffset, 102, gumpID, 0));
 
                 _lockers[1].MouseUp += (sender, e) =>
                 {
                     World.Player.DexLock = (Lock)(((byte)World.Player.DexLock + 1) % 3);
                     GameActions.ChangeStatLock(1, World.Player.DexLock);
-                    Lock st = World.Player.DexLock;
-                    ushort gumpid = 0x0984; //Up
+                    ushort gumpid = GetStatLockGraphic(World.Player.DexLock);
 
-                    if (st == Lock.Down)
-                        gumpid = 0x0986; //Down
-                    else if (st == Lock.Locked)
-                        gumpid = 0x082C; //Lock
                     _lockers[1].Graphic = gumpid;
                     _lockers[1].Texture = UOFileManager.Gumps.GetTexture(gumpid);
                 };
@@ -503,25 +483,16 @@ namespace ClassicUO.Game.UI.Gumps
                 //});
                 status = World.Player.IntLock;
                 xOffset = _useUOPGumps ? 28 : 40;
-                gumpID = 0x0984; //Up
+                gumpID = GetStatLockGraphic(status);
 
-                if (status == Lock.Down)
-                    gumpID = 0x0986; //Down
-                else if (status == Lock.Locked)
-                    gumpID = 0x082C; //Lock
                 Add(_lockers[2] = new GumpPic(xOffset, 132, gumpID, 0));
 
                 _lockers[2].MouseUp += (sender, e) =>
                 {
                     World.Player.IntLock = (Lock)(((byte)World.Player.IntLock + 1) % 3);
                     GameActions.ChangeStatLock(2, World.Player.IntLock);
-                    Lock st = World.Player.IntLock;
-                    ushort gumpid = 0x0984; //Up
+                    ushort gumpid = GetStatLockGraphic(World.Player.IntLock);
 
-                    if (st == Lock.Down)
-                        gumpid = 0x0986; //Down
-                    else if (st == Lock.Locked)
-                        gumpid = 0x082C; //Lock
                     _lockers[2].Graphic = gumpid;
                     _lockers[2].Texture = UOFileManager.Gumps.GetTexture(gumpid);
                 };
@@ -873,7 +844,7 @@ namespace ClassicUO.Game.UI.Gumps
             _lockers[(int)StatType.Str].MouseUp += (sender, e) =>
             {
                 World.Player.StrLock = (Lock)(((byte)World.Player.StrLock + 1) % 3);
-                GameActions.ChangeStatLock((byte)StatType.Str, World.Player.StrLock);
+                GameActions.ChangeStatLock(0, World.Player.StrLock);
                 _lockers[(int)StatType.Str].Graphic = GetStatLockGraphic(World.Player.StrLock);
                 _lockers[(int)StatType.Str].Texture = UOFileManager.Gumps.GetTexture(GetStatLockGraphic(World.Player.StrLock));
             };
@@ -881,7 +852,7 @@ namespace ClassicUO.Game.UI.Gumps
             _lockers[(int)StatType.Dex].MouseUp += (sender, e) =>
             {
                 World.Player.DexLock = (Lock)(((byte)World.Player.DexLock + 1) % 3);
-                GameActions.ChangeStatLock((byte)StatType.Dex, World.Player.DexLock);
+                GameActions.ChangeStatLock(1, World.Player.DexLock);
                 _lockers[(int)StatType.Dex].Graphic = GetStatLockGraphic(World.Player.DexLock);
                 _lockers[(int)StatType.Dex].Texture = UOFileManager.Gumps.GetTexture(GetStatLockGraphic(World.Player.DexLock));
             };
@@ -889,7 +860,7 @@ namespace ClassicUO.Game.UI.Gumps
             _lockers[(int)StatType.Int].MouseUp += (sender, e) =>
             {
                 World.Player.IntLock = (Lock)(((byte)World.Player.IntLock + 1) % 3);
-                GameActions.ChangeStatLock((byte)StatType.Int, World.Player.IntLock);
+                GameActions.ChangeStatLock(2, World.Player.IntLock);
                 _lockers[(int)StatType.Int].Graphic = GetStatLockGraphic(World.Player.IntLock);
                 _lockers[(int)StatType.Int].Texture = UOFileManager.Gumps.GetTexture(GetStatLockGraphic(World.Player.IntLock));
             };

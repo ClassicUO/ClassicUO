@@ -316,7 +316,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                               out int height);
 
                 _lockedPosition.X = (int)((Entity.RealScreenPosition.X + m.Offset.X + 22) / scale);
-                _lockedPosition.Y = (int)((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (m.IsFlying ? -22 : !m.IsMounted ? 22 : 0)) / scale);
+                _lockedPosition.Y = (int)((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0)) / scale);
             }
 
             base.OnMouseOver(x, y);
@@ -371,7 +371,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                                   out int height);
 
                     x = (int)((Entity.RealScreenPosition.X + m.Offset.X + 22) / scale);
-                    y = (int)((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (m.IsFlying ? -22 : !m.IsMounted ? 22 : 0)) / scale);
+                    y = (int)((Entity.RealScreenPosition.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8) + (m.IsGargoyle && m.IsFlying ? -22 : !m.IsMounted ? 22 : 0)) / scale);
                 }
             }
             else if (Entity.Texture != null)
