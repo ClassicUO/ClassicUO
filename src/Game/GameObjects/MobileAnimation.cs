@@ -1042,7 +1042,7 @@ namespace ClassicUO.Game.GameObjects
                                     result = 25;
                                 }
                             }
-                            else if (mobile.IsFlying) // TODO: what's up when it is dead?
+                            else if (mobile.IsGargoyle && mobile.IsFlying) // TODO: what's up when it is dead?
                             {
                                 if (mobile.InWarMode)
                                     result = 65;
@@ -1096,7 +1096,7 @@ namespace ClassicUO.Game.GameObjects
                                             }
                                         }
                                     }
-                                    else if (mobile.IsFlying)
+                                    else if (mobile.IsGargoyle && mobile.IsFlying)
                                         result = 64;
                                     else
                                         result = 7;
@@ -1121,7 +1121,8 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if ((flags & ANIMATION_FLAGS.AF_USE_UOP_ANIMATION) != 0)
                         {
-                            if (mobile.IsFlying)
+                            // i'm not sure here if it's necessary the isgargoyle
+                            if (mobile.IsGargoyle && mobile.IsFlying)
                             {
                                 if (isRun)
                                 {
@@ -1186,7 +1187,7 @@ namespace ClassicUO.Game.GameObjects
                             }
                         }
                     }
-                    else if (mobile.IsFlying)
+                    else if (mobile.IsGargoyle && mobile.IsFlying)
                     {
                         result = 62;
                     }
@@ -1348,7 +1349,7 @@ namespace ClassicUO.Game.GameObjects
 
                         case 3:
 
-                            if ((ia.Flags & ANIMATION_FLAGS.AF_UNKNOWN_1) != 0)
+                            if (((uint) ia.Flags & 1) != 0)
                                 return 12;
 
                             goto case 0;
@@ -1630,7 +1631,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
-                if (mobile.Race == RaceType.GARGOYLE)
+                if (mobile.IsGargoyle)
                 {
                     if (mobile.IsFlying)
                     {
@@ -1669,14 +1670,14 @@ namespace ClassicUO.Game.GameObjects
                     {
                         case 1:
                         case 2:
-                            if (mobile.IsFlying)
+                            if (mobile.IsGargoyle && mobile.IsFlying)
                             {
                                 return 76;
                             }
                             return 17;
                     }
 
-                    if (mobile.IsFlying)
+                    if (mobile.IsGargoyle && mobile.IsFlying)
                     {
                         return 75;
                     }

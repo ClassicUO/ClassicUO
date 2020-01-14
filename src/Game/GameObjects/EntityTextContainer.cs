@@ -209,7 +209,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (Parent is Mobile m)
                 {
-                    if (m.IsFlying)
+                    if (m.IsGargoyle && m.IsFlying)
                         offY += 22;
                     else if (!m.IsMounted)
                         offY = -22;
