@@ -76,7 +76,7 @@ namespace ClassicUO.Game.Data
 
         public bool MoreStorage => Flags.HasFlag(LockedFeatureFlags.MoreStorage);
 
-        public bool CharSlots7 => Flags.HasFlag(LockedFeatureFlags.TheSecondAge);
+        public bool CharSlots7 => Flags.HasFlag(LockedFeatureFlags.CharacterSlot7);
 
         public bool TenthAgeFaces => Flags.HasFlag(LockedFeatureFlags.TenthAgeFaces);
 
