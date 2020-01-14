@@ -203,7 +203,6 @@ namespace ClassicUO.Game.UI.Controls
                         AcceptMouseInput = true,
                         IsPartialHue = true
                     });
-                    _body.Initialize();
                 }
                 else
                     _body.Graphic = body;
@@ -215,7 +214,6 @@ namespace ClassicUO.Game.UI.Controls
                         AcceptMouseInput = true,
                         IsPartialHue = true
                     });
-                    _unk.Initialize();
                 }
                 else
                     _unk.Graphic = 0xC72B;
@@ -235,7 +233,6 @@ namespace ClassicUO.Game.UI.Controls
                         AcceptMouseInput = true,
                         IsPartialHue = true
                     });
-                    _body.Initialize();
                 }
                 else
                 {
@@ -344,7 +341,6 @@ namespace ClassicUO.Game.UI.Controls
                             {
                                 CanPickUp = canPickUp
                             });
-                            itemGump.Initialize();
                             _pgumps[(int) layerIndex] = itemGump;
                             isNew = true;
                         }
@@ -467,7 +463,6 @@ namespace ClassicUO.Game.UI.Controls
                             AcceptMouseInput = true,
                             CanPickUp = false
                         });
-                        backpackGump.Initialize();
                         backpackGump.MouseDoubleClick -= OnDoubleclickBackpackGump;
                         backpackGump.MouseDoubleClick += OnDoubleclickBackpackGump;
                     }

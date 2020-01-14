@@ -367,7 +367,6 @@ namespace ClassicUO.Game.UI.Gumps
             _textBox = null;
 
             BuildGump();
-            Initialize();
         }
 
 
@@ -877,7 +876,6 @@ namespace ClassicUO.Game.UI.Gumps
             _textBox = null;
 
             BuildGump();
-            Initialize();
         }
 
         protected override void BuildGump()

@@ -36,29 +36,39 @@ namespace ClassicUO.Game.UI.Controls
     internal class MacroControl : Control
     {
         private readonly MacroCollectionControl _collection;
+        private readonly HotkeyBox _hotkeyBox;
 
         public MacroControl(string name)
         {
             CanMove = true;
 
-            HotkeyBox box = new HotkeyBox();
+            _hotkeyBox = new HotkeyBox();
 
-            box.HotkeyChanged += BoxOnHotkeyChanged;
-            box.HotkeyCancelled += BoxOnHotkeyCancelled;
+            _hotkeyBox.HotkeyChanged += BoxOnHotkeyChanged;
+            _hotkeyBox.HotkeyCancelled += BoxOnHotkeyCancelled;
 
 
-            Add(box);
+            Add(_hotkeyBox);
 
-            Add(new NiceButton(0, box.Height + 3, 170, 25, ButtonAction.Activate, "+ Create macro button", 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT) { ButtonParameter = 2, IsSelectable = false });
+            Add(new NiceButton(0, _hotkeyBox.Height + 3, 170, 25, ButtonAction.Activate, "+ Create macro button", 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT) { ButtonParameter = 2, IsSelectable = false });
 
-            Add(new NiceButton(0, box.Height + 30, 50, 25, ButtonAction.Activate, "Add") {IsSelectable = false});
-            Add(new NiceButton(52, box.Height + 30, 50, 25, ButtonAction.Activate, "Remove") {ButtonParameter = 1, IsSelectable = false});
+            Add(new NiceButton(0, _hotkeyBox.Height + 30, 50, 25, ButtonAction.Activate, "Add") {IsSelectable = false});
+            Add(new NiceButton(52, _hotkeyBox.Height + 30, 50, 25, ButtonAction.Activate, "Remove") {ButtonParameter = 1, IsSelectable = false});
 
 
             Add(_collection = new MacroCollectionControl(name, 280, 280)
             {
-                Y = box.Height + 50 + 10
+                Y = _hotkeyBox.Height + 50 + 10
             });
+
+            SetupKeyByDefault();
+        }
+
+
+        private void SetupKeyByDefault()
+        {
+            if (_collection?.Macro == null || _hotkeyBox == null)
+                return;
 
             if (_collection.Macro.Key != SDL.SDL_Keycode.SDLK_UNKNOWN)
             {
@@ -73,32 +83,38 @@ namespace ClassicUO.Game.UI.Controls
                 if (_collection.Macro.Ctrl)
                     mod |= SDL.SDL_Keymod.KMOD_CTRL;
 
-                box.SetKey(_collection.Macro.Key, mod);
+                _hotkeyBox.SetKey(_collection.Macro.Key, mod);
             }
         }
 
-
         private void BoxOnHotkeyChanged(object sender, EventArgs e)
         {
-            HotkeyBox b = (HotkeyBox) sender;
+            bool shift = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool alt = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool ctrl = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
 
-            bool shift = (b.Mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
-            bool alt = (b.Mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
-            bool ctrl = (b.Mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+            if (_hotkeyBox.Key != SDL.SDL_Keycode.SDLK_UNKNOWN)
+            {
+                Macro macro = Client.Game.GetScene<GameScene>().Macros.FindMacro(_hotkeyBox.Key, alt, ctrl, shift);
 
-            if (b.Key != SDL.SDL_Keycode.SDLK_UNKNOWN && Client.Game.GetScene<GameScene>().Macros.FindMacro(b.Key, alt, ctrl, shift) != null)
-            {
-                MessageBoxGump gump = new MessageBoxGump(250, 250, "This key combination\nalready exists.", s => { b.SetKey(SDL.SDL_Keycode.SDLK_UNKNOWN, SDL.SDL_Keymod.KMOD_NONE); });
-                UIManager.Add(gump);
+                if (macro != null)
+                {
+                    if (_collection.Macro == macro)
+                        return;
+
+                    SetupKeyByDefault();
+                    UIManager.Add(new MessageBoxGump(250, 150, "This key combination\nalready exists.", null));
+                    return;
+                }
             }
-            else
-            {
-                Macro m = _collection.Macro;
-                m.Key = b.Key;
-                m.Shift = shift;
-                m.Alt = alt;
-                m.Ctrl = ctrl;
-            }
+            else 
+                return;
+
+            Macro m = _collection.Macro;
+            m.Key = _hotkeyBox.Key;
+            m.Shift = shift;
+            m.Alt = alt;
+            m.Ctrl = ctrl;
         }
 
         private void BoxOnHotkeyCancelled(object sender, EventArgs e)

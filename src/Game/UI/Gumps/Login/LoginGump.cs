@@ -261,6 +261,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
                                            text: "<body link=\"#6a6a62\" vlink=\"#00FF00\" ><a href=\"https://discord.gg/VdyCpjQ\">CUO Discord",
                                            0x32, true, isunicode: true, style: FontStyle.Cropped));
 
+
+            if (!string.IsNullOrEmpty(_textboxAccount.Text))
+                _textboxPassword.SetKeyboardFocus();
         }
 
 
@@ -328,15 +331,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     break;
             }
         }
-
-        protected override void OnInitialize()
-        {
-            base.OnInitialize();
-
-            if (!string.IsNullOrEmpty(_textboxAccount.Text))
-                _textboxPassword.SetKeyboardFocus();
-        }
-
+        
         private enum Buttons
         {
             NextArrow,

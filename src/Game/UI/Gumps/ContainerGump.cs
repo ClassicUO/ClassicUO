@@ -76,7 +76,6 @@ namespace ClassicUO.Game.UI.Gumps
                 //CheckItemPosition(i);
             {
                 var x = new ItemGump(i);
-                x.Initialize();
                 Add(x);
             }
         }
@@ -103,8 +102,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                     foreach (var c in Children)
                     {
-                        if (!c.IsInitialized)
-                            c.Initialize();
                         c.IsVisible = !value;
                     }
 
@@ -220,13 +217,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = gg.Y;
             }
 
-            // workaroud to force the children update
-            if (IsInitialized)
-            {
-                IsMinimized = IsMinimized;
-            }
-
-
             if (_data.OpenSound != 0)
                 Client.Game.Scene.Audio.PlaySound(_data.OpenSound);
         }
@@ -276,6 +266,7 @@ namespace ClassicUO.Game.UI.Gumps
         public void ForceUpdate()
         {
             BuildGump();
+            IsMinimized = IsMinimized;
             ItemsOnAdded(null, new CollectionChangedEventArgs<uint>(FindControls<ItemGump>().Select(s => s.LocalSerial)));
         }
         
@@ -346,7 +337,6 @@ namespace ClassicUO.Game.UI.Gumps
 
 
                 var itemControl = new ItemGump(item);
-                itemControl.Initialize();
                 itemControl.IsVisible = !IsMinimized;
 
                 CheckItemControlPosition(itemControl, item);

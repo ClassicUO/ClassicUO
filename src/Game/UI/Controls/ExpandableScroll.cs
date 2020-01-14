@@ -197,11 +197,7 @@ namespace ClassicUO.Game.UI.Controls
                 Add(_gumplingTitle = new GumpPic(0, 0, (ushort) _gumplingTitleGumpID, 0));
             }
 
-            if (!_gumpTop.IsInitialized)
-            {
-                //IsVisible = false;
-            }
-            else
+            
             {
                 //if (!IsVisible)
                 //    IsVisible = true;
@@ -227,7 +223,7 @@ namespace ClassicUO.Game.UI.Controls
                     _gumpExpander.WantUpdateSize = true;
                 }
 
-                if (_gumplingTitle != null && _gumplingTitle.IsInitialized)
+                if (_gumplingTitle != null)
                 {
                     _gumplingTitle.X = (_gumpTop.Width - _gumplingTitle.Width) >> 1;
                     _gumplingTitle.Y = (_gumpTop.Height - _gumplingTitle.Height) >> 1;

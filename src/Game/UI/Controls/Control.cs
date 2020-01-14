@@ -79,6 +79,9 @@ namespace ClassicUO.Game.UI.Controls
             AllowedToDraw = true;
             AcceptMouseInput = true;
             Page = 0;
+
+            IsDisposed = false;
+            IsEnabled = true;
         }
 
         public virtual ClickPriority Priority { get; set; } = ClickPriority.Default;
@@ -108,8 +111,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsEnabled { get; set; }
 
-        public bool IsInitialized { get; set; }
-
         public bool HasKeyboardFocus => UIManager.KeyboardFocusControl == this;
 
         public bool MouseIsOver => UIManager.MouseOverControl == this;
@@ -134,7 +135,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public virtual bool AcceptKeyboardInput
         {
-            get => IsEnabled && !IsDisposed && IsVisible && IsInitialized && _acceptKeyboardInput;
+            get => IsEnabled && !IsDisposed && IsVisible && _acceptKeyboardInput;
             set => _acceptKeyboardInput = value;
         }
 
@@ -171,8 +172,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _bounds.X = value;
 
-                    if (IsInitialized)
-                        OnMove();
+                    OnMove();
                 }
             }
         }
@@ -186,8 +186,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _bounds.Y = value;
 
-                    if (IsInitialized)
-                        OnMove();
+                    OnMove();
                 }
             }
         }
@@ -237,7 +236,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             get
             {
-                if (!IsEnabled || !IsInitialized || IsDisposed || !IsVisible)
+                if (!IsEnabled || IsDisposed || !IsVisible)
                     return false;
 
                 if (_handlesKeyboardFocus)
@@ -311,10 +310,9 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (c.Page == 0 || c.Page == ActivePage)
                 {
-                    if (c.IsVisible && c.IsInitialized)
+                    if (c.IsVisible)
                     {
                         c.Draw(batcher, c.X + x, c.Y + y);
-                        //DrawDebug(batcher, position);
                     }
                 }
             }
@@ -326,11 +324,11 @@ namespace ClassicUO.Game.UI.Controls
 
         public virtual void Update(double totalMS, double frameMS)
         {
-            if (IsDisposed || !IsInitialized) return;
+            if (IsDisposed) return;
 
-            if (Children.Count > 0)
+            if (Children.Count != 0)
             {
-                InitializeControls();
+                //InitializeControls();
                 int w = 0, h = 0;
 
                 for (int i = 0; i < Children.Count; i++)
@@ -428,35 +426,35 @@ namespace ClassicUO.Game.UI.Controls
 
         internal event EventHandler<MouseDoubleClickEventArgs> MouseDoubleClick;
 
-        public void Initialize()
-        {
-            if (IsDisposed) return;
+        //public void Initialize()
+        //{
+        //    if (IsDisposed) return;
 
-            IsDisposed = false;
-            IsEnabled = true;
-            IsInitialized = true;
-            InitializeControls();
-            OnInitialize();
-        }
+        //    IsDisposed = false;
+        //    IsEnabled = true;
+        //    IsInitialized = true;
+        //    //InitializeControls();
+        //    //OnInitialize();
+        //}
 
-        private void InitializeControls()
-        {
-            bool initializedKeyboardFocusedControl = false;
+        //private void InitializeControls()
+        //{
+        //    //bool initializedKeyboardFocusedControl = false;
 
-            foreach (Control c in Children)
-            {
-                if (!c.IsInitialized && !IsDisposed)
-                {
-                    c.Initialize();
+        //    foreach (Control c in Children)
+        //    {
+        //        if (!c.IsInitialized && !IsDisposed)
+        //        {
+        //            c.Initialize();
 
-                    if (!initializedKeyboardFocusedControl && c.AcceptKeyboardInput)
-                    {
-                        UIManager.KeyboardFocusControl = c;
-                        initializedKeyboardFocusedControl = true;
-                    }
-                }
-            }
-        }
+        //            //if (!initializedKeyboardFocusedControl && c.AcceptKeyboardInput)
+        //            //{
+        //            //    UIManager.KeyboardFocusControl = c;
+        //            //    initializedKeyboardFocusedControl = true;
+        //            //}
+        //        }
+        //    }
+        //}
 
         public void HitTest(int x, int y, ref Control res)
         {
@@ -662,7 +660,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Parent?.OnMouseUp(X + x, Y + y, button);
 
-            if (button == MouseButtonType.Right && !IsDisposed && IsInitialized && !CanCloseWithRightClick && !Keyboard.Alt && !Keyboard.Shift && !Keyboard.Ctrl && ContextMenu != null && !ContextMenu.IsDisposed)
+            if (button == MouseButtonType.Right && !IsDisposed && !CanCloseWithRightClick && !Keyboard.Alt && !Keyboard.Shift && !Keyboard.Ctrl && ContextMenu != null && !ContextMenu.IsDisposed)
             {
                 ContextMenu.Show();
             }
@@ -737,9 +735,9 @@ namespace ClassicUO.Game.UI.Controls
         {
         }
 
-        protected virtual void OnInitialize()
-        {
-        }
+        //protected virtual void OnInitialize()
+        //{
+        //}
 
         protected virtual void OnClosing()
         {
