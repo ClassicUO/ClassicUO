@@ -1349,7 +1349,7 @@ namespace ClassicUO.Game.GameObjects
 
                         case 3:
 
-                            if (((uint) ia.Flags & 1) != 0)
+                            if ((ia.Flags & ANIMATION_FLAGS.AF_UNKNOWN_1) != 0)
                                 return 12;
 
                             goto case 0;
