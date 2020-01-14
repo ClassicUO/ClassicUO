@@ -300,6 +300,7 @@ namespace ClassicUO.Game.UI.Controls
                             {
                                 X = 20,
                                 Y = b.Height + 5,
+                                Width = 236,
                                 Height = b.Height * 2
                             };
                             textbox.TxEntry.SetHeight(b.Height * 2);
@@ -365,6 +366,7 @@ namespace ClassicUO.Game.UI.Controls
                         {
                             X = 20,
                             Y = box.Height + 5,
+                            Width = 236,
                             Height = box.Height * 2
                         };
                         textbox.TxEntry.SetHeight(box.Height * 2);
