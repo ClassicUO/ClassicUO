@@ -2917,6 +2917,8 @@ namespace ClassicUO.Network
                 flags = p.ReadUShort();
             World.ClientLockedFeatures.SetFlags((LockedFeatureFlags) flags);
 
+            UOChatManager.ChatIsEnabled = World.ClientLockedFeatures.T2A;
+
             UOFileManager.Animations.UpdateAnimationTable(flags);
         }
 
