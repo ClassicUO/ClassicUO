@@ -1,22 +1,24 @@
 ﻿#region license
-// Copyright (C) 2020 ClassicUO Development Community on Github
-// 
-// This project is an alternative client for the game Ultima Online.
-// The goal of this is to develop a lightweight client considering
-// new technologies.
-// 
+
+//  Copyright (C) 2020 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-// 
+//
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-// 
+//
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -512,7 +514,10 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (type != ANIMATION_GROUPS_TYPE.MONSTER)
                         {
-                            v13 = 5;
+                            if (type == ANIMATION_GROUPS_TYPE.HUMAN || type == ANIMATION_GROUPS_TYPE.EQUIPMENT)
+                                v13 = 16;
+                            else
+                                v13 = 5;
                         }
                         else
                             v13 = 4;
@@ -1059,7 +1064,7 @@ namespace ClassicUO.Game.GameObjects
                                 result = 2;
                             else
                             {
-                                ushort[] handAnimIDs = {0, 0};
+                                ushort[] handAnimIDs = { 0, 0 };
                                 Item hand1 = mobile.HasEquipment ? mobile.Equipment[(int) Layer.OneHanded] : null;
 
                                 if (hand1 != null)
@@ -1091,7 +1096,10 @@ namespace ClassicUO.Game.GameObjects
                                             }
                                         }
                                     }
-                                    result = 7;
+                                    else if (mobile.IsFlying)
+                                        result = 64;
+                                    else
+                                        result = 7;
                                 }
                                 else
                                     result = 7;
@@ -1213,7 +1221,8 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (item.Item1 == idx)
                     {
-                        if (item.Item2 == 0xFF) return walkIdx;
+                        if (item.Item2 == 0xFF)
+                            return walkIdx;
 
                         return item.Item2;
                     }
@@ -1236,7 +1245,8 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         public static byte GetObjectNewAnimation(Mobile mobile, ushort type, ushort action, byte mode)
         {
-            if (mobile.Graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT) return 0;
+            if (mobile.Graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                return 0;
 
             switch (type)
             {
@@ -1321,7 +1331,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
                 ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-                if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0) 
+                if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0)
                     type = ia.Type;
 
                 if (type == ANIMATION_GROUPS_TYPE.MONSTER)
@@ -1338,7 +1348,7 @@ namespace ClassicUO.Game.GameObjects
 
                         case 3:
 
-                            if ((ia.Flags & ANIMATION_FLAGS.AF_UNKNOWN_1) != 0) 
+                            if ((ia.Flags & ANIMATION_FLAGS.AF_UNKNOWN_1) != 0)
                                 return 12;
 
                             goto case 0;
@@ -1361,8 +1371,10 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (action > 0)
                         {
-                            if (action == 1) return 27;
-                            if (action == 2) return 28;
+                            if (action == 1)
+                                return 27;
+                            if (action == 2)
+                                return 28;
 
                             return 26;
                         }
@@ -1432,12 +1444,14 @@ namespace ClassicUO.Game.GameObjects
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
-                if (type <= ANIMATION_GROUPS_TYPE.ANIMAL || mobile.IsMounted) return 0xFF;
+                if (type <= ANIMATION_GROUPS_TYPE.ANIMAL || mobile.IsMounted)
+                    return 0xFF;
 
                 return 30;
             }
 
-            if (mode % 2 != 0) return 15;
+            if (mode % 2 != 0)
+                return 15;
 
             return 16;
         }
@@ -1452,21 +1466,25 @@ namespace ClassicUO.Game.GameObjects
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
-                if (type == ANIMATION_GROUPS_TYPE.SEA_MONSTER) return 8;
+                if (type == ANIMATION_GROUPS_TYPE.SEA_MONSTER)
+                    return 8;
 
                 if (type == ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
-                    if (mode % 2 != 0) return 21;
+                    if (mode % 2 != 0)
+                        return 21;
 
                     return 22;
                 }
 
-                if (mode % 2 != 0) return 8;
+                if (mode % 2 != 0)
+                    return 8;
 
                 return 12;
             }
 
-            if (mode % 2 != 0) return 2;
+            if (mode % 2 != 0)
+                return 2;
 
             return 3;
         }
@@ -1483,7 +1501,8 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (type > ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
-                    if (mobile.IsMounted) return 0xFF;
+                    if (mobile.IsMounted)
+                        return 0xFF;
 
                     return 20;
                 }
@@ -1499,12 +1518,13 @@ namespace ClassicUO.Game.GameObjects
         {
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0) 
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0)
                 type = ia.Type;
 
             if (type <= ANIMATION_GROUPS_TYPE.SEA_MONSTER)
             {
-                if (mode % 2 != 0) return 18;
+                if (mode % 2 != 0)
+                    return 18;
 
                 return 17;
             }
@@ -1513,7 +1533,8 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (mobile.IsMounted)
                     return 0xFF;
-                if (mode % 2 != 0) return 6;
+                if (mode % 2 != 0)
+                    return 6;
 
                 return 5;
             }
@@ -1544,8 +1565,10 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (type != ANIMATION_GROUPS_TYPE.SEA_MONSTER)
                 {
-                    if (type == ANIMATION_GROUPS_TYPE.ANIMAL) return 3;
-                    if (mobile.IsMounted) return 0xFF;
+                    if (type == ANIMATION_GROUPS_TYPE.ANIMAL)
+                        return 3;
+                    if (mobile.IsMounted)
+                        return 0xFF;
 
                     return 34;
                 }
@@ -1559,11 +1582,13 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         private static byte GetObjectNewAnimationType_7(Mobile mobile, ushort action, byte mode)
         {
-            if (mobile.IsMounted) return 0xFF;
+            if (mobile.IsMounted)
+                return 0xFF;
 
             if (action > 0)
             {
-                if (action == 1) return 33;
+                if (action == 1)
+                    return 33;
             }
             else
                 return 32;
@@ -1576,14 +1601,15 @@ namespace ClassicUO.Game.GameObjects
         {
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0) 
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0)
                 type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
                 if (type != ANIMATION_GROUPS_TYPE.SEA_MONSTER)
                 {
-                    if (type == ANIMATION_GROUPS_TYPE.ANIMAL) return 9;
+                    if (type == ANIMATION_GROUPS_TYPE.ANIMAL)
+                        return 9;
 
                     return mobile.IsMounted ? (byte) 0xFF : (byte) 33;
                 }
@@ -1599,7 +1625,7 @@ namespace ClassicUO.Game.GameObjects
         {
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0) 
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0)
                 type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
@@ -1629,14 +1655,15 @@ namespace ClassicUO.Game.GameObjects
         {
             IndexAnimation ia = UOFileManager.Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0) 
+            if ((ia.Flags & ANIMATION_FLAGS.AF_FOUND) != 0)
                 type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
                 if (type >= ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
-                    if (mobile.IsMounted) return 0xFF;
+                    if (mobile.IsMounted)
+                        return 0xFF;
 
                     switch (action)
                     {
