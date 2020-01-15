@@ -109,6 +109,7 @@ namespace ClassicUO
             if (!Directory.Exists(clientPath))
             {
                 Log.Error("Invalid client directory: " + clientPath);
+                ShowErrorMessage($"'{clientPath}' is not a valid UO directory");
                 throw new InvalidClientDirectory($"'{clientPath}' is not a valid directory");
             }
 
@@ -122,10 +123,11 @@ namespace ClassicUO
                     !ClientVersionHelper.TryParse(clientVersionText, out clientVersion))
                 {
                     Log.Error("Invalid client version: " + clientVersionText);
+                    ShowErrorMessage($"Impossible to define the client version.\nClient version: '{clientVersionText}'");
                     throw new InvalidClientVersion($"Invalid client version: '{clientVersionText}'");
                 }
 
-                Log.Trace($"Found a valid client.exe [{clientVersion}]");
+                Log.Trace($"Found a valid client.exe [{clientVersionText} - {clientVersion}]");
 
                 // update the wrong/missing client version in settings.json
                 Settings.GlobalSettings.ClientVersion = clientVersionText;
