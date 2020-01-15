@@ -21,7 +21,7 @@
 
 namespace ClassicUO.Game.Data
 {
-    public enum Lock : byte
+    enum Lock : byte
     {
         Up = 0,
         Down = 1,

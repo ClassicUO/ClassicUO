@@ -21,7 +21,7 @@
 
 namespace ClassicUO.Game.Data
 {
-    public enum ConsolePrompt
+    enum ConsolePrompt
     {
         None,
         ASCII,
