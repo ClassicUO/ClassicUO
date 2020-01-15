@@ -22,6 +22,7 @@
 using System;
 
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -121,7 +122,7 @@ namespace ClassicUO.Game
 
                 if (pixel != 0)
                 {
-                    pixel = Color.Black.PackedValue;
+                    pixel = HuesHelper.RgbaToArgb(pixel);
                     //ushort value = (ushort)(pixel << 3);
 
                     //if (value > 0xFF)

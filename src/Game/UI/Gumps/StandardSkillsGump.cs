@@ -101,8 +101,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             _allSkillControls = new SkillControl[UOFileManager.Skills.SkillsCount];
 
-            foreach (KeyValuePair<string, List<int>> k in SkillsGroupManager.Groups)
-                AddSkillsToGroup(k.Key, k.Value.OrderBy(s => s, _instance).ToList());
+            foreach (KeyValuePair<string, HashSet<int>> k in SkillsGroupManager.Groups)
+            {
+                HashSet<int> list = new HashSet<int>(k.Value.OrderBy(s => s, _instance));
+                AddSkillsToGroup(k.Key, list);
+            }
 
 
             _hitBox = new HitBox(160, 0, 23, 24);
@@ -171,7 +174,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void AddSkillsToGroup(string group, List<int> skills)
+        private void AddSkillsToGroup(string group, HashSet<int> skills)
         {
             MultiSelectionShrinkbox box = new MultiSelectionShrinkbox(0, 0, _container.Width - 30, group, 0, 6, false, true)
             {

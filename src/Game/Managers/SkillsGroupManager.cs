@@ -35,7 +35,7 @@ namespace ClassicUO.Game.Managers
 {
     internal static class SkillsGroupManager
     {
-        public static Dictionary<string, List<int>> Groups { get; } = new Dictionary<string, List<int>>();
+        public static Dictionary<string, HashSet<int>> Groups { get; } = new Dictionary<string, HashSet<int>>();
 
         private static void MakeCUODefault()
         {
@@ -43,13 +43,13 @@ namespace ClassicUO.Game.Managers
 
             int count = UOFileManager.Skills.SkillsCount;
 
-            Groups.Add("Miscellaneous", new List<int>
+            Groups.Add("Miscellaneous", new HashSet<int>
                        {
                            4, 6, 10, 12, 19, 3, 36
                        }
                       );
 
-            Groups.Add("Combat", new List<int>
+            Groups.Add("Combat", new HashSet<int>
                        {
                            1, 31, 42, 17, 41, 5, 40, 27
                        }
@@ -72,13 +72,13 @@ namespace ClassicUO.Game.Managers
                 Groups["Combat"].Add(53);
 
 
-            Groups.Add("Trade Skills", new List<int>
+            Groups.Add("Trade Skills", new HashSet<int>
                        {
                            0, 7, 8, 11, 13, 23, 44, 45, 34, 37
                        }
                       );
 
-            Groups.Add("Magic", new List<int>
+            Groups.Add("Magic", new HashSet<int>
             {
                 16
             });
@@ -100,19 +100,19 @@ namespace ClassicUO.Game.Managers
                 Groups["Magic"].Add(49);
 
 
-            Groups.Add("Wilderness", new List<int>
+            Groups.Add("Wilderness", new HashSet<int>
                        {
                            2, 35, 18, 20, 38, 39
                        }
                       );
 
-            Groups.Add("Thieving", new List<int>
+            Groups.Add("Thieving", new HashSet<int>
                        {
                            14, 21, 24, 30, 48, 28, 33, 47
                        }
                       );
 
-            Groups.Add("Bard", new List<int>
+            Groups.Add("Bard", new HashSet<int>
                        {
                            15, 29, 9, 22
                        }
@@ -159,7 +159,7 @@ namespace ClassicUO.Game.Managers
                         {
                             "Miscellaneous"
                         };
-                    Groups.Add("Miscellaneous", new List<int>());
+                    Groups.Add("Miscellaneous", new HashSet<int>());
                     StringBuilder sb = new StringBuilder(17);
 
                     for (int i = 0; i < count - 1; ++i)
@@ -179,7 +179,7 @@ namespace ClassicUO.Game.Managers
                         }
 
                         groups.Add(sb.ToString());
-                        Groups.Add(sb.ToString(), new List<int>());
+                        Groups.Add(sb.ToString(), new HashSet<int>());
                         sb.Clear();
                     }
 
@@ -207,7 +207,7 @@ namespace ClassicUO.Game.Managers
         {
             if (!Groups.ContainsKey(group))
             {
-                Groups.Add(group, new List<int>());
+                Groups.Add(group, new HashSet<int>());
 
                 return true;
             }
@@ -224,7 +224,18 @@ namespace ClassicUO.Game.Managers
                 if (Groups.Count == 0)
                     Groups.Add("All", list);
                 else
-                    Groups.FirstOrDefault().Value.AddRange(list);
+                {
+                    foreach (var k in Groups)
+                    {
+                        foreach (var item in list)
+                        {
+                            k.Value.Add(item);
+                        }
+
+                        break;
+                    }
+                }
+
 
                 return true;
             }
@@ -232,7 +243,7 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public static List<int> GetSkillsInGroup(string group)
+        public static HashSet<int> GetSkillsInGroup(string group)
         {
             Groups.TryGetValue(group, out var list);
 
@@ -286,7 +297,7 @@ namespace ClassicUO.Game.Managers
             {
                 foreach (XmlElement xml in root.GetElementsByTagName("group"))
                 {
-                    List<int> list = new List<int>();
+                    HashSet<int> list = new HashSet<int>();
 
                     string name = xml.GetAttribute("name");
 
@@ -297,7 +308,18 @@ namespace ClassicUO.Game.Managers
                         foreach (XmlElement xmlIds in xmlIdsRoot.GetElementsByTagName("skill"))
                         {
                             int id = int.Parse(xmlIds.GetAttribute("id"));
-                            list.Add(id);
+                            bool skip = false;
+                            foreach (KeyValuePair<string, HashSet<int>> k in Groups)
+                            {
+                                if (k.Value.Contains(id))
+                                {
+                                    skip = true;
+                                    break;
+                                }
+                            }
+
+                            if (!skip)
+                                list.Add(id);
                         }
                     }
 
@@ -321,7 +343,7 @@ namespace ClassicUO.Game.Managers
                 xml.WriteStartDocument(true);
                 xml.WriteStartElement("skillsgroups");
 
-                foreach (KeyValuePair<string, List<int>> k in Groups)
+                foreach (KeyValuePair<string, HashSet<int>> k in Groups)
                 {
                     xml.WriteStartElement("group");
 
