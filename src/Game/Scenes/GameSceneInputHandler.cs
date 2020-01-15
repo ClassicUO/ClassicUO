@@ -217,7 +217,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (mobile != World.Player)
                     {
-                        if (UIManager.GetGump<BaseHealthBarGump>(mobile) == null)
+                        if (UIManager.GetGump<BaseHealthBarGump>(mobile) != null)
                         {
                             continue;
                         }
