@@ -199,7 +199,7 @@ namespace ClassicUO.IO
 
                                     for (GameObject right = obj.Right; obj != null; obj = right, right = right?.Right)
                                     {
-                                        if (obj is Static || obj is AnimatedItemEffect ef && ef.Source is Static)
+                                        if (obj is Static)
                                             obj.Destroy();
                                     }
                                 }
