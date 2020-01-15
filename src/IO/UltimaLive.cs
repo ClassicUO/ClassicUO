@@ -94,7 +94,7 @@ namespace ClassicUO.IO
                     {
                         if (Time.Ticks >= _UL._SentWarning)
                         {
-                            Log.Trace($"The server is requesting access to MAP: {mapID} but we only have {_UL._filesMap.Length} maps!", ConsoleColor.Red);
+                            Log.Trace($"The server is requesting access to MAP: {mapID} but we only have {_UL._filesMap.Length} maps!");
                             _UL._SentWarning = Time.Ticks + 100000;
                         }
                         return;
@@ -175,7 +175,7 @@ namespace ClassicUO.IO
                     {
                         if (Time.Ticks >= _UL._SentWarning)
                         {
-                            Log.Trace($"The server is requesting access to MAP: {mapID} but we only have {_UL._filesMap.Length} maps!", ConsoleColor.Red);
+                            Log.Trace($"The server is requesting access to MAP: {mapID} but we only have {_UL._filesMap.Length} maps!");
                             _UL._SentWarning = Time.Ticks + 100000;
                         }
                         return;

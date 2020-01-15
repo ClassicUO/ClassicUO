@@ -90,14 +90,12 @@ namespace ClassicUO
 
         public static void Load()
         {
-            Log.Trace("Loading");
-            Log.PushIndent();
+            Log.Trace(">>>>>>>>>>>>> Loading >>>>>>>>>>>>>");
 
             string clientPath = Settings.GlobalSettings.UltimaOnlineDirectory;
             Log.Trace($"Ultima Online installation folder: {clientPath}");
 
             Log.Trace("Loading files...");
-            Log.PushIndent();
 
             if (!string.IsNullOrWhiteSpace(Settings.GlobalSettings.ClientVersion))
             {
@@ -165,7 +163,7 @@ namespace ClassicUO
             PacketHandlers.Load();
             //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
             UltimaLive.Enable();
-            PacketsTable.AdjustPacketSizeByVersion(Client.Version);
+            PacketsTable.AdjustPacketSizeByVersion(Version);
             Log.Trace("Done!");
 
             Log.Trace("Loading plugins...");
@@ -174,11 +172,9 @@ namespace ClassicUO
                 Plugin.Create(p);
             Log.Trace("Done!");
 
-
             UoAssist.Start();
 
-            Log.PopIndent();
-            Log.Trace("Loading done");
+            Log.Trace(">>>>>>>>>>>>> DONE >>>>>>>>>>>>>");
         }
     }
 }

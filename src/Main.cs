@@ -350,7 +350,7 @@ namespace ClassicUO
 
             if (action == "update")
             {
-                Log.Trace( "ClassicUO Updating...", ConsoleColor.Yellow);
+                Log.Trace( "ClassicUO Updating...");
 
                 try
                 {
@@ -412,7 +412,7 @@ namespace ClassicUO
                 {
                 }
 
-                Log.Trace( "ClassicUO updated successfully!", ConsoleColor.Green);
+                Log.Trace( "ClassicUO updated successfully!");
             }
 
             return false;
