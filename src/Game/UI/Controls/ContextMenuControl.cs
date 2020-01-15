@@ -202,7 +202,6 @@ namespace ClassicUO.Game.UI.Controls
             if (entry.CanBeSelected)
             {
                 _selectedPic = new GumpPic(0, 0, 0x838, 0);
-                _selectedPic.Initialize();
                 _selectedPic.IsVisible = entry.IsSelected;
                 Add(_selectedPic);
             }

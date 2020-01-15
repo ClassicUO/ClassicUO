@@ -79,6 +79,7 @@ namespace ClassicUO.Game.UI.Controls
             });
 
             WantUpdateSize = false;
+            IsActive = false;
         }
 
         public SDL.SDL_Keycode Key { get; private set; }
@@ -106,12 +107,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public event EventHandler HotkeyChanged, HotkeyCancelled;
 
-        protected override void OnInitialize()
-        {
-            base.OnInitialize();
-
-            IsActive = false;
-        }
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {

@@ -86,6 +86,10 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_hitBox = new HitBox(160, 0, 23, 24));
             _hitBox.MouseUp += _hitBox_MouseUp;
             _gumpPic.MouseDoubleClick += _gumpPic_MouseDoubleClick;
+
+
+            InitializeJournalEntries();
+            World.Journal.EntryAdded += AddJournalEntry;
         }
 
         public override GUMP_TYPE GumpType => GUMP_TYPE.GT_JOURNAL;
@@ -118,8 +122,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                     foreach (var c in Children)
                     {
-                        if (!c.IsInitialized)
-                            c.Initialize();
                         c.IsVisible = !value;
                     }
 
@@ -134,11 +136,6 @@ namespace ClassicUO.Game.UI.Gumps
             _scrollBar.InvokeMouseWheel(delta);
         }
 
-        protected override void OnInitialize()
-        {
-            InitializeJournalEntries();
-            World.Journal.EntryAdded += AddJournalEntry;
-        }
 
         public override void Dispose()
         {

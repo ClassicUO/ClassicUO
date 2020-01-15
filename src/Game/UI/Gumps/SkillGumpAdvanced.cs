@@ -144,7 +144,7 @@ namespace ClassicUO.Game.UI.Gumps
             _updateSkillsNeeded = true;
         }
 
-        protected override void OnInitialize()
+        private void BuildGump()
         {
             _totalReal = 0;
             _totalValue = 0;
@@ -180,10 +180,12 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (SkillListEntry t in _skillListEntries)
                 _scrollArea.Add(t);
 
-            Add(new Label("Total: ", true, 1153) {X = 40, Y = 320});
-            Add(new Label(_totalReal.ToString(), true, 1153) {X = 220, Y = 320});
-            Add(new Label(_totalValue.ToString(), true, 1153) {X = 300, Y = 320});
+            Add(new Label("Total: ", true, 1153) { X = 40, Y = 320 });
+            Add(new Label(_totalReal.ToString(), true, 1153) { X = 220, Y = 320 });
+            Add(new Label(_totalValue.ToString(), true, 1153) { X = 300, Y = 320 });
         }
+
+
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -194,7 +196,7 @@ namespace ClassicUO.Game.UI.Gumps
                 foreach (var label in Children.OfType<Label>())
                     label.Dispose();
 
-                OnInitialize();
+                BuildGump();
 
                 _updateSkillsNeeded = false;
             }

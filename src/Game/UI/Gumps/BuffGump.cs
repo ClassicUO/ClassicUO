@@ -346,19 +346,18 @@ namespace ClassicUO.Game.UI.Gumps
                 _timer = (uint) (icon.Timer <= 0 ? 0xFFFF_FFFF : Time.Ticks + icon.Timer * 1000);
                 _gText = RenderedText.Create("", 0xFFFF, 2, true, FontStyle.Fixed | FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, Texture.Width);
 
+
+                AcceptMouseInput = true;
+                WantUpdateSize = false;
+                CanMove = true;
+
                 SetTooltip(icon.Text);
             }
 
             public BuffIcon Icon { get; }
             private readonly RenderedText _gText;
 
-            protected override void OnInitialize()
-            {
-                base.OnInitialize();
-                AcceptMouseInput = true;
-                WantUpdateSize = false;
-                CanMove = true;
-            }
+          
 
             public override void Update(double totalMS, double frameMS)
             {

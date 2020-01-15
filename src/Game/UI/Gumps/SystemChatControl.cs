@@ -119,6 +119,8 @@ namespace ClassicUO.Game.UI.Gumps
             Mode = ChatMode.Default;
 
             IsActive = !ProfileManager.Current.ActivateChatAfterEnter;
+
+            SetFocus();
         }
 
         public bool IsActive
@@ -316,12 +318,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _trans.Width = Width;
                 _trans.Height = height + 5;
             }
-        }
-
-        protected override void OnInitialize()
-        {
-            base.OnInitialize();
-            textBox.SetKeyboardFocus();
         }
 
         public override void Update(double totalMS, double frameMS)

@@ -413,7 +413,6 @@ namespace ClassicUO.Configuration
 
                                 Type type = Type.GetType(typeName, true);
                                 Gump gump = (Gump) Activator.CreateInstance(type);
-                                gump.Initialize();
                                 gump.Restore(reader);
                                 gump.X = x;
                                 gump.Y = y;
@@ -571,7 +570,6 @@ namespace ClassicUO.Configuration
                                 continue;
 
                             gump.LocalSerial = serial;
-                            gump.Initialize();
                             gump.Restore(xml);
                             gump.X = x;
                             gump.Y = y;

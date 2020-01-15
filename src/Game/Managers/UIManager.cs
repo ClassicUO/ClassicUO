@@ -374,6 +374,7 @@ namespace ClassicUO.Game.Managers
             List<string> cmdlist = _parser.GetTokens(layout);
             int cmdlen = cmdlist.Count;
             bool applyCheckerTrans = false;
+            bool textBoxFocused = false;
 
             for (int cnt = 0; cnt < cmdlen; cnt++)
             {
@@ -406,128 +407,8 @@ namespace ClassicUO.Game.Managers
                         break;
 
                     case "checkertrans":
-                        CheckerTrans t = new CheckerTrans(gparams);
-
                         applyCheckerTrans = true;
-                        //bool applyTrans(int ii, int current_page)
-                        //{
-                        //    bool transparent = false;
-                        //    for (; ii < gump.Children.Count; ii++)
-                        //    {
-                        //        var child = gump.Children[ii];
-
-                        //        bool canDraw = /*current_page == 0 || child.Page == 0 ||*/
-                        //                       current_page == child.Page;
-
-                        //        if (canDraw && child.IsVisible && child is CheckerTrans)
-                        //        {
-                        //            transparent = true;
-                        //        }
-                        //    }
-
-                        //    return transparent;
-                        //}
-
-                        //void checkerContains(int ii, float tr)
-                        //{
-                        //    var master = gump.Children[ii];
-
-                        //    for (int i = 0; i < ii; i++)
-                        //    {
-                        //        var cc = gump.Children[i];
-
-                        //        if (master.Bounds.Contains(cc.Bounds))
-                        //        {
-                        //            cc.Alpha = 1f;
-                        //        }
-                        //    }
-                        //}
-
-                        //Rectangle bounds = t.Bounds;
-                        //bool trans = false;
-                        //for (int i = gump.Children.Count - 1; i >= 0; i--)
-                        //{
-                        //    var cc = gump.Children[i];
-
-                        //    if (cc is CheckerTrans)
-                        //    {
-                        //        trans = applyTrans(i, cc.Page);
-                        //        bounds = cc.Bounds;
-                        //        continue;
-                        //    }
-
-                        //    if (bounds.Contains(cc.Bounds))
-                        //    {
-                        //        cc.Alpha = 1f;
-                        //    }
-                        //    else
-                        //        cc.Alpha = trans ? 1 : 0.5f;
-                        //}
-
-                        gump.Add(t, page);
-
-                        //  int j = 0;
-                        //  bool trans = applyTrans(j, page, null);
-                        //  float alpha = trans ? 1 : 0.5f;
-                        ////  checkerContains(j, alpha);
-                        //  for (; j < gump.Children.Count; j++)
-                        //  {
-                        //      var child = gump.Children[j];
-
-                        //      if (child is CheckerTrans tt)
-                        //      {
-                        //          trans = applyTrans(j, child.Page, tt);
-                        //          alpha = trans ? 1 : .5f;
-                        //          checkerContains(j, alpha);
-                        //      }
-                        //      else
-                        //      {
-                        //          child.Alpha = alpha != 1 ? 0.5f : alpha;
-                        //      }
-                        //  }
-
-
-                        //float[] alpha = { 1f, 0.5f };
-
-                        //bool checkTransparent(Control c, int start)
-                        //{
-                        //    bool transparent = false;
-                        //    for (int i = start; i < c.Children.Count; i++)
-                        //    //for (int i = start; i >= 0; i--)
-                        //    {
-                        //        var control = c.Children[i];
-
-                        //        bool canDraw = /*c.Page == 0 || control.Page == 0 || c.Page == control.Page ||*/ control.Page == page;
-
-                        //        if (canDraw && control is CheckerTrans)
-                        //        {
-                        //            transparent = true;
-                        //        }
-                        //    }
-
-                        //    return transparent;
-                        //}
-
-
-                        //bool trans = checkTransparent(gump, 0);
-
-                        //for (int i = gump.Children.Count - 1; i >= 0; i--)
-                        //{
-                        //    Control g = gump.Children[i];
-                        //    g.Initialize();
-                        //    g.IsTransparent = true;
-
-                        //    if (g is CheckerTrans)
-                        //    {
-                        //        trans = checkTransparent(gump, i + 1);
-
-                        //        continue;
-                        //    }
-
-                        //    g.Alpha = alpha[trans ? 0 : 1];
-                        //}
-
-
+                        gump.Add(new CheckerTrans(gparams), page);
 
                         break;
 
@@ -696,7 +577,15 @@ namespace ClassicUO.Game.Managers
 
                     case "textentrylimited":
                     case "textentry":
-                        gump.Add(new TextBox(gparams, lines), page);
+                        TextBox textBox = new TextBox(gparams, lines);
+
+                        if (!textBoxFocused)
+                        {
+                            textBox.SetKeyboardFocus();
+                            textBoxFocused = true;
+                        }
+                      
+                        gump.Add(textBox, page);
 
                         break;
 
@@ -832,7 +721,6 @@ namespace ClassicUO.Game.Managers
 
             Add(gump);
 
-            gump.Initialize();
             gump.Update(Time.Ticks, 0);
             gump.SetInScreen();
 
@@ -921,8 +809,6 @@ namespace ClassicUO.Game.Managers
             {
                 Control g = Gumps[i];
 
-                if (!g.IsInitialized && !g.IsDisposed)
-                    g.Initialize();
                 g.Update(totalMS, frameMS);
 
                 if (g.IsDisposed)
@@ -945,9 +831,7 @@ namespace ClassicUO.Game.Managers
             for (int i = Gumps.Count - 1; i >= 0; i--)
             {
                 Control g = Gumps[i];
-
-                if (g.IsInitialized)
-                    g.Draw(batcher, g.X, g.Y);
+                g.Draw(batcher, g.X, g.Y);
             }
 
             GameCursor?.Draw(batcher);

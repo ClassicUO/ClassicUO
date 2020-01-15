@@ -217,7 +217,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (mobile != World.Player)
                     {
-                        if (UIManager.GetGump<BaseHealthBarGump>(mobile)?.IsInitialized ?? false)
+                        if (UIManager.GetGump<BaseHealthBarGump>(mobile) != null)
                         {
                             continue;
                         }
@@ -235,12 +235,6 @@ namespace ClassicUO.Game.Scenes
                         {
                             hbgc = new HealthBarGump(mobile);
                         }
-
-                        // Need to initialize before setting X Y otherwise AnchorableGump.OnMove() is not called
-                        // if OnMove() is not called, _prevX _prevY are not set, anchoring is unpredictable
-                        // maybe should be fixed elsewhere
-                        hbgc.Initialize();
-
 
                         if (finalY >= ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y - 100)
                         {
@@ -705,12 +699,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             GameActions.RequestMobileStatus(obj);
                             var customgump = UIManager.GetGump<BaseHealthBarGump>(obj);
-                            if (customgump != null)
-                            {
-                                if (!customgump.IsInitialized)
-                                    return;
-                                customgump.Dispose();
-                            }
+                            customgump?.Dispose();
 
                             if (obj == World.Player)
                                 StatusGumpBase.GetStatusGump()?.Dispose();

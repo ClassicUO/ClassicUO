@@ -68,9 +68,38 @@ namespace ClassicUO.Game.UI.Controls
             MinValue = min;
             MaxValue = max;
             BarWidth = w;
-            Value = value;
             _style = style;
             AcceptMouseInput = true;
+
+
+            if (_gumpWidget == null)
+            {
+                switch (_style)
+                {
+                    case HSliderBarStyle.MetalWidgetRecessedBar:
+
+                        _gumpSpliderBackground = new UOTexture[3]
+                        {
+                            UOFileManager.Gumps.GetTexture(213), UOFileManager.Gumps.GetTexture(214), UOFileManager.Gumps.GetTexture(215)
+                        };
+                        _gumpWidget = UOFileManager.Gumps.GetTexture(216);
+
+                        break;
+
+                    case HSliderBarStyle.BlueWidgetNoBar:
+                        _gumpWidget = UOFileManager.Gumps.GetTexture(0x845);
+
+                        break;
+                }
+
+                Width = BarWidth;
+                if (_gumpWidget != null)
+                    Height = _gumpWidget.Height;
+                //RecalculateSliderX();
+                CalculateOffset();
+            }
+
+            Value = value;
         }
 
         public int MinValue { get; set; }
@@ -105,8 +134,7 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         ModifyPairedValues(_value - oldValue);
 
-                        if (IsInitialized)
-                            CalculateOffset();
+                        CalculateOffset();
                     }
 
                     ValueChanged.Raise();
@@ -118,32 +146,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_gumpWidget == null)
-            {
-                switch (_style)
-                {
-                    case HSliderBarStyle.MetalWidgetRecessedBar:
-
-                        _gumpSpliderBackground = new UOTexture[3]
-                        {
-                            UOFileManager.Gumps.GetTexture(213), UOFileManager.Gumps.GetTexture(214), UOFileManager.Gumps.GetTexture(215)
-                        };
-                        _gumpWidget = UOFileManager.Gumps.GetTexture(216);
-
-                        break;
-
-                    case HSliderBarStyle.BlueWidgetNoBar:
-                        _gumpWidget = UOFileManager.Gumps.GetTexture(0x845);
-
-                        break;
-                }
-
-                Width = BarWidth;
-                if (_gumpWidget != null) Height = _gumpWidget.Height;
-                //RecalculateSliderX();
-                CalculateOffset();
-            }
-
             if (_gumpSpliderBackground != null)
             {
                 foreach (UOTexture t in _gumpSpliderBackground)

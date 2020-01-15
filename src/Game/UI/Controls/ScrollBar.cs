@@ -48,6 +48,29 @@ namespace ClassicUO.Game.UI.Controls
             Height = height;
             Location = new Point(x, y);
             AcceptMouseInput = true;
+
+
+            _textureUpButton = new UOTexture[2];
+            _textureUpButton[0] = UOFileManager.Gumps.GetTexture(251);
+            _textureUpButton[1] = UOFileManager.Gumps.GetTexture(250);
+            _textureDownButton = new UOTexture[2];
+            _textureDownButton[0] = UOFileManager.Gumps.GetTexture(253);
+            _textureDownButton[1] = UOFileManager.Gumps.GetTexture(252);
+            _textureBackground = new UOTexture[3];
+            _textureBackground[0] = UOFileManager.Gumps.GetTexture(257);
+            _textureBackground[1] = UOFileManager.Gumps.GetTexture(256);
+            _textureBackground[2] = UOFileManager.Gumps.GetTexture(255);
+            _textureSlider = UOFileManager.Gumps.GetTexture(254);
+            Width = _textureBackground[0].Width;
+
+
+            _rectDownButton = new Rectangle(0, Height - _textureDownButton[0].Height, _textureDownButton[0].Width, _textureDownButton[0].Height);
+            _rectUpButton = new Rectangle(0, 0, _textureUpButton[0].Width, _textureUpButton[0].Height);
+            _rectSlider = new Rectangle((_textureBackground[0].Width - _textureSlider.Width) >> 1, _textureUpButton[0].Height + (int) _sliderPosition, _textureSlider.Width, _textureSlider.Height);
+            _emptySpace.X = 0;
+            _emptySpace.Y = _textureUpButton[0].Height;
+            _emptySpace.Width = _textureSlider.Width;
+            _emptySpace.Height = Height - (_textureDownButton[0].Height + _textureUpButton[0].Height);
         }
 
         public event EventHandler ValueChanged;
@@ -101,31 +124,6 @@ namespace ClassicUO.Game.UI.Controls
             return Contains(x, y);
         }
 
-        protected override void OnInitialize()
-        {
-            base.OnInitialize();
-            _textureUpButton = new UOTexture[2];
-            _textureUpButton[0] = UOFileManager.Gumps.GetTexture(251);
-            _textureUpButton[1] = UOFileManager.Gumps.GetTexture(250);
-            _textureDownButton = new UOTexture[2];
-            _textureDownButton[0] = UOFileManager.Gumps.GetTexture(253);
-            _textureDownButton[1] = UOFileManager.Gumps.GetTexture(252);
-            _textureBackground = new UOTexture[3];
-            _textureBackground[0] = UOFileManager.Gumps.GetTexture(257);
-            _textureBackground[1] = UOFileManager.Gumps.GetTexture(256);
-            _textureBackground[2] = UOFileManager.Gumps.GetTexture(255);
-            _textureSlider = UOFileManager.Gumps.GetTexture(254);
-            Width = _textureBackground[0].Width;
-
-
-            _rectDownButton = new Rectangle(0, Height - _textureDownButton[0].Height, _textureDownButton[0].Width, _textureDownButton[0].Height);
-            _rectUpButton = new Rectangle(0, 0, _textureUpButton[0].Width, _textureUpButton[0].Height);
-            _rectSlider = new Rectangle((_textureBackground[0].Width - _textureSlider.Width) >> 1, _textureUpButton[0].Height + (int) _sliderPosition, _textureSlider.Width, _textureSlider.Height);
-            _emptySpace.X = 0;
-            _emptySpace.Y = _textureUpButton[0].Height;
-            _emptySpace.Width = _textureSlider.Width;
-            _emptySpace.Height = Height - (_textureDownButton[0].Height + _textureUpButton[0].Height);
-        }
 
         public override void Update(double totalMS, double frameMS)
         {
