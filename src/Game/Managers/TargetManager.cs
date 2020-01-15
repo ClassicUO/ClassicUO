@@ -33,7 +33,7 @@ using ClassicUO.Network;
 
 namespace ClassicUO.Game.Managers
 {
-    public enum CursorTarget
+    enum CursorTarget
     {
         Invalid = -1,
         Object = 0,
@@ -50,7 +50,7 @@ namespace ClassicUO.Game.Managers
         public static readonly uint Target = 6983686;
     }
 
-    public enum TargetType
+    enum TargetType
     {
         Neutral,
         Harmful,

@@ -271,7 +271,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             SaveCheckboxStatus();
             LoginScene ls = Client.Game.GetScene<LoginScene>();
 
-            if (ls.CurrentLoginStep == LoginScene.LoginStep.Main)
+            if (ls.CurrentLoginStep == LoginSteps.Main)
                 ls.Connect(_textboxAccount.Text, _textboxPassword.Text);
         }
 

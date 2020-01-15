@@ -196,6 +196,7 @@
     <Compile Include="Game\UI\Gumps\TextContainerGump.cs" />
     <Compile Include="Game\UI\Gumps\TipNoticeGump.cs" />
     <Compile Include="Game\UI\Gumps\UOChatGump.cs" />
+    <Compile Include="Game\UI\TextEntryRules.cs" />
     <Compile Include="Game\Weather.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Renderer\MatrixEffect.cs" />

@@ -190,9 +190,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 if (existing != null)
                     Remove(existing);
 
-                Add(new LoadingGump($"Permanently delete {charName}", LoadingGump.Buttons.OK | LoadingGump.Buttons.Cancel, buttonID =>
+                Add(new LoadingGump($"Permanently delete {charName}", LoginButtons.OK | LoginButtons.Cancel, buttonID =>
                 {
-                    if (buttonID == (int) LoadingGump.Buttons.OK)
+                    if (buttonID == (int) LoginButtons.OK)
                         loginScene.DeleteCharacter(_selectedCharacter);
                     else
                         ChangePage(1);

@@ -32,7 +32,7 @@ using Microsoft.Xna.Framework;
 namespace ClassicUO.Renderer
 {
     [Flags]
-    public enum FontStyle : ushort
+    enum FontStyle : ushort
     {
         None = 0x0000,
         Solid = 0x0001,

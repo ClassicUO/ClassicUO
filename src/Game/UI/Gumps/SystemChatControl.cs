@@ -40,7 +40,7 @@ using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    public enum ChatMode
+    enum ChatMode
     {
         Default,
         Whisper,

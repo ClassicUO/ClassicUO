@@ -31,7 +31,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public enum ButtonAction
+    enum ButtonAction
     {
         Default = 0,
         SwitchPage = 0,

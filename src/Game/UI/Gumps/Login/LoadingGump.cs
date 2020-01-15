@@ -28,20 +28,21 @@ using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
-    internal class LoadingGump : Gump
+    [Flags]
+    enum LoginButtons
     {
-        [Flags]
-        public enum Buttons
-        {
-            None = 1,
-            OK = 2,
-            Cancel = 4
-        }
+        None = 1,
+        OK = 2,
+        Cancel = 4
+    }
+
+    class LoadingGump : Gump
+    {  
 
         private readonly Action<int> _buttonClick;
         internal readonly Label _Label;
 
-        public LoadingGump(string labelText, Buttons showButtons, Action<int> buttonClick = null) : base(0, 0)
+        public LoadingGump(string labelText, LoginButtons showButtons, Action<int> buttonClick = null) : base(0, 0)
         {
             _buttonClick = buttonClick;
             CanCloseWithRightClick = false;
@@ -60,21 +61,21 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             Add(_Label);
 
-            if (showButtons == Buttons.OK)
+            if (showButtons == LoginButtons.OK)
             {
-                Add(new Button((int) Buttons.OK, 0x0481, 0x0483, 0x0482)
+                Add(new Button((int) LoginButtons.OK, 0x0481, 0x0483, 0x0482)
                 {
                     X = 306, Y = 304, ButtonAction = ButtonAction.Activate
                 });
             }
-            else if (showButtons == (Buttons.OK | Buttons.Cancel))
+            else if (showButtons == (LoginButtons.OK | LoginButtons.Cancel))
             {
-                Add(new Button((int) Buttons.OK, 0x0481, 0x0483, 0x0482)
+                Add(new Button((int) LoginButtons.OK, 0x0481, 0x0483, 0x0482)
                 {
                     X = 264, Y = 304, ButtonAction = ButtonAction.Activate
                 });
 
-                Add(new Button((int) Buttons.Cancel, 0x047E, 0x0480, 0x047F)
+                Add(new Button((int) LoginButtons.Cancel, 0x047E, 0x0480, 0x047F)
                 {
                     X = 348, Y = 304, ButtonAction = ButtonAction.Activate
                 });
@@ -89,7 +90,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             if (key == SDL.SDL_Keycode.SDLK_KP_ENTER || key == SDL.SDL_Keycode.SDLK_RETURN)
-                OnButtonClick((int) Buttons.OK);
+                OnButtonClick((int) LoginButtons.OK);
         }
 
 

@@ -38,7 +38,7 @@ using ClassicUO.Utility.Logging;
 namespace ClassicUO.Game
 {
     [Flags]
-    public enum MessageType : byte
+    enum MessageType : byte
     {
         Regular = 0,
         System = 1,
@@ -56,7 +56,7 @@ namespace ClassicUO.Game
         Party = 0xFF // This is a CUO assigned type, value is unimportant
     }
 
-    //public enum MessageFont : byte
+    //enum MessageFont : byte
     //{
     //    INVALID = 0xFF,
     //    Bold = 0,
@@ -71,7 +71,7 @@ namespace ClassicUO.Game
     //    SmallLight = 9
     //}
 
-    public enum AffixType : byte
+    enum AffixType : byte
     {
         Append = 0x00,
         Prepend = 0x01,

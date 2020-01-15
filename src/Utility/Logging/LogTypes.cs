@@ -24,7 +24,7 @@ using System;
 namespace ClassicUO.Utility.Logging
 {
     [Flags]
-    public enum LogTypes : byte
+    enum LogTypes : byte
     {
         None = 0x00,
         Info = 0x01,

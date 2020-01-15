@@ -477,7 +477,7 @@ namespace ClassicUO.IO.Resources
     }
 
     [Flags]
-    public enum TileFlag : ulong
+    enum TileFlag : ulong
     {
         /// <summary>
         ///     Nothing is flagged.

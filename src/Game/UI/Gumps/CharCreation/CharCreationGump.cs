@@ -33,7 +33,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
     internal class CharCreationGump : Gump
     {
-        public enum CharCreationStep
+        enum CharCreationStep
         {
             Appearence = 0,
             ChooseProfession = 1,
@@ -131,7 +131,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             if (_loadingGump != null)
                 Remove(_loadingGump);
-            Add(_loadingGump = new LoadingGump(message, LoadingGump.Buttons.OK, a => ChangePage(currentPage)), 4);
+            Add(_loadingGump = new LoadingGump(message, LoginButtons.OK, a => ChangePage(currentPage)), 4);
             ChangePage(4);
         }
 

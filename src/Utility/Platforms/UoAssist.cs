@@ -82,7 +82,7 @@ namespace ClassicUO.Utility.Platforms
 
         private class CustomWindow : IDisposable
         {
-            public enum UOAMessage
+            enum UOAMessage
             {
                 First = REGISTER,
 

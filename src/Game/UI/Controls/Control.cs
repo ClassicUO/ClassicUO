@@ -44,7 +44,7 @@ using Mouse = ClassicUO.Input.Mouse;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public enum ClickPriority
+    enum ClickPriority
     {
         High,
         Default,

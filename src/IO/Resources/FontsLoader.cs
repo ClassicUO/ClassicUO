@@ -3068,14 +3068,14 @@ namespace ClassicUO.IO.Resources
         }
     }
 
-    public enum TEXT_ALIGN_TYPE
+    enum TEXT_ALIGN_TYPE
     {
         TS_LEFT = 0,
         TS_CENTER,
         TS_RIGHT
     }
 
-    public enum HTML_TAG_TYPE
+    enum HTML_TAG_TYPE
     {
         HTT_NONE = 0,
         HTT_B,

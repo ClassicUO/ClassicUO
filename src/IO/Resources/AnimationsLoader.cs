@@ -1708,7 +1708,7 @@ namespace ClassicUO.IO.Resources
         }
     }
 
-    public enum ANIMATION_GROUPS
+    enum ANIMATION_GROUPS
     {
         AG_NONE = 0,
         AG_LOW,
@@ -1716,7 +1716,7 @@ namespace ClassicUO.IO.Resources
         AG_PEOPLE
     }
 
-    public enum ANIMATION_GROUPS_TYPE
+    enum ANIMATION_GROUPS_TYPE
     {
         MONSTER = 0,
         SEA_MONSTER,
@@ -1726,7 +1726,7 @@ namespace ClassicUO.IO.Resources
         UNKNOWN
     }
 
-    public enum HIGHT_ANIMATION_GROUP
+    enum HIGHT_ANIMATION_GROUP
     {
         HAG_WALK = 0,
         HAG_STAND,
@@ -1753,7 +1753,7 @@ namespace ClassicUO.IO.Resources
         HAG_ANIMATION_COUNT
     }
 
-    public enum PEOPLE_ANIMATION_GROUP
+    enum PEOPLE_ANIMATION_GROUP
     {
         PAG_WALK_UNARMED = 0,
         PAG_WALK_ARMED,
@@ -1793,7 +1793,7 @@ namespace ClassicUO.IO.Resources
         PAG_ANIMATION_COUNT
     }
 
-    public enum LOW_ANIMATION_GROUP
+    enum LOW_ANIMATION_GROUP
     {
         LAG_WALK = 0,
         LAG_RUN,

@@ -33,7 +33,7 @@ namespace ClassicUO.Game.Managers
 {
     internal sealed class AnchorManager
     {
-        public enum AnchorDirection
+        enum AnchorDirection
         {
             Left,
             Top,
