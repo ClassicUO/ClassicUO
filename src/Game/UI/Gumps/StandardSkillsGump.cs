@@ -420,7 +420,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _lock.MouseUp += (sender, e) =>
                 {
-                    if (IsVisible)
+                    if (IsVisible && e.Button == MouseButtonType.Left)
                     {
                         byte slock = (byte)skill.Lock;
 
@@ -476,7 +476,8 @@ namespace ClassicUO.Game.UI.Gumps
            
             protected override void OnMouseDown(int x, int y, MouseButtonType button)
             {
-                CanMove = false;
+                if (button == MouseButtonType.Left)
+                    CanMove = false;
             }
 
             protected override void OnMouseOver(int x, int y)
@@ -538,7 +539,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
             {
-                CanMove = true;
+                if (button == MouseButtonType.Left)
+                    CanMove = true;
             }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
