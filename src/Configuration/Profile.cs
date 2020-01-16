@@ -354,7 +354,7 @@ namespace ClassicUO.Configuration
 
                                 if (!SkillsGroupManager.Groups.TryGetValue(groupName, out var list) || list == null)
                                 {
-                                    list = new List<int>();
+                                    list = new HashSet<int>();
                                     SkillsGroupManager.Groups[groupName] = list;
                                 }
 
