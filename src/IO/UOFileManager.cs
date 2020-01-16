@@ -99,7 +99,7 @@ namespace ClassicUO.IO
             tasks.Add(Multi.Load());
 
             Skills = new SkillsLoader();
-            tasks.Add(Skills.Load());
+            tasks.Add(Skills.Load().ContinueWith(t => (Profession = new ProfessionLoader()).Load()));
 
             Textmaps = new TexmapsLoader();
             tasks.Add(Textmaps.Load());
@@ -115,10 +115,6 @@ namespace ClassicUO.IO
 
             Multimap = new MultiMapLoader();
             tasks.Add(Multimap.Load());
-
-            Profession = new ProfessionLoader();
-            tasks.Add(Profession.Load());
-
 
             if (!Task.WhenAll(tasks).Wait(TimeSpan.FromSeconds(10)))
             {
