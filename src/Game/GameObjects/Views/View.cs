@@ -102,21 +102,22 @@ namespace ClassicUO.Game.GameObjects
 
             if (DrawTransparent)
             {
+                int maxDist = ProfileManager.Current.CircleOfTransparencyRadius;
+
                 int x = RealScreenPosition.X;
                 int y = RealScreenPosition.Y;
                 int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
                 int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
 
-                //fx -= x;
-                //fy -= y;
-                //int dist = (int) Math.Sqrt(fx * fx + fy * fy);
+                fx -= x;
+                fy -= y;
+                int dist = (int) Math.Sqrt(fx * fx + fy * fy);
 
-                int dist = Math.Max(Math.Abs(x - fx), Math.Abs(y - fy));
-                int maxDist = ProfileManager.Current.CircleOfTransparencyRadius;
+                //int dist = Math.Max(Math.Abs(fx - x), Math.Abs(fy - y));
 
                 if (dist <= maxDist)
                 {
-                    HueVector.Z = 0.75f;
+                    HueVector.Z = 0.75f; // 1f - (dist / (float) maxDist); //  MathHelper.Lerp(1f, 0f, (dist / (float) maxDist));
 
                     batcher.DrawSprite(Texture, posX - Bounds.X, posY - Bounds.Y, IsFlipped, ref HueVector);
 

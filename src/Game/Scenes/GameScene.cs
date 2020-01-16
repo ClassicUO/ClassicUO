@@ -782,9 +782,10 @@ namespace ClassicUO.Game.Scenes
 
             if (usecircle)
             {
-                CircleOfTransparency.Draw(batcher,
-                                          (int) ((ProfileManager.Current.GameWindowSize.X / 2f) * Scale),
-                                          (int) (((ProfileManager.Current.GameWindowSize.Y - 22) / 2f) * Scale));
+                int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
+                int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
+                
+                CircleOfTransparency.Draw(batcher, fx, fy);
             }
 
             if (!_deathScreenActive)
