@@ -55,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = false;
             CanCloseWithRightClick = true;
 
-            GumpPic background = new GumpPic(0, 0, 0x085C, 0);
+            GumpPic background = new GumpPic(0, 0, 0x085C, 0) { ContainsByBounds = true };
             Add(background);
             Add(_slider = new HSliderBar(29, 16, 105, 1, item.Amount, item.Amount, HSliderBarStyle.BlueWidgetNoBar));
             _lastValue = _slider.Value;
@@ -77,6 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
             _textBox.SetText(item.Amount.ToString());
 
             _textBox.TextChanged += (sender, args) => { UpdateText(); };
+            _textBox.SetKeyboardFocus();
             _slider.ValueChanged += (sender, args) => { UpdateText(); };
         }
 

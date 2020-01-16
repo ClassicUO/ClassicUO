@@ -148,7 +148,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (page % 2 == 1)
                     page += 1;
-                page = page >> 1;
+                page >>= 1;
 
                 MultiLineBox tbox = new MultiLineBox(new MultiLineEntry(DefaultFont, MaxBookChars * MaxBookLines, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), IsEditable)
                 {
