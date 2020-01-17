@@ -70,6 +70,8 @@ namespace ClassicUO.Game.Managers
         private MacroObject _lastMacro;
         private long _nextTimer;
 
+        public static readonly string[] MacroNames = Enum.GetNames(typeof(MacroType));
+
 
         public long WaitForTargetTimer { get; set; }
 
@@ -1301,24 +1303,6 @@ namespace ClassicUO.Game.Managers
 
                     break;
 
-                case MacroType.MovePlayer:
-                    switch (macro.SubCode)
-                    {
-                        case MacroSubType.Top:
-                            break;
-
-                        case MacroSubType.Right:
-                            break;
-
-                        case MacroSubType.Down:
-                            break;
-
-                        case MacroSubType.Left:
-                            break;
-                    }
-
-                    break;
-
                 case MacroType.Aura:
                     // hold to draw
                     break;
@@ -1512,6 +1496,31 @@ namespace ClassicUO.Game.Managers
                 {
                     MacroType code = (MacroType) int.Parse(xmlAction.GetAttribute("code"));
                     MacroSubType sub = (MacroSubType) int.Parse(xmlAction.GetAttribute("subcode"));
+
+                    // ########### PATCH ###########
+                    // FIXME: path to remove the MovePlayer macro. This macro is not needed. We have Walk.
+                    if ((int) code == 61 /*MacroType.MovePlayer*/)
+                    {
+                        code = MacroType.Walk;
+
+                        switch ((int) sub)
+                        {
+                            case 211: // top
+                                sub = MacroSubType.NW;
+                                break;
+                            case 214: // left
+                                sub = MacroSubType.SW;
+                                break;
+                            case 213: // down
+                                sub = MacroSubType.SE;
+                                break;
+                            case 212: // right
+                                sub = MacroSubType.NE;
+                                break;
+                        }
+                    }
+                    // ########### END PATCH ###########
+
                     sbyte subMenuType = sbyte.Parse(xmlAction.GetAttribute("submenutype"));
 
                     MacroObject m;
@@ -1619,12 +1628,6 @@ namespace ClassicUO.Game.Managers
 
                     break;
 
-                case MacroType.MovePlayer:
-                    offset = (int) MacroSubType.Top;
-                    count = 4;
-
-                    break;
-
                 case MacroType.UsePotion:
                     offset = (int) MacroSubType.ConfusionBlastPotion;
                     count = MacroSubType.ExplosionPotion - MacroSubType.ConfusionBlastPotion;
@@ -1657,7 +1660,6 @@ namespace ClassicUO.Game.Managers
                 case MacroType.SelectNext:
                 case MacroType.SelectPrevious:
                 case MacroType.SelectNearest:
-                case MacroType.MovePlayer:
                 case MacroType.UsePotion:
 
                     if (sub == MacroSubType.MSC_NONE)
@@ -1784,8 +1786,8 @@ namespace ClassicUO.Game.Managers
         ToggleGargoyleFly,
         DefaultScale,
         ToggleChatVisibility,
-        MovePlayer,
-        Aura,
+        //MovePlayer,
+        Aura = 62,
         AuraOnOff,
         Grab,
         SetGrabBag,
@@ -1794,7 +1796,6 @@ namespace ClassicUO.Game.Managers
         UsePotion,
         CloseAllHealthBars,
         RazorMacro,
-
     }
 
     internal enum MacroSubType
@@ -2011,13 +2012,14 @@ namespace ClassicUO.Game.Managers
         Object,
         Mobile,
         MscTotalCount,
-        Top,
-        Right,
-        Down,
-        Left,
+
+        //Top,
+        //Right,
+        //Down,
+        //Left,
 
 
-        ConfusionBlastPotion,
+        ConfusionBlastPotion = 215,
         CurePotion,
         AgilityPotion,
         StrengthPotion,

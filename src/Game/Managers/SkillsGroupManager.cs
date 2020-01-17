@@ -308,18 +308,16 @@ namespace ClassicUO.Game.Managers
                         foreach (XmlElement xmlIds in xmlIdsRoot.GetElementsByTagName("skill"))
                         {
                             int id = int.Parse(xmlIds.GetAttribute("id"));
-                            bool skip = false;
+
                             foreach (KeyValuePair<string, HashSet<int>> k in Groups)
                             {
                                 if (k.Value.Contains(id))
                                 {
-                                    skip = true;
-                                    break;
+                                    k.Value.Remove(id);
                                 }
                             }
 
-                            if (!skip)
-                                list.Add(id);
+                            list.Add(id);
                         }
                     }
 

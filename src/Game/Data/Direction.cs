@@ -76,7 +76,7 @@ namespace ClassicUO.Game.Data
 
         public static Direction DirectionFromKeyboardArrows(bool upPressed, bool downPressed, bool leftPressed, bool rightPressed)
         {
-            int direction = 0;
+            int direction = (int) Direction.NONE;
 
             if (upPressed)
             {

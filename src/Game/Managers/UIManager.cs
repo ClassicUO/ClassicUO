@@ -117,22 +117,22 @@ namespace ClassicUO.Game.Managers
         {
             get
             {
-                // We are not at the game scene or no player character present
-                if (World.Player == null || !(Client.Game.Scene is GameScene gs))
-                    return false;
+                //// We are not at the game scene or no player character present
+                //if (World.Player == null || !(Client.Game.Scene is GameScene gs))
+                //    return false;
 
-                // System Chat is NOT focused (items stack amount field or macros text fields is probably focused),
-                // it means that some other text input is focused and we're going to enter some text there
-                // thus we don't expect to execute any game macro or trigger any plugin hotkeys
-                if (SystemChat?.IsFocused == false)
-                    return false;
+                //// System Chat is NOT focused (items stack amount field or macros text fields is probably focused),
+                //// it means that some other text input is focused and we're going to enter some text there
+                //// thus we don't expect to execute any game macro or trigger any plugin hotkeys
+                //if (SystemChat?.IsFocused == false)
+                //    return false;
 
-                // "Press 'Enter' to activate chat" is enabled and System Chat is active,
-                // it means that we want to enter some text into the chat,
-                // thus we don't expect to execute any game macro or trigger any plugin hotkeys
-                if (ProfileManager.Current.ActivateChatAfterEnter &&
-                    SystemChat?.IsActive == true)
-                    return false;
+                //// "Press 'Enter' to activate chat" is enabled and System Chat is active,
+                //// it means that we want to enter some text into the chat,
+                //// thus we don't expect to execute any game macro or trigger any plugin hotkeys
+                //if (ProfileManager.Current.ActivateChatAfterEnter &&
+                //    SystemChat?.IsActive == true)
+                //    return false;
 
                 // In all other cases hotkeys for macros and plugins are allowed
                 return true;
