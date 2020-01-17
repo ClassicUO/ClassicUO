@@ -42,7 +42,7 @@ namespace ClassicUO.Network
             IsDynamic = PacketsTable.GetPacketLength(ID) < 0;
         }
 
-        protected override byte this[int index]
+        public override byte this[int index]
         {
             [MethodImpl(256)]
             get

@@ -924,7 +924,15 @@ namespace ClassicUO.Game.Managers
                         //    TargetManager.TargetGameObject(TargetManager.LastGameObject);
                         //}
                         //else 
-                        TargetManager.Target(TargetManager.LastTarget);
+
+                        if (TargetManager.TargetingState != CursorTarget.Object)
+                        {
+                            TargetManager.TargetLast();
+                        }
+                        else
+                        {
+                            TargetManager.Target(TargetManager.LastTarget);
+                        }
 
                         WaitForTargetTimer = 0;
                     }

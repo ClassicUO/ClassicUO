@@ -32,7 +32,7 @@ namespace ClassicUO.Network
             this[0] = id;
         }
 
-        protected override byte this[int index]
+        public override byte this[int index]
         {
             get => _data[index];
             set

@@ -25,7 +25,7 @@ namespace ClassicUO.Network
 {
     internal abstract class PacketBase
     {
-        protected abstract byte this[int index] { get; set; }
+        public abstract byte this[int index] { get; set; }
 
         public abstract int Length { get; }
 

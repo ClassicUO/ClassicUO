@@ -76,6 +76,9 @@ namespace ClassicUO.Game.Managers
     {
         private static uint _targetCursorId;
 
+        private static byte[] _lastDataBuffer = new byte[19];
+
+
         public static MultiTargetInfo MultiTargetInfo { get; private set; }
 
         public static CursorTarget TargetingState { get; private set; } = CursorTarget.Invalid;
@@ -202,7 +205,14 @@ namespace ClassicUO.Game.Managers
                             }
                         }
 
-                        NetClient.Socket.Send(new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargeringType));
+                        var packet = new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargeringType);
+                       
+                        for (int i = 0; i < _lastDataBuffer.Length; i++)
+                        {
+                            _lastDataBuffer[i] = packet[i];
+                        }
+
+                        NetClient.Socket.Send(packet);
                         ClearTargetingWithoutTargetCancelPacket();
 
                         Mouse.CancelDoubleClick = true;
@@ -244,9 +254,7 @@ namespace ClassicUO.Game.Managers
                 z += itemData.Height;
             }
 
-            NetClient.Socket.Send(new PTargetXYZ(x, y, z, graphic, _targetCursorId, (byte) TargeringType));
-            Mouse.CancelDoubleClick = true;
-            ClearTargetingWithoutTargetCancelPacket();
+            TargetPacket(graphic, x, y, (sbyte) z);
         }
 
         public static void Target(ushort x, ushort y, short z)
@@ -254,16 +262,42 @@ namespace ClassicUO.Game.Managers
             if (!IsTargeting || TargeringType != TargetType.Neutral)
                 return;
 
-            NetClient.Socket.Send(new PTargetXYZ(x, y, z, 0, _targetCursorId, (byte) TargeringType));
-            Mouse.CancelDoubleClick = true;
-            ClearTargetingWithoutTargetCancelPacket();
+            TargetPacket(0, x, y, (sbyte) z);
         }
 
         public static void SendMultiTarget(ushort x, ushort y, sbyte z)
         {
-            NetClient.Socket.Send(new PTargetXYZ(x, y, z, 0, _targetCursorId, (byte)TargeringType));
-            Mouse.CancelDoubleClick = true;
+            TargetPacket(0, x, y, z);
             MultiTargetInfo = null;
+        }
+
+        public static void TargetLast()
+        {
+            if (!IsTargeting)
+                return;
+
+            //_lastDataBuffer[0] = 0x6C;
+            //_lastDataBuffer[1] = (byte) TargetingState;
+            //_lastDataBuffer[6] = (byte) TargeringType;
+
+            NetClient.Socket.Send(_lastDataBuffer);
+            Mouse.CancelDoubleClick = true;
+            ClearTargetingWithoutTargetCancelPacket();
+        }
+
+        private static void TargetPacket(ushort graphic, ushort x, ushort y, sbyte z)
+        {
+            if (!IsTargeting)
+                return;
+
+            var packet = new PTargetXYZ(x, y, z, graphic, _targetCursorId, (byte) TargeringType);       
+            NetClient.Socket.Send(packet);
+            for (int i = 0; i < _lastDataBuffer.Length; i++)
+            {
+                _lastDataBuffer[i] = packet[i];
+            }
+
+            Mouse.CancelDoubleClick = true;
             ClearTargetingWithoutTargetCancelPacket();
         }
     }
