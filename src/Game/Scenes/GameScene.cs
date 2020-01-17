@@ -464,7 +464,7 @@ namespace ClassicUO.Game.Scenes
             _renderListCount = 0;
             _objectHandlesCount = 0;
 
-            _useObjectHandles = NameOverHeadManager.IsToggled || (Keyboard.Ctrl && Keyboard.Shift);
+            _useObjectHandles = NameOverHeadManager.IsToggled || _ctrlAndShiftPressed;
 
             if (_useObjectHandles)
                 NameOverHeadManager.Open();
@@ -581,18 +581,15 @@ namespace ClassicUO.Game.Scenes
             World.Update(totalMS, frameMS);
             Pathfinder.ProcessAutoWalk();
             DelayedObjectClickManager.Update();
-            
-            if (!MoveCharacterByMouseInput() && !ProfileManager.Current.DisableArrowBtn)
-            {
-                Direction dir = DirectionHelper.DirectionFromKeyboardArrows(_flags[0],
-                                                                            _flags[2],
-                                                                            _flags[1],
-                                                                            _flags[3]);
 
-                if (World.InGame && !Pathfinder.AutoWalking && dir != Direction.NONE)
-                {
-                    World.Player.Walk(dir, ProfileManager.Current.AlwaysRun);
-                }
+            if (_rightMousePressed || _continueRunning)
+                MoveCharacterByMouseInput();
+            else if (!ProfileManager.Current.DisableArrowBtn || _isMacroMoveDown)
+            {
+                if (_arrowKeyPressed)
+                    MoveCharacterByKeyboardInput(false);
+                else if (_numPadKeyPressed)
+                    MoveCharacterByKeyboardInput(true);
             }
 
             if (_followingMode && SerialHelper.IsMobile(_followingTarget) && !Pathfinder.AutoWalking)

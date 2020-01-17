@@ -67,12 +67,15 @@ namespace ClassicUO.Game.Scenes
         };
         private bool _followingMode;
         private uint _followingTarget;
+        private bool _isCtrlDown;
         private bool _isSelectionActive;
 
+        private bool _isShiftDown;
+        private bool _isUpDown, _isDownDown, _isLeftDown, _isRightDown, _isMacroMoveDown, _isAuraActive;
         public Direction _numPadDirection;
 
         private bool _requestedWarMode;
-        private bool _rightMousePressed, _continueRunning, _numPadKeyPressed;
+        private bool _rightMousePressed, _continueRunning, _ctrlAndShiftPressed, _arrowKeyPressed, _numPadKeyPressed;
         private (int, int) _selectionStart, _selectionEnd;
         private uint _holdMouse2secOverItemTime;
         private bool _isMouseLeftDown;
@@ -83,9 +86,9 @@ namespace ClassicUO.Game.Scenes
         private Direction _lastBoatDirection;
         private bool _boatRun, _boatIsMoving;
 
-        private bool MoveCharacterByMouseInput()
+        private void MoveCharacterByMouseInput()
         {
-            if ((_rightMousePressed || _continueRunning) && World.InGame && !Pathfinder.AutoWalking)
+            if (World.InGame && !Pathfinder.AutoWalking)
             {
                 int x = ProfileManager.Current.GameWindowPosition.X + (ProfileManager.Current.GameWindowSize.X >> 1);
                 int y = ProfileManager.Current.GameWindowPosition.Y + (ProfileManager.Current.GameWindowSize.Y >> 1);
@@ -113,13 +116,21 @@ namespace ClassicUO.Game.Scenes
                 }
                 else
                     World.Player.Walk(facing - 1, run);
-
-                return true;
             }
-
-            return false;
         }
-        
+
+        private void MoveCharacterByKeyboardInput(bool numPadMovement)
+        {
+            if (World.InGame && !Pathfinder.AutoWalking)
+            {
+                Direction direction = DirectionHelper.DirectionFromKeyboardArrows(_isUpDown, _isDownDown, _isLeftDown, _isRightDown);
+
+                if (numPadMovement) direction = _numPadDirection;
+
+                World.Player.Walk(direction, false);
+            }
+        }
+
         private bool CanDragSelectOnObject(GameObject obj)
         {
             return obj is null || obj is Static || obj is Land || obj is Multi || obj is Item tmpitem && tmpitem.IsLocked;
@@ -149,10 +160,10 @@ namespace ClassicUO.Game.Scenes
             if (ProfileManager.Current.DragSelectModifierKey == 0)
                 return true;
 
-            if (ProfileManager.Current.DragSelectModifierKey == 1 && Keyboard.Shift)
+            if (ProfileManager.Current.DragSelectModifierKey == 1 && _isCtrlDown)
                 return true;
 
-            if (ProfileManager.Current.DragSelectModifierKey == 2 && Keyboard.Shift)
+            if (ProfileManager.Current.DragSelectModifierKey == 2 && _isShiftDown)
                 return true;
 
             return false;
@@ -601,7 +612,7 @@ namespace ClassicUO.Game.Scenes
 
             if (ProfileManager.Current.EnablePathfind && !Pathfinder.AutoWalking)
             {
-                if (ProfileManager.Current.UseShiftToPathfind && !Keyboard.Shift)
+                if (ProfileManager.Current.UseShiftToPathfind && !_isShiftDown)
                     return false;
 
                 if (SelectedObject.Object is GameObject obj)
@@ -710,48 +721,45 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private readonly bool[] _flags = new bool[4];
 
-        public void PushFlag(Direction dir)
-        {
-            if (dir == Direction.Up)
-            {
-                _flags[0] = true;
-            }
-            else if (dir == Direction.Left)
-            {
-                _flags[1] = true;
-            }
-            else if (dir == Direction.Right)
-            {
-                _flags[3] = true;
-            }
-            else if (dir == Direction.Down)
-            {
-                _flags[2] = true;
-            }
-        }
 
         internal override void OnKeyDown(SDL.SDL_KeyboardEvent e)
         {
-            if (UIManager.KeyboardFocusControl != UIManager.SystemChat.textBox)
+            bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+
+            Macro macro = Macros.FindMacro(e.keysym.sym, isalt, isctrl, isshift);
+
+            _isShiftDown = Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT);
+            _isCtrlDown = Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_CTRL);
+
+            _isMacroMoveDown = _isMacroMoveDown || macro != null && macro.FirstNode.Code == MacroType.MovePlayer;
+            _isAuraActive = _isAuraActive || macro != null && macro.FirstNode.Code == MacroType.Aura;
+            _isUpDown = _isUpDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_UP || macro != null && macro.FirstNode.SubCode == MacroSubType.Top;
+            _isDownDown = _isDownDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_DOWN || macro != null && macro.FirstNode.SubCode == MacroSubType.Down;
+            _isLeftDown = _isLeftDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_LEFT || macro != null && macro.FirstNode.SubCode == MacroSubType.Left;
+            _isRightDown = _isRightDown || e.keysym.sym == SDL.SDL_Keycode.SDLK_RIGHT || macro != null && macro.FirstNode.SubCode == MacroSubType.Right;
+
+            if (_isUpDown || _isDownDown || _isLeftDown || _isRightDown)
             {
+                if (UIManager.KeyboardFocusControl == null || UIManager.KeyboardFocusControl is AbstractTextBox textbox && (
+                    !textbox.IsVisible || 
+                    !textbox.IsEnabled || 
+                    !textbox.IsEditable || 
+                    string.IsNullOrEmpty(textbox.Text)))
+
+                    _arrowKeyPressed = true;
+            }
+
+            if (_isAuraActive && !AuraManager.IsEnabled)
+                AuraManager.ToggleVisibility();
+
+            if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
+                TargetManager.CancelTarget();
+
+            if (!UIManager.IsKeyboardFocusAllowHotkeys)
                 return;
-            }
-
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE)
-            {
-                if (TargetManager.IsTargeting && Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
-                {
-                    TargetManager.CancelTarget();
-                    return;
-                }
-            }
-
-           
-
-            //if (!UIManager.IsKeyboardFocusAllowHotkeys)
-            //    return;
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !ProfileManager.Current.DisableTabBtn)
             {
@@ -775,79 +783,96 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
+            _ctrlAndShiftPressed = isshift && isctrl;
 
-            //bool canExecuteMacro = UIManager.KeyboardFocusControl == null || (UIManager.KeyboardFocusControl is AbstractTextBox textbox && (
-            //                                                                                                                                  !textbox.IsVisible ||
-            //                                                                                                                                  !textbox.IsEnabled ||
-            //                                                                                                                                  !textbox.IsEditable 
-            //                                                                                                                                  /*string.IsNullOrEmpty(textbox.Text)*/));
-
-            bool canExecuteMacro = UIManager.KeyboardFocusControl == UIManager.SystemChat.textBox &&
-                                   UIManager.SystemChat.Mode >= ChatMode.Default;
-
-
-            if (canExecuteMacro)
+            if (macro != null && e.keysym.sym != SDL.SDL_Keycode.SDLK_UNKNOWN)
             {
-                Macro macro = Macros.FindMacro(e.keysym.sym, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
-
-                if (macro != null && e.keysym.sym != SDL.SDL_Keycode.SDLK_UNKNOWN)
-                {
-                    Macros.SetMacroToExecute(macro.FirstNode);
-                    Macros.WaitingBandageTarget = false;
-                    Macros.WaitForTargetTimer = 0;
-                    Macros.Update();
-                }
-                else
-                {
-                    switch (e.keysym.sym)
-                    {
-                        case SDL.SDL_Keycode.SDLK_UP:
-                            _flags[0] = true;
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_LEFT:
-                            _flags[1] = true;
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_DOWN:
-                            _flags[2] = true;
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_RIGHT:
-                            _flags[3] = true;
-                            break;
-                    }
-                }
+                Macros.SetMacroToExecute(macro.FirstNode);
+                Macros.WaitForTargetTimer = 0;
+                Macros.Update();
             }
         }
 
 
+
+
         internal override void OnKeyUp(SDL.SDL_KeyboardEvent e)
         {
-            if (ProfileManager.Current.EnableScaleZoom && ProfileManager.Current.RestoreScaleAfterUnpressCtrl && Keyboard.Ctrl && !Keyboard.Ctrl)
+            bool isshift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool isalt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
+            bool isctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+
+            if (ProfileManager.Current.EnableScaleZoom && ProfileManager.Current.RestoreScaleAfterUnpressCtrl && _isCtrlDown && !isctrl)
                 Scale = ProfileManager.Current.RestoreScaleValue;
+
+            _isShiftDown = isshift;
+            _isCtrlDown = isctrl;
 
             switch (e.keysym.sym)
             {
                 case SDL.SDL_Keycode.SDLK_UP:
-                    _flags[0] = false;
-                    break;
+                    _isUpDown = false;
 
-                case SDL.SDL_Keycode.SDLK_LEFT:
-                    _flags[1] = false;
                     break;
 
                 case SDL.SDL_Keycode.SDLK_DOWN:
-                    _flags[2] = false;
+                    _isDownDown = false;
+
+                    break;
+
+                case SDL.SDL_Keycode.SDLK_LEFT:
+                    _isLeftDown = false;
+
                     break;
 
                 case SDL.SDL_Keycode.SDLK_RIGHT:
-                    _flags[3] = false;
+                    _isRightDown = false;
+
                     break;
             }
 
-            if ((e.keysym.mod & SDL.SDL_Keymod.KMOD_NUM) != SDL.SDL_Keymod.KMOD_NUM) 
-                _numPadKeyPressed = false;
+            if (_isAuraActive)
+            {
+                _isAuraActive = false;
+                AuraManager.ToggleVisibility();
+            }
+
+            if (_isMacroMoveDown)
+            {
+                Macro macro = Macros.FindMacro(e.keysym.sym, isalt, isctrl, isshift);
+
+                if (macro != null)
+                {
+                    switch (macro.FirstNode.SubCode)
+                    {
+                        case MacroSubType.Top:
+                            _isUpDown = false;
+
+                            break;
+
+                        case MacroSubType.Down:
+                            _isDownDown = false;
+
+                            break;
+
+                        case MacroSubType.Left:
+                            _isLeftDown = false;
+
+                            break;
+
+                        case MacroSubType.Right:
+                            _isRightDown = false;
+
+                            break;
+                    }
+                }
+            }
+
+            if (!(_isUpDown || _isDownDown || _isLeftDown || _isRightDown)) _isMacroMoveDown = _arrowKeyPressed = false;
+
+            if ((e.keysym.mod & SDL.SDL_Keymod.KMOD_NUM) != SDL.SDL_Keymod.KMOD_NUM) _numPadKeyPressed = false;
+
+            _ctrlAndShiftPressed = isctrl && isshift;
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !ProfileManager.Current.DisableTabBtn)
             {
