@@ -71,7 +71,7 @@ namespace ClassicUO.Game.Scenes
         private Weather _weather;
 
 
-        public GameScene() : base( (int) SceneID.Game,
+        public GameScene() : base((int) SceneID.Game,
             true,
             !ProfileManager.Current.RestoreLastGameSize,
             true)
@@ -116,7 +116,7 @@ namespace ClassicUO.Game.Scenes
 
         public bool UseLights => ProfileManager.Current != null && ProfileManager.Current.UseCustomLightLevel ? World.Light.Personal < World.Light.Overall : World.Light.RealPersonal < World.Light.RealOverall;
         public bool UseAltLights => ProfileManager.Current != null && ProfileManager.Current.UseAlternativeLights;
-       
+
         public void DoubleClickDelayed(uint serial)
         {
             _useItemQueue.Add(serial);
@@ -286,7 +286,7 @@ namespace ClassicUO.Game.Scenes
                     name = e.Name;
                     hue = e.Hue;
 
-                    Log.Warn( $"Unhandled text type {e.Type}  -  text: '{e.Text}'");
+                    Log.Warn($"Unhandled text type {e.Type}  -  text: '{e.Text}'");
 
                     break;
             }
@@ -322,7 +322,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Disconnect();
             _viewportRenderTarget?.Dispose();
             _lightRenderTarget?.Dispose();
-            
+
             CommandManager.UnRegisterAll();
             _weather.Reset();
 
@@ -330,7 +330,7 @@ namespace ClassicUO.Game.Scenes
             World.Clear();
             UOChatManager.Clear();
             DelayedObjectClickManager.Clear();
-          
+
             _useItemQueue?.Clear();
             _useItemQueue = null;
             Hotkeys = null;
@@ -428,7 +428,7 @@ namespace ClassicUO.Game.Scenes
                     }
                     //else if (GameObjectHelper.TryGetStaticData(lightObject, out StaticTiles data))
                     //    light.ID = data.Layer;
-                   
+
                     //else
                     //    return;
                 }
@@ -464,7 +464,7 @@ namespace ClassicUO.Game.Scenes
             _renderListCount = 0;
             _objectHandlesCount = 0;
 
-            _useObjectHandles = NameOverHeadManager.IsToggled || _ctrlAndShiftPressed;
+            _useObjectHandles = NameOverHeadManager.IsToggled || (Keyboard.Ctrl && Keyboard.Shift);
 
             if (_useObjectHandles)
                 NameOverHeadManager.Open();
@@ -535,7 +535,7 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
             }
-                
+
 
             UpdateTextServerEntities(World.Mobiles);
             UpdateTextServerEntities(World.Items);
@@ -554,7 +554,7 @@ namespace ClassicUO.Game.Scenes
                 if (e.UseInRender != _renderIndex && e.TextContainer != null)
                 {
                     e.UpdateRealScreenPosition(_offset.X, _offset.Y);
-                    e.UseInRender = (byte)_renderIndex;
+                    e.UseInRender = (byte) _renderIndex;
                 }
             }
         }
@@ -577,19 +577,22 @@ namespace ClassicUO.Game.Scenes
             if (!World.InGame)
                 return;
 
-            
+
             World.Update(totalMS, frameMS);
             Pathfinder.ProcessAutoWalk();
             DelayedObjectClickManager.Update();
 
-            if (_rightMousePressed || _continueRunning)
-                MoveCharacterByMouseInput();
-            else if (!ProfileManager.Current.DisableArrowBtn || _isMacroMoveDown)
+            if (!MoveCharacterByMouseInput() && !ProfileManager.Current.DisableArrowBtn)
             {
-                if (_arrowKeyPressed)
-                    MoveCharacterByKeyboardInput(false);
-                else if (_numPadKeyPressed)
-                    MoveCharacterByKeyboardInput(true);
+                Direction dir = DirectionHelper.DirectionFromKeyboardArrows(_flags[0],
+                                                                            _flags[2],
+                                                                            _flags[1],
+                                                                            _flags[3]);
+
+                if (World.InGame && !Pathfinder.AutoWalking && dir != Direction.NONE)
+                {
+                    World.Player.Walk(dir, ProfileManager.Current.AlwaysRun);
+                }
             }
 
             if (_followingMode && SerialHelper.IsMobile(_followingTarget) && !Pathfinder.AutoWalking)
@@ -699,14 +702,14 @@ namespace ClassicUO.Game.Scenes
 
             if (_isMouseLeftDown && !IsHoldingItem)
             {
-                if (World.CustomHouseManager != null && 
-                    World.CustomHouseManager.SelectedGraphic != 0 && 
-                    !World.CustomHouseManager.SeekTile && 
+                if (World.CustomHouseManager != null &&
+                    World.CustomHouseManager.SelectedGraphic != 0 &&
+                    !World.CustomHouseManager.SeekTile &&
                     !World.CustomHouseManager.Erasing &&
                     Time.Ticks > _timeToPlaceMultiInHouseCustomization)
                 {
-                    if (SelectedObject.LastObject is GameObject obj && 
-                        (obj.X != _lastSelectedMultiPositionInHouseCustomization.X || 
+                    if (SelectedObject.LastObject is GameObject obj &&
+                        (obj.X != _lastSelectedMultiPositionInHouseCustomization.X ||
                          obj.Y != _lastSelectedMultiPositionInHouseCustomization.Y))
                     {
                         World.CustomHouseManager.OnTargetWorld(obj);
@@ -774,7 +777,7 @@ namespace ClassicUO.Game.Scenes
             batcher.GraphicsDevice.Clear(Color.Black);
             batcher.GraphicsDevice.SetRenderTarget(_viewportRenderTarget);
 
-            
+
 
             batcher.SetBrightlight(ProfileManager.Current.Brighlight);
 
@@ -787,7 +790,7 @@ namespace ClassicUO.Game.Scenes
 
                 fx += 22;
                 //fy -= 22;
-                
+
                 CircleOfTransparency.Draw(batcher, fx, fy);
             }
 
@@ -819,7 +822,7 @@ namespace ClassicUO.Game.Scenes
             _weather.Draw(batcher, 0, 0 /*ProfileManager.Current.GameWindowPosition.X, ProfileManager.Current.GameWindowPosition.Y*/);
             batcher.End();
 
-            DrawLights(batcher);          
+            DrawLights(batcher);
 
             batcher.GraphicsDevice.SetRenderTarget(null);
         }
@@ -849,7 +852,7 @@ namespace ClassicUO.Game.Scenes
                 batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
                 batcher.GraphicsDevice.Clear(ClearOptions.Target, _vectorClear, 0, 0);
             }
-            
+
             batcher.Begin();
             batcher.SetBlendState(BlendState.Additive);
 

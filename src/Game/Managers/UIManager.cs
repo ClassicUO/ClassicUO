@@ -44,8 +44,8 @@ namespace ClassicUO.Game.Managers
 {
     internal static class UIManager
     {
-        private static readonly TextFileParser _parser = new TextFileParser(string.Empty, new[] {' '}, new char[] { }, new[] {'{', '}'});
-        private static readonly TextFileParser _cmdparser = new TextFileParser(string.Empty, new[] {' '}, new char[] { }, new char[] { });
+        private static readonly TextFileParser _parser = new TextFileParser(string.Empty, new[] { ' ' }, new char[] { }, new[] { '{', '}' });
+        private static readonly TextFileParser _cmdparser = new TextFileParser(string.Empty, new[] { ' ' }, new char[] { }, new char[] { });
         private static readonly Dictionary<uint, Point> _gumpPositionCache = new Dictionary<uint, Point>();
         private static readonly Control[] _mouseDownControls = new Control[5];
 
@@ -53,11 +53,11 @@ namespace ClassicUO.Game.Managers
         private static readonly Dictionary<uint, TargetLineGump> _targetLineGumps = new Dictionary<uint, TargetLineGump>();
         private static int _dragOriginX, _dragOriginY;
         private static bool _isDraggingControl;
-        private static Control _keyboardFocusControl,  _validForDClick;
+        private static Control _keyboardFocusControl, _validForDClick;
         private static bool _needSort;
 
 
-      
+
         public static float ContainerScale { get; set; } = 1f;
 
         public static AnchorManager AnchorManager { get; } = new AnchorManager();
@@ -117,22 +117,22 @@ namespace ClassicUO.Game.Managers
         {
             get
             {
-                // We are not at the game scene or no player character present
-                if (World.Player == null || !(Client.Game.Scene is GameScene gs))
-                    return false;
+                //// We are not at the game scene or no player character present
+                //if (World.Player == null || !(Client.Game.Scene is GameScene gs))
+                //    return false;
 
-                // System Chat is NOT focused (items stack amount field or macros text fields is probably focused),
-                // it means that some other text input is focused and we're going to enter some text there
-                // thus we don't expect to execute any game macro or trigger any plugin hotkeys
-                if (SystemChat?.IsFocused == false)
-                    return false;
+                //// System Chat is NOT focused (items stack amount field or macros text fields is probably focused),
+                //// it means that some other text input is focused and we're going to enter some text there
+                //// thus we don't expect to execute any game macro or trigger any plugin hotkeys
+                //if (SystemChat?.IsFocused == false)
+                //    return false;
 
-                // "Press 'Enter' to activate chat" is enabled and System Chat is active,
-                // it means that we want to enter some text into the chat,
-                // thus we don't expect to execute any game macro or trigger any plugin hotkeys
-                if (ProfileManager.Current.ActivateChatAfterEnter &&
-                    SystemChat?.IsActive == true)
-                    return false;
+                //// "Press 'Enter' to activate chat" is enabled and System Chat is active,
+                //// it means that we want to enter some text into the chat,
+                //// thus we don't expect to execute any game macro or trigger any plugin hotkeys
+                //if (ProfileManager.Current.ActivateChatAfterEnter &&
+                //    SystemChat?.IsActive == true)
+                //    return false;
 
                 // In all other cases hotkeys for macros and plugins are allowed
                 return true;
@@ -337,7 +337,8 @@ namespace ClassicUO.Game.Managers
 
         public static void CloseIfClickOutGumps()
         {
-            foreach (Gump gump in Gumps.OfType<Gump>().Where(s => s.CloseIfClickOutside)) gump.Dispose();
+            foreach (Gump gump in Gumps.OfType<Gump>().Where(s => s.CloseIfClickOutside))
+                gump.Dispose();
         }
 
         public static void SavePosition(uint serverSerial, Point point)
@@ -380,7 +381,8 @@ namespace ClassicUO.Game.Managers
             {
                 List<string> gparams = _cmdparser.GetTokens(cmdlist[cnt], false);
 
-                if (gparams.Count == 0) continue;
+                if (gparams.Count == 0)
+                    continue;
 
                 switch (gparams[0].ToLower())
                 {
@@ -462,8 +464,10 @@ namespace ClassicUO.Game.Managers
                                     lvl = "Knight of ";
                                     break;
                                 case 2406:
-                                    if (pic.Graphic == 0x6F) lvl = "Seeker of ";
-                                    else lvl = "Knight of ";
+                                    if (pic.Graphic == 0x6F)
+                                        lvl = "Seeker of ";
+                                    else
+                                        lvl = "Knight of ";
                                     break;
                                 default:
                                     lvl = "";
@@ -584,7 +588,7 @@ namespace ClassicUO.Game.Managers
                             textBox.SetKeyboardFocus();
                             textBoxFocused = true;
                         }
-                      
+
                         gump.Add(textBox, page);
 
                         break;
@@ -641,7 +645,7 @@ namespace ClassicUO.Game.Managers
                                 if (args.Length > 1)
                                     cliloc = UOFileManager.Cliloc.Translate(cliloc, args);
                                 else
-                                    Log.Error( $"String '{args}' too short, something wrong with gump tooltip: {cliloc}");
+                                    Log.Error($"String '{args}' too short, something wrong with gump tooltip: {cliloc}");
                             }
 
                             gump.Children.Last()?.SetTooltip(cliloc);
@@ -667,7 +671,7 @@ namespace ClassicUO.Game.Managers
                         break;
 
                     case "mastergump":
-                        Log.Warn( "Gump part 'mastergump' not handled.");
+                        Log.Warn("Gump part 'mastergump' not handled.");
 
                         break;
                 }
@@ -847,7 +851,7 @@ namespace ClassicUO.Game.Managers
                 _needSort = true;
             }
         }
-        
+
         public static void Clear()
         {
             foreach (Control s in Gumps)
@@ -1059,7 +1063,7 @@ namespace ClassicUO.Game.Managers
         {
             if (_isDraggingControl || (Client.Game.Scene is GameScene gs && gs.IsHoldingItem))
                 return;
-       
+
             Control dragTarget = control;
 
             if (!dragTarget.CanMove)

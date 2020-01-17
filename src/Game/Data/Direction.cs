@@ -51,7 +51,8 @@ namespace ClassicUO.Game.Data
         public static Direction DirectionFromVectors(Vector2 fromPosition, Vector2 toPosition)
         {
             double Angle = Math.Atan2(toPosition.Y - fromPosition.Y, toPosition.X - fromPosition.X);
-            if (Angle < 0) Angle = Math.PI + (Math.PI + Angle);
+            if (Angle < 0)
+                Angle = Math.PI + (Math.PI + Angle);
             double piPerSegment = Math.PI * 2f / 8f;
             double segmentValue = Math.PI * 2f / 16f;
             int direction = int.MaxValue;
@@ -68,7 +69,8 @@ namespace ClassicUO.Game.Data
                 segmentValue += piPerSegment;
             }
 
-            if (direction == int.MaxValue) direction = 0;
+            if (direction == int.MaxValue)
+                direction = 0;
             direction = direction >= 7 ? direction - 7 : direction + 1;
 
             return (Direction) direction;
@@ -76,7 +78,7 @@ namespace ClassicUO.Game.Data
 
         public static Direction DirectionFromKeyboardArrows(bool upPressed, bool downPressed, bool leftPressed, bool rightPressed)
         {
-            int direction = 0;
+            int direction = (int) Direction.NONE;
 
             if (upPressed)
             {
@@ -98,7 +100,8 @@ namespace ClassicUO.Game.Data
             }
             else if (leftPressed)
                 direction = 5;
-            else if (rightPressed) direction = 1;
+            else if (rightPressed)
+                direction = 1;
 
             return (Direction) direction;
         }

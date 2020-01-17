@@ -63,7 +63,7 @@ namespace ClassicUO.Game.Scenes
 
             if (!amount.HasValue && item.Amount > 1 && item.ItemData.IsStackable)
             {
-                if (ProfileManager.Current.HoldShiftToSplitStack == _isShiftDown)
+                if (ProfileManager.Current.HoldShiftToSplitStack == Keyboard.Shift)
                 {
                     if (UIManager.GetGump<SplitMenuGump>(item) != null)
                         return false;
@@ -85,7 +85,8 @@ namespace ClassicUO.Game.Scenes
 
         private bool PickupItemDirectly(Item item, int x, int y, int amount, Point? offset)
         {
-            if (World.Player.IsDead || HeldItem.Enabled || item == null || item.IsDestroyed /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/) return false;
+            if (World.Player.IsDead || HeldItem.Enabled || item == null || item.IsDestroyed /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/)
+                return false;
 
             HeldItem.Clear();
             HeldItem.Set(item, amount <= 0 ? item.Amount : (ushort) amount);
@@ -97,7 +98,8 @@ namespace ClassicUO.Game.Scenes
                 //item.Container = Serial.INVALID;
                 //entity.Items.Remove(item);
 
-                if (entity.HasEquipment) entity.Equipment[(int) item.Layer] = null;
+                if (entity.HasEquipment)
+                    entity.Equipment[(int) item.Layer] = null;
 
                 //entity.Items.ProcessDelta();
             }
@@ -165,10 +167,10 @@ namespace ClassicUO.Game.Scenes
                     ArtTexture texture = UOFileManager.Art.GetTexture(HeldItem.DisplayedGraphic);
                     float scale = UIManager.ContainerScale;
 
-                    bounds.X = (int)(bounds.X * scale);
-                    bounds.Y = (int)(bounds.Y * scale);
+                    bounds.X = (int) (bounds.X * scale);
+                    bounds.Y = (int) (bounds.Y * scale);
                     bounds.Width = (int) (bounds.Width * scale);
-                    bounds.Height = (int)(bounds.Height * scale);
+                    bounds.Height = (int) (bounds.Height * scale);
 
                     if (texture != null && !texture.IsDisposed)
                     {
@@ -176,8 +178,8 @@ namespace ClassicUO.Game.Scenes
 
                         if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
                         {
-                            textureW = (int)(texture.Width * scale);
-                            textureH = (int)(texture.Height * scale);
+                            textureW = (int) (texture.Width * scale);
+                            textureH = (int) (texture.Height * scale);
                         }
                         else
                         {
@@ -201,8 +203,8 @@ namespace ClassicUO.Game.Scenes
                     if (y < bounds.Y)
                         y = bounds.Y;
 
-                    x = (int)(x / scale);
-                    y = (int)(y / scale);
+                    x = (int) (x / scale);
+                    y = (int) (y / scale);
                 }
                 else
                 {
