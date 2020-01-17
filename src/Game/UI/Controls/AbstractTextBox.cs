@@ -31,6 +31,7 @@ namespace ClassicUO.Game.UI.Controls
         public int MaxCharCount { get; set; }
         public bool Unicode { get; protected set; }
         public byte Font { get; protected set; }
+        public string Text => EntryValue?.Text;
         public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)

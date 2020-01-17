@@ -128,7 +128,7 @@ namespace ClassicUO.Game.UI.Gumps
             get => _isActive;
             set
             {
-                _isActive = textBox.IsEditable = value;
+                _isActive = textBox.IsVisible = textBox.IsEditable = value;
 
                 if (_isActive)
                 {

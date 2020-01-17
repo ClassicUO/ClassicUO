@@ -65,20 +65,14 @@ namespace ClassicUO.Game.Scenes
             {SDL.SDL_Keycode.SDLK_KP_7, Direction.West},
             {SDL.SDL_Keycode.SDLK_KP_1, Direction.South}
         };
-        private double _dequeueAt;
-
         private bool _followingMode;
         private uint _followingTarget;
-        //private bool _inqueue;
         private bool _isCtrlDown;
         private bool _isSelectionActive;
 
         private bool _isShiftDown;
         private bool _isUpDown, _isDownDown, _isLeftDown, _isRightDown, _isMacroMoveDown, _isAuraActive;
         public Direction _numPadDirection;
-        //private Action _queuedAction;
-        //private Entity _queuedObject;
-        private bool _wasShiftDown;
 
         private bool _requestedWarMode;
         private bool _rightMousePressed, _continueRunning, _ctrlAndShiftPressed, _arrowKeyPressed, _numPadKeyPressed;
@@ -749,7 +743,12 @@ namespace ClassicUO.Game.Scenes
 
             if (_isUpDown || _isDownDown || _isLeftDown || _isRightDown)
             {
-                if (UIManager.SystemChat?.IsActive == false || UIManager.SystemChat?.textBox.Text.Length == 0)
+                if (UIManager.KeyboardFocusControl is AbstractTextBox textbox && (
+                    !textbox.IsVisible || 
+                    !textbox.IsEnabled || 
+                    !textbox.IsEditable || 
+                    string.IsNullOrEmpty(textbox.Text)))
+
                     _arrowKeyPressed = true;
             }
 
