@@ -784,6 +784,9 @@ namespace ClassicUO.Game.Scenes
             {
                 int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
                 int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
+
+                fx += 22;
+                //fy -= 22;
                 
                 CircleOfTransparency.Draw(batcher, fx, fy);
             }
