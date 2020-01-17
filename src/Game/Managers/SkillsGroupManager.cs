@@ -293,6 +293,8 @@ namespace ClassicUO.Game.Managers
 
             XmlElement root = doc["skillsgroups"];
 
+            bool[] done = new bool[UOFileManager.Skills.SkillsCount];
+
             if (root != null)
             {
                 foreach (XmlElement xml in root.GetElementsByTagName("group"))
@@ -317,12 +319,36 @@ namespace ClassicUO.Game.Managers
                                 }
                             }
 
+                            if (id >= 0 && id < done.Length)
+                                done[id] = true;
+                            else
+                            {
+                                Log.Warn("Strange skill id: " + id);
+                            }
+
                             list.Add(id);
                         }
                     }
 
                     Groups[name] = list;
                 }
+            }
+
+            bool load = true;
+            for (int i = 0; i < done.Length; i++)
+            {
+                if (done[i])
+                {
+                    load = false;
+                }
+                else
+                {
+                }
+            }
+
+            if (load)
+            {
+                LoadDefault();
             }
         }
 
