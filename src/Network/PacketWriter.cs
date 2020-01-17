@@ -38,7 +38,7 @@ namespace ClassicUO.Network
 
             for (int i = 0; i < data.Length; i++)
             {
-                this[i] = data[i];
+                _data[i] = data[i];
             }
         }
 
