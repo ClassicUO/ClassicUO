@@ -122,6 +122,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
         private Checkbox _holdShiftForContext, _holdShiftToSplitStack, _reduceFPSWhenInactive, _sallosEasyGrab, _partyInviteGump, _objectsFading, _holdAltToMoveGumps;
         private Checkbox _showHouseContent;
+        private Combobox _cotType;
 
         //VendorGump Size Option
         private ArrowNumbersTextBox _vendorGumpSize;
@@ -318,10 +319,20 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 20,
                 IsChecked = ProfileManager.Current.UseCircleOfTransparency
             };
-            _useCircleOfTransparency.ValueChanged += (sender, e) => { _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked; };
             item.Add(_useCircleOfTransparency);
             _circleOfTranspRadius = new HSliderBar(210, _useCircleOfTransparency.Y + 5, 200, Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS, Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS, ProfileManager.Current.CircleOfTransparencyRadius, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             item.Add(_circleOfTranspRadius);
+
+            int cottypeindex = ProfileManager.Current.CircleOfTransparencyType;
+            var cotTypes = new[] { "Full transparency", "Gradient transparency" };
+
+            if (cottypeindex < 0 || cottypeindex > cotTypes.Length)
+                cottypeindex = 0;
+
+            _cotType = new Combobox(20, 40, 150, cotTypes, cottypeindex, emptyString: cotTypes[cottypeindex]);
+            item.Add(_cotType);
+            _useCircleOfTransparency.ValueChanged += (sender, e) => { _cotType.IsVisible = _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked; };
+
             rightArea.Add(item);
 
 
@@ -1428,6 +1439,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _hideVegetation.IsChecked = false;
                     _noColorOutOfRangeObjects.IsChecked = false;
                     _circleOfTranspRadius.Value = Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS;
+                    _cotType.SelectedIndex = 0;
                     _useCircleOfTransparency.IsChecked = false;
                     _healtbarType.SelectedIndex = 0;
                     _fieldsType.SelectedIndex = 0;
@@ -1663,6 +1675,8 @@ namespace ClassicUO.Game.UI.Gumps
                 ProfileManager.Current.CircleOfTransparencyRadius = _circleOfTranspRadius.Value;
                 CircleOfTransparency.Create(ProfileManager.Current.CircleOfTransparencyRadius);
             }
+
+            ProfileManager.Current.CircleOfTransparencyType = _cotType.SelectedIndex;
 
             ProfileManager.Current.VendorGumpHeight = (int) _vendorGumpSize.Tag;
             ProfileManager.Current.StandardSkillsGump = _useStandardSkillsGump.IsChecked;

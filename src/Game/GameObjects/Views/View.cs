@@ -115,7 +115,16 @@ namespace ClassicUO.Game.GameObjects
 
                 if (dist <= maxDist)
                 {
-                    HueVector.Z = 0.75f; //                    MathHelper.Lerp(1f, 0f, (dist / (float) maxDist));
+                    switch (ProfileManager.Current.CircleOfTransparencyType)
+                    {
+                        default:
+                        case 0:
+                            HueVector.Z = 0.75f;
+                            break;
+                        case 1:
+                            HueVector.Z = MathHelper.Lerp(1f, 0f, (dist / (float) maxDist));
+                            break;
+                    }
 
                     batcher.DrawSprite(Texture, posX - Bounds.X, posY - Bounds.Y, IsFlipped, ref HueVector);
 

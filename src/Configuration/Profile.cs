@@ -116,6 +116,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool NoColorObjectsOutOfRange { get; set; }
         [JsonProperty] public bool UseCircleOfTransparency { get; set; }
         [JsonProperty] public int CircleOfTransparencyRadius { get; set; } = Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS / 2;
+        [JsonProperty] public int CircleOfTransparencyType { get; set; } // 0 = normal, 1 = like original client
         [JsonProperty] public int VendorGumpHeight { get; set; } = 60; //original vendor gump size
         [JsonProperty] public float ScaleZoom { get; set; } = 1.0f;
         [JsonProperty] public float RestoreScaleValue { get; set; } = 1.0f;
