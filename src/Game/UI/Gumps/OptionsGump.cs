@@ -323,15 +323,23 @@ namespace ClassicUO.Game.UI.Gumps
             _circleOfTranspRadius = new HSliderBar(210, _useCircleOfTransparency.Y + 5, 200, Constants.MIN_CIRCLE_OF_TRANSPARENCY_RADIUS, Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS, ProfileManager.Current.CircleOfTransparencyRadius, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             item.Add(_circleOfTranspRadius);
 
+        
+            var textT = new Label("Transparency type:", true, HUE_FONT)
+            {
+                X = 20,
+                Y = 45
+            };
+            item.Add(textT);
+
             int cottypeindex = ProfileManager.Current.CircleOfTransparencyType;
-            var cotTypes = new[] { "Full transparency", "Gradient transparency" };
+            var cotTypes = new[] { "Full", "Gradient" };
 
             if (cottypeindex < 0 || cottypeindex > cotTypes.Length)
                 cottypeindex = 0;
 
-            _cotType = new Combobox(20, 40, 150, cotTypes, cottypeindex, emptyString: cotTypes[cottypeindex]);
+            _cotType = new Combobox(textT.X + textT.Width + 20, 45, 150, cotTypes, cottypeindex, emptyString: cotTypes[cottypeindex]);
             item.Add(_cotType);
-            _useCircleOfTransparency.ValueChanged += (sender, e) => { _cotType.IsVisible = _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked; };
+            _useCircleOfTransparency.ValueChanged += (sender, e) => { textT.IsVisible = _cotType.IsVisible = _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked; };
 
             rightArea.Add(item);
 
