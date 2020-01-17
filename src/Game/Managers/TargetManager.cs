@@ -276,9 +276,13 @@ namespace ClassicUO.Game.Managers
             if (!IsTargeting)
                 return;
 
-            //_lastDataBuffer[0] = 0x6C;
-            //_lastDataBuffer[1] = (byte) TargetingState;
-            //_lastDataBuffer[6] = (byte) TargeringType;
+            _lastDataBuffer[0] = 0x6C;
+            _lastDataBuffer[1] = (byte) TargetingState;
+            _lastDataBuffer[2] = (byte) (_targetCursorId >> 24);
+            _lastDataBuffer[3] = (byte) (_targetCursorId >> 16);
+            _lastDataBuffer[4] = (byte) (_targetCursorId >> 8);
+            _lastDataBuffer[5] = (byte) _targetCursorId;
+            _lastDataBuffer[6] = (byte) TargeringType;
 
             NetClient.Socket.Send(_lastDataBuffer);
             Mouse.CancelDoubleClick = true;

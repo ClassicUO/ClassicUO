@@ -214,8 +214,21 @@ namespace ClassicUO.Network
             if (Plugin.ProcessSendPacket(ref data, ref length))
             {
                 PacketSent.Raise(p);
-                Send(data);
+                Send(data, length);
             }
+        }
+
+        public void Send(byte[] data, bool ignorePlugin = false)
+        {
+            int length = data.Length;
+
+            if (!ignorePlugin && !Plugin.ProcessSendPacket(ref data, ref length))
+            {
+               return;
+            }
+            
+            PacketSent.Raise(new PacketWriter(data));
+            Send(data, length);
         }
 
         public void Update()
@@ -389,14 +402,14 @@ namespace ClassicUO.Network
         }
 #endif
 
-        public void Send(byte[] data)
+        private void Send(byte[] data, int length)
         {
             if (_socket == null)
                 return;
 
             if (data != null)
             {
-                if (data.Length <= 0)
+                if (data.Length <= 0 || length <= 0)
                     return;
 
                 try
@@ -405,7 +418,7 @@ namespace ClassicUO.Network
                     //LogPacket(data, true);
 #endif
 
-                    int sent = _socket.Send(data, 0, data.Length, SocketFlags.None);
+                    int sent = _socket.Send(data, 0, length, SocketFlags.None);
 
                     if (sent > 0)
                     {

@@ -405,9 +405,9 @@ namespace ClassicUO.Network
         private static bool OnPluginSend(ref byte[] data, ref int length)
         {
             if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
-                NetClient.Socket.Send(data);
+                NetClient.Socket.Send(data, true);
             else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected)
-                NetClient.LoginSocket.Send(data);
+                NetClient.LoginSocket.Send(data, true);
 
             return true;
         }

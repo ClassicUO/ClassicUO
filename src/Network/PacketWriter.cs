@@ -32,6 +32,16 @@ namespace ClassicUO.Network
             this[0] = id;
         }
 
+        public PacketWriter(byte[] data)
+        {
+            Array.Resize(ref _data, data.Length);
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                this[i] = data[i];
+            }
+        }
+
         public override byte this[int index]
         {
             get => _data[index];
