@@ -142,8 +142,13 @@ namespace ClassicUO.Game.UI.Controls
             }
             else
             {
-                if (!(UIManager.KeyboardFocusControl is TextBox tb && tb.Parent is WorldViewportGump))
-                    Parent.GetFirstControlAcceptKeyboardInput()?.SetKeyboardFocus();
+                if (UIManager.KeyboardFocusControl != UIManager.SystemChat.textBox)
+                {
+                    UIManager.KeyboardFocusControl = UIManager.SystemChat.textBox;
+                }
+
+                //if (!(UIManager.KeyboardFocusControl is TextBox tb && tb.Parent is WorldViewportGump))
+                //    Parent.GetFirstControlAcceptKeyboardInput()?.SetKeyboardFocus();
             }
 
             base.OnMouseUp(x, y, button);

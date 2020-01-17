@@ -743,7 +743,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_isUpDown || _isDownDown || _isLeftDown || _isRightDown)
             {
-                if (UIManager.KeyboardFocusControl is AbstractTextBox textbox && (
+                if (UIManager.KeyboardFocusControl == null || UIManager.KeyboardFocusControl is AbstractTextBox textbox && (
                     !textbox.IsVisible || 
                     !textbox.IsEnabled || 
                     !textbox.IsEditable || 

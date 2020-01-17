@@ -80,24 +80,24 @@ namespace ClassicUO.Game.Managers
         {
             get
             {
-                if (_keyboardFocusControl == null || _keyboardFocusControl.IsDisposed || !_keyboardFocusControl.IsVisible || !_keyboardFocusControl.IsEnabled)
-                {
-                    _keyboardFocusControl = null;
+                //if (_keyboardFocusControl == null || _keyboardFocusControl.IsDisposed || !_keyboardFocusControl.IsVisible || !_keyboardFocusControl.IsEnabled)
+                //{
+                //    _keyboardFocusControl = null;
 
-                    foreach (Control c in Gumps)
-                    {
-                        if (!c.IsDisposed && c.IsVisible && c.IsEnabled)
-                        {
-                            _keyboardFocusControl = c.GetFirstControlAcceptKeyboardInput();
+                //    foreach (Control c in Gumps)
+                //    {
+                //        if (!c.IsDisposed && c.IsVisible && c.IsEnabled)
+                //        {
+                //            _keyboardFocusControl = c.GetFirstControlAcceptKeyboardInput();
 
-                            if (_keyboardFocusControl != null)
-                            {
-                                _keyboardFocusControl.OnFocusEnter();
-                                break;
-                            }
-                        }
-                    }
-                }
+                //            if (_keyboardFocusControl != null)
+                //            {
+                //                _keyboardFocusControl.OnFocusEnter();
+                //                break;
+                //            }
+                //        }
+                //    }
+                //}
 
                 return _keyboardFocusControl;
             }
@@ -859,8 +859,33 @@ namespace ClassicUO.Game.Managers
 
         private static void HandleKeyboardInput()
         {
-            if (KeyboardFocusControl != null && _keyboardFocusControl.IsDisposed)
+            if (_keyboardFocusControl != null && _keyboardFocusControl.IsDisposed)
                 _keyboardFocusControl = null;
+
+            if (_keyboardFocusControl == null)
+            {
+                if (SystemChat != null && !SystemChat.IsDisposed)
+                {
+                    _keyboardFocusControl = SystemChat.textBox;
+                    _keyboardFocusControl.OnFocusEnter();
+                }
+                else
+                {
+                    foreach (Control c in Gumps)
+                    {
+                        if (!c.IsDisposed && c.IsVisible && c.IsEnabled)
+                        {
+                            _keyboardFocusControl = c.GetFirstControlAcceptKeyboardInput();
+
+                            if (_keyboardFocusControl != null)
+                            {
+                                _keyboardFocusControl.OnFocusEnter();
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private static void HandleMouseInput()
