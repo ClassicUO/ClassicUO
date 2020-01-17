@@ -110,9 +110,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool ReplaceDefaultTextOnFirstKeyPress { get; set; }
 
-        public string Text
+        public override string Text
         {
-            get => TxEntry.Text;
+            get => base.Text;
             set => SetText(value);
         }
 
