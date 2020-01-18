@@ -751,13 +751,6 @@ namespace ClassicUO.Game.Scenes
             }
             
 
-
-            //bool canExecuteMacro = UIManager.KeyboardFocusControl == null || (UIManager.KeyboardFocusControl is AbstractTextBox textbox && (
-            //                                                                                                                                  !textbox.IsVisible ||
-            //                                                                                                                                  !textbox.IsEnabled ||
-            //                                                                                                                                  !textbox.IsEditable 
-            //                                                                                                                                  /*string.IsNullOrEmpty(textbox.Text)*/));
-
             bool canExecuteMacro = UIManager.KeyboardFocusControl == UIManager.SystemChat.textBox &&
                                    UIManager.SystemChat.Mode >= ChatMode.Default;
 
