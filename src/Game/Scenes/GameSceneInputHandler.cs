@@ -689,7 +689,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private readonly bool[] _flags = new bool[4];
+        private readonly bool[] _flags = new bool[5];
 
         public void PushFlag(Direction dir)
         {
@@ -761,10 +761,33 @@ namespace ClassicUO.Game.Scenes
 
                 if (macro != null && e.keysym.sym != SDL.SDL_Keycode.SDLK_UNKNOWN)
                 {
-                    Macros.SetMacroToExecute(macro.FirstNode);
-                    Macros.WaitingBandageTarget = false;
-                    Macros.WaitForTargetTimer = 0;
-                    Macros.Update();
+                    if (macro.FirstNode != null && macro.FirstNode.Code == MacroType.Walk)
+                    {
+                        _flags[4] = true;
+
+                        switch (macro.FirstNode.SubCode)
+                        {
+                            case MacroSubType.NW:
+                                _flags[0] = true;
+                                break;
+                            case MacroSubType.SW:
+                                _flags[1] = true;
+                                break;
+                            case MacroSubType.SE:
+                                _flags[2] = true;
+                                break;
+                            case MacroSubType.NE:
+                                _flags[3] = true;
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        Macros.SetMacroToExecute(macro.FirstNode);
+                        Macros.WaitingBandageTarget = false;
+                        Macros.WaitForTargetTimer = 0;
+                        Macros.Update();
+                    }
                 }
                 else
                 {
@@ -796,25 +819,71 @@ namespace ClassicUO.Game.Scenes
             if (ProfileManager.Current.EnableScaleZoom && ProfileManager.Current.RestoreScaleAfterUnpressCtrl && !Keyboard.Ctrl)
                 Scale = ProfileManager.Current.RestoreScaleValue;
 
+            if (_flags[4])
+            {
+                _flags[4] = false;
+
+                Macro macro = Macros.FindMacro(e.keysym.sym, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
+
+                if (macro != null && e.keysym.sym != SDL.SDL_Keycode.SDLK_UNKNOWN)
+                {
+                    if (macro.FirstNode != null && macro.FirstNode.Code == MacroType.Walk)
+                    {
+                        switch (macro.FirstNode.SubCode)
+                        {
+                            case MacroSubType.NW:
+                                _flags[0] = false;
+
+                                break;
+                            case MacroSubType.SW:
+                                _flags[1] = false;
+
+                                break;
+                            case MacroSubType.SE:
+                                _flags[2] = false;
+
+                                break;
+                            case MacroSubType.NE:
+                                _flags[3] = false;
+
+                                break;
+                        }
+
+                        for (int i = 0; i < 4; i++)
+                        {
+                            if (_flags[i])
+                            {
+                                _flags[4] = true;
+                                break;
+                            }
+                        }
+
+                    }
+                }
+            }
+
             switch (e.keysym.sym)
             {
                 case SDL.SDL_Keycode.SDLK_UP:
                     _flags[0] = false;
+                    _flags[4] = false;
                     break;
 
                 case SDL.SDL_Keycode.SDLK_LEFT:
                     _flags[1] = false;
+                    _flags[4] = false;
                     break;
 
                 case SDL.SDL_Keycode.SDLK_DOWN:
                     _flags[2] = false;
+                    _flags[4] = false;
                     break;
 
                 case SDL.SDL_Keycode.SDLK_RIGHT:
                     _flags[3] = false;
+                    _flags[4] = false;
                     break;
             }
-
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !ProfileManager.Current.DisableTabBtn)
             {
