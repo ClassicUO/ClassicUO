@@ -523,6 +523,12 @@ namespace ClassicUO.Game.Managers
                             groups[grp].Add(skillidx++);
                         }
                     }
+
+                    for (int i = 0; i < groups.Length; i++)
+                    {
+                        Add(groups[i]);
+                    }
+
                 }
             }
             catch (Exception e)

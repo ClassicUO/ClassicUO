@@ -452,8 +452,8 @@ namespace ClassicUO.Configuration
 
 
             // load skillsgroup
-            SkillsGroupManager.Load();
-
+            //SkillsGroupManager.Load();
+            SkillsGroupManager2.Load();
 
             // load gumps
             string gumpsXmlPath = Path.Combine(path, "gumps.xml");
