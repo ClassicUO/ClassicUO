@@ -519,18 +519,18 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     break;
 
-                case SDL.SDL_Keycode.SDLK_KP_ENTER:
-                case SDL.SDL_Keycode.SDLK_RETURN:
+                //case SDL.SDL_Keycode.SDLK_KP_ENTER:
+                //case SDL.SDL_Keycode.SDLK_RETURN:
 
-                    if (ProfileManager.Current.ActivateChatAfterEnter)
-                    {
-                        Mode = ChatMode.Default;
+                //    if (ProfileManager.Current.ActivateChatAfterEnter)
+                //    {
+                //        Mode = ChatMode.Default;
 
-                        if (!(Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT) && ProfileManager.Current.ActivateChatShiftEnterSupport))
-                            ToggleChatVisibility();
-                    }
+                //        if (!(Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT) && ProfileManager.Current.ActivateChatShiftEnterSupport))
+                //            ToggleChatVisibility();
+                //    }
 
-                    break;
+                //    break;
             }
         }
 

@@ -727,6 +727,29 @@ namespace ClassicUO.Game.Scenes
                     }
 
                     break;
+
+                case SDL.SDL_Keycode.SDLK_RETURN:
+                case SDL.SDL_Keycode.SDLK_KP_ENTER:
+
+                    if (UIManager.KeyboardFocusControl == UIManager.SystemChat.TextBoxControl)
+                    {
+                        if (ProfileManager.Current.ActivateChatAfterEnter)
+                        {
+                            UIManager.SystemChat.Mode = ChatMode.Default;
+
+                            if (!(Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT) && ProfileManager.Current.ActivateChatShiftEnterSupport))
+                                UIManager.SystemChat.ToggleChatVisibility();
+                        }
+
+                        return;
+                    }
+
+                    break;
+            }
+
+            if (UIManager.KeyboardFocusControl == UIManager.SystemChat.TextBoxControl && UIManager.SystemChat.IsActive && ProfileManager.Current.ActivateChatAfterEnter)
+            {
+                return;
             }
             
 
