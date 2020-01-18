@@ -53,6 +53,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
             LoginScene loginScene = Client.Game.GetScene<LoginScene>();
             var lastSelected = loginScene.Characters.FirstOrDefault(o => o == Settings.GlobalSettings.LastCharacterName);
 
+            var f = World.ClientLockedFeatures.Flags;
+            var ff = World.ClientFeatures.Flags;
+
             if ((Client.Version >= ClientVersion.CV_6040) ||
                 (Client.Version >= ClientVersion.CV_5020 && loginScene.Characters.Length > 5))
             {
@@ -87,7 +90,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     if (valid > World.ClientFeatures.MaxChars)
                         break;
 
-                    if(!World.ClientLockedFeatures.CharSlots7)
+                    if(World.ClientLockedFeatures.Flags != 0 && !World.ClientLockedFeatures.CharSlots7)
                     {
                         if (valid == 6 && !World.ClientLockedFeatures.CharSlots6)
                             break;
