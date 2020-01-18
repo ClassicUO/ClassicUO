@@ -638,7 +638,7 @@ namespace ClassicUO.Game.Managers
                             break;
 
                         case MacroType.Close:
-                        case MacroType.Minimize: // TODO: miniminze/maximize
+                        case MacroType.Minimize:
                         case MacroType.Maximize:
 
                             switch (macro.SubCode)
@@ -1290,7 +1290,6 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.KillGumpOpen:
                     // TODO:
-
                     break;
 
                 case MacroType.DefaultScale:
