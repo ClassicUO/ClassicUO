@@ -142,9 +142,9 @@ namespace ClassicUO.Game.UI.Controls
             }
             else
             {
-                if (UIManager.KeyboardFocusControl != UIManager.SystemChat.textBox)
+                if (UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
                 {
-                    UIManager.KeyboardFocusControl = UIManager.SystemChat.textBox;
+                    UIManager.KeyboardFocusControl = UIManager.SystemChat.TextBoxControl;
                 }
 
                 //if (!(UIManager.KeyboardFocusControl is TextBox tb && tb.Parent is WorldViewportGump))

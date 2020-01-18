@@ -870,7 +870,7 @@ namespace ClassicUO.Game.Managers
             {
                 if (SystemChat != null && !SystemChat.IsDisposed)
                 {
-                    _keyboardFocusControl = SystemChat.textBox;
+                    _keyboardFocusControl = SystemChat.TextBoxControl;
                     _keyboardFocusControl.OnFocusEnter();
                 }
                 else

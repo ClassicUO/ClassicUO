@@ -716,7 +716,7 @@ namespace ClassicUO.Game.Scenes
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && e.repeat != 0)
                 return;
 
-            if (UIManager.KeyboardFocusControl != UIManager.SystemChat.textBox)
+            if (UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
             {
                 return;
             }
@@ -751,7 +751,7 @@ namespace ClassicUO.Game.Scenes
             }
             
 
-            bool canExecuteMacro = UIManager.KeyboardFocusControl == UIManager.SystemChat.textBox &&
+            bool canExecuteMacro = UIManager.KeyboardFocusControl == UIManager.SystemChat.TextBoxControl &&
                                    UIManager.SystemChat.Mode >= ChatMode.Default;
 
 
@@ -791,23 +791,26 @@ namespace ClassicUO.Game.Scenes
                 }
                 else
                 {
-                    switch (e.keysym.sym)
+                    if (string.IsNullOrEmpty(UIManager.SystemChat.TextBoxControl.Text))
                     {
-                        case SDL.SDL_Keycode.SDLK_UP:
-                            _flags[0] = true;
-                            break;
+                        switch (e.keysym.sym)
+                        {
+                            case SDL.SDL_Keycode.SDLK_UP:
+                                _flags[0] = true;
+                                break;
 
-                        case SDL.SDL_Keycode.SDLK_LEFT:
-                            _flags[1] = true;
-                            break;
+                            case SDL.SDL_Keycode.SDLK_LEFT:
+                                _flags[1] = true;
+                                break;
 
-                        case SDL.SDL_Keycode.SDLK_DOWN:
-                            _flags[2] = true;
-                            break;
+                            case SDL.SDL_Keycode.SDLK_DOWN:
+                                _flags[2] = true;
+                                break;
 
-                        case SDL.SDL_Keycode.SDLK_RIGHT:
-                            _flags[3] = true;
-                            break;
+                            case SDL.SDL_Keycode.SDLK_RIGHT:
+                                _flags[3] = true;
+                                break;
+                        }
                     }
                 }
             }

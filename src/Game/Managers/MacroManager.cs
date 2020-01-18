@@ -426,7 +426,7 @@ namespace ClassicUO.Game.Managers
                         string s = SDL.SDL_GetClipboardText();
 
                         if (!string.IsNullOrEmpty(s))
-                            UIManager.SystemChat.textBox.Text += s;
+                            UIManager.SystemChat.TextBoxControl.Text += s;
                     }
 
                     break;

@@ -264,7 +264,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        UIManager.SystemChat.textBox.SetText("/");
+                        UIManager.SystemChat.TextBoxControl.SetText("/");
                     }
                     break;
                 case Buttons.LootType:
@@ -307,7 +307,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             //UIManager.SystemChat.textBox.SetText($"/{index + 1}");
                             //UIManager.SystemChat.Mode = ChatMode.Party;
-                            UIManager.SystemChat.textBox.SetText($"/{index + 1} ");
+                            UIManager.SystemChat.TextBoxControl.SetText($"/{index + 1} ");
                         }
                     }
                     else if (buttonID >= (int) Buttons.KickMember)
