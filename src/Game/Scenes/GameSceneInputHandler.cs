@@ -129,7 +129,7 @@ namespace ClassicUO.Game.Scenes
             if (ProfileManager.Current.DragSelectModifierKey == 0)
                 return true;
 
-            if (ProfileManager.Current.DragSelectModifierKey == 1 && Keyboard.Shift)
+            if (ProfileManager.Current.DragSelectModifierKey == 1 && Keyboard.Ctrl)
                 return true;
 
             if (ProfileManager.Current.DragSelectModifierKey == 2 && Keyboard.Shift)
