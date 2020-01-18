@@ -49,12 +49,13 @@ namespace ClassicUO.Game.Scenes
         private bool _followingMode;
         private uint _followingTarget;
         private bool _isSelectionActive;
-
+        private readonly bool[] _flags = new bool[5];
         private bool _requestedWarMode;
         private bool _rightMousePressed, _continueRunning;
         private (int, int) _selectionStart, _selectionEnd;
         private uint _holdMouse2secOverItemTime;
         private bool _isMouseLeftDown;
+
 
         public bool IsMouseOverUI => UIManager.IsMouseOverAControl && !(UIManager.MouseOverControl is WorldViewport);
         public bool IsMouseOverViewport => UIManager.MouseOverControl is WorldViewport;
@@ -688,29 +689,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
         }
-
-        private readonly bool[] _flags = new bool[5];
-
-        public void PushFlag(Direction dir)
-        {
-            if (dir == Direction.Up)
-            {
-                _flags[0] = true;
-            }
-            else if (dir == Direction.Left)
-            {
-                _flags[1] = true;
-            }
-            else if (dir == Direction.Right)
-            {
-                _flags[3] = true;
-            }
-            else if (dir == Direction.Down)
-            {
-                _flags[2] = true;
-            }
-        }
-
+      
         internal override void OnKeyDown(SDL.SDL_KeyboardEvent e)
         {
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && e.repeat != 0)
