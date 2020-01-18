@@ -734,37 +734,44 @@ namespace ClassicUO.Game.Scenes
 
         internal override void OnKeyDown(SDL.SDL_KeyboardEvent e)
         {
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && e.repeat != 0)
+                return;
+
             if (UIManager.KeyboardFocusControl != UIManager.SystemChat.textBox)
             {
                 return;
             }
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE)
+            switch (e.keysym.sym)
             {
-                if (TargetManager.IsTargeting && Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
-                {
-                    TargetManager.CancelTarget();
-                    return;
-                }
-            }
+                case SDL.SDL_Keycode.SDLK_ESCAPE:
 
-
-
-            //if (!UIManager.IsKeyboardFocusAllowHotkeys)
-            //    return;
-
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !ProfileManager.Current.DisableTabBtn)
-            {
-                if (ProfileManager.Current.HoldDownKeyTab)
-                {
-                    if (!_requestedWarMode)
+                    if (TargetManager.IsTargeting)
                     {
-                        _requestedWarMode = true;
-                        if (!World.Player.InWarMode)
-                            NetClient.Socket.Send(new PChangeWarMode(true));
+                        TargetManager.CancelTarget();
                     }
+                    else if (Pathfinder.AutoWalking && Pathfinder.PathindingCanBeCancelled)
+                    {
+                        Pathfinder.StopAutoWalk();
+                    }
+
+                    break;
+                case SDL.SDL_Keycode.SDLK_TAB when !ProfileManager.Current.DisableTabBtn:
+                {
+                    if (ProfileManager.Current.HoldDownKeyTab)
+                    {
+                        if (!_requestedWarMode)
+                        {
+                            _requestedWarMode = true;
+                            if (!World.Player.InWarMode)
+                                NetClient.Socket.Send(new PChangeWarMode(true));
+                        }
+                    }
+
+                    break;
                 }
             }
+
 
             if ((e.keysym.mod & SDL.SDL_Keymod.KMOD_NUM) != SDL.SDL_Keymod.KMOD_NUM)
             {
@@ -862,8 +869,6 @@ namespace ClassicUO.Game.Scenes
                 else
                     GameActions.ChangeWarMode();
             }
-            else if (e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && Pathfinder.AutoWalking)
-                Pathfinder.StopAutoWalk();
         }
     }
 }
