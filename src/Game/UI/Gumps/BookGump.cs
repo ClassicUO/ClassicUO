@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ClassicUO.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -203,6 +204,11 @@ namespace ClassicUO.Game.UI.Gumps
             Client.Game.Scene.Audio.PlaySound(0x0055);
 
             ActivePage = page;
+
+            if (UIManager.KeyboardFocusControl == null || (UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl && UIManager.KeyboardFocusControl.Page != page))
+            {
+                UIManager.SystemChat.TextBoxControl.SetKeyboardFocus();
+            }
         }
 
         public override void OnButtonClick(int buttonID)
