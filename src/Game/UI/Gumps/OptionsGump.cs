@@ -340,7 +340,7 @@ namespace ClassicUO.Game.UI.Gumps
             _cotType = new Combobox(textT.X + textT.Width + 20, 45, 150, cotTypes, cottypeindex, emptyString: cotTypes[cottypeindex]);
             item.Add(_cotType);
             _useCircleOfTransparency.ValueChanged += (sender, e) => { textT.IsVisible = _cotType.IsVisible = _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked; };
-
+            textT.IsVisible = _cotType.IsVisible = _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked;
             rightArea.Add(item);
 
 
