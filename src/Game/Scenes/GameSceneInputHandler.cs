@@ -46,33 +46,12 @@ namespace ClassicUO.Game.Scenes
 {
     internal partial class GameScene
     {
-        private readonly Dictionary<SDL.SDL_Keycode, Direction> _keycodeDirection = new Dictionary<SDL.SDL_Keycode, Direction>
-        {
-            {SDL.SDL_Keycode.SDLK_LEFT, Direction.Left},
-            {SDL.SDL_Keycode.SDLK_RIGHT, Direction.Right},
-            {SDL.SDL_Keycode.SDLK_UP, Direction.Up},
-            {SDL.SDL_Keycode.SDLK_DOWN, Direction.Down}
-        };
-
-        private readonly Dictionary<SDL.SDL_Keycode, Direction> _keycodeDirectionNum = new Dictionary<SDL.SDL_Keycode, Direction>
-        {
-            {SDL.SDL_Keycode.SDLK_KP_4, Direction.Left},
-            {SDL.SDL_Keycode.SDLK_KP_6, Direction.Right},
-            {SDL.SDL_Keycode.SDLK_KP_8, Direction.Up},
-            {SDL.SDL_Keycode.SDLK_KP_2, Direction.Down},
-            {SDL.SDL_Keycode.SDLK_KP_9, Direction.North},
-            {SDL.SDL_Keycode.SDLK_KP_3, Direction.East},
-            {SDL.SDL_Keycode.SDLK_KP_7, Direction.West},
-            {SDL.SDL_Keycode.SDLK_KP_1, Direction.South}
-        };
         private bool _followingMode;
         private uint _followingTarget;
         private bool _isSelectionActive;
 
-        public Direction _numPadDirection;
-
         private bool _requestedWarMode;
-        private bool _rightMousePressed, _continueRunning, _numPadKeyPressed;
+        private bool _rightMousePressed, _continueRunning;
         private (int, int) _selectionStart, _selectionEnd;
         private uint _holdMouse2secOverItemTime;
         private bool _isMouseLeftDown;
@@ -770,16 +749,7 @@ namespace ClassicUO.Game.Scenes
 
                     break;
             }
-
-
-            if ((e.keysym.mod & SDL.SDL_Keymod.KMOD_NUM) != SDL.SDL_Keymod.KMOD_NUM)
-            {
-                if (_keycodeDirectionNum.TryGetValue(e.keysym.sym, out Direction dWalkN))
-                {
-                    _numPadKeyPressed = true;
-                    _numPadDirection = dWalkN;
-                }
-            }
+            
 
 
             //bool canExecuteMacro = UIManager.KeyboardFocusControl == null || (UIManager.KeyboardFocusControl is AbstractTextBox textbox && (
@@ -830,7 +800,7 @@ namespace ClassicUO.Game.Scenes
 
         internal override void OnKeyUp(SDL.SDL_KeyboardEvent e)
         {
-            if (ProfileManager.Current.EnableScaleZoom && ProfileManager.Current.RestoreScaleAfterUnpressCtrl && Keyboard.Ctrl && !Keyboard.Ctrl)
+            if (ProfileManager.Current.EnableScaleZoom && ProfileManager.Current.RestoreScaleAfterUnpressCtrl && !Keyboard.Ctrl)
                 Scale = ProfileManager.Current.RestoreScaleValue;
 
             switch (e.keysym.sym)
@@ -852,8 +822,6 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
 
-            if ((e.keysym.mod & SDL.SDL_Keymod.KMOD_NUM) != SDL.SDL_Keymod.KMOD_NUM)
-                _numPadKeyPressed = false;
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && !ProfileManager.Current.DisableTabBtn)
             {
