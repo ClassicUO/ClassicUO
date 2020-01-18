@@ -319,7 +319,7 @@ namespace ClassicUO.Configuration
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin"))))
                 UIManager.AnchorManager.Save(writer);
 
-            SkillsGroupManager.Save();
+            SkillsGroupManager2.Save();
         }
 
         public static uint GumpsVersion { get; private set; }
@@ -376,12 +376,12 @@ namespace ClassicUO.Configuration
                 }
                 catch (Exception e)
                 {
-                    SkillsGroupManager.LoadDefault();
+                    SkillsGroupManager2.MakeDefault();
                     Log.Error( e.StackTrace);
                 }
 
                
-                SkillsGroupManager.Save();
+                SkillsGroupManager2.Save();
 
                 try
                 {

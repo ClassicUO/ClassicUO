@@ -272,7 +272,7 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        private static void MakeDefault()
+        public static void MakeDefault()
         {
             Clear();
 
