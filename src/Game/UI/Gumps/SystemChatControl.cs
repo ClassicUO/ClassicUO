@@ -489,48 +489,6 @@ namespace ClassicUO.Game.UI.Gumps
                     Chat.PromptData = default;
 
                     break;
-
-                case SDL.SDL_Keycode.SDLK_1 when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT): // !
-                case SDL.SDL_Keycode.SDLK_BACKSLASH when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT): // \
-
-                    if (ProfileManager.Current.ActivateChatAfterEnter && ProfileManager.Current.ActivateChatAdditionalButtons && !IsActive)
-                        IsActive = true;
-
-                    break;
-
-                case SDL.SDL_Keycode.SDLK_EXCLAIM: // !
-                case SDL.SDL_Keycode.SDLK_SEMICOLON: // ;
-                case SDL.SDL_Keycode.SDLK_COLON: // :
-                case SDL.SDL_Keycode.SDLK_SLASH: // /
-                case SDL.SDL_Keycode.SDLK_BACKSLASH: // \
-                case SDL.SDL_Keycode.SDLK_PERIOD: // .
-                case SDL.SDL_Keycode.SDLK_KP_PERIOD: // .
-                case SDL.SDL_Keycode.SDLK_COMMA: // ,
-                case SDL.SDL_Keycode.SDLK_LEFTBRACKET: // [
-                case SDL.SDL_Keycode.SDLK_MINUS: // -
-                case SDL.SDL_Keycode.SDLK_KP_MINUS: // -
-                    if (ProfileManager.Current.ActivateChatAfterEnter &&
-                        ProfileManager.Current.ActivateChatAdditionalButtons && !IsActive)
-                    {
-                        if (Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_NONE))
-                            IsActive = true;
-                        else if (Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT) && key == SDL.SDL_Keycode.SDLK_SEMICOLON)
-                            IsActive = true;
-                    }
-                    break;
-
-                //case SDL.SDL_Keycode.SDLK_KP_ENTER:
-                //case SDL.SDL_Keycode.SDLK_RETURN:
-
-                //    if (ProfileManager.Current.ActivateChatAfterEnter)
-                //    {
-                //        Mode = ChatMode.Default;
-
-                //        if (!(Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_SHIFT) && ProfileManager.Current.ActivateChatShiftEnterSupport))
-                //            ToggleChatVisibility();
-                //    }
-
-                //    break;
             }
         }
 

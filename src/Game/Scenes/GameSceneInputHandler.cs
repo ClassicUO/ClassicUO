@@ -728,6 +728,37 @@ namespace ClassicUO.Game.Scenes
 
                     break;
 
+
+                // chat system activation
+
+                case SDL.SDL_Keycode.SDLK_1 when Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT): // !
+                case SDL.SDL_Keycode.SDLK_BACKSLASH when Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT): // \
+
+                    if (ProfileManager.Current.ActivateChatAfterEnter && ProfileManager.Current.ActivateChatAdditionalButtons && !UIManager.SystemChat.IsActive)
+                        UIManager.SystemChat.IsActive = true;
+
+                    break;
+
+                case SDL.SDL_Keycode.SDLK_EXCLAIM: // !
+                case SDL.SDL_Keycode.SDLK_SEMICOLON: // ;
+                case SDL.SDL_Keycode.SDLK_COLON: // :
+                case SDL.SDL_Keycode.SDLK_SLASH: // /
+                case SDL.SDL_Keycode.SDLK_BACKSLASH: // \
+                case SDL.SDL_Keycode.SDLK_PERIOD: // .
+                case SDL.SDL_Keycode.SDLK_KP_PERIOD: // .
+                case SDL.SDL_Keycode.SDLK_COMMA: // ,
+                case SDL.SDL_Keycode.SDLK_LEFTBRACKET: // [
+                case SDL.SDL_Keycode.SDLK_MINUS: // -
+                case SDL.SDL_Keycode.SDLK_KP_MINUS: // -
+                    if (ProfileManager.Current.ActivateChatAfterEnter &&
+                        ProfileManager.Current.ActivateChatAdditionalButtons && !UIManager.SystemChat.IsActive)
+                    {
+                        if (Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
+                            UIManager.SystemChat.IsActive = true;
+                        else if (Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT) && e.keysym.sym == SDL.SDL_Keycode.SDLK_SEMICOLON)
+                            UIManager.SystemChat.IsActive = true;
+                    }
+                    break;
                 case SDL.SDL_Keycode.SDLK_RETURN:
                 case SDL.SDL_Keycode.SDLK_KP_ENTER:
 
