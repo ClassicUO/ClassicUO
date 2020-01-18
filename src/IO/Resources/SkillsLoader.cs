@@ -74,6 +74,16 @@ namespace ClassicUO.IO.Resources
             });
         }
 
+        public int GetSortedIndex(int index)
+        {
+            if (index < SkillsCount)
+            {
+                return SortedSkills[index].Index;
+            }
+
+            return -1;
+        }
+
         public override void CleanResources()
         {
             //

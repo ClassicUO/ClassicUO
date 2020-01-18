@@ -189,13 +189,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                 foreach (var item in items)
                 {
-                    foreach (EditableLabel c in item.FindControls<EditableLabel>()) c.SetEditable(false);
+                    foreach (EditableLabel c in item.FindControls<EditableLabel>()) 
+                        c.SetEditable(false);
                 }
             };
 
             box.EditStateEnd += (ss, e) =>
             {
-                if (!string.IsNullOrWhiteSpace(e.BackupText) && !string.IsNullOrWhiteSpace(e.Text)) SkillsGroupManager.ReplaceGroup(e.BackupText, e.Text);
+                if (!string.IsNullOrWhiteSpace(e.BackupText) && !string.IsNullOrWhiteSpace(e.Text)) 
+                    SkillsGroupManager.ReplaceGroup(e.BackupText, e.Text);
             };
 
             _container.Add(box);
@@ -284,14 +286,14 @@ namespace ClassicUO.Game.UI.Gumps
         public void ForceUpdate(int skillIndex)
         {
             if (skillIndex < _allSkillControls.Length)
-                _allSkillControls[skillIndex]?.UpdateSkillValue(UIManager.GetGump<StandardSkillsGump>());
+                _allSkillControls[skillIndex]?.UpdateSkillValue(this);
             _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
         }
 
         private void UpdateGump(object sender, EventArgs e)
         {
-            StandardSkillsGump skg = UIManager.GetGump<StandardSkillsGump>();
-            for (int i = 0; i < _allSkillControls.Length; i++) _allSkillControls[i]?.UpdateSkillValue(skg);
+            for (int i = 0; i < _allSkillControls.Length; i++) 
+                _allSkillControls[i]?.UpdateSkillValue(this);
             _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
         }
 
@@ -567,6 +569,33 @@ namespace ClassicUO.Game.UI.Gumps
                     _lock.Texture = UOFileManager.Gumps.GetTexture(graphic);
                 }
             }
+        }
+
+
+        private class SkillsGroup : Control
+        {
+            private bool _isMinimized;
+
+            public SkillsGroup()
+            {
+
+            }
+
+            public bool IsMinimized
+            {
+                get
+                {
+                    return  _isMinimized;
+                }
+                set
+                {
+                    _isMinimized = value;
+                }
+            }
+
+
+
+
         }
     }
 }
