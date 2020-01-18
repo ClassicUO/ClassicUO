@@ -757,7 +757,7 @@ namespace ClassicUO.Game.Scenes
 
                     break;
                 case SDL.SDL_Keycode.SDLK_TAB when !ProfileManager.Current.DisableTabBtn:
-                {
+
                     if (ProfileManager.Current.HoldDownKeyTab)
                     {
                         if (!_requestedWarMode)
@@ -769,7 +769,6 @@ namespace ClassicUO.Game.Scenes
                     }
 
                     break;
-                }
             }
 
 
