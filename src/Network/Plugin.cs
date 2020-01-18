@@ -360,8 +360,11 @@ namespace ClassicUO.Network
         {
             bool result = true;
 
-            if (!UIManager.IsKeyboardFocusAllowHotkeys)
-                return true;
+
+            if (ProfileManager.Current != null && ProfileManager.Current.ActivateChatAfterEnter && UIManager.SystemChat?.IsActive == true)
+            {
+                return result;
+            }
 
             foreach (Plugin plugin in _plugins)
             {
