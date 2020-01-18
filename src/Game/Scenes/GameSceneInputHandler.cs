@@ -821,14 +821,14 @@ namespace ClassicUO.Game.Scenes
 
             if (_flags[4])
             {
-                _flags[4] = false;
-
                 Macro macro = Macros.FindMacro(e.keysym.sym, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
 
                 if (macro != null && e.keysym.sym != SDL.SDL_Keycode.SDLK_UNKNOWN)
                 {
                     if (macro.FirstNode != null && macro.FirstNode.Code == MacroType.Walk)
                     {
+                        _flags[4] = false;
+
                         switch (macro.FirstNode.SubCode)
                         {
                             case MacroSubType.NW:
@@ -866,22 +866,18 @@ namespace ClassicUO.Game.Scenes
             {
                 case SDL.SDL_Keycode.SDLK_UP:
                     _flags[0] = false;
-                    _flags[4] = false;
                     break;
 
                 case SDL.SDL_Keycode.SDLK_LEFT:
                     _flags[1] = false;
-                    _flags[4] = false;
                     break;
 
                 case SDL.SDL_Keycode.SDLK_DOWN:
                     _flags[2] = false;
-                    _flags[4] = false;
                     break;
 
                 case SDL.SDL_Keycode.SDLK_RIGHT:
                     _flags[3] = false;
-                    _flags[4] = false;
                     break;
             }
 
