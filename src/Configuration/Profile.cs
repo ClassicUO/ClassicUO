@@ -353,18 +353,18 @@ namespace ClassicUO.Configuration
                                 int entriesCount = reader.ReadInt32();
                                 string groupName = reader.ReadUTF8String(reader.ReadInt32());
 
-                                if (!SkillsGroupManager.Groups.TryGetValue(groupName, out var list) || list == null)
-                                {
-                                    list = new HashSet<int>();
-                                    SkillsGroupManager.Groups[groupName] = list;
-                                }
+                                //if (!SkillsGroupManager.Groups.TryGetValue(groupName, out var list) || list == null)
+                                //{
+                                //    list = new HashSet<int>();
+                                //    SkillsGroupManager.Groups[groupName] = list;
+                                //}
 
-                                for (int j = 0; j < entriesCount; j++)
-                                {
-                                    int skillIndex = reader.ReadInt32();
-                                    if (skillIndex < UOFileManager.Skills.SkillsCount)
-                                        list.Add(skillIndex);
-                                }
+                                //for (int j = 0; j < entriesCount; j++)
+                                //{
+                                //    int skillIndex = reader.ReadInt32();
+                                //    if (skillIndex < UOFileManager.Skills.SkillsCount)
+                                //        list.Add(skillIndex);
+                                //}
                             }
                         }
                         catch
