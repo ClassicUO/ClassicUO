@@ -125,6 +125,9 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _textures[NORMAL] = UOFileManager.Gumps.GetTexture(value);
                 _gumpGraphics[NORMAL] = value;
+
+                Width = _textures[NORMAL].Width;
+                Height = _textures[NORMAL].Height;
             }
         }
 
@@ -135,6 +138,9 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _textures[PRESSED] = UOFileManager.Gumps.GetTexture(value);
                 _gumpGraphics[PRESSED] = value;
+                
+                Width = _textures[PRESSED].Width;
+                Height = _textures[PRESSED].Height;
             }
         }
 
@@ -145,6 +151,9 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _textures[OVER] = UOFileManager.Gumps.GetTexture(value);
                 _gumpGraphics[OVER] = value;
+
+                Width = _textures[OVER].Width;
+                Height = _textures[OVER].Height;
             }
         }
 

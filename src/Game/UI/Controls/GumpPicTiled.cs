@@ -37,8 +37,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             CanMove = true;
             AcceptMouseInput = true;
-            Texture = UOFileManager.Gumps.GetTexture(graphic);
-            Graphic = _lastGraphic = graphic;
+            Graphic = graphic;
         }
 
         public GumpPicTiled(int x, int y, int width, int heigth, ushort graphic) : this(graphic)
@@ -65,21 +64,32 @@ namespace ClassicUO.Game.UI.Controls
             Y = y;
             Width = width;
             Height = heigth;
-            Graphic = _lastGraphic = 0xFFFF;
+            Graphic = 0xFFFF;
             Texture = texture;
         }
 
-        public ushort Graphic { get; set; }
+        public ushort Graphic
+        {
+            get => _lastGraphic;
+            set
+            {
+                if (_lastGraphic != value && value != 0xFFFF)
+                {
+                    _lastGraphic = value;
+                    Texture = UOFileManager.Gumps.GetTexture(value);
+
+                    Width = Texture.Width;
+                    Height = Texture.Height;
+                }
+            }
+        }
 
         public ushort Hue { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_lastGraphic != Graphic)
-            {
-                Texture = UOFileManager.Gumps.GetTexture(Graphic);
-                _lastGraphic = Graphic;
-            }
+            if (IsDisposed)
+                return;
 
             Texture.Ticks = (long) totalMS;
             base.Update(totalMS, frameMS);

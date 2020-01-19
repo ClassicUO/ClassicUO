@@ -39,6 +39,8 @@ namespace ClassicUO.Game.UI.Controls
             base.AcceptKeyboardInput = true;
             base.AcceptMouseInput = true;
             IsEditable = editable;
+
+            Texture = TxEntry.RenderText.Texture;
         }
 
         public TextBox(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE alig = 0)
@@ -49,6 +51,8 @@ namespace ClassicUO.Game.UI.Controls
             IsEditable = true;
             Unicode = isunicode;
             Font = font;
+
+            Texture = TxEntry.RenderText.Texture;
         }
 
         public TextBox(List<string> parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : byte.MaxValue, 0, int.Parse(parts[3]), style: FontStyle.BlackBorder | FontStyle.CropTexture, hue: (ushort) (UInt16Converter.Parse(parts[5]) + 1))
