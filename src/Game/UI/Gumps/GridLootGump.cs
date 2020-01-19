@@ -93,7 +93,6 @@ namespace ClassicUO.Game.UI.Gumps
             _buttonPrev = new NiceButton(Width - 80, Height - 20, 40, 20, ButtonAction.Activate, "<<") {ButtonParameter = 0, IsSelectable = false};
             _buttonNext = new NiceButton(Width - 40, Height - 20, 40, 20, ButtonAction.Activate, ">>") {ButtonParameter = 1, IsSelectable = false};
 
-            _buttonNext.IsEnabled = _buttonPrev.IsEnabled = false;
             _buttonNext.IsVisible = _buttonPrev.IsVisible = false;
 
 
