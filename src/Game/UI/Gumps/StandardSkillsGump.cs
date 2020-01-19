@@ -48,7 +48,6 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly GumpPic _bottomLine;
 
         private readonly ScrollArea _container;
-        private readonly SkillNameComparer _instance = new SkillNameComparer();
         private readonly Button _newGroupButton;
         private readonly ExpandableScroll _scrollArea;
         private readonly Label _skillsLabelSum;
@@ -380,19 +379,6 @@ namespace ClassicUO.Game.UI.Gumps
             //    }
             //}
         }
-
-
-        private class SkillNameComparer : IComparer<int>
-        {
-            public int Compare(int x, int y)
-            {
-                if (x >= UOFileManager.Skills.Skills.Count || y >= UOFileManager.Skills.Skills.Count)
-                    return 0;
-
-                return UOFileManager.Skills.Skills[x].Name.CompareTo(UOFileManager.Skills.Skills[y].Name);
-            }
-        }
-
 
 
         private class SkillsGroupControl : Control
