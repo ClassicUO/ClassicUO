@@ -381,6 +381,9 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
+
+
+
         private class SkillsGroupControl : Control
         {
             private bool _isMinimized;
