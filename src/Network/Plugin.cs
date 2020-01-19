@@ -361,7 +361,8 @@ namespace ClassicUO.Network
             bool result = true;
 
 
-            if (ProfileManager.Current != null && ProfileManager.Current.ActivateChatAfterEnter && UIManager.SystemChat?.IsActive == true)
+            if (!World.InGame || (ProfileManager.Current != null && ProfileManager.Current.ActivateChatAfterEnter && UIManager.SystemChat?.IsActive == true) ||
+                UIManager.SystemChat?.IsFocused == false)
             {
                 return result;
             }
