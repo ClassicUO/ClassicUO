@@ -648,8 +648,6 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             var skillControl = (SkillItemControl) _box.Children[0];
 
-                            //skillControl.Parent = first._box;
-
                             int itemCount = first._group.Count;
                             for (int i = 0; i < itemCount; i++)
                             {
