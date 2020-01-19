@@ -27,6 +27,7 @@ using System.Text;
 using System.Xml;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.Utility;
@@ -183,9 +184,16 @@ namespace ClassicUO.Game.Managers
         {
             if (Groups.Count == 1)
             {
+                MessageBoxGump messageBox = new MessageBoxGump(200, 125, "Cannot delete this group.", null)
+                {
+                    X = ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X / 2 - 100,
+                    Y = ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y / 2 - 62,
+                };
+                UIManager.Add(messageBox);
                 return false;
             }
 
+            Groups.Remove(g);
             g.PushTo(Groups[0]);
 
             return true;

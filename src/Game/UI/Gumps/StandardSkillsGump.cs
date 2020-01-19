@@ -377,9 +377,8 @@ namespace ClassicUO.Game.UI.Gumps
             //        if (index >= 0 && index < _boxes.Count)
             //            _boxes[index++].Opened = bool.Parse(groupXml.GetAttribute("isopen"));
             //    }
-            //}
+            //
         }
-
 
 
 
@@ -443,7 +442,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _gumpPic.IsVisible = false;
                 };
-                _textbox.FocusLost += (s, e) => 
+                _textbox.FocusLost += (s, e) =>
                 {
                     _gumpPic.IsVisible = true;
                     _textbox.IsEditable = false;
@@ -528,37 +527,32 @@ namespace ClassicUO.Game.UI.Gumps
                         if (originalGroup != null)
                         {
                             // remove from original control the skillcontrol
-                            if (originalGroup._skills.Remove(skillControl))
+                            if (!_group.Contains((byte) skillControl.Index))
                             {
-                                int index = skillControl.Index;
+                                byte index = (byte) skillControl.Index;
+
+                                originalGroup._skills.Remove(skillControl);
+
+                                // update groups
+                                originalGroup._group.Remove(index);
+                                _group.Add(index);
+                                _group.Sort();
 
                                 // insert skillcontrol at the right index
-                                int currIndex = _skills.Count - 1;
-
-                                while (currIndex >= 0)
+                                int itemCount = _group.Count;
+                                for (int i = 0; i < itemCount; i++)
                                 {
-                                    if (_skills[currIndex].Index < index)
+                                    if (_group.GetSkill(i) == index)
+                                    {
+                                        _skills.Insert(i, skillControl);
+                                        _box.Insert(i, skillControl);
                                         break;
-                                    currIndex--;
+                                    }
                                 }
-
-                                if (currIndex < 0)
-                                    currIndex = 0;
-
-                                originalGroup._box.Remove(skillControl);
-
-                                _skills.Insert(currIndex, skillControl);
-                                _box.Children.Insert(currIndex, skillControl);
-                                skillControl.Parent = _box;
 
                                 // update gump positions
                                 UpdateSkillsPosition();
                                 originalGroup.UpdateSkillsPosition();
-
-                                // update gruop manager
-                                originalGroup._group.Remove((byte) index);
-                                _group.Add((byte) index);
-                                _group.Sort();
                             }
                         }
 
@@ -576,7 +570,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override void OnKeyboardReturn(int textID, string text)
             {
-
                 if (string.IsNullOrWhiteSpace(text))
                 {
                     text = "No Name";
@@ -584,7 +577,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 int width = UOFileManager.Fonts.GetWidthASCII(6, text);
-                //.Width = width;
                 int xx = width + 11 + 16;
 
                 if (xx > 0)
@@ -603,6 +595,31 @@ namespace ClassicUO.Game.UI.Gumps
                 _group.Name = text;
 
                 base.OnKeyboardReturn(textID, text);
+            }
+
+            protected override void OnKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+            {
+                base.OnKeyUp(key, mod);
+
+                if (key == SDL.SDL_Keycode.SDLK_DELETE && !_textbox.IsEditable)
+                {
+                    if (SkillsGroupManager2.Remove(_group) && RootParent is StandardSkillsGump gump)
+                    {
+                        var first = gump._skillsControl[0];
+
+                        while (_box.Children.Count != 0)
+                        {
+                            var skillControl = _box.Children[0];
+
+
+                            _box.Children.RemoveAt(0);
+
+                            skillControl.Parent = first._box;
+                        }
+
+                        _skills.Clear();
+                    }
+                }
             }
 
             public override void OnButtonClick(int buttonID)
@@ -699,7 +716,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     UpdateValueText(false, false);
                 }
-                else 
+                else
                     Dispose();
 
 
@@ -780,11 +797,11 @@ namespace ClassicUO.Game.UI.Gumps
                 switch (_status)
                 {
                     default:
-                    case Lock.Up: 
+                    case Lock.Up:
                         return 0x0984;
                     case Lock.Down:
                         return 0x0986;
-                    case Lock.Locked: 
+                    case Lock.Locked:
                         return 0x082C;
                 }
             }

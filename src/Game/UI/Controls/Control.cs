@@ -209,7 +209,10 @@ namespace ClassicUO.Game.UI.Controls
                 if (value == null)
                     _parent?.Children.Remove(this);
                 else
+                {
+                    _parent?.Children.Remove(this);
                     value.Children.Add(this);
+                }
                 _parent = value;
             }
         }
@@ -519,6 +522,19 @@ namespace ClassicUO.Game.UI.Controls
         {
             c.Page = page;
             c.Parent = this;
+            OnChildAdded();
+        }
+
+        public void Insert(int index, Control c, int page = 0)
+        {
+            c.Page = 0;
+
+            c._parent?.Children.Remove(c);
+
+            c._parent = this;
+
+            Children.Insert(index, c);
+            
             OnChildAdded();
         }
 
