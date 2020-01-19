@@ -415,12 +415,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int width = UOFileManager.Fonts.GetWidthASCII(6, group.Name);
 
-                Add(_textbox = new TextBox(6, 32, 0, width, false)
+                Add(_textbox = new TextBox(6, -1, 200, 200, false, FontStyle.Fixed)
                 {
                     X = 16,
                     Y = -5,
                     Text = group.Name,
-                    Width = width,
+                    Width = 200,
                     Height = 17
                 });
 
@@ -437,6 +437,18 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_box = new DataBox(0, 0, 0, 0));
 
                 IsMinimized = !group.IsMaximized;
+
+                _textbox.IsEditable = false;
+                _textbox.FocusEnter += (s, e) =>
+                {
+                    _gumpPic.IsVisible = false;
+                };
+                _textbox.FocusLost += (s, e) => 
+                {
+                    _gumpPic.IsVisible = true;
+                    _textbox.IsEditable = false;
+                };
+                _textbox.MouseDoubleClick += (s, e) => { _textbox.IsEditable = true; };
             }
 
 
@@ -556,6 +568,42 @@ namespace ClassicUO.Game.UI.Gumps
                 base.OnMouseOver(x, y);
             }
 
+            protected override void OnMouseUp(int x, int y, MouseButtonType button)
+            {
+                base.OnMouseUp(x, y, button);
+            }
+
+
+            public override void OnKeyboardReturn(int textID, string text)
+            {
+
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    text = "No Name";
+                    _textbox.SetText(text);
+                }
+
+                int width = UOFileManager.Fonts.GetWidthASCII(6, text);
+                //.Width = width;
+                int xx = width + 11 + 16;
+
+                if (xx > 0)
+                {
+                    _gumpPic.IsVisible = true;
+                    _gumpPic.X = xx;
+                    _gumpPic.Width = 215 - xx;
+                }
+                else
+                {
+                    _gumpPic.IsVisible = false;
+                }
+
+                UIManager.SystemChat?.TextBoxControl?.SetKeyboardFocus();
+
+                _group.Name = text;
+
+                base.OnKeyboardReturn(textID, text);
+            }
 
             public override void OnButtonClick(int buttonID)
             {
@@ -576,6 +624,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _box.WantUpdateSize = true;
                 WantUpdateSize = true;
+            }
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                ResetHueVector();
+
+                if (_textbox != null && _textbox.IsEditable)
+                {
+                    batcher.Draw2D(Texture2DCache.GetTexture(Color.Beige), x, y, Width, Height, ref _hueVector);
+                }
+                return base.Draw(batcher, x, y);
             }
         }
 

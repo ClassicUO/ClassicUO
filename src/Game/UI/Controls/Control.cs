@@ -429,6 +429,8 @@ namespace ClassicUO.Game.UI.Controls
 
         internal event EventHandler<MouseDoubleClickEventArgs> MouseDoubleClick;
 
+        internal event EventHandler FocusEnter, FocusLost;
+
         //public void Initialize()
         //{
         //    if (IsDisposed) return;
@@ -745,11 +747,13 @@ namespace ClassicUO.Game.UI.Controls
 
         internal virtual void OnFocusEnter()
         {
+            FocusEnter.Raise(this);
             Parent?.OnFocusEnter();
         }
 
         internal virtual void OnFocusLeft()
         {
+            FocusLost.Raise(this);
             Parent?.OnFocusLeft();
         }
 
