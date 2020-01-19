@@ -123,6 +123,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsEditable { get; set; }
 
+        public bool IsFocused { get; set; }
+
         public float Alpha { get; set; }
 
         public List<Control> Children { get; }
@@ -763,14 +765,16 @@ namespace ClassicUO.Game.UI.Controls
 
         internal virtual void OnFocusEnter()
         {
+            IsFocused = true;
             FocusEnter.Raise(this);
-            Parent?.OnFocusEnter();
+            //Parent?.OnFocusEnter();
         }
 
         internal virtual void OnFocusLeft()
         {
+            IsFocused = false;
             FocusLost.Raise(this);
-            Parent?.OnFocusLeft();
+            //Parent?.OnFocusLeft();
         }
 
         protected virtual void OnChildAdded()

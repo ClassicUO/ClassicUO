@@ -391,6 +391,7 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly GumpPicTiled _gumpPic;
             private readonly DataBox _box;
             private readonly SkillsGroup _group;
+            private byte _status;
 
             private readonly List<SkillItemControl> _skills = new List<SkillItemControl>();
 
@@ -399,6 +400,7 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = false;
                 AcceptMouseInput = true;
                 WantUpdateSize = true;
+                AcceptKeyboardInput = true;
 
                 X = x;
                 Y = y;
@@ -408,7 +410,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _button = new Button(1000, 0x0827, 0x0827, 0x0827)
                 {
                     ButtonAction = ButtonAction.Activate,
-                    ContainsByBounds = true
+                    ContainsByBounds = true,
+                    IsVisible = false,
                 };
                 Add(_button);
 
@@ -430,6 +433,7 @@ namespace ClassicUO.Game.UI.Gumps
                     X = xx,
                     Y = 5,
                     Width = 215 - xx,
+                    AcceptMouseInput = false,
                 };
                 Add(_gumpPic);
 
@@ -438,18 +442,46 @@ namespace ClassicUO.Game.UI.Gumps
                 IsMinimized = !group.IsMaximized;
 
                 _textbox.IsEditable = false;
-                _textbox.FocusEnter += (s, e) =>
+
+                _textbox.MouseDown += (s, e) =>
                 {
-                    _gumpPic.IsVisible = false;
+                   
+                    _status++;
+
+                    if (_status >= 3)
+                        _status = 0;
+
+                    switch (_status)
+                    {
+                        default:
+                        case 0:
+                            _gumpPic.IsVisible = true;
+                            _textbox.IsEditable = false;
+                            UIManager.SystemChat.TextBoxControl.SetKeyboardFocus();
+                            break;
+                        case 1:
+                            _gumpPic.IsVisible = true;
+                            _textbox.IsEditable = false;
+                            UIManager.KeyboardFocusControl = _textbox;
+                            break;
+                        case 2:
+                            _gumpPic.IsVisible = false;
+                            _textbox.IsEditable = true;
+                            _textbox.SetKeyboardFocus();
+                            break;
+                    }
+
                 };
+
                 _textbox.FocusLost += (s, e) =>
                 {
+                    _status = 0;
                     _gumpPic.IsVisible = true;
                     _textbox.IsEditable = false;
                 };
-                _textbox.MouseDoubleClick += (s, e) => { _textbox.IsEditable = true; };
             }
 
+            
 
             public int Count => _skills.Count;
 
@@ -484,6 +516,9 @@ namespace ClassicUO.Game.UI.Gumps
                 _box.Add(c);
                 _box.WantUpdateSize = true;
                 WantUpdateSize = true;
+
+                if (!_button.IsVisible)
+                    _button.IsVisible = true;
             }
 
             public void UpdateAllSkillsValues(bool showReal, bool showCaps)
@@ -513,6 +548,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return false;
             }
 
+
             protected override void OnMouseOver(int x, int y)
             {
                 if (UIManager.LastControlMouseDown(MouseButtonType.Left) is SkillItemControl skillControl)
@@ -538,6 +574,8 @@ namespace ClassicUO.Game.UI.Gumps
                                 _group.Add(index);
                                 _group.Sort();
 
+                                originalGroup._button.IsVisible = originalGroup._skills.Count != 0;
+
                                 // insert skillcontrol at the right index
                                 int itemCount = _group.Count;
                                 for (int i = 0; i < itemCount; i++)
@@ -546,6 +584,10 @@ namespace ClassicUO.Game.UI.Gumps
                                     {
                                         _skills.Insert(i, skillControl);
                                         _box.Insert(i, skillControl);
+
+                                        if (!_button.IsVisible)
+                                            _button.IsVisible = true;
+
                                         break;
                                     }
                                 }
@@ -560,11 +602,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 base.OnMouseOver(x, y);
-            }
-
-            protected override void OnMouseUp(int x, int y, MouseButtonType button)
-            {
-                base.OnMouseUp(x, y, button);
             }
 
 
@@ -601,23 +638,39 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.OnKeyUp(key, mod);
 
-                if (key == SDL.SDL_Keycode.SDLK_DELETE && !_textbox.IsEditable)
+                if (key == SDL.SDL_Keycode.SDLK_DELETE && _status == 1)
                 {
                     if (SkillsGroupManager2.Remove(_group) && RootParent is StandardSkillsGump gump)
                     {
-                        var first = gump._skillsControl[0];
+                        SkillsGroupControl first = gump._skillsControl[0];
 
                         while (_box.Children.Count != 0)
                         {
-                            var skillControl = _box.Children[0];
+                            var skillControl = (SkillItemControl) _box.Children[0];
 
+                            //skillControl.Parent = first._box;
 
-                            _box.Children.RemoveAt(0);
+                            int itemCount = first._group.Count;
+                            for (int i = 0; i < itemCount; i++)
+                            {
+                                if (first._group.GetSkill(i) == skillControl.Index)
+                                {
+                                    first._skills.Insert(i, skillControl);
+                                    first._box.Insert(i, skillControl);
 
-                            skillControl.Parent = first._box;
+                                    if (!first._button.IsVisible)
+                                        first._button.IsVisible = true;
+
+                                    break;
+                                }
+                            }
+
                         }
 
                         _skills.Clear();
+                        Dispose();
+
+                        first.UpdateSkillsPosition();
                     }
                 }
             }
@@ -647,10 +700,15 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ResetHueVector();
 
-                if (_textbox != null && _textbox.IsEditable)
+                if (_status == 2)
                 {
-                    batcher.Draw2D(Texture2DCache.GetTexture(Color.Beige), x, y, Width, Height, ref _hueVector);
+                    batcher.Draw2D(Texture2DCache.GetTexture(Color.Beige), x, y, Width, 17, ref _hueVector);
                 }
+                else if (_status == 1)
+                {
+                    batcher.Draw2D(Texture2DCache.GetTexture(Color.Bisque), x + 16, y, 200, 17, ref _hueVector);
+                }
+
                 return base.Draw(batcher, x, y);
             }
         }
@@ -816,7 +874,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (UIManager.IsMouseOverWorld && UIManager.LastControlMouseDown(MouseButtonType.Left) == this)
                 {
-                    UIManager.GetGump<SkillButtonGump>((uint) Index)?.Dispose();
+                    UIManager.GetGump<SkillButtonGump>(World.Player.Serial + (uint) Index + 1)?.Dispose();
 
                     if (Index >= 0 && Index < World.Player.Skills.Length)
                         UIManager.Add(new SkillButtonGump(World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22));

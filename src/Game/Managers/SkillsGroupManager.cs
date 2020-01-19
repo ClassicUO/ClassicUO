@@ -136,7 +136,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void PushTo(SkillsGroup group)
+        public void TransferTo(SkillsGroup group)
         {
             for (int i = 0; i < Count; i++)
             {
@@ -194,7 +194,7 @@ namespace ClassicUO.Game.Managers
             }
 
             Groups.Remove(g);
-            g.PushTo(Groups[0]);
+            g.TransferTo(Groups[0]);
 
             return true;
         }

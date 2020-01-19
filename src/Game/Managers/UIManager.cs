@@ -53,7 +53,7 @@ namespace ClassicUO.Game.Managers
         private static readonly Dictionary<uint, TargetLineGump> _targetLineGumps = new Dictionary<uint, TargetLineGump>();
         private static int _dragOriginX, _dragOriginY;
         private static bool _isDraggingControl;
-        private static Control _keyboardFocusControl, _validForDClick;
+        private static Control _keyboardFocusControl, _validForDClick, _lastFocus;
         private static bool _needSort;
 
 
@@ -103,12 +103,15 @@ namespace ClassicUO.Game.Managers
             }
             set
             {
-                _keyboardFocusControl?.OnFocusLeft();
-                _keyboardFocusControl = value;
-
-                if (value != null && value.AcceptKeyboardInput)
+                if (_keyboardFocusControl != value)
                 {
-                    value.OnFocusEnter();
+                    _keyboardFocusControl?.OnFocusLeft();
+                    _keyboardFocusControl = value;
+
+                    if (value != null && value.AcceptKeyboardInput)
+                    {
+                        value.OnFocusEnter();
+                    }
                 }
             }
         }
@@ -163,6 +166,17 @@ namespace ClassicUO.Game.Managers
 
                 if (MouseOverControl.AcceptKeyboardInput)
                     _keyboardFocusControl = MouseOverControl;
+
+                if (MouseOverControl.IsEnabled && MouseOverControl.IsVisible)
+                {
+                    if (_lastFocus != MouseOverControl)
+                    {
+                        _lastFocus?.OnFocusLeft();
+                        MouseOverControl.OnFocusEnter();
+                        _lastFocus = MouseOverControl;
+                    }
+                }
+
                 _mouseDownControls[(int) MouseButtonType.Left] = MouseOverControl;
             }
             else

@@ -41,11 +41,16 @@ namespace ClassicUO.Game.UI.Controls
                 SetKeyboardFocus();
                 EntryValue?.OnMouseClick(x, y);
             }
+
+            base.OnMouseDown(x, y, button);
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButtonType.Left) EntryValue?.OnSelectionEnd(x, y);
+            if (button == MouseButtonType.Left) 
+                EntryValue?.OnSelectionEnd(x, y);
+
+            base.OnMouseUp(x, y, button);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
