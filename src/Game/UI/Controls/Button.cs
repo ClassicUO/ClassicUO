@@ -44,7 +44,7 @@ namespace ClassicUO.Game.UI.Controls
         private const int PRESSED = 1;
         private const int OVER = 2;
         private readonly string _caption;
-        private readonly RenderedText[] _fontTexture = new RenderedText[2];
+        private readonly RenderedText[] _fontTexture;
         private readonly ushort[] _gumpGraphics = new ushort[3];
         private readonly UOTexture[] _textures = new UOTexture[3];
 
@@ -75,6 +75,8 @@ namespace ClassicUO.Game.UI.Controls
 
             if (!string.IsNullOrEmpty(caption) && normalHue != ushort.MaxValue)
             {
+                _fontTexture = new RenderedText[2];
+
                 _caption = caption;
 
                 _fontTexture[0] = RenderedText.Create(caption,FontHue, font, isunicode);
@@ -289,8 +291,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public sealed override void Dispose()
         {
-            foreach (RenderedText t in _fontTexture)
-                t?.Destroy();
+            if (_fontTexture != null)
+                foreach (RenderedText t in _fontTexture)
+                    t?.Destroy();
 
             base.Dispose();
         }

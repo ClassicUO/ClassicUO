@@ -263,7 +263,7 @@ namespace ClassicUO.Game.GameObjects
                 if (ProfileManager.Current != null)
                 {
                     if (ProfileManager.Current.StandardSkillsGump)
-                        UIManager.GetGump<StandardSkillsGump>()?.ForceUpdate(id);
+                        UIManager.GetGump<StandardSkillsGump>()?.Update(id);
                     else
                         UIManager.GetGump<SkillGumpAdvanced>()?.ForceUpdate();
                 }

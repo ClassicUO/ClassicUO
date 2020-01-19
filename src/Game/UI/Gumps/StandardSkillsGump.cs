@@ -33,6 +33,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -96,8 +97,8 @@ namespace ClassicUO.Game.UI.Gumps
             });
             Add(_checkReal = new Checkbox(0x938, 0x939, " - Show Real", 1, 0x0386, false) {X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y - 6});
             Add(_checkCaps = new Checkbox(0x938, 0x939, " - Show Caps", 1, 0x0386, false) {X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y + 7});
-            _checkReal.ValueChanged += UpdateGump;
-            _checkCaps.ValueChanged += UpdateGump;
+            _checkReal.ValueChanged += UpdateSkillsValues;
+            _checkCaps.ValueChanged += UpdateSkillsValues;
 
 
 
@@ -201,24 +202,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void UpdateElementsPosition()
-        {
-            //ushort index = 0;
-            //int currentY = 0;
-
-            //foreach (var c in _skillsControl)
-            //{
-            //    c.Y = currentY;
-            //    //currentY += 19;
-
-            //    if (!c.IsMinimized)
-            //    {
-            //        currentY = c.Count * 17;
-            //    }
-
-            //    index++;
-            //}
-        }
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
@@ -284,17 +267,40 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public void ForceUpdate(int skillIndex)
+        public void Update(int skillIndex)
         {
+            foreach (var c in _skillsControl)
+            {
+                if (c.UpdateSkillValue(skillIndex, _checkReal.IsChecked, _checkCaps.IsChecked))
+                {
+                    break;
+                }
+            }
          
-            _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
+            SumTotalSkills();
         }
 
-        private void UpdateGump(object sender, EventArgs e)
+
+
+        private void UpdateSkillsValues(object sender, EventArgs e)
         {
-         
-            _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
+            Checkbox checkbox = (Checkbox) sender;
+
+            if (_checkReal.IsChecked && _checkCaps.IsChecked)
+            {
+                if (checkbox == _checkReal)
+                    _checkCaps.IsChecked = false;
+                else
+                    _checkReal.IsChecked = false;
+            }
+
+            foreach (var c in _skillsControl)
+            {
+                c.UpdateAllSkillsValues(_checkReal.IsChecked, _checkCaps.IsChecked);
+            }
+            SumTotalSkills();
         }
+
 
         public override void Save(BinaryWriter writer)
         {
@@ -306,6 +312,11 @@ namespace ClassicUO.Game.UI.Gumps
             //for (int i = 0; i < _boxes.Count; i++) 
             //    writer.Write(_boxes[i].Opened);
             //writer.Write(IsMinimized);
+        }
+
+        private void SumTotalSkills()
+        {
+            _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
         }
 
         public override void Restore(BinaryReader reader)
@@ -398,10 +409,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             public SkillsGroupControl(SkillsGroup group, int x, int y)
             {
+                CanMove = false;
+                AcceptMouseInput = true;
+                WantUpdateSize = true;
+
                 X = x;
                 Y = y;
 
-               
                 _button = new Button(1000, 0x0827, 0x0827, 0x0827)
                 {
                     ButtonAction = ButtonAction.Activate,
@@ -433,10 +447,10 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_box = new DataBox(0, 0, 0, 0));
 
                 IsMinimized = !group.IsMaximized;
-                CanMove = false;
-                AcceptMouseInput = true;
-                WantUpdateSize = true;
             }
+
+
+            public int Count => _skills.Count;
 
             public bool IsMinimized
             {
@@ -457,7 +471,10 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            public int Count => _skills.Count;
+
+
+
+
 
             public void AddSkill(int index, int x, int y)
             {
@@ -465,17 +482,34 @@ namespace ClassicUO.Game.UI.Gumps
                 _skills.Add(c);
                 _box.Add(c);
                 _box.WantUpdateSize = true;
+                WantUpdateSize = true;
             }
 
-            public void UpdateDataPosition()
+            public void UpdateAllSkillsValues(bool showReal, bool showCaps)
             {
-                int y = 0;
+                foreach (SkillItemControl skill in _skills)
+                {
+                    skill.UpdateValueText(showReal, showCaps);
+                }
+            }
 
+            public bool UpdateSkillValue(int index, bool showReal, bool showCaps)
+            {
                 foreach (var c in _skills)
                 {
-                    c.Y = y;
-                    y += 17;
+                    if (c.Index == index && index >= 0 && index < World.Player.Skills.Length)
+                    {
+                        Skill skill = World.Player.Skills[index];
+                        if (skill == null)
+                            return true;
+
+                        c.UpdateValueText(showReal, showCaps);
+                        c.SetStatus(skill.Lock);
+                        return true;
+                    }
                 }
+
+                return false;
             }
 
             public override void OnButtonClick(int buttonID)
@@ -488,11 +522,14 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+
+
+
         private class SkillItemControl : Control
         {
             private Lock _status;
-            private readonly Button _buttonUse, _buttonStatus;
-            private readonly Label _name, _value;
+            private readonly Button _buttonStatus;
+            private readonly Label _value;
 
             public SkillItemControl(int index, int x, int y)
             {
@@ -512,16 +549,16 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (skill.IsClickable)
                     {
-                        _buttonUse = new Button(0,
-                                             0x0837,
-                                             0x0838,
-                                             0x0838)
+                        Button buttonUse = new Button(0,
+                                                       0x0837,
+                                                       0x0838,
+                                                       0x0838)
                         {
                             ButtonAction = ButtonAction.Activate,
                             X = 8
                         };
 
-                        Add(_buttonUse);
+                        Add(buttonUse);
                     }
 
                     _status = skill.Lock;
@@ -538,8 +575,9 @@ namespace ClassicUO.Game.UI.Gumps
                     };
                     Add(_buttonStatus);
 
-                    Add(_name = new Label(skill.Name, false, 0x0288, font: 9));
-                    _name.X = 22;
+                    Label name;
+                    Add(name = new Label(skill.Name, false, 0x0288, font: 9));
+                    name.X = 22;
 
                     Add(_value = new Label("", false, 0x0288, font: 9));
 
@@ -551,7 +589,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Width = 255;
                 Height = 17;
-                WantUpdateSize = false;
+                WantUpdateSize = true;
                 AcceptMouseInput = true;
                 CanMove = true;
             }
@@ -563,11 +601,25 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (buttonID == 0) // use
                 {
-
+                    GameActions.UseSkill(Index);
                 }
                 else if (buttonID == 1) // change status
                 {
+                    if (World.Player == null)
+                        return;
 
+                    Skill skill = World.Player.Skills[Index];
+                    byte newStatus = (byte) skill.Lock;
+
+                    if (newStatus < 2)
+                        newStatus++;
+                    else
+                        newStatus = 0;
+
+                    NetClient.Socket.Send(new PSkillsStatusChangeRequest((ushort) Index, newStatus));
+
+                    skill.Lock = (Lock) newStatus;
+                    SetStatus((Lock) newStatus);
                 }
             }
 
@@ -581,17 +633,20 @@ namespace ClassicUO.Game.UI.Gumps
                 _buttonStatus.ButtonGraphicPressed = graphic;
             }
 
-            private void UpdateValueText(bool showReal, bool showCap)
+            public void UpdateValueText(bool showReal, bool showCap)
             {
+                if (World.Player == null || Index < 0 || Index >= World.Player.Skills.Length)
+                    return;
+
                 var skill = World.Player.Skills[Index];
 
                 if (skill != null)
                 {
-                    double val = skill.Base;
+                    double val = skill.Value;
 
                     if (showReal)
                     {
-                        val = skill.Value;
+                        val = skill.Base;
                     }
                     else if (showCap)
                     {
