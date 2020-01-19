@@ -187,8 +187,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (buttonID == 0)
             {
-                SkillsGroup g = new SkillsGroup();
-                g.Name = "New Group";
+                SkillsGroup g = new SkillsGroup
+                {
+                    Name = "New Group"
+                };
 
                 SkillsGroupManager2.Add(g);
 
@@ -196,9 +198,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _skillsControl.Add(control);
                 control.IsMinimized = !g.IsMaximized;
                 _container.Add(control);
-            }
-            else if (buttonID == 1000)
-            {
             }
         }
 
@@ -280,8 +279,6 @@ namespace ClassicUO.Game.UI.Gumps
             SumTotalSkills();
         }
 
-
-
         private void UpdateSkillsValues(object sender, EventArgs e)
         {
             Checkbox checkbox = (Checkbox) sender;
@@ -298,6 +295,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 c.UpdateAllSkillsValues(_checkReal.IsChecked, _checkCaps.IsChecked);
             }
+
             SumTotalSkills();
         }
 
@@ -349,9 +347,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Save(XmlTextWriter writer)
         {
-            //base.Save(writer);
-            //writer.WriteAttributeString("isminimized", IsMinimized.ToString());
-            //writer.WriteAttributeString("height", _scrollArea.SpecialHeight.ToString());
+            base.Save(writer);
+            writer.WriteAttributeString("isminimized", IsMinimized.ToString());
+            writer.WriteAttributeString("height", _scrollArea.SpecialHeight.ToString());
 
             //writer.WriteStartElement("groups");
 
@@ -367,8 +365,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Restore(XmlElement xml)
         {
-            //base.Restore(xml);
-            //_scrollArea.Height = _scrollArea.SpecialHeight = int.Parse(xml.GetAttribute("height"));
+            base.Restore(xml);
+            _scrollArea.Height = _scrollArea.SpecialHeight = int.Parse(xml.GetAttribute("height"));
 
             //XmlElement groupsXml = xml["groups"];
 
@@ -512,13 +510,75 @@ namespace ClassicUO.Game.UI.Gumps
                 return false;
             }
 
+            protected override void OnMouseOver(int x, int y)
+            {
+                if (UIManager.LastControlMouseDown(MouseButtonType.Left) is SkillItemControl skillControl)
+                {
+                    if (skillControl
+                       .Parent // databox
+                       .Parent // skillgruop
+                        != this)
+                    {
+                        SkillsGroupControl originalGroup = (SkillsGroupControl) skillControl.Parent.Parent;
+
+                        if (originalGroup != null)
+                        {
+                            // remove from original control the skillcontrol
+                            if (originalGroup._skills.Remove(skillControl))
+                            {
+                                int index = skillControl.Index;
+
+                                // insert skillcontrol at the right index
+                                int currIndex = _skills.Count - 1;
+
+                                while (currIndex >= 0)
+                                {
+                                    if (_skills[currIndex].Index < index)
+                                        break;
+                                    currIndex--;
+                                }
+
+                                if (currIndex < 0)
+                                    currIndex = 0;
+
+                                originalGroup._box.Remove(skillControl);
+
+                                _skills.Insert(currIndex, skillControl);
+                                _box.Children.Insert(currIndex, skillControl);
+                                skillControl.Parent = _box;
+
+                                // update gump positions
+                                UpdateSkillsPosition();
+                                originalGroup.UpdateSkillsPosition();
+                            }
+                        }
+
+                    }
+                }
+
+                base.OnMouseOver(x, y);
+            }
+
+
             public override void OnButtonClick(int buttonID)
             {
                 if (buttonID == 1000)
                 {
                     IsMinimized = !IsMinimized;
-                    base.OnButtonClick(buttonID);
                 }
+            }
+
+            private void UpdateSkillsPosition()
+            {
+                int currY = 17;
+                foreach (var c in _skills)
+                {
+                    c.Y = currY;
+                    currY += 17;
+                }
+
+                _box.WantUpdateSize = true;
+                WantUpdateSize = true;
             }
         }
 
@@ -591,7 +651,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 17;
                 WantUpdateSize = true;
                 AcceptMouseInput = true;
-                CanMove = true;
+                CanMove = false;
             }
 
             public readonly int Index;
@@ -658,6 +718,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+
             private ushort GetStatusButtonGraphic()
             {
                 switch (_status)
@@ -670,6 +731,43 @@ namespace ClassicUO.Game.UI.Gumps
                     case Lock.Locked: 
                         return 0x082C;
                 }
+            }
+
+
+            protected override void OnMouseUp(int x, int y, MouseButtonType button)
+            {
+                if (button != MouseButtonType.Left)
+                    return;
+
+                UIManager.GameCursor.IsDraggingCursorForced = false;
+
+                if (UIManager.IsMouseOverWorld && UIManager.LastControlMouseDown(MouseButtonType.Left) == this)
+                {
+                    UIManager.GetGump<SkillButtonGump>((uint) Index)?.Dispose();
+
+                    if (Index >= 0 && Index < World.Player.Skills.Length)
+                        UIManager.Add(new SkillButtonGump(World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22));
+                }
+            }
+
+            protected override void OnMouseDown(int x, int y, MouseButtonType button)
+            {
+                if (button == MouseButtonType.Left)
+                {
+                    UIManager.GameCursor.IsDraggingCursorForced = true;
+                }
+            }
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                ResetHueVector();
+
+                if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this)
+                {
+                    batcher.Draw2D(Texture2DCache.GetTexture(Color.Wheat), x, y, Width, Height, ref _hueVector);
+                }
+
+                return base.Draw(batcher, x, y);
             }
         }
     }
