@@ -402,6 +402,7 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly TextBox _textbox;
             private readonly GumpPicTiled _gumpPic;
             private readonly DataBox _box;
+            private readonly SkillsGroup _group;
 
             private readonly List<SkillItemControl> _skills = new List<SkillItemControl>();
 
@@ -413,6 +414,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 X = x;
                 Y = y;
+
+                _group = group;
 
                 _button = new Button(1000, 0x0827, 0x0827, 0x0827)
                 {
@@ -550,6 +553,11 @@ namespace ClassicUO.Game.UI.Gumps
                                 // update gump positions
                                 UpdateSkillsPosition();
                                 originalGroup.UpdateSkillsPosition();
+
+                                // update gruop manager
+                                originalGroup._group.Remove((byte) index);
+                                _group.Add((byte) index);
+                                _group.Sort();
                             }
                         }
 
