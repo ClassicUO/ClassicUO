@@ -31,7 +31,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class GumpPicTiled : Control
     {
-        private ushort _lastGraphic;
+        private ushort _graphic;
 
         public GumpPicTiled(ushort graphic)
         {
@@ -70,12 +70,12 @@ namespace ClassicUO.Game.UI.Controls
 
         public ushort Graphic
         {
-            get => _lastGraphic;
+            get => _graphic;
             set
             {
-                if (_lastGraphic != value && value != 0xFFFF)
+                if (_graphic != value && value != 0xFFFF)
                 {
-                    _lastGraphic = value;
+                    _graphic = value;
                     Texture = UOFileManager.Gumps.GetTexture(value);
 
                     Width = Texture.Width;
