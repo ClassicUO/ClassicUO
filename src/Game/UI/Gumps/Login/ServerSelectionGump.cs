@@ -200,7 +200,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     case Buttons.Next:
                     case Buttons.Earth:
 
-                        if (loginScene.Servers.Any())
+                        if (loginScene.Servers.Length != 0)
                         {
                             int index = Settings.GlobalSettings.LastServerNum;
 
