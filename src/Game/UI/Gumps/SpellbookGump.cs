@@ -242,24 +242,14 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            //if (_spellBookType == SpellBookType.Mastery)
-            //{
-            //    for (;totalSpells < SpellsMastery.MaxSpellCount; totalSpells++)
-            //    {
-            //        _spells[totalSpells] = true;
-            //    }
-            //}
-            //else
+            foreach (Item spell in item.Items)
             {
-                foreach (Item spell in item.Items)
-                {
-                    int currentCount = spell.Amount;
+                int currentCount = spell.Amount;
 
-                    if (currentCount > 0 && currentCount <= maxSpellsCount)
-                    {
-                        _spells[currentCount - 1] = true;
-                        totalSpells++;
-                    }
+                if (currentCount > 0 && currentCount <= maxSpellsCount)
+                {
+                    _spells[currentCount - 1] = true;
+                    totalSpells++;
                 }
             }
 
