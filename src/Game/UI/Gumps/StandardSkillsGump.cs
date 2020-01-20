@@ -332,6 +332,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _textbox.MouseDown += (s, e) =>
                 {
+                    if (_textbox.IsEditable && _status == 2)
+                    {
+                        return;
+                    }
                    
                     _status++;
 
