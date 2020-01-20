@@ -361,8 +361,11 @@ namespace ClassicUO.Network
             bool result = true;
 
 
-            if (!World.InGame || (ProfileManager.Current != null && ProfileManager.Current.ActivateChatAfterEnter && UIManager.SystemChat?.IsActive == true) ||
-                UIManager.SystemChat?.IsFocused == false)
+            if (!World.InGame || 
+                (ProfileManager.Current != null && 
+                ProfileManager.Current.ActivateChatAfterEnter && 
+                UIManager.SystemChat?.IsActive == true) ||
+                UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
             {
                 return result;
             }

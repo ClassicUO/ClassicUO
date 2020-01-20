@@ -69,7 +69,6 @@ namespace ClassicUO.Game.UI.Gumps
         public readonly TextBox TextBoxControl;
 
         private bool _isActive;
-        private bool _isFocused = false;
         private ChatMode _mode = ChatMode.Default;
 
         public SystemChatControl(int x, int y, int w, int h)
@@ -147,11 +146,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public bool IsFocused
-        {
-            get => _isFocused;
-        }
-
+    
         public ChatMode Mode
         {
             get => _mode;
@@ -224,16 +219,6 @@ namespace ClassicUO.Game.UI.Gumps
             TextBoxControl.IsEditable = true;
             TextBoxControl.SetKeyboardFocus();
             TextBoxControl.IsEditable = _isActive;
-        }
-
-        internal override void OnFocusEnter()
-        {
-            _isFocused = true;
-        }
-
-        internal override void OnFocusLeft()
-        {
-            _isFocused = false;
         }
 
         public void ToggleChatVisibility()
