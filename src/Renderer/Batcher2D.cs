@@ -1533,7 +1533,7 @@ namespace ClassicUO.Renderer
             DefaultEffect.ApplyStates();
         }
 
-        private void Flush()
+        private unsafe void Flush()
         {
             ApplyStates();
 
@@ -1543,10 +1543,15 @@ namespace ClassicUO.Renderer
             int start = UpdateVertexBuffer(_numSprites);
 
             //int start = 0;
-            //_vertexBuffer.SetDataPointerEXT(0,
-            //                                _handlePtr,
-            //                                PositionNormalTextureColor4.SIZE_IN_BYTES * _numSprites,
-            //                                SetDataOptions.None);
+
+            //fixed (PositionNormalTextureColor4* p = &_vertexInfo[0])
+            //{
+            //    _vertexBuffer.SetDataPointerEXT(
+            //                                    0,
+            //                                    (IntPtr) p,
+            //                                    _numSprites * PositionNormalTextureColor4.SIZE_IN_BYTES,
+            //                                    SetDataOptions.None);
+            //}
 
             Texture2D current = _textureInfo[0];
             int offset = 0;
