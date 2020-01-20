@@ -200,55 +200,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-
-        protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
-        {
-            //if (key == SDL.SDL_Keycode.SDLK_DELETE)
-            //{
-            //    for (int i = 0; i < _boxes.Count; i++)
-            //    {
-            //        var box = _boxes[i];
-
-            //        if (box.IsEditing)
-            //        {
-            //            if (i == 0)
-            //            {
-            //                UIManager.Add(new MessageBoxGump(200, 150, "Cannot delete this group.", null));
-            //                break;
-            //            }
-
-            //            if (SkillsGroupManager.RemoveGroup(box.LabelText))
-            //            {
-            //                foreach (var child in box.FindControls<SkillControl>())
-            //                {
-            //                    _boxes[0].AddItem(child);
-            //                }
-
-            //                _boxes[0].Items.Sort((a, b) =>
-            //                {
-            //                    var s0 = (SkillControl)a;
-            //                    var s1 = (SkillControl)b;
-
-            //                    var skill0 = World.Player.Skills[s0.SkillIndex];
-            //                    var skill1 = World.Player.Skills[s1.SkillIndex];
-
-            //                    return skill0.Name.CompareTo(skill1.Name);
-            //                });
-
-            //                _boxes[0].GenerateButtons();
-
-            //                box.Children.Clear();
-            //                _container.Remove(box);
-            //                _boxes.RemoveAt(i);
-            //            }
-
-            //            break;
-            //        }
-            //    }
-            //}
-        }
-
-
         public override void Update(double totalMS, double frameMS)
         {
             WantUpdateSize = true;
@@ -296,88 +247,24 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             SumTotalSkills();
-        }
-
-
-        public override void Save(BinaryWriter writer)
-        {
-            //base.Save(writer);
-            //writer.Write(_scrollArea.SpecialHeight);
-
-            //writer.Write(_boxes.Count);
-
-            //for (int i = 0; i < _boxes.Count; i++) 
-            //    writer.Write(_boxes[i].Opened);
-            //writer.Write(IsMinimized);
-        }
-
-        private void SumTotalSkills()
-        {
-            _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
-        }
-
-        public override void Restore(BinaryReader reader)
-        {
-            //base.Restore(reader);
-
-            //if (Configuration.Profile.GumpsVersion == 2)
-            //{
-            //    reader.ReadUInt32();
-            //    _isMinimized = reader.ReadBoolean();
-            //}
-
-            //_scrollArea.Height = _scrollArea.SpecialHeight = reader.ReadInt32();
-
-            //int count = reader.ReadInt32();
-
-            //for (int i = 0; i < count; i++)
-            //{
-            //    bool opened = reader.ReadBoolean();
-
-            //    if (i < _boxes.Count)
-            //        _boxes[i].Opened = opened;
-            //}
-
-            //if (Profile.GumpsVersion >= 3)
-            //{
-            //    _isMinimized = reader.ReadBoolean();
-            //}
-        }
+        } 
 
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);
             writer.WriteAttributeString("isminimized", IsMinimized.ToString());
             writer.WriteAttributeString("height", _scrollArea.SpecialHeight.ToString());
-
-            //writer.WriteStartElement("groups");
-
-            //for (int i = 0; i < _boxes.Count; i++)
-            //{
-            //    writer.WriteStartElement("group");
-            //    writer.WriteAttributeString("isopen", _boxes[i].Opened.ToString());
-            //    writer.WriteEndElement();
-            //}
-
-            //writer.WriteEndElement();
         }
 
         public override void Restore(XmlElement xml)
         {
             base.Restore(xml);
             _scrollArea.Height = _scrollArea.SpecialHeight = int.Parse(xml.GetAttribute("height"));
+        }
 
-            //XmlElement groupsXml = xml["groups"];
-
-            //if (groupsXml != null)
-            //{
-            //    int index = 0;
-            //    foreach (XmlElement groupXml in groupsXml.GetElementsByTagName("group"))
-            //    {
-            //        if (index >= 0 && index < _boxes.Count)
-            //            _boxes[index++].Opened = bool.Parse(groupXml.GetAttribute("isopen"));
-            //    }
-            //
+        private void SumTotalSkills()
+        {
+            _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
         }
 
 
@@ -711,14 +598,12 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-
-
-
         private class SkillItemControl : Control
         {
             private Lock _status;
             private readonly Button _buttonStatus;
             private readonly Label _value;
+
 
             public SkillItemControl(int index, int x, int y)
             {
@@ -773,7 +658,10 @@ namespace ClassicUO.Game.UI.Gumps
                     UpdateValueText(false, false);
                 }
                 else
+                {
                     Dispose();
+                    return;
+                }
 
 
                 Width = 255;
@@ -782,6 +670,7 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = true;
                 CanMove = false;
             }
+
 
             public readonly int Index;
 
@@ -847,7 +736,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-
             private ushort GetStatusButtonGraphic()
             {
                 switch (_status)
@@ -861,7 +749,6 @@ namespace ClassicUO.Game.UI.Gumps
                         return 0x082C;
                 }
             }
-
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
             {
