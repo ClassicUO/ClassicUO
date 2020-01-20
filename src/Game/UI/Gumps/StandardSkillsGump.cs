@@ -348,7 +348,7 @@ namespace ClassicUO.Game.UI.Gumps
                         case 0:
                             _gumpPic.IsVisible = true;
                             _textbox.IsEditable = false;
-                            UIManager.SystemChat.TextBoxControl.SetKeyboardFocus();
+                            UIManager.SystemChat?.TextBoxControl?.SetKeyboardFocus();
                             break;
                         case 1:
                             _gumpPic.IsVisible = true;
