@@ -125,6 +125,7 @@ namespace ClassicUO.Game.UI.Gumps
                         };
 
                         Add(text, page);
+                        text.SetTooltip(UOFileManager.Cliloc.GetString(1061693 + offs), 150);
 
                         y += 15;
                         offs++;
@@ -132,18 +133,24 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (spellsOnPage == 4)
                     {
-                        _primAbility = new GumpPic(215, 105, (ushort) (0x5200 + ((byte) World.Player.PrimaryAbility & 0x7F) - 1), 0);
+                        byte bab1 = (byte) (((byte) World.Player.PrimaryAbility & 0x7F) - 1);
+
+                        _primAbility = new GumpPic(215, 105, (ushort) (0x5200 + bab1), 0);
                         text = new Label("Primary Ability Icon", false, 0x0288, 80, 6) {X = 265, Y = 105};
                         Add(_primAbility, page);
                         Add(text, page);
-
+                        _primAbility.SetTooltip(UOFileManager.Cliloc.GetString(1028838 + bab1));
                         _primAbility.DragBegin += OnGumpicDragBeginPrimary;
 
-                        _secAbility = new GumpPic(215, 150, (ushort) (0x5200 + ((byte) World.Player.SecondaryAbility & 0x7F) - 1), 0);
+
+
+                        byte bab2 = (byte) (((byte) World.Player.SecondaryAbility & 0x7F) - 1);
+
+                        _secAbility = new GumpPic(215, 150, (ushort) (0x5200 + bab2), 0);
                         text = new Label("Secondary Ability Icon", false, 0x0288, 80, 6) {X = 265, Y = 150};
                         Add(_secAbility, page);
                         Add(text, page);
-
+                        _secAbility.SetTooltip(UOFileManager.Cliloc.GetString(1028838 + bab2));
                         _secAbility.DragBegin += OnGumpicDragBeginSecondary;
                     }
                 }
@@ -161,6 +168,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 var icon = new GumpPic(62, 40, (ushort) (0x5200 + i), 0);
                 Add(icon, pageW);
+                icon.SetTooltip(UOFileManager.Cliloc.GetString(1061693 + i), 150);
 
                 Label text = new Label(StringHelper.CapitalizeAllWords(AbilityData.Abilities[i].Name), false, 0x0288, 80, 6)
                 {
