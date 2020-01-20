@@ -144,14 +144,23 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseEnter(int x, int y)
         {
-            GameScene gs = Client.Game.GetScene<GameScene>();
-
-            if (gs.IsHoldingItem)
+            if (ItemHold.Enabled)
             {
-                Item it = new Item(gs.HeldItem.Serial) { Graphic = gs.HeldItem.Graphic, Hue = gs.HeldItem.Hue };
+                Item it = new Item(ItemHold.Serial) { Graphic = ItemHold.Graphic, Hue = ItemHold.Hue };
 
                 _paperDollInteractable.AddFakeDress(it);
             }
+        }
+
+        protected override void OnMouseOver(int x, int y)
+        {
+            base.OnMouseOver(x, y);
+
+            if (ItemHold.Enabled)
+            {
+
+            }
+
         }
 
         private void BuildGump()
@@ -318,7 +327,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             GameScene gs = Client.Game.GetScene<GameScene>();
 
-            if (!gs.IsHoldingItem || !gs.IsMouseOverUI || _paperDollInteractable.IsOverBackpack)
+            if (!ItemHold.Enabled || !gs.IsMouseOverUI || _paperDollInteractable.IsOverBackpack)
                 return;
 
             gs.WearHeldItem(Mobile);

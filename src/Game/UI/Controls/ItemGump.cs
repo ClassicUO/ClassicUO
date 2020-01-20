@@ -193,14 +193,14 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (Mouse.IsDragging && CanPickup())
                     {
-                        if (!gs.IsHoldingItem || !gs.IsMouseOverUI) 
+                        if (!ItemHold.Enabled || !gs.IsMouseOverUI) 
                             return;
 
                         SelectedObject.Object = Item;
 
                         if (Item.ItemData.IsContainer)
                             gs.DropHeldItemToContainer(Item);
-                        else if (gs.HeldItem.Graphic == Item.Graphic && gs.HeldItem.IsStackable)
+                        else if (ItemHold.Graphic == Item.Graphic && ItemHold.IsStackable)
                             gs.MergeHeldItem(Item);
                         else
                         {
@@ -254,7 +254,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
                 else
                 {
-                    if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+                    if (!ItemHold.Enabled || !gs.IsMouseOverUI)
                     {
                         //if (_clickedCanDrag)
                         //{
@@ -273,7 +273,7 @@ namespace ClassicUO.Game.UI.Controls
 
                         if (Item.ItemData.IsContainer)
                             gs.DropHeldItemToContainer(Item);
-                        else if (gs.HeldItem.Graphic == Item.Graphic && gs.HeldItem.IsStackable)
+                        else if (ItemHold.Graphic == Item.Graphic && ItemHold.IsStackable)
                             gs.MergeHeldItem(Item);
                         else
                         {

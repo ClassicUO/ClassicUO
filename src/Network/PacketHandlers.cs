@@ -746,7 +746,7 @@ namespace ClassicUO.Network
                     GameScene scene = Client.Game.GetScene<GameScene>();
 
                     if (cont == World.Player && it.Layer == Layer.Invalid)
-                        scene.HeldItem.Enabled = false;
+                        ItemHold.Enabled = false;
 
 
                     if (it.Layer != Layer.Invalid)
@@ -1099,28 +1099,26 @@ namespace ClassicUO.Network
 
             GameScene scene = Client.Game.GetScene<GameScene>();
 
-            ItemHold hold = scene.HeldItem;
+            Item item = World.Items.Get(ItemHold.Serial);
 
-            Item item = World.Items.Get(hold.Serial);
-
-            if (hold.Enabled || hold.Dropped && item == null)
+            if (ItemHold.Enabled || ItemHold.Dropped && item == null)
             {
-                if (hold.Layer == Layer.Invalid && SerialHelper.IsValid(hold.Container))
+                if (ItemHold.Layer == Layer.Invalid && SerialHelper.IsValid(ItemHold.Container))
                 {
-                    Entity container = World.Get(hold.Container);
+                    Entity container = World.Get(ItemHold.Container);
 
                     if (container != null)
                     {
-                        item = World.GetOrCreateItem(hold.Serial);
-                        item.Graphic = hold.Graphic;
-                        item.FixHue(hold.Hue);
-                        item.Amount = hold.Amount;
-                        item.Flags = hold.Flags;
-                        item.Layer = hold.Layer;
-                        item.Container = hold.Container;
-                        item.X = hold.X;
-                        item.Y = hold.Y;
-                        item.Z = hold.Z;
+                        item = World.GetOrCreateItem(ItemHold.Serial);
+                        item.Graphic = ItemHold.Graphic;
+                        item.FixHue(ItemHold.Hue);
+                        item.Amount = ItemHold.Amount;
+                        item.Flags = ItemHold.Flags;
+                        item.Layer = ItemHold.Layer;
+                        item.Container = ItemHold.Container;
+                        item.X = ItemHold.X;
+                        item.Y = ItemHold.Y;
+                        item.Z = ItemHold.Z;
                         item.UpdateScreenPosition();
 
                         container.Items.Add(item);
@@ -1133,24 +1131,24 @@ namespace ClassicUO.Network
                 }
                 else
                 {
-                    item = World.GetOrCreateItem(hold.Serial);
+                    item = World.GetOrCreateItem(ItemHold.Serial);
 
                     //if (item != null)
                     {
-                        item.Graphic = hold.Graphic;
-                        item.FixHue(hold.Hue);
-                        item.Amount = hold.Amount;
-                        item.Flags = hold.Flags;
-                        item.Layer = hold.Layer;
-                        item.Container = hold.Container;
-                        item.X = hold.X;
-                        item.Y = hold.Y;
-                        item.Z = hold.Z;
+                        item.Graphic = ItemHold.Graphic;
+                        item.FixHue(ItemHold.Hue);
+                        item.Amount = ItemHold.Amount;
+                        item.Flags = ItemHold.Flags;
+                        item.Layer = ItemHold.Layer;
+                        item.Container = ItemHold.Container;
+                        item.X = ItemHold.X;
+                        item.Y = ItemHold.Y;
+                        item.Z = ItemHold.Z;
                         item.UpdateScreenPosition();
 
 
                         Entity container = null;
-                        if (!hold.OnGround)
+                        if (!ItemHold.OnGround)
                         {
                             container = World.Get(item.Container);
 
@@ -1162,7 +1160,7 @@ namespace ClassicUO.Network
 
                                     mob.Items.Add(item);
 
-                                    mob.Equipment[(int) hold.Layer] = item;
+                                    mob.Equipment[(int) ItemHold.Layer] = item;
                                 }
                                 else
                                     Log.Warn( "SOMETHING WRONG WITH CONTAINER (should be a mobile)");
@@ -1184,7 +1182,7 @@ namespace ClassicUO.Network
                     }
                 }
 
-                hold.Clear();
+                ItemHold.Clear();
             }
             else
                 Log.Warn( "There was a problem with ItemHold object. It was cleared before :|");
@@ -1199,10 +1197,8 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            GameScene scene = Client.Game.GetScene<GameScene>();
-
-            scene.HeldItem.Enabled = false;
-            scene.HeldItem.Dropped = false;
+            ItemHold.Enabled = false;
+            ItemHold.Dropped = false;
         }
 
         private static void DropItemAccepted(Packet p)
@@ -1210,10 +1206,8 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            GameScene scene = Client.Game.GetScene<GameScene>();
-
-            scene.HeldItem.Enabled = false;
-            scene.HeldItem.Dropped = false;
+            ItemHold.Enabled = false;
+            ItemHold.Dropped = false;
         }
 
         private static void DeathScreen(Packet p)
@@ -1319,8 +1313,8 @@ namespace ClassicUO.Network
 
             GameScene gs = Client.Game.GetScene<GameScene>();
 
-            if (gs.HeldItem.Serial == item.Serial)
-                gs.HeldItem.Clear();      
+            if (ItemHold.Serial == item.Serial)
+                ItemHold.Clear();      
         }
 
         private static void UpdateSkills(Packet p)
@@ -4223,8 +4217,8 @@ namespace ClassicUO.Network
         {
             GameScene gs = Client.Game.GetScene<GameScene>();
 
-            if (gs != null && gs.HeldItem.Serial == serial && gs.HeldItem.Dropped)
-                gs.HeldItem.Clear();
+            if (gs != null && ItemHold.Serial == serial && ItemHold.Dropped)
+                ItemHold.Clear();
 
             Entity container = World.Get(containerSerial);
 

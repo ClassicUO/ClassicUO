@@ -63,7 +63,6 @@ namespace ClassicUO.Game
         private IntPtr _cursor, _surface;
         private UOTexture _draggedItemTexture;
         private ushort _graphic = 0x2073;
-        private ItemHold _itemHold;
         private bool _needGraphicUpdate = true;
         private Point _offset;
         private static Vector3 _vec = Vector3.Zero;
@@ -247,10 +246,9 @@ namespace ClassicUO.Game
         public bool IsDraggingCursorForced { get; set; }
 
 
-        public void SetDraggedItem(ItemHold hold, Point? offset)
+        public void SetDraggedItem(Point? offset)
         {
-            _itemHold = hold;
-            _draggedItemTexture = UOFileManager.Art.GetTexture(_itemHold.DisplayedGraphic);
+            _draggedItemTexture = UOFileManager.Art.GetTexture(ItemHold.DisplayedGraphic);
             if (_draggedItemTexture == null)
                 return;
 
@@ -305,7 +303,7 @@ namespace ClassicUO.Game
                 }
             }
 
-            if (_itemHold != null && _itemHold.Enabled)
+            if (ItemHold.Enabled)
                 _draggedItemTexture.Ticks = (long) totalMS;
         }
 
@@ -439,7 +437,7 @@ namespace ClassicUO.Game
                 _temp.Clear();
             }
 
-            if (_itemHold != null && _itemHold.Enabled && !_itemHold.Dropped)
+            if (ItemHold.Enabled && !ItemHold.Dropped)
             {
                 float scale = 1;
 
@@ -450,11 +448,11 @@ namespace ClassicUO.Game
                 int y = Mouse.Position.Y - _offset.Y;
 
                 Vector3 hue = Vector3.Zero;
-                ShaderHuesTraslator.GetHueVector(ref hue, _itemHold.Hue, _itemHold.IsPartialHue, _itemHold.HasAlpha ? .5f : 0);
+                ShaderHuesTraslator.GetHueVector(ref hue, ItemHold.Hue, ItemHold.IsPartialHue, ItemHold.HasAlpha ? .5f : 0);
 
                 sb.Draw2D(_draggedItemTexture, x, y, _draggedItemTexture.Width * scale, _draggedItemTexture.Height * scale, ref hue);
 
-                if (_itemHold.Amount > 1 && _itemHold.DisplayedGraphic == _itemHold.Graphic && _itemHold.IsStackable)
+                if (ItemHold.Amount > 1 && ItemHold.DisplayedGraphic == ItemHold.Graphic && ItemHold.IsStackable)
                 {
                     x += 5;
                     y += 5;
@@ -485,7 +483,7 @@ namespace ClassicUO.Game
         {
             if (Client.Game.Scene is GameScene gs)
             {
-                if (!World.ClientFeatures.TooltipsEnabled || (SelectedObject.Object is Item selectedItem && selectedItem.IsLocked && selectedItem.ItemData.Weight == 255 && !selectedItem.ItemData.IsContainer) || gs.IsHoldingItem)
+                if (!World.ClientFeatures.TooltipsEnabled || (SelectedObject.Object is Item selectedItem && selectedItem.IsLocked && selectedItem.ItemData.Weight == 255 && !selectedItem.ItemData.IsContainer) || ItemHold.Enabled)
                 {
                     if (!_tooltip.IsEmpty)
                         _tooltip.Clear();
@@ -561,9 +559,7 @@ namespace ClassicUO.Game
 
             if (TargetManager.IsTargeting)
             {
-                GameScene gs = Client.Game.GetScene<GameScene>();
-
-                if (gs != null && !gs.IsHoldingItem)
+                if (!ItemHold.Enabled)
                     return _cursorData[war, 12];
             }
 

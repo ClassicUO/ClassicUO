@@ -169,7 +169,7 @@ namespace ClassicUO.Game.UI.Controls
         //        {
         //            if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
         //            {
-        //                if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI) return;
+        //                if (gs == null || !ItemHold.Enabled || !gs.IsMouseOverUI) return;
 
         //                gs.WearHeldItem(Mobile);
 
@@ -209,7 +209,7 @@ namespace ClassicUO.Game.UI.Controls
         //        }
         //        else
         //        {
-        //            if (gs == null || !gs.IsHoldingItem || !gs.IsMouseOverUI) return;
+        //            if (gs == null || !ItemHold.Enabled || !gs.IsMouseOverUI) return;
 
         //            if (Item == Mobile.Equipment[(int) Layer.Backpack])
         //                gs.DropHeldItemToContainer(Item);

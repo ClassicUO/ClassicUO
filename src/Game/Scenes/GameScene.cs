@@ -136,7 +136,7 @@ namespace ClassicUO.Game.Scenes
                 //Engine.DropFpsMinMaxValues();
             }
 
-            HeldItem = new ItemHold();
+            ItemHold.Clear();
             Hotkeys = new HotkeysManager();
             Macros = new MacroManager();
 
@@ -296,7 +296,7 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
-            HeldItem?.Clear();
+            ItemHold.Clear();
 
             try
             {
@@ -700,7 +700,7 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            if (_isMouseLeftDown && !IsHoldingItem)
+            if (_isMouseLeftDown && !ItemHold.Enabled)
             {
                 if (World.CustomHouseManager != null &&
                     World.CustomHouseManager.SelectedGraphic != 0 &&

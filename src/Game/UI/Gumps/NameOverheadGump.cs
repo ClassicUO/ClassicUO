@@ -227,7 +227,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 GameScene scene = Client.Game.GetScene<GameScene>();
 
-                if (!scene.IsHoldingItem)
+                if (!ItemHold.Enabled)
                 {
                     if (UIManager.IsDragging || Math.Max(Math.Abs(Mouse.LDroppedOffset.X), Math.Abs(Mouse.LDroppedOffset.Y)) >= 1)
                     {
@@ -268,7 +268,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    if (scene.IsHoldingItem)
+                    if (ItemHold.Enabled)
                     {
                         if (Entity.Distance < Constants.DRAG_ITEMS_DISTANCE)
                         {

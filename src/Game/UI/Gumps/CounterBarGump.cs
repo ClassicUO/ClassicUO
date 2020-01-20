@@ -361,17 +361,17 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     GameScene gs = Client.Game.GetScene<GameScene>();
 
-                    if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+                    if (!ItemHold.Enabled || !gs.IsMouseOverUI)
                         return;
 
-                    Item item = World.Items.Get(gs.HeldItem.Container);
+                    Item item = World.Items.Get(ItemHold.Container);
 
                     if (item == null)
                         return;
 
-                    SetGraphic(gs.HeldItem.Graphic, gs.HeldItem.Hue);
+                    SetGraphic(ItemHold.Graphic, ItemHold.Hue);
 
-                    gs.DropHeldItemToContainer(item, gs.HeldItem.X, gs.HeldItem.Y);
+                    gs.DropHeldItemToContainer(item, ItemHold.X, ItemHold.Y);
                 }
                 else if (button == MouseButtonType.Right && Keyboard.Alt && _graphic != 0)
                 {

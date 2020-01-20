@@ -455,10 +455,10 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     GameScene gs = Client.Game.GetScene<GameScene>();
 
-                    if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+                    if (!ItemHold.Enabled || !gs.IsMouseOverUI)
                         return;
 
-                    ArtTexture texture = UOFileManager.Art.GetTexture(gs.HeldItem.DisplayedGraphic);
+                    ArtTexture texture = UOFileManager.Art.GetTexture(ItemHold.DisplayedGraphic);
 
                     int x = e.X;
                     int y = e.Y;
@@ -481,9 +481,9 @@ namespace ClassicUO.Game.UI.Gumps
                     if (y < 0)
                         y = 0;
 
-                    GameActions.DropItem(gs.HeldItem.Serial, x, y, 0, ID1);
-                    gs.HeldItem.Dropped = true;
-                    gs.HeldItem.Enabled = false;
+                    GameActions.DropItem(ItemHold.Serial, x, y, 0, ID1);
+                    ItemHold.Dropped = true;
+                    ItemHold.Enabled = false;
                     //Mouse.CancelDoubleClick = true;
                 }
             };

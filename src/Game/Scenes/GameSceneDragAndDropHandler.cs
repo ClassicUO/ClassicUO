@@ -37,22 +37,17 @@ namespace ClassicUO.Game.Scenes
     {
         private Entity _dragginObject;
 
-        public ItemHold HeldItem { get; private set; }
-
-        public bool IsHoldingItem => HeldItem != null && HeldItem.Enabled;
-
-
         public void MergeHeldItem(Entity container)
         {
-            if (HeldItem.Enabled && HeldItem.Serial != container)
+            if (ItemHold.Enabled && ItemHold.Serial != container)
             {
                 if (SerialHelper.IsMobile(container.Serial))
-                    GameActions.DropItem(HeldItem.Serial, 0xFFFF, 0xFFFF, 0, container.Serial);
+                    GameActions.DropItem(ItemHold.Serial, 0xFFFF, 0xFFFF, 0, container.Serial);
                 else if (SerialHelper.IsItem(container.Serial))
-                    GameActions.DropItem(HeldItem.Serial, container.X, container.Y, container.Z, container.Serial);
+                    GameActions.DropItem(ItemHold.Serial, container.X, container.Y, container.Z, container.Serial);
 
-                HeldItem.Enabled = false;
-                HeldItem.Dropped = true;
+                ItemHold.Enabled = false;
+                ItemHold.Dropped = true;
             }
         }
 
@@ -85,12 +80,12 @@ namespace ClassicUO.Game.Scenes
 
         private bool PickupItemDirectly(Item item, int x, int y, int amount, Point? offset)
         {
-            if (World.Player.IsDead || HeldItem.Enabled || item == null || item.IsDestroyed /*|| (!HeldItem.Enabled && HeldItem.Dropped && HeldItem.Serial.IsValid)*/)
+            if (World.Player.IsDead || ItemHold.Enabled || item == null || item.IsDestroyed /*|| (!ItemHold.Enabled && ItemHold.Dropped && ItemHold.Serial.IsValid)*/)
                 return false;
 
-            HeldItem.Clear();
-            HeldItem.Set(item, amount <= 0 ? item.Amount : (ushort) amount);
-            UIManager.GameCursor.SetDraggedItem(HeldItem, offset);
+            ItemHold.Clear();
+            ItemHold.Set(item, amount <= 0 ? item.Amount : (ushort) amount);
+            UIManager.GameCursor.SetDraggedItem(offset);
 
             if (!item.OnGround)
             {
@@ -147,24 +142,24 @@ namespace ClassicUO.Game.Scenes
             else
                 serial = 0xFFFF_FFFF;
 
-            if (HeldItem.Enabled && HeldItem.Serial != serial)
+            if (ItemHold.Enabled && ItemHold.Serial != serial)
             {
-                GameActions.DropItem(HeldItem.Serial, x, y, z, serial);
-                HeldItem.Enabled = false;
-                HeldItem.Dropped = true;
+                GameActions.DropItem(ItemHold.Serial, x, y, z, serial);
+                ItemHold.Enabled = false;
+                ItemHold.Dropped = true;
             }
         }
 
         public void DropHeldItemToContainer(Item container, int x = 0xFFFF, int y = 0xFFFF)
         {
-            if (HeldItem.Enabled && container != null && HeldItem.Serial != container.Serial)
+            if (ItemHold.Enabled && container != null && ItemHold.Serial != container.Serial)
             {
                 ContainerGump gump = UIManager.GetGump<ContainerGump>(container);
 
                 if (gump != null && (x != 0xFFFF || y != 0xFFFF))
                 {
                     Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
-                    ArtTexture texture = UOFileManager.Art.GetTexture(HeldItem.DisplayedGraphic);
+                    ArtTexture texture = UOFileManager.Art.GetTexture(ItemHold.DisplayedGraphic);
                     float scale = UIManager.ContainerScale;
 
                     bounds.X = (int) (bounds.X * scale);
@@ -213,19 +208,19 @@ namespace ClassicUO.Game.Scenes
                 }
 
 
-                GameActions.DropItem(HeldItem.Serial, x, y, 0, container);
-                HeldItem.Enabled = false;
-                HeldItem.Dropped = true;
+                GameActions.DropItem(ItemHold.Serial, x, y, 0, container);
+                ItemHold.Enabled = false;
+                ItemHold.Dropped = true;
             }
         }
 
         public void WearHeldItem(Mobile target)
         {
-            if (HeldItem.Enabled && HeldItem.IsWearable)
+            if (ItemHold.Enabled && ItemHold.IsWearable)
             {
-                GameActions.Equip(HeldItem.Serial, (Layer) UOFileManager.TileData.StaticData[HeldItem.Graphic].Layer, target);
-                HeldItem.Enabled = false;
-                HeldItem.Dropped = true;
+                GameActions.Equip(ItemHold.Serial, (Layer) UOFileManager.TileData.StaticData[ItemHold.Graphic].Layer, target);
+                ItemHold.Enabled = false;
+                ItemHold.Dropped = true;
             }
         }
     }

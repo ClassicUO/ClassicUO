@@ -317,7 +317,7 @@ namespace ClassicUO.Game.Scenes
 
             if (!IsMouseOverViewport)
             {
-                if (IsHoldingItem)
+                if (ItemHold.Enabled)
                 {
                     UIManager.MouseOverControl?.InvokeMouseUp(Mouse.Position, MouseButtonType.Left);
                 }
@@ -333,7 +333,7 @@ namespace ClassicUO.Game.Scenes
             if (UIManager.IsDragging)
                 return;
 
-            if (IsHoldingItem)
+            if (ItemHold.Enabled)
             {
                 if (SelectedObject.Object is GameObject obj && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
                 {
@@ -352,7 +352,7 @@ namespace ClassicUO.Game.Scenes
                             {
                                 SelectedObject.Object = item;
 
-                                if (item.Graphic == HeldItem.Graphic && HeldItem.IsStackable)
+                                if (item.Graphic == ItemHold.Graphic && ItemHold.IsStackable)
                                     MergeHeldItem(item);
                                 else
                                     DropHeldItemToWorld(obj.X, obj.Y, (sbyte) (obj.Z + item.ItemData.Height));
@@ -640,7 +640,7 @@ namespace ClassicUO.Game.Scenes
             if (!IsMouseOverViewport)
                 return;
 
-            if (Mouse.LButtonPressed && !IsHoldingItem)
+            if (Mouse.LButtonPressed && !ItemHold.Enabled)
             {
                 Point offset = Mouse.LDroppedOffset;
 

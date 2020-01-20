@@ -27,29 +27,29 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game
 {
-    internal class ItemHold
+    internal static class ItemHold
     {
-        public bool OnGround { get; private set; }
-        public ushort X { get; private set; }
-        public ushort Y { get; private set; }
-        public sbyte Z { get; private set; }
-        public uint Container { get; private set; }
-        public uint Serial { get; private set; }
-        public ushort Graphic { get; private set; }
-        public ushort DisplayedGraphic { get; private set; }
-        public ushort Hue { get; private set; }
-        public ushort Amount { get; private set; }
-        public bool IsStackable { get; private set; }
-        public bool IsPartialHue { get; private set; }
-        public bool IsWearable { get; private set; }
-        public bool HasAlpha { get; private set; }
-        public Layer Layer { get; private set; }
-        public Flags Flags { get; private set; }
+        public static bool OnGround { get; private set; }
+        public static ushort X { get; private set; }
+        public static ushort Y { get; private set; }
+        public static sbyte Z { get; private set; }
+        public static uint Container { get; private set; }
+        public static uint Serial { get; private set; }
+        public static ushort Graphic { get; private set; }
+        public static ushort DisplayedGraphic { get; private set; }
+        public static ushort Hue { get; private set; }
+        public static ushort Amount { get; private set; }
+        public static bool IsStackable { get; private set; }
+        public static bool IsPartialHue { get; private set; }
+        public static bool IsWearable { get; private set; }
+        public static bool HasAlpha { get; private set; }
+        public static Layer Layer { get; private set; }
+        public static Flags Flags { get; private set; }
 
-        public bool Enabled { get; set; }
-        public bool Dropped { get; set; }
+        public static bool Enabled { get; set; }
+        public static bool Dropped { get; set; }
 
-        public void Set(Item item, ushort amount, Point? offset = null)
+        public static void Set(Item item, ushort amount, Point? offset = null)
         {
             Enabled = true;
 
@@ -71,7 +71,7 @@ namespace ClassicUO.Game
             Flags = item.Flags;
         }
 
-        public void Clear()
+        public static void Clear()
         {
             Serial = 0;
             X = 0xFFFF;

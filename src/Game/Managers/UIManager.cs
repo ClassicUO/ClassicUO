@@ -1055,7 +1055,7 @@ namespace ClassicUO.Game.Managers
 
         public static void AttemptDragControl(Control control, Point mousePosition, bool attemptAlwaysSuccessful = false)
         {
-            if (_isDraggingControl || (Client.Game.Scene is GameScene gs && gs.IsHoldingItem))
+            if (_isDraggingControl || ItemHold.Enabled)
                 return;
 
             Control dragTarget = control;

@@ -43,7 +43,7 @@ namespace ClassicUO.Game.UI.Controls
 
             GameScene gs = Client.Game.GetScene<GameScene>();
 
-            if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+            if (!ItemHold.Enabled || !gs.IsMouseOverUI)
                 return;
 
             if (Item.Layer == Layer.Backpack || !Item.OnGround || Item.Distance < Constants.DRAG_ITEMS_DISTANCE)

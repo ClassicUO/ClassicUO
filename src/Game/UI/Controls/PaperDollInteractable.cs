@@ -148,6 +148,8 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
+        
+
         public void AddFakeDress(Item item)
         {
             if (item == null && _fakeItem != null)

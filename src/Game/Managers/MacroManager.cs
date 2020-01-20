@@ -966,7 +966,7 @@ namespace ClassicUO.Game.Managers
                     int handIndex = 1 - (macro.SubCode - MacroSubType.LeftHand);
                     GameScene gs = Client.Game.GetScene<GameScene>();
 
-                    if (handIndex < 0 || handIndex > 1 || gs.IsHoldingItem)
+                    if (handIndex < 0 || handIndex > 1 || ItemHold.Enabled)
                         break;
 
                     if (_itemsInHand[handIndex] != 0)
