@@ -342,34 +342,27 @@ namespace ClassicUO.Configuration
                 {
                     using (BinaryReader reader = new BinaryReader(File.OpenRead(skillsGroupsPath)))
                     {
-                        try
+                        int version = reader.ReadInt32();
+
+                        int groupCount = reader.ReadInt32();
+
+                        for (int i = 0; i < groupCount; i++)
                         {
-                            int version = reader.ReadInt32();
+                            int entriesCount = reader.ReadInt32();
+                            string groupName = reader.ReadUTF8String(reader.ReadInt32());
 
-                            int groupCount = reader.ReadInt32();
+                            SkillsGroup g = new SkillsGroup();
+                            g.Name = groupName;
 
-                            for (int i = 0; i < groupCount; i++)
+                            for (int j = 0; j < entriesCount; j++)
                             {
-                                int entriesCount = reader.ReadInt32();
-                                string groupName = reader.ReadUTF8String(reader.ReadInt32());
-
-                                //if (!SkillsGroupManager.Groups.TryGetValue(groupName, out var list) || list == null)
-                                //{
-                                //    list = new HashSet<int>();
-                                //    SkillsGroupManager.Groups[groupName] = list;
-                                //}
-
-                                //for (int j = 0; j < entriesCount; j++)
-                                //{
-                                //    int skillIndex = reader.ReadInt32();
-                                //    if (skillIndex < UOFileManager.Skills.SkillsCount)
-                                //        list.Add(skillIndex);
-                                //}
+                                byte idx = (byte) reader.ReadInt32();
+                                g.Add(idx);
                             }
-                        }
-                        catch
-                        {
 
+                            g.Sort();
+
+                            SkillsGroupManager.Add(g);
                         }
                     }
 
