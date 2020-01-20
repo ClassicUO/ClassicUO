@@ -1785,7 +1785,7 @@ namespace ClassicUO.Game.Managers
         ToggleGargoyleFly,
         DefaultScale,
         ToggleChatVisibility,
-        //MovePlayer,
+        INVALID,
         Aura = 62,
         AuraOnOff,
         Grab,
@@ -2012,10 +2012,10 @@ namespace ClassicUO.Game.Managers
         Mobile,
         MscTotalCount,
 
-        //Top,
-        //Right,
-        //Down,
-        //Left,
+        INVALID_0,
+        INVALID_1,
+        INVALID_2,
+        INVALID_3,
 
 
         ConfusionBlastPotion = 215,
