@@ -30,11 +30,17 @@ namespace ClassicUO.Game.Managers
         private readonly Deque<uint> _actions = new Deque<uint>();
         private long _timer;
 
+
+        public UseItemQueue()
+        {
+            _timer = Time.Ticks + 1000;
+        }
+
         public void Update(double totalMS, double frameMS)
         {
-            if (_timer <= totalMS)
+            if (_timer < Time.Ticks)
             {
-                _timer = (long) (totalMS + 1000);
+                _timer = Time.Ticks + 1000;
 
                 if (_actions.Count == 0)
                     return;
@@ -51,9 +57,15 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void Add(uint action)
+        public void Add(uint serial)
         {
-            _actions.AddToBack(action);
+            foreach (uint s in _actions)
+            {
+                if (serial == s)
+                    return;
+            }
+
+            _actions.AddToBack(serial);
         }
 
         public void Clear()
