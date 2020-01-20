@@ -75,7 +75,7 @@ namespace ClassicUO.Game.UI.Gumps
             // OK
             Button b;
 
-            Add(b = new Button(0, 0x0481, 0x0482, 0x0483)
+            Add(b = new Button(0, 0x0481, 0x0483, 0x0482)
             {
                 Y = Height - 45,
                 ButtonAction = ButtonAction.Activate

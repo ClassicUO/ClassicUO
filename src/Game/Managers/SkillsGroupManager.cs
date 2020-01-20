@@ -182,7 +182,7 @@ namespace ClassicUO.Game.Managers
 
         public static bool Remove(SkillsGroup g)
         {
-            if (Groups.Count == 1)
+            if (Groups[0] == g)
             {
                 MessageBoxGump messageBox = new MessageBoxGump(200, 125, "Cannot delete this group.", null)
                 {
