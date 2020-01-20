@@ -548,7 +548,7 @@ namespace ClassicUO.Game.Managers
                 return false;
             }
 
-            return true;
+            return Groups.Count != 0;
         }
     }
 }
