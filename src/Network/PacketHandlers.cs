@@ -3639,7 +3639,7 @@ namespace ClassicUO.Network
                         {
                             name = str;
 
-                            if (entity != null && !SerialHelper.IsMobile(entity.Serial))
+                            if (!SerialHelper.IsMobile(entity.Serial))
                             {
                                 entity.Name = str;
                             }

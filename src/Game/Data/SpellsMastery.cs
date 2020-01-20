@@ -240,6 +240,110 @@ namespace ClassicUO.Game.Data
             return SpellDefinition.EmptySpell;
         }
 
+        public static List<int> GetSpellListByGroupName(string group)
+        {
+            List<int> list = new List<int>();
+
+            switch (group.ToLower())
+            {
+                default:
+                case "provocation":
+                    list.Add(1);
+                    list.Add(2);
+                    break;
+                case "peacemaking":
+                    list.Add(3);
+                    list.Add(4);
+                    break;
+                case "discordance":
+                    list.Add(5);
+                    list.Add(6);
+                    break;
+                case "magery":
+                    list.Add(15);
+                    list.Add(7);
+                    list.Add(8);
+                    break;
+                case "mysticism":
+                    list.Add(15);
+                    list.Add(9);
+                    list.Add(10);
+                    break;
+                case "necromancy":
+                    list.Add(15);
+                    list.Add(11);
+                    list.Add(12);
+                    break;
+                case "spellweaving":
+                    list.Add(15);
+                    list.Add(13);
+                    list.Add(14);
+                    break;
+                case "bushido":
+                    list.Add(18);
+                    list.Add(16);
+                    list.Add(17);
+                    break;
+                case "chivalry":
+                    list.Add(18);
+                    list.Add(19);
+                    list.Add(20);
+                    break;
+                case "ninjitsu":
+                    list.Add(18);
+                    list.Add(21);
+                    list.Add(22);
+                    break;
+                case "archery":
+                    list.Add(33);
+                    list.Add(23);
+                    list.Add(24);
+                    break;
+                case "fencing":
+                    list.Add(33);
+                    list.Add(25);
+                    list.Add(26);
+                    break;
+                case "mace fighting":
+                    list.Add(33);
+                    list.Add(27);
+                    list.Add(28);
+                    break;
+                case "swordsmanship":
+                    list.Add(33);
+                    list.Add(29);
+                    list.Add(30);
+                    break;
+                case "throwing":
+                    list.Add(33);
+                    list.Add(31);
+                    list.Add(32);
+                    break;
+                case "parrying":
+                    list.Add(34);
+                    list.Add(35);
+                    list.Add(36);
+                    break;
+                case "poisoning":
+                    list.Add(39);
+                    list.Add(37);
+                    list.Add(38);
+                    break;
+                case "wrestling":
+                    list.Add(40);
+                    list.Add(42);
+                    list.Add(41);
+                    break;
+                case "animal taming":
+                    list.Add(45);
+                    list.Add(43);
+                    list.Add(44);
+                    break;
+            }
+
+            return list;
+        }
+
         public static string GetMasteryGroupByID(int id)
         {
             switch (id)

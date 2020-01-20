@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
@@ -342,6 +343,71 @@ namespace ClassicUO.Game.UI.Gumps
                             Y = 30
                         };
                         _dataBox.Add(text, page);
+
+                        if (World.OPL.TryGetNameAndData(LocalSerial, out string name, out string data))
+                        {
+                            data = data.ToLower();
+                            string[] buff = data.Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
+
+                            for (int i = 0; i < buff.Length; i++)
+                            {
+                                if (buff[i] != null)
+                                {
+                                    int index = buff[i].IndexOf("mastery", StringComparison.InvariantCulture);
+
+                                    if (--index < 0)
+                                        continue;
+
+                                    string skillName = buff[i].Substring(0, index);
+
+                                    if (!string.IsNullOrEmpty(skillName))
+                                    {
+                                        List<int> activedSpells = SpellsMastery.GetSpellListByGroupName(skillName);
+
+                                        for (int k = 0; k < activedSpells.Count; k++)
+                                        {
+                                            int id = activedSpells[k];
+
+                                            var spell = SpellsMastery.GetSpell(id);
+
+                                            if (spell != null)
+                                            {
+                                                ushort iconGraphic = (ushort) spell.GumpIconID;
+                                                int toolTipCliloc = id >= 0 && id < 6 ? 1115689 : 1155938 - 6;
+
+                                                int iconMY = 55 + 44 * k;
+
+                                                GumpPic icon = new GumpPic(225, iconMY, iconGraphic, 0)
+                                                {
+                                                    LocalSerial = (uint) (id - 1)
+                                                };
+
+                                                _dataBox.Add(icon, page);
+                                                icon.MouseDoubleClick += OnIconDoubleClick;
+                                                icon.DragBegin += OnIconDragBegin;
+
+                                                text = new Label(spell.Name, false, 0x0288, 80, 6)
+                                                {
+                                                    X = 225 + 44 + 4,
+                                                    Y = iconMY + 2,
+                                                };
+                                                _dataBox.Add(text, page);
+
+                                                if (toolTipCliloc > 0)
+                                                {
+                                                    string tooltip = UOFileManager.Cliloc.GetString(toolTipCliloc + id);
+                                                    icon.SetTooltip(tooltip, 250);
+                                                }
+                                            }
+                                        }
+
+                                    }
+
+                                    break;
+                                }
+                            }
+                        }
+
                         break;
                     }
 
@@ -580,36 +646,9 @@ namespace ClassicUO.Game.UI.Gumps
                     icon.SetTooltip(tooltip, 250);
                 }
 
-                icon.MouseDoubleClick += (sender, e) =>
-                {
-                    if (e.Button == MouseButtonType.Left)
-                    {
-                        SpellDefinition def = GetSpellDefinition((sender as Control).LocalSerial);
-
-                        if (def != null)
-                            GameActions.CastSpell(def.ID);
-                    }
-                };
-
-                icon.DragBegin += (sender, e) =>
-                {
-                    if (UIManager.IsDragging)
-                        return;
-
-                    SpellDefinition def = GetSpellDefinition((sender as Control).LocalSerial);
-
-                    if (def == null)
-                        return;
-
-                    UseSpellButtonGump gump = new UseSpellButtonGump(def)
-                    {
-                        X = Mouse.Position.X - 22, Y = Mouse.Position.Y - 22
-                    };
-
-                    UIManager.Add(gump);
-                    UIManager.AttemptDragControl(gump, Mouse.Position, true);
-                };
-
+                icon.MouseDoubleClick += OnIconDoubleClick;
+                icon.DragBegin += OnIconDragBegin;
+                
                 _dataBox.Add(icon, page1);
 
                 if (!string.IsNullOrEmpty(reagents))
@@ -644,6 +683,38 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             SetActivePage(1);
+        }
+
+
+        private void OnIconDoubleClick(object sender, MouseDoubleClickEventArgs e)
+        {
+            if (e.Button == MouseButtonType.Left)
+            {
+                SpellDefinition def = GetSpellDefinition((sender as Control).LocalSerial);
+
+                if (def != null)
+                    GameActions.CastSpell(def.ID);
+            }
+        }
+
+        private void OnIconDragBegin(object sender, EventArgs e)
+        {
+            if (UIManager.IsDragging)
+                return;
+
+            SpellDefinition def = GetSpellDefinition((sender as Control).LocalSerial);
+
+            if (def == null)
+                return;
+
+            UseSpellButtonGump gump = new UseSpellButtonGump(def)
+            {
+                X = Mouse.Position.X - 22,
+                Y = Mouse.Position.Y - 22
+            };
+
+            UIManager.Add(gump);
+            UIManager.AttemptDragControl(gump, Mouse.Position, true);
         }
 
 
