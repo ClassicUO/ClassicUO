@@ -319,7 +319,7 @@ namespace ClassicUO.Configuration
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin"))))
                 UIManager.AnchorManager.Save(writer);
 
-            SkillsGroupManager2.Save();
+            SkillsGroupManager.Save();
         }
 
         public static uint GumpsVersion { get; private set; }
@@ -376,12 +376,12 @@ namespace ClassicUO.Configuration
                 }
                 catch (Exception e)
                 {
-                    SkillsGroupManager2.MakeDefault();
+                    SkillsGroupManager.MakeDefault();
                     Log.Error( e.StackTrace);
                 }
 
                
-                SkillsGroupManager2.Save();
+                SkillsGroupManager.Save();
 
                 try
                 {
@@ -453,7 +453,7 @@ namespace ClassicUO.Configuration
 
             // load skillsgroup
             //SkillsGroupManager.Load();
-            SkillsGroupManager2.Load();
+            SkillsGroupManager.Load();
 
             // load gumps
             string gumpsXmlPath = Path.Combine(path, "gumps.xml");

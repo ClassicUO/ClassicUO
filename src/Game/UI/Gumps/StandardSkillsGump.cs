@@ -103,7 +103,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (World.Player != null)
             {
-                foreach (var g in SkillsGroupManager2.Groups)
+                foreach (var g in SkillsGroupManager.Groups)
                 {
                     SkillsGroupControl control = new SkillsGroupControl(g, 3, 3)
                     {
@@ -191,7 +191,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Name = "New Group"
                 };
 
-                SkillsGroupManager2.Add(g);
+                SkillsGroupManager.Add(g);
 
                 var control = new SkillsGroupControl(g, 3, 3);
                 _skillsControl.Add(control);
@@ -640,7 +640,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (key == SDL.SDL_Keycode.SDLK_DELETE && _status == 1)
                 {
-                    if (SkillsGroupManager2.Remove(_group) && RootParent is StandardSkillsGump gump)
+                    if (SkillsGroupManager.Remove(_group) && RootParent is StandardSkillsGump gump)
                     {
                         SkillsGroupControl first = gump._skillsControl[0];
 
