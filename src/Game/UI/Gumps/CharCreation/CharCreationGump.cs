@@ -86,7 +86,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     // reset skills if needed
                     for (int k = 0; k < i; k++)
                     {
-                        _character.UpdateSkill(info.SkillDefVal[k, 0], 0, 0, Lock.Locked, 0);
+                        var skill = _character.Skills[info.SkillDefVal[k, 0]];
+                        skill.ValueFixed = 0;
+                        skill.BaseFixed = 0;
+                        skill.CapFixed = 0;
+                        skill.Lock = Lock.Locked;
                     }
 
                     MessageBoxGump messageBox = new MessageBoxGump(400, 300, UOFileManager.Cliloc.GetString(1063016), null, true)
@@ -99,7 +103,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     return;
                 }
 
-                _character.UpdateSkill(skillIndex, (ushort) info.SkillDefVal[i, 1], 0, Lock.Locked, 0);
+                var skill2 = _character.Skills[skillIndex];
+                skill2.ValueFixed = (ushort) info.SkillDefVal[i, 1];
+                skill2.BaseFixed = 0;
+                skill2.CapFixed = 0;
+                skill2.Lock = Lock.Locked;
             }
 
             _selectedProfession = info;

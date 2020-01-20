@@ -37,6 +37,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
@@ -1322,68 +1323,135 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            if (World.SkillsRequested)
-            {
-                World.SkillsRequested = false;
+           
 
-                // TODO: make a base class for this gump
+
+            byte type = p.ReadByte();
+            bool haveCap = (((type != 0u) && type <= 0x03) || type == 0xDF);
+            bool isSingleUpdate = (type == 0xFF || type == 0xDF);
+
+            if (type == 0xFE)
+            {
+                int count = p.ReadUShort();
+
+                UOFileManager.Skills.Skills.Clear();
+                UOFileManager.Skills.SortedSkills.Clear();
+
+                for (int i = 0; i < count; i++)
+                {
+                    bool haveButton = p.ReadBool();
+                    int nameLength = p.ReadByte();
+
+                    UOFileManager.Skills.Skills.Add(new SkillEntry(i,p.ReadASCII(nameLength), haveButton));
+                }
+
+
+                UOFileManager.Skills.SortedSkills.AddRange(UOFileManager.Skills.Skills);
+                UOFileManager.Skills.SortedSkills.Sort((a, b) => a.Name.CompareTo(b.Name));
+            }
+            else
+            {
+                StandardSkillsGump standard = null;
+                SkillGumpAdvanced advanced = null;
+
                 if (ProfileManager.Current.StandardSkillsGump)
                 {
-                    var gumpSkills = UIManager.GetGump<StandardSkillsGump>();
-
-                    if (gumpSkills == null)
-                    {
-                        UIManager.Add(new StandardSkillsGump
-                        {
-                            X = 100,
-                            Y = 100
-                        });
-                    }
+                    standard = UIManager.GetGump<StandardSkillsGump>();
                 }
                 else
                 {
-                    var gumpSkills = UIManager.GetGump<SkillGumpAdvanced>();
+                    advanced = UIManager.GetGump<SkillGumpAdvanced>();
+                }
 
-                    if (gumpSkills == null)
+                if (!isSingleUpdate && (type == 1 || type == 3 || World.SkillsRequested))
+                {
+                    World.SkillsRequested = false;
+
+                    // TODO: make a base class for this gump
+                    if (ProfileManager.Current.StandardSkillsGump)
                     {
-                        UIManager.Add(new SkillGumpAdvanced
+                        if (standard == null)
                         {
-                            X = 100,
-                            Y = 100
-                        });
+                            UIManager.Add(standard = new StandardSkillsGump
+                            {
+                                X = 100,
+                                Y = 100
+                            });
+                        }
+                    }
+                    else
+                    {
+                        if (advanced == null)
+                        {
+                            UIManager.Add(advanced = new SkillGumpAdvanced
+                            {
+                                X = 100,
+                                Y = 100
+                            });
+                        }
                     }
                 }
-            }
 
-            ushort id;
 
-            switch (p.ReadByte())
-            {
-                case 0:
 
-                    while (p.Position + 2 <= p.Length && (id = p.ReadUShort()) > 0)
-                        World.Player.UpdateSkill(id - 1, p.ReadUShort(), p.ReadUShort(), (Lock) p.ReadByte(), 100);
+                while (p.Position < p.Length)
+                {
+                    ushort id = p.ReadUShort();
 
-                    break;
+                    if (p.Position >= p.Length)
+                        break;
 
-                case 2:
+                    if (id == 0 && type == 0)
+                        break;
 
-                    while (p.Position + 2 <= p.Length && (id = p.ReadUShort()) > 0)
-                        World.Player.UpdateSkill(id - 1, p.ReadUShort(), p.ReadUShort(), (Lock) p.ReadByte(), p.ReadUShort());
+                    if (type == 0 || type == 0x02)
+                        id--;
 
-                    break;
+                    ushort baseVal = p.ReadUShort();
+                    ushort realVal = p.ReadUShort();
+                    Lock locked = (Lock) p.ReadByte();
+                    ushort cap = 1000;
 
-                case 0xDF:
-                    id = p.ReadUShort();
-                    World.Player.UpdateSkill(id, p.ReadUShort(), p.ReadUShort(), (Lock) p.ReadByte(), p.ReadUShort(), true);
+                    if (haveCap)
+                    {
+                        cap = p.ReadUShort();
+                    }
 
-                    break;
+                    if (id < World.Player.Skills.Length)
+                    {
+                        Skill skill = World.Player.Skills[id];
 
-                case 0xFF:
-                    id = p.ReadUShort();
-                    World.Player.UpdateSkill(id, p.ReadUShort(), p.ReadUShort(), (Lock) p.ReadByte(), 100);
+                        if (skill != null)
+                        {
+                            if (isSingleUpdate)
+                            {
+                                float change = (baseVal / 10.0f) - skill.Base;
 
-                    break;
+                                if (change != 0.0f)
+                                {
+                                    GameActions.Print($"Your skill in {skill.Name} has {(change < 0 ? "decreased" : "increased")} by {Math.Abs(change):F1}.  It is now {(skill.Base + change):F1}.",
+                                                      0x58,
+                                                      MessageType.System,
+                                                      3, 
+                                                      false);
+                                }
+                            }
+
+
+                            skill.BaseFixed = baseVal;
+                            skill.ValueFixed = realVal;
+                            skill.CapFixed = cap;
+                            skill.Lock = locked;
+
+                            standard?.Update(id);
+                            advanced?.ForceUpdate();
+                        }
+
+                    }
+
+                    if (isSingleUpdate)
+                        break;
+                }
             }
 
             World.Player.ProcessDelta();

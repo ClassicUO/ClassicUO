@@ -43,7 +43,10 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             foreach (var skill in _character.Skills)
             {
-                _character.UpdateSkill(skill.Index, 0, 0, Lock.Locked, 0);
+                skill.ValueFixed = 0;
+                skill.BaseFixed = 0;
+                skill.CapFixed = 0;
+                skill.Lock = Lock.Locked;
             }
 
             Add(new ResizePic(2600)
@@ -146,7 +149,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         for (int i = 0; i < _skills.Length; i++)
                         {
                             if (_skills[i].SelectedIndex != -1)
-                                _character.UpdateSkill(UOFileManager.Skills.SortedSkills[_skills[i].SelectedIndex].Index, (ushort) _skillSliders[i].Value, 0, Lock.Locked, 0);
+                            {
+                                var skill = _character.Skills[UOFileManager.Skills.SortedSkills[_skills[i].SelectedIndex].Index];
+                                skill.ValueFixed = (ushort) _skillSliders[i].Value;
+                                skill.BaseFixed = 0;
+                                skill.CapFixed = 0;
+                                skill.Lock = Lock.Locked;
+                            }
                         }
 
                         _character.Strength = (ushort) _attributeSliders[0].Value;

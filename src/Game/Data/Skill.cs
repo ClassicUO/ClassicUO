@@ -45,11 +45,11 @@ namespace ClassicUO.Game.Data
 
         public ushort CapFixed { get; internal set; }
 
-        public double Value => ValueFixed / 10.0;
+        public float Value => ValueFixed / 10.0f;
 
-        public double Base => BaseFixed / 10.0;
+        public float Base => BaseFixed / 10.0f;
 
-        public double Cap => CapFixed / 10.0;
+        public float Cap => CapFixed / 10.0f;
 
         public bool IsClickable { get; }
 

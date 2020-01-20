@@ -240,36 +240,6 @@ namespace ClassicUO.Game.GameObjects
             _buffIcons.Remove(graphic);
         }
 
-        public void UpdateSkill(int id, ushort realValue, ushort baseValue, Lock @lock, ushort cap, bool displayMessage = false)
-        {
-            if (id < Skills.Length)
-            {
-                Skill skill = Skills[id];
-
-                if (displayMessage && skill.ValueFixed != realValue)
-                {
-                    var delta = realValue - skill.ValueFixed;
-                    var direction = delta < 0 ? "decreased" : "increased";
-
-                    GameActions.Print($"Your skill in {skill.Name} has {direction} by {delta / 10.0:#0.0}%.  It is now {realValue / 10.0:#0.0}%.", 0x58, MessageType.System, 3, false);
-                }
-
-                skill.ValueFixed = realValue;
-                skill.BaseFixed = baseValue;
-                skill.Lock = @lock;
-                skill.CapFixed = cap;
-
-                // check needed to avoid crash when you create a char
-                if (ProfileManager.Current != null)
-                {
-                    if (ProfileManager.Current.StandardSkillsGump)
-                        UIManager.GetGump<StandardSkillsGump>()?.Update(id);
-                    else
-                        UIManager.GetGump<SkillGumpAdvanced>()?.ForceUpdate();
-                }
-            }
-        }
-
         public void UpdateAbilities()
         {
             ushort equippedGraphic = 0;
