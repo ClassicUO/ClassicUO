@@ -458,7 +458,14 @@ namespace ClassicUO.Game.UI.Controls
                     ref var backpackGump = ref _pgumps[(int) Layer.Backpack];
                     if (backpackGump == null)
                     {
-                        Add(backpackGump = new ItemGumpPaperdoll(0, 0, backpack, Mobile)
+                        int bx = 0;
+
+                        if (World.ClientFeatures.PaperdollBooks)
+                        {
+                            bx = 6;
+                        }
+
+                        Add(backpackGump = new ItemGumpPaperdoll(-bx, 0, backpack, Mobile)
                         {
                             AcceptMouseInput = true,
                             CanPickUp = false
