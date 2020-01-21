@@ -113,7 +113,7 @@ namespace ClassicUO.Game.UI
             batcher.Draw2D(Texture2DCache.GetTexture(Color.Black), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue);
             batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue);
 
-            return _renderedText.Draw(batcher, x, y);
+            return _renderedText.Draw(batcher, x + 3, y);
         }
 
         public void Clear()
