@@ -165,33 +165,9 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public int X
-        {
-            get => _bounds.X;
-            set
-            {
-                if (_bounds.X != value)
-                {
-                    _bounds.X = value;
+        public ref int X => ref _bounds.X;
 
-                    OnMove();
-                }
-            }
-        }
-
-        public int Y
-        {
-            get => _bounds.Y;
-            set
-            {
-                if (_bounds.Y != value)
-                {
-                    _bounds.Y = value;
-
-                    OnMove();
-                }
-            }
-        }
+        public ref int Y => ref _bounds.Y;
 
         public int ParentX => Parent != null ? Parent.X + Parent.ParentX : 0;
 
@@ -436,35 +412,6 @@ namespace ClassicUO.Game.UI.Controls
 
         internal event EventHandler FocusEnter, FocusLost;
 
-        //public void Initialize()
-        //{
-        //    if (IsDisposed) return;
-
-        //    IsDisposed = false;
-        //    IsEnabled = true;
-        //    IsInitialized = true;
-        //    //InitializeControls();
-        //    //OnInitialize();
-        //}
-
-        //private void InitializeControls()
-        //{
-        //    //bool initializedKeyboardFocusedControl = false;
-
-        //    foreach (Control c in Children)
-        //    {
-        //        if (!c.IsInitialized && !IsDisposed)
-        //        {
-        //            c.Initialize();
-
-        //            //if (!initializedKeyboardFocusedControl && c.AcceptKeyboardInput)
-        //            //{
-        //            //    UIManager.KeyboardFocusControl = c;
-        //            //    initializedKeyboardFocusedControl = true;
-        //            //}
-        //        }
-        //    }
-        //}
 
         public void HitTest(int x, int y, ref Control res)
         {
@@ -662,6 +609,13 @@ namespace ClassicUO.Game.UI.Controls
             DragEnd.Raise(new MouseEventArgs(x, y, MouseButtonType.Left), this);
         }
 
+        public void InvokeMove(int x, int y)
+        {
+            x = x - X - ParentX;
+            y = y - Y - ParentY;
+            OnMove(x, y);
+        }
+
         protected virtual void OnMouseDown(int x, int y, MouseButtonType button)
         {
             _mouseIsDown = true;
@@ -751,13 +705,9 @@ namespace ClassicUO.Game.UI.Controls
             return !IsDisposed;
         }
 
-        protected virtual void OnMove()
+        protected virtual void OnMove(int x, int y)
         {
         }
-
-        //protected virtual void OnInitialize()
-        //{
-        //}
 
         protected virtual void OnClosing()
         {

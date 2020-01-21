@@ -36,7 +36,7 @@ namespace ClassicUO.Game.UI.Controls
 
     internal class ScrollArea : Control
     {
-        private readonly IScrollBar _scrollBar;
+        private readonly ScrollBarBase _scrollBar;
         private readonly int _scrollbarHeight;
         private bool _isNormalScroll;
 
@@ -68,7 +68,7 @@ namespace ClassicUO.Game.UI.Controls
 
             //Add((Control)_scrollBar);
 
-            Control c = (Control) _scrollBar;
+            Control c = _scrollBar;
             c.Parent = this;
 
             AcceptMouseInput = true;

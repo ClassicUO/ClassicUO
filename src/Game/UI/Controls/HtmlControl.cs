@@ -36,7 +36,7 @@ namespace ClassicUO.Game.UI.Controls
     internal class HtmlControl : Control
     {
         private RenderedText _gameText;
-        private IScrollBar _scrollBar;
+        private ScrollBarBase _scrollBar;
 
         public HtmlControl(List<string> parts, string[] lines) : this()
         {

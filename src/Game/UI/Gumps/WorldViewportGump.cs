@@ -149,8 +149,10 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        protected override void OnMove()
+        protected override void OnDragEnd(int x, int y)
         {
+            base.OnDragEnd(x, y);
+
             Point position = Location;
 
             if (position.X + Width - BORDER_WIDTH > Client.Game.Window.ClientBounds.Width)

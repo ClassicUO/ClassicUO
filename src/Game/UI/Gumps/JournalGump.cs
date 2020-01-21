@@ -224,9 +224,9 @@ namespace ClassicUO.Game.UI.Gumps
         private class RenderedTextList : Control
         {
             private readonly Deque<RenderedText> _entries, _hours;
-            private readonly IScrollBar _scrollBar;
+            private readonly ScrollBarBase _scrollBar;
 
-            public RenderedTextList(int x, int y, int width, int height, IScrollBar scrollBarControl)
+            public RenderedTextList(int x, int y, int width, int height, ScrollBarBase scrollBarControl)
             {
                 _scrollBar = scrollBarControl;
                 _scrollBar.IsVisible = false;

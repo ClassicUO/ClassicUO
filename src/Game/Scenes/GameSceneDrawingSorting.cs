@@ -768,13 +768,14 @@ namespace ClassicUO.Game.Scenes
                 maxBlockY = MapLoader.Instance.MapsDefaultSize[World.Map.Index, 1] - 1;
 
             int drawOffset = (int) (Scale * 40.0);
-            float maxX = winGamePosX + winGameWidth + drawOffset;
-            float maxY = winGamePosY + winGameHeight + drawOffset;
-            float newMaxX = maxX * Scale;
-            float newMaxY = maxY * Scale;
-            int minPixelsX = (int) ((winGamePosX - drawOffset) * Scale - MAX /*- (newMaxX + maxX)*/);
+            float maxX = winGamePosX + winGameWidth ;
+            float maxY = winGamePosY + winGameHeight;
+            float newMaxX = maxX * Scale + drawOffset;
+            float newMaxY = maxY * Scale + drawOffset;
+            
+            int minPixelsX = (int) ((winGamePosX) * Scale /*- (newMaxX - maxX)*/ ) - drawOffset * 2;
             int maxPixelsX = (int) newMaxX;
-            int minPixelsY = (int) ((winGamePosY - drawOffset) * Scale - MAX /*- (newMaxY + maxY)*/);
+            int minPixelsY = (int) ((winGamePosY) * Scale /*- (newMaxY - maxY)*/) - drawOffset * 2;
             int maxPixlesY = (int) newMaxY;
 
             if (UpdateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY)

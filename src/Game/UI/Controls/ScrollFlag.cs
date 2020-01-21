@@ -31,7 +31,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class ScrollFlag : Control, IScrollBar
+    internal class ScrollFlag : ScrollBarBase
     {
         private const int TIME_BETWEEN_CLICKS = 150;
         private readonly UOTexture _downButton;
@@ -41,12 +41,10 @@ namespace ClassicUO.Game.UI.Controls
         private bool _btUpClicked, _btDownClicked, _btnSliderClicked;
 
         private Point _clickPosition;
-        private int _max, _min;
 
         private Rectangle _rectUpButton, _rectDownButton;
         private float _sliderPosition;
         private float _timeUntilNextClick;
-        private float _value;
 
         public ScrollFlag(int x, int y, int height, bool showbuttons) : this()
         {
@@ -77,54 +75,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public override ClickPriority Priority { get; set; } = ClickPriority.High;
 
-        public event EventHandler ValueChanged;
-
-        public int Value
-        {
-            get => (int) _value;
-            set
-            {
-                _value = value;
-
-                if (_value < MinValue)
-                    _value = MinValue;
-
-                if (_value > MaxValue)
-                    _value = MaxValue;
-                ValueChanged.Raise();
-            }
-        }
-
-        public int MinValue
-        {
-            get => _min;
-            set
-            {
-                _min = value;
-
-                if (_value < _min)
-                    _value = _min;
-            }
-        }
-
-        public int MaxValue
-        {
-            get => _max;
-            set
-            {
-                _max = value;
-
-                if (_value > _max)
-                    _value = _max;
-            }
-        }
-
-        public int ScrollStep { get; set; } = 15;
-
-        bool IScrollBar.Contains(int x, int y)
-        {
-            return Contains(x, y);
-        }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -175,15 +125,7 @@ namespace ClassicUO.Game.UI.Controls
             return base.Draw(batcher, x, y);
         }
 
-        private float GetSliderYPosition()
-        {
-            if (MaxValue - MinValue == 0)
-                return 0f;
-
-            return GetScrollableArea() * ((_value - MinValue) / (MaxValue - MinValue));
-        }
-
-        private float GetScrollableArea()
+        protected override float GetScrollableArea()
         {
             return Height - Texture.Height;
         }
@@ -232,7 +174,7 @@ namespace ClassicUO.Game.UI.Controls
                     if (sliderY > scrollableArea)
                         sliderY = scrollableArea;
                     _clickPosition = new Point(x, y);
-                    _value = sliderY / scrollableArea * (MaxValue - MinValue) + MinValue;
+                    _value = (int) (sliderY / scrollableArea * (MaxValue - MinValue) + MinValue);
                     _sliderPosition = sliderY;
                 }
             }

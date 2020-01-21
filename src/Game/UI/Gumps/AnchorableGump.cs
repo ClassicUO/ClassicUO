@@ -45,7 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
         public int WidthMultiplier { get; protected set; } = 1;
         public int HeightMultiplier { get; protected set; } = 1;
 
-        protected override void OnMove()
+        protected override void OnMove(int x, int y)
         {
             if (Keyboard.Alt)
             {
@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
             _prevX = X;
             _prevY = Y;
 
-            base.OnMove();
+            base.OnMove(x, y);
         }
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
