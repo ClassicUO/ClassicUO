@@ -552,7 +552,7 @@ namespace ClassicUO.Game.Managers
                             }
                         }
 
-                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[5]) == 1, int.Parse(gparams[6]) != 0, gparams[5] != "0" && gparams[6] == "2", sb == null ? ClilocLoader.Instance.GetString(int.Parse(gparams[8])) : ClilocLoader.Instance.Translate(ClilocLoader.Instance.GetString(int.Parse(gparams[8])), sb.ToString().Trim('@')), color, true), page);
+                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[5]) == 1, int.Parse(gparams[6]) != 0, gparams[5] != "0" && gparams[6] == "2", sb == null ? ClilocLoader.Instance.GetString(int.Parse(gparams[8])) : ClilocLoader.Instance.Translate(ClilocLoader.Instance.GetString(int.Parse(gparams[8])), sb.ToString().Trim('@').Replace('@', '\t')), color, true), page);
 
                         break;
 
@@ -652,7 +652,9 @@ namespace ClassicUO.Game.Managers
 
                         if (World.ClientFeatures.TooltipsEnabled)
                         {
-                            var entity = World.Get(SerialHelper.Parse(gparams[1]));
+                            uint serial = SerialHelper.Parse(gparams[1]);
+                            Entity entity = World.Get(serial);
+
                             var lastControl = gump.Children.LastOrDefault();
 
                             if (lastControl != default(Control) && entity != default(Entity))
@@ -668,6 +670,9 @@ namespace ClassicUO.Game.Managers
                     case "mastergump":
                         Log.Warn("Gump part 'mastergump' not handled.");
 
+                        break;
+                    default:
+                        Log.Warn(gparams[0]);
                         break;
                 }
             }
