@@ -36,7 +36,30 @@ namespace ClassicUO.IO.Resources
             "begin", "name", "truename", "desc", "toplevel", "gump", "type", "children", "skill",
             "stat", "str", "int", "dex", "end", "true", "category", "nameid", "descid"
         };
-        public Dictionary<ProfessionInfo, List<ProfessionInfo>> Professions = new Dictionary<ProfessionInfo, List<ProfessionInfo>>();
+
+        private ProfessionLoader()
+        {
+
+        }
+
+        private static ProfessionLoader _instance;
+        public static ProfessionLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new ProfessionLoader();
+                }
+
+                return _instance;
+            }
+        }
+
+
+        public Dictionary<ProfessionInfo, List<ProfessionInfo>> Professions { get; } = new Dictionary<ProfessionInfo, List<ProfessionInfo>>();
+
+
 
         public override Task Load()
         {
@@ -222,9 +245,9 @@ namespace ClassicUO.IO.Resources
                                 }
                             }
 
-                            for (int j = 0; j < UOFileManager.Skills.SkillsCount; j++)
+                            for (int j = 0; j < SkillsLoader.Instance.SkillsCount; j++)
                             {
-                                SkillEntry skill = UOFileManager.Skills.Skills[j];
+                                SkillEntry skill = SkillsLoader.Instance.Skills[j];
 
                                 if (strings[1] == skill.Name)
                                 {
@@ -261,7 +284,7 @@ namespace ClassicUO.IO.Resources
 
                     {
                         int.TryParse(strings[1], out nameClilocID);
-                        name = UOFileManager.Cliloc.GetString(nameClilocID);
+                        name = ClilocLoader.Instance.GetString(nameClilocID);
 
                         break;
                     }

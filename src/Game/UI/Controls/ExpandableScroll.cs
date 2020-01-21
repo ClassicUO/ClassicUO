@@ -21,6 +21,7 @@
 
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -60,7 +61,7 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 0; i < 4; i++)
             {
-                var t = UOFileManager.Gumps.GetTexture((ushort) (graphic + i));
+                var t = GumpsLoader.Instance.GetTexture((ushort) (graphic + i));
 
                 if (t == null)
                 {

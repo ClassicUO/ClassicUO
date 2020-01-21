@@ -122,9 +122,9 @@ namespace ClassicUO.Game.UI.Controls
                 id = 0x0223;
             }
 
-            UOFileManager.Animations.ConvertBodyIfNeeded(ref mobGraphic);
+            AnimationsLoader.Instance.ConvertBodyIfNeeded(ref mobGraphic);
 
-            if (UOFileManager.Animations.EquipConversions.TryGetValue(mobGraphic, out var dict))
+            if (AnimationsLoader.Instance.EquipConversions.TryGetValue(mobGraphic, out var dict))
             {
                 if (dict.TryGetValue(id, out EquipConvData data))
                 {
@@ -135,10 +135,10 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            Texture = UOFileManager.Gumps.GetTexture((ushort)(id + offset));
+            Texture = GumpsLoader.Instance.GetTexture((ushort)(id + offset));
 
             if (!Mobile.IsMale && Texture == null)
-                Texture = UOFileManager.Gumps.GetTexture((ushort)(id + MALE_OFFSET));
+                Texture = GumpsLoader.Instance.GetTexture((ushort)(id + MALE_OFFSET));
 
             if (Texture == null)
             {

@@ -324,29 +324,29 @@ namespace ClassicUO.Game.GameObjects
 
                 ushort graphic = GetGraphicForAnimation();
 
-                ANIMATION_GROUPS_TYPE type = UOFileManager.Animations.DataIndex[graphic].Type;
+                ANIMATION_GROUPS_TYPE type = AnimationsLoader.Instance.DataIndex[graphic].Type;
 
-                if (UOFileManager.Animations.DataIndex[graphic].IsUOP && !UOFileManager.Animations.DataIndex[graphic].IsValidMUL)
+                if (AnimationsLoader.Instance.DataIndex[graphic].IsUOP && !AnimationsLoader.Instance.DataIndex[graphic].IsValidMUL)
                 {
                     // do nothing ?
                 }
                 else
                 {
-                    if (!UOFileManager.Animations.DataIndex[graphic].HasBodyConversion)
+                    if (!AnimationsLoader.Instance.DataIndex[graphic].HasBodyConversion)
                     {
-                        ushort newGraphic = UOFileManager.Animations.DataIndex[graphic].Graphic;
+                        ushort newGraphic = AnimationsLoader.Instance.DataIndex[graphic].Graphic;
 
                         if (graphic != newGraphic)
                         {
                             graphic = newGraphic;
-                            ANIMATION_GROUPS_TYPE newType = UOFileManager.Animations.DataIndex[graphic].Type;
+                            ANIMATION_GROUPS_TYPE newType = AnimationsLoader.Instance.DataIndex[graphic].Type;
 
                             if (newType != type) type = newType;
                         }
                     }
                 }
 
-                ANIMATION_FLAGS flags = UOFileManager.Animations.DataIndex[graphic].Flags;
+                ANIMATION_FLAGS flags = AnimationsLoader.Instance.DataIndex[graphic].Flags;
                 ANIMATION_GROUPS animGroup = ANIMATION_GROUPS.AG_NONE;
 
                 bool isLowExtended = false;
@@ -528,20 +528,20 @@ namespace ClassicUO.Game.GameObjects
                 //}
 
                 bool mirror = false;
-                UOFileManager.Animations.GetAnimDirection(ref dir, ref mirror);
+                AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
                 int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
 
                 if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
                     ushort hue = 0;
-                    var direction = UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
-                    UOFileManager.Animations.AnimID = id;
-                    UOFileManager.Animations.AnimGroup = animGroup;
-                    UOFileManager.Animations.Direction = dir;
+                    var direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
+                    AnimationsLoader.Instance.AnimID = id;
+                    AnimationsLoader.Instance.AnimGroup = animGroup;
+                    AnimationsLoader.Instance.Direction = dir;
 
 
                     if (direction != null && (direction.FrameCount == 0 || direction.Frames == null))
-                        UOFileManager.Animations.LoadDirectionGroup(ref direction);
+                        AnimationsLoader.Instance.LoadDirectionGroup(ref direction);
 
                     if (direction != null && ((direction.Address != 0 && direction.Size != 0 && direction.FileIndex != -1) || direction.IsUOP))
                     {
@@ -898,7 +898,7 @@ namespace ClassicUO.Game.GameObjects
 
                                     for (int i = 0; i < 98; i++)
                                     {
-                                        if (UOFileManager.Animations.SittingInfos[i].Graphic == graphic)
+                                        if (AnimationsLoader.Instance.SittingInfos[i].Graphic == graphic)
                                         {
                                             result = i + 1;
 
@@ -959,7 +959,7 @@ namespace ClassicUO.Game.GameObjects
             else if (!IsMounted)
                 y += 22;
 
-            UOFileManager.Animations.GetAnimationDimensions(AnimIndex,
+            AnimationsLoader.Instance.GetAnimationDimensions(AnimIndex,
                                                           GetGraphicForAnimation(),
                                                           /*(byte) m.GetDirectionForAnimation()*/ 0,
                                                           /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,

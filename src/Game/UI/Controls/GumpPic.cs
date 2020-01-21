@@ -23,6 +23,7 @@ using System.Collections.Generic;
 
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -48,7 +49,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _graphic = value;
 
-                Texture = UOFileManager.Gumps.GetTexture(_graphic);
+                Texture = GumpsLoader.Instance.GetTexture(_graphic);
 
                 if (Texture == null)
                 {

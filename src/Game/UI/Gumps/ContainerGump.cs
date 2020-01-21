@@ -31,6 +31,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -364,7 +365,7 @@ namespace ClassicUO.Game.UI.Gumps
             int x = (int) (itemGump.X * scale);
             int y = (int) (itemGump.Y * scale);
           
-            ArtTexture texture = UOFileManager.Art.GetTexture(item.DisplayedGraphic);
+            ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
 
             int boundX = (int)(_data.Bounds.X * scale);
             int boundY = (int)(_data.Bounds.Y * scale);

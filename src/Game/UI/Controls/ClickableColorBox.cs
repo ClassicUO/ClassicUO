@@ -23,6 +23,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Controls
@@ -39,7 +40,7 @@ namespace ClassicUO.Game.UI.Controls
             Y = y + 3;
             WantUpdateSize = false;
 
-            _background = UOFileManager.Gumps.GetTexture(0x00D4);
+            _background = GumpsLoader.Instance.GetTexture(0x00D4);
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -61,7 +62,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button == MouseButtonType.Left)
             {
-                ColorPickerGump pickerGump = new ColorPickerGump(0, 0, 100, 100, s => SetColor(s, UOFileManager.Hues.GetPolygoneColor(CELL, s)));
+                ColorPickerGump pickerGump = new ColorPickerGump(0, 0, 100, 100, s => SetColor(s, HuesLoader.Instance.GetPolygoneColor(CELL, s)));
                 UIManager.Add(pickerGump);
             }
         }

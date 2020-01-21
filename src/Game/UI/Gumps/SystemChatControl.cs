@@ -30,6 +30,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -82,7 +83,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = false;
             AcceptKeyboardInput = false;
 
-            int height = UOFileManager.Fonts.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
+            int height = FontsLoader.Instance.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
 
             TextBoxControl = new TextBox(ProfileManager.Current.ChatFont, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
             {
@@ -139,7 +140,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    int height = UOFileManager.Fonts.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
+                    int height = FontsLoader.Instance.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
                     TextBoxControl.Width = 1;
                     _trans.Y = TextBoxControl.Y + height + 3;
                 }
@@ -295,7 +296,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (TextBoxControl != null)
             {
-                int height = UOFileManager.Fonts.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
+                int height = FontsLoader.Instance.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
                 TextBoxControl.Y = Height - height - 3;
                 TextBoxControl.Width = IsActive ? Width : 1;
                 TextBoxControl.Height = height - 3;

@@ -37,7 +37,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         public CreateCharProfessionGump(ProfessionInfo parent = null) : base(0, 0)
         {
             _Parent = parent;
-            if (parent == null || !UOFileManager.Profession.Professions.TryGetValue(parent, out List<ProfessionInfo> professions) || professions == null) professions = new List<ProfessionInfo>(UOFileManager.Profession.Professions.Keys);
+            if (parent == null || !ProfessionLoader.Instance.Professions.TryGetValue(parent, out List<ProfessionInfo> professions) || professions == null) professions = new List<ProfessionInfo>(ProfessionLoader.Instance.Professions.Keys);
 
             /* Build the gump */
             Add(new ResizePic(2600)
@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(new GumpPic(214, 58, 0x058B, 0));
             Add(new GumpPic(300, 51, 0x15A9, 0));
 
-            ClilocLoader localization = UOFileManager.Cliloc;
+            ClilocLoader localization = ClilocLoader.Instance;
 
             Add(new Label(localization.Translate(3000326), false, 0x0386, font: 2)
             {
@@ -84,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public void SelectProfession(ProfessionInfo info)
         {
-            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && UOFileManager.Profession.Professions.TryGetValue(info, out List<ProfessionInfo> list) && list != null)
+            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && ProfessionLoader.Instance.Professions.TryGetValue(info, out List<ProfessionInfo> list) && list != null)
             {
                 Parent.Add(new CreateCharProfessionGump(info));
                 Parent.Remove(this);
@@ -139,7 +139,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             _info = info;
 
-            ClilocLoader localization = UOFileManager.Cliloc;
+            ClilocLoader localization = ClilocLoader.Instance;
 
             ResizePic background = new ResizePic(3000)
             {

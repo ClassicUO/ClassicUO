@@ -78,7 +78,7 @@ namespace ClassicUO.Game.UI.Gumps
                         t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
 
                         if (string.IsNullOrEmpty(t))
-                            t = UOFileManager.Cliloc.Translate(1020000 + item.Graphic, capitalize: true);
+                            t = ClilocLoader.Instance.Translate(1020000 + item.Graphic, capitalize: true);
                     }
 
                     if (string.IsNullOrEmpty(t))
@@ -87,15 +87,15 @@ namespace ClassicUO.Game.UI.Gumps
                     if (!item.IsCorpse && item.Amount > 1)
                         t += ": " + item.Amount;
 
-                    UOFileManager.Fonts.SetUseHTML(true);
-                    UOFileManager.Fonts.RecalculateWidthByInfo = true;
+                    FontsLoader.Instance.SetUseHTML(true);
+                    FontsLoader.Instance.RecalculateWidthByInfo = true;
 
 
-                    int width = UOFileManager.Fonts.GetWidthUnicode(_renderedText.Font, t);
+                    int width = FontsLoader.Instance.GetWidthUnicode(_renderedText.Font, t);
 
                     if (width > 100)
                     {
-                        t = UOFileManager.Fonts.GetTextByWidthUnicode(_renderedText.Font, t, 100, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
+                        t = FontsLoader.Instance.GetTextByWidthUnicode(_renderedText.Font, t, 100, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
                         width = 100;
                     }
 
@@ -111,8 +111,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _renderedText.Text = t;
 
-                    UOFileManager.Fonts.RecalculateWidthByInfo = false;
-                    UOFileManager.Fonts.SetUseHTML(false);
+                    FontsLoader.Instance.RecalculateWidthByInfo = false;
+                    FontsLoader.Instance.SetUseHTML(false);
 
                     Width = _background.Width = _renderedText.Width + 4;
                     Height = _background.Height = _renderedText.Height + 4;
@@ -127,11 +127,11 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     string t = Entity.Name;
 
-                    int width = UOFileManager.Fonts.GetWidthUnicode(_renderedText.Font, t);
+                    int width = FontsLoader.Instance.GetWidthUnicode(_renderedText.Font, t);
 
                     if (width > 100)
                     {
-                        t = UOFileManager.Fonts.GetTextByWidthUnicode(_renderedText.Font, t, 100, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
+                        t = FontsLoader.Instance.GetTextByWidthUnicode(_renderedText.Font, t, 100, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
                         width = 100;
                     }
 
@@ -191,7 +191,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    Rectangle rect = UOFileManager.Gumps.GetTexture(0x0804).Bounds;
+                    Rectangle rect = GumpsLoader.Instance.GetTexture(0x0804).Bounds;
                     UIManager.Add(gump = new HealthBarGump(Entity) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                 }
 
@@ -304,7 +304,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _positionLocked = true;
 
-                UOFileManager.Animations.GetAnimationDimensions(m.AnimIndex,
+                AnimationsLoader.Instance.GetAnimationDimensions(m.AnimIndex,
                                                               m.GetGraphicForAnimation(),
                                                               /*(byte) m.GetDirectionForAnimation()*/ 0,
                                                               /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
@@ -359,7 +359,7 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                 {
 
-                    UOFileManager.Animations.GetAnimationDimensions(m.AnimIndex,
+                    AnimationsLoader.Instance.GetAnimationDimensions(m.AnimIndex,
                                                                   m.GetGraphicForAnimation(),
                                                                   /*(byte) m.GetDirectionForAnimation()*/ 0,
                                                                   /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,

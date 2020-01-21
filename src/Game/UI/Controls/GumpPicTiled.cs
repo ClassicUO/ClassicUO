@@ -22,6 +22,7 @@
 using System.Collections.Generic;
 
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -76,7 +77,7 @@ namespace ClassicUO.Game.UI.Controls
                 if (_graphic != value && value != 0xFFFF)
                 {
                     _graphic = value;
-                    Texture = UOFileManager.Gumps.GetTexture(value);
+                    Texture = GumpsLoader.Instance.GetTexture(value);
 
                     Width = Texture.Width;
                     Height = Texture.Height;

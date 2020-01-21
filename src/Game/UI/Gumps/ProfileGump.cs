@@ -61,7 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _textBox = new MultiLineBox(new MultiLineEntry(1, -1, 0, 220, true, hue: 0), canEdit)
             {
-                Height = UOFileManager.Fonts.GetHeightUnicode(1, body, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0),
+                Height = FontsLoader.Instance.GetHeightUnicode(1, body, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0),
                 Width = 220,
                 X = 35,
                 Y = 0,
@@ -149,7 +149,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _textBox.Height = Height - 150;*/
             if (!_textBox.IsDisposed && _textBox.IsChanged)
             {
-                _textBox.Height = Math.Max(UOFileManager.Fonts.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
+                _textBox.Height = Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
 
                 foreach (Control c in _scrollArea.Children)
                 {
@@ -163,9 +163,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void AddHorizontalBar(ScrollArea area, ushort start, int x, int width)
         {
-            var startBounds = UOFileManager.Gumps.GetTexture(start);
-            var middleBounds = UOFileManager.Gumps.GetTexture((ushort) (start + 1));
-            var endBounds = UOFileManager.Gumps.GetTexture((ushort) (start + 2));
+            var startBounds = GumpsLoader.Instance.GetTexture(start);
+            var middleBounds = GumpsLoader.Instance.GetTexture((ushort) (start + 1));
+            var endBounds = GumpsLoader.Instance.GetTexture((ushort) (start + 2));
 
             PrivateContainer container = new PrivateContainer();
 

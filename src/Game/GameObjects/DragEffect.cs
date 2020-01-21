@@ -85,7 +85,7 @@ namespace ClassicUO.Game.GameObjects
             if (AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
             {
                 _displayedGraphic = AnimationGraphic;
-                Texture = UOFileManager.Art.GetTexture(AnimationGraphic);
+                Texture = ArtLoader.Instance.GetTexture(AnimationGraphic);
                 Bounds.X = 0;
                 Bounds.Y = 0;
                 Bounds.Width = Texture.Width;
@@ -111,7 +111,7 @@ namespace ClassicUO.Game.GameObjects
             //Engine.DebugInfo.EffectsRendered++;
             base.Draw(batcher, posX, posY);
 
-            ref readonly StaticTiles data = ref UOFileManager.TileData.StaticData[_displayedGraphic];
+            ref readonly StaticTiles data = ref TileDataLoader.Instance.StaticData[_displayedGraphic];
 
             if (data.IsLight && Source != null)
             {

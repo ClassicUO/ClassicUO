@@ -45,11 +45,11 @@ namespace ClassicUO.Game.GameObjects
 
         public PlayerMobile(uint serial) : base(serial)
         {
-            Skills = new Skill[UOFileManager.Skills.SkillsCount];
+            Skills = new Skill[SkillsLoader.Instance.SkillsCount];
 
             for (int i = 0; i < Skills.Length; i++)
             {
-                SkillEntry skill = UOFileManager.Skills.Skills[i];
+                SkillEntry skill = SkillsLoader.Instance.Skills[i];
                 Skills[i] = new Skill(skill.Name, skill.Index, skill.HasAction);
             }
         }
@@ -271,7 +271,7 @@ namespace ClassicUO.Game.GameObjects
 
                     ushort testGraphic = (ushort) (equippedGraphic - 1);
 
-                    if (UOFileManager.TileData.StaticData[testGraphic].AnimID == imageID)
+                    if (TileDataLoader.Instance.StaticData[testGraphic].AnimID == imageID)
                     {
                         graphics[1] = testGraphic;
                         count = 2;
@@ -280,7 +280,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         testGraphic = (ushort) (equippedGraphic + 1);
 
-                        if (UOFileManager.TileData.StaticData[testGraphic].AnimID == imageID)
+                        if (TileDataLoader.Instance.StaticData[testGraphic].AnimID == imageID)
                         {
                             graphics[1] = testGraphic;
                             count = 2;

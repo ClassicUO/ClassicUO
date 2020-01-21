@@ -26,6 +26,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 
@@ -234,8 +235,8 @@ namespace ClassicUO.Game.UI.Gumps
             Y = y;
             Width = w;
             Height = h;
-            _borders[0] = UOFileManager.Gumps.GetTexture(0x0A8C);
-            _borders[1] = UOFileManager.Gumps.GetTexture(0x0A8D);
+            _borders[0] = GumpsLoader.Instance.GetTexture(0x0A8C);
+            _borders[1] = GumpsLoader.Instance.GetTexture(0x0A8D);
             _borderSize = borderSize;
             CanMove = true;
             AcceptMouseInput = true;

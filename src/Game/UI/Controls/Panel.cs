@@ -20,6 +20,7 @@
 #endregion
 
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -33,7 +34,7 @@ namespace ClassicUO.Game.UI.Controls
         public Panel(ushort background)
         {
             for (int i = 0; i < _frame.Length; i++)
-                _frame[i] = UOFileManager.Gumps.GetTexture((ushort) (background + i));
+                _frame[i] = GumpsLoader.Instance.GetTexture((ushort) (background + i));
         }
 
         public override void Update(double totalMS, double frameMS)

@@ -34,7 +34,25 @@ namespace ClassicUO.IO.Resources
         private readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
         private readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
         private UOFile _file;
-        //private readonly List<uint> _usedIndex = new List<uint>();
+
+        private TexmapsLoader()
+        {
+
+        }
+
+        private static TexmapsLoader _instance;
+        public static TexmapsLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new TexmapsLoader();
+                }
+
+                return _instance;
+            }
+        }
 
 
         public override Task Load()

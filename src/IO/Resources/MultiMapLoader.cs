@@ -34,6 +34,27 @@ namespace ClassicUO.IO.Resources
         private readonly UOFileMul[] _facets = new UOFileMul[6];
         private UOFile _file;
 
+        private MultiMapLoader()
+        {
+
+        }
+
+        private static MultiMapLoader _instance;
+        public static MultiMapLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new MultiMapLoader();
+                }
+
+                return _instance;
+            }
+        }
+
+
+
         internal bool HasFacet(int map)
         {
             return map >= 0 && map < _facets.Length && _facets[map] != null;
@@ -147,10 +168,10 @@ namespace ClassicUO.IO.Resources
             if (maxPixelValue >= 1)
             {
                 int s = Marshal.SizeOf<HuesGroup>();
-                IntPtr ptr = Marshal.AllocHGlobal(s * UOFileManager.Hues.HuesRange.Length);
+                IntPtr ptr = Marshal.AllocHGlobal(s * HuesLoader.Instance.HuesRange.Length);
 
-                for (int i = 0; i < UOFileManager.Hues.HuesRange.Length; i++)
-                    Marshal.StructureToPtr(UOFileManager.Hues.HuesRange[i], ptr + i * s, false);
+                for (int i = 0; i < HuesLoader.Instance.HuesRange.Length; i++)
+                    Marshal.StructureToPtr(HuesLoader.Instance.HuesRange[i], ptr + i * s, false);
 
                 ushort* huesData = (ushort*) (byte*) (ptr + 30800);
 

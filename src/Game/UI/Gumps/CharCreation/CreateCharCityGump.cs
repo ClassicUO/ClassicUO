@@ -169,8 +169,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     if (cityFacet > 5)
                         cityFacet = 5;
 
-                    x = 62 + Utility.MathHelper.PercetangeOf(UOFileManager.Map.MapsDefaultSize[cityFacet, 0] - 2048, c.X, 383);
-                    y = 54 + Utility.MathHelper.PercetangeOf(UOFileManager.Map.MapsDefaultSize[cityFacet, 1], c.Y, 384);
+                    x = 62 + Utility.MathHelper.PercetangeOf(MapLoader.Instance.MapsDefaultSize[cityFacet, 0] - 2048, c.X, 383);
+                    y = 54 + Utility.MathHelper.PercetangeOf(MapLoader.Instance.MapsDefaultSize[cityFacet, 1], c.Y, 384);
                 }
                 else if ( i < _townButtonsText.Length)
                 {

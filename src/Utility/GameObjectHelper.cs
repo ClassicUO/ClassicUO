@@ -50,7 +50,7 @@ namespace ClassicUO.Utility
             {
                 if (g >= 0x2198 && g <= 0x21A4) return true;
 
-                ref readonly StaticTiles data = ref UOFileManager.TileData.StaticData[g];
+                ref readonly StaticTiles data = ref TileDataLoader.Instance.StaticData[g];
 
                 if (!data.IsNoDiagonal || data.IsAnimated && World.Player != null && World.Player.Race == RaceType.GARGOYLE) return false;
             }

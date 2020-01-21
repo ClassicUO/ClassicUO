@@ -32,6 +32,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Collections;
 
@@ -101,7 +102,7 @@ namespace ClassicUO.Game
                 {
                     ushort id = _cursorData[i, j];
 
-                    ushort[] pixels = UOFileManager.Art.ReadStaticArt(id, out short w, out short h, out _);
+                    ushort[] pixels = ArtLoader.Instance.ReadStaticArt(id, out short w, out short h, out _);
 
                     if (i == 0)
                     {
@@ -248,7 +249,7 @@ namespace ClassicUO.Game
 
         public void SetDraggedItem(Point? offset)
         {
-            _draggedItemTexture = UOFileManager.Art.GetTexture(ItemHold.DisplayedGraphic);
+            _draggedItemTexture = ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
             if (_draggedItemTexture == null)
                 return;
 
@@ -474,7 +475,7 @@ namespace ClassicUO.Game
                 int offX = _cursorOffset[0, graphic];
                 int offY = _cursorOffset[1, graphic];
 
-                sb.Draw2D(UOFileManager.Art.GetTexture(Graphic), Mouse.Position.X + offX, Mouse.Position.Y + offY, ref _vec);
+                sb.Draw2D(ArtLoader.Instance.GetTexture(Graphic), Mouse.Position.X + offX, Mouse.Position.Y + offY, ref _vec);
             }
 
         }

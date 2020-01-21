@@ -24,6 +24,7 @@ using System.Collections.Generic;
 
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -80,14 +81,14 @@ namespace ClassicUO.Game.UI.Controls
 
                         _gumpSpliderBackground = new UOTexture[3]
                         {
-                            UOFileManager.Gumps.GetTexture(213), UOFileManager.Gumps.GetTexture(214), UOFileManager.Gumps.GetTexture(215)
+                            GumpsLoader.Instance.GetTexture(213), GumpsLoader.Instance.GetTexture(214), GumpsLoader.Instance.GetTexture(215)
                         };
-                        _gumpWidget = UOFileManager.Gumps.GetTexture(216);
+                        _gumpWidget = GumpsLoader.Instance.GetTexture(216);
 
                         break;
 
                     case HSliderBarStyle.BlueWidgetNoBar:
-                        _gumpWidget = UOFileManager.Gumps.GetTexture(0x845);
+                        _gumpWidget = GumpsLoader.Instance.GetTexture(0x845);
 
                         break;
                 }

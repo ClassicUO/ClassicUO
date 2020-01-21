@@ -115,7 +115,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (tileZ > pz14 && _maxZ > tileZ)
                     {
-                        ref readonly var itemdata = ref UOFileManager.TileData.StaticData[obj.Graphic];
+                        ref readonly var itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
 
                         //if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && ((ulong) itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
                         if (((ulong) itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
@@ -155,7 +155,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             if (!(obj2 is Land))
                             {
-                                ref readonly var itemdata = ref UOFileManager.TileData.StaticData[obj2.Graphic];
+                                ref readonly var itemdata = ref TileDataLoader.Instance.StaticData[obj2.Graphic];
 
                                 if (((ulong) itemdata.Flags & 0x204) == 0 && itemdata.IsRoof)
                                 {
@@ -323,7 +323,7 @@ namespace ClassicUO.Game.Scenes
 
                     default:
 
-                        itemData = ref UOFileManager.TileData.StaticData[obj.Graphic];
+                        itemData = ref TileDataLoader.Instance.StaticData[obj.Graphic];
 
                         //if (GameObjectHelper.TryGetStaticData(obj, out itemData))
                         {
@@ -761,11 +761,11 @@ namespace ClassicUO.Game.Scenes
             if (minBlockY < 0)
                 minBlockY = 0;
 
-            if (maxBlockX >= UOFileManager.Map.MapsDefaultSize[World.Map.Index, 0])
-                maxBlockX = UOFileManager.Map.MapsDefaultSize[World.Map.Index, 0] - 1;
+            if (maxBlockX >= MapLoader.Instance.MapsDefaultSize[World.Map.Index, 0])
+                maxBlockX = MapLoader.Instance.MapsDefaultSize[World.Map.Index, 0] - 1;
 
-            if (maxBlockY >= UOFileManager.Map.MapsDefaultSize[World.Map.Index, 1])
-                maxBlockY = UOFileManager.Map.MapsDefaultSize[World.Map.Index, 1] - 1;
+            if (maxBlockY >= MapLoader.Instance.MapsDefaultSize[World.Map.Index, 1])
+                maxBlockY = MapLoader.Instance.MapsDefaultSize[World.Map.Index, 1] - 1;
 
             int drawOffset = (int) (Scale * 40.0);
             float maxX = winGamePosX + winGameWidth + drawOffset;

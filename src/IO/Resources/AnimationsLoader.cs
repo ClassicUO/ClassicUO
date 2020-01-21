@@ -58,6 +58,26 @@ namespace ClassicUO.IO.Resources
         private readonly List<AnimationDirection> _usedTextures = new List<AnimationDirection>();
 
 
+        private AnimationsLoader()
+        {
+            
+        }
+
+        private static AnimationsLoader _instance;
+        public static AnimationsLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new AnimationsLoader();
+                }
+
+                return _instance;
+            }
+        }
+
+
         public ushort Color { get; set; }
         public byte AnimGroup { get; set; }
         public byte Direction { get; set; }
@@ -1183,7 +1203,7 @@ namespace ClassicUO.IO.Resources
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
                 ushort hue = 0;
-                AnimationDirection direction = isCorpse ? UOFileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref group, ref hue)?.Direction[0] : UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref group, ref hue, true)?.Direction[0];
+                AnimationDirection direction = isCorpse ? AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref group, ref hue)?.Direction[0] : AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref group, ref hue, true)?.Direction[0];
 
 
                 return direction != null && (direction.Address != 0 && direction.Size != 0 ||
@@ -1466,11 +1486,11 @@ namespace ClassicUO.IO.Resources
         {
             dir &= 0x7F;
             bool mirror = false;
-            UOFileManager.Animations.GetAnimDirection(ref dir, ref mirror);
+            AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
 
             if (frameIndex == 0xFF)
                 frameIndex = (byte)animIndex;
-            UOFileManager.Animations.GetAnimationDimensions(frameIndex, graphic, dir, animGroup, out centerX, out centerY, out width, out height);
+            AnimationsLoader.Instance.GetAnimationDimensions(frameIndex, graphic, dir, animGroup, out centerX, out centerY, out width, out height);
             if (centerX == 0 && centerY == 0 && width == 0 && height == 0) height = ismounted ? 100 : 60;
         }
 
@@ -1492,7 +1512,7 @@ namespace ClassicUO.IO.Resources
 
                 if (dir < 5)
                 {
-                    AnimationDirection direction = UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
+                    AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[dir];
 
                     if (direction != null)
                     {
@@ -1519,7 +1539,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                AnimationDirection direction1 = UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[0];
+                AnimationDirection direction1 = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true).Direction[0];
 
                 if (direction1 != null)
                 {
@@ -1535,7 +1555,7 @@ namespace ClassicUO.IO.Resources
                             return;
                         }
                     }
-                    else if (direction1.IsUOP && UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true) is AnimationGroupUop animDataStruct)
+                    else if (direction1.IsUOP && AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hue, true) is AnimationGroupUop animDataStruct)
                     {
                         if (!(animDataStruct.FileIndex == 0 && animDataStruct.CompressedLength == 0 && animDataStruct.DecompressedLength == 0 && animDataStruct.Offset == 0))
                         {

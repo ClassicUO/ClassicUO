@@ -30,13 +30,34 @@ using System.Threading.Tasks;
 namespace ClassicUO.IO.Resources
 {
     internal class SkillsLoader : UOFileLoader
-    {
+    {    
+        private UOFileMul _file;
+
+        private SkillsLoader()
+        {
+
+        }
+
+        private static SkillsLoader _instance;
+        public static SkillsLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new SkillsLoader();
+                }
+
+                return _instance;
+            }
+        }
+
+
+
+        public int SkillsCount => Skills.Count;
         public readonly List<SkillEntry> Skills = new List<SkillEntry>();
         public readonly List<SkillEntry> SortedSkills = new List<SkillEntry>();
 
-        private UOFileMul _file;
-
-        public int SkillsCount => Skills.Count;
 
         public override Task Load()
         {

@@ -32,6 +32,25 @@ namespace ClassicUO.IO.Resources
 {
     internal class TileDataLoader : UOFileLoader
     {
+        private TileDataLoader()
+        {
+
+        }
+
+        private static TileDataLoader _instance;
+        public static TileDataLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new TileDataLoader();
+                }
+
+                return _instance;
+            }
+        }
+
         private static StaticTiles[] _staticData;
         private static LandTiles[] _landData;
 

@@ -74,7 +74,7 @@ namespace ClassicUO.Game.GameObjects
         {
             _equipConvData = null;
             _transform = false;
-            UOFileManager.Animations.SittingValue = 0;
+            AnimationsLoader.Instance.SittingValue = 0;
             FrameInfo.X = 0;
             FrameInfo.Y = 0;
             FrameInfo.Width = 0;
@@ -160,21 +160,21 @@ namespace ClassicUO.Game.GameObjects
 
             ProcessSteps(out byte dir);
 
-            UOFileManager.Animations.GetAnimDirection(ref dir, ref mirror);
+            AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
 
             ushort graphic = GetGraphicForAnimation();
             byte animGroup = GetGroupForAnimation(this, graphic, true);
             sbyte animIndex = AnimIndex;
 
-            UOFileManager.Animations.Direction = dir;
-            UOFileManager.Animations.AnimGroup = animGroup;
+            AnimationsLoader.Instance.Direction = dir;
+            AnimationsLoader.Instance.AnimGroup = animGroup;
 
             Item mount = HasEquipment ? Equipment[(int) Layer.Mount] : null;
 
             if (isHuman && mount != null)
             {
-                UOFileManager.Animations.SittingValue = 0;
+                AnimationsLoader.Instance.SittingValue = 0;
 
                 ushort mountGraphic = mount.GetGraphicForAnimation();
 
@@ -183,27 +183,27 @@ namespace ClassicUO.Game.GameObjects
                     if (hasShadow)
                     {
                         DrawInternal(batcher, this, null, drawX, drawY + 10, mirror, ref animIndex, true, graphic, isHuman);
-                        UOFileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
+                        AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, mountGraphic);
                         DrawInternal(batcher, this, mount, drawX, drawY, mirror, ref animIndex, true, mountGraphic, isHuman);
                     }
                     else
-                        UOFileManager.Animations.AnimGroup = GetGroupForAnimation(this, mountGraphic);
+                        AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, mountGraphic);
 
                     drawY += DrawInternal(batcher, this, mount, drawX, drawY, mirror, ref animIndex, false, mountGraphic, isHuman, isMount: true);
                 }
             }
             else
             {
-                if ((UOFileManager.Animations.SittingValue = IsSitting()) != 0)
+                if ((AnimationsLoader.Instance.SittingValue = IsSitting()) != 0)
                 {
                     animGroup = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
                     animIndex = 0;
 
                     ProcessSteps(out dir);
-                    UOFileManager.Animations.Direction = dir;
-                    UOFileManager.Animations.FixSittingDirection(ref dir, ref mirror, ref drawX, ref drawY);
+                    AnimationsLoader.Instance.Direction = dir;
+                    AnimationsLoader.Instance.FixSittingDirection(ref dir, ref mirror, ref drawX, ref drawY);
 
-                    if (UOFileManager.Animations.Direction == 3)
+                    if (AnimationsLoader.Instance.Direction == 3)
                         animGroup = 25;
                     else
                         _transform = true;
@@ -212,7 +212,7 @@ namespace ClassicUO.Game.GameObjects
                     DrawInternal(batcher, this, null, drawX, drawY, mirror, ref animIndex, true, graphic, isHuman);
             }
 
-            UOFileManager.Animations.AnimGroup = animGroup;
+            AnimationsLoader.Instance.AnimGroup = animGroup;
 
             DrawInternal(batcher, this, null, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman);
 
@@ -240,7 +240,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             graphic = item.ItemData.AnimID;
 
-                            if (UOFileManager.Animations.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
+                            if (AnimationsLoader.Instance.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
                             {
                                 if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
                                 {
@@ -306,7 +306,7 @@ namespace ClassicUO.Game.GameObjects
                 return 0;
 
             ushort hueFromFile = _viewHue;
-            byte animGroup = UOFileManager.Animations.AnimGroup;
+            byte animGroup = AnimationsLoader.Instance.AnimGroup;
 
             // NOTE: i'm not sure this is the right way. This code patch the dead shroud for gargoyles.
             if (Client.Version >= ClientVersion.CV_7000 &&
@@ -315,8 +315,8 @@ namespace ClassicUO.Game.GameObjects
                 id = 0x0223;
             }
 
-            AnimationDirection direction = UOFileManager.Animations.GetBodyAnimationGroup(ref id, ref animGroup, ref hueFromFile, isParent).Direction[UOFileManager.Animations.Direction];
-            UOFileManager.Animations.AnimID = id;
+            AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hueFromFile, isParent).Direction[AnimationsLoader.Instance.Direction];
+            AnimationsLoader.Instance.AnimID = id;
 
 
             if (direction == null || direction.Address == -1 || direction.FileIndex == -1)
@@ -325,7 +325,7 @@ namespace ClassicUO.Game.GameObjects
                     return 0;
             }
 
-            if (direction == null || ((direction.FrameCount == 0 || direction.Frames == null) && !UOFileManager.Animations.LoadDirectionGroup(ref direction)))
+            if (direction == null || ((direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadDirectionGroup(ref direction)))
             {
                 if (!(_transform && entity == null && !hasShadow))
                     return 0;
@@ -505,7 +505,7 @@ namespace ClassicUO.Game.GameObjects
                         Client.Game.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x, y);
                 }
 
-                return UOFileManager.Animations.DataIndex[id].MountedHeightOffset;
+                return AnimationsLoader.Instance.DataIndex[id].MountedHeightOffset;
             }
 
             return 0;

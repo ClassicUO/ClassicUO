@@ -30,6 +30,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -116,13 +117,13 @@ namespace ClassicUO.Game.Managers
             byte[] table = new byte[60];
             int index = 0;
 
-            int count = UOFileManager.Skills.SkillsCount;
+            int count = SkillsLoader.Instance.SkillsCount;
 
             for (int i = 0; i < count; i++)
             {
                 for (int j = 0; j < Count; j++)
                 {
-                    if (UOFileManager.Skills.GetSortedIndex(i) == _list[j])
+                    if (SkillsLoader.Instance.GetSortedIndex(i) == _list[j])
                     {
                         table[index++] = _list[j];
                         break;
@@ -322,7 +323,7 @@ namespace ClassicUO.Game.Managers
 
         private static void MakeDefaultCombat()
         {
-            int count = UOFileManager.Skills.SkillsCount;
+            int count = SkillsLoader.Instance.SkillsCount;
 
             SkillsGroup g = new SkillsGroup();
             g.Name = "Combat";
@@ -385,7 +386,7 @@ namespace ClassicUO.Game.Managers
 
         private static void MakeDefaultMagic()
         {
-            int count = UOFileManager.Skills.SkillsCount;
+            int count = SkillsLoader.Instance.SkillsCount;
 
             SkillsGroup g = new SkillsGroup();
             g.Name = "Magic";
@@ -528,7 +529,7 @@ namespace ClassicUO.Game.Managers
                     {
                         int grp = bin.ReadInt32();
 
-                        if (grp < groups.Length && skillidx + 1 < UOFileManager.Skills.SkillsCount)
+                        if (grp < groups.Length && skillidx + 1 < SkillsLoader.Instance.SkillsCount)
                         {
                             groups[grp].Add(skillidx++);
                         }

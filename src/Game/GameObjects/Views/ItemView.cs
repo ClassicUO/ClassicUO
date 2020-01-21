@@ -58,7 +58,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 unsafe
                 {
-                    IntPtr ptr = UOFileManager.AnimData.GetAddressToAnim(Graphic);
+                    IntPtr ptr = AnimDataLoader.Instance.GetAddressToAnim(Graphic);
 
                     if (ptr != IntPtr.Zero)
                     {
@@ -107,7 +107,7 @@ namespace ClassicUO.Game.GameObjects
                 if (_originalGraphic == 0)
                     _originalGraphic = DisplayedGraphic;
 
-                Texture = UOFileManager.Art.GetTexture(_originalGraphic);
+                Texture = ArtLoader.Instance.GetTexture(_originalGraphic);
                 Bounds.X = (Texture.Width >> 1) - 22;
                 Bounds.Y = Texture.Height - 44;
                 Bounds.Width = Texture.Width;
@@ -173,9 +173,9 @@ namespace ClassicUO.Game.GameObjects
 
             byte dir = (byte) ((byte) Layer & 0x7F & 7);
             bool mirror = false;
-            UOFileManager.Animations.GetAnimDirection(ref dir, ref mirror);
+            AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
-            UOFileManager.Animations.Direction = dir;
+            AnimationsLoader.Instance.Direction = dir;
             byte animIndex = (byte) AnimIndex;
 
             bool ishuman = MathHelper.InRange(Amount, 0x0190, 0x0193) ||
@@ -207,7 +207,7 @@ namespace ClassicUO.Game.GameObjects
             if (layer == Layer.Invalid)
             {
                 graphic = GetGraphicForAnimation();
-                UOFileManager.Animations.AnimGroup = UOFileManager.Animations.GetDieGroupIndex(graphic, UsedLayer);
+                AnimationsLoader.Instance.AnimGroup = AnimationsLoader.Instance.GetDieGroupIndex(graphic, UsedLayer);
 
                 if (color == 0)
                     color = Hue;
@@ -222,9 +222,9 @@ namespace ClassicUO.Game.GameObjects
                 ispartialhue = itemEquip.ItemData.IsPartialHue;
 
                 ushort mobGraphic = Amount;
-                UOFileManager.Animations.ConvertBodyIfNeeded(ref mobGraphic);
+                AnimationsLoader.Instance.ConvertBodyIfNeeded(ref mobGraphic);
 
-                if (UOFileManager.Animations.EquipConversions.TryGetValue(mobGraphic, out Dictionary<ushort, EquipConvData> map))
+                if (AnimationsLoader.Instance.EquipConversions.TryGetValue(mobGraphic, out Dictionary<ushort, EquipConvData> map))
                 {
                     if (map.TryGetValue(graphic, out EquipConvData data))
                     {
@@ -240,24 +240,24 @@ namespace ClassicUO.Game.GameObjects
 
 
 
-            byte animGroup = UOFileManager.Animations.AnimGroup;
+            byte animGroup = AnimationsLoader.Instance.AnimGroup;
             ushort newHue = 0;
 
             AnimationGroup gr = layer == Layer.Invalid
-                                    ? UOFileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue)
-                                    : UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
+                                    ? AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref newHue)
+                                    : AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref newHue);
 
-            UOFileManager.Animations.AnimID = graphic;
+            AnimationsLoader.Instance.AnimID = graphic;
 
             if (color == 0)
                 color = newHue;
 
-            var direction = gr.Direction[UOFileManager.Animations.Direction];
+            var direction = gr.Direction[AnimationsLoader.Instance.Direction];
 
             if (direction == null)
                 return;
 
-            if ((direction.FrameCount == 0 || direction.Frames == null) && !UOFileManager.Animations.LoadDirectionGroup(ref direction))
+            if ((direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadDirectionGroup(ref direction))
                 return;
 
             direction.LastAccessTime = Time.Ticks;

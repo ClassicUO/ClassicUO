@@ -29,6 +29,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
@@ -274,7 +275,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // Hair
             CharacterCreationValues.ComboContent content = CharacterCreationValues.GetHairComboContent(isFemale, race);
 
-            Add(_hairLabel = new Label(UOFileManager.Cliloc.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), false, 0, font: 9)
+            Add(_hairLabel = new Label(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), false, 0, font: 9)
             {
                 X = 98, Y = 142
             }, 1);
@@ -286,7 +287,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             {
                 content = CharacterCreationValues.GetFacialHairComboContent(race);
 
-                Add(_facialLabel = new Label(UOFileManager.Cliloc.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), false, 0, font: 9)
+                Add(_facialLabel = new Label(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), false, 0, font: 9)
                 {
                     X = 98, Y = 186
                 }, 1);
@@ -436,7 +437,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             if (string.IsNullOrEmpty(character.Name))
             {
-                UIManager.GetGump<CharCreationGump>()?.ShowMessage(UOFileManager.Cliloc.GetString(3000612));
+                UIManager.GetGump<CharCreationGump>()?.ShowMessage(ClilocLoader.Instance.GetString(3000612));
 
                 return false;
             }
@@ -527,7 +528,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 _layer = layer;
                 _pallet = pallet;
 
-                Add(new Label(UOFileManager.Cliloc.GetString(label), false, 0, font: 9)
+                Add(new Label(ClilocLoader.Instance.GetString(label), false, 0, font: 9)
                 {
                     X = 0,
                     Y = 0

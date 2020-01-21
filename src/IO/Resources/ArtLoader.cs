@@ -41,6 +41,26 @@ namespace ClassicUO.IO.Resources
         private readonly Dictionary<uint, UOTexture16> _landDictionary = new Dictionary<uint, UOTexture16>();
         private UOFile _file;
 
+        private ArtLoader()
+        {
+
+        }
+
+        private static ArtLoader _instance;
+        public static ArtLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new ArtLoader();
+                }
+
+                return _instance;
+            }
+        }
+
+
         public override Task Load()
         {
             return Task.Run(() =>

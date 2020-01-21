@@ -31,6 +31,26 @@ namespace ClassicUO.IO.Resources
 {
     internal class HuesLoader : UOFileLoader
     {
+        private HuesLoader()
+        {
+
+        }
+
+        private static HuesLoader _instance;
+        public static HuesLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new HuesLoader();
+                }
+
+                return _instance;
+            }
+        }
+
+
         public HuesGroup[] HuesRange { get; private set; }
 
         public int HuesCount { get; private set; }

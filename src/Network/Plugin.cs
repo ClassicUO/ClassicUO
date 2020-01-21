@@ -31,6 +31,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 
@@ -260,7 +261,7 @@ namespace ClassicUO.Network
 
         private static void GetStaticImage(ushort g, ref ArtInfo info)
         {
-            UOFileManager.Art.TryGetEntryInfo(g, out long address, out long size, out long compressedsize);
+            ArtLoader.Instance.TryGetEntryInfo(g, out long address, out long size, out long compressedsize);
             info.Address = address;
             info.Size = size;
             info.CompressedSize = compressedsize;

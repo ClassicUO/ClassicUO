@@ -540,7 +540,7 @@ namespace ClassicUO.Game.UI.Gumps
             _textFixtures.Hue = (ushort)(_customHouseManager.Fixtures >= _customHouseManager.MaxFixtures ? 0x0026 : 0x0481);
             _textFixtures.Text = _customHouseManager.Fixtures.ToString();
 
-            string tooltip = UOFileManager.Cliloc.Translate(1061039, $"{_customHouseManager.MaxComponets}\t{_customHouseManager.MaxFixtures}", true);
+            string tooltip = ClilocLoader.Instance.Translate(1061039, $"{_customHouseManager.MaxComponets}\t{_customHouseManager.MaxFixtures}", true);
             _textComponents.SetTooltip(tooltip);
             _textFixtures.SetTooltip(tooltip);
 
@@ -637,7 +637,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (vec.Count == 0)
                         continue;
 
-                    Rectangle bounds = UOFileManager.Art.GetTexture((ushort)vec[0].East1).Bounds;
+                    Rectangle bounds = ArtLoader.Instance.GetTexture((ushort)vec[0].East1).Bounds;
 
                     int offsetX = x + 121 + (48 - bounds.Width) / 2;
                     int offsetY = y + 36;
@@ -686,7 +686,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            Rectangle bounds = UOFileManager.Art.GetTexture(graphic).Bounds;
+                            Rectangle bounds = ArtLoader.Instance.GetTexture(graphic).Bounds;
 
                             int offsetX = x + 130 + (48 - bounds.Width) / 2;
                             int offsetY = y + 36 + (120 - bounds.Height) / 2;
@@ -767,7 +767,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ushort graphic = item.Graphics[i];
                     if (graphic != 0)
                     {
-                        Rectangle bounds = UOFileManager.Art.GetTexture(graphic).Bounds;
+                        Rectangle bounds = ArtLoader.Instance.GetTexture(graphic).Bounds;
 
                         int offsetX = x + 138 + (48 - bounds.Width) / 2;
 
@@ -901,7 +901,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            Rectangle bounds = UOFileManager.Art.GetTexture(graphic).Bounds;
+                            Rectangle bounds = ArtLoader.Instance.GetTexture(graphic).Bounds;
 
                             int offsetX = x + 123 + (48 - bounds.Width) / 2;
                             int offsetY = y + 36 + (60 - bounds.Height) / 2;
@@ -948,7 +948,7 @@ namespace ClassicUO.Game.UI.Gumps
                     // add scissor
                     _dataBox.Add(new ScissorControl(true, 121, 36 + y, 384, 60));
 
-                    Label text = new Label(UOFileManager.Cliloc.GetString(1062113 + j), true, 0xFFFF, 90, 0)
+                    Label text = new Label(ClilocLoader.Instance.GetString(1062113 + j), true, 0xFFFF, 90, 0)
                     {
                         X = 137,
                         Y = j != 0 ? 111 : 51
@@ -965,7 +965,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            Rectangle bounds = UOFileManager.Art.GetTexture(graphic).Bounds;
+                            Rectangle bounds = ArtLoader.Instance.GetTexture(graphic).Bounds;
 
                             int offsetX = x + 123 + (48 - bounds.Width) / 2;
                             int offsetY = y + 36 + (60 - bounds.Height) / 2;
@@ -1018,7 +1018,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (vec.Count == 0)
                         continue;
 
-                    Rectangle bounds = UOFileManager.Art.GetTexture((ushort)vec[0].NSCrosspiece).Bounds;
+                    Rectangle bounds = ArtLoader.Instance.GetTexture((ushort)vec[0].NSCrosspiece).Bounds;
 
                     int offsetX = x + 121 + (48 - bounds.Width) / 2;
                     int offsetY = y + 36;
@@ -1074,7 +1074,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (graphic != 0)
                             {
-                                Rectangle bounds = UOFileManager.Art.GetTexture(graphic).Bounds;
+                                Rectangle bounds = ArtLoader.Instance.GetTexture(graphic).Bounds;
 
                                 int offsetX = x + 130 + (48 - bounds.Width) / 2;
                                 int offsetY = y + 44 + (60 - bounds.Height) / 2;
@@ -1165,7 +1165,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (vec.Count == 0)
                         continue;
 
-                    Rectangle bounds = UOFileManager.Art.GetTexture((ushort)vec[0].Piece5).Bounds;
+                    Rectangle bounds = ArtLoader.Instance.GetTexture((ushort)vec[0].Piece5).Bounds;
 
                     int offsetX = x + 121 + (48 - bounds.Width) / 2;
                     int offsetY = y + 36;
@@ -1215,7 +1215,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            Rectangle bounds = UOFileManager.Art.GetTexture(graphic).Bounds;
+                            Rectangle bounds = ArtLoader.Instance.GetTexture(graphic).Bounds;
 
                             int offsetX = x + 130 + (48 - bounds.Width) / 2;
                             int offsetY = y + 44 + (120 - bounds.Height) / 2;

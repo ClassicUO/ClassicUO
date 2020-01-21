@@ -30,6 +30,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Network
 {
@@ -404,7 +405,7 @@ namespace ClassicUO.Network
     {
         public PUnicodeSpeechRequest(string text, MessageType type, byte font, ushort hue, string lang) : base(0xAD)
         {
-            var entries = UOFileManager.Speeches.GetKeywords(text);
+            var entries = SpeechesLoader.Instance.GetKeywords(text);
 
             bool encoded = entries != null && entries.Count != 0;
             if(encoded)

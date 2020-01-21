@@ -29,6 +29,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 
 namespace ClassicUO.Game.Managers
@@ -244,10 +245,10 @@ namespace ClassicUO.Game.Managers
 
         public static void Target(ushort graphic, ushort x, ushort y, short z)
         {
-            if (!IsTargeting || TargeringType != TargetType.Neutral || graphic >= UOFileManager.TileData.StaticData.Length)
+            if (!IsTargeting || TargeringType != TargetType.Neutral || graphic >= TileDataLoader.Instance.StaticData.Length)
                 return;
 
-            ref readonly var itemData = ref UOFileManager.TileData.StaticData[graphic];
+            ref readonly var itemData = ref TileDataLoader.Instance.StaticData[graphic];
 
             if (Client.Version >= ClientVersion.CV_7090 && itemData.IsSurface)
             {

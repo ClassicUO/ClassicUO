@@ -29,6 +29,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
@@ -71,7 +72,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (cliloc != 0)
             {
-                SetTooltip(UOFileManager.Cliloc.GetString(cliloc), 80);
+                SetTooltip(ClilocLoader.Instance.GetString(cliloc), 80);
             }
 
             WantUpdateSize = true;

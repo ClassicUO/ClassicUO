@@ -30,6 +30,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -57,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             var pic = new GumpPic(0, 0, Graphic, 0);
             Add(pic);
-            pic.SetTooltip(UOFileManager.Cliloc.GetString(1112198 + (Graphic - 0x5DD0)), 200);
+            pic.SetTooltip(ClilocLoader.Instance.GetString(1112198 + (Graphic - 0x5DD0)), 200);
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)

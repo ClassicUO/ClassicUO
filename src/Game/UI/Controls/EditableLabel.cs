@@ -117,14 +117,14 @@ namespace ClassicUO.Game.UI.Controls
             int w, h;
 
             if (_label.Unicode)
-                w = UOFileManager.Fonts.GetWidthUnicode(_label.Font, _label.Text);
+                w = FontsLoader.Instance.GetWidthUnicode(_label.Font, _label.Text);
             else
-                w = UOFileManager.Fonts.GetWidthASCII(_label.Font, _label.Text);
+                w = FontsLoader.Instance.GetWidthASCII(_label.Font, _label.Text);
 
             if (_label.Unicode)
-                h = UOFileManager.Fonts.GetHeightUnicode(_label.Font, _label.Text, w, TEXT_ALIGN_TYPE.TS_LEFT, 0x0);
+                h = FontsLoader.Instance.GetHeightUnicode(_label.Font, _label.Text, w, TEXT_ALIGN_TYPE.TS_LEFT, 0x0);
             else
-                h = UOFileManager.Fonts.GetHeightASCII(_label.Font, _label.Text, w, TEXT_ALIGN_TYPE.TS_LEFT, 0x0);
+                h = FontsLoader.Instance.GetHeightASCII(_label.Font, _label.Text, w, TEXT_ALIGN_TYPE.TS_LEFT, 0x0);
 
             Width = w;
             Height = h;

@@ -1334,20 +1334,20 @@ namespace ClassicUO.Network
             {
                 int count = p.ReadUShort();
 
-                UOFileManager.Skills.Skills.Clear();
-                UOFileManager.Skills.SortedSkills.Clear();
+                SkillsLoader.Instance.Skills.Clear();
+                SkillsLoader.Instance.SortedSkills.Clear();
 
                 for (int i = 0; i < count; i++)
                 {
                     bool haveButton = p.ReadBool();
                     int nameLength = p.ReadByte();
 
-                    UOFileManager.Skills.Skills.Add(new SkillEntry(i,p.ReadASCII(nameLength), haveButton));
+                    SkillsLoader.Instance.Skills.Add(new SkillEntry(i,p.ReadASCII(nameLength), haveButton));
                 }
 
 
-                UOFileManager.Skills.SortedSkills.AddRange(UOFileManager.Skills.Skills);
-                UOFileManager.Skills.SortedSkills.Sort((a, b) => a.Name.CompareTo(b.Name));
+                SkillsLoader.Instance.SortedSkills.AddRange(SkillsLoader.Instance.Skills);
+                SkillsLoader.Instance.SortedSkills.Sort((a, b) => a.Name.CompareTo(b.Name));
             }
             else
             {
@@ -2045,7 +2045,7 @@ namespace ClassicUO.Network
 
                     if (int.TryParse(name, out int cliloc))
                     {
-                        it.Name = UOFileManager.Cliloc.GetString(cliloc);
+                        it.Name = ClilocLoader.Instance.GetString(cliloc);
                         fromcliloc = true;
                     }
                     else if (string.IsNullOrEmpty(it.Name))
@@ -2267,7 +2267,7 @@ namespace ClassicUO.Network
                     ushort hue = p.ReadUShort();
                     name = p.ReadASCII(p.ReadByte());
 
-                    Rectangle rect = UOFileManager.Art.GetTexture(graphic).Bounds;
+                    Rectangle rect = ArtLoader.Instance.GetTexture(graphic).Bounds;
 
                     if (rect.Width != 0 && rect.Height != 0)
                     {
@@ -2410,13 +2410,13 @@ namespace ClassicUO.Network
                 if (p.ID == 0xF5)
                     facet = p.ReadUShort();
 
-                if (UOFileManager.Multimap.HasFacet(facet))
-                    gump.SetMapTexture(UOFileManager.Multimap.LoadFacet(facet, width, height, startX, startY, endX, endY));
+                if (MultiMapLoader.Instance.HasFacet(facet))
+                    gump.SetMapTexture(MultiMapLoader.Instance.LoadFacet(facet, width, height, startX, startY, endX, endY));
                 else
-                    gump.SetMapTexture(UOFileManager.Multimap.LoadMap(width, height, startX, startY, endX, endY));
+                    gump.SetMapTexture(MultiMapLoader.Instance.LoadMap(width, height, startX, startY, endX, endY));
             }
             else
-                gump.SetMapTexture(UOFileManager.Multimap.LoadMap(width, height, startX, startY, endX, endY));
+                gump.SetMapTexture(MultiMapLoader.Instance.LoadMap(width, height, startX, startY, endX, endY));
 
             UIManager.Add(gump);
         }
@@ -2482,7 +2482,7 @@ namespace ClassicUO.Network
             p.Skip(2);
             ushort graphic = p.ReadUShort();
 
-            Rectangle rect = UOFileManager.Gumps.GetTexture(0x0906).Bounds;
+            Rectangle rect = GumpsLoader.Instance.GetTexture(0x0906).Bounds;
 
             int x = (Client.Game.Window.ClientBounds.Width >> 1) - (rect.Width >> 1);
             int y = (Client.Game.Window.ClientBounds.Height >> 1) - (rect.Height >> 1);
@@ -2562,7 +2562,7 @@ namespace ClassicUO.Network
 
                 if (int.TryParse(name, out int clilocnum))
                 {
-                    name = UOFileManager.Cliloc.GetString(clilocnum);
+                    name = ClilocLoader.Instance.GetString(clilocnum);
                     fromcliloc = true;
                 }
 
@@ -2794,7 +2794,7 @@ namespace ClassicUO.Network
                 World.CorpseManager.Add(corpseSerial, serial, owner.Direction, running != 0);
 
 
-            byte group = UOFileManager.Animations.GetDieGroupIndex(owner.Graphic, running != 0, true);
+            byte group = AnimationsLoader.Instance.GetDieGroupIndex(owner.Graphic, running != 0, true);
             owner.SetAnimation(group, 0, 5, 1);
 
             if (ProfileManager.Current.AutoOpenCorpses)
@@ -2981,7 +2981,7 @@ namespace ClassicUO.Network
 
             UOChatManager.ChatIsEnabled = World.ClientLockedFeatures.T2A;
 
-            UOFileManager.Animations.UpdateAnimationTable(flags);
+            AnimationsLoader.Instance.UpdateAnimationTable(flags);
         }
 
         private static void DisplayQuestArrow(Packet p)
@@ -3131,7 +3131,7 @@ namespace ClassicUO.Network
 
                     if (cliloc > 0)
                     {
-                        str = UOFileManager.Cliloc.Translate(UOFileManager.Cliloc.GetString((int) cliloc), capitalize: true);
+                        str = ClilocLoader.Instance.Translate(ClilocLoader.Instance.GetString((int) cliloc), capitalize: true);
 
                         if (!string.IsNullOrEmpty(str))
                             item.Name = str;
@@ -3163,7 +3163,7 @@ namespace ClassicUO.Network
                     {
                         if (count != 0 || next == 0xFFFFFFFD || next == 0xFFFFFFFC) next = p.ReadUInt();
                         short charges = (short) p.ReadUShort();
-                        string attr = UOFileManager.Cliloc.GetString((int) next);
+                        string attr = ClilocLoader.Instance.GetString((int) next);
 
                         if (charges == -1)
                         {
@@ -3250,7 +3250,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 case 0x18: // enable map patches
 
-                    if (UOFileManager.Map.ApplyPatches(p))
+                    if (MapLoader.Instance.ApplyPatches(p))
                     {
                         Log.Trace("Map Patches applied.");
                     }
@@ -3487,7 +3487,7 @@ namespace ClassicUO.Network
             if (p.Position < p.Length)
                 arguments = p.ReadUnicodeReversed(p.Length - p.Position);
 
-            string text = UOFileManager.Cliloc.Translate((int) cliloc, arguments);
+            string text = ClilocLoader.Instance.Translate((int) cliloc, arguments);
 
             if (text == null)
                 return;
@@ -3503,7 +3503,7 @@ namespace ClassicUO.Network
             if ((flags & AffixType.System) != 0)
                 type = MessageType.System;
 
-            if (!UOFileManager.Fonts.UnicodeFontExists((byte) font))
+            if (!FontsLoader.Instance.UnicodeFontExists((byte) font))
                 font = 0;
 
             if (entity != null)
@@ -3592,7 +3592,7 @@ namespace ClassicUO.Network
                 {
                     string argument = p.ReadUnicodeReversed(p.ReadUShort());
 
-                    string str = UOFileManager.Cliloc.Translate(cliloc, argument, true);
+                    string str = ClilocLoader.Instance.Translate(cliloc, argument, true);
 
 
                     for (int i = 0; i < list.Count; i++)
@@ -3938,14 +3938,14 @@ namespace ClassicUO.Network
                     uint descriptionCliloc = p.ReadUInt();
                     uint wtfCliloc = p.ReadUInt();
                     p.Skip(4);
-                    string title = UOFileManager.Cliloc.GetString((int) titleCliloc);
+                    string title = ClilocLoader.Instance.GetString((int) titleCliloc);
                     string description = string.Empty;
                     string wtf = string.Empty;
 
                     if (descriptionCliloc != 0)
                     {
                         string args = p.ReadUnicodeReversed();
-                        description = "\n" + UOFileManager.Cliloc.Translate((int) descriptionCliloc, args, true);
+                        description = "\n" + ClilocLoader.Instance.Translate((int) descriptionCliloc, args, true);
 
                         if (description.Length < 2)
                             description = string.Empty;
@@ -3953,7 +3953,7 @@ namespace ClassicUO.Network
 
                     if (wtfCliloc != 0)
                     {
-                        wtf = UOFileManager.Cliloc.GetString((int) wtfCliloc);
+                        wtf = ClilocLoader.Instance.GetString((int) wtfCliloc);
                         if (!string.IsNullOrWhiteSpace(wtf))
                             wtf = $"\n{wtf}";
                     }

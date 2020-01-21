@@ -150,7 +150,7 @@ namespace ClassicUO.Renderer
                         IsPartialHue = false;
 
                         if (IsHTML)
-                            UOFileManager.Fonts.SetUseHTML(false);
+                            FontsLoader.Instance.SetUseHTML(false);
                         Links.Clear();
                         _texture?.Dispose();
                         _texture = null;
@@ -271,16 +271,16 @@ namespace ClassicUO.Renderer
             }
 
             if (IsHTML)
-                UOFileManager.Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
+                FontsLoader.Instance.SetUseHTML(true, HTMLColor, HasBackgroundColor);
 
-            UOFileManager.Fonts.RecalculateWidthByInfo = RecalculateWidthByInfo;
+            FontsLoader.Instance.RecalculateWidthByInfo = RecalculateWidthByInfo;
 
             bool ispartial = false;
 
             if (IsUnicode)
-                UOFileManager.Fonts.GenerateUnicode(ref _texture, Font, Text, Hue, Cell, MaxWidth, Align, (ushort)FontStyle, SaveHitMap, MaxHeight);
+                FontsLoader.Instance.GenerateUnicode(ref _texture, Font, Text, Hue, Cell, MaxWidth, Align, (ushort)FontStyle, SaveHitMap, MaxHeight);
             else
-                UOFileManager.Fonts.GenerateASCII(ref _texture, Font, Text, Hue, MaxWidth, Align, (ushort)FontStyle, out ispartial, SaveHitMap, MaxHeight);
+                FontsLoader.Instance.GenerateASCII(ref _texture, Font, Text, Hue, MaxWidth, Align, (ushort)FontStyle, out ispartial, SaveHitMap, MaxHeight);
 
             IsPartialHue = ispartial;
 
@@ -292,8 +292,8 @@ namespace ClassicUO.Renderer
             }
 
             if (IsHTML)
-                UOFileManager.Fonts.SetUseHTML(false);
-            UOFileManager.Fonts.RecalculateWidthByInfo = false;
+                FontsLoader.Instance.SetUseHTML(false);
+            FontsLoader.Instance.RecalculateWidthByInfo = false;
         }
 
         public void Destroy()

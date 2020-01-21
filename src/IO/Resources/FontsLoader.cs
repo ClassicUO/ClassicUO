@@ -76,6 +76,25 @@ namespace ClassicUO.IO.Resources
         private uint _visitedWebLinkColor;
         private uint _webLinkColor;
 
+        private FontsLoader()
+        {
+
+        }
+
+        private static FontsLoader _instance;
+        public static FontsLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new FontsLoader();
+                }
+
+                return _instance;
+            }
+        }
+
         public int FontCount { get; private set; }
 
         public bool UnusePartialHue { get; set; } = false;
@@ -498,9 +517,9 @@ namespace ClassicUO.IO.Resources
                                 uint pcl = 0;
 
                                 if (isPartial)
-                                    pcl = UOFileManager.Hues.GetPartialHueColor(pic, charColor) | 0xFF000000;
+                                    pcl = HuesLoader.Instance.GetPartialHueColor(pic, charColor) | 0xFF000000;
                                 else
-                                    pcl = UOFileManager.Hues.GetColor(pic, charColor) | 0xFF000000;
+                                    pcl = HuesLoader.Instance.GetColor(pic, charColor) | 0xFF000000;
                                 int block = testrY * width + x + w;
                                 pData[block] = pcl; //HuesHelper.RgbaToArgb((pcl << 8) | 0xFF);
                             }
@@ -1181,7 +1200,7 @@ namespace ClassicUO.IO.Resources
             else
             {
                 datacolor = /*FileManager.Hues.GetPolygoneColor(cell, color) << 8 | 0xFF;*/
-                    HuesHelper.RgbaToArgb((UOFileManager.Hues.GetPolygoneColor(cell, color) << 8) | 0xFF);
+                    HuesHelper.RgbaToArgb((HuesLoader.Instance.GetPolygoneColor(cell, color) << 8) | 0xFF);
             }
 
             bool isItalic = (flags & UOFONT_ITALIC) != 0;

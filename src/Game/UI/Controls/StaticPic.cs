@@ -22,6 +22,7 @@
 using System.Collections.Generic;
 
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -36,10 +37,10 @@ namespace ClassicUO.Game.UI.Controls
         public StaticPic(ushort graphic, ushort hue)
         {
             Hue = hue;
-            _isPartial = UOFileManager.TileData.StaticData[graphic].IsPartialHue;
+            _isPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
             CanMove = true;
 
-            Texture = UOFileManager.Art.GetTexture(graphic);
+            Texture = ArtLoader.Instance.GetTexture(graphic);
             Width = Texture.Width;
             Height = Texture.Height;
 

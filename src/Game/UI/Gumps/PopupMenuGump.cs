@@ -23,6 +23,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
@@ -49,7 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (PopupMenuItem item in data.Items)
             {
-                string text = UOFileManager.Cliloc.GetString(item.Cliloc);
+                string text = ClilocLoader.Instance.GetString(item.Cliloc);
 
                 ushort hue = item.Hue;
 
@@ -63,14 +64,14 @@ namespace ClassicUO.Game.UI.Gumps
                     if (c.A == 0)
                         c.A = 0xFF;
 
-                    UOFileManager.Fonts.SetUseHTML(true, HuesHelper.RgbaToArgb(c.PackedValue));
+                    FontsLoader.Instance.SetUseHTML(true, HuesHelper.RgbaToArgb(c.PackedValue));
                 }
 
                 Label label = new Label(text, true, hue, font: 1)
                 {
                     X = 10, Y = offsetY
                 };
-                UOFileManager.Fonts.SetUseHTML(false);
+                FontsLoader.Instance.SetUseHTML(false);
 
                 HitBox box = new HitBox(10, offsetY, label.Width, label.Height)
                 {

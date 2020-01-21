@@ -23,6 +23,7 @@ using System;
 
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -36,7 +37,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             Add(new GumpPic(0, 0, 0x0816, 0));
 
-            UOTexture t = UOFileManager.Gumps.GetTexture(0x0816);
+            UOTexture t = GumpsLoader.Instance.GetTexture(0x0816);
 
             Width = t.Width;
             Height = t.Height;

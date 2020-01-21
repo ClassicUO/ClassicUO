@@ -188,7 +188,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public ref readonly StaticTiles ItemData => ref UOFileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
+        public ref readonly StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[IsMulti ? MultiGraphic : Graphic];
 
         public bool IsLootable =>
             ItemData.Layer != (int) Layer.Hair &&
@@ -204,7 +204,7 @@ namespace ClassicUO.Game.GameObjects
             short maxX = 0;
             short maxY = 0;
 
-            int count = UOFileManager.Multi.GetCount(Graphic, out bool uopValid);
+            int count = MultiLoader.Instance.GetCount(Graphic, out bool uopValid);
 
             if (!World.HouseManager.TryGetHouse(Serial, out House house))
             {
@@ -218,7 +218,7 @@ namespace ClassicUO.Game.GameObjects
 
             for (int i = 0; i < count; i++)
             {
-                UOFileManager.Multi.GetMultiData(i, Graphic, uopValid, out ushort graphic, out short x, out short y, out short z, out bool add);
+                MultiLoader.Instance.GetMultiData(i, Graphic, uopValid, out ushort graphic, out short x, out short y, out short z, out bool add);
 
                 if (x < minX) minX = x;
                 if (x > maxX) maxX = x;
@@ -258,7 +258,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            UOFileManager.Multi.ReleaseLastMultiDataRead();
+            MultiLoader.Instance.ReleaseLastMultiDataRead();
 
             MultiInfo = new Rectangle()
             {
@@ -290,7 +290,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         AnimIndex = animIndex;
 
-                        IntPtr ptr = UOFileManager.AnimData.GetAddressToAnim(Graphic);
+                        IntPtr ptr = AnimDataLoader.Instance.GetAddressToAnim(Graphic);
 
                         if (ptr != IntPtr.Zero)
                         {
@@ -872,20 +872,20 @@ namespace ClassicUO.Game.GameObjects
                     //    id = corpseGraphic;
 
                     bool mirror = false;
-                    UOFileManager.Animations.GetAnimDirection(ref dir, ref mirror);
+                    AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
 
                     if (id < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                     {
-                        byte animGroup = UOFileManager.Animations.GetDieGroupIndex(id, UsedLayer);
+                        byte animGroup = AnimationsLoader.Instance.GetDieGroupIndex(id, UsedLayer);
 
                         ushort hue = 0;
-                        var direction = UOFileManager.Animations.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
-                        UOFileManager.Animations.AnimID = id;
-                        UOFileManager.Animations.AnimGroup = animGroup;
-                        UOFileManager.Animations.Direction = dir;
+                        var direction = AnimationsLoader.Instance.GetCorpseAnimationGroup(ref id, ref animGroup, ref hue).Direction[dir];
+                        AnimationsLoader.Instance.AnimID = id;
+                        AnimationsLoader.Instance.AnimGroup = animGroup;
+                        AnimationsLoader.Instance.Direction = dir;
 
                         if (direction.FrameCount == 0 || direction.Frames == null)
-                            UOFileManager.Animations.LoadDirectionGroup(ref direction);
+                            AnimationsLoader.Instance.LoadDirectionGroup(ref direction);
 
                         if (direction.Address != 0 && direction.Size != 0 || direction.IsUOP)
                         {
@@ -903,7 +903,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (OnGround && ItemData.IsAnimated && LastAnimationChangeTime < Time.Ticks)
             {
-                IntPtr ptr = UOFileManager.AnimData.GetAddressToAnim(Graphic);
+                IntPtr ptr = AnimDataLoader.Instance.GetAddressToAnim(Graphic);
 
                 if (ptr != IntPtr.Zero)
                 {

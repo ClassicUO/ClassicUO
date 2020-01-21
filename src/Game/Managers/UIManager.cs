@@ -32,6 +32,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
@@ -471,30 +472,30 @@ namespace ClassicUO.Game.Managers
                             switch (pic.Graphic)
                             {
                                 case 0x69:
-                                    s = UOFileManager.Cliloc.GetString(1051000 + 2);
+                                    s = ClilocLoader.Instance.GetString(1051000 + 2);
                                     break;
                                 case 0x6A:
-                                    s = UOFileManager.Cliloc.GetString(1051000 + 7);
+                                    s = ClilocLoader.Instance.GetString(1051000 + 7);
                                     break;
                                 case 0x6B:
-                                    s = UOFileManager.Cliloc.GetString(1051000 + 5);
+                                    s = ClilocLoader.Instance.GetString(1051000 + 5);
                                     break;
                                 case 0x6D:
-                                    s = UOFileManager.Cliloc.GetString(1051000 + 6);
+                                    s = ClilocLoader.Instance.GetString(1051000 + 6);
                                     break;
                                 case 0x6E:
-                                    s = UOFileManager.Cliloc.GetString(1051000 + 1);
+                                    s = ClilocLoader.Instance.GetString(1051000 + 1);
                                     break;
                                 case 0x6F:
-                                    s = UOFileManager.Cliloc.GetString(1051000 + 3);
+                                    s = ClilocLoader.Instance.GetString(1051000 + 3);
                                     break;
                                 case 0x70:
-                                    s = UOFileManager.Cliloc.GetString(1051000 + 4);
+                                    s = ClilocLoader.Instance.GetString(1051000 + 4);
                                     break;
 
                                 case 0x6C:
                                 default:
-                                    s = UOFileManager.Cliloc.GetString(1051000);
+                                    s = ClilocLoader.Instance.GetString(1051000);
                                     break;
                             }
 
@@ -519,7 +520,7 @@ namespace ClassicUO.Game.Managers
                         break;
 
                     case "xmfhtmlgump":
-                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", UOFileManager.Cliloc.GetString(int.Parse(gparams[5])), 0, true), page);
+                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", ClilocLoader.Instance.GetString(int.Parse(gparams[5])), 0, true), page);
 
                         break;
 
@@ -528,7 +529,7 @@ namespace ClassicUO.Game.Managers
 
                         if (color == 0x7FFF)
                             color = 0x00FFFFFF;
-                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", UOFileManager.Cliloc.GetString(int.Parse(gparams[5])), color, true), page);
+                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", ClilocLoader.Instance.GetString(int.Parse(gparams[5])), color, true), page);
 
                         break;
 
@@ -551,7 +552,7 @@ namespace ClassicUO.Game.Managers
                             }
                         }
 
-                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[5]) == 1, int.Parse(gparams[6]) != 0, gparams[5] != "0" && gparams[6] == "2", sb == null ? UOFileManager.Cliloc.GetString(int.Parse(gparams[8])) : UOFileManager.Cliloc.Translate(UOFileManager.Cliloc.GetString(int.Parse(gparams[8])), sb.ToString().Trim('@')), color, true), page);
+                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[5]) == 1, int.Parse(gparams[6]) != 0, gparams[5] != "0" && gparams[6] == "2", sb == null ? ClilocLoader.Instance.GetString(int.Parse(gparams[8])) : ClilocLoader.Instance.Translate(ClilocLoader.Instance.GetString(int.Parse(gparams[8])), sb.ToString().Trim('@')), color, true), page);
 
                         break;
 
@@ -628,7 +629,7 @@ namespace ClassicUO.Game.Managers
 
                         if (World.ClientFeatures.TooltipsEnabled)
                         {
-                            string cliloc = UOFileManager.Cliloc.GetString(int.Parse(gparams[1]));
+                            string cliloc = ClilocLoader.Instance.GetString(int.Parse(gparams[1]));
 
                             if (gparams.Count > 2 && gparams[2][0] == '@')
                             {
@@ -637,7 +638,7 @@ namespace ClassicUO.Game.Managers
                                 args = args.Trim('@').Replace('@', '\t');
 
                                 if (args.Length > 1)
-                                    cliloc = UOFileManager.Cliloc.Translate(cliloc, args);
+                                    cliloc = ClilocLoader.Instance.Translate(cliloc, args);
                                 else
                                     Log.Error($"String '{args}' too short, something wrong with gump tooltip: {cliloc}");
                             }

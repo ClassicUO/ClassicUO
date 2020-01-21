@@ -32,7 +32,28 @@ namespace ClassicUO.IO.Resources
     internal class AnimDataLoader : UOFileLoader
     {
         private UOFileMul _file;
-        private readonly Dictionary<ushort, IntPtr> _anims= new Dictionary<ushort, IntPtr>();
+        private readonly Dictionary<ushort, IntPtr> _anims = new Dictionary<ushort, IntPtr>();
+
+        private AnimDataLoader()
+        {
+
+        }
+
+        private static AnimDataLoader _instance;
+        public static AnimDataLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new AnimDataLoader();
+                }
+
+                return _instance;
+            }
+        }
+
+
         public override Task Load()
         {
             return Task.Run(() => 

@@ -24,6 +24,7 @@ using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -47,7 +48,7 @@ namespace ClassicUO.Game.UI.Controls
             uint color = 0xFF7F7F7F;
 
             if (item.hue != 0xFFFF)
-                color = UOFileManager.Hues.GetPolygoneColor(12, item.hue);
+                color = HuesLoader.Instance.GetPolygoneColor(12, item.hue);
 
             labelColor = new ClickableColorBox(150, 0, 13, 14, item.hue, color);
 

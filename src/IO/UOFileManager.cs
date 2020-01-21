@@ -44,77 +44,29 @@ namespace ClassicUO.IO
         }
 
 
-        public static AnimationsLoader Animations { get; private set; }
-        public static AnimDataLoader AnimData { get; private set; }
-        public static ArtLoader Art { get; private set; }
-        public static MapLoader Map { get; private set; }
-        public static ClilocLoader Cliloc { get; private set; }
-        public static GumpsLoader Gumps { get; private set; }
-        public static FontsLoader Fonts { get; private set; }
-        public static HuesLoader Hues { get; private set; }
-        public static TileDataLoader TileData { get; private set; }
-        public static MultiLoader Multi { get; private set; }
-        public static SkillsLoader Skills { get; private set; }
-        public static TexmapsLoader Textmaps { get; private set; }
-        public static SpeechesLoader Speeches { get; private set; }
-        public static LightsLoader Lights { get; private set; }
-        public static SoundsLoader Sounds { get; private set; }
-        public static MultiMapLoader Multimap { get; private set; }
-        public static ProfessionLoader Profession { get; private set; }
-
         public static void Load()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 
-            List<Task> tasks = new List<Task>();
-
-            Animations = new AnimationsLoader();
-            tasks.Add(Animations.Load());
-
-            AnimData = new AnimDataLoader();
-            tasks.Add(AnimData.Load());
-
-            Art = new ArtLoader();
-            tasks.Add(Art.Load());
-
-            Map = new MapLoader();
-            tasks.Add(Map.Load());
-
-            Cliloc = new ClilocLoader();
-            tasks.Add(Cliloc.Load(Settings.GlobalSettings.ClilocFile));
-
-            Gumps = new GumpsLoader();
-            tasks.Add(Gumps.Load());
-
-            Fonts = new FontsLoader();
-            tasks.Add(Fonts.Load());
-
-            Hues = new HuesLoader();
-            tasks.Add(Hues.Load());
-
-            TileData = new TileDataLoader();
-            tasks.Add(TileData.Load());
-
-            Multi = new MultiLoader();
-            tasks.Add(Multi.Load());
-
-            Skills = new SkillsLoader();
-            tasks.Add(Skills.Load().ContinueWith(t => (Profession = new ProfessionLoader()).Load()));
-
-            Textmaps = new TexmapsLoader();
-            tasks.Add(Textmaps.Load());
-
-            Speeches = new SpeechesLoader();
-            tasks.Add(Speeches.Load());
-
-            Lights = new LightsLoader();
-            tasks.Add(Lights.Load());
-
-            Sounds = new SoundsLoader();
-            tasks.Add(Sounds.Load());
-
-            Multimap = new MultiMapLoader();
-            tasks.Add(Multimap.Load());
+            List<Task> tasks = new List<Task>
+            {
+                AnimationsLoader.Instance.Load(),
+                AnimDataLoader.Instance.Load(),
+                ArtLoader.Instance.Load(),
+                MapLoader.Instance.Load(),
+                ClilocLoader.Instance.Load(Settings.GlobalSettings.ClilocFile),
+                GumpsLoader.Instance.Load(),
+                FontsLoader.Instance.Load(),
+                HuesLoader.Instance.Load(),
+                TileDataLoader.Instance.Load(),
+                MultiLoader.Instance.Load(),
+                SkillsLoader.Instance.Load().ContinueWith(t => ProfessionLoader.Instance.Load()),
+                TexmapsLoader.Instance.Load(),
+                SpeechesLoader.Instance.Load(),
+                LightsLoader.Instance.Load(),
+                SoundsLoader.Instance.Load(),
+                MultiMapLoader.Instance.Load()
+            };
 
             if (!Task.WhenAll(tasks).Wait(TimeSpan.FromSeconds(10)))
             {
@@ -130,7 +82,7 @@ namespace ClassicUO.IO
                     ref UOFileIndex5D vh = ref Verdata.Patches[i];
 
                     if (vh.FileID == 0)
-                        Map.PatchMapBlock(vh.BlockID, vh.Position);
+                        MapLoader.Instance.PatchMapBlock(vh.BlockID, vh.Position);
                     else if (vh.FileID == 4)
                     {
                         if (vh.BlockID >= Constants.MAX_LAND_DATA_INDEX_COUNT)
@@ -141,10 +93,10 @@ namespace ClassicUO.IO
                     else if (vh.FileID == 12)
                     {
                     }
-                    else if (vh.FileID == 14 && vh.BlockID < Multi.Count)
+                    else if (vh.FileID == 14 && vh.BlockID < MultiLoader.Instance.Count)
                     {
                     }
-                    else if (vh.FileID == 16 && vh.BlockID < Skills.SkillsCount)
+                    else if (vh.FileID == 16 && vh.BlockID < SkillsLoader.Instance.SkillsCount)
                     {
                     }
                     else if (vh.FileID == 30)
@@ -162,8 +114,8 @@ namespace ClassicUO.IO
 
         internal static void MapLoaderReLoad(MapLoader newloader)
         {
-            Map?.Dispose();
-            Map = newloader;
+            MapLoader.Instance?.Dispose();
+            MapLoader.Instance = newloader;
         }
     }
 }

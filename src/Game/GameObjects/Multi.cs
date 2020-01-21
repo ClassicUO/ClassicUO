@@ -111,7 +111,7 @@ namespace ClassicUO.Game.GameObjects
         public bool IsCustom;
         public bool IsVegetation;
 
-        public ref readonly StaticTiles ItemData => ref UOFileManager.TileData.StaticData[Graphic];
+        public ref readonly StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
 
         public override void UpdateGraphicBySeason()
         {

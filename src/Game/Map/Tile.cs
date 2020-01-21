@@ -113,7 +113,7 @@ namespace ClassicUO.Game.Map
 
                 default:
                     MULTI_DEFAULT:
-                    ref readonly StaticTiles data = ref UOFileManager.TileData.StaticData[obj.Graphic];
+                    ref readonly StaticTiles data = ref TileDataLoader.Instance.StaticData[obj.Graphic];
 
                     if (data.IsBackground)
                         priorityZ--;

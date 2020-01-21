@@ -31,6 +31,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -153,7 +154,7 @@ namespace ClassicUO.Game.Scenes
 
             bool useCHB = ProfileManager.Current.CustomBarsToggled;
 
-            Rectangle rect = useCHB ? new Rectangle(0, 0, HealthBarGumpCustom.HPB_BAR_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_MULTILINE) : UOFileManager.Gumps.GetTexture(0x0804).Bounds;
+            Rectangle rect = useCHB ? new Rectangle(0, 0, HealthBarGumpCustom.HPB_BAR_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_MULTILINE) : GumpsLoader.Instance.GetTexture(0x0804).Bounds;
 
             foreach (Mobile mobile in World.Mobiles)
             {
@@ -465,7 +466,7 @@ namespace ClassicUO.Game.Scenes
                     case Static st:
                         string name = st.Name;
                         if (string.IsNullOrEmpty(name))
-                            name = UOFileManager.Cliloc.GetString(1020000 + st.Graphic);
+                            name = ClilocLoader.Instance.GetString(1020000 + st.Graphic);
                         obj.AddMessage(MessageType.Label, name, 3, 1001, false);
 
 
@@ -477,7 +478,7 @@ namespace ClassicUO.Game.Scenes
                         name = multi.Name;
 
                         if (string.IsNullOrEmpty(name))
-                            name = UOFileManager.Cliloc.GetString(1020000 + multi.Graphic);
+                            name = ClilocLoader.Instance.GetString(1020000 + multi.Graphic);
                         obj.AddMessage(MessageType.Label, name, 3, 1001, false);
 
                         if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
@@ -588,7 +589,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (obj is Static || obj is Multi || obj is Item)
                     {
-                        ref readonly var itemdata = ref UOFileManager.TileData.StaticData[obj.Graphic];
+                        ref readonly var itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
 
                         if (itemdata.IsSurface && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                         {
@@ -674,7 +675,7 @@ namespace ClassicUO.Game.Scenes
                             }
                             else
                             {
-                                Rectangle rect = UOFileManager.Gumps.GetTexture(0x0804).Bounds;
+                                Rectangle rect = GumpsLoader.Instance.GetTexture(0x0804).Bounds;
                                 UIManager.Add(customgump = new HealthBarGump(obj) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
                             }
                             UIManager.AttemptDragControl(customgump, Mouse.Position, true);

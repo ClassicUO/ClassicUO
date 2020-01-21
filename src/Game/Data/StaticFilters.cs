@@ -21,6 +21,7 @@
 
 using ClassicUO.Configuration;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;
@@ -101,7 +102,7 @@ namespace ClassicUO.Game.Data
                     {
                         ushort g = vegetationTiles[i];
 
-                        if ((UOFileManager.TileData.StaticData[g].IsImpassable))
+                        if ((TileDataLoader.Instance.StaticData[g].IsImpassable))
                         {
                             continue;
                         }
@@ -150,7 +151,7 @@ namespace ClassicUO.Game.Data
                                 break;
                         }
 
-                        if ((!UOFileManager.TileData.StaticData[graphic].IsImpassable))
+                        if ((!TileDataLoader.Instance.StaticData[graphic].IsImpassable))
                         {
                             writerveg.WriteLine(graphic);
                         }
@@ -221,24 +222,24 @@ namespace ClassicUO.Game.Data
         {
             foreach (ushort graphic in CaveTiles)
             {
-                var texture = UOFileManager.Art.GetTexture(graphic);
+                var texture = ArtLoader.Instance.GetTexture(graphic);
                 if (texture != null)
                     texture.Ticks = 0;
             }
 
-            UOFileManager.Art.CleaUnusedResources(short.MaxValue);
+            ArtLoader.Instance.CleaUnusedResources(short.MaxValue);
         }
 
         public static void CleanTreeTextures()
         {
             foreach (ushort graphic in TreeTiles)
             {
-                var texture = UOFileManager.Art.GetTexture(graphic);
+                var texture = ArtLoader.Instance.GetTexture(graphic);
                 if (texture != null)
                     texture.Ticks = 0;
             }
 
-            UOFileManager.Art.CleaUnusedResources(short.MaxValue);
+            ArtLoader.Instance.CleaUnusedResources(short.MaxValue);
         }
 
         [MethodImpl(256)]

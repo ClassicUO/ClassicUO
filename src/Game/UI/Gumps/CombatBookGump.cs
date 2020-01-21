@@ -25,6 +25,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;
@@ -125,7 +126,7 @@ namespace ClassicUO.Game.UI.Gumps
                         };
 
                         Add(text, page);
-                        text.SetTooltip(UOFileManager.Cliloc.GetString(1061693 + offs), 150);
+                        text.SetTooltip(ClilocLoader.Instance.GetString(1061693 + offs), 150);
 
                         y += 15;
                         offs++;
@@ -139,7 +140,7 @@ namespace ClassicUO.Game.UI.Gumps
                         text = new Label("Primary Ability Icon", false, 0x0288, 80, 6) {X = 265, Y = 105};
                         Add(_primAbility, page);
                         Add(text, page);
-                        _primAbility.SetTooltip(UOFileManager.Cliloc.GetString(1028838 + bab1));
+                        _primAbility.SetTooltip(ClilocLoader.Instance.GetString(1028838 + bab1));
                         _primAbility.DragBegin += OnGumpicDragBeginPrimary;
 
 
@@ -150,7 +151,7 @@ namespace ClassicUO.Game.UI.Gumps
                         text = new Label("Secondary Ability Icon", false, 0x0288, 80, 6) {X = 265, Y = 150};
                         Add(_secAbility, page);
                         Add(text, page);
-                        _secAbility.SetTooltip(UOFileManager.Cliloc.GetString(1028838 + bab2));
+                        _secAbility.SetTooltip(ClilocLoader.Instance.GetString(1028838 + bab2));
                         _secAbility.DragBegin += OnGumpicDragBeginSecondary;
                     }
                 }
@@ -168,7 +169,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 var icon = new GumpPic(62, 40, (ushort) (0x5200 + i), 0);
                 Add(icon, pageW);
-                icon.SetTooltip(UOFileManager.Cliloc.GetString(1061693 + i), 150);
+                icon.SetTooltip(ClilocLoader.Instance.GetString(1061693 + i), 150);
 
                 Label text = new Label(StringHelper.CapitalizeAllWords(AbilityData.Abilities[i].Name), false, 0x0288, 80, 6)
                 {
@@ -187,7 +188,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
                 var list = GetItemsList((byte) i);
-                int maxStaticCount = UOFileManager.TileData.StaticData.Length;
+                int maxStaticCount = TileDataLoader.Instance.StaticData.Length;
 
                 int textX = 62;
                 int textY = 98;
@@ -206,7 +207,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (id >= maxStaticCount)
                         continue;
 
-                    text = new Label(StringHelper.CapitalizeAllWords(UOFileManager.TileData.StaticData[id].Name), false, 0x0288, font: 9)
+                    text = new Label(StringHelper.CapitalizeAllWords(TileDataLoader.Instance.StaticData[id].Name), false, 0x0288, font: 9)
                     {
                         X = textX,
                         Y = textY

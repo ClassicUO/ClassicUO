@@ -32,6 +32,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -395,7 +396,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                                 if (toolTipCliloc > 0)
                                                 {
-                                                    string tooltip = UOFileManager.Cliloc.GetString(toolTipCliloc + id);
+                                                    string tooltip = ClilocLoader.Instance.GetString(toolTipCliloc + id);
                                                     icon.SetTooltip(tooltip, 250);
                                                 }
                                             }
@@ -642,7 +643,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (toolTipCliloc > 0)
                 {
-                    string tooltip = UOFileManager.Cliloc.GetString(toolTipCliloc + i);
+                    string tooltip = ClilocLoader.Instance.GetString(toolTipCliloc + i);
                     icon.SetTooltip(tooltip, 250);
                 }
 

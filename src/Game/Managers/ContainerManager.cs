@@ -29,6 +29,7 @@ using Microsoft.Xna.Framework;
 using ClassicUO.Game.Data;
 using System.IO;
 using ClassicUO.Utility;
+using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Managers
 {
@@ -245,7 +246,7 @@ namespace ClassicUO.Game.Managers
 
         public static void CalculateContainerPosition(ushort g)
         {
-            UOTexture texture = UOFileManager.Gumps.GetTexture(g);
+            UOTexture texture = GumpsLoader.Instance.GetTexture(g);
 
             int passed = 0;
 

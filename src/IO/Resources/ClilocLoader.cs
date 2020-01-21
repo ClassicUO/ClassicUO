@@ -33,6 +33,26 @@ namespace ClassicUO.IO.Resources
         private readonly Dictionary<int, string> _entries = new Dictionary<int, string>();
         private string _cliloc;
 
+        private ClilocLoader()
+        {
+
+        }
+
+        private static ClilocLoader _instance;
+        public static ClilocLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new ClilocLoader();
+                }
+
+                return _instance;
+            }
+        }
+
+
         public Task Load(string cliloc)
         {
             _cliloc = cliloc;

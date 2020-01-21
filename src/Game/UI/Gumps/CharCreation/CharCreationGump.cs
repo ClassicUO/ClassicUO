@@ -28,6 +28,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps.Login;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -93,7 +94,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         skill.Lock = Lock.Locked;
                     }
 
-                    MessageBoxGump messageBox = new MessageBoxGump(400, 300, UOFileManager.Cliloc.GetString(1063016), null, true)
+                    MessageBoxGump messageBox = new MessageBoxGump(400, 300, ClilocLoader.Instance.GetString(1063016), null, true)
                     {
                         X = (470 / 2 - 400 / 2) + 100,
                         Y = (372 / 2 - 300 / 2) + 20,

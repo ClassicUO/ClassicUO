@@ -119,7 +119,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         byte index = g.GetSkill(i);
 
-                        if (index < UOFileManager.Skills.SkillsCount)
+                        if (index < SkillsLoader.Instance.SkillsCount)
                         {
                             control.AddSkill(index, 0, 17 + i * 17);
                         }
@@ -302,7 +302,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 Add(_button);
 
-                int width = UOFileManager.Fonts.GetWidthASCII(6, group.Name);
+                int width = FontsLoader.Instance.GetWidthASCII(6, group.Name);
 
                 Add(_textbox = new TextBox(6, -1, 200, 200, false, FontStyle.Fixed)
                 {
@@ -504,7 +504,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _textbox.SetText(text);
                 }
 
-                int width = UOFileManager.Fonts.GetWidthASCII(6, text);
+                int width = FontsLoader.Instance.GetWidthASCII(6, text);
                 int xx = width + 11 + 16;
 
                 if (xx > 0)
@@ -615,7 +615,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = x;
                 Y = y;
 
-                if (index < 0 || index >= UOFileManager.Skills.Skills.Count)
+                if (index < 0 || index >= SkillsLoader.Instance.Skills.Count)
                 {
                     Dispose();
                     return;

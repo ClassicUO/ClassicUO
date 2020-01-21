@@ -33,6 +33,27 @@ namespace ClassicUO.IO.Resources
     {
         private SpeechEntry[] _speech;
 
+        private SpeechesLoader()
+        {
+
+        }
+
+
+        private static SpeechesLoader _instance;
+        public static SpeechesLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new SpeechesLoader();
+                }
+
+                return _instance;
+            }
+        }
+
+
         public override unsafe Task Load()
         {
             return Task.Run(() =>

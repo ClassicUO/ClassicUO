@@ -24,6 +24,7 @@ using System.Collections.Generic;
 
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -41,8 +42,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public Checkbox(ushort inactive, ushort active, string text = "", byte font = 0, ushort color = 0, bool isunicode = true, int maxWidth = 0)
         {
-            _textures[INACTIVE] = UOFileManager.Gumps.GetTexture(inactive);
-            _textures[ACTIVE] = UOFileManager.Gumps.GetTexture(active);
+            _textures[INACTIVE] = GumpsLoader.Instance.GetTexture(inactive);
+            _textures[ACTIVE] = GumpsLoader.Instance.GetTexture(active);
 
             if (_textures[0] == null || _textures[1] == null)
             {

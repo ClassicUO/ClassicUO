@@ -30,6 +30,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
@@ -58,8 +59,8 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             // big
-            UOTexture16 th1 = UOFileManager.Gumps.GetTexture(0x098B);
-            UOTexture16 th2 = UOFileManager.Gumps.GetTexture(0x098D);
+            UOTexture16 th1 = GumpsLoader.Instance.GetTexture(0x098B);
+            UOTexture16 th2 = GumpsLoader.Instance.GetTexture(0x098D);
 
             int smallWidth = 50;
 

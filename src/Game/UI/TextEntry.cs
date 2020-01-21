@@ -183,8 +183,8 @@ namespace ClassicUO.Game.UI
             if (MaxWidth > 0)
             {
                 int width = RenderText.IsUnicode ? 
-                    UOFileManager.Fonts.GetWidthUnicode(RenderText.Font, text) : 
-                    UOFileManager.Fonts.GetWidthASCII(RenderText.Font, text);
+                    FontsLoader.Instance.GetWidthUnicode(RenderText.Font, text) : 
+                    FontsLoader.Instance.GetWidthASCII(RenderText.Font, text);
                 int len = text.Length;
 
                 while (MaxWidth < width && len > 0)
@@ -196,7 +196,7 @@ namespace ClassicUO.Game.UI
 
                     text = CaretIndex < text.Length ? text.Remove(CaretIndex, 1) : text.Remove(text.Length - 1);
                     len--;
-                    width = RenderText.IsUnicode ? UOFileManager.Fonts.GetWidthUnicode(RenderText.Font, text) : UOFileManager.Fonts.GetWidthASCII(RenderText.Font, text);
+                    width = RenderText.IsUnicode ? FontsLoader.Instance.GetWidthUnicode(RenderText.Font, text) : FontsLoader.Instance.GetWidthASCII(RenderText.Font, text);
                 }
             }
 

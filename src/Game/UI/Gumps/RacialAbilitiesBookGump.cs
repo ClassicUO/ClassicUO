@@ -25,6 +25,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -192,7 +193,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 Add(pic, page1);
-                pic.SetTooltip(UOFileManager.Cliloc.GetString(_tooltipOffset + i), 150);
+                pic.SetTooltip(ClilocLoader.Instance.GetString(_tooltipOffset + i), 150);
                 Add(new GumpPicTiled(iconX, 88, 120, 4, 0x0835), page1);
             }
         }

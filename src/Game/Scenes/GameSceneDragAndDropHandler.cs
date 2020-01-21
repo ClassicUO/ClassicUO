@@ -26,6 +26,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 
@@ -159,7 +160,7 @@ namespace ClassicUO.Game.Scenes
                 if (gump != null && (x != 0xFFFF || y != 0xFFFF))
                 {
                     Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
-                    ArtTexture texture = UOFileManager.Art.GetTexture(ItemHold.DisplayedGraphic);
+                    ArtTexture texture = ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
                     float scale = UIManager.ContainerScale;
 
                     bounds.X = (int) (bounds.X * scale);
@@ -218,7 +219,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (ItemHold.Enabled && ItemHold.IsWearable)
             {
-                GameActions.Equip(ItemHold.Serial, (Layer) UOFileManager.TileData.StaticData[ItemHold.Graphic].Layer, target);
+                GameActions.Equip(ItemHold.Serial, (Layer) TileDataLoader.Instance.StaticData[ItemHold.Graphic].Layer, target);
                 ItemHold.Enabled = false;
                 ItemHold.Dropped = true;
             }

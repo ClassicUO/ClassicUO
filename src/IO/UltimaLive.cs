@@ -101,8 +101,8 @@ namespace ClassicUO.IO
                     }
                     else if (World.Map == null || mapID != World.Map.Index) return;
 
-                    int mapWidthInBlocks = UOFileManager.Map.MapBlocksSize[mapID, 0];
-                    int mapHeightInBlocks = UOFileManager.Map.MapBlocksSize[mapID, 1];
+                    int mapWidthInBlocks = MapLoader.Instance.MapBlocksSize[mapID, 0];
+                    int mapHeightInBlocks = MapLoader.Instance.MapBlocksSize[mapID, 1];
                     int blocks = mapWidthInBlocks * mapHeightInBlocks;
 
                     if (block < 0 || block >= blocks) return;
@@ -185,7 +185,7 @@ namespace ClassicUO.IO
                     byte[] staticsData = new byte[totallen];
                     for (int i = 0; i < totallen; i++) staticsData[i] = p.ReadByte();
 
-                    if (block >= 0 && block < UOFileManager.Map.MapBlocksSize[mapID, 0] * UOFileManager.Map.MapBlocksSize[mapID, 1])
+                    if (block >= 0 && block < MapLoader.Instance.MapBlocksSize[mapID, 0] * MapLoader.Instance.MapBlocksSize[mapID, 1])
                     {
                         Chunk chunk = World.Map.Chunks[block];
 
@@ -298,8 +298,8 @@ namespace ClassicUO.IO
                     for (int i = 0; i < maps; i++)
                     {
                         int mapnum = p.ReadByte();
-                        _UL.MapSizeWrapSize[mapnum, 0] = Math.Min((ushort) UOFileManager.Map.MapsDefaultSize[0, 0], p.ReadUShort());
-                        _UL.MapSizeWrapSize[mapnum, 1] = Math.Min((ushort) UOFileManager.Map.MapsDefaultSize[0, 1], p.ReadUShort());
+                        _UL.MapSizeWrapSize[mapnum, 0] = Math.Min((ushort) MapLoader.Instance.MapsDefaultSize[0, 0], p.ReadUShort());
+                        _UL.MapSizeWrapSize[mapnum, 1] = Math.Min((ushort) MapLoader.Instance.MapsDefaultSize[0, 1], p.ReadUShort());
                         _UL.MapSizeWrapSize[mapnum, 2] = Math.Min(p.ReadUShort(), _UL.MapSizeWrapSize[mapnum, 0]);
                         _UL.MapSizeWrapSize[mapnum, 3] = Math.Min(p.ReadUShort(), _UL.MapSizeWrapSize[mapnum, 1]);
                     }
@@ -376,8 +376,8 @@ namespace ClassicUO.IO
             if (World.Map == null || mapID != World.Map.Index)
                 return;
 
-            int mapWidthInBlocks = UOFileManager.Map.MapBlocksSize[mapID, 0];
-            int mapHeightInBlocks = UOFileManager.Map.MapBlocksSize[mapID, 1];
+            int mapWidthInBlocks = MapLoader.Instance.MapBlocksSize[mapID, 0];
+            int mapHeightInBlocks = MapLoader.Instance.MapBlocksSize[mapID, 1];
 
             if (block >= 0 && block < mapWidthInBlocks * mapHeightInBlocks)
             {
@@ -590,7 +590,7 @@ namespace ClassicUO.IO
 
             public override void Dispose()
             {
-                UOFileManager.Map.Dispose();
+                MapLoader.Instance.Dispose();
             }
 
             internal void WriteArray(long position, byte[] array)
@@ -603,7 +603,7 @@ namespace ClassicUO.IO
             }
         }
 
-        internal class ULMapLoader : MapLoader
+        class ULMapLoader : MapLoader
         {
             private protected readonly CancellationTokenSource feedCancel;
             private readonly Task _twriter;
@@ -647,7 +647,8 @@ namespace ClassicUO.IO
                 }
                 if (_filesStaticsStream != null)
                 {
-                    for (int i = _filesStaticsStream.Length - 1; i >= 0; --i) _filesStaticsStream[i]?.Dispose();
+                    for (int i = _filesStaticsStream.Length - 1; i >= 0; --i)
+                        _filesStaticsStream[i]?.Dispose();
                     _filesStaticsStream = null;
                 }
             }
@@ -656,7 +657,7 @@ namespace ClassicUO.IO
             {
                 return Task.Run(() =>
                 {
-                    if (UOFileManager.Map is ULMapLoader)
+                    if (MapLoader.Instance is ULMapLoader)
                         return;
 
                     UOFileManager.MapLoaderReLoad(this);
@@ -671,7 +672,7 @@ namespace ClassicUO.IO
                         if (File.Exists(path))
                         {
                             _filesMap[i] = new ULFileMul(path, false);
-                            
+
                             foundedOneMap = true;
                         }
 
@@ -738,7 +739,7 @@ namespace ClassicUO.IO
                             Entries[mapID] = new UOFileIndex[uop.TotalEntriesCount];
                             uop.FillEntries(ref Entries[mapID]);
 
-                            Log.Trace( $"UltimaLive -> converting file:\t{mapPath} from {uop.FilePath}");
+                            Log.Trace($"UltimaLive -> converting file:\t{mapPath} from {uop.FilePath}");
 
                             using (FileStream stream = File.Create(mapPath))
                             {
@@ -765,8 +766,8 @@ namespace ClassicUO.IO
 
             private static void CreateNewPersistantMap(int mapID, string mapPath, string staidxPath, string staticsPath)
             {
-                int mapWidthInBlocks = UOFileManager.Map.MapBlocksSize[UOFileManager.Map.MapBlocksSize.GetLength(0) > mapID ? mapID : 0, 0]; //orizontal
-                int mapHeightInBlocks = UOFileManager.Map.MapBlocksSize[UOFileManager.Map.MapBlocksSize.GetLength(0) > mapID ? mapID : 0, 1]; //vertical
+                int mapWidthInBlocks = MapLoader.Instance.MapBlocksSize[MapLoader.Instance.MapBlocksSize.GetLength(0) > mapID ? mapID : 0, 0]; //orizontal
+                int mapHeightInBlocks = MapLoader.Instance.MapBlocksSize[MapLoader.Instance.MapBlocksSize.GetLength(0) > mapID ? mapID : 0, 1]; //vertical
                 int numberOfBytesInStrip = 196 * mapHeightInBlocks;
                 byte[] pVerticalBlockStrip = new byte[numberOfBytesInStrip];
 
@@ -782,38 +783,43 @@ namespace ClassicUO.IO
                     0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00,
                     0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00
                 };
-                for (int y = 0; y < mapHeightInBlocks; y++) Array.Copy(block, 0, pVerticalBlockStrip, 196 * y, 196);
+                for (int y = 0; y < mapHeightInBlocks; y++)
+                    Array.Copy(block, 0, pVerticalBlockStrip, 196 * y, 196);
 
                 //create map new file
                 using (FileStream stream = File.Create(mapPath))
                 {
-                    Log.Trace( $"UltimaLive -> creating new blank map:\t{mapPath}");
-                    Log.Trace( $"Writing {mapWidthInBlocks} blocks by {mapHeightInBlocks} blocks");
-                    for (int x = 0; x < mapWidthInBlocks; x++) stream.Write(pVerticalBlockStrip, 0, numberOfBytesInStrip);
+                    Log.Trace($"UltimaLive -> creating new blank map:\t{mapPath}");
+                    Log.Trace($"Writing {mapWidthInBlocks} blocks by {mapHeightInBlocks} blocks");
+                    for (int x = 0; x < mapWidthInBlocks; x++)
+                        stream.Write(pVerticalBlockStrip, 0, numberOfBytesInStrip);
                     stream.Flush();
                 }
 
                 numberOfBytesInStrip = 12 * mapHeightInBlocks;
                 pVerticalBlockStrip = new byte[numberOfBytesInStrip];
-                block = new byte[12] {0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-                for (int y = 0; y < mapHeightInBlocks; y++) Array.Copy(block, 0, pVerticalBlockStrip, 12 * y, 12);
+                block = new byte[12] { 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+                for (int y = 0; y < mapHeightInBlocks; y++)
+                    Array.Copy(block, 0, pVerticalBlockStrip, 12 * y, 12);
 
                 //create map new file
                 using (FileStream stream = File.Create(staidxPath))
                 {
-                    Log.Trace( "UltimaLive -> creating new index file");
-                    for (int x = 0; x < mapWidthInBlocks; x++) stream.Write(pVerticalBlockStrip, 0, numberOfBytesInStrip);
+                    Log.Trace("UltimaLive -> creating new index file");
+                    for (int x = 0; x < mapWidthInBlocks; x++)
+                        stream.Write(pVerticalBlockStrip, 0, numberOfBytesInStrip);
                     stream.Flush();
                 }
 
-                using (FileStream stream = File.Create(staticsPath)) Log.Trace( "UltimaLive -> creating empty static file");
+                using (FileStream stream = File.Create(staticsPath))
+                    Log.Trace("UltimaLive -> creating empty static file");
             }
 
             private static void CopyFile(string fromfile, string tofile)
             {
                 if (!File.Exists(tofile) || new FileInfo(tofile).Length == 0)
                 {
-                    Log.Trace( $"UltimaLive -> copying file:\t{tofile} from {fromfile}");
+                    Log.Trace($"UltimaLive -> copying file:\t{tofile} from {fromfile}");
                     File.Copy(fromfile, tofile, true);
                 }
             }
@@ -849,7 +855,7 @@ namespace ClassicUO.IO
                         fileNumber = shifted;
 
                         if (shifted < Entries.Length)
-                            uopoffset = (ulong)Entries[map][shifted].Offset;
+                            uopoffset = (ulong) Entries[map][shifted].Offset;
                     }
                 }
 
@@ -914,5 +920,6 @@ namespace ClassicUO.IO
                 }
             }
         }
+
     }
 }

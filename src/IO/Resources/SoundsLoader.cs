@@ -37,6 +37,25 @@ namespace ClassicUO.IO.Resources
         private readonly Dictionary<int, Sound> _sounds = new Dictionary<int, Sound>(), _musics = new Dictionary<int, Sound>();
         private UOFile _file;
 
+        private SoundsLoader()
+        {
+
+        }
+
+        private static SoundsLoader _instance;
+        public static SoundsLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new SoundsLoader();
+                }
+
+                return _instance;
+            }
+        }
+
 
         public override Task Load()
         {

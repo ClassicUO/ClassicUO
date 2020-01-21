@@ -215,7 +215,7 @@ namespace ClassicUO.Game.GameObjects
                         offY = -22;
 
 
-                    UOFileManager.Animations.GetAnimationDimensions(m.AnimIndex,
+                    AnimationsLoader.Instance.GetAnimationDimensions(m.AnimIndex,
                                                                   m.GetGraphicForAnimation(),
                                                                   /*(byte) m.GetDirectionForAnimation()*/ 0,
                                                                   /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
@@ -240,7 +240,7 @@ namespace ClassicUO.Game.GameObjects
                             offY = -22;
                         else if (it.ItemData.IsAnimated)
                         {
-                            ArtTexture texture = UOFileManager.Art.GetTexture(it.Graphic);
+                            ArtTexture texture = ArtLoader.Instance.GetTexture(it.Graphic);
 
                             if (texture != null)
                                 yValue = texture.Height >> 1;

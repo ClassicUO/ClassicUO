@@ -199,10 +199,10 @@ namespace ClassicUO.Game.UI.Controls
             ushort startColor = (ushort) (Graduation + 1);
             _hues = new ushort[_rows * _columns];
             int size = Marshal.SizeOf<HuesGroup>();
-            IntPtr ptr = Marshal.AllocHGlobal(size * UOFileManager.Hues.HuesRange.Length);
+            IntPtr ptr = Marshal.AllocHGlobal(size * HuesLoader.Instance.HuesRange.Length);
 
-            for (int i = 0; i < UOFileManager.Hues.HuesRange.Length; i++)
-                Marshal.StructureToPtr(UOFileManager.Hues.HuesRange[i], ptr + i * size, false);
+            for (int i = 0; i < HuesLoader.Instance.HuesRange.Length; i++)
+                Marshal.StructureToPtr(HuesLoader.Instance.HuesRange[i], ptr + i * size, false);
             byte* huesData = (byte*) (ptr + (32 + 4));
 
             for (int y = 0; y < _rows; y++)
@@ -229,10 +229,10 @@ namespace ClassicUO.Game.UI.Controls
         private unsafe void CreateTextureFromCustomPallet()
         {
             int size = Marshal.SizeOf<HuesGroup>();
-            IntPtr ptr = Marshal.AllocHGlobal(size * UOFileManager.Hues.HuesRange.Length);
+            IntPtr ptr = Marshal.AllocHGlobal(size * HuesLoader.Instance.HuesRange.Length);
 
-            for (int i = 0; i < UOFileManager.Hues.HuesRange.Length; i++)
-                Marshal.StructureToPtr(UOFileManager.Hues.HuesRange[i], ptr + i * size, false);
+            for (int i = 0; i < HuesLoader.Instance.HuesRange.Length; i++)
+                Marshal.StructureToPtr(HuesLoader.Instance.HuesRange[i], ptr + i * size, false);
             byte* huesData = (byte*) (ptr + (32 + 4));
 
             _hues = new ushort[_rows * _columns];

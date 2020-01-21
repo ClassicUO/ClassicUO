@@ -25,6 +25,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Audio;
+using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework.Audio;
 
@@ -95,7 +96,7 @@ namespace ClassicUO.Game.Managers
             if (volume < -1 || volume > 1f)
                 return;
 
-            UOSound sound = (UOSound)UOFileManager.Sounds.GetSound(index);
+            UOSound sound = (UOSound)SoundsLoader.Instance.GetSound(index);
 
             if (sound != null)
             {
@@ -117,7 +118,7 @@ namespace ClassicUO.Game.Managers
             if (volume < -1 || volume > 1f)
                 return;
 
-            UOSound sound = (UOSound)UOFileManager.Sounds.GetSound(index);
+            UOSound sound = (UOSound)SoundsLoader.Instance.GetSound(index);
 
             if (sound != null)
             {
@@ -155,7 +156,7 @@ namespace ClassicUO.Game.Managers
             if (volume < -1 || volume > 1f)
                 return;
 
-            Sound m = UOFileManager.Sounds.GetMusic(music);
+            Sound m = SoundsLoader.Instance.GetMusic(music);
 
             if (m == null && _currentMusic != null)
                 StopMusic();

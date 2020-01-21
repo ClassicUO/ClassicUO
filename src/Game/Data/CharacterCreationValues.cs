@@ -23,6 +23,7 @@ using System.Linq;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Data
 {
@@ -220,7 +221,7 @@ namespace ClassicUO.Game.Data
             public ComboContent(int[] labels, int[] ids)
             {
                 _ids = ids;
-                Labels = labels.Select(o => UOFileManager.Cliloc.GetString(o)).ToArray();
+                Labels = labels.Select(o => ClilocLoader.Instance.GetString(o)).ToArray();
             }
 
             public string[] Labels { get; }

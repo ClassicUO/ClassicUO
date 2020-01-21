@@ -25,6 +25,7 @@ using System.Linq;
 
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -109,7 +110,7 @@ namespace ClassicUO.Game.UI.Controls
             };
 
             int xx = _label.X + _label.Width + 5;
-            int hh = UOFileManager.Gumps.GetTexture(0x0835)?.Height ?? 0;
+            int hh = GumpsLoader.Instance.GetTexture(0x0835)?.Height ?? 0;
             int decWidth = width - xx - 10;
 
             if (decWidth < 0)

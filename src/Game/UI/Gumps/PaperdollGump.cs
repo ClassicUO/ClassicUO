@@ -32,6 +32,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 
@@ -548,7 +549,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            Rectangle bounds = UOFileManager.Gumps.GetTexture(0x0804).Bounds;
+                            Rectangle bounds = GumpsLoader.Instance.GetTexture(0x0804).Bounds;
 
                             UIManager.Add(new HealthBarGump(Mobile)
                             {

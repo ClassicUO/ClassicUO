@@ -38,6 +38,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -107,9 +108,9 @@ namespace ClassicUO
         {
             Client.Load();
 
-            uint[] hues = UOFileManager.Hues.CreateShaderColors();
+            uint[] hues = HuesLoader.Instance.CreateShaderColors();
 
-            int size = UOFileManager.Hues.HuesCount;
+            int size = HuesLoader.Instance.HuesCount;
 
             Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size * 2);
             texture0.SetData(hues, 0, size * 2);

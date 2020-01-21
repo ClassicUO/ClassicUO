@@ -43,6 +43,32 @@ namespace ClassicUO.IO.Resources
         private readonly UOFileMul[] _staDifi = new UOFileMul[MAPS_COUNT];
         private readonly UOFileMul[] _staDifl = new UOFileMul[MAPS_COUNT];
 
+        public MapLoader()
+        {
+
+        }
+
+        private static MapLoader _instance;
+        public static MapLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new MapLoader();
+                }
+
+                return _instance;
+            }
+            set
+            {
+                _instance?.Dispose();
+                _instance = value;
+            }
+        }
+
+
+
         public new UOFileIndex[][] Entries = new UOFileIndex[MAPS_COUNT][]; 
 
         public IndexMap[][] BlockData { get; private set; } = new IndexMap[MAPS_COUNT][];
@@ -78,8 +104,8 @@ namespace ClassicUO.IO.Resources
 
         protected static UOFile GetMapFile(int map)
         {
-            if (map < UOFileManager.Map._filesMap.Length)
-                return UOFileManager.Map._filesMap[map];
+            if (map < MapLoader.Instance._filesMap.Length)
+                return MapLoader.Instance._filesMap[map];
 
             return null;
         }

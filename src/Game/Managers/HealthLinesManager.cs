@@ -22,6 +22,7 @@
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -114,7 +115,7 @@ namespace ClassicUO.Game.Managers
                             yy += (int) (22 / scale);
 
 
-                        UOFileManager.Animations.GetAnimationDimensions(mobile.AnimIndex,
+                        AnimationsLoader.Instance.GetAnimationDimensions(mobile.AnimIndex,
                                                                       mobile.GetGraphicForAnimation(),
                                                                       /*(byte) m.GetDirectionForAnimation()*/ 0,
                                                                       /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,

@@ -28,6 +28,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 
@@ -322,7 +323,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _texture.IsPartial = item.ItemData.IsPartialHue;
                 _texture.ScaleTexture = true;
                 _texture.Hue = item.Hue;
-                _texture.Texture = UOFileManager.Art.GetTexture(item.DisplayedGraphic);
+                _texture.Texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
                 _texture.Y = 15;
                 _texture.Width = SIZE;
                 _texture.Height = SIZE;

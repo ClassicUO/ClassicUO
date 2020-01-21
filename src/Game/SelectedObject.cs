@@ -47,7 +47,7 @@ namespace ClassicUO.Game
         {
             bool mirror = false;
             byte dir = (byte) mobile.GetDirectionForAnimation();
-            UOFileManager.Animations.GetAnimDirection(ref dir, ref mirror);
+            AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
 
 
             sbyte animIndex = mobile.AnimIndex;
@@ -76,7 +76,7 @@ namespace ClassicUO.Game
 
                         graphic = item.ItemData.AnimID;
 
-                        if (UOFileManager.Animations.EquipConversions.TryGetValue(mobile.Graphic, out Dictionary<ushort, EquipConvData> map))
+                        if (AnimationsLoader.Instance.EquipConversions.TryGetValue(mobile.Graphic, out Dictionary<ushort, EquipConvData> map))
                         {
                             if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
                                 graphic = data.Graphic;
@@ -92,13 +92,13 @@ namespace ClassicUO.Game
                 byte animGroup = Mobile.GetGroupForAnimation(mobile, graphic, layer == Layer.Invalid);
 
                 ushort hue = 0;
-                AnimationDirection direction = UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, true).Direction[dir];
+                AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref hue, true).Direction[dir];
 
-                UOFileManager.Animations.AnimID = graphic;
-                UOFileManager.Animations.AnimGroup = animGroup;
-                UOFileManager.Animations.Direction = dir;
+                AnimationsLoader.Instance.AnimID = graphic;
+                AnimationsLoader.Instance.AnimGroup = animGroup;
+                AnimationsLoader.Instance.Direction = dir;
 
-                if (direction == null || ((direction.FrameCount == 0 || direction.Frames == null) && !UOFileManager.Animations.LoadDirectionGroup(ref direction)))
+                if (direction == null || ((direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadDirectionGroup(ref direction)))
                     continue;
 
                 int fc = direction.FrameCount;
@@ -150,8 +150,8 @@ namespace ClassicUO.Game
 
             byte dir = (byte) ((byte) corpse.Layer & 0x7F & 7);
             bool mirror = false;
-            UOFileManager.Animations.GetAnimDirection(ref dir, ref mirror);
-            UOFileManager.Animations.Direction = dir;
+            AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
+            AnimationsLoader.Instance.Direction = dir;
             byte animIndex = (byte) corpse.AnimIndex;
 
             for (int i = -1; i < Constants.USED_LAYER_COUNT; i++)
@@ -164,7 +164,7 @@ namespace ClassicUO.Game
                 if (layer == Layer.Invalid)
                 {
                     graphic = corpse.GetGraphicForAnimation();
-                    UOFileManager.Animations.AnimGroup = UOFileManager.Animations.GetDieGroupIndex(graphic, corpse.UsedLayer);
+                    AnimationsLoader.Instance.AnimGroup = AnimationsLoader.Instance.GetDieGroupIndex(graphic, corpse.UsedLayer);
                 }
                 else if (corpse.HasEquipment && MathHelper.InRange(corpse.Amount, 0x0190, 0x0193) ||
                          MathHelper.InRange(corpse.Amount, 0x00B7, 0x00BA) ||
@@ -180,7 +180,7 @@ namespace ClassicUO.Game
 
                     graphic = itemEquip.ItemData.AnimID;
 
-                    if (UOFileManager.Animations.EquipConversions.TryGetValue(corpse.Amount, out Dictionary<ushort, EquipConvData> map))
+                    if (AnimationsLoader.Instance.EquipConversions.TryGetValue(corpse.Amount, out Dictionary<ushort, EquipConvData> map))
                     {
                         if (map.TryGetValue(graphic, out EquipConvData data))
                             graphic = data.Graphic;
@@ -190,15 +190,15 @@ namespace ClassicUO.Game
                     continue;
 
 
-                byte animGroup = UOFileManager.Animations.AnimGroup;
+                byte animGroup = AnimationsLoader.Instance.AnimGroup;
 
                 AnimationGroup gr = layer == Layer.Invalid
-                                        ? UOFileManager.Animations.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref color)
-                                        : UOFileManager.Animations.GetBodyAnimationGroup(ref graphic, ref animGroup, ref color);
+                                        ? AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref animGroup, ref color)
+                                        : AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref animGroup, ref color);
 
-                AnimationDirection direction = gr.Direction[UOFileManager.Animations.Direction];
+                AnimationDirection direction = gr.Direction[AnimationsLoader.Instance.Direction];
 
-                if (direction == null || ((direction.FrameCount == 0 || direction.Frames == null) && !UOFileManager.Animations.LoadDirectionGroup(ref direction)))
+                if (direction == null || ((direction.FrameCount == 0 || direction.Frames == null) && !AnimationsLoader.Instance.LoadDirectionGroup(ref direction)))
                     continue;
 
                 int fc = direction.FrameCount;

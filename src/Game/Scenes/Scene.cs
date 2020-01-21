@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Coroutines;
 using ClassicUO.Utility.Logging;
@@ -128,19 +129,19 @@ namespace ClassicUO.Game.Scenes
 
             while (!IsDestroyed)
             {
-                UOFileManager.Art.CleaUnusedResources(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
+                ArtLoader.Instance.CleaUnusedResources(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
 
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
 
-                UOFileManager.Gumps.CleaUnusedResources(Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
+                GumpsLoader.Instance.CleaUnusedResources(Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
 
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
 
-                UOFileManager.Textmaps.CleaUnusedResources(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
+                TexmapsLoader.Instance.CleaUnusedResources(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
 
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
 
-                UOFileManager.Animations.CleaUnusedResources(Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
+                AnimationsLoader.Instance.CleaUnusedResources(Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
 
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
 
@@ -148,7 +149,7 @@ namespace ClassicUO.Game.Scenes
 
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
 
-                UOFileManager.Lights.CleaUnusedResources(20);
+                LightsLoader.Instance.CleaUnusedResources(20);
 
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
             }

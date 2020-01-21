@@ -66,7 +66,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void Load()
         {
-            AnimDataFrame = UOFileManager.AnimData.CalculateCurrentGraphic(Graphic);
+            AnimDataFrame = AnimDataLoader.Instance.CalculateCurrentGraphic(Graphic);
             IsEnabled = true;
             AnimIndex = 0;
 

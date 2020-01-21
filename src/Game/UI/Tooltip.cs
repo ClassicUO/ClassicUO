@@ -73,23 +73,23 @@ namespace ClassicUO.Game.UI
             {
                 if (_maxWidth == 0)
                 {
-                    UOFileManager.Fonts.SetUseHTML(true);
-                    UOFileManager.Fonts.RecalculateWidthByInfo = true;
+                    FontsLoader.Instance.SetUseHTML(true);
+                    FontsLoader.Instance.RecalculateWidthByInfo = true;
 
-                    int width = UOFileManager.Fonts.GetWidthUnicode(1, Text);
+                    int width = FontsLoader.Instance.GetWidthUnicode(1, Text);
 
                     if (width > 600)
                         width = 600;
 
-                    width = UOFileManager.Fonts.GetWidthExUnicode(1, Text, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) FontStyle.BlackBorder);
+                    width = FontsLoader.Instance.GetWidthExUnicode(1, Text, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) FontStyle.BlackBorder);
 
                     if (width > 600)
                         width = 600;
 
                     _renderedText.MaxWidth = width;
 
-                    UOFileManager.Fonts.RecalculateWidthByInfo = false;
-                    UOFileManager.Fonts.SetUseHTML(false);
+                    FontsLoader.Instance.RecalculateWidthByInfo = false;
+                    FontsLoader.Instance.SetUseHTML(false);
                 }
                 else
                     _renderedText.MaxWidth = _maxWidth;

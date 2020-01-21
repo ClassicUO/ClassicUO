@@ -33,6 +33,25 @@ namespace ClassicUO.IO.Resources
     {
         private UOFile _file;
 
+        private GumpsLoader()
+        {
+
+        }
+
+        private static GumpsLoader _instance;
+        public static GumpsLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new GumpsLoader();
+                }
+
+                return _instance;
+            }
+        }
+
         public override Task Load()
         {
             return Task.Run(() => {

@@ -40,6 +40,7 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using SDL2;
+using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -235,22 +236,22 @@ namespace ClassicUO.Game.Scenes
                 switch (CurrentLoginStep)
                 {
                     case LoginSteps.Connecting:
-                        labelText = UOFileManager.Cliloc.GetString(3000002); // "Connecting..."
+                        labelText = ClilocLoader.Instance.GetString(3000002); // "Connecting..."
 
                         break;
 
                     case LoginSteps.VerifyingAccount:
-                        labelText = UOFileManager.Cliloc.GetString(3000003); // "Verifying Account..."
+                        labelText = ClilocLoader.Instance.GetString(3000003); // "Verifying Account..."
 
                         break;
 
                     case LoginSteps.LoginInToServer:
-                        labelText = UOFileManager.Cliloc.GetString(3000053); // logging into shard
+                        labelText = ClilocLoader.Instance.GetString(3000053); // logging into shard
 
                         break;
 
                     case LoginSteps.EnteringBritania:
-                        labelText = UOFileManager.Cliloc.GetString(3000001); // Entering Britania...
+                        labelText = ClilocLoader.Instance.GetString(3000001); // Entering Britania...
 
                         break;
                     case LoginSteps.CreatingCharacter:
@@ -653,7 +654,7 @@ namespace ClassicUO.Game.Scenes
                     uint cityDescription = p.ReadUInt();
                     p.Skip(4);
 
-                    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, UOFileManager.Cliloc.GetString((int) cityDescription), cityX, cityY, cityZ, cityMapIndex, isNew);
+                    cityInfo = new CityInfo(cityIndex, cityName, cityBuilding, ClilocLoader.Instance.GetString((int) cityDescription), cityX, cityY, cityZ, cityMapIndex, isNew);
                 }
                 else
                 {

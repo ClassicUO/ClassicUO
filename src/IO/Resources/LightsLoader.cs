@@ -32,6 +32,25 @@ namespace ClassicUO.IO.Resources
     {
         private UOFileMul _file;
 
+        private LightsLoader()
+        {
+
+        }
+
+        private static LightsLoader _instance;
+        public static LightsLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new LightsLoader();
+                }
+
+                return _instance;
+            }
+        }
+
         public override Task Load()
         {
             return Task.Run(() => {
