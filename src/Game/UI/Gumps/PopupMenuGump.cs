@@ -35,8 +35,6 @@ namespace ClassicUO.Game.UI.Gumps
         public PopupMenuGump(PopupMenuData data) : base(0, 0)
         {
             CloseIfClickOutside = true;
-            //ControlInfo.IsModal = true;
-            //ControlInfo.ModalClickOutsideAreaClosesThisControl = true;
             CanMove = false;
             CanCloseWithRightClick = true;
             ResizePic pic = new ResizePic(0x0A3C)
