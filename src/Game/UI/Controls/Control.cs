@@ -385,12 +385,10 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public void SetTooltip(Entity entity)
+        public void SetTooltip(uint entity)
         {
             ClearTooltip();
-
-            if (entity != null && !entity.IsDestroyed)
-                Tooltip = entity;
+            Tooltip = entity;
         }
 
         public void ClearTooltip()

@@ -652,13 +652,8 @@ namespace ClassicUO.Game.Managers
 
                         if (World.ClientFeatures.TooltipsEnabled)
                         {
-                            uint serial = SerialHelper.Parse(gparams[1]);
-                            Entity entity = World.Get(serial);
-
-                            var lastControl = gump.Children.LastOrDefault();
-
-                            if (lastControl != default(Control) && entity != default(Entity))
-                                lastControl.SetTooltip(entity);
+                            gump.Children.LastOrDefault()?
+                               .SetTooltip(SerialHelper.Parse(gparams[1]));
                         }
 
                         break;

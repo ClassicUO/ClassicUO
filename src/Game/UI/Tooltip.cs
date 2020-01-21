@@ -38,7 +38,7 @@ namespace ClassicUO.Game.UI
         private static readonly char[] _titleFormatChars = {' ', '-', '\n', '['};
         private readonly StringBuilder _sb = new StringBuilder();
         private readonly StringBuilder _sbHTML = new StringBuilder();
-        private Entity _gameObject;
+        private uint _serial;
         private uint _hash;
         private float _lastHoverTime;
         private int _maxWidth;
@@ -49,14 +49,14 @@ namespace ClassicUO.Game.UI
 
         public bool IsEmpty => Text == null;
 
-        public GameObject Object => _gameObject;
+        public uint Serial => _serial;
 
         public bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (_gameObject != null && World.OPL.TryGetRevision(_gameObject, out uint revision) && _hash != revision)
+            if (SerialHelper.IsValid(_serial) && World.OPL.TryGetRevision(_serial, out uint revision) && _hash != revision)
             {
                 _hash = revision;
-                Text = ReadProperties(_gameObject, out _textHTML);
+                Text = ReadProperties(_serial, out _textHTML);
             }
 
             if (string.IsNullOrEmpty(Text))
@@ -118,21 +118,21 @@ namespace ClassicUO.Game.UI
 
         public void Clear()
         {
-            _gameObject = null;
+            _serial = 0;
             _hash = 0;
             _textHTML = Text = null;
             _maxWidth = 0;
         }
 
-        public void SetGameObject(Entity obj)
+        public void SetGameObject(uint obj)
         {
-            if (_gameObject == null || obj != _gameObject)
+            if (_serial == 0 || obj != _serial)
             {
                 uint revision2 = 0;
-                if (_gameObject == null || (World.OPL.TryGetRevision(_gameObject, out uint revision) && World.OPL.TryGetRevision(obj, out revision2) && revision != revision2))
+                if (_serial == 0 || (World.OPL.TryGetRevision(_serial, out uint revision) && World.OPL.TryGetRevision(obj, out revision2) && revision != revision2))
                 {
                     _maxWidth = 0;
-                    _gameObject = obj;
+                    _serial = obj;
                     _hash = revision2;
                     Text = ReadProperties(obj, out _textHTML);
                     _lastHoverTime = Time.Ticks + 250;
@@ -141,7 +141,7 @@ namespace ClassicUO.Game.UI
         }
 
 
-        private string ReadProperties(Entity obj, out string htmltext)
+        private string ReadProperties(uint serial, out string htmltext)
         {
             _sb.Clear();
             _sbHTML.Clear();
@@ -149,20 +149,25 @@ namespace ClassicUO.Game.UI
             bool hasStartColor = false;
 
 
-            if (obj != null && 
-                World.OPL.TryGetNameAndData(obj, out string name, out string data))
+            if (SerialHelper.IsValid(serial) && 
+                World.OPL.TryGetNameAndData(serial, out string name, out string data))
             {
                 if (!string.IsNullOrEmpty(name))
                 {
-                    if (SerialHelper.IsItem(obj.Serial))
+                    if (SerialHelper.IsItem(serial))
                     {
                         _sbHTML.Append("<basefont color=\"yellow\">");
                         hasStartColor = true;
                     }
-                    else if (obj is Mobile mob)
+                    else
                     {
-                        _sbHTML.Append(Notoriety.GetHTMLHue(mob.NotorietyFlag));
-                        hasStartColor = true;
+                        Mobile mob = World.Mobiles.Get(serial);
+
+                        if (mob != null)
+                        {
+                            _sbHTML.Append(Notoriety.GetHTMLHue(mob.NotorietyFlag));
+                            hasStartColor = true;
+                        }
                     }
 
                     _sb.Append(name);
@@ -183,47 +188,6 @@ namespace ClassicUO.Game.UI
                 }
             }
 
-
-
-            //for (int i = 0; i < obj.Properties.Count; i++)
-            //{
-            //    Property property = obj.Properties[i];
-
-            //    if (property.Cliloc <= 0)
-            //        continue;
-
-            //    if (i == 0 /*&& !string.IsNullOrEmpty(obj.Name)*/)
-            //    {
-            //        if (obj is Mobile mobile)
-            //        {
-            //            //ushort hue = Notoriety.GetHue(mobile.NotorietyFlag);
-            //            _sbHTML.Append(Notoriety.GetHTMLHue(mobile.NotorietyFlag));
-            //        }
-            //        else
-            //            _sbHTML.Append("<basefont color=\"yellow\">");
-
-            //        hasStartColor = true;
-            //    }
-
-            //    string text = FormatTitle(FileManager.Cliloc.Translate((int) property.Cliloc, property.Args, true));
-
-            //    if (string.IsNullOrEmpty(text)) continue;
-
-            //    _sb.Append(text);
-            //    _sbHTML.Append(text);
-
-            //    if (hasStartColor)
-            //    {
-            //        _sbHTML.Append("<basefont color=\"#FFFFFFFF\">");
-            //        hasStartColor = false;
-            //    }
-
-            //    if (i < obj.Properties.Count - 1)
-            //    {
-            //        _sb.Append("\n");
-            //        _sbHTML.Append("\n");
-            //    }
-            //}
 
             htmltext = _sbHTML.ToString();
             string result = _sb.ToString();
@@ -257,7 +221,7 @@ namespace ClassicUO.Game.UI
         public void SetText(string text, int maxWidth = 0)
         {
             _maxWidth = maxWidth;
-            _gameObject = null;
+            _serial = 0;
             Text = _textHTML = text;
         }
     }

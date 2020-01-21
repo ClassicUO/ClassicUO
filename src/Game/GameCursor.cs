@@ -493,7 +493,7 @@ namespace ClassicUO.Game
                 {
                     if (gs.IsMouseOverViewport && SelectedObject.Object is Entity item && World.OPL.Contains(item))
                     {
-                        if (_tooltip.IsEmpty || item != _tooltip.Object)
+                        if (_tooltip.IsEmpty || item != _tooltip.Serial)
                             _tooltip.SetGameObject(item);
                         _tooltip.Draw(batcher, position.X, position.Y + 24);
 
@@ -502,34 +502,29 @@ namespace ClassicUO.Game
 
                     if (UIManager.IsMouseOverAControl)
                     {
-                        Entity it = null;
+                        uint serial = 0;
 
                         switch (UIManager.MouseOverControl)
                         {
-                            //case EquipmentSlot equipmentSlot:
-                            //    it = equipmentSlot.Item;
-
-                            //    break;
-
                             case ItemGump gumpling:
-                                it = World.Items.Get(gumpling.LocalSerial);
+                                serial = gumpling.LocalSerial;
 
                                 break;
 
-                            case Control control when control.Tooltip is Item i:
-                                it = i;
+                            case Control control when control.Tooltip is uint i:
+                                serial = i;
 
                                 break;
 
                             case NameOverheadGump overhead:
-                                it = overhead.Entity;
+                                serial = overhead.Entity;
                                 break;
                         }
 
-                        if (it != null && World.OPL.Contains(it))
+                        if (SerialHelper.IsValid(serial) && World.OPL.Contains(serial))
                         {
-                            if (_tooltip.IsEmpty || it != _tooltip.Object)
-                                _tooltip.SetGameObject(it);
+                            if (_tooltip.IsEmpty || serial != _tooltip.Serial)
+                                _tooltip.SetGameObject(serial);
                             _tooltip.Draw(batcher, position.X, position.Y + 24);
 
                             return;
@@ -551,7 +546,8 @@ namespace ClassicUO.Game
                     _tooltip.Draw(batcher, position.X, position.Y + 24);
                 }
             }
-            else if (!_tooltip.IsEmpty) _tooltip.Clear();
+            else if (!_tooltip.IsEmpty) 
+                _tooltip.Clear();
         }
 
         private ushort AssignGraphicByState()

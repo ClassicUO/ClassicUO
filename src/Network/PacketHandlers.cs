@@ -3582,7 +3582,7 @@ namespace ClassicUO.Network
                 entity = World.Items.Get(serial);
             }
 
-            if (entity != null)
+            //if (entity != null)
             {
                 int cliloc;
 
@@ -3639,7 +3639,7 @@ namespace ClassicUO.Network
                         {
                             name = str;
 
-                            if (!SerialHelper.IsMobile(entity.Serial))
+                            if (entity != null && !SerialHelper.IsMobile(serial))
                             {
                                 entity.Name = str;
                             }
@@ -3658,7 +3658,7 @@ namespace ClassicUO.Network
 
                 World.OPL.Add(serial, revision, name, data);
 
-                if (inBuyList && SerialHelper.IsValid(container.Serial))
+                if (inBuyList && container != null && SerialHelper.IsValid(container.Serial))
                 {
                     UIManager.GetGump<ShopGump>(container.RootContainer)?.SetNameTo((Item)entity, name);
                 }
