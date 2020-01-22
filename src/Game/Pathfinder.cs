@@ -47,6 +47,7 @@ namespace ClassicUO.Game
         private static readonly PathNode[] _closedList = new PathNode[PATHFINDER_MAX_NODES];
         private static readonly PathNode[] _path = new PathNode[PATHFINDER_MAX_NODES];
         private static int _pointIndex, _pathSize;
+        private static bool _run;
         private static readonly int[] _offsetX =
         {
             0, 1, 1, 1, 0, -1, -1, -1, 0, 1
@@ -674,7 +675,7 @@ namespace ClassicUO.Game
                             diagonal = -1;
                     }
 
-                    if (diagonal >= 0 && AddNodeToList(0, (int) direction, x, y, z, node, 1) != -1)
+                    if (diagonal >= 0 && AddNodeToList(0, (int) direction, x, y, z, node, diagonal == 0 ? 1 : 2) != -1)
                         found = true;
                 }
             }
@@ -717,7 +718,8 @@ namespace ClassicUO.Game
             _closedList[0].Parent = null;
             _closedList[0].DistFromGoalCost = GetGoalDistCost(_startPoint, 0);
             _closedList[0].Cost = _closedList[0].DistFromGoalCost;
-
+            if (GetGoalDistCost(_startPoint, 0) > 14)
+                _run = true;
             while (AutoWalking)
             {
                 OpenNodes(_closedList[curNode]);
@@ -820,7 +822,7 @@ namespace ClassicUO.Game
                     if (dir == (Direction) p.Direction)
                         _pointIndex++;
 
-                    if (!World.Player.Walk((Direction) p.Direction, false))
+                    if (!World.Player.Walk((Direction) p.Direction, _run))
                         StopAutoWalk();
                 }
                 else
@@ -831,6 +833,7 @@ namespace ClassicUO.Game
         public static void StopAutoWalk()
         {
             AutoWalking = false;
+            _run = false;
             _pathSize = 0;
         }
 
