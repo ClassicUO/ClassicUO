@@ -124,17 +124,17 @@ namespace ClassicUO.Game.UI
             _maxWidth = 0;
         }
 
-        public void SetGameObject(uint obj)
+        public void SetGameObject(uint serial)
         {
-            if (_serial == 0 || obj != _serial)
+            if (_serial == 0 || serial != _serial)
             {
                 uint revision2 = 0;
-                if (_serial == 0 || (World.OPL.TryGetRevision(_serial, out uint revision) && World.OPL.TryGetRevision(obj, out revision2) && revision != revision2))
+                if (_serial == 0 || (World.OPL.TryGetRevision(_serial, out uint revision) && World.OPL.TryGetRevision(serial, out revision2) && revision != revision2))
                 {
                     _maxWidth = 0;
-                    _serial = obj;
+                    _serial = serial;
                     _hash = revision2;
-                    Text = ReadProperties(obj, out _textHTML);
+                    Text = ReadProperties(serial, out _textHTML);
                     _lastHoverTime = Time.Ticks + 250;
                 }
             }
@@ -223,6 +223,7 @@ namespace ClassicUO.Game.UI
             _maxWidth = maxWidth;
             _serial = 0;
             Text = _textHTML = text;
+            _lastHoverTime = Time.Ticks + 250;
         }
     }
 }
