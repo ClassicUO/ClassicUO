@@ -168,6 +168,7 @@
     <Compile Include="Game\UI\Controls\AbstractTextBox.cs" />
     <Compile Include="Game\UI\Controls\AlphaBlendControl.cs" />
     <Compile Include="Game\UI\Controls\ArrowNumbersTextBox.cs" />
+    <Compile Include="Game\UI\Controls\ButtonTileArt.cs" />
     <Compile Include="Game\UI\Controls\ClickableColorBox.cs" />
     <Compile Include="Game\UI\Controls\ContextMenuControl.cs" />
     <Compile Include="Game\UI\Controls\InfoBarBuilderControl.cs" />

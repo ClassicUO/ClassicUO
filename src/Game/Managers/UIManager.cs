@@ -388,18 +388,7 @@ namespace ClassicUO.Game.Managers
 
                     case "buttontileart":
 
-                        gump.Add(new Button(gparams)
-                        {
-                            ContainsByBounds = true
-                        }, page);
-
-                        gump.Add(new StaticPic(UInt16Converter.Parse(gparams[8]), UInt16Converter.Parse(gparams[9]))
-                        {
-                            X = int.Parse(gparams[1]) + int.Parse(gparams[10]),
-                            Y = int.Parse(gparams[2]) + int.Parse(gparams[11]),
-
-                            AcceptMouseInput = true
-                        }, page);
+                        gump.Add(new ButtonTileArt(gparams), page);
 
                         break;
 
