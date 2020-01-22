@@ -40,7 +40,7 @@ namespace ClassicUO.Game.UI
         private readonly StringBuilder _sbHTML = new StringBuilder();
         private uint _serial;
         private uint _hash;
-        private float _lastHoverTime;
+        private uint _lastHoverTime;
         private int _maxWidth;
         private RenderedText _renderedText;
         private string _textHTML;
@@ -148,7 +148,6 @@ namespace ClassicUO.Game.UI
 
             bool hasStartColor = false;
 
-
             if (SerialHelper.IsValid(serial) && 
                 World.OPL.TryGetNameAndData(serial, out string name, out string data))
             {
@@ -193,29 +192,6 @@ namespace ClassicUO.Game.UI
             string result = _sb.ToString();
 
             return string.IsNullOrEmpty(result) ? null : result;
-        }
-
-        public unsafe string FormatTitle(string text)
-        {
-            if (text != null)
-            {
-                int index = 0;
-
-                fixed (char* value = text)
-                {
-                    while (index < text.Length)
-                    {
-                        if (index <= 0 || _titleFormatChars.Contains(value[index - 1]))
-                            value[index] = char.ToUpper(value[index]);
-
-                        index++;
-                    }
-
-                    return new string(value);
-                }
-            }
-
-            return text;
         }
 
         public void SetText(string text, int maxWidth = 0)
