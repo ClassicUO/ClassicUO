@@ -629,7 +629,7 @@ namespace ClassicUO.Game.Managers
 
                         if (World.ClientFeatures.TooltipsEnabled)
                         {
-                            string cliloc = ClilocLoader.Instance.GetString(int.Parse(gparams[1]));
+                            string text = ClilocLoader.Instance.GetString(int.Parse(gparams[1]));
 
                             if (gparams.Count > 2 && gparams[2][0] == '@')
                             {
@@ -638,12 +638,12 @@ namespace ClassicUO.Game.Managers
                                 args = args.Trim('@').Replace('@', '\t');
 
                                 if (args.Length > 1)
-                                    cliloc = ClilocLoader.Instance.Translate(cliloc, args);
+                                    text = ClilocLoader.Instance.Translate(text, args);
                                 else
-                                    Log.Error($"String '{args}' too short, something wrong with gump tooltip: {cliloc}");
+                                    Log.Error($"String '{args}' too short, something wrong with gump tooltip: {text}");
                             }
 
-                            gump.Children.Last()?.SetTooltip(cliloc);
+                            gump.Children.LastOrDefault()?.SetTooltip(text);
                         }
 
                         break;
@@ -652,8 +652,7 @@ namespace ClassicUO.Game.Managers
 
                         if (World.ClientFeatures.TooltipsEnabled)
                         {
-                            gump.Children.LastOrDefault()?
-                               .SetTooltip(SerialHelper.Parse(gparams[1]));
+                            gump.Children.LastOrDefault()?.SetTooltip(SerialHelper.Parse(gparams[1]));
                         }
 
                         break;
