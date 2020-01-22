@@ -63,6 +63,8 @@ namespace ClassicUO.Game.UI.Gumps
                 WantUpdateSize = false,
                 Hue = hue
             });
+
+            SetTooltip(entity);
         }
 
         public Entity Entity { get; }

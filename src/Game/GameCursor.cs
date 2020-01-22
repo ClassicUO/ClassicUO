@@ -500,27 +500,8 @@ namespace ClassicUO.Game
                         return;
                     }
 
-                    if (UIManager.IsMouseOverAControl)
+                    if (UIManager.IsMouseOverAControl && UIManager.MouseOverControl.Tooltip is uint serial)
                     {
-                        uint serial = 0;
-
-                        switch (UIManager.MouseOverControl)
-                        {
-                            case ItemGump gumpling:
-                                serial = gumpling.LocalSerial;
-
-                                break;
-
-                            case Control control when control.Tooltip is uint i:
-                                serial = i;
-
-                                break;
-
-                            case NameOverheadGump overhead:
-                                serial = overhead.Entity;
-                                break;
-                        }
-
                         if (SerialHelper.IsValid(serial) && World.OPL.Contains(serial))
                         {
                             if (_tooltip.IsEmpty || serial != _tooltip.Serial)
