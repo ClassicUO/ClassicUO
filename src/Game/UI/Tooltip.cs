@@ -35,7 +35,6 @@ namespace ClassicUO.Game.UI
 {
     internal class Tooltip
     {
-        private static readonly char[] _titleFormatChars = {' ', '-', '\n', '['};
         private readonly StringBuilder _sb = new StringBuilder();
         private readonly StringBuilder _sbHTML = new StringBuilder();
         private uint _serial;
