@@ -13,7 +13,7 @@ namespace ClassicUO.Game.UI.Controls
     class ButtonTileArt : Button
     {
         private readonly int _tileX, _tileY;
-        private readonly ushort _graphic, _hue;
+        private readonly ushort _hue;
         private readonly UOTexture16 _texture;
         private readonly bool _isPartial;
 
@@ -25,13 +25,13 @@ namespace ClassicUO.Game.UI.Controls
         {
             X = int.Parse(gparams[1]);
             Y = int.Parse(gparams[2]);
-            _graphic = UInt16Converter.Parse(gparams[8]);
+            ushort graphic = UInt16Converter.Parse(gparams[8]);
             _hue = UInt16Converter.Parse(gparams[9]);
             _tileX = int.Parse(gparams[10]);
             _tileY = int.Parse(gparams[11]);
             ContainsByBounds = true;
 
-            _texture = ArtLoader.Instance.GetTexture(_graphic);
+            _texture = ArtLoader.Instance.GetTexture(graphic);
 
             if (_texture == null)
             {
@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
-            _isPartial = TileDataLoader.Instance.StaticData[_graphic].IsPartialHue;
+            _isPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
         }
 
         public override void Update(double totalMS, double frameMS)
