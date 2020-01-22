@@ -66,8 +66,11 @@ namespace ClassicUO.Game.Scenes
 
         private bool MoveCharacterByMouseInput()
         {
-            if ((_rightMousePressed || _continueRunning) && World.InGame && !Pathfinder.AutoWalking)
+            if ((_rightMousePressed || _continueRunning) && World.InGame)// && !Pathfinder.AutoWalking)
             {
+                if (Pathfinder.AutoWalking)
+                    Pathfinder.StopAutoWalk();
+
                 int x = ProfileManager.Current.GameWindowPosition.X + (ProfileManager.Current.GameWindowSize.X >> 1);
                 int y = ProfileManager.Current.GameWindowPosition.Y + (ProfileManager.Current.GameWindowSize.Y >> 1);
 
