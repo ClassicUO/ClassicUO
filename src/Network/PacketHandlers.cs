@@ -3058,7 +3058,9 @@ namespace ClassicUO.Network
 
         private static void ExtendedCommand(Packet p)
         {
-            switch (p.ReadUShort())
+            ushort cmd = p.ReadUShort();
+
+            switch (cmd)
             {
                 case 0:
 
@@ -3453,7 +3455,7 @@ namespace ClassicUO.Network
 
                     break;
                 default:
-                    Log.Warn($"Unhandled 0xDF - sub: {p.ID.ToHex()}");
+                    Log.Warn($"Unhandled 0xBF - sub: {cmd.ToHex()}");
                     break;
             }
         }
