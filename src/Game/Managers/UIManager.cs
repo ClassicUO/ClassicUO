@@ -631,7 +631,7 @@ namespace ClassicUO.Game.Managers
                         {
                             string text = ClilocLoader.Instance.GetString(int.Parse(gparams[1]));
 
-                            if (gparams.Count > 2 && gparams[2][0] == '@')
+                            if (gparams.Count > 2 && gparams[2].Length != 0 && gparams[2][0] == '@')
                             {
                                 string args = gparams[2];
                                 //Convert tooltip args format to standard cliloc format
