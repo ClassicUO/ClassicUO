@@ -182,8 +182,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _scrollArea.Add(t);
 
             Add(new Label("Total: ", true, 1153) { X = 40, Y = 320 });
-            Add(new Label(_totalReal.ToString(), true, 1153) { X = 220, Y = 320 });
-            Add(new Label(_totalValue.ToString(), true, 1153) { X = 300, Y = 320 });
+            Add(new Label(_totalReal.ToString("F1"), true, 1153) { X = 220, Y = 320 });
+            Add(new Label(_totalValue.ToString("F1"), true, 1153) { X = 300, Y = 320 });
         }
 
 
