@@ -698,7 +698,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            if (entity != null)
+            if (!(type == MessageType.System || serial == 0xFFFF_FFFF || serial == 0 || (name.ToLower() == "system" && entity == null)))
             {
                 if (string.IsNullOrEmpty(entity.Name))
                     entity.Name = name;
@@ -2762,7 +2762,7 @@ namespace ClassicUO.Network
                 text = p.ReadUnicode();
             }
 
-            if (entity != null)
+            if (!(type == MessageType.System || serial == 0xFFFF_FFFF || serial == 0 || (name.ToLower() == "system" && entity == null)))
             {
                 if (string.IsNullOrEmpty(entity.Name))
                     entity.Name = name;
@@ -3459,6 +3459,10 @@ namespace ClassicUO.Network
                     byte animID = p.ReadByte();
                     byte frameCount = p.ReadByte();
                     // TODO: apply anim
+                    //Mobile mobile = World.Mobiles.Get(serial);
+                    //mobile.SetAnimation(Mobile.GetReplacedObjectAnimation(mobile.Graphic, action), delay, (byte) frameCount, (byte) repeatMode, repeat, frameDirection);
+                    //mobile.AnimationFromServer = true;
+
                     break;
                 default:
                     Log.Warn($"Unhandled 0xBF - sub: {cmd.ToHex()}");
