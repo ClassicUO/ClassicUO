@@ -136,7 +136,7 @@ namespace ClassicUO.IO.Resources
         {
             int count;
             ref readonly var entry = ref GetValidRefEntry(graphic);
-            _file.SetData(entry.Address, entry.Length);
+            _file.SetData(entry.Address, entry.FileSize);
 
             if (_file is UOFileUop uop)
             {
