@@ -66,6 +66,8 @@ namespace ClassicUO.Game.UI.Controls
             LocalSerial = item;
 
             WantUpdateSize = false;
+
+            SetTooltip(item);
         }
 
 

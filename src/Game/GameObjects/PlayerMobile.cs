@@ -306,7 +306,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x0905: // Glass Staff
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.MortalStrike;
 
                                 goto done;
@@ -348,7 +348,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x0E85:
                             case 0x0E86: // Pickaxes
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.Disarm;
 
                                 goto done;
@@ -362,7 +362,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x0E89:
                             case 0x0E8A: // Quarter Staves
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.ConcussionBlow;
 
                                 goto done;
@@ -494,7 +494,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x13B7:
                             case 0x13B8: // Scimitars
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.ParalyzingBlow;
 
                                 goto done;
@@ -606,7 +606,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x1442:
                             case 0x1443: // Two Handed Axes
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.ShadowStrike;
 
                                 goto done;
@@ -642,7 +642,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x26BF: // Double Bladed Staff
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.InfectiousStrike;
 
                                 goto done;
@@ -654,7 +654,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x26C1: // Crescent Blades
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.MortalStrike;
 
                                 goto done;
@@ -666,7 +666,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x26C3: // Repeating Crossbows
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.MovingShot;
 
                                 goto done;
@@ -702,7 +702,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x26C9: // also Double Bladed Staff
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.InfectiousStrike;
 
                                 goto done;
@@ -714,7 +714,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x26CB: // also Crescent Blades
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.MortalStrike;
 
                                 goto done;
@@ -726,7 +726,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x26CD: // also Repeating Crossbows
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.MovingShot;
 
                                 goto done;
@@ -745,7 +745,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x27A4: // Wakizashi
                                 Abilities[0] = Ability.FrenziedWhirlwind;
-                                Abilities[1] = Ability.DoubleShot;
+                                Abilities[1] = Ability.DoubleStrike;
 
                                 goto done;
 
@@ -775,7 +775,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x27A9: // Daisho
                                 Abilities[0] = Ability.Feint;
-                                Abilities[1] = Ability.DoubleShot;
+                                Abilities[1] = Ability.DoubleStrike;
 
                                 goto done;
 
@@ -823,7 +823,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x27EF: // also Wakizashi
                                 Abilities[0] = Ability.FrenziedWhirlwind;
-                                Abilities[1] = Ability.DoubleShot;
+                                Abilities[1] = Ability.DoubleStrike;
 
                                 goto done;
 
@@ -853,7 +853,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x27F4: // also Daisho
                                 Abilities[0] = Ability.Feint;
-                                Abilities[1] = Ability.DoubleShot;
+                                Abilities[1] = Ability.DoubleStrike;
 
                                 goto done;
 
@@ -1038,7 +1038,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x4068: // Dual Short Axes
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.InfectiousStrike;
 
                                 goto done;
@@ -1056,7 +1056,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x406D: // Dual Pointed Spear
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.Disarm;
 
                                 goto done;
@@ -1128,7 +1128,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x48BA: // Gargish Katana
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.ArmorIgnore;
 
                                 goto done;
@@ -1195,7 +1195,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x48D0: // Gargish Daisho
                                 Abilities[0] = Ability.Feint;
-                                Abilities[1] = Ability.DoubleShot;
+                                Abilities[1] = Ability.DoubleStrike;
 
                                 goto done;
                         }

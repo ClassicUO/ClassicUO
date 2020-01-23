@@ -72,7 +72,7 @@ namespace ClassicUO.Game.UI.Controls
                 _gameText.Align = align;
                 _gameText.Font = font;
                 _gameText.IsUnicode = isunicode;
-                _gameText.MaxWidth = w - (HasScrollbar ? 15 : 0) - (HasBackground ? 8 : 0);
+                _gameText.MaxWidth = w - (HasScrollbar ? 16 : 0) - (HasBackground ? 8 : 0);
             }
 
             InternalBuild(text, hue);
@@ -167,7 +167,7 @@ namespace ClassicUO.Game.UI.Controls
                 _scrollBar.MaxValue = /* _gameText.Height*/ /* Children.Sum(s => s.Height) - Height +*/ _gameText.Height - Height + (HasBackground ? 8 : 0);
                 ScrollY = _scrollBar.Value;
 
-                Add((Control) _scrollBar);
+                Add(_scrollBar);
             }
 
             //if (Width != _gameText.Width)
@@ -225,7 +225,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 batcher.EnableScissorTest(true);
                 base.Draw(batcher, x, y);
-               
+
                 _gameText.Draw(batcher,
                     _gameText.MaxWidth + ScrollX, Height + ScrollY,
                     x + (HasBackground ? 4 : 0),

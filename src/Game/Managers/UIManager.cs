@@ -388,18 +388,7 @@ namespace ClassicUO.Game.Managers
 
                     case "buttontileart":
 
-                        gump.Add(new Button(gparams)
-                        {
-                            ContainsByBounds = true
-                        }, page);
-
-                        gump.Add(new StaticPic(UInt16Converter.Parse(gparams[8]), UInt16Converter.Parse(gparams[9]))
-                        {
-                            X = int.Parse(gparams[1]) + int.Parse(gparams[10]),
-                            Y = int.Parse(gparams[2]) + int.Parse(gparams[11]),
-
-                            AcceptMouseInput = true
-                        }, page);
+                        gump.Add(new ButtonTileArt(gparams), page);
 
                         break;
 
@@ -629,21 +618,21 @@ namespace ClassicUO.Game.Managers
 
                         if (World.ClientFeatures.TooltipsEnabled)
                         {
-                            string cliloc = ClilocLoader.Instance.GetString(int.Parse(gparams[1]));
+                            string text = ClilocLoader.Instance.GetString(int.Parse(gparams[1]));
 
-                            if (gparams.Count > 2 && gparams[2][0] == '@')
+                            if (gparams.Count > 2 && gparams[2].Length != 0 && gparams[2][0] == '@')
                             {
                                 string args = gparams[2];
                                 //Convert tooltip args format to standard cliloc format
                                 args = args.Trim('@').Replace('@', '\t');
 
                                 if (args.Length > 1)
-                                    cliloc = ClilocLoader.Instance.Translate(cliloc, args);
+                                    text = ClilocLoader.Instance.Translate(text, args);
                                 else
-                                    Log.Error($"String '{args}' too short, something wrong with gump tooltip: {cliloc}");
+                                    Log.Error($"String '{args}' too short, something wrong with gump tooltip: {text}");
                             }
 
-                            gump.Children.Last()?.SetTooltip(cliloc);
+                            gump.Children.LastOrDefault()?.SetTooltip(text);
                         }
 
                         break;
@@ -652,8 +641,7 @@ namespace ClassicUO.Game.Managers
 
                         if (World.ClientFeatures.TooltipsEnabled)
                         {
-                            gump.Children.LastOrDefault()?
-                               .SetTooltip(SerialHelper.Parse(gparams[1]));
+                            gump.Children.LastOrDefault()?.SetTooltip(SerialHelper.Parse(gparams[1]));
                         }
 
                         break;
