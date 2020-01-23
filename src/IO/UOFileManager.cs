@@ -84,9 +84,12 @@ namespace ClassicUO.IO
                 for (int i = 0; i < Verdata.Patches.Length; i++)
                 {
                     ref UOFileIndex5D vh = ref Verdata.Patches[i];
+                    Log.Info($">>> patching  FileID: {vh.FileID}  -  BlockID: {vh.BlockID}");
 
                     if (vh.FileID == 0)
+                    {
                         MapLoader.Instance.PatchMapBlock(vh.BlockID, vh.Position);
+                    }
                     else if (vh.FileID == 4)
                     {
                         ushort id = (ushort) (vh.BlockID - Constants.MAX_LAND_DATA_INDEX_COUNT);
