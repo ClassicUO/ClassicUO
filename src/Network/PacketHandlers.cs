@@ -700,9 +700,12 @@ namespace ClassicUO.Network
 
             if (!(type == MessageType.System || serial == 0xFFFF_FFFF || serial == 0 || (name.ToLower() == "system" && entity == null)))
             {
-                if (string.IsNullOrEmpty(entity.Name))
-                    entity.Name = name;
-                entity.ProcessDelta();
+                if (entity != null)
+                {
+                    if (string.IsNullOrEmpty(entity.Name))
+                        entity.Name = name;
+                    entity.ProcessDelta();
+                }
             }
 
             Chat.HandleMessage(entity, text, name, hue, type, (byte) font);
@@ -2764,9 +2767,12 @@ namespace ClassicUO.Network
 
             if (!(type == MessageType.System || serial == 0xFFFF_FFFF || serial == 0 || (name.ToLower() == "system" && entity == null)))
             {
-                if (string.IsNullOrEmpty(entity.Name))
-                    entity.Name = name;
-                entity.ProcessDelta();
+                if (entity != null)
+                {
+                    if (string.IsNullOrEmpty(entity.Name))
+                        entity.Name = name;
+                    entity.ProcessDelta();
+                }           
             }
 
             Chat.HandleMessage(entity, text, name, hue, type, ProfileManager.Current.ChatFont, true, lang);
@@ -3459,8 +3465,12 @@ namespace ClassicUO.Network
                     byte animID = p.ReadByte();
                     byte frameCount = p.ReadByte();
                     // TODO: apply anim
-                    //Mobile mobile = World.Mobiles.Get(serial);
-                    //mobile.SetAnimation(Mobile.GetReplacedObjectAnimation(mobile.Graphic, action), delay, (byte) frameCount, (byte) repeatMode, repeat, frameDirection);
+                    Mobile mobile = World.Mobiles.Get(serial);
+                    //mobile.SetAnimation(Mobile.GetReplacedObjectAnimation(mobile.Graphic, action),
+                    //    delay, (byte) frameCount, 
+                    //    (byte) repeatMode,
+                    //    repeat, 
+                    //    frameDirection);
                     //mobile.AnimationFromServer = true;
 
                     break;
