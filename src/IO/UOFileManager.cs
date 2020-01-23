@@ -146,7 +146,7 @@ namespace ClassicUO.IO
 
                             for (int j = 0; j < 32; j++)
                             {
-                                uint flags;
+                                ulong flags;
 
                                 if (Client.Version < ClientVersion.CV_7090)
                                 {
@@ -154,7 +154,7 @@ namespace ClassicUO.IO
                                 }
                                 else
                                 {
-                                    flags = verdata.ReadUShort();
+                                    flags = verdata.ReadULong();
                                 }
 
                                 TileDataLoader.Instance.LandData[offset + j] = new LandTiles(flags, verdata.ReadUShort(), verdata.ReadASCII(20));
@@ -171,7 +171,7 @@ namespace ClassicUO.IO
 
                             for (int j = 0; j < 32; j++)
                             {
-                                uint flags;
+                                ulong flags;
 
                                 if (Client.Version < ClientVersion.CV_7090)
                                 {
@@ -179,7 +179,7 @@ namespace ClassicUO.IO
                                 }
                                 else
                                 {
-                                    flags = verdata.ReadUShort();
+                                    flags = verdata.ReadULong();
                                 }
 
                                 TileDataLoader.Instance.StaticData[offset + j] = 
