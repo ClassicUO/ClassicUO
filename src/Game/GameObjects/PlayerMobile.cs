@@ -90,68 +90,68 @@ namespace ClassicUO.Game.GameObjects
 
         public uint TithingPoints;
 
-        public ushort DamageMin;
+        public short DamageMin;
 
-        public ushort DamageMax;
+        public short DamageMax;
 
-        public ushort StatsCap;
+        public short StatsCap;
 
-        public ushort HitChanceIncrease;
+        public short HitChanceIncrease;
 
-        public ushort SwingSpeedIncrease;
+        public short SwingSpeedIncrease;
 
-        public ushort DamageIncrease;
+        public short DamageIncrease;
 
-        public ushort LowerReagentCost;
+        public short LowerReagentCost;
 
-        public ushort HitPointsRegeneration;
+        public short HitPointsRegeneration;
 
-        public ushort StaminaRegeneration;
+        public short StaminaRegeneration;
 
-        public ushort ManaRegeneration;
+        public short ManaRegeneration;
 
-        public ushort MaxPhysicResistence;
+        public short MaxPhysicResistence;
 
-        public ushort MaxFireResistence;
+        public short MaxFireResistence;
 
-        public ushort MaxColdResistence;
+        public short MaxColdResistence;
 
-        public ushort MaxPoisonResistence;
+        public short MaxPoisonResistence;
 
-        public ushort MaxEnergyResistence;
+        public short MaxEnergyResistence;
 
-        public ushort MaxDefenseChanceIncrease;
+        public short MaxDefenseChanceIncrease;
 
-        public ushort ReflectPhysicalDamage;
+        public short ReflectPhysicalDamage;
 
-        public ushort EnhancePotions;
+        public short EnhancePotions;
 
-        public ushort DefenseChanceIncrease;
-        public ushort SpellDamageIncrease;
+        public short DefenseChanceIncrease;
+        public short SpellDamageIncrease;
 
-        public ushort FasterCastRecovery;
+        public short FasterCastRecovery;
 
-        public ushort FasterCasting;
+        public short FasterCasting;
 
-        public ushort LowerManaCost;
+        public short LowerManaCost;
 
-        public ushort StrengthIncrease;
+        public short StrengthIncrease;
 
-        public ushort DexterityIncrease;
+        public short DexterityIncrease;
 
-        public ushort IntelligenceIncrease;
+        public short IntelligenceIncrease;
 
-        public ushort HitPointsIncrease;
+        public short HitPointsIncrease;
 
-        public ushort StaminaIncrease;
+        public short StaminaIncrease;
 
-        public ushort ManaIncrease;
+        public short ManaIncrease;
 
-        public ushort MaxHitPointsIncrease;
+        public short MaxHitPointsIncrease;
 
-        public ushort MaxStaminaIncrease;
+        public short MaxStaminaIncrease;
 
-        public ushort MaxManaIncrease;
+        public short MaxManaIncrease;
 
         public Ability PrimaryAbility
         {
