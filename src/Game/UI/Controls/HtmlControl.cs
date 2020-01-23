@@ -227,7 +227,7 @@ namespace ClassicUO.Game.UI.Controls
                 base.Draw(batcher, x, y);
 
                 _gameText.Draw(batcher,
-                    _gameText.MaxWidth + ScrollX, Height + ScrollY,
+                    Width + ScrollX, Height + ScrollY,
                     x + (HasBackground ? 4 : 0),
                     y + (HasBackground ? 4 : 0),
                     Width - (HasBackground ? 8 : 0),
