@@ -75,7 +75,6 @@ namespace ClassicUO.IO.Resources
                     }
                     Client.UseUOPGumps = false;
                 }
-
                 _file.FillEntries(ref Entries);
 
                 string pathdef = UOFileManager.GetUOFilePath("gump.def");
@@ -153,9 +152,12 @@ namespace ClassicUO.IO.Resources
             if (width == 0 || height == 0)
                 return null;
 
+            _file.SetData(entry.Address, entry.FileSize);
+
             _file.Seek(entry.Offset);
-            //width = PaddedRowWidth(16, width, 4) >> 1;
+
             IntPtr dataStart = _file.PositionAddress;
+
             ushort[] pixels = new ushort[width * height];
             int* lookuplist = (int*) dataStart;
 
@@ -176,28 +178,6 @@ namespace ClassicUO.IO.Resources
                     ushort hue = (ushort) ((val != 0 ? 0x8000 : 0) | val);
 
                     int count = gmul[i].Run;
-
-                    //byte a = (byte)(((val & 0x8000) >> 0) << 0);
-                    //byte r = (byte)(((val & 0x7C00) >> 0) << 0);
-                    //byte g = (byte)(((val & 0x3E0) >> 0) << 0);
-                    //byte b = (byte)(((val & 0x1F) >> 0) << 0);
-
-                    //byte r = (byte) (( (val >> 10) ) );
-                    //byte g = (byte) (( (val >> 5)  ) );
-                    //byte b = (byte) (( (val >> 0)  ) );
-                    //byte a = (byte) (( (val >> 15) ) );
-
-
-                    //if (b == 8)
-                    //{
-                    //    hue = (ushort)((
-                    //                       (a << 15) |
-                    //                       (r << 10) |
-                    //                       (g << 5)  |
-                    //                       b)
-                    //                   );
-                    //    hue |= 0x8000;
-                    //}
 
                     for (int j = 0; j < count; j++)
                         pixels[pos++] = hue == 0 && count == 1 ? (ushort)1 : hue;//avoid single zero pixels

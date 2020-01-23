@@ -3464,15 +3464,25 @@ namespace ClassicUO.Network
                     serial = p.ReadUShort();
                     byte animID = p.ReadByte();
                     byte frameCount = p.ReadByte();
-                    // TODO: apply anim
-                    Mobile mobile = World.Mobiles.Get(serial);
-                    //mobile.SetAnimation(Mobile.GetReplacedObjectAnimation(mobile.Graphic, action),
-                    //    delay, (byte) frameCount, 
-                    //    (byte) repeatMode,
-                    //    repeat, 
-                    //    frameDirection);
-                    //mobile.AnimationFromServer = true;
 
+                    //foreach (Mobile m in World.Mobiles)
+                    //{
+                    //    if ((m.Serial & 0xFFFF) == serial)
+                    //    {
+                    //       // byte group = Mobile.GetObjectNewAnimation(m, animID, action, mode);
+                    //        m.SetAnimation(animID);
+                    //        //m.AnimationRepeatMode = 1;
+                    //        //m.AnimationDirection = true;
+                    //        //if ((type == 1 || type == 2) && mobile.Graphic == 0x0015)
+                    //        //    mobile.AnimationRepeat = true;
+                    //        //mobile.AnimationFromServer = true;
+
+                    //        //m.SetAnimation(Mobile.GetReplacedObjectAnimation(m.Graphic, animID), 0, frameCount);
+                    //       // m.AnimationFromServer = true;
+                    //        break;
+                    //    }
+                    //}
+                    
                     break;
                 default:
                     Log.Warn($"Unhandled 0xBF - sub: {cmd.ToHex()}");

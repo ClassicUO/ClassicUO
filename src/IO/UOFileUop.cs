@@ -96,12 +96,12 @@ namespace ClassicUO.IO
                         int extra1 = ReadInt();
                         int extra2 = ReadInt();
 
-                        _hashes.Add(hash, new UOFileIndex(offset + 8, compressedLength - 8, decompressedLength, (extra1 << 16) | extra2));
+                        _hashes.Add(hash, new UOFileIndex(StartAddress, (uint) Length, offset + 8, compressedLength - 8, decompressedLength, (extra1 << 16) | extra2));
 
                         Seek(curpos);
                     }
                     else
-                        _hashes.Add(hash, new UOFileIndex(offset, compressedLength, decompressedLength, 0));
+                        _hashes.Add(hash, new UOFileIndex(StartAddress, (uint) Length, offset, compressedLength, decompressedLength, 0));
                 }
 
                 Seek(nextBlock);
@@ -156,6 +156,7 @@ namespace ClassicUO.IO
 
             fixed (byte* destPtr = data)
                 ZLib.Decompress(PositionAddress, compressedSize, 0, (IntPtr) destPtr, uncompressedSize);
+
 
             return data;
         }

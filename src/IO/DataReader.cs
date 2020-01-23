@@ -22,6 +22,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace ClassicUO.IO
 {
@@ -205,6 +206,25 @@ namespace ClassicUO.IO
             Position += count;
 
             return data;
+        }
+
+        internal string ReadASCII(int size)
+        {
+            EnsureSize(size);
+
+            StringBuilder sb = new StringBuilder(size);
+
+            for (int i = 0; i < size; i++)
+            {
+                char c = (char) ReadByte();
+
+                if (c != 0)
+                {
+                    sb.Append(c);
+                }
+            }
+
+            return sb.ToString();
         }
 
         [MethodImpl(256)]

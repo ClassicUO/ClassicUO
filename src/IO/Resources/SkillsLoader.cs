@@ -121,8 +121,8 @@ namespace ClassicUO.IO.Resources
         }
 
         public readonly int Index;
-        public readonly string Name;
-        public readonly bool HasAction;
+        public string Name;
+        public bool HasAction;
 
         public override string ToString()
         {

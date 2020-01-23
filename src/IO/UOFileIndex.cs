@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using System.Runtime.InteropServices;
 
 namespace ClassicUO.IO
@@ -26,20 +27,24 @@ namespace ClassicUO.IO
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     internal readonly struct UOFileIndex
     {
-        public UOFileIndex(long offset, int length, int decompressed, int extra = 0)
+        public UOFileIndex(IntPtr address, uint fileSize, long offset, int length, int decompressed, int extra = 0)
         {
+            Address = address;
+            FileSize = fileSize;
             Offset = offset;
             Length = length;
             DecompressedLength = decompressed;
             Extra = extra;
         }
 
+        public readonly IntPtr Address;
+        public readonly uint FileSize;
         public readonly long Offset;
         public readonly int Length;
         public readonly int DecompressedLength;
         public readonly int Extra;
 
-        public static readonly UOFileIndex Invalid = new UOFileIndex(0, 0, 0, 0);
+        public static readonly UOFileIndex Invalid = new UOFileIndex(IntPtr.Zero, 0, 0, 0, 0, 0);
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
