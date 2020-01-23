@@ -879,23 +879,29 @@ namespace ClassicUO.Network
 
     internal sealed class PBulletinBoardPostMessage : PacketWriter
     {
-        public PBulletinBoardPostMessage(uint serial, uint msgserial, string subject, string message) : base(0x71)
+        public PBulletinBoardPostMessage(uint serial, uint msgserial, string subject, Game.UI.Controls.MultiLineBox _textBox) : base(0x71)
         {
             WriteByte(0x05);
             WriteUInt(serial);
             WriteUInt(msgserial);
-            WriteByte((byte) (subject.Length + 1));
-            WriteASCII(subject);
+            WriteByte((byte)(subject.Length + 1));
+            var title = Encoding.UTF8.GetBytes(subject); 
+            WriteBytes(title, 0, title.Length);
+            WriteByte(0);
+            var numlinee = _textBox.LinesCount;
+            var length = 0; 
+            var carTot = 0;
+            WriteByte((byte)numlinee);
 
-            string[] lines = message.Split(new[]
+            for (var L = 0; L < numlinee; L++)
             {
-                '\n'
-            }, StringSplitOptions.RemoveEmptyEntries);
+                length = _textBox.GetCharsOnLine(L); 
+                var buf = Encoding.UTF8.GetBytes(_textBox.Text.Substring(carTot, Math.Min(length, _textBox.Text.Length - carTot)).Trim());
+                WriteByte((byte)(buf.Length + 1)); 
+                WriteBytes(buf, 0, buf.Length);
+                WriteByte(0);
 
-            for (int i = 0; i < lines.Length; i++)
-            {
-                WriteByte((byte) lines[i].Length);
-                WriteASCII(lines[i]);
+                carTot += length;
             }
         }
     }

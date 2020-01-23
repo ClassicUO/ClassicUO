@@ -1870,8 +1870,12 @@ namespace ClassicUO.Network
         {
             World.ClientViewRange = p.ReadByte();
         }
-
-        private static void BulletinBoardData(Packet p)
+        public static string Truncate(string value, int maxLength)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+            return value.Length <= maxLength ? value : value.Substring(0, maxLength);
+        }
+        private static void BulletinBoardData(Packet p) 
         {
             if (!World.InGame)
                 return;
@@ -1880,95 +1884,109 @@ namespace ClassicUO.Network
             {
                 case 0: // open
 
-                {
-                    uint serial = p.ReadUInt();
-                    Item item = World.Items.Get(serial);
-
-                    if (item != null)
                     {
-                        BulletinBoardGump bulletinBoard = UIManager.GetGump<BulletinBoardGump>(serial);
-                        bulletinBoard?.Dispose();
+                        uint serial = p.ReadUInt();
+                        Item item = World.Items.Get(serial);
 
-                        int x = (Client.Game.Window.ClientBounds.Width >> 1) - 245;
-                        int y = (Client.Game.Window.ClientBounds.Height >> 1) - 205;
+                        if (item != null)
+                        {
+                            BulletinBoardGump bulletinBoard = UIManager.GetGump<BulletinBoardGump>(serial);
+                            bulletinBoard?.Dispose();
 
-                        bulletinBoard = new BulletinBoardGump(item, x, y, p.ReadASCII(22));
-                        UIManager.Add(bulletinBoard);
+                            int x = (Client.Game.Window.ClientBounds.Width >> 1) - 245;
+                            int y = (Client.Game.Window.ClientBounds.Height >> 1) - 205;
+
+                            bulletinBoard = new BulletinBoardGump(item, x, y, p.ReadASCII(22));
+                            UIManager.Add(bulletinBoard);
+                        }
                     }
-                }
 
                     break;
 
                 case 1: // summary msg
 
-                {
-                    uint boardSerial = p.ReadUInt();
-                    BulletinBoardGump bulletinBoard = UIManager.GetGump<BulletinBoardGump>(boardSerial);
-
-                    if (bulletinBoard != null)
                     {
-                        uint serial = p.ReadUInt();
-                        uint parendID = p.ReadUInt();
+                        uint boardSerial = p.ReadUInt();
+                        BulletinBoardGump bulletinBoard = UIManager.GetGump<BulletinBoardGump>(boardSerial);
 
-                        int len = p.ReadByte();
-                        string text = len > 0 ? p.ReadASCII(len) : string.Empty;
-                        text += " - ";
+                        if (bulletinBoard != null)
+                        {
+                            uint serial = p.ReadUInt();
+                            uint parendID = p.ReadUInt(); 
 
-                        len = p.ReadByte();
-                        text += len > 0 ? p.ReadASCII(len) : string.Empty;
-                        text += " - ";
+                            int posterlen = p.ReadByte();
+                            var text = posterlen > 0 ? p.ReadASCII(posterlen) : string.Empty;
+                            if (parendID == 0)
+                                text = "";
 
-                        bulletinBoard.Add(new BulletinBoardObject(boardSerial, World.Items.Get(serial), text));
+                            int titlelen = p.ReadByte();
+                            if (parendID == 0)
+                            {
+                                text += titlelen > 0 ? p.ReadUTF8StringSafe() : string.Empty;
+                                p.ReadByte();
+                            }
+
+                            if (text.Length > 34)
+                            {
+                                text = Truncate(text, 33);
+                                text += "...";
+                            }
+
+                            bulletinBoard.Add(new BulletinBoardObject(boardSerial, parendID, World.Items.Get(serial),
+                                text));
+                        }
                     }
-                }
 
                     break;
 
                 case 2: // message
 
-                {
-                    uint boardSerial = p.ReadUInt();
-                    BulletinBoardGump bulletinBoard = UIManager.GetGump<BulletinBoardGump>(boardSerial);
-
-                    if (bulletinBoard != null)
                     {
-                        uint serial = p.ReadUInt();
+                        uint boardSerial = p.ReadUInt();
+                        BulletinBoardGump bulletinBoard = UIManager.GetGump<BulletinBoardGump>(boardSerial);
 
-                        int len = p.ReadByte();
-                        string poster = len > 0 ? p.ReadASCII(len) : string.Empty;
-
-                        len = p.ReadByte();
-                        string subject = len > 0 ? p.ReadASCII(len) : string.Empty;
-
-                        len = p.ReadByte();
-                        string dataTime = len > 0 ? p.ReadASCII(len) : string.Empty;
-
-                        p.Skip(4);
-
-                        byte unk = p.ReadByte();
-
-                        if (unk > 0) p.Skip(unk * 4);
-
-                        byte lines = p.ReadByte();
-
-                        StringBuilder sb = new StringBuilder();
-
-                        for (int i = 0; i < lines; i++)
+                        if (bulletinBoard != null)
                         {
-                            byte lineLen = p.ReadByte();
+                            uint serial = p.ReadUInt();
 
-                            if (sb.Length != 0)
-                                sb.Append('\n');
+                            int len = p.ReadByte();
+                            string poster = len > 0 ? p.ReadASCII(len) : string.Empty;
 
-                            if (lineLen > 0)
-                                sb.Append(p.ReadASCII(lineLen));
+                            len = p.ReadByte();
+                            string subject = len > 0 ? p.ReadUTF8StringSafe() : string.Empty;
+
+                            len = p.ReadByte();
+                            string dataTime = len > 0 ? p.ReadASCII(len) : string.Empty;
+
+                            p.Skip(4);
+
+                            byte unk = p.ReadByte();
+
+                            if (unk > 0) p.Skip(unk * 4);
+
+                            byte lines = p.ReadByte();
+
+                            StringBuilder sb = new StringBuilder();
+
+                            for (int i = 0; i < lines; i++)
+                            {
+                                byte lineLen = p.ReadByte(); 
+
+                                if (lineLen > 0)
+                                {
+                                    string putta = p.ReadUTF8StringSafe();
+                                    sb.Append(putta);
+                                    sb.Append('\n');
+                                }
+                            }
+
+                            var msg = sb.ToString();
+                            var variant = (byte)1;
+                            UIManager.Add(new BulletinBoardItem(boardSerial, serial, poster, subject, dataTime,
+                                msg.TrimStart(), variant)
+                            { X = 400, Y = 335 });
                         }
-
-                        byte variant = (byte) (1 + (poster == World.Player.Name ? 1 : 0));
-
-                        UIManager.Add(new BulletinBoardItem(serial, 0, poster, subject, dataTime, sb.ToString(), variant));
                     }
-                }
 
                     break;
             }
