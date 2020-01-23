@@ -136,6 +136,7 @@ namespace ClassicUO.IO.Resources
         {
             int count;
             ref readonly var entry = ref GetValidRefEntry(graphic);
+            _file.SetData(entry.Address, entry.Length);
 
             if (_file is UOFileUop uop)
             {

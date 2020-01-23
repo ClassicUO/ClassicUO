@@ -75,11 +75,12 @@ namespace ClassicUO.IO
             }
 
 
-            Log.Info(">> PATCHING WITH VERDATA.MUL");
             var verdata = Verdata.File;
 
             if (verdata != null && Verdata.Patches.Length != 0)
             {
+                Log.Info(">> PATCHING WITH VERDATA.MUL");
+
                 for (int i = 0; i < Verdata.Patches.Length; i++)
                 {
                     ref UOFileIndex5D vh = ref Verdata.Patches[i];
