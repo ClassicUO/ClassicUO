@@ -3454,6 +3454,12 @@ namespace ClassicUO.Network
                     World.Player.SpeedMode = (CharacterSpeedType) val;
 
                     break;
+                case 0x2B:
+                    serial = p.ReadUShort();
+                    byte animID = p.ReadByte();
+                    byte frameCount = p.ReadByte();
+                    // TODO: apply anim
+                    break;
                 default:
                     Log.Warn($"Unhandled 0xBF - sub: {cmd.ToHex()}");
                     break;
