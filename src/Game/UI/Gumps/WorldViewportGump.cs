@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
+
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Managers;
@@ -170,6 +172,17 @@ namespace ClassicUO.Game.UI.Gumps
             Location = position;
 
             ProfileManager.Current.GameWindowPosition = position;
+
+            var scene = Client.Game.GetScene<GameScene>();
+            if (scene != null)
+                scene.UpdateDrawPosition = true;
+        }
+
+        protected override void OnMove(int x, int y)
+        {
+            base.OnMove(x, y);
+
+            ProfileManager.Current.GameWindowPosition = new Point(ScreenCoordinateX, ScreenCoordinateY);
 
             var scene = Client.Game.GetScene<GameScene>();
             if (scene != null)

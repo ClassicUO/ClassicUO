@@ -1109,7 +1109,7 @@ namespace ClassicUO.Game.Managers
             int deltaY = mousePosition.Y - _dragOriginY;
             DraggingControl.X = DraggingControl.X + deltaX;
             DraggingControl.Y = DraggingControl.Y + deltaY;
-            DraggingControl.InvokeMove(DraggingControl.X, DraggingControl.Y);
+            DraggingControl.InvokeMove(deltaX, deltaY);
             _dragOriginX = mousePosition.X;
             _dragOriginY = mousePosition.Y;
         }
