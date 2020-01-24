@@ -198,7 +198,7 @@ namespace ClassicUO.Game.UI
             _maxWidth = maxWidth;
             _serial = 0;
             Text = _textHTML = text;
-            _lastHoverTime = Time.Ticks + 250;
+            //_lastHoverTime = Time.Ticks + 250;
         }
     }
 }
