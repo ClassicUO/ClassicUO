@@ -195,10 +195,13 @@ namespace ClassicUO.Game.UI
 
         public void SetText(string text, int maxWidth = 0)
         {
-            _maxWidth = maxWidth;
-            _serial = 0;
-            Text = _textHTML = text;
-            //_lastHoverTime = Time.Ticks + 250;
+            //if (Text != text)
+            {
+                _maxWidth = maxWidth;
+                _serial = 0;
+                Text = _textHTML = text;
+                _lastHoverTime = Time.Ticks + 250;
+            }
         }
     }
 }

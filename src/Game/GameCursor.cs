@@ -518,10 +518,7 @@ namespace ClassicUO.Game
             {
                 if (UIManager.MouseOverControl.Tooltip is string text)
                 {
-                    if (_tooltip.Text != text)
-                        _tooltip.Clear();
-
-                    if (_tooltip.IsEmpty)
+                    if (_tooltip.IsEmpty || _tooltip.Text != text)
                         _tooltip.SetText(text, UIManager.MouseOverControl.TooltipMaxLength);
 
                     _tooltip.Draw(batcher, position.X, position.Y + 24);
