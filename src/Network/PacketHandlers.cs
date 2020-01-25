@@ -1027,7 +1027,7 @@ namespace ClassicUO.Network
                         list = list.Reverse().ToArray();
 
                     foreach (var i in list) 
-                        gump.AddItem(i, false);
+                        gump.AddItem(i.Serial, i.Graphic, i.Hue, i.Amount, (ushort) i.Price, i.Name, false);
                 }
             }
             else
@@ -2554,12 +2554,11 @@ namespace ClassicUO.Network
 
             for (int i = 0; i < countItems; i++)
             {
-                Item item = World.GetOrCreateItem(p.ReadUInt());
-                item.Graphic = p.ReadUShort();
-                item.FixHue(p.ReadUShort());
-                item.Amount = p.ReadUShort();
-                item.Price = p.ReadUShort();
-
+                uint serial = p.ReadUInt();
+                ushort graphic = p.ReadUShort();
+                ushort hue = p.ReadUShort();
+                ushort amount = p.ReadUShort();
+                ushort price = p.ReadUShort();
                 string name = p.ReadASCII(p.ReadUShort());
                 bool fromcliloc = false;
 
@@ -2569,10 +2568,10 @@ namespace ClassicUO.Network
                     fromcliloc = true;
                 }
 
-                if (string.IsNullOrEmpty(item.Name))
-                    item.Name = name;
+                //if (string.IsNullOrEmpty(item.Name))
+                //    item.Name = name;
 
-                gump.AddItem(item, fromcliloc);
+                gump.AddItem(serial, graphic, hue, amount, price, name, fromcliloc);
             }
 
             UIManager.Add(gump);
