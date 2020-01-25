@@ -410,7 +410,7 @@ namespace ClassicUO.Game.Scenes
                                 TargetManager.Target(ent.Serial);
                                 break;
                             case Land land:
-                                TargetManager.Target(land.X, land.Y, land.Z);
+                                TargetManager.Target(0, land.X, land.Y, land.Z);
                                 break;
                             case GameObject o:
                                 TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
@@ -436,7 +436,7 @@ namespace ClassicUO.Game.Scenes
                                 UIManager.Add(new InspectorGump(ent));
                                 break;
                             case Land land:
-                                TargetManager.Target(land.X, land.Y, land.Z);
+                                TargetManager.Target(0, land.X, land.Y, land.Z);
                                 UIManager.Add(new InspectorGump(land));
                                 break;
                             case GameObject o:
