@@ -82,6 +82,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             {
                 int skillIndex = info.SkillDefVal[i, 0];
 
+                if (skillIndex >= _character.Skills.Length)
+                    continue;
+
                 if ((World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0 && (skillIndex == 52 || skillIndex == 53))
                 {
                     // reset skills if needed
