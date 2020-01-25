@@ -141,7 +141,7 @@ namespace ClassicUO.Network
             if (EnsureSize(length))
                 return Empty;
 
-            if (Position + length >= Length)
+            if (Position + length > Length)
             {
                 length = Length - Position - 1;
             }
