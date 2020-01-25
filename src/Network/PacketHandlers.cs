@@ -2569,7 +2569,7 @@ namespace ClassicUO.Network
                     fromcliloc = true;
                 }
 
-                if (!fromcliloc && string.IsNullOrEmpty(item.Name))
+                if (string.IsNullOrEmpty(item.Name))
                     item.Name = name;
 
                 gump.AddItem(item, fromcliloc);
