@@ -2906,8 +2906,8 @@ namespace ClassicUO.Network
                     {
                         int idx = msgSent.IndexOf('{');
                         int idxLast = msgSent.IndexOf('}') + 1;
-
-                        msgSent = msgSent.Remove(idx, idxLast - idx);
+                        if (idxLast > idx)
+                            msgSent = msgSent.Remove(idx, idxLast - idx);
                     }
 
                     //Color c = new Color(49, 82, 156, 0);
