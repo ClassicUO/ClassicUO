@@ -484,9 +484,14 @@ namespace ClassicUO.Game
         {
             if (Client.Game.Scene is GameScene gs)
             {
-                if (!World.ClientFeatures.TooltipsEnabled || (SelectedObject.Object is Item selectedItem && selectedItem.IsLocked && selectedItem.ItemData.Weight == 255 && !selectedItem.ItemData.IsContainer) || ItemHold.Enabled)
+                if (!World.ClientFeatures.TooltipsEnabled || 
+                    (SelectedObject.Object is Item selectedItem && 
+                     selectedItem.IsLocked && 
+                     selectedItem.ItemData.Weight == 255
+                     && !selectedItem.ItemData.IsContainer) || 
+                    ItemHold.Enabled)
                 {
-                    if (!_tooltip.IsEmpty)
+                    if (!_tooltip.IsEmpty && (!UIManager.IsMouseOverAControl || UIManager.IsMouseOverWorld))
                         _tooltip.Clear();
                 }
                 else
