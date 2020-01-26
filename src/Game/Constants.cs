@@ -59,6 +59,7 @@ namespace ClassicUO.Game
         public const byte FOLIAGE_ALPHA = 76;
         public const byte ALPHA_TIME = 20;
 
+        public const int MAX_OBJECT_HANDLES = 200;
 
         public const int SPELLBOOK_1_SPELLS_COUNT = 64;
         public const int SPELLBOOK_2_SPELLS_COUNT = 17;
