@@ -146,7 +146,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
-            if (SelectedObject.Object == this)
+            if (SelectedObject.Object == this || (FoliageIndex != -1 && Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex))
                 return;
 
             if (DrawTransparent)

@@ -56,6 +56,7 @@ namespace ClassicUO.Game.Scenes
         private int _renderListCount, _foliageCount;
 
         public Point ScreenOffset => _offset;
+        public sbyte FoliageIndex => _foliageIndex;
 
         public void UpdateMaxDrawZ(bool force = false)
         {
