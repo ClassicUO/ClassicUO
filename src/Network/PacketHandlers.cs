@@ -1222,7 +1222,7 @@ namespace ClassicUO.Network
             if (action != 1)
             {
                 Client.Game.GetScene<GameScene>()?.Weather?.Reset();
-                Client.Game.Scene.Audio.PlayMusic(42);
+                Client.Game.Scene.Audio.PlayMusic(42, true);
 
                 if (ProfileManager.Current.EnableDeathScreen)
                     World.Player.DeathScreenTimer = Time.Ticks + Constants.DEATH_SCREEN_TIMER;
