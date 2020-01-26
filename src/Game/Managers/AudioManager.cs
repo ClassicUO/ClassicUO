@@ -127,7 +127,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void PlayMusic(int music)
+        public void PlayMusic(int music, bool iswarmode = false)
         {
             if (!_canReproduceAudio)
                 return;
@@ -160,7 +160,7 @@ namespace ClassicUO.Game.Managers
 
             if (m == null && _currentMusic != null)
                 StopMusic();
-            else if (m != null && m != _currentMusic)
+            else if (m != null && (m != _currentMusic || iswarmode))
             {
                 StopMusic();
                 _currentMusic = (UOMusic) m;

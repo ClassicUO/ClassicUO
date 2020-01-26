@@ -31,6 +31,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.Network;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
@@ -66,6 +67,18 @@ namespace ClassicUO.Game
                 newStatus = ok;
             }
 
+            //if (ProfileManager.Current != null && ProfileManager.Current.EnableCombatMusic)
+            {
+                if (newStatus && ProfileManager.Current != null && ProfileManager.Current.EnableMusic)
+                {
+                    Client.Game.Scene.Audio.PlayMusic((RandomHelper.GetValue(0, 3) % 3) + 38, true);
+                }
+                else if (!newStatus)
+                {
+                    Client.Game.Scene.Audio.StopMusic();
+                }
+            }
+            
             Socket.Send(new PChangeWarMode(newStatus));
         }
 
