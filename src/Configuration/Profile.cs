@@ -558,6 +558,9 @@ namespace ClassicUO.Configuration
                                 case GUMP_TYPE.GT_RACIALBUTTON:
                                     gump = new RacialAbilityButton();
                                     break;
+                                case GUMP_TYPE.GT_WORLDMAP:
+                                    gump = new WorldMapGump();
+                                    break;
                             }
 
                             if (gump == null)
