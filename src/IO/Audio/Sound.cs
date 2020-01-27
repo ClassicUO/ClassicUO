@@ -196,17 +196,7 @@ namespace ClassicUO.IO.Audio
 
         public void Stop()
         {
-            foreach(Tuple<DynamicSoundEffectInstance, double> sound in m_EffectInstances)
-            {
-                sound.Item1.Stop();
-                sound.Item1.Dispose();
-            }
-
-            foreach (Tuple<DynamicSoundEffectInstance, double> music in m_MusicInstances)
-            {
-                music.Item1.Stop();
-                music.Item1.Dispose();
-            }
+            m_ThisInstance?.Stop();
 
             AfterStop();
         }

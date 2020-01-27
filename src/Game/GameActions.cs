@@ -75,7 +75,7 @@ namespace ClassicUO.Game
                 }
                 else if (!newStatus)
                 {
-                    Client.Game.Scene.Audio.StopMusic();
+                    Client.Game.Scene.Audio.StopWarMusic();
                 }
             }
             
