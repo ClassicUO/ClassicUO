@@ -1425,6 +1425,10 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
+              
+                if ((ia.Flags & ANIMATION_FLAGS.AF_USE_2_IF_HITTED_WHILE_RUNNING) != 0)
+                    return 2;
+
                 if (mode % 2 != 0)
                     return 6;
 
