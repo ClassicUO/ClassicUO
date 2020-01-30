@@ -108,7 +108,7 @@ namespace ClassicUO.Game.Scenes
             item.AllowedToDraw = false;
             //World.Items.Remove(item);
             //World.Items.ProcessDelta();
-            CloseItemGumps(item);
+            //CloseItemGumps(item);
 
             NetClient.Socket.Send(new PPickUpRequest(item, (ushort) amount));
 
@@ -119,7 +119,15 @@ namespace ClassicUO.Game.Scenes
         {
             if (item != null)
             {
-                UIManager.GetGump<Gump>(item)?.Dispose();
+                var gump = UIManager.GetGump<Gump>(item);
+           
+                if (gump != null)
+                {
+                    if (gump.GumpType == GUMP_TYPE.GT_SPELLBUTTON)
+                        return;
+
+                    gump.Dispose();
+                }
 
                 if (SerialHelper.IsValid(item.Container))
                 {
