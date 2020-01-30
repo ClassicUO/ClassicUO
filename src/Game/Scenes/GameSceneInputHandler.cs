@@ -699,6 +699,11 @@ namespace ClassicUO.Game.Scenes
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && e.repeat != 0)
                 return;
 
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && TargetManager.IsTargeting)
+            {
+                TargetManager.CancelTarget();
+            }
+
             if (UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
             {
                 return;
@@ -708,11 +713,7 @@ namespace ClassicUO.Game.Scenes
             {
                 case SDL.SDL_Keycode.SDLK_ESCAPE:
 
-                    if (TargetManager.IsTargeting)
-                    {
-                        TargetManager.CancelTarget();
-                    }
-                    else if (Pathfinder.AutoWalking && Pathfinder.PathindingCanBeCancelled)
+                    if (Pathfinder.AutoWalking && Pathfinder.PathindingCanBeCancelled)
                     {
                         Pathfinder.StopAutoWalk();
                     }
