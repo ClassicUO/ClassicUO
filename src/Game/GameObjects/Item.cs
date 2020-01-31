@@ -108,6 +108,8 @@ namespace ClassicUO.Game.GameObjects
                 return;
 
             base.Destroy();
+            
+            UIManager.GetGump<Gump>(Serial)?.Dispose();
             //_pool.Enqueue(this);
         }
 
