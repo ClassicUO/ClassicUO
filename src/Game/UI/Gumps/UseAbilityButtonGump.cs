@@ -26,6 +26,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -63,6 +64,8 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = false
             };
             Add(_button);
+
+            SetTooltip(ClilocLoader.Instance.GetString(1028838 + (byte) (((byte) (_isPrimary ? World.Player.PrimaryAbility : World.Player.SecondaryAbility) & 0x7F) - 1)), 80);
 
             WantUpdateSize = true;
             AcceptMouseInput = true;
