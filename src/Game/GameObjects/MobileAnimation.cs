@@ -1064,45 +1064,49 @@ namespace ClassicUO.Game.GameObjects
                                 result = 2;
                             else
                             {
-                                ushort[] handAnimIDs = { 0, 0 };
-                                Item hand1 = mobile.HasEquipment ? mobile.Equipment[(int) Layer.OneHanded] : null;
-
-                                if (hand1 != null)
-                                    handAnimIDs[0] = hand1.ItemData.AnimID;
-
-                                if (hand2 != null)
-                                    handAnimIDs[1] = hand2.ItemData.AnimID;
-
-
-                                if (hand1 == null)
+                                unsafe
                                 {
-                                    if (hand2 != null)
-                                    {
-                                        result = 7;
+                                    ushort* handAnimIDs = stackalloc ushort[2];
+                                    Item hand1 = mobile.HasEquipment ? mobile.Equipment[(int) Layer.OneHanded] : null;
 
-                                        for (int i = 0; i < handAnimIDs.Length; i++)
+                                    if (hand1 != null)
+                                        handAnimIDs[0] = hand1.ItemData.AnimID;
+
+                                    if (hand2 != null)
+                                        handAnimIDs[1] = hand2.ItemData.AnimID;
+
+
+                                    if (hand1 == null)
+                                    {
+                                        if (hand2 != null)
                                         {
-                                            if (handAnimIDs[i] >= 0x0263 && handAnimIDs[i] <= 0x028B)
+                                            result = 7;
+
+                                            for (int i = 0; i < 2; i++)
                                             {
-                                                for (int k = 0; k < HANDS_BASE_ANIMID.Length; k++)
+                                                if (handAnimIDs[i] >= 0x0263 && handAnimIDs[i] <= 0x028B)
                                                 {
-                                                    if (handAnimIDs[i] == HANDS_BASE_ANIMID[k])
+                                                    for (int k = 0; k < HANDS_BASE_ANIMID.Length; k++)
                                                     {
-                                                        result = 8;
-                                                        i = handAnimIDs.Length;
-                                                        break;
+                                                        if (handAnimIDs[i] == HANDS_BASE_ANIMID[k])
+                                                        {
+                                                            result = 8;
+                                                            i = 2;
+                                                            break;
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
+                                        else if (mobile.IsGargoyle && mobile.IsFlying)
+                                            result = 64;
+                                        else
+                                            result = 7;
                                     }
-                                    else if (mobile.IsGargoyle && mobile.IsFlying)
-                                        result = 64;
                                     else
                                         result = 7;
                                 }
-                                else
-                                    result = 7;
+                               
                             }
                         }
                     }
