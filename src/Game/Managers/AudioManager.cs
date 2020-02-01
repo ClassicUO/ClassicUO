@@ -134,7 +134,7 @@ namespace ClassicUO.Game.Managers
             if (!_canReproduceAudio)
                 return;
 
-            if (music >= Constants.MAX_MUSIC_DATA_INDEX_COUNT || (ProfileManager.Current.EnableCombatMusic && iswarmode))
+            if (music >= Constants.MAX_MUSIC_DATA_INDEX_COUNT || (!ProfileManager.Current.EnableCombatMusic && iswarmode))
                 return;
 
             float volume;
