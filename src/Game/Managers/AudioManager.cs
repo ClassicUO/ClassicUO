@@ -134,7 +134,7 @@ namespace ClassicUO.Game.Managers
             if (!_canReproduceAudio)
                 return;
 
-            if (music >= Constants.MAX_MUSIC_DATA_INDEX_COUNT || (!ProfileManager.Current.EnableCombatMusic && iswarmode))
+            if (music >= Constants.MAX_MUSIC_DATA_INDEX_COUNT)
                 return;
 
             float volume;
@@ -148,7 +148,7 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                if (ProfileManager.Current == null || !ProfileManager.Current.EnableMusic)
+                if (ProfileManager.Current == null || !ProfileManager.Current.EnableMusic || (!ProfileManager.Current.EnableCombatMusic && iswarmode))
                     return;
 
                 volume = ProfileManager.Current.MusicVolume / Constants.SOUND_DELTA;
