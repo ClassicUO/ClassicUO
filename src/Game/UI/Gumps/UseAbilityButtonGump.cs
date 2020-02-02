@@ -65,13 +65,18 @@ namespace ClassicUO.Game.UI.Gumps
             };
             Add(_button);
 
-            SetTooltip(ClilocLoader.Instance.GetString(1028838 + (byte) (((byte) (_isPrimary ? World.Player.PrimaryAbility : World.Player.SecondaryAbility) & 0x7F) - 1)), 80);
+            SetTooltip();
 
             WantUpdateSize = true;
             AcceptMouseInput = true;
             AnchorGroupName = "spell";
             GroupMatrixWidth = 44;
             GroupMatrixHeight = 44;
+        }
+
+        private void SetTooltip()
+        {
+            SetTooltip(ClilocLoader.Instance.GetString(1028838 + (byte) (((byte) (_isPrimary ? World.Player.PrimaryAbility : World.Player.SecondaryAbility) & 0x7F) - 1)), 80);
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
@@ -103,6 +108,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _definition = def;
                 _button.Graphic = def.Icon;
+
+                SetTooltip();
             }
         }
 
