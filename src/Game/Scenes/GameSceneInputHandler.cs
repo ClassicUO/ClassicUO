@@ -328,7 +328,7 @@ namespace ClassicUO.Game.Scenes
                 return;
             }
 
-            if (_rightMousePressed)
+            if (!ProfileManager.Current.DisableAutoMove && _rightMousePressed)
                 _continueRunning = true;
 
             if (_dragginObject != null)

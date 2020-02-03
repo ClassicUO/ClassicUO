@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG;
         private Combobox _overrideContainerLocationSetting;
 
         // sounds
@@ -1222,7 +1222,14 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 45,
                     IsChecked = ProfileManager.Current.DisableCtrlQWBtn
                 };
-                _defaultHotkeysArea.Add(_disableCtrlQWBtn);
+
+                _disableAutoMove = new Checkbox(0x00D2, 0x00D3, "Disable Right+Left Click Automove", FONT, HUE_FONT)
+                {
+                    X = 20,
+                    Y = 45,
+                    IsChecked = ProfileManager.Current.DisableAutoMove
+                };
+                _defaultHotkeysArea.Add(_disableAutoMove);
 
                 rightArea.Add(_defaultHotkeysArea);
 
@@ -1586,6 +1593,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _disableArrowBtn.IsChecked = false;
                     _disableTabBtn.IsChecked = false;
                     _disableCtrlQWBtn.IsChecked = false;
+                    _disableAutoMove.IsChecked = false;
                     _enableDragSelect.IsChecked = false;
                     _overrideContainerLocation.IsChecked = false;
                     _overrideContainerLocationSetting.SelectedIndex = 0;
@@ -1978,6 +1986,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _disableArrowBtn.IsChecked = false;
                 _disableTabBtn.IsChecked = false;
                 _disableCtrlQWBtn.IsChecked = false;
+                _disableAutoMove.IsChecked = false;
             }
 
             // NOTE: Keep these assignments AFTER the code above that resets nested checkboxes if parent checkbox is unchecked
@@ -1985,6 +1994,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.DisableArrowBtn = _disableArrowBtn.IsChecked;
             ProfileManager.Current.DisableTabBtn = _disableTabBtn.IsChecked;
             ProfileManager.Current.DisableCtrlQWBtn = _disableCtrlQWBtn.IsChecked;
+            ProfileManager.Current.DisableAutoMove = _disableAutoMove.IsChecked;
 
             if (ProfileManager.Current.DebugGumpIsDisabled != _debugGumpIsDisabled.IsChecked)
             {

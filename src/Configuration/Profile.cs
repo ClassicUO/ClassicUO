@@ -185,6 +185,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool DisableArrowBtn { get; set; }
         [JsonProperty] public bool DisableTabBtn { get; set; }
         [JsonProperty] public bool DisableCtrlQWBtn { get; set; }
+        [JsonProperty] public bool DisableAutoMove { get; set; }
         [JsonProperty] public bool EnableDragSelect { get; set; }
         [JsonProperty] public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift
         [JsonProperty] public bool OverrideContainerLocation { get; set; }
