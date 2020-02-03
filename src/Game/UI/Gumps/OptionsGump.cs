@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
         private Combobox _overrideContainerLocationSetting;
 
         // sounds
@@ -1289,6 +1289,8 @@ namespace ClassicUO.Game.UI.Gumps
             _customBars = CreateCheckBox(rightArea, "Use Custom Health Bars", ProfileManager.Current.CustomBarsToggled, 0, 5);
             _customBarsBBG = CreateCheckBox(rightArea, "Use All Black Backgrounds", ProfileManager.Current.CBBlackBGToggled, 20, 5);
 
+            _saveHealthbars = CreateCheckBox(rightArea, "Save healthbars on logout", ProfileManager.Current.SaveHealthbars, 0, 5);
+
             Add(rightArea, PAGE);
 
             _autoOpenCorpseArea.IsVisible = _autoOpenCorpse.IsChecked;
@@ -1603,6 +1605,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _customBarsBBG.IsChecked = false;
                     _autoOpenCorpse.IsChecked = false;
                     _skipEmptyCorpse.IsChecked = false;
+                    _saveHealthbars.IsChecked = false;
                     
                     break;
 
@@ -2071,6 +2074,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             ProfileManager.Current.CBBlackBGToggled = _customBarsBBG.IsChecked;
+            ProfileManager.Current.SaveHealthbars = _saveHealthbars.IsChecked;
 
             // network
             ProfileManager.Current.ShowNetworkStats = _showNetStats.IsChecked;
