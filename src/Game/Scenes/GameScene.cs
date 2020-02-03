@@ -920,6 +920,15 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
+        public void ZoomIn()
+        {
+            ScalePos--;
+        }
+
+        public void ZoomOut()
+        {
+            ScalePos++;
+        }
 
         private struct LightData
         {

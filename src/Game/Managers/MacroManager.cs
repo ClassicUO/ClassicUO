@@ -1292,8 +1292,23 @@ namespace ClassicUO.Game.Managers
                     // TODO:
                     break;
 
-                case MacroType.DefaultScale:
-                    Client.Game.GetScene<GameScene>().Scale = 1;
+                case MacroType.Zoom:
+
+                    switch (macro.SubCode)
+                    {
+                        case MacroSubType.MSC_NONE:
+                        case MacroSubType.DefaultZoom:
+                            Client.Game.GetScene<GameScene>().Scale = 1;
+                            break;
+
+                        case MacroSubType.ZoomIn:
+                            Client.Game.GetScene<GameScene>().ZoomIn();
+                            break;
+
+                        case MacroSubType.ZoomOut:
+                            Client.Game.GetScene<GameScene>().ZoomOut();
+                            break;
+                    }
 
                     break;
 
@@ -1631,6 +1646,11 @@ namespace ClassicUO.Game.Managers
                     offset = (int) MacroSubType.ConfusionBlastPotion;
                     count = MacroSubType.ExplosionPotion - MacroSubType.ConfusionBlastPotion;
                     break;
+
+                case MacroType.Zoom:
+                    offset = (int) MacroSubType.DefaultZoom;
+                    count = 1 + MacroSubType.ZoomOut - MacroSubType.DefaultZoom;
+                    break;
             }
         }
     }
@@ -1660,6 +1680,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.SelectPrevious:
                 case MacroType.SelectNearest:
                 case MacroType.UsePotion:
+                case MacroType.Zoom:
 
                     if (sub == MacroSubType.MSC_NONE)
                     {
@@ -1783,7 +1804,7 @@ namespace ClassicUO.Game.Managers
         BandageSelf,
         BandageTarget,
         ToggleGargoyleFly,
-        DefaultScale,
+        Zoom,
         ToggleChatVisibility,
         INVALID,
         Aura = 62,
@@ -2026,5 +2047,9 @@ namespace ClassicUO.Game.Managers
         RefreshPotion,
         HealPotion,
         ExplosionPotion,
+
+        DefaultZoom,
+        ZoomIn,
+        ZoomOut,
     }
 }
