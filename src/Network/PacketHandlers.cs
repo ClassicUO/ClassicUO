@@ -2906,7 +2906,7 @@ namespace ClassicUO.Network
                     {
                         int idx = msgSent.IndexOf('{');
                         int idxLast = msgSent.IndexOf('}') + 1;
-                        if (idxLast > idx)
+                        if (idxLast > idx && idx > -1)
                             msgSent = msgSent.Remove(idx, idxLast - idx);
                     }
 
@@ -3482,6 +3482,12 @@ namespace ClassicUO.Network
                     //    }
                     //}
                     
+                    break;
+                case 0x051B: // ClassicUO commands
+
+                    type = p.ReadUShort();
+                    
+
                     break;
                 default:
                     Log.Warn($"Unhandled 0xBF - sub: {cmd.ToHex()}");
