@@ -747,8 +747,6 @@ namespace ClassicUO.Network
                             UIManager.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == tradeBox || s.ID2 == tradeBox)?.UpdateContent();
                     }
 
-                    GameScene scene = Client.Game.GetScene<GameScene>();
-
                     if (cont == World.Player && it.Layer == Layer.Invalid)
                         ItemHold.Enabled = false;
 
@@ -1101,8 +1099,6 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            GameScene scene = Client.Game.GetScene<GameScene>();
-
             Item item = World.Items.Get(ItemHold.Serial);
 
             if (ItemHold.Enabled || ItemHold.Dropped && item == null)
@@ -1124,7 +1120,6 @@ namespace ClassicUO.Network
                         item.Y = ItemHold.Y;
                         item.Z = ItemHold.Z;
                         item.UpdateScreenPosition();
-
                         container.Items.Add(item);
 
                         World.Items.Add(item);
@@ -1190,6 +1185,11 @@ namespace ClassicUO.Network
             }
             else
                 Log.Warn( "There was a problem with ItemHold object. It was cleared before :|");
+
+            if (item != null)
+            {
+                item.AllowedToDraw = true;
+            }
 
             byte code = p.ReadByte();
 
