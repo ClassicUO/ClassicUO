@@ -1644,7 +1644,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.UsePotion:
                     offset = (int) MacroSubType.ConfusionBlastPotion;
-                    count = MacroSubType.ExplosionPotion - MacroSubType.ConfusionBlastPotion;
+                    count = MacroSubType.DefaultZoom - MacroSubType.ConfusionBlastPotion;
                     break;
 
                 case MacroType.Zoom:
