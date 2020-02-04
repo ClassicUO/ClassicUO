@@ -1324,9 +1324,6 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-           
-
-
             byte type = p.ReadByte();
             bool haveCap = (((type != 0u) && type <= 0x03) || type == 0xDF);
             bool isSingleUpdate = (type == 0xFF || type == 0xDF);
@@ -1345,7 +1342,6 @@ namespace ClassicUO.Network
 
                     SkillsLoader.Instance.Skills.Add(new SkillEntry(i,p.ReadASCII(nameLength), haveButton));
                 }
-
 
                 SkillsLoader.Instance.SortedSkills.AddRange(SkillsLoader.Instance.Skills);
                 SkillsLoader.Instance.SortedSkills.Sort((a, b) => a.Name.CompareTo(b.Name));
@@ -1392,8 +1388,6 @@ namespace ClassicUO.Network
                         }
                     }
                 }
-
-
 
                 while (p.Position < p.Length)
                 {
