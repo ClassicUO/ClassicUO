@@ -55,11 +55,10 @@ namespace ClassicUO.Game
 
         private readonly Texture2D _aura;
         private readonly int[,] _cursorOffset = new int[2, 16];
-        private readonly CursorInfo[,] _cursorPixels = new CursorInfo[2, 16];
+        private readonly IntPtr[,] _cursorPixels = new IntPtr[2, 16];
         private readonly Tooltip _tooltip;
         private Vector3 _auraVector = new Vector3(0, 13, 0);
         private readonly RenderedText _targetDistanceText = RenderedText.Create(String.Empty, 0x0481, style: FontStyle.BlackBorder);
-        private IntPtr _cursor, _surface;
         private UOTexture _draggedItemTexture;
         private ushort _graphic = 0x2073;
         private bool _needGraphicUpdate = true;
@@ -223,7 +222,21 @@ namespace ClassicUO.Game
                         }
                     }
 
-                    if (pixels != null && pixels.Length != 0) _cursorPixels[i, j] = new CursorInfo(pixels, w, h);
+                    if (pixels != null && pixels.Length != 0)
+                    {
+                        unsafe
+                        {
+                            fixed (ushort* ptr = pixels)
+                            {
+                                IntPtr surface = SDL.SDL_CreateRGBSurfaceWithFormatFrom((IntPtr) ptr, w, h, 16, 2 * w, SDL.SDL_PIXELFORMAT_ARGB1555);
+
+                                int hotX = -_cursorOffset[0, j];
+                                int hotY = -_cursorOffset[1, j];
+
+                                _cursorPixels[i, j] = SDL.SDL_CreateColorCursor(surface, hotX, hotY);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -274,9 +287,6 @@ namespace ClassicUO.Game
 
                 if (Settings.GlobalSettings.RunMouseInASeparateThread)
                 {
-                    if (_cursor != IntPtr.Zero)
-                        SDL.SDL_FreeCursor(_cursor);
-
                     ushort id = Graphic;
 
                     if (id < 0x206A)
@@ -285,19 +295,11 @@ namespace ClassicUO.Game
                         id -= 0x206A;
                     int war = World.InGame && World.Player.InWarMode ? 1 : 0;
 
-                    ref readonly CursorInfo info = ref _cursorPixels[war, id];
+                    ref IntPtr ptrCursor = ref _cursorPixels[war, id];
 
-                    fixed (ushort* ptr = info.Pixels)
-                        _surface = SDL.SDL_CreateRGBSurfaceWithFormatFrom((IntPtr) ptr, info.Width, info.Height, 16, 2 * info.Width, SDL.SDL_PIXELFORMAT_ARGB1555);
-
-                    if (_surface != IntPtr.Zero)
+                    if (ptrCursor != IntPtr.Zero)
                     {
-                        int hotX = -_cursorOffset[0, id];
-                        int hotY = -_cursorOffset[1, id];
-
-                        _cursor = SDL.SDL_CreateColorCursor(_surface, hotX, hotY);
-                        SDL.SDL_SetCursor(_cursor);
-                        SDL.SDL_FreeSurface(_surface);
+                        SDL.SDL_SetCursor(ptrCursor);
                     }
                 }
             }
@@ -668,15 +670,15 @@ namespace ClassicUO.Game
 
         private readonly struct CursorInfo
         {
-            public CursorInfo(ushort[] pixels, int w, int h)
+            public CursorInfo(IntPtr ptr, int w, int h)
             {
-                Pixels = pixels;
+                CursorPtr = ptr;
                 Width = w;
                 Height = h;
             }
 
-            public readonly ushort[] Pixels;
             public readonly int Width, Height;
+            public readonly IntPtr CursorPtr;
         }
     }
 }
