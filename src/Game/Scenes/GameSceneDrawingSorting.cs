@@ -694,7 +694,7 @@ namespace ClassicUO.Game.Scenes
             int winGameScaledWidth;
             int winGameScaledHeight;
 
-            if (ProfileManager.Current != null && ProfileManager.Current.EnableScaleZoom)
+            if (ProfileManager.Current != null /*&& ProfileManager.Current.EnableScaleZoom*/)
             {
                 float left = winGamePosX;
                 float right = winGameWidth + left;

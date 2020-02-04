@@ -622,16 +622,17 @@ namespace ClassicUO.Game.Scenes
             if (!IsMouseOverViewport)
                 return;
 
-            if (!ProfileManager.Current.EnableScaleZoom || !Keyboard.Ctrl)
-                return;
+            if (ProfileManager.Current.EnableMousewheelScaleZoom)
+            {
+                if (!Keyboard.Ctrl)
+                    return;
 
-            if (!up)
-                ScalePos++;
-            else
-                ScalePos--;
+                if (!up)
+                    ZoomOut();
+                else
+                    ZoomIn();
+            }
 
-            if (ProfileManager.Current.SaveScaleAfterClose)
-                ProfileManager.Current.ScaleZoom = Scale;
         }
 
 
@@ -853,8 +854,8 @@ namespace ClassicUO.Game.Scenes
 
         internal override void OnKeyUp(SDL.SDL_KeyboardEvent e)
         {
-            if (ProfileManager.Current.EnableScaleZoom && ProfileManager.Current.RestoreScaleAfterUnpressCtrl && !Keyboard.Ctrl)
-                Scale = ProfileManager.Current.RestoreScaleValue;
+            if (ProfileManager.Current.EnableMousewheelScaleZoom && ProfileManager.Current.RestoreScaleAfterUnpressCtrl && !Keyboard.Ctrl)
+                Scale = ProfileManager.Current.DefaultScale;
 
             if (_flags[4])
             {

@@ -79,7 +79,7 @@ namespace ClassicUO.Game.Scenes
 
         public bool UpdateDrawPosition { get; set; }
 
-        private int ScalePos
+        public int ScalePos
         {
             get => _scale;
             set
@@ -175,12 +175,8 @@ namespace ClassicUO.Game.Scenes
 
             MessageManager.MessageReceived += ChatOnMessageReceived;
 
-            if (!ProfileManager.Current.EnableScaleZoom || !ProfileManager.Current.SaveScaleAfterClose)
-                Scale = 1f;
-            else
-                Scale = ProfileManager.Current.ScaleZoom;
+            Scale = ProfileManager.Current.DefaultScale;
 
-            ProfileManager.Current.RestoreScaleValue = ProfileManager.Current.ScaleZoom = Scale;
             UIManager.ContainerScale = ProfileManager.Current.ContainersScale / 100f;
 
             if (ProfileManager.Current.WindowBorderless)
