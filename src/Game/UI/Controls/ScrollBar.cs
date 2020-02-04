@@ -238,22 +238,6 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        protected override void OnMouseWheel(MouseEventType delta)
-        {
-            switch (delta)
-            {
-                case MouseEventType.WheelScrollUp:
-                    Value -= ScrollStep;
-
-                    break;
-
-                case MouseEventType.WheelScrollDown:
-                    Value += ScrollStep;
-
-                    break;
-            }
-        }
-
         public override bool Contains(int x, int y)
         {
             return x >= 0 && x <= Width && y >= 0 && y <= Height;
