@@ -28,6 +28,7 @@ using System.Threading;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
+using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
