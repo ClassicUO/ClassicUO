@@ -23,7 +23,6 @@ using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.IO;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 

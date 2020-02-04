@@ -22,7 +22,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -35,7 +34,6 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -708,7 +706,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            Chat.HandleMessage(entity, text, name, hue, type, (byte) font);
+            MessageManager.HandleMessage(entity, text, name, hue, type, (byte) font);
         }
 
         private static void DeleteObject(Packet p)
@@ -1193,7 +1191,7 @@ namespace ClassicUO.Network
 
             byte code = p.ReadByte();
 
-            if (code < 5) Chat.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 1001, MessageType.System, 3);
+            if (code < 5) MessageManager.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 1001, MessageType.System, 3);
         }
 
         private static void EndDraggingItem(Packet p)
@@ -2528,7 +2526,7 @@ namespace ClassicUO.Network
 
             byte[] data = p.ReadArray(8);
 
-            Chat.PromptData = new PromptData
+            MessageManager.PromptData = new PromptData
             {
                 Prompt = ConsolePrompt.ASCII,
                 Data = data
@@ -2774,7 +2772,7 @@ namespace ClassicUO.Network
                 }           
             }
 
-            Chat.HandleMessage(entity, text, name, hue, type, ProfileManager.Current.ChatFont, true, lang);
+            MessageManager.HandleMessage(entity, text, name, hue, type, ProfileManager.Current.ChatFont, true, lang);
         }
 
         private static void DisplayDeath(Packet p)
@@ -3143,7 +3141,7 @@ namespace ClassicUO.Network
                         if (!string.IsNullOrEmpty(str))
                             item.Name = str;
 
-                        Chat.HandleMessage(item, str, item.Name, 0x3B2, MessageType.Regular, 3, true);
+                        MessageManager.HandleMessage(item, str, item.Name, 0x3B2, MessageType.Regular, 3, true);
                     }
 
                     str = string.Empty;
@@ -3201,7 +3199,7 @@ namespace ClassicUO.Network
                     if (count < 20 && count > 0 || next == 0xFFFFFFFC && count == 0)
                         strBuffer.Append(']');
 
-                    if (strBuffer.Length != 0) Chat.HandleMessage(item, strBuffer.ToString(), item.Name, 0x3B2, MessageType.Regular, 3, true);
+                    if (strBuffer.Length != 0) MessageManager.HandleMessage(item, strBuffer.ToString(), item.Name, 0x3B2, MessageType.Regular, 3, true);
 
                     NetClient.Socket.Send(new PMegaClilocRequestOld(item));
 
@@ -3550,7 +3548,7 @@ namespace ClassicUO.Network
                 entity.ProcessDelta();
             }
 
-            Chat.HandleMessage(entity, text, name, hue, type, (byte) font, true);
+            MessageManager.HandleMessage(entity, text, name, hue, type, (byte) font, true);
         }
 
         private static void UnicodePrompt(Packet p)
@@ -3560,7 +3558,7 @@ namespace ClassicUO.Network
 
             byte[] data = p.ReadArray(8);
 
-            Chat.PromptData = new PromptData
+            MessageManager.PromptData = new PromptData
             {
                 Prompt = ConsolePrompt.Unicode,
                 Data = data

@@ -20,12 +20,7 @@
 #endregion
 
 using System.Collections.Generic;
-
-using ClassicUO.IO;
 using ClassicUO.Renderer;
-using ClassicUO.Game.UI.Controls;
-
-using Microsoft.Xna.Framework;
 using ClassicUO.Game.Data;
 using System.IO;
 using ClassicUO.Utility;

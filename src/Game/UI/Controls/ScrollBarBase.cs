@@ -21,7 +21,6 @@
 
 using System;
 using ClassicUO.Utility;
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {

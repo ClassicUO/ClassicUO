@@ -23,8 +23,6 @@ using System.Runtime.CompilerServices;
 
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
-using ClassicUO.Game.GameObjects;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Utility

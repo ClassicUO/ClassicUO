@@ -26,6 +26,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 using ClassicUO.Game;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Utility.Logging;
@@ -330,7 +331,7 @@ namespace ClassicUO.Utility.Platforms
                                 return 0;
 
                             if ((wParam & 0x00010000) != 0)
-                                Chat.HandleMessage(null, sb.ToString(), "System", hue, MessageType.Regular, 3, true);
+                                MessageManager.HandleMessage(null, sb.ToString(), "System", hue, MessageType.Regular, 3, true);
                             else
                                 World.Player.AddMessage(MessageType.Regular, sb.ToString(), 3, hue, true);
 

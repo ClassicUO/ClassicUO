@@ -23,7 +23,6 @@ using System;
 
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps
 {

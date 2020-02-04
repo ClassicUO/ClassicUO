@@ -23,17 +23,10 @@ using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Logging;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Game.Managers;
 using ClassicUO.Network;
 using ClassicUO.Utility.Platforms;
 

@@ -28,15 +28,12 @@ using System.Xml;
 using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
 using Newtonsoft.Json;
-
-using SDL2;
 
 namespace ClassicUO.Configuration
 {

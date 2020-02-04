@@ -26,9 +26,7 @@ using ClassicUO.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
-using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 using SDL2;
 

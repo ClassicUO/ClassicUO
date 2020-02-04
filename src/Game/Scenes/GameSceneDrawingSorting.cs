@@ -20,14 +20,11 @@
 #endregion
 
 using System;
-using System.Text;
 
 using ClassicUO.Configuration;
-using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 

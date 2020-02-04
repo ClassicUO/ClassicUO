@@ -32,11 +32,8 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Interfaces;
-using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
-
-using Microsoft.Xna.Framework;
 
 using Newtonsoft.Json;
 

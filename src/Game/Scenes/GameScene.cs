@@ -23,7 +23,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
-using System.Threading;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -33,7 +32,6 @@ using ClassicUO.Game.Map;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
@@ -42,7 +40,6 @@ using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SDL2;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -176,7 +173,7 @@ namespace ClassicUO.Game.Scenes
             CommandManager.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
 
-            Chat.MessageReceived += ChatOnMessageReceived;
+            MessageManager.MessageReceived += ChatOnMessageReceived;
 
             if (!ProfileManager.Current.EnableScaleZoom || !ProfileManager.Current.SaveScaleAfterClose)
                 Scale = 1f;
@@ -335,7 +332,7 @@ namespace ClassicUO.Game.Scenes
             _useItemQueue = null;
             Hotkeys = null;
             Macros = null;
-            Chat.MessageReceived -= ChatOnMessageReceived;
+            MessageManager.MessageReceived -= ChatOnMessageReceived;
 
 
             Settings.GlobalSettings.WindowSize = new Point(Client.Game.Window.ClientBounds.Width, Client.Game.Window.ClientBounds.Height);

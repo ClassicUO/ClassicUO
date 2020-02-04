@@ -19,10 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using System;
 using System.Collections.Generic;
-
-using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -651,7 +648,7 @@ namespace ClassicUO.Game
             Party.Clear();
             ServerName = string.Empty;
             TargetManager.LastAttack = 0;
-            Chat.PromptData = default;
+            MessageManager.PromptData = default;
             _effectManager.Clear();
             _toRemove.Clear();
             CorpseManager.Clear();

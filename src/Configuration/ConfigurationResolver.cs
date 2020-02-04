@@ -25,7 +25,6 @@ using System.Text.RegularExpressions;
 using ClassicUO.Utility.Logging;
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace ClassicUO.Configuration
 {

@@ -23,8 +23,6 @@ using System;
 
 using ClassicUO.Configuration;
 
-using Microsoft.Xna.Framework;
-
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class MovingEffect : GameEffect

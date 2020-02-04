@@ -20,7 +20,6 @@
 #endregion
 
 using ClassicUO.Interfaces;
-using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.Managers

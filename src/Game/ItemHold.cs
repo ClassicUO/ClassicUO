@@ -21,7 +21,6 @@
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Managers;
 
 using Microsoft.Xna.Framework;
 
