@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient;
         private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
         private Combobox _dragSelectModifierKey;
-        private HSliderBar _brighlight;
+        private HSliderBar _brighlight, _sliderZoom;
 
         //counters
         private Checkbox _enableCounters, _highlightOnUse, _highlightOnAmount, _enableAbbreviatedAmount;
@@ -582,9 +582,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             // [BLOCK] scale
             {
-                _zoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Enable in game zoom scaling (Ctrl + Scroll)", FONT, HUE_FONT)
+
+                ScrollAreaItem scaleSlider = new ScrollAreaItem();
+                Label zoomSliderText = new Label("Default zoom (5 for standard zoom):", true, HUE_FONT);
+                scaleSlider.Add(zoomSliderText);
+                _sliderZoom = new HSliderBar(zoomSliderText.X, zoomSliderText.Height + 5, 250, 0, 20, Client.Game.GetScene<GameScene>().ScalePos, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+                scaleSlider.Add(_sliderZoom);
+                rightArea.Add(scaleSlider);
+
+                _zoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Enable mousewheel for in game zoom scaling (Ctrl + Scroll)", FONT, HUE_FONT)
                 {
-                    IsChecked = ProfileManager.Current.EnableScaleZoom
+                    IsChecked = ProfileManager.Current.EnableMousewheelScaleZoom,
+                    Y = 5
                 };
                 _zoomCheckbox.ValueChanged += (sender, e) => { _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked; };
 
@@ -592,23 +601,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _zoomSizeArea = new ScrollAreaItem();
 
-                _savezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Save scale after exit", FONT, HUE_FONT)
-                {
-                    X = 20,
-                    Y = 15,
-                    IsChecked = ProfileManager.Current.SaveScaleAfterClose
-                };
-                _zoomSizeArea.Add(_savezoomCheckbox);
-
                 _restorezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Releasing Ctrl Restores Scale", FONT, HUE_FONT)
                 {
                     X = 20,
-                    Y = 35,
+                    Y = 5,
                     IsChecked = ProfileManager.Current.RestoreScaleAfterUnpressCtrl
                 };
                 _zoomSizeArea.Add(_restorezoomCheckbox);
 
                 rightArea.Add(_zoomSizeArea);
+
                 _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked;
             }
 
@@ -1501,7 +1503,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _enableDeathScreen.IsChecked = true;
                     _enableBlackWhiteEffect.IsChecked = true;
                     Client.Game.GetScene<GameScene>().Scale = 1;
-                    ProfileManager.Current.RestoreScaleValue = ProfileManager.Current.ScaleZoom = 1f;
+                    ProfileManager.Current.DefaultScale = 1f;
                     _lightBar.Value = 0;
                     _enableLight.IsChecked = false;
                     _useColoredLights.IsChecked = false;
@@ -1782,23 +1784,10 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.EnableDeathScreen = _enableDeathScreen.IsChecked;
             ProfileManager.Current.EnableBlackWhiteEffect = _enableBlackWhiteEffect.IsChecked;
 
-            if (ProfileManager.Current.EnableScaleZoom != _zoomCheckbox.IsChecked)
-            {
-                if (!_zoomCheckbox.IsChecked)
-                    Client.Game.GetScene<GameScene>().Scale = 1;
-
-                ProfileManager.Current.EnableScaleZoom = _zoomCheckbox.IsChecked;
-            }
-
-            ProfileManager.Current.SaveScaleAfterClose = _savezoomCheckbox.IsChecked;
-
-            if (_restorezoomCheckbox.IsChecked != ProfileManager.Current.RestoreScaleAfterUnpressCtrl)
-            {
-                if (_restorezoomCheckbox.IsChecked)
-                    ProfileManager.Current.RestoreScaleValue = Client.Game.GetScene<GameScene>().Scale;
-
-                ProfileManager.Current.RestoreScaleAfterUnpressCtrl = _restorezoomCheckbox.IsChecked;
-            }
+            Client.Game.GetScene<GameScene>().ScalePos = _sliderZoom.Value;
+            ProfileManager.Current.DefaultScale = Client.Game.GetScene<GameScene>().Scale;
+            ProfileManager.Current.EnableMousewheelScaleZoom = _zoomCheckbox.IsChecked;
+            ProfileManager.Current.RestoreScaleAfterUnpressCtrl = _restorezoomCheckbox.IsChecked;
 
             if (Settings.GlobalSettings.ShardType != _shardType.SelectedIndex)
             {
