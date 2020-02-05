@@ -1,27 +1,24 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -38,7 +35,30 @@ namespace ClassicUO.IO.Resources
             "begin", "name", "truename", "desc", "toplevel", "gump", "type", "children", "skill",
             "stat", "str", "int", "dex", "end", "true", "category", "nameid", "descid"
         };
-        public Dictionary<ProfessionInfo, List<ProfessionInfo>> Professions = new Dictionary<ProfessionInfo, List<ProfessionInfo>>();
+
+        private ProfessionLoader()
+        {
+
+        }
+
+        private static ProfessionLoader _instance;
+        public static ProfessionLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new ProfessionLoader();
+                }
+
+                return _instance;
+            }
+        }
+
+
+        public Dictionary<ProfessionInfo, List<ProfessionInfo>> Professions { get; } = new Dictionary<ProfessionInfo, List<ProfessionInfo>>();
+
+
 
         public override Task Load()
         {
@@ -224,9 +244,9 @@ namespace ClassicUO.IO.Resources
                                 }
                             }
 
-                            for (int j = 0; j < UOFileManager.Skills.SkillsCount; j++)
+                            for (int j = 0; j < SkillsLoader.Instance.SkillsCount; j++)
                             {
-                                SkillEntry skill = UOFileManager.Skills.GetSkill(j);
+                                SkillEntry skill = SkillsLoader.Instance.Skills[j];
 
                                 if (strings[1] == skill.Name)
                                 {
@@ -263,7 +283,7 @@ namespace ClassicUO.IO.Resources
 
                     {
                         int.TryParse(strings[1], out nameClilocID);
-                        name = UOFileManager.Cliloc.GetString(nameClilocID);
+                        name = ClilocLoader.Instance.GetString(nameClilocID);
 
                         break;
                     }

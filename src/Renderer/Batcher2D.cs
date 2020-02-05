@@ -1,24 +1,22 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
@@ -27,8 +25,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-
-using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -44,7 +40,7 @@ namespace ClassicUO.Renderer
 
         private readonly IndexBuffer _indexBuffer;
         private readonly RasterizerState _rasterizerState;
-        private readonly VertexBuffer _vertexBuffer;
+        private readonly DynamicVertexBuffer _vertexBuffer;
         private readonly Texture2D[] _textureInfo;
         private PositionNormalTextureColor4[] _vertexInfo;
         private BlendState _blendState;
@@ -54,9 +50,6 @@ namespace ClassicUO.Renderer
         private bool _useScissor;
         private BoundingBox _drawingArea;
         private int _numSprites;
-        //private readonly IntPtr _ptrVertexBufferArray;
-        private GCHandle _handle;
-        private IntPtr _handlePtr;
 
         public UltimaBatcher2D(GraphicsDevice device)
         {
@@ -82,10 +75,6 @@ namespace ClassicUO.Renderer
             _stencil = Stencil;
 
             DefaultEffect = new IsometricEffect(device);
-
-
-            _handle = GCHandle.Alloc(_vertexInfo, GCHandleType.Pinned);
-            _handlePtr = _handle.AddrOfPinnedObject();
         }
 
 
@@ -303,14 +292,9 @@ namespace ClassicUO.Renderer
             vertex.Hue2 =
             vertex.Hue3 = hue;
 
-            if (CheckInScreen(_numSprites))
-            {
-                PushSprite(texture);
+            PushSprite(texture);
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         [MethodImpl(256)]
@@ -360,14 +344,9 @@ namespace ClassicUO.Renderer
             vertex.Hue2 =
             vertex.Hue3 = hue;
 
-            if (CheckInScreen(_numSprites))
-            {
-                PushSprite(texture);
+            PushSprite(texture);
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         [MethodImpl(256)]
@@ -443,14 +422,9 @@ namespace ClassicUO.Renderer
             vertex.Hue2 =
             vertex.Hue3 = hue;
 
-            if (CheckInScreen(_numSprites))
-            {
-                PushSprite(texture);
+            PushSprite(texture);
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         [MethodImpl(256)]
@@ -560,14 +534,9 @@ namespace ClassicUO.Renderer
             vertex.Hue2.Y =
             vertex.Hue3.Y = ShaderHuesTraslator.SHADER_SHADOW;
 
-            if (CheckInScreen(_numSprites))
-            {
-                PushSprite(texture);
+            PushSprite(texture);
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         [MethodImpl(256)]
@@ -1098,14 +1067,9 @@ namespace ClassicUO.Renderer
 
             vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
-            if (CheckInScreen(_numSprites))
-            {
-                PushSprite(texture);
+            PushSprite(texture);
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         [MethodImpl(256)]
@@ -1158,14 +1122,9 @@ namespace ClassicUO.Renderer
             vertex.TextureCoordinate3.Z = 0;
             vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
-            if (CheckInScreen(_numSprites))
-            {
-                PushSprite(texture);
+            PushSprite(texture);
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
         
         [MethodImpl(256)]
@@ -1355,14 +1314,9 @@ namespace ClassicUO.Renderer
 
             vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
 
-            if (CheckInScreen(_numSprites))
-            {
-                PushSprite(texture);
+            PushSprite(texture);
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         [MethodImpl(256)]
@@ -1487,36 +1441,8 @@ namespace ClassicUO.Renderer
             vertex.Hue2 =
             vertex.Hue3 = Vector3.Zero;
 
-            if (CheckInScreen(_numSprites))
-            {
-                PushSprite(texture);
-
-                return true;
-            }
-
-            return false;
-        }
-
-
-
-        [MethodImpl(256)]
-        private bool CheckInScreen(int index)
-        {
+            PushSprite(texture);
             return true;
-            //_drawingArea.Contains(ref _vertexInfo[index].Position0, out ContainmentType res);
-            //if (res == ContainmentType.Contains)
-            //    return true;
-            //_drawingArea.Contains(ref _vertexInfo[index].Position1, out res);
-            //if (res == ContainmentType.Contains)
-            //    return true; 
-            //_drawingArea.Contains(ref _vertexInfo[index].Position2, out res);
-            //if (res == ContainmentType.Contains)
-            //    return true; 
-            //_drawingArea.Contains(ref _vertexInfo[index].Position3, out res);
-            //if (res == ContainmentType.Contains)
-            //    return true;
-
-            //return false;
         }
 
         [MethodImpl(256)]
@@ -1605,20 +1531,25 @@ namespace ClassicUO.Renderer
             DefaultEffect.ApplyStates();
         }
 
-        private void Flush()
+        private unsafe void Flush()
         {
             ApplyStates();
 
             if (_numSprites == 0)
                 return;
 
-            //int start = UpdateVerteBuffer(_handle.AddrOfPinnedObject(), _numSprites);
+            int start = UpdateVertexBuffer(_numSprites);
 
-            int start = 0;
-            _vertexBuffer.SetDataPointerEXT(0,
-                                            _handlePtr,
-                                            PositionNormalTextureColor4.SIZE_IN_BYTES * _numSprites,
-                                            SetDataOptions.None);
+            //int start = 0;
+
+            //fixed (PositionNormalTextureColor4* p = &_vertexInfo[0])
+            //{
+            //    _vertexBuffer.SetDataPointerEXT(
+            //                                    0,
+            //                                    (IntPtr) p,
+            //                                    _numSprites * PositionNormalTextureColor4.SIZE_IN_BYTES,
+            //                                    SetDataOptions.None);
+            //}
 
             Texture2D current = _textureInfo[0];
             int offset = 0;
@@ -1650,7 +1581,12 @@ namespace ClassicUO.Renderer
         private void InternalDraw(Texture2D texture, int baseSprite, int batchSize)
         {
             GraphicsDevice.Textures[0] = texture;
-            GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, baseSprite << 2, 0, batchSize << 2, 0, batchSize << 1);
+            GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList,
+                                                 baseSprite << 2,
+                                                 0,
+                                                 batchSize << 2,
+                                                 0,
+                                                 batchSize << 1);
         }
 
         [MethodImpl(256)]
@@ -1685,22 +1621,31 @@ namespace ClassicUO.Renderer
 
         private int _currentBufferPosition;
 
-        private int UpdateVerteBuffer(IntPtr p, int len)
+        private unsafe int UpdateVertexBuffer(int len)
         {
-            int pos = _currentBufferPosition;
-            SetDataOptions hint = SetDataOptions.NoOverwrite;
+            int pos;
+            SetDataOptions hint;
 
-            if (pos + len > MAX_SPRITES)
+            if (_currentBufferPosition + len > MAX_SPRITES)
             {
                 pos = 0;
                 hint = SetDataOptions.Discard;
             }
+            else
+            {
+                pos = _currentBufferPosition;
+                hint = SetDataOptions.NoOverwrite;
+            }
 
-            _vertexBuffer.SetDataPointerEXT(
-                                            pos * PositionNormalTextureColor4.SIZE_IN_BYTES, 
-                                            p, 
-                                            len * PositionNormalTextureColor4.SIZE_IN_BYTES,
-                                            hint);
+            fixed (PositionNormalTextureColor4* p = &_vertexInfo[0])
+            {
+                _vertexBuffer.SetDataPointerEXT(
+                                                pos * PositionNormalTextureColor4.SIZE_IN_BYTES,
+                                                (IntPtr) p,
+                                                len * PositionNormalTextureColor4.SIZE_IN_BYTES,
+                                                hint);
+            }
+           
             _currentBufferPosition = pos + len;
             return pos;
         }
@@ -1727,7 +1672,6 @@ namespace ClassicUO.Renderer
             DefaultEffect?.Dispose();
             _vertexBuffer.Dispose();
             _indexBuffer.Dispose();
-            _handle.Free();
         }
 
 
@@ -1757,7 +1701,7 @@ namespace ClassicUO.Renderer
 
             public override void ApplyStates()
             {
-                WorldMatrix.SetValueRef(ref _matrix);
+                WorldMatrix.SetValue(_matrix);
 
                 _viewPort.X = GraphicsDevice.Viewport.Width;
                 _viewPort.Y = GraphicsDevice.Viewport.Height;

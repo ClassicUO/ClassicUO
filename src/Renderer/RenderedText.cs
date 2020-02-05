@@ -1,32 +1,27 @@
 #region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
 using System.Collections.Generic;
-
-using ClassicUO.Game;
-using ClassicUO.Interfaces;
-using ClassicUO.IO;
+using ClassicUO.Data;
 using ClassicUO.IO.Resources;
 
 using Microsoft.Xna.Framework;
@@ -34,7 +29,7 @@ using Microsoft.Xna.Framework;
 namespace ClassicUO.Renderer
 {
     [Flags]
-    public enum FontStyle : ushort
+    enum FontStyle : ushort
     {
         None = 0x0000,
         Solid = 0x0001,
@@ -109,7 +104,7 @@ namespace ClassicUO.Renderer
             set
             {
                 if (value == 0xFF)
-                    value = (byte) (UOFileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
+                    value = (byte) (Client.Version >= ClientVersion.CV_305D ? 1 : 0);
                 _font = value;
             }
         }
@@ -130,7 +125,7 @@ namespace ClassicUO.Renderer
 
         public List<WebLinkRect> Links { get; set; } = new List<WebLinkRect>();
 
-        public Hue Hue { get; set; }
+        public ushort Hue { get; set; }
 
         public uint HTMLColor { get; set; } = 0xFFFFFFFF;
 
@@ -152,7 +147,7 @@ namespace ClassicUO.Renderer
                         IsPartialHue = false;
 
                         if (IsHTML)
-                            UOFileManager.Fonts.SetUseHTML(false);
+                            FontsLoader.Instance.SetUseHTML(false);
                         Links.Clear();
                         _texture?.Dispose();
                         _texture = null;
@@ -273,16 +268,16 @@ namespace ClassicUO.Renderer
             }
 
             if (IsHTML)
-                UOFileManager.Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
+                FontsLoader.Instance.SetUseHTML(true, HTMLColor, HasBackgroundColor);
 
-            UOFileManager.Fonts.RecalculateWidthByInfo = RecalculateWidthByInfo;
+            FontsLoader.Instance.RecalculateWidthByInfo = RecalculateWidthByInfo;
 
             bool ispartial = false;
 
             if (IsUnicode)
-                UOFileManager.Fonts.GenerateUnicode(ref _texture, Font, Text, Hue, Cell, MaxWidth, Align, (ushort)FontStyle, SaveHitMap, MaxHeight);
+                FontsLoader.Instance.GenerateUnicode(ref _texture, Font, Text, Hue, Cell, MaxWidth, Align, (ushort)FontStyle, SaveHitMap, MaxHeight);
             else
-                UOFileManager.Fonts.GenerateASCII(ref _texture, Font, Text, Hue, MaxWidth, Align, (ushort)FontStyle, out ispartial, SaveHitMap, MaxHeight);
+                FontsLoader.Instance.GenerateASCII(ref _texture, Font, Text, Hue, MaxWidth, Align, (ushort)FontStyle, out ispartial, SaveHitMap, MaxHeight);
 
             IsPartialHue = ispartial;
 
@@ -294,8 +289,8 @@ namespace ClassicUO.Renderer
             }
 
             if (IsHTML)
-                UOFileManager.Fonts.SetUseHTML(false);
-            UOFileManager.Fonts.RecalculateWidthByInfo = false;
+                FontsLoader.Instance.SetUseHTML(false);
+            FontsLoader.Instance.RecalculateWidthByInfo = false;
         }
 
         public void Destroy()

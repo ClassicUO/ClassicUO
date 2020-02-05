@@ -1,24 +1,22 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
@@ -30,21 +28,21 @@ namespace ClassicUO.Game.Managers
 {
     internal class HouseManager
     {
-        private readonly Dictionary<Serial, House> _houses = new Dictionary<Serial, House>();
+        private readonly Dictionary<uint, House> _houses = new Dictionary<uint, House>();
 
         public IReadOnlyCollection<House> Houses => _houses.Values;
 
-        public void Add(Serial serial, House revision)
+        public void Add(uint serial, House revision)
         {
             _houses[serial] = revision;
         }
 
-        public bool TryGetHouse(Serial serial, out House house)
+        public bool TryGetHouse(uint serial, out House house)
         {
             return _houses.TryGetValue(serial, out house);
         }
 
-        public bool TryToRemove(Serial serial, int distance)
+        public bool TryToRemove(uint serial, int distance)
         {
             if (!IsHouseInRange(serial, distance))
             {
@@ -65,7 +63,7 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public bool IsHouseInRange(Serial serial, int distance)
+        public bool IsHouseInRange(uint serial, int distance)
         {
             if (TryGetHouse(serial, out _))
             {
@@ -98,19 +96,19 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public bool EntityIntoHouse(Serial house, GameObject obj)
+        public bool EntityIntoHouse(uint house, GameObject obj)
         {
             if (obj != null && TryGetHouse(house, out _))
             {
                 Item found = World.Items.Get(house);
 
-                if (found == null)
+                if (found == null || !found.MultiInfo.HasValue)
                     return true;
 
-                int minX = found.X + found.MultiInfo.MinX;
-                int maxX = found.X + found.MultiInfo.MaxX;
-                int minY = found.Y + found.MultiInfo.MinY;
-                int maxY = found.Y + found.MultiInfo.MaxY;
+                int minX = found.X + found.MultiInfo.Value.X;
+                int maxX = found.X + found.MultiInfo.Value.Y;
+                int minY = found.Y + found.MultiInfo.Value.Width;
+                int maxY = found.Y + found.MultiInfo.Value.Height;
 
                 return obj.X >= minX &&
                        obj.X <= maxX &&
@@ -121,7 +119,7 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public void Remove(Serial serial)
+        public void Remove(uint serial)
         {
             if (TryGetHouse(serial, out House house))
             {
@@ -139,14 +137,14 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public bool Exists(Serial serial)
+        public bool Exists(uint serial)
         {
             return _houses.ContainsKey(serial);
         }
 
         public void Clear()
         {
-            foreach (KeyValuePair<Serial, House> house in _houses) house.Value.ClearComponents();
+            foreach (KeyValuePair<uint, House> house in _houses) house.Value.ClearComponents();
             _houses.Clear();
         }
     }

@@ -1,29 +1,26 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
-
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI
@@ -96,22 +93,19 @@ namespace ClassicUO.Game.UI
 
             if (MaxWidth > 0)
             {
-                int width = RenderText.IsUnicode ? UOFileManager.Fonts.GetWidthUnicode(RenderText.Font, text) : UOFileManager.Fonts.GetWidthASCII(RenderText.Font, text);
+                int width = RenderText.IsUnicode ? FontsLoader.Instance.GetWidthUnicode(RenderText.Font, text) : FontsLoader.Instance.GetWidthASCII(RenderText.Font, text);
                 int len = text.Length;
 
                 while (MaxWidth < width && len > 0)
                 {
                     if (CaretIndex > 0)
                     {
-                        if (CaretIndex < 1)
-                            return;
-
                         CaretIndex--;
                     }
 
                     text = CaretIndex < text.Length ? text.Remove(CaretIndex, 1) : text.Remove(text.Length - 1);
                     len--;
-                    width = RenderText.IsUnicode ? UOFileManager.Fonts.GetWidthUnicode(RenderText.Font, text) : UOFileManager.Fonts.GetWidthASCII(RenderText.Font, text);
+                    width = RenderText.IsUnicode ? FontsLoader.Instance.GetWidthUnicode(RenderText.Font, text) : FontsLoader.Instance.GetWidthASCII(RenderText.Font, text);
                 }
             }
 
@@ -121,12 +115,12 @@ namespace ClassicUO.Game.UI
 
         public int[] GetLinesCharsCount()
         {
-            return RenderText.IsUnicode ? UOFileManager.Fonts.GetLinesCharsCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true) : UOFileManager.Fonts.GetLinesCharsCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true);
+            return RenderText.IsUnicode ? FontsLoader.Instance.GetLinesCharsCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true) : FontsLoader.Instance.GetLinesCharsCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true);
         }
 
         public int[] GetLinesCharsCount(string text)
         {
-            return RenderText.IsUnicode ? UOFileManager.Fonts.GetLinesCharsCountUnicode(RenderText.Font, text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true, true) : UOFileManager.Fonts.GetLinesCharsCountASCII(RenderText.Font, text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true, true);
+            return RenderText.IsUnicode ? FontsLoader.Instance.GetLinesCharsCountUnicode(RenderText.Font, text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true, true) : FontsLoader.Instance.GetLinesCharsCountASCII(RenderText.Font, text, RenderText.Align, (ushort) RenderText.FontStyle, Width, true, true);
         }
     }
 }

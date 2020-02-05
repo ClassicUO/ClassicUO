@@ -1,34 +1,32 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System.IO;
 using System.Linq;
+using System.Xml;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -52,9 +50,12 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             AcceptMouseInput = true;
-            CanBeSaved = true;
+            CanCloseWithRightClick = true;
         }
-        
+
+
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_MINIMAP;
+
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);
@@ -68,9 +69,22 @@ namespace ClassicUO.Game.UI.Gumps
             CreateMap();
         }
 
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            writer.WriteAttributeString("isminimized", _useLargeMap.ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+            _useLargeMap = bool.Parse(xml.GetAttribute("isminimized"));
+            CreateMap();
+        }
+
         private void CreateMap()
         {
-            _gumpTexture = UOFileManager.Gumps.GetTexture(_useLargeMap ? (ushort) 5011 : (ushort) 5010);
+            _gumpTexture = GumpsLoader.Instance.GetTexture(_useLargeMap ? (ushort) 5011 : (ushort) 5010);
             Width = _gumpTexture.Width;
             Height = _gumpTexture.Height;
             CreateMiniMapTexture(true);
@@ -169,9 +183,9 @@ namespace ClassicUO.Game.UI.Gumps
             return base.Draw(batcher, x, y);
         }
 
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButton.Left)
+            if (button == MouseButtonType.Left)
             {
                 ToggleSize();
                 return true;
@@ -190,8 +204,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (_gumpTexture == null || _gumpTexture.IsDisposed)
                 return;
 
-            ushort lastX = World.Player.Position.X;
-            ushort lastY = World.Player.Position.Y;
+            ushort lastX = World.Player.X;
+            ushort lastY = World.Player.Y;
 
 
             if (_x != lastX || _y != lastY)
@@ -221,9 +235,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (minBlockY < 0)
                 minBlockY = 0;
-            int maxBlockIndex = World.Map.MapBlockIndex;
-            int mapBlockHeight = UOFileManager.Map.MapBlocksSize[World.MapIndex, 1];
-            ushort[] data = UOFileManager.Gumps.GetGumpPixels(_useLargeMap ? (uint) 5011 : 5010, out _, out _);
+            int maxBlockIndex = World.Map.BlocksCount;
+            int mapBlockHeight = MapLoader.Instance.MapBlocksSize[World.MapIndex, 1];
+            ushort[] data = GumpsLoader.Instance.GetGumpPixels(_useLargeMap ? (uint) 5011 : 5010, out _, out _);
 
             Point[] table = new Point[2]
             {
@@ -241,7 +255,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (blockIndex >= maxBlockIndex)
                         break;
 
-                    RadarMapBlock? mbbv = UOFileManager.Map.GetRadarMapBlock(World.MapIndex, i, j);
+                    RadarMapBlock? mbbv = MapLoader.Instance.GetRadarMapBlock(World.MapIndex, i, j);
 
                     if (!mbbv.HasValue)
                         break;
@@ -290,9 +304,9 @@ namespace ClassicUO.Game.UI.Gumps
                                 color += 0x4000;
                             int tableSize = 2;
                             if(island && color > 0x4000)
-                                color = UOFileManager.Hues.GetColor16(16384, (ushort)(color - 0x4000));//28672 is an arbitrary position in hues.mul, is the 14 position in the range
+                                color = HuesLoader.Instance.GetColor16(16384, (ushort)(color - 0x4000));//28672 is an arbitrary position in hues.mul, is the 14 position in the range
                             else
-                                color = UOFileManager.Hues.GetRadarColorData(color);
+                                color = HuesLoader.Instance.GetRadarColorData(color);
                             CreatePixels(data, 0x8000 | color, gx, gy, Width, Height, table, tableSize);
                         }
                     }

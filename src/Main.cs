@@ -1,13 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#region license
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+// 
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+
+using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -24,6 +41,8 @@ namespace ClassicUO
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
+
+        private static bool _skipUpdates;
 
 
         static void Main(string[] args)
@@ -44,12 +63,28 @@ namespace ClassicUO
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
                 StringBuilder sb = new StringBuilder();
+                sb.AppendLine("######################## [START LOG] ########################");
+
 #if DEV_BUILD
-                sb.AppendFormat("ClassicUO [dev] - v{0}\nOS: {1} {2}\nThread: {3}\n\n", CUOEnviroment.Version, Environment.OSVersion.Platform, Environment.Is64BitOperatingSystem ? "x64" : "x86", Thread.CurrentThread.Name);
+                sb.AppendLine($"ClassicUO [DEV_BUILD] - {CUOEnviroment.Version}");
 #else
-                sb.AppendFormat("ClassicUO - v{0}\nOS: {1} {2}\nThread: {3}\n\n", CUOEnviroment.Version, Environment.OSVersion.Platform, Environment.Is64BitOperatingSystem ? "x64" : "x86", Thread.CurrentThread.Name);
+                sb.AppendLine($"ClassicUO [STANDARD_BUILD] - {CUOEnviroment.Version}");
 #endif
-                sb.AppendFormat("Exception:\n{0}", e.ExceptionObject);
+
+                sb.AppendLine($"OS: {Environment.OSVersion.Platform} x{(Environment.Is64BitOperatingSystem ? "64" : "86")}");
+                sb.AppendLine($"Thread: {Thread.CurrentThread.Name}");
+                sb.AppendLine();
+
+                sb.AppendLine($"Protocol: {Client.Protocol}");
+                sb.AppendLine($"ClientFeatures: {World.ClientFeatures.Flags}");
+                sb.AppendLine($"ClientLockedFeatures: {World.ClientLockedFeatures.Flags}");
+                sb.AppendLine($"ClientVersion: {Client.Version}");
+
+                sb.AppendLine();
+                sb.AppendFormat("Exception:\n{0}\n", e.ExceptionObject);
+                sb.AppendLine("######################## [END LOG] ########################");
+                sb.AppendLine();
+                sb.AppendLine();
 
                 Log.Panic(e.ExceptionObject.ToString());
                 string path = Path.Combine(CUOEnviroment.ExecutablePath, "Logs");
@@ -60,13 +95,6 @@ namespace ClassicUO
                 using (LogFile crashfile = new LogFile(path, "crash.txt"))
                 {
                     crashfile.WriteAsync(sb.ToString()).RunSynchronously();
-
-                    //SDL.SDL_ShowSimpleMessageBox(
-                    //                             SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION,
-                    //                             "An error occurred",
-                    //                             $"{crashfile}\ncreated in /Logs.",
-                    //                             SDL.SDL_GL_GetCurrentWindow()
-                    //                            );
                 }
             };
 #endif
@@ -78,10 +106,11 @@ namespace ClassicUO
 #endif
             ReadSettingsFromArgs(args);
 
-            if (!SkipUpdate)
+            if (!_skipUpdates)
                 if (CheckUpdate(args))
                     return;
 
+            //Environment.SetEnvironmentVariable("FNA_GRAPHICS_FORCE_GLDEVICE", "ModernGLDevice");
             Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI",  CUOEnviroment.IsHighDPI ? "1" : "0");
             Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
             Environment.SetEnvironmentVariable("FNA_OPENGL_FORCE_COMPATIBILITY_PROFILE", "1");
@@ -107,11 +136,10 @@ namespace ClassicUO
             ReadSettingsFromArgs(args);
 
             // still invalid, cannot load settings
-            if (Settings.GlobalSettings == null || !Settings.GlobalSettings.IsValid())
+            if (Settings.GlobalSettings == null)
             {
-                // TODO: 
-                Settings.GlobalSettings?.Save();
-                return;
+                Settings.GlobalSettings = new Settings();
+                Settings.GlobalSettings.Save();
             }
 
             if (!CUOEnviroment.IsUnix)
@@ -120,17 +148,15 @@ namespace ClassicUO
                 SetDllDirectory(libsPath);
             }
 
+            if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.UltimaOnlineDirectory))
+                Settings.GlobalSettings.UltimaOnlineDirectory = CUOEnviroment.ExecutablePath;
 
-            CUOEnviroment.Client = new GameController();
-            CUOEnviroment.Client.Run();
-            CUOEnviroment.Client.Dispose();
+
+            Client.Run();
 
             Log.Trace("Closing...");
         }
 
-        public static bool StartMinimized { get; set; }
-        public static bool StartInLittleWindow { get; set; }
-        public static bool SkipUpdate { get; set; }
 
         private static void ReadSettingsFromArgs(string[] args)
         {
@@ -143,9 +169,15 @@ namespace ClassicUO
                     continue;
 
                 cmd = cmd.Remove(0, 1);
-                string value = (i < args.Length - 1) ? args[i + 1] : null;
+                string value = null;
 
-                Log.Trace( $"ARG: {cmd}, VALUE: {value}");
+                if (i < args.Length - 1)
+                {
+                    if (!string.IsNullOrWhiteSpace(args[i + 1]) && !args[i + 1].StartsWith("-"))
+                        value = args[++i];
+                }
+
+                Log.Trace($"ARG: {cmd}, VALUE: {value}");
 
                 switch (cmd)
                 {
@@ -157,19 +189,9 @@ namespace ClassicUO
                         Settings.CustomSettingsFilepath = value;
                         break;
 
-                    case "minimized":
-                        StartMinimized = true;
-                        break;
-
-                    case "littlewindow":
-                        StartInLittleWindow = true;
-                        break;
-
                     case "skipupdate":
-                        SkipUpdate = true;
+                        _skipUpdates = true;
                         break;
-
-
 
                     case "username":
                         Settings.GlobalSettings.Username = value;
@@ -198,12 +220,12 @@ namespace ClassicUO
 
                     case "ultimaonlinedirectory":
                     case "uopath":
-                        Settings.GlobalSettings.UltimaOnlineDirectory = value; // Required
+                        Settings.GlobalSettings.UltimaOnlineDirectory = value;
 
                         break;
 
                     case "clientversion":
-                        Settings.GlobalSettings.ClientVersion = value; // Required
+                        Settings.GlobalSettings.ClientVersion = value;
 
                         break;
 
@@ -231,7 +253,7 @@ namespace ClassicUO
                         break;
 
                     case "debug":
-                        CUOEnviroment.Debug = Settings.GlobalSettings.Debug = bool.Parse(value);
+                        CUOEnviroment.Debug = true;
                         
                         break;
 
@@ -287,6 +309,13 @@ namespace ClassicUO
                         CUOEnviroment.SkipLoginScreen = true;
                         break;
 
+                    case "plugins":
+                        if (!string.IsNullOrWhiteSpace(value))
+                        {
+                            Settings.GlobalSettings.Plugins = value.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+                        }
+                        break;
+
                 }
             }
         }
@@ -317,7 +346,7 @@ namespace ClassicUO
 
             if (action == "update")
             {
-                Log.Trace( "ClassicUO Updating...", ConsoleColor.Yellow);
+                Log.Trace( "ClassicUO Updating...");
 
                 try
                 {
@@ -379,7 +408,7 @@ namespace ClassicUO
                 {
                 }
 
-                Log.Trace( "ClassicUO updated successfully!", ConsoleColor.Green);
+                Log.Trace( "ClassicUO updated successfully!");
             }
 
             return false;

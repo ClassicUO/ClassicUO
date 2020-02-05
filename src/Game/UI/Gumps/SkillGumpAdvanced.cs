@@ -1,27 +1,24 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -29,7 +26,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -63,7 +60,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _totalReal = 0;
             _totalValue = 0;
-            CanBeSaved = true;
             CanMove = true;
             AcceptMouseInput = true;
             WantUpdateSize = false;
@@ -121,6 +117,8 @@ namespace ClassicUO.Game.UI.Gumps
             OnButtonClick((int) Buttons.SortName);
         }
 
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SKILLMENU;
+
         public override void OnButtonClick(int buttonID)
         {
             if (_buttonsToSkillsValues.TryGetValue((Buttons) buttonID, out string fieldValue))
@@ -134,10 +132,10 @@ namespace ClassicUO.Game.UI.Gumps
             if (FindControls<NiceButton>().Any(s => s.ButtonParameter == buttonID))
             {
                 NiceButton btn = FindControls<NiceButton>().First(s => s.ButtonParameter == buttonID);
-                Graphic g = (Graphic) (_sortAsc ? 0x985 : 0x983);
+                var g = (ushort) (_sortAsc ? 0x985 : 0x983);
 
                 _sortOrderIndicator.Graphic = g;
-                _sortOrderIndicator.Texture = UOFileManager.Gumps.GetTexture(g);
+                _sortOrderIndicator.Texture = GumpsLoader.Instance.GetTexture(g);
                 _sortOrderIndicator.X = btn.X + btn.Width - 15;
                 _sortOrderIndicator.Y = btn.Y + 5;
             }
@@ -145,7 +143,7 @@ namespace ClassicUO.Game.UI.Gumps
             _updateSkillsNeeded = true;
         }
 
-        protected override void OnInitialize()
+        private void BuildGump()
         {
             _totalReal = 0;
             _totalValue = 0;
@@ -181,10 +179,12 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (SkillListEntry t in _skillListEntries)
                 _scrollArea.Add(t);
 
-            Add(new Label("Total: ", true, 1153) {X = 40, Y = 320});
-            Add(new Label(_totalReal.ToString(), true, 1153) {X = 220, Y = 320});
-            Add(new Label(_totalValue.ToString(), true, 1153) {X = 300, Y = 320});
+            Add(new Label("Total: ", true, 1153) { X = 40, Y = 320 });
+            Add(new Label(_totalReal.ToString("F1"), true, 1153) { X = 220, Y = 320 });
+            Add(new Label(_totalValue.ToString("F1"), true, 1153) { X = 300, Y = 320 });
         }
+
+
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -195,7 +195,7 @@ namespace ClassicUO.Game.UI.Gumps
                 foreach (var label in Children.OfType<Label>())
                     label.Dispose();
 
-                OnInitialize();
+                BuildGump();
 
                 _updateSkillsNeeded = false;
             }
@@ -205,7 +205,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             ResetHueVector();
 
-            batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
+            batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
 
             return base.Draw(batcher, x, y);
         }
@@ -257,7 +257,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(skillCap);
 
-            GumpPic loc = new GumpPic(425, 4, (Graphic) (skill.Lock == Lock.Up ? 0x983 : skill.Lock == Lock.Down ? 0x985 : 0x82C), 0);
+            GumpPic loc = new GumpPic(425, 4, (ushort) (skill.Lock == Lock.Up ? 0x983 : skill.Lock == Lock.Down ? 0x985 : 0x82C), 0);
             Add(loc);
 
             loc.MouseUp += (sender, e) =>
@@ -268,7 +268,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _skill.Lock = Lock.Down;
                         GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Down);
                         loc.Graphic = 0x985;
-                        loc.Texture = UOFileManager.Gumps.GetTexture(0x985);
+                        loc.Texture = GumpsLoader.Instance.GetTexture(0x985);
 
                         break;
 
@@ -276,7 +276,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _skill.Lock = Lock.Locked;
                         GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Locked);
                         loc.Graphic = 0x82C;
-                        loc.Texture = UOFileManager.Gumps.GetTexture(0x82C);
+                        loc.Texture = GumpsLoader.Instance.GetTexture(0x82C);
 
                         break;
 
@@ -284,7 +284,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _skill.Lock = Lock.Up;
                         GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Up);
                         loc.Graphic = 0x983;
-                        loc.Texture = UOFileManager.Gumps.GetTexture(0x983);
+                        loc.Texture = GumpsLoader.Instance.GetTexture(0x983);
 
                         break;
                 }
@@ -297,12 +297,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 uint serial = (uint) (World.Player + _skill.Index + 1);
 
-                if (UIManager.GetGump<SkillButtonGump>(serial) != null)
-                    UIManager.Remove<SkillButtonGump>(serial);
+                UIManager.GetGump<SkillButtonGump>(serial)?.Dispose();
 
                 SkillButtonGump skillButtonGump = new SkillButtonGump(_skill, Mouse.Position.X, Mouse.Position.Y);
                 UIManager.Add(skillButtonGump);
-                Rectangle rect = UOFileManager.Gumps.GetTexture(0x24B8).Bounds;
+                Rectangle rect = GumpsLoader.Instance.GetTexture(0x24B8).Bounds;
                 UIManager.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
             }
         }

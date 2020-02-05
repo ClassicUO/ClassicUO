@@ -1,29 +1,25 @@
 #region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
-
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -52,9 +48,9 @@ namespace ClassicUO.Game.UI
             set
             {
                 if (value)
-                    ValidationRules = (uint) (Constants.RULES.NUMERIC | Constants.RULES.SYMBOL | Constants.RULES.SPACE | Constants.RULES.LETTER);
+                    ValidationRules = (uint) (TEXT_ENTRY_RULES.NUMERIC | TEXT_ENTRY_RULES.SYMBOL | TEXT_ENTRY_RULES.SPACE | TEXT_ENTRY_RULES.LETTER);
                 else
-                    ValidationRules = ValidationRules - (uint) (Constants.RULES.NUMERIC | Constants.RULES.SYMBOL | Constants.RULES.SPACE | Constants.RULES.LETTER);
+                    ValidationRules = ValidationRules - (uint) (TEXT_ENTRY_RULES.NUMERIC | TEXT_ENTRY_RULES.SYMBOL | TEXT_ENTRY_RULES.SPACE | TEXT_ENTRY_RULES.LETTER);
             }
         }
 
@@ -63,9 +59,9 @@ namespace ClassicUO.Game.UI
             set
             {
                 if (value)
-                    ValidationRules = (uint) Constants.RULES.NUMERIC;
+                    ValidationRules = (uint) TEXT_ENTRY_RULES.NUMERIC;
                 else
-                    ValidationRules = ValidationRules - (uint) Constants.RULES.NUMERIC;
+                    ValidationRules = ValidationRules - (uint) TEXT_ENTRY_RULES.NUMERIC;
             }
         }
 
@@ -74,9 +70,9 @@ namespace ClassicUO.Game.UI
             set
             {
                 if (value)
-                    ValidationRules = (uint) Constants.RULES.NUMERIC + (uint) Constants.RULES.UNUMERIC;
+                    ValidationRules = (uint) TEXT_ENTRY_RULES.NUMERIC + (uint) TEXT_ENTRY_RULES.UNUMERIC;
                 else
-                    ValidationRules = ValidationRules - (uint) Constants.RULES.UNUMERIC;
+                    ValidationRules = ValidationRules - (uint) TEXT_ENTRY_RULES.UNUMERIC;
             }
         }
 
@@ -85,9 +81,9 @@ namespace ClassicUO.Game.UI
             set
             {
                 if (value)
-                    ValidationRules = (uint) Constants.RULES.LETTER;
+                    ValidationRules = (uint) TEXT_ENTRY_RULES.LETTER;
                 else
-                    ValidationRules = ValidationRules - (uint) Constants.RULES.LETTER;
+                    ValidationRules = ValidationRules - (uint) TEXT_ENTRY_RULES.LETTER;
             }
         }
 
@@ -116,15 +112,15 @@ namespace ClassicUO.Game.UI
             {
                 foreach (char c1 in c)
                 {
-                    bool allowChar = (ValidationRules & (uint) Constants.RULES.SYMBOL) != 0 && (c1 >= 33 && c1 <= 47 || c1 >= 58 && c1 <= 64 || c1 >= 91 && c1 <= 96 || c1 >= 123 && c1 <= 126);
+                    bool allowChar = (ValidationRules & (uint) TEXT_ENTRY_RULES.SYMBOL) != 0 && (c1 >= 33 && c1 <= 47 || c1 >= 58 && c1 <= 64 || c1 >= 91 && c1 <= 96 || c1 >= 123 && c1 <= 126);
 
-                    if ((ValidationRules & (uint) Constants.RULES.NUMERIC) != 0 && (c1 >= 48 && c1 <= 57 || (ValidationRules & (uint) Constants.RULES.UNUMERIC) == 0 && Text.Length == 0 && c1 == 45))
+                    if ((ValidationRules & (uint) TEXT_ENTRY_RULES.NUMERIC) != 0 && (c1 >= 48 && c1 <= 57 || (ValidationRules & (uint) TEXT_ENTRY_RULES.UNUMERIC) == 0 && Text.Length == 0 && c1 == 45))
                         allowChar = true;
 
-                    if ((ValidationRules & (uint) Constants.RULES.LETTER) != 0 && (c1 >= 65 && c1 <= 90 || c1 >= 97 && c1 <= 122 || c1 == 39))
+                    if ((ValidationRules & (uint) TEXT_ENTRY_RULES.LETTER) != 0 && (c1 >= 65 && c1 <= 90 || c1 >= 97 && c1 <= 122 || c1 == 39))
                         allowChar = true;
 
-                    if ((ValidationRules & (uint) Constants.RULES.SPACE) != 0 && c1 == 32)
+                    if ((ValidationRules & (uint) TEXT_ENTRY_RULES.SPACE) != 0 && c1 == 32)
                         allowChar = true;
 
                     if (!allowChar)
@@ -156,16 +152,16 @@ namespace ClassicUO.Game.UI
 
                         var c1 = (int) Convert.ToChar(c);
 
-                        if ((ValidationRules & (uint) Constants.RULES.SYMBOL) != 0 && (c1 >= 33 && c1 <= 47 || c1 >= 58 && c1 <= 64 || c1 >= 91 && c1 <= 96 || c1 >= 123 && c1 <= 126))
+                        if ((ValidationRules & (uint) TEXT_ENTRY_RULES.SYMBOL) != 0 && (c1 >= 33 && c1 <= 47 || c1 >= 58 && c1 <= 64 || c1 >= 91 && c1 <= 96 || c1 >= 123 && c1 <= 126))
                             allowChar = true;
 
-                        if ((ValidationRules & (uint) Constants.RULES.NUMERIC) != 0 && (c1 >= 48 && c1 <= 57 || c1 == 45))
+                        if ((ValidationRules & (uint) TEXT_ENTRY_RULES.NUMERIC) != 0 && (c1 >= 48 && c1 <= 57 || c1 == 45))
                             allowChar = true;
 
-                        if ((ValidationRules & (uint) Constants.RULES.LETTER) != 0 && (c1 >= 65 && c1 <= 90 || c1 >= 97 && c1 <= 122 || c1 == 39))
+                        if ((ValidationRules & (uint) TEXT_ENTRY_RULES.LETTER) != 0 && (c1 >= 65 && c1 <= 90 || c1 >= 97 && c1 <= 122 || c1 == 39))
                             allowChar = true;
 
-                        if ((ValidationRules & (uint) Constants.RULES.SPACE) != 0 && c1 == 32)
+                        if ((ValidationRules & (uint) TEXT_ENTRY_RULES.SPACE) != 0 && c1 == 32)
                             allowChar = true;
 
                         if (allowChar)
@@ -185,23 +181,20 @@ namespace ClassicUO.Game.UI
             if (MaxWidth > 0)
             {
                 int width = RenderText.IsUnicode ? 
-                    UOFileManager.Fonts.GetWidthUnicode(RenderText.Font, text) : 
-                    UOFileManager.Fonts.GetWidthASCII(RenderText.Font, text);
+                    FontsLoader.Instance.GetWidthUnicode(RenderText.Font, text) : 
+                    FontsLoader.Instance.GetWidthASCII(RenderText.Font, text);
                 int len = text.Length;
 
                 while (MaxWidth < width && len > 0)
                 {
                     if (CaretIndex > 0)
                     {
-                        if (CaretIndex < 1)
-                            return;
-
                         CaretIndex--;
                     }
 
                     text = CaretIndex < text.Length ? text.Remove(CaretIndex, 1) : text.Remove(text.Length - 1);
                     len--;
-                    width = RenderText.IsUnicode ? UOFileManager.Fonts.GetWidthUnicode(RenderText.Font, text) : UOFileManager.Fonts.GetWidthASCII(RenderText.Font, text);
+                    width = RenderText.IsUnicode ? FontsLoader.Instance.GetWidthUnicode(RenderText.Font, text) : FontsLoader.Instance.GetWidthASCII(RenderText.Font, text);
                 }
             }
 

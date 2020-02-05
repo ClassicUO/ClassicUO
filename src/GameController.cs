@@ -1,24 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#region license
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+// 
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+
+#define DEV_BUILD
+
+using System;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-using ClassicUO.Utility.Platforms;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -34,23 +52,23 @@ namespace ClassicUO
         private bool _dragStarted;
         private bool _ignoreNextTextInput;
         private readonly GraphicsDeviceManager _graphicDeviceManager;
-        private readonly UltimaBatcher2D _uoSpriteBatch;
+        private UltimaBatcher2D _uoSpriteBatch;
         private readonly float[] _intervalFixedUpdate = new float[2];
         private double _statisticsTimer;
+        private RenderTarget2D _buffer;
+        private double _totalElapsed, _currentFpsTime;
+        private uint _totalFrames;
+        private Vector3 _hueVector;
+
+
 
         public GameController()
         {
             _graphicDeviceManager = new GraphicsDeviceManager(this);
-            _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice);
         }
 
         public Scene Scene => _scene;
-        public uint[] FrameDelay { get; } = new uint[2];
-
-        public T GetScene<T>() where T : Scene
-        {
-            return _scene as T;
-        }
+        public readonly uint[] FrameDelay = new uint[2];
 
 
         protected override void Initialize()
@@ -74,13 +92,29 @@ namespace ClassicUO
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0f / 250);
 
             SetRefreshRate(Settings.GlobalSettings.FPS);
+            _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice);
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            LoadGameFilesFromFileSystem();
+            Client.Load();
+
+            uint[] hues = HuesLoader.Instance.CreateShaderColors();
+
+            int size = HuesLoader.Instance.HuesCount;
+
+            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size * 2);
+            texture0.SetData(hues, 0, size * 2);
+            Texture2D texture1 = new Texture2D(GraphicsDevice, 32, size);
+            texture1.SetData(hues, size, size);
+            GraphicsDevice.Textures[1] = texture0;
+            GraphicsDevice.Textures[2] = texture1;
+
+            AuraManager.CreateAuraTexture();
+            UIManager.InitializeGameCursor();
+
             base.LoadContent();
 
             SetScene(new LoginScene());
@@ -96,6 +130,11 @@ namespace ClassicUO
             Settings.GlobalSettings.Save();
             Plugin.OnClosing();
             base.UnloadContent();
+        }
+
+        public T GetScene<T>() where T : Scene
+        {
+            return _scene as T;
         }
 
         public void SetScene(Scene scene)
@@ -217,72 +256,6 @@ namespace ClassicUO
             }
         }
 
-        public void LoadGameFilesFromFileSystem()
-        {
-            Log.Trace( "Checking for Ultima Online installation...");
-            Log.PushIndent();
-
-
-            try
-            {
-                UOFileManager.UoFolderPath = Settings.GlobalSettings.UltimaOnlineDirectory;
-            }
-            catch (FileNotFoundException)
-            {
-                Log.Error( "Wrong Ultima Online installation folder.");
-
-                throw;
-            }
-
-            Log.Trace( "Done!");
-            Log.Trace( $"Ultima Online installation folder: {UOFileManager.UoFolderPath}");
-            Log.PopIndent();
-
-            Log.Trace( "Loading files...");
-            Log.PushIndent();
-            UOFileManager.LoadFiles();
-            Log.PopIndent();
-
-            uint[] hues = UOFileManager.Hues.CreateShaderColors();
-
-            int size = UOFileManager.Hues.HuesCount;
-
-            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size * 2);
-            texture0.SetData(hues, 0, size * 2);
-            Texture2D texture1 = new Texture2D(GraphicsDevice, 32, size);
-            texture1.SetData(hues, size, size);
-            GraphicsDevice.Textures[1] = texture0;
-            GraphicsDevice.Textures[2] = texture1;
-
-            AuraManager.CreateAuraTexture();
-
-            Log.Trace( "Network calibration...");
-            Log.PushIndent();
-            PacketHandlers.Load();
-            //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
-            UltimaLive.Enable();
-            PacketsTable.AdjustPacketSizeByVersion(UOFileManager.ClientVersion);
-            Log.Trace( "Done!");
-            Log.PopIndent();
-
-            Log.Trace( "Loading plugins...");
-            Log.PushIndent();
-
-            UIManager.InitializeGameCursor();
-
-            foreach (var p in Settings.GlobalSettings.Plugins)
-                Plugin.Create(p);
-            Log.Trace( "Done!");
-            Log.PopIndent();
-
-
-            UoAssist.Start();
-        }
-
-
-        private float _totalElapsed, _currentFpsTime;
-        private uint _totalFrames;
-
         protected override void Update(GameTime gameTime)
         {
             if (Profiler.InContext("OutOfContext"))
@@ -302,8 +275,8 @@ namespace ClassicUO
                 Profiler.ExitContext("Update");
             }
 
-            _totalElapsed += (float) gameTime.ElapsedGameTime.TotalMilliseconds;
-            _currentFpsTime += (float) gameTime.ElapsedGameTime.TotalMilliseconds;
+            _totalElapsed += gameTime.ElapsedGameTime.TotalMilliseconds;
+            _currentFpsTime += gameTime.ElapsedGameTime.TotalMilliseconds;
 
             if (_currentFpsTime >= 1000)
             {
@@ -313,7 +286,7 @@ namespace ClassicUO
                 _currentFpsTime = 0;
             }
 
-            float x = _intervalFixedUpdate[!IsActive && ProfileManager.Current != null && ProfileManager.Current.ReduceFPSWhenInactive ? 1 : 0];
+            double x = _intervalFixedUpdate[!IsActive && ProfileManager.Current != null && ProfileManager.Current.ReduceFPSWhenInactive ? 1 : 0];
 
             if (_totalElapsed > x)
             {
@@ -339,7 +312,6 @@ namespace ClassicUO
             base.Update(gameTime);
         }
 
-        private RenderTarget2D _buffer;
 
         protected override void Draw(GameTime gameTime)
         {
@@ -380,7 +352,6 @@ namespace ClassicUO
             UpdateWindowCaption(gameTime);
         }
 
-        private Vector3 _hueVector;
 
         private void UpdateWindowCaption(GameTime gameTime)
         {
@@ -440,7 +411,8 @@ namespace ClassicUO
 
             if (CUOEnviroment.IsHighDPI)
             {
-                //TODO:
+                //TODO
+                Log.Warn("HighDPI not supported yet.");
             }
 
             if (!IsWindowMaximized())
@@ -479,10 +451,6 @@ namespace ClassicUO
 
                     switch (e.window.windowEvent)
                     {
-                        case SDL_WindowEventID.SDL_WINDOWEVENT_MOVED:
-
-                           
-                            break;
                         case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_ENTER:
                             Mouse.MouseInWindow = true;
 
@@ -496,33 +464,16 @@ namespace ClassicUO
                         case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED:
                             Plugin.OnFocusGained();
 
-                            // SDL_CaptureMouse(SDL_bool.SDL_TRUE);
-                            //Log.Debug("FOCUS");
                             break;
 
                         case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST:
                             Plugin.OnFocusLost();
-                            //Log.Debug("NO FOCUS");
-                            //SDL_CaptureMouse(SDL_bool.SDL_FALSE);
-
-                            break;
-
-                        case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_TAKE_FOCUS:
-
-                            //Log.Debug("TAKE FOCUS");
-                            break;
-
-                        case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_HIT_TEST:
 
                             break;
                     }
 
                     break;
-
-                case SDL.SDL_EventType.SDL_SYSWMEVENT:
-
-                    break;
-
+                
                 case SDL.SDL_EventType.SDL_KEYDOWN:
                     
                     Keyboard.OnKeyDown(e.key);
@@ -530,9 +481,6 @@ namespace ClassicUO
                     if (Plugin.ProcessHotkeys((int) e.key.keysym.sym, (int) e.key.keysym.mod, true))
                     {
                         _ignoreNextTextInput = false;
-
-                        //UIManager.MouseOverControl?.InvokeKeyDown(e.key.keysym.sym, e.key.keysym.mod);
-                        //if (UIManager.MouseOverControl != UIManager.KeyboardFocusControl)
                         UIManager.KeyboardFocusControl?.InvokeKeyDown(e.key.keysym.sym, e.key.keysym.mod);
 
                         _scene.OnKeyDown(e.key);
@@ -545,39 +493,20 @@ namespace ClassicUO
                 case SDL.SDL_EventType.SDL_KEYUP:
                     
                     Keyboard.OnKeyUp(e.key);
-
-                    //if (e.key.keysym.sym == SDL_Keycode.SDLK_0)
-                    //{
-
-                       
-                    //    byte[] firebreathcode = {
-
-                    //   0xC0, 
-                    //  0x00, 0x00, 0x00, 0x00 , // source serial
-                    //  0x00 ,0x00 ,0x00 , 0x00,  // target serial
-                    //    0x00, 0xAA,  // graphic
-                    //    0xAC, 0x06, // src X
-                    //    0x74, 0x06,  // src Y
-                    //    0x28,       // src Z
-                    //   0x3F, 0x06, // targ X
-                    //    0x74, 0x06, // targY
-                    //        0x2B,   // targZ
-                    //        0x3F, 0x01, 0xF0 , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ,0x00, 0x00,
-                    //   0x00, 0x00, 0x00, 0x00, 
-                    //    };
-                    //    int xx =  (0x06 << 8) | (0xAC ) ;
-                    //    int yy =  (0x06 << 8) | (0x74 ) ;
-                    //    int txx = (0x06 << 8) |  (0x3F);
-                    //    int tyy = (0x06 << 8) | (0x74 );
-
-                    //    NetClient.EnqueuePacketFromPlugin(firebreathcode, 36);
-                    //}
-
-                    //UIManager.MouseOverControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
-                    //if (UIManager.MouseOverControl != UIManager.KeyboardFocusControl)
                     UIManager.KeyboardFocusControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
-
                     _scene.OnKeyUp(e.key);
+
+                    if (e.key.keysym.sym == SDL_Keycode.SDLK_PRINTSCREEN)
+                    {
+                        string path = Path.Combine(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Data", "Client", "Screenshots"), $"screenshot_{DateTime.Now:yyyy-MM-dd_hh-mm-ss}.png");
+
+                        using (Stream stream = File.Create(path))
+                        {
+                            _buffer.SaveAsPng(stream, _buffer.Width, _buffer.Height);
+
+                            GameActions.Print($"Screenshot stored in: {path}", 0x44, MessageType.System);
+                        }
+                    }
 
                     break;
 
@@ -586,7 +515,7 @@ namespace ClassicUO
                     if (_ignoreNextTextInput)
                         break;
 
-                    fixed (SDL.SDL_Event* ev = &e)
+                    fixed (SDL_Event* ev = &e)
                     {
                         string s = StringHelper.ReadUTF8(ev->text.text);
 
@@ -630,12 +559,10 @@ namespace ClassicUO
                 case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
                     Mouse.Update();
                     bool isDown = e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN;
-                    bool resetTime = false;
 
                     if (_dragStarted && !isDown)
                     {
                         _dragStarted = false;
-                        resetTime = true;
                     }
 
                     SDL.SDL_MouseButtonEvent mouse = e.button;
@@ -655,26 +582,18 @@ namespace ClassicUO
                                 if (Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
                                 {
                                     Mouse.LastLeftButtonClickTime = 0;
-                                    bool res;
+                                 
+                                    bool res = UIManager.ValidForDClick() ? UIManager.OnLeftMouseDoubleClick() : _scene.OnLeftMouseDoubleClick();
 
-                                    if (UIManager.ValidForDClick())
-                                    {
-                                        res = UIManager.OnLeftMouseDoubleClick();
-                                    }
-                                    else
-                                        res = _scene.OnLeftMouseDoubleClick();
-
-                                    //bool res = _scene.OnLeftMouseDoubleClick() || UIManager.OnLeftMouseDoubleClick();
-
-                                    MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Left);
-
-                                    if (!arg.Result && !res)
+                                    if (!res)
                                     {
                                         _scene.OnLeftMouseDown();
                                         UIManager.OnLeftMouseButtonDown();
                                     }
                                     else
+                                    {
                                         Mouse.LastLeftButtonClickTime = 0xFFFF_FFFF;
+                                    }
 
                                     break;
                                 }
@@ -686,12 +605,10 @@ namespace ClassicUO
                             }
                             else
                             {
-                                if (resetTime)
-                                    Mouse.LastLeftButtonClickTime = 0;
-
                                 if (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF)
                                 {
-                                    _scene.OnLeftMouseUp();
+                                    if (!UIManager.HadMouseDownOnGump(MouseButtonType.Left))
+                                        _scene.OnLeftMouseUp();
                                     UIManager.OnLeftMouseButtonUp();
                                 }
                                 Mouse.LButtonPressed = false;
@@ -715,11 +632,8 @@ namespace ClassicUO
                                 if (Mouse.LastMidButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
                                 {
                                     Mouse.LastMidButtonClickTime = 0;
-                                    var res = _scene.OnMiddleMouseDoubleClick();
 
-                                    MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Middle);
-
-                                    if (!arg.Result && !res)
+                                    if (!_scene.OnMiddleMouseDoubleClick())
                                     {
                                         _scene.OnMiddleMouseDown();
                                     }
@@ -754,17 +668,17 @@ namespace ClassicUO
                                 {
                                     Mouse.LastRightButtonClickTime = 0;
 
-                                    var res = _scene.OnRightMouseDoubleClick() || UIManager.OnRightMouseDoubleClick();
+                                    bool res = _scene.OnRightMouseDoubleClick() || UIManager.OnRightMouseDoubleClick();
 
-                                    MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Right);
-
-                                    if (!arg.Result && !res)
+                                    if (!res)
                                     {
                                         _scene.OnRightMouseDown();
                                         UIManager.OnRightMouseButtonDown();
                                     }
                                     else
+                                    {
                                         Mouse.LastRightButtonClickTime = 0xFFFF_FFFF;
+                                    }
 
                                     break;
                                 }
@@ -776,12 +690,10 @@ namespace ClassicUO
                             }
                             else
                             {
-                                if (resetTime)
-                                    Mouse.LastRightButtonClickTime = 0;
-
                                 if (Mouse.LastRightButtonClickTime != 0xFFFF_FFFF)
                                 {
-                                    _scene.OnRightMouseUp();
+                                    if (!UIManager.HadMouseDownOnGump(MouseButtonType.Right))
+                                        _scene.OnRightMouseUp();
                                     UIManager.OnRightMouseButtonUp();
                                 }
                                 Mouse.RButtonPressed = false;

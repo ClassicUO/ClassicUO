@@ -1,31 +1,27 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using ClassicUO.Input;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -62,7 +58,7 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 0; i < 4; i++)
             {
-                var t = UOFileManager.Gumps.GetTexture((ushort) (graphic + i));
+                var t = GumpsLoader.Instance.GetTexture((ushort) (graphic + i));
 
                 if (t == null)
                 {
@@ -132,7 +128,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public int SpecialHeight { get; set; }
 
-        public Hue Hue
+        public ushort Hue
         {
             get => _gumpTop.Hue;
             set => _gumpTop.Hue = _gumpBottom.Hue = _gumpMiddle.Hue = _gumpRight.Hue = value;
@@ -196,14 +192,10 @@ namespace ClassicUO.Game.UI.Controls
                 _gumplingTitleGumpIDDelta = false;
 
                 _gumplingTitle?.Dispose();
-                Add(_gumplingTitle = new GumpPic(0, 0, (Graphic) _gumplingTitleGumpID, 0));
+                Add(_gumplingTitle = new GumpPic(0, 0, (ushort) _gumplingTitleGumpID, 0));
             }
 
-            if (!_gumpTop.IsInitialized)
-            {
-                //IsVisible = false;
-            }
-            else
+            
             {
                 //if (!IsVisible)
                 //    IsVisible = true;
@@ -229,7 +221,7 @@ namespace ClassicUO.Game.UI.Controls
                     _gumpExpander.WantUpdateSize = true;
                 }
 
-                if (_gumplingTitle != null && _gumplingTitle.IsInitialized)
+                if (_gumplingTitle != null)
                 {
                     _gumplingTitle.X = (_gumpTop.Width - _gumplingTitle.Width) >> 1;
                     _gumplingTitle.Y = (_gumpTop.Height - _gumplingTitle.Height) >> 1;
@@ -251,7 +243,7 @@ namespace ClassicUO.Game.UI.Controls
             int x = args.X;
             y += _gumpExpander.Y + ScreenCoordinateY - Y;
 
-            if (args.Button == MouseButton.Left)
+            if (args.Button == MouseButtonType.Left)
             {
                 _isExpanding = true;
                 _isExpanding_InitialHeight = SpecialHeight;

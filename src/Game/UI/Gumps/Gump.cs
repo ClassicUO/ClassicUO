@@ -1,32 +1,30 @@
 #region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml;
 
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -35,9 +33,33 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
+    enum GUMP_TYPE
+    {
+        NONE,
+
+        GT_BUFF,
+        GT_CONTAINER,
+        GT_COUNTERBAR,
+        GT_HEALTHBAR,
+        GT_INFOBAR,
+        GT_JOURNAL,
+        GT_MACROBUTTON,
+        GT_MINIMAP,
+        GT_PAPERDOLL,
+        GT_SKILLMENU,
+        GT_SPELLBOOK,
+        GT_STATUSGUMP,
+        GT_TIPNOTICE,
+        GT_ABILITYBUTTON,
+        GT_SPELLBUTTON,
+        GT_SKILLBUTTON,
+        GT_RACIALBUTTON,
+        GT_WORLDMAP,
+    }
+
     internal class Gump : Control
     {
-        public Gump(Serial local, Serial server)
+        public Gump(uint local, uint server)
         {
             LocalSerial = local;
             ServerSerial = server;
@@ -49,7 +71,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool CloseIfClickOutside { get; set; }
 
-        public bool CanBeSaved { get; protected set; }
+        public bool CanBeSaved => GumpType != GUMP_TYPE.NONE;
+
+        public virtual GUMP_TYPE GumpType { get; }
 
         public override bool CanMove
         {
@@ -75,9 +99,17 @@ namespace ClassicUO.Game.UI.Gumps
             writer.Write(Y);
         }
 
+        public virtual void Save(XmlTextWriter writer)
+        {
+            writer.WriteAttributeString("type", ((int)GumpType).ToString());
+            writer.WriteAttributeString("x", X.ToString());
+            writer.WriteAttributeString("y", Y.ToString());
+            writer.WriteAttributeString("serial", LocalSerial.ToString());
+        }
+
         public void SetInScreen()
         {
-            Rectangle rect = new Rectangle(0, 0, CUOEnviroment.Client.Window.ClientBounds.Width, CUOEnviroment.Client.Window.ClientBounds.Height);
+            Rectangle rect = new Rectangle(0, 0, Client.Game.Window.ClientBounds.Width, Client.Game.Window.ClientBounds.Height);
 
             if (rect.Intersects(Bounds))
                 return;
@@ -88,6 +120,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         public virtual void Restore(BinaryReader reader)
         {
+        }
+
+        public virtual void Restore(XmlElement xml)
+        {
+
         }
 
         protected override void OnDragEnd(int x, int y)
@@ -102,11 +139,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (Y < -halfHeight)
                 position.Y = -halfHeight;
 
-            if (X > CUOEnviroment.Client.Window.ClientBounds.Width - (Width - halfWidth))
-                position.X = CUOEnviroment.Client.Window.ClientBounds.Width - (Width - halfWidth);
+            if (X > Client.Game.Window.ClientBounds.Width - (Width - halfWidth))
+                position.X = Client.Game.Window.ClientBounds.Width - (Width - halfWidth);
 
-            if (Y > CUOEnviroment.Client.Window.ClientBounds.Height - (Height - halfHeight))
-                position.Y = CUOEnviroment.Client.Window.ClientBounds.Height - (Height - halfHeight);
+            if (Y > Client.Game.Window.ClientBounds.Height - (Height - halfHeight))
+                position.Y = Client.Game.Window.ClientBounds.Height - (Height - halfHeight);
             Location = position;
         }
 
@@ -117,9 +154,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-            if (!IsDisposed && LocalSerial != 0 && !LocalSerial.IsValidLocalGumpSerial)
+            if (!IsDisposed && LocalSerial != 0 && !SerialHelper.IsValidLocalGumpSerial(LocalSerial))
             {
-                List<Serial> switches = new List<Serial>();
+                List<uint> switches = new List<uint>();
                 List<Tuple<ushort, string>> entries = new List<Tuple<ushort, string>>();
 
                 foreach (Control control in Children)

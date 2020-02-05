@@ -1,58 +1,49 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal sealed class House : IEquatable<Serial>
+    internal sealed class House : IEquatable<uint>
     {
-        public House(Serial serial, uint revision, bool isCustom)
+        public House(uint serial, uint revision, bool isCustom)
         {
             Serial = serial;
             Revision = revision;
             IsCustom = isCustom;
         }
 
-        public Serial Serial { get; }
+        public uint Serial { get; }
         public uint Revision;
         public List<Multi> Components { get; } = new List<Multi>();
         public bool IsCustom;
 
-        public Multi GetMultiAt(int x, int y)
+        public IEnumerable<Multi> GetMultiAt(int x, int y)
         {
-            foreach (Multi component in Components)
-            {
-                if (component.X == x && component.Y == y)
-                    return component;
-            }
-
-            return null;
+            return Components.Where(s => s.X == x && s.Y == y);
         }
 
         public Multi Add(ushort graphic, ushort hue, int x, int y, sbyte z, bool iscustom)
@@ -61,7 +52,10 @@ namespace ClassicUO.Game.GameObjects
 
             Multi m = Multi.Create(graphic);
             m.Hue = hue;
-            m.Position = new Position((ushort) (item.X + x), (ushort) (item.Y +  y), z);
+            m.X = (ushort) (item.X + x);
+            m.Y = (ushort) (item.Y + y);
+            m.Z = z;
+            m.UpdateScreenPosition();
             m.IsCustom = iscustom;
             m.AddToTile();
 
@@ -100,18 +94,22 @@ namespace ClassicUO.Game.GameObjects
                         if (((state == 0) || (component.State & state) != 0))
                         {
                             component.Destroy();
-                            Components.RemoveAt(i--);
                         }
                     }
                     else if (component.Z <= checkZ)
                     {
                         component.State = component.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
                     }
+
+                    if (component.IsDestroyed)
+                    {
+                        Components.RemoveAt(i--);
+                    }
                 }
             }
         }
 
-        public bool Equals(Serial other)
+        public bool Equals(uint other)
         {
             return Serial == other;
         }
@@ -139,7 +137,12 @@ namespace ClassicUO.Game.GameObjects
                 if (item != null)
                 {
                     if (recalculate)
-                        s.Position = new Position((ushort) (item.X + s.MultiOffsetX), (ushort) (item.Y + s.MultiOffsetY), (sbyte) (item.Z + s.MultiOffsetZ));
+                    {
+                        s.X = (ushort) (item.X + s.MultiOffsetX);
+                        s.Y = (ushort) (item.Y + s.MultiOffsetY);
+                        s.Z = (sbyte) (item.Z + s.MultiOffsetZ);
+                        s.UpdateScreenPosition();
+                    }
                     s.Hue = item.Hue;
                     //s.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
                     //s.IsCustom = IsCustom;

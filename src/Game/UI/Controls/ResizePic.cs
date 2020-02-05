@@ -1,35 +1,31 @@
 #region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
 using System.Collections.Generic;
-
-using ClassicUO.Input;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -37,14 +33,14 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly UOTexture[] _gumpTexture = new UOTexture[9];
 
-        public ResizePic(Graphic graphic)
+        public ResizePic(ushort graphic)
         {
             CanMove = true;
             CanCloseWithRightClick = true;
 
             for (int i = 0; i < _gumpTexture.Length; i++)
             {
-                UOTexture t = UOFileManager.Gumps.GetTexture((Graphic) (graphic + i));
+                UOTexture t = GumpsLoader.Instance.GetTexture((ushort) (graphic + i));
 
                 if (t == null)
                 {
@@ -64,7 +60,7 @@ namespace ClassicUO.Game.UI.Controls
             Graphic = graphic;
         }
 
-        public ResizePic(List<string> parts) : this(Graphic.Parse(parts[3]))
+        public ResizePic(List<string> parts) : this(UInt16Converter.Parse(parts[3]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -72,7 +68,7 @@ namespace ClassicUO.Game.UI.Controls
             Height = int.Parse(parts[5]);
         }
 
-        public Graphic Graphic { get; }
+        public ushort Graphic { get; }
 
         public bool OnlyCenterTransparent { get; set; }
 
@@ -99,7 +95,7 @@ namespace ClassicUO.Game.UI.Controls
                 switch (i)
                 {
                     case 0:
-                        if (PixelsInXY(UOFileManager.Gumps.GetTexture(Graphic), x, y))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture(Graphic), x, y))
                             return true;
                         break;
                     case 1:
@@ -107,13 +103,13 @@ namespace ClassicUO.Game.UI.Controls
                         if (DW < 1)
                             break;
 
-                        if (PixelsInXY(UOFileManager.Gumps.GetTexture((ushort) (Graphic + 1)), x - th[0].Width, y, DW, 0))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 1)), x - th[0].Width, y, DW, 0))
                             return true;
 
                         break;
                     case 2:
 
-                        if (PixelsInXY(UOFileManager.Gumps.GetTexture((ushort)(Graphic + 2)), x - (Width - th[i].Width), y - offsetTop))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 2)), x - (Width - th[i].Width), y - offsetTop))
                             return true;
                     
                         break;
@@ -123,7 +119,7 @@ namespace ClassicUO.Game.UI.Controls
                         if (DH < 1)
                             break;
 
-                        if (PixelsInXY(UOFileManager.Gumps.GetTexture((ushort)(Graphic + 3)), x - offsetLeft, y - th[0].Height, 0, DH))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 3)), x - offsetLeft, y - th[0].Height, 0, DH))
                             return true;
 
 
@@ -134,13 +130,13 @@ namespace ClassicUO.Game.UI.Controls
                         if (DH < 1)
                             break;
 
-                        if (PixelsInXY(UOFileManager.Gumps.GetTexture((ushort)(Graphic + 5)), x - (Width - th[i].Width - offsetRight), y - th[2].Height, 0, DH))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 5)), x - (Width - th[i].Width - offsetRight), y - th[2].Height, 0, DH))
                             return true;
 
                         break;
                     case 5:
 
-                        if (PixelsInXY(UOFileManager.Gumps.GetTexture((ushort)(Graphic + 6)), x, y - (Height - th[i].Height)))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 6)), x, y - (Height - th[i].Height)))
                             return true;
 
                         break;
@@ -150,14 +146,14 @@ namespace ClassicUO.Game.UI.Controls
                         if (DW < 1)
                             break;
 
-                        if (PixelsInXY(UOFileManager.Gumps.GetTexture((ushort)(Graphic + 7)), x - th[5].Width, y - (Height - th[i].Height - offsetBottom), DW, 0))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 7)), x - th[5].Width, y - (Height - th[i].Height - offsetBottom), DW, 0))
                             return true;
 
 
                         break;
                     case 7:
 
-                        if (PixelsInXY(UOFileManager.Gumps.GetTexture((ushort)(Graphic + 8)), x - (Width - th[i].Width), y - (Height - th[i].Height)))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 8)), x - (Width - th[i].Width), y - (Height - th[i].Height)))
                             return true;
 
                         break;
@@ -171,7 +167,7 @@ namespace ClassicUO.Game.UI.Controls
                         if (DH < 1)
                             break;
 
-                        if (PixelsInXY(UOFileManager.Gumps.GetTexture((ushort)(Graphic + 4)), x - th[0].Width, y - th[0].Height, DW, DH))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 4)), x - th[0].Width, y - th[0].Height, DW, DH))
                             return true;
 
 

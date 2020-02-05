@@ -1,31 +1,28 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
 using System.Runtime.InteropServices;
 
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -170,9 +167,9 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButton.Left)
+            if (button == MouseButtonType.Left)
             {
                 int row = x / (Width / _columns);
                 int column = y / (Height / _rows);
@@ -201,10 +198,10 @@ namespace ClassicUO.Game.UI.Controls
             ushort startColor = (ushort) (Graduation + 1);
             _hues = new ushort[_rows * _columns];
             int size = Marshal.SizeOf<HuesGroup>();
-            IntPtr ptr = Marshal.AllocHGlobal(size * UOFileManager.Hues.HuesRange.Length);
+            IntPtr ptr = Marshal.AllocHGlobal(size * HuesLoader.Instance.HuesRange.Length);
 
-            for (int i = 0; i < UOFileManager.Hues.HuesRange.Length; i++)
-                Marshal.StructureToPtr(UOFileManager.Hues.HuesRange[i], ptr + i * size, false);
+            for (int i = 0; i < HuesLoader.Instance.HuesRange.Length; i++)
+                Marshal.StructureToPtr(HuesLoader.Instance.HuesRange[i], ptr + i * size, false);
             byte* huesData = (byte*) (ptr + (32 + 4));
 
             for (int y = 0; y < _rows; y++)
@@ -231,10 +228,10 @@ namespace ClassicUO.Game.UI.Controls
         private unsafe void CreateTextureFromCustomPallet()
         {
             int size = Marshal.SizeOf<HuesGroup>();
-            IntPtr ptr = Marshal.AllocHGlobal(size * UOFileManager.Hues.HuesRange.Length);
+            IntPtr ptr = Marshal.AllocHGlobal(size * HuesLoader.Instance.HuesRange.Length);
 
-            for (int i = 0; i < UOFileManager.Hues.HuesRange.Length; i++)
-                Marshal.StructureToPtr(UOFileManager.Hues.HuesRange[i], ptr + i * size, false);
+            for (int i = 0; i < HuesLoader.Instance.HuesRange.Length; i++)
+                Marshal.StructureToPtr(HuesLoader.Instance.HuesRange[i], ptr + i * size, false);
             byte* huesData = (byte*) (ptr + (32 + 4));
 
             _hues = new ushort[_rows * _columns];

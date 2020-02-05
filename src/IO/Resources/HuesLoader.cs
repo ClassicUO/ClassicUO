@@ -1,28 +1,25 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -33,6 +30,26 @@ namespace ClassicUO.IO.Resources
 {
     internal class HuesLoader : UOFileLoader
     {
+        private HuesLoader()
+        {
+
+        }
+
+        private static HuesLoader _instance;
+        public static HuesLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new HuesLoader();
+                }
+
+                return _instance;
+            }
+        }
+
+
         public HuesGroup[] HuesRange { get; private set; }
 
         public int HuesCount { get; private set; }
@@ -242,7 +259,12 @@ namespace ClassicUO.IO.Resources
         }
 
         [MethodImpl(256)]
-        public ushort GetRadarColorData(int c) => c >= 0 && c < RadarCol.Length ? RadarCol[c] : (ushort) 0;
+        public ushort GetRadarColorData(int c)
+        {
+            if (c >= 0 && c < RadarCol.Length)
+                return RadarCol[c];
+            return 0;
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

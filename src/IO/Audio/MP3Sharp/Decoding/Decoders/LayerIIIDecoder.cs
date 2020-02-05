@@ -1,3 +1,24 @@
+#region license
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+// 
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+
 using System;
 
 using ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders.LayerIII;
@@ -1190,10 +1211,30 @@ namespace ClassicUO.IO.Audio.MP3Sharp.Decoding.Decoders
                 {
                     int abv = is_1d[j];
 
-                    if (is_1d[j] > 0)
-                        xr_1d[quotien][reste] = g_gain * t_43[abv];
+                    double d43 = (4.0 / 3.0);
+                    if (abv < t_43.Length)
+                    {
+                        if (is_1d[j] > 0)
+                        {
+                            xr_1d[quotien][reste] = g_gain * t_43[abv];
+                        }
+                        else if (-abv < t_43.Length)
+                        {
+                            xr_1d[quotien][reste] = -g_gain * t_43[-abv];
+                        }
+                        else
+                        {
+                            xr_1d[quotien][reste] = -g_gain * (float) Math.Pow(-abv, d43);
+                        }
+                    }
+                    else if (is_1d[j] > 0)
+                    {
+                        xr_1d[quotien][reste] = g_gain * (float) Math.Pow(abv, d43);
+                    }
                     else
-                        xr_1d[quotien][reste] = -g_gain * t_43[-abv];
+                    {
+                        xr_1d[quotien][reste] = -g_gain * (float) Math.Pow(-abv, d43);
+                    }
                 }
             }
 

@@ -1,24 +1,22 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
@@ -27,7 +25,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -36,15 +33,14 @@ namespace ClassicUO.Network
     internal sealed class NetClient
     {
         private const int BUFF_SIZE = 0x80000;
-        private readonly object _sendLock = new object();
-        private CircularBuffer _circularBuffer;
         private int _incompletePacketLength;
-        private bool _isCompressionEnabled, _sending;
-        private ConcurrentQueue<Packet> _recvQueue = new ConcurrentQueue<Packet>();
+        private bool _isCompressionEnabled;
         private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer;
-        private SocketAsyncEventArgs _sendEventArgs, _recvEventArgs;
-        private SendQueue _sendQueue;
         private Socket _socket;
+        private CircularBuffer _circularBuffer;
+        private SocketAsyncEventArgs _recvEventArgs;
+        private ConcurrentQueue<Packet> _recvQueue = new ConcurrentQueue<Packet>();
+
 
         private NetClient()
         {
@@ -85,7 +81,7 @@ namespace ClassicUO.Network
         public event EventHandler<SocketError> Disconnected;
 
         public static event EventHandler<Packet> PacketReceived;
-        public static event EventHandler<PacketWriter> PacketSended;
+        public static event EventHandler<PacketWriter> PacketSent;
 
         public static void EnqueuePacketFromPlugin(byte[] data, int length)
         {
@@ -105,7 +101,7 @@ namespace ClassicUO.Network
 
         public bool Connect(string ip, ushort port)
         {
-            IsDisposed = _sending = false;
+            IsDisposed = false;
             IPAddress address = ResolveIP(ip);
 
             if (address == null)
@@ -119,7 +115,7 @@ namespace ClassicUO.Network
 
         public void Connect(IPAddress address, ushort port)
         {
-            IsDisposed = _sending = false;
+            IsDisposed = false;
             IPEndPoint endpoint = new IPEndPoint(address, port);
             Connect(endpoint);
         }
@@ -131,38 +127,34 @@ namespace ClassicUO.Network
             _recvBuffer = new byte[BUFF_SIZE];
             _incompletePacketBuffer = new byte[BUFF_SIZE];
             _decompBuffer = new byte[BUFF_SIZE];
-            _sendQueue = new SendQueue();
             _circularBuffer = new CircularBuffer();
-            _sendEventArgs = new SocketAsyncEventArgs();
-            _sendEventArgs.Completed += IO_Socket;
             _recvEventArgs = new SocketAsyncEventArgs();
             _recvEventArgs.Completed += IO_Socket;
             _recvEventArgs.SetBuffer(_recvBuffer, 0, _recvBuffer.Length);
             _recvQueue = new ConcurrentQueue<Packet>();
             Statistics.Reset();
-            SocketAsyncEventArgs connectEventArgs = new SocketAsyncEventArgs();
 
-            connectEventArgs.Completed += (sender, e) =>
+            try
             {
-                if (e.SocketError == SocketError.Success)
+                _socket.Connect(endpoint);
+
+                if (_socket.Connected)
                 {
                     Connected.Raise();
                     Statistics.ConnectedFrom = DateTime.Now;
                     StartRecv();
                 }
-                else
-                {
-                    Log.Error( e.SocketError.ToString());
-                    Disconnect(e.SocketError);
-                }
-            };
-            connectEventArgs.RemoteEndPoint = endpoint;
-            _socket.ConnectAsync(connectEventArgs);
+            }
+            catch (SocketException e)
+            {
+                Log.Error(e.ToString());
+                Disconnect(e.SocketErrorCode);
+            }
         }
 
         public void Disconnect()
         {
-            Disconnect(SocketError.SocketError);
+            Disconnect(SocketError.Success);
         }
 
         private void Disconnect(SocketError error)
@@ -175,8 +167,6 @@ namespace ClassicUO.Network
             if (_socket == null)
                 return;
 
-            Flush();
-
             try
             {
                 _socket.Shutdown(SocketShutdown.Both);
@@ -185,7 +175,13 @@ namespace ClassicUO.Network
             {
             }
 
-            _socket.Close();
+            try
+            {
+                _socket.Close();
+            }
+            catch
+            {
+            }
 
             _incompletePacketBuffer = null;
             _incompletePacketLength = 0;
@@ -193,16 +189,11 @@ namespace ClassicUO.Network
             _isCompressionEnabled = false;
             _socket = null;
             _recvEventArgs = null;
-            _sendEventArgs = null;
-
-            lock (_sendQueue)
-            {
-                if (!_sendQueue.IsEmpty)
-                    _sendQueue.Clear();
-            }
-
             _circularBuffer = null;
-            Disconnected.Raise(error);
+
+            if (error != 0)
+                Disconnected.Raise(error);
+
             Statistics.Reset();
         }
 
@@ -218,9 +209,22 @@ namespace ClassicUO.Network
 
             if (Plugin.ProcessSendPacket(ref data, ref length))
             {
-                PacketSended.Raise(p);
-                Send(data);
+                PacketSent.Raise(p);
+                Send(data, length);
             }
+        }
+
+        public void Send(byte[] data, bool ignorePlugin = false)
+        {
+            int length = data.Length;
+
+            if (!ignorePlugin && !Plugin.ProcessSendPacket(ref data, ref length))
+            {
+               return;
+            }
+            
+            PacketSent.Raise(new PacketWriter(data));
+            Send(data, length);
         }
 
         public void Update()
@@ -235,8 +239,6 @@ namespace ClassicUO.Network
                     PacketReceived.Raise(p);
                 }
             }
-
-            Flush();
         }
 
         private void ExtractPackets()
@@ -396,44 +398,33 @@ namespace ClassicUO.Network
         }
 #endif
 
-        public void Send(byte[] data)
+        private void Send(byte[] data, int length)
         {
             if (_socket == null)
                 return;
 
-            if (data != null)
+            if (data != null || data.Length == 0 || length <= 0)
             {
-                if (data.Length <= 0)
-                    return;
-
                 try
                 {
 #if !DEBUG
                     //LogPacket(data, true);
 #endif
 
-                    lock (_sendLock)
+                    int sent = _socket.Send(data, 0, length, SocketFlags.None);
+
+                    if (sent > 0)
                     {
-                        SendQueue.Gram gram;
-
-                        lock (_sendQueue)
-                            gram = _sendQueue.Enqueue(data, 0, data.Length);
-
-                        if (gram != null && !_sending)
-                        {
-                            _sending = true;
-                            _sendEventArgs.SetBuffer(gram.Buffer, 0, gram.Length);
-                            StartSend();
-                        }
+                        Statistics.TotalBytesSent += (uint) sent;
+                        Statistics.TotalPacketsSent++;
                     }
                 }
-                catch (CapacityExceededException)
+                catch (SocketException ex)
                 {
-                    Disconnect();
+                    Log.Error("SOCKET ERROR: " + ex);
+                    Disconnect(ex.SocketErrorCode);
                 }
             }
-            else
-                Disconnect();
         }
 
         private void IO_Socket(object sender, SocketAsyncEventArgs e)
@@ -446,32 +437,9 @@ namespace ClassicUO.Network
 
                     break;
 
-                case SocketAsyncOperation.Send:
-                    ProcessSend(e);
-
-                    if (IsDisposed) return;
-
-                    SendQueue.Gram gram;
-
-                    lock (_sendQueue)
-                    {
-                        gram = _sendQueue.Dequeue();
-                        if (gram == null && _sendQueue.IsFlushReady) gram = _sendQueue.CheckFlushReady();
-                    }
-
-                    if (gram != null)
-                    {
-                        _sendEventArgs.SetBuffer(gram.Buffer, 0, gram.Length);
-                        StartSend();
-                    }
-                    else
-                    {
-                        lock (_sendLock)
-                            _sending = false;
-                    }
+                case SocketAsyncOperation.Send: // should not enter here
 
                     break;
-
                 default:
 
                     Log.Panic("The last operation completed on the socket was not a receive or send");
@@ -494,40 +462,52 @@ namespace ClassicUO.Network
                         ProcessRecv(_recvEventArgs);
                 } while (ok);
             }
+            catch (SocketException ex)
+            {
+                Log.Error("SOCKET ERROR: " + ex);
+                Disconnect(ex.SocketErrorCode);
+            }
             catch (Exception e)
             {
-                Disconnect();
+                Disconnect(SocketError.SocketError);
             }
         }
 
-        private static int _count = 0;
+
         private void ProcessRecv(SocketAsyncEventArgs e)
         {
             int bytesLen = e.BytesTransferred;
 
-            if (bytesLen > 0 && e.SocketError == SocketError.Success && _circularBuffer != null)
+            if (_circularBuffer != null)
             {
-                _count++;
-                if (_count > 1)
-                    Log.Panic("Double-Access to buffer! Report this error in #BUGS-HUB in CUO Channel!");
-                Statistics.TotalBytesReceived += (uint)bytesLen;
-                byte[] buffer = _recvBuffer;
-
-                if (_isCompressionEnabled)
+                if (bytesLen > 0)
                 {
-                    //int outSize = 65536;
-                    //Huffman2.Decompress(buffer, _recvBuffer, ref outSize, ref bytesLen);
-                    //bytesLen = outSize;
+                    if (e.SocketError == SocketError.Success)
+                    {
+                        Statistics.TotalBytesReceived += (uint) bytesLen;
 
-                    DecompressBuffer(ref buffer, ref bytesLen);
+                        byte[] buffer = _recvBuffer;
+
+                        if (_isCompressionEnabled)
+                        {
+                            DecompressBuffer(ref buffer, ref bytesLen);
+                        }
+
+                        lock (_circularBuffer)
+                            _circularBuffer.Enqueue(buffer, 0, bytesLen);
+
+                        ExtractPackets();
+                    }
+                    else
+                    {
+                        Disconnect(e.SocketError);
+                    }
                 }
-
-                lock (_circularBuffer) _circularBuffer.Enqueue(buffer, 0, bytesLen);
-                ExtractPackets();
-                _count--;
+                else
+                {
+                    Disconnect(SocketError.ConnectionAborted);
+                }
             }
-            else
-                Disconnect();
         }
 
         private void DecompressBuffer(ref byte[] buffer, ref int length)
@@ -561,49 +541,6 @@ namespace ClassicUO.Network
                 int l = sourcelength - processedOffset;
                 Buffer.BlockCopy(source, processedOffset, _incompletePacketBuffer, _incompletePacketLength, l);
                 _incompletePacketLength += l;
-            }
-        }
-
-        private void StartSend()
-        {
-            if (!_socket.SendAsync(_sendEventArgs))
-                IO_Socket(null, _sendEventArgs);
-        }
-
-        private void ProcessSend(SocketAsyncEventArgs e)
-        {
-            if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
-            {
-                Statistics.TotalBytesSended += (uint)e.BytesTransferred;
-                Statistics.TotalPacketsSended++;
-            }
-            else
-                Disconnect();
-        }
-
-        private void Flush()
-        {
-            if (_socket == null) return;
-
-            lock (_sendLock)
-            {
-                if (_sending) return;
-
-                SendQueue.Gram gram;
-
-                lock (_sendQueue)
-                {
-                    if (!_sendQueue.IsFlushReady) return;
-
-                    gram = _sendQueue.CheckFlushReady();
-                }
-
-                if (gram != null)
-                {
-                    _sending = true;
-                    _sendEventArgs.SetBuffer(gram.Buffer, 0, gram.Length);
-                    StartSend();
-                }
             }
         }
 

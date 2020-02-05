@@ -1,27 +1,24 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
-using System;
 using System.IO;
 
 using Microsoft.Xna.Framework;
@@ -51,7 +48,7 @@ namespace ClassicUO.Configuration
         [JsonProperty(PropertyName = "port")] public ushort Port { get; set; } = 2593;
 
         [JsonProperty(PropertyName = "ultimaonlinedirectory")]
-        public string UltimaOnlineDirectory { get; set; } = "path/to/uo/";
+        public string UltimaOnlineDirectory { get; set; } = "";
 
         [JsonProperty(PropertyName = "clientversion")]
         public string ClientVersion { get; set; } = string.Empty;
@@ -72,7 +69,6 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "is_win_maximized")]
         public bool IsWindowMaximized { get; set; } = true;
-        [JsonProperty(PropertyName = "debug")] public bool Debug { get; set; }
 
         [JsonProperty(PropertyName = "profiler")]
         public bool Profiler { get; set; } = true;
@@ -144,20 +140,6 @@ namespace ClassicUO.Configuration
             // NOTE: We can do any other settings clean-ups here before we save them
 
             ConfigurationResolver.Save(settingsToSave, GetSettingsFilepath());
-        }
-
-        public bool IsValid()
-        {
-            bool valid = !string.IsNullOrWhiteSpace(UltimaOnlineDirectory);
-
-
-            //if (string.IsNullOrWhiteSpace(ClientVersion) || ClientVersion == "0.0.0.0" || ClientVersion.Split(new [] { '.' }, StringSplitOptions.RemoveEmptyEntries).Length <= 2)
-            //{
-            //    valid = false;
-            //}
-
-
-            return valid;
         }
     }
 }

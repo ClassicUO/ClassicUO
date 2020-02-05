@@ -1,31 +1,27 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
-using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.GameObjects
@@ -52,13 +48,13 @@ namespace ClassicUO.Game.GameObjects
 
         protected int TargetZ;
 
-        public int Speed;
+        public int IntervalInMs;
 
-        public long LastChangeFrameTime;
+        public long NextChangeFrameTime;
 
         public bool IsEnabled;
 
-        public Graphic AnimationGraphic = Graphic.INVALID;
+        public ushort AnimationGraphic = 0xFFFF;
 
         public bool IsMoving => Target != null || TargetX != 0 && TargetY != 0;
 
@@ -68,10 +64,18 @@ namespace ClassicUO.Game.GameObjects
 
         public void Load()
         {
-            AnimDataFrame = UOFileManager.AnimData.CalculateCurrentGraphic(Graphic);
+            AnimDataFrame = AnimDataLoader.Instance.CalculateCurrentGraphic(Graphic);
             IsEnabled = true;
             AnimIndex = 0;
-            Speed += AnimDataFrame.FrameInterval != 0 ? AnimDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY : Constants.ITEM_EFFECT_ANIMATION_DELAY;
+
+            if (AnimDataFrame.FrameInterval == 0)
+            {
+                IntervalInMs = Constants.ITEM_EFFECT_ANIMATION_DELAY;
+            }
+            else
+            {
+                IntervalInMs = AnimDataFrame.FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY;
+            }
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -107,14 +111,14 @@ namespace ClassicUO.Game.GameObjects
                 //    _start += frameMS;
                 //}
 
-                else if (LastChangeFrameTime < totalMS)
+                else if (NextChangeFrameTime < totalMS)
                 {
 
                     if (AnimDataFrame.FrameCount != 0)
                     {
                         unsafe
                         {
-                            AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
+                            AnimationGraphic = (ushort) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
                         }
 
                         AnimIndex++;
@@ -128,7 +132,7 @@ namespace ClassicUO.Game.GameObjects
                             AnimationGraphic = Graphic;
                     }
 
-                    LastChangeFrameTime = (long) totalMS + Speed;
+                    NextChangeFrameTime = (long) totalMS + IntervalInMs;
                 }
             }
             else if (Graphic != AnimationGraphic)
@@ -148,14 +152,20 @@ namespace ClassicUO.Game.GameObjects
         public void SetSource(GameObject source)
         {
             Source = source;
-            Position = source.Position;
+            X = source.X;
+            Y = source.Y;
+            Z = source.Z;
+            UpdateScreenPosition();
             AddToTile();
         }
 
         public void SetSource(int x, int y, int z)
         {
             Source = null;
-            Position = new Position((ushort) x, (ushort) y, (sbyte) z);
+            X = (ushort) x;
+            Y = (ushort) y;
+            Z = (sbyte) z;
+            UpdateScreenPosition();
             AddToTile();
         }
 

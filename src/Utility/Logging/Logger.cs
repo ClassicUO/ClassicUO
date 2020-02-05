@@ -1,24 +1,22 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
@@ -28,7 +26,7 @@ namespace ClassicUO.Utility.Logging
 {
     internal class Logger
     {
-        public static readonly Dictionary<LogTypes, Tuple<ConsoleColor, string>> LogTypeInfo = new Dictionary<LogTypes, Tuple<ConsoleColor, string>>
+        private static readonly Dictionary<LogTypes, Tuple<ConsoleColor, string>> _logTypesInfo = new Dictionary<LogTypes, Tuple<ConsoleColor, string>>
         {
             {
                 LogTypes.None, Tuple.Create(ConsoleColor.White, "")
@@ -53,21 +51,6 @@ namespace ClassicUO.Utility.Logging
             }
         };
 
-        private static readonly Dictionary<ConsoleColor, ConsoleColor> _foreGroundsColors = new Dictionary<ConsoleColor, ConsoleColor>
-        {
-            {ConsoleColor.Green, ConsoleColor.Black},
-            {ConsoleColor.Black, ConsoleColor.White},
-            {ConsoleColor.White, ConsoleColor.Black},
-            {ConsoleColor.DarkBlue, ConsoleColor.White},
-            {ConsoleColor.Cyan, ConsoleColor.Black},
-            {ConsoleColor.Magenta, ConsoleColor.Black},
-            {ConsoleColor.DarkGreen, ConsoleColor.Black},
-            {ConsoleColor.DarkGray, ConsoleColor.White},
-            {ConsoleColor.DarkCyan, ConsoleColor.Black},
-            {ConsoleColor.Gray, ConsoleColor.White},
-            {ConsoleColor.DarkRed, ConsoleColor.White},
-            {ConsoleColor.Yellow, ConsoleColor.Black}
-        };
         private int _indent;
 
         private bool _isLogging;
@@ -85,16 +68,16 @@ namespace ClassicUO.Utility.Logging
             _isLogging = false;
         }
 
-        public void Message(LogTypes logType, string text, ConsoleColor highlightColor)
+        public void Message(LogTypes logType, string text)
         {
             lock (_syncObject)
-                SetLogger(logType, text, highlightColor);
+                SetLogger(logType, text);
         }
 
         public void NewLine()
         {
             lock (_syncObject)
-                SetLogger(LogTypes.None, string.Empty, ConsoleColor.Black);
+                SetLogger(LogTypes.None, string.Empty);
         }
 
         public void Clear()
@@ -116,18 +99,13 @@ namespace ClassicUO.Utility.Logging
         }
         private readonly object _syncObject = new object();
 
-        private void SetLogger(LogTypes type, string text, ConsoleColor highlightColor)
+        private void SetLogger(LogTypes type, string text)
         {
             if (!_isLogging)
                 return;
 
             if ((LogTypes & type) == type)
             {
-                var temp = Console.BackgroundColor;
-                Console.BackgroundColor = highlightColor;
-
-                Console.ForegroundColor = _foreGroundsColors[highlightColor];
-
                 if (type == LogTypes.None)
                 {
                     if (_indent > 0)
@@ -141,9 +119,10 @@ namespace ClassicUO.Utility.Logging
                 else
                 {
                     Console.Write($"{DateTime.Now:T} |");
-                    Console.ForegroundColor = LogTypeInfo[type].Item1;
-                    Console.Write(LogTypeInfo[type].Item2);
-                    Console.ForegroundColor = _foreGroundsColors[highlightColor];
+                    var temp = Console.ForegroundColor;
+                    Console.ForegroundColor = _logTypesInfo[type].Item1;
+                    Console.Write(_logTypesInfo[type].Item2);
+                    Console.ForegroundColor = temp;
 
                     if (_indent > 0)
                     {
@@ -154,8 +133,6 @@ namespace ClassicUO.Utility.Logging
                     else
                         Console.WriteLine($"| {text}");
                 }
-
-                Console.BackgroundColor = temp;
             }
         }
     }

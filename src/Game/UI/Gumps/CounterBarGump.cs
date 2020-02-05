@@ -1,28 +1,26 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System.IO;
-using System.Linq;
+using System.Xml;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -30,9 +28,9 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -74,6 +72,8 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_COUNTERBAR;
+
         private void BuildGump()
         {
             CanMove = true;
@@ -81,7 +81,6 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptKeyboardInput = false;
             CanCloseWithRightClick = false;
             WantUpdateSize = false;
-            CanBeSaved = true;
 
             Width = _rectSize * _columns + 1;
             Height = _rectSize * _rows + 1;
@@ -237,12 +236,66 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+
+            writer.WriteAttributeString("rows", _rows.ToString());
+            writer.WriteAttributeString("columns", _columns.ToString());
+            writer.WriteAttributeString("rectsize", _rectSize.ToString());
+
+            var controls = FindControls<CounterItem>();
+
+            writer.WriteStartElement("controls");
+            foreach (CounterItem control in controls)
+            {
+                writer.WriteStartElement("control");
+                writer.WriteAttributeString("graphic", control.Graphic.ToString());
+                writer.WriteAttributeString("hue", control.Hue.ToString());
+                writer.WriteEndElement();
+            }
+            writer.WriteEndElement();
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+
+            _rows = int.Parse(xml.GetAttribute("rows"));
+            _columns = int.Parse(xml.GetAttribute("columns"));
+            _rectSize = int.Parse(xml.GetAttribute("rectsize"));
+
+            BuildGump();
+
+            XmlElement controlsXml = xml["controls"];
+
+            if (controlsXml != null)
+            {
+                var items = GetControls<CounterItem>();
+                int index = 0;
+
+                foreach (XmlElement controlXml in controlsXml.GetElementsByTagName("control"))
+                {
+                    if (index < items.Length)
+                    {
+                        items[index++]?.SetGraphic(ushort.Parse(controlXml.GetAttribute("graphic")), ushort.Parse(controlXml.GetAttribute("hue")));
+                    }
+                    else
+                    {
+                        Log.Error("Index outbounds when parsing counter bar items");
+                    }
+                }
+            }
+
+            IsEnabled = IsVisible = ProfileManager.Current.CounterBarEnabled;
+        }
+
 
         private class CounterItem : Control
         {
             private int _amount;
-            private Graphic _graphic;
-            private Hue _hue;
+            private ushort _graphic;
+            private ushort _hue;
             private uint _time;
 
             private ImageWithText _image;
@@ -252,6 +305,7 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = true;
                 WantUpdateSize = false;
                 CanMove = true;
+                CanCloseWithRightClick = false;
 
                 X = x;
                 Y = y;
@@ -260,6 +314,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _image = new ImageWithText();
                 Add(_image);
+
+                ContextMenu = new ContextMenuControl();
+                ContextMenu.Add("Use object (Double click)", Use);
+                ContextMenu.Add("Remove (ALT + Right click)", RemoveItem);
             }
 
             public ushort Graphic => _graphic;
@@ -276,41 +334,56 @@ namespace ClassicUO.Game.UI.Gumps
                 _hue = hue;
             }
 
-            protected override void OnMouseUp(int x, int y, MouseButton button)
+            public void RemoveItem()
             {
-                if (button == MouseButton.Left)
-                {
-                    GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+                _image?.ChangeGraphic(0, 0);
+                _amount = 0;
+                _graphic = 0;
+            }
 
-                    if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+            public void Use()
+            {
+                if (_graphic == 0)
+                    return;
+
+                Item backpack = World.Player.Equipment[(int) Layer.Backpack];
+                Item item = backpack.FindItem(_graphic, _hue);
+
+                if (item != null)
+                    GameActions.DoubleClick(item);
+            }
+
+            protected override void OnMouseUp(int x, int y, MouseButtonType button)
+            {
+                if (button == MouseButtonType.Left)
+                {
+                    GameScene gs = Client.Game.GetScene<GameScene>();
+
+                    if (!ItemHold.Enabled || !gs.IsMouseOverUI)
                         return;
 
-                    Item item = World.Items.Get(gs.HeldItem.Container);
+                    Item item = World.Items.Get(ItemHold.Container);
 
                     if (item == null)
                         return;
 
-                    SetGraphic(gs.HeldItem.Graphic, gs.HeldItem.Hue);
+                    SetGraphic(ItemHold.Graphic, ItemHold.Hue);
 
-                    gs.DropHeldItemToContainer(item, gs.HeldItem.Position.X, gs.HeldItem.Position.Y);
+                    gs.DropHeldItemToContainer(item, ItemHold.X, ItemHold.Y);
                 }
-                else if (button == MouseButton.Right && Keyboard.Alt && _graphic != 0)
+                else if (button == MouseButtonType.Right && Keyboard.Alt && _graphic != 0)
                 {
-                    _image.ChangeGraphic(0, 0);
-                    _amount = 0;
-                    _graphic = 0;
+                    RemoveItem();
                 }
+                else if (_graphic != 0)
+                    base.OnMouseUp(x, y, button);
             }
 
-            protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+            protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
             {
-                if (button == MouseButton.Left)
+                if (button == MouseButtonType.Left)
                 {
-                    Item backpack = World.Player.Equipment[(int)Layer.Backpack];
-                    Item item = backpack.FindItem(_graphic, _hue);
-
-                    if (item != null)
-                        GameActions.DoubleClick(item);
+                    Use();
                 }
 
                 return true;
@@ -346,7 +419,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            private static void GetAmount(Item parent, Graphic graphic, Hue hue, ref int amount)
+            private static void GetAmount(Item parent, ushort graphic, ushort hue, ref int amount)
             {
                 if (parent == null)
                     return;
@@ -355,7 +428,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     GetAmount(item, graphic, hue, ref amount);
 
-                    if (item.Graphic == graphic && item.Hue == hue)
+                    if (item.Graphic == graphic && item.Hue == hue && item.Exists)
                         amount += item.Amount;
                 }
             }
@@ -365,7 +438,7 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Draw(batcher, x, y);
 
 
-                Texture2D color = Textures.GetTexture(ProfileManager.Current.CounterBarHighlightOnAmount &&
+                Texture2D color = Texture2DCache.GetTexture(MouseIsOver ? Color.Yellow : ProfileManager.Current.CounterBarHighlightOnAmount &&
                                                       _amount < ProfileManager.Current.CounterBarHighlightAmount && _graphic != 0 ? Color.Red : Color.Gray);
                 ResetHueVector();
                 batcher.DrawRectangle(color, x, y, Width, Height, ref _hueVector);
@@ -383,7 +456,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     CanMove = true;
                     WantUpdateSize = true;
-
+                    AcceptMouseInput = false;
                     _textureControl = new TextureControl()
                     {
                         ScaleTexture = true,
@@ -405,7 +478,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (graphic != 0)
                     {
-                        _textureControl.Texture = UOFileManager.Art.GetTexture(graphic);
+                        _textureControl.Texture = ArtLoader.Instance.GetTexture(graphic);
                         _textureControl.Hue = hue;
                         _textureControl.Width = Parent.Width;
                         _textureControl.Height = Parent.Height;

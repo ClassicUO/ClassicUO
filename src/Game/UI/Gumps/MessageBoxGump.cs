@@ -1,24 +1,22 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
@@ -32,7 +30,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly Action<bool> _action;
 
-        public MessageBoxGump(int w, int h, string message, Action<bool> action) : base(0, 0)
+        public MessageBoxGump(int w, int h, string message, Action<bool> action, bool hasBackground = false) : base(0, 0)
         {
             CanMove = true;
             CanCloseWithRightClick = false;
@@ -52,19 +50,32 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = w, Height = h
             });
 
+            if (hasBackground)
+            {
+                ResizePic background = new ResizePic(3000)
+                {
+                    X = X + 30,
+                    Y = Y + 40,
+                    Width = Width - 60,
+                    Height = Height - 100
+                };
+
+                Add(background);
+            }
+
             Add(new Label(message, false, 0x0386, Width - 90, 1)
             {
                 X = 40,
                 Y = 45
             });
 
-            X = (CUOEnviroment.Client.Window.ClientBounds.Width - Width) >> 1;
-            Y = (CUOEnviroment.Client.Window.ClientBounds.Height - Height) >> 1;
+            X = (Client.Game.Window.ClientBounds.Width - Width) >> 1;
+            Y = (Client.Game.Window.ClientBounds.Height - Height) >> 1;
 
             // OK
             Button b;
 
-            Add(b = new Button(0, 0x0481, 0x0482, 0x0483)
+            Add(b = new Button(0, 0x0481, 0x0483, 0x0482)
             {
                 Y = Height - 45,
                 ButtonAction = ButtonAction.Activate
@@ -143,8 +154,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_textBox);
 
-            X = (CUOEnviroment.Client.Window.ClientBounds.Width - Width) >> 1;
-            Y = (CUOEnviroment.Client.Window.ClientBounds.Height - Height) >> 1;
+            X = (Client.Game.Window.ClientBounds.Width - Width) >> 1;
+            Y = (Client.Game.Window.ClientBounds.Height - Height) >> 1;
 
 
             // OK

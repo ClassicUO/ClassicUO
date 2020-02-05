@@ -1,31 +1,27 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
 
 using ClassicUO.Configuration;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -35,14 +31,14 @@ namespace ClassicUO.Game.GameObjects
         private int _distance;
         //private Vector2 _velocity;
 
-        private MovingEffect(Graphic graphic, Hue hue)
+        private MovingEffect(ushort graphic, ushort hue)
         {
             Hue = hue;
             Graphic = graphic;
             Load();
         }
 
-        public MovingEffect(Serial src, Serial trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, Graphic graphic, Hue hue, bool fixedDir, byte speed) : this(graphic, hue)
+        public MovingEffect(uint src, uint trg, int xSource, int ySource, int zSource, int xTarget, int yTarget, int zTarget, ushort graphic, ushort hue, bool fixedDir, byte speed) : this(graphic, hue)
         {
             FixedDir = fixedDir;
 
@@ -53,7 +49,7 @@ namespace ClassicUO.Game.GameObjects
 
             Entity source = World.Get(src);
 
-            if (src.IsValid && source != null)
+            if (SerialHelper.IsValid(src) && source != null)
                 SetSource(source);
             else
                 SetSource(xSource, ySource, zSource);
@@ -61,7 +57,7 @@ namespace ClassicUO.Game.GameObjects
 
             Entity target = World.Get(trg);
 
-            if (trg.IsValid && target != null)
+            if (SerialHelper.IsValid(trg) && target != null)
                 SetTarget(target);
             else
                 SetTarget(xTarget, yTarget, zTarget);

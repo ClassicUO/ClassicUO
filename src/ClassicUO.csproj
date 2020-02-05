@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{71F289FA-0EF8-4F72-A26E-A8280C0931C5}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>ClassicUO</RootNamespace>
     <AssemblyName>ClassicUO</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
@@ -61,7 +61,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>..\bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;JAEDAN_MOVEMENT_PATCH_, MOVEMENT2_</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
@@ -71,7 +71,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE;JAEDAN_MOVEMENT_PATCH_, MOVEMENT2_</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -88,22 +88,22 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\api\cuoapi.dll</HintPath>
     </Reference>
-    <Reference Include="FNA, Version=18.12.0.0, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="FNA, Version=19.12.1.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\FNA\FNA.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client.cs" />
+    <Compile Include="ClientException.cs" />
     <Compile Include="Configuration\Profile.cs" />
     <Compile Include="Configuration\ProfileManager.cs" />
     <Compile Include="CUOEnviroment.cs" />
@@ -116,6 +116,8 @@
     <Compile Include="Game\Data\CharacterCreationValues.cs" />
     <Compile Include="Game\Data\CharacterSpeedType.cs" />
     <Compile Include="Game\Data\ClientFeatures.cs" />
+    <Compile Include="Game\Data\ClientProtocol.cs" />
+    <Compile Include="Game\Data\ContainerData.cs" />
     <Compile Include="Game\Data\CustomHouse.cs" />
     <Compile Include="Game\Data\EntityFlags.cs" />
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
@@ -123,15 +125,17 @@
     <Compile Include="Game\Data\Layers.cs" />
     <Compile Include="Game\Data\LightColors.cs" />
     <Compile Include="Game\Data\MapMessageType.cs" />
-    <Compile Include="Game\Data\MultiInfo.cs" />
+    <Compile Include="Game\Data\MessageType.cs" />
     <Compile Include="Game\Data\NotorietyFlag.cs" />
     <Compile Include="Game\Data\PopupMenuData.cs" />
     <Compile Include="Game\Data\PopupMenuItem.cs" />
     <Compile Include="Game\Data\PromptData.cs" />
     <Compile Include="Game\Data\RaceType.cs" />
-    <Compile Include="Game\Data\Seasons.cs" />
+    <Compile Include="Game\Managers\ActiveIconsManager.cs" />
+    <Compile Include="Game\Managers\DelayedObjectClickManager.cs" />
+    <Compile Include="Game\Managers\Seasons.cs" />
     <Compile Include="Game\Data\ServerErrorMessages.cs" />
-    <Compile Include="Game\Data\SpellsBardic.cs" />
+    <Compile Include="Game\Data\SpellsMastery.cs" />
     <Compile Include="Game\Data\SpellsBushido.cs" />
     <Compile Include="Game\Data\SpellsChivalry.cs" />
     <Compile Include="Game\Data\SpellsMysticism.cs" />
@@ -144,10 +148,11 @@
     <Compile Include="Game\GameObjects\EntityTextContainer.cs" />
     <Compile Include="Game\GameObjects\TextOverhead.cs" />
     <Compile Include="Game\ItemHold.cs" />
+    <Compile Include="Game\LinkedObject.cs" />
     <Compile Include="Game\Managers\AnchorManager.cs" />
     <Compile Include="Game\Managers\AuraManager.cs" />
     <Compile Include="Game\Managers\CorpseManager.cs" />
-    <Compile Include="Game\Managers\CustomHouseManager.cs" />
+    <Compile Include="Game\Managers\HouseCustomizationManager.cs" />
     <Compile Include="Game\Managers\HealthLinesManager.cs" />
     <Compile Include="Game\Managers\HotkeysManager.cs" />
     <Compile Include="Game\Managers\InfoBarManager.cs" />
@@ -157,6 +162,7 @@
     <Compile Include="Game\Managers\ObjectPropertiesListManager.cs" />
     <Compile Include="Game\Managers\PoolsManager.cs" />
     <Compile Include="Game\Managers\SkillsGroupManager.cs" />
+    <Compile Include="Game\Managers\UOChatManager.cs" />
     <Compile Include="Game\Managers\WorldMapEntityManager.cs" />
     <Compile Include="Game\Scenes\SceneID.cs" />
     <Compile Include="Game\SelectedObject.cs" />
@@ -164,6 +170,7 @@
     <Compile Include="Game\UI\Controls\AbstractTextBox.cs" />
     <Compile Include="Game\UI\Controls\AlphaBlendControl.cs" />
     <Compile Include="Game\UI\Controls\ArrowNumbersTextBox.cs" />
+    <Compile Include="Game\UI\Controls\ButtonTileArt.cs" />
     <Compile Include="Game\UI\Controls\ClickableColorBox.cs" />
     <Compile Include="Game\UI\Controls\ContextMenuControl.cs" />
     <Compile Include="Game\UI\Controls\InfoBarBuilderControl.cs" />
@@ -184,11 +191,15 @@
     <Compile Include="Game\UI\Gumps\InfoBarGump.cs" />
     <Compile Include="Game\UI\Gumps\MacroButtonGump.cs" />
     <Compile Include="Game\UI\Gumps\NameOverHeadHandlerGump.cs" />
+    <Compile Include="Game\UI\Gumps\PartyGump.cs" />
     <Compile Include="Game\UI\Gumps\PartyInviteGump.cs" />
+    <Compile Include="Game\UI\Gumps\RacialAbilityButton.cs" />
     <Compile Include="Game\UI\Gumps\ResizableGump.cs" />
     <Compile Include="Game\UI\Gumps\StandardSkillsGump.cs" />
     <Compile Include="Game\UI\Gumps\TextContainerGump.cs" />
     <Compile Include="Game\UI\Gumps\TipNoticeGump.cs" />
+    <Compile Include="Game\UI\Gumps\UOChatGump.cs" />
+    <Compile Include="Game\UI\TextEntryRules.cs" />
     <Compile Include="Game\Weather.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Renderer\MatrixEffect.cs" />
@@ -293,7 +304,6 @@
     <Compile Include="IO\Resources\SpeechesLoader.cs" />
     <Compile Include="IO\Resources\TexmapsLoader.cs" />
     <Compile Include="IO\Resources\TileDataLoader.cs" />
-    <Compile Include="Network\BufferPool.cs" />
     <Compile Include="Network\Plugin.cs" />
     <Compile Include="Network\Updater.cs" />
     <Compile Include="Utility\Platforms\PlatformHelper.cs" />
@@ -301,7 +311,7 @@
     <Compile Include="Renderer\Batcher2D.cs" />
     <Compile Include="Renderer\Fonts.cs" />
     <Compile Include="Renderer\SpriteFont.cs" />
-    <Compile Include="Renderer\Textures.cs" />
+    <Compile Include="Renderer\Texture2DCache.cs" />
     <Compile Include="Utility\Collections\CollectionHelper.cs" />
     <Compile Include="Utility\Coroutines\Coroutine.cs" />
     <Compile Include="Utility\Coroutines\CoroutineManager.cs" />
@@ -323,7 +333,7 @@
     <Compile Include="Game\UI\Gumps\BuffGump.cs" />
     <Compile Include="Game\UI\Controls\Combobox.cs" />
     <Compile Include="Game\UI\Controls\HoveredLabel.cs" />
-    <Compile Include="Game\UI\Gumps\InfoGump.cs" />
+    <Compile Include="Game\UI\Gumps\InspectorGump.cs" />
     <Compile Include="Game\UI\Gumps\MessageBoxGump.cs" />
     <Compile Include="Game\UI\Gumps\ShopGump.cs" />
     <Compile Include="Game\UI\Gumps\CharCreation\CharCreationGump.cs" />
@@ -353,23 +363,18 @@
     <Compile Include="Game\GameObjects\Views\MovingEffectView.cs" />
     <Compile Include="Input\Mouse.cs" />
     <Compile Include="Interfaces\INode.cs" />
-    <Compile Include="Interfaces\ISmoothMovable.cs" />
     <Compile Include="IO\UltimaLive.cs" />
     <Compile Include="Network\NetStatistics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Configuration\ConfigurationResolver.cs" />
     <Compile Include="Configuration\Settings.cs" />
-    <Compile Include="Engine.cs" />
-    <Compile Include="Game\Chat.cs" />
-    <Compile Include="Game\Data\AssistantFeatures.cs" />
-    <Compile Include="Game\Data\ContainerManager.cs" />
+    <Compile Include="Game\Managers\MessageManager.cs" />
+    <Compile Include="Game\Managers\ContainerManager.cs" />
     <Compile Include="Game\Data\Direction.cs" />
     <Compile Include="Game\Data\LockedFeatures.cs" />
-    <Compile Include="Game\Data\FeaturesFlags.cs" />
     <Compile Include="Game\Data\MovementSpeed.cs" />
     <Compile Include="Game\Data\Reagents.cs" />
     <Compile Include="Game\Data\Skill.cs" />
-    <Compile Include="Game\Data\SpellbookData.cs" />
     <Compile Include="Game\Data\SpellbookTypes.cs" />
     <Compile Include="Game\Data\SpellDefinition.cs" />
     <Compile Include="Game\Data\SpellsMagery.cs" />
@@ -386,7 +391,7 @@
     <Compile Include="Game\GameObjects\Multi.cs" />
     <Compile Include="Game\GameObjects\PlayerMobile.cs" />
     <Compile Include="Game\GameObjects\Static.cs" />
-    <Compile Include="Game\Graphic.cs" />
+    <Compile Include="Utility\UInt16Converter.cs" />
     <Compile Include="Game\UI\Controls\Button.cs" />
     <Compile Include="Game\UI\Controls\Checkbox.cs" />
     <Compile Include="Game\UI\Controls\CheckerTrans.cs" />
@@ -400,7 +405,7 @@
     <Compile Include="Game\UI\Controls\GumpPicTiled.cs" />
     <Compile Include="Game\UI\Controls\HSliderBar.cs" />
     <Compile Include="Game\UI\Controls\HtmlControl.cs" />
-    <Compile Include="Game\UI\Controls\IScrollBar.cs" />
+    <Compile Include="Game\UI\Controls\ScrollBarBase.cs" />
     <Compile Include="Game\UI\Controls\ItemGump.cs" />
     <Compile Include="Game\UI\Controls\ItemGumpPaperdoll.cs" />
     <Compile Include="Game\UI\Controls\Label.cs" />
@@ -428,16 +433,14 @@
     <Compile Include="Game\UI\Controls\WorldViewport.cs" />
     <Compile Include="Game\UI\Gumps\WorldViewportGump.cs" />
     <Compile Include="Game\Managers\UIManager.cs" />
-    <Compile Include="Game\Hue.cs" />
     <Compile Include="Game\Map\Map.cs" />
     <Compile Include="Game\Map\Chunk.cs" />
     <Compile Include="Game\Map\Tile.cs" />
     <Compile Include="Game\Pathfinder.cs" />
-    <Compile Include="Game\Position.cs" />
     <Compile Include="Game\Scenes\GameScene.cs" />
     <Compile Include="Game\Scenes\LoginScene.cs" />
     <Compile Include="Game\Scenes\Scene.cs" />
-    <Compile Include="Game\Serial.cs" />
+    <Compile Include="Game\SerialHelper.cs" />
     <Compile Include="Game\GameObjects\Views\AnimatedEffectView.cs" />
     <Compile Include="Game\GameObjects\Views\ItemView.cs" />
     <Compile Include="Game\Data\LayerOrder.cs" />
@@ -446,21 +449,16 @@
     <Compile Include="Game\GameObjects\Views\TileView.cs" />
     <Compile Include="Game\GameObjects\Views\View.cs" />
     <Compile Include="Game\World.cs" />
-    <Compile Include="Input\EventArgs.cs" />
-    <Compile Include="Input\InputEvent.cs" />
-    <Compile Include="Input\InputKeyboardEvent.cs" />
-    <Compile Include="Input\InputMouseEvent.cs" />
-    <Compile Include="Input\KeyboardEvent.cs" />
+    <Compile Include="Input\InputEventArgs.cs" />
+    <Compile Include="Input\KeyboardEventType.cs" />
     <Compile Include="Input\MouseButtons.cs" />
-    <Compile Include="Input\MouseEvent.cs" />
+    <Compile Include="Input\MouseEventType.cs" />
     <Compile Include="Game\UI\TextEntry.cs" />
-    <Compile Include="Interfaces\IColorable.cs" />
-    <Compile Include="Interfaces\IDebuggable.cs" />
     <Compile Include="Interfaces\IDrawable.cs" />
     <Compile Include="Interfaces\IUpdateable.cs" />
-    <Compile Include="IO\ClientVersions.cs" />
+    <Compile Include="Game\Data\ClientVersion.cs" />
     <Compile Include="IO\DataReader.cs" />
-    <Compile Include="IO\FileManager.cs" />
+    <Compile Include="IO\UOFileManager.cs" />
     <Compile Include="IO\Resources\Verdata.cs" />
     <Compile Include="IO\UOFile.cs" />
     <Compile Include="IO\UOFileIndex.cs" />
@@ -475,7 +473,6 @@
     <Compile Include="Network\Packets.cs" />
     <Compile Include="Network\PacketsTable.cs" />
     <Compile Include="Network\PacketWriter.cs" />
-    <Compile Include="Network\SendQueue.cs" />
     <Compile Include="Game\GameCursor.cs" />
     <Compile Include="Game\GameObjects\IsometricLight.cs" />
     <Compile Include="Game\Managers\WorldTextManager.cs" />
@@ -513,7 +510,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
-    <None Include="README.md" />
     <None Include="shaders\compile_shaders.bat" />
     <None Include="shaders\IsometricWorld.fx" />
     <EmbeddedResource Include="shaders\IsometricWorld.fxc" />

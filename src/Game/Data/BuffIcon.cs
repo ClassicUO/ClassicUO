@@ -1,40 +1,41 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
 
 namespace ClassicUO.Game.Data
 {
-    internal readonly struct BuffIcon : IEquatable<BuffIcon>
+    internal class BuffIcon : IEquatable<BuffIcon>
     {
-        public BuffIcon(Graphic graphic, long timer, string text)
+        public BuffIcon(BuffIconType type, ushort graphic, long timer, string text)
         {
+            Type = type;
             Graphic = graphic;
             Timer = timer;
             Text = text;
         }
 
-        public readonly Graphic Graphic;
+        public readonly BuffIconType Type;
+
+        public readonly ushort Graphic;
 
         public readonly long Timer;
 
@@ -42,7 +43,7 @@ namespace ClassicUO.Game.Data
 
         public bool Equals(BuffIcon other)
         {
-            return Graphic == other.Graphic;
+            return other != null && Type == other.Type;
         }
     }
 }

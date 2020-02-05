@@ -1,24 +1,22 @@
 #region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
@@ -27,10 +25,7 @@ using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Collections;
 
 using Microsoft.Xna.Framework;
 
@@ -246,9 +241,9 @@ namespace ClassicUO.Game.Managers
 
     internal class WorldTextManager : TextRenderer
     {
-        private readonly Dictionary<Serial, OverheadDamage> _damages = new Dictionary<Serial, OverheadDamage>();
-        private readonly List<Tuple<Serial, Serial>> _subst = new List<Tuple<Serial, Serial>>();
-        private readonly List<Serial> _toRemoveDamages = new List<Serial>();
+        private readonly Dictionary<uint, OverheadDamage> _damages = new Dictionary<uint, OverheadDamage>();
+        private readonly List<Tuple<uint, uint>> _subst = new List<Tuple<uint, uint>>();
+        private readonly List<uint> _toRemoveDamages = new List<uint>();
 
 
         public override void Update(double totalMS, double frameMS)
@@ -260,7 +255,7 @@ namespace ClassicUO.Game.Managers
 
             if (_toRemoveDamages.Count > 0)
             {
-                foreach ( Serial s in _toRemoveDamages)
+                foreach ( uint s in _toRemoveDamages)
                 {
                     _damages.Remove(s);
                 }
@@ -274,11 +269,11 @@ namespace ClassicUO.Game.Managers
 
         public override void Draw(UltimaBatcher2D batcher, int startX, int startY, int renderIndex, bool isGump = false)
         {
-            float scale = CUOEnviroment.Client.GetScene<GameScene>().Scale;
+            float scale = Client.Game.GetScene<GameScene>().Scale;
 
             base.Draw(batcher, 0, 0, renderIndex, isGump);
 
-            foreach (KeyValuePair<Serial, OverheadDamage> overheadDamage in _damages)
+            foreach (KeyValuePair<uint, OverheadDamage> overheadDamage in _damages)
             {
                 int x = startX;
                 int y = startY;
@@ -311,7 +306,7 @@ namespace ClassicUO.Game.Managers
         {
             if (_subst.Count != 0)
             {
-                foreach (Tuple<Serial, Serial> tuple in _subst)
+                foreach (Tuple<uint, uint> tuple in _subst)
                 {
                     if (_damages.TryGetValue(tuple.Item1, out var dmg))
                     {
@@ -323,7 +318,7 @@ namespace ClassicUO.Game.Managers
                 _subst.Clear();
             }
 
-            foreach (KeyValuePair<Serial, OverheadDamage> overheadDamage in _damages)
+            foreach (KeyValuePair<uint, OverheadDamage> overheadDamage in _damages)
             {
                 overheadDamage.Value.Update();
 
@@ -332,7 +327,7 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        internal void AddDamage(Serial obj, int dmg)
+        internal void AddDamage(uint obj, int dmg)
         {
             if (!_damages.TryGetValue(obj, out var dm) || dm == null)
             {
@@ -347,7 +342,7 @@ namespace ClassicUO.Game.Managers
         {
             if (_toRemoveDamages.Count > 0)
             {
-                foreach (Serial s in _toRemoveDamages)
+                foreach (uint s in _toRemoveDamages)
                 {
                     _damages.Remove(s);
                 }

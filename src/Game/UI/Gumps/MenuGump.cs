@@ -1,24 +1,22 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System.Linq;
@@ -37,7 +35,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly HSliderBar _slider;
         private bool _isDown, _isLeft;
 
-        public MenuGump(Serial serial, Serial serv, string name) : base(serial, serv)
+        public MenuGump(uint serial, uint serv, string name) : base(serial, serv)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -111,7 +109,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public void AddItem(Graphic graphic, Hue hue, string name, int x, int y, int index)
+        public void AddItem(ushort graphic, ushort hue, string name, int x, int y, int index)
         {
             StaticPic pic = new StaticPic(graphic, hue)
             {
@@ -123,7 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             pic.MouseDoubleClick += (sender, e) =>
             {
-                NetClient.Socket.Send(new PMenuResponse(LocalSerial, (Graphic) ServerSerial.Value, index, graphic, hue));
+                NetClient.Socket.Send(new PMenuResponse(LocalSerial, (ushort) ServerSerial, index, graphic, hue));
                 Dispose();
                 e.Result = true;
             };
@@ -135,6 +133,14 @@ namespace ClassicUO.Game.UI.Gumps
             _container.CalculateWidth();
             _slider.MaxValue = _container.MaxValue;
         }
+
+        protected override void CloseWithRightClick()
+        {
+            base.CloseWithRightClick();
+
+            NetClient.Socket.Send(new PMenuResponse(LocalSerial, (ushort) ServerSerial, 0, 0, 0));
+        }
+
 
         private class ContainerHorizontal : Control
         {
@@ -215,7 +221,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly ResizePic _resizePic;
 
-        public GrayMenuGump(Serial local, Serial serv, string name) : base(local, serv)
+        public GrayMenuGump(uint local, uint serv, string name) : base(local, serv)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -265,7 +271,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch (buttonID)
             {
                 case 0: // cancel
-                    NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (Graphic) ServerSerial.Value, 0));
+                    NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (ushort) ServerSerial, 0));
 
                     Dispose();
 
@@ -279,7 +285,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (radioButton.IsChecked)
                         {
-                            NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (Graphic) ServerSerial.Value, index));
+                            NetClient.Socket.Send(new PGrayMenuResponse(LocalSerial, (ushort) ServerSerial, index));
 
                             break;
                         }

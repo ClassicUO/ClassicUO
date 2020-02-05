@@ -1,34 +1,32 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using ClassicUO.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
@@ -65,7 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         public ushort BookPageCount { get; internal set; }
-        public static bool IsNewBookD4 => UOFileManager.ClientVersion > ClientVersions.CV_200;
+        public static bool IsNewBookD4 => Client.Version > ClientVersion.CV_200;
         public static byte DefaultFont => (byte) (IsNewBookD4 ? 1 : 4);
 
         public string[] BookPages
@@ -100,6 +98,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump(string[] pages)
         {
+            CanCloseWithRightClick = true;
             Add(new GumpPic(0, 0, 0x1FE, 0)
             {
                 CanMove = true
@@ -111,22 +110,22 @@ namespace ClassicUO.Game.UI.Gumps
 
             m_Forward.MouseUp += (sender, e) =>
             {
-                if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(ActivePage + 1);
+                if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(ActivePage + 1);
             };
 
             m_Forward.MouseDoubleClick += (sender, e) =>
             {
-                if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(MaxPage);
+                if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(MaxPage);
             };
 
             m_Backward.MouseUp += (sender, e) =>
             {
-                if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(ActivePage - 1);
+                if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(ActivePage - 1);
             };
 
             m_Backward.MouseDoubleClick += (sender, e) =>
             {
-                if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(1);
+                if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(1);
             };
 
             PageChanged = new bool[BookPageCount + 1];
@@ -149,7 +148,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (page % 2 == 1)
                     page += 1;
-                page = page >> 1;
+                page >>= 1;
 
                 MultiLineBox tbox = new MultiLineBox(new MultiLineEntry(DefaultFont, MaxBookChars * MaxBookLines, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), IsEditable)
                 {
@@ -166,19 +165,19 @@ namespace ClassicUO.Game.UI.Gumps
 
                 tbox.MouseUp += (sender, e) =>
                 {
-                    if (e.Button == MouseButton.Left && sender is Control ctrl) OnLeftClick();
+                    if (e.Button == MouseButtonType.Left && sender is Control ctrl) OnLeftClick();
                 };
 
                 tbox.MouseDoubleClick += (sender, e) =>
                 {
-                    if (e.Button == MouseButton.Left && sender is Control ctrl) OnLeftClick();
+                    if (e.Button == MouseButtonType.Left && sender is Control ctrl) OnLeftClick();
                 };
                 Add(new Label(k.ToString(), true, 1) {X = x + 80, Y = 200}, page);
             }
 
             _activated = 1;
 
-            CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
+            Client.Game.Scene.Audio.PlaySound(0x0055);
         }
 
         private void SetActivePage(int page)
@@ -201,9 +200,14 @@ namespace ClassicUO.Game.UI.Gumps
                 m_Forward.IsVisible = true;
             }
 
-            CUOEnviroment.Client.Scene.Audio.PlaySound(0x0055);
+            Client.Game.Scene.Audio.PlaySound(0x0055);
 
             ActivePage = page;
+
+            if (UIManager.KeyboardFocusControl == null || (UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl && UIManager.KeyboardFocusControl.Page != page))
+            {
+                UIManager.SystemChat.TextBoxControl.SetKeyboardFocus();
+            }
         }
 
         public override void OnButtonClick(int buttonID)

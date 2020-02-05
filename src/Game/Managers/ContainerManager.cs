@@ -1,39 +1,36 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System.Collections.Generic;
-
-using ClassicUO.IO;
 using ClassicUO.Renderer;
-using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.Data;
+using System.IO;
+using ClassicUO.Utility;
+using ClassicUO.IO.Resources;
 
-using Microsoft.Xna.Framework;
-
-namespace ClassicUO.Game.Data
+namespace ClassicUO.Game.Managers
 {
     internal static class ContainerManager
     {
-        private static readonly Dictionary<Graphic, ContainerData> _data = new Dictionary<Graphic, ContainerData>
+        private static readonly Dictionary<ushort, ContainerData> _data = new Dictionary<ushort, ContainerData>
         {
             {
                 0x9, new ContainerData(0x0009, 0x0000, 0x0000, 20, 85, 124, 196)
@@ -163,13 +160,77 @@ namespace ClassicUO.Game.Data
             }
         };
 
+        static ContainerManager()
+        {
+            string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
+
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            path = Path.Combine(path, "containers.txt");
+
+            if (!File.Exists(path))
+            {
+                using (StreamWriter writer = new StreamWriter(File.Create(path)))
+                {
+                    writer.WriteLine("# FORMAT");
+                    writer.WriteLine("# GRAPHIC OPEN_SOUND_ID CLOSE_SOUND_ID LEFT TOP RIGHT BOTTOM ICONIZED_GRAPHIC [0 if not exists] MINIMIZER_AREA_X [0 if not exists] MINIMIZER_AREA_Y [0 if not exists]");
+                    writer.WriteLine("# LEFT = X,  TOP = Y,  RIGHT = X + WIDTH,  BOTTOM = Y + HEIGHT");
+                    writer.WriteLine();
+                    writer.WriteLine();
+
+                    foreach (var e in _data)
+                    {
+                        writer.WriteLine($"{e.Value.Graphic} {e.Value.OpenSound} {e.Value.ClosedSound} {e.Value.Bounds.X} {e.Value.Bounds.Y} {e.Value.Bounds.Width} {e.Value.Bounds.Height} {e.Value.IconizedGraphic} {e.Value.MinimizerArea.X} {e.Value.MinimizerArea.Y}");
+                    }
+                }
+            }
+
+            _data.Clear();
+
+            TextFileParser containersParser = new TextFileParser(File.ReadAllText(path), new[] { ' ', '\t', ',' }, new[] { '#', ';' }, new[] { '"', '"' });
+
+            while (!containersParser.IsEOF())
+            {
+                var ss = containersParser.ReadTokens();
+                if (ss != null && ss.Count != 0)
+                {
+                    if (ushort.TryParse(ss[0], out ushort graphic) && 
+                        ushort.TryParse(ss[1], out ushort open_sound_id) &&
+                        ushort.TryParse(ss[2], out ushort close_sound_id) &&
+                        int.TryParse(ss[3], out int x) && 
+                        int.TryParse(ss[4], out int y) &&
+                        int.TryParse(ss[5], out int w) && 
+                        int.TryParse(ss[6], out int h))
+                    {
+                        ushort iconized_graphic = 0;
+                        int minimizer_x = 0, minimizer_y = 0;
+
+                        if (ss.Count >= 8 && ushort.TryParse(ss[7], out iconized_graphic))
+                        {
+                            if (ss.Count >= 9 && int.TryParse(ss[8], out minimizer_x))
+                            {
+                                if (ss.Count >= 10 && int.TryParse(ss[9], out minimizer_y))
+                                {
+                                    // nice!
+                                }
+                            }
+                        }
+
+                        _data[graphic] = new ContainerData(graphic, open_sound_id, close_sound_id, x, y, w, h, iconized_graphic, minimizer_x, minimizer_y);
+                    }
+                }
+            }
+        }
+
+
         public static int DefaultX { get; } = 40;
         public static int DefaultY { get; } = 40;
 
         public static int X { get; private set; } = 40;
         public static int Y { get; private set; } = 40;
 
-        public static ContainerData Get(Graphic graphic)
+        public static ContainerData Get(ushort graphic)
         {
             //if the server requests for a non present gump in container data dictionary, create it, but without any particular sound.
             if (!_data.TryGetValue(graphic, out ContainerData value))
@@ -178,26 +239,26 @@ namespace ClassicUO.Game.Data
         }
 
 
-        public static void CalculateContainerPosition(Graphic g)
+        public static void CalculateContainerPosition(ushort g)
         {
-            UOTexture texture = UOFileManager.Gumps.GetTexture(g);
+            UOTexture texture = GumpsLoader.Instance.GetTexture(g);
 
             int passed = 0;
 
             for (int i = 0; i < 4 && passed == 0; i++)
             {
-                if (X + texture.Width + Constants.CONTAINER_RECT_STEP > CUOEnviroment.Client.Window.ClientBounds.Width)
+                if (X + texture.Width + Constants.CONTAINER_RECT_STEP > Client.Game.Window.ClientBounds.Width)
                 {
                     X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
 
-                    if (Y + texture.Height + Constants.CONTAINER_RECT_LINESTEP > CUOEnviroment.Client.Window.ClientBounds.Height)
+                    if (Y + texture.Height + Constants.CONTAINER_RECT_LINESTEP > Client.Game.Window.ClientBounds.Height)
                         Y = Constants.CONTAINER_RECT_DEFAULT_POSITION;
                     else
                         Y += Constants.CONTAINER_RECT_LINESTEP;
                 }
-                else if (Y + texture.Height + Constants.CONTAINER_RECT_STEP > CUOEnviroment.Client.Window.ClientBounds.Height)
+                else if (Y + texture.Height + Constants.CONTAINER_RECT_STEP > Client.Game.Window.ClientBounds.Height)
                 {
-                    if (X + texture.Width + Constants.CONTAINER_RECT_LINESTEP > CUOEnviroment.Client.Window.ClientBounds.Width)
+                    if (X + texture.Width + Constants.CONTAINER_RECT_LINESTEP > Client.Game.Window.ClientBounds.Width)
                         X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
                     else
                         X += Constants.CONTAINER_RECT_LINESTEP;
@@ -219,25 +280,5 @@ namespace ClassicUO.Game.Data
                 Y += Constants.CONTAINER_RECT_STEP;
             }
         }
-    }
-
-    internal readonly struct ContainerData
-    {
-        public ContainerData(Graphic graphic, ushort sound, ushort closed, int x, int y, int w, int h, ushort iconizedgraphic = 0, int minimizerX = 0, int minimizerY = 0)
-        {
-            Graphic = graphic;
-            Bounds = new Rectangle(x, y, w, h);
-            OpenSound = sound;
-            ClosedSound = closed;
-            MinimizerArea = (minimizerX == 0 && minimizerY == 0 ? Rectangle.Empty : new Rectangle(minimizerX, minimizerY, 16, 16));
-            IconizedGraphic = iconizedgraphic;
-        }
-
-        public readonly Graphic Graphic;
-        public readonly Rectangle Bounds;
-        public readonly ushort OpenSound;
-        public readonly ushort ClosedSound;
-        public readonly Rectangle MinimizerArea;
-        public readonly ushort IconizedGraphic;
     }
 }

@@ -1,35 +1,32 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System.Linq;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
-using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 using SDL2;
 
@@ -54,26 +51,26 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 X = 610, Y = 445, ButtonAction = ButtonAction.Activate
             });
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_500A)
+            if (Client.Version >= ClientVersion.CV_500A)
             {
                 ushort textColor = 0xFFFF;
 
-                Add(new Label(UOFileManager.Cliloc.GetString(1044579), true, textColor, font: 1)
+                Add(new Label(ClilocLoader.Instance.GetString(1044579), true, textColor, font: 1)
                 {
                     X = 155, Y = 70
                 }); // "Select which shard to play on:"
 
-                Add(new Label(UOFileManager.Cliloc.GetString(1044577), true, textColor, font: 1)
+                Add(new Label(ClilocLoader.Instance.GetString(1044577), true, textColor, font: 1)
                 {
                     X = 400, Y = 70
                 }); // "Latency:"
 
-                Add(new Label(UOFileManager.Cliloc.GetString(1044578), true, textColor, font: 1)
+                Add(new Label(ClilocLoader.Instance.GetString(1044578), true, textColor, font: 1)
                 {
                     X = 470, Y = 70
                 }); // "Packet Loss:"
 
-                Add(new Label(UOFileManager.Cliloc.GetString(1044580), true, textColor, font: 1)
+                Add(new Label(ClilocLoader.Instance.GetString(1044580), true, textColor, font: 1)
                 {
                     X = 153, Y = 368
                 }); // "Sort by:"
@@ -82,22 +79,22 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 ushort textColor = 0x0481;
 
-                Add(new Label("Select which shard to play on:", true, textColor, font: 9)
+                Add(new Label("Select which shard to play on:", false, textColor, font: 9)
                 {
                     X = 155, Y = 70
                 });
 
-                Add(new Label("Latency:", true, textColor, font: 9)
+                Add(new Label("Latency:", false, textColor, font: 9)
                 {
                     X = 400, Y = 70
                 });
 
-                Add(new Label("Packet Loss:", true, textColor, font: 9)
+                Add(new Label("Packet Loss:", false, textColor, font: 9)
                 {
                     X = 470, Y = 70
                 });
 
-                Add(new Label("Sort by:", true, textColor, font: 9)
+                Add(new Label("Sort by:", false, textColor, font: 9)
                 {
                     X = 153, Y = 368
                 });
@@ -134,12 +131,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
             });
             // Sever Scroll Area
             ScrollArea scrollArea = new ScrollArea(150, 100, 383, 271, true);
-            LoginScene loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
+            LoginScene loginScene = Client.Game.GetScene<LoginScene>();
 
             foreach (ServerListEntry server in loginScene.Servers)
             {
                 HoveredLabel label;
-                scrollArea.Add(label = new HoveredLabel($"{server.Name}                         -           -", false, NORMAL_COLOR, SELECTED_COLOR, font: 5)
+                scrollArea.Add(label = new HoveredLabel($"{server.Name}                         -           -", false, NORMAL_COLOR, SELECTED_COLOR, NORMAL_COLOR,font: 5)
                 {
                     X = 74,
                     //Y = 250
@@ -150,22 +147,35 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             Add(scrollArea);
 
-            if (loginScene.Servers.Length > 0)
+            if (loginScene.Servers.Length != 0)
             {
-                if (loginScene.Servers.Last().Index < loginScene.Servers.Count())
+                int index = Settings.GlobalSettings.LastServerNum - 1;
+
+                if (index < 0 || index >= loginScene.Servers.Length)
                 {
-                    Add(new Label(loginScene.Servers.Last().Name, false, 0x0481, font: 9)
-                    {
-                        X = 243, Y = 420
-                    });
+                    index = 0;
                 }
-                else
+
+                Add(new Label(loginScene.Servers[index].Name, false, 0x0481, font: 9)
                 {
-                    Add(new Label(loginScene.Servers.First().Name, false, 0x0481, font: 9)
-                    {
-                        X = 243, Y = 420
-                    });
-                }
+                    X = 243,
+                    Y = 420
+                });
+
+                //if (loginScene.Servers.Last().Index < loginScene.Servers.Count())
+                //{
+                //    Add(new Label(loginScene.Servers.Last().Name, false, 0x0481, font: 9)
+                //    {
+                //        X = 243, Y = 420
+                //    });
+                //}
+                //else
+                //{
+                //    Add(new Label(loginScene.Servers.First().Name, false, 0x0481, font: 9)
+                //    {
+                //        X = 243, Y = 420
+                //    });
+                //}
             }
 
             AcceptKeyboardInput = true;
@@ -174,7 +184,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            LoginScene loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
+            LoginScene loginScene = Client.Game.GetScene<LoginScene>();
 
             if (buttonID >= (int) Buttons.Server)
             {
@@ -188,7 +198,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     case Buttons.Next:
                     case Buttons.Earth:
 
-                        if (loginScene.Servers.Any())
+                        if (loginScene.Servers.Length != 0)
                         {
                             int index = Settings.GlobalSettings.LastServerNum;
 
@@ -216,7 +226,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             if (key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER)
             {
-                LoginScene loginScene = CUOEnviroment.Client.GetScene<LoginScene>();
+                LoginScene loginScene = Client.Game.GetScene<LoginScene>();
 
                 if (loginScene.Servers.Any())
                 {
@@ -255,7 +265,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 _buttonId = entry.Index;
 
-                Add(_serverName = new HoveredLabel($"{entry.Name}     -      -" , false, NORMAL_COLOR, SELECTED_COLOR, font: 5));
+                Add(_serverName = new HoveredLabel($"{entry.Name}     -      -" , false, NORMAL_COLOR, SELECTED_COLOR, NORMAL_COLOR,font: 5));
                 _serverName.X = 74;
                 _serverName.Y = 250;
 
@@ -280,9 +290,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 base.OnMouseExit(x, y);
             }
 
-            protected override void OnMouseUp(int x, int y, MouseButton button)
+            protected override void OnMouseUp(int x, int y, MouseButtonType button)
             {
-                if (button == MouseButton.Left) OnButtonClick((int)Buttons.Server + _buttonId);
+                if (button == MouseButtonType.Left) OnButtonClick((int)Buttons.Server + _buttonId);
             }
         }
     }

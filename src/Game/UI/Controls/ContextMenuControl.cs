@@ -1,13 +1,29 @@
-﻿using System;
+﻿#region license
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+// 
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+
+using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Game.Managers;
 using ClassicUO.Input;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -30,34 +46,34 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            base.Update(totalMS, frameMS);
+        //public override void Update(double totalMS, double frameMS)
+        //{
+        //    base.Update(totalMS, frameMS);
 
-            if (Parent != null)
-            {
-                Width = Parent.Width;
-                Height = Parent.Height;
-            }
-        }
+        //    //if (Parent != null)
+        //    //{
+        //    //    Width = Parent.Width;
+        //    //    Height = Parent.Height;
+        //    //}
+        //}
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
-        {
-            if (button != MouseButton.Right)
-            {
-                base.OnMouseUp(x, y, button);
-                return;
-            }
+        //protected override void OnMouseUp(int x, int y, MouseButtonType button)
+        //{
+        //    if (button != MouseButtonType.Right)
+        //    {
+        //        base.OnMouseUp(x, y, button);
+        //        return;
+        //    }
 
-            _menu?.Dispose();
+        //    _menu?.Dispose();
 
-            _menu = new ContextMenuShowMenu(_items)
-            {
-                X = Mouse.Position.X,
-                Y = Mouse.Position.Y
-            };
-            UIManager.Add(_menu);
-        }
+        //    _menu = new ContextMenuShowMenu(_items)
+        //    {
+        //        X = Mouse.Position.X,
+        //        Y = Mouse.Position.Y
+        //    };
+        //    UIManager.Add(_menu);
+        //}
 
         public void Add(string text, Action action, bool canBeSelected = false, bool defaultValue = false)
         {
@@ -66,6 +82,21 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Add(Control c, int page = 0)
         {
+        }
+
+        public void Show()
+        {
+            _menu?.Dispose();
+
+            if (_items.Count == 0)
+                return;
+
+            _menu = new ContextMenuShowMenu(_items)
+            {
+                X = Mouse.Position.X,
+                Y = Mouse.Position.Y
+            };
+            UIManager.Add(_menu);
         }
 
         private class ContextMenuShowMenu : Control
@@ -122,7 +153,7 @@ namespace ClassicUO.Game.UI.Controls
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 ResetHueVector();
-                batcher.DrawRectangle(Textures.GetTexture(Color.Gray), x - 1, y - 1, Width + 1, Height + 1, ref _hueVector);
+                batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x - 1, y - 1, Width + 1, Height + 1, ref _hueVector);
                 return base.Draw(batcher, x, y);
             }
         }
@@ -149,12 +180,12 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly Label _label;
         private readonly GumpPic _selectedPic;
-        private uint _timeHover;
         private readonly ContextMenuItemEntry _entry;
 
 
         public ContextMenuItem(ContextMenuItemEntry entry)
         {
+            CanCloseWithRightClick = false;
             _entry = entry;
 
             _label = new Label(entry.Text, true, 1150, 0, style: FontStyle.BlackBorder)
@@ -166,7 +197,6 @@ namespace ClassicUO.Game.UI.Controls
             if (entry.CanBeSelected)
             {
                 _selectedPic = new GumpPic(0, 0, 0x838, 0);
-                _selectedPic.Initialize();
                 _selectedPic.IsVisible = entry.IsSelected;
                 Add(_selectedPic);
             }
@@ -178,7 +208,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_selectedPic != null)
             {
-                _label.X = _selectedPic.X + _selectedPic.Width + 5;
+                _label.X = _selectedPic.X + _selectedPic.Width + 6;
                 _selectedPic.Y = (Height >> 1) - (_selectedPic.Height >> 1);
             }
             Width = _label.X + _label.Width + 3;
@@ -194,9 +224,9 @@ namespace ClassicUO.Game.UI.Controls
                 _label.Width = Width;
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButton.Left)
+            if (button == MouseButtonType.Left)
             {
                 _entry.Action?.Invoke();
 
@@ -207,26 +237,11 @@ namespace ClassicUO.Game.UI.Controls
                     _entry.IsSelected = !_entry.IsSelected;
                     _selectedPic.IsVisible = _entry.IsSelected;
                 }
+
+                Mouse.CancelDoubleClick = true;
+                Mouse.LastLeftButtonClickTime = 0;
+                base.OnMouseUp(x, y, button);
             }
-            base.OnMouseUp(x, y, button);
-        }
-
-
-        protected override void OnMouseOver(int x, int y)
-        {
-            if (_timeHover < Time.Ticks)
-            {
-
-            }
-
-            base.OnMouseOver(x, y);
-        }
-
-
-        protected override void OnMouseEnter(int x, int y)
-        {
-            _timeHover = Time.Ticks + 500;
-            base.OnMouseEnter(x, y);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -234,7 +249,8 @@ namespace ClassicUO.Game.UI.Controls
             if (!string.IsNullOrWhiteSpace(_label.Text) && MouseIsOver)
             {
                 ResetHueVector();
-                batcher.Draw2D(Textures.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
+
+                batcher.Draw2D(Texture2DCache.GetTexture(Color.Gray), x + 2, y + 5, Width - 4, Height - 10, ref _hueVector);
             }
 
             return base.Draw(batcher, x, y);

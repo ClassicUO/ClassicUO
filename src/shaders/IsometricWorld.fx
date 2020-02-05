@@ -73,11 +73,11 @@ float3 get_light(float3 norm)
 float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 {	
 	float4 color = tex2D(DrawSampler, IN.TexCoord);
-	
-	int mode = int(IN.Hue.y);
-	
+		
 	if (color.a == 0.0f)
 		discard;
+
+	int mode = int(IN.Hue.y);
 
 	bool swap = false;
 	if (mode >= COLOR_SWAP)

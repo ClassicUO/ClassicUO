@@ -1,28 +1,25 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
-using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -86,9 +83,9 @@ namespace ClassicUO.Game.UI.Controls
             base.Dispose();
         }
 
-        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Serial> e)
+        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<uint> e)
         {
-            foreach (Serial serial in e)
+            foreach (uint serial in e)
             {
                 Item item = World.Items.Get(serial);
 
@@ -112,11 +109,11 @@ namespace ClassicUO.Game.UI.Controls
             UpdateEntity();
         }
 
-        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Serial> e)
+        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<uint> e)
         {
             if (_fakeItem != null)
             {
-                foreach (Serial item in e)
+                foreach (uint item in e)
                 {
                     if (item == _fakeItem.Serial)
                     {
@@ -150,6 +147,8 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
+        
+
         public void AddFakeDress(Item item)
         {
             if (item == null && _fakeItem != null)
@@ -176,7 +175,7 @@ namespace ClassicUO.Game.UI.Controls
             //Clear();
 
             // Add the base gump - the semi-naked paper doll.
-            Graphic body = 0;
+            ushort body = 0;
 
             bool isGM = false;
 
@@ -205,7 +204,6 @@ namespace ClassicUO.Game.UI.Controls
                         AcceptMouseInput = true,
                         IsPartialHue = true
                     });
-                    _body.Initialize();
                 }
                 else
                     _body.Graphic = body;
@@ -217,7 +215,6 @@ namespace ClassicUO.Game.UI.Controls
                         AcceptMouseInput = true,
                         IsPartialHue = true
                     });
-                    _unk.Initialize();
                 }
                 else
                     _unk.Graphic = 0xC72B;
@@ -237,7 +234,6 @@ namespace ClassicUO.Game.UI.Controls
                         AcceptMouseInput = true,
                         IsPartialHue = true
                     });
-                    _body.Initialize();
                 }
                 else
                 {
@@ -346,7 +342,6 @@ namespace ClassicUO.Game.UI.Controls
                             {
                                 CanPickUp = canPickUp
                             });
-                            itemGump.Initialize();
                             _pgumps[(int) layerIndex] = itemGump;
                             isNew = true;
                         }
@@ -464,12 +459,18 @@ namespace ClassicUO.Game.UI.Controls
                     ref var backpackGump = ref _pgumps[(int) Layer.Backpack];
                     if (backpackGump == null)
                     {
-                        Add(backpackGump = new ItemGumpPaperdoll(0, 0, backpack, Mobile)
+                        int bx = 0;
+
+                        if (World.ClientFeatures.PaperdollBooks)
+                        {
+                            bx = 6;
+                        }
+
+                        Add(backpackGump = new ItemGumpPaperdoll(-bx, 0, backpack, Mobile)
                         {
                             AcceptMouseInput = true,
                             CanPickUp = false
                         });
-                        backpackGump.Initialize();
                         backpackGump.MouseDoubleClick -= OnDoubleclickBackpackGump;
                         backpackGump.MouseDoubleClick += OnDoubleclickBackpackGump;
                     }

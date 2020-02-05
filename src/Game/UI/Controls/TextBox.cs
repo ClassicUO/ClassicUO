@@ -1,24 +1,22 @@
 #region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
@@ -41,6 +39,8 @@ namespace ClassicUO.Game.UI.Controls
             base.AcceptKeyboardInput = true;
             base.AcceptMouseInput = true;
             IsEditable = editable;
+
+            Texture = TxEntry.RenderText.Texture;
         }
 
         public TextBox(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE alig = 0)
@@ -51,15 +51,17 @@ namespace ClassicUO.Game.UI.Controls
             IsEditable = true;
             Unicode = isunicode;
             Font = font;
+
+            Texture = TxEntry.RenderText.Texture;
         }
 
-        public TextBox(List<string> parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : byte.MaxValue, 0, int.Parse(parts[3]), style: FontStyle.BlackBorder | FontStyle.CropTexture, hue: (Hue)(Hue.Parse(parts[5]) + 1))
+        public TextBox(List<string> parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : byte.MaxValue, 0, int.Parse(parts[3]), style: FontStyle.BlackBorder | FontStyle.CropTexture, hue: (ushort) (UInt16Converter.Parse(parts[5]) + 1))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
             Width = int.Parse(parts[3]);
             Height = int.Parse(parts[4]);
-            LocalSerial = Serial.Parse(parts[6]);
+            LocalSerial = SerialHelper.Parse(parts[6]);
             TxEntry.SetHeight(Height);
 
             int index = int.Parse(parts[7]);
@@ -72,7 +74,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsChanged => TxEntry.IsChanged;
 
-        public Hue Hue
+        public ushort Hue
         {
             get => TxEntry.Hue;
             set => TxEntry.Hue = value;
@@ -112,9 +114,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool ReplaceDefaultTextOnFirstKeyPress { get; set; }
 
-        public string Text
+        public override string Text
         {
-            get => TxEntry.Text;
+            get => base.Text;
             set => SetText(value);
         }
 

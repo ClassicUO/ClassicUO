@@ -27,7 +27,11 @@ ClassicUO is natively cross platform and supports:
 * Linux
 * MacOS
 
-# Building (Windows)
+# Download & Play!
+Follow the [Wiki](https://github.com/andreakarasho/ClassicUO/wiki) to setup correctly ClassicUO
+
+# Code building
+### Windows
 The binary produced will work on all supported platforms.
 
 You'll need [Visual Studio 2019](https://www.visualstudio.com/downloads/). The free community edition should be fine. Once that
@@ -39,7 +43,7 @@ is installed:
 
 3. Hit F5 to build. The output will be in the "bin/Release" or "bin/Debug" directory.
 
-# Building (Linux)
+### Linux
 Open a terminal instance and put the following commands:
 
 1. `sudo apt-get install mono-complete`
@@ -50,7 +54,7 @@ Open a terminal instance and put the following commands:
 
 4. Hit F5 to build. The output will be in the "bin/Release" or "bin/Debug" directory.
 
-# Building (macOS)
+### MacOS
 All the commands should be executed in terminal. All global package installs should be done only if not yet installed.
 
 1. Install Homebrew, a package manager for macOS (if not yet installed):
@@ -84,9 +88,6 @@ Other useful commands:
 - `msbuild /t:Clean /p:Configuration=Release`
 - `msbuild /t:RestorePackages`
 
-# Running
-Follow the [Wiki](https://github.com/andreakarasho/ClassicUO/wiki) to setup correctly ClassicUO
-
 # Contribute
 Everyone is welcome to contribute! The GitHub issues and project tracker are kept up to date with tasks that need work.
 
@@ -100,4 +101,4 @@ The code itself has been written using the following projects as a reference:
 
 This work is released under the GPLv3 license. This project does not distribute any copyrighted game assets. In order to run this client you'll need to legally obtain a copy of the Ultima Online Classic Client.
 
-Ultima Online(R) © 2019 Electronic Arts Inc. All Rights Reserved.
+Ultima Online(R) © 2020 Electronic Arts Inc. All Rights Reserved.

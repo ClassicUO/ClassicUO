@@ -1,39 +1,33 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -51,11 +45,10 @@ namespace ClassicUO.Game.GameObjects
 
         }
 
-        public Static(Graphic graphic, Hue hue, int index)
+        public Static(ushort graphic, ushort hue, int index)
         {
             Graphic = OriginalGraphic = graphic;
             Hue = hue;
-            Index = index;
 
             UpdateGraphicBySeason();
 
@@ -69,17 +62,16 @@ namespace ClassicUO.Game.GameObjects
                 _canBeTransparent = 0;
         }
 
-        public static Static Create(Graphic graphic, Hue hue, int index)
+        public static Static Create(ushort graphic, ushort hue, int index)
         {
             if (_pool.Count != 0)
             {
                 var s = _pool.Dequeue();
                 s.Graphic = s.OriginalGraphic = graphic;
                 s.Hue = hue;
-                s.Index = index;
                 s.IsDestroyed = false;
                 s.AlphaHue = 0;
-                s.CharacterIsBehindFoliage = false;
+                s.FoliageIndex = 0;
                 s.UpdateGraphicBySeason();
 
                 if (s.ItemData.Height > 5)
@@ -97,15 +89,15 @@ namespace ClassicUO.Game.GameObjects
             return new Static(graphic, hue, index);
         }
 
-        public int Index { get; private set; }
-
         public string Name => ItemData.Name;
 
-        public Graphic OriginalGraphic { get; private set; }
+        public ushort OriginalGraphic { get; private set; }
 
-        public ref readonly StaticTiles ItemData => ref UOFileManager.TileData.StaticData[Graphic];
+        public bool IsVegetation;
 
-        public void SetGraphic(Graphic g)
+        public ref readonly StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
+
+        public void SetGraphic(ushort g)
         {
             Graphic = g;
             SetTextureByGraphic(g);
@@ -119,10 +111,10 @@ namespace ClassicUO.Game.GameObjects
 
         public override void UpdateGraphicBySeason()
         {
-            SetGraphic(Season.GetSeasonGraphic(World.Season, OriginalGraphic));
+            SetGraphic(SeasonManager.GetSeasonGraphic(World.Season, OriginalGraphic));
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
             SetTextureByGraphic(Graphic);
-
+            IsVegetation = StaticFilters.IsVegetation(Graphic);
         }
 
         public override void UpdateTextCoordsV()
@@ -142,7 +134,7 @@ namespace ClassicUO.Game.GameObjects
 
             int startX = ProfileManager.Current.GameWindowPosition.X + 6;
             int startY = ProfileManager.Current.GameWindowPosition.Y + 6;
-            var scene = CUOEnviroment.Client.GetScene<GameScene>();
+            var scene = Client.Game.GetScene<GameScene>();
             float scale = scene?.Scale ?? 1;
             int x = RealScreenPosition.X;
             int y = RealScreenPosition.Y;

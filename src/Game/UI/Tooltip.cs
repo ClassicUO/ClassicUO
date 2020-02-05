@@ -1,33 +1,28 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
-using System.Linq;
 using System.Text;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Managers;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -37,12 +32,11 @@ namespace ClassicUO.Game.UI
 {
     internal class Tooltip
     {
-        private static readonly char[] _titleFormatChars = {' ', '-', '\n', '['};
         private readonly StringBuilder _sb = new StringBuilder();
         private readonly StringBuilder _sbHTML = new StringBuilder();
-        private Entity _gameObject;
+        private uint _serial;
         private uint _hash;
-        private float _lastHoverTime;
+        private uint _lastHoverTime;
         private int _maxWidth;
         private RenderedText _renderedText;
         private string _textHTML;
@@ -51,14 +45,14 @@ namespace ClassicUO.Game.UI
 
         public bool IsEmpty => Text == null;
 
-        public GameObject Object => _gameObject;
+        public uint Serial => _serial;
 
         public bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (_gameObject != null && World.OPL.TryGetRevision(_gameObject, out uint revision) && _hash != revision)
+            if (SerialHelper.IsValid(_serial) && World.OPL.TryGetRevision(_serial, out uint revision) && _hash != revision)
             {
                 _hash = revision;
-                Text = ReadProperties(_gameObject, out _textHTML);
+                Text = ReadProperties(_serial, out _textHTML);
             }
 
             if (string.IsNullOrEmpty(Text))
@@ -75,23 +69,23 @@ namespace ClassicUO.Game.UI
             {
                 if (_maxWidth == 0)
                 {
-                    UOFileManager.Fonts.SetUseHTML(true);
-                    UOFileManager.Fonts.RecalculateWidthByInfo = true;
+                    FontsLoader.Instance.SetUseHTML(true);
+                    FontsLoader.Instance.RecalculateWidthByInfo = true;
 
-                    int width = UOFileManager.Fonts.GetWidthUnicode(1, Text);
+                    int width = FontsLoader.Instance.GetWidthUnicode(1, Text);
 
                     if (width > 600)
                         width = 600;
 
-                    width = UOFileManager.Fonts.GetWidthExUnicode(1, Text, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) FontStyle.BlackBorder);
+                    width = FontsLoader.Instance.GetWidthExUnicode(1, Text, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) FontStyle.BlackBorder);
 
                     if (width > 600)
                         width = 600;
 
                     _renderedText.MaxWidth = width;
 
-                    UOFileManager.Fonts.RecalculateWidthByInfo = false;
-                    UOFileManager.Fonts.SetUseHTML(false);
+                    FontsLoader.Instance.RecalculateWidthByInfo = false;
+                    FontsLoader.Instance.SetUseHTML(false);
                 }
                 else
                     _renderedText.MaxWidth = _maxWidth;
@@ -101,68 +95,74 @@ namespace ClassicUO.Game.UI
 
             if (x < 0)
                 x = 0;
-            else if (x > CUOEnviroment.Client.Window.ClientBounds.Width - (_renderedText.Width + 8))
-                x = CUOEnviroment.Client.Window.ClientBounds.Width - (_renderedText.Width + 8);
+            else if (x > Client.Game.Window.ClientBounds.Width - (_renderedText.Width + 8))
+                x = Client.Game.Window.ClientBounds.Width - (_renderedText.Width + 8);
 
             if (y < 0)
                 y = 0;
-            else if (y > CUOEnviroment.Client.Window.ClientBounds.Height - (_renderedText.Height + 8))
-                y = CUOEnviroment.Client.Window.ClientBounds.Height - (_renderedText.Height + 8);
+            else if (y > Client.Game.Window.ClientBounds.Height - (_renderedText.Height + 8))
+                y = Client.Game.Window.ClientBounds.Height - (_renderedText.Height + 8);
 
             Vector3 hue = Vector3.Zero;
             ShaderHuesTraslator.GetHueVector(ref hue, 0, false, 0.3f, true);
 
-            batcher.Draw2D(Textures.GetTexture(Color.Black), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue);
+            batcher.Draw2D(Texture2DCache.GetTexture(Color.Black), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue);
+            batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue);
 
-            return _renderedText.Draw(batcher, x, y);
+            return _renderedText.Draw(batcher, x + 3, y);
         }
 
         public void Clear()
         {
-            _gameObject = null;
+            _serial = 0;
             _hash = 0;
             _textHTML = Text = null;
             _maxWidth = 0;
         }
 
-        public void SetGameObject(Entity obj)
+        public void SetGameObject(uint serial)
         {
-            if (_gameObject == null || obj != _gameObject)
+            if (_serial == 0 || serial != _serial)
             {
                 uint revision2 = 0;
-                if (_gameObject == null || (World.OPL.TryGetRevision(_gameObject, out uint revision) && World.OPL.TryGetRevision(obj, out revision2) && revision != revision2))
+                if (_serial == 0 || (World.OPL.TryGetRevision(_serial, out uint revision) && World.OPL.TryGetRevision(serial, out revision2) && revision != revision2))
                 {
                     _maxWidth = 0;
-                    _gameObject = obj;
+                    _serial = serial;
                     _hash = revision2;
-                    Text = ReadProperties(obj, out _textHTML);
+                    Text = ReadProperties(serial, out _textHTML);
                     _lastHoverTime = Time.Ticks + 250;
                 }
             }
         }
 
 
-        private string ReadProperties(Entity obj, out string htmltext)
+        private string ReadProperties(uint serial, out string htmltext)
         {
             _sb.Clear();
             _sbHTML.Clear();
 
             bool hasStartColor = false;
 
-
-            if (obj != null && World.OPL.TryGetNameAndData(obj, out string name, out string data))
+            if (SerialHelper.IsValid(serial) && 
+                World.OPL.TryGetNameAndData(serial, out string name, out string data))
             {
                 if (!string.IsNullOrEmpty(name))
                 {
-                    if (obj is Item)
+                    if (SerialHelper.IsItem(serial))
                     {
                         _sbHTML.Append("<basefont color=\"yellow\">");
                         hasStartColor = true;
                     }
-                    else if (obj is Mobile mob)
+                    else
                     {
-                        _sbHTML.Append(Notoriety.GetHTMLHue(mob.NotorietyFlag));
-                        hasStartColor = true;
+                        Mobile mob = World.Mobiles.Get(serial);
+
+                        if (mob != null)
+                        {
+                            _sbHTML.Append(Notoriety.GetHTMLHue(mob.NotorietyFlag));
+                            hasStartColor = true;
+                        }
                     }
 
                     _sb.Append(name);
@@ -184,81 +184,21 @@ namespace ClassicUO.Game.UI
             }
 
 
-
-            //for (int i = 0; i < obj.Properties.Count; i++)
-            //{
-            //    Property property = obj.Properties[i];
-
-            //    if (property.Cliloc <= 0)
-            //        continue;
-
-            //    if (i == 0 /*&& !string.IsNullOrEmpty(obj.Name)*/)
-            //    {
-            //        if (obj is Mobile mobile)
-            //        {
-            //            //ushort hue = Notoriety.GetHue(mobile.NotorietyFlag);
-            //            _sbHTML.Append(Notoriety.GetHTMLHue(mobile.NotorietyFlag));
-            //        }
-            //        else
-            //            _sbHTML.Append("<basefont color=\"yellow\">");
-
-            //        hasStartColor = true;
-            //    }
-
-            //    string text = FormatTitle(FileManager.Cliloc.Translate((int) property.Cliloc, property.Args, true));
-
-            //    if (string.IsNullOrEmpty(text)) continue;
-
-            //    _sb.Append(text);
-            //    _sbHTML.Append(text);
-
-            //    if (hasStartColor)
-            //    {
-            //        _sbHTML.Append("<basefont color=\"#FFFFFFFF\">");
-            //        hasStartColor = false;
-            //    }
-
-            //    if (i < obj.Properties.Count - 1)
-            //    {
-            //        _sb.Append("\n");
-            //        _sbHTML.Append("\n");
-            //    }
-            //}
-
             htmltext = _sbHTML.ToString();
             string result = _sb.ToString();
 
             return string.IsNullOrEmpty(result) ? null : result;
         }
 
-        public unsafe string FormatTitle(string text)
-        {
-            if (text != null)
-            {
-                int index = 0;
-
-                fixed (char* value = text)
-                {
-                    while (index < text.Length)
-                    {
-                        if (index <= 0 || _titleFormatChars.Contains(value[index - 1]))
-                            value[index] = char.ToUpper(value[index]);
-
-                        index++;
-                    }
-
-                    return new string(value);
-                }
-            }
-
-            return text;
-        }
-
         public void SetText(string text, int maxWidth = 0)
         {
-            _maxWidth = maxWidth;
-            _gameObject = null;
-            Text = _textHTML = text;
+            //if (Text != text)
+            {
+                _maxWidth = maxWidth;
+                _serial = 0;
+                Text = _textHTML = text;
+                _lastHoverTime = Time.Ticks + 250;
+            }
         }
     }
 }

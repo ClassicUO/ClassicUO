@@ -1,24 +1,22 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using ClassicUO.Network;
@@ -27,7 +25,7 @@ namespace ClassicUO.Game.Data
 {
     internal class PopupMenuData
     {
-        public PopupMenuData(Serial serial, PopupMenuItem[] items)
+        public PopupMenuData(uint serial, PopupMenuItem[] items)
         {
             Serial = serial;
             Items = items;
@@ -35,7 +33,7 @@ namespace ClassicUO.Game.Data
 
         public PopupMenuItem[] Items { get; }
 
-        public Serial Serial { get; }
+        public uint Serial { get; }
 
         public PopupMenuItem this[int i] => Items[i];
 
@@ -43,13 +41,13 @@ namespace ClassicUO.Game.Data
         {
             ushort mode = p.ReadUShort();
             bool isNewCliloc = mode >= 2;
-            Serial serial = p.ReadUInt();
+            uint serial = p.ReadUInt();
             byte count = p.ReadByte();
             PopupMenuItem[] items = new PopupMenuItem[count];
 
             for (int i = 0; i < count; i++)
             {
-                Hue hue = 0xFFFF, replaced = 0;
+                ushort hue = 0xFFFF, replaced = 0;
                 int cliloc;
                 ushort index, flags;
 
@@ -72,7 +70,7 @@ namespace ClassicUO.Game.Data
                         p.Skip(2);
 
                     if ((flags & 0x20) != 0)
-                        replaced = (Hue) (p.ReadUShort() & 0x3FFF);
+                        replaced = (ushort) (p.ReadUShort() & 0x3FFF);
                 }
 
                 if ((flags & 0x01) != 0)

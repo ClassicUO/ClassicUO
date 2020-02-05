@@ -1,38 +1,35 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -48,8 +45,9 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanCloseWithRightClick = true;
             AcceptMouseInput = true;
-            CanBeSaved = true;
         }
+
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_BUFF;
 
         public BuffGump(int x, int y) : this()
         {
@@ -80,7 +78,7 @@ namespace ClassicUO.Game.UI.Gumps
             _direction = GumpDirection.LEFT_HORIZONTAL;
 
 
-            foreach (KeyValuePair<Graphic, BuffIcon> k in World.Player.BuffIcons)
+            foreach (KeyValuePair<BuffIconType, BuffIcon> k in World.Player.BuffIcons)
                 Add(new BuffControlEntry(World.Player.BuffIcons[k.Key]));
 
             Change();
@@ -102,20 +100,33 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        //protected override bool Contains(int x, int y)
-        //{
-        //    return Bounds.Contains(X + x, Y + y);
-        //}
 
-        public void AddBuff(Graphic graphic)
+        public override void Save(XmlTextWriter writer)
         {
-            Add(new BuffControlEntry(World.Player.BuffIcons[graphic]));
+            base.Save(writer);
+            writer.WriteAttributeString("graphic", _graphic.ToString());
+            writer.WriteAttributeString("direction", ((int) _direction).ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+
+            _graphic = ushort.Parse(xml.GetAttribute("graphic"));
+            _direction = (GumpDirection) byte.Parse(xml.GetAttribute("direction"));
+            BuildGump();
+        }
+
+
+        public void AddBuff(BuffIconType type)
+        {
+            Add(new BuffControlEntry(World.Player.BuffIcons[type]));
             UpdateElements();
         }
 
-        public void RemoveBuff(Graphic graphic)
+        public void RemoveBuff(BuffIconType type)
         {
-            foreach (BuffControlEntry entry in Children.OfType<BuffControlEntry>().Where(s => s.Icon.Graphic == graphic))
+            foreach (BuffControlEntry entry in Children.OfType<BuffControlEntry>().Where(s => s.Icon.Type == type))
             {
                 if (Height > _background.Texture.Height)
                 {
@@ -322,6 +333,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             public BuffControlEntry(BuffIcon icon) : base(0, 0, icon.Graphic, 0)
             {
+                if (IsDisposed)
+                    return;
+
                 Icon = icon;
                 Width = Texture.Width;
                 Height = Texture.Height;
@@ -330,19 +344,18 @@ namespace ClassicUO.Game.UI.Gumps
                 _timer = (uint) (icon.Timer <= 0 ? 0xFFFF_FFFF : Time.Ticks + icon.Timer * 1000);
                 _gText = RenderedText.Create("", 0xFFFF, 2, true, FontStyle.Fixed | FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, Texture.Width);
 
+
+                AcceptMouseInput = true;
+                WantUpdateSize = false;
+                CanMove = true;
+
                 SetTooltip(icon.Text);
             }
 
             public BuffIcon Icon { get; }
             private readonly RenderedText _gText;
 
-            protected override void OnInitialize()
-            {
-                base.OnInitialize();
-                AcceptMouseInput = true;
-                WantUpdateSize = false;
-                CanMove = true;
-            }
+          
 
             public override void Update(double totalMS, double frameMS)
             {
@@ -367,7 +380,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_timer != 0xFFFF_FFFF && delta < 10000)
                 {
                     if (delta <= 0)
-                        ((BuffGump) Parent).RemoveBuff(Icon.Graphic);
+                        ((BuffGump) Parent).RemoveBuff(Icon.Type);
                     else
                     {
                         int alpha = _alpha;

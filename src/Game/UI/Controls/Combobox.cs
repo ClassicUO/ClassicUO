@@ -1,24 +1,22 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
@@ -78,7 +76,7 @@ namespace ClassicUO.Game.UI.Controls
                 if (_items != null)
                 {
                     _label.Text = _items[value];
-                    UIManager.Remove<ComboboxContextMenu>();
+                    UIManager.GetGump<ComboboxContextMenu>()?.Dispose();
                     OnOptionSelected?.Invoke(this, value);
                 }
             }
@@ -112,7 +110,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
             OnBeforeContextMenu?.Invoke(this, null);
 
@@ -121,7 +119,7 @@ namespace ClassicUO.Game.UI.Controls
                 X = ScreenCoordinateX,
                 Y = ScreenCoordinateY
             };
-            if (contextMenu.Height + ScreenCoordinateY > CUOEnviroment.Client.Window.ClientBounds.Height) contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - CUOEnviroment.Client.Window.ClientBounds.Height;
+            if (contextMenu.Height + ScreenCoordinateY > Client.Game.Window.ClientBounds.Height) contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - Client.Game.Window.ClientBounds.Height;
             UIManager.Add(contextMenu);
             base.OnMouseUp(x, y, button);
         }
@@ -138,19 +136,23 @@ namespace ClassicUO.Game.UI.Controls
                 HoveredLabel[] labels = new HoveredLabel[items.Length];
                 var index = 0;
 
-                foreach (var item in items)
+                for (int i = 0; i < items.Length; i++)
                 {
-                    var label = new HoveredLabel(item, false, 0x0453, 0x0453, font: _box._font)
+                    string item = items[i];
+
+                    if (item == null)
+                        item = string.Empty;
+
+                    var label = new HoveredLabel(item, false, 0x0453, 0x0453, 0x0453, font: _box._font)
                     {
                         X = 2,
                         Y = index * 15,
                         Tag = index,
-                        DrawBackgroundCurrentIndex = true
+                        DrawBackgroundCurrentIndex = true,
+                        IsVisible = item.Length != 0
                     };
                     label.MouseUp += Label_MouseUp;
-                    labels[index] = label;
-
-                    index++;
+                    labels[index++] = label;
                 }
 
                 var totalHeight = labels.Max(o => o.Y + o.Height);
@@ -189,7 +191,7 @@ namespace ClassicUO.Game.UI.Controls
 
             private void Label_MouseUp(object sender, MouseEventArgs e)
             {
-                if (e.Button == MouseButton.Left)
+                if (e.Button == MouseButtonType.Left)
                     _box.SelectedIndex = (int) ((Label) sender).Tag;
             }
         }

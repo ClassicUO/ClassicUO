@@ -1,29 +1,29 @@
 #region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering
-//	new technologies.
-//
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
+using System.Xml;
 
 using ClassicUO.Game;
 using ClassicUO.Game.Managers;
@@ -34,8 +34,6 @@ using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
 using Newtonsoft.Json;
-
-using SDL2;
 
 namespace ClassicUO.Configuration
 {
@@ -67,6 +65,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public int SpeechDelay { get; set; } = 100;
         [JsonProperty] public bool ScaleSpeechDelay { get; set; } = true;
         [JsonProperty] public bool SaveJournalToFile { get; set; }
+        [JsonProperty] public bool ForceUnicodeJournal { get; set; }
 
         // hues
         [JsonProperty] public ushort SpeechHue { get; set; } = 0x02B2;
@@ -76,6 +75,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public ushort PartyMessageHue { get; set; } = 0x0044;
         [JsonProperty] public ushort GuildMessageHue { get; set; } = 0x0044;
         [JsonProperty] public ushort AllyMessageHue { get; set; } = 0x0057;
+        [JsonProperty] public ushort ChatMessageHue { get; set; } = 0x0256;
         [JsonProperty] public ushort InnocentHue { get; set; } = 0x005A;
         [JsonProperty] public ushort PartyAuraHue { get; set; } = 0x0044;
         [JsonProperty] public ushort FriendHue { get; set; } = 0x0044;
@@ -113,10 +113,10 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool NoColorObjectsOutOfRange { get; set; }
         [JsonProperty] public bool UseCircleOfTransparency { get; set; }
         [JsonProperty] public int CircleOfTransparencyRadius { get; set; } = Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS / 2;
+        [JsonProperty] public int CircleOfTransparencyType { get; set; } // 0 = normal, 1 = like original client
         [JsonProperty] public int VendorGumpHeight { get; set; } = 60; //original vendor gump size
-        [JsonProperty] public float ScaleZoom { get; set; } = 1.0f;
-        [JsonProperty] public float RestoreScaleValue { get; set; } = 1.0f;
-        [JsonProperty] public bool EnableScaleZoom { get; set; }
+        [JsonProperty] public float DefaultScale { get; set; } = 1.0f;
+        [JsonProperty] public bool EnableMousewheelScaleZoom { get; set; }
         [JsonProperty] public bool SaveScaleAfterClose { get; set; }
         [JsonProperty] public bool RestoreScaleAfterUnpressCtrl { get; set; }
         [JsonProperty] public bool BandageSelfOld { get; set; } = true;
@@ -181,6 +181,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool DisableArrowBtn { get; set; }
         [JsonProperty] public bool DisableTabBtn { get; set; }
         [JsonProperty] public bool DisableCtrlQWBtn { get; set; }
+        [JsonProperty] public bool DisableAutoMove { get; set; }
         [JsonProperty] public bool EnableDragSelect { get; set; }
         [JsonProperty] public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift
         [JsonProperty] public bool OverrideContainerLocation { get; set; }
@@ -196,75 +197,13 @@ namespace ClassicUO.Configuration
 
         [JsonProperty] public bool ShowInfoBar { get; set; }
         [JsonProperty] public int InfoBarHighlightType { get; set; } // 0 = text colour changes, 1 = underline
-        [JsonProperty]
-        public InfoBarItem[] InfoBarItems { get; set; } =
-        {
-            new InfoBarItem("", InfoBarVars.NameNotoriety, 0x3D2),
-            new InfoBarItem("Hits", InfoBarVars.HP, 0x1B6),
-            new InfoBarItem("Mana", InfoBarVars.Mana, 0x1ED),
-            new InfoBarItem("Stam", InfoBarVars.Stamina, 0x22E),
-            new InfoBarItem("Weight", InfoBarVars.Weight, 0x3D2),
-        };
+      
 
         [JsonProperty]
-        public Macro[] Macros { get; set; } =
-        {
-            new Macro("Paperdoll", (SDL.SDL_Keycode) 112, true, false, false)
-            {
-                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 10)
-                {
-                    HasSubMenu = 1
-                }
-            },
+        public InfoBarItem[] InfoBarItems { get; set; }// [FILE_FIX] TODO: REMOVE IT
+        [JsonProperty]
+        public Macro[] Macros { get; set; } // [FILE_FIX] TODO: REMOVE IT
 
-            new Macro("Options", (SDL.SDL_Keycode) 111, true, false, false)
-            {
-                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 9)
-                {
-                    HasSubMenu = 1
-                }
-            },
-
-            new Macro("Journal", (SDL.SDL_Keycode) 106, true, false, false)
-            {
-                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 12)
-                {
-                    HasSubMenu = 1
-                }
-            },
-
-            new Macro("Backpack", (SDL.SDL_Keycode) 105, true, false, false)
-            {
-                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 16)
-                {
-                    HasSubMenu = 1
-                }
-            },
-
-            new Macro("Radar", (SDL.SDL_Keycode) 114, true, false, false)
-            {
-                FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 17)
-                {
-                    HasSubMenu = 1
-                }
-            },
-
-            new Macro("Bow", (SDL.SDL_Keycode) 98, false, true, false)
-            {
-                FirstNode = new MacroObject((MacroType) 18, 0)
-                {
-                    HasSubMenu = 0
-                }
-            },
-
-            new Macro("Salute", (SDL.SDL_Keycode) 115, false, true, false)
-            {
-                FirstNode = new MacroObject((MacroType) 19, 0)
-                {
-                    HasSubMenu = 0
-                }
-            }
-        };
 
         [JsonProperty] public bool CounterBarEnabled { get; set; }
         [JsonProperty] public bool CounterBarHighlightOnUse { get; set; }
@@ -315,6 +254,9 @@ namespace ClassicUO.Configuration
 
         [JsonProperty] public bool RelativeDragAndDropItems { get; set; }
 
+        [JsonProperty] public bool ShowHouseContent { get; set; }
+        [JsonProperty] public bool SaveHealthbars { get; set; }
+
 
         internal static string ProfilePath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data");
@@ -349,53 +291,47 @@ namespace ClassicUO.Configuration
 
         private void SaveGumps(string path, List<Gump> gumps)
         {
-            using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "gumps.bin"))))
+            string gumpsXmlPath = Path.Combine(path, "gumps.xml");
+
+            using (XmlTextWriter xml = new XmlTextWriter(gumpsXmlPath, Encoding.UTF8)
             {
-                const uint VERSION = 3;
+                Formatting = System.Xml.Formatting.Indented,
+                IndentChar = '\t',
+                Indentation = 1
+            })
+            {
+                xml.WriteStartDocument(true);
+                xml.WriteStartElement("gumps");
 
-                writer.Write(VERSION);
-                writer.Write(0);
-
-                /*
-                 * int gumpsCount
-                 * loop:
-                 *      ushort typeLen
-                 *      string type
-                 *      int x
-                 *      int y
-                 *      undefinited data
-                 * endloop.
-                 */
-
-
-                if (gumps != null)
+                foreach (Gump gump in gumps)
                 {
-                    writer.Write(gumps.Count);
-
-                    foreach (Gump gump in gumps) gump.Save(writer);
+                    xml.WriteStartElement("gump");
+                    gump.Save(xml);
+                    xml.WriteEndElement();
                 }
-                else
-                    writer.Write(0);
+
+                xml.WriteEndElement();
+                xml.WriteEndDocument();
             }
 
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin"))))
                 UIManager.AnchorManager.Save(writer);
 
-            using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "skillsgroups.bin"))))
-                SkillsGroupManager.Save(writer);
+            SkillsGroupManager.Save();
         }
 
         public static uint GumpsVersion { get; private set; }
+
         public List<Gump> ReadGumps()
         {
             string path = FileSystemHelper.CreateFolderIfNotExists(ProfilePath, Username.Trim(), ServerName.Trim(), CharacterName.Trim());
-
-            string binpath = Path.Combine(path, "gumps.bin");
-
-            if (!File.Exists(binpath))
-                return null;
+            List<Gump> gumps = new List<Gump>();
 
 
+
+            // #########################################################
+            // [FILE_FIX]
+            // TODO: this code is a workaround to port old macros to the new xml system.
             string skillsGroupsPath = Path.Combine(path, "skillsgroups.bin");
 
             if (File.Exists(skillsGroupsPath))
@@ -403,58 +339,257 @@ namespace ClassicUO.Configuration
                 try
                 {
                     using (BinaryReader reader = new BinaryReader(File.OpenRead(skillsGroupsPath)))
-                        SkillsGroupManager.Load(reader);
+                    {
+                        int version = reader.ReadInt32();
+
+                        int groupCount = reader.ReadInt32();
+
+                        for (int i = 0; i < groupCount; i++)
+                        {
+                            int entriesCount = reader.ReadInt32();
+                            string groupName = reader.ReadUTF8String(reader.ReadInt32());
+
+                            SkillsGroup g = new SkillsGroup();
+                            g.Name = groupName;
+
+                            for (int j = 0; j < entriesCount; j++)
+                            {
+                                byte idx = (byte) reader.ReadInt32();
+                                g.Add(idx);
+                            }
+
+                            g.Sort();
+
+                            SkillsGroupManager.Add(g);
+                        }
+                    }
+
                 }
                 catch (Exception e)
                 {
-                    SkillsGroupManager.LoadDefault();
+                    SkillsGroupManager.MakeDefault();
                     Log.Error( e.StackTrace);
                 }
+
+               
+                SkillsGroupManager.Save();
+
+                try
+                {
+                    File.Delete(skillsGroupsPath);
+                }
+                catch { }
             }
 
-            List<Gump> gumps = new List<Gump>();
+            string binpath = Path.Combine(path, "gumps.bin");
 
-            using (BinaryReader reader = new BinaryReader(File.OpenRead(binpath)))
+            if (File.Exists(binpath))
             {
-                if (reader.BaseStream.Position + 12 < reader.BaseStream.Length)
+                using (BinaryReader reader = new BinaryReader(File.OpenRead(binpath)))
                 {
-                    GumpsVersion = reader.ReadUInt32();
-                    uint empty = reader.ReadUInt32();
+                    if (reader.BaseStream.Position + 12 < reader.BaseStream.Length)
+                    {
+                        GumpsVersion = reader.ReadUInt32();
+                        uint empty = reader.ReadUInt32();
 
-                    int count = reader.ReadInt32();
+                        int count = reader.ReadInt32();
 
-                    for (int i = 0; i < count; i++)
+                        for (int i = 0; i < count; i++)
+                        {
+                            try
+                            {
+                                int typeLen = reader.ReadUInt16();
+                                string typeName = reader.ReadUTF8String(typeLen);
+                                int x = reader.ReadInt32();
+                                int y = reader.ReadInt32();
+
+                                Type type = Type.GetType(typeName, true);
+                                Gump gump = (Gump) Activator.CreateInstance(type);
+                                gump.Restore(reader);
+                                gump.X = x;
+                                gump.Y = y;
+
+                                //gump.SetInScreen();
+
+                                if (gump.LocalSerial != 0)
+                                    UIManager.SavePosition(gump.LocalSerial, new Point(x, y));
+
+                                if (!gump.IsDisposed)
+                                    gumps.Add(gump);
+                            }
+                            catch (Exception e)
+                            {
+                                Log.Error(e.StackTrace);
+                            }
+                        }
+                    }
+                }
+
+                SaveGumps(path, gumps);
+
+                gumps.Clear();
+
+                try
+                {
+                    File.Delete(binpath);
+                }
+                catch
+                {
+
+                }
+            }
+            // #########################################################
+
+
+
+            // load skillsgroup
+            //SkillsGroupManager.Load();
+            SkillsGroupManager.Load();
+
+            // load gumps
+            string gumpsXmlPath = Path.Combine(path, "gumps.xml");
+
+            if (File.Exists(gumpsXmlPath))
+            {
+                XmlDocument doc = new XmlDocument();
+                try
+                {
+                    doc.Load(gumpsXmlPath);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+
+                    return gumps;
+                }
+
+                XmlElement root = doc["gumps"];
+
+                if (root != null)
+                {
+                    foreach (XmlElement xml in root.GetElementsByTagName("gump"))
                     {
                         try
                         {
-                            int typeLen = reader.ReadUInt16();
-                            string typeName = reader.ReadUTF8String(typeLen);
-                            int x = reader.ReadInt32();
-                            int y = reader.ReadInt32();
+                            GUMP_TYPE type = (GUMP_TYPE) int.Parse(xml.GetAttribute("type"));
+                            int x = int.Parse(xml.GetAttribute("x"));
+                            int y = int.Parse(xml.GetAttribute("y"));
+                            uint serial = uint.Parse(xml.GetAttribute("serial"));
 
-                            Type type = Type.GetType(typeName, true);
-                            Gump gump = (Gump) Activator.CreateInstance(type);
-                            gump.Initialize();
-                            gump.Restore(reader);
+                            Gump gump = null;
+                            switch (type)
+                            {
+                                case GUMP_TYPE.GT_BUFF:
+                                    gump = new BuffGump();
+                                    break;
+                                case GUMP_TYPE.GT_CONTAINER:
+                                    gump = new ContainerGump();
+                                    break;
+                                case GUMP_TYPE.GT_COUNTERBAR:
+                                    gump = new CounterBarGump();
+                                    break;
+                                case GUMP_TYPE.GT_HEALTHBAR:
+                                    if (CustomBarsToggled)
+                                        gump = new HealthBarGumpCustom();
+                                    else
+                                        gump = new HealthBarGump();
+                                    break;
+                                case GUMP_TYPE.GT_INFOBAR:
+                                    gump = new InfoBarGump();
+                                    break;
+                                case GUMP_TYPE.GT_JOURNAL:
+                                    gump = new JournalGump();
+                                    break;
+                                case GUMP_TYPE.GT_MACROBUTTON:
+                                    gump = new MacroButtonGump();
+                                    break;
+                                case GUMP_TYPE.GT_MINIMAP:
+                                    gump = new MiniMapGump();
+                                    break;
+                                case GUMP_TYPE.GT_PAPERDOLL:
+                                    gump = new PaperDollGump();
+                                    break;
+                                case GUMP_TYPE.GT_SKILLMENU:
+                                    if (StandardSkillsGump)
+                                        gump = new StandardSkillsGump();
+                                    else
+                                        gump = new SkillGumpAdvanced();
+                                    break;
+                                case GUMP_TYPE.GT_SPELLBOOK:
+                                    gump = new SpellbookGump();
+                                    break;
+                                case GUMP_TYPE.GT_STATUSGUMP:
+                                    switch (Settings.GlobalSettings.ShardType)
+                                    {
+                                        default:
+                                        case 0: // modern
+
+                                            gump = new StatusGumpModern();
+
+                                            break;
+
+                                        case 1: // old
+
+                                            gump = new StatusGumpOld();
+
+                                            break;
+
+                                        case 2: // outlands
+
+                                            gump = new StatusGumpOutlands();
+
+                                            break;
+                                    }
+                                    break;
+                                //case GUMP_TYPE.GT_TIPNOTICE: 
+                                //    gump = new TipNoticeGump();
+                                //    break;
+                                case GUMP_TYPE.GT_ABILITYBUTTON:
+                                    gump = new UseAbilityButtonGump();
+                                    break;
+                                case GUMP_TYPE.GT_SPELLBUTTON:
+                                    gump = new UseSpellButtonGump();
+                                    break;
+                                case GUMP_TYPE.GT_SKILLBUTTON:
+                                    gump = new SkillButtonGump();
+                                    break;
+                                case GUMP_TYPE.GT_RACIALBUTTON:
+                                    gump = new RacialAbilityButton();
+                                    break;
+                                case GUMP_TYPE.GT_WORLDMAP:
+                                    gump = new WorldMapGump();
+                                    break;
+                            }
+
+                            if (gump == null)
+                                continue;
+
+                            gump.LocalSerial = serial;
+                            gump.Restore(xml);
                             gump.X = x;
                             gump.Y = y;
 
-                            //gump.SetInScreen();
-
                             if (gump.LocalSerial != 0)
+                            {
                                 UIManager.SavePosition(gump.LocalSerial, new Point(x, y));
+                            }
 
-                            if (!gump.IsDisposed) gumps.Add(gump);
+                            if (!gump.IsDisposed)
+                            {
+                                gumps.Add(gump);
+                            }
+
                         }
-                        catch (Exception e)
+                        catch (Exception ex)
                         {
-                            Log.Error( e.StackTrace);
+                            Log.Error(ex.ToString());
                         }
                     }
                 }
             }
 
-
+          
+            // load anchors
             string anchorsPath = Path.Combine(path, "anchors.bin");
 
             if (File.Exists(anchorsPath))

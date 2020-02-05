@@ -1,32 +1,28 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.CompilerServices;
-
-using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -108,7 +104,6 @@ namespace ClassicUO.IO
             {
                 buffer[i] = ptr[i];
             }
-            //fixed (byte* ptr = buffer) Buffer.MemoryCopy((byte*) PositionAddress, ptr, count, count);
 
             Position += count;
         }
@@ -138,32 +133,5 @@ namespace ClassicUO.IO
 
             return s;
         }
-
-        //[MethodImpl(256)]
-        //internal (int, int, bool) SeekByEntryIndex(int entryidx)
-        //{
-        //    if (entryidx < 0 || Entries == null || entryidx >= Entries.Length)
-        //        return (0, 0, false);
-
-        //    ref readonly UOFileIndex3D e = ref Entries[entryidx];
-
-        //    if (e.Offset < 0) return (0, 0, false);
-
-        //    int length = e.Length & 0x7FFFFFFF;
-        //    int extra = e.Extra;
-
-        //    if ((e.Length & (1 << 31)) != 0)
-        //    {
-        //        Verdata.File.Seek(e.Offset);
-
-        //        return (length, extra, true);
-        //    }
-
-        //    if (e.Length < 0) return (0, 0, false);
-
-        //    Seek(e.Offset);
-
-        //    return (length, extra, false);
-        //}
     }
 }

@@ -1,33 +1,30 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System.Linq;
-
+using ClassicUO.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 
@@ -77,18 +74,18 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_area);
         }
 
-        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Serial> e)
+        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<uint> e)
         {
             foreach (BulletinBoardObject v in Children.OfType<BulletinBoardObject>().Where(s => e.Contains(s.Item)))
                 v.Dispose();
         }
 
-        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Serial> e)
+        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<uint> e)
         {
             foreach (BulletinBoardObject v in Children.OfType<BulletinBoardObject>().Where(s => e.Contains(s.Item)))
                 v.Dispose();
 
-            foreach (Serial item in e) NetClient.Socket.Send(new PBulletinBoardRequestMessageSummary(LocalSerial, item));
+            foreach (uint item in e) NetClient.Socket.Send(new PBulletinBoardRequestMessageSummary(LocalSerial, item));
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -124,12 +121,12 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Button _buttonRemove;
         private readonly Button _buttonReply;
 
-        private readonly Serial _msgSerial;
+        private readonly uint _msgSerial;
         private readonly ScrollFlag _scrollBar;
         private readonly TextBox _subjectTextbox;
         private readonly MultiLineBox _textBox;
 
-        public BulletinBoardItem(Serial serial, Serial msgSerial, string poster, string subject, string datatime, string data, byte variant) : base(serial, 0)
+        public BulletinBoardItem(uint serial, uint msgSerial, string poster, string subject, string datatime, string data, byte variant) : base(serial, 0)
         {
             _msgSerial = msgSerial;
             AcceptKeyboardInput = true;
@@ -142,7 +139,7 @@ namespace ClassicUO.Game.UI.Gumps
             });
             _scrollBar = new ScrollFlag(0, 0, Height, true);
             Add(_scrollBar);
-            bool useUnicode = UOFileManager.ClientVersion >= ClientVersions.CV_305D;
+            bool useUnicode = Client.Version >= ClientVersion.CV_305D;
             byte unicodeFontIndex = 1;
             int unicodeFontHeightOffset = 0;
 
@@ -293,16 +290,16 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        protected override void OnMouseWheel(MouseEvent delta)
+        protected override void OnMouseWheel(MouseEventType delta)
         {
             switch (delta)
             {
-                case MouseEvent.WheelScrollUp:
+                case MouseEventType.WheelScrollUp:
                     _scrollBar.Value -= 5;
 
                     break;
 
-                case MouseEvent.WheelScrollDown:
+                case MouseEventType.WheelScrollDown:
                     _scrollBar.Value += 5;
 
                     break;
@@ -342,12 +339,12 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class BulletinBoardObject : ScrollAreaItem
     {
-        public BulletinBoardObject(Serial parent, Item serial, string text)
+        public BulletinBoardObject(uint parent, Item serial, string text)
         {
             LocalSerial = parent;
             Item = serial;
             CanMove = false;
-            bool unicode = UOFileManager.ClientVersion >= ClientVersions.CV_305D;
+            bool unicode = Client.Version >= ClientVersion.CV_305D;
 
             Add(new GumpPic(0, 0, 0x1523, 0));
             Add(new Label(text, unicode, (ushort) (unicode ? 0 : 0x0386), font: (byte) (unicode ? 1 : 9)) {X = Children[Children.Count - 1].Texture.Width + 2});
@@ -355,9 +352,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public Item Item { get; }
 
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (button != MouseButton.Left)
+            if (button != MouseButtonType.Left)
                 return false;
 
             NetClient.Socket.Send(new PBulletinBoardRequestMessage(LocalSerial, Item));

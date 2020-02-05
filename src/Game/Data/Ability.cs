@@ -1,24 +1,22 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
@@ -26,7 +24,7 @@ using System;
 namespace ClassicUO.Game.Data
 {
     [Flags]
-    public enum Ability : ushort
+    enum Ability : ushort
     {
         Invalid = 0xFF,
         None = 0,
@@ -79,7 +77,7 @@ namespace ClassicUO.Game.Data
 
     internal static class AbilityData
     {
-        public static AbilityDefinition[] Abilities { get; } = new AbilityDefinition[Constants.MAX_ABILITIES_COUNT]
+        public static readonly AbilityDefinition[] Abilities = new AbilityDefinition[Constants.MAX_ABILITIES_COUNT]
         {
             new AbilityDefinition(1, "Armor Ignore", 0x5200),
             new AbilityDefinition(2, "Bleed Attack", 0x5201),

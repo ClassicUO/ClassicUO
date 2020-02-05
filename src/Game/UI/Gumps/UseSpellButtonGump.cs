@@ -1,35 +1,34 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
 using System.IO;
+using System.Xml;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
@@ -39,12 +38,13 @@ namespace ClassicUO.Game.UI.Gumps
     internal class UseSpellButtonGump : AnchorableGump
     {
         private SpellDefinition _spell;
+        private GumpPic _background;
 
         public UseSpellButtonGump() : base(0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
-            CanBeSaved = true;
+            CanCloseWithRightClick = true;
         }
 
         public UseSpellButtonGump(SpellDefinition spell) : this()
@@ -54,17 +54,24 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SPELLBUTTON;
+
+        public ushort Hue
+        {
+            set => _background.Hue = value;
+        }
+
         private void BuildGump()
         {
             LocalSerial = (uint) _spell.ID;
 
-            Add(new GumpPic(0, 0, (ushort) _spell.GumpIconSmallID, 0) {AcceptMouseInput = false});
+            Add(_background = new GumpPic(0, 0, (ushort) _spell.GumpIconSmallID, 0) {AcceptMouseInput = false});
 
-            (int cliloc, int spl) = GetSpellTooltip(_spell.ID);
+            int cliloc = GetSpellTooltip(_spell.ID);
 
-            if (cliloc != 0 || spl != 0)
+            if (cliloc != 0)
             {
-                SetTooltip(UOFileManager.Cliloc.GetString(cliloc - spl + _spell.ID));
+                SetTooltip(ClilocLoader.Instance.GetString(cliloc), 80);
             }
 
             WantUpdateSize = true;
@@ -74,43 +81,52 @@ namespace ClassicUO.Game.UI.Gumps
             GroupMatrixHeight = 44;
         }
 
-        private static (int, int) GetSpellTooltip(int id)
+        private static int GetSpellTooltip(int id)
         {
             if (id >= 1 && id < 64) // Magery
-                return (3002010, 0);
-            
+                return 3002011 + (id - 1);
+
             if (id >= 101 && id <= 117) // necro
-                return (1060508, 64);
+                return 1060509 + (id - 101);
 
             if (id >= 201 && id <= 210)
-                return (1060584, 81);
+                return 1060585 + (id - 201);
 
             if (id >= 401 && id <= 406)
-                return (1060594, 91);
+                return 1060595 + (id - 401);
 
             if (id >= 501 && id <= 508)
-                return (1060609, 97);
+                return 1060610 + (id - 501);
 
             if (id >= 601 && id <= 616)
-                return (1071025, 15);
+                return 1071026 + (id - 601);
 
             if (id >= 678 && id <= 693)
-                return (0, 0);
+                return 1031678 + (id - 678);
 
-            return (0, 0);
+            if (id >= 701 && id <= 745)
+            {
+                if (id <= 706)
+                    return 1115612 + (id - 701);
+
+                if (id <= 745)
+                    return 1155896 + (id - 707);
+            }
+
+            return 0;
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
             Point offset = Mouse.LDroppedOffset;
 
-            if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButton.Left && Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
+            if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left && Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
                 GameActions.CastSpell(_spell.ID);
         }
 
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (!ProfileManager.Current.CastSpellsByOneClick && button == MouseButton.Left)
+            if (!ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left)
                 GameActions.CastSpell(_spell.ID);
 
             return true;
@@ -154,9 +170,18 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        public override void Dispose()
+
+        public override void Save(XmlTextWriter writer)
         {
-            base.Dispose();
+            base.Save(writer);
+            writer.WriteAttributeString("id", _spell.ID.ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+            _spell = SpellDefinition.FullIndexGetSpell(int.Parse(xml.GetAttribute("id")));
+            BuildGump();
         }
     }
 }

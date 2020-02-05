@@ -1,32 +1,32 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System.IO;
+using System.Xml;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             AcceptMouseInput = true;
-            CanBeSaved = true;
+            CanCloseWithRightClick = true;
         }
 
         public UseAbilityButtonGump(AbilityDefinition def, bool primary) : this()
@@ -52,6 +52,8 @@ namespace ClassicUO.Game.UI.Gumps
             _definition = def;
             BuildGump();
         }
+
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_ABILITYBUTTON;
 
         private void BuildGump()
         {
@@ -63,6 +65,8 @@ namespace ClassicUO.Game.UI.Gumps
             };
             Add(_button);
 
+            SetTooltip();
+
             WantUpdateSize = true;
             AcceptMouseInput = true;
             AnchorGroupName = "spell";
@@ -70,9 +74,14 @@ namespace ClassicUO.Game.UI.Gumps
             GroupMatrixHeight = 44;
         }
 
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        private void SetTooltip()
         {
-            if (button == MouseButton.Left)
+            SetTooltip(ClilocLoader.Instance.GetString(1028838 + (byte) (((byte) (_isPrimary ? World.Player.PrimaryAbility : World.Player.SecondaryAbility) & 0x7F) - 1)), 80);
+        }
+
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
+        {
+            if (button == MouseButtonType.Left)
             {
                 if (_isPrimary)
                     GameActions.UsePrimaryAbility();
@@ -99,6 +108,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _definition = def;
                 _button.Graphic = def.Icon;
+
+                SetTooltip();
             }
         }
 
@@ -140,6 +151,26 @@ namespace ClassicUO.Game.UI.Gumps
             _definition = new AbilityDefinition(index, name, (ushort) graphic);
             _isPrimary = reader.ReadBoolean();
 
+            BuildGump();
+        }
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            writer.WriteAttributeString("id", _definition.Index.ToString());
+            writer.WriteAttributeString("name", _definition.Name);
+            writer.WriteAttributeString("graphic", _definition.Icon.ToString());
+            writer.WriteAttributeString("isprimary", _isPrimary.ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+
+            _definition = new AbilityDefinition(ushort.Parse(xml.GetAttribute("id")),
+                                                xml.GetAttribute("name"),
+                                                ushort.Parse(xml.GetAttribute("graphic")));
+            _isPrimary = bool.Parse(xml.GetAttribute("isprimary"));
             BuildGump();
         }
     }

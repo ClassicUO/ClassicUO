@@ -1,29 +1,30 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
 
+using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.IO.Audio.MP3Sharp;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework.Audio;
 
@@ -37,15 +38,17 @@ namespace ClassicUO.IO.Audio
         private bool m_Playing;
         private MP3Stream m_Stream;
 
+
         public UOMusic(int index, string name, bool loop)
             : base(name, index)
         {
             m_Repeat = loop;
             m_Playing = false;
             Channels = AudioChannels.Stereo;
+            Delay = 0;
         }
 
-        private string Path => System.IO.Path.Combine(UOFileManager.UoFolderPath, UOFileManager.ClientVersion <= ClientVersions.CV_5090 ? $"music/{Name}.mp3" : $"Music/Digital/{Name}.mp3");
+        private string Path => System.IO.Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, Client.Version > ClientVersion.CV_5090 ? $"Music/Digital/{Name}.mp3" : $"music/{Name}.mp3");
 
         public void Update()
         {
@@ -55,26 +58,34 @@ namespace ClassicUO.IO.Audio
 
         protected override byte[] GetBuffer()
         {
-            if (m_Playing)
+            try
             {
-                int bytesReturned = m_Stream.Read(m_WaveBuffer, 0, m_WaveBuffer.Length);
-
-                if (bytesReturned != NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK)
+                if (m_Playing)
                 {
-                    if (m_Repeat)
+                    int bytesReturned = m_Stream.Read(m_WaveBuffer, 0, m_WaveBuffer.Length);
+
+                    if (bytesReturned != NUMBER_OF_PCM_BYTES_TO_READ_PER_CHUNK)
                     {
-                        m_Stream.Position = 0;
-                        m_Stream.Read(m_WaveBuffer, bytesReturned, m_WaveBuffer.Length - bytesReturned);
+                        if (m_Repeat)
+                        {
+                            m_Stream.Position = 0;
+                            m_Stream.Read(m_WaveBuffer, bytesReturned, m_WaveBuffer.Length - bytesReturned);
+                        }
+                        else
+                        {
+                            if (bytesReturned == 0)
+                                Stop();
+                        }
                     }
-                    else
-                    {
-                        if (bytesReturned == 0) Stop();
-                    }
+
+                    return m_WaveBuffer;
                 }
-
-                return m_WaveBuffer;
             }
-
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+            
             Stop();
 
             return null;

@@ -1,36 +1,34 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
@@ -43,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private readonly RadioButton _humanRadio;
         private readonly RadioButton _maleRadio;
         private readonly TextBox _nameTextBox;
-        private readonly Dictionary<Layer, Tuple<int, Hue>> CurrentColorOption = new Dictionary<Layer, Tuple<int, Hue>>();
+        private readonly Dictionary<Layer, Tuple<int, ushort>> CurrentColorOption = new Dictionary<Layer, Tuple<int, ushort>>();
         private readonly Dictionary<Layer, int> CurrentOption = new Dictionary<Layer, int>
         {
             {
@@ -101,7 +99,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(_nameTextBox = new TextBox(5, 16, 0, 200, false, hue: 1, style: FontStyle.Fixed)
             {
                 X = 257, Y = 65, Width = 200, Height = 20,
-                ValidationRules = (uint) (Constants.RULES.LETTER | Constants.RULES.SPACE)
+                ValidationRules = (uint) (TEXT_ENTRY_RULES.LETTER | TEXT_ENTRY_RULES.SPACE)
             }, 1);
             _nameTextBox.SetText(string.Empty);
 
@@ -128,7 +126,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }, 1);
             _elfRadio.ValueChanged += Race_ValueChanged;
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_60144)
+            if (Client.Version >= ClientVersion.CV_60144)
             {
                 Add(_gargoyleRadio = new RadioButton(1, 0x0768, 0x0767)
                 {
@@ -169,7 +167,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             switch (race)
             {
                 case RaceType.GARGOYLE:
-                    character.Graphic = isFemale ? (Graphic) 0x029B : (Graphic) 0x029A;
+                    character.Graphic = isFemale ? (ushort) 0x029B : (ushort) 0x029A;
 
                     character.Equipment[(int) Layer.Robe] = CreateItem(0x4001, CurrentColorOption[Layer.Shirt].Item2, Layer.Robe);
 
@@ -276,7 +274,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // Hair
             CharacterCreationValues.ComboContent content = CharacterCreationValues.GetHairComboContent(isFemale, race);
 
-            Add(_hairLabel = new Label(UOFileManager.Cliloc.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), false, 0, font: 9)
+            Add(_hairLabel = new Label(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), false, 0, font: 9)
             {
                 X = 98, Y = 142
             }, 1);
@@ -288,7 +286,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             {
                 content = CharacterCreationValues.GetFacialHairComboContent(race);
 
-                Add(_facialLabel = new Label(UOFileManager.Cliloc.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), false, 0, font: 9)
+                Add(_facialLabel = new Label(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), false, 0, font: 9)
                 {
                     X = 98, Y = 186
                 }, 1);
@@ -344,7 +342,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }, 1);
 
             if (!CurrentColorOption.ContainsKey(layer))
-                CurrentColorOption[layer] = new Tuple<int, Hue>(0, colorPicker.HueSelected);
+                CurrentColorOption[layer] = new Tuple<int, ushort>(0, colorPicker.HueSelected);
             else
                 colorPicker.SetSelectedIndex(CurrentColorOption[layer].Item1);
             colorPicker.ColorSelected += ColorPicker_ColorSelected;
@@ -352,7 +350,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private void ColorPicker_ColorSelected(object sender, ColorSelectedEventArgs e)
         {
-            CurrentColorOption[e.Layer] = new Tuple<int, Hue>(e.SelectedIndex, e.SelectedHue);
+            CurrentColorOption[e.Layer] = new Tuple<int, ushort>(e.SelectedIndex, e.SelectedHue);
 
             if (e.Layer != Layer.Invalid)
             {
@@ -438,7 +436,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             if (string.IsNullOrEmpty(character.Name))
             {
-                UIManager.GetGump<CharCreationGump>()?.ShowMessage(UOFileManager.Cliloc.GetString(3000612));
+                UIManager.GetGump<CharCreationGump>()?.ShowMessage(ClilocLoader.Instance.GetString(3000612));
 
                 return false;
             }
@@ -460,7 +458,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             return RaceType.HUMAN;
         }
 
-        private Item CreateItem(int id, Hue hue, Layer layer)
+        private Item CreateItem(int id, ushort hue, Layer layer)
         {
             if (id == 0)
                 return null;
@@ -529,7 +527,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 _layer = layer;
                 _pallet = pallet;
 
-                Add(new Label(UOFileManager.Cliloc.GetString(label), false, 0, font: 9)
+                Add(new Label(ClilocLoader.Instance.GetString(label), false, 0, font: 9)
                 {
                     X = 0,
                     Y = 0
@@ -551,7 +549,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 _colorPickerBox.MouseUp += ColorPickerBoxOnMouseUp;
             }
 
-            public Hue HueSelected => (ushort) (_colorPickerBox.SelectedHue + 1);
+            public ushort HueSelected => (ushort) (_colorPickerBox.SelectedHue + 1);
 
             private void ColorPickerBoxOnMouseUp(object sender, MouseEventArgs e)
             {
@@ -578,7 +576,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             private void ColorPicker_MouseClick(object sender, MouseEventArgs e)
             {
-                if (e.Button == MouseButton.Left)
+                if (e.Button == MouseButtonType.Left)
                 {
                     //Parent?.Add(_colorPickerBox);
                     _colorPickerBox?.Dispose();

@@ -1,24 +1,22 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
@@ -28,37 +26,18 @@ using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Managers
 {
-    [Flags]
-    public enum MessageType : byte
-    {
-        Regular = 0,
-        System = 1,
-        Emote = 2,
-        Limit3Spell = 3, // Sphere style shards use this to limit to 3 of these message types showing overhead.
-        Label = 6,
-        Focus = 7,
-        Whisper = 8,
-        Yell = 9,
-        Spell = 10,
-        Guild = 13,
-        Alliance = 14,
-        Command = 15,
-        Encoded = 0xC0,
-        Party = 0xFF // This is a CUO assigned type, value is unimportant
-    }
 
-    //public enum MessageFont : byte
+
+    //enum MessageFont : byte
     //{
     //    INVALID = 0xFF,
     //    Bold = 0,
@@ -73,7 +52,7 @@ namespace ClassicUO.Game
     //    SmallLight = 9
     //}
 
-    public enum AffixType : byte
+    enum AffixType : byte
     {
         Append = 0x00,
         Prepend = 0x01,
@@ -83,7 +62,7 @@ namespace ClassicUO.Game
 
 
 
-    internal static class Chat
+    internal static class MessageManager
     {
         public static PromptData PromptData { get; set; }
 
@@ -92,7 +71,7 @@ namespace ClassicUO.Game
         public static event EventHandler<UOMessageEventArgs> LocalizedMessageReceived;
 
 
-        public static void HandleMessage(Entity parent, string text, string name, Hue hue, MessageType type, byte font, bool unicode = false, string lang = null)
+        public static void HandleMessage(Entity parent, string text, string name, ushort hue, MessageType type, byte font, bool unicode = false, string lang = null)
         {
             if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
             {
@@ -244,10 +223,10 @@ namespace ClassicUO.Game
                 isunicode = ProfileManager.Current.OverrideAllFontsIsUnicode;
             }
 
-            int width = isunicode ? UOFileManager.Fonts.GetWidthUnicode(font, msg) : UOFileManager.Fonts.GetWidthASCII(font, msg);
+            int width = isunicode ? FontsLoader.Instance.GetWidthUnicode(font, msg) : FontsLoader.Instance.GetWidthASCII(font, msg);
 
             if (width > 200)
-                width = isunicode ? UOFileManager.Fonts.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder) : UOFileManager.Fonts.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder);
+                width = isunicode ? FontsLoader.Instance.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder) : FontsLoader.Instance.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder);
             else
                 width = 0;
 
@@ -293,7 +272,7 @@ namespace ClassicUO.Game
 
     internal class UOMessageEventArgs : EventArgs
     {
-        public UOMessageEventArgs(Entity parent, string text, string name, Hue hue, MessageType type, byte font, bool unicode = false, string lang = null)
+        public UOMessageEventArgs(Entity parent, string text, string name, ushort hue, MessageType type, byte font, bool unicode = false, string lang = null)
         {
             Parent = parent;
             Text = text;
@@ -306,7 +285,7 @@ namespace ClassicUO.Game
             IsUnicode = unicode;
         }
 
-        public UOMessageEventArgs(Entity parent, string text, Hue hue, MessageType type, byte font, uint cliloc, bool unicode = false, AffixType affixType = AffixType.None, string affix = null)
+        public UOMessageEventArgs(Entity parent, string text, ushort hue, MessageType type, byte font, uint cliloc, bool unicode = false, AffixType affixType = AffixType.None, string affix = null)
         {
             Parent = parent;
             Text = text;
@@ -325,7 +304,7 @@ namespace ClassicUO.Game
 
         public string Name { get; }
 
-        public Hue Hue { get; }
+        public ushort Hue { get; }
 
         public MessageType Type { get; }
 

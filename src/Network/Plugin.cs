@@ -1,24 +1,22 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
@@ -27,11 +25,11 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 
@@ -131,7 +129,7 @@ namespace ClassicUO.Network
 
             PluginHeader header = new PluginHeader
             {
-                ClientVersion = (int) UOFileManager.ClientVersion,
+                ClientVersion = (int) Client.Version,
                 Recv = Marshal.GetFunctionPointerForDelegate(_recv),
                 Send = Marshal.GetFunctionPointerForDelegate(_send),
                 GetPacketLength = Marshal.GetFunctionPointerForDelegate(_getPacketLength),
@@ -245,7 +243,7 @@ namespace ClassicUO.Network
 
         private static string GetUOFilePath()
         {
-            return UOFileManager.UoFolderPath;
+            return Settings.GlobalSettings.UltimaOnlineDirectory;
         }
 
         private static void SetWindowTitle(string str)
@@ -255,13 +253,13 @@ namespace ClassicUO.Network
             else
             {
                 CUOEnviroment.DisableUpdateWindowCaption = true;
-                CUOEnviroment.Client.Window.Title = str;
+                Client.Game.Window.Title = str;
             }
         }
 
         private static void GetStaticImage(ushort g, ref ArtInfo info)
         {
-            UOFileManager.Art.TryGetEntryInfo(g, out long address, out long size, out long compressedsize);
+            ArtLoader.Instance.TryGetEntryInfo(g, out long address, out long size, out long compressedsize);
             info.Address = address;
             info.Size = size;
             info.CompressedSize = compressedsize;
@@ -361,8 +359,15 @@ namespace ClassicUO.Network
         {
             bool result = true;
 
-            if (!UIManager.IsKeyboardFocusAllowHotkeys)
-                return true;
+
+            if (!World.InGame || 
+                (ProfileManager.Current != null && 
+                ProfileManager.Current.ActivateChatAfterEnter && 
+                UIManager.SystemChat?.IsActive == true) ||
+                UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
+            {
+                return result;
+            }
 
             foreach (Plugin plugin in _plugins)
             {
@@ -406,9 +411,9 @@ namespace ClassicUO.Network
         private static bool OnPluginSend(ref byte[] data, ref int length)
         {
             if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
-                NetClient.Socket.Send(data);
+                NetClient.Socket.Send(data, true);
             else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected)
-                NetClient.LoginSocket.Send(data);
+                NetClient.LoginSocket.Send(data, true);
 
             return true;
         }

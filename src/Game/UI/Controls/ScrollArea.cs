@@ -1,24 +1,22 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System.Linq;
@@ -30,9 +28,15 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
+    enum ScrollbarBehaviour
+    {
+        ShowWhenDataExceedFromView,
+        ShowAlways,
+    }
+
     internal class ScrollArea : Control
     {
-        private readonly IScrollBar _scrollBar;
+        private readonly ScrollBarBase _scrollBar;
         private readonly int _scrollbarHeight;
         private bool _isNormalScroll;
 
@@ -64,21 +68,32 @@ namespace ClassicUO.Game.UI.Controls
 
             //Add((Control)_scrollBar);
 
-            Control c = (Control) _scrollBar;
+            Control c = _scrollBar;
             c.Parent = this;
 
             AcceptMouseInput = true;
             WantUpdateSize = false;
             CanMove = true;
+            ScrollbarBehaviour = ScrollbarBehaviour.ShowWhenDataExceedFromView;
         }
 
+        public ScrollbarBehaviour ScrollbarBehaviour;
 
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
 
             CalculateScrollBarMaxValue();
-            _scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
+
+            if (ScrollbarBehaviour == ScrollbarBehaviour.ShowAlways)
+            {
+                _scrollBar.IsVisible = true;
+            }
+            else if (ScrollbarBehaviour == ScrollbarBehaviour.ShowWhenDataExceedFromView)
+            {
+                _scrollBar.IsVisible =_scrollBar.MaxValue > _scrollBar.MinValue;
+            }
+
         }
 
 
@@ -130,16 +145,16 @@ namespace ClassicUO.Game.UI.Controls
             return true;
         }
 
-        protected override void OnMouseWheel(MouseEvent delta)
+        protected override void OnMouseWheel(MouseEventType delta)
         {
             switch (delta)
             {
-                case MouseEvent.WheelScrollUp:
+                case MouseEventType.WheelScrollUp:
                     _scrollBar.Value -= _scrollBar.ScrollStep;
 
                     break;
 
-                case MouseEvent.WheelScrollDown:
+                case MouseEventType.WheelScrollDown:
                     _scrollBar.Value += _scrollBar.ScrollStep;
 
                     break;

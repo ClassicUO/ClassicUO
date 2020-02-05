@@ -1,10 +1,32 @@
-﻿using System;
+﻿#region license
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+// 
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
 using ClassicUO.Game;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Utility.Logging;
@@ -54,14 +76,14 @@ namespace ClassicUO.Utility.Platforms
             _customWindow?.SignalManaUpdate();
         }
 
-        public static void SignalAddMulti(ushort graphic, Position position)
+        public static void SignalAddMulti(ushort graphic, ushort x, ushort y)
         {
-            _customWindow?.SignalAddMulti(graphic, position);
+            _customWindow?.SignalAddMulti(graphic, x, y);
         }
 
         private class CustomWindow : IDisposable
         {
-            public enum UOAMessage
+            enum UOAMessage
             {
                 First = REGISTER,
 
@@ -265,7 +287,7 @@ namespace ClassicUO.Utility.Platforms
                         if (lParam == 1 && World.InGame)
                         {
                             foreach (Item item in World.Items.Where(s => s.IsMulti))
-                                PostMessage((IntPtr) wParam, (uint) UOAMessage.ADD_MULTI, (IntPtr) ((item.X & 0xFFFF) | ((item.Y & 0xFFFF) << 16)), (IntPtr) (int) item.Graphic);
+                                PostMessage((IntPtr) wParam, (uint) UOAMessage.ADD_MULTI, (IntPtr) ((item.X & 0xFFFF) | ((item.Y & 0xFFFF) << 16)), (IntPtr) item.Graphic);
                         }
 
                         return 1;
@@ -309,7 +331,7 @@ namespace ClassicUO.Utility.Platforms
                                 return 0;
 
                             if ((wParam & 0x00010000) != 0)
-                                Chat.HandleMessage(null, sb.ToString(), "System", hue, MessageType.Regular, 3, true);
+                                MessageManager.HandleMessage(null, sb.ToString(), "System", hue, MessageType.Regular, 3, true);
                             else
                                 World.Player.AddMessage(MessageType.Regular, sb.ToString(), 3, hue, true);
 
@@ -342,7 +364,7 @@ namespace ClassicUO.Utility.Platforms
                         return (int) _cmdID++;
                     }
 
-                    case UOAMessage.GET_UID: return World.Player != null ? (int) World.Player.Serial.Value : 0;
+                    case UOAMessage.GET_UID: return World.Player != null ? (int) World.Player.Serial : 0;
                     case UOAMessage.GET_SHARDNAME: break;
                     case UOAMessage.ADD_USER_2_PARTY: break;
 
@@ -412,9 +434,9 @@ namespace ClassicUO.Utility.Platforms
                     PostMessage((uint) UOAMessage.INT_STATUS, (IntPtr) World.Player.HitsMax, (IntPtr) World.Player.Hits);
             }
 
-            public void SignalAddMulti(ushort graphic, Position position)
+            public void SignalAddMulti(ushort graphic, ushort x, ushort y)
             {
-                IntPtr pos = (IntPtr) ((position.X & 0xFFFF) | ((position.Y & 0xFFFF) << 16));
+                IntPtr pos = (IntPtr) ((x & 0xFFFF) | ((y & 0xFFFF) << 16));
 
                 if (pos == IntPtr.Zero)
                     return;

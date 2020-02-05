@@ -1,24 +1,22 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
@@ -31,8 +29,6 @@ using ClassicUO.Network;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 using Mouse = ClassicUO.Input.Mouse;
 
@@ -49,11 +45,11 @@ namespace ClassicUO.Game.UI.Gumps
         private Point _lastPoint;
 
 
-        public MapGump(Serial serial, ushort gumpid, int width, int height) : base(serial, 0)
+        public MapGump(uint serial, ushort gumpid, int width, int height) : base(serial, 0)
         {
             AcceptMouseInput = false;
             CanMove = true;
-
+            CanCloseWithRightClick = true;
             Width = width;
             Height = height;
 
@@ -207,7 +203,7 @@ namespace ClassicUO.Game.UI.Gumps
                 var c0 = _container[i];
                 var c1 = _container[i + 1];
 
-                batcher.DrawLine(Textures.GetTexture(Color.White), 
+                batcher.DrawLine(Texture2DCache.GetTexture(Color.White), 
                                       c0.ScreenCoordinateX, c0.ScreenCoordinateY, 
                                       c1.ScreenCoordinateX, c1.ScreenCoordinateY,
                                       c0.ScreenCoordinateX + (c1.ScreenCoordinateX - c0.ScreenCoordinateX) / 2, c0.ScreenCoordinateY + (c1.ScreenCoordinateY - c0.ScreenCoordinateY) / 2);
@@ -218,14 +214,14 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
             base.OnMouseUp(x, y, button);
             _currentPin = null;
             _lastPoint = Point.Zero;
         }
 
-        protected override void OnMouseDown(int x, int y, MouseButton button)
+        protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
             _pinTimer = Time.Ticks + 300;
 

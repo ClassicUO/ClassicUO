@@ -1,27 +1,25 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
-using ClassicUO.IO;
+using ClassicUO.Data;
 
 namespace ClassicUO.Network
 {
@@ -214,7 +212,7 @@ namespace ClassicUO.Network
             0x0009, // 0xB6
             -1, // 0xB7
             -1, // 0xB8
-            0x0003, // 0xB9 //aggiornato da 3 a 5
+            0x0003, // 0xB9
             0x0006, // 0xBA
             0x0009, // 0xBB
             0x0003, // 0xBC
@@ -268,19 +266,19 @@ namespace ClassicUO.Network
             -1, // ec
             -1, // ed
             0x0A, // ee
-            0x0015, // ef -> mortacci tua
+            0x0015, // ef
             -1, // f0
             0x09, // f1
             0x19, // f2
-            0x1A, // f3 -> altro mortacci tua
+            0x1A, // f3
             -1, // f4
             0x15, // f5
             -1, // f6
             -1, // f7
             0x6A, // f8
             -1, // f9
-            -1, // fa
-            -1, // fb
+            -1, // fa -> UOStore
+            -1, // fb -> public house content
             -1, // fc
             -1, // fd
             -1 // ff
@@ -291,9 +289,9 @@ namespace ClassicUO.Network
             return _packetsTable[id];
         }
 
-        public static void AdjustPacketSizeByVersion(ClientVersions version)
+        public static void AdjustPacketSizeByVersion(ClientVersion version)
         {
-            if (version >= ClientVersions.CV_500A)
+            if (version >= ClientVersion.CV_500A)
             {
                 _packetsTable[0x0B] = 0x07;
                 _packetsTable[0x16] = -1;
@@ -306,12 +304,12 @@ namespace ClassicUO.Network
                 _packetsTable[0x31] = 0x01;
             }
 
-            if (version >= ClientVersions.CV_5090)
+            if (version >= ClientVersion.CV_5090)
                 _packetsTable[0xE1] = -1;
             else
                 _packetsTable[0xE1] = 0x09;
 
-            if (version >= ClientVersions.CV_6013)
+            if (version >= ClientVersion.CV_6013)
             {
                 _packetsTable[0xE3] = -1;
                 _packetsTable[0xE6] = 0x05;
@@ -330,7 +328,7 @@ namespace ClassicUO.Network
                 _packetsTable[0xEA] = -1;
             }
 
-            if (version >= ClientVersions.CV_6017)
+            if (version >= ClientVersion.CV_6017)
             {
                 _packetsTable[0x08] = 0x0F;
                 _packetsTable[0x25] = 0x15;
@@ -341,7 +339,7 @@ namespace ClassicUO.Network
                 _packetsTable[0x25] = 0x14;
             }
 
-            if (version >= ClientVersions.CV_6060)
+            if (version >= ClientVersion.CV_6060)
             {
                 _packetsTable[0xEE] = 0x2000;
                 _packetsTable[0xEF] = 0x2000;
@@ -354,12 +352,12 @@ namespace ClassicUO.Network
                 _packetsTable[0xF1] = -1;
             }
 
-            if (version >= ClientVersions.CV_60142)
+            if (version >= ClientVersion.CV_60142)
                 _packetsTable[0xB9] = 0x05;
             else
                 _packetsTable[0xB9] = 0x03;
 
-            if (version >= ClientVersions.CV_7000)
+            if (version >= ClientVersion.CV_7000)
             {
                 _packetsTable[0xEE] = 0x0A; //0x2000;
                 _packetsTable[0xEF] = 0x15; //0x2000;
@@ -370,7 +368,7 @@ namespace ClassicUO.Network
                 _packetsTable[0xEF] = 0x15;
             }
 
-            if (version >= ClientVersions.CV_7090)
+            if (version >= ClientVersion.CV_7090)
             {
                 _packetsTable[0x24] = 0x09;
                 _packetsTable[0x99] = 0x1E;
@@ -389,10 +387,16 @@ namespace ClassicUO.Network
                 _packetsTable[0xF2] = -1;
             }
 
-            if (version >= ClientVersions.CV_70180)
+            if (version >= ClientVersion.CV_70180)
                 _packetsTable[0x00] = 0x6A;
             else
                 _packetsTable[0x00] = 0x68;
+
+            if (version >= ClientVersion.CV_706400)
+            {
+                _packetsTable[0xFA] = 0x01;
+                _packetsTable[0xFB] = 0x02;
+            }
         }
     }
 }

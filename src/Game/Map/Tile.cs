@@ -1,37 +1,50 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Map
 {
     internal sealed class Tile
     {
+        private static readonly Queue<Tile> _pool = new Queue<Tile>();
+
+        public static Tile Create(ushort x, ushort y)
+        {
+            if (_pool.Count != 0)
+            {
+                Tile t = _pool.Dequeue();
+                t.X = x;
+                t.Y = y;
+                t._isDestroyed = false;
+
+                return t;
+            }
+            return new Tile(x, y);
+        }
+
+
         private bool _isDestroyed;
 
         public Tile(ushort x, ushort y)
@@ -40,30 +53,15 @@ namespace ClassicUO.Game.Map
             Y = y;
         }
 
-        private static readonly Queue<Tile> _pool = new Queue<Tile>();
-
-        public static Tile Create(ushort x, ushort y)
-        {
-            if (_pool.Count != 0)
-            {
-                var t = _pool.Dequeue();
-                t.X = x;
-                t.Y = y;
-                t._isDestroyed = false;
-                
-                return t;
-            }
-            return new Tile(x, y);
-        }
-
+      
         public ushort X { get; private set; }
         public ushort Y { get; private set;  }
-
         public GameObject FirstNode { get; private set; }
 
         public void AddGameObject(GameObject obj)
         {
             short priorityZ = obj.Z;
+            sbyte state = -1;
 
             switch (obj)
             {
@@ -73,6 +71,8 @@ namespace ClassicUO.Game.Map
                         priorityZ = (short) (tile.AverageZ - 1);
                     else
                         priorityZ--;
+
+                    state = 0;
 
                     break;
 
@@ -86,26 +86,38 @@ namespace ClassicUO.Game.Map
 
                     break;
 
-                case GameEffect _ /*when effect.Source == null*/:
+                case GameEffect _:
                     priorityZ += 2;
 
                     break;
 
-                case Multi m when (m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0:
-                    priorityZ--;
-                    break;
+                case Multi m :
+
+                    state = 1;
+
+                    if ((m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0)
+                    {
+                        priorityZ--;
+                        break;
+                    }
+
+                    if ((m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW) != 0)
+                    {
+                        state = 2;
+                        priorityZ++;
+                    }
+
+                    goto MULTI_DEFAULT;
 
                 default:
-
-                {
-                    ref readonly StaticTiles data = ref UOFileManager.TileData.StaticData[obj.Graphic];
+                    MULTI_DEFAULT:
+                    ref readonly StaticTiles data = ref TileDataLoader.Instance.StaticData[obj.Graphic];
 
                     if (data.IsBackground)
                         priorityZ--;
 
                     if (data.Height != 0)
                         priorityZ++;
-                }
 
                     break;
             }
@@ -127,12 +139,14 @@ namespace ClassicUO.Game.Map
 
             GameObject found = null;
             GameObject start = o;
-
+         
             while (o != null)
             {
                 int testPriorityZ = o.PriorityZ;
 
-                if (testPriorityZ > priorityZ || testPriorityZ == priorityZ && (obj is Land || obj is Multi m) && !(o is Land))
+                if (testPriorityZ > priorityZ || 
+                    (testPriorityZ == priorityZ && 
+                    (state == 0 || (state == 1 && !(o is Land)) ) ))
                     break;
 
                 found = o;

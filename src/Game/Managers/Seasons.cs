@@ -1,10 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿#region license
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+// 
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
 
-namespace ClassicUO.Game.Data
+
+namespace ClassicUO.Game.Managers
 {
     enum Seasons
     {
@@ -15,8 +31,45 @@ namespace ClassicUO.Game.Data
         Desolation
     }
 
-    static class Season
+    static class SeasonManager
     {
+        private readonly static ushort[] _winterGraphic = new ushort[Constants.MAX_LAND_DATA_INDEX_COUNT];
+
+        static SeasonManager()
+        {
+            _winterGraphic[196] = 0x011A;
+            _winterGraphic[197] = 0x011B;
+            _winterGraphic[198] = 0x011C;
+            _winterGraphic[199] = 0x011D;
+            _winterGraphic[206] = 0x05C0;
+            _winterGraphic[248] = 0x011A;
+            _winterGraphic[249] = 0x011B;
+            _winterGraphic[250] = 0x011C;
+            _winterGraphic[251] = 0x011D;
+            _winterGraphic[804] = 0x0391;
+            _winterGraphic[805] = 0x0392;
+            _winterGraphic[806] = 0x0393;
+            _winterGraphic[807] = 0x0394;
+            _winterGraphic[808] = 0x0395;
+            _winterGraphic[809] = 0x0396;
+            _winterGraphic[1521] = 0x011A;
+            _winterGraphic[1522] = 0x011B;
+            _winterGraphic[1523] = 0x011C;
+            _winterGraphic[1524] = 0x011D;
+            _winterGraphic[1529] = 0x011A;
+            _winterGraphic[1530] = 0x011B;
+            _winterGraphic[1531] = 0x011C;
+            _winterGraphic[1532] = 0x011D;
+            _winterGraphic[1533] = 0x011B;
+            _winterGraphic[1534] = 0x011C;
+            _winterGraphic[1535] = 0x011D;
+            _winterGraphic[1536] = 0x011B;
+            _winterGraphic[1537] = 0x011C;
+            _winterGraphic[1538] = 0x011D;
+            _winterGraphic[1539] = 0x011C;
+            _winterGraphic[1540] = 0x011D;
+        }
+
         public static ushort GetSeasonGraphic(Seasons season, ushort graphic)
         {
             switch (season)
@@ -24,6 +77,21 @@ namespace ClassicUO.Game.Data
                 case Seasons.Spring: return GetSpringGraphic(graphic);
                 case Seasons.Fall: return GetFallGraphic(graphic);
                 case Seasons.Desolation: return GetDesolationGraphic(graphic);
+            }
+
+            return graphic;
+        }
+
+        public static ushort GetLandSeasonGraphic(Seasons season, ushort graphic)
+        {
+            if (season != Seasons.Winter)
+                return graphic;
+
+            ushort buf = _winterGraphic[graphic];
+
+            if (buf != 0)
+            {
+                graphic = buf;
             }
 
             return graphic;

@@ -1,33 +1,30 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
 using System.Collections.Generic;
-
+using ClassicUO.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
@@ -39,7 +36,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         public CreateCharProfessionGump(ProfessionInfo parent = null) : base(0, 0)
         {
             _Parent = parent;
-            if (parent == null || !UOFileManager.Profession.Professions.TryGetValue(parent, out List<ProfessionInfo> professions) || professions == null) professions = new List<ProfessionInfo>(UOFileManager.Profession.Professions.Keys);
+            if (parent == null || !ProfessionLoader.Instance.Professions.TryGetValue(parent, out List<ProfessionInfo> professions) || professions == null) professions = new List<ProfessionInfo>(ProfessionLoader.Instance.Professions.Keys);
 
             /* Build the gump */
             Add(new ResizePic(2600)
@@ -54,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(new GumpPic(214, 58, 0x058B, 0));
             Add(new GumpPic(300, 51, 0x15A9, 0));
 
-            ClilocLoader localization = UOFileManager.Cliloc;
+            ClilocLoader localization = ClilocLoader.Instance;
 
             Add(new Label(localization.Translate(3000326), false, 0x0386, font: 2)
             {
@@ -86,7 +83,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public void SelectProfession(ProfessionInfo info)
         {
-            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && UOFileManager.Profession.Professions.TryGetValue(info, out List<ProfessionInfo> list) && list != null)
+            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && ProfessionLoader.Instance.Professions.TryGetValue(info, out List<ProfessionInfo> list) && list != null)
             {
                 Parent.Add(new CreateCharProfessionGump(info));
                 Parent.Remove(this);
@@ -141,7 +138,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             _info = info;
 
-            ClilocLoader localization = UOFileManager.Cliloc;
+            ClilocLoader localization = ClilocLoader.Instance;
 
             ResizePic background = new ResizePic(3000)
             {
@@ -161,19 +158,19 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(new GumpPic(121, -12, info.Graphic, 0));
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
             base.OnMouseUp(x, y, button);
-            if (button == MouseButton.Left) Selected?.Invoke(_info);
+            if (button == MouseButtonType.Left) Selected?.Invoke(_info);
         }
     }
 
     internal class ProfessionInfo
     {
-        internal static readonly int[,] _VoidSkills = new int[4, 2] {{0, InitialSkillValue}, {0, InitialSkillValue}, {0, UOFileManager.ClientVersion < ClientVersions.CV_70160 ? 0 : InitialSkillValue}, {0, 10}};
+        internal static readonly int[,] _VoidSkills = new int[4, 2] {{0, InitialSkillValue}, {0, InitialSkillValue}, {0, Client.Version < ClientVersion.CV_70160 ? 0 : InitialSkillValue}, {0, InitialSkillValue } };
         internal static readonly int[] _VoidStats = new int[3] {60, RemainStatValue, RemainStatValue};
-        public static int InitialSkillValue => UOFileManager.ClientVersion >= ClientVersions.CV_70160 ? 30 : 50;
-        public static int RemainStatValue => UOFileManager.ClientVersion >= ClientVersions.CV_70160 ? 15 : 10;
+        public static int InitialSkillValue => Client.Version >= ClientVersion.CV_70160 ? 30 : 50;
+        public static int RemainStatValue => Client.Version >= ClientVersion.CV_70160 ? 15 : 10;
         public string Name { get; set; }
         public string TrueName { get; set; }
         public int Localization { get; set; }
@@ -181,7 +178,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         public int DescriptionIndex { get; set; }
         public ProfessionLoader.PROF_TYPE Type { get; set; }
 
-        public Graphic Graphic { get; set; }
+        public ushort Graphic { get; set; }
 
         public bool TopLevel { get; set; }
         public int[,] SkillDefVal { get; set; } = _VoidSkills;

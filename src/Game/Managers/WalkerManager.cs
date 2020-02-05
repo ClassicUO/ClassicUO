@@ -1,31 +1,28 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using ClassicUO.Network;
 
 namespace ClassicUO.Game.Managers
 {
-#if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
     internal struct StepInfo
     {
         public byte Direction;
@@ -86,7 +83,7 @@ namespace ClassicUO.Game.Managers
         public byte CurrentWalkSequence;
         public long LastStepRequestTime;
         public ushort NewPlayerZ;
-        public bool ResendPacketSended;
+        public bool ResendPacketResync;
         public StepInfo[] StepInfos = new StepInfo[Constants.MAX_STEP_COUNT]
         {
             new StepInfo(), new StepInfo(), new StepInfo(),
@@ -108,7 +105,10 @@ namespace ClassicUO.Game.Managers
 
             if (x != -1)
             {
-                World.Player.Position = new Position((ushort) x, (ushort) y, z);
+                World.Player.X = (ushort) x;
+                World.Player.Y = (ushort) y;
+                World.Player.Z = z;
+                World.Player.UpdateScreenPosition();
 
                 World.RangeSize.X = x;
                 World.RangeSize.Y = y;
@@ -161,10 +161,10 @@ namespace ClassicUO.Game.Managers
 
             if (isBadStep)
             {
-                if (!ResendPacketSended)
+                if (!ResendPacketResync)
                 {
                     NetClient.Socket.Send(new PResend());
-                    ResendPacketSended = true;
+                    ResendPacketResync = true;
                 }
 
                 WalkingFailed = true;
@@ -180,9 +180,8 @@ namespace ClassicUO.Game.Managers
             WalkSequence = 0;
             CurrentWalkSequence = 0;
             WalkingFailed = false;
-            ResendPacketSended = false;
+            ResendPacketResync = false;
             LastStepRequestTime = 0;
         }
     }
-#endif
 }

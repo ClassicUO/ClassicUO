@@ -1,27 +1,24 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -119,14 +116,14 @@ namespace ClassicUO.Game.UI.Controls
             int w, h;
 
             if (_label.Unicode)
-                w = UOFileManager.Fonts.GetWidthUnicode(_label.Font, _label.Text);
+                w = FontsLoader.Instance.GetWidthUnicode(_label.Font, _label.Text);
             else
-                w = UOFileManager.Fonts.GetWidthASCII(_label.Font, _label.Text);
+                w = FontsLoader.Instance.GetWidthASCII(_label.Font, _label.Text);
 
             if (_label.Unicode)
-                h = UOFileManager.Fonts.GetHeightUnicode(_label.Font, _label.Text, w, TEXT_ALIGN_TYPE.TS_LEFT, 0x0);
+                h = FontsLoader.Instance.GetHeightUnicode(_label.Font, _label.Text, w, TEXT_ALIGN_TYPE.TS_LEFT, 0x0);
             else
-                h = UOFileManager.Fonts.GetHeightASCII(_label.Font, _label.Text, w, TEXT_ALIGN_TYPE.TS_LEFT, 0x0);
+                h = FontsLoader.Instance.GetHeightASCII(_label.Font, _label.Text, w, TEXT_ALIGN_TYPE.TS_LEFT, 0x0);
 
             Width = w;
             Height = h;
@@ -139,7 +136,7 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
 
             if (_label.IsEditable)
-                batcher.Draw2D(Textures.GetTexture(Color.Wheat), x, y, _label.Width, _label.Height, ref _hueVector);
+                batcher.Draw2D(Texture2DCache.GetTexture(Color.Wheat), x, y, _label.Width, _label.Height, ref _hueVector);
 
             return base.Draw(batcher, x, y);
         }

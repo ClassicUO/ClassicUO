@@ -1,43 +1,41 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
-using System.IO;
 using System.Linq;
-
+using ClassicUO.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal sealed class TradingGump : TextContainerGump
     {
+        private uint _gold, _platinum, _hisGold, _hisPlatinum;
         private readonly string _name;
         private GumpPic _hisPic;
 
@@ -45,8 +43,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         private DataBox _myBox, _hisBox;
         private Checkbox _myCheckbox;
+        private readonly Label[] _myCoins = new Label[2];
+        private readonly Label[] _hisCoins = new Label[2];
+        private readonly TextBox[] _myCoinsEntries = new TextBox[2];
 
-        public TradingGump(Serial local, string name, Serial id1, Serial id2) : base(local, 0)
+        public TradingGump(uint local, string name, uint id1, uint id2) : base(local, 0)
         {
             CanMove = true;
             CanCloseWithRightClick = true;
@@ -60,8 +61,65 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        public Serial ID1 { get; }
-        public Serial ID2 { get; }
+        public uint ID1 { get; }
+        public uint ID2 { get; }
+
+        public uint Gold
+        {
+            get => _gold;
+            set
+            {
+                if (_gold != value)
+                {
+                    _gold = value;
+
+                    if (Client.Version >= ClientVersion.CV_704565)
+                        _myCoins[0].Text = _gold.ToString();
+                }
+            }
+        }
+        public uint Platinum
+        {
+            get => _platinum;
+            set
+            {
+                if (_platinum != value)
+                {
+                    _platinum = value;
+
+                    if (Client.Version >= ClientVersion.CV_704565)
+                        _myCoins[1].Text = _platinum.ToString();
+                }
+            }
+        }
+        public uint HisGold
+        {
+            get => _hisGold;
+            set
+            {
+                if (_hisGold != value)
+                {
+                    _hisGold = value;
+
+                    if (Client.Version >= ClientVersion.CV_704565)
+                        _hisCoins[0].Text = _hisGold.ToString();
+                }
+            }
+        }
+        public uint HisPlatinum
+        {
+            get => _hisPlatinum;
+            set
+            {
+                if (_hisPlatinum != value)
+                {
+                    _hisPlatinum = value;
+
+                    if (Client.Version >= ClientVersion.CV_704565)
+                        _hisCoins[1].Text = _hisPlatinum.ToString();
+                }
+            }
+        }
 
         public bool ImAccepting
         {
@@ -72,7 +130,6 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _imAccepting = value;
                     SetCheckboxes();
-                    //BuildGump();
                 }
             }
         }
@@ -86,7 +143,6 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _heIsAccepting = value;
                     SetCheckboxes();
-                    //BuildGump();
                 }
             }
         }
@@ -184,7 +240,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int myX, myY, otherX, otherY;
 
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_704565)
+            if (Client.Version >= ClientVersion.CV_704565)
             {
                 myX = 37;
                 myY = 29;
@@ -233,29 +289,133 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            if (UOFileManager.ClientVersion >= ClientVersions.CV_704565)
+            int mydbX, mydbY, opdbX, opdbY;
+
+            if (Client.Version >= ClientVersion.CV_704565)
             {
                 Add(new GumpPic(0, 0, 0x088A, 0));
                 Add(new Label(World.Player.Name, false, 0x0481, font: 3)
                         { X = 73, Y = 32 });
-                int fontWidth = 250 - UOFileManager.Fonts.GetWidthASCII(3, _name);
+                int fontWidth = 250 - FontsLoader.Instance.GetWidthASCII(3, _name);
 
                 Add(new Label(_name, false, 0x0481, font: 3)
                         { X = fontWidth, Y = 244 });
+
+
+                _myCoins[0] = new Label("0", false, 0x0481, font: 9)
+                {
+                    X = 43,
+                    Y = 67
+                };
+                Add(_myCoins[0]);
+
+                _myCoins[1] = new Label("0", false, 0x0481, font: 9)
+                {
+                    X = 180,
+                    Y = 67
+                };
+                Add(_myCoins[1]);
+
+                _hisCoins[0] = new Label("0", false, 0x0481, font: 9)
+                {
+                    X = 180,
+                    Y = 190
+                };
+                Add(_hisCoins[0]);
+
+                _hisCoins[1] = new Label("0", false, 0x0481, font: 9)
+                {
+                    X = 180,
+                    Y = 210
+                };
+                Add(_hisCoins[1]);
+
+                _myCoinsEntries[0] = new TextBox(9, -1, 100, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
+                {
+                    X = 43,
+                    Y = 190,
+                    Width = 100,
+                    Height = 20,
+                    NumericOnly = true,
+                    Tag = 0
+                };
+                Add(_myCoinsEntries[0]);
+                _myCoinsEntries[0].SetText("0");
+
+                _myCoinsEntries[1] = new TextBox(9, -1, 100, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
+                {
+                    X = 43,
+                    Y = 210,
+                    Width = 100,
+                    Height = 20,
+                    NumericOnly = true,
+                    Tag = 1
+                };
+                Add(_myCoinsEntries[1]);
+                _myCoinsEntries[1].SetText("0");
+
+
+                void OnTextChanged(object sender, EventArgs e)
+                {
+                    TextBox entry = (TextBox) sender;
+
+                    if (entry != null)
+                    {
+                        if (string.IsNullOrEmpty(entry.Text))
+                        {
+                            entry.SetText("0");
+                        }
+                        else if (uint.TryParse(entry.Text, out uint value))
+                        {
+                            if ((int) entry.Tag == 0) // gold
+                            {
+                                if (value > Gold)
+                                {
+                                    value = Gold;
+                                }
+                            }
+                            else // platinum
+                            {
+                                if (value > Platinum)
+                                {
+                                    value = Platinum;
+                                }
+                            }
+
+                            entry.SetText(value.ToString());
+                        }
+
+                        NetClient.Socket.Send(new PTradeUpdateGold(ID1, uint.Parse(_myCoinsEntries[0].Text), uint.Parse(_myCoinsEntries[1].Text)));
+                    }
+                }
+
+                _myCoinsEntries[0].TextChanged += OnTextChanged;
+                _myCoinsEntries[1].TextChanged += OnTextChanged;
+
+
+                mydbX = 30;
+                mydbY = 110;
+                opdbX = 192;
+                opdbY = 110;
             }
             else
             {
                 Add(new GumpPic(0, 0, 0x0866, 0));
                 Add(new Label(World.Player.Name, false, 0x0386, font: 1)
                         { X = 84, Y = 40 });
-                int fontWidth = 260 - UOFileManager.Fonts.GetWidthASCII(1, _name);
+                int fontWidth = 260 - FontsLoader.Instance.GetWidthASCII(1, _name);
 
                 Add(new Label(_name, false, 0x0386, font: 1)
                         { X = fontWidth, Y = 170 });
+
+                mydbX = 45;
+                mydbY = 70;
+                opdbX = 192;
+                opdbY = 70;
             }
 
 
-            if (UOFileManager.ClientVersion < ClientVersions.CV_500A)
+            if (Client.Version < ClientVersion.CV_500A)
             {
                 Add(new ColorBox(110, 60, 0, 0xFF000001)
                 {
@@ -268,14 +428,20 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            Add(_myBox = new DataBox(45, 70, 110, 80)
+            Add(_myBox = new DataBox(mydbX, mydbY, 110, 80)
             {
-                WantUpdateSize = false
+                WantUpdateSize = false,
+                ContainsByBounds = true,
+                AcceptMouseInput = true,
+                CanMove = true
             });
 
-            Add(_hisBox = new DataBox(192, 70, 110, 80)
+            Add(_hisBox = new DataBox(opdbX, opdbY, 110, 80)
             {
-                WantUpdateSize = false
+                WantUpdateSize = false,
+                ContainsByBounds = true,
+                AcceptMouseInput = true,
+                CanMove = true
             });
 
             SetCheckboxes();
@@ -284,14 +450,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             _myBox.MouseUp += (sender, e) =>
             {
-                if (e.Button == MouseButton.Left)
+                if (e.Button == MouseButtonType.Left)
                 {
-                    GameScene gs = CUOEnviroment.Client.GetScene<GameScene>();
+                    GameScene gs = Client.Game.GetScene<GameScene>();
 
-                    if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+                    if (!ItemHold.Enabled || !gs.IsMouseOverUI)
                         return;
 
-                    ArtTexture texture = UOFileManager.Art.GetTexture(gs.HeldItem.DisplayedGraphic);
+                    ArtTexture texture = ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
 
                     int x = e.X;
                     int y = e.Y;
@@ -314,9 +480,9 @@ namespace ClassicUO.Game.UI.Gumps
                     if (y < 0)
                         y = 0;
 
-                    GameActions.DropItem(gs.HeldItem.Serial, x, y, 0, ID1);
-                    gs.HeldItem.Dropped = true;
-                    gs.HeldItem.Enabled = false;
+                    GameActions.DropItem(ItemHold.Serial, x, y, 0, ID1);
+                    ItemHold.Dropped = true;
+                    ItemHold.Enabled = false;
                     //Mouse.CancelDoubleClick = true;
                 }
             };

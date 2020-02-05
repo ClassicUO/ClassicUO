@@ -1,39 +1,34 @@
 #region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering
-//	new technologies.
-//
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -42,15 +37,15 @@ namespace ClassicUO.Game.GameObjects
 {
     internal class PlayerMobile : Mobile
     {
-        private readonly Dictionary<Graphic, BuffIcon> _buffIcons = new Dictionary<Graphic, BuffIcon>();
+        private readonly Dictionary<BuffIconType, BuffIcon> _buffIcons = new Dictionary<BuffIconType, BuffIcon>();
 
-        public PlayerMobile(Serial serial) : base(serial)
+        public PlayerMobile(uint serial) : base(serial)
         {
-            Skills = new Skill[UOFileManager.Skills.SkillsCount];
+            Skills = new Skill[SkillsLoader.Instance.SkillsCount];
 
             for (int i = 0; i < Skills.Length; i++)
             {
-                SkillEntry skill = UOFileManager.Skills.GetSkill(i);
+                SkillEntry skill = SkillsLoader.Instance.Skills[i];
                 Skills[i] = new Skill(skill.Name, skill.Index, skill.HasAction);
             }
         }
@@ -59,11 +54,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool InWarMode { get; set; }
 
-#if MOVEMENT2
-        public Deque<Step> RequestedSteps { get; } = new Deque<Step>();
-#endif
-
-        public IReadOnlyDictionary<Graphic, BuffIcon> BuffIcons => _buffIcons;
+        public IReadOnlyDictionary<BuffIconType, BuffIcon> BuffIcons => _buffIcons;
 
         public ushort Strength;
 
@@ -77,15 +68,15 @@ namespace ClassicUO.Game.GameObjects
 
         public uint Gold;
 
-        public ushort PhysicalResistence;
+        public short PhysicalResistance;
 
-        public ushort FireResistance;
+        public short FireResistance;
 
-        public ushort ColdResistance;
+        public short ColdResistance;
 
-        public ushort PoisonResistance;
+        public short PoisonResistance;
 
-        public ushort EnergyResistance;
+        public short EnergyResistance;
 
         public byte Followers;
 
@@ -95,68 +86,68 @@ namespace ClassicUO.Game.GameObjects
 
         public uint TithingPoints;
 
-        public ushort DamageMin;
+        public short DamageMin;
 
-        public ushort DamageMax;
+        public short DamageMax;
 
-        public ushort StatsCap;
+        public short StatsCap;
 
-        public ushort HitChanceIncrease;
+        public short HitChanceIncrease;
 
-        public ushort SwingSpeedIncrease;
+        public short SwingSpeedIncrease;
 
-        public ushort DamageIncrease;
+        public short DamageIncrease;
 
-        public ushort LowerReagentCost;
+        public short LowerReagentCost;
 
-        public ushort HitPointsRegeneration;
+        public short HitPointsRegeneration;
 
-        public ushort StaminaRegeneration;
+        public short StaminaRegeneration;
 
-        public ushort ManaRegeneration;
+        public short ManaRegeneration;
 
-        public ushort MaxPhysicResistence;
+        public short MaxPhysicResistence;
 
-        public ushort MaxFireResistence;
+        public short MaxFireResistence;
 
-        public ushort MaxColdResistence;
+        public short MaxColdResistence;
 
-        public ushort MaxPoisonResistence;
+        public short MaxPoisonResistence;
 
-        public ushort MaxEnergyResistence;
+        public short MaxEnergyResistence;
 
-        public ushort MaxDefenseChanceIncrease;
+        public short MaxDefenseChanceIncrease;
 
-        public ushort ReflectPhysicalDamage;
+        public short ReflectPhysicalDamage;
 
-        public ushort EnhancePotions;
+        public short EnhancePotions;
 
-        public ushort DefenseChanceIncrease;
-        public ushort SpellDamageIncrease;
+        public short DefenseChanceIncrease;
+        public short SpellDamageIncrease;
 
-        public ushort FasterCastRecovery;
+        public short FasterCastRecovery;
 
-        public ushort FasterCasting;
+        public short FasterCasting;
 
-        public ushort LowerManaCost;
+        public short LowerManaCost;
 
-        public ushort StrengthIncrease;
+        public short StrengthIncrease;
 
-        public ushort DexterityIncrease;
+        public short DexterityIncrease;
 
-        public ushort IntelligenceIncrease;
+        public short IntelligenceIncrease;
 
-        public ushort HitPointsIncrease;
+        public short HitPointsIncrease;
 
-        public ushort StaminaIncrease;
+        public short StaminaIncrease;
 
-        public ushort ManaIncrease;
+        public short ManaIncrease;
 
-        public ushort MaxHitPointsIncrease;
+        public short MaxHitPointsIncrease;
 
-        public ushort MaxStaminaIncrease;
+        public short MaxStaminaIncrease;
 
-        public ushort MaxManaIncrease;
+        public short MaxManaIncrease;
 
         public Ability PrimaryAbility
         {
@@ -229,50 +220,20 @@ namespace ClassicUO.Game.GameObjects
             return found;
         }
 
-        public void AddBuff(Graphic graphic, uint time, string text)
+        public void AddBuff(BuffIconType type, ushort graphic, uint time, string text)
         {
-            _buffIcons[graphic] = new BuffIcon(graphic, time, text);
+            _buffIcons[type] = new BuffIcon(type, graphic, time, text);
         }
 
 
-        public bool IsBuffIconExists(Graphic graphic)
+        public bool IsBuffIconExists(BuffIconType graphic)
         {
             return _buffIcons.ContainsKey(graphic);
         }
 
-        public void RemoveBuff(Graphic graphic)
+        public void RemoveBuff(BuffIconType graphic)
         {
             _buffIcons.Remove(graphic);
-        }
-
-        public void UpdateSkill(int id, ushort realValue, ushort baseValue, Lock @lock, ushort cap, bool displayMessage = false)
-        {
-            if (id < Skills.Length)
-            {
-                Skill skill = Skills[id];
-
-                if (displayMessage && skill.ValueFixed != realValue)
-                {
-                    var delta = realValue - skill.ValueFixed;
-                    var direction = delta < 0 ? "decreased" : "increased";
-
-                    GameActions.Print($"Your skill in {skill.Name} has {direction} by {delta / 10.0:#0.0}%.  It is now {realValue / 10.0:#0.0}%.", 0x58, MessageType.System, 3, false);
-                }
-
-                skill.ValueFixed = realValue;
-                skill.BaseFixed = baseValue;
-                skill.Lock = @lock;
-                skill.CapFixed = cap;
-
-                // check needed to avoid crash when you create a char
-                if (ProfileManager.Current != null)
-                {
-                    if (ProfileManager.Current.StandardSkillsGump)
-                        UIManager.GetGump<StandardSkillsGump>()?.ForceUpdate(id);
-                    else
-                        UIManager.GetGump<SkillGumpAdvanced>()?.ForceUpdate();
-                }
-            }
         }
 
         public void UpdateAbilities()
@@ -306,7 +267,7 @@ namespace ClassicUO.Game.GameObjects
 
                     ushort testGraphic = (ushort) (equippedGraphic - 1);
 
-                    if (UOFileManager.TileData.StaticData[testGraphic].AnimID == imageID)
+                    if (TileDataLoader.Instance.StaticData[testGraphic].AnimID == imageID)
                     {
                         graphics[1] = testGraphic;
                         count = 2;
@@ -315,7 +276,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         testGraphic = (ushort) (equippedGraphic + 1);
 
-                        if (UOFileManager.TileData.StaticData[testGraphic].AnimID == imageID)
+                        if (TileDataLoader.Instance.StaticData[testGraphic].AnimID == imageID)
                         {
                             graphics[1] = testGraphic;
                             count = 2;
@@ -324,7 +285,7 @@ namespace ClassicUO.Game.GameObjects
 
                     for (int i = 0; i < count; i++)
                     {
-                        Graphic g = graphics[i];
+                        ushort g = graphics[i];
 
                         switch (g)
                         {
@@ -341,7 +302,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x0905: // Glass Staff
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.MortalStrike;
 
                                 goto done;
@@ -383,7 +344,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x0E85:
                             case 0x0E86: // Pickaxes
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.Disarm;
 
                                 goto done;
@@ -397,7 +358,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x0E89:
                             case 0x0E8A: // Quarter Staves
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.ConcussionBlow;
 
                                 goto done;
@@ -424,7 +385,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x0F45:
-                            case 0x0F46: // Double Axes
+                            case 0x0F46: // Executioner Axes
                                 Abilities[0] = Ability.BleedAttack;
                                 Abilities[1] = Ability.MortalStrike;
 
@@ -444,9 +405,9 @@ namespace ClassicUO.Game.GameObjects
 
                                 goto done;
 
-                            case 0x0F4B:
+                            case 0x0F4B: // Double Axe
                             case 0x0F4C:
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.WhirlwindAttack;
 
                                 goto done;
@@ -529,7 +490,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x13B7:
                             case 0x13B8: // Scimitars
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.ParalyzingBlow;
 
                                 goto done;
@@ -561,7 +522,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x13F8: // Gnarled Staves
                                 Abilities[0] = Ability.ConcussionBlow;
-                                Abilities[1] = Ability.ParalyzingBlow;
+                                Abilities[1] = Ability.ForceOfNature;
 
                                 goto done;
 
@@ -572,7 +533,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x13FF: // Katana
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.ArmorIgnore;
 
                                 goto done;
@@ -641,7 +602,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x1442:
                             case 0x1443: // Two Handed Axes
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.ShadowStrike;
 
                                 goto done;
@@ -677,7 +638,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x26BF: // Double Bladed Staff
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.InfectiousStrike;
 
                                 goto done;
@@ -689,7 +650,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x26C1: // Crescent Blades
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.MortalStrike;
 
                                 goto done;
@@ -701,7 +662,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x26C3: // Repeating Crossbows
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.MovingShot;
 
                                 goto done;
@@ -737,7 +698,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x26C9: // also Double Bladed Staff
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.InfectiousStrike;
 
                                 goto done;
@@ -749,7 +710,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x26CB: // also Crescent Blades
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.MortalStrike;
 
                                 goto done;
@@ -761,7 +722,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x26CD: // also Repeating Crossbows
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.MovingShot;
 
                                 goto done;
@@ -780,7 +741,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x27A4: // Wakizashi
                                 Abilities[0] = Ability.FrenziedWhirlwind;
-                                Abilities[1] = Ability.DoubleShot;
+                                Abilities[1] = Ability.DoubleStrike;
 
                                 goto done;
 
@@ -810,7 +771,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x27A9: // Daisho
                                 Abilities[0] = Ability.Feint;
-                                Abilities[1] = Ability.DoubleShot;
+                                Abilities[1] = Ability.DoubleStrike;
 
                                 goto done;
 
@@ -858,7 +819,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x27EF: // also Wakizashi
                                 Abilities[0] = Ability.FrenziedWhirlwind;
-                                Abilities[1] = Ability.DoubleShot;
+                                Abilities[1] = Ability.DoubleStrike;
 
                                 goto done;
 
@@ -888,7 +849,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x27F4: // also Daisho
                                 Abilities[0] = Ability.Feint;
-                                Abilities[1] = Ability.DoubleShot;
+                                Abilities[1] = Ability.DoubleStrike;
 
                                 goto done;
 
@@ -1073,7 +1034,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x4068: // Dual Short Axes
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.InfectiousStrike;
 
                                 goto done;
@@ -1091,7 +1052,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x406D: // Dual Pointed Spear
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.Disarm;
 
                                 goto done;
@@ -1163,7 +1124,7 @@ namespace ClassicUO.Game.GameObjects
                                 goto done;
 
                             case 0x48BA: // Gargish Katana
-                                Abilities[0] = Ability.DoubleShot;
+                                Abilities[0] = Ability.DoubleStrike;
                                 Abilities[1] = Ability.ArmorIgnore;
 
                                 goto done;
@@ -1230,7 +1191,7 @@ namespace ClassicUO.Game.GameObjects
 
                             case 0x48D0: // Gargish Daisho
                                 Abilities[0] = Ability.Feint;
-                                Abilities[1] = Ability.DoubleShot;
+                                Abilities[1] = Ability.DoubleStrike;
 
                                 goto done;
                         }
@@ -1295,7 +1256,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (World.Items.Any(s =>
                                         s.ItemData.IsDoor && s.X == x && s.Y == y && s.Z - 15 <= z &&
-                                        s.Position.Z + 15 >= z))
+                                        s.Z + 15 >= z))
                     GameActions.OpenDoor();
             }
         }
@@ -1337,7 +1298,7 @@ namespace ClassicUO.Game.GameObjects
                         int distance = int.MaxValue;
                         if (ent != null)
                         {
-                            if (ent.Serial.IsItem)
+                            if (SerialHelper.IsItem(ent.Serial))
                             {
                                 var top = World.Get(((Item)ent).RootContainer);
 
@@ -1358,7 +1319,7 @@ namespace ClassicUO.Game.GameObjects
                         distance = int.MaxValue;
                         if (ent != null)
                         {
-                            if (ent.Serial.IsItem)
+                            if (SerialHelper.IsItem(ent.Serial))
                             {
                                 var top = World.Get(((Item) ent).RootContainer);
 
@@ -1378,7 +1339,6 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-#if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
         internal WalkerManager Walker { get; } = new WalkerManager();
 
 
@@ -1413,7 +1373,7 @@ namespace ClassicUO.Game.GameObjects
         public bool Walk(Direction direction, bool run)
         {
             if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT ||
-                (UOFileManager.ClientVersion >= ClientVersions.CV_60142 && IsParalyzed))
+                (Client.Version >= ClientVersion.CV_60142 && IsParalyzed))
                 return false;
 
             if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead)
@@ -1532,24 +1492,25 @@ namespace ClassicUO.Game.GameObjects
 
             Walker.UnacceptedPacketsCount++;
 
+            AddToTile();
 
             int nowDelta = 0;
 
-            if (_lastDir == (int) direction && _lastMount == IsMounted && _lastRun == run)
-            {
-                nowDelta = (int) (Time.Ticks - _lastStepTime - walkTime + _lastDelta);
+            //if (_lastDir == (int) direction && _lastMount == IsMounted && _lastRun == run)
+            //{
+            //    nowDelta = (int) (Time.Ticks - _lastStepTime - walkTime + _lastDelta);
 
-                if (Math.Abs(nowDelta) > 70)
-                    nowDelta = 0;
-                _lastDelta = nowDelta;
-            }
-            else
-                _lastDelta = 0;
+            //    if (Math.Abs(nowDelta) > 70)
+            //        nowDelta = 0;
+            //    _lastDelta = nowDelta;
+            //}
+            //else
+            //    _lastDelta = 0;
 
-            _lastStepTime = (int) Time.Ticks;
-            _lastRun = run;
-            _lastMount = IsMounted;
-            _lastDir = (int) direction;
+            //_lastStepTime = (int) Time.Ticks;
+            //_lastRun = run;
+            //_lastMount = IsMounted;
+            //_lastDir = (int) direction;
 
 
             Walker.LastStepRequestTime = Time.Ticks + walkTime - nowDelta;
@@ -1558,362 +1519,11 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private bool _lastRun, _lastMount;
-        private int _lastDir = -1, _lastDelta, _lastStepTime;
+        //private bool _lastRun, _lastMount;
+        //private int _lastDir = -1, _lastDelta, _lastStepTime;
 
-#elif !MOVEMENT2
-        private int _movementX, _movementY;
-        private sbyte _movementZ;
-        private int _stepsOutstanding;
-        private Direction _movementDirection = Direction.North;
-        private byte _sequenceNumber;
-        private int _resynchronizing;
-        private long _nextAllowedStepTime;
-
-        public bool IsWaitingNextMovement => _nextAllowedStepTime > Time.Ticks;
-
-        public bool Walk(Direction direction, bool run)
-        {
-            if (_nextAllowedStepTime > Time.Ticks || IsParalyzed)
-            {
-                return false;
-            }
-
-            if (_stepsOutstanding > Constants.MAX_STEP_COUNT)
-            {
-                if (_nextAllowedStepTime + 1000 > Time.Ticks)
-                    Resynchronize();
-                return false;
-            }
-
-
-
-            if (SpeedMode >= CharacterSpeedType.CantRun)
-                run = false;
-            // else ALWASY RUN CHECK
-
-            ushort walkTime;
-            Direction newDirection = direction;
-            int newX = _movementX;
-            int newY = _movementY;
-            sbyte newZ = _movementZ;
-
-            if (_movementDirection == newDirection)
-            {
-                if (!Pathfinder.CanWalk(ref newDirection, ref newX, ref newY, ref newZ))
-                    return false;
-
-                if (newDirection != direction)
-                {
-                    direction = newDirection;
-                    walkTime = Constants.TURN_DELAY;
-                }
-                else
-                {
-                    direction = newDirection;
-                    _movementX = newX;
-                    _movementY = newY;
-                    _movementZ = newZ;
-                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, run);
-                }
-            }
-            else
-            {
-                if (!Pathfinder.CanWalk(ref newDirection, ref newX, ref newY, ref newZ))
-                {
-                    if (newDirection == _movementDirection)
-                        return false;
-                }
-
-                if (_movementDirection == newDirection)
-                {
-                    direction = newDirection;
-                    _movementX = newX;
-                    _movementY = newY;
-                    _movementZ = newZ;
-                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, run);
-                }
-                else
-                {
-                    direction = newDirection;
-                    walkTime = Constants.TURN_DELAY;
-                }
-            }
-
-            _movementDirection = direction;
-
-            EnqueueStep(_movementX, _movementY, _movementZ, _movementDirection, run);
-
-            Log.Panic("SEND");
-            NetClient.Socket.Send(new PWalkRequest(direction, _sequenceNumber, run));
-            //Log.Trace( $"Walk request - SEQUENCE: {_sequenceNumber}");
-
-            if (_sequenceNumber == 0xFF)
-                _sequenceNumber = 1;
-            else
-                _sequenceNumber++;
-            _nextAllowedStepTime = Time.Ticks + walkTime;
-            _stepsOutstanding++;
-            GetGroupForAnimation(this);
-
-            return true;
-        }
-#else
-        public long LastStepRequestedTime { get; set; }
-        public byte SequenceNumber { get; set; }
-
-        private PlayerMovementState _movementState;
-
-        enum PlayerMovementState
-        {
-            ANIMATE_IMMEDIATELY = 0,
-            ANIMATE_ON_CONFIRM,
-        }
-
-        public bool Walk(Direction direction, bool run)
-        {
-            if (LastStepRequestedTime > Time.Ticks)
-                return false;
-
-            if (RequestedSteps.Count >= Constants.MAX_STEP_COUNT)
-                return false;
-
-            if (SpeedMode >= CharacterSpeedType.CantRun)
-                run = false;
-            // else ALWASY RUN CHECK
-
-
-            int x, y;
-            sbyte z;
-            Direction oldDirection;
-
-            if (RequestedSteps.Count == 0)
-                GetEndPosition(out x, out y, out  z, out oldDirection);
-            else
-            {
-                Step step = RequestedSteps.Back();
-
-                x = step.X;
-                y = step.Y;
-                z = step.Z;
-                oldDirection = (Direction) step.Direction;
-            }
-
-            bool onMount = IsMounted;
-            ushort walkTime;
-
-            Direction newDirection = direction;
-            int newX = x;
-            int newY = y;
-            sbyte newZ = z;
-
-            if (oldDirection == newDirection)
-            {
-                if (!Pathfinder.CanWalk(ref newDirection, ref newX, ref newY, ref newZ))
-                    return false;
-
-                if (newDirection != direction)
-                {
-                    direction = newDirection;
-                    walkTime = Constants.TURN_DELAY;
-                }
-                else
-                {
-                    direction = newDirection;
-                    x = newX;
-                    y = newY;
-                    z = newZ;
-                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(this, run);
-                }
-            }
-            else
-            {
-                if (!Pathfinder.CanWalk(ref newDirection, ref newX, ref newY, ref newZ))
-                {
-                    if (newDirection == oldDirection)
-                        return false;
-                }
-
-                if (oldDirection == newDirection)
-                {
-                    direction = newDirection;
-                    x = newX;
-                    y = newY;
-                    z = newZ;
-                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, run);
-                }
-                else
-                {
-                    direction = newDirection;
-                    walkTime = Constants.TURN_DELAY;
-                }
-            }
-
-            Step step1 = new Step()
-            {
-                X = x,
-                Y = y,
-                Z = z,
-                Direction = (byte) direction,
-                Run = run,
-                Rej = 0,
-                Seq = SequenceNumber
-            };
-
-            if (_movementState == PlayerMovementState.ANIMATE_IMMEDIATELY)
-            {
-                for (int i = 0; i < RequestedSteps.Count; i++)
-                {
-                    var s = RequestedSteps[i];
-
-                    if (!s.Anim)
-                    {
-                        s.Anim = true;
-                        RequestedSteps[i] = s;
-                        EnqueueStep(s.X, s.Y, s.Z, (Direction) s.Direction, s.Run);
-                    }
-                }
-
-                step1.Anim = true;
-
-                EnqueueStep(step1.X, step1.Y, step1.Z, (Direction) step1.Direction, step1.Run);
-            }
-            RequestedSteps.AddToBack(step1);
-
-            NetClient.Socket.Send(new PWalkRequest(direction, SequenceNumber, run, 0));
-
-            if (SequenceNumber == 0xFF)
-                SequenceNumber = 1;
-            else SequenceNumber++;
-
-            LastStepRequestedTime = Time.Ticks + walkTime;
-
-            GetGroupForAnimation(this);
-
-            return true;
-        }
-#endif
-
-        public void ConfirmWalk(byte seq)
-        {
-#if MOVEMENT2
-            if (RequestedSteps.Count == 0)
-            {
-                NetClient.Socket.Send(new PResend());
-                return;
-            }
-
-            Step step = RequestedSteps.RemoveFromFront();
-
-            if (step.Seq != seq)
-            {
-                NetClient.Socket.Send(new PResend());
-                return;
-            }
-
-            if (!step.Anim)
-            {
-                GetEndPosition(out int x, out int y, out sbyte z, out Direction dir);
-
-                if (step.Direction == (byte) dir)
-                {
-                    if (_movementState == PlayerMovementState.ANIMATE_ON_CONFIRM)
-                    {
-                        _movementState = PlayerMovementState.ANIMATE_IMMEDIATELY;
-                    }
-                }
-
-                EnqueueStep(step.X, step.Y, step.Z, (Direction) step.Direction, step.Run);
-            }
-
-#elif JAEDAN_MOVEMENT_PATCH
-            if (_stepsOutstanding == 0)
-            {
-                Log.Warn( $"Resync needed after confirmwalk packet - SEQUENCE: {_sequenceNumber}");
-                Resynchronize();
-            }
-            else
-            {
-                //Log.Trace( $"Step accepted - SEQUENCE: {_sequenceNumber}");
-                _stepsOutstanding--;
-            }
-#else
-            Walker.ConfirmWalk(seq);
-#endif
-        }
-
-        public readonly HashSet<Serial> AutoOpenedCorpses = new HashSet<Serial>();
-        public readonly HashSet<Serial> ManualOpenedCorpses = new HashSet<Serial>();
-#if JAEDAN_MOVEMENT_PATCH
-        public override void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
-        {
-
-            //Log.Warn( $"Forced position. - SEQUENCE: {_sequenceNumber}");
-
-            _nextAllowedStepTime = Time.Ticks;
-            _sequenceNumber = 0;
-            _stepsOutstanding = 0;
-            _movementX = x;
-            _movementY = y;
-            _movementZ = z;
-            _movementDirection = dir;
-            _resynchronizing = 0;
-
-            base.ForcePosition(x, y, z, dir);
-        }
-
-        internal void Resynchronize()
-        {
-            if (_resynchronizing > 0)
-            {
-                if (_nextAllowedStepTime + (_resynchronizing * 1000) > Time.Ticks)
-                    return;
-            }
-
-            _resynchronizing++;
-            NetClient.Socket.Send(new PResend());
-            Log.Trace( $"Resync request num: {_resynchronizing}");
-        }
-#elif MOVEMENT2
-        public void DenyWalk(byte seq, Direction dir, ushort x, ushort y, sbyte z)
-        {
-            if (RequestedSteps.Count == 0)
-            {
-                NetClient.Socket.Send(new PResend());
-                return;
-            }
-
-            Step step = RequestedSteps.RemoveFromFront();
-
-            if (step.Rej == 0)
-            {
-                ResetSteps();
-                ForcePosition(x, y , z ,dir);
-
-                if (step.Seq != seq)
-                {
-                    NetClient.Socket.Send(new PResend());
-
-                }
-            }
-            else
-            {
-
-            }
-        }
-
-        public void ResetSteps()
-        {
-            for (int i = 0; i < RequestedSteps.Count; i++)
-            {
-                var s = RequestedSteps[i];
-                s.Rej = 1;
-                RequestedSteps[i] = s;
-            }
-
-            SequenceNumber = 0;
-            LastStepRequestedTime = 0;
-        }
-#endif
+        
+        public readonly HashSet<uint> AutoOpenedCorpses = new HashSet<uint>();
+        public readonly HashSet<uint> ManualOpenedCorpses = new HashSet<uint>();
     }
 }

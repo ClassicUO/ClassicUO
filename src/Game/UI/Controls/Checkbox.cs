@@ -1,35 +1,31 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
 using System.Collections.Generic;
 
 using ClassicUO.Input;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -43,8 +39,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public Checkbox(ushort inactive, ushort active, string text = "", byte font = 0, ushort color = 0, bool isunicode = true, int maxWidth = 0)
         {
-            _textures[INACTIVE] = UOFileManager.Gumps.GetTexture(inactive);
-            _textures[ACTIVE] = UOFileManager.Gumps.GetTexture(active);
+            _textures[INACTIVE] = GumpsLoader.Instance.GetTexture(inactive);
+            _textures[ACTIVE] = GumpsLoader.Instance.GetTexture(active);
 
             if (_textures[0] == null || _textures[1] == null)
             {
@@ -69,7 +65,7 @@ namespace ClassicUO.Game.UI.Controls
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
             IsChecked = parts[5] == "1";
-            LocalSerial = Serial.Parse(parts[6]);
+            LocalSerial = SerialHelper.Parse(parts[6]);
         }
 
         public bool IsChecked
@@ -121,9 +117,9 @@ namespace ClassicUO.Game.UI.Controls
             ValueChanged.Raise(this);
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButton.Left)
+            if (button == MouseButtonType.Left)
                 IsChecked = !IsChecked;
         }
 

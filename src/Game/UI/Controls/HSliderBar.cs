@@ -1,31 +1,29 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
 using System.Collections.Generic;
 
 using ClassicUO.Input;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -70,9 +68,38 @@ namespace ClassicUO.Game.UI.Controls
             MinValue = min;
             MaxValue = max;
             BarWidth = w;
-            Value = value;
             _style = style;
             AcceptMouseInput = true;
+
+
+            if (_gumpWidget == null)
+            {
+                switch (_style)
+                {
+                    case HSliderBarStyle.MetalWidgetRecessedBar:
+
+                        _gumpSpliderBackground = new UOTexture[3]
+                        {
+                            GumpsLoader.Instance.GetTexture(213), GumpsLoader.Instance.GetTexture(214), GumpsLoader.Instance.GetTexture(215)
+                        };
+                        _gumpWidget = GumpsLoader.Instance.GetTexture(216);
+
+                        break;
+
+                    case HSliderBarStyle.BlueWidgetNoBar:
+                        _gumpWidget = GumpsLoader.Instance.GetTexture(0x845);
+
+                        break;
+                }
+
+                Width = BarWidth;
+                if (_gumpWidget != null)
+                    Height = _gumpWidget.Height;
+                //RecalculateSliderX();
+                CalculateOffset();
+            }
+
+            Value = value;
         }
 
         public int MinValue { get; set; }
@@ -107,8 +134,7 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         ModifyPairedValues(_value - oldValue);
 
-                        if (IsInitialized)
-                            CalculateOffset();
+                        CalculateOffset();
                     }
 
                     ValueChanged.Raise();
@@ -120,32 +146,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_gumpWidget == null)
-            {
-                switch (_style)
-                {
-                    case HSliderBarStyle.MetalWidgetRecessedBar:
-
-                        _gumpSpliderBackground = new UOTexture[3]
-                        {
-                            UOFileManager.Gumps.GetTexture(213), UOFileManager.Gumps.GetTexture(214), UOFileManager.Gumps.GetTexture(215)
-                        };
-                        _gumpWidget = UOFileManager.Gumps.GetTexture(216);
-
-                        break;
-
-                    case HSliderBarStyle.BlueWidgetNoBar:
-                        _gumpWidget = UOFileManager.Gumps.GetTexture(0x845);
-
-                        break;
-                }
-
-                Width = BarWidth;
-                if (_gumpWidget != null) Height = _gumpWidget.Height;
-                //RecalculateSliderX();
-                CalculateOffset();
-            }
-
             if (_gumpSpliderBackground != null)
             {
                 foreach (UOTexture t in _gumpSpliderBackground)
@@ -193,32 +193,37 @@ namespace ClassicUO.Game.UI.Controls
                 _text.Text = Value.ToString();
         }
 
-        protected override void OnMouseDown(int x, int y, MouseButton button)
+        protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
+            if (button != MouseButtonType.Left)
+                return;
+
             _clicked = true;
             _clickPosition.X = x;
             _clickPosition.Y = y;
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            _clicked = false;
+            if (button != MouseButtonType.Left)
+                return;
 
-            if (button == MouseButton.Left) CalculateNew(x);
+            _clicked = false;
+            CalculateNew(x);
         }
 
        
 
-        protected override void OnMouseWheel(MouseEvent delta)
+        protected override void OnMouseWheel(MouseEventType delta)
         {
             switch (delta)
             {
-                case MouseEvent.WheelScrollUp:
+                case MouseEventType.WheelScrollUp:
                     Value--;
 
                     break;
 
-                case MouseEvent.WheelScrollDown:
+                case MouseEventType.WheelScrollDown:
                     Value++;
 
                     break;

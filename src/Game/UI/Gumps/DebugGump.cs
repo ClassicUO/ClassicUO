@@ -1,24 +1,22 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System.Text;
@@ -84,9 +82,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButton.Left)
+            if (button == MouseButtonType.Left)
             {
                 FullDisplayMode = !FullDisplayMode;
 
@@ -107,13 +105,13 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             _sb.Clear();
-            GameScene scene = CUOEnviroment.Client.GetScene<GameScene>();
+            GameScene scene = Client.Game.GetScene<GameScene>();
 
             if (FullDisplayMode && scene != null)
             {
                 _sb.AppendFormat(DEBUG_STRING_0, CUOEnviroment.CurrentRefreshRate, 0, 0, !World.InGame ? 1f : scene.Scale, scene.RenderedObjectsCount);
                 //_sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
-                _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.INVALID, Mouse.Position, (SelectedObject.Object as GameObject)?.Position ?? Position.INVALID);
+                _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0");
                 _sb.AppendFormat(DEBUG_STRING_3, ReadObject(SelectedObject.Object));
             }
             else
@@ -132,34 +130,30 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     case Mobile mob:
 
-                        return $"Mobile ({mob.Serial})  graphic: {mob.Graphic}  flags: {mob.Flags}  noto: {mob.NotorietyFlag}";
+                        return $"Mobile (0x{mob.Serial:X8})  graphic: 0x{mob.Graphic:X4}  flags: {mob.Flags}  noto: {mob.NotorietyFlag}";
 
                     case Item item:
 
-                        return $"Item ({item.Serial})  graphic: {item.Graphic}  flags: {item.Flags}  amount: {item.Amount}";
+                        return $"Item (0x{item.Serial:X8})  graphic: 0x{item.Graphic:X4}  flags: {item.Flags}  amount: {item.Amount} itemdata: {item.ItemData.Flags}";
 
                     case Static st:
 
-                        return $"Static ({st.Graphic})  height: {st.ItemData.Height}  flags: {st.ItemData.Flags}  Alpha: {st.AlphaHue}";
+                        return $"Static (0x{st.Graphic:X4})  height: {st.ItemData.Height}  flags: {st.ItemData.Flags}  Alpha: {st.AlphaHue}";
 
                     case Multi multi:
 
-                        return $"Multi ({multi.Graphic})  height: {multi.ItemData.Height}  flags: {multi.ItemData.Flags}";
+                        return $"Multi (0x{multi.Graphic:X4})  height: {multi.ItemData.Height}  flags: {multi.ItemData.Flags}";
 
                     case GameEffect effect:
-
-                        if (effect.Source is Static s)
-                            return $"Static ({s.Graphic})  height: {s.ItemData.Height}  flags: {s.ItemData.Flags}";
-
                         return "GameEffect";
 
                     case TextOverhead overhead:
 
-                        return $"TextOverhead type: {overhead.Type}";
+                        return $"TextOverhead type: {overhead.Type}  hue: 0x{overhead.Hue:X4}";
 
                     case Land land:
 
-                        return $"Land ({land.Graphic})  flags: {land.TileData.Flags}";
+                        return $"Land (0x{land.Graphic:X4})  flags: {land.TileData.Flags}";
                 }
             }
 

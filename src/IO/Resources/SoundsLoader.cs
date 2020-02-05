@@ -1,24 +1,22 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
@@ -26,7 +24,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-
+using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.IO.Audio;
 
@@ -38,6 +36,25 @@ namespace ClassicUO.IO.Resources
         private static readonly Dictionary<int, Tuple<string, bool>> _mMusicData = new Dictionary<int, Tuple<string, bool>>();
         private readonly Dictionary<int, Sound> _sounds = new Dictionary<int, Sound>(), _musics = new Dictionary<int, Sound>();
         private UOFile _file;
+
+        private SoundsLoader()
+        {
+
+        }
+
+        private static SoundsLoader _instance;
+        public static SoundsLoader Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new SoundsLoader();
+                }
+
+                return _instance;
+            }
+        }
 
 
         public override Task Load()
@@ -124,7 +141,7 @@ namespace ClassicUO.IO.Resources
                         }
                     }
                 }
-                else if (UOFileManager.ClientVersion <= ClientVersions.CV_5090)
+                else if (Client.Version <= ClientVersion.CV_5090)
                 {
                     _mMusicData.Add(0, new Tuple<string, bool>("oldult01", true));
                     _mMusicData.Add(1, new Tuple<string, bool>("create1", false));

@@ -1,46 +1,41 @@
 #region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
 
 using ClassicUO.Input;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    internal class ScrollBar : Control, IScrollBar
+    internal class ScrollBar : ScrollBarBase
     {
         private const int TIME_BETWEEN_CLICKS = 2;
         private bool _btUpClicked, _btDownClicked, _btSliderClicked;
         private Point _clickPosition;
-        private int _max;
-        private int _min;
         private Rectangle _rectDownButton, _rectUpButton, _rectSlider, _emptySpace;
-        private float _sliderPosition, _value;
+        private float _sliderPosition;
         private UOTexture _textureSlider;
         private UOTexture[] _textureUpButton, _textureDownButton, _textureBackground;
         private uint _timeUntilNextClick;
@@ -50,73 +45,19 @@ namespace ClassicUO.Game.UI.Controls
             Height = height;
             Location = new Point(x, y);
             AcceptMouseInput = true;
-        }
 
-        public event EventHandler ValueChanged;
 
-        public int Value
-        {
-            get => (int) _value;
-            set
-            {
-                _value = value;
-
-                if (_value < MinValue)
-                    _value = MinValue;
-
-                if (_value > MaxValue)
-                    _value = MaxValue;
-                ValueChanged.Raise();
-            }
-        }
-
-        public int MinValue
-        {
-            get => _min;
-            set
-            {
-                _min = value;
-
-                if (_value < _min)
-                    _value = _min;
-            }
-        }
-
-        public int MaxValue
-        {
-            get => _max;
-            set
-            {
-                if (value < 0)
-                    value = 0;
-                _max = value;
-
-                if (_value > _max)
-                    _value = _max;
-            }
-        }
-
-        public int ScrollStep { get; set; } = 15;
-
-        bool IScrollBar.Contains(int x, int y)
-        {
-            return Contains(x, y);
-        }
-
-        protected override void OnInitialize()
-        {
-            base.OnInitialize();
             _textureUpButton = new UOTexture[2];
-            _textureUpButton[0] = UOFileManager.Gumps.GetTexture(251);
-            _textureUpButton[1] = UOFileManager.Gumps.GetTexture(250);
+            _textureUpButton[0] = GumpsLoader.Instance.GetTexture(251);
+            _textureUpButton[1] = GumpsLoader.Instance.GetTexture(250);
             _textureDownButton = new UOTexture[2];
-            _textureDownButton[0] = UOFileManager.Gumps.GetTexture(253);
-            _textureDownButton[1] = UOFileManager.Gumps.GetTexture(252);
+            _textureDownButton[0] = GumpsLoader.Instance.GetTexture(253);
+            _textureDownButton[1] = GumpsLoader.Instance.GetTexture(252);
             _textureBackground = new UOTexture[3];
-            _textureBackground[0] = UOFileManager.Gumps.GetTexture(257);
-            _textureBackground[1] = UOFileManager.Gumps.GetTexture(256);
-            _textureBackground[2] = UOFileManager.Gumps.GetTexture(255);
-            _textureSlider = UOFileManager.Gumps.GetTexture(254);
+            _textureBackground[0] = GumpsLoader.Instance.GetTexture(257);
+            _textureBackground[1] = GumpsLoader.Instance.GetTexture(256);
+            _textureBackground[2] = GumpsLoader.Instance.GetTexture(255);
+            _textureSlider = GumpsLoader.Instance.GetTexture(254);
             Width = _textureBackground[0].Width;
 
 
@@ -129,11 +70,12 @@ namespace ClassicUO.Game.UI.Controls
             _emptySpace.Height = Height - (_textureDownButton[0].Height + _textureUpButton[0].Height);
         }
 
+       
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
 
-            if (MaxValue <= MinValue || MinValue >= MaxValue)
+            if (MaxValue <= MinValue)
                 Value = MaxValue = MinValue;
             _sliderPosition = GetSliderYPosition();
             _rectSlider.Y = _textureUpButton[0].Height + (int) _sliderPosition;
@@ -206,22 +148,14 @@ namespace ClassicUO.Game.UI.Controls
             return base.Draw(batcher, x, y);
         }
 
-        private float GetSliderYPosition()
-        {
-            if (MaxValue - MinValue == 0)
-                return 0f;
-
-            return GetScrollableArea() * ((_value - MinValue) / (MaxValue - MinValue));
-        }
-
-        private float GetScrollableArea()
+        protected override float GetScrollableArea()
         {
             return Height - _textureUpButton[0].Height - _textureDownButton[0].Height - _textureSlider.Height;
         }
 
-        protected override void OnMouseDown(int x, int y, MouseButton button)
+        protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            if (button != MouseButton.Left)
+            if (button != MouseButtonType.Left)
                 return;
 
             _timeUntilNextClick = 0;
@@ -256,15 +190,15 @@ namespace ClassicUO.Game.UI.Controls
                 if (_sliderPosition > scrollableArea)
                     _sliderPosition = scrollableArea;
 
-                _value = _sliderPosition / GetScrollableArea() * (MaxValue - MinValue) + MinValue;
+                _value = (int)  Math.Round (_sliderPosition / GetScrollableArea() * (MaxValue - MinValue) + MinValue);
                 _clickPosition.Y = y;
                 _clickPosition.X = x;
             }
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button != MouseButton.Left)
+            if (button != MouseButtonType.Left)
                 return;
 
             _btDownClicked = false;
@@ -299,24 +233,8 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (sliderY == scrollableArea && _clickPosition.Y > Height - _textureDownButton[0].Height - (_textureSlider.Height >> 1))
                     _clickPosition.Y = Height - _textureDownButton[0].Height - (_textureSlider.Height >> 1);
-                _value = sliderY / scrollableArea * (MaxValue - MinValue) + MinValue;
+                _value = (int) Math.Round (sliderY / scrollableArea * (MaxValue - MinValue) + MinValue);
                 _sliderPosition = sliderY;
-            }
-        }
-
-        protected override void OnMouseWheel(MouseEvent delta)
-        {
-            switch (delta)
-            {
-                case MouseEvent.WheelScrollUp:
-                    Value -= ScrollStep;
-
-                    break;
-
-                case MouseEvent.WheelScrollDown:
-                    Value += ScrollStep;
-
-                    break;
             }
         }
 

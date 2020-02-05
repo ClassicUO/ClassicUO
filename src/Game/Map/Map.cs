@@ -1,24 +1,22 @@
 #region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
@@ -26,10 +24,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Managers;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
-using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
@@ -38,24 +33,19 @@ namespace ClassicUO.Game.Map
     internal sealed class Map
     {
         private readonly bool[] _blockAccessList = new bool[0x1000];
-        //private const int CHUNKS_NUM = 5;
-        //private const int MAX_CHUNKS = CHUNKS_NUM * 2 + 1;
         private readonly List<int> _usedIndices = new List<int>();
 
         public Map(int index)
         {
             Index = index;
-            MapBlockIndex = UOFileManager.Map.MapBlocksSize[Index, 0] * UOFileManager.Map.MapBlocksSize[Index, 1];
-            Chunks = new Chunk[MapBlockIndex];
+            BlocksCount = MapLoader.Instance.MapBlocksSize[Index, 0] * MapLoader.Instance.MapBlocksSize[Index, 1];
+            Chunks = new Chunk[BlocksCount];
         }
 
-        public int Index { get; }
-
-        public Chunk[] Chunks { get; private set; }
-
-        public int MapBlockIndex { get; set; }
-
-        public Point Center { get; set; }
+        public readonly int Index;
+        public Chunk[] Chunks;
+        public readonly int BlocksCount;
+        public Point Center;
 
         
         public Tile GetTile(short x, short y, bool load = true)
@@ -165,16 +155,11 @@ namespace ClassicUO.Game.Map
                     if (!(obj is Static) && !(obj is Multi))
                         continue;
 
-                    if (obj.Graphic >= UOFileManager.TileData.StaticData.Length)
+                    if (obj.Graphic >= TileDataLoader.Instance.StaticData.Length)
                         continue;
 
-                    ref readonly var itemdata = ref UOFileManager.TileData.StaticData[obj.Graphic];
-
-                    if (!itemdata.IsRoof || Math.Abs(z - obj.Z) > 6)
+                    if (!TileDataLoader.Instance.StaticData[obj.Graphic].IsRoof || Math.Abs(z - obj.Z) > 6)
                         continue;
-
-                    //if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && (!itemdata.IsRoof || Math.Abs(z - obj.Z) > 6))
-                    //    continue;
 
                     break;
                 }
@@ -200,8 +185,8 @@ namespace ClassicUO.Game.Map
         {
             int block = GetBlock(blockX, blockY);
             int map = Index;
-            UOFileManager.Map.SanitizeMapIndex(ref map);
-            IndexMap[] list = UOFileManager.Map.BlockData[map];
+            MapLoader.Instance.SanitizeMapIndex(ref map);
+            IndexMap[] list = MapLoader.Instance.BlockData[map];
 
             return ref block >= list.Length ? ref IndexMap.Invalid : ref list[block];
         }
@@ -209,7 +194,7 @@ namespace ClassicUO.Game.Map
         [MethodImpl(256)]
         private int GetBlock(int blockX, int blockY)
         {
-            return blockX * UOFileManager.Map.MapBlocksSize[Index, 1] + blockY;
+            return blockX * MapLoader.Instance.MapBlocksSize[Index, 1] + blockY;
         }
 
 
@@ -251,7 +236,6 @@ namespace ClassicUO.Game.Map
             }
 
             _usedIndices.Clear();
-            //FileManager.Map.UnloadMap(Index);
             Chunks = null;
         }
 
@@ -270,17 +254,17 @@ namespace ClassicUO.Game.Map
             if (minBlockY < 0)
                 minBlockY = 0;
 
-            if (maxBlockX >= UOFileManager.Map.MapBlocksSize[Index, 0])
-                maxBlockX = UOFileManager.Map.MapBlocksSize[Index, 0] - 1;
+            if (maxBlockX >= MapLoader.Instance.MapBlocksSize[Index, 0])
+                maxBlockX = MapLoader.Instance.MapBlocksSize[Index, 0] - 1;
 
-            if (maxBlockY >= UOFileManager.Map.MapBlocksSize[Index, 1])
-                maxBlockY = UOFileManager.Map.MapBlocksSize[Index, 1] - 1;
+            if (maxBlockY >= MapLoader.Instance.MapBlocksSize[Index, 1])
+                maxBlockY = MapLoader.Instance.MapBlocksSize[Index, 1] - 1;
             long tick = Time.Ticks;
             long maxDelay = 100; /*Engine.FrameDelay[1] >> 1*/;
 
             for (int i = minBlockX; i <= maxBlockX; i++)
             {
-                int index = i * UOFileManager.Map.MapBlocksSize[Index, 1];
+                int index = i * MapLoader.Instance.MapBlocksSize[Index, 1];
 
                 for (int j = minBlockY; j <= maxBlockY; j++)
                 {

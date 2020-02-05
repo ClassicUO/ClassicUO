@@ -1,33 +1,27 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
-using System.Collections.Generic;
-
 using ClassicUO.Configuration;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 
 using Microsoft.Xna.Framework;
@@ -144,7 +138,7 @@ namespace ClassicUO.Game.GameObjects
         {
             _messages.AddToFront(new TextOverhead
             {
-                RenderedText = RenderedText.Create(damage.ToString(), (Hue)(Parent == World.Player ? 0x0034 : 0x0021), 3, false),
+                RenderedText = RenderedText.Create(damage.ToString(), (ushort) (Parent == World.Player ? 0x0034 : 0x0021), 3, false),
                 Time = Time.Ticks + 1500
             });
 
@@ -211,11 +205,13 @@ namespace ClassicUO.Game.GameObjects
 
                 if (Parent is Mobile m)
                 {
-                    if (!m.IsMounted)
+                    if (m.IsGargoyle && m.IsFlying)
+                        offY += 22;
+                    else if (!m.IsMounted)
                         offY = -22;
 
 
-                    UOFileManager.Animations.GetAnimationDimensions(m.AnimIndex,
+                    AnimationsLoader.Instance.GetAnimationDimensions(m.AnimIndex,
                                                                   m.GetGraphicForAnimation(),
                                                                   /*(byte) m.GetDirectionForAnimation()*/ 0,
                                                                   /*Mobile.GetGroupForAnimation(m, isParent:true)*/ 0,
@@ -240,7 +236,7 @@ namespace ClassicUO.Game.GameObjects
                             offY = -22;
                         else if (it.ItemData.IsAnimated)
                         {
-                            ArtTexture texture = UOFileManager.Art.GetTexture(it.Graphic);
+                            ArtTexture texture = ArtLoader.Instance.GetTexture(it.Graphic);
 
                             if (texture != null)
                                 yValue = texture.Height >> 1;

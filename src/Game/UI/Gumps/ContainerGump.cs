@@ -1,28 +1,27 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System.IO;
 using System.Linq;
+using System.Xml;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -31,7 +30,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -54,7 +53,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
         }
 
-        public ContainerGump(Serial serial, Graphic gumpid) : this()
+        public ContainerGump(uint serial, ushort gumpid) : this()
         {
             LocalSerial = serial;
             Item item = World.Items.Get(serial);
@@ -77,12 +76,13 @@ namespace ClassicUO.Game.UI.Gumps
                 //CheckItemPosition(i);
             {
                 var x = new ItemGump(i);
-                x.Initialize();
                 Add(x);
             }
         }
 
-        public Graphic Graphic { get; }
+        public ushort Graphic { get; }
+
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_CONTAINER;
 
         public TextContainer TextContainer { get; } = new TextContainer();
 
@@ -94,7 +94,7 @@ namespace ClassicUO.Game.UI.Gumps
                 //if (_isMinimized != value)
                 {
                     _isMinimized = value;
-                    _gumpPicContainer.Graphic = value ? (Graphic) _data.IconizedGraphic : Graphic;
+                    _gumpPicContainer.Graphic = value ? _data.IconizedGraphic : Graphic;
                     float scale = UIManager.ContainerScale;
 
                     Width = _gumpPicContainer.Width = (int) (_gumpPicContainer.Width * scale);
@@ -102,8 +102,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                     foreach (var c in Children)
                     {
-                        if (!c.IsInitialized)
-                            c.Initialize();
                         c.IsVisible = !value;
                     }
 
@@ -117,7 +115,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGump()
         {
             CanMove = true;
-            CanBeSaved = true;
+            CanCloseWithRightClick = true;
             WantUpdateSize = false;
             _isCorspeContainer = Graphic == 0x0009;
 
@@ -138,7 +136,7 @@ namespace ClassicUO.Game.UI.Gumps
             float scale = UIManager.ContainerScale;
 
             _data = ContainerManager.Get(Graphic);
-            Graphic g = _data.Graphic;
+            ushort g = _data.Graphic;
 
 
             _gumpPicContainer?.Dispose();
@@ -195,12 +193,12 @@ namespace ClassicUO.Game.UI.Gumps
                                 break;
                         }
 
-                        if ((X + Width) > CUOEnviroment.Client.Window.ClientBounds.Width)
+                        if ((X + Width) > Client.Game.Window.ClientBounds.Width)
                         {
                             X -= Width;
                         }
 
-                        if ((Y + Height) > CUOEnviroment.Client.Window.ClientBounds.Height)
+                        if ((Y + Height) > Client.Game.Window.ClientBounds.Height)
                         {
                             Y -= Height;
                         }
@@ -219,20 +217,13 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = gg.Y;
             }
 
-            // workaroud to force the children update
-            if (IsInitialized)
-            {
-                IsMinimized = IsMinimized;
-            }
-
-
             if (_data.OpenSound != 0)
-                CUOEnviroment.Client.Scene.Audio.PlaySound(_data.OpenSound);
+                Client.Game.Scene.Audio.PlaySound(_data.OpenSound);
         }
 
         private void HitBoxOnMouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButton.Left && !IsMinimized)
+            if (e.Button == MouseButtonType.Left && !IsMinimized)
             {
                 IsMinimized = true;
             }
@@ -240,7 +231,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void GumpPicContainerOnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            if (e.Button == MouseButton.Left && IsMinimized)
+            if (e.Button == MouseButtonType.Left && IsMinimized)
             {
                 IsMinimized = false;
                 e.Result = true;
@@ -265,7 +256,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _eyeCorspeOffset = _eyeCorspeOffset == 0 ? 1 : 0;
                 _corpseEyeTicks = (long) totalMS + 750;
-                _eyeGumpPic.Graphic = (Graphic) (0x0045 + _eyeCorspeOffset);
+                _eyeGumpPic.Graphic = (ushort) (0x0045 + _eyeCorspeOffset);
                 float scale = UIManager.ContainerScale;
                 _eyeGumpPic.Width = (int)(_eyeGumpPic.Texture.Width * scale);
                 _eyeGumpPic.Height = (int)(_eyeGumpPic.Texture.Height * scale);
@@ -275,7 +266,8 @@ namespace ClassicUO.Game.UI.Gumps
         public void ForceUpdate()
         {
             BuildGump();
-            ItemsOnAdded(null, new CollectionChangedEventArgs<Serial>(FindControls<ItemGump>().Select(s => s.LocalSerial)));
+            IsMinimized = IsMinimized;
+            ItemsOnAdded(null, new CollectionChangedEventArgs<uint>(FindControls<ItemGump>().Select(s => s.LocalSerial)));
         }
         
         public override void Save(BinaryWriter writer)
@@ -297,7 +289,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             LocalSerial = reader.ReadUInt32();
-            CUOEnviroment.Client.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
+            Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
             reader.ReadUInt16();
 
             if (Profile.GumpsVersion >= 3)
@@ -308,18 +300,35 @@ namespace ClassicUO.Game.UI.Gumps
             Dispose();
         }
 
-        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Serial> e)
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+            writer.WriteAttributeString("graphic", Graphic.ToString());
+            writer.WriteAttributeString("isminimized", IsMinimized.ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+            // skip loading
+
+            Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
+            Dispose();
+        }
+
+      
+        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<uint> e)
         {
             foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.LocalSerial)))
                 v.Dispose();
         }
 
-        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Serial> e)
+        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<uint> e)
         {
             foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.LocalSerial)))
                 v.Dispose();
 
-            foreach (Serial s in e)
+            foreach (uint s in e)
             {
                 var item = World.Items.Get(s);
 
@@ -328,7 +337,6 @@ namespace ClassicUO.Game.UI.Gumps
 
 
                 var itemControl = new ItemGump(item);
-                itemControl.Initialize();
                 itemControl.IsVisible = !IsMinimized;
 
                 CheckItemControlPosition(itemControl, item);
@@ -356,7 +364,7 @@ namespace ClassicUO.Game.UI.Gumps
             int x = (int) (itemGump.X * scale);
             int y = (int) (itemGump.Y * scale);
           
-            ArtTexture texture = UOFileManager.Art.GetTexture(item.DisplayedGraphic);
+            ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
 
             int boundX = (int)(_data.Bounds.X * scale);
             int boundY = (int)(_data.Bounds.Y * scale);
@@ -412,7 +420,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void SetPositionNearGameObject(Graphic g, Item item)
+        private void SetPositionNearGameObject(ushort g, Item item)
         {
             if (World.Player.Equipment[(int)Layer.Bank] != null && item.Serial == World.Player.Equipment[(int)Layer.Bank])
             {
@@ -426,7 +434,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = item.RealScreenPosition.X + ProfileManager.Current.GameWindowPosition.X + 40;
                 Y = item.RealScreenPosition.Y + ProfileManager.Current.GameWindowPosition.Y - (Height >> 1);
             }
-            else if (item.Container.IsMobile)
+            else if (SerialHelper.IsMobile(item.Container))
             {
                 // pack animal, snooped player, npc vendor
                 Mobile mobile = World.Mobiles.Get(item.Container);
@@ -457,7 +465,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void SetPositionTopRight()
         {
-            X = CUOEnviroment.Client.Window.ClientBounds.Width - Width;
+            X = Client.Game.Window.ClientBounds.Width - Width;
             Y = 0;
         }
 
@@ -487,7 +495,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 if (_data.ClosedSound != 0)
-                    CUOEnviroment.Client.Scene.Audio.PlaySound(_data.ClosedSound);
+                    Client.Game.Scene.Audio.PlaySound(_data.ClosedSound);
             }
 
             base.Dispose();

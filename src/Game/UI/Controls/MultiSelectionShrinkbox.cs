@@ -1,24 +1,22 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
@@ -26,7 +24,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Input;
-using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -111,7 +109,7 @@ namespace ClassicUO.Game.UI.Controls
             };
 
             int xx = _label.X + _label.Width + 5;
-            int hh = UOFileManager.Gumps.GetTexture(0x0835)?.Height ?? 0;
+            int hh = GumpsLoader.Instance.GetTexture(0x0835)?.Height ?? 0;
             int decWidth = width - xx - 10;
 
             if (decWidth < 0)
@@ -127,7 +125,7 @@ namespace ClassicUO.Game.UI.Controls
 
             _arrow.MouseUp += (sender, state) =>
             {
-                if (state.Button == MouseButton.Left) Opened = !_opened;
+                if (state.Button == MouseButtonType.Left) Opened = !_opened;
             };
         }
 
@@ -407,9 +405,9 @@ namespace ClassicUO.Game.UI.Controls
         public event EventHandler OnBeforeContextMenu;
         public event EventHandler OnAfterContextMenu;
 
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (_label.Bounds.Contains(Mouse.Position.X - ScreenCoordinateX, Mouse.Position.Y - ScreenCoordinateY) && button == MouseButton.Left)
+            if (_label.Bounds.Contains(Mouse.Position.X - ScreenCoordinateX, Mouse.Position.Y - ScreenCoordinateY) && button == MouseButtonType.Left)
                 Opened = !_opened;
 
             return base.OnMouseDoubleClick(x, y, button);

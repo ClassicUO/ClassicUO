@@ -1,24 +1,22 @@
 ﻿#region license
-
-//  Copyright (C) 2019 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
+// Copyright (C) 2020 ClassicUO Development Community on Github
+// 
+// This project is an alternative client for the game Ultima Online.
+// The goal of this is to develop a lightweight client considering
+// new technologies.
+// 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
+// 
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-//
+// 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
 using System;
@@ -26,8 +24,6 @@ using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -39,8 +35,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private int _canBeTransparent;
 
-        public bool CharacterIsBehindFoliage { get; set; }
-        public bool IsFromTarget { get; set; }
+        public bool IsFromTarget;
 
         public override bool TransparentTest(int z)
         {
@@ -87,22 +82,9 @@ namespace ClassicUO.Game.GameObjects
 
             ushort graphic = Graphic;
 
-            if (ItemData.IsFoliage)
+            if (ItemData.IsAnimated && _lastAnimationFrameTime < Time.Ticks)
             {
-                if (CharacterIsBehindFoliage)
-                {
-                    if (AlphaHue != Constants.FOLIAGE_ALPHA)
-                        ProcessAlpha(Constants.FOLIAGE_ALPHA);
-                }
-                else
-                {
-                    if (AlphaHue != 0xFF)
-                        ProcessAlpha(0xFF);
-                }
-            }
-            else if (ItemData.IsAnimated && _lastAnimationFrameTime < Time.Ticks)
-            {
-                IntPtr ptr = UOFileManager.AnimData.GetAddressToAnim(Graphic);
+                IntPtr ptr = AnimDataLoader.Instance.GetAddressToAnim(Graphic);
 
                 if (ptr != IntPtr.Zero)
                 {
@@ -112,13 +94,12 @@ namespace ClassicUO.Game.GameObjects
 
                         if (animData->FrameCount != 0)
                         {
-                            graphic = (Graphic)(Graphic + animData->FrameData[AnimIndex++]);
+                            graphic = (ushort) (Graphic + animData->FrameData[AnimIndex++]);
 
                             if (AnimIndex >= animData->FrameCount)
                                 AnimIndex = 0;
 
-                            _lastAnimationFrameTime = Time.Ticks + (uint)(animData->FrameInterval != 0 ?
-                                                          animData->FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY + 25 : Constants.ITEM_EFFECT_ANIMATION_DELAY);
+                            _lastAnimationFrameTime = Time.Ticks + (uint)(animData->FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY);
                         }
                     }
                 }
@@ -127,7 +108,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (Texture == null || Texture.IsDisposed || Graphic != graphic)
             {
-                ArtTexture texture = UOFileManager.Art.GetTexture(graphic);
+                ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
                 Texture = texture;
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
 
@@ -165,7 +146,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (ItemData.IsLight)
             {
-                CUOEnviroment.Client.GetScene<GameScene>()
+                Client.Game.GetScene<GameScene>()
                       .AddLight(this, this, posX + 22, posY + 22);
             }
 
@@ -174,12 +155,13 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Select(int x, int y)
         {
-            if (SelectedObject.Object == this || IsFromTarget || CharacterIsBehindFoliage)
+            if (SelectedObject.Object == this || IsFromTarget || (FoliageIndex != -1 && Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex))
                 return;
 
             if (State != 0)
             {
-                if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER) != 0)
+                if ((State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER | 
+                              CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW)) != 0)
                     return;
             }
 
