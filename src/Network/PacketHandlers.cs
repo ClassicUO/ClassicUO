@@ -1402,8 +1402,8 @@ namespace ClassicUO.Network
                     if (type == 0 || type == 0x02)
                         id--;
 
-                    ushort baseVal = p.ReadUShort();
                     ushort realVal = p.ReadUShort();
+                    ushort baseVal = p.ReadUShort();
                     Lock locked = (Lock) p.ReadByte();
                     ushort cap = 1000;
 
