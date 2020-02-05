@@ -19,7 +19,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-#define DEV_BUILD
 
 using System;
 using System.IO;
