@@ -178,6 +178,11 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_macro != null)
             {
+                // hack to give macro buttons a unique id for use in anchor groups
+                int macroid = Client.Game.GetScene<GameScene>().Macros.GetAllMacros().IndexOf(_macro);
+
+                LocalSerial = (uint) macroid + 1000;
+
                 base.Save(writer);
 
                 writer.WriteAttributeString("name", _macro.Name);
