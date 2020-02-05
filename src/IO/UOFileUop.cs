@@ -21,10 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
-
-using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 
 namespace ClassicUO.IO

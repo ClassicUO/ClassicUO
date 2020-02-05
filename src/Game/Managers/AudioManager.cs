@@ -23,7 +23,6 @@ using System.Collections.Generic;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
-using ClassicUO.IO;
 using ClassicUO.IO.Audio;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Logging;

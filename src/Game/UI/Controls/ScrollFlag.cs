@@ -19,13 +19,9 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using System;
-
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
@@ -180,21 +176,6 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        protected override void OnMouseWheel(MouseEventType delta)
-        {
-            switch (delta)
-            {
-                case MouseEventType.WheelScrollUp:
-                    Value -= ScrollStep;
-
-                    break;
-
-                case MouseEventType.WheelScrollDown:
-                    Value += ScrollStep;
-
-                    break;
-            }
-        }
 
         public override bool Contains(int x, int y)
         {

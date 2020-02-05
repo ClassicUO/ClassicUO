@@ -21,14 +21,11 @@
 
 using System;
 using System.Collections.Generic;
-using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Coroutines;
 using ClassicUO.Utility.Logging;
-using Microsoft.Xna.Framework;
 using SDL2;
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 

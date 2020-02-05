@@ -21,8 +21,6 @@
 
 using System.Collections.Generic;
 
-using ClassicUO.Game.GameObjects;
-
 namespace ClassicUO.Utility
 {
     internal class QueuedPool<T> where T : class, new()

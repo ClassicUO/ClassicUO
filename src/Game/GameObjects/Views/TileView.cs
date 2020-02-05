@@ -22,7 +22,6 @@
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Configuration;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 

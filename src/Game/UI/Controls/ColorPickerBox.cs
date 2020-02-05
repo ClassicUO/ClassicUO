@@ -23,7 +23,6 @@ using System;
 using System.Runtime.InteropServices;
 
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;

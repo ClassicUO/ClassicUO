@@ -22,10 +22,8 @@
 using System;
 
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
@@ -237,22 +235,6 @@ namespace ClassicUO.Game.UI.Controls
                     _clickPosition.Y = Height - _textureDownButton[0].Height - (_textureSlider.Height >> 1);
                 _value = (int) Math.Round (sliderY / scrollableArea * (MaxValue - MinValue) + MinValue);
                 _sliderPosition = sliderY;
-            }
-        }
-
-        protected override void OnMouseWheel(MouseEventType delta)
-        {
-            switch (delta)
-            {
-                case MouseEventType.WheelScrollUp:
-                    Value -= ScrollStep;
-
-                    break;
-
-                case MouseEventType.WheelScrollDown:
-                    Value += ScrollStep;
-
-                    break;
             }
         }
 

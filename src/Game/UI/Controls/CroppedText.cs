@@ -21,7 +21,6 @@
 
 using System.Collections.Generic;
 using ClassicUO.Data;
-using ClassicUO.IO;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 

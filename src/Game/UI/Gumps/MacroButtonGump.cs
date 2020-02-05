@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
@@ -31,10 +30,8 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -181,6 +178,11 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_macro != null)
             {
+                // hack to give macro buttons a unique id for use in anchor groups
+                int macroid = Client.Game.GetScene<GameScene>().Macros.GetAllMacros().IndexOf(_macro);
+
+                LocalSerial = (uint) macroid + 1000;
+
                 base.Save(writer);
 
                 writer.WriteAttributeString("name", _macro.Name);

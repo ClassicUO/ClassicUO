@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
         public UseAbilityButtonGump(AbilityDefinition def, bool primary) : this()
         {
             _isPrimary = primary;
-            UIManager.GetGump<UseAbilityButtonGump>((uint) def.Index)?.Dispose();
+            UIManager.GetGump<UseAbilityButtonGump>(2000 + (uint) def.Index)?.Dispose();
             _definition = def;
             BuildGump();
         }
@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            LocalSerial = (uint) _definition.Index;
+            LocalSerial = 2000 + (uint) _definition.Index;
 
             _button = new GumpPic(0, 0, _definition.Icon, 0)
             {
@@ -167,7 +167,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(xml);
 
-            _definition = new AbilityDefinition(ushort.Parse(xml.GetAttribute("id")),
+            _definition = new AbilityDefinition(int.Parse(xml.GetAttribute("id")),
                                                 xml.GetAttribute("name"),
                                                 ushort.Parse(xml.GetAttribute("graphic")));
             _isPrimary = bool.Parse(xml.GetAttribute("isprimary"));

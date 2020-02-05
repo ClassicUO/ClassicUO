@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;

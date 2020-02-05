@@ -19,9 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 using ClassicUO.IO.Resources;
 

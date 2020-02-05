@@ -19,8 +19,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using System;
-
 using ClassicUO.Configuration;
 
 namespace ClassicUO.Game.Data

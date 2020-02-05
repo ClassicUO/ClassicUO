@@ -22,7 +22,6 @@
 using System;
 
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 

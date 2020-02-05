@@ -22,7 +22,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -35,7 +34,6 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -708,7 +706,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            Chat.HandleMessage(entity, text, name, hue, type, (byte) font);
+            MessageManager.HandleMessage(entity, text, name, hue, type, (byte) font);
         }
 
         private static void DeleteObject(Packet p)
@@ -746,8 +744,6 @@ namespace ClassicUO.Network
                         if (tradeBox != null)
                             UIManager.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == tradeBox || s.ID2 == tradeBox)?.UpdateContent();
                     }
-
-                    GameScene scene = Client.Game.GetScene<GameScene>();
 
                     if (cont == World.Player && it.Layer == Layer.Invalid)
                         ItemHold.Enabled = false;
@@ -1101,8 +1097,6 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            GameScene scene = Client.Game.GetScene<GameScene>();
-
             Item item = World.Items.Get(ItemHold.Serial);
 
             if (ItemHold.Enabled || ItemHold.Dropped && item == null)
@@ -1124,7 +1118,6 @@ namespace ClassicUO.Network
                         item.Y = ItemHold.Y;
                         item.Z = ItemHold.Z;
                         item.UpdateScreenPosition();
-
                         container.Items.Add(item);
 
                         World.Items.Add(item);
@@ -1191,9 +1184,14 @@ namespace ClassicUO.Network
             else
                 Log.Warn( "There was a problem with ItemHold object. It was cleared before :|");
 
+            if (item != null)
+            {
+                item.AllowedToDraw = true;
+            }
+
             byte code = p.ReadByte();
 
-            if (code < 5) Chat.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 1001, MessageType.System, 3);
+            if (code < 5) MessageManager.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 1001, MessageType.System, 3);
         }
 
         private static void EndDraggingItem(Packet p)
@@ -1326,9 +1324,6 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-           
-
-
             byte type = p.ReadByte();
             bool haveCap = (((type != 0u) && type <= 0x03) || type == 0xDF);
             bool isSingleUpdate = (type == 0xFF || type == 0xDF);
@@ -1347,7 +1342,6 @@ namespace ClassicUO.Network
 
                     SkillsLoader.Instance.Skills.Add(new SkillEntry(i,p.ReadASCII(nameLength), haveButton));
                 }
-
 
                 SkillsLoader.Instance.SortedSkills.AddRange(SkillsLoader.Instance.Skills);
                 SkillsLoader.Instance.SortedSkills.Sort((a, b) => a.Name.CompareTo(b.Name));
@@ -1395,8 +1389,6 @@ namespace ClassicUO.Network
                     }
                 }
 
-
-
                 while (p.Position < p.Length)
                 {
                     ushort id = p.ReadUShort();
@@ -1410,8 +1402,8 @@ namespace ClassicUO.Network
                     if (type == 0 || type == 0x02)
                         id--;
 
-                    ushort baseVal = p.ReadUShort();
                     ushort realVal = p.ReadUShort();
+                    ushort baseVal = p.ReadUShort();
                     Lock locked = (Lock) p.ReadByte();
                     ushort cap = 1000;
 
@@ -2528,7 +2520,7 @@ namespace ClassicUO.Network
 
             byte[] data = p.ReadArray(8);
 
-            Chat.PromptData = new PromptData
+            MessageManager.PromptData = new PromptData
             {
                 Prompt = ConsolePrompt.ASCII,
                 Data = data
@@ -2774,7 +2766,7 @@ namespace ClassicUO.Network
                 }           
             }
 
-            Chat.HandleMessage(entity, text, name, hue, type, ProfileManager.Current.ChatFont, true, lang);
+            MessageManager.HandleMessage(entity, text, name, hue, type, ProfileManager.Current.ChatFont, true, lang);
         }
 
         private static void DisplayDeath(Packet p)
@@ -2906,7 +2898,7 @@ namespace ClassicUO.Network
                     {
                         int idx = msgSent.IndexOf('{');
                         int idxLast = msgSent.IndexOf('}') + 1;
-                        if (idxLast > idx)
+                        if (idxLast > idx && idx > -1)
                             msgSent = msgSent.Remove(idx, idxLast - idx);
                     }
 
@@ -3143,7 +3135,7 @@ namespace ClassicUO.Network
                         if (!string.IsNullOrEmpty(str))
                             item.Name = str;
 
-                        Chat.HandleMessage(item, str, item.Name, 0x3B2, MessageType.Regular, 3, true);
+                        MessageManager.HandleMessage(item, str, item.Name, 0x3B2, MessageType.Regular, 3, true);
                     }
 
                     str = string.Empty;
@@ -3201,7 +3193,7 @@ namespace ClassicUO.Network
                     if (count < 20 && count > 0 || next == 0xFFFFFFFC && count == 0)
                         strBuffer.Append(']');
 
-                    if (strBuffer.Length != 0) Chat.HandleMessage(item, strBuffer.ToString(), item.Name, 0x3B2, MessageType.Regular, 3, true);
+                    if (strBuffer.Length != 0) MessageManager.HandleMessage(item, strBuffer.ToString(), item.Name, 0x3B2, MessageType.Regular, 3, true);
 
                     NetClient.Socket.Send(new PMegaClilocRequestOld(item));
 
@@ -3483,6 +3475,12 @@ namespace ClassicUO.Network
                     //}
                     
                     break;
+                case 0x051B: // ClassicUO commands
+
+                    type = p.ReadUShort();
+                    
+
+                    break;
                 default:
                     Log.Warn($"Unhandled 0xBF - sub: {cmd.ToHex()}");
                     break;
@@ -3544,7 +3542,7 @@ namespace ClassicUO.Network
                 entity.ProcessDelta();
             }
 
-            Chat.HandleMessage(entity, text, name, hue, type, (byte) font, true);
+            MessageManager.HandleMessage(entity, text, name, hue, type, (byte) font, true);
         }
 
         private static void UnicodePrompt(Packet p)
@@ -3554,7 +3552,7 @@ namespace ClassicUO.Network
 
             byte[] data = p.ReadArray(8);
 
-            Chat.PromptData = new PromptData
+            MessageManager.PromptData = new PromptData
             {
                 Prompt = ConsolePrompt.Unicode,
                 Data = data

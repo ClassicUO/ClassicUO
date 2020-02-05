@@ -21,7 +21,6 @@
 
 using ClassicUO.Data;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.IO;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {

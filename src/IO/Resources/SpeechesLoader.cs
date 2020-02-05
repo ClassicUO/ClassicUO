@@ -20,7 +20,6 @@
 #endregion
 
 using ClassicUO.Data;
-using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;

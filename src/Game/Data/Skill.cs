@@ -59,7 +59,7 @@ namespace ClassicUO.Game.Data
 
         public override string ToString()
         {
-            return $"Name: {Value:F1}";
+            return $"Name: {Name} - {Value:F1}";
         }
     }
 }

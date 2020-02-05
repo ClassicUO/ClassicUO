@@ -23,10 +23,8 @@ using System;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Map;
-using ClassicUO.Game.Scenes;
-using ClassicUO.Interfaces;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 

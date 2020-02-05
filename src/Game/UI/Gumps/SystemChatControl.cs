@@ -29,11 +29,9 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Platforms;
 
@@ -115,7 +113,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             WantUpdateSize = false;
 
-            Chat.MessageReceived += ChatOnMessageReceived;
+            MessageManager.MessageReceived += ChatOnMessageReceived;
             Mode = ChatMode.Default;
 
             IsActive = !ProfileManager.Current.ActivateChatAfterEnter;
@@ -257,7 +255,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            Chat.MessageReceived -= ChatOnMessageReceived;
+            MessageManager.MessageReceived -= ChatOnMessageReceived;
             base.Dispose();
         }
 
@@ -467,13 +465,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_ESCAPE when Chat.PromptData.Prompt != ConsolePrompt.None:
+                case SDL.SDL_Keycode.SDLK_ESCAPE when MessageManager.PromptData.Prompt != ConsolePrompt.None:
 
-                    if (Chat.PromptData.Prompt == ConsolePrompt.ASCII)
+                    if (MessageManager.PromptData.Prompt == ConsolePrompt.ASCII)
                         NetClient.Socket.Send(new PASCIIPromptResponse(string.Empty, true));
-                    else if (Chat.PromptData.Prompt == ConsolePrompt.Unicode)
+                    else if (MessageManager.PromptData.Prompt == ConsolePrompt.Unicode)
                         NetClient.Socket.Send(new PUnicodePromptResponse(string.Empty, "ENU", true));
-                    Chat.PromptData = default;
+                    MessageManager.PromptData = default;
 
                     break;
             }
@@ -500,14 +498,14 @@ namespace ClassicUO.Game.UI.Gumps
             _messageHistoryIndex = _messageHistory.Count;
             Mode = ChatMode.Default;
 
-            if (Chat.PromptData.Prompt != ConsolePrompt.None)
+            if (MessageManager.PromptData.Prompt != ConsolePrompt.None)
             {
-                if (Chat.PromptData.Prompt == ConsolePrompt.ASCII)
+                if (MessageManager.PromptData.Prompt == ConsolePrompt.ASCII)
                     NetClient.Socket.Send(new PASCIIPromptResponse(text, text.Length < 1));
-                else if (Chat.PromptData.Prompt == ConsolePrompt.Unicode)
+                else if (MessageManager.PromptData.Prompt == ConsolePrompt.Unicode)
                     NetClient.Socket.Send(new PUnicodePromptResponse(text, "ENU", text.Length < 1));
 
-                Chat.PromptData = default;
+                MessageManager.PromptData = default;
             }
             else
             {
@@ -537,7 +535,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (World.Party.Leader == 0 || World.Party.Leader == World.Player)
                                     GameActions.RequestPartyInviteByTarget();
                                 else
-                                    Chat.HandleMessage(null, "You are not party leader.", "System", 0xFFFF, MessageType.Regular, 3);
+                                    MessageManager.HandleMessage(null, "You are not party leader.", "System", 0xFFFF, MessageType.Regular, 3);
 
                                 break;
 
@@ -546,7 +544,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (World.Party.Leader != 0)
                                     World.Party.CanLoot = !World.Party.CanLoot;
                                 else
-                                    Chat.HandleMessage(null, "You are not in a party.", "System", 0xFFFF, MessageType.Regular, 3);
+                                    MessageManager.HandleMessage(null, "You are not in a party.", "System", 0xFFFF, MessageType.Regular, 3);
 
 
                                 break;
@@ -554,7 +552,7 @@ namespace ClassicUO.Game.UI.Gumps
                             case "quit":
 
                                 if (World.Party.Leader == 0)
-                                    Chat.HandleMessage(null, "You are not in a party.", "System", 0xFFFF, MessageType.Regular, 3);
+                                    MessageManager.HandleMessage(null, "You are not in a party.", "System", 0xFFFF, MessageType.Regular, 3);
                                 else
                                 {
                                     for (int i = 0; i < World.Party.Members.Length; i++)
@@ -575,7 +573,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     World.Party.Inviter = 0;
                                 }
                                 else
-                                    Chat.HandleMessage(null, "No one has invited you to be in a party.", "System", 0xFFFF, MessageType.Regular, 3);
+                                    MessageManager.HandleMessage(null, "No one has invited you to be in a party.", "System", 0xFFFF, MessageType.Regular, 3);
 
                                 break;
 
@@ -588,7 +586,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     World.Party.Inviter = 0;
                                 }
                                 else
-                                    Chat.HandleMessage(null, "No one has invited you to be in a party.", "System", 0xFFFF, MessageType.Regular, 3);
+                                    MessageManager.HandleMessage(null, "No one has invited you to be in a party.", "System", 0xFFFF, MessageType.Regular, 3);
 
 
                                 break;
