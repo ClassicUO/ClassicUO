@@ -244,7 +244,7 @@ namespace ClassicUO.Network
                         Environment.OSVersion.Platform == PlatformID.Unix)
                     {
                         processStartInfo.FileName = "mono";
-                        processStartInfo.Arguments = $"{Path.Combine(tempPath, "ClassicUO.exe")} --source \"{CUOEnviroment.ExecutablePath}\" --pid {Process.GetCurrentProcess().Id} --action update";
+                        processStartInfo.Arguments = $"\"{Path.Combine(tempPath, "ClassicUO.exe")}\" --source \"{CUOEnviroment.ExecutablePath}\" --pid {Process.GetCurrentProcess().Id} --action update";
                     }
                     else
                     {

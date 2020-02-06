@@ -382,7 +382,7 @@ namespace ClassicUO
                     Environment.OSVersion.Platform == PlatformID.Unix)
                 {
                     processStartInfo.FileName = "mono";
-                    processStartInfo.Arguments = $"{Path.Combine(path, "ClassicUO.exe")} --source \"{currentPath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup";
+                    processStartInfo.Arguments = $"\"{Path.Combine(path, "ClassicUO.exe")}\" --source \"{currentPath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup";
                 }
                 else
                 {
