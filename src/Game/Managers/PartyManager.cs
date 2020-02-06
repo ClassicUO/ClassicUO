@@ -22,6 +22,7 @@
 using System;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 
@@ -126,7 +127,7 @@ namespace ClassicUO.Game.Managers
                     {
                         if (Members[i] != null && Members[i].Serial == ser)
                         {
-                            Chat.HandleMessage(null, name, Members[i].Name, ProfileManager.Current.PartyMessageHue, MessageType.Party, 3);
+                            MessageManager.HandleMessage(null, name, Members[i].Name, ProfileManager.Current.PartyMessageHue, MessageType.Party, 3);
 
                             break;
                         }

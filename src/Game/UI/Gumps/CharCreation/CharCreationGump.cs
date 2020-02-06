@@ -25,9 +25,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps.Login;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
@@ -81,6 +79,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             for (int i = 0; i < _skillsCount; i++)
             {
                 int skillIndex = info.SkillDefVal[i, 0];
+
+                if (skillIndex >= _character.Skills.Length)
+                    continue;
 
                 if ((World.ClientFeatures.Flags & CharacterListFlags.CLF_SAMURAI_NINJA) == 0 && (skillIndex == 52 || skillIndex == 53))
                 {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -18,10 +14,7 @@ namespace ClassicUO.Game.UI.Controls
         private readonly bool _isPartial;
 
         public ButtonTileArt(List<string> gparams) : 
-            base(int.Parse(gparams[5]),
-                 UInt16Converter.Parse(gparams[3]),
-                 UInt16Converter.Parse(gparams[4]),
-                 UInt16Converter.Parse(gparams[3]))
+            base(gparams)
         {
             X = int.Parse(gparams[1]);
             Y = int.Parse(gparams[2]);

@@ -39,7 +39,6 @@ using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
-using SDL2;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Scenes

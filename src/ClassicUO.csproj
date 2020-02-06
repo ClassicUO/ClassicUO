@@ -116,6 +116,7 @@
     <Compile Include="Game\Data\CharacterCreationValues.cs" />
     <Compile Include="Game\Data\CharacterSpeedType.cs" />
     <Compile Include="Game\Data\ClientFeatures.cs" />
+    <Compile Include="Game\Data\ClientProtocol.cs" />
     <Compile Include="Game\Data\ContainerData.cs" />
     <Compile Include="Game\Data\CustomHouse.cs" />
     <Compile Include="Game\Data\EntityFlags.cs" />
@@ -124,6 +125,7 @@
     <Compile Include="Game\Data\Layers.cs" />
     <Compile Include="Game\Data\LightColors.cs" />
     <Compile Include="Game\Data\MapMessageType.cs" />
+    <Compile Include="Game\Data\MessageType.cs" />
     <Compile Include="Game\Data\NotorietyFlag.cs" />
     <Compile Include="Game\Data\PopupMenuData.cs" />
     <Compile Include="Game\Data\PopupMenuItem.cs" />
@@ -366,7 +368,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Configuration\ConfigurationResolver.cs" />
     <Compile Include="Configuration\Settings.cs" />
-    <Compile Include="Game\Chat.cs" />
+    <Compile Include="Game\Managers\MessageManager.cs" />
     <Compile Include="Game\Managers\ContainerManager.cs" />
     <Compile Include="Game\Data\Direction.cs" />
     <Compile Include="Game\Data\LockedFeatures.cs" />

@@ -19,11 +19,9 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using System;
 using System.IO;
 
 using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 
 using Newtonsoft.Json;
 

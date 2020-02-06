@@ -20,7 +20,6 @@
 #endregion
 
 using System.Text;
-using System.Globalization;
 using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Utility

@@ -28,8 +28,6 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Network
@@ -714,7 +712,7 @@ namespace ClassicUO.Network
     {
         public PASCIIPromptResponse(string text, bool cancel) : base(0x9A)
         {
-            WriteBytes(Chat.PromptData.Data, 0, 8);
+            WriteBytes(MessageManager.PromptData.Data, 0, 8);
             WriteUInt((uint) (cancel ? 0 : 1));
 
             WriteASCII(text);
@@ -725,7 +723,7 @@ namespace ClassicUO.Network
     {
         public PUnicodePromptResponse(string text, string lang, bool cancel) : base(0xC2)
         {
-            WriteBytes(Chat.PromptData.Data, 0, 8);
+            WriteBytes(MessageManager.PromptData.Data, 0, 8);
             WriteUInt((uint) (cancel ? 0 : 1));
             WriteASCII(lang, 3);
             WriteUnicode(text);

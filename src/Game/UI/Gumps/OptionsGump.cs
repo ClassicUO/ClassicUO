@@ -27,12 +27,10 @@ using System.Linq;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
@@ -61,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient;
         private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
         private Combobox _dragSelectModifierKey;
-        private HSliderBar _brighlight;
+        private HSliderBar _brighlight, _sliderZoom;
 
         //counters
         private Checkbox _enableCounters, _highlightOnUse, _highlightOnAmount, _enableAbbreviatedAmount;
@@ -69,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
         private Combobox _overrideContainerLocationSetting;
 
         // sounds
@@ -584,9 +582,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             // [BLOCK] scale
             {
-                _zoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Enable in game zoom scaling (Ctrl + Scroll)", FONT, HUE_FONT)
+
+                ScrollAreaItem scaleSlider = new ScrollAreaItem();
+                Label zoomSliderText = new Label("Default zoom (5 for standard zoom):", true, HUE_FONT);
+                scaleSlider.Add(zoomSliderText);
+                _sliderZoom = new HSliderBar(zoomSliderText.X, zoomSliderText.Height + 5, 250, 0, 20, Client.Game.GetScene<GameScene>().ScalePos, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+                scaleSlider.Add(_sliderZoom);
+                rightArea.Add(scaleSlider);
+
+                _zoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Enable mousewheel for in game zoom scaling (Ctrl + Scroll)", FONT, HUE_FONT)
                 {
-                    IsChecked = ProfileManager.Current.EnableScaleZoom
+                    IsChecked = ProfileManager.Current.EnableMousewheelScaleZoom,
+                    Y = 5
                 };
                 _zoomCheckbox.ValueChanged += (sender, e) => { _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked; };
 
@@ -594,23 +601,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _zoomSizeArea = new ScrollAreaItem();
 
-                _savezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Save scale after exit", FONT, HUE_FONT)
-                {
-                    X = 20,
-                    Y = 15,
-                    IsChecked = ProfileManager.Current.SaveScaleAfterClose
-                };
-                _zoomSizeArea.Add(_savezoomCheckbox);
-
                 _restorezoomCheckbox = new Checkbox(0x00D2, 0x00D3, "Releasing Ctrl Restores Scale", FONT, HUE_FONT)
                 {
                     X = 20,
-                    Y = 35,
+                    Y = 5,
                     IsChecked = ProfileManager.Current.RestoreScaleAfterUnpressCtrl
                 };
                 _zoomSizeArea.Add(_restorezoomCheckbox);
 
                 rightArea.Add(_zoomSizeArea);
+
                 _zoomSizeArea.IsVisible = _zoomCheckbox.IsChecked;
             }
 
@@ -1222,7 +1222,14 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 45,
                     IsChecked = ProfileManager.Current.DisableCtrlQWBtn
                 };
-                _defaultHotkeysArea.Add(_disableCtrlQWBtn);
+
+                _disableAutoMove = new Checkbox(0x00D2, 0x00D3, "Disable Right+Left Click Automove", FONT, HUE_FONT)
+                {
+                    X = 20,
+                    Y = 45,
+                    IsChecked = ProfileManager.Current.DisableAutoMove
+                };
+                _defaultHotkeysArea.Add(_disableAutoMove);
 
                 rightArea.Add(_defaultHotkeysArea);
 
@@ -1281,6 +1288,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             _customBars = CreateCheckBox(rightArea, "Use Custom Health Bars", ProfileManager.Current.CustomBarsToggled, 0, 5);
             _customBarsBBG = CreateCheckBox(rightArea, "Use All Black Backgrounds", ProfileManager.Current.CBBlackBGToggled, 20, 5);
+
+            _saveHealthbars = CreateCheckBox(rightArea, "Save healthbars on logout", ProfileManager.Current.SaveHealthbars, 0, 5);
 
             Add(rightArea, PAGE);
 
@@ -1494,7 +1503,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _enableDeathScreen.IsChecked = true;
                     _enableBlackWhiteEffect.IsChecked = true;
                     Client.Game.GetScene<GameScene>().Scale = 1;
-                    ProfileManager.Current.RestoreScaleValue = ProfileManager.Current.ScaleZoom = 1f;
+                    ProfileManager.Current.DefaultScale = 1f;
                     _lightBar.Value = 0;
                     _enableLight.IsChecked = false;
                     _useColoredLights.IsChecked = false;
@@ -1586,6 +1595,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _disableArrowBtn.IsChecked = false;
                     _disableTabBtn.IsChecked = false;
                     _disableCtrlQWBtn.IsChecked = false;
+                    _disableAutoMove.IsChecked = false;
                     _enableDragSelect.IsChecked = false;
                     _overrideContainerLocation.IsChecked = false;
                     _overrideContainerLocationSetting.SelectedIndex = 0;
@@ -1595,6 +1605,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _customBarsBBG.IsChecked = false;
                     _autoOpenCorpse.IsChecked = false;
                     _skipEmptyCorpse.IsChecked = false;
+                    _saveHealthbars.IsChecked = false;
                     
                     break;
 
@@ -1773,23 +1784,10 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.EnableDeathScreen = _enableDeathScreen.IsChecked;
             ProfileManager.Current.EnableBlackWhiteEffect = _enableBlackWhiteEffect.IsChecked;
 
-            if (ProfileManager.Current.EnableScaleZoom != _zoomCheckbox.IsChecked)
-            {
-                if (!_zoomCheckbox.IsChecked)
-                    Client.Game.GetScene<GameScene>().Scale = 1;
-
-                ProfileManager.Current.EnableScaleZoom = _zoomCheckbox.IsChecked;
-            }
-
-            ProfileManager.Current.SaveScaleAfterClose = _savezoomCheckbox.IsChecked;
-
-            if (_restorezoomCheckbox.IsChecked != ProfileManager.Current.RestoreScaleAfterUnpressCtrl)
-            {
-                if (_restorezoomCheckbox.IsChecked)
-                    ProfileManager.Current.RestoreScaleValue = Client.Game.GetScene<GameScene>().Scale;
-
-                ProfileManager.Current.RestoreScaleAfterUnpressCtrl = _restorezoomCheckbox.IsChecked;
-            }
+            Client.Game.GetScene<GameScene>().ScalePos = _sliderZoom.Value;
+            ProfileManager.Current.DefaultScale = Client.Game.GetScene<GameScene>().Scale;
+            ProfileManager.Current.EnableMousewheelScaleZoom = _zoomCheckbox.IsChecked;
+            ProfileManager.Current.RestoreScaleAfterUnpressCtrl = _restorezoomCheckbox.IsChecked;
 
             if (Settings.GlobalSettings.ShardType != _shardType.SelectedIndex)
             {
@@ -1978,6 +1976,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _disableArrowBtn.IsChecked = false;
                 _disableTabBtn.IsChecked = false;
                 _disableCtrlQWBtn.IsChecked = false;
+                _disableAutoMove.IsChecked = false;
             }
 
             // NOTE: Keep these assignments AFTER the code above that resets nested checkboxes if parent checkbox is unchecked
@@ -1985,6 +1984,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.DisableArrowBtn = _disableArrowBtn.IsChecked;
             ProfileManager.Current.DisableTabBtn = _disableTabBtn.IsChecked;
             ProfileManager.Current.DisableCtrlQWBtn = _disableCtrlQWBtn.IsChecked;
+            ProfileManager.Current.DisableAutoMove = _disableAutoMove.IsChecked;
 
             if (ProfileManager.Current.DebugGumpIsDisabled != _debugGumpIsDisabled.IsChecked)
             {
@@ -2061,6 +2061,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             ProfileManager.Current.CBBlackBGToggled = _customBarsBBG.IsChecked;
+            ProfileManager.Current.SaveHealthbars = _saveHealthbars.IsChecked;
 
             // network
             ProfileManager.Current.ShowNetworkStats = _showNetStats.IsChecked;

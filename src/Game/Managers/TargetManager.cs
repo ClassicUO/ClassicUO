@@ -19,16 +19,12 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using System;
-
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 
@@ -245,25 +241,28 @@ namespace ClassicUO.Game.Managers
 
         public static void Target(ushort graphic, ushort x, ushort y, short z)
         {
-            if (!IsTargeting || TargeringType != TargetType.Neutral || graphic >= TileDataLoader.Instance.StaticData.Length)
+            if (!IsTargeting)
                 return;
 
-            ref readonly var itemData = ref TileDataLoader.Instance.StaticData[graphic];
-
-            if (Client.Version >= ClientVersion.CV_7090 && itemData.IsSurface)
+            if (graphic == 0)
             {
-                z += itemData.Height;
+                if (TargeringType != TargetType.Neutral)
+                    return;
+            }
+            else
+            {
+                if (graphic >= TileDataLoader.Instance.StaticData.Length)
+                    return;
+
+                ref readonly var itemData = ref TileDataLoader.Instance.StaticData[graphic];
+
+                if (Client.Version >= ClientVersion.CV_7090 && itemData.IsSurface)
+                {
+                    z += itemData.Height;
+                }
             }
 
             TargetPacket(graphic, x, y, (sbyte) z);
-        }
-
-        public static void Target(ushort x, ushort y, short z)
-        {
-            if (!IsTargeting || TargeringType != TargetType.Neutral)
-                return;
-
-            TargetPacket(0, x, y, (sbyte) z);
         }
 
         public static void SendMultiTarget(ushort x, ushort y, sbyte z)

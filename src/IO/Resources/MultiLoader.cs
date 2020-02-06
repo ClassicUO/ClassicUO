@@ -19,7 +19,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -136,6 +135,7 @@ namespace ClassicUO.IO.Resources
         {
             int count;
             ref readonly var entry = ref GetValidRefEntry(graphic);
+            _file.SetData(entry.Address, entry.FileSize);
 
             if (_file is UOFileUop uop)
             {

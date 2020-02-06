@@ -33,7 +33,7 @@ namespace ClassicUO.IO.Audio
         {
             _isPlaying = false;
             _waveBuffer = buffer;
-            Delay = (uint) ((buffer.Length - 16) / 88.2f);
+            Delay = (uint) ((buffer.Length - 32) / 88.2f);
         }
 
         public bool IsPlaying()

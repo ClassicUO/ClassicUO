@@ -25,7 +25,6 @@ using ClassicUO.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
@@ -168,7 +167,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
     internal class ProfessionInfo
     {
-        internal static readonly int[,] _VoidSkills = new int[4, 2] {{0, InitialSkillValue}, {0, InitialSkillValue}, {0, Client.Version < ClientVersion.CV_70160 ? 0 : InitialSkillValue}, {0, 10}};
+        internal static readonly int[,] _VoidSkills = new int[4, 2] {{0, InitialSkillValue}, {0, InitialSkillValue}, {0, Client.Version < ClientVersion.CV_70160 ? 0 : InitialSkillValue}, {0, InitialSkillValue } };
         internal static readonly int[] _VoidStats = new int[3] {60, RemainStatValue, RemainStatValue};
         public static int InitialSkillValue => Client.Version >= ClientVersion.CV_70160 ? 30 : 50;
         public static int RemainStatValue => Client.Version >= ClientVersion.CV_70160 ? 15 : 10;

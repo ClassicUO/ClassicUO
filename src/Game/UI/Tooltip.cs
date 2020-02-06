@@ -19,13 +19,10 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using System.Linq;
 using System.Text;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Managers;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -195,10 +192,13 @@ namespace ClassicUO.Game.UI
 
         public void SetText(string text, int maxWidth = 0)
         {
-            _maxWidth = maxWidth;
-            _serial = 0;
-            Text = _textHTML = text;
-            _lastHoverTime = Time.Ticks + 250;
+            //if (Text != text)
+            {
+                _maxWidth = maxWidth;
+                _serial = 0;
+                Text = _textHTML = text;
+                _lastHoverTime = Time.Ticks + 250;
+            }
         }
     }
 }

@@ -134,6 +134,14 @@ namespace ClassicUO.Game.UI.Gumps
             _slider.MaxValue = _container.MaxValue;
         }
 
+        protected override void CloseWithRightClick()
+        {
+            base.CloseWithRightClick();
+
+            NetClient.Socket.Send(new PMenuResponse(LocalSerial, (ushort) ServerSerial, 0, 0, 0));
+        }
+
+
         private class ContainerHorizontal : Control
         {
             private int _value;

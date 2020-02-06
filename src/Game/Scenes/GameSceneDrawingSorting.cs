@@ -20,14 +20,11 @@
 #endregion
 
 using System;
-using System.Text;
 
 using ClassicUO.Configuration;
-using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 
@@ -38,24 +35,50 @@ namespace ClassicUO.Game.Scenes
 {
     internal partial class GameScene
     {
+        private readonly struct TreeUnion
+        {
+            public TreeUnion(ushort start, ushort end)
+            {
+                Start = start;
+                End = end;
+            }
+
+            public readonly ushort Start, End;
+        }
+
+
         private sbyte _maxGroundZ;
         private int _maxZ;
         private Vector2 _minPixel, _maxPixel;
         private bool _noDrawRoofs;
         private int _objectHandlesCount;
-        //private WeakReference<GameObject>[] _renderList = new WeakReference<GameObject>[2000];
-
-
         private Point _offset, _maxTile, _minTile;
         private int _oldPlayerX, _oldPlayerY, _oldPlayerZ;
-
         private int _renderIndex = 1;
-
         private GameObject[] _renderList = new GameObject[10000];
         private GameObject[] _foliages = new GameObject[100];
+        private readonly GameObject[] _objectHandles = new GameObject[Constants.MAX_OBJECT_HANDLES];
         private int _renderListCount, _foliageCount;
+        private readonly StaticTiles _empty;
+        private sbyte _foliageIndex;
+        private static readonly TreeUnion[] _treeInfos =
+        {
+            new TreeUnion(0x0D45, 0x0D4C),
+            new TreeUnion(0x0D5C, 0x0D62),
+            new TreeUnion(0x0D73, 0x0D79),
+            new TreeUnion(0x0D87, 0x0D8B),
+            new TreeUnion(0x12BE, 0x12C7),
+            new TreeUnion(0x0D4D, 0x0D53),
+            new TreeUnion(0x0D63, 0x0D69),
+            new TreeUnion(0x0D7A, 0x0D7F),
+            new TreeUnion(0x0D8C, 0x0D90)
+        };
+
 
         public Point ScreenOffset => _offset;
+        public sbyte FoliageIndex => _foliageIndex;
+
+
 
         public void UpdateMaxDrawZ(bool force = false)
         {
@@ -191,35 +214,6 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-
-        private readonly StaticTiles _empty;
-        private sbyte _foliageIndex;
-
-
-        private readonly struct TreeUnion
-        {
-            public TreeUnion(ushort start, ushort end)
-            {
-                Start = start;
-                End = end;
-            }
-
-            public readonly ushort Start, End;
-        }
-
-        private static readonly TreeUnion[] _treeInfos =
-        {
-            new TreeUnion(0x0D45, 0x0D4C),
-            new TreeUnion(0x0D5C, 0x0D62),
-            new TreeUnion(0x0D73, 0x0D79),
-            new TreeUnion(0x0D87, 0x0D8B),
-            new TreeUnion(0x12BE, 0x12C7),
-            new TreeUnion(0x0D4D, 0x0D53),
-            new TreeUnion(0x0D63, 0x0D69),
-            new TreeUnion(0x0D7A, 0x0D7F),
-            new TreeUnion(0x0D8C, 0x0D90)
-        };
-
         private void IsFoliageUnion(ushort graphic, int x, int y, int z)
         {
             for (int i = 0; i < _treeInfos.Length; i++)
@@ -262,8 +256,6 @@ namespace ClassicUO.Game.Scenes
                 }
             }
         }
-
-
 
         private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ/*, GameObject entity*/)
         {
@@ -360,12 +352,22 @@ namespace ClassicUO.Game.Scenes
 
                 if (useObjectHandles && NameOverHeadManager.IsAllowed(obj as Entity))
                 {
-                    obj.UseObjectHandles = (ismobile ||
-                                            iscorpse ||
-                                            obj is Item it && (!it.IsLocked || it.IsLocked && itemData.IsContainer) && !it.IsMulti) &&
-                                           !obj.ClosedObjectHandles && _objectHandlesCount <= 400;
-                    if (obj.UseObjectHandles)
+                    if ((ismobile ||
+                         iscorpse ||
+                         obj is Item it && (!it.IsLocked || it.IsLocked && itemData.IsContainer) && !it.IsMulti) &&
+                        !obj.ClosedObjectHandles)
+                    {
+                        int index = _objectHandlesCount % Constants.MAX_OBJECT_HANDLES;
+
+                        if (_objectHandles[index] != null && !_objectHandles[index].ObjectHandlesOpened)
+                        {
+                            _objectHandles[index].UseObjectHandles = false;
+                            //_objectHandles[index].ObjectHandlesOpened = false;
+                        }
+                        _objectHandles[index] = obj;
+                        obj.UseObjectHandles = true;
                         _objectHandlesCount++;
+                    }
                 }
                 else if (obj.ClosedObjectHandles)
                 {
@@ -692,7 +694,7 @@ namespace ClassicUO.Game.Scenes
             int winGameScaledWidth;
             int winGameScaledHeight;
 
-            if (ProfileManager.Current != null && ProfileManager.Current.EnableScaleZoom)
+            if (ProfileManager.Current != null /*&& ProfileManager.Current.EnableScaleZoom*/)
             {
                 float left = winGamePosX;
                 float right = winGameWidth + left;

@@ -27,15 +27,10 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-
-using Microsoft.Xna.Framework;
-
-using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -43,10 +38,10 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private static UOTexture[] _shopGumpParts;
         private readonly GumpPicTiled _middleGumpLeft, _middleGumpRight;
-        private readonly Dictionary<Item, ShopItem> _shopItems;
+        private readonly Dictionary<uint, ShopItem> _shopItems;
         private readonly ScrollArea _shopScrollArea, _transactionScrollArea;
         private readonly Label _totalLabel, _playerGoldLabel;
-        private readonly Dictionary<Item, TransactionItem> _transactionItems;
+        private readonly Dictionary<uint, TransactionItem> _transactionItems;
 
         private bool _isUpDOWN, _isDownDOWN;
         private bool _isUpDOWN_T, _isDownDOWN_T;
@@ -66,8 +61,8 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             IsBuyGump = isBuyGump;
 
-            _transactionItems = new Dictionary<Item, TransactionItem>();
-            _shopItems = new Dictionary<Item, ShopItem>();
+            _transactionItems = new Dictionary<uint, TransactionItem>();
+            _shopItems = new Dictionary<uint, ShopItem>();
             _updateTotal = false;
 
             int add = isBuyGump ? 0 : 6;
@@ -228,11 +223,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (_shopItems.TryGetValue(it, out var shopItem)) shopItem.NameFromCliloc = fromcliloc;
         }
 
-        public void AddItem(Item item, bool fromcliloc)
+        public void AddItem(uint serial, ushort graphic, ushort hue, ushort amount, ushort price, string name, bool fromcliloc)
         {
             ShopItem shopItem;
 
-            _shopScrollArea.Add(shopItem = new ShopItem(item)
+            _shopScrollArea.Add(shopItem = new ShopItem(serial, graphic, hue, amount, price, name)
             {
                 X = 5,
                 Y = 5,
@@ -246,7 +241,7 @@ namespace ClassicUO.Game.UI.Gumps
             });
             shopItem.MouseUp += ShopItem_MouseClick;
             shopItem.MouseDoubleClick += ShopItem_MouseDoubleClick;
-            _shopItems.Add(item, shopItem);
+            _shopItems.Add(serial, shopItem);
         }
 
         public void SetNameTo(Item item, string name)
@@ -281,7 +276,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_updateTotal)
             {
-                _totalLabel.Text = _transactionItems.Sum(o => o.Value.Amount * o.Key.Price).ToString();
+                _totalLabel.Text = _transactionItems.Sum(o => o.Value.Amount * o.Value.Price).ToString();
                 _updateTotal = false;
             }
 
@@ -301,15 +296,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             int total = _shiftPressed ? shopItem.Amount : 1;
 
-            if (_transactionItems.TryGetValue(shopItem.Item, out TransactionItem transactionItem))
+            if (_transactionItems.TryGetValue(shopItem.LocalSerial, out TransactionItem transactionItem))
                 transactionItem.Amount += total;
             else
             {
-                transactionItem = new TransactionItem(shopItem.Item, total, shopItem.ShopItemName);
+                transactionItem = new TransactionItem(shopItem.LocalSerial, shopItem.Graphic, shopItem.Hue, total, (ushort) shopItem.Price, shopItem.ShopItemName);
                 transactionItem.OnIncreaseButtomClicked += TransactionItem_OnIncreaseButtomClicked;
                 transactionItem.OnDecreaseButtomClicked += TransactionItem_OnDecreaseButtomClicked;
                 _transactionScrollArea.Add(transactionItem);
-                _transactionItems.Add(shopItem.Item, transactionItem);
+                _transactionItems.Add(shopItem.LocalSerial, transactionItem);
             }
 
             shopItem.Amount -= total;
@@ -324,7 +319,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (transactionItem.Amount > 0)
             {
-                _shopItems[transactionItem.Item].Amount += total;
+                _shopItems[transactionItem.LocalSerial].Amount += total;
                 transactionItem.Amount -= total;
             }
 
@@ -335,10 +330,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void RemoveTransactionItem(TransactionItem transactionItem)
         {
-            _shopItems[transactionItem.Item].Amount += transactionItem.Amount;
+            _shopItems[transactionItem.LocalSerial].Amount += transactionItem.Amount;
             transactionItem.OnIncreaseButtomClicked -= TransactionItem_OnIncreaseButtomClicked;
             transactionItem.OnDecreaseButtomClicked -= TransactionItem_OnDecreaseButtomClicked;
-            _transactionItems.Remove(transactionItem.Item);
+            _transactionItems.Remove(transactionItem.LocalSerial);
             _transactionScrollArea.Remove(transactionItem);
             _updateTotal = true;
         }
@@ -347,9 +342,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             var transactionItem = (TransactionItem) sender;
 
-            if (_shopItems[transactionItem.Item].Amount > 0)
+            if (_shopItems[transactionItem.LocalSerial].Amount > 0)
             {
-                _shopItems[transactionItem.Item].Amount--;
+                _shopItems[transactionItem.LocalSerial].Amount--;
                 transactionItem.Amount++;
             }
 
@@ -366,7 +361,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((Buttons) buttonID)
             {
                 case Buttons.Accept:
-                    var items = _transactionItems.Select(t => new Tuple<uint, ushort>(t.Key.Serial, (ushort) t.Value.Amount)).ToArray();
+                    var items = _transactionItems.Select(t => new Tuple<uint, ushort>(t.Key, (ushort) t.Value.Amount)).ToArray();
 
                     if (IsBuyGump)
                         NetClient.Socket.Send(new PBuyRequest(LocalSerial, items));
@@ -442,17 +437,22 @@ namespace ClassicUO.Game.UI.Gumps
                 return direction;
             }
 
-            public ShopItem(Item item)
+            public ShopItem(uint serial, ushort graphic, ushort hue, int count, int price, string name)
             {
-                Item = item;
-                string itemName = StringHelper.CapitalizeWordsByLimitator(item.Name);
+                LocalSerial = serial;
+                Graphic = graphic;
+                Hue = hue;
+                Price = price;
+                Name = name;
+
+                string itemName = StringHelper.CapitalizeAllWords(Name);
 
                 TextureControl control;
 
-                if (SerialHelper.IsMobile(item.Serial))
+                if (SerialHelper.IsMobile(LocalSerial))
                 {
-                    ushort hue2 = item.Hue;
-                    AnimationDirection direction = GetMobileAnimationDirection(item.Graphic, ref hue2, 1);
+                    ushort hue2 = Hue;
+                    AnimationDirection direction = GetMobileAnimationDirection(Graphic, ref hue2, 1);
 
                     Add(control = new TextureControl
                     {
@@ -460,8 +460,8 @@ namespace ClassicUO.Game.UI.Gumps
                         X = 5,
                         Y = 5,
                         AcceptMouseInput = false,
-                        Hue = item.Hue == 0 ? hue2 : item.Hue,
-                        IsPartial = item.ItemData.IsPartialHue
+                        Hue = Hue == 0 ? hue2 : Hue,
+                        IsPartial = TileDataLoader.Instance.StaticData[Graphic].IsPartialHue
                     });
 
                     if (control.Texture != null)
@@ -481,9 +481,9 @@ namespace ClassicUO.Game.UI.Gumps
                     if (control.Height > 35)
                         control.Height = 35;
                 }
-                else if (SerialHelper.IsItem(item.Serial))
+                else if (SerialHelper.IsItem(LocalSerial))
                 {
-                    var texture = ArtLoader.Instance.GetTexture(item.Graphic);
+                    var texture = ArtLoader.Instance.GetTexture(Graphic);
 
                     Add(control = new TextureControl
                     {
@@ -494,14 +494,14 @@ namespace ClassicUO.Game.UI.Gumps
                         Height = texture.ImageRectangle.Height,
                         AcceptMouseInput = false,
                         ScaleTexture = false,
-                        Hue = item.Hue,
-                        IsPartial = item.ItemData.IsPartialHue
+                        Hue = Hue,
+                        IsPartial = TileDataLoader.Instance.StaticData[Graphic].IsPartialHue
                     });
                 }
                 else
                     return;
 
-                string subname = $"{itemName} at {item.Price}gp";
+                string subname = $"{itemName} at {Price}gp";
 
                 Add(_name = new Label(subname, true, 0x219, 110, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_LEFT, true)
                 {
@@ -511,7 +511,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int height = Math.Max(_name.Height, control.Height) + 10;
 
-                Add(_amountLabel = new Label(item.Amount.ToString(), true, 0x0219, 35, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_RIGHT)
+                Add(_amountLabel = new Label(count.ToString(), true, 0x0219, 35, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_RIGHT)
                 {
                     X = 168,
                     Y = height >> 2
@@ -523,13 +523,14 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = height;
                 WantUpdateSize = false;
 
-                if (World.ClientFeatures.TooltipsEnabled) SetTooltip(item);
+                if (World.ClientFeatures.TooltipsEnabled) 
+                    SetTooltip(LocalSerial);
+
+                Amount = count;
             }
 
             internal string ShopItemName => _name.Text;
 
-
-            public Item Item { get; }
 
             public int Amount
             {
@@ -546,11 +547,16 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            public int Price { get; set; }
+            public ushort Hue { get; set; }
+            public ushort Graphic { get; set; }
+            public string Name { get; set; }
+
             public bool NameFromCliloc { get; set; }
 
             public void SetName(string s)
             {
-                _name.Text = $"{s} at {Item.Price}gp";
+                _name.Text = $"{s} at {Price}gp";
                 WantUpdateSize = true;
             }
 
@@ -563,10 +569,10 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.Update(totalMS, frameMS);
 
-                if (Item != null && SerialHelper.IsMobile(Item.Serial))
+                if (SerialHelper.IsMobile(LocalSerial))
                 {
-                    ushort hue = Item.Hue;
-                    GetMobileAnimationDirection(Item.Graphic, ref hue, 1).LastAccessTime = Time.Ticks;
+                    ushort hue = Hue;
+                    GetMobileAnimationDirection(Graphic, ref hue, 1).LastAccessTime = Time.Ticks;
                 }
             }
         }
@@ -575,9 +581,13 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private readonly Label _amountLabel;
 
-            public TransactionItem(Item item, int amount, string realname)
+            public TransactionItem(uint serial, ushort graphic, ushort hue, int amount, ushort price, string realname)
             {
-                Item = item;
+                LocalSerial = serial;
+                Graphic = graphic;
+                Hue = hue;
+                Price = price;
+
                 Label l;
 
                 Add(l = new Label(realname, true, 0x021F, 140, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_LEFT, true)
@@ -694,9 +704,14 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = 245;
                 Height = l.Height;
                 WantUpdateSize = false;
+                Amount = amount;
             }
 
-            public Item Item { get; }
+
+            public ushort Graphic { get; }
+            public ushort Hue { get; }
+
+            public ushort Price { get; }
 
             public int Amount
             {

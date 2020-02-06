@@ -25,7 +25,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using ClassicUO.Data;
-using ClassicUO.Game;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 

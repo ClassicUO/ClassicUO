@@ -21,8 +21,6 @@
 
 using ClassicUO.Renderer;
 
-using Microsoft.Xna.Framework;
-
 namespace ClassicUO.Game.UI.Controls
 {
     internal class TextureControl : Control

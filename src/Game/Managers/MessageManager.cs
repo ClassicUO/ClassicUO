@@ -26,35 +26,16 @@ using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Managers
 {
-    [Flags]
-    enum MessageType : byte
-    {
-        Regular = 0,
-        System = 1,
-        Emote = 2,
-        Limit3Spell = 3, // Sphere style shards use this to limit to 3 of these message types showing overhead.
-        Label = 6,
-        Focus = 7,
-        Whisper = 8,
-        Yell = 9,
-        Spell = 10,
-        Guild = 13,
-        Alliance = 14,
-        Command = 15,
-        Encoded = 0xC0,
-        Party = 0xFF // This is a CUO assigned type, value is unimportant
-    }
+
 
     //enum MessageFont : byte
     //{
@@ -81,7 +62,7 @@ namespace ClassicUO.Game
 
 
 
-    internal static class Chat
+    internal static class MessageManager
     {
         public static PromptData PromptData { get; set; }
 

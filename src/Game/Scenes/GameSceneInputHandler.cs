@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Configuration;
@@ -30,11 +29,8 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
-using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -328,7 +324,7 @@ namespace ClassicUO.Game.Scenes
                 return;
             }
 
-            if (_rightMousePressed)
+            if (!ProfileManager.Current.DisableAutoMove && _rightMousePressed)
                 _continueRunning = true;
 
             if (_dragginObject != null)
@@ -410,7 +406,7 @@ namespace ClassicUO.Game.Scenes
                                 TargetManager.Target(ent.Serial);
                                 break;
                             case Land land:
-                                TargetManager.Target(land.X, land.Y, land.Z);
+                                TargetManager.Target(0, land.X, land.Y, land.Z);
                                 break;
                             case GameObject o:
                                 TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
@@ -436,7 +432,7 @@ namespace ClassicUO.Game.Scenes
                                 UIManager.Add(new InspectorGump(ent));
                                 break;
                             case Land land:
-                                TargetManager.Target(land.X, land.Y, land.Z);
+                                TargetManager.Target(0, land.X, land.Y, land.Z);
                                 UIManager.Add(new InspectorGump(land));
                                 break;
                             case GameObject o:
@@ -626,16 +622,17 @@ namespace ClassicUO.Game.Scenes
             if (!IsMouseOverViewport)
                 return;
 
-            if (!ProfileManager.Current.EnableScaleZoom || !Keyboard.Ctrl)
-                return;
+            if (ProfileManager.Current.EnableMousewheelScaleZoom)
+            {
+                if (!Keyboard.Ctrl)
+                    return;
 
-            if (!up)
-                ScalePos++;
-            else
-                ScalePos--;
+                if (!up)
+                    ZoomOut();
+                else
+                    ZoomIn();
+            }
 
-            if (ProfileManager.Current.SaveScaleAfterClose)
-                ProfileManager.Current.ScaleZoom = Scale;
         }
 
 
@@ -699,6 +696,11 @@ namespace ClassicUO.Game.Scenes
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_TAB && e.repeat != 0)
                 return;
 
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && TargetManager.IsTargeting)
+            {
+                TargetManager.CancelTarget();
+            }
+
             if (UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
             {
                 return;
@@ -708,11 +710,7 @@ namespace ClassicUO.Game.Scenes
             {
                 case SDL.SDL_Keycode.SDLK_ESCAPE:
 
-                    if (TargetManager.IsTargeting)
-                    {
-                        TargetManager.CancelTarget();
-                    }
-                    else if (Pathfinder.AutoWalking && Pathfinder.PathindingCanBeCancelled)
+                    if (Pathfinder.AutoWalking && Pathfinder.PathindingCanBeCancelled)
                     {
                         Pathfinder.StopAutoWalk();
                     }
@@ -856,8 +854,8 @@ namespace ClassicUO.Game.Scenes
 
         internal override void OnKeyUp(SDL.SDL_KeyboardEvent e)
         {
-            if (ProfileManager.Current.EnableScaleZoom && ProfileManager.Current.RestoreScaleAfterUnpressCtrl && !Keyboard.Ctrl)
-                Scale = ProfileManager.Current.RestoreScaleValue;
+            if (ProfileManager.Current.EnableMousewheelScaleZoom && ProfileManager.Current.RestoreScaleAfterUnpressCtrl && !Keyboard.Ctrl)
+                Scale = ProfileManager.Current.DefaultScale;
 
             if (_flags[4])
             {

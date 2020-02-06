@@ -20,7 +20,6 @@
 #endregion
 
 using ClassicUO.Data;
-using ClassicUO.IO;
 using System;
 
 namespace ClassicUO.Game.Data

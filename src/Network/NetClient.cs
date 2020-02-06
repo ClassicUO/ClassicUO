@@ -25,7 +25,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -39,7 +38,7 @@ namespace ClassicUO.Network
         private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer;
         private Socket _socket;
         private CircularBuffer _circularBuffer;
-        private SocketAsyncEventArgs _sendEventArgs, _recvEventArgs;
+        private SocketAsyncEventArgs _recvEventArgs;
         private ConcurrentQueue<Packet> _recvQueue = new ConcurrentQueue<Packet>();
 
 
@@ -129,8 +128,6 @@ namespace ClassicUO.Network
             _incompletePacketBuffer = new byte[BUFF_SIZE];
             _decompBuffer = new byte[BUFF_SIZE];
             _circularBuffer = new CircularBuffer();
-            _sendEventArgs = new SocketAsyncEventArgs();
-            _sendEventArgs.Completed += IO_Socket;
             _recvEventArgs = new SocketAsyncEventArgs();
             _recvEventArgs.Completed += IO_Socket;
             _recvEventArgs.SetBuffer(_recvBuffer, 0, _recvBuffer.Length);
@@ -192,7 +189,6 @@ namespace ClassicUO.Network
             _isCompressionEnabled = false;
             _socket = null;
             _recvEventArgs = null;
-            _sendEventArgs = null;
             _circularBuffer = null;
 
             if (error != 0)

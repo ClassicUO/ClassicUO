@@ -28,15 +28,12 @@ using System.Xml;
 using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
 using Newtonsoft.Json;
-
-using SDL2;
 
 namespace ClassicUO.Configuration
 {
@@ -118,9 +115,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public int CircleOfTransparencyRadius { get; set; } = Constants.MAX_CIRCLE_OF_TRANSPARENCY_RADIUS / 2;
         [JsonProperty] public int CircleOfTransparencyType { get; set; } // 0 = normal, 1 = like original client
         [JsonProperty] public int VendorGumpHeight { get; set; } = 60; //original vendor gump size
-        [JsonProperty] public float ScaleZoom { get; set; } = 1.0f;
-        [JsonProperty] public float RestoreScaleValue { get; set; } = 1.0f;
-        [JsonProperty] public bool EnableScaleZoom { get; set; }
+        [JsonProperty] public float DefaultScale { get; set; } = 1.0f;
+        [JsonProperty] public bool EnableMousewheelScaleZoom { get; set; }
         [JsonProperty] public bool SaveScaleAfterClose { get; set; }
         [JsonProperty] public bool RestoreScaleAfterUnpressCtrl { get; set; }
         [JsonProperty] public bool BandageSelfOld { get; set; } = true;
@@ -185,6 +181,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool DisableArrowBtn { get; set; }
         [JsonProperty] public bool DisableTabBtn { get; set; }
         [JsonProperty] public bool DisableCtrlQWBtn { get; set; }
+        [JsonProperty] public bool DisableAutoMove { get; set; }
         [JsonProperty] public bool EnableDragSelect { get; set; }
         [JsonProperty] public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift
         [JsonProperty] public bool OverrideContainerLocation { get; set; }
@@ -258,6 +255,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool RelativeDragAndDropItems { get; set; }
 
         [JsonProperty] public bool ShowHouseContent { get; set; }
+        [JsonProperty] public bool SaveHealthbars { get; set; }
 
 
         internal static string ProfilePath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
@@ -557,6 +555,9 @@ namespace ClassicUO.Configuration
                                     break;
                                 case GUMP_TYPE.GT_RACIALBUTTON:
                                     gump = new RacialAbilityButton();
+                                    break;
+                                case GUMP_TYPE.GT_WORLDMAP:
+                                    gump = new WorldMapGump();
                                     break;
                             }
 

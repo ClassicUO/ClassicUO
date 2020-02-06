@@ -21,14 +21,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 

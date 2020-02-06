@@ -26,8 +26,6 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
-using Microsoft.Xna.Framework;
-
 namespace ClassicUO.Game.UI.Controls
 {
     internal class NiceButton : HitBox

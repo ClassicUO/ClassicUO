@@ -25,13 +25,10 @@ using System.Linq;
 using System.Text;
 
 using ClassicUO.Configuration;
-using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -39,7 +36,6 @@ using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Managers
 {
@@ -1109,7 +1105,7 @@ namespace ClassicUO.Game.Managers
             int deltaY = mousePosition.Y - _dragOriginY;
             DraggingControl.X = DraggingControl.X + deltaX;
             DraggingControl.Y = DraggingControl.Y + deltaY;
-            DraggingControl.InvokeMove(DraggingControl.X, DraggingControl.Y);
+            DraggingControl.InvokeMove(deltaX, deltaY);
             _dragOriginX = mousePosition.X;
             _dragOriginY = mousePosition.Y;
         }

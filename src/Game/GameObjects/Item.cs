@@ -20,19 +20,15 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
 
@@ -108,6 +104,8 @@ namespace ClassicUO.Game.GameObjects
                 return;
 
             base.Destroy();
+            
+            UIManager.GetGump<Gump>(Serial)?.Dispose();
             //_pool.Enqueue(this);
         }
 

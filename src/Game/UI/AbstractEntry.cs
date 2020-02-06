@@ -21,7 +21,6 @@
 
 using ClassicUO.Configuration;
 using ClassicUO.Input;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 

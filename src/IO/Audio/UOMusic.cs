@@ -38,12 +38,14 @@ namespace ClassicUO.IO.Audio
         private bool m_Playing;
         private MP3Stream m_Stream;
 
+
         public UOMusic(int index, string name, bool loop)
             : base(name, index)
         {
             m_Repeat = loop;
             m_Playing = false;
             Channels = AudioChannels.Stereo;
+            Delay = 0;
         }
 
         private string Path => System.IO.Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, Client.Version > ClientVersion.CV_5090 ? $"Music/Digital/{Name}.mp3" : $"music/{Name}.mp3");

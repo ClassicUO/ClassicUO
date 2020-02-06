@@ -20,7 +20,6 @@
 #endregion
 
 using ClassicUO.Configuration;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using System;

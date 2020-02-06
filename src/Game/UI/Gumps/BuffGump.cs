@@ -31,8 +31,6 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
-using Microsoft.Xna.Framework;
-
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class BuffGump : Gump

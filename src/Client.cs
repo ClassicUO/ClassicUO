@@ -23,17 +23,10 @@ using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Logging;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Game.Managers;
 using ClassicUO.Network;
 using ClassicUO.Utility.Platforms;
 
@@ -41,23 +34,6 @@ using SDL2;
 
 namespace ClassicUO
 {
-    [Flags]
-    enum ClientFlags : uint
-    {
-        CF_T2A = 0x00,
-        CF_RE = 0x01,
-        CF_TD = 0x02,
-        CF_LBR = 0x04,
-        CF_AOS = 0x08,
-        CF_SE = 0x10,
-        CF_SA = 0x20,
-        CF_UO3D = 0x40,
-        CF_RESERVED = 0x80,
-        CF_3D = 0x100,
-        CF_UNDEFINED = 0xFFFF,
-    }
-
-
     static class Client
     {
         public static ClientVersion Version { get; private set; } 

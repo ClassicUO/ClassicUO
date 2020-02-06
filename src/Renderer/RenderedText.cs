@@ -22,9 +22,6 @@
 using System;
 using System.Collections.Generic;
 using ClassicUO.Data;
-using ClassicUO.Game;
-using ClassicUO.Interfaces;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 using Microsoft.Xna.Framework;

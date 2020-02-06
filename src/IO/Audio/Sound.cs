@@ -44,6 +44,8 @@ namespace ClassicUO.IO.Audio
         private uint _lastPlayedTime;
         protected uint Delay = 250;
 
+        public bool IsDisposed { get; private set; }
+
         static Sound()
         {
             m_EffectInstances = new List<Tuple<DynamicSoundEffectInstance, double>>();
@@ -118,6 +120,8 @@ namespace ClassicUO.IO.Audio
 
                 m_ThisInstance = null;
             }
+
+            IsDisposed = true;
         }
 
         public void Mute()
@@ -196,7 +200,12 @@ namespace ClassicUO.IO.Audio
 
         public void Stop()
         {
-            foreach(Tuple<DynamicSoundEffectInstance, double> sound in m_EffectInstances)
+            //m_ThisInstance?.Stop();
+            //m_ThisInstance?.Dispose();
+
+            //CullExpiredEffects(Time.Ticks);
+
+            foreach (Tuple<DynamicSoundEffectInstance, double> sound in m_EffectInstances)
             {
                 sound.Item1.Stop();
                 sound.Item1.Dispose();

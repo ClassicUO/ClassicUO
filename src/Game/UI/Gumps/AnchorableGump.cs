@@ -47,7 +47,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMove(int x, int y)
         {
-            if (Keyboard.Alt)
+            if (Keyboard.Alt && !ProfileManager.Current.HoldAltToMoveGumps)
             {
                 UIManager.AnchorManager.DetachControl(this);
             }

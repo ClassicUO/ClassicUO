@@ -20,14 +20,19 @@
 #endregion
 
 using System;
+
+using ClassicUO.Input;
 using ClassicUO.Utility;
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
     abstract class ScrollBarBase : Control
     {
         protected int _value, _minValue, _maxValue;
+
+
+        public event EventHandler ValueChanged;
+
 
         public int Value
         {
@@ -81,13 +86,27 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public int ScrollStep { get; set; } = 15;
+        public int ScrollStep { get; set; } = 50;
 
 
 
-        public event EventHandler ValueChanged;
 
 
+        protected override void OnMouseWheel(MouseEventType delta)
+        {
+            switch (delta)
+            {
+                case MouseEventType.WheelScrollUp:
+                    Value -= ScrollStep;
+
+                    break;
+
+                case MouseEventType.WheelScrollDown:
+                    Value += ScrollStep;
+
+                    break;
+            }
+        }
 
         protected float GetSliderYPosition()
         {

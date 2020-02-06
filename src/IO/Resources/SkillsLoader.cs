@@ -21,9 +21,6 @@
 
 using ClassicUO.Utility;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -121,8 +118,8 @@ namespace ClassicUO.IO.Resources
         }
 
         public readonly int Index;
-        public readonly string Name;
-        public readonly bool HasAction;
+        public string Name;
+        public bool HasAction;
 
         public override string ToString()
         {
