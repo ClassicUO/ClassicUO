@@ -174,7 +174,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (gg == null)
             {
-                if (UIManager.GetGumpCachePosition(LocalSerial, out Point location) && item.Serial == World.Player.Equipment[(int) Layer.Backpack])
+                if (UIManager.GetGumpCachePosition(LocalSerial, out Point location))
                     Location = location;
                 else
                 {
@@ -486,7 +486,7 @@ namespace ClassicUO.Game.UI.Gumps
                 item.Items.Added -= ItemsOnAdded;
                 item.Items.Removed -= ItemsOnRemoved;
 
-                if (World.Player != null && item == World.Player.Equipment[(int) Layer.Backpack]) UIManager.SavePosition(item, Location);
+                if (World.Player != null) UIManager.SavePosition(item, Location);
 
                 foreach (Item child in item.Items)
                 {
