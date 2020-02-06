@@ -107,6 +107,7 @@ namespace ClassicUO.Network
             Handlers.Add(0x2C, DeathScreen);
             Handlers.Add(0x2D, MobileAttributes);
             Handlers.Add(0x2E, EquipItem);
+            Handlers.Add(0x2F, Swing);
             Handlers.Add(0x32, p => { }); // unknown
             Handlers.Add(0x38, Pathfinding);
             Handlers.Add(0x3A, UpdateSkills);
@@ -1318,7 +1319,57 @@ namespace ClassicUO.Network
             if (ItemHold.Serial == item.Serial)
                 ItemHold.Clear();      
         }
+        private static ushort _pdX, _pdY;
+        private static DateTime _swingT;
+        private static void Swing(Packet p)
+        {
+            if (!World.InGame)
+                return;
+            if ((DateTime.Now - _swingT).TotalMilliseconds < 800)
+            {
+                return;
+            }
+            _swingT = DateTime.Now;
+            p.Skip(1);
+            uint attackers = p.ReadUInt();
+            uint defenders = p.ReadUInt();
+            Mobile def = World.Mobiles.Get(defenders);
+            Direction pdir = GetDirectionAB(World.Player.X, World.Player.Y, def.X, def.Y);
+            if (World.Player.X == _pdX && World.Player.Y == _pdY && World.Player.Direction != pdir)
+            {
+                NetClient.Socket.Send(new PWalkRequest(pdir, World.Player.Walker.WalkSequence, false, World.Player.Walker.FastWalkStack.GetValue()));
+            }
+            _pdX = World.Player.X;
+            _pdY = World.Player.Y;
+        }
+        public static Direction GetDirectionAB(int AAx, int AAy, int BBx, int BBy)
+        {
+            int dx = AAx - BBx;
+            int dy = AAy - BBy;
 
+            int rx = (dx - dy) * 44;
+            int ry = (dx + dy) * 44;
+
+            int ax = Math.Abs(rx);
+            int ay = Math.Abs(ry);
+
+            Direction ret;
+
+            if (((ay >> 1) - ax) >= 0)
+                ret = (ry > 0) ? Direction.Up : Direction.Down;
+            else if (((ax >> 1) - ay) >= 0)
+                ret = (rx > 0) ? Direction.Left : Direction.Right;
+            else if (rx >= 0 && ry >= 0)
+                ret = Direction.West;
+            else if (rx >= 0 && ry < 0)
+                ret = Direction.South;
+            else if (rx < 0 && ry < 0)
+                ret = Direction.East;
+            else
+                ret = Direction.North;
+
+            return ret;
+        }
         private static void UpdateSkills(Packet p)
         {
             if (!World.InGame)
