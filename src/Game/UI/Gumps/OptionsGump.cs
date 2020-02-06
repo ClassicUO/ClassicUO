@@ -67,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
+        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars, _saveContainerLocations;
         private Combobox _overrideContainerLocationSetting;
 
         // sounds
@@ -1279,6 +1279,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(_containerGumpLocation);
 
+            _saveContainerLocations = CreateCheckBox(rightArea, "Save container gumps locations", ProfileManager.Current.SaveContainerLocations, 0, 5);
+
             _showTargetRangeIndicator = new Checkbox(0x00D2, 0x00D3, "Show target range indicator", FONT, HUE_FONT, true)
             {
                 IsChecked = ProfileManager.Current.ShowTargetRangeIndicator,
@@ -1599,6 +1601,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _enableDragSelect.IsChecked = false;
                     _overrideContainerLocation.IsChecked = false;
                     _overrideContainerLocationSetting.SelectedIndex = 0;
+                    _saveContainerLocations.IsChecked = false;
                     _dragSelectHumanoidsOnly.IsChecked = false;
                     _showTargetRangeIndicator.IsChecked = false;
                     _customBars.IsChecked = false;
@@ -2029,6 +2032,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ProfileManager.Current.OverrideContainerLocation = _overrideContainerLocation.IsChecked;
             ProfileManager.Current.OverrideContainerLocationSetting = _overrideContainerLocationSetting.SelectedIndex;
+            ProfileManager.Current.SaveContainerLocations = _saveContainerLocations.IsChecked;
 
             ProfileManager.Current.ShowTargetRangeIndicator = _showTargetRangeIndicator.IsChecked;
 

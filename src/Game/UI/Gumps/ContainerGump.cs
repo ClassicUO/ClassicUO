@@ -72,8 +72,8 @@ namespace ClassicUO.Game.UI.Gumps
                 c.Dispose();
 
             foreach (Item i in item.Items.Where(s => s != null && s.IsLootable))
-                //FIXME: this should be disabled. Server sends the right position
-                //CheckItemPosition(i);
+            //FIXME: this should be disabled. Server sends the right position
+            //CheckItemPosition(i);
             {
                 var x = new ItemGump(i);
                 Add(x);
@@ -119,7 +119,7 @@ namespace ClassicUO.Game.UI.Gumps
             WantUpdateSize = false;
             _isCorspeContainer = Graphic == 0x0009;
 
-          
+
             Item item = World.Items.Get(LocalSerial);
 
             if (item == null)
@@ -174,7 +174,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (gg == null)
             {
-                if (UIManager.GetGumpCachePosition(LocalSerial, out Point location) && item.Serial == World.Player.Equipment[(int) Layer.Backpack])
+                if (UIManager.GetGumpCachePosition(LocalSerial, out Point location) && (item.Serial == World.Player.Equipment[(int)Layer.Backpack] || ProfileManager.Current.SaveContainerLocations))
                     Location = location;
                 else
                 {
@@ -269,7 +269,7 @@ namespace ClassicUO.Game.UI.Gumps
             IsMinimized = IsMinimized;
             ItemsOnAdded(null, new CollectionChangedEventArgs<uint>(FindControls<ItemGump>().Select(s => s.LocalSerial)));
         }
-        
+
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);
@@ -316,7 +316,7 @@ namespace ClassicUO.Game.UI.Gumps
             Dispose();
         }
 
-      
+
         private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<uint> e)
         {
             foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.LocalSerial)))
@@ -355,7 +355,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(itemControl);
             }
         }
-    
+
 
         private void CheckItemControlPosition(ItemGump itemGump, Item item)
         {
@@ -363,7 +363,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int x = (int) (itemGump.X * scale);
             int y = (int) (itemGump.Y * scale);
-          
+
             ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
 
             int boundX = (int)(_data.Bounds.X * scale);
@@ -486,7 +486,7 @@ namespace ClassicUO.Game.UI.Gumps
                 item.Items.Added -= ItemsOnAdded;
                 item.Items.Removed -= ItemsOnRemoved;
 
-                if (World.Player != null && item == World.Player.Equipment[(int) Layer.Backpack]) UIManager.SavePosition(item, Location);
+                if (World.Player != null && (item == World.Player.Equipment[(int)Layer.Backpack] || (ProfileManager.Current?.SaveContainerLocations ?? false))) UIManager.SavePosition(item, Location);
 
                 foreach (Item child in item.Items)
                 {

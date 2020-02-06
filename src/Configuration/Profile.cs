@@ -187,6 +187,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool OverrideContainerLocation { get; set; }
         [JsonProperty] public int OverrideContainerLocationSetting { get; set; } // 0 = container position, 1 = top right of screen, 2 = last dragged position
         [JsonProperty] public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
+        [JsonProperty] public bool SaveContainerLocations { get; set; }
         [JsonProperty] public bool DragSelectHumanoidsOnly { get; set; }
         [JsonProperty] public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
         [JsonProperty] public bool NameOverheadToggled { get; set; } = false;
@@ -197,7 +198,7 @@ namespace ClassicUO.Configuration
 
         [JsonProperty] public bool ShowInfoBar { get; set; }
         [JsonProperty] public int InfoBarHighlightType { get; set; } // 0 = text colour changes, 1 = underline
-      
+
 
         [JsonProperty]
         public InfoBarItem[] InfoBarItems { get; set; }// [FILE_FIX] TODO: REMOVE IT
@@ -371,7 +372,7 @@ namespace ClassicUO.Configuration
                     Log.Error( e.StackTrace);
                 }
 
-               
+
                 SkillsGroupManager.Save();
 
                 try
@@ -588,7 +589,7 @@ namespace ClassicUO.Configuration
                 }
             }
 
-          
+
             // load anchors
             string anchorsPath = Path.Combine(path, "anchors.bin");
 
