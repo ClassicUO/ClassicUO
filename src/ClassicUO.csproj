@@ -286,7 +286,7 @@
     <Compile Include="IO\Audio\UOSound.cs" />
     <Compile Include="IO\Audio\VolumeState.cs" />
     <Compile Include="IO\DefReader.cs" />
-    <Compile Include="IO\UoFileLoader.cs" />
+    <Compile Include="IO\UOFileLoader.cs" />
     <Compile Include="IO\Resources\AnimationsLoader.cs" />
     <Compile Include="IO\Resources\AnimDataLoader.cs" />
     <Compile Include="IO\Resources\ArtLoader.cs" />
