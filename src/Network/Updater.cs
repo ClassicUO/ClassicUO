@@ -233,21 +233,26 @@ namespace ClassicUO.Network
                     {
                         Log.Error( "[UPDATER ERROR]: impossible to update.\n" + ex);
                     }
-                    
-                    string prefix = Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? "mono " : string.Empty;
 
-                    new Process
+                    ProcessStartInfo processStartInfo = new ProcessStartInfo()
                     {
-                        StartInfo =
-                        {
-                            WorkingDirectory = tempPath,
-                            FileName = prefix + Path.Combine(tempPath, "ClassicUO.exe"),
-                            UseShellExecute = false,
-                            Arguments =
-                                $"--source \"{CUOEnviroment.ExecutablePath}\" --pid {Process.GetCurrentProcess().Id} --action update"
-                        }
-                    }.Start();
+                        WorkingDirectory = tempPath,
+                        UseShellExecute = false,
+                    };
+                    
+                    if (Environment.OSVersion.Platform == PlatformID.MacOSX || 
+                        Environment.OSVersion.Platform == PlatformID.Unix)
+                    {
+                        processStartInfo.FileName = "mono";
+                        processStartInfo.Arguments = $"{Path.Combine(tempPath, "ClassicUO.exe")} --source \"{CUOEnviroment.ExecutablePath}\" --pid {Process.GetCurrentProcess().Id} --action update";
+                    }
+                    else
+                    {
+                        processStartInfo.FileName = Path.Combine(tempPath, "ClassicUO.exe");
+                        processStartInfo.Arguments = $"--source \"{CUOEnviroment.ExecutablePath}\" --pid {Process.GetCurrentProcess().Id} --action update";
+                    }
 
+                    Process.Start(processStartInfo);
 
                     return true;
                 }
