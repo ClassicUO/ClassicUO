@@ -1312,35 +1312,44 @@ namespace ClassicUO.Network
 
 
             if (mobile == World.Player && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded))
-                World.Player.UpdateAbilities();
+                World.Player?.UpdateAbilities();
 
-            GameScene gs = Client.Game.GetScene<GameScene>();
 
             if (ItemHold.Serial == item.Serial)
                 ItemHold.Clear();      
         }
-        private static ushort _pdX, _pdY;
-        private static DateTime _swingT;
+
+
+ 
         private static void Swing(Packet p)
         {
             if (!World.InGame)
                 return;
-            if ((DateTime.Now - _swingT).TotalMilliseconds < 800)
-            {
-                return;
-            }
-            _swingT = DateTime.Now;
+
             p.Skip(1);
+
             uint attackers = p.ReadUInt();
             uint defenders = p.ReadUInt();
-            Mobile def = World.Mobiles.Get(defenders);
-            Direction pdir = DirectionHelper.GetDirectionAB(World.Player.X, World.Player.Y, def.X, def.Y);
-            if (World.Player.X == _pdX && World.Player.Y == _pdY && World.Player.Direction != pdir)
+
+            const int TIME_TURN_TO_LASTTARGET = 2000;
+
+            if (TargetManager.LastAttack != 0 &&
+                World.Player.InWarMode &&
+                World.Player.Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks)
             {
-                NetClient.Socket.Send(new PWalkRequest(pdir, World.Player.Walker.WalkSequence, false, World.Player.Walker.FastWalkStack.GetValue()));
+                Mobile enemy = World.Mobiles.Get(defenders);
+
+                if (enemy != null && enemy.Distance <= 1)
+                {
+                    Direction pdir = DirectionHelper.GetDirectionAB(World.Player.X,
+                                                                    World.Player.Y,
+                                                                    enemy.X,
+                                                                    enemy.Y);
+
+                    if (World.Player.Direction != pdir)
+                        World.Player.Walk(pdir, false);
+                }
             }
-            _pdX = World.Player.X;
-            _pdY = World.Player.Y;
         }
        
         private static void UpdateSkills(Packet p)
