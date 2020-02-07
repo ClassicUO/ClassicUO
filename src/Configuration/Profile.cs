@@ -220,6 +220,9 @@ namespace ClassicUO.Configuration
         [JsonProperty] public int AuraUnderFeetType { get; set; } // 0 = NO, 1 = in warmode, 2 = ctrl+shift, 3 = always
         [JsonProperty] public bool AuraOnMouse { get; set; } = true;
         [JsonProperty] public bool ShowNetworkStats { get; set; }
+        [JsonProperty] public bool NetworkStatsMinimized { get; set; } = false;
+        [JsonProperty] public Point NetworkStatsPosition { get; set; } = new Point(25, 50);
+
         [JsonProperty] public bool PartyAura { get; set; }
 
         [JsonProperty] public bool UseXBR { get; set; } = true;
