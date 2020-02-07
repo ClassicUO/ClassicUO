@@ -4029,26 +4029,48 @@ namespace ClassicUO.Network
         private static void KrriosClientSpecial(Packet p)
         {
             byte type = p.ReadByte();
-
+         
             switch (type)
             {
                 case 0x01: // custom party info
+
+                    uint _serial;
+
+                    while ((_serial = p.ReadUInt()) != 0)
+                    {
+                        ushort x = p.ReadUShort();
+                        ushort y = p.ReadUShort();
+                        int _hits = -1; // This packet does not contain hit information, so -1 will get discarded in the function
+                        int _map = -1;  // No map data in this packet
+                        string name = null;
+                        int _isguild = -1; // for discard
+                        int _isparty = 1; // Only party members in this packet
+                        
+                        World.WMapManager.AddOrUpdate(_serial, x, y, _hits, _map, name, _isguild, _isparty);
+                    }
+
+                    World.WMapManager.RemoveUnupdatedWEntity();
+
+                    break;
+
                 case 0x02: // guild track info
-                    bool locations = type == 0x01 || p.ReadBool();
+                    byte _discard = p.ReadByte(); //bit 3 is case switch for guildmembers, but data begins @ bit 5. Unsure of bit 4 purpose
 
                     uint serial;
 
                     while((serial = p.ReadUInt()) != 0)
                     {
-                        if (locations)
-                        {
-                            ushort x = p.ReadUShort();
-                            ushort y = p.ReadUShort();
-                            byte map = p.ReadByte();
-                            byte hits = p.ReadByte();
 
-                            World.WMapManager.AddOrUpdate(serial, x, y, hits, map, type == 0x02);
-                        }
+                        ushort x = p.ReadUShort();
+                        ushort y = p.ReadUShort();
+                        byte map = p.ReadByte();
+                        byte hits = p.ReadByte();
+                        string name = null;
+                        int isguild = 1;    //Only guild members in this packet, so party to -1 to discard
+                        int isparty = -1;
+
+                        World.WMapManager.AddOrUpdate(serial, x, y, hits, map, name, isguild, isparty);
+         
                     }
 
                     World.WMapManager.RemoveUnupdatedWEntity();

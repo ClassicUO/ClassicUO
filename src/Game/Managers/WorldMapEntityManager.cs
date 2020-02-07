@@ -28,30 +28,15 @@ namespace ClassicUO.Game.Managers
         public WMapEntity(uint serial)
         {
             Serial = serial;
-
-            //var mob = World.Mobiles.Get(serial);
-
-            //if (mob != null)
-            //    GetName();
         } 
 
         public readonly uint Serial;
         public int X, Y, HP, Map;
         public uint LastUpdate;
         public bool IsGuild;
+        public bool IsParty;
         public string Name;
 
-        //public string GetName()
-        //{
-        //    Entity e = World.Get(Serial);
-
-        //    if (e != null && !e.IsDestroyed && !string.IsNullOrEmpty(e.Name) && Name != e.Name)
-        //    {
-        //        Name = e.Name;
-        //    }
-
-        //    return string.IsNullOrEmpty(Name) ? "<out of range>" : Name;
-        //}
     }
 
     class WorldMapEntityManager
@@ -62,46 +47,73 @@ namespace ClassicUO.Game.Managers
 
         private uint _lastUpdate;
  
-        public void AddOrUpdate(uint serial, int x, int y, int hp, int map, bool isguild)
+        public void AddOrUpdate(uint serial, int x, int y, int hp, int map, string name, int isguild, int isparty)
         {
             if (!Entities.TryGetValue(serial, out var entity) || entity == null)
             {
-                entity = new WMapEntity(serial)
+                
+                entity = new WMapEntity(serial) // create new entity
                 {
-                    X = x, Y = y, HP = hp, Map = map,
-                    LastUpdate = Time.Ticks + 1000,
-                    IsGuild = isguild
+                    X = x,
+                    Y = y,
+                    HP = hp,
+                    Map = map,
+                    Name = name,
+                    LastUpdate = Time.Ticks,
+                    IsGuild = bool.Equals(isguild, 1),
+                    IsParty = bool.Equals(isparty, 1),
+
                 };
 
                 Entities[serial] = entity;
             }
-            else
+            else //Update existing entity > Leave existing if values are -1 or null
             {
                 entity.X = x;
                 entity.Y = y;
-                entity.HP = hp;
-                entity.Map = map;
-                entity.IsGuild = isguild;
-                entity.LastUpdate = Time.Ticks + 1000;
-            }
+                entity.LastUpdate = Time.Ticks;
+
+                if (hp != -1)
+                {
+                    entity.HP = hp;
+                }
+
+                if (map != -1)
+                {
+                    entity.Map = map;
+                }
+
+                if (name != null)
+                {
+                    entity.Name = name;
+                }
+
+                if (isguild != -1)
+                {
+                    entity.IsGuild = (bool.Equals(isguild, 1));
+                }
+
+                if (isparty != -1)
+                {
+                    entity.IsParty = (bool.Equals(isparty, 1));
+                }
+
+                //entity.Map = map;                
+                //entity.Name = name;
+                //entity.IsGuild = isguild;
+                //entity.IsParty = isparty;
+            }    
         }
 
-        public void Remove(uint serial)
-        {
-            if (Entities.ContainsKey(serial))
-            {
-                Entities.Remove(serial);
-            }
-        }
-
+        
         public void RemoveUnupdatedWEntity()
         {
-            if (_lastUpdate < Time.Ticks)
+            if (_lastUpdate > Time.Ticks)
                 return;
 
-            _lastUpdate = Time.Ticks + 1000;
+            _lastUpdate = Time.Ticks + 150;  // removal update scan time
 
-            long ticks = Time.Ticks - 1000;
+            long ticks = Time.Ticks - 1000;  // time to remove unupdated entries
 
             foreach (WMapEntity entity in Entities.Values)
             {

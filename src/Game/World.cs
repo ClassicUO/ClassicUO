@@ -192,6 +192,21 @@ namespace ClassicUO.Game
                 {
                     mob.Update(totalMS, frameMS);
 
+                    int _isguild = -1;
+                    if (mob.NotorietyFlag.Equals(NotorietyFlag.Ally))
+                        _isguild = 1;
+
+                    int _isparty = -1;
+
+                    int _hp = mob.Hits;
+
+                    if (_hp != 0)
+                        _hp = mob.Hits / mob.HitsMax * 100;
+
+                    
+
+                    WMapManager.AddOrUpdate(mob.Serial, mob.X, mob.Y, _hp, MapIndex, mob.Name, _isguild, _isparty);
+
                     if (mob.Distance > ClientViewRange)
                         RemoveMobile(mob);
 
