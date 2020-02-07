@@ -1335,11 +1335,12 @@ namespace ClassicUO.Network
 
             if (TargetManager.LastAttack != 0 &&
                 World.Player.InWarMode &&
-                World.Player.Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks)
+                World.Player.Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks && 
+                World.Player.Steps.Count == 0)
             {
                 Mobile enemy = World.Mobiles.Get(defenders);
 
-                if (enemy != null && enemy.Distance <= 1)
+                if (enemy != null)
                 {
                     Direction pdir = DirectionHelper.GetDirectionAB(World.Player.X,
                                                                     World.Player.Y,
