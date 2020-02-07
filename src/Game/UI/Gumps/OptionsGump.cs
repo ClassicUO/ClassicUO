@@ -2066,6 +2066,29 @@ namespace ClassicUO.Game.UI.Gumps
             // network
             ProfileManager.Current.ShowNetworkStats = _showNetStats.IsChecked;
 
+            NetworkStatsGump networkStatsGump = UIManager.GetGump<NetworkStatsGump>();
+
+            if (ProfileManager.Current.ShowNetworkStats)
+            {
+                if (networkStatsGump == null)
+                {
+                    UIManager.Add(new NetworkStatsGump() { X = ProfileManager.Current.NetworkStatsPosition.X, Y = ProfileManager.Current.NetworkStatsPosition.Y });
+                }
+                else
+                {
+                    networkStatsGump.IsVisible = true;
+                    networkStatsGump.SetInScreen();
+                }
+            }
+            else
+            {
+                if (networkStatsGump != null)
+                {
+                    networkStatsGump.Dispose();
+                }
+            }
+
+
             // infobar
             ProfileManager.Current.ShowInfoBar = _showInfoBar.IsChecked;
             ProfileManager.Current.InfoBarHighlightType = _infoBarHighlightType.SelectedIndex;
