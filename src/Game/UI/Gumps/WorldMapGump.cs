@@ -232,12 +232,13 @@ namespace ClassicUO.Game.UI.Gumps
                 Load();
             }
 
-            if (_nextQueryPacket < Time.Ticks)
+            if (World.InGame && _nextQueryPacket < Time.Ticks)
             {
                 _nextQueryPacket = Time.Ticks + 250;
+
                 NetClient.Socket.Send(new PQueryGuildPosition());
 
-                if (World.InGame && World.Party != null && World.Party.Leader != 0)
+                if (World.Party != null && World.Party.Leader != 0)
                 {
                     foreach (var e in World.Party.Members)
                     {

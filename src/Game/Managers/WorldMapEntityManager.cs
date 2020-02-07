@@ -96,7 +96,7 @@ namespace ClassicUO.Game.Managers
 
         public void RemoveUnupdatedWEntity()
         {
-            if (_lastUpdate < Time.Ticks)
+            if (_lastUpdate > Time.Ticks)
                 return;
 
             _lastUpdate = Time.Ticks + 1000;
