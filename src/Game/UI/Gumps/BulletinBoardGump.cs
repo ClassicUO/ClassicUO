@@ -19,7 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using ClassicUO.Data;
 using System.Text;
@@ -36,7 +36,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly ScrollArea _area;
         private readonly Item _item;
-        private readonly ArrayList _elements = new ArrayList();
+        private readonly List<BulletinBoardObject> _elements = new List<BulletinBoardObject>();
         private int _indexMax;
 
 
@@ -370,7 +370,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((ButtonType)buttonID)
             {
                 case ButtonType.Post:
-                    NetClient.Socket.Send(new PBulletinBoardPostMessage(LocalSerial, _msgSerial, _subjectTextbox.Text,_textBox));
+                    NetClient.Socket.Send(new PBulletinBoardPostMessage(LocalSerial, _msgSerial, _subjectTextbox.Text,_textBox.Text));
                     Dispose();
 
                     break;

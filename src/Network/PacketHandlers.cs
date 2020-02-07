@@ -1334,7 +1334,7 @@ namespace ClassicUO.Network
             uint attackers = p.ReadUInt();
             uint defenders = p.ReadUInt();
             Mobile def = World.Mobiles.Get(defenders);
-            Direction pdir = GetDirectionAB(World.Player.X, World.Player.Y, def.X, def.Y);
+            Direction pdir = DirectionHelper.GetDirectionAB(World.Player.X, World.Player.Y, def.X, def.Y);
             if (World.Player.X == _pdX && World.Player.Y == _pdY && World.Player.Direction != pdir)
             {
                 NetClient.Socket.Send(new PWalkRequest(pdir, World.Player.Walker.WalkSequence, false, World.Player.Walker.FastWalkStack.GetValue()));
@@ -1342,34 +1342,7 @@ namespace ClassicUO.Network
             _pdX = World.Player.X;
             _pdY = World.Player.Y;
         }
-        public static Direction GetDirectionAB(int AAx, int AAy, int BBx, int BBy)
-        {
-            int dx = AAx - BBx;
-            int dy = AAy - BBy;
-
-            int rx = (dx - dy) * 44;
-            int ry = (dx + dy) * 44;
-
-            int ax = Math.Abs(rx);
-            int ay = Math.Abs(ry);
-
-            Direction ret;
-
-            if (((ay >> 1) - ax) >= 0)
-                ret = (ry > 0) ? Direction.Up : Direction.Down;
-            else if (((ax >> 1) - ay) >= 0)
-                ret = (rx > 0) ? Direction.Left : Direction.Right;
-            else if (rx >= 0 && ry >= 0)
-                ret = Direction.West;
-            else if (rx >= 0 && ry < 0)
-                ret = Direction.South;
-            else if (rx < 0 && ry < 0)
-                ret = Direction.East;
-            else
-                ret = Direction.North;
-
-            return ret;
-        }
+       
         private static void UpdateSkills(Packet p)
         {
             if (!World.InGame)
@@ -1921,11 +1894,7 @@ namespace ClassicUO.Network
         {
             World.ClientViewRange = p.ReadByte();
         }
-        public static string Truncate(string value, int maxLength)
-        {
-            if (string.IsNullOrEmpty(value)) return value;
-            return value.Length <= maxLength ? value : value.Substring(0, maxLength);
-        }
+        
         private static void BulletinBoardData(Packet p) 
         {
             if (!World.InGame)
@@ -1979,7 +1948,7 @@ namespace ClassicUO.Network
 
                             if (text.Length > 34)
                             {
-                                text = Truncate(text, 33);
+                                text = (string.IsNullOrEmpty(text)) ? text : text.Length <= 33 ? text : text.Substring(0, 33);
                                 text += "...";
                             }
 
