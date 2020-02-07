@@ -75,7 +75,34 @@ namespace ClassicUO.Game.Data
 
             return (Direction) direction;
         }
+        public static Direction GetDirectionAB(int AAx, int AAy, int BBx, int BBy)
+        {
+            int dx = AAx - BBx;
+            int dy = AAy - BBy;
 
+            int rx = (dx - dy) * 44;
+            int ry = (dx + dy) * 44;
+
+            int ax = Math.Abs(rx);
+            int ay = Math.Abs(ry);
+
+            Direction ret;
+
+            if (((ay >> 1) - ax) >= 0)
+                ret = (ry > 0) ? Direction.Up : Direction.Down;
+            else if (((ax >> 1) - ay) >= 0)
+                ret = (rx > 0) ? Direction.Left : Direction.Right;
+            else if (rx >= 0 && ry >= 0)
+                ret = Direction.West;
+            else if (rx >= 0 && ry < 0)
+                ret = Direction.South;
+            else if (rx < 0 && ry < 0)
+                ret = Direction.East;
+            else
+                ret = Direction.North;
+
+            return ret;
+        }
         public static Direction DirectionFromKeyboardArrows(bool upPressed, bool downPressed, bool leftPressed, bool rightPressed)
         {
             int direction = (int) Direction.NONE;
