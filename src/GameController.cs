@@ -330,13 +330,14 @@ namespace ClassicUO
             GraphicsDevice.SetRenderTarget(_buffer);
             UIManager.Draw(_uoSpriteBatch);
 
-            if (ProfileManager.Current != null && ProfileManager.Current.ShowNetworkStats)
+            //NetStatistics converted to gump
+            /*if (ProfileManager.Current != null && ProfileManager.Current.ShowNetworkStats)
             {
                 if (!NetClient.Socket.IsConnected)
                     NetClient.LoginSocket.Statistics.Draw(_uoSpriteBatch, 10, 50);
                 else if (!NetClient.Socket.IsDisposed)
                     NetClient.Socket.Statistics.Draw(_uoSpriteBatch, 10, 50);
-            }
+            }*/
 
 
             base.Draw(gameTime);

@@ -47,6 +47,7 @@ namespace ClassicUO.Network
 
         public uint Ping { get; private set; }
 
+        public RenderedText RenderedText { get; private set; }
 
         public void PingReceived()
         {
@@ -102,6 +103,7 @@ namespace ClassicUO.Network
 
             _renderedText.Hue = hue;
             _renderedText.Text = $"Ping: {Ping} ms\nIn: {GetSizeAdaptive(_lastTotalByteReceived - _currentTotalByteReceived)}   Out: {GetSizeAdaptive(_lastTotalBytesSent - _currentTotalBytesSent)}";
+            RenderedText = _renderedText;
         }
 
         public override string ToString()
