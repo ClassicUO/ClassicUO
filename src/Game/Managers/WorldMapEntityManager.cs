@@ -61,16 +61,26 @@ namespace ClassicUO.Game.Managers
         private readonly List<WMapEntity> _toRemove = new List<WMapEntity>();
 
         private uint _lastUpdate;
+
+        /// <summary>
+        /// If WorldMapGump is not visible, disable it
+        /// </summary>
+        public bool Enabled { get; set; }
+
  
-        public void AddOrUpdate(uint serial, int x, int y, int hp, int map, bool isguild)
+        public void AddOrUpdate(uint serial, int x, int y, int hp, int map, bool isguild, string name = null)
         {
+            if (!Enabled)
+                return;
+
             if (!Entities.TryGetValue(serial, out var entity) || entity == null)
             {
                 entity = new WMapEntity(serial)
                 {
                     X = x, Y = y, HP = hp, Map = map,
                     LastUpdate = Time.Ticks + 1000,
-                    IsGuild = isguild
+                    IsGuild = isguild,
+                    Name = name
                 };
 
                 Entities[serial] = entity;
@@ -83,6 +93,9 @@ namespace ClassicUO.Game.Managers
                 entity.Map = map;
                 entity.IsGuild = isguild;
                 entity.LastUpdate = Time.Ticks + 1000;
+
+                if (name != null)
+                    entity.Name = name;
             }
         }
 
