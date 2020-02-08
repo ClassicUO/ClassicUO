@@ -1347,7 +1347,7 @@ namespace ClassicUO.IO.Resources
                             int testY = offsY + lineOffsY + y;
 
                             if (testY < 0)
-                                continue;
+                                testY = 0;
 
                             if (testY >= height)
                                 break;
@@ -1481,7 +1481,7 @@ namespace ClassicUO.IO.Resources
                                 int testY = offsY + lineOffsY + cy;
 
                                 if (testY < 0)
-                                    continue;
+                                    testY = 0;
 
                                 if (testY >= height)
                                     break;
