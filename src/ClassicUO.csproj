@@ -186,6 +186,7 @@
     <Compile Include="Game\UI\Controls\NiceButton.cs" />
     <Compile Include="Game\UI\Controls\ScissorControl.cs" />
     <Compile Include="Game\UI\Controls\TextureControl.cs" />
+    <Compile Include="Game\UI\Gumps\NetworkStatsGump.cs" />
     <Compile Include="Game\UI\Gumps\GridLootGump.cs" />
     <Compile Include="Game\UI\Gumps\HouseCustomizationGump.cs" />
     <Compile Include="Game\UI\Gumps\InfoBarGump.cs" />

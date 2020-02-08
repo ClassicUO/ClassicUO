@@ -133,6 +133,15 @@ namespace ClassicUO.Game.Scenes
                 //Engine.DropFpsMinMaxValues();
             }
 
+            if (ProfileManager.Current.ShowNetworkStats)
+            {
+                UIManager.Add(new NetworkStatsGump
+                {
+                    X = ProfileManager.Current.NetworkStatsPosition.X,
+                    Y = ProfileManager.Current.NetworkStatsPosition.Y
+                });
+            }
+
             ItemHold.Clear();
             Hotkeys = new HotkeysManager();
             Macros = new MacroManager();
