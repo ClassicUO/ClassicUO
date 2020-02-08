@@ -1403,6 +1403,9 @@ namespace ClassicUO.IO.Resources
                                 if (testY >= height)
                                     break;
 
+                                if (testY < 0)
+                                    testY = 0;
+
                                 int italicOffset = 0;
 
                                 if (isItalic && cy < dh)
@@ -1446,6 +1449,9 @@ namespace ClassicUO.IO.Resources
 
                                 if (testY >= height)
                                     break;
+
+                                if (testY < 0)
+                                    testY = 0;
 
                                 int italicOffset = 0;
 
@@ -1566,6 +1572,9 @@ namespace ClassicUO.IO.Resources
 
                         if (testY >= height)
                             break;
+
+                        if (testY < 0)
+                            testY = 0;
 
                         for (int cx = minXOk; cx < dw + maxXOk; cx++)
                         {
