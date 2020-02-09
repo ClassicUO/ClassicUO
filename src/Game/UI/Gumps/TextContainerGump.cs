@@ -37,7 +37,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void AddText(TextOverhead msg)
         {
-            if (World.ClientFeatures.TooltipsEnabled || msg == null)
+            if (msg == null)
                 return;
 
             msg.Time = Time.Ticks + 4000;
