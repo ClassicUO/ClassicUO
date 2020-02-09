@@ -4093,7 +4093,7 @@ namespace ClassicUO.Network
                             ushort x = p.ReadUShort();
                             ushort y = p.ReadUShort();
                             byte map = p.ReadByte();
-                            byte hits = p.ReadByte();
+                            int hits = type == 1 ? 0 : p.ReadByte();
 
                             World.WMapManager.AddOrUpdate(serial, x, y, hits, map, type == 0x02);
                         }
