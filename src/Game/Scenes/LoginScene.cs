@@ -65,7 +65,7 @@ namespace ClassicUO.Game.Scenes
         private int _reconnectTryCounter = 1;
 
 
-        public LoginScene() : base((int) SceneID.Login,
+        public LoginScene() : base((int) SceneType.Login,
             false,
             false,
             true)

@@ -68,7 +68,7 @@ namespace ClassicUO.Game.Scenes
         private Weather _weather;
 
 
-        public GameScene() : base((int) SceneID.Game,
+        public GameScene() : base((int) SceneType.Game,
             true,
             !ProfileManager.Current.RestoreLastGameSize,
             true)

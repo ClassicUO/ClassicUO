@@ -22,7 +22,7 @@
 
 namespace ClassicUO.Game.Scenes
 {
-    enum SceneID
+    enum SceneType
     {
         None,
         Login,
