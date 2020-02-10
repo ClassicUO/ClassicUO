@@ -1329,6 +1329,10 @@ namespace ClassicUO.Network
             p.Skip(1);
 
             uint attackers = p.ReadUInt();
+
+            if (attackers != World.Player)
+                return;
+
             uint defenders = p.ReadUInt();
 
             const int TIME_TURN_TO_LASTTARGET = 2000;

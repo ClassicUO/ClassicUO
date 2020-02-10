@@ -75,6 +75,7 @@ namespace ClassicUO.Game.Data
 
             return (Direction) direction;
         }
+
         public static Direction GetDirectionAB(int AAx, int AAy, int BBx, int BBy)
         {
             int dx = AAx - BBx;
