@@ -142,7 +142,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool AnimationDirection;
 
-        public long LastStepTime;
+       // public long LastStepTime;
 
         public long LastStepSoundTime;
 

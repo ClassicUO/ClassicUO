@@ -39,7 +39,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-
+        public uint LastStepTime;
 
         protected long LastAnimationChangeTime;
 

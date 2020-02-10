@@ -581,6 +581,7 @@ namespace ClassicUO.Game.Scenes
 
 
             World.Update(totalMS, frameMS);
+            BoatMovingManager.Update();
             Pathfinder.ProcessAutoWalk();
             DelayedObjectClickManager.Update();
 

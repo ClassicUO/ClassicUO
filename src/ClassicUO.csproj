@@ -132,6 +132,7 @@
     <Compile Include="Game\Data\PromptData.cs" />
     <Compile Include="Game\Data\RaceType.cs" />
     <Compile Include="Game\Managers\ActiveIconsManager.cs" />
+    <Compile Include="Game\Managers\BoatMovingManager.cs" />
     <Compile Include="Game\Managers\DelayedObjectClickManager.cs" />
     <Compile Include="Game\Managers\Seasons.cs" />
     <Compile Include="Game\Data\ServerErrorMessages.cs" />

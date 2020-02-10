@@ -127,7 +127,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void Generate(bool recalculate = false)
+        public void Generate(bool recalculate = false, bool pushtotile = true)
         {
             Item item = World.Items.Get(Serial);
             //ClearCustomHouseComponents(0);
@@ -141,6 +141,7 @@ namespace ClassicUO.Game.GameObjects
                         s.X = (ushort) (item.X + s.MultiOffsetX);
                         s.Y = (ushort) (item.Y + s.MultiOffsetY);
                         s.Z = (sbyte) (item.Z + s.MultiOffsetZ);
+                        s.Offset = item.Offset;
                         s.UpdateScreenPosition();
                     }
                     s.Hue = item.Hue;
@@ -148,7 +149,8 @@ namespace ClassicUO.Game.GameObjects
                     //s.IsCustom = IsCustom;
                 }
 
-                s.AddToTile();
+                if (pushtotile)
+                    s.AddToTile();
             }
 
             World.CustomHouseManager?.GenerateFloorPlace();

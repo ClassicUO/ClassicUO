@@ -4293,19 +4293,21 @@ namespace ClassicUO.Network
             ushort y = p.ReadUShort();
             ushort z = p.ReadUShort();
 
-            Item item = World.Items.Get(serial);
+            //Item item = World.Items.Get(serial);
 
-            if (item == null)
-                return;
+            //if (item == null)
+            //    return;
 
-            item.X = x;
-            item.Y = y;
-            item.Z = (sbyte) z;
-            item.UpdateScreenPosition();
-            item.AddToTile();
+            //item.X = x;
+            //item.Y = y;
+            //item.Z = (sbyte) z;
+            //item.UpdateScreenPosition();
+            //item.AddToTile();
 
-            if (World.HouseManager.TryGetHouse(item, out House house))
-                house.Generate(true);
+            //if (World.HouseManager.TryGetHouse(item, out House house))
+            //    house.Generate(true);
+
+            BoatMovingManager.AddStep(serial, boatSpeed, movingDirection, facingDirection, x, y, (sbyte) z);
 
 
             int count = p.ReadUShort();
@@ -4321,17 +4323,19 @@ namespace ClassicUO.Network
 
                 if (entity != null)
                 {
-                    if (entity == World.Player)
-                    {
-                        World.RangeSize.X = cx;
-                        World.RangeSize.Y = cy;
-                    }
+                    //if (entity == World.Player)
+                    //{
+                    //    World.RangeSize.X = cx;
+                    //    World.RangeSize.Y = cy;
+                    //}
 
-                    entity.X = cx;
-                    entity.Y = cy;
-                    entity.Z = (sbyte) cz;
-                    entity.UpdateScreenPosition();
-                    entity.AddToTile();
+                    BoatMovingManager.PushItemToList(serial, cSerial, cx, cy, (sbyte) cz);
+
+                    //entity.X = cx;
+                    //entity.Y = cy;
+                    //entity.Z = (sbyte) cz;
+                    //entity.UpdateScreenPosition();
+                    //entity.AddToTile();
                 }
             }
         }

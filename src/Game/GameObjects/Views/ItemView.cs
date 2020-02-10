@@ -47,6 +47,11 @@ namespace ClassicUO.Game.GameObjects
 
             ResetHueVector();
 
+
+            posX += (int) Offset.X;
+            posY += (int) (Offset.Y + Offset.Z);
+
+
             if (IsCorpse)
                 return DrawCorpse(batcher, posX, posY - 3);
 
