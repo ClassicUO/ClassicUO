@@ -128,7 +128,7 @@ namespace ClassicUO.Game.Managers
                         continue;
                     }
 
-                    int maxDelay = 150; // MovementSpeed.TimeToCompleteMovement(this, step.Run) - (int) Client.Game.FrameDelay[1];
+                    int maxDelay = 200; // MovementSpeed.TimeToCompleteMovement(this, step.Run) - (int) Client.Game.FrameDelay[1];
                     int delay = (int) Time.Ticks - (int) item.LastStepTime;
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
@@ -157,12 +157,12 @@ namespace ClassicUO.Game.Managers
                         item.X = step.X;
                         item.Y = step.Y;
                         item.Z = step.Z;
-                        item.UpdateScreenPosition();
                         
 
                         item.Offset.X = 0;
                         item.Offset.Y = 0;
                         item.Offset.Z = 0;
+                        item.UpdateScreenPosition();
 
                         deques.RemoveFromFront();
 
