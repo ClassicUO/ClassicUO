@@ -1337,7 +1337,7 @@ namespace ClassicUO.Network
 
             const int TIME_TURN_TO_LASTTARGET = 2000;
 
-            if (TargetManager.LastAttack != 0 &&
+            if (TargetManager.LastAttack == defenders &&
                 World.Player.InWarMode &&
                 World.Player.Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks && 
                 World.Player.Steps.Count == 0)
