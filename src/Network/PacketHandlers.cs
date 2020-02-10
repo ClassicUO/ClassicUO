@@ -1319,8 +1319,6 @@ namespace ClassicUO.Network
                 ItemHold.Clear();      
         }
 
-
- 
         private static void Swing(Packet p)
         {
             if (!World.InGame)
