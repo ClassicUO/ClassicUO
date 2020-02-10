@@ -147,7 +147,7 @@ namespace ClassicUO.Game.Managers
         {
             SetTargeting(CursorTarget.MultiPlacement, deedSerial, TargetType.Neutral);
 
-            if (model != 0)
+            //if (model != 0)
                 MultiTargetInfo = new MultiTargetInfo(model, x, y, z, hue);
         }
 
