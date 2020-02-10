@@ -189,6 +189,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 SetPositionTopRight();
                                 break;
                             case 2:
+                            case 3:
                                 SetPositionByLastDragged();
                                 break;
                         }
@@ -486,7 +487,7 @@ namespace ClassicUO.Game.UI.Gumps
                 item.Items.Added -= ItemsOnAdded;
                 item.Items.Removed -= ItemsOnRemoved;
 
-                if (World.Player != null) UIManager.SavePosition(item, Location);
+                if (World.Player != null && (ProfileManager.Current?.OverrideContainerLocationSetting == 3)) UIManager.SavePosition(item, Location);
 
                 foreach (Item child in item.Items)
                 {
@@ -503,7 +504,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
-            if (ProfileManager.Current.OverrideContainerLocation && ProfileManager.Current.OverrideContainerLocationSetting == 2)
+            if (ProfileManager.Current.OverrideContainerLocation && ProfileManager.Current.OverrideContainerLocationSetting >= 2)
             {
                 Point gumpCenter = new Point(X + (Width >> 1), Y + (Height >> 1));
                 ProfileManager.Current.OverrideContainerLocationPosition = gumpCenter;
