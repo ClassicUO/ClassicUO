@@ -4304,7 +4304,12 @@ namespace ClassicUO.Network
                 ushort cy = p.ReadUShort();
                 ushort cz = p.ReadUShort();
 
-                BoatMovingManager.PushItemToList(serial, cSerial, cx, cy, (sbyte) cz);
+                BoatMovingManager.PushItemToList(
+                    serial,
+                    cSerial, 
+                    x - cx, 
+                    y - cy,
+                    z - (sbyte) cz);
             }
         }
 
