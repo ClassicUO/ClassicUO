@@ -4287,28 +4287,13 @@ namespace ClassicUO.Network
 
             uint serial = p.ReadUInt();
             byte boatSpeed = p.ReadByte();
-            Direction movingDirection = (Direction) p.ReadByte();
-            Direction facingDirection = (Direction) p.ReadByte();
+            Direction movingDirection = (Direction) p.ReadByte() & Direction.Mask;
+            Direction facingDirection = (Direction) p.ReadByte() & Direction.Mask;
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
             ushort z = p.ReadUShort();
 
-            //Item item = World.Items.Get(serial);
-
-            //if (item == null)
-            //    return;
-
-            //item.X = x;
-            //item.Y = y;
-            //item.Z = (sbyte) z;
-            //item.UpdateScreenPosition();
-            //item.AddToTile();
-
-            //if (World.HouseManager.TryGetHouse(item, out House house))
-            //    house.Generate(true);
-
             BoatMovingManager.AddStep(serial, boatSpeed, movingDirection, facingDirection, x, y, (sbyte) z);
-
 
             int count = p.ReadUShort();
 
@@ -4319,24 +4304,7 @@ namespace ClassicUO.Network
                 ushort cy = p.ReadUShort();
                 ushort cz = p.ReadUShort();
 
-                Entity entity = World.Get(cSerial);
-
-                if (entity != null)
-                {
-                    //if (entity == World.Player)
-                    //{
-                    //    World.RangeSize.X = cx;
-                    //    World.RangeSize.Y = cy;
-                    //}
-
-                    BoatMovingManager.PushItemToList(serial, cSerial, cx, cy, (sbyte) cz);
-
-                    //entity.X = cx;
-                    //entity.Y = cy;
-                    //entity.Z = (sbyte) cz;
-                    //entity.UpdateScreenPosition();
-                    //entity.AddToTile();
-                }
+                BoatMovingManager.PushItemToList(serial, cSerial, cx, cy, (sbyte) cz);
             }
         }
 

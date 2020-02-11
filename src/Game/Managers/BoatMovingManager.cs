@@ -54,6 +54,33 @@ namespace ClassicUO.Game.Managers
                 _steps[serial] = deque;
             }
 
+            ushort currX, currY;
+            sbyte currZ;
+            Direction endDir;
+
+            if (deque.Count == 0)
+            {
+                currX = item.X;
+                currY = item.Y;
+                currZ = item.Z;
+                endDir = item.Direction & Direction.Up;
+                endDir &= Direction.Running;
+            }
+            else
+            {
+                var s = deque.RemoveFromBack();
+                currX = s.X;
+                currY = s.Y;
+                currZ = s.Z;
+                endDir = s.MovingDir;
+            }
+
+
+            if (currX == x && currY == y && currZ == z && endDir == movingDir)
+            {
+                return;
+            }
+
             if (deque.Count == 0)
             {
                 Console.WriteLine("SET TIMER");
@@ -61,19 +88,39 @@ namespace ClassicUO.Game.Managers
             }
 
 
-            BoatStep step = new BoatStep()
-            {
-                Serial = serial,
-                Speed = speed,
-                MovingDir = movingDir,
-                FacingDir = facingDir,
-                X = x,
-                Y = y,
-                Z = z,
-                Time = Time.Ticks
-            };
+            Direction moveDir = DirectionHelper.CalculateDirection(currX, currY, x, y);
 
-            deque.AddToBack(step);
+            BoatStep step = new BoatStep();
+            step.Serial = serial;
+            step.Time = Time.Ticks;
+            step.Speed = speed;
+
+            if (moveDir != Direction.NONE)
+            {
+                if (moveDir != endDir)
+                {
+                    step.X = currX;
+                    step.Y = currY;
+                    step.Z = currZ;
+                    step.MovingDir = moveDir;
+                    deque.AddToBack(step);
+                }
+
+                step.X = x;
+                step.Y = y;
+                step.Z = z;
+                step.MovingDir = moveDir;
+                deque.AddToBack(step);
+            }
+
+            if (moveDir != movingDir)
+            {
+                step.X = x;
+                step.Y = y;
+                step.Z = z;
+                step.MovingDir = movingDir;
+                deque.AddToBack(step);
+            }
 
             Console.WriteLine(">>> STEP ADDED {0}", speed);
         }
@@ -91,9 +138,8 @@ namespace ClassicUO.Game.Managers
 
                 _items[serial] = list;
             }
-
-            int i = 0;
-            for (; i < list.Count; i++)
+     
+            for (int i = 0; i < list.Count; i++)
             {
                 ref var item = ref list[i];
 
@@ -149,8 +195,8 @@ namespace ClassicUO.Game.Managers
                         float y = x;
                         item.Offset.Z = (sbyte) ((step.Z - item.Z) * x * (4.0f / steps));
                         MovementSpeed.GetPixelOffset((byte) step.MovingDir, ref x, ref y, steps);
-                        item.Offset.X = x;
-                        item.Offset.Y = y;
+                        item.Offset.X = (sbyte) x;
+                        item.Offset.Y = (sbyte) y;
                     }
                     else
                     {
@@ -190,7 +236,6 @@ namespace ClassicUO.Game.Managers
 
 
                         house?.Generate(true);
-
                     }
                     else
                     {
@@ -204,7 +249,6 @@ namespace ClassicUO.Game.Managers
 
 
                     UpdateEntitiesInside(item, removeStep);
-
                 }
             }
 
@@ -247,16 +291,19 @@ namespace ClassicUO.Game.Managers
                         entity.X = it.X;
                         entity.Y = it.Y;
                         entity.Z = it.Z;
+                        entity.UpdateScreenPosition();
+
                         entity.Offset.X = 0;
                         entity.Offset.Y = 0;
                         entity.Offset.Z = 0;
-                        entity.UpdateScreenPosition();
                         entity.AddToTile();             
                     }
                     else
                     {
                         if (item != null)
+                        {
                             entity.Offset = item.Offset;
+                        }
                     }
 
                 }

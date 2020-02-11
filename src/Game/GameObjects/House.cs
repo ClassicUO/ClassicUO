@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ClassicUO.Game.Managers;
 using ClassicUO.Utility.Collections;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -141,8 +142,8 @@ namespace ClassicUO.Game.GameObjects
                         s.X = (ushort) (item.X + s.MultiOffsetX);
                         s.Y = (ushort) (item.Y + s.MultiOffsetY);
                         s.Z = (sbyte) (item.Z + s.MultiOffsetZ);
-                        s.Offset = item.Offset;
                         s.UpdateScreenPosition();
+                        s.Offset = Vector3.Zero;
                     }
                     s.Hue = item.Hue;
                     //s.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
