@@ -13,8 +13,7 @@ namespace ClassicUO.Game.Managers
     {   
         struct BoatStep
         {
-            public uint LastStepTime;
-            public uint Serial;
+            public uint Serial, Time;
             public ushort X, Y;
             public sbyte Z;
             public byte Speed;
@@ -42,20 +41,22 @@ namespace ClassicUO.Game.Managers
             ushort y,
             sbyte z)
         {
-
-
             Item item = World.Items.Get(serial);
             if (item == null || item.IsDestroyed) 
             {
                 return;
             }
 
-            item.LastStepTime = Time.Ticks;
 
             if (!_steps.TryGetValue(serial, out var deque))
             {
                 deque = new Deque<BoatStep>();
                 _steps[serial] = deque;
+            }
+
+            if (deque.Count == 0)
+            {
+                item.LastStepTime = Time.Ticks;
             }
 
 
@@ -68,9 +69,12 @@ namespace ClassicUO.Game.Managers
                 X = x,
                 Y = y,
                 Z = z,
+                Time = Time.Ticks
             };
 
             deque.AddToBack(step);
+
+            Console.WriteLine(">>> STEP ADDED {0}", speed);
         }
 
         public static void PushItemToList(
@@ -128,22 +132,24 @@ namespace ClassicUO.Game.Managers
                         continue;
                     }
 
-                    int maxDelay = 200; // MovementSpeed.TimeToCompleteMovement(this, step.Run) - (int) Client.Game.FrameDelay[1];
+                    int maxDelay = step.Speed == 2 ? 400 : 200;  // MovementSpeed.TimeToCompleteMovement(this, step.Run) ;
                     int delay = (int) Time.Ticks - (int) item.LastStepTime;
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
 
-                    const int DELAY = 100;
 
-                    if (item.X != step.X || item.Y != step.Y)
+                    const int DELAY = 80;
+
+                    if (/*step.FacingDir == step.MovingDir &&*/
+                        (item.X != step.X || item.Y != step.Y))
                     {
                         float steps = maxDelay / (float) DELAY;
                         float x = delay / (float) DELAY;
                         float y = x;
                         item.Offset.Z = (sbyte) ((step.Z - item.Z) * x * (4.0f / steps));
                         MovementSpeed.GetPixelOffset((byte) step.MovingDir, ref x, ref y, steps);
-                        item.Offset.X = (sbyte) x;
-                        item.Offset.Y = (sbyte) y;
+                        item.Offset.X = x;
+                        item.Offset.Y = y;
                     }
                     else
                     {
@@ -151,18 +157,21 @@ namespace ClassicUO.Game.Managers
                         removeStep = true;
                     }
 
+                    if (World.HouseManager.TryGetHouse(item, out House house))
+                    {
+
+                    }
 
                     if (removeStep)
                     {
                         item.X = step.X;
                         item.Y = step.Y;
                         item.Z = step.Z;
-                        
+                        item.UpdateScreenPosition();
 
                         item.Offset.X = 0;
                         item.Offset.Y = 0;
                         item.Offset.Z = 0;
-                        item.UpdateScreenPosition();
 
                         deques.RemoveFromFront();
 
@@ -175,14 +184,25 @@ namespace ClassicUO.Game.Managers
                             item.AddToTile();
 
                         item.LastStepTime = Time.Ticks;
+
+                        Console.WriteLine("REMOVE STEP");
+
+
+                        house?.Generate(true);
+
+                    }
+                    else
+                    {
+                        //Console.WriteLine(item.Offset);
+                        if (house != null)
+                            foreach(var c in house.Components)
+                            {
+                                c.Offset = item.Offset;
+                            }
                     }
 
 
                     UpdateEntitiesInside(item, removeStep);
-
-
-                    if (World.HouseManager.TryGetHouse(item, out House house))
-                        house.Generate(true);
 
                 }
             }
@@ -203,6 +223,8 @@ namespace ClassicUO.Game.Managers
         {
             if (_items.TryGetValue(serial, out var list))
             {
+                Item item = World.Items.Get(serial);
+
                 for (int i = 0; i < list.Count; i++)
                 {
                     ref var it = ref list[i];
@@ -228,11 +250,10 @@ namespace ClassicUO.Game.Managers
                         entity.Offset.Y = 0;
                         entity.Offset.Z = 0;
                         entity.UpdateScreenPosition();
-                        entity.AddToTile();
+                        entity.AddToTile();             
                     }
                     else
                     {
-                        Item item = World.Items.Get(serial);
                         if (item != null)
                             entity.Offset = item.Offset;
                     }
