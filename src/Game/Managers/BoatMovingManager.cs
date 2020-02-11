@@ -56,6 +56,7 @@ namespace ClassicUO.Game.Managers
 
             if (deque.Count == 0)
             {
+                Console.WriteLine("SET TIMER");
                 item.LastStepTime = Time.Ticks;
             }
 
@@ -132,7 +133,7 @@ namespace ClassicUO.Game.Managers
                         continue;
                     }
 
-                    int maxDelay = step.Speed == 2 ? 400 : 200;  // MovementSpeed.TimeToCompleteMovement(this, step.Run) ;
+                    int maxDelay = step.Speed <= 2 ? 1000 : 250;  // MovementSpeed.TimeToCompleteMovement(this, step.Run) ;
                     int delay = (int) Time.Ticks - (int) item.LastStepTime;
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
