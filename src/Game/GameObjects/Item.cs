@@ -275,6 +275,8 @@ namespace ClassicUO.Game.GameObjects
 
             if (World.HouseManager.EntityIntoHouse(Serial, World.Player))
                 Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+
+            BoatMovingManager.ClearSteps(Serial);
         }
 
         public void CheckGraphicChange(sbyte animIndex = 0)

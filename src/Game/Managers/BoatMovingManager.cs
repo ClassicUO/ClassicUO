@@ -136,6 +136,25 @@ namespace ClassicUO.Game.Managers
             Console.WriteLine(">>> STEP ADDED {0}", speed);
         }
 
+        public static void ClearSteps(uint serial)
+        {
+            if (_steps.TryGetValue(serial, out var deque) && deque.Count != 0)
+            {
+                ref var step = ref deque.Back();
+
+                //Item it = World.Items.Get(serial);
+
+                if (_items.TryGetValue(serial, out var list))
+                {
+                    //UpdateEntitiesInside(serial, true, it.X, it.Y, it.Z);
+                    list.Clear();
+                }
+
+                deque.Clear();
+
+            }
+        }
+
         public static void PushItemToList(
             uint serial,
             uint objSerial,

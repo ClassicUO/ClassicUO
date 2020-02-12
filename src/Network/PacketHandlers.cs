@@ -3399,6 +3399,7 @@ namespace ClassicUO.Network
                     else
                     {
                         house.Generate();
+                        BoatMovingManager.ClearSteps(serial);
                         UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
                         if (World.HouseManager.EntityIntoHouse(serial, World.Player))
                             Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
@@ -3917,6 +3918,8 @@ namespace ClassicUO.Network
 
             if (World.HouseManager.EntityIntoHouse(serial, World.Player))
                 Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+
+            BoatMovingManager.ClearSteps(serial);
         }
 
         private static void CharacterTransferLog(Packet p)
