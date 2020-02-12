@@ -512,5 +512,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             base.OnDragEnd(x, y);
         }
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {            
+            UIManager.RemovePosition(LocalSerial);
+            return IsVisible && base.Draw(batcher, x, y);
+        }
+
     }
 }
