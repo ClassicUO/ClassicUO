@@ -176,8 +176,7 @@ namespace ClassicUO.Game.Managers
         {
             foreach (Deque<BoatStep> deques in _steps.Values)
             {
-                LABEL:
-                if (deques.Count != 0)
+                while (deques.Count != 0)
                 {
                     ref var step = ref deques.Front();
 
@@ -186,7 +185,7 @@ namespace ClassicUO.Game.Managers
                     if (item == null || item.IsDestroyed)
                     {
                         _toRemove.Add(step.Serial);
-                        continue;
+                        break;
                     }
 
                     int maxDelay = step.Speed <= 2 ? 1000 : 250;  // MovementSpeed.TimeToCompleteMovement(this, step.Run) ;
@@ -237,7 +236,7 @@ namespace ClassicUO.Game.Managers
 
                         if (directionChange)
                         {
-                            goto LABEL;
+                            continue;
                         }
 
                         if (item.Right != null || item.Left != null)
@@ -261,6 +260,7 @@ namespace ClassicUO.Game.Managers
                     }
 
 
+                    break;
                 }
             }
 
