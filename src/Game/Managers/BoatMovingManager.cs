@@ -231,9 +231,6 @@ namespace ClassicUO.Game.Managers
 
                         deques.RemoveFromFront();
 
-                        UpdateEntitiesInside(item, removeStep, step.X, step.Y, step.Z);
-
-
                         if (directionChange)
                         {
                             continue;
@@ -241,22 +238,25 @@ namespace ClassicUO.Game.Managers
 
                         if (item.Right != null || item.Left != null)
                             item.AddToTile();
+                
+                        house?.Generate(true);
+                        UpdateEntitiesInside(item, removeStep, step.X, step.Y, step.Z);
 
                         item.LastStepTime = Time.Ticks;
 
                         Console.WriteLine("REMOVE STEP");
-
-                        house?.Generate(true);
                     }
                     else
                     {
                         if (house != null)
-                            foreach(var c in house.Components)
+                        {
+                            foreach (var c in house.Components)
                             {
                                 c.Offset = item.Offset;
                             }
+                        }                      
 
-                        UpdateEntitiesInside(item, removeStep, 0, 0, 0);
+                        UpdateEntitiesInside(item, removeStep, item.X, item.Y, item.Z);
                     }
 
 
@@ -310,7 +310,9 @@ namespace ClassicUO.Game.Managers
                         entity.Offset.X = 0;
                         entity.Offset.Y = 0;
                         entity.Offset.Z = 0;
-                        entity.AddToTile();             
+
+                        if (entity.Left != null || entity.Right != null)
+                            entity.AddToTile();             
                     }
                     else
                     {
