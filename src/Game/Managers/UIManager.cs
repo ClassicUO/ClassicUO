@@ -337,6 +337,11 @@ namespace ClassicUO.Game.Managers
             _gumpPositionCache[serverSerial] = point;
         }
 
+        public static bool RemovePosition(uint serverSerial)
+        {
+            return _gumpPositionCache.Remove(serverSerial);
+        }
+
         public static bool GetGumpCachePosition(uint id, out Point pos)
         {
             return _gumpPositionCache.TryGetValue(id, out pos);
