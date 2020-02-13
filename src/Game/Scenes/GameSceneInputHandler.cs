@@ -406,7 +406,7 @@ namespace ClassicUO.Game.Scenes
                                 TargetManager.Target(ent.Serial);
                                 break;
                             case Land land:
-                                TargetManager.Target(0, land.X, land.Y, land.Z);
+                                TargetManager.Target(0, land.X, land.Y, land.Z, land.TileData.IsWet);
                                 break;
                             case GameObject o:
                                 TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);

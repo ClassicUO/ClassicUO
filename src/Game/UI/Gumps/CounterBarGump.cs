@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -151,6 +151,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             _background.Width = Width;
             _background.Height = Height;
+            
+            
 
             CounterItem[] items = GetControls<CounterItem>();
 
@@ -170,7 +172,7 @@ namespace ClassicUO.Game.UI.Gumps
                         c.Y = row * _rectSize + 2;
                         c.Width = _rectSize - 4;
                         c.Height = _rectSize - 4;
-
+                        
                         c.SetGraphic(c.Graphic, c.Hue);
 
                         indices[index] = -1;
@@ -389,9 +391,9 @@ namespace ClassicUO.Game.UI.Gumps
                 return true;
             }
 
-            public override void Update(double totalMS, double frameMS)
+            public override void Update(double totalMs, double frameMs)
             {
-                base.Update(totalMS, frameMS);
+                base.Update(totalMs, frameMs);
 
                 if (_time < Time.Ticks)
                 {
@@ -440,6 +442,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Texture2D color = Texture2DCache.GetTexture(MouseIsOver ? Color.Yellow : ProfileManager.Current.CounterBarHighlightOnAmount &&
                                                       _amount < ProfileManager.Current.CounterBarHighlightAmount && _graphic != 0 ? Color.Red : Color.Gray);
+                                                      
                 ResetHueVector();
                 batcher.DrawRectangle(color, x, y, Width, Height, ref _hueVector);
 
@@ -480,6 +483,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _textureControl.Texture = ArtLoader.Instance.GetTexture(graphic);
                         _textureControl.Hue = hue;
+                        _textureControl.IsPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
                         _textureControl.Width = Parent.Width;
                         _textureControl.Height = Parent.Height;
                         _label.Y = Parent.Height - 15;

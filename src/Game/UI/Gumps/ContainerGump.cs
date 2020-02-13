@@ -220,6 +220,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_data.OpenSound != 0)
                 Client.Game.Scene.Audio.PlaySound(_data.OpenSound);
+
+            UIManager.RemovePosition(LocalSerial);
         }
 
         private void HitBoxOnMouseUp(object sender, MouseEventArgs e)
