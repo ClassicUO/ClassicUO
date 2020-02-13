@@ -151,6 +151,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             _background.Width = Width;
             _background.Height = Height;
+            
+            
 
             CounterItem[] items = GetControls<CounterItem>();
 
@@ -170,8 +172,8 @@ namespace ClassicUO.Game.UI.Gumps
                         c.Y = row * _rectSize + 2;
                         c.Width = _rectSize - 4;
                         c.Height = _rectSize - 4;
-
-                        c.SetGraphic(c.Graphic, c.Hue);
+                        
+                        c.SetGraphic(c.Graphic, c.Hue, c.Partial);
 
                         indices[index] = -1;
                     }
@@ -230,7 +232,7 @@ namespace ClassicUO.Game.UI.Gumps
             CounterItem[] items = GetControls<CounterItem>();
 
             for (int i = 0; i < count; i++)
-                items[i].SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort)0);
+                items[i].SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort)0, reader.ReadBoolean());
 
             IsEnabled = IsVisible = ProfileManager.Current.CounterBarEnabled;
         }
@@ -252,6 +254,7 @@ namespace ClassicUO.Game.UI.Gumps
                 writer.WriteStartElement("control");
                 writer.WriteAttributeString("graphic", control.Graphic.ToString());
                 writer.WriteAttributeString("hue", control.Hue.ToString());
+                writer.WriteAttributeString("partial", control.Partial.ToString());
                 writer.WriteEndElement();
             }
             writer.WriteEndElement();
@@ -278,7 +281,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (index < items.Length)
                     {
-                        items[index++]?.SetGraphic(ushort.Parse(controlXml.GetAttribute("graphic")), ushort.Parse(controlXml.GetAttribute("hue")));
+                        items[index++]?.SetGraphic(ushort.Parse(controlXml.GetAttribute("graphic")), ushort.Parse(controlXml.GetAttribute("hue")), bool.Parse(controlXml.GetAttribute("partial")));
                     }
                     else
                     {
@@ -297,6 +300,7 @@ namespace ClassicUO.Game.UI.Gumps
             private ushort _graphic;
             private ushort _hue;
             private uint _time;
+            private bool _partial;
 
             private ImageWithText _image;
 
@@ -322,21 +326,23 @@ namespace ClassicUO.Game.UI.Gumps
 
             public ushort Graphic => _graphic;
             public ushort Hue => _hue;
+            public bool Partial => _partial;
 
-            public void SetGraphic(ushort graphic, ushort hue)
+            public void SetGraphic(ushort graphic, ushort hue, bool partial)
             {
-                _image.ChangeGraphic(graphic, hue);
+                _image.ChangeGraphic(graphic, hue, partial);
 
                 if (graphic == 0)
                     return;
 
                 _graphic = graphic;
                 _hue = hue;
+                _partial = partial;
             }
 
             public void RemoveItem()
             {
-                _image?.ChangeGraphic(0, 0);
+                _image?.ChangeGraphic(0, 0, false);
                 _amount = 0;
                 _graphic = 0;
             }
@@ -367,7 +373,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (item == null)
                         return;
 
-                    SetGraphic(ItemHold.Graphic, ItemHold.Hue);
+                    SetGraphic(ItemHold.Graphic, ItemHold.Hue, ItemHold.IsPartialHue);
 
                     gs.DropHeldItemToContainer(item, ItemHold.X, ItemHold.Y);
                 }
@@ -389,9 +395,9 @@ namespace ClassicUO.Game.UI.Gumps
                 return true;
             }
 
-            public override void Update(double totalMS, double frameMS)
+            public override void Update(double totalMs, double frameMs)
             {
-                base.Update(totalMS, frameMS);
+                base.Update(totalMs, frameMs);
 
                 if (_time < Time.Ticks)
                 {
@@ -440,6 +446,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Texture2D color = Texture2DCache.GetTexture(MouseIsOver ? Color.Yellow : ProfileManager.Current.CounterBarHighlightOnAmount &&
                                                       _amount < ProfileManager.Current.CounterBarHighlightAmount && _graphic != 0 ? Color.Red : Color.Gray);
+                                                      
                 ResetHueVector();
                 batcher.DrawRectangle(color, x, y, Width, Height, ref _hueVector);
 
@@ -474,12 +481,13 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
 
-                public void ChangeGraphic(ushort graphic, ushort hue)
+                public void ChangeGraphic(ushort graphic, ushort hue, bool partial)
                 {
                     if (graphic != 0)
                     {
                         _textureControl.Texture = ArtLoader.Instance.GetTexture(graphic);
                         _textureControl.Hue = hue;
+                        _textureControl.IsPartial = partial;
                         _textureControl.Width = Parent.Width;
                         _textureControl.Height = Parent.Height;
                         _label.Y = Parent.Height - 15;
