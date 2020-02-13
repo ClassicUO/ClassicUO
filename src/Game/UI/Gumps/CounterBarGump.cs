@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 // Copyright (C) 2020 ClassicUO Development Community on Github
 // 
 // This project is an alternative client for the game Ultima Online.
@@ -173,7 +173,7 @@ namespace ClassicUO.Game.UI.Gumps
                         c.Width = _rectSize - 4;
                         c.Height = _rectSize - 4;
                         
-                        c.SetGraphic(c.Graphic, c.Hue, c.Partial);
+                        c.SetGraphic(c.Graphic, c.Hue);
 
                         indices[index] = -1;
                     }
@@ -232,7 +232,7 @@ namespace ClassicUO.Game.UI.Gumps
             CounterItem[] items = GetControls<CounterItem>();
 
             for (int i = 0; i < count; i++)
-                items[i].SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort)0, reader.ReadBoolean());
+                items[i].SetGraphic(reader.ReadUInt16(), version > 1 ? reader.ReadUInt16() : (ushort)0);
 
             IsEnabled = IsVisible = ProfileManager.Current.CounterBarEnabled;
         }
@@ -254,7 +254,6 @@ namespace ClassicUO.Game.UI.Gumps
                 writer.WriteStartElement("control");
                 writer.WriteAttributeString("graphic", control.Graphic.ToString());
                 writer.WriteAttributeString("hue", control.Hue.ToString());
-                writer.WriteAttributeString("partial", control.Partial.ToString());
                 writer.WriteEndElement();
             }
             writer.WriteEndElement();
@@ -281,7 +280,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (index < items.Length)
                     {
-                        items[index++]?.SetGraphic(ushort.Parse(controlXml.GetAttribute("graphic")), ushort.Parse(controlXml.GetAttribute("hue")), bool.Parse(controlXml.GetAttribute("partial")));
+                        items[index++]?.SetGraphic(ushort.Parse(controlXml.GetAttribute("graphic")), ushort.Parse(controlXml.GetAttribute("hue")));
                     }
                     else
                     {
@@ -300,7 +299,6 @@ namespace ClassicUO.Game.UI.Gumps
             private ushort _graphic;
             private ushort _hue;
             private uint _time;
-            private bool _partial;
 
             private ImageWithText _image;
 
@@ -326,23 +324,21 @@ namespace ClassicUO.Game.UI.Gumps
 
             public ushort Graphic => _graphic;
             public ushort Hue => _hue;
-            public bool Partial => _partial;
 
-            public void SetGraphic(ushort graphic, ushort hue, bool partial)
+            public void SetGraphic(ushort graphic, ushort hue)
             {
-                _image.ChangeGraphic(graphic, hue, partial);
+                _image.ChangeGraphic(graphic, hue);
 
                 if (graphic == 0)
                     return;
 
                 _graphic = graphic;
                 _hue = hue;
-                _partial = partial;
             }
 
             public void RemoveItem()
             {
-                _image?.ChangeGraphic(0, 0, false);
+                _image?.ChangeGraphic(0, 0);
                 _amount = 0;
                 _graphic = 0;
             }
@@ -373,7 +369,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (item == null)
                         return;
 
-                    SetGraphic(ItemHold.Graphic, ItemHold.Hue, ItemHold.IsPartialHue);
+                    SetGraphic(ItemHold.Graphic, ItemHold.Hue);
 
                     gs.DropHeldItemToContainer(item, ItemHold.X, ItemHold.Y);
                 }
@@ -481,13 +477,13 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
 
-                public void ChangeGraphic(ushort graphic, ushort hue, bool partial)
+                public void ChangeGraphic(ushort graphic, ushort hue)
                 {
                     if (graphic != 0)
                     {
                         _textureControl.Texture = ArtLoader.Instance.GetTexture(graphic);
                         _textureControl.Hue = hue;
-                        _textureControl.IsPartial = partial;
+                        _textureControl.IsPartial = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
                         _textureControl.Width = Parent.Width;
                         _textureControl.Height = Parent.Height;
                         _label.Y = Parent.Height - 15;
