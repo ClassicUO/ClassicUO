@@ -741,12 +741,6 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
             }
-            else
-            {
-                Offset.X = 0;
-                Offset.Y = 0;
-                Offset.Z = 0;
-            }
         }
 
         public int IsSitting()
