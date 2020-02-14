@@ -202,13 +202,11 @@ namespace ClassicUO.Game.Managers
                     bool directionChange = false;
 
 
-                    const int DELAY = 80;
-
                     if (/*step.FacingDir == step.MovingDir &&*/
                         (item.X != step.X || item.Y != step.Y))
                     {
-                        float steps = maxDelay / (float) DELAY;
-                        float x = delay / (float) DELAY;
+                        float steps = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
+                        float x = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;
                         float y = x;
                         item.Offset.Z = (sbyte) ((step.Z - item.Z) * x * (4.0f / steps));
                         MovementSpeed.GetPixelOffset((byte) step.MovingDir, ref x, ref y, steps);
