@@ -312,9 +312,17 @@ namespace ClassicUO.Game.Scenes
                         island = true;
                         goto SKIP_HANDLES_CHECK;
 
-                    case Item it when it.IsCorpse:
-                        iscorpse = true;
-                        push_with_priority = true;
+                    case Item it:
+
+                        if (it.IsCorpse)
+                        {
+                            iscorpse = true;
+                            push_with_priority = true;
+                        }
+                        else if (it.Offset != Vector3.Zero)
+                        {
+                            push_with_priority = true;
+                        }
                         goto default;
 
                     case Multi multi:
