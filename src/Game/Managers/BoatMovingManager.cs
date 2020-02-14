@@ -34,21 +34,6 @@ namespace ClassicUO.Game.Managers
         private static readonly Dictionary<uint, RawList<ItemInside>> _items = new Dictionary<uint, RawList<ItemInside>>();
 
 
-        //public static bool IsMoving(uint serial)
-        //{
-        //    if (_steps.TryGetValue(serial, out var steps))
-        //    {
-        //        return steps.Count != 0;
-        //    }
-
-        //    if (_items.TryGetValue(serial, out var list) && list.ContainsKey()
-        //    {
-                
-        //    }
-
-        //    return false;
-        //}
-
         public static void AddStep(uint serial, byte speed, Direction movingDir, Direction facingDir, ushort x, ushort y, sbyte z)
         {
             Item item = World.Items.Get(serial);
@@ -131,8 +116,6 @@ namespace ClassicUO.Game.Managers
         {
             if (_steps.TryGetValue(serial, out var deque) && deque.Count != 0)
             {
-                //ref var step = ref deque.Back();
-
                 Item multiItem = World.Items.Get(serial);
 
                 if (multiItem != null)
