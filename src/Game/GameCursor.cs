@@ -308,7 +308,8 @@ namespace ClassicUO.Game
                 _draggedItemTexture.Ticks = (long) totalMS;
         }
 
-     
+        private readonly RawList<CustomBuildObject> _componentsList = new RawList<CustomBuildObject>();
+
         public void Draw(UltimaBatcher2D sb)
         {
             if (World.InGame && TargetManager.IsTargeting && ProfileManager.Current != null)
@@ -317,10 +318,10 @@ namespace ClassicUO.Game
                 {
                     if (World.CustomHouseManager != null && World.CustomHouseManager.SelectedGraphic != 0)
                     {
-                        RawList<CustomBuildObject> list = new RawList<CustomBuildObject>();
                         ushort hue = 0;
+                        _componentsList.Clear();
 
-                        if (!World.CustomHouseManager.CanBuildHere(list, out var type))
+                        if (!World.CustomHouseManager.CanBuildHere(_componentsList, out var type))
                         {
                             hue = 0x0021;
                         }
@@ -330,9 +331,9 @@ namespace ClassicUO.Game
                             _temp.ForEach(s => s.Destroy());
                             _temp.Clear();
 
-                            for (int i = 0; i < list.Count; i++)
+                            for (int i = 0; i < _componentsList.Count; i++)
                             {
-                                Multi m = Multi.Create(list[i].Graphic);
+                                Multi m = Multi.Create(_componentsList[i].Graphic);
                                 m.AlphaHue = 0xFF;
                                 m.Hue = hue;
                                 m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW;
@@ -340,7 +341,7 @@ namespace ClassicUO.Game
                             }
                         }
 
-                        if (list.Count != 0)
+                        if (_componentsList.Count != 0)
                         {
                             if (SelectedObject.LastObject is GameObject selectedObj)
                             {
@@ -358,9 +359,9 @@ namespace ClassicUO.Game
 
                                 GameScene gs = Client.Game.GetScene<GameScene>();
 
-                                for (int i = 0; i < list.Count; i++)
+                                for (int i = 0; i < _componentsList.Count; i++)
                                 {
-                                    ref readonly CustomBuildObject item = ref list[i];
+                                    ref readonly CustomBuildObject item = ref _componentsList[i];
 
                                     _temp[i].X = (ushort) (selectedObj.X + item.X);
                                     _temp[i].Y = (ushort) (selectedObj.Y + item.Y);
