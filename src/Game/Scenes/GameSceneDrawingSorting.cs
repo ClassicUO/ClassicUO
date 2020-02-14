@@ -22,6 +22,7 @@
 using System;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
@@ -297,12 +298,14 @@ namespace ClassicUO.Game.Scenes
                 bool iscorpse = false;
                 bool ismobile = false;
 
+                bool push_with_priority = false;
+
                 switch (obj)
                 {
                     case Mobile _:
                         maxObjectZ += Constants.DEFAULT_CHARACTER_HEIGHT;
                         ismobile = true;
-
+                        push_with_priority = true;
                         break;
 
                     case Land _:
@@ -311,6 +314,13 @@ namespace ClassicUO.Game.Scenes
 
                     case Item it when it.IsCorpse:
                         iscorpse = true;
+                        push_with_priority = true;
+                        goto default;
+
+                    case Multi multi:
+                        push_with_priority = (multi.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW) != 0 &&
+                                                multi.Offset != Vector3.Zero;
+
                         goto default;
 
                     default:
@@ -447,7 +457,7 @@ namespace ClassicUO.Game.Scenes
                     continue;
                 }
 
-                if (ismobile || iscorpse)
+                if (push_with_priority)
                     AddOffsetCharacterTileToRenderList(obj, useObjectHandles);
                 else if (!island && itemData.IsFoliage)
                 {
@@ -524,15 +534,17 @@ namespace ClassicUO.Game.Scenes
 
             int dropMaxZIndex = -1;
 
-            if (entity is Mobile mob && mob.Steps.Count != 0)
+            if (entity is Mobile mob)
             {
-                ref var step = ref mob.Steps.Back();
+                if (mob.Steps.Count != 0)
+                {
+                    ref var step = ref mob.Steps.Back();
 
-                if ((step.Direction & 7) == 2)
-                    dropMaxZIndex = 0;
+                    if ((step.Direction & 7) == 2)
+                        dropMaxZIndex = 0;
+                }       
             }
-
-
+            
             for (int i = 0; i < 8; i++)
             {
                 int x = charX;

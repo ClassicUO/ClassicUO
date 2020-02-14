@@ -128,7 +128,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void Generate(bool recalculate = false, bool pushtotile = true)
+        public void Generate(bool recalculate = false, bool pushtotile = true, bool removePreview = false)
         {
             Item item = World.Items.Get(Serial);
             //ClearCustomHouseComponents(0);
@@ -145,6 +145,13 @@ namespace ClassicUO.Game.GameObjects
                         s.UpdateScreenPosition();
                         s.Offset = Vector3.Zero;
                     }
+
+
+                    if (removePreview)
+                    {
+                        s.State &= ~CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW;
+                    }
+
                     s.Hue = item.Hue;
                     //s.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
                     //s.IsCustom = IsCustom;

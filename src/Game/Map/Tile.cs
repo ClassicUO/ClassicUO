@@ -107,10 +107,9 @@ namespace ClassicUO.Game.Map
                         priorityZ++;
                     }
 
-                    goto MULTI_DEFAULT;
+                    goto default;
 
                 default:
-                    MULTI_DEFAULT:
                     ref readonly StaticTiles data = ref TileDataLoader.Instance.StaticData[obj.Graphic];
 
                     if (data.IsBackground)

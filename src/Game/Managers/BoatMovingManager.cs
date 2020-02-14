@@ -34,7 +34,20 @@ namespace ClassicUO.Game.Managers
         private static readonly Dictionary<uint, RawList<ItemInside>> _items = new Dictionary<uint, RawList<ItemInside>>();
 
 
+        //public static bool IsMoving(uint serial)
+        //{
+        //    if (_steps.TryGetValue(serial, out var steps))
+        //    {
+        //        return steps.Count != 0;
+        //    }
 
+        //    if (_items.TryGetValue(serial, out var list) && list.ContainsKey()
+        //    {
+                
+        //    }
+
+        //    return false;
+        //}
 
         public static void AddStep(uint serial, byte speed, Direction movingDir, Direction facingDir, ushort x, ushort y, sbyte z)
         {
@@ -242,7 +255,7 @@ namespace ClassicUO.Game.Managers
                         if (item.Right != null || item.Left != null)
                             item.AddToTile();
                 
-                        house?.Generate(true);
+                        house?.Generate(true, true, true);
                         UpdateEntitiesInside(item, removeStep, step.X, step.Y, step.Z);
 
                         item.LastStepTime = Time.Ticks;
@@ -251,9 +264,16 @@ namespace ClassicUO.Game.Managers
                     {
                         if (house != null)
                         {
+                            bool preview = step.MovingDir != Direction.West &&
+                                    step.MovingDir != Direction.Up &&
+                                    step.MovingDir != Direction.North;
+
                             foreach (var c in house.Components)
                             {
                                 c.Offset = item.Offset;
+
+                                if (preview)
+                                    c.State |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW;
                             }
                         }                      
 
