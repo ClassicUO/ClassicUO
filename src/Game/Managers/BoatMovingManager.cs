@@ -140,18 +140,34 @@ namespace ClassicUO.Game.Managers
         {
             if (_steps.TryGetValue(serial, out var deque) && deque.Count != 0)
             {
-                ref var step = ref deque.Back();
+                //ref var step = ref deque.Back();
 
-                //Item it = World.Items.Get(serial);
+                Item multiItem = World.Items.Get(serial);
+
+                if (multiItem != null)
+                {
+                    multiItem.Offset.X = 0;
+                    multiItem.Offset.Y = 0;
+                    multiItem.Offset.Z = 0;
+                }
 
                 if (_items.TryGetValue(serial, out var list))
                 {
-                    //UpdateEntitiesInside(serial, true, it.X, it.Y, it.Z);
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        ref var it = ref list[i];
+
+                        Entity ent = World.Get(it.Serial);
+
+                        ent.Offset.X = 0;
+                        ent.Offset.Y = 0;
+                        ent.Offset.Z = 0;
+                    }
+
                     list.Clear();
                 }
 
                 deque.Clear();
-
             }
         }
 
