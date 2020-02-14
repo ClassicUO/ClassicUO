@@ -31,25 +31,8 @@ namespace ClassicUO.Game.Managers
         private static readonly List<uint> _toRemove = new List<uint>();
         private static readonly Dictionary<uint, RawList<ItemInside>> _items = new Dictionary<uint, RawList<ItemInside>>();
 
-        private static void GetEndPosition(Item item, Deque<BoatStep> deque, out ushort x, out ushort y, out sbyte z, out Direction dir)
-        {
-            if (deque.Count == 0)
-            {
-                x = item.X;
-                y = item.Y;
-                z = item.Z;
-                dir = item.Direction & Direction.Up;
-                dir &= Direction.Running;
-            }
-            else
-            {
-                ref var s = ref deque.Back();
-                x = s.X;
-                y = s.Y;
-                z = s.Z;
-                dir = s.MovingDir;
-            }
-        }
+
+
 
         public static void AddStep(
             uint serial, 
@@ -363,7 +346,37 @@ namespace ClassicUO.Game.Managers
 
         public static void Remove(uint serial)
         {
+            if (_steps.ContainsKey(serial))
+            {
+                _steps.Remove(serial);
+            }
 
+            if (_items.ContainsKey(serial))
+            {
+                _items.Remove(serial);
+            }
+        }
+
+
+
+        private static void GetEndPosition(Item item, Deque<BoatStep> deque, out ushort x, out ushort y, out sbyte z, out Direction dir)
+        {
+            if (deque.Count == 0)
+            {
+                x = item.X;
+                y = item.Y;
+                z = item.Z;
+                dir = item.Direction & Direction.Up;
+                dir &= Direction.Running;
+            }
+            else
+            {
+                ref var s = ref deque.Back();
+                x = s.X;
+                y = s.Y;
+                z = s.Z;
+                dir = s.MovingDir;
+            }
         }
     }
 }
