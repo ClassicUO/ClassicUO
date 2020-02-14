@@ -104,7 +104,10 @@ namespace ClassicUO.Game.GameObjects
                 return;
 
             if (SerialHelper.IsItem(Serial))
+            {
                 UIManager.GetGump<Gump>(Serial)?.Dispose();
+            }
+
             base.Destroy();
             
             //_pool.Enqueue(this);

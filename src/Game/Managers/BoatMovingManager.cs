@@ -27,6 +27,8 @@ namespace ClassicUO.Game.Managers
             public int X, Y, Z;
         }
 
+
+
         private static readonly Dictionary<uint, Deque<BoatStep>> _steps = new Dictionary<uint, Deque<BoatStep>>();
         private static readonly List<uint> _toRemove = new List<uint>();
         private static readonly Dictionary<uint, RawList<ItemInside>> _items = new Dictionary<uint, RawList<ItemInside>>();
@@ -34,14 +36,7 @@ namespace ClassicUO.Game.Managers
 
 
 
-        public static void AddStep(
-            uint serial, 
-            byte speed, 
-            Direction movingDir,
-            Direction facingDir,
-            ushort x, 
-            ushort y,
-            sbyte z)
+        public static void AddStep(uint serial, byte speed, Direction movingDir, Direction facingDir, ushort x, ushort y, sbyte z)
         {
             Item item = World.Items.Get(serial);
             if (item == null || item.IsDestroyed) 
@@ -154,12 +149,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void PushItemToList(
-            uint serial,
-            uint objSerial,
-            int x,
-            int y,
-            int z)
+        public static void PushItemToList(uint serial, uint objSerial, int x, int y, int z)
         {
             if (!_items.TryGetValue(serial, out var list))
             {
@@ -206,7 +196,7 @@ namespace ClassicUO.Game.Managers
                         break;
                     }
 
-                    int maxDelay = step.Speed <= 2 ? 1000 : 250;  // MovementSpeed.TimeToCompleteMovement(this, step.Run) ;
+                    int maxDelay = step.Speed <= 2 ? 1000 : 250;
                     int delay = (int) Time.Ticks - (int) item.LastStepTime;
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
@@ -231,10 +221,7 @@ namespace ClassicUO.Game.Managers
                         removeStep = true;
                     }
 
-                    if (World.HouseManager.TryGetHouse(item, out House house))
-                    {
-
-                    }
+                    World.HouseManager.TryGetHouse(item, out House house);
 
                     if (removeStep)
                     {
@@ -261,8 +248,6 @@ namespace ClassicUO.Game.Managers
                         UpdateEntitiesInside(item, removeStep, step.X, step.Y, step.Z);
 
                         item.LastStepTime = Time.Ticks;
-
-                        Console.WriteLine("REMOVE STEP");
                     }
                     else
                     {
@@ -288,6 +273,7 @@ namespace ClassicUO.Game.Managers
                 for (int i = 0; i < _toRemove.Count; i++)
                 {
                     _steps.Remove(_toRemove[i]);
+                    _items.Remove(_toRemove[i]);
                 }
 
                 _toRemove.Clear();
@@ -343,21 +329,6 @@ namespace ClassicUO.Game.Managers
                 }
             }
         }
-
-        public static void Remove(uint serial)
-        {
-            if (_steps.ContainsKey(serial))
-            {
-                _steps.Remove(serial);
-            }
-
-            if (_items.ContainsKey(serial))
-            {
-                _items.Remove(serial);
-            }
-        }
-
-
 
         private static void GetEndPosition(Item item, Deque<BoatStep> deque, out ushort x, out ushort y, out sbyte z, out Direction dir)
         {
