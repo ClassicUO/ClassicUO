@@ -147,6 +147,9 @@ namespace ClassicUO.Game.GameObjects
             x = (int)(x / scale);
             y = (int)(y / scale);
 
+            x += (int) Offset.X;
+            y += (int) (Offset.Y - Offset.Z);
+
             for (; last != null; last = last.ListLeft)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
