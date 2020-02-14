@@ -4312,7 +4312,7 @@ namespace ClassicUO.Network
                     cSerial, 
                     x - cx, 
                     y - cy,
-                    z - (sbyte) cz);
+                    (sbyte) (z - cz));
             }
         }
 
