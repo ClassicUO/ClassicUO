@@ -325,6 +325,10 @@ namespace ClassicUO.Game.Scenes
                         }
                         goto default;
 
+                    case MovingEffect moveEff:
+                        push_with_priority = true;
+                        goto default;
+
                     case Multi multi:
                         push_with_priority = (multi.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW) != 0 &&
                                                 multi.Offset != Vector3.Zero;
