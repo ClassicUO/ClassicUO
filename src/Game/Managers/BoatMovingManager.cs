@@ -315,9 +315,6 @@ namespace ClassicUO.Game.Managers
                         continue;
                     }
 
-                    //if (entity is Mobile mob && mob.Steps.Count != 0)
-                    //    continue;
-
                     if (removeStep)
                     {                    
                         entity.X = (ushort) (x - it.X);
