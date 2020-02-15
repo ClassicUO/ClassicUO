@@ -40,10 +40,11 @@ namespace ClassicUO.IO.Resources
 
         private readonly Dictionary<uint, UOTexture16> _landDictionary = new Dictionary<uint, UOTexture16>();
         private UOFile _file;
+        private ushort _graphicMask;
 
         private ArtLoader()
         {
-
+            _graphicMask = Client.IsUOPInstallation ? (ushort) 0xFFFF : (ushort) 0x3FFF;
         }
 
         private static ArtLoader _instance;
@@ -441,7 +442,7 @@ namespace ClassicUO.IO.Resources
         {
             const int SIZE = 44 * 44;
 
-            graphic &= Client.GraphicMask;
+            graphic &= _graphicMask;
             ref readonly var entry = ref GetValidRefEntry(graphic);
 
             if (entry.Length == 0)
