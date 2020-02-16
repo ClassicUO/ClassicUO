@@ -241,7 +241,7 @@ namespace ClassicUO.Game.Scenes
 
                     case LoginSteps.VerifyingAccount:
                         labelText = ClilocLoader.Instance.GetString(3000003); // "Verifying Account..."
-
+                        showButtons = LoginButtons.Cancel;
                         break;
 
                     case LoginSteps.LoginInToServer:
@@ -264,7 +264,9 @@ namespace ClassicUO.Game.Scenes
 
         private void OnLoadingGumpButtonClick(int buttonId)
         {
-            if ((LoginButtons) buttonId == LoginButtons.OK)
+            LoginButtons butt = (LoginButtons) buttonId;
+
+            if (butt == LoginButtons.OK || butt == LoginButtons.Cancel)
                 StepBack();
         }
 
