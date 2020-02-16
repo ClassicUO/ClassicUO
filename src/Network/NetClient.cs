@@ -136,6 +136,9 @@ namespace ClassicUO.Network
             _recvQueue = new ConcurrentQueue<Packet>();
             Statistics.Reset();
 
+            _socket.ReceiveTimeout = -1;
+            _socket.SendTimeout = -1;
+
             if (_connectAsync)
             {
                 Task.Run(() =>
