@@ -64,7 +64,7 @@ namespace ClassicUO.Utility
             if (current <= 0 || max <= 0)
                 return 0;
 
-            return current / max * 100;
+            return (current * 100) / max;
         }
 
         [MethodImpl(256)]
