@@ -142,7 +142,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool AnimationDirection;
 
-        public long LastStepTime;
+       // public long LastStepTime;
 
         public long LastStepSoundTime;
 
@@ -207,7 +207,7 @@ namespace ClassicUO.Game.GameObjects
                 LastStepTime = Time.Ticks;
             }
 
-            Direction moveDir = CalculateDirection(endX, endY, x, y);
+            Direction moveDir = DirectionHelper.CalculateDirection(endX, endY, x, y);
             Step step = new Step();
 
             if (moveDir != Direction.NONE)
@@ -241,30 +241,6 @@ namespace ClassicUO.Game.GameObjects
             }
 
             return true;
-        }
-
-        private static Direction CalculateDirection(int curX, int curY, int newX, int newY)
-        {
-            int deltaX = newX - curX;
-            int deltaY = newY - curY;
-
-            if (deltaX > 0)
-            {
-                if (deltaY > 0) return Direction.Down;
-
-                return deltaY == 0 ? Direction.East : Direction.Right;
-            }
-
-            if (deltaX == 0)
-            {
-                if (deltaY > 0) return Direction.South;
-
-                return deltaY == 0 ? Direction.NONE : Direction.North;
-            }
-
-            if (deltaY > 0) return Direction.Left;
-
-            return deltaY == 0 ? Direction.West : Direction.Up;
         }
 
         internal void GetEndPosition(out int x, out int y, out sbyte z, out Direction dir)
@@ -317,6 +293,9 @@ namespace ClassicUO.Game.GameObjects
 
 
                 ushort graphic = GetGraphicForAnimation();
+
+                if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                    return;
 
                 ANIMATION_GROUPS_TYPE type = AnimationsLoader.Instance.DataIndex[graphic].Type;
 
@@ -761,12 +740,6 @@ namespace ClassicUO.Game.GameObjects
                         ProcessDelta();
                     }
                 }
-            }
-            else
-            {
-                Offset.X = 0;
-                Offset.Y = 0;
-                Offset.Z = 0;
             }
         }
 

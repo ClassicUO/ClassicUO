@@ -80,12 +80,18 @@ namespace ClassicUO.Game.Managers
                 try
                 {
                     string path = FileSystemHelper.CreateFolderIfNotExists(Path.Combine(CUOEnviroment.ExecutablePath, "Data"), "Client", "JournalLogs");
-                    path = Path.Combine(path, $"{DateTime.Now:yyyy_MM_dd_HH_mm_ss}_journal.txt");
-
-                    _fileWriter = new StreamWriter(File.Open(path, FileMode.Create, FileAccess.Write, FileShare.Read))
+                    _fileWriter = new StreamWriter(File.Open(Path.Combine(path, $"{DateTime.Now:yyyy_MM_dd_HH_mm_ss}_journal.txt"), FileMode.Create, FileAccess.Write, FileShare.Read))
                     {
                         AutoFlush = true
                     };
+                    try
+                    {
+                        string[] files = Directory.GetFiles(path, "*_journal.txt");
+                        Array.Sort<string>(files);
+                        for (int i = files.Length - 1; i >= 100; --i)
+                            File.Delete(files[i]);
+                    }
+                    catch { }
                 }
                 catch (Exception ex)
                 {

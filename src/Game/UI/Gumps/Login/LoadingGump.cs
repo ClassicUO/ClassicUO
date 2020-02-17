@@ -68,6 +68,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     X = 306, Y = 304, ButtonAction = ButtonAction.Activate
                 });
             }
+            else if (showButtons == LoginButtons.Cancel)
+            {
+                Add(new Button((int) LoginButtons.Cancel, 0x047E, 0x0480, 0x047F)
+                {
+                    X = 306,
+                    Y = 304,
+                    ButtonAction = ButtonAction.Activate
+                });
+            }
             else if (showButtons == (LoginButtons.OK | LoginButtons.Cancel))
             {
                 Add(new Button((int) LoginButtons.OK, 0x0481, 0x0483, 0x0482)
@@ -80,11 +89,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     X = 348, Y = 304, ButtonAction = ButtonAction.Activate
                 });
             }
-        }
-
-        private void InputOnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
-        {
-           
         }
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)

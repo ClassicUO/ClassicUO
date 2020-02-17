@@ -371,19 +371,26 @@ namespace ClassicUO
                 DirectoryInfo dd = new DirectoryInfo(currentPath);
                 dd.CopyAllTo(new DirectoryInfo(path));
 
-                string prefix = Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? "mono " : string.Empty;
 
-                new Process
+                ProcessStartInfo processStartInfo = new ProcessStartInfo()
                 {
-                    StartInfo =
-                    {
-                        WorkingDirectory = path,
-                        FileName = prefix + Path.Combine(path, "ClassicUO.exe"),
-                        UseShellExecute = false,
-                        Arguments =
-                            $"--source \"{currentPath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup"
-                    }
-                }.Start();
+                    WorkingDirectory = path,
+                    UseShellExecute = false,
+                };
+
+                if (Environment.OSVersion.Platform == PlatformID.MacOSX ||
+                    Environment.OSVersion.Platform == PlatformID.Unix)
+                {
+                    processStartInfo.FileName = "mono";
+                    processStartInfo.Arguments = $"\"{Path.Combine(path, "ClassicUO.exe")}\" --source \"{currentPath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup";
+                }
+                else
+                {
+                    processStartInfo.FileName = Path.Combine(path, "ClassicUO.exe");
+                    processStartInfo.Arguments = $"--source \"{currentPath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup";
+                }
+
+                Process.Start(processStartInfo);
 
                 return true;
             }

@@ -1346,21 +1346,25 @@ namespace ClassicUO.Game.GameObjects
         {
             base.Update(totalMS, frameMS);
 
-            /*const int TIME_TURN_TO_LASTTARGET = 2000;
+            //const int TIME_TURN_TO_LASTTARGET = 2000;
 
-            if (InWarMode && Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks)
-            {
-                Mobile enemy = World.Mobiles.Get(World.LastAttack);
+            //if (TargetManager.LastAttack != 0 && 
+            //    InWarMode && 
+            //    Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks)
+            //{
+            //    Mobile enemy = World.Mobiles.Get(TargetManager.LastAttack);
 
-                if (enemy != null)
-                {
-                    Point center = new Point(ProfileManager.Current.GameWindowPosition.X + (ProfileManager.Current.GameWindowSize.X >> 1), ProfileManager.Current.GameWindowPosition.Y + (ProfileManager.Current.GameWindowSize.Y >> 1));
-                    Direction direction = DirectionHelper.DirectionFromPoints(center, new Point(enemy.RealScreenPosition.X, enemy.RealScreenPosition.Y));
+            //    if (enemy != null && enemy.Distance <= 1)
+            //    {
+            //        Direction pdir = DirectionHelper.GetDirectionAB(World.Player.X,
+            //                                                        World.Player.Y, 
+            //                                                        enemy.X,
+            //                                                        enemy.Y);
 
-                    if (Direction != direction)
-                        Walk(direction, false);
-                }
-            }*/
+            //        if (Direction != pdir)
+            //            Walk(pdir, false);
+            //    }
+            //}
         }
 
         // ############# DO NOT DELETE IT! #############

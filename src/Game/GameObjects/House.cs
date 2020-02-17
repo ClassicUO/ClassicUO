@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ClassicUO.Game.Managers;
 using ClassicUO.Utility.Collections;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -127,7 +128,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void Generate(bool recalculate = false)
+        public void Generate(bool recalculate = false, bool pushtotile = true, bool removePreview = false)
         {
             Item item = World.Items.Get(Serial);
             //ClearCustomHouseComponents(0);
@@ -142,13 +143,22 @@ namespace ClassicUO.Game.GameObjects
                         s.Y = (ushort) (item.Y + s.MultiOffsetY);
                         s.Z = (sbyte) (item.Z + s.MultiOffsetZ);
                         s.UpdateScreenPosition();
+                        s.Offset = Vector3.Zero;
                     }
+
+
+                    if (removePreview)
+                    {
+                        s.State &= ~CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW;
+                    }
+
                     s.Hue = item.Hue;
                     //s.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
                     //s.IsCustom = IsCustom;
                 }
 
-                s.AddToTile();
+                if (pushtotile)
+                    s.AddToTile();
             }
 
             World.CustomHouseManager?.GenerateFloorPlace();

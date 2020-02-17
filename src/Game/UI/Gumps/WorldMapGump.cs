@@ -62,6 +62,7 @@ namespace ClassicUO.Game.UI.Gumps
             Load();
             OnResize();
 
+            World.WMapManager.Enabled = true;
             BuildGump();
         }
 
@@ -232,12 +233,26 @@ namespace ClassicUO.Game.UI.Gumps
                 Load();
             }
 
-            if (_nextQueryPacket < Time.Ticks)
+            if (World.InGame && _nextQueryPacket < Time.Ticks)
             {
                 _nextQueryPacket = Time.Ticks + 250;
+
+                //foreach (var m in World.WMapManager.Entities.Values)
+                //{
+                //    if (m.IsGuild)
+                //    {
+                //        var mob = World.Mobiles.Get(m.Serial);
+
+                //        if (mob == null)
+                //        {
+
+                //        }
+                //    }
+                //}
+
                 NetClient.Socket.Send(new PQueryGuildPosition());
 
-                if (World.InGame && World.Party != null && World.Party.Leader != 0)
+                if (World.Party != null && World.Party.Leader != 0)
                 {
                     foreach (var e in World.Party.Members)
                     {
@@ -494,10 +509,40 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void DrawAll(UltimaBatcher2D batcher, int gX, int gY, int halfWidth, int halfHeight)
         {
-            foreach (Mobile mobile in World.Mobiles)
+            foreach (Mobile mob in World.Mobiles)
             {
-                if (mobile != World.Player)
-                    DrawMobile(batcher, mobile, gX, gY, halfWidth, halfHeight, Zoom, Color.Red);
+                if (mob == World.Player)
+                    continue;
+
+                if (mob.NotorietyFlag != NotorietyFlag.Ally)
+                    DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Red);
+                else
+                {
+                    if (mob != null && mob.Distance <= World.ClientViewRange)
+                    {
+                        var wme = World.WMapManager.GetEntity(mob);
+                        if (wme != null)
+                            wme.Name = mob.Name;
+                        else
+                            DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Lime, true, true, true);
+                    }
+                    else
+                    {
+                        var wme = World.WMapManager.GetEntity(mob.Serial);
+                        if (wme != null && wme.IsGuild)
+                        {
+                            DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom);
+                        }
+                    }
+                }
+            }
+
+            foreach (var wme in World.WMapManager.Entities.Values)
+            {
+                if (wme.IsGuild && !World.Party.Contains(wme.Serial))
+                {
+                    DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom);
+                }
             }
 
             if (_showPartyMembers)
@@ -529,27 +574,6 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }
-
-            foreach (var wme in World.WMapManager.Entities.Values)
-            {
-                if (!wme.IsGuild)
-                {
-                    continue;
-                }
-
-                if (string.IsNullOrEmpty(wme.Name))
-                {
-                    Mobile m = World.Mobiles.Get(wme.Serial);
-
-                    if (m != null && !string.IsNullOrEmpty(m.Name))
-                    {
-                        wme.Name = m.Name;
-                    }
-                }
-
-                DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom);
-            }
-
 
             DrawMobile(batcher, World.Player, gX, gY, halfWidth, halfHeight, Zoom, Color.White, true, false, true);
         }
@@ -822,6 +846,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
+            World.WMapManager.Enabled = false;
             UIManager.GameCursor.IsDraggingCursorForced = false;
 
             _mapTexture?.Dispose();

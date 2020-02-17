@@ -25,6 +25,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -40,16 +41,17 @@ namespace ClassicUO.Network
         private CircularBuffer _circularBuffer;
         private SocketAsyncEventArgs _recvEventArgs;
         private ConcurrentQueue<Packet> _recvQueue = new ConcurrentQueue<Packet>();
+        private bool _connectAsync;
 
-
-        private NetClient()
+        private NetClient(bool connectAsync)
         {
+            _connectAsync = connectAsync;
             Statistics = new NetStatistics();
         }
 
-        public static NetClient LoginSocket { get; } = new NetClient();
+        public static NetClient LoginSocket { get; } = new NetClient(true);
 
-        public static NetClient Socket { get; } = new NetClient();
+        public static NetClient Socket { get; } = new NetClient(false);
 
         public bool IsConnected => _socket != null && _socket.Connected;
 
@@ -134,6 +136,24 @@ namespace ClassicUO.Network
             _recvQueue = new ConcurrentQueue<Packet>();
             Statistics.Reset();
 
+            _socket.ReceiveTimeout = -1;
+            _socket.SendTimeout = -1;
+
+            if (_connectAsync)
+            {
+                Task.Run(() =>
+                {
+                    InternalConnect(endpoint);
+                });
+            }
+            else
+            {
+                InternalConnect(endpoint);
+            }
+        }
+
+        private void InternalConnect(EndPoint endpoint)
+        {
             try
             {
                 _socket.Connect(endpoint);

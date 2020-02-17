@@ -1314,14 +1314,13 @@ namespace ClassicUO.IO.Resources
                     {
                         offsX = (sbyte) data[0] + 1;
                         offsY = (sbyte) data[1];
-                        dw = (sbyte) data[2];
-                        dh = (sbyte) data[3];
+                        dw = (byte) data[2];
+                        dh = (byte) data[3];
                         data += 4;
                     }
 
                     int tmpW = w;
                     uint charcolor = datacolor;
-                    //bool isBlackPixel = ((charcolor >> 24) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8;
                     bool isBlackPixel = ((charcolor >> 0) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8;
 
                     if (si != ' ')
@@ -1346,6 +1345,9 @@ namespace ClassicUO.IO.Resources
                         for (int y = 0; y < dh; y++)
                         {
                             int testY = offsY + lineOffsY + y;
+
+                            if (testY < 0)
+                                testY = 0;
 
                             if (testY >= height)
                                 break;
@@ -1401,6 +1403,9 @@ namespace ClassicUO.IO.Resources
                                 if (testY >= height)
                                     break;
 
+                                if (testY < 0)
+                                    testY = 0;
+
                                 int italicOffset = 0;
 
                                 if (isItalic && cy < dh)
@@ -1445,6 +1450,9 @@ namespace ClassicUO.IO.Resources
                                 if (testY >= height)
                                     break;
 
+                                if (testY < 0)
+                                    testY = 0;
+
                                 int italicOffset = 0;
 
                                 if (isItalic)
@@ -1477,6 +1485,9 @@ namespace ClassicUO.IO.Resources
                             for (int cy = minYOk; cy < maxYOk; cy++)
                             {
                                 int testY = offsY + lineOffsY + cy;
+
+                                if (testY < 0)
+                                    testY = 0;
 
                                 if (testY >= height)
                                     break;
@@ -1513,6 +1524,9 @@ namespace ClassicUO.IO.Resources
                                             for (int y = startY; y < endY; y++)
                                             {
                                                 int testBlock = (testY + y) * width + nowX;
+
+                                                if (testBlock < 0)
+                                                    continue;
 
                                                 if (testBlock < pData.Length && pData[testBlock] != 0 && pData[testBlock] != blackColor)
                                                 {
@@ -1558,6 +1572,9 @@ namespace ClassicUO.IO.Resources
 
                         if (testY >= height)
                             break;
+
+                        if (testY < 0)
+                            testY = 0;
 
                         for (int cx = minXOk; cx < dw + maxXOk; cx++)
                         {

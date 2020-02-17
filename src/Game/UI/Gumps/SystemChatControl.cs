@@ -70,6 +70,8 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _isActive;
         private ChatMode _mode = ChatMode.Default;
 
+     
+
         public SystemChatControl(int x, int y, int w, int h)
         {
             X = x;
@@ -165,48 +167,48 @@ namespace ClassicUO.Game.UI.Gumps
                             break;
 
                         case ChatMode.Whisper:
-                            AppendChatModePrefix("[Whisper]: ", ProfileManager.Current.WhisperHue);
+                            AppendChatModePrefix("[Whisper]: ", ProfileManager.Current.WhisperHue, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.Emote:
-                            AppendChatModePrefix("[Emote]: ", ProfileManager.Current.EmoteHue);
+                            AppendChatModePrefix("[Emote]: ", ProfileManager.Current.EmoteHue, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.Yell:
-                            AppendChatModePrefix("[Yell]: ", ProfileManager.Current.YellHue);
+                            AppendChatModePrefix("[Yell]: ", ProfileManager.Current.YellHue, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.Party:
-                            AppendChatModePrefix("[Party]: ", ProfileManager.Current.PartyMessageHue);
+                            AppendChatModePrefix("[Party]: ", ProfileManager.Current.PartyMessageHue, TextBoxControl.Text);
 
                             break;
                         
                         case ChatMode.Guild:
-                            AppendChatModePrefix("[Guild]: ", ProfileManager.Current.GuildMessageHue);
+                            AppendChatModePrefix("[Guild]: ", ProfileManager.Current.GuildMessageHue, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.Alliance:
-                            AppendChatModePrefix("[Alliance]: ", ProfileManager.Current.AllyMessageHue);
+                            AppendChatModePrefix("[Alliance]: ", ProfileManager.Current.AllyMessageHue, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.ClientCommand:
-                            AppendChatModePrefix("[Command]: ", 1161);
+                            AppendChatModePrefix("[Command]: ", 1161, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.UOAMChat:
                             DisposeChatModePrefix();
-                            AppendChatModePrefix("[UOAM]: ", 83);
+                            AppendChatModePrefix("[UOAM]: ", 83, TextBoxControl.Text);
 
                             break;
                         case ChatMode.UOChat:
                             DisposeChatModePrefix();
-                            AppendChatModePrefix("Chat: ", ProfileManager.Current.ChatMessageHue);
+                            AppendChatModePrefix("Chat: ", ProfileManager.Current.ChatMessageHue, TextBoxControl.Text);
                             break;
                     }
                 }
@@ -259,7 +261,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
-        private void AppendChatModePrefix(string labelText, ushort hue)
+        private void AppendChatModePrefix(string labelText, ushort hue, string text)
         {
             if (!_currentChatModeLabel.IsVisible)
             {
@@ -269,7 +271,15 @@ namespace ClassicUO.Game.UI.Gumps
                 _currentChatModeLabel.Location = TextBoxControl.Location;
                 TextBoxControl.X = _currentChatModeLabel.Width;
                 TextBoxControl.Hue = hue;
-                TextBoxControl.SetText(string.Empty);
+
+                int idx = string.IsNullOrEmpty(text) ? -1 : TextBoxControl.Text.IndexOf(text);
+                string str = string.Empty;
+                if (idx > 0)
+                {
+                    str = TextBoxControl.Text.Substring(idx, TextBoxControl.Text.Length - labelText.Length - 1);
+                }
+
+                TextBoxControl.SetText(str);
             }
         }
 
@@ -317,13 +327,36 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (Mode == ChatMode.Default && IsActive)
             {
-                if (TextBoxControl.Text.Length == 1)
+                if (TextBoxControl.Text.Length > 0)
                 {
                     switch (TextBoxControl.Text[0])
-                    {
-                     
+                    {                  
                         case '/':
-                            Mode = ChatMode.Party;
+
+                            int pos = 1;
+
+                            while (pos < TextBoxControl.Text.Length && TextBoxControl.Text[pos] != ' ')
+                            {
+                                pos++;
+                            }
+
+                            if (pos < TextBoxControl.Text.Length && int.TryParse(TextBoxControl.Text.Substring(1, pos), out int index) && index > 0 && index < 11)
+                            {
+                                if (World.Party.Members[index - 1] != null && World.Party.Members[index - 1].Serial != 0)
+                                {
+                                    AppendChatModePrefix($"[Tell] [{World.Party.Members[index - 1].Name}]: ", ProfileManager.Current.PartyMessageHue, string.Empty);
+                                }
+                                else
+                                {
+                                    AppendChatModePrefix("[Tell] []: ", ProfileManager.Current.PartyMessageHue, string.Empty);
+                                }
+
+                                Mode = ChatMode.Party;
+                                TextBoxControl.Text = $"{index} ";
+                            }
+                            else
+                                Mode = ChatMode.Party;
+
                             break;
 
                         case '\\':
@@ -341,49 +374,17 @@ namespace ClassicUO.Game.UI.Gumps
                         case ',' when UOChatManager.ChatIsEnabled:
                             Mode = ChatMode.UOChat;
                             break;
-                    }
-                }
-                else if (TextBoxControl.Text.Length > 0)
-                {
-                    if (TextBoxControl.Text[0] == '/')
-                    {
-                        int pos = 1;
 
-                        while (pos < TextBoxControl.Text.Length && TextBoxControl.Text[pos] != ' ')
-                        {
-                            pos++;
-                        }
 
-                        if (pos < TextBoxControl.Text.Length && int.TryParse(TextBoxControl.Text.Substring(1, pos), out int index) && index > 0 && index < 11)
-                        {
-                            if (World.Party.Members[index - 1] != null && World.Party.Members[index - 1].Serial != 0)
-                            {
-                                AppendChatModePrefix($"[Tell] [{World.Party.Members[index - 1].Name}]: ", ProfileManager.Current.PartyMessageHue);
-                            }
-                            else
-                            {
-                                AppendChatModePrefix("[Tell] []: ", ProfileManager.Current.PartyMessageHue);
-                            }
-
-                            Mode = ChatMode.Party;
-                            TextBoxControl.Text = $"{index} ";
-                        }
-                    }
-                    else if (TextBoxControl.Text.Length == 2 && TextBoxControl.Text[1] == ' ')
-                    {
-                        switch (TextBoxControl.Text[0])
-                        {
-                            case ':':
-                                Mode = ChatMode.Emote;
-                                break;
-                            case ';':
-                                Mode = ChatMode.Whisper;
-                                break;
-
-                            case '!':
-                                Mode = ChatMode.Yell;
-                                break;
-                        }
+                        case ':' when TextBoxControl.Text.Length > 1 && TextBoxControl.Text[1] == ' ':
+                            Mode = ChatMode.Emote;
+                            break;
+                        case ';' when TextBoxControl.Text.Length > 1 && TextBoxControl.Text[1] == ' ':
+                            Mode = ChatMode.Whisper;
+                            break;
+                        case '!' when TextBoxControl.Text.Length > 1 && TextBoxControl.Text[1] == ' ':
+                            Mode = ChatMode.Yell;
+                            break;
                     }
                 }
             }

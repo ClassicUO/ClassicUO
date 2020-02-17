@@ -41,7 +41,6 @@ namespace ClassicUO
         public static string ClientPath { get; private set; }
         public static bool IsUOPInstallation { get; private set; }
         public static bool UseUOPGumps { get; set; }
-        public static ushort GraphicMask { get; private set; }
         public static GameController Game { get; private set; }
 
 
@@ -112,7 +111,6 @@ namespace ClassicUO
             Version = clientVersion;
             ClientPath = clientPath;
             IsUOPInstallation = Version >= ClientVersion.CV_70240;
-            GraphicMask = IsUOPInstallation ? (ushort) 0xFFFF : (ushort) 0x3FFF;
             Protocol = ClientFlags.CF_T2A;
 
             if (Version >= ClientVersion.CV_200)

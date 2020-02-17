@@ -147,7 +147,7 @@ namespace ClassicUO.Game.Managers
         {
             SetTargeting(CursorTarget.MultiPlacement, deedSerial, TargetType.Neutral);
 
-            if (model != 0)
+            //if (model != 0)
                 MultiTargetInfo = new MultiTargetInfo(model, x, y, z, hue);
         }
 
@@ -239,14 +239,14 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void Target(ushort graphic, ushort x, ushort y, short z)
+        public static void Target(ushort graphic, ushort x, ushort y, short z, bool wet = false)
         {
             if (!IsTargeting)
                 return;
 
             if (graphic == 0)
             {
-                if (TargeringType != TargetType.Neutral)
+                if (TargeringType != TargetType.Neutral && !wet)
                     return;
             }
             else

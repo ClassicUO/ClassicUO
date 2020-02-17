@@ -174,7 +174,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (gg == null)
             {
-                if (UIManager.GetGumpCachePosition(LocalSerial, out Point location) && item.Serial == World.Player.Equipment[(int) Layer.Backpack])
+                if (UIManager.GetGumpCachePosition(LocalSerial, out Point location))
                     Location = location;
                 else
                 {
@@ -189,6 +189,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 SetPositionTopRight();
                                 break;
                             case 2:
+                            case 3:
                                 SetPositionByLastDragged();
                                 break;
                         }
@@ -219,6 +220,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_data.OpenSound != 0)
                 Client.Game.Scene.Audio.PlaySound(_data.OpenSound);
+
+            UIManager.RemovePosition(LocalSerial);
         }
 
         private void HitBoxOnMouseUp(object sender, MouseEventArgs e)
@@ -486,7 +489,7 @@ namespace ClassicUO.Game.UI.Gumps
                 item.Items.Added -= ItemsOnAdded;
                 item.Items.Removed -= ItemsOnRemoved;
 
-                if (World.Player != null && item == World.Player.Equipment[(int) Layer.Backpack]) UIManager.SavePosition(item, Location);
+                if (World.Player != null && (ProfileManager.Current?.OverrideContainerLocationSetting == 3)) UIManager.SavePosition(item, Location);
 
                 foreach (Item child in item.Items)
                 {
@@ -503,7 +506,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
-            if (ProfileManager.Current.OverrideContainerLocation && ProfileManager.Current.OverrideContainerLocationSetting == 2)
+            if (ProfileManager.Current.OverrideContainerLocation && ProfileManager.Current.OverrideContainerLocationSetting >= 2)
             {
                 Point gumpCenter = new Point(X + (Width >> 1), Y + (Height >> 1));
                 ProfileManager.Current.OverrideContainerLocationPosition = gumpCenter;

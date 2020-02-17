@@ -103,9 +103,13 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return;
 
+            if (SerialHelper.IsItem(Serial))
+            {
+                UIManager.GetGump<Gump>(Serial)?.Dispose();
+            }
+
             base.Destroy();
             
-            UIManager.GetGump<Gump>(Serial)?.Dispose();
             //_pool.Enqueue(this);
         }
 
@@ -274,6 +278,8 @@ namespace ClassicUO.Game.GameObjects
 
             if (World.HouseManager.EntityIntoHouse(Serial, World.Player))
                 Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+
+            BoatMovingManager.ClearSteps(Serial);
         }
 
         public void CheckGraphicChange(sbyte animIndex = 0)
@@ -807,6 +813,9 @@ namespace ClassicUO.Game.GameObjects
 
                 x = (int)(x / scale);
                 y = (int)(y / scale);
+
+                x += (int) Offset.X;
+                y += (int) (Offset.Y - Offset.Z);
 
                 for (; last != null; last = last.ListLeft)
                 {

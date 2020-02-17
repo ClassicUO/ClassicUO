@@ -68,7 +68,7 @@ namespace ClassicUO.Game.Scenes
         private Weather _weather;
 
 
-        public GameScene() : base((int) SceneID.Game,
+        public GameScene() : base((int) SceneType.Game,
             true,
             !ProfileManager.Current.RestoreLastGameSize,
             true)
@@ -131,6 +131,15 @@ namespace ClassicUO.Game.Scenes
                     Y = ProfileManager.Current.DebugGumpPosition.Y
                 });
                 //Engine.DropFpsMinMaxValues();
+            }
+
+            if (ProfileManager.Current.ShowNetworkStats)
+            {
+                UIManager.Add(new NetworkStatsGump
+                {
+                    X = ProfileManager.Current.NetworkStatsPosition.X,
+                    Y = ProfileManager.Current.NetworkStatsPosition.Y
+                });
             }
 
             ItemHold.Clear();
@@ -572,6 +581,7 @@ namespace ClassicUO.Game.Scenes
 
 
             World.Update(totalMS, frameMS);
+            BoatMovingManager.Update();
             Pathfinder.ProcessAutoWalk();
             DelayedObjectClickManager.Update();
 

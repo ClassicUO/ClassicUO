@@ -142,6 +142,9 @@ namespace ClassicUO.Game.GameObjects
             if (IsFromTarget)
                 HueVector.Z = 0.5f;
 
+            posX += (int) Offset.X;
+            posY += (int) (Offset.Y + Offset.Z);
+
             base.Draw(batcher, posX, posY);
 
             if (ItemData.IsLight)

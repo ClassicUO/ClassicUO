@@ -185,7 +185,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool EnableDragSelect { get; set; }
         [JsonProperty] public int DragSelectModifierKey { get; set; } // 0 = none, 1 = control, 2 = shift
         [JsonProperty] public bool OverrideContainerLocation { get; set; }
-        [JsonProperty] public int OverrideContainerLocationSetting { get; set; } // 0 = container position, 1 = top right of screen, 2 = last dragged position
+        [JsonProperty] public int OverrideContainerLocationSetting { get; set; } // 0 = container position, 1 = top right of screen, 2 = last dragged position, 3 = remember every container
         [JsonProperty] public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
         [JsonProperty] public bool DragSelectHumanoidsOnly { get; set; }
         [JsonProperty] public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
@@ -220,6 +220,9 @@ namespace ClassicUO.Configuration
         [JsonProperty] public int AuraUnderFeetType { get; set; } // 0 = NO, 1 = in warmode, 2 = ctrl+shift, 3 = always
         [JsonProperty] public bool AuraOnMouse { get; set; } = true;
         [JsonProperty] public bool ShowNetworkStats { get; set; }
+        [JsonProperty] public bool NetworkStatsMinimized { get; set; } = false;
+        [JsonProperty] public Point NetworkStatsPosition { get; set; } = new Point(25, 50);
+
         [JsonProperty] public bool PartyAura { get; set; }
 
         [JsonProperty] public bool UseXBR { get; set; } = true;
