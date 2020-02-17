@@ -171,5 +171,34 @@ namespace ClassicUO.Network
                 Position += (length - value.Length - 1) * 2;
             }
         }
+
+
+        public void WriteUTF8(string value)
+        {
+            if (value == null)
+                value = string.Empty;
+
+            byte[] buffer = System.Text.Encoding.UTF8.GetBytes(value);
+            EnsureSize(buffer.Length + 2);
+            for (int i = 0; i < buffer.Length; i++)
+                WriteByte(buffer[i]);
+            WriteUShort(0);
+        }
+
+        public void WriteUTF8(string value, int length)
+        {
+            if (value == null)
+                value = string.Empty;
+
+            byte[] buffer = System.Text.Encoding.UTF8.GetBytes(value);
+            EnsureSize(length);
+            for (int i = 0; i < length; i++)
+            {
+                if(i < buffer.Length)
+                    WriteByte(buffer[i]);
+                else
+                    WriteByte(0);//padding with zero
+            }
+        }
     }
 }
