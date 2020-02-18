@@ -29,6 +29,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
@@ -530,7 +531,7 @@ namespace ClassicUO.IO.Resources
             }
 
             if (texture == null || texture.IsDisposed)
-                texture = new FontTexture(width, height, linesCount, new List<WebLinkRect>());
+                texture = new FontTexture(width, height, linesCount, new RawList<WebLinkRect>());
             else
             {
                 texture.Links.Clear();
@@ -1206,7 +1207,7 @@ namespace ClassicUO.IO.Resources
             int linkStartX = 0;
             int linkStartY = 0;
             int linesCount = 0;
-            List<WebLinkRect> links = new List<WebLinkRect>();
+            RawList<WebLinkRect> links = new RawList<WebLinkRect>();
 
             while (ptr != null)
             {
@@ -1287,10 +1288,7 @@ namespace ClassicUO.IO.Resources
                         WebLinkRect wlr = new WebLinkRect
                         {
                             LinkID = oldLink,
-                            StartX = linkStartX,
-                            StartY = linkStartY,
-                            EndX = w - ofsX,
-                            EndY = linkHeight
+                            Bounds = new Rectangle(linkStartX, linkStartY, w - ofsX, linkHeight)
                         };
                         links.Add(wlr);
                         oldLink = 0;
@@ -3198,10 +3196,10 @@ namespace ClassicUO.IO.Resources
     internal struct WebLinkRect
     {
         public ushort LinkID;
-        public int StartX, StartY, EndX, EndY;
+        public Rectangle Bounds;
     }
 
-    internal struct WebLink
+    internal class WebLink
     {
         public bool IsVisited;
         public string Link;

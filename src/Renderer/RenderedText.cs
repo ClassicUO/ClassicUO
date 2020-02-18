@@ -23,7 +23,7 @@ using System;
 using System.Collections.Generic;
 using ClassicUO.Data;
 using ClassicUO.IO.Resources;
-
+using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer
@@ -123,7 +123,7 @@ namespace ClassicUO.Renderer
 
         public bool RecalculateWidthByInfo { get; set; }
 
-        public List<WebLinkRect> Links { get; set; } = new List<WebLinkRect>();
+        public RawList<WebLinkRect> Links { get; set; } = new RawList<WebLinkRect>();
 
         public ushort Hue { get; set; }
 
