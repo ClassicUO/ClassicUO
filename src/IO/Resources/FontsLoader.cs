@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -2398,7 +2399,10 @@ namespace ClassicUO.IO.Resources
                     {
                         start = 3;
                     }
-                    color = Convert.ToUInt32(str.Substring(start), 16);
+
+                    uint.TryParse(str.Substring(start), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out color);
+
+                    //color = Convert.ToUInt32(str.Substring(start), 16);
 
                     byte* clrbuf = (byte*) &color;
                     color = (uint) ((clrbuf[0] << 24) | (clrbuf[1] << 16) | (clrbuf[2] << 8) | 0xFF);
