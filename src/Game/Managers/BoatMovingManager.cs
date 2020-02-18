@@ -213,6 +213,9 @@ namespace ClassicUO.Game.Managers
                             break;
                     }
 
+                    Console.WriteLine("Speed: {0}, delay: {1}", step.Speed, maxDelay);
+
+
                     int delay = (int) Time.Ticks - (int) item.LastStepTime;
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
@@ -322,14 +325,7 @@ namespace ClassicUO.Game.Managers
                     {                    
                         entity.X = (ushort) (x - it.X);
                         entity.Y = (ushort) (y - it.Y);
-                        entity.Z = (sbyte) (z - it.Z);
-
-                        if (entity == World.Player)
-                        {
-                            World.RangeSize.X = entity.X;
-                            World.RangeSize.Y = entity.Y;
-                        }
-
+                        entity.Z = (sbyte) (z - it.Z);                       
                         entity.UpdateScreenPosition();
 
                         entity.Offset.X = 0;

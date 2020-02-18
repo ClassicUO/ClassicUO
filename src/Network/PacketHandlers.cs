@@ -4307,6 +4307,13 @@ namespace ClassicUO.Network
                 ushort cy = p.ReadUShort();
                 ushort cz = p.ReadUShort();
 
+                if (cSerial == World.Player)
+                {
+                    World.RangeSize.X = cx;
+                    World.RangeSize.Y = cy;
+                }
+
+
                 BoatMovingManager.PushItemToList(
                     serial,
                     cSerial, 
