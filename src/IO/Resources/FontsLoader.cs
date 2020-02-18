@@ -471,8 +471,8 @@ namespace ClassicUO.IO.Resources
                     {
                         w = width - 10 - ptr.Width;
 
-                        if (w == 0)
-                            w = 0;
+                        if (w < 0)
+                            w = width;
 
                         break;
                     }
@@ -1945,7 +1945,7 @@ namespace ClassicUO.IO.Resources
                     case HTML_TAG_TYPE.HTT_U:
                     case HTML_TAG_TYPE.HTT_P:
                         info.Flags |= current.Flags;
-
+                        info.Align = current.Align;
                         break;
 
                     case HTML_TAG_TYPE.HTT_A:
@@ -2175,6 +2175,7 @@ namespace ClassicUO.IO.Resources
                             case HTML_TAG_TYPE.HTT_BASEFONT:
                             case HTML_TAG_TYPE.HTT_A:
                             case HTML_TAG_TYPE.HTT_DIV:
+                            case HTML_TAG_TYPE.HTT_P:
                                 cmdLen = i - j;
                                 string content = str.Substring(j, cmdLen);
 
@@ -2311,6 +2312,7 @@ namespace ClassicUO.IO.Resources
 
                         break;
 
+                    case HTML_TAG_TYPE.HTT_P:
                     case HTML_TAG_TYPE.HTT_DIV:
 
                         if (str == "align")
