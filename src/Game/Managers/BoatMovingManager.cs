@@ -33,6 +33,9 @@ namespace ClassicUO.Game.Managers
         private static readonly List<uint> _toRemove = new List<uint>();
         private static readonly Dictionary<uint, RawList<ItemInside>> _items = new Dictionary<uint, RawList<ItemInside>>();
 
+        private const int SLOW_INTERVAL = 1000;
+        private const int NORMAL_INTERVAL = 500;
+        private const int FAST_INTERVAL = 250;
 
         public static void AddStep(uint serial, byte speed, Direction movingDir, Direction facingDir, ushort x, ushort y, sbyte z)
         {
@@ -192,7 +195,24 @@ namespace ClassicUO.Game.Managers
                         break;
                     }
 
-                    int maxDelay = step.Speed <= 2 ? 1000 : 250;
+                    bool drift = step.MovingDir != step.FacingDir;
+
+                    int maxDelay;
+
+                    switch (step.Speed)
+                    {
+                        case 0x02:
+                            maxDelay = SLOW_INTERVAL;
+                            break;
+                        default:
+                        case 0x03:
+                            maxDelay = NORMAL_INTERVAL;
+                            break;
+                        case 0x04:
+                            maxDelay = FAST_INTERVAL;
+                            break;
+                    }
+
                     int delay = (int) Time.Ticks - (int) item.LastStepTime;
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
