@@ -28,6 +28,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -41,7 +42,7 @@ namespace ClassicUO.Game.GameObjects
 
         static Multi()
         {
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 5000; i++)
                 _pool.Enqueue(new Multi());
         }
 
@@ -92,6 +93,7 @@ namespace ClassicUO.Game.GameObjects
                 m.MultiOffsetX = m.MultiOffsetY = m.MultiOffsetZ = 0;
                 m.IsCustom = false;
                 m.State = 0;
+                m.Offset = Vector3.Zero;
 
                 return m;
             }

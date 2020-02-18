@@ -34,7 +34,7 @@ namespace ClassicUO.Game.GameObjects
         private static readonly Queue<Land> _pool = new Queue<Land>();
         static Land()
         {
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 5000; i++)
                 _pool.Enqueue(new Land());
         }
 

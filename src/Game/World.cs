@@ -286,7 +286,7 @@ namespace ClassicUO.Game
             if (mob == null /*|| mob.IsDestroyed*/)
             {
                 //Mobiles.Remove(serial);
-                mob = new Mobile(serial);
+                mob = Mobile.Create(serial);
             }
 
             return mob;
