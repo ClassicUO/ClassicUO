@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Managers
     internal static class UIManager
     {
         private static readonly TextFileParser _parser = new TextFileParser(string.Empty, new[] { ' ' }, new char[] { }, new[] { '{', '}' });
-        private static readonly TextFileParser _cmdparser = new TextFileParser(string.Empty, new[] { ' ' }, new char[] { }, new char[] { });
+        private static readonly TextFileParser _cmdparser = new TextFileParser(string.Empty, new[] { ' ' }, new char[] { }, new char[] { '@', '@' });
         private static readonly Dictionary<uint, Point> _gumpPositionCache = new Dictionary<uint, Point>();
         private static readonly Control[] _mouseDownControls = new Control[5];
 
@@ -621,11 +621,9 @@ namespace ClassicUO.Game.Managers
                         {
                             string text = ClilocLoader.Instance.GetString(int.Parse(gparams[1]));
 
-                            if (gparams.Count > 2 && gparams[2].Length != 0 && gparams[2][0] == '@')
+                            if (gparams.Count > 2 && gparams[2].Length != 0)
                             {
                                 string args = gparams[2];
-                                //Convert tooltip args format to standard cliloc format
-                                args = args.Trim('@').Replace('@', '\t');
 
                                 if (args.Length > 1)
                                     text = ClilocLoader.Instance.Translate(text, args);
