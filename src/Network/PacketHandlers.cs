@@ -1348,8 +1348,11 @@ namespace ClassicUO.Network
                                                                     World.Player.Y,
                                                                     enemy.X,
                                                                     enemy.Y);
+                    int x = World.Player.X;
+                    int y = World.Player.Y;
+                    sbyte z = World.Player.Z;
 
-                    if (World.Player.Direction != pdir)
+                    if (Pathfinder.CanWalk(ref pdir, ref x, ref y, ref z) && World.Player.Direction != pdir)
                         World.Player.Walk(pdir, false);
                 }
             }
