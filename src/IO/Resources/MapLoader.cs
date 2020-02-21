@@ -25,6 +25,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using ClassicUO.Data;
+using ClassicUO.Game;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 
@@ -163,6 +164,13 @@ namespace ClassicUO.IO.Resources
                 if (_filesMap[0].Length / mapblocksize == 393216 || Client.Version < ClientVersion.CV_4011D)
                     MapsDefaultSize[0, 0] = MapsDefaultSize[1, 0] = 6144;
 
+                //if (_filesMap[1] == null || _filesMap[1].StartAddress == IntPtr.Zero)
+                //{
+                //    _filesMap[1] = _filesMap[0];
+                //    _filesStatics[1] = _filesStatics[0];
+                //    _filesIdxStatics[1] = _filesIdxStatics[0];
+                //}
+
                 //for (int i = 0; i < MAPS_COUNT; i++)
                 Parallel.For(0, MAPS_COUNT, i =>
                 {
@@ -170,6 +178,24 @@ namespace ClassicUO.IO.Resources
                     MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
                     LoadMap(i);
                 });
+
+                //if (_filesMap[1] == null)
+                //{
+                //    BlockData[1] = new IndexMap[BlockData[0].Length];
+
+                //    for (int i = 0; i < BlockData[0].Length; i++)
+                //    {
+                //        ref var listOrig = ref BlockData[0][i];
+                //        ref var list = ref BlockData[1][i];
+
+                //        list.MapAddress = listOrig.MapAddress;
+                //        list.OriginalMapAddress = listOrig.OriginalMapAddress;
+                //        list.OriginalStaticAddress = listOrig.OriginalStaticAddress;
+                //        list.OriginalStaticCount = listOrig.OriginalStaticCount;
+                //        list.StaticAddress = listOrig.StaticAddress;
+                //        list.StaticCount = listOrig.StaticCount;
+                //    }
+                //}
 
                 Entries = null;
             });
@@ -301,7 +327,11 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < PatchesCount; i++)
             {
-                if (_filesMap[i] == null || _filesMap[i].StartAddress == IntPtr.Zero)
+                int idx = i;
+
+                SanitizeMapIndex(ref idx);
+
+                if (_filesMap[idx] == null || _filesMap[idx].StartAddress == IntPtr.Zero)
                 {
                     reader.Skip(8);
 
@@ -337,7 +367,7 @@ namespace ClassicUO.IO.Resources
 
                         if (blockIndex < maxBlockCount)
                         {
-                            BlockData[i][blockIndex].MapAddress = (ulong) dif.PositionAddress;
+                            BlockData[idx][blockIndex].MapAddress = (ulong) dif.PositionAddress;
                             result = true;
                         }
 
@@ -387,8 +417,8 @@ namespace ClassicUO.IO.Resources
                                 }
                             }
 
-                            BlockData[i][blockIndex].StaticAddress = realStaticAddress;
-                            BlockData[i][blockIndex].StaticCount = (uint) realStaticCount;
+                            BlockData[idx][blockIndex].StaticAddress = realStaticAddress;
+                            BlockData[idx][blockIndex].StaticCount = (uint) realStaticCount;
 
                             result = true;
                         }

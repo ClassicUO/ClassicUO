@@ -30,6 +30,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI;
 using ClassicUO.Game.UI.Controls;
@@ -3304,6 +3305,35 @@ namespace ClassicUO.Network
 
                     if (MapLoader.Instance.ApplyPatches(p))
                     {
+                        //List<GameObject> list = new List<GameObject>();
+
+                        //foreach (int i in World.Map.GetUsedChunks())
+                        //{
+                        //    Chunk chunk = World.Map.Chunks[i];
+
+                        //    for (int xx = 0; xx < 8; xx++)
+                        //    {
+                        //        for (int yy = 0; yy < 8; yy++)
+                        //        {
+                        //            Tile tile = chunk.Tiles[xx, yy];
+
+                        //            for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+                        //            {
+                        //                if (!(obj is Static) && !(obj is Land))
+                        //                {
+                        //                    list.Add(obj);
+                        //                }
+                        //            }
+                        //        }
+                        //    }
+                        //}
+
+
+                        int map = World.MapIndex;
+                        World.MapIndex = -1;
+                        World.MapIndex = map;
+
+
                         Log.Trace("Map Patches applied.");
                     }
 
