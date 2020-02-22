@@ -164,12 +164,13 @@ namespace ClassicUO.IO.Resources
                 if (_filesMap[0].Length / mapblocksize == 393216 || Client.Version < ClientVersion.CV_4011D)
                     MapsDefaultSize[0, 0] = MapsDefaultSize[1, 0] = 6144;
 
-                //if (_filesMap[1] == null || _filesMap[1].StartAddress == IntPtr.Zero)
-                //{
-                //    _filesMap[1] = _filesMap[0];
-                //    _filesStatics[1] = _filesStatics[0];
-                //    _filesIdxStatics[1] = _filesIdxStatics[0];
-                //}
+                // This is an hack to patch correctly all maps when you have to fake map1
+                if (_filesMap[1] == null || _filesMap[1].StartAddress == IntPtr.Zero)
+                {
+                    _filesMap[1] = _filesMap[0];
+                    _filesStatics[1] = _filesStatics[0];
+                    _filesIdxStatics[1] = _filesIdxStatics[0];
+                }
 
                 //for (int i = 0; i < MAPS_COUNT; i++)
                 Parallel.For(0, MAPS_COUNT, i =>
@@ -178,24 +179,6 @@ namespace ClassicUO.IO.Resources
                     MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
                     LoadMap(i);
                 });
-
-                //if (_filesMap[1] == null)
-                //{
-                //    BlockData[1] = new IndexMap[BlockData[0].Length];
-
-                //    for (int i = 0; i < BlockData[0].Length; i++)
-                //    {
-                //        ref var listOrig = ref BlockData[0][i];
-                //        ref var list = ref BlockData[1][i];
-
-                //        list.MapAddress = listOrig.MapAddress;
-                //        list.OriginalMapAddress = listOrig.OriginalMapAddress;
-                //        list.OriginalStaticAddress = listOrig.OriginalStaticAddress;
-                //        list.OriginalStaticCount = listOrig.OriginalStaticCount;
-                //        list.StaticAddress = listOrig.StaticAddress;
-                //        list.StaticCount = listOrig.StaticCount;
-                //    }
-                //}
 
                 Entries = null;
             });
@@ -329,7 +312,7 @@ namespace ClassicUO.IO.Resources
             {
                 int idx = i;
 
-                SanitizeMapIndex(ref idx);
+                //SanitizeMapIndex(ref idx);
 
                 if (_filesMap[idx] == null || _filesMap[idx].StartAddress == IntPtr.Zero)
                 {
