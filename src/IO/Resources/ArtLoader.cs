@@ -463,11 +463,7 @@ namespace ClassicUO.IO.Resources
 
                 for (int j = start; j < end; j++)
                 {
-                    ushort val = _file.ReadUShort();
-
-                    if (val != 0)
-                        val = (ushort) (0x8000 | val);
-                    data[pos++] = val;
+                    data[pos++] = (ushort) (0x8000 | _file.ReadUShort());
                 }
             }
 
@@ -478,11 +474,7 @@ namespace ClassicUO.IO.Resources
 
                 for (int j = i; j < end; j++)
                 {
-                    ushort val = _file.ReadUShort();
-
-                    if (val != 0)
-                        val = (ushort) (0x8000 | val);
-                    data[pos++] = val;
+                    data[pos++] = (ushort) (0x8000 | _file.ReadUShort());
                 }
             }
 

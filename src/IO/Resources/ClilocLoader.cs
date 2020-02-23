@@ -141,7 +141,8 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            for (int i = 0; i < arguments.Count; i++)
+            int index = 0;
+            while (true)
             {
                 int pos = baseCliloc.IndexOf('~');
 
@@ -153,18 +154,44 @@ namespace ClassicUO.IO.Resources
                 if (pos2 == -1)
                     break;
 
-                string a = arguments[i];
+                string a = index >= arguments.Count ? string.Empty : arguments[index];
 
                 if (a.Length > 1 && a[0] == '#')
                 {
                     if (int.TryParse(a.Substring(1), out int id1))
-                        arguments[i] = GetString(id1) ?? string.Empty;
+                        arguments[index] = GetString(id1) ?? string.Empty;
                     else
-                        arguments[i] = a;
+                        arguments[index] = a;
                 }
 
-                baseCliloc = baseCliloc.Remove(pos, pos2 - pos + 1).Insert(pos, arguments[i]);
+                baseCliloc = baseCliloc.Remove(pos, pos2 - pos + 1).Insert(pos, index >= arguments.Count ? string.Empty : arguments[index]);
+                index++;
             }
+
+            //for (int i = 0; i < arguments.Count; i++)
+            //{
+            //    int pos = baseCliloc.IndexOf('~');
+
+            //    if (pos == -1)
+            //        break;
+
+            //    int pos2 = baseCliloc.IndexOf('~', pos + 1);
+
+            //    if (pos2 == -1)
+            //        break;
+
+            //    string a = arguments[i];
+
+            //    if (a.Length > 1 && a[0] == '#')
+            //    {
+            //        if (int.TryParse(a.Substring(1), out int id1))
+            //            arguments[i] = GetString(id1) ?? string.Empty;
+            //        else
+            //            arguments[i] = a;
+            //    }
+
+            //    baseCliloc = baseCliloc.Remove(pos, pos2 - pos + 1).Insert(pos, arguments[i]);
+            //}
 
             if (capitalize)
                 baseCliloc = StringHelper.CapitalizeAllWords(baseCliloc);

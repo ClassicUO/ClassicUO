@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Configuration;
@@ -45,6 +46,84 @@ namespace ClassicUO.Game.GameObjects
             LastAnimationChangeTime = Time.Ticks;
             CalculateRandomIdleTime();
         }
+
+
+        private static readonly Queue<Mobile> _pool = new Queue<Mobile>();
+
+        static Mobile()
+        {
+            for (int i = 0; i < 1000; i++)
+                _pool.Enqueue(new Mobile(0));
+        }
+
+        public static Mobile Create(uint serial)
+        {
+            if (_pool.Count != 0)
+            {
+                Mobile mobile = _pool.Dequeue();
+                mobile.IsDestroyed = false;
+                mobile.Graphic = 0;
+                mobile.Serial = serial;
+                mobile.Steps.Clear();
+                mobile.Offset = Vector3.Zero;
+                mobile.SpeedMode = CharacterSpeedType.Normal;
+                mobile.DeathScreenTimer = 0;
+                mobile._isMale = false;
+                mobile.Race = 0;
+                mobile.Hits = 0;
+                mobile.HitsMax = 0;
+                mobile.Mana = 0;
+                mobile.ManaMax = 0;
+                mobile.Stamina = 0;
+                mobile.StaminaMax = 0;
+                mobile.NotorietyFlag = 0;
+                mobile.IsRenamable = false;
+                mobile.Flags = 0;
+                mobile.InWarMode = false;
+                mobile.Equipment = null;
+                mobile.IsRunning = false;
+                mobile.AnimationInterval = 0;
+                mobile.AnimationFrameCount = 0;
+                mobile.AnimationRepeatMode = 1;
+                mobile.AnimationRepeat = false;
+                mobile.AnimationFromServer = false;
+                mobile.AnimationDirection = false;
+                mobile.LastStepSoundTime = 0;
+                mobile.StepSoundOffset = 0;
+                mobile.Title = string.Empty;
+                mobile.AnimationGroup = 0xFF;
+                mobile._isDead = false;
+                mobile._isSA_Poisoned = false;
+                mobile._lastAnimationIdleDelay = 0;
+                mobile.X = 0;
+                mobile.Y = 0;
+                mobile.Z = 0;
+                mobile.Direction = 0;
+                mobile.LastAnimationChangeTime = Time.Ticks;
+                mobile.TextContainer?.Clear();
+                mobile.HitsPercentage = 0;
+                mobile.HitsTexture?.Destroy();
+                mobile.HitsTexture = null;
+                mobile.IsFlipped = false;
+                mobile.Bounds = Rectangle.Empty;
+                mobile.FrameInfo = Rectangle.Empty;
+                mobile.UseObjectHandles = false;
+                mobile.ClosedObjectHandles = false;
+                mobile.ObjectHandlesOpened = false;
+                mobile.AlphaHue = 0;
+                mobile.DrawTransparent = false;
+                mobile.AllowedToDraw = true;
+                mobile.Texture = null;
+
+                if (mobile.Items == null || mobile.Items.Count != 0)
+                    mobile.Items = new EntityCollection<Item>();
+
+                mobile.CalculateRandomIdleTime();
+            }
+
+            return new Mobile(serial);
+        }
+
 
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);
 
@@ -972,6 +1051,9 @@ namespace ClassicUO.Game.GameObjects
             }
 
             base.Destroy();
+
+            if (!(this is PlayerMobile))
+                _pool.Enqueue(this);
         }
 
         internal struct Step

@@ -30,6 +30,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI;
 using ClassicUO.Game.UI.Controls;
@@ -1348,8 +1349,11 @@ namespace ClassicUO.Network
                                                                     World.Player.Y,
                                                                     enemy.X,
                                                                     enemy.Y);
+                    int x = World.Player.X;
+                    int y = World.Player.Y;
+                    sbyte z = World.Player.Z;
 
-                    if (World.Player.Direction != pdir)
+                    if (Pathfinder.CanWalk(ref pdir, ref x, ref y, ref z) && World.Player.Direction != pdir)
                         World.Player.Walk(pdir, false);
                 }
             }
@@ -3301,6 +3305,35 @@ namespace ClassicUO.Network
 
                     if (MapLoader.Instance.ApplyPatches(p))
                     {
+                        //List<GameObject> list = new List<GameObject>();
+
+                        //foreach (int i in World.Map.GetUsedChunks())
+                        //{
+                        //    Chunk chunk = World.Map.Chunks[i];
+
+                        //    for (int xx = 0; xx < 8; xx++)
+                        //    {
+                        //        for (int yy = 0; yy < 8; yy++)
+                        //        {
+                        //            Tile tile = chunk.Tiles[xx, yy];
+
+                        //            for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+                        //            {
+                        //                if (!(obj is Static) && !(obj is Land))
+                        //                {
+                        //                    list.Add(obj);
+                        //                }
+                        //            }
+                        //        }
+                        //    }
+                        //}
+
+
+                        int map = World.MapIndex;
+                        World.MapIndex = -1;
+                        World.MapIndex = map;
+
+
                         Log.Trace("Map Patches applied.");
                     }
 
@@ -4306,6 +4339,13 @@ namespace ClassicUO.Network
                 ushort cx = p.ReadUShort();
                 ushort cy = p.ReadUShort();
                 ushort cz = p.ReadUShort();
+
+                if (cSerial == World.Player)
+                {
+                    World.RangeSize.X = cx;
+                    World.RangeSize.Y = cy;
+                }
+
 
                 BoatMovingManager.PushItemToList(
                     serial,

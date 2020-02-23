@@ -20,7 +20,7 @@
 #endregion
 
 using System;
-
+using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -41,7 +41,13 @@ namespace ClassicUO.Game.GameObjects
         private bool _isMulti;
 
 
-        //private static readonly Queue<Item> _pool = new Queue<Item>();
+        private static readonly Queue<Item> _pool = new Queue<Item>();
+
+        static Item()
+        {
+            for (int i = 0; i < 5000; i++)
+                _pool.Enqueue(new Item(0));
+        }
 
         public Item(uint serial) : base(serial)
         {
@@ -50,50 +56,62 @@ namespace ClassicUO.Game.GameObjects
 
         public static Item Create(uint serial)
         {
-            //if (_pool.Count != 0)
-            //{
-            //    var i = _pool.Dequeue();
-            //    i.IsDestroyed = false;
-            //    i.Graphic = 0;
-            //    i.uint = serial;
-            //    i._amount = 0;
-            //    i._animDataFrame = default;
-            //    i._animSpeed = 0;
-            //    i._container = 0;
-            //    i._isMulti = false;
-            //    i._layer = 0;
-            //    i._price = 0;
-            //    i._spellsBitFiled = 0;
-            //    i.UsedLayer = false;
-            //    i._originalGraphic = 0;
-            //    i._displayedGraphic = null;
+            if (_pool.Count != 0)
+            {
+                var i = _pool.Dequeue();
+                i.IsDestroyed = false;
+                i.Graphic = 0;
+                i.Serial = serial;
+                i.Amount = 0;
+                i._animSpeed = 0;
+                i.Container = 0;
+                i._isMulti = false;
+                i.Layer = 0;
+                i.Price = 0;
+                i.UsedLayer = false;
+                i._originalGraphic = 0;
+                i._displayedGraphic = null;
+                i.X = 0;
+                i.Y = 0;
+                i.Z = 0;
 
-            //    i.LightID = 0;
-            //    i.MultiDistanceBonus = 0;
-            //    i.BookType = SpellBookType.Unknown;
-            //    i.Flags = 0;
-            //    i.WantUpdateMulti = true;
-            //    i._force = false;
-            //    i.MultiInfo = null;
-            //    i.MultiGraphic = 0;
-            //    i.CharacterIsBehindFoliage = false;
+                i.LightID = 0;
+                i.MultiDistanceBonus = 0;
+                i.Flags = 0;
+                i.WantUpdateMulti = true;
+                i._force = false;
+                i.MultiInfo = null;
+                i.MultiGraphic = 0;
 
-            //    i.AlphaHue = 0;
-            //    i.Name = null;
-            //    i.Direction = 0;
-            //    i.Equipment = null;
-            //    i.LastAnimationChangeTime = 0;
-            //    i.Items = new EntityCollection<Item>();
-            //    i.IsClicked = false;
-            //    i.Properties.Clear();
-            //    i._delta = 0;
-            //    i.PropertiesHash = 0;
+                i.AlphaHue = 0;
+                i.Name = null;
+                i.Direction = 0;
+                i.Equipment = null;
+                i.AnimIndex = 0;
+                i.Hits = 0;
+                i.HitsMax = 0;
+                i.LastStepTime = 0;
+                i.LastAnimationChangeTime = 0;
+                if (i.Items == null || i.Items.Count != 0)
+                    i.Items = new EntityCollection<Item>();
+                i.IsClicked = false;
+                i.IsDamageable = false;
+                i.Offset = Vector3.Zero;
 
-            //    i._itemData = null;
-                
+                i.TextContainer?.Clear();
+                i.IsFlipped = false;
+                i.Bounds = Rectangle.Empty;
+                i.FrameInfo = Rectangle.Empty;
+                i.UseObjectHandles = false;
+                i.ClosedObjectHandles = false;
+                i.ObjectHandlesOpened = false;
+                i.AlphaHue = 0;
+                i.DrawTransparent = false;
+                i.AllowedToDraw = true;
+                i.Texture = null;
 
-            //    return i;
-            //}
+                return i;
+            }
 
             return new Item(serial);
         }
@@ -110,7 +128,7 @@ namespace ClassicUO.Game.GameObjects
 
             base.Destroy();
             
-            //_pool.Enqueue(this);
+            _pool.Enqueue(this);
         }
 
         public uint Price;

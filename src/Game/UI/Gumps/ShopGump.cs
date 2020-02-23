@@ -410,6 +410,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             private static AnimationDirection GetMobileAnimationDirection(ushort graphic, ref ushort hue, byte dirIndex)
             {
+                if (graphic >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                {
+                    return null;
+                }
+
                 byte group = GetAnimGroup(graphic);
                 var index = AnimationsLoader.Instance.DataIndex[graphic];
 
@@ -456,7 +461,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Add(control = new TextureControl
                     {
-                        Texture = direction.FrameCount != 0 ? direction.Frames[0] : null,
+                        Texture = direction != null ? direction.FrameCount != 0 ? direction.Frames[0] : null : null,
                         X = 5,
                         Y = 5,
                         AcceptMouseInput = false,
@@ -572,7 +577,9 @@ namespace ClassicUO.Game.UI.Gumps
                 if (SerialHelper.IsMobile(LocalSerial))
                 {
                     ushort hue = Hue;
-                    GetMobileAnimationDirection(Graphic, ref hue, 1).LastAccessTime = Time.Ticks;
+                    var dir = GetMobileAnimationDirection(Graphic, ref hue, 1);
+                    if (dir != null)
+                        dir.LastAccessTime = Time.Ticks;
                 }
             }
         }

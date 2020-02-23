@@ -22,7 +22,7 @@
 using System.Collections.Generic;
 
 using ClassicUO.IO.Resources;
-
+using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -105,7 +105,7 @@ namespace ClassicUO.Renderer
 
     internal class FontTexture : UOTexture32
     {
-        public FontTexture(int width, int height, int linescount, List<WebLinkRect> links) : base(width, height)
+        public FontTexture(int width, int height, int linescount, RawList<WebLinkRect> links) : base(width, height)
         {
             LinesCount = linescount;
             Links = links;
@@ -113,7 +113,7 @@ namespace ClassicUO.Renderer
 
         public int LinesCount { get; set; }
 
-        public List<WebLinkRect> Links { get; }
+        public RawList<WebLinkRect> Links { get; }
     }
 
     internal class AnimationFrameTexture : UOTexture16

@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -29,6 +30,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
@@ -469,8 +471,8 @@ namespace ClassicUO.IO.Resources
                     {
                         w = width - 10 - ptr.Width;
 
-                        if (w == 0)
-                            w = 0;
+                        if (w < 0)
+                            w = width;
 
                         break;
                     }
@@ -530,7 +532,7 @@ namespace ClassicUO.IO.Resources
             }
 
             if (texture == null || texture.IsDisposed)
-                texture = new FontTexture(width, height, linesCount, new List<WebLinkRect>());
+                texture = new FontTexture(width, height, linesCount, new RawList<WebLinkRect>());
             else
             {
                 texture.Links.Clear();
@@ -1206,7 +1208,7 @@ namespace ClassicUO.IO.Resources
             int linkStartX = 0;
             int linkStartY = 0;
             int linesCount = 0;
-            List<WebLinkRect> links = new List<WebLinkRect>();
+            RawList<WebLinkRect> links = new RawList<WebLinkRect>();
 
             while (ptr != null)
             {
@@ -1287,10 +1289,7 @@ namespace ClassicUO.IO.Resources
                         WebLinkRect wlr = new WebLinkRect
                         {
                             LinkID = oldLink,
-                            StartX = linkStartX,
-                            StartY = linkStartY,
-                            EndX = w - ofsX,
-                            EndY = linkHeight
+                            Bounds = new Rectangle(linkStartX, linkStartY, w - ofsX, linkHeight)
                         };
                         links.Add(wlr);
                         oldLink = 0;
@@ -1946,7 +1945,7 @@ namespace ClassicUO.IO.Resources
                     case HTML_TAG_TYPE.HTT_U:
                     case HTML_TAG_TYPE.HTT_P:
                         info.Flags |= current.Flags;
-
+                        info.Align = current.Align;
                         break;
 
                     case HTML_TAG_TYPE.HTT_A:
@@ -2176,6 +2175,7 @@ namespace ClassicUO.IO.Resources
                             case HTML_TAG_TYPE.HTT_BASEFONT:
                             case HTML_TAG_TYPE.HTT_A:
                             case HTML_TAG_TYPE.HTT_DIV:
+                            case HTML_TAG_TYPE.HTT_P:
                                 cmdLen = i - j;
                                 string content = str.Substring(j, cmdLen);
 
@@ -2312,6 +2312,7 @@ namespace ClassicUO.IO.Resources
 
                         break;
 
+                    case HTML_TAG_TYPE.HTT_P:
                     case HTML_TAG_TYPE.HTT_DIV:
 
                         if (str == "align")
@@ -2400,7 +2401,10 @@ namespace ClassicUO.IO.Resources
                     {
                         start = 3;
                     }
-                    color = Convert.ToUInt32(str.Substring(start), 16);
+
+                    uint.TryParse(str.Substring(start), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out color);
+
+                    //color = Convert.ToUInt32(str.Substring(start), 16);
 
                     byte* clrbuf = (byte*) &color;
                     color = (uint) ((clrbuf[0] << 24) | (clrbuf[1] << 16) | (clrbuf[2] << 8) | 0xFF);
@@ -3198,10 +3202,10 @@ namespace ClassicUO.IO.Resources
     internal struct WebLinkRect
     {
         public ushort LinkID;
-        public int StartX, StartY, EndX, EndY;
+        public Rectangle Bounds;
     }
 
-    internal struct WebLink
+    internal class WebLink
     {
         public bool IsVisited;
         public string Link;

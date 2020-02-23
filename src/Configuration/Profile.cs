@@ -259,6 +259,7 @@ namespace ClassicUO.Configuration
 
         [JsonProperty] public bool ShowHouseContent { get; set; }
         [JsonProperty] public bool SaveHealthbars { get; set; }
+        [JsonProperty] public bool TextFading { get; set; } = true;
 
 
         internal static string ProfilePath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");

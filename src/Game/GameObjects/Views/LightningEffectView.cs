@@ -61,7 +61,7 @@ namespace ClassicUO.Game.GameObjects
                     return false;
 
                 Texture = GumpsLoader.Instance.GetTexture(_displayed);
-                ref Point offset = ref _offsets[_displayed - 20000];
+                ref Point offset = ref _offsets[ Utility.RandomHelper.GetValue(0, _offsets.Length - 1)];
 
                 Bounds.X = offset.X;
                 Bounds.Y = Texture.Height - 33 + offset.Y;

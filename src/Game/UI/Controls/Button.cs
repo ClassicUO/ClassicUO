@@ -228,6 +228,10 @@ namespace ClassicUO.Game.UI.Controls
             if (button == MouseButtonType.Left)
             {
                 IsClicked = false;
+
+                if (!MouseIsOver)
+                    return;
+
                 if (_entered || Client.Game.Scene is GameScene)
                 {
                     switch (ButtonAction)
