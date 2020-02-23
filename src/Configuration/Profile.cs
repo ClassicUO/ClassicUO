@@ -162,6 +162,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool HoldDownKeyAltToCloseAnchored { get; set; } = true;
         [JsonProperty] public bool CloseAllAnchoredGumpsInGroupWithRightClick { get; set; } = false;
         [JsonProperty] public bool HoldAltToMoveGumps { get; set; }
+        [JsonProperty] public int WorldMapZoom { get; set; } = 4;
 
         // Experimental
         [JsonProperty] public bool EnableSelectionArea { get; set; }

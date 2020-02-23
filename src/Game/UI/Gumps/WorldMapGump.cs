@@ -31,6 +31,7 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Configuration;
 
 using Microsoft.Xna.Framework;
 
@@ -44,7 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private bool _isTopMost;
         private readonly float[] _zooms = new float[10] { 0.125f, 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f, 4f, 6f, 8f };
-        private int _zoomIndex = 4;
+        private int _zoomIndex = ProfileManager.Current.WorldMapZoom;
         private Point _center, _lastScroll;
         private bool _isScrolling;
         private bool _flipMap = true;
@@ -428,7 +429,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_zoomIndex < 0)
                     _zoomIndex = 0;
             }
-
+            ProfileManager.Current.WorldMapZoom = _zoomIndex;
 
             base.OnMouseWheel(delta);
         }
