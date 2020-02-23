@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
@@ -157,25 +158,28 @@ namespace ClassicUO.Game.Managers
 
         private void CalculateAlpha(TextOverhead msg)
         {
-            int delta = (int)(msg.Time - Time.Ticks);
-
-            if (delta >= 0 && delta <= 1000)
+            if (ProfileManager.Current != null && ProfileManager.Current.TextFading)
             {
-                delta /= 10;
+                int delta = (int) (msg.Time - Time.Ticks);
 
-                if (delta > 100)
-                    delta = 100;
-                else if (delta < 1)
-                    delta = 0;
-
-                delta = (255 * delta) / 100;
-
-                if (!msg.IsTransparent || delta <= 0x7F)
+                if (delta >= 0 && delta <= 1000)
                 {
-                    msg.Alpha = (byte)delta;
-                }
+                    delta /= 10;
 
-                msg.IsTransparent = true;
+                    if (delta > 100)
+                        delta = 100;
+                    else if (delta < 1)
+                        delta = 0;
+
+                    delta = (255 * delta) / 100;
+
+                    if (!msg.IsTransparent || delta <= 0x7F)
+                    {
+                        msg.Alpha = (byte) delta;
+                    }
+
+                    msg.IsTransparent = true;
+                }
             }
         }
 
