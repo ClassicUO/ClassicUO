@@ -694,7 +694,16 @@ namespace ClassicUO.Game
                 }
 
                 RemoveItem(item);
+
+                _toRemove.Add(item);
             }
+
+            foreach (var serial in _toRemove)
+            {
+                Items.Remove(serial);
+            }
+
+            _toRemove.Clear();
 
             foreach (Mobile mob in Mobiles)
             {
@@ -705,7 +714,16 @@ namespace ClassicUO.Game
                 }
 
                 RemoveMobile(mob);
+
+                _toRemove.Add(mob);
             }
+
+            foreach (var serial in _toRemove)
+            {
+                Mobiles.Remove(serial);
+            }
+
+            _toRemove.Clear();
         }
     }
 }
