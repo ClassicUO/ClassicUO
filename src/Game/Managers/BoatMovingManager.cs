@@ -136,6 +136,9 @@ namespace ClassicUO.Game.Managers
 
                         Entity ent = World.Get(it.Serial);
 
+                        if (ent == null)
+                            continue;
+
                         ent.Offset.X = 0;
                         ent.Offset.Y = 0;
                         ent.Offset.Z = 0;
