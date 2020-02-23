@@ -78,71 +78,73 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 		discard;
 
 	int mode = int(IN.Hue.y);
-
-	bool swap = false;
-	if (mode >= COLOR_SWAP)
-	{
-		mode -= COLOR_SWAP;
-		swap = true;
-	}
-
 	float alpha = 1 - IN.Hue.z;
 
-	if (mode == COLOR || (mode == PARTIAL_COLOR && color.r == color.g && color.r == color.b))
+	if (mode > NOCOLOR)
 	{
-		color.rgb = get_rgb(color.r, IN.Hue.x, swap);
-	}
-	else if (mode > 5)
-	{
-		if (mode > 9)
+		bool swap = false;
+		if (mode >= COLOR_SWAP)
 		{
-			float red = color.r;
-			
-			if (mode > 10)
-			{
-				if (mode > 11)
-				{
-					if (mode > 12)
-					{
-						if (IN.Hue.x != 0.0f)
-						{
-							color.rgb *= get_rgb(color.r, IN.Hue.x, swap);
-						}
-						return color * alpha;
-					}
+			mode -= COLOR_SWAP;
+			swap = true;
+		}
 
-					red = 0.6f;
+		if (mode == COLOR || (mode == PARTIAL_COLOR && color.r == color.g && color.r == color.b))
+		{
+			color.rgb = get_rgb(color.r, IN.Hue.x, swap);
+		}
+		else if (mode > 5)
+		{
+			if (mode > 9)
+			{
+				float red = color.r;
+
+				if (mode > 10)
+				{
+					if (mode > 11)
+					{
+						if (mode > 12)
+						{
+							if (IN.Hue.x != 0.0f)
+							{
+								color.rgb *= get_rgb(color.r, IN.Hue.x, swap);
+							}
+							return color * alpha;
+						}
+
+						red = 0.6f;
+					}
+					else
+					{
+						red *= 0.5f;
+					}
 				}
 				else
 				{
-					red *= 0.5f;
+					red *= 1.5f;
+				}
+
+				alpha = 1 - red;
+				color.rgb = VEC3_ZERO;
+			}
+			else
+			{
+				float3 norm = get_light(IN.Normal);
+
+				if (mode > 6)
+				{
+					color.rgb = get_rgb(color.r, IN.Hue.x, swap) * norm;
+				}
+				else
+				{
+					color.rgb *= norm;
 				}
 			}
-			else
-			{
-				red *= 1.5f;
-			}
-
-			alpha = 1 - red;
-			color.rgb = VEC3_ZERO;
 		}
-		else
+		else if (mode == 4 || (mode == 3 && (color.r > 0.08 || color.g > 0.08 || color.b > 0.08)) || (mode == 5 && color.r > 0.08))
 		{
-			float3 norm = get_light(IN.Normal);
-
-			if (mode > 6)
-			{
-				color.rgb = get_rgb(color.r, IN.Hue.x, swap) * norm;
-			}
-			else
-			{
-				color.rgb *= norm;
-			}
+			color.rgb = get_rgb(color.r + 90, IN.Hue.x, swap);
 		}
-	}
-	else if (mode == 4 || (mode == 3 && (color.r > 0.08 || color.g > 0.08 || color.b > 0.08)) || (mode == 5 && color.r > 0.08 )  )
-	{
-		color.rgb = get_rgb(color.r + 90, IN.Hue.x, swap);
 	}
 
 	return color * alpha;
