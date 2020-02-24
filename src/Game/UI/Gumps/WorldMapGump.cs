@@ -83,7 +83,8 @@ namespace ClassicUO.Game.UI.Gumps
             TopMost = bool.Parse(xml.GetAttribute("topmost"));
             FreeView = bool.Parse(xml.GetAttribute("freeview"));
             _showPartyMembers = bool.Parse(xml.GetAttribute("showpartymembers"));
-
+            if (int.TryParse(xml.GetAttribute("zoomindex"), out int value))
+                _zoomIndex = (value >= 0 && value < _zooms.Length) ? value : 4;
 
             BuildGump();
         }
@@ -99,6 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("topmost", _isTopMost.ToString());
             writer.WriteAttributeString("freeview", _freeView.ToString());
             writer.WriteAttributeString("showpartymembers", _showPartyMembers.ToString());
+            writer.WriteAttributeString("zoomindex", _zoomIndex.ToString());
         }
 
         private void BuildGump()
