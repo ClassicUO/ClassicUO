@@ -131,7 +131,7 @@ namespace ClassicUO.Game.Managers
                 int componentsOnFloor = (width - 1) * (height - 1);
 
                 MaxComponets = FloorCount * (componentsOnFloor + 2 * (width + height) - 4) -
-                               (int)(FloorCount * componentsOnFloor * -0.25) + 2 * width + 3 * height - 5;
+                               (int) (FloorCount * componentsOnFloor * -0.25) + 2 * width + 3 * height - 5;
                 MaxFixtures = MaxComponets / 20;
             }
         }
@@ -183,12 +183,12 @@ namespace ClassicUO.Game.Managers
                     {
                         state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR;
 
-                        if (FloorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_FLOOR)
+                        if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_FLOOR)
                         {
                             state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
                         }
-                        else if (FloorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_FLOOR ||
-                                 FloorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSLUCENT_FLOOR)
+                        else if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_FLOOR ||
+                                 FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSLUCENT_FLOOR)
                         {
                             state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
                         }
@@ -231,11 +231,11 @@ namespace ClassicUO.Game.Managers
 
                         if (!ignore)
                         {
-                            if (FloorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_CONTENT)
+                            if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_CONTENT)
                             {
                                 state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
                             }
-                            else if (FloorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_CONTENT)
+                            else if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_CONTENT)
                             {
                                 state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
                             }
@@ -245,7 +245,7 @@ namespace ClassicUO.Game.Managers
 
                     if (!ignore)
                     {
-                        if (FloorVisionState[currentFloor] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_ALL)
+                        if (FloorVisionState[currentFloor] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_ALL)
                         {
                             state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
                         }
@@ -287,17 +287,17 @@ namespace ClassicUO.Game.Managers
 
                         if (floorMulti != null && floorCustomMulti == null)
                         {
-                            var mo = house.Add(floorMulti.Graphic, 0, x - foundationItem.X, y - foundationItem.Y, (sbyte)z, true);
+                            var mo = house.Add(floorMulti.Graphic, 0, x - foundationItem.X, y - foundationItem.Y, (sbyte) z, true);
                             mo.AlphaHue = 0xFF;
 
                             CUSTOM_HOUSE_MULTI_OBJECT_FLAGS state = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR;
 
-                            if (FloorVisionState[0] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_FLOOR)
+                            if (FloorVisionState[0] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_FLOOR)
                             {
                                 state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER;
                             }
-                            else if (FloorVisionState[0] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_FLOOR ||
-                                     FloorVisionState[0] == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSLUCENT_FLOOR)
+                            else if (FloorVisionState[0] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_FLOOR ||
+                                     FloorVisionState[0] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSLUCENT_FLOOR)
                             {
                                 state |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
                             }
@@ -545,7 +545,7 @@ namespace ClassicUO.Game.Managers
                                 tempColor++;
                             }
 
-                            var mo = house.Add(0x0496, tempColor, x - foundationItem.X, y - foundationItem.Y, (sbyte)z, true);
+                            var mo = house.Add(0x0496, tempColor, x - foundationItem.X, y - foundationItem.Y, (sbyte) z, true);
 
                             mo.AlphaHue = 0xFF;
                             mo.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT;
@@ -617,9 +617,9 @@ namespace ClassicUO.Game.Managers
                     }
                     else if (SelectedGraphic != 0)
                     {
-                        RawList<CustomBuildObject> list = new RawList<CustomBuildObject>();
+                        CustomBuildObject[] list = new CustomBuildObject[10];
 
-                        if (CanBuildHere(list, out var type) && list.Count != 0)
+                        if (CanBuildHere(list, out var type) && list.Length != 0)
                         {
                             //if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR && !(place is Multi))
                             //    return;
@@ -717,8 +717,8 @@ namespace ClassicUO.Game.Managers
                                             }
                                             else
                                             {
-                                                if ((multiObject.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR | 
-                                                                          CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF | 
+                                                if ((multiObject.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
+                                                                          CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
                                                                           CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR |
                                                                           CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE)) == 0)
                                                 {
@@ -752,6 +752,9 @@ namespace ClassicUO.Game.Managers
 
                             foreach (CustomBuildObject item in list)
                             {
+                                if (item.Graphic == 0)
+                                    break;
+
                                 house.Add(item.Graphic, 0, xx + item.X, yy + item.Y, (sbyte) (z + item.Z), true);
                             }
                         }
@@ -773,7 +776,7 @@ namespace ClassicUO.Game.Managers
                 State = state;
                 var gump = UIManager.GetGump<HouseCustomizationGump>(Serial);
 
-                if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL || 
+                if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL ||
                     State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF ||
                     State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC)
                 {
@@ -803,7 +806,7 @@ namespace ClassicUO.Game.Managers
             CombinedStair = false;
         }
 
-        public bool CanBuildHere(RawList<CustomBuildObject> list, out CUSTOM_HOUSE_BUILD_TYPE type)
+        public bool CanBuildHere(CustomBuildObject[] list, out CUSTOM_HOUSE_BUILD_TYPE type)
         {
             type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_NORMAL;
 
@@ -823,8 +826,10 @@ namespace ClassicUO.Game.Managers
 
                 if (res1 == -1 || res2 == -1 || res1 >= Stairs.Count)
                 {
-                    list.Add(new CustomBuildObject(SelectedGraphic));
-
+                    list[0].Graphic = SelectedGraphic;
+                    list[0].X = 0;
+                    list[0].Y = 0;
+                    list[0].Z = 0;
                     return false;
                 }
 
@@ -834,59 +839,218 @@ namespace ClassicUO.Game.Managers
                 {
                     if (SelectedGraphic == item.North)
                     {
-                        list.Add(new CustomBuildObject((ushort) item.Block) { X = 0, Y = -3, Z = 0});
-                        list.Add(new CustomBuildObject((ushort) item.Block) {X = 0, Y = -2, Z = 0});
-                        list.Add(new CustomBuildObject((ushort) item.Block) {X = 0, Y = -1, Z = 0});
-                        list.Add(new CustomBuildObject((ushort) item.North) {X = 0, Y = 0, Z = 0});
-                        list.Add(new CustomBuildObject((ushort) item.Block) {X = 0, Y = -3, Z = 5});
-                        list.Add(new CustomBuildObject((ushort) item.Block) {X = 0, Y = -2, Z = 5});
-                        list.Add(new CustomBuildObject((ushort) item.North) {X = 0, Y = -1, Z = 5});
-                        list.Add(new CustomBuildObject((ushort) item.Block) {X = 0, Y = -3, Z = 10});
-                        list.Add(new CustomBuildObject((ushort) item.North) {X = 0, Y = -2, Z = 10});
-                        list.Add(new CustomBuildObject((ushort) item.North) { X = 0, Y = -3, Z = 15});
+                        list[0].Graphic = (ushort) item.Block;
+                        list[0].X = 0;
+                        list[0].Y = -3;
+                        list[0].Z = 0;
+
+                        list[1].Graphic = (ushort) item.Block;
+                        list[1].X = 0;
+                        list[1].Y = -2;
+                        list[1].Z = 0;
+
+                        list[2].Graphic = (ushort) item.Block;
+                        list[2].X = 0;
+                        list[2].Y = -1;
+                        list[2].Z = 0;
+
+                        list[3].Graphic = (ushort) item.North;
+                        list[3].X = 0;
+                        list[3].Y = 0;
+                        list[3].Z = 0;
+
+                        list[4].Graphic = (ushort) item.Block;
+                        list[4].X = 0;
+                        list[4].Y = -3;
+                        list[4].Z = 5;
+
+                        list[5].Graphic = (ushort) item.Block;
+                        list[5].X = 0;
+                        list[5].Y = -2;
+                        list[5].Z = 5;
+
+                        list[6].Graphic = (ushort) item.North;
+                        list[6].X = 0;
+                        list[6].Y = -1;
+                        list[6].Z = 5;
+
+                        list[7].Graphic = (ushort) item.Block;
+                        list[7].X = 0;
+                        list[7].Y = -3;
+                        list[7].Z = 10;
+
+                        list[8].Graphic = (ushort) item.North;
+                        list[8].X = 0;
+                        list[8].Y = -2;
+                        list[8].Z = 10;
+
+                        list[9].Graphic = (ushort) item.North;
+                        list[9].X = 0;
+                        list[9].Y = -3;
+                        list[9].Z = 15;
                     }
                     else if (SelectedGraphic == item.East)
                     {
-                       list.Add(new CustomBuildObject((ushort) item.East)  {X = 0, Y = 0, Z = 0});
-                       list.Add(new CustomBuildObject((ushort) item.Block) {X = 1, Y = 0, Z = 0});
-                       list.Add(new CustomBuildObject((ushort) item.Block) {X = 2, Y = 0, Z = 0});
-                       list.Add(new CustomBuildObject((ushort) item.Block) {X = 3, Y = 0, Z = 0});
-                       list.Add(new CustomBuildObject((ushort) item.East)  {X = 1, Y = 0, Z = 5});
-                       list.Add(new CustomBuildObject((ushort) item.Block) {X = 2, Y = 0, Z = 5});
-                       list.Add(new CustomBuildObject((ushort) item.Block) {X = 3, Y = 0, Z = 5});
-                       list.Add(new CustomBuildObject((ushort) item.East)  {X = 2, Y = 0, Z = 10});
-                       list.Add(new CustomBuildObject((ushort) item.Block) {X = 3, Y = 0, Z = 10});
-                       list.Add(new CustomBuildObject((ushort) item.East){X = 3, Y = 0, Z = 15});
+                        list[0].Graphic = (ushort) item.East;
+                        list[0].X = 0;
+                        list[0].Y = 0;
+                        list[0].Z = 0;
+
+                        list[1].Graphic = (ushort) item.Block;
+                        list[1].X = 1;
+                        list[1].Y = 0;
+                        list[1].Z = 0;
+
+                        list[2].Graphic = (ushort) item.Block;
+                        list[2].X = 2;
+                        list[2].Y = 0;
+                        list[2].Z = 0;
+
+                        list[3].Graphic = (ushort) item.Block;
+                        list[3].X = 3;
+                        list[3].Y = 0;
+                        list[3].Z = 0;
+
+                        list[4].Graphic = (ushort) item.East;
+                        list[4].X = 1;
+                        list[4].Y = 0;
+                        list[4].Z = 5;
+
+                        list[5].Graphic = (ushort) item.Block;
+                        list[5].X = 2;
+                        list[5].Y = 0;
+                        list[5].Z = 5;
+
+                        list[6].Graphic = (ushort) item.Block;
+                        list[6].X = 3;
+                        list[6].Y = 0;
+                        list[6].Z = 5;
+
+                        list[7].Graphic = (ushort) item.East;
+                        list[7].X = 2;
+                        list[7].Y = 0;
+                        list[7].Z = 10;
+
+                        list[8].Graphic = (ushort) item.Block;
+                        list[8].X = 3;
+                        list[8].Y = 0;
+                        list[8].Z = 10;
+
+                        list[9].Graphic = (ushort) item.East;
+                        list[9].X = 3;
+                        list[9].Y = 0;
+                        list[9].Z = 15;
                     }
                     else if (SelectedGraphic == item.South)
                     {
-                        list.Add(new CustomBuildObject((ushort) item.South) {X = 0, Y = 0, Z = 0});
-                        list.Add(new CustomBuildObject((ushort) item.Block) {X = 0, Y = 1, Z = 0});
-                        list.Add(new CustomBuildObject((ushort) item.Block) {X = 0, Y = 2, Z = 0});
-                        list.Add(new CustomBuildObject((ushort) item.Block) {X = 0, Y = 3, Z = 0});
-                        list.Add(new CustomBuildObject((ushort) item.South) {X = 0, Y = 1, Z = 5});
-                        list.Add(new CustomBuildObject((ushort) item.Block) {X = 0, Y = 2, Z = 5});
-                        list.Add(new CustomBuildObject((ushort) item.Block) {X = 0, Y = 3, Z = 5});
-                        list.Add(new CustomBuildObject((ushort) item.South) {X = 0, Y = 2, Z = 10});
-                        list.Add(new CustomBuildObject((ushort) item.Block) {X = 0, Y = 3, Z = 10});
-                        list.Add(new CustomBuildObject((ushort) item.South) {X = 0, Y = 3, Z = 15});
+                        list[0].Graphic = (ushort) item.South;
+                        list[0].X = 0;
+                        list[0].Y = 0;
+                        list[0].Z = 0;
+
+                        list[1].Graphic = (ushort) item.Block;
+                        list[1].X = 0;
+                        list[1].Y = 1;
+                        list[1].Z = 0;
+
+                        list[2].Graphic = (ushort) item.Block;
+                        list[2].X = 0;
+                        list[2].Y = 2;
+                        list[2].Z = 0;
+
+                        list[3].Graphic = (ushort) item.Block;
+                        list[3].X = 0;
+                        list[3].Y = 3;
+                        list[3].Z = 0;
+
+                        list[4].Graphic = (ushort) item.South;
+                        list[4].X = 0;
+                        list[4].Y = 1;
+                        list[4].Z = 5;
+
+                        list[5].Graphic = (ushort) item.Block;
+                        list[5].X = 0;
+                        list[5].Y = 2;
+                        list[5].Z = 5;
+
+                        list[6].Graphic = (ushort) item.Block;
+                        list[6].X = 0;
+                        list[6].Y = 3;
+                        list[6].Z = 5;
+
+                        list[7].Graphic = (ushort) item.South;
+                        list[7].X = 0;
+                        list[7].Y = 2;
+                        list[7].Z = 10;
+
+                        list[8].Graphic = (ushort) item.Block;
+                        list[8].X = 0;
+                        list[8].Y = 3;
+                        list[8].Z = 10;
+
+                        list[9].Graphic = (ushort) item.South;
+                        list[9].X = 0;
+                        list[9].Y = 3;
+                        list[9].Z = 15;
                     }
                     else if (SelectedGraphic == item.West)
                     {
-                        list.Add(new CustomBuildObject((ushort) item.Block) {X = -3, Y = 0, Z = 0});
-                        list.Add(new CustomBuildObject((ushort) item.Block) {X = -2, Y = 0, Z = 0});
-                        list.Add(new CustomBuildObject((ushort) item.Block) {X = -1, Y = 0, Z = 0});
-                        list.Add(new CustomBuildObject((ushort) item.West)  {X = 0, Y = 0, Z = 0});
-                        list.Add(new CustomBuildObject((ushort) item.Block) {X = -3, Y = 0, Z = 5});
-                        list.Add(new CustomBuildObject((ushort) item.Block) {X = -2, Y = 0, Z = 5});
-                        list.Add(new CustomBuildObject((ushort) item.West)  {X = -1, Y = 0, Z = 5});
-                        list.Add(new CustomBuildObject((ushort) item.Block) {X = -3, Y = 0, Z = 10});
-                        list.Add(new CustomBuildObject((ushort) item.West)  {X = -2, Y = 0, Z = 10});
-                        list.Add(new CustomBuildObject((ushort) item.West)  {X = -3, Y = 0, Z = 15});
+                        list[0].Graphic = (ushort) item.Block;
+                        list[0].X = -3;
+                        list[0].Y = 0;
+                        list[0].Z = 0;
+
+                        list[1].Graphic = (ushort) item.Block;
+                        list[1].X = -2;
+                        list[1].Y = 0;
+                        list[1].Z = 0;
+
+                        list[2].Graphic = (ushort) item.Block;
+                        list[2].X = -1;
+                        list[2].Y = 0;
+                        list[2].Z = 0;
+
+                        list[3].Graphic = (ushort) item.West;
+                        list[3].X = 0;
+                        list[3].Y = 0;
+                        list[3].Z = 0;
+
+                        list[4].Graphic = (ushort) item.Block;
+                        list[4].X = -3;
+                        list[4].Y = 0;
+                        list[4].Z = 5;
+
+                        list[5].Graphic = (ushort) item.Block;
+                        list[5].X = -2;
+                        list[5].Y = 0;
+                        list[5].Z = 5;
+
+                        list[6].Graphic = (ushort) item.West;
+                        list[6].X = -1;
+                        list[6].Y = 0;
+                        list[6].Z = 5;
+
+                        list[7].Graphic = (ushort) item.Block;
+                        list[7].X = -3;
+                        list[7].Y = 0;
+                        list[7].Z = 10;
+
+                        list[8].Graphic = (ushort) item.West;
+                        list[8].X = -2;
+                        list[8].Y = 0;
+                        list[8].Z = 10;
+
+                        list[9].Graphic = (ushort) item.West;
+                        list[9].X = -3;
+                        list[9].Y = 0;
+                        list[9].Z = 15;
                     }
                     else
                     {
-                        list.Add(new CustomBuildObject(SelectedGraphic));
+                        list[0].Graphic = SelectedGraphic;
+                        list[0].X = 0;
+                        list[0].Y = 0;
+                        list[0].Z = 0;
                     }
                 }
 
@@ -928,14 +1092,20 @@ namespace ClassicUO.Game.Managers
 
                 if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF)
                 {
-                    list.Add(new CustomBuildObject() { Graphic = SelectedGraphic, Z = (RoofZ - 2) * 3 });
+                    list[0].Graphic = SelectedGraphic;
+                    list[0].X = 0;
+                    list[0].Y = 0;
+                    list[0].Z = (RoofZ - 2) * 3;
                     type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF;
                 }
                 else
                 {
                     if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR)
                     {
-                        list.Add(new CustomBuildObject() { Graphic = SelectedGraphic, Y = 1 });
+                        list[0].Graphic = SelectedGraphic;
+                        list[0].X = 0;
+                        list[0].Y = 1;
+                        list[0].Z = 0;
                         type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR;
                     }
                     else
@@ -945,7 +1115,10 @@ namespace ClassicUO.Game.Managers
                             type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_FLOOR;
                         }
 
-                        list.Add(new CustomBuildObject() { Graphic = SelectedGraphic });
+                        list[0].Graphic = SelectedGraphic;
+                        list[0].X = 0;
+                        list[0].Y = 0;
+                        list[0].Z = 0;
                     }
                 }
             }
@@ -1002,7 +1175,7 @@ namespace ClassicUO.Game.Managers
                             int sx = gobj.X + item.X;
                             int sy = gobj.Y + item.Y;
 
-                            if (sy < EndPos.Y || 
+                            if (sy < EndPos.Y ||
                                 sx == StartPos.X ||
                                 gobj.Z >= MinHouseZ)
 
@@ -1063,7 +1236,7 @@ namespace ClassicUO.Game.Managers
 
             return result;
         }
-        
+
         public bool CanEraseHere(GameObject place, out CUSTOM_HOUSE_BUILD_TYPE type)
         {
             type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_NORMAL;
@@ -1085,7 +1258,7 @@ namespace ClassicUO.Game.Managers
                         type = CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF;
                     }
                     else if (place.X >= StartPos.X && place.X <= EndPos.X &&
-                             place.Y >= StartPos.Y && place.Y <= EndPos.Y && 
+                             place.Y >= StartPos.Y && place.Y <= EndPos.Y &&
                              place.Z >= MinHouseZ)
                     {
                         // it's into the bounds
@@ -1222,7 +1395,7 @@ namespace ClassicUO.Game.Managers
                         house.GetMultiAt(item.X, item.Y),
                         minZ - 20,
                         maxZ - 20,
-                        (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT) ||
+                        (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT) ||
 
                     ValidatePlaceStructure(
                         foundationItem,
@@ -1230,7 +1403,7 @@ namespace ClassicUO.Game.Managers
                         house.GetMultiAt(item.X - 1, item.Y - 1),
                         minZ - 20,
                         maxZ - 20,
-                        (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_W)) ||
+                        (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_W)) ||
 
                     ValidatePlaceStructure(
                         foundationItem,
@@ -1238,7 +1411,7 @@ namespace ClassicUO.Game.Managers
                         house.GetMultiAt(item.X, item.Y - 1),
                         minZ - 20,
                         maxZ - 20,
-                        (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_N)))
+                        (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_N)))
                 {
                     Point[] table =
                     {
@@ -1311,7 +1484,7 @@ namespace ClassicUO.Game.Managers
                     {
                         found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X, item.Y + 1), minZ,
                             maxZ,
-                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM |
+                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM |
                                    CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N));
                     }
 
@@ -1319,7 +1492,7 @@ namespace ClassicUO.Game.Managers
                     {
                         found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X - 1, item.Y), minZ,
                             maxZ,
-                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM |
+                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM |
                                   CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E));
                     }
 
@@ -1327,7 +1500,7 @@ namespace ClassicUO.Game.Managers
                     {
                         found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X, item.Y - 1), minZ,
                             maxZ,
-                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM |
+                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM |
                                   CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S));
                     }
 
@@ -1335,7 +1508,7 @@ namespace ClassicUO.Game.Managers
                     {
                         found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X + 1, item.Y), minZ,
                             maxZ,
-                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM |
+                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM |
                                   CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W));
                     }
 
@@ -1351,7 +1524,7 @@ namespace ClassicUO.Game.Managers
                     {
                         found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X, item.Y + 1), minZ,
                             maxZ,
-                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP |
+                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP |
                                   CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N));
                     }
 
@@ -1359,7 +1532,7 @@ namespace ClassicUO.Game.Managers
                     {
                         found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X - 1, item.Y), minZ,
                             maxZ,
-                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP |
+                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP |
                                   CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E));
                     }
 
@@ -1367,7 +1540,7 @@ namespace ClassicUO.Game.Managers
                     {
                         found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X, item.Y - 1), minZ,
                             maxZ,
-                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP |
+                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP |
                                   CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S));
                     }
 
@@ -1375,7 +1548,7 @@ namespace ClassicUO.Game.Managers
                     {
                         found = ValidatePlaceStructure(foundationItem, house, house.GetMultiAt(item.X + 1, item.Y), minZ,
                             maxZ,
-                            (int)(CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP |
+                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP |
                                   CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W));
                     }
 
@@ -1409,7 +1582,7 @@ namespace ClassicUO.Game.Managers
                     {
                         var info = ObjectsInfo[info1];
 
-                        if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT) != 0)
+                        if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT) != 0)
                         {
                             if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) != 0 ||
                                 info.DirectSupports == 0)
@@ -1417,12 +1590,12 @@ namespace ClassicUO.Game.Managers
                                 continue;
                             }
 
-                            if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_W) != 0)
+                            if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_W) != 0)
                             {
                                 if (info.CanGoW != 0)
                                     return true;
                             }
-                            else if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_N) != 0)
+                            else if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_N) != 0)
                             {
                                 if (info.CanGoN != 0)
                                     return true;
@@ -1431,8 +1604,8 @@ namespace ClassicUO.Game.Managers
                                 return true;
                         }
                         else if (
-                            (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM) != 0) && info.Bottom != 0) ||
-                            (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP) != 0) && info.Top != 0)
+                            (((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM) != 0) && info.Bottom != 0) ||
+                            (((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP) != 0) && info.Top != 0)
                         )
                         {
                             if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) == 0)
@@ -1450,40 +1623,40 @@ namespace ClassicUO.Game.Managers
 
                             if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0)
                             {
-                                if ((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM) != 0)
+                                if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM) != 0)
                                 {
-                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N) != 0) && (info.AdjUN != 0))
+                                    if (((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N) != 0) && (info.AdjUN != 0))
                                     {
                                         return true;
                                     }
-                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E) != 0) && (info.AdjUE != 0))
+                                    if (((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E) != 0) && (info.AdjUE != 0))
                                     {
                                         return true;
                                     }
-                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S) != 0) && (info.AdjUS != 0))
+                                    if (((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S) != 0) && (info.AdjUS != 0))
                                     {
                                         return true;
                                     }
-                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W) != 0) && (info.AdjUW != 0))
+                                    if (((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W) != 0) && (info.AdjUW != 0))
                                     {
                                         return true;
                                     }
                                 }
                                 else
                                 {
-                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N) != 0) && (info.AdjLN != 0))
+                                    if (((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N) != 0) && (info.AdjLN != 0))
                                     {
                                         return true;
                                     }
-                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E) != 0) && (info.AdjLE != 0))
+                                    if (((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E) != 0) && (info.AdjLE != 0))
                                     {
                                         return true;
                                     }
-                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S) != 0) && (info.AdjLS != 0))
+                                    if (((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S) != 0) && (info.AdjLS != 0))
                                     {
                                         return true;
                                     }
-                                    if (((flags & (int)CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W) != 0) && (info.AdjLW != 0))
+                                    if (((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W) != 0) && (info.AdjLW != 0))
                                     {
                                         return true;
                                     }
@@ -1516,7 +1689,7 @@ namespace ClassicUO.Game.Managers
 
                     if (item.Parse(line))
                     {
-                        if (item.FeatureMask == 0 || ((int)World.ClientLockedFeatures.Flags & item.FeatureMask) != 0)
+                        if (item.FeatureMask == 0 || ((int) World.ClientLockedFeatures.Flags & item.FeatureMask) != 0)
                         {
                             list.Add(item);
                         }
@@ -1547,7 +1720,7 @@ namespace ClassicUO.Game.Managers
 
                     if (item.Parse(line))
                     {
-                        if (item.FeatureMask != 0 && ((int)World.ClientLockedFeatures.Flags & item.FeatureMask) == 0)
+                        if (item.FeatureMask != 0 && ((int) World.ClientLockedFeatures.Flags & item.FeatureMask) == 0)
                             continue;
 
                         bool found = false;
