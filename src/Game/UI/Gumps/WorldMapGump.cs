@@ -20,8 +20,10 @@
 #endregion
 
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using System.Xml;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -233,7 +235,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Load();
             }
 
-            if (World.InGame && _nextQueryPacket < Time.Ticks)
+            if (World.InGame && _nextQueryPacket < Time.Ticks  && Settings.GlobalSettings.ProtocolExtensions)
             {
                 _nextQueryPacket = Time.Ticks + 250;
 
@@ -249,6 +251,7 @@ namespace ClassicUO.Game.UI.Gumps
                 //        }
                 //    }
                 //}
+
 
                 NetClient.Socket.Send(new PQueryGuildPosition());
 

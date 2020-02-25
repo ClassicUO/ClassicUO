@@ -103,7 +103,8 @@ namespace ClassicUO.Configuration
         [JsonProperty(PropertyName = "plugins")]
         public string[] Plugins { get; set; } = {@"./Assistant/Razor.dll"};
 
-
+        [JsonProperty(PropertyName = "ProtocolExtensions")]
+        public bool ProtocolExtensions { get; set; } = true;
 
 
         public const string SETTINGS_FILENAME = "settings.json";
