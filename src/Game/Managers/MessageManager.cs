@@ -115,6 +115,7 @@ namespace ClassicUO.Game.Managers
                 case MessageType.Yell:
                 case MessageType.Regular:
                 case MessageType.Label:
+                case MessageType.Limit3Spell:
 
                     if (parent == null)
                         break;
