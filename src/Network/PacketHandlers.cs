@@ -2102,7 +2102,7 @@ namespace ClassicUO.Network
                             it.Name = it.ItemData.Name;
                         }
                     }
-                    else if (string.IsNullOrEmpty(it.Name))
+                    if (string.IsNullOrEmpty(it.Name))
                         it.Name = name;
 
                     gump.SetIfNameIsFromCliloc(it, fromcliloc);
