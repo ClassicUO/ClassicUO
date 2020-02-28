@@ -2076,13 +2076,10 @@ namespace ClassicUO.Network
             {
                 byte count = p.ReadByte();
 
-                var list = container.Items /*.OrderBy(s => s.Serial.Value)*/.ToArray();
+                var list = container.Items /*.OrderBy(s => s.Serial.Value)*/.Reverse().ToArray();
 
                 if (list.Length == 0)
                     return;
-
-                if (list[0].X > 1)
-                    list = list.Reverse().ToArray();
 
 
                 foreach (Item it in list.Take(count))
@@ -2096,6 +2093,14 @@ namespace ClassicUO.Network
                     {
                         it.Name = ClilocLoader.Instance.GetString(cliloc);
                         fromcliloc = true;
+                    }
+                    else if (string.IsNullOrEmpty(name))
+                    {
+                        bool success = World.OPL.TryGetNameAndData(it.Serial, out it.Name, out _);
+                        if (!success)
+                        {
+                            it.Name = it.ItemData.Name;
+                        }
                     }
                     else if (string.IsNullOrEmpty(it.Name))
                         it.Name = name;
@@ -2612,6 +2617,14 @@ namespace ClassicUO.Network
                 {
                     name = ClilocLoader.Instance.GetString(clilocnum);
                     fromcliloc = true;
+                }
+                else if (string.IsNullOrEmpty(name))
+                {
+                    bool success = World.OPL.TryGetNameAndData(serial, out name, out _);
+                    if (!success)
+                    {
+                        name = TileDataLoader.Instance.StaticData[graphic].Name;
+                    }
                 }
 
                 //if (string.IsNullOrEmpty(item.Name))
