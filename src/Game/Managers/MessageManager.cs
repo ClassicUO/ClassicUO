@@ -180,7 +180,7 @@ namespace ClassicUO.Game.Managers
                     if (parent == null)
                         break;
 
-                    msg = CreateMessage($"*{text}*", hue, font, unicode, type);
+                    msg = CreateMessage($"{text}", hue, font, unicode, type);
 
                     parent.AddMessage(msg);
 

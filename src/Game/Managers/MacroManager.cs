@@ -357,17 +357,17 @@ namespace ClassicUO.Game.Managers
                 case MacroType.Yell:
                 case MacroType.RazorMacro:
 
-                    MacroObjectString mos = (MacroObjectString) macro;
+                    string text = ((MacroObjectString)macro).Text;
 
-                    if (!string.IsNullOrEmpty(mos.Text))
+                    if (!string.IsNullOrEmpty(text))
                     {
                         MessageType type = MessageType.Regular;
                         ushort hue = ProfileManager.Current.SpeechHue;
-                        string prefix = null;
 
                         switch (macro.Code)
                         {
                             case MacroType.Emote:
+                                text = "*" + text + "*";
                                 type = MessageType.Emote;
                                 hue = ProfileManager.Current.EmoteHue;
 
@@ -385,12 +385,12 @@ namespace ClassicUO.Game.Managers
                                 break;
 
                             case MacroType.RazorMacro:
-                                prefix = ">macro ";
+                                text = ">macro " + text;
 
                                 break;
                         }
 
-                        GameActions.Say(prefix + mos.Text, hue, type);
+                        GameActions.Say(text, hue, type);
                     }
 
                     break;
