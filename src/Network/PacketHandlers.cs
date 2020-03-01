@@ -1025,7 +1025,7 @@ namespace ClassicUO.Network
                         list = list.Reverse().ToArray();
 
                     foreach (var i in list) 
-                        gump.AddItem(i.Serial, i.Graphic, i.Hue, i.Amount, (ushort) i.Price, i.Name, false);
+                        gump.AddItem(i.Serial, i.Graphic, i.Hue, i.Amount, i.Price, i.Name, false);
                 }
             }
             else
