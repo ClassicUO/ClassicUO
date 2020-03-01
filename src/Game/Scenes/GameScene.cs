@@ -225,6 +225,7 @@ namespace ClassicUO.Game.Scenes
             switch (e.Type)
             {
                 case MessageType.Regular:
+                case MessageType.Limit3Spell:
 
                     if (e.Parent == null || !SerialHelper.IsValid(e.Parent.Serial))
                         name = "System";
