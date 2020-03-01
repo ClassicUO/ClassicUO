@@ -69,100 +69,94 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool SetName()
         {
-            if (string.IsNullOrEmpty(_renderedText.Text))
+            if (Entity is Item item)
             {
-                if (Entity is Item item)
+                if (!World.OPL.TryGetNameAndData(item, out string t, out _))
                 {
-                    if (!World.OPL.TryGetNameAndData(item, out string t, out _))
-                    {
-                        t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
-
-                        if (string.IsNullOrEmpty(t))
-                            t = ClilocLoader.Instance.Translate(1020000 + item.Graphic, capitalize: true);
-                    }
+                    t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
 
                     if (string.IsNullOrEmpty(t))
-                        return false;
-
-                    if (!item.IsCorpse && item.Amount > 1)
-                        t += ": " + item.Amount;
-
-                    FontsLoader.Instance.SetUseHTML(true);
-                    FontsLoader.Instance.RecalculateWidthByInfo = true;
-
-
-                    int width = FontsLoader.Instance.GetWidthUnicode(_renderedText.Font, t);
-
-                    if (width > 100)
-                    {
-                        t = FontsLoader.Instance.GetTextByWidthUnicode(_renderedText.Font, t, 100, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
-                        width = 100;
-                    }
-
-                    //if (width > 100)
-                    //    width = 100;
-
-                    //width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, t, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) (FontStyle.BlackBorder /*| FontStyle.Cropped*/));
-
-                    //if (width > 100)
-                    //    width = 100;
-
-                    _renderedText.MaxWidth = width;
-
-                    _renderedText.Text = t;
-
-                    FontsLoader.Instance.RecalculateWidthByInfo = false;
-                    FontsLoader.Instance.SetUseHTML(false);
-
-                    Width = _background.Width = _renderedText.Width + 4;
-                    Height = _background.Height = _renderedText.Height + 4;
-
-                    WantUpdateSize = false;
-
-                    return true;
+                        t = ClilocLoader.Instance.Translate(1020000 + item.Graphic, capitalize: true);
                 }
 
+                if (string.IsNullOrEmpty(t))
+                    return false;
 
-                if (!string.IsNullOrEmpty(Entity.Name))
+                if (!item.IsCorpse && item.Amount > 1)
+                    t += ": " + item.Amount;
+
+                FontsLoader.Instance.SetUseHTML(true);
+                FontsLoader.Instance.RecalculateWidthByInfo = true;
+
+
+                int width = FontsLoader.Instance.GetWidthUnicode(_renderedText.Font, t);
+
+                if (width > 100)
                 {
-                    string t = Entity.Name;
-
-                    int width = FontsLoader.Instance.GetWidthUnicode(_renderedText.Font, t);
-
-                    if (width > 100)
-                    {
-                        t = FontsLoader.Instance.GetTextByWidthUnicode(_renderedText.Font, t, 100, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
-                        width = 100;
-                    }
-
-                    //int width = FileManager.Fonts.GetWidthUnicode(_renderedText.Font, Entity.Name);
-
-                    //if (width > 200)
-                    //    width = 200;
-
-                    //width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, Entity.Name, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)(FontStyle.BlackBorder));
-
-                    //if (width > 200)
-                    //    width = 200;
-
-                    _renderedText.MaxWidth = width;
-
-                    _renderedText.Text = t;
-
-                    Width = _background.Width = Math.Max(_renderedText.Width + 4, MIN_WIDTH);
-                    Height = _background.Height = _renderedText.Height + 4;
-
-                    WantUpdateSize = false;
-
-                    return true;
+                    t = FontsLoader.Instance.GetTextByWidthUnicode(_renderedText.Font, t, 100, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
+                    width = 100;
                 }
 
-                return false;
+                //if (width > 100)
+                //    width = 100;
+
+                //width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, t, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) (FontStyle.BlackBorder /*| FontStyle.Cropped*/));
+
+                //if (width > 100)
+                //    width = 100;
+
+                _renderedText.MaxWidth = width;
+
+                _renderedText.Text = t;
+
+                FontsLoader.Instance.RecalculateWidthByInfo = false;
+                FontsLoader.Instance.SetUseHTML(false);
+
+                Width = _background.Width = _renderedText.Width + 4;
+                Height = _background.Height = _renderedText.Height + 4;
+
+                WantUpdateSize = false;
+
+                return true;
             }
 
-            return true;
-        }
 
+            if (!string.IsNullOrEmpty(Entity.Name))
+            {
+                string t = Entity.Name;
+
+                int width = FontsLoader.Instance.GetWidthUnicode(_renderedText.Font, t);
+
+                if (width > 100)
+                {
+                    t = FontsLoader.Instance.GetTextByWidthUnicode(_renderedText.Font, t, 100, true, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)FontStyle.BlackBorder);
+                    width = 100;
+                }
+
+                //int width = FileManager.Fonts.GetWidthUnicode(_renderedText.Font, Entity.Name);
+
+                //if (width > 200)
+                //    width = 200;
+
+                //width = FileManager.Fonts.GetWidthExUnicode(_renderedText.Font, Entity.Name, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort)(FontStyle.BlackBorder));
+
+                //if (width > 200)
+                //    width = 200;
+
+                _renderedText.MaxWidth = width;
+
+                _renderedText.Text = t;
+
+                Width = _background.Width = Math.Max(_renderedText.Width + 4, MIN_WIDTH);
+                Height = _background.Height = _renderedText.Height + 4;
+
+                WantUpdateSize = false;
+
+                return true;
+            }
+
+            return false;
+        }
 
         protected override void CloseWithRightClick()
         {
