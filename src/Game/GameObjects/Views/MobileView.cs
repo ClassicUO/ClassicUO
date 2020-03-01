@@ -138,7 +138,7 @@ namespace ClassicUO.Game.GameObjects
 
 
             bool isAttack = Serial == TargetManager.LastAttack;
-            bool isUnderMouse = SelectedObject.LastObject == this && TargetManager.IsTargeting;
+            bool isUnderMouse = TargetManager.IsTargeting && SelectedObject.LastObject == this;
             //bool needHpLine = false;
 
             if (this != World.Player)
