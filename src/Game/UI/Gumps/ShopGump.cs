@@ -223,7 +223,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_shopItems.TryGetValue(it, out var shopItem)) shopItem.NameFromCliloc = fromcliloc;
         }
 
-        public void AddItem(uint serial, ushort graphic, ushort hue, ushort amount, ushort price, string name, bool fromcliloc)
+        public void AddItem(uint serial, ushort graphic, ushort hue, ushort amount, uint price, string name, bool fromcliloc)
         {
             ShopItem shopItem;
 
@@ -442,7 +442,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return direction;
             }
 
-            public ShopItem(uint serial, ushort graphic, ushort hue, int count, int price, string name)
+            public ShopItem(uint serial, ushort graphic, ushort hue, int count, uint price, string name)
             {
                 LocalSerial = serial;
                 Graphic = graphic;
@@ -552,7 +552,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            public int Price { get; set; }
+            public uint Price { get; set; }
             public ushort Hue { get; set; }
             public ushort Graphic { get; set; }
             public string Name { get; set; }
