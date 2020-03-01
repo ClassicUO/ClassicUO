@@ -67,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public Entity Entity { get; }
 
-        private bool SetName()
+        public bool SetName()
         {
             if (string.IsNullOrEmpty(_renderedText.Text))
             {

@@ -138,6 +138,7 @@ namespace ClassicUO.Network
             Handlers.Add(0x93, OpenBook);
             Handlers.Add(0x95, DyeData);
             Handlers.Add(0x97, MovePlayer);
+            Handlers.Add(0x98, UpdateName);
             Handlers.Add(0x99, MultiPlacement);
             Handlers.Add(0x9A, ASCIIPrompt);
             Handlers.Add(0x9E, SellList);
@@ -2553,6 +2554,25 @@ namespace ClassicUO.Network
 
             Direction direction = (Direction) p.ReadByte();
             World.Player.Walk(direction & Direction.Mask, (direction & Direction.Running) != 0);
+        }
+
+        private static void UpdateName(Packet p)
+        {
+            if (!World.InGame)
+                return;
+
+            uint serial = p.ReadUInt();
+            string name = p.ReadASCII();
+
+            Entity entity = World.Get(serial);
+            if (entity == null)
+                return;
+            entity.Name = name;
+
+            NameOverheadGump gump = UIManager.GetGump<NameOverheadGump>(serial);
+            if (gump == null)
+                return;
+            gump.SetName();
         }
 
         private static void MultiPlacement(Packet p)

@@ -24,6 +24,8 @@ using System;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Network;
+using static ClassicUO.Network.NetClient;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -108,7 +110,9 @@ namespace ClassicUO.Game.GameObjects
 
                 //if (gump == null)
                 {
+                    Socket.Send(new PNameRequest(Serial));
                     UIManager.Add(new NameOverheadGump(this));
+
                     ObjectHandlesOpened = true;
                 }
             }
