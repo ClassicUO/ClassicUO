@@ -521,6 +521,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case ChatMode.Emote:
+                        text = "*" + text + "*";    
                         GameActions.Say(text, ProfileManager.Current.EmoteHue, MessageType.Emote);
                         break;
 
