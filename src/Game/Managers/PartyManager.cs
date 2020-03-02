@@ -145,6 +145,7 @@ namespace ClassicUO.Game.Managers
                     break;
             }
         }
+
         public bool Contains(uint serial)
         {
             for (int i = 0; i < PARTY_SIZE; i++)
