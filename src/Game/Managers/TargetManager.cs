@@ -246,8 +246,8 @@ namespace ClassicUO.Game.Managers
 
             if (graphic == 0)
             {
-                if (TargeringType != TargetType.Neutral && !wet)
-                    return;
+                //if (TargeringType != TargetType.Neutral && !wet)
+                //    return;
             }
             else
             {
