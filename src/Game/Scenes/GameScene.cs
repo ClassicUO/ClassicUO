@@ -244,7 +244,7 @@ namespace ClassicUO.Game.Scenes
 
                 case MessageType.Emote:
                     name = e.Name;
-                    text = $"*{e.Text}*";
+                    text = $"{e.Text}";
 
                     if (e.Hue == 0)
                         hue = ProfileManager.Current.EmoteHue;
