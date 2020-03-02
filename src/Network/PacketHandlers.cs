@@ -4184,7 +4184,7 @@ namespace ClassicUO.Network
                             byte map = p.ReadByte();
                             int hits = type == 1 ? 0 : p.ReadByte();
 
-                            World.WMapManager.AddOrUpdate(serial, x, y, hits, map, type == 0x02);
+                            World.WMapManager.AddOrUpdate(serial, x, y, hits, map, type == 0x02, null, true);
                         }
                     }
 

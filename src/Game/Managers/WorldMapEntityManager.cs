@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using ClassicUO.Network;
 using System.Collections.Generic;
 
 namespace ClassicUO.Game.Managers
@@ -65,14 +66,38 @@ namespace ClassicUO.Game.Managers
         /// <summary>
         /// If WorldMapGump is not visible, disable it
         /// </summary>
-        public bool Enabled { get; set; }
+        public bool Enabled { get; private set; }
 
- 
-        public void AddOrUpdate(uint serial, int x, int y, int hp, int map, bool isguild, string name = null)
+        public uint LastPacketSend, LastPacketRecv;
+
+
+        public void SetEnable(bool v)
         {
+            if (LastPacketRecv < Time.Ticks)
+            {
+                Enabled = false;
+            }
+            else
+            { 
+                Enabled = v; 
+            }
+        }
+ 
+        public void AddOrUpdate(uint serial, int x, int y, int hp, int map, bool isguild, string name = null, bool from_packet = false)
+        {
+            if (from_packet)
+            {
+                LastPacketRecv = Time.Ticks + 10000;
+            }
+
+            if (LastPacketRecv < Time.Ticks)
+            {
+                Enabled = false;
+            }
+
             if (!Enabled)
                 return;
-
+        
             if (!Entities.TryGetValue(serial, out var entity) || entity == null)
             {
                 entity = new WMapEntity(serial)
@@ -138,6 +163,34 @@ namespace ClassicUO.Game.Managers
             Entities.TryGetValue(serial, out var entity);
 
             return entity;
+        }
+
+
+        public void RequestServerPartyGuildInfo(bool force = false)
+        {
+            if (World.InGame && LastPacketSend < Time.Ticks)
+            {
+                LastPacketSend = Time.Ticks + 250;
+
+                NetClient.Socket.Send(new PQueryGuildPosition());
+
+                if (World.Party != null && World.Party.Leader != 0)
+                {
+                    foreach (var e in World.Party.Members)
+                    {
+                        if (e != null && SerialHelper.IsValid(e.Serial))
+                        {
+                            var mob = World.Mobiles.Get(e.Serial);
+
+                            if (mob == null || mob.Distance > World.ClientViewRange)
+                            {
+                                NetClient.Socket.Send(new PQueryPartyPosition());
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public void Clear()
