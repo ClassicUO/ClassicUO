@@ -2911,7 +2911,7 @@ namespace ClassicUO.Network
 
                 while (true_length < length)
                 {
-                    if (((buffer[true_length++] << 8) | buffer[true_length++]) << 1 == '\0')
+                    if (((buffer[index + true_length++] << 8) | buffer[index + true_length++]) << 1 == '\0')
                         break;
                 }
 
@@ -4061,7 +4061,7 @@ namespace ClassicUO.Network
 
                     while (true_length < length)
                     {
-                        if (((decData[true_length++] << 8) | decData[true_length++]) << 1 == '\0')
+                        if (((decData[index + true_length++] << 8) | decData[index + true_length++]) << 1 == '\0')
                             break;
                     }
 
