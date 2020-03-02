@@ -2907,7 +2907,15 @@ namespace ClassicUO.Network
             for (int i = 0, index = p.Position; i < textLinesCount; i++)
             {
                 int length = ((buffer[index++] << 8) | buffer[index++]) << 1;
-                lines[i] = Encoding.BigEndianUnicode.GetString(buffer, index, length);
+                int true_length = 0;
+
+                while (true_length < length)
+                {
+                    if (((buffer[true_length++] << 8) | buffer[true_length++]) << 1 == '\0')
+                        break;
+                }
+
+                lines[i] = Encoding.BigEndianUnicode.GetString(buffer, index, true_length);
                 index += length;
             }
 
@@ -4048,7 +4056,17 @@ namespace ClassicUO.Network
                 for (int i = 0, index = 0; i < linesNum; i++)
                 {
                     int length = ((decData[index++] << 8) | decData[index++]) << 1;
-                    lines[i] = Encoding.BigEndianUnicode.GetString(decData, index, length);
+
+                    int true_length = 0;
+
+                    while (true_length < length)
+                    {
+                        if (((decData[true_length++] << 8) | decData[true_length++]) << 1 == '\0')
+                            break;
+                    }
+
+                    lines[i] = Encoding.BigEndianUnicode.GetString(decData, index, true_length);
+
                     index += length;
                 }
             }
