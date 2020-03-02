@@ -62,7 +62,7 @@ namespace ClassicUO.Game.UI.Gumps
             Load();
             OnResize();
 
-            World.WMapManager.Enabled = true;
+            World.WMapManager.SetEnable(true);
             BuildGump();
         }
 
@@ -235,42 +235,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Load();
             }
 
-            if (World.InGame && _nextQueryPacket < Time.Ticks)
-            {
-                _nextQueryPacket = Time.Ticks + 250;
-
-                //foreach (var m in World.WMapManager.Entities.Values)
-                //{
-                //    if (m.IsGuild)
-                //    {
-                //        var mob = World.Mobiles.Get(m.Serial);
-
-                //        if (mob == null)
-                //        {
-
-                //        }
-                //    }
-                //}
-
-                NetClient.Socket.Send(new PQueryGuildPosition());
-
-                if (World.Party != null && World.Party.Leader != 0)
-                {
-                    foreach (var e in World.Party.Members)
-                    {
-                        if (e != null && SerialHelper.IsValid(e.Serial))
-                        {
-                            var mob = World.Mobiles.Get(e.Serial);
-
-                            if (mob == null || mob.Distance > World.ClientViewRange)
-                            {
-                                NetClient.Socket.Send(new PQueryPartyPosition());
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
+            World.WMapManager.RequestServerPartyGuildInfo();
         }
 
         private unsafe Task Load()
@@ -848,7 +813,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            World.WMapManager.Enabled = false;
+            World.WMapManager.SetEnable(false);
+
             UIManager.GameCursor.IsDraggingCursorForced = false;
 
             _mapTexture?.Dispose();
