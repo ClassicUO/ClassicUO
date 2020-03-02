@@ -197,14 +197,14 @@ namespace ClassicUO.Game
 
                     if (mob.IsDestroyed)
                         _toRemove.Add(mob);
-                    else if (mob.NotorietyFlag == NotorietyFlag.Ally)
+                    else if (mob.NotorietyFlag == NotorietyFlag.Ally || (World.Party != null && World.Party.Contains(mob.Serial)))
                         WMapManager.AddOrUpdate(
                             mob.Serial,
                             mob.X, 
                             mob.Y, 
                             Utility.MathHelper.PercetangeOf(mob.Hits, mob.HitsMax),
-                            MapIndex, 
-                            true,
+                            MapIndex,
+                            mob.NotorietyFlag == NotorietyFlag.Ally,
                             mob.Name);
                 }
 
