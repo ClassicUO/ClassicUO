@@ -61,38 +61,32 @@ namespace ClassicUO.Game.Managers
 
         private readonly List<WMapEntity> _toRemove = new List<WMapEntity>();
 
-        private uint _lastUpdate;
+        private uint _lastUpdate, _lastPacketSend, _lastPacketRecv;
 
         /// <summary>
         /// If WorldMapGump is not visible, disable it
         /// </summary>
         public bool Enabled { get; private set; }
 
-        public uint LastPacketSend, LastPacketRecv;
 
 
         public void SetEnable(bool v)
         {
-            if (LastPacketRecv < Time.Ticks)
-            {
-                Enabled = false;
-            }
-            else
-            { 
-                Enabled = v; 
-            }
+            Enabled = v;
+
+            if (v)
+                RequestServerPartyGuildInfo(true);
         }
  
         public void AddOrUpdate(uint serial, int x, int y, int hp, int map, bool isguild, string name = null, bool from_packet = false)
         {
             if (from_packet)
             {
-                LastPacketRecv = Time.Ticks + 10000;
+                _lastPacketRecv = Time.Ticks + 10000;
             }
-
-            if (LastPacketRecv < Time.Ticks)
+            else if (_lastPacketRecv < Time.Ticks)
             {
-                Enabled = false;
+                return;
             }
 
             if (!Enabled)
@@ -168,9 +162,12 @@ namespace ClassicUO.Game.Managers
 
         public void RequestServerPartyGuildInfo(bool force = false)
         {
-            if (World.InGame && LastPacketSend < Time.Ticks)
+            if (!force && !Enabled)
+                return;
+
+            if (World.InGame && _lastPacketSend < Time.Ticks)
             {
-                LastPacketSend = Time.Ticks + 250;
+                _lastPacketSend = Time.Ticks + (uint) (_lastPacketRecv < Time.Ticks ? 2000 : 250);
 
                 NetClient.Socket.Send(new PQueryGuildPosition());
 
