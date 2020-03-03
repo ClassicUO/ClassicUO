@@ -726,7 +726,10 @@ namespace ClassicUO.Network
             WriteBytes(MessageManager.PromptData.Data, 0, 8);
             WriteUInt((uint) (cancel ? 0 : 1));
             WriteASCII(lang, 3);
-            WriteUnicode(text);
+            WriteUnicode(text, text.Length);
+            //This must be terminated with EXACTLY one null byte, unlike most unicode-containing packets which are terminated with two.
+            //Some servers are fussy about this and will reject the packet otherwise!
+            WriteByte(0x00);
         }
     }
 
