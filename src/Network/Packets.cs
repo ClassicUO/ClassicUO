@@ -453,7 +453,7 @@ namespace ClassicUO.Network
             }
             else
             {
-                WriteUnicode(text, 14 + text.Length * 2);
+                WriteUnicode(text);
             }
         }
     }
