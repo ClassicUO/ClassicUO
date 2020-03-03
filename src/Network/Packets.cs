@@ -198,24 +198,25 @@ namespace ClassicUO.Network
                 WriteUShort(0x00);
             }
 
-            if (Client.Version >= ClientVersion.CV_70160)
-            {
-                ushort location = (ushort) cityIndex;
+            WriteUShort((ushort) cityIndex);
+            WriteUShort(0x0000);
+            WriteUShort((ushort) slot);
 
-                WriteUShort(location);
-                WriteUShort(0x0000);
-                WriteUShort((ushort) slot);
-            }
-            else
-            {
-                WriteByte((byte) serverIndex);
-                if (Client.Version < ClientVersion.CV_70130 && cityIndex > 0)
-                    cityIndex--;
+            //if (Client.Version >= ClientVersion.CV_70160)
+            //{
+            //    WriteUShort((ushort) cityIndex);
+            //    WriteUShort(0x0000);
+            //    WriteUShort((ushort) slot);
+            //}
+            //else
+            //{
+            //    WriteByte((byte) serverIndex);
+            //    if (Client.Version < ClientVersion.CV_70130 && cityIndex > 0)
+            //        cityIndex--;
 
-                WriteByte((byte) cityIndex);
-                WriteUInt(slot);
-
-            }
+            //    WriteByte((byte) cityIndex);
+            //    WriteUInt(slot);
+            //}
 
             WriteUInt(clientIP);
 
