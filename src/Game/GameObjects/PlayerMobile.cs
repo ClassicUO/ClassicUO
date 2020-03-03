@@ -1380,14 +1380,10 @@ namespace ClassicUO.Game.GameObjects
                 (Client.Version >= ClientVersion.CV_60142 && IsParalyzed))
                 return false;
 
-            if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead)
+            run |= ProfileManager.Current.AlwaysRun;
+
+            if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead || IsHidden && ProfileManager.Current.AlwaysRunUnlessHidden)
                 run = false;
-            else if (!run)
-            {
-                if (!IsHidden ||
-                    IsHidden && !ProfileManager.Current.AlwaysRunUnlessHidden)
-                    run = ProfileManager.Current.AlwaysRun;
-            }
 
             int x = X;
             int y = Y;
