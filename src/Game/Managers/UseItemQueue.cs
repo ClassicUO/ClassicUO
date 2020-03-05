@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Interfaces;
 using ClassicUO.Utility.Collections;
 
@@ -70,6 +71,21 @@ namespace ClassicUO.Game.Managers
         public void Clear()
         {
             _actions.Clear();
+        }
+
+        public void ClearCorpses()
+        {
+            for (int i = 0; i < _actions.Count; i++)
+            {
+                Entity entity = World.Get(_actions[i]);
+
+                if (entity == null)
+                    continue;
+
+                if(entity is Item it && it.IsCorpse)
+                    _actions.RemoveAt(i--);
+
+            }
         }
     }
 }

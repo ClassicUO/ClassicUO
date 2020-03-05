@@ -624,6 +624,11 @@ namespace ClassicUO.Game.Scenes
             }
 
             Macros.Update();
+
+            if (((ProfileManager.Current.CorpseOpenOptions == 1 || ProfileManager.Current.CorpseOpenOptions == 3) && TargetManager.IsTargeting) ||
+                ((ProfileManager.Current.CorpseOpenOptions == 2 || ProfileManager.Current.CorpseOpenOptions == 3) && World.Player.IsHidden))
+                    _useItemQueue.ClearCorpses();
+
             _useItemQueue.Update(totalMS, frameMS);
 
             if (!IsMouseOverViewport)
