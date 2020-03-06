@@ -23,6 +23,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 using ClassicUO.Configuration;
@@ -132,6 +133,7 @@ namespace ClassicUO
             base.UnloadContent();
         }
 
+        [MethodImpl(256)]
         public T GetScene<T>() where T : Scene
         {
             return _scene as T;
