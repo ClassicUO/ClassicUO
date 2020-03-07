@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using ClassicUO.Game.Data;
@@ -51,6 +52,10 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _freeView;
         private int _mapIndex;
         private bool _showPartyMembers = true;
+
+        private StringBuilder _sb =  new StringBuilder();
+        private Label _coords;
+        private bool _showCoordinates = true;
 
         public WorldMapGump() : base(400, 400, 100, 100, 0, 0)
         {
@@ -86,6 +91,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (int.TryParse(xml.GetAttribute("zoomindex"), out int value))
                 _zoomIndex = (value >= 0 && value < _zooms.Length) ? value : 4;
 
+            _showCoordinates = bool.Parse(xml.GetAttribute("showcoordinates"));
+
             BuildGump();
         }
 
@@ -101,6 +108,7 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("freeview", _freeView.ToString());
             writer.WriteAttributeString("showpartymembers", _showPartyMembers.ToString());
             writer.WriteAttributeString("zoomindex", _zoomIndex.ToString());
+            writer.WriteAttributeString("showcoordinates", _showCoordinates.ToString());
         }
 
         private void BuildGump()
@@ -111,13 +119,18 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu = new ContextMenuControl();
             ContextMenu.Add("Flip map", () => _flipMap = !_flipMap, true, _flipMap);
             ContextMenu.Add("Top Most", () => TopMost = !TopMost, true, _isTopMost);
-            ContextMenu.Add("Free view", () =>
-            {
-                FreeView = !FreeView;
-            }, true, _freeView);
+            ContextMenu.Add("Free view", () => { FreeView = !FreeView; }, true, _freeView);
             ContextMenu.Add("Show party members", () => { _showPartyMembers = !_showPartyMembers; }, true, _showPartyMembers);
+            ContextMenu.Add("Show coordinates", () => { _showCoordinates = !_showCoordinates; }, true, _showCoordinates);
             ContextMenu.Add("", null);
             ContextMenu.Add("Close", Dispose);
+
+
+            Add(_coords = new Label("", true, 1001, font: 1, style: FontStyle.BlackBorder)
+            {
+                X = 10,
+                Y = 5
+            });
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
@@ -460,6 +473,17 @@ namespace ClassicUO.Game.UI.Gumps
                     ScissorStack.PopScissors();
                 }
 
+            }
+
+            if (_showCoordinates)
+            {
+                _sb.Clear();
+                _sb.AppendLine($"{World.Player.X}, {World.Player.Y} ({World.Player.Z})");
+                _coords.Text = _sb.ToString();
+            }
+            else
+            {
+                _coords.Text = string.Empty;
             }
 
             //foreach (House house in World.HouseManager.Houses)
