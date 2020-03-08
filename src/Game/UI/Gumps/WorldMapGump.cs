@@ -476,18 +476,6 @@ namespace ClassicUO.Game.UI.Gumps
                     batcher.EnableScissorTest(false);
                     ScissorStack.PopScissors();
                 }
-
-            }
-
-            if (_showCoordinates)
-            {
-                _sb.Clear();
-                _sb.AppendLine($"{World.Player.X}, {World.Player.Y} ({World.Player.Z})");
-                _coords.Text = _sb.ToString();
-            }
-            else
-            {
-                _coords.Text = string.Empty;
             }
 
             //foreach (House house in World.HouseManager.Houses)
@@ -504,6 +492,17 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void DrawAll(UltimaBatcher2D batcher, int gX, int gY, int halfWidth, int halfHeight)
         {
+            if (_showCoordinates)
+            {
+                _sb.Clear();
+                _sb.AppendLine($"{World.Player.X}, {World.Player.Y} ({World.Player.Z})");
+                _coords.Text = _sb.ToString();
+            }
+            else
+            {
+                _coords.Text = string.Empty;
+            }
+
             if (_showMobiles)
             {
                 foreach (Mobile mob in World.Mobiles)
