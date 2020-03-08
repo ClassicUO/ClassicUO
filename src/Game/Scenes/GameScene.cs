@@ -309,7 +309,7 @@ namespace ClassicUO.Game.Scenes
             {
             }
 
-            _renderList = null;
+            ////_renderList = null;
 
             TargetManager.ClearTargetingWithoutTargetCancelPacket();
 
