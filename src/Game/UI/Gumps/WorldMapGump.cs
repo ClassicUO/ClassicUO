@@ -53,9 +53,11 @@ namespace ClassicUO.Game.UI.Gumps
         private int _mapIndex;
         private bool _showPartyMembers = true;
 
-        private StringBuilder _sb =  new StringBuilder();
         private Label _coords;
-        private bool _showCoordinates = false;
+        private bool _showCoordinates;
+        private int _lastX;
+        private int _lastY;
+        private int _lastZ;
         private bool _showMobiles = true;
         private bool _showPlayerName = true;
         private bool _showPlayerBar = true;
@@ -505,9 +507,13 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_showCoordinates)
             {
-                _sb.Clear();
-                _sb.AppendLine($"{World.Player.X}, {World.Player.Y} ({World.Player.Z})");
-                _coords.Text = _sb.ToString();
+                if (World.Player.X != _lastX || World.Player.Y != _lastY || World.Player.Z != _lastZ)
+                {
+                    _coords.Text = $"{World.Player.X}, {World.Player.Y} ({World.Player.Z})";
+                    _lastX = World.Player.X;
+                    _lastY = World.Player.Y;
+                    _lastZ = World.Player.Z;
+                }
             }
             else
             {
