@@ -55,7 +55,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private StringBuilder _sb =  new StringBuilder();
         private Label _coords;
-        private bool _showCoordinates = true;
+        private bool _showCoordinates = false;
+        private bool _showMobiles = true;
 
         public WorldMapGump() : base(400, 400, 100, 100, 0, 0)
         {
@@ -92,6 +93,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _zoomIndex = (value >= 0 && value < _zooms.Length) ? value : 4;
 
             _showCoordinates = bool.Parse(xml.GetAttribute("showcoordinates"));
+            _showMobiles = bool.Parse(xml.GetAttribute("showmobiles"));
 
             BuildGump();
         }
@@ -109,6 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("showpartymembers", _showPartyMembers.ToString());
             writer.WriteAttributeString("zoomindex", _zoomIndex.ToString());
             writer.WriteAttributeString("showcoordinates", _showCoordinates.ToString());
+            writer.WriteAttributeString("showmobiles", _showMobiles.ToString());
         }
 
         private void BuildGump()
@@ -121,6 +124,7 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add("Top Most", () => TopMost = !TopMost, true, _isTopMost);
             ContextMenu.Add("Free view", () => { FreeView = !FreeView; }, true, _freeView);
             ContextMenu.Add("Show party members", () => { _showPartyMembers = !_showPartyMembers; }, true, _showPartyMembers);
+            ContextMenu.Add("Show mobiles", () => { _showMobiles = !_showMobiles; }, true, _showMobiles);
             ContextMenu.Add("Show coordinates", () => { _showCoordinates = !_showCoordinates; }, true, _showCoordinates);
             ContextMenu.Add("", null);
             ContextMenu.Add("Close", Dispose);
@@ -500,29 +504,32 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void DrawAll(UltimaBatcher2D batcher, int gX, int gY, int halfWidth, int halfHeight)
         {
-            foreach (Mobile mob in World.Mobiles)
+            if (_showMobiles)
             {
-                if (mob == World.Player)
-                    continue;
-
-                if (mob.NotorietyFlag != NotorietyFlag.Ally)
-                    DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Red);
-                else
+                foreach (Mobile mob in World.Mobiles)
                 {
-                    if (mob != null && mob.Distance <= World.ClientViewRange)
-                    {
-                        var wme = World.WMapManager.GetEntity(mob);
-                        if (wme != null)
-                            wme.Name = mob.Name;
-                        else
-                            DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Lime, true, true, true);
-                    }
+                    if (mob == World.Player)
+                        continue;
+
+                    if (mob.NotorietyFlag != NotorietyFlag.Ally)
+                        DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Red);
                     else
                     {
-                        var wme = World.WMapManager.GetEntity(mob.Serial);
-                        if (wme != null && wme.IsGuild)
+                        if (mob != null && mob.Distance <= World.ClientViewRange)
                         {
-                            DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom);
+                            var wme = World.WMapManager.GetEntity(mob);
+                            if (wme != null)
+                                wme.Name = mob.Name;
+                            else
+                                DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Lime, true, true, true);
+                        }
+                        else
+                        {
+                            var wme = World.WMapManager.GetEntity(mob.Serial);
+                            if (wme != null && wme.IsGuild)
+                            {
+                                DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom);
+                            }
                         }
                     }
                 }
