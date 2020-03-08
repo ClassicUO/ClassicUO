@@ -57,6 +57,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Label _coords;
         private bool _showCoordinates = false;
         private bool _showMobiles = true;
+        private bool _showPlayerName = true;
+        private bool _showPlayerBar = true;
 
         public WorldMapGump() : base(400, 400, 100, 100, 0, 0)
         {
@@ -95,6 +97,9 @@ namespace ClassicUO.Game.UI.Gumps
             _showCoordinates = bool.Parse(xml.GetAttribute("showcoordinates"));
             _showMobiles = bool.Parse(xml.GetAttribute("showmobiles"));
 
+            _showPlayerName = bool.Parse(xml.GetAttribute("showplayername"));
+            _showPlayerBar = bool.Parse(xml.GetAttribute("showplayerbar"));
+
             BuildGump();
         }
 
@@ -112,6 +117,8 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("zoomindex", _zoomIndex.ToString());
             writer.WriteAttributeString("showcoordinates", _showCoordinates.ToString());
             writer.WriteAttributeString("showmobiles", _showMobiles.ToString());
+            writer.WriteAttributeString("showplayername", _showPlayerName.ToString());
+            writer.WriteAttributeString("showplayerbar", _showPlayerBar.ToString());
         }
 
         private void BuildGump()
@@ -123,9 +130,13 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add("Flip map", () => _flipMap = !_flipMap, true, _flipMap);
             ContextMenu.Add("Top Most", () => TopMost = !TopMost, true, _isTopMost);
             ContextMenu.Add("Free view", () => { FreeView = !FreeView; }, true, _freeView);
+            ContextMenu.Add("", null);
             ContextMenu.Add("Show party members", () => { _showPartyMembers = !_showPartyMembers; }, true, _showPartyMembers);
             ContextMenu.Add("Show mobiles", () => { _showMobiles = !_showMobiles; }, true, _showMobiles);
             ContextMenu.Add("Show coordinates", () => { _showCoordinates = !_showCoordinates; }, true, _showCoordinates);
+            ContextMenu.Add("", null);
+            ContextMenu.Add("Show your name", () => { _showPlayerName = !_showPlayerName; }, true, _showPlayerName);
+            ContextMenu.Add("Show your healthbar", () => { _showPlayerBar = !_showPlayerBar; }, true, _showPlayerBar);
             ContextMenu.Add("", null);
             ContextMenu.Add("Close", Dispose);
 
@@ -572,7 +583,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            DrawMobile(batcher, World.Player, gX, gY, halfWidth, halfHeight, Zoom, Color.White, true, false, true);
+            DrawMobile(batcher, World.Player, gX, gY, halfWidth, halfHeight, Zoom, Color.White, _showPlayerName, false, _showPlayerBar);
         }
 
         private void DrawMobile(UltimaBatcher2D batcher, Mobile mobile, int x, int y, int width, int height, float zoom, Color color, bool drawName = false, bool isparty = false, bool drawHpBar = false)
