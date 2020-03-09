@@ -117,5 +117,8 @@ namespace ClassicUO.Game
         public const byte MAX_CONTAINER_SIZE_PERC = 200;
 
         public const int WEATHER_TIMER = 6 * 60 * 1000;
+
+        public const int PREDICTABLE_CHUNKS = 500;
+        public const int PREDICTABLE_TILE_COUNT = 64 * PREDICTABLE_CHUNKS;
     }
 }

@@ -24,6 +24,7 @@ using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Map
 {
@@ -31,30 +32,44 @@ namespace ClassicUO.Game.Map
     {
         private static readonly Queue<Chunk> _pool = new Queue<Chunk>();
 
+        static Chunk()
+        {
+            for (int i = 0; i < Constants.PREDICTABLE_CHUNKS; i++)
+                _pool.Enqueue(new Chunk(0xFFFF, 0xFFFF));
+        }
+
         public static Chunk Create(ushort x, ushort y)
         {
+            Chunk c;
+
             if (_pool.Count != 0)
             {
-                Chunk c = _pool.Dequeue();
+                c = _pool.Dequeue();
                 c.X = x;
                 c.Y = y;
                 c.LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
-
-                x <<= 3;
-                y <<= 3;
-
-                for (int i = 0; i < 8; i++)
-                {
-                    for (int j = 0; j < 8; j++)
-                    {
-                        Tile t = Tile.Create((ushort) (i + x), (ushort) (j + y));
-                        c.Tiles[i, j] = t;
-                    }
-                }
-
-                return c;
             }
-            return new Chunk(x, y);
+            else
+            {
+                Log.Debug(string.Intern("Created new Chunk"));
+
+                c = new Chunk(x, y);
+            }
+
+            x <<= 3;
+            y <<= 3;
+
+            for (int i = 0; i < 8; i++)
+            {
+                ushort tileX = (ushort) (i + x);
+
+                for (int j = 0; j < 8; j++)
+                {
+                    c.Tiles[i, j] = Tile.Create(tileX, (ushort) (j + y));
+                }
+            }
+
+            return c;
         }
 
 
@@ -64,19 +79,6 @@ namespace ClassicUO.Game.Map
             X = x;
             Y = y;
             Tiles = new Tile[8, 8];
-
-            x <<= 3;
-            y <<= 3;
-
-            for (int i = 0; i < 8; i++)
-            {
-                for (int j = 0; j < 8; j++)
-                {
-                    Tile t = Tile.Create((ushort)(i + x), (ushort)(j + y));
-                    Tiles[i, j] = t;
-                }
-            }
-
             LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
         }
 
@@ -102,6 +104,8 @@ namespace ClassicUO.Game.Map
 
                 for (int x = 0; x < 8; x++)
                 {
+                    ushort tileX = (ushort) (bx + x);
+
                     for (int y = 0; y < 8; y++)
                     {
                         int pos = (y << 3) + x;
@@ -112,7 +116,6 @@ namespace ClassicUO.Game.Map
                         land.AverageZ = z;
                         land.MinZ = z;
 
-                        ushort tileX = (ushort) (bx + x);
                         ushort tileY = (ushort) (by + y);
 
                         land.ApplyStrech(tileX, tileY, z);
@@ -222,6 +225,8 @@ namespace ClassicUO.Game.Map
 
                 for (int x = 0; x < 8; x++)
                 {
+                    ushort tileX = (ushort) (bx + x);
+
                     for (int y = 0; y < 8; y++)
                     {
                         int pos = (y << 3) + x;
@@ -232,7 +237,6 @@ namespace ClassicUO.Game.Map
                         land.AverageZ = z;
                         land.MinZ = z;
 
-                        ushort tileX = (ushort) (bx + x);
                         ushort tileY = (ushort) (by + y);
 
                         land.ApplyStrech(tileX, tileY, z);

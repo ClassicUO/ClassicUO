@@ -28,6 +28,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -36,7 +37,7 @@ namespace ClassicUO.Game.GameObjects
         private static readonly Queue<Static> _pool = new Queue<Static>();
         static Static()
         {
-            for (int i = 0; i < 5000; i++)
+            for (int i = 0; i < Constants.PREDICTABLE_TILE_COUNT; i++)
                 _pool.Enqueue(new Static());
         }
 
@@ -85,6 +86,8 @@ namespace ClassicUO.Game.GameObjects
 
                 return s;
             }
+
+            Log.Trace(string.Intern("Created new Static"));
 
             return new Static(graphic, hue, index);
         }
