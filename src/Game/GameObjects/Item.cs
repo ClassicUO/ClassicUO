@@ -29,6 +29,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
 
@@ -112,6 +113,8 @@ namespace ClassicUO.Game.GameObjects
 
                 return i;
             }
+
+            Log.Trace(string.Intern("Created new Item"));
 
             return new Item(serial);
         }

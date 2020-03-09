@@ -30,6 +30,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
@@ -119,7 +120,11 @@ namespace ClassicUO.Game.GameObjects
                     mobile.Items = new EntityCollection<Item>();
 
                 mobile.CalculateRandomIdleTime();
+
+                return mobile;
             }
+
+            Log.Trace(string.Intern("Created new Mobile"));
 
             return new Mobile(serial);
         }

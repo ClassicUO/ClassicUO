@@ -28,6 +28,8 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
@@ -97,6 +99,8 @@ namespace ClassicUO.Game.GameObjects
 
                 return m;
             }
+
+            Log.Trace(string.Intern("Created new Multi"));
 
             return new Multi(graphic);
         }
