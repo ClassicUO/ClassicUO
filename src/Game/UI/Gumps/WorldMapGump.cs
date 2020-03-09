@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using ClassicUO.Game.Data;
@@ -51,6 +52,15 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _freeView;
         private int _mapIndex;
         private bool _showPartyMembers = true;
+
+        private Label _coords;
+        private bool _showCoordinates;
+        private int _lastX;
+        private int _lastY;
+        private int _lastZ;
+        private bool _showMobiles = true;
+        private bool _showPlayerName = true;
+        private bool _showPlayerBar = true;
 
         public WorldMapGump() : base(400, 400, 100, 100, 0, 0)
         {
@@ -86,6 +96,12 @@ namespace ClassicUO.Game.UI.Gumps
             if (int.TryParse(xml.GetAttribute("zoomindex"), out int value))
                 _zoomIndex = (value >= 0 && value < _zooms.Length) ? value : 4;
 
+            _showCoordinates = bool.Parse(xml.GetAttribute("showcoordinates"));
+            _showMobiles = bool.Parse(xml.GetAttribute("showmobiles"));
+
+            _showPlayerName = bool.Parse(xml.GetAttribute("showplayername"));
+            _showPlayerBar = bool.Parse(xml.GetAttribute("showplayerbar"));
+
             BuildGump();
         }
 
@@ -101,6 +117,10 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("freeview", _freeView.ToString());
             writer.WriteAttributeString("showpartymembers", _showPartyMembers.ToString());
             writer.WriteAttributeString("zoomindex", _zoomIndex.ToString());
+            writer.WriteAttributeString("showcoordinates", _showCoordinates.ToString());
+            writer.WriteAttributeString("showmobiles", _showMobiles.ToString());
+            writer.WriteAttributeString("showplayername", _showPlayerName.ToString());
+            writer.WriteAttributeString("showplayerbar", _showPlayerBar.ToString());
         }
 
         private void BuildGump()
@@ -111,13 +131,23 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu = new ContextMenuControl();
             ContextMenu.Add("Flip map", () => _flipMap = !_flipMap, true, _flipMap);
             ContextMenu.Add("Top Most", () => TopMost = !TopMost, true, _isTopMost);
-            ContextMenu.Add("Free view", () =>
-            {
-                FreeView = !FreeView;
-            }, true, _freeView);
+            ContextMenu.Add("Free view", () => { FreeView = !FreeView; }, true, _freeView);
+            ContextMenu.Add("", null);
             ContextMenu.Add("Show party members", () => { _showPartyMembers = !_showPartyMembers; }, true, _showPartyMembers);
+            ContextMenu.Add("Show mobiles", () => { _showMobiles = !_showMobiles; }, true, _showMobiles);
+            ContextMenu.Add("Show coordinates", () => { _showCoordinates = !_showCoordinates; }, true, _showCoordinates);
+            ContextMenu.Add("", null);
+            ContextMenu.Add("Show your name", () => { _showPlayerName = !_showPlayerName; }, true, _showPlayerName);
+            ContextMenu.Add("Show your healthbar", () => { _showPlayerBar = !_showPlayerBar; }, true, _showPlayerBar);
             ContextMenu.Add("", null);
             ContextMenu.Add("Close", Dispose);
+
+
+            Add(_coords = new Label("", true, 1001, font: 1, style: FontStyle.BlackBorder)
+            {
+                X = 10,
+                Y = 5
+            });
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
@@ -459,7 +489,6 @@ namespace ClassicUO.Game.UI.Gumps
                     batcher.EnableScissorTest(false);
                     ScissorStack.PopScissors();
                 }
-
             }
 
             //foreach (House house in World.HouseManager.Houses)
@@ -476,29 +505,47 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void DrawAll(UltimaBatcher2D batcher, int gX, int gY, int halfWidth, int halfHeight)
         {
-            foreach (Mobile mob in World.Mobiles)
+            if (_showCoordinates)
             {
-                if (mob == World.Player)
-                    continue;
-
-                if (mob.NotorietyFlag != NotorietyFlag.Ally)
-                    DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Red);
-                else
+                if (World.Player.X != _lastX || World.Player.Y != _lastY || World.Player.Z != _lastZ)
                 {
-                    if (mob != null && mob.Distance <= World.ClientViewRange)
-                    {
-                        var wme = World.WMapManager.GetEntity(mob);
-                        if (wme != null)
-                            wme.Name = mob.Name;
-                        else
-                            DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Lime, true, true, true);
-                    }
+                    _coords.Text = $"{World.Player.X}, {World.Player.Y} ({World.Player.Z})";
+                    _lastX = World.Player.X;
+                    _lastY = World.Player.Y;
+                    _lastZ = World.Player.Z;
+                }
+            }
+            else
+            {
+                _coords.Text = string.Empty;
+            }
+
+            if (_showMobiles)
+            {
+                foreach (Mobile mob in World.Mobiles)
+                {
+                    if (mob == World.Player)
+                        continue;
+
+                    if (mob.NotorietyFlag != NotorietyFlag.Ally)
+                        DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Red);
                     else
                     {
-                        var wme = World.WMapManager.GetEntity(mob.Serial);
-                        if (wme != null && wme.IsGuild)
+                        if (mob != null && mob.Distance <= World.ClientViewRange)
                         {
-                            DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom);
+                            var wme = World.WMapManager.GetEntity(mob);
+                            if (wme != null)
+                                wme.Name = mob.Name;
+                            else
+                                DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Lime, true, true, true);
+                        }
+                        else
+                        {
+                            var wme = World.WMapManager.GetEntity(mob.Serial);
+                            if (wme != null && wme.IsGuild)
+                            {
+                                DrawWMEntity(batcher, wme, gX, gY, halfWidth, halfHeight, Zoom);
+                            }
                         }
                     }
                 }
@@ -542,7 +589,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            DrawMobile(batcher, World.Player, gX, gY, halfWidth, halfHeight, Zoom, Color.White, true, false, true);
+            DrawMobile(batcher, World.Player, gX, gY, halfWidth, halfHeight, Zoom, Color.White, _showPlayerName, false, _showPlayerBar);
         }
 
         private void DrawMobile(UltimaBatcher2D batcher, Mobile mobile, int x, int y, int width, int height, float zoom, Color color, bool drawName = false, bool isparty = false, bool drawHpBar = false)
