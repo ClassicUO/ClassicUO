@@ -530,7 +530,27 @@ namespace ClassicUO.Game.UI.Gumps
                     _bars[0].IsVisible = true;
                 }
 
+                if (TargetManager.LastTarget != World.Player && !_outOfRange)
+                {
+                    if (mobile == TargetManager.LastTarget)
+                    {
+                        _border[0].LineColor = HPB_COLOR_RED;
 
+                        if (_border.Length >= 3)
+                        {
+                            _border[1].LineColor = _border[2].LineColor = _border[3].LineColor = HPB_COLOR_RED;
+                        }
+                    }
+                    else if (mobile != TargetManager.LastTarget)
+                    {
+                        _border[0].LineColor = HPB_COLOR_BLACK;
+
+                        if (_border.Length >= 3)
+                        {
+                            _border[1].LineColor = _border[2].LineColor = _border[3].LineColor = HPB_COLOR_BLACK;
+                        }
+                    }
+                }
 
                 if (mobile != null)
                 {
