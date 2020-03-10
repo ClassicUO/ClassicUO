@@ -266,6 +266,8 @@ namespace ClassicUO.Game.UI.Gumps
                     return World.Player.StatsCap.ToString();
                 case InfoBarVars.NameNotoriety:
                     return World.Player.Name;
+                case InfoBarVars.TithingPoints:
+                    return World.Player.TithingPoints.ToString();
                 default:
                     return "";
             }
