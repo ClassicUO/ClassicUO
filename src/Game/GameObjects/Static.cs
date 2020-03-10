@@ -87,7 +87,7 @@ namespace ClassicUO.Game.GameObjects
                 return s;
             }
 
-            Log.Trace(string.Intern("Created new Static"));
+            Log.Debug(string.Intern("Created new Static"));
 
             return new Static(graphic, hue, index);
         }

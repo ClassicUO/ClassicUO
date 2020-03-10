@@ -100,7 +100,7 @@ namespace ClassicUO.Game.GameObjects
                 return m;
             }
 
-            Log.Trace(string.Intern("Created new Multi"));
+            Log.Debug(string.Intern("Created new Multi"));
 
             return new Multi(graphic);
         }
