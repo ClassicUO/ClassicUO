@@ -75,7 +75,7 @@ namespace ClassicUO.Game.GameObjects
                 return l;
             }
 
-            Log.Trace(string.Intern("Created new Land"));
+            Log.Debug(string.Intern("Created new Land"));
 
             return new Land(graphic);
         }

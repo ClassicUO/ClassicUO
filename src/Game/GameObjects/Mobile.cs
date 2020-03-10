@@ -124,7 +124,7 @@ namespace ClassicUO.Game.GameObjects
                 return mobile;
             }
 
-            Log.Trace(string.Intern("Created new Mobile"));
+            Log.Debug(string.Intern("Created new Mobile"));
 
             return new Mobile(serial);
         }

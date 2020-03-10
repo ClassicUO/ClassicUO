@@ -114,7 +114,7 @@ namespace ClassicUO.Game.GameObjects
                 return i;
             }
 
-            Log.Trace(string.Intern("Created new Item"));
+            Log.Debug(string.Intern("Created new Item"));
 
             return new Item(serial);
         }
