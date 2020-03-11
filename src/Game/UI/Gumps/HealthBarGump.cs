@@ -530,7 +530,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _bars[0].IsVisible = true;
                 }
 
-                if (TargetManager.LastTarget != World.Player && !_outOfRange && !mobile != null)
+                if (TargetManager.LastTarget != World.Player && !_outOfRange && mobile != null)
                 {
                     if (mobile == TargetManager.LastTarget)
                     {
