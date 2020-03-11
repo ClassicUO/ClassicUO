@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -92,7 +93,8 @@ namespace ClassicUO.Game.UI.Gumps
             Load();
             OnResize();
 
-            _mapFiles = Directory.GetFiles(_mapFilesPath, "*.map");
+            _mapFiles = Directory.GetFiles(_mapFilesPath, "*.map").Union(Directory.GetFiles(_mapFilesPath, "*.xml"))
+                .ToArray();
             LoadMarkers();
 
             World.WMapManager.SetEnable(true);
@@ -474,7 +476,8 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         GameActions.Print("Loading WorldMap labels..", 0x48);
 
-                        _mapFiles = Directory.GetFiles(_mapFilesPath, "*.map");
+                        _mapFiles = Directory.GetFiles(_mapFilesPath, "*.map")
+                            .Union(Directory.GetFiles(_mapFilesPath, "*.xml")).ToArray();
 
                         _markers.Clear();
 
@@ -483,51 +486,76 @@ namespace ClassicUO.Game.UI.Gumps
                             if (File.Exists(mapFile))
                             {
                                 GameActions.Print($"..{Path.GetFileName(mapFile)}", 0x48);
-                                using (StreamReader reader = new StreamReader(mapFile))
+
+                                if (Path.GetExtension(mapFile).Equals(".xml"))
                                 {
-                                    while (!reader.EndOfStream)
+                                    XmlTextReader reader = new XmlTextReader(mapFile);
+
+                                    while (reader.Read())
                                     {
-                                        string line = reader.ReadLine();
-
-                                        // ignore empty lines, and if UOAM, ignore the first line that always has a 3
-                                        if (string.IsNullOrEmpty(line) || line.Equals("3")) continue;
-
-                                        // Check for UOAM file
-                                        if (line.Substring(0, 1).Equals("+") || line.Substring(0, 1).Equals("-"))
+                                        if (reader.Name.Equals("Marker"))
                                         {
-                                            line = line.Substring(line.IndexOf(':') + 2);
-
-                                            string[] splits = line.Split(' ');
-
-                                            if (splits.Length <= 1) continue;
-
                                             WMapMarker marker = new WMapMarker
                                             {
-                                                X = int.Parse(splits[0]),
-                                                Y = int.Parse(splits[1]),
-                                                Name = string.Join(" ", splits, 3, splits.Length - 3),
+                                                X = int.Parse(reader.GetAttribute("X")),
+                                                Y = int.Parse(reader.GetAttribute("Y")),
+                                                Name = reader.GetAttribute("Name"),
                                                 MarkerId = Path.GetFileNameWithoutExtension(mapFile),
                                                 Color = Color.White
                                             };
 
                                             _markers.Add(marker);
                                         }
-                                        else // go go CSV
+                                    }
+                                }
+                                else
+                                {
+                                    using (StreamReader reader = new StreamReader(mapFile))
+                                    {
+                                        while (!reader.EndOfStream)
                                         {
-                                            string[] splits = line.Split(',');
+                                            string line = reader.ReadLine();
 
-                                            if (splits.Length <= 1) continue;
+                                            // ignore empty lines, and if UOAM, ignore the first line that always has a 3
+                                            if (string.IsNullOrEmpty(line) || line.Equals("3")) continue;
 
-                                            WMapMarker marker = new WMapMarker
+                                            // Check for UOAM file
+                                            if (line.Substring(0, 1).Equals("+") || line.Substring(0, 1).Equals("-"))
                                             {
-                                                X = int.Parse(splits[0]),
-                                                Y = int.Parse(splits[1]),
-                                                Name = splits[2],
-                                                MarkerId = Path.GetFileNameWithoutExtension(mapFile),
-                                                Color = splits.Length == 4 ? GetColor(splits[3]) : Color.White
-                                            };
+                                                line = line.Substring(line.IndexOf(':') + 2);
 
-                                            _markers.Add(marker);
+                                                string[] splits = line.Split(' ');
+
+                                                if (splits.Length <= 1) continue;
+
+                                                WMapMarker marker = new WMapMarker
+                                                {
+                                                    X = int.Parse(splits[0]),
+                                                    Y = int.Parse(splits[1]),
+                                                    Name = string.Join(" ", splits, 3, splits.Length - 3),
+                                                    MarkerId = Path.GetFileNameWithoutExtension(mapFile),
+                                                    Color = Color.White
+                                                };
+
+                                                _markers.Add(marker);
+                                            }
+                                            else // go go CSV
+                                            {
+                                                string[] splits = line.Split(',');
+
+                                                if (splits.Length <= 1) continue;
+
+                                                WMapMarker marker = new WMapMarker
+                                                {
+                                                    X = int.Parse(splits[0]),
+                                                    Y = int.Parse(splits[1]),
+                                                    Name = splits[2],
+                                                    MarkerId = Path.GetFileNameWithoutExtension(mapFile),
+                                                    Color = splits.Length == 4 ? GetColor(splits[3]) : Color.White
+                                                };
+
+                                                _markers.Add(marker);
+                                            }
                                         }
                                     }
                                 }
@@ -539,7 +567,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
         }
-
+        
         protected override void OnMouseWheel(MouseEventType delta)
         {
             if (delta == MouseEventType.WheelScrollUp)
@@ -840,8 +868,9 @@ namespace ClassicUO.Game.UI.Gumps
                 rotY < y ||
                 rotY > y + Height - 8 - DOT_SIZE)
                 return;
-            
-            batcher.Draw2D(Texture2DCache.GetTexture(marker.Color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE,
+
+            batcher.Draw2D(Texture2DCache.GetTexture(marker.Color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF,
+                DOT_SIZE,
                 DOT_SIZE, ref _hueVector);
 
             if (drawName && !string.IsNullOrEmpty(marker.Name))
@@ -869,8 +898,8 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_zoomIndex < 6) return;
                 //if (_currentMarkerCount > 50) return;
 
-                int xx = (int)(rotX - size.X / 2);
-                int yy = (int)(rotY - size.Y);
+                int xx = (int) (rotX - size.X / 2);
+                int yy = (int) (rotY - size.Y);
 
                 _hueVector.X = 0;
                 _hueVector.Y = 1;
