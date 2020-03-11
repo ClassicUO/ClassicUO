@@ -68,8 +68,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public ushort Graphic { get; }
 
-        public bool OnlyCenterTransparent { get; set; }
-
         public override void Update(double totalMS, double frameMS)
         {
             for (int i = 0; i < _gumpTexture.Length; i++)
@@ -83,17 +81,35 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            UOTexture[] th = _gumpTexture;
+            int th_0_width = _gumpTexture[0]?.Width ?? 0;
+            int th_0_height = _gumpTexture[0]?.Height ?? 0;
+            int th_1_width = _gumpTexture[1]?.Width ?? 0;
+            int th_1_height = _gumpTexture[1]?.Height ?? 0;
+            int th_2_width = _gumpTexture[2]?.Width ?? 0;
+            int th_2_height = _gumpTexture[2]?.Height ?? 0;
+            int th_3_width = _gumpTexture[3]?.Width ?? 0;
+            int th_3_height = _gumpTexture[3]?.Height ?? 0;
+            int th_4_width = _gumpTexture[4]?.Width ?? 0;
+            int th_4_height = _gumpTexture[4]?.Height ?? 0;
+            int th_5_width = _gumpTexture[5]?.Width ?? 0;
+            int th_5_height = _gumpTexture[5]?.Height ?? 0;
+            int th_6_width = _gumpTexture[6]?.Width ?? 0;
+            int th_6_height = _gumpTexture[6]?.Height ?? 0;
+            int th_7_width = _gumpTexture[7]?.Width ?? 0;
+            int th_7_height = _gumpTexture[7]?.Height ?? 0;
+            int th_8_width = _gumpTexture[8]?.Width ?? 0;
+            int th_8_height = _gumpTexture[8]?.Height ?? 0;
 
-            int offsetTop = Math.Max(th[0]?.Height ?? 0, th[2]?.Height ?? 0) - th[1]?.Height ?? 0;
-            int offsetBottom = Math.Max(th[5]?.Height ?? 0, th[7]?.Height ?? 0) - th[6]?.Height ?? 0;
-            int offsetLeft = Math.Max(th[0]?.Width ?? 0, th[5]?.Width ?? 0) - th[3]?.Width ?? 0;
-            int offsetRight = Math.Max(th[2]?.Width ?? 0, th[7]?.Width ?? 0) - th[4]?.Width ?? 0;
+
+            int offsetTop = Math.Max(th_0_height, th_2_height) - th_1_height;
+            int offsetBottom = Math.Max(th_5_height, th_7_height) - th_6_height;
+            int offsetLeft = Math.Max(th_0_width, th_5_width) - th_3_width;
+            int offsetRight = Math.Max(th_2_width, th_7_width) - th_4_width;
 
 
             for (int i = 0; i < 9; i++)
             {
-                if (th[i] == null)
+                if (_gumpTexture[i] == null)
                     continue;
 
                 switch (i)
@@ -103,75 +119,75 @@ namespace ClassicUO.Game.UI.Controls
                             return true;
                         break;
                     case 1:
-                        int DW = Width - th[0]?.Width ?? 0 - th[2]?.Width ?? 0;
+                        int DW = Width - th_0_width - th_2_width;
                         if (DW < 1)
                             break;
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 1)), x - th[0]?.Width ?? 0, y, DW, 0))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort) (Graphic + 1)), x - th_0_width, y, DW, 0))
                             return true;
 
                         break;
                     case 2:
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 2)), x - (Width - th[i]?.Width ?? 0), y - offsetTop))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 2)), x - (Width - th_2_width), y - offsetTop))
                             return true;
                     
                         break;
                     case 3:
 
-                        int DH = Height - th[0]?.Height ?? 0 - th[5]?.Height ?? 0;
+                        int DH = Height - th_0_height - th_5_height;
                         if (DH < 1)
                             break;
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 3)), x - offsetLeft, y - th[0]?.Height ?? 0, 0, DH))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 3)), x - offsetLeft, y - th_0_height, 0, DH))
                             return true;
 
 
                         break;
                     case 4:
 
-                        DH = Height - th[2]?.Height ?? 0 - th[7]?.Height ?? 0;
+                        DH = Height - th_2_height - th_7_height;
                         if (DH < 1)
                             break;
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 5)), x - (Width - th[i]?.Width ?? 0 - offsetRight), y - th[2]?.Height ?? 0, 0, DH))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 5)), x - (Width - th_4_width - offsetRight), y - th_2_height, 0, DH))
                             return true;
 
                         break;
                     case 5:
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 6)), x, y - (Height - th[i]?.Height ?? 0)))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 6)), x, y - (Height - th_5_height)))
                             return true;
 
                         break;
                     case 6:
 
-                        DW = Width - th[5]?.Width ?? 0 - th[2]?.Width ?? 0;
+                        DW = Width - th_5_width - th_2_width;
                         if (DW < 1)
                             break;
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 7)), x - th[5]?.Width ?? 0, y - (Height - th[i]?.Height ?? 0 - offsetBottom), DW, 0))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 7)), x - th_5_width, y - (Height - th_6_height - offsetBottom), DW, 0))
                             return true;
 
 
                         break;
                     case 7:
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 8)), x - (Width - th[i]?.Width ?? 0), y - (Height - th[i]?.Height ?? 0)))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 8)), x - (Width - th_7_width), y - (Height - th_7_height)))
                             return true;
 
                         break;
                     case 8:
 
-                        DW = Width - th[0]?.Width ?? 0 - th[2]?.Width ?? 0;
+                        DW = Width - th_0_width - th_2_width;
                         if (DW < 1)
                             break;
 
-                        DH = Height - th[2]?.Height ?? 0 - th[7]?.Height ?? 0;
+                        DH = Height - th_2_height - th_7_height;
                         if (DH < 1)
                             break;
 
-                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 4)), x - th[0]?.Width ?? 0, y - th[0]?.Height ?? 0, DW, DH))
+                        if (PixelsInXY(GumpsLoader.Instance.GetTexture((ushort)(Graphic + 4)), x - th_0_width, y - th_0_height, DW, DH))
                             return true;
 
 
@@ -245,10 +261,31 @@ namespace ClassicUO.Game.UI.Controls
 
         private void DrawInternal(UltimaBatcher2D batcher, int x, int y, ref Vector3 color)
         {
-            int offsetTop = Math.Max(_gumpTexture[0]?.Height ?? 0, _gumpTexture[2]?.Height ?? 0) - _gumpTexture[1]?.Height ?? 0;
-            int offsetBottom = Math.Max(_gumpTexture[5]?.Height ?? 0, _gumpTexture[7]?.Height ?? 0) - _gumpTexture[6]?.Height ?? 0;
-            int offsetLeft = Math.Max(_gumpTexture[0]?.Width ?? 0, _gumpTexture[5]?.Width ?? 0) - _gumpTexture[3]?.Width ?? 0;
-            int offsetRight = Math.Max(_gumpTexture[2]?.Width ?? 0, _gumpTexture[7]?.Width ?? 0) - _gumpTexture[4]?.Width ?? 0;
+            int th_0_width = _gumpTexture[0]?.Width ?? 0;
+            int th_0_height = _gumpTexture[0]?.Height ?? 0; 
+            int th_1_width = _gumpTexture[1]?.Width ?? 0;
+            int th_1_height = _gumpTexture[1]?.Height ?? 0;  
+            int th_2_width = _gumpTexture[2]?.Width ?? 0;
+            int th_2_height = _gumpTexture[2]?.Height ?? 0;  
+            int th_3_width = _gumpTexture[3]?.Width ?? 0;
+            int th_3_height = _gumpTexture[3]?.Height ?? 0;  
+            int th_4_width = _gumpTexture[4]?.Width ?? 0;
+            int th_4_height = _gumpTexture[4]?.Height ?? 0;  
+            int th_5_width = _gumpTexture[5]?.Width ?? 0;
+            int th_5_height = _gumpTexture[5]?.Height ?? 0;
+            int th_6_width = _gumpTexture[6]?.Width ?? 0;
+            int th_6_height = _gumpTexture[6]?.Height ?? 0;
+            int th_7_width = _gumpTexture[7]?.Width ?? 0;
+            int th_7_height = _gumpTexture[7]?.Height ?? 0;
+            int th_8_width = _gumpTexture[8]?.Width ?? 0;
+            int th_8_height = _gumpTexture[8]?.Height ?? 0;
+
+
+            int offsetTop = Math.Max(th_0_height, th_2_height) - th_1_height;
+            int offsetBottom = Math.Max(th_5_height, th_7_height) - th_6_height;
+            int offsetLeft = Math.Max(th_0_width, th_5_width) - th_3_width;
+            int offsetRight = Math.Max(th_2_width, th_7_width) - th_4_width;
+
 
             for (int i = 0; i < 9; i++)
             {
@@ -269,8 +306,8 @@ namespace ClassicUO.Game.UI.Controls
                         break;
 
                     case 1:
-                        drawX += _gumpTexture[0]?.Width ?? 0;
-                        drawWidth = Width - _gumpTexture[0]?.Width ?? 0 - _gumpTexture[2]?.Width ?? 0;
+                        drawX += th_0_width;
+                        drawWidth = Width - th_0_width - th_2_width;
                         batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, ref color);
 
                         break;
@@ -284,16 +321,16 @@ namespace ClassicUO.Game.UI.Controls
 
                     case 3:
                         drawX += offsetLeft;
-                        drawY += _gumpTexture[0]?.Height ?? 0;
-                        drawHeight = Height - _gumpTexture[0]?.Height - _gumpTexture[5]?.Height ?? 0;
+                        drawY += th_0_height;
+                        drawHeight = Height - th_0_height - th_5_height;
                         batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, ref color);
 
                         break;
 
                     case 4:
                         drawX += Width - drawWidth - offsetRight;
-                        drawY += _gumpTexture[2]?.Height ?? 0;
-                        drawHeight = Height - _gumpTexture[2]?.Height ?? 0 - _gumpTexture[7]?.Height ?? 0;
+                        drawY += th_2_height;
+                        drawHeight = Height - th_2_height - th_7_height;
                         batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, ref color);
 
                         break;
@@ -305,9 +342,9 @@ namespace ClassicUO.Game.UI.Controls
                         break;
 
                     case 6:
-                        drawX += _gumpTexture[5]?.Width ?? 0;
+                        drawX += th_5_width;
                         drawY += Height - drawHeight - offsetBottom;
-                        drawWidth = Width - _gumpTexture[5]?.Width ?? 0 - _gumpTexture[7]?.Width ?? 0;
+                        drawWidth = Width - th_5_width - th_7_width;
                         batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, ref color);
 
                         break;
@@ -320,13 +357,10 @@ namespace ClassicUO.Game.UI.Controls
                         break;
 
                     case 8:
-                        drawX += _gumpTexture[0]?.Width ?? 0;
-                        drawY += _gumpTexture[0]?.Height ?? 0;
-                        drawWidth = Width - _gumpTexture[0]?.Width ?? 0 - _gumpTexture[2]?.Width ?? 0;
-                        drawHeight = Height - _gumpTexture[2]?.Height ?? 0 - _gumpTexture[7]?.Height ?? 0;
-
-                        if (OnlyCenterTransparent)
-                            color.Z = 1;
+                        drawX += th_0_width;
+                        drawY += th_0_height;
+                        drawWidth = Width - th_0_width - th_2_width;
+                        drawHeight = Height - th_2_height - th_7_height;
 
                         batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, ref color);
 
