@@ -840,8 +840,10 @@ namespace ClassicUO.Game.UI.Gumps
                     rotY = y + (int) size.Y;
                 }
 
-                int xx = (int) (rotX - size.X / 2);
-                int yy = (int) (rotY - size.Y);
+                if (_zoomIndex < 7) return;
+
+                int xx = (int)(rotX - size.X / 2);
+                int yy = (int)(rotY - size.Y);
 
                 _hueVector.X = 0;
                 _hueVector.Y = 1;
