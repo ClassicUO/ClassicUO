@@ -20,6 +20,8 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -62,6 +64,18 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _showPlayerName = true;
         private bool _showPlayerBar = true;
 
+        private string[] _mapFiles;
+
+        private class WMapMarker
+        {
+            public string Name { get; set; }
+            public int X { get; set; }
+            public int Y { get; set; }
+            public string MarkerId { get; set; }
+        }
+
+        private List<WMapMarker> _markers = new List<WMapMarker>();
+
         public WorldMapGump() : base(400, 400, 100, 100, 0, 0)
         {
             CanMove = true;
@@ -71,6 +85,8 @@ namespace ClassicUO.Game.UI.Gumps
             GameActions.Print("WorldMap loading...", 0x35);
             Load();
             OnResize();
+
+            LoadMarkers();
 
             World.WMapManager.SetEnable(true);
             BuildGump();
@@ -139,6 +155,8 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add("", null);
             ContextMenu.Add("Show your name", () => { _showPlayerName = !_showPlayerName; }, true, _showPlayerName);
             ContextMenu.Add("Show your healthbar", () => { _showPlayerBar = !_showPlayerBar; }, true, _showPlayerBar);
+            ContextMenu.Add("", null);
+            ContextMenu.Add("Reload map markers", () => { LoadMarkers(); });
             ContextMenu.Add("", null);
             ContextMenu.Add("Close", Dispose);
 
@@ -409,6 +427,80 @@ namespace ClassicUO.Game.UI.Gumps
             );
         }
 
+        private unsafe Task LoadMarkers()
+        {
+            return Task.Run(() =>
+            {
+                if (World.InGame)
+                {
+                    GameActions.Print("Loading WorldMap labels..", 0x48);
+
+                    string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
+                    
+                    _mapFiles = Directory.GetFiles(path, "*.map");
+                    
+                    _markers.Clear();
+
+                    foreach (string mapFile in _mapFiles)
+                    {
+                        if (File.Exists(mapFile))
+                        {
+                            using (StreamReader reader = new StreamReader(mapFile))
+                            {
+                                while (!reader.EndOfStream)
+                                {
+                                    string line = reader.ReadLine();
+
+                                    // ignore empty lines, and if UOAM, ignore the first line that always has a 3
+                                    if (string.IsNullOrEmpty(line) || line.Equals("3")) continue;
+
+                                    // Check for UOAM file
+                                    if (line.Equals("3") || line.Substring(0, 1).Equals("+") ||
+                                        line.Substring(0, 1).Equals("-"))
+                                    {
+                                        line = line.Substring(line.IndexOf(':') + 2);
+
+                                        string[] splits = line.Split(' ');
+
+                                        if (splits.Length <= 1) continue;
+
+                                        WMapMarker marker = new WMapMarker
+                                        {
+                                            X = int.Parse(splits[0]),
+                                            Y = int.Parse(splits[1]),
+                                            Name = string.Join(" ", splits, 3, splits.Length - 3),
+                                            MarkerId = Path.GetFileNameWithoutExtension(mapFile)
+                                        };
+
+                                        _markers.Add(marker);
+                                    }
+                                    else // go go CSV
+                                    {
+                                        string[] splits = line.Split(',');
+
+                                        if (splits.Length <= 1) continue;
+
+                                        WMapMarker marker = new WMapMarker
+                                        {
+                                            X = int.Parse(splits[0]),
+                                            Y = int.Parse(splits[1]),
+                                            Name = splits[2],
+                                            MarkerId = Path.GetFileNameWithoutExtension(mapFile)
+                                        };
+
+                                        _markers.Add(marker);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    GameActions.Print("WorldMap labels loaded", 0x48);
+                }
+            }
+            );
+        }
+
         protected override void OnMouseWheel(MouseEventType delta)
         {
             if (delta == MouseEventType.WheelScrollUp)
@@ -518,6 +610,12 @@ namespace ClassicUO.Game.UI.Gumps
             else
             {
                 _coords.Text = string.Empty;
+            }
+
+            foreach (WMapMarker marker in _markers)
+            {
+                if (ViewContainsCoords(marker.X, marker.Y, halfWidth, halfHeight))
+                    DrawMarker(batcher, marker, gX, gY, halfWidth, halfHeight, Zoom, Color.White);
             }
 
             if (_showMobiles)
@@ -676,6 +774,89 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        private void DrawMarker(UltimaBatcher2D batcher, WMapMarker marker, int x, int y, int width, int height, float zoom, Color color, bool drawName = true)
+        {
+            ResetHueVector();
+
+            int sx = marker.X - _center.X;
+            int sy = marker.Y - _center.Y;
+
+            (int rotX, int rotY) = RotatePoint(sx, sy, zoom, 1, _flipMap ? 45f : 0f);
+            AdjustPosition(rotX, rotY, width - 4, height - 4, out rotX, out rotY);
+
+            rotX += x + width;
+            rotY += y + height;
+
+            const int DOT_SIZE = 4;
+            const int DOT_SIZE_HALF = DOT_SIZE >> 1;
+
+            if (rotX < x)
+                rotX = x;
+
+            if (rotX > x + Width - 8 - DOT_SIZE)
+                rotX = x + Width - 8 - DOT_SIZE;
+
+            if (rotY < y)
+                rotY = y;
+
+            if (rotY > y + Height - 8 - DOT_SIZE)
+                rotY = y + Height - 8 - DOT_SIZE;
+
+            batcher.Draw2D(Texture2DCache.GetTexture(color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE, DOT_SIZE, ref _hueVector);
+
+            if (drawName && !string.IsNullOrEmpty(marker.Name))
+            {
+                Vector2 size = Fonts.Regular.MeasureString(marker.Name);
+
+                if (rotX + size.X / 2 > x + Width - 8)
+                {
+                    rotX = x + Width - 8 - (int)(size.X / 2);
+                }
+                else if (rotX - size.X / 2 < x)
+                {
+                    rotX = x + (int)(size.X / 2);
+                }
+
+                if (rotY + size.Y > y + Height)
+                {
+                    rotY = y + Height - (int)(size.Y);
+                }
+                else if (rotY - size.Y < y)
+                {
+                    rotY = y + (int)size.Y;
+                }
+
+                int xx = (int)(rotX - size.X / 2);
+                int yy = (int)(rotY - size.Y);
+
+                _hueVector.X = 0;
+                _hueVector.Y = 1;
+                batcher.DrawString(Fonts.Regular, marker.Name, xx + 1, yy + 1, ref _hueVector);
+                ResetHueVector();
+                _hueVector.X = 0x0034;
+                _hueVector.Y = 1;
+                batcher.DrawString(Fonts.Regular, marker.Name, xx, yy, ref _hueVector);
+            }
+        }
+
+        private bool ViewContainsCoords(int coordX, int coordY, int width, int height)
+        {
+            int sx = coordX - _center.X;
+            int sy = coordY - _center.Y;
+
+            (int rotX, int rotY) = RotatePoint(sx, sy, Zoom, 1, _flipMap ? 45f : 0f);
+
+            AdjustPosition(rotX, rotY, width - 4, height - 4, out rotX, out rotY);
+
+            rotX += coordX + width;
+            rotY += coordY + height;
+
+            return rotX >= coordX &&
+                   rotX < coordX + Width - 8 - width &&
+                   rotY >= coordY &&
+                   rotY < coordY + Height - 8 - height;
+        }
+
         private void DrawWMEntity(UltimaBatcher2D batcher, WMapEntity entity, int x, int y, int width, int height, float zoom)
         {
             ResetHueVector();
@@ -803,7 +984,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (angle == 0.0f)
                 return (x, y);
 
-            return ((int) Math.Round(Math.Cos(dist * Math.PI / 4.0) * x - Math.Sin(dist * Math.PI / 4.0) * y), (int) Math.Round(Math.Sin(dist * Math.PI / 4.0) * x + Math.Cos(dist * Math.PI / 4.0) * y));
+            return ((int) Math.Round(Math.Cos(dist * Math.PI / 4.0) * x - Math.Sin(dist * Math.PI / 4.0) * y),
+                (int) Math.Round(Math.Sin(dist * Math.PI / 4.0) * x + Math.Cos(dist * Math.PI / 4.0) * y));
         }
 
         private void AdjustPosition(int x, int y, int centerX, int centerY, out int newX, out int newY)
