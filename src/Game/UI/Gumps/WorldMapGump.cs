@@ -65,6 +65,8 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _showPlayerName = true;
         private bool _showPlayerBar = true;
 
+        private bool _showMarkers = true;
+
         private string[] _mapFiles;
 
         private class WMapMarker
@@ -118,6 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _showPlayerName = bool.Parse(xml.GetAttribute("showplayername"));
             _showPlayerBar = bool.Parse(xml.GetAttribute("showplayerbar"));
+            _showMarkers = bool.Parse(xml.GetAttribute("showmarkers"));
 
             BuildGump();
         }
@@ -138,6 +141,7 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("showmobiles", _showMobiles.ToString());
             writer.WriteAttributeString("showplayername", _showPlayerName.ToString());
             writer.WriteAttributeString("showplayerbar", _showPlayerBar.ToString());
+            writer.WriteAttributeString("showmarkers", _showMarkers.ToString());
         }
 
         private void BuildGump()
@@ -159,6 +163,7 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add("Show your name", () => { _showPlayerName = !_showPlayerName; }, true, _showPlayerName);
             ContextMenu.Add("Show your healthbar", () => { _showPlayerBar = !_showPlayerBar; }, true, _showPlayerBar);
             ContextMenu.Add("", null);
+            ContextMenu.Add("Show markers", () => { _showMarkers = !_showMarkers; }, true, _showMarkers);
             ContextMenu.Add("Reload map markers", () => { LoadMarkers(); });
             ContextMenu.Add("", null);
             ContextMenu.Add("Close", Dispose);
@@ -619,10 +624,12 @@ namespace ClassicUO.Game.UI.Gumps
                 _coords.Text = string.Empty;
             }
 
-            foreach (WMapMarker marker in _markers)
+            if (_showMarkers)
             {
-                //if (ViewContainsCoords(marker.X, marker.Y, gX, gY, halfWidth, halfHeight))
-                DrawMarker(batcher, marker, gX, gY, halfWidth, halfHeight, Zoom, Color.White);
+                foreach (WMapMarker marker in _markers)
+                {
+                    DrawMarker(batcher, marker, gX, gY, halfWidth, halfHeight, Zoom, Color.White);
+                }
             }
 
             if (_showMobiles)
