@@ -75,6 +75,7 @@ namespace ClassicUO.Game.UI.Gumps
             public int X { get; set; }
             public int Y { get; set; }
             public string MarkerId { get; set; }
+            public Color Color { get; set; }
         }
 
         private List<WMapMarker> _markers = new List<WMapMarker>();
@@ -470,8 +471,7 @@ namespace ClassicUO.Game.UI.Gumps
                                         if (string.IsNullOrEmpty(line) || line.Equals("3")) continue;
 
                                         // Check for UOAM file
-                                        if (line.Equals("3") || line.Substring(0, 1).Equals("+") ||
-                                            line.Substring(0, 1).Equals("-"))
+                                        if (line.Substring(0, 1).Equals("+") || line.Substring(0, 1).Equals("-"))
                                         {
                                             line = line.Substring(line.IndexOf(':') + 2);
 
@@ -484,7 +484,8 @@ namespace ClassicUO.Game.UI.Gumps
                                                 X = int.Parse(splits[0]),
                                                 Y = int.Parse(splits[1]),
                                                 Name = string.Join(" ", splits, 3, splits.Length - 3),
-                                                MarkerId = Path.GetFileNameWithoutExtension(mapFile)
+                                                MarkerId = Path.GetFileNameWithoutExtension(mapFile),
+                                                Color = Color.White
                                             };
 
                                             _markers.Add(marker);
@@ -500,7 +501,8 @@ namespace ClassicUO.Game.UI.Gumps
                                                 X = int.Parse(splits[0]),
                                                 Y = int.Parse(splits[1]),
                                                 Name = splits[2],
-                                                MarkerId = Path.GetFileNameWithoutExtension(mapFile)
+                                                MarkerId = Path.GetFileNameWithoutExtension(mapFile),
+                                                Color = splits.Length == 4 ? GetColor(splits[3]) : Color.White
                                             };
 
                                             _markers.Add(marker);
@@ -628,7 +630,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 foreach (WMapMarker marker in _markers)
                 {
-                    DrawMarker(batcher, marker, gX, gY, halfWidth, halfHeight, Zoom, Color.White);
+                    DrawMarker(batcher, marker, gX, gY, halfWidth, halfHeight, Zoom);
                 }
             }
 
@@ -794,7 +796,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         private void DrawMarker(UltimaBatcher2D batcher, WMapMarker marker, int x, int y, int width, int height,
-            float zoom, Color color, bool drawName = true)
+            float zoom, bool drawName = true)
         {
             ResetHueVector();
 
@@ -815,7 +817,7 @@ namespace ClassicUO.Game.UI.Gumps
                 rotY > y + Height - 8 - DOT_SIZE)
                 return;
 
-            batcher.Draw2D(Texture2DCache.GetTexture(color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE,
+            batcher.Draw2D(Texture2DCache.GetTexture(marker.Color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE,
                 DOT_SIZE, ref _hueVector);
 
             if (drawName && !string.IsNullOrEmpty(marker.Name))
@@ -1052,6 +1054,29 @@ namespace ClassicUO.Game.UI.Gumps
 
             _mapTexture?.Dispose();
             base.Dispose();
+        }
+
+        private Color GetColor(string name)
+        {
+            if (name.Equals("red", StringComparison.OrdinalIgnoreCase))
+                return Color.Red;
+
+            if (name.Equals("green", StringComparison.OrdinalIgnoreCase))
+                return Color.Green;
+
+            if (name.Equals("blue", StringComparison.OrdinalIgnoreCase))
+                return Color.Blue;
+
+            if (name.Equals("purple", StringComparison.OrdinalIgnoreCase))
+                return Color.Purple;
+
+            if (name.Equals("black", StringComparison.OrdinalIgnoreCase))
+                return Color.Black;
+
+            if (name.Equals("yellow", StringComparison.OrdinalIgnoreCase))
+                return Color.Yellow;
+
+            return Color.White;
         }
     }
 }
