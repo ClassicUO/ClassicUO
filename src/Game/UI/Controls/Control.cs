@@ -492,7 +492,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public virtual void Clear()
         {
-            Children.ForEach(s => s.Dispose());
+            foreach (Control c in Children)
+            {
+                c.Dispose();
+            }
         }
 
         public T[] GetControls<T>() where T : Control
