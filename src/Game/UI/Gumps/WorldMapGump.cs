@@ -77,6 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
             public int X { get; set; }
             public int Y { get; set; }
             public string MarkerId { get; set; }
+            public int MapId { get; set; }
             public Color Color { get; set; }
             public bool Hidden { get; set; }
         }
@@ -114,21 +115,26 @@ namespace ClassicUO.Game.UI.Gumps
 
             ResizeWindow(new Point(width, height));
 
-            _flipMap = bool.Parse(xml.GetAttribute("flipmap"));
-            TopMost = bool.Parse(xml.GetAttribute("topmost"));
-            FreeView = bool.Parse(xml.GetAttribute("freeview"));
-            _showPartyMembers = bool.Parse(xml.GetAttribute("showpartymembers"));
+            _flipMap = ParseBool(xml.GetAttribute("flipmap"));
+            TopMost = ParseBool(xml.GetAttribute("topmost"));
+            FreeView = ParseBool(xml.GetAttribute("freeview"));
+            _showPartyMembers = ParseBool(xml.GetAttribute("showpartymembers"));
             if (int.TryParse(xml.GetAttribute("zoomindex"), out int value))
                 _zoomIndex = (value >= 0 && value < _zooms.Length) ? value : 4;
 
-            _showCoordinates = bool.Parse(xml.GetAttribute("showcoordinates"));
-            _showMobiles = bool.Parse(xml.GetAttribute("showmobiles"));
+            _showCoordinates = ParseBool(xml.GetAttribute("showcoordinates"));
+            _showMobiles = ParseBool(xml.GetAttribute("showmobiles"));
 
-            _showPlayerName = bool.Parse(xml.GetAttribute("showplayername"));
-            _showPlayerBar = bool.Parse(xml.GetAttribute("showplayerbar"));
-            _hideMarkers = bool.Parse(xml.GetAttribute("hidemarkers"));
+            _showPlayerName = ParseBool(xml.GetAttribute("showplayername"));
+            _showPlayerBar = ParseBool(xml.GetAttribute("showplayerbar"));
+            _hideMarkers = ParseBool(xml.GetAttribute("hidemarkers"));
 
             BuildGump();
+        }
+
+        private bool ParseBool(string boolStr)
+        {
+            return bool.TryParse(boolStr, out bool value) && value;
         }
 
         public override void Save(XmlTextWriter writer)
@@ -487,7 +493,7 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 GameActions.Print($"..{Path.GetFileName(mapFile)}", 0x48);
 
-                                if (Path.GetExtension(mapFile).Equals(".xml"))
+                                if (mapFile != null && Path.GetExtension(mapFile).Equals(".xml"))
                                 {
                                     XmlTextReader reader = new XmlTextReader(mapFile);
 
@@ -500,6 +506,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                 X = int.Parse(reader.GetAttribute("X")),
                                                 Y = int.Parse(reader.GetAttribute("Y")),
                                                 Name = reader.GetAttribute("Name"),
+                                                MapId = int.Parse(reader.GetAttribute("Facet")),
                                                 MarkerId = Path.GetFileNameWithoutExtension(mapFile),
                                                 Color = Color.White
                                             };
@@ -532,6 +539,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                 {
                                                     X = int.Parse(splits[0]),
                                                     Y = int.Parse(splits[1]),
+                                                    MapId = int.Parse(splits[2]),
                                                     Name = string.Join(" ", splits, 3, splits.Length - 3),
                                                     MarkerId = Path.GetFileNameWithoutExtension(mapFile),
                                                     Color = Color.White
@@ -549,9 +557,10 @@ namespace ClassicUO.Game.UI.Gumps
                                                 {
                                                     X = int.Parse(splits[0]),
                                                     Y = int.Parse(splits[1]),
-                                                    Name = splits[2],
+                                                    MapId = int.Parse(splits[2]),
+                                                    Name = splits[3],
                                                     MarkerId = Path.GetFileNameWithoutExtension(mapFile),
-                                                    Color = splits.Length == 4 ? GetColor(splits[3]) : Color.White
+                                                    Color = splits.Length == 5 ? GetColor(splits[4]) : Color.White
                                                 };
 
                                                 _markers.Add(marker);
@@ -848,7 +857,11 @@ namespace ClassicUO.Game.UI.Gumps
         private void DrawMarker(UltimaBatcher2D batcher, WMapMarker marker, int x, int y, int width, int height,
             float zoom, bool drawName = true)
         {
-            if (marker.Hidden) return;
+            if (marker.Hidden)
+                return;
+
+            if (marker.MapId != World.MapIndex)
+                return;
 
             ResetHueVector();
 
