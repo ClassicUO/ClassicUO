@@ -202,7 +202,19 @@ namespace ClassicUO.Game.GameObjects
                     AnimationsLoader.Instance.FixSittingDirection(ref dir, ref mirror, ref drawX, ref drawY);
 
                     if (AnimationsLoader.Instance.Direction == 3)
-                        animGroup = 25;
+                    {
+                        if (IsGargoyle)
+                        {
+                            drawY -= 30;
+                            animGroup = 42;
+                        }
+                        else
+                            animGroup = 25;
+                    }
+                    else if (IsGargoyle)
+                    {
+                        animGroup = 42;
+                    }
                     else
                         _transform = true;
                 }
