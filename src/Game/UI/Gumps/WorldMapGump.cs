@@ -202,11 +202,10 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
                 });
-            }
-            
+            }            
+
             ContextMenu.Add("", null);
             ContextMenu.Add("Close", Dispose);
-
 
             Add(_coords = new Label("", true, 1001, font: 1, style: FontStyle.BlackBorder)
             {
@@ -677,7 +676,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void DrawAll(UltimaBatcher2D batcher, int gX, int gY, int halfWidth, int halfHeight)
         {
-            if (_showCoordinates)
+           if (_showCoordinates)
             {
                 if (World.Player.X != _lastX || World.Player.Y != _lastY || World.Player.Z != _lastZ)
                 {
@@ -773,7 +772,6 @@ namespace ClassicUO.Game.UI.Gumps
             
             DrawMobile(batcher, World.Player, gX, gY, halfWidth, halfHeight, Zoom, Color.White, _showPlayerName, false,
                 _showPlayerBar);
-
         }
 
         private void DrawMobile(UltimaBatcher2D batcher, Mobile mobile, int x, int y, int width, int height, float zoom,
