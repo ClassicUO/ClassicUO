@@ -236,7 +236,7 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add("Show party members", () => { _showPartyMembers = !_showPartyMembers; }, true,
                 _showPartyMembers);
             ContextMenu.Add("Show mobiles", () => { _showMobiles = !_showMobiles; }, true, _showMobiles);
-            ContextMenu.Add("Show coordinates", () => { _showCoordinates = !_showCoordinates; }, true,
+            ContextMenu.Add("Show coordinates", () => { _showCoordinates = !_showCoordinates; _lastX = -1; }, true,
                 _showCoordinates);
             ContextMenu.Add("", null);
             ContextMenu.Add("Show your name", () => { _showPlayerName = !_showPlayerName; }, true, _showPlayerName);
