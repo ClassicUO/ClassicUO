@@ -96,14 +96,17 @@ namespace ClassicUO.Renderer
                 {
                     if (!DefaultCharacter.HasValue)
                     {
-                        throw new ArgumentException(
-                                                    "Text contains characters that cannot be" +
-                                                    " resolved by this SpriteFont.",
-                                                    "text"
-                                                   );
+                        index = CharacterMap.IndexOf('?');
+                        //throw new ArgumentException(
+                        //                            "Text contains characters that cannot be" +
+                        //                            " resolved by this SpriteFont.",
+                        //                            "text"
+                        //                           );
                     }
-
-                    index = CharacterMap.IndexOf(DefaultCharacter.Value);
+                    else
+                    {
+                        index = CharacterMap.IndexOf(DefaultCharacter.Value);
+                    }
                 }
 
                 /* For the first character in a line, always push the width
