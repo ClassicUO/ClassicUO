@@ -264,8 +264,17 @@ namespace ClassicUO.Game.GameObjects
                                 }
                             }
 
-                            AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, graphic);
-                            DrawInternal(batcher, this, item, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman, false);
+                            if (AnimationsLoader.Instance.SittingValue == 0 && IsGargoyle && item.ItemData.IsWeapon)
+                            {
+                                AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, graphic);
+                                DrawInternal(batcher, this, item, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman, false);
+                                AnimationsLoader.Instance.AnimGroup = animGroup;
+                            }
+                            else
+                            {
+                                DrawInternal(batcher, this, item, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman, false);
+
+                            }
                         }
                         else
                         {
