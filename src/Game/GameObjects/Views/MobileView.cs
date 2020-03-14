@@ -250,6 +250,11 @@ namespace ClassicUO.Game.GameObjects
                         {
                             graphic = item.ItemData.AnimID;
 
+                            if (graphic == 469)
+                            {
+                                graphic = 342;
+                            }
+
                             if (AnimationsLoader.Instance.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
                             {
                                 if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
@@ -259,6 +264,7 @@ namespace ClassicUO.Game.GameObjects
                                 }
                             }
 
+                            AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, graphic);
                             DrawInternal(batcher, this, item, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman, false);
                         }
                         else
@@ -327,7 +333,6 @@ namespace ClassicUO.Game.GameObjects
 
             AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hueFromFile, isParent).Direction[AnimationsLoader.Instance.Direction];
             AnimationsLoader.Instance.AnimID = id;
-
 
             if (direction == null || direction.Address == -1 || direction.FileIndex == -1)
             {
