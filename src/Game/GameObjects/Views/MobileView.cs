@@ -273,7 +273,6 @@ namespace ClassicUO.Game.GameObjects
                             else
                             {
                                 DrawInternal(batcher, this, item, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman, false);
-
                             }
                         }
                         else
