@@ -250,10 +250,10 @@ namespace ClassicUO.Game.GameObjects
                         {
                             graphic = item.ItemData.AnimID;
 
-                            if (graphic == 469)
-                            {
-                                graphic = 342;
-                            }
+                            //if (graphic == 469)
+                            //{
+                            //    graphic = 342;
+                            //}
 
                             if (AnimationsLoader.Instance.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
                             {
