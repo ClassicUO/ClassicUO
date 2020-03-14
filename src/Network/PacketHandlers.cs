@@ -3823,6 +3823,108 @@ namespace ClassicUO.Network
         {
         }
 
+        private static readonly DataReader _reader = new DataReader();
+        private static unsafe void ReadUnsafeCustomHouseData(byte[] source, int sourcePosition, int dlen, int clen, int planeZ, int planeMode, short minX, short minY, short maxY, ref RawList<CustomBuildObject> list)
+        {
+            byte* decompressedBytes = stackalloc byte[dlen];
+
+            fixed (byte* srcPtr = &source[sourcePosition])
+                ZLib.Decompress((IntPtr) srcPtr, clen, 0, (IntPtr) decompressedBytes, dlen);
+
+            _reader.SetData(decompressedBytes, dlen);
+            {
+
+                ushort id = 0;
+                sbyte x = 0, y = 0, z = 0;
+
+                switch (planeMode)
+                {
+                    case 0:
+                        int c = dlen / 5;
+                        for (uint i = 0; i < c; i++)
+                        {
+                            id = _reader.ReadUShortReversed();
+                            x = _reader.ReadSByte();
+                            y = _reader.ReadSByte();
+                            z = _reader.ReadSByte();
+
+                            if (id != 0)
+                            {
+                                list.Add(new CustomBuildObject(id) { X = x, Y = y, Z = z });
+                            }
+                        }
+
+                        break;
+
+                    case 1:
+
+                        if (planeZ > 0)
+                            z = (sbyte) ((planeZ - 1) % 4 * 20 + 7);
+                        else
+                            z = 0;
+
+                        c = dlen >> 2;
+                        for (uint i = 0; i < c; i++)
+                        {
+                            id = _reader.ReadUShortReversed();
+                            x = _reader.ReadSByte();
+                            y = _reader.ReadSByte();
+
+                            if (id != 0)
+                            {
+                                list.Add(new CustomBuildObject(id) { X = x, Y = y, Z = z });
+                            }
+                        }
+
+                        break;
+
+                    case 2:
+                        short offX = 0, offY = 0;
+                        short multiHeight = 0;
+
+                        if (planeZ > 0)
+                            z = (sbyte) ((planeZ - 1) % 4 * 20 + 7);
+                        else
+                            z = 0;
+
+                        if (planeZ <= 0)
+                        {
+                            offX = minX;
+                            offY = minY;
+                            multiHeight = (short) (maxY - minY + 2);
+                        }
+                        else if (planeZ <= 4)
+                        {
+                            offX = (short) (minX + 1);
+                            offY = (short) (minY + 1);
+                            multiHeight = (short) (maxY - minY);
+                        }
+                        else
+                        {
+                            offX = minX;
+                            offY = minY;
+                            multiHeight = (short) (maxY - minY + 1);
+                        }
+
+                        c = dlen >> 1;
+                        for (uint i = 0; i < c; i++)
+                        {
+                            id = _reader.ReadUShortReversed();
+                            x = (sbyte) (i / multiHeight + offX);
+                            y = (sbyte) (i % multiHeight + offY);
+
+                            if (id != 0)
+                            {
+                                list.Add(new CustomBuildObject(id) { X = x, Y = y, Z = z });
+                            }
+                        }
+
+                        break;
+                }
+            }
+            _reader.ReleaseData();
+        }
+
         private static unsafe void CustomHouse(Packet p)
         {
             bool compressed = p.ReadByte() == 0x03;
@@ -3865,10 +3967,11 @@ namespace ClassicUO.Network
 
             byte planes = p.ReadByte();
 
-            DataReader stream = new DataReader();
+
             ref byte[] buffer = ref p.ToArray();
 
             RawList<CustomBuildObject> list = new RawList<CustomBuildObject>();
+
 
             for (int plane = 0; plane < planes; plane++)
             {
@@ -3878,107 +3981,12 @@ namespace ClassicUO.Network
                 int planeZ = (int) ((header & 0x0F000000) >> 24);
                 int planeMode = (int) ((header & 0xF0000000) >> 28);
 
-                if (clen <= 0) continue;
+                if (clen <= 0) 
+                    continue;
 
-                byte[] decompressedBytes = new byte[dlen];
-
-                fixed (byte* srcPtr = &buffer[p.Position], destPtr = decompressedBytes)
-                    ZLib.Decompress((IntPtr)srcPtr, clen, 0, (IntPtr)destPtr, dlen);
-
-                stream.SetData(decompressedBytes, dlen);
-                {
-                    p.Skip(clen);
-                    ushort id = 0;
-                    sbyte x = 0, y = 0, z = 0;
-
-                    switch (planeMode)
-                    {
-                        case 0:
-                            int c = dlen / 5;
-                            for (uint i = 0; i < c; i++)
-                            {
-                                id = stream.ReadUShortReversed();
-                                x = stream.ReadSByte();
-                                y = stream.ReadSByte();
-                                z = stream.ReadSByte();
-
-                                if (id != 0)
-                                {
-                                    list.Add(new CustomBuildObject(id){ X= x, Y = y, Z = z});
-                                }
-                            }
-
-                            break;
-
-                        case 1:
-
-                            if (planeZ > 0)
-                                z = (sbyte) ((planeZ - 1) % 4 * 20 + 7);
-                            else
-                                z = 0;
-
-                            c = dlen >> 2;
-                            for (uint i = 0; i < c; i++)
-                            {
-                                id = stream.ReadUShortReversed();
-                                x = stream.ReadSByte();
-                                y = stream.ReadSByte();
-
-                                if (id != 0)
-                                {
-                                    list.Add(new CustomBuildObject(id) { X = x, Y = y, Z = z });
-                                }
-                            }
-
-                            break;
-
-                        case 2:
-                            short offX = 0, offY = 0;
-                            short multiHeight = 0;
-
-                            if (planeZ > 0)
-                                z = (sbyte) ((planeZ - 1) % 4 * 20 + 7);
-                            else
-                                z = 0;
-
-                            if (planeZ <= 0)
-                            {
-                                offX = minX;
-                                offY = minY;
-                                multiHeight = (short) (maxY - minY + 2);
-                            }
-                            else if (planeZ <= 4)
-                            {
-                                offX = (short) (minX + 1);
-                                offY = (short) (minY + 1);
-                                multiHeight = (short) (maxY - minY);
-                            }
-                            else
-                            {
-                                offX = minX;
-                                offY = minY;
-                                multiHeight = (short) (maxY - minY + 1);
-                            }
-
-                            c = dlen >> 1;
-                            for (uint i = 0; i < c; i++)
-                            {
-                                id = stream.ReadUShortReversed();
-                                x = (sbyte) (i / multiHeight + offX);
-                                y = (sbyte) (i % multiHeight + offY);
-
-                                if (id != 0)
-                                {
-                                    list.Add(new CustomBuildObject(id) { X = x, Y = y, Z = z });
-                                }
-                            }
-
-                            break;
-                    }
-                }
-                stream.ReleaseData();
+                ReadUnsafeCustomHouseData(buffer, p.Position, dlen, clen, planeZ, planeMode, minX, minY, maxY, ref list);
+                p.Skip(clen);
             }
-            stream.ReleaseData();
 
             house.Fill(list);
 
