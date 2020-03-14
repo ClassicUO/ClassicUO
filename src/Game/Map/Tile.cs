@@ -23,12 +23,19 @@ using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Map
 {
     internal sealed class Tile
     {
         private static readonly Queue<Tile> _pool = new Queue<Tile>();
+
+        static Tile()
+        {
+            for (int i = 0; i < Constants.PREDICTABLE_TILE_COUNT; i++)
+                _pool.Enqueue(new Tile(0xFFFF, 0xFFFF));
+        }
 
         public static Tile Create(ushort x, ushort y)
         {
@@ -41,6 +48,9 @@ namespace ClassicUO.Game.Map
 
                 return t;
             }
+
+            Log.Debug(string.Intern("Created new Tile"));
+
             return new Tile(x, y);
         }
 

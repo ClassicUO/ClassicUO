@@ -77,25 +77,6 @@ namespace ClassicUO.Game.Managers
         {
             get
             {
-                //if (_keyboardFocusControl == null || _keyboardFocusControl.IsDisposed || !_keyboardFocusControl.IsVisible || !_keyboardFocusControl.IsEnabled)
-                //{
-                //    _keyboardFocusControl = null;
-
-                //    foreach (Control c in Gumps)
-                //    {
-                //        if (!c.IsDisposed && c.IsVisible && c.IsEnabled)
-                //        {
-                //            _keyboardFocusControl = c.GetFirstControlAcceptKeyboardInput();
-
-                //            if (_keyboardFocusControl != null)
-                //            {
-                //                _keyboardFocusControl.OnFocusEnter();
-                //                break;
-                //            }
-                //        }
-                //    }
-                //}
-
                 return _keyboardFocusControl;
             }
             set
@@ -116,9 +97,9 @@ namespace ClassicUO.Game.Managers
 
         public static bool IsModalControlOpen()
         {
-            foreach (var g in Gumps)
+            for (int i = 0; i < Gumps.Count; i++)
             {
-                if (g.ControlInfo.IsModal)
+                if (Gumps[i].ControlInfo.IsModal)
                     return true;
             }
             return false;
@@ -180,8 +161,10 @@ namespace ClassicUO.Game.Managers
             {
                 if (IsModalControlOpen())
                 {
-                    foreach (Control s in Gumps)
+                    for (int i = 0; i < Gumps.Count; i++)
                     {
+                        var s = Gumps[i];
+
                         if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
                         {
                             s.Dispose();
@@ -248,8 +231,10 @@ namespace ClassicUO.Game.Managers
             {
                 if (IsModalControlOpen())
                 {
-                    foreach (Control s in Gumps)
+                    for (int i = 0; i < Gumps.Count; i++)
                     {
+                        var s = Gumps[i];
+
                         if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
                         {
                             s.Dispose();
@@ -349,22 +334,39 @@ namespace ClassicUO.Game.Managers
 
         public static Control Create(uint sender, uint gumpID, int x, int y, string layout, string[] lines)
         {
+            Gump gump = null;
+            bool mustBeAdded = true;
+
             if (GetGumpCachePosition(gumpID, out Point pos))
             {
                 x = pos.X;
                 y = pos.Y;
+
+                for (int i = Gumps.Count - 1; i >= 0 ; i--)
+                {
+                    var g = Gumps[i];
+
+                    if (!g.IsDisposed && g.LocalSerial == sender)
+                    {
+                        g.Clear();
+                        gump = g as Gump;
+                        mustBeAdded = false;
+                        break;
+                    }
+                }
             }
             else
                 SavePosition(gumpID, new Point(x, y));
 
-            Gump gump = new Gump(sender, gumpID)
-            {
-                X = x,
-                Y = y,
-                CanMove = true,
-                CanCloseWithRightClick = true,
-                CanCloseWithEsc = true
-            };
+            if (gump == null)
+                gump = new Gump(sender, gumpID)
+                {
+                    X = x,
+                    Y = y,
+                    CanMove = true,
+                    CanCloseWithRightClick = true,
+                    CanCloseWithEsc = true
+                };
             int group = 0;
             int page = 0;
 
@@ -705,7 +707,8 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            Add(gump);
+            if (mustBeAdded)
+                Add(gump);
 
             gump.Update(Time.Ticks, 0);
             gump.SetInScreen();
@@ -762,8 +765,10 @@ namespace ClassicUO.Game.Managers
 
         public static T GetGump<T>(uint? serial = null) where T : Control
         {
-            foreach (Control c in Gumps)
+            for (int i = 0; i < Gumps.Count; i++)
             {
+                var c = Gumps[i];
+
                 if (!c.IsDisposed && (!serial.HasValue || c.LocalSerial == serial) && c is T t)
                 {
                     return t;
@@ -775,8 +780,10 @@ namespace ClassicUO.Game.Managers
 
         public static Gump GetGump(uint serial)
         {
-            foreach (Control c in Gumps)
+            for (int i = 0; i < Gumps.Count; i++)
             {
+                var c = Gumps[i];
+
                 if (!c.IsDisposed && c.LocalSerial == serial)
                 {
                     return c as Gump;
@@ -857,8 +864,10 @@ namespace ClassicUO.Game.Managers
                 }
                 else
                 {
-                    foreach (Control c in Gumps)
+                    for (int i = 0; i < Gumps.Count; i++)
                     {
+                        var c = Gumps[i];
+
                         if (!c.IsDisposed && c.IsVisible && c.IsEnabled)
                         {
                             _keyboardFocusControl = c.GetFirstControlAcceptKeyboardInput();
@@ -931,8 +940,10 @@ namespace ClassicUO.Game.Managers
 
             bool ismodal = IsModalControlOpen();
 
-            foreach (Control c in Gumps)
+            for (int i = 0; i < Gumps.Count; i++)
             {
+                var c = Gumps[i];
+
                 if ((ismodal && !c.ControlInfo.IsModal) || !c.IsVisible || !c.IsEnabled)
                 {
                     continue;
@@ -1010,8 +1021,10 @@ namespace ClassicUO.Game.Managers
                 int over = 0;
                 int under = Gumps.Count - 1;
 
-                foreach (Control c in gumps)
+                for (int j = 0; j < gumps.Length; j++)
                 {
+                    var c = gumps[j];
+
                     if (c.ControlInfo.Layer == UILayer.Under)
                     {
                         for (int i = 0; i < Gumps.Count; i++)

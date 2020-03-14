@@ -56,9 +56,9 @@ namespace ClassicUO.Game.Scenes
         private Point _offset, _maxTile, _minTile;
         private int _oldPlayerX, _oldPlayerY, _oldPlayerZ;
         private int _renderIndex = 1;
-        private GameObject[] _renderList = new GameObject[10000];
-        private GameObject[] _foliages = new GameObject[100];
-        private readonly GameObject[] _objectHandles = new GameObject[Constants.MAX_OBJECT_HANDLES];
+        private static GameObject[] _renderList = new GameObject[10000];
+        private static GameObject[] _foliages = new GameObject[100];
+        private static readonly GameObject[] _objectHandles = new GameObject[Constants.MAX_OBJECT_HANDLES];
         private int _renderListCount, _foliageCount;
         private readonly StaticTiles _empty;
         private sbyte _foliageIndex;

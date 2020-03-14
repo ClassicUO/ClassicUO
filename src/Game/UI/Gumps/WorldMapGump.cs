@@ -203,9 +203,16 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 });
             }
-
+            
             ContextMenu.Add("", null);
             ContextMenu.Add("Close", Dispose);
+
+
+            Add(_coords = new Label("", true, 1001, font: 1, style: FontStyle.BlackBorder)
+            {
+                X = 10,
+                Y = 5
+            });
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
@@ -763,9 +770,10 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }
-
+            
             DrawMobile(batcher, World.Player, gX, gY, halfWidth, halfHeight, Zoom, Color.White, _showPlayerName, false,
                 _showPlayerBar);
+
         }
 
         private void DrawMobile(UltimaBatcher2D batcher, Mobile mobile, int x, int y, int width, int height, float zoom,

@@ -202,7 +202,19 @@ namespace ClassicUO.Game.GameObjects
                     AnimationsLoader.Instance.FixSittingDirection(ref dir, ref mirror, ref drawX, ref drawY);
 
                     if (AnimationsLoader.Instance.Direction == 3)
-                        animGroup = 25;
+                    {
+                        if (IsGargoyle)
+                        {
+                            drawY -= 30;
+                            animGroup = 42;
+                        }
+                        else
+                            animGroup = 25;
+                    }
+                    else if (IsGargoyle)
+                    {
+                        animGroup = 42;
+                    }
                     else
                         _transform = true;
                 }
@@ -238,6 +250,11 @@ namespace ClassicUO.Game.GameObjects
                         {
                             graphic = item.ItemData.AnimID;
 
+                            //if (graphic == 469)
+                            //{
+                            //    graphic = 342;
+                            //}
+
                             if (AnimationsLoader.Instance.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
                             {
                                 if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
@@ -247,7 +264,16 @@ namespace ClassicUO.Game.GameObjects
                                 }
                             }
 
-                            DrawInternal(batcher, this, item, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman, false);
+                            if (AnimationsLoader.Instance.SittingValue == 0 && IsGargoyle && item.ItemData.IsWeapon)
+                            {
+                                AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, graphic);
+                                DrawInternal(batcher, this, item, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman, false);
+                                AnimationsLoader.Instance.AnimGroup = animGroup;
+                            }
+                            else
+                            {
+                                DrawInternal(batcher, this, item, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman, false);
+                            }
                         }
                         else
                         {
@@ -315,7 +341,6 @@ namespace ClassicUO.Game.GameObjects
 
             AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hueFromFile, isParent).Direction[AnimationsLoader.Instance.Direction];
             AnimationsLoader.Instance.AnimID = id;
-
 
             if (direction == null || direction.Address == -1 || direction.FileIndex == -1)
             {

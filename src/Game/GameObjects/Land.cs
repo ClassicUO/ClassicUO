@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
@@ -34,7 +35,7 @@ namespace ClassicUO.Game.GameObjects
         private static readonly Queue<Land> _pool = new Queue<Land>();
         static Land()
         {
-            for (int i = 0; i < 5000; i++)
+            for (int i = 0; i < Constants.PREDICTABLE_TILE_COUNT; i++)
                 _pool.Enqueue(new Land());
         }
 
@@ -45,7 +46,7 @@ namespace ClassicUO.Game.GameObjects
 
         public ushort OriginalGraphic;
 
-        public Land(ushort graphic)
+        private Land(ushort graphic)
         {
             OriginalGraphic = Graphic = graphic;
             IsStretched = TileData.TexID == 0 && TileData.IsWet;
@@ -73,6 +74,9 @@ namespace ClassicUO.Game.GameObjects
                 l.Bounds = Rectangle.Empty;
                 return l;
             }
+
+            Log.Debug(string.Intern("Created new Land"));
+
             return new Land(graphic);
         }
 
