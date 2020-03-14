@@ -144,14 +144,15 @@ namespace ClassicUO.Renderer
                 {
                     if (!spriteFont.DefaultCharacter.HasValue)
                     {
-                        throw new ArgumentException(
-                                                    "Text contains characters that cannot be" +
-                                                    " resolved by this SpriteFont.",
-                                                    "text"
-                                                   );
+                        index = characterMap.IndexOf('?');
+                        //throw new ArgumentException(
+                        //                            "Text contains characters that cannot be" +
+                        //                            " resolved by this SpriteFont.",
+                        //                            "text"
+                        //                           );
                     }
-
-                    index = characterMap.IndexOf(
+                    else 
+                        index = characterMap.IndexOf(
                                                  spriteFont.DefaultCharacter.Value
                                                 );
                 }
