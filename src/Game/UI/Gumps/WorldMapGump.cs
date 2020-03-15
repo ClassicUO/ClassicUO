@@ -75,6 +75,8 @@ namespace ClassicUO.Game.UI.Gumps
         private string _mapFilesPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
         private string _mapIconsPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "MapIcons");
 
+        private bool _markersLoaded = false;
+
         private ContextMenuControl _markersContextMenu;
 
         private class WMapMarker
@@ -523,6 +525,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (World.InGame)
                 {
+                    _markersLoaded = false;
+
                     GameActions.Print("Loading WorldMap markers..", 0x48);
 
                     _markerIcons.Clear();
@@ -661,6 +665,8 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     GameActions.Print($"WorldMap markers loaded ({_markers.Count})", 0x48);
+
+                    _markersLoaded = true;
                 }
             });
         }
@@ -773,7 +779,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _coords.Text = string.Empty;
             }
 
-            if (_showMarkers)
+            if (_showMarkers && _markersLoaded)
             {
                 foreach (WMapMarker marker in _markers)
                 {
