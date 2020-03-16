@@ -527,7 +527,10 @@ namespace ClassicUO.Game.UI.Gumps
                     if (!Directory.Exists(_mapIconsPath))
                         Directory.CreateDirectory(_mapIconsPath);
 
-                    foreach (string icon in Directory.GetFiles(_mapIconsPath, "*.cur"))
+                    foreach (string icon in Directory.GetFiles(_mapIconsPath, "*.cur")
+                        .Union(Directory.GetFiles(_mapFilesPath, "*.png"))
+                        .Union(Directory.GetFiles(_mapFilesPath, "*.jpg"))
+                        .Union(Directory.GetFiles(_mapFilesPath, "*.ico")))
                     {
                         FileStream fs = new FileStream(icon, FileMode.Open, FileAccess.Read);
                         MemoryStream ms = new MemoryStream();
