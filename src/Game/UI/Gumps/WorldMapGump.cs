@@ -528,9 +528,9 @@ namespace ClassicUO.Game.UI.Gumps
                         Directory.CreateDirectory(_mapIconsPath);
 
                     foreach (string icon in Directory.GetFiles(_mapIconsPath, "*.cur")
-                        .Union(Directory.GetFiles(_mapFilesPath, "*.png"))
-                        .Union(Directory.GetFiles(_mapFilesPath, "*.jpg"))
-                        .Union(Directory.GetFiles(_mapFilesPath, "*.ico")))
+                        .Union(Directory.GetFiles(_mapIconsPath, "*.png"))
+                        .Union(Directory.GetFiles(_mapIconsPath, "*.jpg"))
+                        .Union(Directory.GetFiles(_mapIconsPath, "*.ico")))
                     {
                         FileStream fs = new FileStream(icon, FileMode.Open, FileAccess.Read);
                         MemoryStream ms = new MemoryStream();
