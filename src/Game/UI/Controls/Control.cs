@@ -630,9 +630,9 @@ namespace ClassicUO.Game.UI.Controls
 
             Parent?.OnMouseUp(X + x, Y + y, button);
 
-            if (button == MouseButtonType.Right && !IsDisposed && !CanCloseWithRightClick && !Keyboard.Alt && !Keyboard.Shift && !Keyboard.Ctrl && ContextMenu != null && !ContextMenu.IsDisposed)
+            if (button == MouseButtonType.Right && !IsDisposed && !CanCloseWithRightClick && !Keyboard.Alt && !Keyboard.Shift && !Keyboard.Ctrl)
             {
-                ContextMenu.Show();
+                ContextMenu?.Show();
             }
         }
 
@@ -803,8 +803,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             Children.Clear();
-
-            ContextMenu?.Dispose();
 
             IsDisposed = true;
         }

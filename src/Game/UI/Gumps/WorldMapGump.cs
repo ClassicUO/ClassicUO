@@ -46,7 +46,6 @@ namespace ClassicUO.Game.UI.Gumps
     internal class WorldMapGump : ResizableGump
     {
         private UOTexture _mapTexture;
-        private uint _nextQueryPacket;
 
         private bool _isTopMost;
         private readonly float[] _zooms = new float[10] { 0.125f, 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f, 4f, 6f, 8f };
@@ -75,7 +74,6 @@ namespace ClassicUO.Game.UI.Gumps
         private string _mapFilesPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
         private string _mapIconsPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "MapIcons");
 
-        private ContextMenuControl _markersContextMenu;
 
         private class WMapMarker
         {
@@ -179,25 +177,23 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildContextMenu()
         {
-            ContextMenu?.Dispose();
-            _markersContextMenu?.Dispose();
+            ContextMenu = new ContextMenuControl();
 
-            _markersContextMenu = null;
-            _markersContextMenu = new ContextMenuControl();
-
-            _markersContextMenu.Add("Reload map markers", () => { LoadMarkers(); });
-            _markersContextMenu.Add("Show all markers", () => { _showMarkers = !_showMarkers; }, true, _showMarkers);
-            _markersContextMenu.Add("", null);
-            _markersContextMenu.Add("Show marker names", () => { _showMarkerNames = !_showMarkerNames; }, true, _showMarkerNames);
-            _markersContextMenu.Add("Show marker icons", () => { _showMarkerIcons = !_showMarkerIcons; }, true, _showMarkerIcons);
-            _markersContextMenu.Add("", null);
+            ContextMenuItemEntry markersEntry = new ContextMenuItemEntry("Markers Options");
+            markersEntry.Add(new ContextMenuItemEntry("Reload map markers", () => { LoadMarkers(); }));
+            markersEntry.Add(new ContextMenuItemEntry("Reload map markers", () => { LoadMarkers(); }));
+            markersEntry.Add(new ContextMenuItemEntry("Show all markers", () => { _showMarkers = !_showMarkers; }, true, _showMarkers));
+            markersEntry.Add(new ContextMenuItemEntry(""));
+            markersEntry.Add(new ContextMenuItemEntry("Show marker names", () => { _showMarkerNames = !_showMarkerNames; }, true, _showMarkerNames));
+            markersEntry.Add(new ContextMenuItemEntry("Show marker icons", () => { _showMarkerIcons = !_showMarkerIcons; }, true, _showMarkerIcons));
+            markersEntry.Add(new ContextMenuItemEntry(""));
 
             if (_mapFiles.Length > 0)
             {
                 foreach (string mapFile in _mapFiles)
                 {
                     string file = Path.GetFileNameWithoutExtension(mapFile);
-                    _markersContextMenu.Add($"Show/Hide '{file}'", () =>
+                    markersEntry.Add(new ContextMenuItemEntry($"Show/Hide '{file}'", () =>
                     {
                         foreach (WMapMarker marker in _markers)
                         {
@@ -206,7 +202,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 marker.Hidden = !marker.Hidden;
                             }
                         }
-                    });
+                    }));
                 }
 
                 /*_markersContextMenu.Add("Save to CSV", () =>
@@ -221,13 +217,11 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                _markersContextMenu.Add("No map files", null);
+                markersEntry.Add(new ContextMenuItemEntry("No map files"));
             }
 
-            ContextMenu = null;
 
-            ContextMenu = new ContextMenuControl();
-            ContextMenu.Add("Marker Options", () => { _markersContextMenu.Show(); });
+            ContextMenu.Add(markersEntry);
             ContextMenu.Add("", null);
             ContextMenu.Add("Flip map", () => _flipMap = !_flipMap, true, _flipMap);
             ContextMenu.Add("Top Most", () => TopMost = !TopMost, true, _isTopMost);

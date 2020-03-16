@@ -762,6 +762,26 @@ namespace ClassicUO.Game.Managers
         }
 
 
+        public static ContextMenuShowMenu ContextMenu { get; private set; }
+
+        public static void ShowContextMenu(ContextMenuShowMenu menu)
+        {
+            ContextMenu?.Dispose();
+
+            ContextMenu = menu;
+
+            if (ContextMenu == null || menu.IsDisposed)
+                return;
+
+            Add(ContextMenu);
+        }
+
+        public static void HideContextMenu()
+        {
+            ContextMenu?.Dispose();
+            ContextMenu = null;
+        }
+
 
         public static T GetGump<T>(uint? serial = null) where T : Control
         {
