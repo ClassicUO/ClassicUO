@@ -70,7 +70,6 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _showMarkerNames = true;
         private bool _showMarkerIcons = true;
 
-        private string[] _mapFiles;
         private string _mapFilesPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
         private string _mapIconsPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "MapIcons");
 
@@ -107,9 +106,6 @@ namespace ClassicUO.Game.UI.Gumps
             GameActions.Print("WorldMap loading...", 0x35);
             Load();
             OnResize();
-
-            _mapFiles = Directory.GetFiles(_mapFilesPath, "*.map").Union(Directory.GetFiles(_mapFilesPath, "*.csv"))
-                    .Union(Directory.GetFiles(_mapFilesPath, "*.xml")).ToArray();
 
             LoadMarkers();
 
@@ -539,12 +535,12 @@ namespace ClassicUO.Game.UI.Gumps
                         fs.Dispose();
                     }
 
-                    _mapFiles = Directory.GetFiles(_mapFilesPath, "*.map").Union(Directory.GetFiles(_mapFilesPath, "*.csv"))
+                    string[] mapFiles = Directory.GetFiles(_mapFilesPath, "*.map").Union(Directory.GetFiles(_mapFilesPath, "*.csv"))
                         .Union(Directory.GetFiles(_mapFilesPath, "*.xml")).ToArray();
 
                     _markerFiles.Clear();
 
-                    foreach (string mapFile in _mapFiles)
+                    foreach (string mapFile in mapFiles)
                     {
                         if (File.Exists(mapFile))
                         {
