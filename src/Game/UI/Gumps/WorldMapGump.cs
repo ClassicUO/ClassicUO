@@ -215,8 +215,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     foreach (WMapMarker marker in _markers)
                     {
-                        File.AppendAllText($"{_mapFilesPath}\\{marker.MarkerId}-save.map",
-                            $"{marker.X},{marker.Y},{marker.MapId},{marker.Name},{marker.MarkerIconName},yellow{Environment.NewLine}");
+                        File.AppendAllText($"{_mapFilesPath}\\{marker.MarkerId}.csv",
+                            $"{marker.X},{marker.Y},{marker.MapId},{marker.Name.Replace(",", "")},{marker.MarkerIconName},yellow{Environment.NewLine}");
                     }
 
                 });*/
@@ -534,14 +534,18 @@ namespace ClassicUO.Game.UI.Gumps
                     if (!Directory.Exists(_mapIconsPath))
                         Directory.CreateDirectory(_mapIconsPath);
 
-                    foreach (string icon in Directory.GetFiles(_mapIconsPath, "*.cur"))
+                    foreach (string icon in Directory.GetFiles(_mapIconsPath, "*.cur")
+                        .Union(Directory.GetFiles(_mapFilesPath, "*.png"))
+                        .Union(Directory.GetFiles(_mapFilesPath, "*.jpg"))
+                        .Union(Directory.GetFiles(_mapFilesPath, "*.ico")))
                     {
                         FileStream fs = new FileStream(icon, FileMode.Open, FileAccess.Read);
                         MemoryStream ms = new MemoryStream();
 
                         fs.CopyTo(ms);
 
-                        _markerIcons.Add(Path.GetFileNameWithoutExtension(icon).ToLower(), Texture2D.FromStream(Client.Game.GraphicsDevice, ms));
+                        _markerIcons.Add(Path.GetFileNameWithoutExtension(icon).ToLower(),
+                            Texture2D.FromStream(Client.Game.GraphicsDevice, ms));
 
                         ms.Dispose();
                         fs.Dispose();
