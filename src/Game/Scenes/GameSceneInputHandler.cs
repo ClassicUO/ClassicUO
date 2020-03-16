@@ -814,6 +814,22 @@ namespace ClassicUO.Game.Scenes
                             case MacroSubType.NE:
                                 _flags[3] = true;
                                 break;
+                            case MacroSubType.N:
+                                _flags[0] = true;
+                                _flags[3] = true;
+                                break;
+                            case MacroSubType.S:
+                                _flags[1] = true;
+                                _flags[2] = true;
+                                break;
+                            case MacroSubType.E:
+                                _flags[3] = true;
+                                _flags[1] = true;
+                                break;
+                            case MacroSubType.W:
+                                _flags[0] = true;
+                                _flags[2] = true;
+                                break;
                         }
                     }
                     else
@@ -884,6 +900,22 @@ namespace ClassicUO.Game.Scenes
                             case MacroSubType.NE:
                                 _flags[3] = false;
 
+                                break;
+                            case MacroSubType.N:
+                                _flags[0] = false;
+                                _flags[3] = false;
+                                break;
+                            case MacroSubType.S:
+                                _flags[1] = false;
+                                _flags[2] = false;
+                                break;
+                            case MacroSubType.E:
+                                _flags[3] = false;
+                                _flags[1] = false;
+                                break;
+                            case MacroSubType.W:
+                                _flags[0] = false;
+                                _flags[2] = false;
                                 break;
                         }
 
