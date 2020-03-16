@@ -1012,8 +1012,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _hueVector.Y = 1;
                 batcher.DrawString(Fonts.Regular, marker.Name, xx + 1, yy + 1, ref _hueVector);
                 ResetHueVector();
-                _hueVector.X = 0x0034;
-                _hueVector.Y = 1;
                 batcher.DrawString(Fonts.Regular, marker.Name, xx, yy, ref _hueVector);
             }
         }
