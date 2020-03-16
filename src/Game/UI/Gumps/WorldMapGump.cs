@@ -182,9 +182,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             ContextMenu = new ContextMenuControl();
 
-            ContextMenuItemEntry markersEntry = new ContextMenuItemEntry("Markers Options");
-            markersEntry.Add(new ContextMenuItemEntry("Reload map markers", () => { LoadMarkers(); }));
-            markersEntry.Add(new ContextMenuItemEntry("Reload map markers", () => { LoadMarkers(); }));
+            ContextMenuItemEntry markersEntry = new ContextMenuItemEntry("Map Marker Options");
+            markersEntry.Add(new ContextMenuItemEntry("Reload markers", () => { LoadMarkers(); }));
             markersEntry.Add(new ContextMenuItemEntry("Show all markers", () => { _showMarkers = !_showMarkers; }, true, _showMarkers));
             markersEntry.Add(new ContextMenuItemEntry(""));
             markersEntry.Add(new ContextMenuItemEntry("Show marker names", () => { _showMarkerNames = !_showMarkerNames; }, true, _showMarkerNames));
@@ -197,16 +196,6 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     markersEntry.Add(new ContextMenuItemEntry($"Show/Hide '{markerFile.Name}'", () => { markerFile.Hidden = !markerFile.Hidden; }, true, !markerFile.Hidden));
                 }
-
-                /*_markersContextMenu.Add("Save to CSV", () =>
-                {
-                    foreach (WMapMarker marker in _markers)
-                    {
-                        File.AppendAllText($"{_mapFilesPath}\\{marker.MarkerId}-save.map",
-                            $"{marker.X},{marker.Y},{marker.MapId},{marker.Name},{marker.MarkerIconName},yellow{Environment.NewLine}");
-                    }
-
-                });*/
             }
             else
             {
@@ -552,7 +541,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 Markers = new List<WMapMarker>()
                             };
 
-                            if (mapFile != null && Path.GetExtension(mapFile).Equals(".xml")) // Ultima Mapper
+                            if (mapFile != null && Path.GetExtension(mapFile).ToLower().Equals(".xml")) // Ultima Mapper
                             {
                                 XmlTextReader reader = new XmlTextReader(mapFile);
 
@@ -579,7 +568,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     }
                                 }
                             }
-                            else if (mapFile != null && Path.GetExtension(mapFile).Equals(".map")) //UOAM
+                            else if (mapFile != null && Path.GetExtension(mapFile).ToLower().Equals(".map")) //UOAM
                             {
                                 using (StreamReader reader = new StreamReader(mapFile))
                                 {
