@@ -521,6 +521,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _markerIcons.Clear();
 
+                    if (!Directory.Exists(_mapIconsPath))
+                        Directory.CreateDirectory(_mapIconsPath);
+
                     foreach (string icon in Directory.GetFiles(_mapIconsPath, "*.cur"))
                     {
                         FileStream fs = new FileStream(icon, FileMode.Open, FileAccess.Read);
