@@ -71,7 +71,6 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _showMarkerNames = true;
         private bool _showMarkerIcons = true;
 
-        private string[] _mapFiles;
         private string _mapFilesPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
         private string _mapIconsPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "MapIcons");
 
@@ -195,7 +194,7 @@ namespace ClassicUO.Game.UI.Gumps
             _markersContextMenu.Add("Show marker icons", () => { _showMarkerIcons = !_showMarkerIcons; }, true, _showMarkerIcons);
             _markersContextMenu.Add("", null);
 
-            if (_mapFiles.Length > 0)
+            if (_markerFiles.Count > 0)
             {
                 foreach (WMapMarkerFile markerFile in _markerFiles)
                 {
@@ -542,12 +541,12 @@ namespace ClassicUO.Game.UI.Gumps
                         fs.Dispose();
                     }
 
-                    _mapFiles = Directory.GetFiles(_mapFilesPath, "*.map").Union(Directory.GetFiles(_mapFilesPath, "*.csv"))
+                    string[] mapFiles = Directory.GetFiles(_mapFilesPath, "*.map").Union(Directory.GetFiles(_mapFilesPath, "*.csv"))
                         .Union(Directory.GetFiles(_mapFilesPath, "*.xml")).ToArray();
 
                     _markerFiles.Clear();
 
-                    foreach (string mapFile in _mapFiles)
+                    foreach (string mapFile in mapFiles)
                     {
                         if (File.Exists(mapFile))
                         {
