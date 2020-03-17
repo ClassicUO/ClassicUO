@@ -899,6 +899,8 @@ namespace ClassicUO.Game.UI.Gumps
                 rotY > y + Height - 8 - DOT_SIZE)
                 return;
 
+            bool showMarkerName = _showMarkerNames && !string.IsNullOrEmpty(marker.Name) && _zoomIndex > 5;
+
             if (_zoomIndex < 3 || !_showMarkerIcons || marker.MarkerIcon == null)
             {
                 batcher.Draw2D(Texture2DCache.GetTexture(marker.Color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF,
@@ -909,17 +911,21 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 batcher.Draw2D(marker.MarkerIcon, rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, ref _hueVector);
 
-                // ####  Icon hovering example  ####
-                /*if (Mouse.Position.X >= rotX && Mouse.Position.X <= rotX + marker.MarkerIcon.Width &&
-                    Mouse.Position.Y >= rotY && Mouse.Position.Y <= rotY + marker.MarkerIcon.Height)
+                if (!showMarkerName)
                 {
-                    Console.WriteLine("HOVERING ICON --> {0}", marker.Name);
-
-                    batcher.DrawString(Fonts.Regular, $"I'm hovering '{marker.Name}'", rotX, rotY, ref _hueVector);
-                }*/
+                    if (Mouse.Position.X >= rotX && Mouse.Position.X <= rotX + marker.MarkerIcon.Width &&
+                        Mouse.Position.Y >= rotY && Mouse.Position.Y <= rotY + marker.MarkerIcon.Height)
+                    {
+                        _hueVector.X = 0;
+                        _hueVector.Y = 1;
+                        batcher.DrawString(Fonts.Regular, marker.Name, rotX - 16, rotY - 16, ref _hueVector);
+                        ResetHueVector();
+                        batcher.DrawString(Fonts.Regular, marker.Name, rotX - 15, rotY - 15, ref _hueVector);
+                    }
+                }
             }
 
-            if (_showMarkerNames && !string.IsNullOrEmpty(marker.Name))
+            if (showMarkerName)
             {
                 Vector2 size = Fonts.Regular.MeasureString(marker.Name);
 
@@ -940,11 +946,6 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     rotY = y + (int) size.Y;
                 }
-
-                if (_zoomIndex < 6)
-                    return;
-                //if (_currentMarkerCount > 50) return;
-
                 int xx = (int) (rotX - size.X / 2);
                 int yy = (int) (rotY - size.Y);
 
