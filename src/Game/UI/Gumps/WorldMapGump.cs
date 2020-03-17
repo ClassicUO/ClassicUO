@@ -265,84 +265,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButtonType button)
-        {
-            if (button == MouseButtonType.Left)
-            {
-                _isScrolling = false;
-                CanMove = true;
-            }
-
-            UIManager.GameCursor.IsDraggingCursorForced = false;
-
-            base.OnMouseUp(x, y, button);
-        }
-
-        protected override void OnMouseDown(int x, int y, MouseButtonType button)
-        {
-            if (button == MouseButtonType.Left && (Keyboard.Alt || _freeView))
-            {
-                if (x > 4 && x < Width - 8 && y > 4 && y < Height - 8)
-                {
-                    _lastScroll.X = x;
-                    _lastScroll.Y = y;
-                    _isScrolling = true;
-                    CanMove = false;
-
-                    UIManager.GameCursor.IsDraggingCursorForced = true;
-                }
-            }
-
-            base.OnMouseDown(x, y, button);
-        }
-
-        protected override void OnMouseOver(int x, int y)
-        {
-            Point offset = Mouse.LDroppedOffset;
-
-            if (_isScrolling && offset != Point.Zero)
-            {
-                int scrollX = _lastScroll.X - x;
-                int scrollY = _lastScroll.Y - y;
-
-                (scrollX, scrollY) = RotatePoint(scrollX, scrollY, 1f, -1, _flipMap ? 45f : 0f);
-
-                _center.X += (int)(scrollX / Zoom);
-                _center.Y += (int)(scrollY / Zoom);
-
-                if (_center.X < 0)
-                    _center.X = 0;
-
-                if (_center.Y < 0)
-                    _center.Y = 0;
-
-                if (_center.X > MapLoader.Instance.MapsDefaultSize[World.MapIndex, 0])
-                    _center.X = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 0];
-
-                if (_center.Y > MapLoader.Instance.MapsDefaultSize[World.MapIndex, 1])
-                    _center.Y = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 1];
-
-                _lastScroll.X = x;
-                _lastScroll.Y = y;
-            }
-            else
-            {
-                base.OnMouseOver(x, y);
-            }
-        }
 
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            base.Update(totalMS, frameMS);
-
-            if (_mapIndex != World.MapIndex)
-            {
-                Load();
-            }
-
-            World.WMapManager.RequestServerPartyGuildInfo();
-        }
+        #region Loading
 
         private unsafe Task Load()
         {
@@ -665,26 +590,28 @@ namespace ClassicUO.Game.UI.Gumps
             });
         }
 
-        protected override void OnMouseWheel(MouseEventType delta)
+        #endregion
+
+
+        #region Update
+
+        public override void Update(double totalMS, double frameMS)
         {
-            if (delta == MouseEventType.WheelScrollUp)
-            {
-                _zoomIndex++;
+            base.Update(totalMS, frameMS);
 
-                if (_zoomIndex >= _zooms.Length)
-                    _zoomIndex = _zooms.Length - 1;
-            }
-            else
+            if (_mapIndex != World.MapIndex)
             {
-                _zoomIndex--;
-
-                if (_zoomIndex < 0)
-                    _zoomIndex = 0;
+                Load();
             }
 
-
-            base.OnMouseWheel(delta);
+            World.WMapManager.RequestServerPartyGuildInfo();
         }
+
+
+        #endregion
+
+
+        #region Draw
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
@@ -706,9 +633,9 @@ namespace ClassicUO.Game.UI.Gumps
             int sx = _center.X + 1;
             int sy = _center.Y + 1;
 
-            int size = (int)Math.Max(gWidth * 1.75f, gHeight * 1.75f);
+            int size = (int) Math.Max(gWidth * 1.75f, gHeight * 1.75f);
 
-            int size_zoom = (int)(size / Zoom);
+            int size_zoom = (int) (size / Zoom);
             int size_zoom_half = size_zoom >> 1;
 
             int halfWidth = gWidth >> 1;
@@ -777,7 +704,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 foreach (WMapMarkerFile file in _markerFiles)
                 {
-                    if (file.Hidden) continue;
+                    if (file.Hidden)
+                        continue;
 
                     foreach (WMapMarker marker in file.Markers)
                     {
@@ -899,24 +827,24 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (rotX + size.X / 2 > x + Width - 8)
                 {
-                    rotX = x + Width - 8 - (int)(size.X / 2);
+                    rotX = x + Width - 8 - (int) (size.X / 2);
                 }
                 else if (rotX - size.X / 2 < x)
                 {
-                    rotX = x + (int)(size.X / 2);
+                    rotX = x + (int) (size.X / 2);
                 }
 
                 if (rotY + size.Y > y + Height)
                 {
-                    rotY = y + Height - (int)(size.Y);
+                    rotY = y + Height - (int) (size.Y);
                 }
                 else if (rotY - size.Y < y)
                 {
-                    rotY = y + (int)size.Y;
+                    rotY = y + (int) size.Y;
                 }
 
-                int xx = (int)(rotX - size.X / 2);
-                int yy = (int)(rotY - size.Y);
+                int xx = (int) (rotX - size.X / 2);
+                int yy = (int) (rotY - size.Y);
 
                 _hueVector.X = 0;
                 _hueVector.Y = 1;
@@ -947,8 +875,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void DrawMarker(UltimaBatcher2D batcher, WMapMarker marker, int x, int y, int width, int height,
-            float zoom)
+        private void DrawMarker(UltimaBatcher2D batcher, WMapMarker marker, int x, int y, int width, int height, float zoom)
         {
             if (marker.MapId != World.MapIndex)
                 return;
@@ -981,6 +908,15 @@ namespace ClassicUO.Game.UI.Gumps
             else
             {
                 batcher.Draw2D(marker.MarkerIcon, rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, ref _hueVector);
+
+                // ####  Icon hovering example  ####
+                /*if (Mouse.Position.X >= rotX && Mouse.Position.X <= rotX + marker.MarkerIcon.Width &&
+                    Mouse.Position.Y >= rotY && Mouse.Position.Y <= rotY + marker.MarkerIcon.Height)
+                {
+                    Console.WriteLine("HOVERING ICON --> {0}", marker.Name);
+
+                    batcher.DrawString(Fonts.Regular, $"I'm hovering '{marker.Name}'", rotX, rotY, ref _hueVector);
+                }*/
             }
 
             if (_showMarkerNames && !string.IsNullOrEmpty(marker.Name))
@@ -989,27 +925,28 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (rotX + size.X / 2 > x + Width - 8)
                 {
-                    rotX = x + Width - 8 - (int)(size.X / 2);
+                    rotX = x + Width - 8 - (int) (size.X / 2);
                 }
                 else if (rotX - size.X / 2 < x)
                 {
-                    rotX = x + (int)(size.X / 2);
+                    rotX = x + (int) (size.X / 2);
                 }
 
                 if (rotY + size.Y > y + Height)
                 {
-                    rotY = y + Height - (int)(size.Y);
+                    rotY = y + Height - (int) (size.Y);
                 }
                 else if (rotY - size.Y < y)
                 {
-                    rotY = y + (int)size.Y;
+                    rotY = y + (int) size.Y;
                 }
 
-                if (_zoomIndex < 6) return;
+                if (_zoomIndex < 6)
+                    return;
                 //if (_currentMarkerCount > 50) return;
 
-                int xx = (int)(rotX - size.X / 2);
-                int yy = (int)(rotY - size.Y);
+                int xx = (int) (rotX - size.X / 2);
+                int yy = (int) (rotY - size.Y);
 
                 _hueVector.X = 0;
                 _hueVector.Y = 1;
@@ -1018,7 +955,6 @@ namespace ClassicUO.Game.UI.Gumps
                 batcher.DrawString(Fonts.Regular, marker.Name, xx, yy, ref _hueVector);
             }
         }
-
 
         private void DrawWMEntity(UltimaBatcher2D batcher, WMapEntity entity, int x, int y, int width, int height,
             float zoom)
@@ -1078,24 +1014,24 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (rotX + size.X / 2 > x + Width - 8)
             {
-                rotX = x + Width - 8 - (int)(size.X / 2);
+                rotX = x + Width - 8 - (int) (size.X / 2);
             }
             else if (rotX - size.X / 2 < x)
             {
-                rotX = x + (int)(size.X / 2);
+                rotX = x + (int) (size.X / 2);
             }
 
             if (rotY + size.Y > y + Height)
             {
-                rotY = y + Height - (int)(size.Y);
+                rotY = y + Height - (int) (size.Y);
             }
             else if (rotY - size.Y < y)
             {
-                rotY = y + (int)size.Y;
+                rotY = y + (int) size.Y;
             }
 
-            int xx = (int)(rotX - size.X / 2);
-            int yy = (int)(rotY - size.Y);
+            int xx = (int) (rotX - size.X / 2);
+            int yy = (int) (rotY - size.Y);
 
             _hueVector.X = 0;
             _hueVector.Y = 1;
@@ -1143,6 +1079,108 @@ namespace ClassicUO.Game.UI.Gumps
             batcher.Draw2D(Texture2DCache.GetTexture(Color.CornflowerBlue), x - BAR_MAX_WIDTH_HALF,
                 y - BAR_MAX_HEIGHT_HALF, max, BAR_MAX_HEIGHT, ref _hueVector);
         }
+
+
+        #endregion
+
+
+        #region I/O
+
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
+        {
+            if (button == MouseButtonType.Left)
+            {
+                _isScrolling = false;
+                CanMove = true;
+            }
+
+            UIManager.GameCursor.IsDraggingCursorForced = false;
+
+            base.OnMouseUp(x, y, button);
+        }
+
+        protected override void OnMouseDown(int x, int y, MouseButtonType button)
+        {
+            if (button == MouseButtonType.Left && (Keyboard.Alt || _freeView))
+            {
+                if (x > 4 && x < Width - 8 && y > 4 && y < Height - 8)
+                {
+                    _lastScroll.X = x;
+                    _lastScroll.Y = y;
+                    _isScrolling = true;
+                    CanMove = false;
+
+                    UIManager.GameCursor.IsDraggingCursorForced = true;
+                }
+            }
+
+            base.OnMouseDown(x, y, button);
+        }
+
+        protected override void OnMouseOver(int x, int y)
+        {
+            Point offset = Mouse.LDroppedOffset;
+
+            if (_isScrolling && offset != Point.Zero)
+            {
+                int scrollX = _lastScroll.X - x;
+                int scrollY = _lastScroll.Y - y;
+
+                (scrollX, scrollY) = RotatePoint(scrollX, scrollY, 1f, -1, _flipMap ? 45f : 0f);
+
+                _center.X += (int) (scrollX / Zoom);
+                _center.Y += (int) (scrollY / Zoom);
+
+                if (_center.X < 0)
+                    _center.X = 0;
+
+                if (_center.Y < 0)
+                    _center.Y = 0;
+
+                if (_center.X > MapLoader.Instance.MapsDefaultSize[World.MapIndex, 0])
+                    _center.X = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 0];
+
+                if (_center.Y > MapLoader.Instance.MapsDefaultSize[World.MapIndex, 1])
+                    _center.Y = MapLoader.Instance.MapsDefaultSize[World.MapIndex, 1];
+
+                _lastScroll.X = x;
+                _lastScroll.Y = y;
+            }
+            else
+            {
+                base.OnMouseOver(x, y);
+            }
+        }
+
+        protected override void OnMouseWheel(MouseEventType delta)
+        {
+            if (delta == MouseEventType.WheelScrollUp)
+            {
+                _zoomIndex++;
+
+                if (_zoomIndex >= _zooms.Length)
+                    _zoomIndex = _zooms.Length - 1;
+            }
+            else
+            {
+                _zoomIndex--;
+
+                if (_zoomIndex < 0)
+                    _zoomIndex = 0;
+            }
+
+
+            base.OnMouseWheel(delta);
+        }
+
+
+        #endregion
+
+
+
+
+
+
 
         private (int, int) RotatePoint(int x, int y, float zoom, int dist, float angle = 45f)
         {
