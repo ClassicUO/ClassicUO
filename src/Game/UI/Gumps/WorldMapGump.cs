@@ -70,25 +70,31 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _showMarkerNames = true;
         private bool _showMarkerIcons = true;
 
-        private string[] _mapFiles;
         private string _mapFilesPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
         private string _mapIconsPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "MapIcons");
 
+        private bool _mapMarkersLoaded = false;
 
         private class WMapMarker
         {
             public string Name { get; set; }
             public int X { get; set; }
             public int Y { get; set; }
-            public string MarkerId { get; set; }
             public int MapId { get; set; }
             public Color Color { get; set; }
-            public bool Hidden { get; set; }
             public Texture2D MarkerIcon { get; set; }
             public string MarkerIconName { get; set; }
         }
 
-        private List<WMapMarker> _markers = new List<WMapMarker>();
+        private class WMapMarkerFile
+        {
+            public string Name { get; set; }
+            public string FullPath { get; set; }
+            public List<WMapMarker> Markers { get; set; }
+            public bool Hidden { get; set; }
+        }
+
+        private List<WMapMarkerFile> _markerFiles = new List<WMapMarkerFile>();
         private Dictionary<string, Texture2D> _markerIcons = new Dictionary<string, Texture2D>();
 
         public WorldMapGump() : base(400, 400, 100, 100, 0, 0)
@@ -100,9 +106,6 @@ namespace ClassicUO.Game.UI.Gumps
             GameActions.Print("WorldMap loading...", 0x35);
             Load();
             OnResize();
-
-            _mapFiles = Directory.GetFiles(_mapFilesPath, "*.map").Union(Directory.GetFiles(_mapFilesPath, "*.csv"))
-                    .Union(Directory.GetFiles(_mapFilesPath, "*.xml")).ToArray();
 
             LoadMarkers();
 
@@ -179,41 +182,20 @@ namespace ClassicUO.Game.UI.Gumps
         {
             ContextMenu = new ContextMenuControl();
 
-            ContextMenuItemEntry markersEntry = new ContextMenuItemEntry("Markers Options");
-            markersEntry.Add(new ContextMenuItemEntry("Reload map markers", () => { LoadMarkers(); }));
-            markersEntry.Add(new ContextMenuItemEntry("Reload map markers", () => { LoadMarkers(); }));
+            ContextMenuItemEntry markersEntry = new ContextMenuItemEntry("Map Marker Options");
+            markersEntry.Add(new ContextMenuItemEntry("Reload markers", () => { LoadMarkers(); }));
             markersEntry.Add(new ContextMenuItemEntry("Show all markers", () => { _showMarkers = !_showMarkers; }, true, _showMarkers));
             markersEntry.Add(new ContextMenuItemEntry(""));
             markersEntry.Add(new ContextMenuItemEntry("Show marker names", () => { _showMarkerNames = !_showMarkerNames; }, true, _showMarkerNames));
             markersEntry.Add(new ContextMenuItemEntry("Show marker icons", () => { _showMarkerIcons = !_showMarkerIcons; }, true, _showMarkerIcons));
             markersEntry.Add(new ContextMenuItemEntry(""));
 
-            if (_mapFiles.Length > 0)
+            if (_markerFiles.Count > 0)
             {
-                foreach (string mapFile in _mapFiles)
+                foreach (WMapMarkerFile markerFile in _markerFiles)
                 {
-                    string file = Path.GetFileNameWithoutExtension(mapFile);
-                    markersEntry.Add(new ContextMenuItemEntry($"Show/Hide '{file}'", () =>
-                    {
-                        foreach (WMapMarker marker in _markers)
-                        {
-                            if (marker.MarkerId.Equals(file))
-                            {
-                                marker.Hidden = !marker.Hidden;
-                            }
-                        }
-                    }));
+                    markersEntry.Add(new ContextMenuItemEntry($"Show/Hide '{markerFile.Name}'", () => { markerFile.Hidden = !markerFile.Hidden; }, true, !markerFile.Hidden));
                 }
-
-                /*_markersContextMenu.Add("Save to CSV", () =>
-                {
-                    foreach (WMapMarker marker in _markers)
-                    {
-                        File.AppendAllText($"{_mapFilesPath}\\{marker.MarkerId}-save.map",
-                            $"{marker.X},{marker.Y},{marker.MapId},{marker.Name},{marker.MarkerIconName},yellow{Environment.NewLine}");
-                    }
-
-                });*/
             }
             else
             {
@@ -517,11 +499,19 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (World.InGame)
                 {
-                    GameActions.Print("Loading WorldMap markers..", 0x48);
+                    _mapMarkersLoaded = false;
+
+                    GameActions.Print("Loading WorldMap markers..", 0x2A);
 
                     _markerIcons.Clear();
 
-                    foreach (string icon in Directory.GetFiles(_mapIconsPath, "*.cur"))
+                    if (!Directory.Exists(_mapIconsPath))
+                        Directory.CreateDirectory(_mapIconsPath);
+
+                    foreach (string icon in Directory.GetFiles(_mapIconsPath, "*.cur")
+                        .Union(Directory.GetFiles(_mapIconsPath, "*.png"))
+                        .Union(Directory.GetFiles(_mapIconsPath, "*.jpg"))
+                        .Union(Directory.GetFiles(_mapIconsPath, "*.ico")))
                     {
                         FileStream fs = new FileStream(icon, FileMode.Open, FileAccess.Read);
                         MemoryStream ms = new MemoryStream();
@@ -534,18 +524,24 @@ namespace ClassicUO.Game.UI.Gumps
                         fs.Dispose();
                     }
 
-                    _mapFiles = Directory.GetFiles(_mapFilesPath, "*.map").Union(Directory.GetFiles(_mapFilesPath, "*.csv"))
+                    string[] mapFiles = Directory.GetFiles(_mapFilesPath, "*.map").Union(Directory.GetFiles(_mapFilesPath, "*.csv"))
                         .Union(Directory.GetFiles(_mapFilesPath, "*.xml")).ToArray();
 
-                    _markers.Clear();
+                    _markerFiles.Clear();
 
-                    foreach (string mapFile in _mapFiles)
+                    foreach (string mapFile in mapFiles)
                     {
                         if (File.Exists(mapFile))
                         {
-                            GameActions.Print($"..{Path.GetFileName(mapFile)}", 0x48);
+                            WMapMarkerFile markerFile = new WMapMarkerFile
+                            {
+                                Hidden = false,
+                                Name = Path.GetFileNameWithoutExtension(mapFile),
+                                FullPath = mapFile,
+                                Markers = new List<WMapMarker>()
+                            };
 
-                            if (mapFile != null && Path.GetExtension(mapFile).Equals(".xml")) // Ultima Mapper
+                            if (mapFile != null && Path.GetExtension(mapFile).ToLower().Equals(".xml")) // Ultima Mapper
                             {
                                 XmlTextReader reader = new XmlTextReader(mapFile);
 
@@ -559,7 +555,6 @@ namespace ClassicUO.Game.UI.Gumps
                                             Y = int.Parse(reader.GetAttribute("Y")),
                                             Name = reader.GetAttribute("Name"),
                                             MapId = int.Parse(reader.GetAttribute("Facet")),
-                                            MarkerId = Path.GetFileNameWithoutExtension(mapFile),
                                             Color = Color.White
                                         };
 
@@ -569,11 +564,11 @@ namespace ClassicUO.Game.UI.Gumps
                                             marker.MarkerIconName = reader.GetAttribute("Icon").ToLower();
                                         }
 
-                                        _markers.Add(marker);
+                                        markerFile.Markers.Add(marker);
                                     }
                                 }
                             }
-                            else if (mapFile != null && Path.GetExtension(mapFile).Equals(".map")) //UOAM
+                            else if (mapFile != null && Path.GetExtension(mapFile).ToLower().Equals(".map")) //UOAM
                             {
                                 using (StreamReader reader = new StreamReader(mapFile))
                                 {
@@ -601,7 +596,6 @@ namespace ClassicUO.Game.UI.Gumps
                                                 Y = int.Parse(splits[1]),
                                                 MapId = int.Parse(splits[2]),
                                                 Name = string.Join(" ", splits, 3, splits.Length - 3),
-                                                MarkerId = Path.GetFileNameWithoutExtension(mapFile),
                                                 Color = Color.White
                                             };
 
@@ -611,7 +605,7 @@ namespace ClassicUO.Game.UI.Gumps
                                             if (_markerIcons.TryGetValue(iconSplits[0].ToLower(), out Texture2D value))
                                                 marker.MarkerIcon = value;
 
-                                            _markers.Add(marker);
+                                            markerFile.Markers.Add(marker);
                                         }
                                     }
                                 }
@@ -637,21 +631,36 @@ namespace ClassicUO.Game.UI.Gumps
                                             MapId = int.Parse(splits[2]),
                                             Name = splits[3],
                                             MarkerIconName = splits[4].ToLower(),
-                                            MarkerId = Path.GetFileNameWithoutExtension(mapFile),
                                             Color = splits.Length == 6 ? GetColor(splits[5]) : Color.White
                                         };
 
                                         if (_markerIcons.TryGetValue(splits[4].ToLower(), out Texture2D value))
                                             marker.MarkerIcon = value;
 
-                                        _markers.Add(marker);
+                                        markerFile.Markers.Add(marker);
                                     }
                                 }
+                            }
+
+                            if (markerFile.Markers.Count > 0)
+                            {
+                                GameActions.Print($"..{Path.GetFileName(mapFile)} ({markerFile.Markers.Count})", 0x2B);
+                                _markerFiles.Add(markerFile);
                             }
                         }
                     }
 
-                    GameActions.Print($"WorldMap markers loaded ({_markers.Count})", 0x48);
+                    BuildContextMenu();
+
+                    int count = 0;
+                    foreach (WMapMarkerFile file in _markerFiles)
+                    {
+                        count += file.Markers.Count;
+                    }
+
+                    _mapMarkersLoaded = true;
+
+                    GameActions.Print($"WorldMap markers loaded ({count})", 0x2A);
                 }
             });
         }
@@ -764,11 +773,16 @@ namespace ClassicUO.Game.UI.Gumps
                 _coords.Text = string.Empty;
             }
 
-            if (_showMarkers)
+            if (_showMarkers && _mapMarkersLoaded)
             {
-                foreach (WMapMarker marker in _markers)
+                foreach (WMapMarkerFile file in _markerFiles)
                 {
-                    DrawMarker(batcher, marker, gX, gY, halfWidth, halfHeight, Zoom);
+                    if (file.Hidden) continue;
+
+                    foreach (WMapMarker marker in file.Markers)
+                    {
+                        DrawMarker(batcher, marker, gX, gY, halfWidth, halfHeight, Zoom);
+                    }
                 }
             }
 
@@ -936,9 +950,6 @@ namespace ClassicUO.Game.UI.Gumps
         private void DrawMarker(UltimaBatcher2D batcher, WMapMarker marker, int x, int y, int width, int height,
             float zoom)
         {
-            if (marker.Hidden)
-                return;
-
             if (marker.MapId != World.MapIndex)
                 return;
 
@@ -1004,8 +1015,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _hueVector.Y = 1;
                 batcher.DrawString(Fonts.Regular, marker.Name, xx + 1, yy + 1, ref _hueVector);
                 ResetHueVector();
-                _hueVector.X = 0x0034;
-                _hueVector.Y = 1;
                 batcher.DrawString(Fonts.Regular, marker.Name, xx, yy, ref _hueVector);
             }
         }
