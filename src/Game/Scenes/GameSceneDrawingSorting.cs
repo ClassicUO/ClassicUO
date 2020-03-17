@@ -116,8 +116,11 @@ namespace ClassicUO.Game.Scenes
                 {
                     sbyte tileZ = obj.Z;
 
-                    if (obj is Land)
+                    if (obj is Land l)
                     {
+                        if (l.IsStretched)
+                            tileZ = l.AverageZ;
+
                         if (pz16 <= tileZ)
                         {
                             maxGroundZ = (sbyte) pz16;
