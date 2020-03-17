@@ -824,11 +824,11 @@ namespace ClassicUO.Game.Scenes
                                 break;
                             case MacroSubType.E:
                                 _flags[3] = true;
-                                _flags[1] = true;
+                                _flags[2] = true;
                                 break;
                             case MacroSubType.W:
                                 _flags[0] = true;
-                                _flags[2] = true;
+                                _flags[1] = true;
                                 break;
                         }
                     }
@@ -911,14 +911,16 @@ namespace ClassicUO.Game.Scenes
                                 break;
                             case MacroSubType.E:
                                 _flags[3] = false;
-                                _flags[1] = false;
+                                _flags[2] = false;
                                 break;
                             case MacroSubType.W:
                                 _flags[0] = false;
-                                _flags[2] = false;
+                                _flags[1] = false;
                                 break;
                         }
-
+                        Macros.SetMacroToExecute(macro.FirstNode);
+                        Macros.WaitForTargetTimer = 0;
+                        Macros.Update();
                         for (int i = 0; i < 4; i++)
                         {
                             if (_flags[i])
