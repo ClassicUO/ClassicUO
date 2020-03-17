@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Network;
+
 namespace ClassicUO.Game.Managers
 {
     static class BoatMovingManager
@@ -36,6 +38,15 @@ namespace ClassicUO.Game.Managers
         private const int SLOW_INTERVAL = 1000;
         private const int NORMAL_INTERVAL = 500;
         private const int FAST_INTERVAL = 250;
+
+        private static uint _timePacket;
+
+
+        public static void MoveRequest(Direction direciton, byte speed)
+        {
+            NetClient.Socket.Send(new PMultiBoatMoveRequest(World.Player, direciton, speed));
+            _timePacket = Time.Ticks;
+        }
 
         public static void AddStep(uint serial, byte speed, Direction movingDir, Direction facingDir, ushort x, ushort y, sbyte z)
         {
@@ -73,16 +84,14 @@ namespace ClassicUO.Game.Managers
 
             if (deque.Count == 0)
             {
-                Console.WriteLine("SET TIMER");
                 item.LastStepTime = Time.Ticks;
             }
-
 
             Direction moveDir = DirectionHelper.CalculateDirection(currX, currY, x, y);
 
             BoatStep step = new BoatStep();
             step.Serial = serial;
-            step.Time = Time.Ticks;
+            step.Time = _timePacket == 0 ? 25 : Time.Ticks - _timePacket;
             step.Speed = speed;
 
             if (moveDir != Direction.NONE)
@@ -112,7 +121,7 @@ namespace ClassicUO.Game.Managers
                 deque.AddToBack(step);
             }
 
-            Console.WriteLine(">>> STEP ADDED {0}", speed);
+            _timePacket = Time.Ticks;
         }
 
         public static void ClearSteps(uint serial)
@@ -200,23 +209,22 @@ namespace ClassicUO.Game.Managers
 
                     bool drift = step.MovingDir != step.FacingDir;
 
-                    int maxDelay;
+                    var maxDelay = Math.Max(step.Time, 25);
 
-                    switch (step.Speed)
-                    {
-                        case 0x02:
-                            maxDelay = SLOW_INTERVAL;
-                            break;
-                        default:
-                        case 0x03:
-                            maxDelay = NORMAL_INTERVAL;
-                            break;
-                        case 0x04:
-                            maxDelay = FAST_INTERVAL;
-                            break;
-                    }
 
-                    Console.WriteLine("Speed: {0}, delay: {1}", step.Speed, maxDelay);
+                    //switch (step.Speed)
+                    //{
+                    //    case 0x02:
+                    //        maxDelay = SLOW_INTERVAL;
+                    //        break;
+                    //    default:
+                    //    case 0x03:
+                    //        maxDelay = NORMAL_INTERVAL;
+                    //        break;
+                    //    case 0x04:
+                    //        maxDelay = FAST_INTERVAL;
+                    //        break;
+                    //}
 
 
                     int delay = (int) Time.Ticks - (int) item.LastStepTime;

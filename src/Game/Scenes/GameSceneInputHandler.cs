@@ -88,7 +88,7 @@ namespace ClassicUO.Game.Scenes
                         _lastBoatDirection = facing - 1;
                         _boatIsMoving = true;
 
-                        NetClient.Socket.Send(new PMultiBoatMoveRequest(World.Player, facing - 1, (byte) (run ? 2 : 1)));
+                        BoatMovingManager.MoveRequest(facing - 1, (byte) (run ? 2 : 1));
                     }
                 }
                 else
@@ -569,7 +569,7 @@ namespace ClassicUO.Game.Scenes
             if (_boatIsMoving)
             {
                 _boatIsMoving = false;
-                NetClient.Socket.Send(new PMultiBoatMoveRequest(World.Player, World.Player.Direction, 0x00));
+                BoatMovingManager.MoveRequest(World.Player.Direction, 0);
             }
         }
 
