@@ -65,6 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _showMobiles = true;
         private bool _showPlayerName = true;
         private bool _showPlayerBar = true;
+        private bool _showMultis = true;
 
         private bool _showMarkers = true;
         private bool _showMarkerNames = true;
@@ -139,6 +140,7 @@ namespace ClassicUO.Game.UI.Gumps
             _showPlayerName = ParseBool(xml.GetAttribute("showplayername"));
             _showPlayerBar = ParseBool(xml.GetAttribute("showplayerbar"));
             _showMarkers = ParseBool(xml.GetAttribute("showmarkers"));
+            _showMultis = ParseBool(xml.GetAttribute("showmultis"));
 
             BuildGump();
         }
@@ -165,6 +167,7 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("showplayername", _showPlayerName.ToString());
             writer.WriteAttributeString("showplayerbar", _showPlayerBar.ToString());
             writer.WriteAttributeString("showmarkers", _showMarkers.ToString());
+            writer.WriteAttributeString("showmultis", _showMultis.ToString());
         }
 
         private void BuildGump()
@@ -212,6 +215,7 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add("Show party members", () => { _showPartyMembers = !_showPartyMembers; }, true,
                 _showPartyMembers);
             ContextMenu.Add("Show mobiles", () => { _showMobiles = !_showMobiles; }, true, _showMobiles);
+            ContextMenu.Add("Show multis (houses/ships)", () => { _showMultis = !_showMultis; }, true, _showMultis);
             ContextMenu.Add("Show coordinates", () => { _showCoordinates = !_showCoordinates; _lastX = -1; }, true,
                 _showCoordinates);
             ContextMenu.Add("", null);
@@ -708,6 +712,17 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            if (_showMultis)
+            {
+                foreach (House house in World.HouseManager.Houses)
+                {
+                    Item item = World.Items.Get(house.Serial);
+
+                    if (item != null)
+                        DrawMulti(batcher, item.X, item.Y, gX, gY, halfWidth, halfHeight, Zoom);
+                }
+            }
+
             if (_showMobiles)
             {
                 foreach (Mobile mob in World.Mobiles)
@@ -949,6 +964,32 @@ namespace ClassicUO.Game.UI.Gumps
                 ResetHueVector();
                 batcher.DrawString(Fonts.Regular, marker.Name, xx, yy, ref _hueVector);
             }
+        }
+
+        private void DrawMulti(UltimaBatcher2D batcher, int multiX, int multiY, int x, int y, int width, int height, float zoom)
+        {
+            ResetHueVector();
+
+            int sx = multiX - _center.X;
+            int sy = multiY - _center.Y;
+
+            (int rotX, int rotY) = RotatePoint(sx, sy, zoom, 1, _flipMap ? 45f : 0f);
+
+            rotX += x + width;
+            rotY += y + height;
+
+            const int DOT_SIZE = 4;
+            const int DOT_SIZE_HALF = DOT_SIZE >> 1;
+
+            if (rotX < x ||
+                rotX > x + Width - 8 - DOT_SIZE ||
+                rotY < y ||
+                rotY > y + Height - 8 - DOT_SIZE)
+                return;
+
+            batcher.Draw2D(Texture2DCache.GetTexture(Color.Aquamarine), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF,
+                DOT_SIZE,
+                DOT_SIZE, ref _hueVector);
         }
 
         private void DrawWMEntity(UltimaBatcher2D batcher, WMapEntity entity, int x, int y, int width, int height,
