@@ -219,12 +219,6 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add("Show your healthbar", () => { _showPlayerBar = !_showPlayerBar; }, true, _showPlayerBar);
             ContextMenu.Add("", null);
             ContextMenu.Add("Close", Dispose);
-
-            Add(_coords = new Label("", true, 1001, font: 1, style: FontStyle.BlackBorder)
-            {
-                X = 10,
-                Y = 5
-            });
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
