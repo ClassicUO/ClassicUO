@@ -406,7 +406,7 @@ namespace ClassicUO.Game.GameObjects
 
                 ANIMATION_FLAGS flags = AnimationsLoader.Instance.DataIndex[graphic].Flags;
                 ANIMATION_GROUPS animGroup = ANIMATION_GROUPS.AG_NONE;
-
+                
                 bool isLowExtended = false;
                 bool isLow = false;
 
@@ -474,7 +474,16 @@ namespace ClassicUO.Game.GameObjects
                 AnimationGroup = _animationIdle[(byte)animGroup - 1, RandomHelper.GetValue(0, 2)];
 
                 if (isLowExtended && AnimationGroup == 18)
-                    AnimationGroup = 1;
+                {
+                    if (!AnimationsLoader.Instance.AnimationExists(graphic, 18) && AnimationsLoader.Instance.AnimationExists(graphic, 17))
+                    {
+                        AnimationGroup = GetReplacedObjectAnimation(graphic, 17);
+                    }
+                    else
+                    {
+                        AnimationGroup = 1;
+                    }
+                }
             }
         }
 
