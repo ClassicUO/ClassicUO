@@ -115,6 +115,7 @@ namespace ClassicUO.Game.GameObjects
                 mobile.DrawTransparent = false;
                 mobile.AllowedToDraw = true;
                 mobile.Texture = null;
+                mobile.IsClicked = false;
 
                 if (mobile.Items == null || mobile.Items.Count != 0)
                     mobile.Items = new EntityCollection<Item>();
