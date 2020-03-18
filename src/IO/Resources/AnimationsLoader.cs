@@ -1205,7 +1205,10 @@ namespace ClassicUO.IO.Resources
             if (graphic < Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
                 ushort hue = 0;
-                AnimationDirection direction = isCorpse ? AnimationsLoader.Instance.GetCorpseAnimationGroup(ref graphic, ref group, ref hue)?.Direction[0] : AnimationsLoader.Instance.GetBodyAnimationGroup(ref graphic, ref group, ref hue, true)?.Direction[0];
+                AnimationDirection direction = isCorpse ? 
+                                                   GetCorpseAnimationGroup(ref graphic, ref group, ref hue)?.Direction[0] 
+                                                   :
+                                                   GetBodyAnimationGroup(ref graphic, ref group, ref hue, true)?.Direction[0];
 
 
                 return direction != null && (direction.Address != 0 && direction.Size != 0 ||
