@@ -1194,6 +1194,22 @@ namespace ClassicUO.Game.GameObjects
                                 Abilities[1] = Ability.DoubleStrike;
 
                                 goto done;
+
+                            // TODO: these are the new whips. More info here: https://uo.com/wiki/ultima-online-wiki/publish-notes/publish-103/  . They needed a version check?
+                            case 0xA289: // Barbed Whip
+                                Abilities[0] = Ability.ConcussionBlow;
+                                Abilities[1] = Ability.WhirlwindAttack;
+                                goto done;
+
+                            case 0xA28A: // Spiked Whip
+                                Abilities[0] = Ability.ArmorPierce;
+                                Abilities[1] = Ability.WhirlwindAttack;
+                                goto done;
+
+                            case 0xA28B: // Bladed Whip
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.WhirlwindAttack;
+                                goto done;
                         }
                     }
                 }
