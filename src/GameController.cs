@@ -648,7 +648,7 @@ namespace ClassicUO
                                 {
                                     if (!UIManager.HadMouseDownOnGump(MouseButtonType.Middle))
                                         _scene.OnMiddleMouseUp();
-                                    UIManager.OnMiddleMouseButtronUp();
+                                    UIManager.OnMiddleMouseButtonUp();
                                 }
 
                                 Mouse.MButtonPressed = false;
