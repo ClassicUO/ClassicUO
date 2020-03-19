@@ -917,6 +917,16 @@ namespace ClassicUO.Game.UI.Gumps
                 batcher.Draw2D(Texture2DCache.GetTexture(marker.Color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF,
                     DOT_SIZE,
                     DOT_SIZE, ref _hueVector);
+
+                if (Mouse.Position.X >= rotX - DOT_SIZE && Mouse.Position.X <= rotX + DOT_SIZE_HALF &&
+                    Mouse.Position.Y >= rotY - DOT_SIZE && Mouse.Position.Y <= rotY + DOT_SIZE_HALF)
+                {
+                    _hueVector.X = 0;
+                    _hueVector.Y = 1;
+                    batcher.DrawString(Fonts.Regular, marker.Name, rotX - 16, rotY - 16, ref _hueVector);
+                    ResetHueVector();
+                    batcher.DrawString(Fonts.Regular, marker.Name, rotX - 15, rotY - 15, ref _hueVector);
+                }
             }
             else
             {
