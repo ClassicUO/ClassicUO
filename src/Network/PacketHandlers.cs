@@ -2426,16 +2426,23 @@ namespace ClassicUO.Network
             {
                 if (!UIManager.GetGumpCachePosition(mobile, out Point location))
                     location = new Point(100, 100);
-                UIManager.Add(paperdoll = new PaperDollGump(mobile) {Location = location});
+                UIManager.Add(new PaperDollGump(mobile, (flags & 0x02) != 0) {Location = location});
             }
             else
             {
+                var old = paperdoll.CanLift;
+                bool newLift = (flags & 0x02) != 0;
+
+                paperdoll.CanLift = newLift;
                 paperdoll.UpdateTitle(text);
+                if (old != newLift)
+                {
+                    paperdoll.Update();
+                }
                 paperdoll.SetInScreen();
                 paperdoll.BringOnTop();
             }
 
-            paperdoll.CanLift = (flags & 0x02) != 0;
         }
 
         private static void CorpseEquipment(Packet p)
