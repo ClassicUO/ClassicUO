@@ -1463,7 +1463,7 @@ namespace ClassicUO.Network
                             {
                                 float change = (baseVal / 10.0f) - skill.Base;
 
-                                if (change != 0.0f)
+                                if (change != 0.0f && !Single.IsNaN(change))
                                 {
                                     GameActions.Print($"Your skill in {skill.Name} has {(change < 0 ? "decreased" : "increased")} by {Math.Abs(change):F1}.  It is now {(skill.Base + change):F1}.",
                                                       0x58,
