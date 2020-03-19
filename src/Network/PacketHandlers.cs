@@ -3660,7 +3660,9 @@ namespace ClassicUO.Network
             if (!FontsLoader.Instance.UnicodeFontExists((byte) font))
                 font = 0;
 
-            if (entity != null)
+            if (!(serial == 0xFFFF_FFFF || 
+                  serial == 0 || 
+                  (!string.IsNullOrEmpty(name) && name.ToLower() == "system" && entity == null)))
             {
                 //entity.Graphic = graphic;
                 entity.Name = name;
