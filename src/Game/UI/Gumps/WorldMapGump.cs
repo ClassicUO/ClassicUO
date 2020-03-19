@@ -920,6 +920,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
+                rotX -= marker.MarkerIcon.Width >> 1;
+                rotY -= marker.MarkerIcon.Height >> 1;
+
                 batcher.Draw2D(marker.MarkerIcon, rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, ref _hueVector);
 
                 if (!showMarkerName)
