@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -39,6 +40,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SpriteFont = ClassicUO.Renderer.SpriteFont;
 
 
 namespace ClassicUO.Game.UI.Gumps
@@ -76,6 +78,8 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _showMarkerNames = true;
         private bool _showMarkerIcons = true;
 
+        private SpriteFont _markerFont = Fonts.Map1;
+        private int _markerFontIndex = 1;
 
         private readonly Dictionary<string, ContextMenuItemEntry> _options = new Dictionary<string, ContextMenuItemEntry>();
 
@@ -144,6 +148,8 @@ namespace ClassicUO.Game.UI.Gumps
             int width = int.Parse(xml.GetAttribute("width"));
             int height = int.Parse(xml.GetAttribute("height"));
 
+            SetFont(int.TryParse(xml.GetAttribute("markerfont"), out int font) ? font : 1);
+            
             ResizeWindow(new Point(width, height));
 
             _flipMap = ParseBool(xml.GetAttribute("flipmap"));
@@ -175,6 +181,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             writer.WriteAttributeString("width", Width.ToString());
             writer.WriteAttributeString("height", Height.ToString());
+
+            writer.WriteAttributeString("markerfont", _markerFontIndex.ToString());
 
             writer.WriteAttributeString("flipmap", _flipMap.ToString());
             writer.WriteAttributeString("topmost", _isTopMost.ToString());
@@ -224,8 +232,19 @@ namespace ClassicUO.Game.UI.Gumps
 
             ContextMenu = new ContextMenuControl();
 
+            ContextMenuItemEntry markerFontEntry = new ContextMenuItemEntry("Font Style");
+            markerFontEntry.Add(new ContextMenuItemEntry("Style 1", () => { SetFont(1); }));
+            markerFontEntry.Add(new ContextMenuItemEntry("Style 2", () => { SetFont(2); }));
+            markerFontEntry.Add(new ContextMenuItemEntry("Style 3", () => { SetFont(3); }));
+            markerFontEntry.Add(new ContextMenuItemEntry("Style 4", () => { SetFont(4); }));
+            markerFontEntry.Add(new ContextMenuItemEntry("Style 5", () => { SetFont(5); }));
+            markerFontEntry.Add(new ContextMenuItemEntry("Style 6", () => { SetFont(6); }));
+
             ContextMenuItemEntry markersEntry = new ContextMenuItemEntry("Map Marker Options");
             markersEntry.Add(new ContextMenuItemEntry("Reload markers", () => { LoadMarkers(); }));
+
+            markersEntry.Add(markerFontEntry);
+
             markersEntry.Add(_options["show_all_markers"]);
             markersEntry.Add(new ContextMenuItemEntry(""));
             markersEntry.Add(_options["show_marker_names"]);
@@ -923,9 +942,9 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _hueVector.X = 0;
                     _hueVector.Y = 1;
-                    batcher.DrawString(Fonts.Regular, marker.Name, rotX - 16, rotY - 16, ref _hueVector);
+                    batcher.DrawString(_markerFont, marker.Name, rotX - 16, rotY - 16, ref _hueVector);
                     ResetHueVector();
-                    batcher.DrawString(Fonts.Regular, marker.Name, rotX - 15, rotY - 15, ref _hueVector);
+                    batcher.DrawString(_markerFont, marker.Name, rotX - 15, rotY - 15, ref _hueVector);
                 }
             }
             else
@@ -942,16 +961,16 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _hueVector.X = 0;
                         _hueVector.Y = 1;
-                        batcher.DrawString(Fonts.Regular, marker.Name, rotX - 16, rotY - 16, ref _hueVector);
+                        batcher.DrawString(_markerFont, marker.Name, rotX - 16, rotY - 16, ref _hueVector);
                         ResetHueVector();
-                        batcher.DrawString(Fonts.Regular, marker.Name, rotX - 15, rotY - 15, ref _hueVector);
+                        batcher.DrawString(_markerFont, marker.Name, rotX - 15, rotY - 15, ref _hueVector);
                     }
                 }
             }
 
             if (showMarkerName)
             {
-                Vector2 size = Fonts.Regular.MeasureString(marker.Name);
+                Vector2 size = _markerFont.MeasureString(marker.Name);
 
                 if (rotX + size.X / 2 > x + Width - 8)
                 {
@@ -975,9 +994,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _hueVector.X = 0;
                 _hueVector.Y = 1;
-                batcher.DrawString(Fonts.Regular, marker.Name, xx + 1, yy + 1, ref _hueVector);
+                batcher.DrawString(_markerFont, marker.Name, xx + 1, yy + 1, ref _hueVector);
                 ResetHueVector();
-                batcher.DrawString(Fonts.Regular, marker.Name, xx, yy, ref _hueVector);
+                batcher.DrawString(_markerFont, marker.Name, xx, yy, ref _hueVector);
             }
         }
 
@@ -1345,6 +1364,36 @@ namespace ClassicUO.Game.UI.Gumps
             return Color.White;
         }
 
+        private void SetFont(int fontIndex)
+        {
+            _markerFontIndex = fontIndex;
+
+            switch (fontIndex)
+            {
+                case 1:
+                    _markerFont = Fonts.Map1;
+                    break;
+                case 2:
+                    _markerFont = Fonts.Map2;
+                    break;
+                case 3:
+                    _markerFont = Fonts.Map3;
+                    break;
+                case 4:
+                    _markerFont = Fonts.Map4;
+                    break;
+                case 5:
+                    _markerFont = Fonts.Map5;
+                    break;
+                case 6:
+                    _markerFont = Fonts.Map6;
+                    break;
+                default:
+                    _markerFontIndex = 1;
+                    _markerFont = Fonts.Map1;
+                    break;
+            }
+        }
 
         private bool GetOptionValue(string key)
         {
