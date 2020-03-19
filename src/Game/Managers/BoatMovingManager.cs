@@ -60,20 +60,15 @@ namespace ClassicUO.Game.Managers
         {
             NetClient.Socket.Send(new PMultiBoatMoveRequest(World.Player, direciton, speed));
             _timePacket = Time.Ticks;
-
-            Console.WriteLine("MOVE REQUEST");
         }
 
         public static void AddStep(uint serial, byte speed, Direction movingDir, Direction facingDir, ushort x, ushort y, sbyte z)
         {
-            Console.WriteLine("STEP RECEIVED");
-
             Item item = World.Items.Get(serial);
             if (item == null || item.IsDestroyed) 
             {
                 return;
             }
-
 
             if (!_steps.TryGetValue(serial, out var deque))
             {
