@@ -346,124 +346,133 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
 
-            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            uint serial = p.ReadUInt();
+            Entity entity = World.Get(serial);
 
-            if (mobile == null)
+            if (entity == null)
                 return;
 
-            mobile.Name = p.ReadASCII(30);
-            mobile.Hits = p.ReadUShort();
-            mobile.HitsMax = p.ReadUShort();
-            mobile.IsRenamable = p.ReadBool();
-            byte type = p.ReadByte();
+            entity.Name = p.ReadASCII(30);
+            entity.Hits = p.ReadUShort();
+            entity.HitsMax = p.ReadUShort();
 
-            if (type > 0 && p.Position + 1 <= p.Length)
+            if (SerialHelper.IsMobile(serial))
             {
-                mobile.IsMale = !p.ReadBool();
+                Mobile mobile = entity as Mobile;
+
+                if (mobile == null)
+                    return;
+
+                mobile.IsRenamable = p.ReadBool();
+                byte type = p.ReadByte();
+
+                if (type > 0 && p.Position + 1 <= p.Length)
+                {
+                    mobile.IsMale = !p.ReadBool();
+
+                    if (mobile == World.Player)
+                    {
+                        ushort str = p.ReadUShort();
+                        ushort dex = p.ReadUShort();
+                        ushort intell = p.ReadUShort();
+                        World.Player.Stamina = p.ReadUShort();
+                        World.Player.StaminaMax = p.ReadUShort();
+                        World.Player.Mana = p.ReadUShort();
+                        World.Player.ManaMax = p.ReadUShort();
+                        World.Player.Gold = p.ReadUInt();
+                        World.Player.PhysicalResistance = (short) p.ReadUShort();
+                        World.Player.Weight = p.ReadUShort();
+
+
+                        if (World.Player.Strength != 0)
+                        {
+                            ushort currentStr = World.Player.Strength;
+                            ushort currentDex = World.Player.Dexterity;
+                            ushort currentInt = World.Player.Intelligence;
+
+                            int deltaStr = str - currentStr;
+                            int deltaDex = dex - currentDex;
+                            int deltaInt = intell - currentInt;
+
+                            if (deltaStr != 0)
+                                GameActions.Print($"Your strength has changed by {deltaStr}.  It is now {str}", 0x0170, MessageType.System, 3, false);
+
+                            if (deltaDex != 0)
+                                GameActions.Print($"Your dexterity has changed by {deltaDex}.  It is now {dex}", 0x0170, MessageType.System, 3, false);
+
+                            if (deltaInt != 0)
+                                GameActions.Print($"Your intelligence has changed by {deltaInt}.  It is now {intell}", 0x0170, MessageType.System, 3, false);
+                        }
+
+                        World.Player.Strength = str;
+                        World.Player.Dexterity = dex;
+                        World.Player.Intelligence = intell;
+
+                        if (type >= 5) //ML
+                        {
+                            World.Player.WeightMax = p.ReadUShort();
+                            byte race = p.ReadByte();
+
+                            if (race == 0)
+                                race = 1;
+                            World.Player.Race = (RaceType) race;
+                        }
+                        else
+                        {
+                            if (Client.Version >= Data.ClientVersion.CV_500A)
+                                World.Player.WeightMax = (ushort) (7 * (World.Player.Strength >> 1) + 40);
+                            else
+                                World.Player.WeightMax = (ushort) (World.Player.Strength * 4 + 25);
+                        }
+
+                        if (type >= 3) //Renaissance
+                        {
+                            World.Player.StatsCap = (short) p.ReadUShort();
+                            World.Player.Followers = p.ReadByte();
+                            World.Player.FollowersMax = p.ReadByte();
+                        }
+
+                        if (type >= 4) //AOS
+                        {
+                            World.Player.FireResistance = (short) p.ReadUShort();
+                            World.Player.ColdResistance = (short) p.ReadUShort();
+                            World.Player.PoisonResistance = (short) p.ReadUShort();
+                            World.Player.EnergyResistance = (short) p.ReadUShort();
+                            World.Player.Luck = p.ReadUShort();
+                            World.Player.DamageMin = (short) p.ReadUShort();
+                            World.Player.DamageMax = (short) p.ReadUShort();
+                            World.Player.TithingPoints = p.ReadUInt();
+                        }
+
+                        if (type >= 6)
+                        {
+                            World.Player.MaxPhysicResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.MaxFireResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.MaxColdResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.MaxPoisonResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.MaxEnergyResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.DefenseChanceIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.MaxDefenseChanceIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.HitChanceIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.SwingSpeedIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.DamageIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.LowerReagentCost = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.SpellDamageIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.FasterCastRecovery = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.FasterCasting = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.LowerManaCost = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                        }
+                    }
+                }
+
+                mobile.ProcessDelta();
 
                 if (mobile == World.Player)
                 {
-                    ushort str = p.ReadUShort();
-                    ushort dex = p.ReadUShort();
-                    ushort intell = p.ReadUShort();
-                    World.Player.Stamina = p.ReadUShort();
-                    World.Player.StaminaMax = p.ReadUShort();
-                    World.Player.Mana = p.ReadUShort();
-                    World.Player.ManaMax = p.ReadUShort();
-                    World.Player.Gold = p.ReadUInt();
-                    World.Player.PhysicalResistance = (short) p.ReadUShort();
-                    World.Player.Weight = p.ReadUShort();
-
-
-                    if (World.Player.Strength != 0)
-                    {
-                        ushort currentStr = World.Player.Strength;
-                        ushort currentDex = World.Player.Dexterity;
-                        ushort currentInt = World.Player.Intelligence;
-
-                        int deltaStr = str - currentStr;
-                        int deltaDex = dex - currentDex;
-                        int deltaInt = intell - currentInt;
-
-                        if (deltaStr != 0)
-                            GameActions.Print($"Your strength has changed by {deltaStr}.  It is now {str}", 0x0170, MessageType.System, 3, false);
-
-                        if (deltaDex != 0)
-                            GameActions.Print($"Your dexterity has changed by {deltaDex}.  It is now {dex}", 0x0170, MessageType.System, 3, false);
-
-                        if (deltaInt != 0)
-                            GameActions.Print($"Your intelligence has changed by {deltaInt}.  It is now {intell}", 0x0170, MessageType.System, 3, false);
-                    }
-
-                    World.Player.Strength = str;
-                    World.Player.Dexterity = dex;
-                    World.Player.Intelligence = intell;
-
-                    if (type >= 5) //ML
-                    {
-                        World.Player.WeightMax = p.ReadUShort();
-                        byte race = p.ReadByte();
-
-                        if (race == 0)
-                            race = 1;
-                        World.Player.Race = (RaceType) race;
-                    }
-                    else
-                    {
-                        if (Client.Version >= Data.ClientVersion.CV_500A)
-                            World.Player.WeightMax = (ushort) (7 * (World.Player.Strength >> 1) + 40);
-                        else
-                            World.Player.WeightMax = (ushort) (World.Player.Strength * 4 + 25);
-                    }
-
-                    if (type >= 3) //Renaissance
-                    {
-                        World.Player.StatsCap = (short) p.ReadUShort();
-                        World.Player.Followers = p.ReadByte();
-                        World.Player.FollowersMax = p.ReadByte();
-                    }
-
-                    if (type >= 4) //AOS
-                    {
-                        World.Player.FireResistance = (short) p.ReadUShort();
-                        World.Player.ColdResistance = (short) p.ReadUShort();
-                        World.Player.PoisonResistance = (short) p.ReadUShort();
-                        World.Player.EnergyResistance = (short) p.ReadUShort();
-                        World.Player.Luck = p.ReadUShort();
-                        World.Player.DamageMin = (short) p.ReadUShort();
-                        World.Player.DamageMax = (short) p.ReadUShort();
-                        World.Player.TithingPoints = p.ReadUInt();
-                    }
-
-                    if (type >= 6)
-                    {
-                        World.Player.MaxPhysicResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.MaxFireResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.MaxColdResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.MaxPoisonResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.MaxEnergyResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.DefenseChanceIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.MaxDefenseChanceIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.HitChanceIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.SwingSpeedIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.DamageIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.LowerReagentCost = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.SpellDamageIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.FasterCastRecovery = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.FasterCasting = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.LowerManaCost = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                    }
+                    UoAssist.SignalHits();
+                    UoAssist.SignalStamina();
+                    UoAssist.SignalMana();
                 }
-            }
-
-            mobile.ProcessDelta();
-
-
-            if (mobile == World.Player)
-            {
-                UoAssist.SignalHits();
-                UoAssist.SignalStamina();
-                UoAssist.SignalMana();
             }
         }
 
@@ -1234,24 +1243,34 @@ namespace ClassicUO.Network
 
         private static void MobileAttributes(Packet p)
         {
-            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            uint serial = p.ReadUInt();
 
-            if (mobile == null)
+            Entity entity = World.Get(serial);
+            if (entity == null)
                 return;
 
-            mobile.HitsMax = p.ReadUShort();
-            mobile.Hits = p.ReadUShort();
-            mobile.ManaMax = p.ReadUShort();
-            mobile.Mana = p.ReadUShort();
-            mobile.StaminaMax = p.ReadUShort();
-            mobile.Stamina = p.ReadUShort();
-            mobile.ProcessDelta();
+            entity.HitsMax = p.ReadUShort();
+            entity.Hits = p.ReadUShort();
 
-            if (mobile == World.Player)
+            if (SerialHelper.IsMobile(serial))
             {
-                UoAssist.SignalHits();
-                UoAssist.SignalStamina();
-                UoAssist.SignalMana();
+                Mobile mobile = entity as Mobile;
+
+                if (mobile == null)
+                    return;
+
+                mobile.ManaMax = p.ReadUShort();
+                mobile.Mana = p.ReadUShort();
+                mobile.StaminaMax = p.ReadUShort();
+                mobile.Stamina = p.ReadUShort();
+                mobile.ProcessDelta();
+
+                if (mobile == World.Player)
+                {
+                    UoAssist.SignalHits();
+                    UoAssist.SignalStamina();
+                    UoAssist.SignalMana();
+                }
             }
         }
 
