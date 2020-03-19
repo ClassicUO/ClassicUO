@@ -298,9 +298,17 @@ namespace ClassicUO.Game.Managers
                 MakeTopMostGump(MouseOverControl);
                 MouseOverControl.InvokeMouseDown(Mouse.Position, MouseButtonType.Middle);
 
-                if (MouseOverControl.AcceptKeyboardInput)
-                    _keyboardFocusControl = MouseOverControl;
-                _mouseDownControls[(int) MouseButtonType.Middle] = MouseOverControl;
+                if (MouseOverControl.IsEnabled && MouseOverControl.IsVisible)
+                {
+                    if (_lastFocus != MouseOverControl)
+                    {
+                        _lastFocus?.OnFocusLeft();
+                        MouseOverControl.OnFocusEnter();
+                        _lastFocus = MouseOverControl;
+                    }
+                }
+
+                _mouseDownControls[btn] = MouseOverControl;
             }
             else
             {
@@ -318,11 +326,9 @@ namespace ClassicUO.Game.Managers
                     }
                 }
             }
-
-            CloseIfClickOutGumps();
         }
 
-        public static void OnMiddleMouseButtronUp()
+        public static void OnMiddleMouseButtonUp()
         {
             HandleMouseInput();
 
@@ -331,20 +337,18 @@ namespace ClassicUO.Game.Managers
 
             if (MouseOverControl != null)
             {
-                MouseOverControl.InvokeMouseUp(Mouse.Position, MouseButtonType.Middle);
+                if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
+                    MouseOverControl.InvokeMouseUp(Mouse.Position, MouseButtonType.Middle);
 
                 if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
-                {
                     _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButtonType.Middle);
-                }
             }
-            else if (_mouseDownControls[btn] != null)
-            {
-                _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButtonType.Middle);
-            }
+            else
+                _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButtonType.Middle);
 
             CloseIfClickOutGumps();
             _mouseDownControls[btn] = null;
+            _validForDClick = MouseOverControl;
         }
 
 

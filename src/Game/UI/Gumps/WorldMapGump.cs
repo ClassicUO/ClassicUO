@@ -209,7 +209,7 @@ namespace ClassicUO.Game.UI.Gumps
             _options["show_marker_icons"] = new ContextMenuItemEntry("Show marker icons", () => { _showMarkerIcons = !_showMarkerIcons; }, true, _showMarkerIcons);
             _options["flip_map"] = new ContextMenuItemEntry("Flip map", () => { _flipMap = !_flipMap; }, true, _flipMap);
             _options["top_most"] = new ContextMenuItemEntry("TopMost", () => { TopMost = !TopMost; }, true, _isTopMost);
-            _options["free_view"] = new ContextMenuItemEntry("Free view", () => { _freeView = !_freeView; }, true, _freeView);
+            _options["free_view"] = new ContextMenuItemEntry("Free view", () => { FreeView = !FreeView; }, true, FreeView);
             _options["show_party_members"] = new ContextMenuItemEntry("Show party members", () => { _showPartyMembers = !_showPartyMembers; }, true, _showPartyMembers);
             _options["show_mobiles"] = new ContextMenuItemEntry("Show mobiles", () => { _showMobiles = !_showMobiles; }, true, _showMobiles);
             _options["show_multis"] = new ContextMenuItemEntry("Show houses/boats", () => { _showMultis = !_showMultis; }, true, _showMultis);
@@ -1142,7 +1142,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            if ((button == MouseButtonType.Left && (Keyboard.Alt || _freeView)) || (button == MouseButtonType.Middle && !_freeView))
+            if ((button == MouseButtonType.Left && (Keyboard.Alt || _freeView)) || (button == MouseButtonType.Middle))
             {
                 if (x > 4 && x < Width - 8 && y > 4 && y < Height - 8)
                 {
@@ -1163,7 +1163,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseOver(int x, int y)
         {
-            Point offset = Mouse.LDroppedOffset;
+            Point offset = Mouse.LButtonPressed ? Mouse.LDroppedOffset : Mouse.MButtonPressed ? Mouse.MDroppedOffset : Point.Zero;
 
             if (_isScrolling && offset != Point.Zero)
             {
