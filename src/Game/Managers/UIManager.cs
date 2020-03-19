@@ -287,6 +287,67 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
+        public static void OnMiddleMouseButtonDown()
+        {
+            HandleMouseInput();
+
+            const int btn = (int) MouseButtonType.Middle;
+
+            if (MouseOverControl != null)
+            {
+                MakeTopMostGump(MouseOverControl);
+                MouseOverControl.InvokeMouseDown(Mouse.Position, MouseButtonType.Middle);
+
+                if (MouseOverControl.AcceptKeyboardInput)
+                    _keyboardFocusControl = MouseOverControl;
+                _mouseDownControls[(int) MouseButtonType.Middle] = MouseOverControl;
+            }
+            else
+            {
+                if (IsModalControlOpen())
+                {
+                    for (int i = 0; i < Gumps.Count; i++)
+                    {
+                        var s = Gumps[i];
+
+                        if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
+                        {
+                            s.Dispose();
+                            Mouse.CancelDoubleClick = true;
+                        }
+                    }
+                }
+            }
+
+            CloseIfClickOutGumps();
+        }
+
+        public static void OnMiddleMouseButtronUp()
+        {
+            HandleMouseInput();
+
+            const int btn = (int) MouseButtonType.Middle;
+            EndDragControl(Mouse.Position);
+
+            if (MouseOverControl != null)
+            {
+                MouseOverControl.InvokeMouseUp(Mouse.Position, MouseButtonType.Middle);
+
+                if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
+                {
+                    _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButtonType.Middle);
+                }
+            }
+            else if (_mouseDownControls[btn] != null)
+            {
+                _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButtonType.Middle);
+            }
+
+            CloseIfClickOutGumps();
+            _mouseDownControls[btn] = null;
+        }
+
+
         public static void OnMouseWheel(bool isup)
         {
             if (MouseOverControl != null && MouseOverControl.AcceptMouseInput)

@@ -47,53 +47,39 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private UOTexture _mapTexture;
 
-        private bool _isTopMost;
         private readonly float[] _zooms = new float[10] { 0.125f, 0.25f, 0.5f, 0.75f, 1f, 1.5f, 2f, 4f, 6f, 8f };
         private int _zoomIndex = 4;
         private Point _center, _lastScroll;
         private bool _isScrolling;
-        private bool _flipMap = true;
-        private bool _freeView;
         private int _mapIndex;
-        private bool _showPartyMembers = true;
-
-        private Label _coords;
-        private bool _showCoordinates;
         private int _lastX;
         private int _lastY;
         private int _lastZ;
+        private bool _mapMarkersLoaded = false;
+        private Label _coords;
+        private readonly string _mapFilesPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
+        private readonly string _mapIconsPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "MapIcons");
+
+
+
+
+        private bool _flipMap = true;
+        private bool _freeView;
+        private bool _showPartyMembers = true;
+        private bool _isTopMost;
+        private bool _showCoordinates;
         private bool _showMobiles = true;
         private bool _showPlayerName = true;
         private bool _showPlayerBar = true;
         private bool _showMultis = true;
-
         private bool _showMarkers = true;
         private bool _showMarkerNames = true;
         private bool _showMarkerIcons = true;
 
-        private string _mapFilesPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
-        private string _mapIconsPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "MapIcons");
 
-        private bool _mapMarkersLoaded = false;
+        private readonly Dictionary<string, ContextMenuItemEntry> _options = new Dictionary<string, ContextMenuItemEntry>();
 
-        private class WMapMarker
-        {
-            public string Name { get; set; }
-            public int X { get; set; }
-            public int Y { get; set; }
-            public int MapId { get; set; }
-            public Color Color { get; set; }
-            public Texture2D MarkerIcon { get; set; }
-            public string MarkerIconName { get; set; }
-        }
 
-        private class WMapMarkerFile
-        {
-            public string Name { get; set; }
-            public string FullPath { get; set; }
-            public List<WMapMarker> Markers { get; set; }
-            public bool Hidden { get; set; }
-        }
 
         private List<WMapMarkerFile> _markerFiles = new List<WMapMarkerFile>();
         private Dictionary<string, Texture2D> _markerIcons = new Dictionary<string, Texture2D>();
@@ -111,11 +97,44 @@ namespace ClassicUO.Game.UI.Gumps
             LoadMarkers();
 
             World.WMapManager.SetEnable(true);
+
             BuildGump();
         }
 
         public override GUMP_TYPE GumpType => GUMP_TYPE.GT_WORLDMAP;
         public float Zoom => _zooms[_zoomIndex];
+        public bool TopMost
+        {
+            get => _isTopMost;
+            set
+            {
+                _isTopMost = value;
+
+                ShowBorder = !_isTopMost;
+
+                ControlInfo.Layer = _isTopMost ? UILayer.Over : UILayer.Default;
+
+                SetOptionValue("top_most", value);
+            }
+        }
+
+        public bool FreeView
+        {
+            get => _freeView;
+            set
+            {
+                _freeView = value;
+
+                if (!_freeView)
+                {
+                    _isScrolling = false;
+                    CanMove = true;
+                }
+
+                SetOptionValue("free_view", value);
+            }
+        }
+
 
 
         public override void Restore(XmlElement xml)
@@ -181,23 +200,45 @@ namespace ClassicUO.Game.UI.Gumps
             });
         }
 
+        private void BuildOptionDictionary()
+        {
+            _options.Clear();
+
+            _options["show_all_markers"] = new ContextMenuItemEntry("Show all markers", () => { _showMarkers = !_showMarkers; }, true, _showMarkers);
+            _options["show_marker_names"] = new ContextMenuItemEntry("Show marker names", () => { _showMarkerNames = !_showMarkerNames; }, true, _showMarkerNames);
+            _options["show_marker_icons"] = new ContextMenuItemEntry("Show marker icons", () => { _showMarkerIcons = !_showMarkerIcons; }, true, _showMarkerIcons);
+            _options["flip_map"] = new ContextMenuItemEntry("Flip map", () => { _flipMap = !_flipMap; }, true, _flipMap);
+            _options["top_most"] = new ContextMenuItemEntry("TopMost", () => { TopMost = !TopMost; }, true, _isTopMost);
+            _options["free_view"] = new ContextMenuItemEntry("Free view", () => { _freeView = !_freeView; }, true, _freeView);
+            _options["show_party_members"] = new ContextMenuItemEntry("Show party members", () => { _showPartyMembers = !_showPartyMembers; }, true, _showPartyMembers);
+            _options["show_mobiles"] = new ContextMenuItemEntry("Show mobiles", () => { _showMobiles = !_showMobiles; }, true, _showMobiles);
+            _options["show_multis"] = new ContextMenuItemEntry("Show houses/boats", () => { _showMultis = !_showMultis; }, true, _showMultis);
+            _options["show_your_name"] = new ContextMenuItemEntry("Show your name", () => { _showPlayerName = !_showPlayerName; }, true, _showPlayerName);
+            _options["show_your_healthbar"] = new ContextMenuItemEntry("Show your hp", () => { _showPlayerBar = !_showPlayerBar; }, true, _showPlayerBar);
+            _options["show_coordinates"] = new ContextMenuItemEntry("Show your coords", () => { _showCoordinates = !_showCoordinates; }, true, _showCoordinates);
+        }
+
         private void BuildContextMenu()
         {
+            BuildOptionDictionary();
+
             ContextMenu = new ContextMenuControl();
 
             ContextMenuItemEntry markersEntry = new ContextMenuItemEntry("Map Marker Options");
             markersEntry.Add(new ContextMenuItemEntry("Reload markers", () => { LoadMarkers(); }));
-            markersEntry.Add(new ContextMenuItemEntry("Show all markers", () => { _showMarkers = !_showMarkers; }, true, _showMarkers));
+            markersEntry.Add(_options["show_all_markers"]);
             markersEntry.Add(new ContextMenuItemEntry(""));
-            markersEntry.Add(new ContextMenuItemEntry("Show marker names", () => { _showMarkerNames = !_showMarkerNames; }, true, _showMarkerNames));
-            markersEntry.Add(new ContextMenuItemEntry("Show marker icons", () => { _showMarkerIcons = !_showMarkerIcons; }, true, _showMarkerIcons));
+            markersEntry.Add(_options["show_marker_names"]);
+            markersEntry.Add(_options["show_marker_icons"]);
             markersEntry.Add(new ContextMenuItemEntry(""));
 
             if (_markerFiles.Count > 0)
             {
                 foreach (WMapMarkerFile markerFile in _markerFiles)
                 {
-                    markersEntry.Add(new ContextMenuItemEntry($"Show/Hide '{markerFile.Name}'", () => { markerFile.Hidden = !markerFile.Hidden; }, true, !markerFile.Hidden));
+                    var entry = new ContextMenuItemEntry($"Show/Hide '{markerFile.Name}'", () => { markerFile.Hidden = !markerFile.Hidden; }, true, !markerFile.Hidden);
+                    _options[$"show_marker_{markerFile.Name}"] = entry;
+                    markersEntry.Add(entry);
                 }
             }
             else
@@ -208,60 +249,21 @@ namespace ClassicUO.Game.UI.Gumps
 
             ContextMenu.Add(markersEntry);
             ContextMenu.Add("", null);
-            ContextMenu.Add("Flip map", () => _flipMap = !_flipMap, true, _flipMap);
-            ContextMenu.Add("Top Most", () => TopMost = !TopMost, true, _isTopMost);
-            ContextMenu.Add("Free view", () => { FreeView = !FreeView; }, true, _freeView);
+            ContextMenu.Add(_options["flip_map"]);
+            ContextMenu.Add(_options["top_most"]);
+            ContextMenu.Add(_options["free_view"]);
             ContextMenu.Add("", null);
-            ContextMenu.Add("Show party members", () => { _showPartyMembers = !_showPartyMembers; }, true,
-                _showPartyMembers);
-            ContextMenu.Add("Show mobiles", () => { _showMobiles = !_showMobiles; }, true, _showMobiles);
-            ContextMenu.Add("Show multis (houses/ships)", () => { _showMultis = !_showMultis; }, true, _showMultis);
-            ContextMenu.Add("Show coordinates", () => { _showCoordinates = !_showCoordinates; _lastX = -1; }, true,
-                _showCoordinates);
+            ContextMenu.Add(_options["show_party_members"]);
+            ContextMenu.Add(_options["show_mobiles"]);
+            ContextMenu.Add(_options["show_multis"]);
+            ContextMenu.Add(_options["show_coordinates"]);
             ContextMenu.Add("", null);
-            ContextMenu.Add("Show your name", () => { _showPlayerName = !_showPlayerName; }, true, _showPlayerName);
-            ContextMenu.Add("Show your healthbar", () => { _showPlayerBar = !_showPlayerBar; }, true, _showPlayerBar);
+            ContextMenu.Add(_options["show_your_name"]);
+            ContextMenu.Add(_options["show_your_healthbar"]);
             ContextMenu.Add("", null);
             ContextMenu.Add("Close", Dispose);
         }
 
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
-        {
-            if (button != MouseButtonType.Left || _isScrolling || Keyboard.Alt)
-                return base.OnMouseDoubleClick(x, y, button);
-
-            TopMost = !TopMost;
-
-            return true;
-        }
-
-        public bool TopMost
-        {
-            get => _isTopMost;
-            set
-            {
-                _isTopMost = value;
-
-                ShowBorder = !_isTopMost;
-
-                ControlInfo.Layer = _isTopMost ? UILayer.Over : UILayer.Default;
-            }
-        }
-
-        public bool FreeView
-        {
-            get => _freeView;
-            set
-            {
-                _freeView = value;
-
-                if (!_freeView)
-                {
-                    _isScrolling = false;
-                    CanMove = true;
-                }
-            }
-        }
 
 
 
@@ -1137,10 +1139,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButtonType.Left && (Keyboard.Alt || _freeView))
+            if ((button == MouseButtonType.Left && (Keyboard.Alt || _freeView)) || (button == MouseButtonType.Middle && !_freeView))
             {
                 if (x > 4 && x < Width - 8 && y > 4 && y < Height - 8)
                 {
+                    if (button == MouseButtonType.Middle)
+                        FreeView = true;
+
                     _lastScroll.X = x;
                     _lastScroll.Y = y;
                     _isScrolling = true;
@@ -1209,6 +1214,15 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnMouseWheel(delta);
         }
 
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
+        {
+            if (button != MouseButtonType.Left || _isScrolling || Keyboard.Alt)
+                return base.OnMouseDoubleClick(x, y, button);
+
+            TopMost = !TopMost;
+
+            return true;
+        }
 
         #endregion
 
@@ -1317,5 +1331,42 @@ namespace ClassicUO.Game.UI.Gumps
 
             return Color.White;
         }
+
+
+        private bool GetOptionValue(string key)
+        {
+            _options.TryGetValue(key, out var v);
+
+            return v != null && v.IsSelected;
+        }
+
+        public void SetOptionValue(string key, bool v)
+        {
+            if (_options.TryGetValue(key, out var entry) && entry != null)
+            {
+                entry.IsSelected = v;
+            }
+        }
+
+
+        private class WMapMarker
+        {
+            public string Name { get; set; }
+            public int X { get; set; }
+            public int Y { get; set; }
+            public int MapId { get; set; }
+            public Color Color { get; set; }
+            public Texture2D MarkerIcon { get; set; }
+            public string MarkerIconName { get; set; }
+        }
+
+        private class WMapMarkerFile
+        {
+            public string Name { get; set; }
+            public string FullPath { get; set; }
+            public List<WMapMarker> Markers { get; set; }
+            public bool Hidden { get; set; }
+        }
+
     }
 }

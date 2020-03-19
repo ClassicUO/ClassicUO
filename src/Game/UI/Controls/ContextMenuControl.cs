@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public void Add(string text, List<ContextMenuItemEntry> entries)
         {
-            _items.Add(new ContextMenuItemEntry(text, null, true, false)
+            _items.Add(new ContextMenuItemEntry(text)
             {
                 Items = entries
             });

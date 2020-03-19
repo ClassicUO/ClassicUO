@@ -629,6 +629,7 @@ namespace ClassicUO
                                     if (!_scene.OnMiddleMouseDoubleClick())
                                     {
                                         _scene.OnMiddleMouseDown();
+                                        UIManager.OnMiddleMouseButtonDown();
                                     }
 
                                     break;
@@ -637,10 +638,19 @@ namespace ClassicUO
                                 Plugin.ProcessMouse(e.button.button, 0);
 
                                 _scene.OnMiddleMouseDown();
+                                UIManager.OnMiddleMouseButtonDown();
+
                                 Mouse.LastMidButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
                             else
                             {
+                                if (Mouse.LastMidButtonClickTime != 0xFFFF_FFFF)
+                                {
+                                    if (!UIManager.HadMouseDownOnGump(MouseButtonType.Middle))
+                                        _scene.OnMiddleMouseUp();
+                                    UIManager.OnMiddleMouseButtronUp();
+                                }
+
                                 Mouse.MButtonPressed = false;
                                 Mouse.End();
                             }
