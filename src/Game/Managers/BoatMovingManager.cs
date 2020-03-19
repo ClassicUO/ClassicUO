@@ -42,14 +42,32 @@ namespace ClassicUO.Game.Managers
         private static uint _timePacket;
 
 
+        private static int GetVelocity(byte speed)
+        {
+            switch (speed)
+            {
+                case 0x02:
+                    return SLOW_INTERVAL;
+                default:
+                case 0x03:
+                    return NORMAL_INTERVAL;
+                case 0x04:
+                    return FAST_INTERVAL;
+            }
+        }
+
         public static void MoveRequest(Direction direciton, byte speed)
         {
             NetClient.Socket.Send(new PMultiBoatMoveRequest(World.Player, direciton, speed));
             _timePacket = Time.Ticks;
+
+            Console.WriteLine("MOVE REQUEST");
         }
 
         public static void AddStep(uint serial, byte speed, Direction movingDir, Direction facingDir, ushort x, ushort y, sbyte z)
         {
+            Console.WriteLine("STEP RECEIVED");
+
             Item item = World.Items.Get(serial);
             if (item == null || item.IsDestroyed) 
             {
@@ -91,7 +109,7 @@ namespace ClassicUO.Game.Managers
 
             BoatStep step = new BoatStep();
             step.Serial = serial;
-            step.Time = _timePacket == 0 ? 25 : Time.Ticks - _timePacket;
+            step.Time = _timePacket == 0 || deque.Count == 0 ? (uint) GetVelocity(speed) : Time.Ticks - _timePacket;
             step.Speed = speed;
 
             if (moveDir != Direction.NONE)
