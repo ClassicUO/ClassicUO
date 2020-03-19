@@ -1603,7 +1603,23 @@ namespace ClassicUO.Network
 
             if (container != null && SerialHelper.IsItem(container.Serial))
             {
-                UIManager.GetGump<SpellbookGump>(container)?.Update();
+                var gump = UIManager.GetGump(container.Serial);
+
+                if (gump != null && !gump.IsDisposed)
+                {
+                    if (gump is SpellbookGump sb)
+                    {
+                        sb.Update();
+                    }
+                    else if (gump is ContainerGump cont)
+                    {
+                        cont.ForceUpdate();
+                    }
+                    else if (gump is PaperDollGump paperdoll)
+                    {
+                        paperdoll.Update();
+                    }
+                }
             }
 
             World.Items.ProcessDelta();
