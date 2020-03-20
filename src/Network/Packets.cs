@@ -1135,7 +1135,9 @@ namespace ClassicUO.Network
     {
         public PMegaClilocRequest(ref List<uint> list) : base(0xD6)
         {
-            for (int i = 0; i < list.Count && i < 50; i++)
+            int count = Math.Min(50, list.Count);
+
+            for (int i = 0; i < count; i++)
             {
                 WriteUInt(list[i]);
                 list.RemoveAt(i--);

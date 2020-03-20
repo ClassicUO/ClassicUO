@@ -1702,13 +1702,13 @@ namespace ClassicUO.Network
                 GameScene scene = new GameScene();
                 Client.Game.SetScene(scene);
 
-                GameActions.OpenPaperdoll(World.Player);
+                //GameActions.OpenPaperdoll(World.Player);
                 NetClient.Socket.Send(new PStatusRequest(World.Player));
                 NetClient.Socket.Send(new POpenChat(""));
 
 
                 //NetClient.Socket.Send(new PSkillsRequest(World.Player));
-                //scene.DoubleClickDelayed(World.Player);
+                scene.DoubleClickDelayed(World.Player);
 
                 if (Client.Version >= Data.ClientVersion.CV_306E)
                     NetClient.Socket.Send(new PClientType());
