@@ -131,7 +131,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             base.Destroy();
-            
+
             _pool.Enqueue(this);
         }
 
@@ -152,8 +152,10 @@ namespace ClassicUO.Game.GameObjects
 
                 if (IsCoin)
                 {
-                    if (Amount > 5) return (ushort) (Graphic + 2);
-                    if (Amount > 1) return (ushort) (Graphic + 1);
+                    if (Amount > 5)
+                        return (ushort) (Graphic + 2);
+                    if (Amount > 1)
+                        return (ushort) (Graphic + 1);
                 }
                 else if (IsMulti)
                     return MultiGraphic;
@@ -208,7 +210,7 @@ namespace ClassicUO.Game.GameObjects
                         return 0;
                 }
 
-                return  SerialHelper.IsMobile( item.Container) ? item.Container : item;
+                return SerialHelper.IsMobile(item.Container) ? item.Container : item;
             }
         }
 
@@ -523,7 +525,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         graphic = 0x00BF;
 
-                        return  graphic;
+                        return graphic;
                     }
 
                     case 0x3E9E: // 16030
@@ -825,33 +827,33 @@ namespace ClassicUO.Game.GameObjects
                     }
 
                     case 0x3ED1: // CoconutCrab
-                        {
-                            graphic = 0x05E6;
-                            break;
-                        }
+                    {
+                        graphic = 0x05E6;
+                        break;
+                    }
 
                     case 0x3ECB: // Lasher
-                        {
-                            graphic = 0x057F;
-                            break;
-                        }
+                    {
+                        graphic = 0x057F;
+                        break;
+                    }
 
                     case 0x3ED0: //SkeletalCat
-                        {
-                            graphic = 0x05A1;
-                            break;
-                        }
+                    {
+                        graphic = 0x05A1;
+                        break;
+                    }
 
                     case 0x3ECD: //Palomino
-                        {
-                            graphic = 0x0580;
-                            break;
-                        }
+                    {
+                        graphic = 0x0580;
+                        break;
+                    }
                     case 0x3ECF: //Eowmu
-                        {
-                            graphic = 0x05A0;
-                            break;
-                        }
+                    {
+                        graphic = 0x05A0;
+                        break;
+                    }
                 }
 
                 if (ItemData.AnimID != 0)
@@ -864,7 +866,7 @@ namespace ClassicUO.Game.GameObjects
 
             return graphic;
         }
-        
+
         public override void UpdateTextCoordsV()
         {
             if (TextContainer == null)
@@ -895,9 +897,10 @@ namespace ClassicUO.Game.GameObjects
                 if (Texture != null)
                     y -= Texture is ArtTexture t ? (t.ImageRectangle.Height >> 1) : (Texture.Height >> 1);
                 x += 22;
+                y += 22;
 
-                x = (int)(x / scale);
-                y = (int)(y / scale);
+                x = (int) (x / scale);
+                y = (int) (y / scale);
 
                 x += (int) Offset.X;
                 y += (int) (Offset.Y - Offset.Z);
