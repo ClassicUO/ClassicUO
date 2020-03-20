@@ -100,14 +100,14 @@ namespace ClassicUO.Game.Scenes
             _noDrawRoofs = !ProfileManager.Current.DrawRoofs;
             int bx = playerX;
             int by = playerY;
-            Tile tile = World.Map.GetTile(bx, by, false);
+            var tile = World.Map.GetTile(bx, by, false);
 
             if (tile != null)
             {
                 int pz14 = playerZ + 14;
                 int pz16 = playerZ + 16;
 
-                GameObject obj = tile.FirstNode;
+                GameObject obj = tile;
 
                 while (obj.Left != null)
                     obj = obj.Left;
@@ -163,7 +163,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (tile != null)
                 {
-                    GameObject obj2 = tile.FirstNode;
+                    GameObject obj2 = tile;
 
                     while (obj2.Left != null)
                         obj2 = obj2.Left;
@@ -245,11 +245,11 @@ namespace ClassicUO.Game.Scenes
 
         private void ApplyFoliageTransparency(ushort graphic, int x, int y, int z)
         {
-            Tile tile = World.Map.GetTile(x, y);
+            var tile = World.Map.GetTile(x, y);
 
             if (tile != null)
             {
-                for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+                for (GameObject obj = tile; obj != null; obj = obj.Right)
                 {
                     ushort testGraphic = obj.Graphic;
 
@@ -613,7 +613,7 @@ namespace ClassicUO.Game.Scenes
                 var tile = World.Map.GetTile(x, y);
 
                 if (tile != null)
-                    AddTileToRenderList(tile.FirstNode, x, y, useObjectHandles, currentMaxZ);
+                    AddTileToRenderList(tile, x, y, useObjectHandles, currentMaxZ);
             }
 
             /*int area = 2;

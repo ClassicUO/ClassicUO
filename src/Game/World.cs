@@ -170,9 +170,9 @@ namespace ClassicUO.Game
                 {
                     for (int y = 0; y < 8; y++)
                     {
-                        Tile tile = chunk.Tiles[x, y];
+                        var tile = chunk.Tiles[x, y];
 
-                        for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+                        for (GameObject obj = tile; obj != null; obj = obj.Right)
                         {
                             obj.UpdateGraphicBySeason();
                         }

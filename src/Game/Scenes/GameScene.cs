@@ -384,13 +384,13 @@ namespace ClassicUO.Game.Scenes
             int testX = obj.X + 1;
             int testY = obj.Y + 1;
 
-            Tile tile = World.Map.GetTile(testX, testY);
+            var tile = World.Map.GetTile(testX, testY);
 
             if (tile != null)
             {
                 sbyte z5 = (sbyte) (obj.Z + 5);
 
-                for (GameObject o = tile.FirstNode; o != null; o = o.Right)
+                for (GameObject o = tile; o != null; o = o.Right)
                 {
                     if ((!(o is Static s) || s.ItemData.IsTransparent) &&
                         (!(o is Multi m) || m.ItemData.IsTransparent) || !o.AllowedToDraw)
@@ -512,10 +512,10 @@ namespace ClassicUO.Game.Scenes
                         if (x < minX || x > maxX || y < minY || y > maxY)
                             break;
 
-                        Tile tile = World.Map.GetTile(x, y);
+                        var tile = World.Map.GetTile(x, y);
 
                         if (tile != null)
-                            AddTileToRenderList(tile.FirstNode, x, y, _useObjectHandles, 150/*, null*/);
+                            AddTileToRenderList(tile, x, y, _useObjectHandles, 150/*, null*/);
                         x++;
                         y--;
                     }
@@ -659,7 +659,10 @@ namespace ClassicUO.Game.Scenes
                     ushort x, y;
                     sbyte z;
 
-                    var o = gobj.Tile?.FirstNode;
+                    int cellX = gobj.X % 8;
+                    int cellY = gobj.Y % 8;
+
+                    var o = World.Map.GetChunk(gobj.X, gobj.Y)?.Tiles[cellX, cellY];
                     if (o != null)
                     {
                         x = o.X;

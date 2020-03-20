@@ -3704,7 +3704,7 @@ namespace ClassicUO.Network
 
             if (!(serial == 0xFFFF_FFFF || 
                   serial == 0 || 
-                  (!string.IsNullOrEmpty(name) && name.ToLower() == "system" && entity == null)))
+                  (!string.IsNullOrEmpty(name) && name.ToLower() == "system")) && entity != null)
             {
                 //entity.Graphic = graphic;
                 entity.Name = name;
