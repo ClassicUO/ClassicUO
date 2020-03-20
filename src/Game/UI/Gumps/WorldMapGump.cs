@@ -1161,7 +1161,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButtonType.Left)
+            if (button == MouseButtonType.Left && !Keyboard.Alt)
             {
                 _isScrolling = false;
                 CanMove = true;
