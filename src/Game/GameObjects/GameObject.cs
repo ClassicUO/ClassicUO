@@ -312,7 +312,7 @@ namespace ClassicUO.Game.GameObjects
             int cellX = X % 8;
             int cellY = Y % 8;
 
-            World.Map.GetChunk(X, Y)?.RemoveGameObject(this, cellX, cellY);
+            World.Map.GetChunk(X, Y, false)?.RemoveGameObject(this, cellX, cellY);
             TextContainer?.Clear();
 
             IsDestroyed = true;

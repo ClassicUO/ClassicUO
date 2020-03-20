@@ -55,42 +55,7 @@ namespace ClassicUO.Game.Map
         public Point Center;
 
 
-        public Chunk GetChunk(int x, int y)
-        {
-            int cellX = x >> 3;
-            int cellY = y >> 3;
-            int block = GetBlock(cellX, cellY);
-
-            if (block >= Chunks.Length)
-                return null;
-
-            ref Chunk chunk = ref Chunks[block];
-
-            if (chunk == null)
-            {
-                _usedIndices.Add(block);
-                chunk = Chunk.Create((ushort) cellX, (ushort) cellY);
-                chunk.Load(Index);
-            }
-            else if (chunk.X != cellX || chunk.Y != cellY || chunk.Tiles[x % 8, y % 8] == null)
-            {
-                if (chunk.IsDestroyed)
-                {
-                    Console.WriteLine("RELOAD CHUNK!");
-
-                    _usedIndices.Add(block);
-                    chunk.X = (ushort) cellX;
-                    chunk.Y = (ushort) cellY;
-                }
-                chunk.Load(Index);
-            }
-
-            chunk.LastAccessTime = Time.Ticks;
-
-            return chunk;
-        }
-
-        public GameObject GetTile(short x, short y, bool load = true)
+        public Chunk GetChunk(int x, int y, bool load = true)
         {
             if (x < 0 || y < 0)
                 return null;
@@ -104,37 +69,36 @@ namespace ClassicUO.Game.Map
 
             ref Chunk chunk = ref Chunks[block];
 
-            int dx = x % 8;
-            int dy = y % 8;
-
             if (chunk == null)
             {
-                if (load)
-                {
-                    _usedIndices.Add(block);
-                    chunk = Chunk.Create((ushort) cellX, (ushort) cellY);
-                    chunk.Load(Index);
-                }
-                else
+                if (!load)
                     return null;
-            }
-            else if (chunk.X != cellX || chunk.Y != cellY || chunk.Tiles[dx, dy] == null)
-            {
-                Console.WriteLine("RELOAD CHUNK!");
 
+                _usedIndices.Add(block);
+                chunk = Chunk.Create((ushort) cellX, (ushort) cellY);
+                chunk.Load(Index);
+            }
+            else //if (chunk.X != cellX || chunk.Y != cellY ||)
+            {
                 if (chunk.IsDestroyed)
                 {
+                    Console.WriteLine("RELOAD CHUNK!");
+
                     _usedIndices.Add(block);
                     chunk.X = (ushort) cellX;
                     chunk.Y = (ushort) cellY;
+                    chunk.Load(Index);
                 }
-                
-                chunk.Load(Index);
             }
 
             chunk.LastAccessTime = Time.Ticks;
 
-            return chunk.Tiles[dx, dy];
+            return chunk;
+        }
+
+        public GameObject GetTile(short x, short y, bool load = true)
+        {
+            return GetChunk(x, y, load)?.Tiles[x % 8, y % 8];
         }
 
         public GameObject GetTile(int x, int y, bool load = true)
