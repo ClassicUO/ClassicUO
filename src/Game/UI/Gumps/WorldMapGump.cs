@@ -499,7 +499,8 @@ namespace ClassicUO.Game.UI.Gumps
                                             Y = int.Parse(reader.GetAttribute("Y")),
                                             Name = reader.GetAttribute("Name"),
                                             MapId = int.Parse(reader.GetAttribute("Facet")),
-                                            Color = Color.White
+                                            Color = Color.White,
+                                            ZoomIndex = 3
                                         };
 
                                         if (_markerIcons.TryGetValue(reader.GetAttribute("Icon").ToLower(), out Texture2D value))
@@ -540,7 +541,8 @@ namespace ClassicUO.Game.UI.Gumps
                                                 Y = int.Parse(splits[1]),
                                                 MapId = int.Parse(splits[2]),
                                                 Name = string.Join(" ", splits, 3, splits.Length - 3),
-                                                Color = Color.White
+                                                Color = Color.White,
+                                                ZoomIndex = 3
                                             };
 
                                             string[] iconSplits = icon.Split(' ');
@@ -554,7 +556,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     }
                                 }
                             }
-                            else if (mapFile != null) //CSV
+                            else if (mapFile != null) //CSV x,y,mapindex,name of marker,iconname,color,zoom
                             {
                                 using (StreamReader reader = new StreamReader(mapFile))
                                 {
@@ -575,7 +577,8 @@ namespace ClassicUO.Game.UI.Gumps
                                             MapId = int.Parse(splits[2]),
                                             Name = splits[3],
                                             MarkerIconName = splits[4].ToLower(),
-                                            Color = splits.Length == 6 ? GetColor(splits[5]) : Color.White
+                                            Color = GetColor(splits[5]),
+                                            ZoomIndex = splits.Length == 7 ? int.Parse(splits[6]) : 3
                                         };
 
                                         if (_markerIcons.TryGetValue(splits[4].ToLower(), out Texture2D value))
@@ -931,7 +934,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             bool showMarkerName = _showMarkerNames && !string.IsNullOrEmpty(marker.Name) && _zoomIndex > 5;
 
-            if (_zoomIndex < 3 || !_showMarkerIcons || marker.MarkerIcon == null)
+            if (_zoomIndex < marker.ZoomIndex || !_showMarkerIcons || marker.MarkerIcon == null)
             {
                 batcher.Draw2D(Texture2DCache.GetTexture(marker.Color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF,
                     DOT_SIZE,
@@ -1420,6 +1423,7 @@ namespace ClassicUO.Game.UI.Gumps
             public Color Color { get; set; }
             public Texture2D MarkerIcon { get; set; }
             public string MarkerIconName { get; set; }
+            public int ZoomIndex { get; set; }
         }
 
         private class WMapMarkerFile
