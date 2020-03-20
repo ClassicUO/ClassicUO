@@ -1140,8 +1140,9 @@ namespace ClassicUO.Network
             for (int i = 0; i < count; i++)
             {
                 WriteUInt(list[i]);
-                list.RemoveAt(i--);
             }
+
+            list.RemoveRange(0, count);
         }
 
         public PMegaClilocRequest(uint serial) : base(0xD6)
