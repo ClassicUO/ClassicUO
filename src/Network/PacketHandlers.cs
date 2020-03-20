@@ -201,7 +201,7 @@ namespace ClassicUO.Network
             {
                 if (Client.Version >= Data.ClientVersion.CV_500A)
                 {
-                    while (Handlers._clilocRequests.Count != 0)
+                    if (Handlers._clilocRequests.Count != 0)
                         NetClient.Socket.Send(new PMegaClilocRequest(ref Handlers._clilocRequests));
                 }
                 else
