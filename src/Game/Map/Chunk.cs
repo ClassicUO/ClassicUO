@@ -28,14 +28,14 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Map
 {
-    internal sealed class Chunk 
+    internal sealed class Chunk
     {
         private static readonly Queue<Chunk> _pool = new Queue<Chunk>();
 
         static Chunk()
         {
-            for (int i = 0; i < Constants.PREDICTABLE_CHUNKS; i++)
-                _pool.Enqueue(new Chunk(0xFFFF, 0xFFFF));
+            //for (int i = 0; i < Constants.PREDICTABLE_CHUNKS; i++)
+            //    _pool.Enqueue(new Chunk(0xFFFF, 0xFFFF));
         }
 
         public static Chunk Create(ushort x, ushort y)
@@ -82,8 +82,8 @@ namespace ClassicUO.Game.Map
             LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
         }
 
-        public ushort X { get; private set; }
-        public ushort Y { get; private set; }
+        public ushort X { get; set; }
+        public ushort Y { get; set; }
 
         public Tile[,] Tiles { get; private set; }
 
@@ -281,6 +281,31 @@ namespace ClassicUO.Game.Map
 
             _pool.Enqueue(this);
             //Tiles = null;
+        }
+
+        public void Clear()
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    GameObject obj = Tiles[i, j].FirstNode;
+
+                    if (obj == null)
+                        return;
+
+                    while (obj.Left != null)
+                        obj = obj.Left;
+
+                    for (GameObject right = obj.Right; obj != null; obj = right, right = right?.Right)
+                    {
+                        if (obj != World.Player)
+                            obj.Destroy();
+                    }
+
+                    Tiles[i, j].Destroy();
+                }
+            }
         }
 
         public bool HasNoExternalData()
