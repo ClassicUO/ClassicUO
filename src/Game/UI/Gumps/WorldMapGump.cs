@@ -74,6 +74,8 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _showMobiles = true;
         private bool _showPlayerName = true;
         private bool _showPlayerBar = true;
+        private bool _showGroupName = true;
+        private bool _showGroupBar = true;
         private bool _showMultis = true;
         private bool _showMarkers = true;
         private bool _showMarkerNames = true;
@@ -165,6 +167,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             _showPlayerName = ParseBool(xml.GetAttribute("showplayername"));
             _showPlayerBar = ParseBool(xml.GetAttribute("showplayerbar"));
+            _showGroupName = ParseBool(xml.GetAttribute("showgroupname"));
+            _showGroupBar = ParseBool(xml.GetAttribute("showgroupbar"));
             _showMarkers = ParseBool(xml.GetAttribute("showmarkers"));
             _showMultis = ParseBool(xml.GetAttribute("showmultis"));
 
@@ -192,8 +196,10 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("zoomindex", _zoomIndex.ToString());
             writer.WriteAttributeString("showcoordinates", _showCoordinates.ToString());
             writer.WriteAttributeString("showmobiles", _showMobiles.ToString());
-            writer.WriteAttributeString("showplayername", _showPlayerName.ToString());
-            writer.WriteAttributeString("showplayerbar", _showPlayerBar.ToString());
+            writer.WriteAttributeString("showgroupname", _showPlayerName.ToString());
+            writer.WriteAttributeString("showgroupbar", _showPlayerBar.ToString());
+            writer.WriteAttributeString("showpartyname", _showGroupName.ToString());
+            writer.WriteAttributeString("showpartybar", _showPlayerBar.ToString());
             writer.WriteAttributeString("showmarkers", _showMarkers.ToString());
             writer.WriteAttributeString("showmultis", _showMultis.ToString());
         }
@@ -223,8 +229,10 @@ namespace ClassicUO.Game.UI.Gumps
             _options["show_mobiles"] = new ContextMenuItemEntry("Show mobiles", () => { _showMobiles = !_showMobiles; }, true, _showMobiles);
             _options["show_multis"] = new ContextMenuItemEntry("Show houses/boats", () => { _showMultis = !_showMultis; }, true, _showMultis);
             _options["show_your_name"] = new ContextMenuItemEntry("Show your name", () => { _showPlayerName = !_showPlayerName; }, true, _showPlayerName);
-            _options["show_your_healthbar"] = new ContextMenuItemEntry("Show your hp", () => { _showPlayerBar = !_showPlayerBar; }, true, _showPlayerBar);
-            _options["show_coordinates"] = new ContextMenuItemEntry("Show your coords", () => { _showCoordinates = !_showCoordinates; }, true, _showCoordinates);
+            _options["show_your_healthbar"] = new ContextMenuItemEntry("Show your healthbar", () => { _showPlayerBar = !_showPlayerBar; }, true, _showPlayerBar);
+            _options["show_party_name"] = new ContextMenuItemEntry("Show group name", () => { _showGroupName = !_showGroupName; }, true, _showGroupName);
+            _options["show_party_healthbar"] = new ContextMenuItemEntry("Show group healthbar", () => { _showGroupBar = !_showGroupBar; }, true, _showGroupBar);
+            _options["show_coordinates"] = new ContextMenuItemEntry("Show your coordinates", () => { _showCoordinates = !_showCoordinates; }, true, _showCoordinates);
         }
 
         private void BuildContextMenu()
@@ -268,6 +276,15 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             ContextMenu.Add(markersEntry);
+
+            ContextMenuItemEntry namesHpBarEntry = new ContextMenuItemEntry("Names & Healthbars");
+            namesHpBarEntry.Add(_options["show_your_name"]);
+            namesHpBarEntry.Add(_options["show_your_healthbar"]);
+            namesHpBarEntry.Add(_options["show_party_name"]);
+            namesHpBarEntry.Add(_options["show_party_healthbar"]);
+
+            ContextMenu.Add(namesHpBarEntry);
+
             ContextMenu.Add("", null);
             ContextMenu.Add(_options["flip_map"]);
             ContextMenu.Add(_options["top_most"]);
@@ -277,9 +294,6 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add(_options["show_mobiles"]);
             ContextMenu.Add(_options["show_multis"]);
             ContextMenu.Add(_options["show_coordinates"]);
-            ContextMenu.Add("", null);
-            ContextMenu.Add(_options["show_your_name"]);
-            ContextMenu.Add(_options["show_your_healthbar"]);
             ContextMenu.Add("", null);
             ContextMenu.Add("Close", Dispose);
         }
@@ -767,7 +781,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 wme.Name = mob.Name;
                             else
                                 DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Lime, true, true,
-                                    true);
+                                    _showGroupBar);
                         }
                         else
                         {
@@ -805,8 +819,8 @@ namespace ClassicUO.Game.UI.Gumps
                             if (wme != null)
                                 wme.Name = partyMember.Name;
 
-                            DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Yellow, true, true,
-                                true);
+                            DrawMobile(batcher, mob, gX, gY, halfWidth, halfHeight, Zoom, Color.Yellow, _showGroupName, true,
+                                _showGroupBar);
                         }
                         else
                         {
@@ -1083,42 +1097,46 @@ namespace ClassicUO.Game.UI.Gumps
             batcher.Draw2D(Texture2DCache.GetTexture(color), rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, DOT_SIZE,
                 DOT_SIZE, ref _hueVector);
 
-            //string name = entity.GetName();
-            string name = entity.Name ?? "<out of range>";
-            Vector2 size = Fonts.Regular.MeasureString(entity.Name ?? name);
-
-            if (rotX + size.X / 2 > x + Width - 8)
+            if (_showGroupName)
             {
-                rotX = x + Width - 8 - (int) (size.X / 2);
+                string name = entity.Name ?? "<out of range>";
+                Vector2 size = Fonts.Regular.MeasureString(entity.Name ?? name);
+
+                if (rotX + size.X / 2 > x + Width - 8)
+                {
+                    rotX = x + Width - 8 - (int)(size.X / 2);
+                }
+                else if (rotX - size.X / 2 < x)
+                {
+                    rotX = x + (int)(size.X / 2);
+                }
+
+                if (rotY + size.Y > y + Height)
+                {
+                    rotY = y + Height - (int)(size.Y);
+                }
+                else if (rotY - size.Y < y)
+                {
+                    rotY = y + (int)size.Y;
+                }
+
+                int xx = (int)(rotX - size.X / 2);
+                int yy = (int)(rotY - size.Y);
+
+                _hueVector.X = 0;
+                _hueVector.Y = 1;
+                batcher.DrawString(Fonts.Regular, name, xx + 1, yy + 1, ref _hueVector);
+                ResetHueVector();
+                _hueVector.X = uohue;
+                _hueVector.Y = 1;
+                batcher.DrawString(Fonts.Regular, name, xx, yy, ref _hueVector);
             }
-            else if (rotX - size.X / 2 < x)
+
+            if (_showGroupBar)
             {
-                rotX = x + (int) (size.X / 2);
+                rotY += DOT_SIZE + 1;
+                DrawHpBar(batcher, rotX, rotY, entity.HP);
             }
-
-            if (rotY + size.Y > y + Height)
-            {
-                rotY = y + Height - (int) (size.Y);
-            }
-            else if (rotY - size.Y < y)
-            {
-                rotY = y + (int) size.Y;
-            }
-
-            int xx = (int) (rotX - size.X / 2);
-            int yy = (int) (rotY - size.Y);
-
-            _hueVector.X = 0;
-            _hueVector.Y = 1;
-            batcher.DrawString(Fonts.Regular, name, xx + 1, yy + 1, ref _hueVector);
-            ResetHueVector();
-            _hueVector.X = uohue;
-            _hueVector.Y = 1;
-            batcher.DrawString(Fonts.Regular, name, xx, yy, ref _hueVector);
-
-            rotY += DOT_SIZE + 1;
-
-            DrawHpBar(batcher, rotX, rotY, entity.HP);
         }
 
         private void DrawHpBar(UltimaBatcher2D batcher, int x, int y, int hp)
