@@ -57,6 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
         private int _lastX;
         private int _lastY;
         private int _lastZ;
+        private int _lastZoom;
         private bool _mapMarkersLoaded = false;
         private Label _coords;
         private readonly string _mapFilesPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
@@ -709,12 +710,13 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_showCoordinates)
             {
-                if (World.Player.X != _lastX || World.Player.Y != _lastY || World.Player.Z != _lastZ)
+                if (World.Player.X != _lastX || World.Player.Y != _lastY || World.Player.Z != _lastZ || _zoomIndex != _lastZoom)
                 {
-                    _coords.Text = $"{World.Player.X}, {World.Player.Y} ({World.Player.Z})";
+                    _coords.Text = $"{World.Player.X}, {World.Player.Y} ({World.Player.Z}) [{_zoomIndex}]";
                     _lastX = World.Player.X;
                     _lastY = World.Player.Y;
                     _lastZ = World.Player.Z;
+                    _lastZoom = _zoomIndex;
                 }
             }
             else
