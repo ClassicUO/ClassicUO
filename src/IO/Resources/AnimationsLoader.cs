@@ -1244,7 +1244,8 @@ namespace ClassicUO.IO.Resources
             return true;
         }
 
-        private static readonly DataReader _reader = new DataReader();
+        private readonly DataReader _reader = new DataReader();
+        private byte[] _buffer = new byte[0x800000];
 
         private unsafe bool ReadUOPAnimationFrame(ref AnimationDirection animDirection)
         {
@@ -1262,18 +1263,17 @@ namespace ClassicUO.IO.Resources
             var file = _filesUop[animData.FileIndex];
             file.Seek(animData.Offset);
 
-            byte* decBuffer = stackalloc byte[decLen];
+           // byte* decBuffer = stackalloc byte[decLen];
 
-            ZLib.Decompress(file.PositionAddress, (int) animData.CompressedLength, 0, (IntPtr) decBuffer, decLen);
-
+            fixed (byte* ptr = &_buffer[0])
             {
-                _reader.SetData(decBuffer, decLen);
+                ZLib.Decompress(file.PositionAddress, (int) animData.CompressedLength, 0, (IntPtr) ptr, decLen);
+                _reader.SetData(ptr, decLen);
                 _reader.Skip(32);
 
                 int frameCount = _reader.ReadInt();
                 int dataStart = _reader.ReadInt();
                 _reader.Seek(dataStart);
-
 
                 UOPFrameData* pixelDataOffsets = stackalloc UOPFrameData[frameCount];
 
