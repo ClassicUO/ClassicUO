@@ -1600,8 +1600,9 @@ namespace ClassicUO.Network
             }
 
             container?.Items.ProcessDelta();
+            World.Items.ProcessDelta();
 
-            if (container != null && SerialHelper.IsItem(container.Serial))
+            if (container != null)
             {
                 var gump = UIManager.GetGump(container.Serial);
 
@@ -1621,8 +1622,6 @@ namespace ClassicUO.Network
                     }
                 }
             }
-
-            World.Items.ProcessDelta();
         }
 
         private static void PersonalLightLevel(Packet p)
