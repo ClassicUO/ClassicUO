@@ -1138,7 +1138,7 @@ namespace ClassicUO.Network
             for (int i = 0; i < list.Count && i < 50; i++)
             {
                 WriteUInt(list[i]);
-                list.RemoveAt(i--);
+                list.RemoveAt(i);
             }
         }
 
