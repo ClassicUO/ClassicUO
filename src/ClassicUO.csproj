@@ -437,7 +437,6 @@
     <Compile Include="Game\Managers\UIManager.cs" />
     <Compile Include="Game\Map\Map.cs" />
     <Compile Include="Game\Map\Chunk.cs" />
-    <Compile Include="Game\Map\Tile.cs" />
     <Compile Include="Game\Pathfinder.cs" />
     <Compile Include="Game\Scenes\GameScene.cs" />
     <Compile Include="Game\Scenes\LoginScene.cs" />
