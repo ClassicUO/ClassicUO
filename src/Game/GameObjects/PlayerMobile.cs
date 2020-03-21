@@ -1288,7 +1288,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void CloseBank()
         {
-            var bank = Equipment[(int) Layer.Bank];
+            var bank = HasEquipment ? Equipment[(int) Layer.Bank] : null;
 
             if (bank != null)
             {
