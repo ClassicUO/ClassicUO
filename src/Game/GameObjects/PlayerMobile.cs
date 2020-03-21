@@ -1279,6 +1279,9 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Destroy()
         {
+            if (IsDestroyed)
+                return;
+
             Log.Warn( "PlayerMobile disposed!");
             base.Destroy();
         }

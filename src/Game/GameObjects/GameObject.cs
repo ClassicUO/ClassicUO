@@ -105,7 +105,8 @@ namespace ClassicUO.Game.GameObjects
                 int cellX = X % 8;
                 int cellY = Y % 8;
 
-                World.Map.GetChunk(X, Y)?.RemoveGameObject(this, cellX, cellY);
+                if (Left != null || Right != null)
+                    World.Map.GetChunk(X, Y)?.RemoveGameObject(this, cellX, cellY);
 
                 if (!IsDestroyed)
                 {
@@ -130,7 +131,7 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         public void RemoveFromTile()
         {
-            if (World.Map != null)
+            if (World.Map != null && (Left != null || Right != null))
             {
                 int cellX = X % 8;
                 int cellY = Y % 8;

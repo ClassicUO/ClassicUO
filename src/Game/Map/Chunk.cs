@@ -411,6 +411,8 @@ namespace ClassicUO.Game.Map
                         {
                             obj.Destroy();
                         }
+
+                        obj.RemoveFromTile();
                     }
 
                     if (Tiles[i, j] != World.Player)
@@ -442,6 +444,8 @@ namespace ClassicUO.Game.Map
                     {
                         if (obj != World.Player)
                             obj.Destroy();
+
+                        obj.RemoveFromTile();
                     }
 
                     if (Tiles[i, j] != World.Player)
