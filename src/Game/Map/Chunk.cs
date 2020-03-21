@@ -32,9 +32,15 @@ namespace ClassicUO.Game.Map
     internal sealed class Chunk
     {
         private static readonly Queue<Chunk> _pool = new Queue<Chunk>();
+        private static readonly Queue<GameObject[,]> _pool2 = new Queue<GameObject[,]>();
 
         static Chunk()
         {
+            for (int i = 0; i < Constants.PREDICTABLE_CHUNKS; i++)
+            {
+                _pool2.Enqueue(new GameObject[8, 8]);
+            }
+
             for (int i = 0; i < Constants.PREDICTABLE_CHUNKS; i++)
                 _pool.Enqueue(new Chunk(0xFFFF, 0xFFFF));
         }
@@ -67,7 +73,7 @@ namespace ClassicUO.Game.Map
         {
             X = x;
             Y = y;
-            Tiles = new GameObject[8, 8];
+            Tiles = _pool2.Count != 0 ? _pool2.Dequeue() : new GameObject[8, 8];
             LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
         }
 
@@ -79,6 +85,13 @@ namespace ClassicUO.Game.Map
         public GameObject[,] Tiles { get; private set; }
 
         public long LastAccessTime { get; set; }
+
+
+        public GameObject this[int a, int b]
+        {
+            get => Tiles[a, b];
+            set => Tiles[a, b] = value;
+        }
 
 
         [MethodImpl(256)]

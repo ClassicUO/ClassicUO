@@ -109,7 +109,9 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void ApplyStrech(int x, int y, sbyte z)
+        private static Vector3[,,] _vectCache = new Vector3[3, 3, 4];
+
+        public unsafe void ApplyStrech(int x, int y, sbyte z)
         {
             Map.Map map = World.Map;
 
@@ -127,7 +129,8 @@ namespace ClassicUO.Game.GameObjects
                     map.GetTileZ(x + 1, y),
                     z);
 
-                Vector3[,,] vec = new Vector3[3, 3, 4];
+                //Vector3[,,] vec = new Vector3[3, 3, 4];
+
                 int i;
                 int j;
 
@@ -152,7 +155,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             for (int k = 0; k < 4; k++)
                             {
-                                ref var v = ref vec[curI, curJ, k];
+                                ref var v = ref _vectCache[curI, curJ, k];
                                 v.X = 0;
                                 v.Y = 0;
                                 v.Z = 1;
@@ -160,30 +163,35 @@ namespace ClassicUO.Game.GameObjects
                         }
                         else
                         {
-                            ref var v0 = ref vec[curI, curJ, 0];
+                            int half_0 = (currentZ - rightZ) << 2;
+                            int half_1 = (leftZ - currentZ) << 2;
+                            int half_2 = (rightZ - bottomZ) << 2;
+                            int half_3 = (bottomZ - leftZ) << 2;
+
+                            ref var v0 = ref _vectCache[curI, curJ, 0];
                             v0.X = -22;
                             v0.Y = 22;
-                            v0.Z = (currentZ - rightZ) << 2;
-                            MergeAndNormalize(ref v0, -22.0f, -22.0f, (leftZ - currentZ) << 2);
+                            v0.Z = half_0;
+                            MergeAndNormalize(ref v0, -22.0f, -22.0f, half_1);
 
 
-                            ref var v1 = ref vec[curI, curJ, 1];
+                            ref var v1 = ref _vectCache[curI, curJ, 1];
                             v1.X = 22;
                             v1.Y = 22;
-                            v1.Z = (rightZ - bottomZ) << 2;
-                            MergeAndNormalize(ref v1, -22.0f, 22.0f, (currentZ - rightZ) << 2);
+                            v1.Z = half_2;
+                            MergeAndNormalize(ref v1, -22.0f, 22.0f, half_0);
 
-                            ref var v2 = ref vec[curI, curJ, 2];
+                            ref var v2 = ref _vectCache[curI, curJ, 2];
                             v2.X = 22;
                             v2.Y = -22;
-                            v2.Z = (bottomZ - leftZ) << 2;
-                            MergeAndNormalize(ref v2, 22.0f, 22.0f, (rightZ - bottomZ) << 2);
+                            v2.Z = half_3;
+                            MergeAndNormalize(ref v2, 22.0f, 22.0f, half_2);
 
-                            ref var v3 = ref vec[curI, curJ, 3];
+                            ref var v3 = ref _vectCache[curI, curJ, 3];
                             v3.X = -22;
                             v3.Y = -22;
-                            v3.Z = (leftZ - currentZ) << 2;
-                            MergeAndNormalize(ref v3, 22.0f, -22.0f, (bottomZ - leftZ) << 2);
+                            v3.Z = half_1;
+                            MergeAndNormalize(ref v3, 22.0f, -22.0f, half_3);
                         }
                     }
                 }
@@ -193,7 +201,7 @@ namespace ClassicUO.Game.GameObjects
 
                 // 0
                 SumAndNormalize(
-                     ref vec,
+                     ref _vectCache,
                      i - 1, j - 1, 2,
                      i - 1, j, 1,
                      i, j - 1, 3,
@@ -202,7 +210,7 @@ namespace ClassicUO.Game.GameObjects
 
                 // 1
                 SumAndNormalize(
-                    ref vec,
+                    ref _vectCache,
                     i, j - 1, 2,
                     i, j, 1,
                     i + 1, j - 1, 3,
@@ -211,7 +219,7 @@ namespace ClassicUO.Game.GameObjects
 
                 // 2
                 SumAndNormalize(
-                    ref vec,
+                    ref _vectCache,
                     i, j, 2,
                     i, j + 1, 1,
                     i + 1, j, 3,
@@ -220,7 +228,7 @@ namespace ClassicUO.Game.GameObjects
 
                 // 3
                 SumAndNormalize(
-                    ref vec,
+                    ref _vectCache,
                     i - 1, j, 2,
                     i - 1, j + 1, 1,
                     i, j, 3,
