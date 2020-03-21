@@ -82,16 +82,9 @@ namespace ClassicUO.Game.Map
 
         public bool IsDestroyed;
 
-        public GameObject[,] Tiles { get; private set; }
+        public GameObject[,] Tiles { get; }
 
         public long LastAccessTime { get; set; }
-
-
-        public GameObject this[int a, int b]
-        {
-            get => Tiles[a, b];
-            set => Tiles[a, b] = value;
-        }
 
 
         [MethodImpl(256)]
