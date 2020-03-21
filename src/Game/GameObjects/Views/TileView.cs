@@ -86,7 +86,7 @@ namespace ClassicUO.Game.GameObjects
         private bool Draw3DStretched(UltimaBatcher2D batcher, int posX, int posY)
         {
             Texture.Ticks = Time.Ticks;
-            batcher.DrawSpriteLand(Texture, posX, posY + (Z << 2), ref Rectangle, ref Normals, ref HueVector);
+            batcher.DrawSpriteLand(Texture, posX, posY + (Z << 2), ref Rectangle, ref Normal0, ref Normal1, ref Normal2, ref Normal3, ref HueVector);
             Select(posX, posY);
 
             return true;
@@ -133,9 +133,6 @@ namespace ClassicUO.Game.GameObjects
 
                 int i;
                 int j;
-
-                if (Normals == null || Normals.Length != 4)
-                    Normals = new Vector3[4];
 
                 for (i = -1; i < 2; i++)
                 {
@@ -206,7 +203,7 @@ namespace ClassicUO.Game.GameObjects
                      i - 1, j, 1,
                      i, j - 1, 3,
                      i, j, 0,
-                     out Normals[0]);
+                     out Normal0);
 
                 // 1
                 SumAndNormalize(
@@ -215,7 +212,7 @@ namespace ClassicUO.Game.GameObjects
                     i, j, 1,
                     i + 1, j - 1, 3,
                     i + 1, j, 0,
-                    out Normals[1]);
+                    out Normal1);
 
                 // 2
                 SumAndNormalize(
@@ -224,7 +221,7 @@ namespace ClassicUO.Game.GameObjects
                     i, j + 1, 1,
                     i + 1, j, 3,
                     i + 1, j + 1, 0,
-                    out Normals[2]);
+                    out Normal2);
 
                 // 3
                 SumAndNormalize(
@@ -233,7 +230,7 @@ namespace ClassicUO.Game.GameObjects
                     i - 1, j + 1, 1,
                     i, j, 3,
                     i, j + 1, 0,
-                    out Normals[3]);
+                    out Normal3);
             }
         }
 

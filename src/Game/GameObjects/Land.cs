@@ -67,7 +67,7 @@ namespace ClassicUO.Game.GameObjects
                 l.AlphaHue = 255;
                 l.IsStretched = l.TileData.TexID == 0 && l.TileData.IsWet;
                 l.AllowedToDraw = l.Graphic > 2;
-                l.Normals = null;
+                l.Normal0 = l.Normal1 = l.Normal2 = l.Normal3 = Vector3.Zero;
                 l.Rectangle = Rectangle.Empty;
                 l.MinZ = l.AverageZ = 0;
                 l.Texture = null;
@@ -89,9 +89,9 @@ namespace ClassicUO.Game.GameObjects
             _pool.Enqueue(this);
         }
 
-        public Vector3[] Normals;
-
+        public Vector3 Normal0, Normal1, Normal2, Normal3;
         public Rectangle Rectangle;
+
         public ref readonly LandTiles TileData => ref TileDataLoader.Instance.LandData[Graphic];
 
         public sbyte MinZ;

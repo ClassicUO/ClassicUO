@@ -33,8 +33,7 @@ namespace ClassicUO.Game.Map
     internal sealed class Map
     {
         private readonly bool[] _blockAccessList = new bool[0x1000];
-        private readonly List<int> _usedIndices = new List<int>();
-
+        private readonly LinkedList<int> _usedIndices = new LinkedList<int>();
 
         private const int CELL_NUM = 16;
         private const int CELL_SPAN = CELL_NUM * 2;
@@ -74,7 +73,7 @@ namespace ClassicUO.Game.Map
                 if (!load)
                     return null;
 
-                _usedIndices.Add(block);
+                _usedIndices.AddLast(block);
                 chunk = Chunk.Create((ushort) cellX, (ushort) cellY);
                 chunk.Load(Index);
             }
@@ -84,7 +83,7 @@ namespace ClassicUO.Game.Map
                 {
                     Console.WriteLine("RELOAD CHUNK!");
 
-                    _usedIndices.Add(block);
+                    _usedIndices.AddLast(block);
                     chunk.X = (ushort) cellX;
                     chunk.Y = (ushort) cellY;
                     chunk.Load(Index);
@@ -232,16 +231,18 @@ namespace ClassicUO.Game.Map
             int count = 0;
             long ticks = Time.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
-            for (int i = 0; i < _usedIndices.Count; i++)
+            var first = _usedIndices.First;
+
+            for (var right = first.Next; first != null; first = right, right = right?.Next)
             {
-                ref Chunk block = ref Chunks[_usedIndices[i]];
+                ref Chunk block = ref Chunks[first.Value];
 
                 if (block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
                     block.Clear();
                     block.IsDestroyed = true;
                     //block = null;
-                    _usedIndices.RemoveAt(i--);
+                    _usedIndices.Remove(first);
 
                     if (++count >= Constants.MAX_MAP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
                         break;
@@ -251,9 +252,11 @@ namespace ClassicUO.Game.Map
 
         public void Destroy()
         {
-            for (int i = 0; i < _usedIndices.Count; i++)
+            var first = _usedIndices.First;
+
+            for (var right = first.Next; first != null; first = right, right = right?.Next)
             {
-                ref Chunk block = ref Chunks[_usedIndices[i]];
+                ref Chunk block = ref Chunks[first.Value];
                 block.Destroy();
                 block.IsDestroyed = true;
                 //block = null;
@@ -301,7 +304,7 @@ namespace ClassicUO.Game.Map
                         if (Time.Ticks - tick >= maxDelay)
                             return;
 
-                        _usedIndices.Add(cellindex);
+                        _usedIndices.AddLast(cellindex);
                         chunk = Chunk.Create((ushort) i, (ushort) j);
                         chunk.Load(Index);
                     }
