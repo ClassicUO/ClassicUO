@@ -63,7 +63,7 @@ namespace ClassicUO.Game.Map
             int cellY = y >> 3;
             int block = GetBlock(cellX, cellY);
 
-            if (block >= Chunks.Length)
+            if (block >= BlocksCount)
                 return null;
 
             ref Chunk chunk = ref Chunks[block];
@@ -261,6 +261,7 @@ namespace ClassicUO.Game.Map
         public void Initialize()
         {
             return;
+
             const int XY_OFFSET = 30;
 
             int minBlockX = ((Center.X - XY_OFFSET) >> 3) - 1;
