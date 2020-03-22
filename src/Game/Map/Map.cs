@@ -77,17 +77,12 @@ namespace ClassicUO.Game.Map
                 chunk = Chunk.Create((ushort) cellX, (ushort) cellY);
                 chunk.Load(Index);
             }
-            else
+            else if (chunk.IsDestroyed)
             {
-                if (chunk.IsDestroyed)
-                {
-                    Console.WriteLine("RELOAD CHUNK!");
-
-                    _usedIndices.AddLast(block);
-                    chunk.X = (ushort) cellX;
-                    chunk.Y = (ushort) cellY;
-                    chunk.Load(Index);
-                }
+                _usedIndices.AddLast(block);
+                chunk.X = (ushort) cellX;
+                chunk.Y = (ushort) cellY;
+                chunk.Load(Index);
             }
 
             chunk.LastAccessTime = Time.Ticks;
