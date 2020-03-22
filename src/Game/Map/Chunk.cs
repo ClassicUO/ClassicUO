@@ -23,17 +23,24 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Map
 {
-    internal sealed class Chunk 
+    internal sealed class Chunk
     {
         private static readonly Queue<Chunk> _pool = new Queue<Chunk>();
+        private static readonly Queue<GameObject[,]> _pool2 = new Queue<GameObject[,]>();
 
         static Chunk()
         {
+            for (int i = 0; i < Constants.PREDICTABLE_CHUNKS; i++)
+            {
+                _pool2.Enqueue(new GameObject[8, 8]);
+            }
+
             for (int i = 0; i < Constants.PREDICTABLE_CHUNKS; i++)
                 _pool.Enqueue(new Chunk(0xFFFF, 0xFFFF));
         }
@@ -48,25 +55,13 @@ namespace ClassicUO.Game.Map
                 c.X = x;
                 c.Y = y;
                 c.LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
+                c.IsDestroyed = false;
             }
             else
             {
                 Log.Debug(string.Intern("Created new Chunk"));
 
                 c = new Chunk(x, y);
-            }
-
-            x <<= 3;
-            y <<= 3;
-
-            for (int i = 0; i < 8; i++)
-            {
-                ushort tileX = (ushort) (i + x);
-
-                for (int j = 0; j < 8; j++)
-                {
-                    c.Tiles[i, j] = Tile.Create(tileX, (ushort) (j + y));
-                }
             }
 
             return c;
@@ -78,14 +73,16 @@ namespace ClassicUO.Game.Map
         {
             X = x;
             Y = y;
-            Tiles = new Tile[8, 8];
+            Tiles = _pool2.Count != 0 ? _pool2.Dequeue() : new GameObject[8, 8];
             LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
         }
 
-        public ushort X { get; private set; }
-        public ushort Y { get; private set; }
+        public ushort X { get; set; }
+        public ushort Y { get; set; }
 
-        public Tile[,] Tiles { get; private set; }
+        public bool IsDestroyed;
+
+        public GameObject[,] Tiles { get; }
 
         public long LastAccessTime { get; set; }
 
@@ -93,6 +90,8 @@ namespace ClassicUO.Game.Map
         [MethodImpl(256)]
         public unsafe void Load(int map)
         {
+            IsDestroyed = false;
+
             ref IndexMap im = ref GetIndex(map);
 
             if (im.MapAddress != 0)
@@ -123,7 +122,8 @@ namespace ClassicUO.Game.Map
                         land.Y = tileY;
                         land.Z = z;
                         land.UpdateScreenPosition();
-                        land.AddToTile(Tiles[x, y]);
+
+                        AddGameObject(land, x, y);
                     }
                 }
 
@@ -156,7 +156,8 @@ namespace ClassicUO.Game.Map
                                 staticObject.Y = staticY;
                                 staticObject.Z = z;
                                 staticObject.UpdateScreenPosition();
-                                staticObject.AddToTile(Tiles[x, y]);
+
+                                AddGameObject(staticObject, x, y);
                             }
                         }
                     }
@@ -167,6 +168,8 @@ namespace ClassicUO.Game.Map
         [MethodImpl(256)]
         public unsafe void LoadStatics(int map)
         {
+            IsDestroyed = false;
+
             ref IndexMap im = ref GetIndex(map);
 
             if (im.MapAddress != 0)
@@ -203,7 +206,8 @@ namespace ClassicUO.Game.Map
                                 staticObject.Y = staticY;
                                 staticObject.Z = z;
                                 staticObject.UpdateScreenPosition();
-                                staticObject.AddToTile(Tiles[x, y]);
+                               
+                                AddGameObject(staticObject, x, y);
                             }
                         }
                     }
@@ -214,6 +218,8 @@ namespace ClassicUO.Game.Map
         [MethodImpl(256)]
         public unsafe void LoadLand(int map)
         {
+            IsDestroyed = false;
+
             ref IndexMap im = ref GetIndex(map);
 
             if (im.MapAddress != 0)
@@ -244,7 +250,8 @@ namespace ClassicUO.Game.Map
                         land.Y = tileY;
                         land.Z = z;
                         land.UpdateScreenPosition();
-                        land.AddToTile(Tiles[x, y]);
+                       
+                        AddGameObject(land, x, y);
                     }
                 }
             }
@@ -257,13 +264,184 @@ namespace ClassicUO.Game.Map
             return ref MapLoader.Instance.GetIndex(map, X, Y);
         }
 
+        public void AddGameObject(GameObject obj, int x, int y)
+        {
+            ref var firstNode = ref Tiles[x, y];
+
+            short priorityZ = obj.Z;
+            sbyte state = -1;
+
+            switch (obj)
+            {
+                case Land tile:
+
+                    if (tile.IsStretched)
+                        priorityZ = (short) (tile.AverageZ - 1);
+                    else
+                        priorityZ--;
+
+                    state = 0;
+
+                    break;
+
+                case Mobile _:
+                    priorityZ++;
+
+                    break;
+
+                case Item item when item.IsCorpse:
+                    priorityZ++;
+
+                    break;
+
+                case GameEffect _:
+                    priorityZ += 2;
+
+                    break;
+
+                case Multi m:
+
+                    state = 1;
+
+                    if ((m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0)
+                    {
+                        priorityZ--;
+                        break;
+                    }
+
+                    if ((m.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW) != 0)
+                    {
+                        state = 2;
+                        priorityZ++;
+                    }
+
+                    goto default;
+
+                default:
+                    ref readonly StaticTiles data = ref TileDataLoader.Instance.StaticData[obj.Graphic];
+
+                    if (data.IsBackground)
+                        priorityZ--;
+
+                    if (data.Height != 0)
+                        priorityZ++;
+
+                    break;
+            }
+
+            obj.PriorityZ = priorityZ;
+
+
+            if (firstNode == null)
+            {
+                firstNode = obj;
+
+                return;
+            }
+
+            GameObject o = firstNode;
+
+            while (o?.Left != null)
+                o = o.Left;
+
+            GameObject found = null;
+            GameObject start = o;
+
+            while (o != null)
+            {
+                int testPriorityZ = o.PriorityZ;
+
+                if (testPriorityZ > priorityZ ||
+                    (testPriorityZ == priorityZ &&
+                    (state == 0 || (state == 1 && !(o is Land)))))
+                    break;
+
+                found = o;
+                o = o.Right;
+            }
+
+            if (found != null)
+            {
+                obj.Left = found;
+                GameObject next = found.Right;
+                obj.Right = next;
+                found.Right = obj;
+
+                if (next != null)
+                    next.Left = obj;
+            }
+            else if (start != null)
+            {
+                obj.Right = start;
+                start.Left = obj;
+                obj.Left = null;
+                firstNode = obj;
+            }
+        }
+
+        public void RemoveGameObject(GameObject obj, int x, int y)
+        {
+            ref var firstNode = ref Tiles[x, y];
+
+            if (firstNode == null || obj == null)
+                return;
+
+            if (firstNode == obj)
+                firstNode = obj.Right;
+
+            if (obj.Right != null)
+                obj.Right.Left = obj.Left;
+
+            if (obj.Left != null)
+                obj.Left.Right = obj.Right;
+
+            obj.Left = null;
+            obj.Right = null;
+        }
+
+
         public void Destroy()
         {
             for (int i = 0; i < 8; i++)
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    GameObject obj = Tiles[i, j].FirstNode;
+                    GameObject obj = Tiles[i, j];
+
+                    while (obj.Left != null)
+                        obj = obj.Left;
+
+                    for (GameObject right = obj.Right; obj != null; obj = right, right = right?.Right)
+                    {
+                        if (obj != World.Player)
+                        {
+                            obj.Destroy();
+                        }
+
+                        obj.RemoveFromTile();
+                    }
+
+                    if (Tiles[i, j] != World.Player)
+                        Tiles[i, j]?.Destroy();
+                    Tiles[i, j] = null;
+                }
+            }
+
+            IsDestroyed = true;
+            _pool.Enqueue(this);
+            //Tiles = null;
+        }
+
+        public void Clear()
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    GameObject obj = Tiles[i, j];
+
+                    if (obj == null)
+                        return;
 
                     while (obj.Left != null)
                         obj = obj.Left;
@@ -272,15 +450,17 @@ namespace ClassicUO.Game.Map
                     {
                         if (obj != World.Player)
                             obj.Destroy();
+
+                        obj.RemoveFromTile();
                     }
 
-                    Tiles[i, j].Destroy();
+                    if (Tiles[i, j] != World.Player)
+                        Tiles[i, j]?.Destroy();
                     Tiles[i, j] = null;
                 }
             }
 
-            _pool.Enqueue(this);
-            //Tiles = null;
+            IsDestroyed = true;
         }
 
         public bool HasNoExternalData()
@@ -289,9 +469,7 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    Tile tile = Tiles[i, j];
-
-                    GameObject obj = tile.FirstNode;
+                    GameObject obj = Tiles[i, j];
 
                     while (obj.Left != null)
                         obj = obj.Left;

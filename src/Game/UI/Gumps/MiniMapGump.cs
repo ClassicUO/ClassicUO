@@ -279,7 +279,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (block != null)
                             {
-                                GameObject obj = block.Tiles[x, y].FirstNode;
+                                GameObject obj = block.Tiles[x, y];
 
                                 while (obj?.Right != null)
                                     obj = obj.Right;

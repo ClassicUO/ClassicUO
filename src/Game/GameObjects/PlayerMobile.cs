@@ -1279,13 +1279,16 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Destroy()
         {
+            if (IsDestroyed)
+                return;
+
             Log.Warn( "PlayerMobile disposed!");
             base.Destroy();
         }
 
         public void CloseBank()
         {
-            var bank = Equipment[(int) Layer.Bank];
+            var bank = HasEquipment ? Equipment[(int) Layer.Bank] : null;
 
             if (bank != null)
             {

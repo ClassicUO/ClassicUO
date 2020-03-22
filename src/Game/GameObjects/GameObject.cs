@@ -91,8 +91,7 @@ namespace ClassicUO.Game.GameObjects
                 return Math.Max(Math.Abs(x - fx), Math.Abs(y - fy));
             }
         }
-        public Tile Tile { get; private set; }
-    
+
 
         public virtual void Update(double totalMS, double frameMS)
         {
@@ -103,12 +102,21 @@ namespace ClassicUO.Game.GameObjects
         {
             if (World.Map != null)
             {
-                Tile?.RemoveGameObject(this);
+                int cellX = X % 8;
+                int cellY = Y % 8;
+
+                if (Left != null || Right != null)
+                    World.Map.GetChunk(X, Y)?.RemoveGameObject(this, cellX, cellY);
 
                 if (!IsDestroyed)
                 {
-                    Tile = World.Map.GetTile(x, y);
-                    Tile?.AddGameObject(this);
+                    if (X != x || Y != y)
+                    {
+                        cellX = x % 8;
+                        cellY = y % 8;
+                    }
+                    
+                    World.Map.GetChunk(x, y)?.AddGameObject(this, cellX, cellY);
                 }
             }
         }
@@ -119,28 +127,16 @@ namespace ClassicUO.Game.GameObjects
             AddToTile(X, Y);
         }
 
-        [MethodImpl(256)]
-        public void AddToTile(Tile tile)
-        {
-            if (World.Map != null)
-            {
-                Tile?.RemoveGameObject(this);
-
-                if (!IsDestroyed)
-                {
-                    Tile = tile;
-                    Tile?.AddGameObject(this);
-                }
-            }
-        }
-
+      
         [MethodImpl(256)]
         public void RemoveFromTile()
         {
-            if (World.Map != null && Tile != null)
+            if (World.Map != null && (Left != null || Right != null))
             {
-                Tile.RemoveGameObject(this);
-                Tile = null;
+                int cellX = X % 8;
+                int cellY = Y % 8;
+
+                World.Map.GetChunk(X, Y)?.RemoveGameObject(this, cellX, cellY);
             }
         }
 
@@ -314,9 +310,10 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return;
 
-            Tile?.RemoveGameObject(this);
-            Tile = null;
+            int cellX = X % 8;
+            int cellY = Y % 8;
 
+            World.Map.GetChunk(X, Y, false)?.RemoveGameObject(this, cellX, cellY);
             TextContainer?.Clear();
 
             IsDestroyed = true;
