@@ -975,8 +975,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!showMarkerName)
                 {
-                    if (Mouse.Position.X >= rotX && Mouse.Position.X <= rotX + marker.MarkerIcon.Width &&
-                        Mouse.Position.Y >= rotY && Mouse.Position.Y <= rotY + marker.MarkerIcon.Height)
+                    if (Mouse.Position.X >= rotX - (marker.MarkerIcon.Width / 2) && Mouse.Position.X <= rotX + (marker.MarkerIcon.Width / 2) &&
+                        Mouse.Position.Y >= rotY - (marker.MarkerIcon.Height / 2) && Mouse.Position.Y <= rotY + (marker.MarkerIcon.Height / 2))
                     {
                         _hueVector.X = 0;
                         _hueVector.Y = 1;
