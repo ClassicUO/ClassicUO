@@ -1099,14 +1099,12 @@ namespace ClassicUO.Game.Managers
         {
             if (_needSort)
             {
-                var gumps = Gumps.Where(s => s.ControlInfo.Layer != UILayer.Default).ToArray();
-
-                int over = 0;
-                int under = Gumps.Count - 1;
-
-                for (int j = 0; j < gumps.Length; j++)
+                for (var el = Gumps.First; el != null; el = el.Next)
                 {
-                    var c = gumps[j];
+                    var c = el.Value;
+
+                    if (c.ControlInfo.Layer == UILayer.Default)
+                        continue;
 
                     if (c.ControlInfo.Layer == UILayer.Under)
                     {
