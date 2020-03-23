@@ -160,15 +160,12 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                if (IsModalControlOpen())
+                foreach (Control s in Gumps)
                 {
-                    foreach (Control s in Gumps)
+                    if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
                     {
-                        if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
-                        {
-                            s.Dispose();
-                            Mouse.CancelDoubleClick = true;
-                        }
+                        s.Dispose();
+                        Mouse.CancelDoubleClick = true;
                     }
                 }
             }
@@ -1002,7 +999,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (ProfileManager.Current == null || !ProfileManager.Current.HoldAltToMoveGumps || Keyboard.Alt)
                     {
-                        AttemptDragControl(gump, Mouse.Position);
+                        AttemptDragControl(gump, Mouse.Position, true);
                     }
                 }
             }
@@ -1154,47 +1151,22 @@ namespace ClassicUO.Game.Managers
 
             if (dragTarget.CanMove)
             {
-                if (attemptAlwaysSuccessful)
-                {
-                    DraggingControl = dragTarget;
-                    if (_needSort && control == dragTarget)
-                    {
-                        _dragOriginX = mousePosition.X;
-                        _dragOriginY = mousePosition.Y;
-                    }
-                }
-
-                if (DraggingControl == dragTarget)
-                {
-                    //var p = Mouse.LDroppedOffset;
-                    int deltaX = mousePosition.X - _dragOriginX;
-                    int deltaY = mousePosition.Y - _dragOriginY;
-
-                    if (attemptAlwaysSuccessful || Math.Abs(deltaX) + Math.Abs(deltaY) > Constants.MIN_GUMP_DRAG_DISTANCE)
-                    {
-                        _isDraggingControl = true;
-                        dragTarget.InvokeDragBegin(new Point(deltaX, deltaY));
-                    }
-                }
-                else
+                if (attemptAlwaysSuccessful || !_isDraggingControl)
                 {
                     DraggingControl = dragTarget;
                     _dragOriginX = mousePosition.X;
                     _dragOriginY = mousePosition.Y;
                 }
-            }
 
-            //if (_isDraggingControl)
-            //{
-            //    for (int i = 0; i < 5; i++)
-            //    {
-            //        if (_mouseDownControls[i] != null && _mouseDownControls[i] != DraggingControl)
-            //        {
-            //            //_mouseDownControls[i].InvokeMouseUp(mousePosition, (MouseButton) i);
-            //            _mouseDownControls[i] = null;
-            //        }
-            //    }
-            //}
+                int deltaX = mousePosition.X - _dragOriginX;
+                int deltaY = mousePosition.Y - _dragOriginY;
+
+                if (attemptAlwaysSuccessful || Math.Abs(deltaX) + Math.Abs(deltaY) > Constants.MIN_GUMP_DRAG_DISTANCE)
+                {
+                    _isDraggingControl = true;
+                    dragTarget.InvokeDragBegin(new Point(deltaX, deltaY));
+                }
+            }
         }
 
         private static void DoDragControl(Point mousePosition)
