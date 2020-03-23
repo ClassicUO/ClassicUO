@@ -34,6 +34,8 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class SpellbookGump : Gump
@@ -453,7 +455,8 @@ namespace ClassicUO.Game.UI.Gumps
                                     Y = 52 + y,
                                     LocalSerial = (uint) (pagesToFill + (currentSpellIndex / 2) + 1),
                                     AcceptMouseInput = true,
-                                    Tag = currentSpellIndex + 1
+                                    Tag = currentSpellIndex + 1,
+                                    CanMove = true
                                 };
                                 text.MouseUp += OnClicked;
                                 text.MouseDoubleClick += OnDoubleClicked;
@@ -482,7 +485,8 @@ namespace ClassicUO.Game.UI.Gumps
                                     Y = 52 + y,
                                     LocalSerial = (uint) topage,
                                     AcceptMouseInput = true,
-                                    Tag = currentSpellIndex + 1
+                                    Tag = currentSpellIndex + 1,
+                                    CanMove = true
                                 };
                                 text.MouseUp += OnClicked;
                                 text.MouseDoubleClick += OnDoubleClicked;
@@ -1048,7 +1052,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OnClicked(object sender, MouseEventArgs e)
         {
-            if (sender is HoveredLabel l && e.Button == MouseButtonType.Left)
+            if (e.Button == MouseButtonType.Left && Mouse.LDroppedOffset == Point.Zero && sender is HoveredLabel l)
             {
                 _clickTiming += Mouse.MOUSE_DELAY_DOUBLE_CLICK;
 
@@ -1172,7 +1176,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void PageCornerOnMouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? _dataBox.ActivePage - 1 : _dataBox.ActivePage + 1);
+            if (e.Button == MouseButtonType.Left && Mouse.LDroppedOffset == Point.Zero && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? _dataBox.ActivePage - 1 : _dataBox.ActivePage + 1);
         }
 
         private void PageCornerOnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
