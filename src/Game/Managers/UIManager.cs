@@ -999,7 +999,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (ProfileManager.Current == null || !ProfileManager.Current.HoldAltToMoveGumps || Keyboard.Alt)
                     {
-                        AttemptDragControl(gump, Mouse.Position, true);
+                        AttemptDragControl(gump, Mouse.Position);
                     }
                 }
             }
@@ -1149,21 +1149,49 @@ namespace ClassicUO.Game.Managers
 
             if (dragTarget.CanMove)
             {
-                if (attemptAlwaysSuccessful || !_isDraggingControl)
+                if (attemptAlwaysSuccessful)
+                {
+                    DraggingControl = dragTarget;
+                    if (_needSort && control == dragTarget)
+                    {
+                        _dragOriginX = mousePosition.X;
+                        _dragOriginY = mousePosition.Y;
+                    }
+                }
+
+                if (DraggingControl == dragTarget)
+                {
+                    //var p = Mouse.LDroppedOffset;
+                    int deltaX = mousePosition.X - _dragOriginX;
+                    int deltaY = mousePosition.Y - _dragOriginY;
+
+                    if (attemptAlwaysSuccessful || Math.Abs(deltaX) + Math.Abs(deltaY) > Constants.MIN_GUMP_DRAG_DISTANCE)
+                    {
+                        _isDraggingControl = true;
+                        dragTarget.InvokeDragBegin(new Point(deltaX, deltaY));
+                    }
+                }
+                else
                 {
                     DraggingControl = dragTarget;
                     _dragOriginX = mousePosition.X;
                     _dragOriginY = mousePosition.Y;
                 }
+                //if (attemptAlwaysSuccessful || !_isDraggingControl)
+                //{
+                //    DraggingControl = dragTarget;
+                //    _dragOriginX = mousePosition.X;
+                //    _dragOriginY = mousePosition.Y;
+                //}
 
-                int deltaX = mousePosition.X - _dragOriginX;
-                int deltaY = mousePosition.Y - _dragOriginY;
+                //int deltaX = mousePosition.X - _dragOriginX;
+                //int deltaY = mousePosition.Y - _dragOriginY;
 
-                if (attemptAlwaysSuccessful || Math.Abs(deltaX) + Math.Abs(deltaY) > Constants.MIN_GUMP_DRAG_DISTANCE)
-                {
-                    _isDraggingControl = true;
-                    dragTarget.InvokeDragBegin(new Point(deltaX, deltaY));
-                }
+                //if (attemptAlwaysSuccessful || Math.Abs(deltaX) + Math.Abs(deltaY) > Constants.MIN_GUMP_DRAG_DISTANCE)
+                //{
+                //    _isDraggingControl = true;
+                //    dragTarget.InvokeDragBegin(new Point(deltaX, deltaY));
+                //}
             }
         }
 
