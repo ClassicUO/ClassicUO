@@ -408,6 +408,9 @@ namespace ClassicUO.Game.Map
                 {
                     GameObject obj = Tiles[i, j];
 
+                    if (obj == null)
+                        continue;
+
                     while (obj.Left != null)
                         obj = obj.Left;
 
@@ -441,7 +444,7 @@ namespace ClassicUO.Game.Map
                     GameObject obj = Tiles[i, j];
 
                     if (obj == null)
-                        return;
+                        continue;
 
                     while (obj.Left != null)
                         obj = obj.Left;

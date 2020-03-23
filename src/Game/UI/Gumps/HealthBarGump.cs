@@ -249,7 +249,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (entity == null || SerialHelper.IsItem(entity.Serial))
                 return;
 
-            if ((key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER) && _textBox.IsEditable)
+            if ((key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER) && _textBox != null && _textBox.IsEditable)
             {
                 GameActions.Rename(entity, _textBox.Text);
                 UIManager.SystemChat?.SetFocus();
