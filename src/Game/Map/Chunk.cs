@@ -413,12 +413,12 @@ namespace ClassicUO.Game.Map
 
                     for (GameObject right = obj.Right; obj != null; obj = right, right = right?.Right)
                     {
+                        RemoveGameObject(obj, i, j);
+
                         if (obj != World.Player)
                         {
                             obj.Destroy();
                         }
-
-                        obj.RemoveFromTile();
                     }
 
                     if (Tiles[i, j] != World.Player)
@@ -448,10 +448,10 @@ namespace ClassicUO.Game.Map
 
                     for (GameObject right = obj.Right; obj != null; obj = right, right = right?.Right)
                     {
+                        RemoveGameObject(obj, i, j);
+
                         if (obj != World.Player)
                             obj.Destroy();
-
-                        obj.RemoveFromTile();
                     }
 
                     if (Tiles[i, j] != World.Player)
