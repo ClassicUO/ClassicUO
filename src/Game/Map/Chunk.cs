@@ -375,7 +375,7 @@ namespace ClassicUO.Game.Map
                 obj.Right = start;
                 start.Left = obj;
                 obj.Left = null;
-                firstNode = obj;
+                //firstNode = obj;
             }
         }
 
