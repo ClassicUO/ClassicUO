@@ -59,7 +59,7 @@ namespace ClassicUO.Game.Managers
 
         public static AnchorManager AnchorManager { get; } = new AnchorManager();
 
-        public static Deque<Control> Gumps { get; } = new Deque<Control>();
+        public static LinkedList<Control> Gumps { get; } = new LinkedList<Control>();
 
         public static Control MouseOverControl { get; private set; }
 
@@ -97,11 +97,12 @@ namespace ClassicUO.Game.Managers
 
         public static bool IsModalControlOpen()
         {
-            for (int i = 0; i < Gumps.Count; i++)
+            foreach (Control control in Gumps)
             {
-                if (Gumps[i].ControlInfo.IsModal)
+                if (control.ControlInfo.IsModal)
                     return true;
             }
+
             return false;
         }
 
@@ -161,10 +162,8 @@ namespace ClassicUO.Game.Managers
             {
                 if (IsModalControlOpen())
                 {
-                    for (int i = 0; i < Gumps.Count; i++)
+                    foreach (Control s in Gumps)
                     {
-                        var s = Gumps[i];
-
                         if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
                         {
                             s.Dispose();
@@ -229,17 +228,12 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                if (IsModalControlOpen())
+                foreach (Control s in Gumps)
                 {
-                    for (int i = 0; i < Gumps.Count; i++)
+                    if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
                     {
-                        var s = Gumps[i];
-
-                        if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
-                        {
-                            s.Dispose();
-                            Mouse.CancelDoubleClick = true;
-                        }
+                        s.Dispose();
+                        Mouse.CancelDoubleClick = true;
                     }
                 }
             }
@@ -312,17 +306,12 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                if (IsModalControlOpen())
+                foreach (Control s in Gumps)
                 {
-                    for (int i = 0; i < Gumps.Count; i++)
+                    if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
                     {
-                        var s = Gumps[i];
-
-                        if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
-                        {
-                            s.Dispose();
-                            Mouse.CancelDoubleClick = true;
-                        }
+                        s.Dispose();
+                        Mouse.CancelDoubleClick = true;
                     }
                 }
             }
@@ -407,9 +396,9 @@ namespace ClassicUO.Game.Managers
                 x = pos.X;
                 y = pos.Y;
 
-                for (int i = Gumps.Count - 1; i >= 0 ; i--)
+                for (var last = Gumps.Last; last != null; last = last.Previous)
                 {
-                    var g = Gumps[i];
+                    var g = last.Value;
 
                     if (!g.IsDisposed && g.LocalSerial == sender)
                     {
@@ -850,29 +839,37 @@ namespace ClassicUO.Game.Managers
 
         public static T GetGump<T>(uint? serial = null) where T : Control
         {
-            for (int i = 0; i < Gumps.Count; i++)
+            if (serial.HasValue)
             {
-                var c = Gumps[i];
-
-                if (!c.IsDisposed && (!serial.HasValue || c.LocalSerial == serial) && c is T t)
+                for (var last = Gumps.Last; last != null; last = last.Previous)
                 {
-                    return t;
+                    var c = last.Value;
+
+                    if (!c.IsDisposed && c.LocalSerial == serial.Value && c is T t)
+                        return t;
                 }
             }
+            else
+            {
+                for (var first = Gumps.First; first != null; first = first.Next)
+                {
+                    var c = first.Value;
 
+                    if (!c.IsDisposed && c is T t)
+                        return t;
+                }
+            }
             return null;
         }
 
         public static Gump GetGump(uint serial)
         {
-            for (int i = 0; i < Gumps.Count; i++)
+            for (var last = Gumps.Last; last != null; last = last.Previous)
             {
-                var c = Gumps[i];
+                var c = last.Value;
 
                 if (!c.IsDisposed && c.LocalSerial == serial)
-                {
                     return c as Gump;
-                }
             }
 
             return null;
@@ -883,14 +880,16 @@ namespace ClassicUO.Game.Managers
         {
             SortControlsByInfo();
 
-            for (int i = 0; i < Gumps.Count; i++)
+            var first = Gumps.First;
+
+            for (var right = first.Next; first != null; first = right, right = right?.Next)
             {
-                Control g = Gumps[i];
+                Control g = first.Value;
 
                 g.Update(totalMS, frameMS);
 
                 if (g.IsDisposed)
-                    Gumps.RemoveAt(i--);
+                    Gumps.Remove(first);
             }
 
             GameCursor?.Update(totalMS, frameMS);
@@ -906,11 +905,12 @@ namespace ClassicUO.Game.Managers
 
             batcher.Begin();
 
-            for (int i = Gumps.Count - 1; i >= 0; i--)
+            for (var last = Gumps.Last; last != null; last = last.Previous)
             {
-                Control g = Gumps[i];
+                var g = last.Value;
                 g.Draw(batcher, g.X, g.Y);
             }
+
 
             GameCursor?.Draw(batcher);
 
@@ -921,7 +921,7 @@ namespace ClassicUO.Game.Managers
         {
             if (!gump.IsDisposed)
             {
-                Gumps.AddToFront(gump);
+                Gumps.AddFirst(gump);
                 _needSort = true;
             }
         }
@@ -949,9 +949,9 @@ namespace ClassicUO.Game.Managers
                 }
                 else
                 {
-                    for (int i = 0; i < Gumps.Count; i++)
+                    for (var first = Gumps.First; first != null; first = first.Next)
                     {
-                        var c = Gumps[i];
+                        var c = first.Value;
 
                         if (!c.IsDisposed && c.IsVisible && c.IsEnabled)
                         {
@@ -1025,9 +1025,9 @@ namespace ClassicUO.Game.Managers
 
             bool ismodal = IsModalControlOpen();
 
-            for (int i = 0; i < Gumps.Count; i++)
+            for (var first = Gumps.First; first != null; first = first.Next)
             {
-                var c = Gumps[i];
+                var c = first.Value;
 
                 if ((ismodal && !c.ControlInfo.IsModal) || !c.IsVisible || !c.IsEnabled)
                 {
@@ -1052,13 +1052,14 @@ namespace ClassicUO.Game.Managers
             while (c.Parent != null)
                 c = c.Parent;
 
-            for (int i = 1; i < Gumps.Count; i++)
+            var first = Gumps.First?.Next; // skip game window
+
+            for (; first != null; first = first.Next)
             {
-                if (Gumps[i] == c)
+                if (first.Value == c)
                 {
-                    Control cm = Gumps[i];
-                    Gumps.RemoveAt(i);
-                    Gumps.AddToFront(cm);
+                    Gumps.Remove(first);
+                    Gumps.AddFirst(first);
                     _needSort = true;
                 }
             }
@@ -1066,34 +1067,34 @@ namespace ClassicUO.Game.Managers
 
         public static void MakeTopMostGumpOverAnother(Control control, Control overed)
         {
-            Control c = control;
+            //Control c = control;
 
-            while (c.Parent != null)
-                c = c.Parent;
+            //while (c.Parent != null)
+            //    c = c.Parent;
 
-            Control c1 = overed;
+            //Control c1 = overed;
 
-            while (c1.Parent != null)
-                c1 = c1.Parent;
+            //while (c1.Parent != null)
+            //    c1 = c1.Parent;
 
-            int index = 0;
+            //int index = 0;
 
-            for (int i = Gumps.Count - 1; i >= 1; i--)
-            {
-                if (Gumps[i] == c)
-                {
-                    Control cm = Gumps[i];
-                    Gumps.RemoveAt(i);
+            //for (int i = Gumps.Count - 1; i >= 1; i--)
+            //{
+            //    if (Gumps[i] == c)
+            //    {
+            //        Control cm = Gumps[i];
+            //        Gumps.RemoveAt(i);
 
-                    if (index == 0)
-                        index = i;
+            //        if (index == 0)
+            //            index = i;
 
-                    Gumps.Insert(index - 1, cm);
-                    _needSort = true;
-                }
-                else if (Gumps[i] == c1)
-                    index = i;
-            }
+            //        Gumps.Insert(index - 1, cm);
+            //        _needSort = true;
+            //    }
+            //    else if (Gumps[i] == c1)
+            //        index = i;
+            //}
         }
 
 
@@ -1112,23 +1113,23 @@ namespace ClassicUO.Game.Managers
 
                     if (c.ControlInfo.Layer == UILayer.Under)
                     {
-                        for (int i = 0; i < Gumps.Count; i++)
+                        for (var first = Gumps.First; first != null; first = first.Next)
                         {
-                            if (Gumps[i] == c)
+                            if (first.Value == c)
                             {
-                                Gumps.RemoveAt(i);
-                                Gumps.Insert(under, c);
+                                Gumps.Remove(first);
+                                Gumps.AddAfter(Gumps.Last, c);
                             }
                         }
                     }
                     else if (c.ControlInfo.Layer == UILayer.Over)
                     {
-                        for (int i = 0; i < Gumps.Count; i++)
+                        for (var first = Gumps.First; first != null; first = first.Next)
                         {
-                            if (Gumps[i] == c)
+                            if (first.Value == c)
                             {
-                                Gumps.RemoveAt(i);
-                                Gumps.Insert(over++, c);
+                                Gumps.Remove(first);
+                                Gumps.AddFirst(c);
                             }
                         }
                     }
