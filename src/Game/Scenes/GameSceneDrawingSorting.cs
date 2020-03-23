@@ -100,19 +100,17 @@ namespace ClassicUO.Game.Scenes
             _noDrawRoofs = !ProfileManager.Current.DrawRoofs;
             int bx = playerX;
             int by = playerY;
-            var tile = World.Map.GetTile(bx, by, false);
+            var chunk = World.Map.GetChunk(bx, by, false);
 
-            if (tile != null)
+            if (chunk != null)
             {
+                int x = playerX % 8;
+                int y = playerY % 8;
+
                 int pz14 = playerZ + 14;
                 int pz16 = playerZ + 16;
 
-                GameObject obj = tile;
-
-                while (obj.Left != null)
-                    obj = obj.Left;
-
-                for (; obj != null; obj = obj.Right)
+                for (GameObject obj = chunk.GetHeadObject(x, y); obj != null; obj = obj.Right)
                 {
                     sbyte tileZ = obj.Z;
 
@@ -159,16 +157,14 @@ namespace ClassicUO.Game.Scenes
                 playerY++;
                 bx = playerX;
                 by = playerY;
-                tile = World.Map.GetTile(bx, by, false);
+                chunk = World.Map.GetChunk(bx, by, false);
 
-                if (tile != null)
+                if (chunk != null)
                 {
-                    GameObject obj2 = tile;
+                    x = playerX % 8;
+                    y = playerY % 8;
 
-                    while (obj2.Left != null)
-                        obj2 = obj2.Left;
-
-                    for (; obj2 != null; obj2 = obj2.Right)
+                    for (GameObject obj2 = chunk.GetHeadObject(x, y); obj2 != null; obj2 = obj2.Right)
                     {
                         //if (obj is Item it && !it.ItemData.IsRoof || !(obj is Static) && !(obj is Multi))
                         //    continue;

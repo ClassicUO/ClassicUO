@@ -1135,7 +1135,6 @@ namespace ClassicUO.Game.Managers
                     }
                 }
 
-                //_gumps.Sort((a, b) => a.ControlInfo.Layer.CompareTo(b.ControlInfo.Layer));
                 _needSort = false;
             }
         }

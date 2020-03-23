@@ -845,10 +845,10 @@ namespace ClassicUO.Game.GameObjects
 
                 if (IsHuman && !IsMounted && !IsFlying && !TestStepNoChangeDirection(this, GetGroupForAnimation(this, isParent: true)))
                 {
-                    int cellX = X % 8;
-                    int cellY = Y % 8;
+                    GameObject start = this;
 
-                    GameObject start = World.Map.GetChunk(X, Y)?.Tiles[cellX, cellY];
+                    while (start?.Left != null)
+                        start = start.Left;
 
                     while (start != null && result == 0)
                     {

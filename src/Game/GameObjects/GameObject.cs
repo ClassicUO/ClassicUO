@@ -102,29 +102,11 @@ namespace ClassicUO.Game.GameObjects
         {
             if (World.Map != null)
             {
-                int cellX = X % 8;
-                int cellY = Y % 8;
-                Chunk chunk = null;
-
-                if (Left != null || Right != null)
-                {
-                    chunk = World.Map.GetChunk(X, Y);
-                    chunk?.RemoveGameObject(this, cellX, cellY);
-                }
+                RemoveFromTile();
 
                 if (!IsDestroyed)
                 {
-                    if (X != x || Y != y)
-                    {
-                        cellX = x % 8;
-                        cellY = y % 8;
-
-                        chunk = World.Map.GetChunk(x, y);
-                    }
-                    else if (chunk == null)
-                        chunk = World.Map.GetChunk(x, y);
-
-                    chunk?.AddGameObject(this, cellX, cellY);
+                    World.Map.GetChunk(x, y)?.AddGameObject(this, x % 8, y % 8);
                 }
             }
         }
@@ -139,10 +121,14 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         public void RemoveFromTile()
         {
-            if (World.Map != null && (Left != null || Right != null))
-            {
-                World.Map.GetChunk(X, Y)?.RemoveGameObject(this, X % 8, Y % 8);
-            }
+            if (Left != null)
+                Left.Right = Right;
+
+            if (Right != null)
+                Right.Left = Left;
+
+            Right = null;
+            Left = null;
         }
 
         public virtual void UpdateGraphicBySeason()
@@ -315,10 +301,12 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return;
 
-            if (Left != null || Right != null)
-            {
-                World.Map.GetChunk(X, Y, false)?.RemoveGameObject(this, X % 8, Y % 8);
-            }
+            RemoveFromTile();
+
+            //if (Left != null || Right != null)
+            //{
+            //    World.Map.GetChunk(X, Y, false)?.RemoveGameObject(this, X % 8, Y % 8);
+            //}
 
             TextContainer?.Clear();
 

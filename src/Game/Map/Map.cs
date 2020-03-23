@@ -92,7 +92,7 @@ namespace ClassicUO.Game.Map
 
         public GameObject GetTile(short x, short y, bool load = true)
         {
-            return GetChunk(x, y, load)?.Tiles[x % 8, y % 8];
+            return GetChunk(x, y, load)?.GetHeadObject(x % 8, y % 8);
         }
 
         public GameObject GetTile(int x, int y, bool load = true)
@@ -157,14 +157,11 @@ namespace ClassicUO.Game.Map
                 return defaultZ;
 
             access = true;
-            var tile = GetTile(x, y, false);
+            var chunk = GetChunk(x, y, false);
 
-            if (tile != null)
+            if (chunk != null)
             {
-                GameObject obj = tile;
-
-                while (obj.Left != null)
-                    obj = obj.Left;
+                GameObject obj = chunk.Tiles[x % 8, y % 8];
 
                 for (; obj != null; obj = obj.Right)
                 {

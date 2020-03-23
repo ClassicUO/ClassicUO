@@ -264,9 +264,24 @@ namespace ClassicUO.Game.Map
             return ref MapLoader.Instance.GetIndex(map, X, Y);
         }
 
+        public GameObject GetHeadObject(int x, int y)
+        {
+            var obj = Tiles[x, y];
+
+            while (obj?.Left != null)
+                obj = obj.Left;
+
+            return obj;
+        }
+
         public void AddGameObject(GameObject obj, int x, int y)
         {
-            ref var firstNode = ref Tiles[x, y];
+            if (obj is PlayerMobile)
+            {
+
+            }
+
+            obj.RemoveFromTile();
 
             short priorityZ = obj.Z;
             sbyte state = -1;
@@ -331,15 +346,16 @@ namespace ClassicUO.Game.Map
 
             obj.PriorityZ = priorityZ;
 
-
-            if (firstNode == null)
+            if (Tiles[x, y] == null)
             {
-                firstNode = obj;
+                Tiles[x, y] = obj;
+                obj.Left = null;
+                obj.Right = null;
 
                 return;
             }
 
-            GameObject o = firstNode;
+            GameObject o = Tiles[x, y];
 
             while (o?.Left != null)
                 o = o.Left;
@@ -375,7 +391,6 @@ namespace ClassicUO.Game.Map
                 obj.Right = start;
                 start.Left = obj;
                 obj.Left = null;
-                //firstNode = obj;
             }
         }
 
@@ -411,28 +426,25 @@ namespace ClassicUO.Game.Map
                     if (obj == null)
                         continue;
 
-                    while (obj.Left != null)
-                        obj = obj.Left;
+                    var first = GetHeadObject(i, j);
 
-                    for (GameObject right = obj.Right; obj != null; obj = right, right = right?.Right)
+                    while (first != null)
                     {
-                        RemoveGameObject(obj, i, j);
+                        if (first != World.Player)
+                            first.Destroy();
 
-                        if (obj != World.Player)
-                        {
-                            obj.Destroy();
-                        }
+                        var next = first.Right;
+                        first.Left = null;
+                        first.Right = null;
+                        first = next;
                     }
 
-                    if (Tiles[i, j] != World.Player)
-                        Tiles[i, j]?.Destroy();
                     Tiles[i, j] = null;
                 }
             }
 
             IsDestroyed = true;
             _pool.Enqueue(this);
-            //Tiles = null;
         }
 
         public void Clear()
@@ -446,19 +458,19 @@ namespace ClassicUO.Game.Map
                     if (obj == null)
                         continue;
 
-                    while (obj.Left != null)
-                        obj = obj.Left;
+                    var first = GetHeadObject(i, j);
 
-                    for (GameObject right = obj.Right; obj != null; obj = right, right = right?.Right)
+                    while (first != null)
                     {
-                        RemoveGameObject(obj, i, j);
+                        if (first != World.Player)
+                            first.Destroy();
 
-                        if (obj != World.Player)
-                            obj.Destroy();
+                        var next = first.Right;
+                        first.Left = null;
+                        first.Right = null;
+                        first = next;
                     }
 
-                    if (Tiles[i, j] != World.Player)
-                        Tiles[i, j]?.Destroy();
                     Tiles[i, j] = null;
                 }
             }
@@ -472,12 +484,7 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    GameObject obj = Tiles[i, j];
-
-                    while (obj.Left != null)
-                        obj = obj.Left;
-
-                    for (; obj != null; obj = obj.Right)
+                    for (var obj = GetHeadObject(i, j); obj != null; obj = obj.Right)
                     {
                         if (!(obj is Land) && !(obj is Static) /*&& !(obj is Multi)*/)
                             return false;
