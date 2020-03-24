@@ -136,7 +136,7 @@ namespace ClassicUO.Network
             return _sb.ToString();
         }
 
-        public string ReadASCII(int length, bool exitIfNull = false)
+        public string ReadASCII(int length)
         {
             if (EnsureSize(length))
                 return Empty;
