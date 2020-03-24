@@ -1839,20 +1839,20 @@ namespace ClassicUO.Network
 
             var serial = p.ReadUInt();
             var pageCnt = p.ReadUShort();
-            var pages = new string[pageCnt];
             var gump = UIManager.GetGump<BookGump>(serial);
-
+           
             if (gump == null) return;
 
+            var pages = gump.BookPages;
+
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < pageCnt; i++) pages[i] = string.Empty;
 
             //packets sent from server can contain also an uneven amount of page, not counting that we could receive only part of them, not every page!
             for (int i = 0; i < pageCnt; i++, sb.Clear())
             {
-                var pageNum = p.ReadUShort() - 1;
+                var pageNum = p.ReadUShort();
 
-                if (pageNum < pageCnt)
+                if (pageNum <= pages.Length)
                 {
                     var lineCnt = p.ReadUShort();
 
@@ -1864,7 +1864,7 @@ namespace ClassicUO.Network
 
                     if (sb.Length > 0)
                         sb.Remove(sb.Length - 1, 1); //this removes the last, unwanted, newline
-                    pages[pageNum] = sb.ToString();
+                    pages[pageNum - 1] = sb.ToString();
                 }
                 else
                     Log.Error( "BOOKGUMP: The server is sending a page number GREATER than the allowed number of pages in BOOK!");
@@ -2560,6 +2560,7 @@ namespace ClassicUO.Network
                         },
                     IsEditable = editable
                 });
+                NetClient.Socket.Send(new PBookPageDataRequest(serial, 1));
             }
             else
             {

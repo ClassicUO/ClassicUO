@@ -68,25 +68,32 @@ namespace ClassicUO.Game.UI.Gumps
 
         public string[] BookPages
         {
-            get => null;
+            get
+            {
+                string[] pages = new string[BookPageCount];
+                for (int i = 0; i < pages.Length; i++) pages[i] = string.Empty;
+
+                for (int i = 0; i < m_Pages.Count; i++)
+                {
+                    pages[i] = m_Pages[i].Text;
+                }
+                return pages;
+            }
             set
             {
                 if (value != null)
                 {
                     if (_activated > 0)
                     {
-                        for (int i = 0; i < m_Pages.Count; i++)
+                        for (int i = 0; i < Math.Min(m_Pages.Count, value.Length); i++)
                         {
                             m_Pages[i].IsEditable = IsEditable;
                             m_Pages[i].Text = value[i];
                         }
-
-                        SetActivePage(ActivePage);
                     }
                     else
                     {
                         BuildGump(value);
-                        SetActivePage(1);
                     }
                 }
             }
@@ -127,6 +134,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(1);
             };
+            updatePageButtonVisibility();
 
             PageChanged = new bool[BookPageCount + 1];
             Add(BookTitle, 1);
@@ -150,6 +158,7 @@ namespace ClassicUO.Game.UI.Gumps
                     page += 1;
                 page >>= 1;
 
+                string text = k <= pages.Length ? pages[k - 1] : "";
                 MultiLineBox tbox = new MultiLineBox(new MultiLineEntry(DefaultFont, MaxBookChars * MaxBookLines, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), IsEditable)
                 {
                     X = x,
@@ -157,7 +166,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Height = 170,
                     Width = 155,
                     IsEditable = IsEditable,
-                    Text = pages[k - 1],
+                    Text = text,
                     MaxLines = 8
                 };
                 Add(tbox, page);
@@ -180,29 +189,54 @@ namespace ClassicUO.Game.UI.Gumps
             Client.Game.Scene.Audio.PlaySound(0x0055);
         }
 
-        private void SetActivePage(int page)
+        private void updatePageButtonVisibility()
         {
-            if (page <= 1)
+            if (ActivePage == 1)
             {
                 m_Backward.IsVisible = false;
                 m_Forward.IsVisible = true;
-                page = 1;
             }
-            else if (page >= MaxPage)
+            else if (ActivePage == MaxPage)
             {
                 m_Forward.IsVisible = false;
                 m_Backward.IsVisible = true;
-                page = MaxPage;
             }
             else
             {
                 m_Backward.IsVisible = true;
                 m_Forward.IsVisible = true;
             }
+        }
+
+        private void SetActivePage(int page)
+        {
+            page = Math.Min(Math.Max(page, 1), MaxPage); //clamp the value between 1..MaxPage
+            if (page <= 1)
+            {
+                page = 1;
+            }
+            else if (page >= MaxPage)
+            {
+                page = MaxPage;
+            }
+            ActivePage = page;
+            updatePageButtonVisibility();
 
             Client.Game.Scene.Audio.PlaySound(0x0055);
 
-            ActivePage = page;
+            if (!IsEditable)
+            {
+                int leftPage = (page - 1) << 1;
+                int rightPage = leftPage + 1;
+                if (leftPage > 0)
+                {
+                    NetClient.Socket.Send(new PBookPageDataRequest(LocalSerial, (ushort)leftPage));
+                }
+                if (leftPage + 1 < MaxPage * 2)
+                {
+                    NetClient.Socket.Send(new PBookPageDataRequest(LocalSerial, (ushort)rightPage));
+                }
+            }
 
             if (UIManager.KeyboardFocusControl == null || (UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl && UIManager.KeyboardFocusControl.Page != page))
             {
