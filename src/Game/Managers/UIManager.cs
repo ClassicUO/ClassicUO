@@ -397,7 +397,7 @@ namespace ClassicUO.Game.Managers
                 {
                     var g = last.Value;
 
-                    if (!g.IsDisposed && g.LocalSerial == sender)
+                    if (!g.IsDisposed && g.LocalSerial == sender && g.ServerSerial == gumpID)
                     {
                         g.Clear();
                         gump = g as Gump;
