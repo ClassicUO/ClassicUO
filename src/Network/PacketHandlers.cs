@@ -1858,7 +1858,7 @@ namespace ClassicUO.Network
 
                     for (int x = 0; x < lineCnt; x++)
                     {
-                        sb.Append(BookGump.IsNewBookD4 ? p.ReadUTF8StringSafe() : p.ReadASCII());
+                        sb.Append(BookGump.IsNewBook ? p.ReadUTF8StringSafe() : p.ReadASCII());
                         sb.Append('\n');
                     }
 
@@ -2538,7 +2538,7 @@ namespace ClassicUO.Network
                     BookPageCount = p.ReadUShort(),
                     //title allows only 47 dots (. + \0) so 47 is the right number
                     BookTitle =
-                        new MultiLineBox(new MultiLineEntry(BookGump.DefaultFont, 47, 150, 150, BookGump.IsNewBookD4, FontStyle.None, 0), editable)
+                        new MultiLineBox(new MultiLineEntry(BookGump.DefaultFont, 47, 150, 150, BookGump.IsNewBook, FontStyle.None, 0), editable)
                         {
                             X = 40,
                             Y = 60,
@@ -2549,7 +2549,7 @@ namespace ClassicUO.Network
                         },
                     //as the old booktitle supports only 30 characters in AUTHOR and since the new clients only allow 29 dots (. + \0 character at end), we use 29 as a limitation
                     BookAuthor =
-                        new MultiLineBox(new MultiLineEntry(BookGump.DefaultFont, 29, 150, 150, BookGump.IsNewBookD4, FontStyle.None, 0), editable)
+                        new MultiLineBox(new MultiLineEntry(BookGump.DefaultFont, 29, 150, 150, BookGump.IsNewBook, FontStyle.None, 0), editable)
                         {
                             X = 40,
                             Y = 160,
@@ -2558,7 +2558,8 @@ namespace ClassicUO.Network
                             IsEditable = editable,
                             Text = oldpacket ? p.ReadUTF8StringSafe(30).Trim('\0') : p.ReadUTF8StringSafe(p.ReadUShort()).Trim('\0')
                         },
-                    IsEditable = editable
+                    IsEditable = editable,
+                    UseNewHeader = !oldpacket
                 });
                 NetClient.Socket.Send(new PBookPageDataRequest(serial, 1));
             }
@@ -2570,6 +2571,7 @@ namespace ClassicUO.Network
                 bgump.BookTitle.IsEditable = editable;
                 bgump.BookAuthor.Text = oldpacket ? p.ReadASCII(30).Trim('\0') : p.ReadASCII(p.ReadUShort()).Trim('\0');
                 bgump.BookAuthor.IsEditable = editable;
+                bgump.UseNewHeader = !oldpacket;
             }
         }
 

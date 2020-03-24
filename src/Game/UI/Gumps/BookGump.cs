@@ -63,8 +63,9 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         public ushort BookPageCount { get; internal set; }
-        public static bool IsNewBookD4 => Client.Version > ClientVersion.CV_200;
-        public static byte DefaultFont => (byte) (IsNewBookD4 ? 1 : 4);
+        public static bool IsNewBook => Client.Version > ClientVersion.CV_200;
+        public bool UseNewHeader { get; set; } = true;
+        public static byte DefaultFont => (byte) (IsNewBook ? 1 : 4);
 
         public string[] BookPages
         {
@@ -134,7 +135,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(1);
             };
-            updatePageButtonVisibility();
 
             PageChanged = new bool[BookPageCount + 1];
             Add(BookTitle, 1);
@@ -159,7 +159,7 @@ namespace ClassicUO.Game.UI.Gumps
                 page >>= 1;
 
                 string text = k <= pages.Length ? pages[k - 1] : "";
-                MultiLineBox tbox = new MultiLineBox(new MultiLineEntry(DefaultFont, MaxBookChars * MaxBookLines, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), IsEditable)
+                MultiLineBox tbox = new MultiLineBox(new MultiLineEntry(DefaultFont, MaxBookChars * MaxBookLines, 0, 155, IsNewBook, FontStyle.ExtraHeight, 2), IsEditable)
                 {
                     X = x,
                     Y = y,
@@ -185,11 +185,13 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             _activated = 1;
+            ActivePage = 1;
+            UpdatePageButtonVisibility();
 
             Client.Game.Scene.Audio.PlaySound(0x0055);
         }
 
-        private void updatePageButtonVisibility()
+        private void UpdatePageButtonVisibility()
         {
             if (ActivePage == 1)
             {
@@ -220,7 +222,7 @@ namespace ClassicUO.Game.UI.Gumps
                 page = MaxPage;
             }
             ActivePage = page;
-            updatePageButtonVisibility();
+            UpdatePageButtonVisibility();
 
             Client.Game.Scene.Audio.PlaySound(0x0055);
 
@@ -264,8 +266,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (PageChanged[0])
             {
-                if (IsNewBookD4)
+                if (UseNewHeader)
                     NetClient.Socket.Send(new PBookHeader(this));
+                else if (IsNewBook)
+                    NetClient.Socket.Send(new PBookHeaderOldUTF8(this));
                 else
                     NetClient.Socket.Send(new PBookHeaderOld(this));
                 PageChanged[0] = false;
@@ -711,6 +715,22 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        internal sealed class PBookHeaderOldUTF8 : PacketWriter
+        {
+            public PBookHeaderOldUTF8(BookGump gump) : base(0x93)
+            {
+                EnsureSize(15 + 60 + 30);
+                WriteUInt(gump.LocalSerial);
+                WriteByte(gump.BookPageCount > 0 ? (byte)1 : (byte)0);
+                WriteByte(gump.BookPageCount > 0 ? (byte)1 : (byte)0);
+
+                WriteUShort(gump.BookPageCount);
+
+                WriteUTF8(gump.BookTitle.Text, 60);
+                WriteUTF8(gump.BookAuthor.Text, 30);
+            }
+        }
+
         internal sealed class PBookHeaderOld : PacketWriter
         {
             public PBookHeaderOld(BookGump gump) : base(0x93)
@@ -775,7 +795,7 @@ namespace ClassicUO.Game.UI.Gumps
                         // a page full of dots is 52 chars exactly, but in multibyte things might change in byte size!)
                         if (j < MaxBookLines)
                         {
-                            if (IsNewBookD4)
+                            if (IsNewBook)
                             {
                                 byte[] buf = Encoding.UTF8.GetBytes(splits[j]);
 
