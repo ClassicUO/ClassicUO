@@ -56,9 +56,9 @@ namespace ClassicUO.Game.Scenes
         private Point _offset, _maxTile, _minTile;
         private int _oldPlayerX, _oldPlayerY, _oldPlayerZ;
         private int _renderIndex = 1;
-        private GameObject[] _renderList = new GameObject[10000];
-        private GameObject[] _foliages = new GameObject[100];
-        private readonly GameObject[] _objectHandles = new GameObject[Constants.MAX_OBJECT_HANDLES];
+        private static GameObject[] _renderList = new GameObject[10000];
+        private static GameObject[] _foliages = new GameObject[100];
+        private static readonly GameObject[] _objectHandles = new GameObject[Constants.MAX_OBJECT_HANDLES];
         private int _renderListCount, _foliageCount;
         private readonly StaticTiles _empty;
         private sbyte _foliageIndex;
@@ -100,24 +100,25 @@ namespace ClassicUO.Game.Scenes
             _noDrawRoofs = !ProfileManager.Current.DrawRoofs;
             int bx = playerX;
             int by = playerY;
-            Tile tile = World.Map.GetTile(bx, by, false);
+            var chunk = World.Map.GetChunk(bx, by, false);
 
-            if (tile != null)
+            if (chunk != null)
             {
+                int x = playerX % 8;
+                int y = playerY % 8;
+
                 int pz14 = playerZ + 14;
                 int pz16 = playerZ + 16;
 
-                GameObject obj = tile.FirstNode;
-
-                while (obj.Left != null)
-                    obj = obj.Left;
-
-                for (; obj != null; obj = obj.Right)
+                for (GameObject obj = chunk.GetHeadObject(x, y); obj != null; obj = obj.Right)
                 {
                     sbyte tileZ = obj.Z;
 
-                    if (obj is Land)
+                    if (obj is Land l)
                     {
+                        if (l.IsStretched)
+                            tileZ = l.AverageZ;
+
                         if (pz16 <= tileZ)
                         {
                             maxGroundZ = (sbyte) pz16;
@@ -156,16 +157,14 @@ namespace ClassicUO.Game.Scenes
                 playerY++;
                 bx = playerX;
                 by = playerY;
-                tile = World.Map.GetTile(bx, by, false);
+                chunk = World.Map.GetChunk(bx, by, false);
 
-                if (tile != null)
+                if (chunk != null)
                 {
-                    GameObject obj2 = tile.FirstNode;
+                    x = playerX % 8;
+                    y = playerY % 8;
 
-                    while (obj2.Left != null)
-                        obj2 = obj2.Left;
-
-                    for (; obj2 != null; obj2 = obj2.Right)
+                    for (GameObject obj2 = chunk.GetHeadObject(x, y); obj2 != null; obj2 = obj2.Right)
                     {
                         //if (obj is Item it && !it.ItemData.IsRoof || !(obj is Static) && !(obj is Multi))
                         //    continue;
@@ -242,11 +241,11 @@ namespace ClassicUO.Game.Scenes
 
         private void ApplyFoliageTransparency(ushort graphic, int x, int y, int z)
         {
-            Tile tile = World.Map.GetTile(x, y);
+            var tile = World.Map.GetTile(x, y);
 
             if (tile != null)
             {
-                for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+                for (GameObject obj = tile; obj != null; obj = obj.Right)
                 {
                     ushort testGraphic = obj.Graphic;
 
@@ -610,7 +609,7 @@ namespace ClassicUO.Game.Scenes
                 var tile = World.Map.GetTile(x, y);
 
                 if (tile != null)
-                    AddTileToRenderList(tile.FirstNode, x, y, useObjectHandles, currentMaxZ);
+                    AddTileToRenderList(tile, x, y, useObjectHandles, currentMaxZ);
             }
 
             /*int area = 2;

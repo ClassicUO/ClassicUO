@@ -20,6 +20,8 @@
 #endregion
 
 
+using System.Diagnostics;
+
 namespace ClassicUO.Utility.Logging
 {
     internal class Log
@@ -51,6 +53,7 @@ namespace ClassicUO.Utility.Logging
             _logger.LogTypes = LogTypes.None;
         }
 
+        [Conditional("DEBUG")]
         public static void Debug(string text)
         {
             _logger.Message(LogTypes.Debug, text);

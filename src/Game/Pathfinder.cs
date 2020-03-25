@@ -75,7 +75,7 @@ namespace ClassicUO.Game
 
         private static bool CreateItemList(List<PathObject> list, int x, int y, int stepState)
         {
-            Tile tile = World.Map.GetTile(x, y, false);
+            var tile = World.Map.GetTile(x, y, false);
 
             if (tile == null)
                 return false;
@@ -83,7 +83,7 @@ namespace ClassicUO.Game
             bool ignoreGameCharacters = IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Map.Index == 0);
             bool isGM = World.Player.Graphic == 0x03DB;
 
-            GameObject obj = tile.FirstNode;
+            GameObject obj = tile;
 
             while (obj.Left != null)
                 obj = obj.Left;

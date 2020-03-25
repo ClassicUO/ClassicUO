@@ -91,8 +91,7 @@ namespace ClassicUO.Game.GameObjects
                 return Math.Max(Math.Abs(x - fx), Math.Abs(y - fy));
             }
         }
-        public Tile Tile { get; private set; }
-    
+
 
         public virtual void Update(double totalMS, double frameMS)
         {
@@ -103,12 +102,11 @@ namespace ClassicUO.Game.GameObjects
         {
             if (World.Map != null)
             {
-                Tile?.RemoveGameObject(this);
+                RemoveFromTile();
 
                 if (!IsDestroyed)
                 {
-                    Tile = World.Map.GetTile(x, y);
-                    Tile?.AddGameObject(this);
+                    World.Map.GetChunk(x, y)?.AddGameObject(this, x % 8, y % 8);
                 }
             }
         }
@@ -119,29 +117,18 @@ namespace ClassicUO.Game.GameObjects
             AddToTile(X, Y);
         }
 
-        [MethodImpl(256)]
-        public void AddToTile(Tile tile)
-        {
-            if (World.Map != null)
-            {
-                Tile?.RemoveGameObject(this);
-
-                if (!IsDestroyed)
-                {
-                    Tile = tile;
-                    Tile?.AddGameObject(this);
-                }
-            }
-        }
-
+      
         [MethodImpl(256)]
         public void RemoveFromTile()
         {
-            if (World.Map != null && Tile != null)
-            {
-                Tile.RemoveGameObject(this);
-                Tile = null;
-            }
+            if (Left != null)
+                Left.Right = Right;
+
+            if (Right != null)
+                Right.Left = Left;
+
+            Right = null;
+            Left = null;
         }
 
         public virtual void UpdateGraphicBySeason()
@@ -314,8 +301,12 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return;
 
-            Tile?.RemoveGameObject(this);
-            Tile = null;
+            RemoveFromTile();
+
+            //if (Left != null || Right != null)
+            //{
+            //    World.Map.GetChunk(X, Y, false)?.RemoveGameObject(this, X % 8, Y % 8);
+            //}
 
             TextContainer?.Clear();
 

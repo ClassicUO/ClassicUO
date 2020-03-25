@@ -198,24 +198,25 @@ namespace ClassicUO.Network
                 WriteUShort(0x00);
             }
 
-            if (Client.Version >= ClientVersion.CV_70160)
-            {
-                ushort location = (ushort) cityIndex;
+            WriteUShort((ushort) cityIndex);
+            WriteUShort(0x0000);
+            WriteUShort((ushort) slot);
 
-                WriteUShort(location);
-                WriteUShort(0x0000);
-                WriteUShort((ushort) slot);
-            }
-            else
-            {
-                WriteByte((byte) serverIndex);
-                if (Client.Version < ClientVersion.CV_70130 && cityIndex > 0)
-                    cityIndex--;
+            //if (Client.Version >= ClientVersion.CV_70160)
+            //{
+            //    WriteUShort((ushort) cityIndex);
+            //    WriteUShort(0x0000);
+            //    WriteUShort((ushort) slot);
+            //}
+            //else
+            //{
+            //    WriteByte((byte) serverIndex);
+            //    if (Client.Version < ClientVersion.CV_70130 && cityIndex > 0)
+            //        cityIndex--;
 
-                WriteByte((byte) cityIndex);
-                WriteUInt(slot);
-
-            }
+            //    WriteByte((byte) cityIndex);
+            //    WriteUInt(slot);
+            //}
 
             WriteUInt(clientIP);
 
@@ -453,7 +454,7 @@ namespace ClassicUO.Network
             }
             else
             {
-                WriteUnicode(text, 14 + text.Length * 2);
+                WriteUnicode(text);
             }
         }
     }
@@ -726,7 +727,10 @@ namespace ClassicUO.Network
             WriteBytes(MessageManager.PromptData.Data, 0, 8);
             WriteUInt((uint) (cancel ? 0 : 1));
             WriteASCII(lang, 3);
-            WriteUnicode(text);
+            WriteUnicode(text, text.Length);
+            //This must be terminated with EXACTLY one null byte, unlike most unicode-containing packets which are terminated with two.
+            //Some servers are fussy about this and will reject the packet otherwise!
+            WriteByte(0x00);
         }
     }
 
@@ -1131,11 +1135,14 @@ namespace ClassicUO.Network
     {
         public PMegaClilocRequest(ref List<uint> list) : base(0xD6)
         {
-            for (int i = 0; i < list.Count && i < 50; i++)
+            int count = Math.Min(15, list.Count);
+
+            for (int i = 0; i < count; i++)
             {
                 WriteUInt(list[i]);
-                list.RemoveAt(i--);
             }
+
+            list.RemoveRange(0, count);
         }
 
         public PMegaClilocRequest(uint serial) : base(0xD6)

@@ -144,14 +144,15 @@ namespace ClassicUO.Renderer
                 {
                     if (!spriteFont.DefaultCharacter.HasValue)
                     {
-                        throw new ArgumentException(
-                                                    "Text contains characters that cannot be" +
-                                                    " resolved by this SpriteFont.",
-                                                    "text"
-                                                   );
+                        index = characterMap.IndexOf('?');
+                        //throw new ArgumentException(
+                        //                            "Text contains characters that cannot be" +
+                        //                            " resolved by this SpriteFont.",
+                        //                            "text"
+                        //                           );
                     }
-
-                    index = characterMap.IndexOf(
+                    else 
+                        index = characterMap.IndexOf(
                                                  spriteFont.DefaultCharacter.Value
                                                 );
                 }
@@ -298,7 +299,15 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(256)]
-        public bool DrawSpriteLand(Texture2D texture, int x, int y, ref Rectangle rect, ref Vector3[] normals, ref Vector3 hue)
+        public bool DrawSpriteLand(Texture2D texture, 
+                                   int x, int y,
+                                   ref Rectangle rect,
+                                   ref Vector3 normal0,
+                                   ref Vector3 normal1,
+                                   ref Vector3 normal2,
+                                   ref Vector3 normal3,
+                                   
+                                   ref Vector3 hue)
         {
             EnsureSize();
 
@@ -318,10 +327,10 @@ namespace ClassicUO.Renderer
             vertex.TextureCoordinate3.Z = 0;
 
 
-            vertex.Normal0 = normals[0];
-            vertex.Normal1 = normals[1];
-            vertex.Normal3 = normals[2]; // right order!
-            vertex.Normal2 = normals[3];
+            vertex.Normal0 = normal0;
+            vertex.Normal1 = normal1;
+            vertex.Normal3 = normal2; // right order!
+            vertex.Normal2 = normal3;
 
             vertex.Position0.X = x + 22;
             vertex.Position0.Y = y - rect.Left;

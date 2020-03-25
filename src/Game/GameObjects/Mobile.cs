@@ -30,6 +30,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
@@ -114,12 +115,17 @@ namespace ClassicUO.Game.GameObjects
                 mobile.DrawTransparent = false;
                 mobile.AllowedToDraw = true;
                 mobile.Texture = null;
+                mobile.IsClicked = false;
 
                 if (mobile.Items == null || mobile.Items.Count != 0)
                     mobile.Items = new EntityCollection<Item>();
 
                 mobile.CalculateRandomIdleTime();
+
+                return mobile;
             }
+
+            Log.Debug(string.Intern("Created new Mobile"));
 
             return new Mobile(serial);
         }
@@ -400,7 +406,7 @@ namespace ClassicUO.Game.GameObjects
 
                 ANIMATION_FLAGS flags = AnimationsLoader.Instance.DataIndex[graphic].Flags;
                 ANIMATION_GROUPS animGroup = ANIMATION_GROUPS.AG_NONE;
-
+                
                 bool isLowExtended = false;
                 bool isLow = false;
 
@@ -468,7 +474,16 @@ namespace ClassicUO.Game.GameObjects
                 AnimationGroup = _animationIdle[(byte)animGroup - 1, RandomHelper.GetValue(0, 2)];
 
                 if (isLowExtended && AnimationGroup == 18)
-                    AnimationGroup = 1;
+                {
+                    if (!AnimationsLoader.Instance.AnimationExists(graphic, 18) && AnimationsLoader.Instance.AnimationExists(graphic, 17))
+                    {
+                        AnimationGroup = GetReplacedObjectAnimation(graphic, 17);
+                    }
+                    else
+                    {
+                        AnimationGroup = 1;
+                    }
+                }
             }
         }
 
@@ -828,9 +843,12 @@ namespace ClassicUO.Game.GameObjects
             {
                 int result = 0;
 
-                if (IsHuman && !IsMounted && !IsFlying && !TestStepNoChangeDirection(this, GetGroupForAnimation(this, isParent: true)) && Tile != null)
+                if (IsHuman && !IsMounted && !IsFlying && !TestStepNoChangeDirection(this, GetGroupForAnimation(this, isParent: true)))
                 {
-                    GameObject start = Tile.FirstNode;
+                    GameObject start = this;
+
+                    while (start?.Left != null)
+                        start = start.Left;
 
                     while (start != null && result == 0)
                     {

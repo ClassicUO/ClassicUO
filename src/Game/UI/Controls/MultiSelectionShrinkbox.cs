@@ -32,40 +32,32 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class MultiSelectionShrinkbox : Control
     {
-        private readonly GumpPic _arrow;
         private readonly int _buttongroup;
         private readonly ushort _buttonimg;
-
-        private readonly EditableLabel _label;
-        //private readonly Label _label;
+        private readonly Label _label;
         //this particular list will be used when inside a scroll area or similar situations where you want to nest a multi selection shrinkbox inside another one,
         //so that when the parent is deactivated, all the child will be made non visible
         private readonly List<MultiSelectionShrinkbox> _nestedBoxes = new List<MultiSelectionShrinkbox>();
-
+        private readonly GumpPic _arrow;
+        private NiceButton[] _buttons;
         private readonly bool _useArrow2;
-        //private NiceButton[] _buttons;
         private int[] _correspondence;
-        private readonly GumpPicTiled _decoration;
+        private string[] _items;
         private bool _opened;
-        //private GumpPic[] _pics;
+        private GumpPic[] _pics;
         private int _selectedIndex;
 
-        public MultiSelectionShrinkbox(int x, int y, int width, string indextext, Control[] items, ushort hue = 0x0453, bool unicode = false, byte font = 9, int group = 0, ushort button = 0, bool useArrow2 = false) : this(x, y, width, indextext, hue, unicode, font, group, button, useArrow2)
+        public MultiSelectionShrinkbox(int x, int y, int width, string indextext, string[] items, ushort hue = 0x0453, bool unicode = false, byte font = 9, int group = 0, ushort button = 0, bool useArrow2 = false) : this(x, y, width, indextext, hue, unicode, font, group, button, useArrow2)
         {
             SetItemsValue(items);
         }
 
-        public MultiSelectionShrinkbox(int x, int y, int width, string indextext, Dictionary<int, Control> items, ushort hue = 0x0453, bool unicode = false, byte font = 9, int group = 0, ushort button = 0, bool useArrow2 = false) : this(x, y, width, indextext, hue, unicode, font, group, button, useArrow2)
+        public MultiSelectionShrinkbox(int x, int y, int width, string indextext, Dictionary<int, string> items, ushort hue = 0x0453, bool unicode = false, byte font = 9, int group = 0, ushort button = 0, bool useArrow2 = false) : this(x, y, width, indextext, hue, unicode, font, group, button, useArrow2)
         {
             SetItemsValue(items);
         }
 
-        public MultiSelectionShrinkbox(int x, int y, int width, string text, ushort hue, byte font, bool unicode,
-                                       bool userArrow2 = false) : this(x, y, width, text, hue, unicode, font, 0, 0, userArrow2)
-        {
-        }
-
-        private MultiSelectionShrinkbox(int x, int y, int width, string indextext, ushort hue, bool unicode, byte font, int group, ushort button, bool userArrow2)
+        private MultiSelectionShrinkbox(int x, int y, int width, string indextext, ushort hue, bool unicode, byte font, int group, ushort button, bool userArrow2 = false)
         {
             WantUpdateSize = false;
             X = x;
@@ -75,64 +67,19 @@ namespace ClassicUO.Game.UI.Controls
             Width = width;
             _useArrow2 = userArrow2;
 
-
-            //_label = new Label(indextext, unicode, hue, font: font, align: TEXT_ALIGN_TYPE.TS_LEFT)
-            //{
-            //    X = 18,
-            //    Y = 0
-            //};
-
-
-            //_label = new TextBox(font, 32, maxWidth: width, width: width, isunicode: unicode, hue: hue)
-            //{
-            //    X = 18,
-            //    Y = 0,
-            //    Width = tw,
-            //    Height = th,
-            //    IsEditable = false,
-            //    Text = indextext
-            //};
-
-            _label = new EditableLabel(indextext, font, hue, unicode, width, FontStyle.None)
+            Add(_label = new Label(indextext, unicode, hue, font: font, align: TEXT_ALIGN_TYPE.TS_LEFT)
             {
                 X = 18
-            };
-
-            _label.MouseUp += (senderr, e) =>
-            {
-                if (!IsEditable)
-                    return;
-
-                EditStateStart.Raise(_label);
-
-                _label.SetEditable(true);
-            };
-
-            int xx = _label.X + _label.Width + 5;
-            int hh = GumpsLoader.Instance.GetTexture(0x0835)?.Height ?? 0;
-            int decWidth = width - xx - 10;
-
-            if (decWidth < 0)
-                decWidth = 0;
-            _decoration = new GumpPicTiled(xx, (_label.Height >> 1) - (hh >> 1), decWidth, hh, 0x0835);
-
-            Add(_decoration);
-            Add(_label);
+            });
             Height = _label.Height;
 
-
-            Add(_arrow = new GumpPic(1, 1, (ushort) (userArrow2 ? 0x0827 : 0x15E1), 0) {ContainsByBounds = true});
+            Add(_arrow = new GumpPic(1, 1, (ushort)(userArrow2 ? 0x0827 : 0x15E1), 0));
 
             _arrow.MouseUp += (sender, state) =>
             {
                 if (state.Button == MouseButtonType.Left) Opened = !_opened;
             };
         }
-
-
-        public string LabelText => _label.Text;
-
-        public bool IsEditing => _label.GetEditable();
 
         internal bool Opened
         {
@@ -167,8 +114,6 @@ namespace ClassicUO.Game.UI.Controls
                             msb.IsVisible = false;
                             msb.OnPageChanged();
                         }
-
-                        foreach (Control control in Items) control.IsVisible = false;
                     }
 
                     Parent?.OnPageChanged();
@@ -183,41 +128,13 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _selectedIndex = value;
 
-                if (Items != null && _selectedIndex >= 0 && _selectedIndex < Items.Count) OnOptionSelected?.Invoke(this, value);
+                if (_items != null && _selectedIndex >= 0 && _selectedIndex < _items.Length) OnOptionSelected?.Invoke(this, value);
             }
         }
 
         public int SelectedItem => _correspondence != null && _selectedIndex >= 0 && _selectedIndex < _correspondence.Length ? _correspondence[_selectedIndex] : _selectedIndex;
 
-        internal uint GetItemsLength => (uint) Items.Count;
-
-        public List<Control> Items { get; private set; }
-
-        public event EventHandler<EditableLabel> EditStateStart, EditStateEnd;
-
-        public override void OnKeyboardReturn(int textID, string text)
-        {
-            if (_label.GetEditable())
-            {
-                _label.SetEditable(false);
-
-                _decoration.X = _label.X + _label.Width + 5;
-                _decoration.Width = Width - 10 - _decoration.X;
-
-                if (_decoration.Width < 0)
-                    _decoration.Width = 0;
-
-                EditStateEnd.Raise(_label);
-            }
-
-            base.OnKeyboardReturn(textID, text);
-        }
-
-        public void SetEditableLabelState(bool edit)
-        {
-            if (IsEditable)
-                _label.IsEditable = edit;
-        }
+        internal uint GetItemsLength => (uint)_items.Length;
 
         internal bool NestBox(MultiSelectionShrinkbox box)
         {
@@ -246,159 +163,126 @@ namespace ClassicUO.Game.UI.Controls
             return false;
         }
 
-
-        public void AddItem(Control t, int index = -1)
+        internal void SetItemsValue(string[] items)
         {
-            t.IsVisible = Opened;
-            Add(t);
-
-            if (index >= 0 && index < Items.Count)
-                Items.Insert(index, t);
-            else
-                Items.Add(t);
-
-
-            if (_opened)
-                GenerateButtons();
-            _arrow.IsVisible = Items.Count > 0 || _nestedBoxes.Count > 0;
-        }
-
-        public override void Remove(Control c)
-        {
-            Items.Remove(c);
-
-            base.Remove(c);
-
-            if (_opened)
-                GenerateButtons();
-            _arrow.IsVisible = Items.Count > 0 || _nestedBoxes.Count > 0;
-        }
-
-        internal void SetItemsValue(Control[] items)
-        {
-            Items = items.ToList();
+            _items = items;
             _correspondence = null;
 
             if (_opened)
                 GenerateButtons();
             _arrow.IsVisible = items.Length > 0 || _nestedBoxes.Count > 0;
-
-            Items.ForEach(s =>
-            {
-                s.IsVisible = false;
-                Add(s);
-            });
         }
 
-        internal void SetItemsValue(Dictionary<int, Control> items)
+        internal void SetItemsValue(Dictionary<int, string> items)
         {
-            Items = items.Select(o => o.Value).ToList();
+            _items = items.Select(o => o.Value).ToArray();
             _correspondence = items.Select(o => o.Key).ToArray();
-
-            Items.ForEach(s =>
-            {
-                s.IsVisible = false;
-                Add(s);
-            });
 
             if (_opened)
                 GenerateButtons();
             _arrow.IsVisible = items.Count > 0 || _nestedBoxes.Count > 0;
         }
 
-        public void GenerateButtons()
+        private void GenerateButtons()
         {
-            if (!_opened)
-                return;
+            ClearButtons();
+            _buttons = new NiceButton[_items.Length];
 
-            //ClearButtons();
-            //_buttons = new NiceButton[_items.Length];
-
-            //if (_buttonimg > 0)
-            //    _pics = new GumpPic[_items.Length];
+            if (_buttonimg > 0)
+                _pics = new GumpPic[_items.Length];
 
             var index = 0;
-            //int width = 0;
+            int width = 0;
             int height = 0;
             int lh = _label.Height + 2;
 
-            //foreach (var item in _items)
-            //{
-            //    int w, h;
-
-            //    w = item.Width;
-            //    h = item.Height;
-            //    height = h + 2;
-
-
-            //    //if (_label.Unicode)
-            //    //    w = FileManager.Fonts.GetWidthUnicode(_label.Font, item);
-            //    //else
-            //    //    w = FileManager.Fonts.GetWidthASCII(_label.Font, item);
-
-            //    //if (w > width)
-            //    //{
-            //    //    if (_label.Unicode)
-            //    //        h = FileManager.Fonts.GetHeightUnicode(_label.Font, item, w, TEXT_ALIGN_TYPE.TS_LEFT, 0x0);
-            //    //    else
-            //    //        h = FileManager.Fonts.GetHeightASCII(_label.Font, item, w, TEXT_ALIGN_TYPE.TS_LEFT, 0x0);
-            //    //    width = w;
-            //    //    height = h + 2;
-            //    //}
-            //}
-
-            foreach (Control control in Items)
+            foreach (string item in _items)
             {
-                control.IsVisible = true;
-                control.X = 6;
-                control.Y = height + lh;
-                height += control.Height;
+                int w, h;
 
+                if (_label.Unicode)
+                    w = FontsLoader.Instance.GetWidthUnicode(_label.Font, item);
+                else
+                    w = FontsLoader.Instance.GetWidthASCII(_label.Font, item);
+
+                if (w > width)
+                {
+                    if (_label.Unicode)
+                        h = FontsLoader.Instance.GetHeightUnicode(_label.Font, item, w, TEXT_ALIGN_TYPE.TS_LEFT, 0x0);
+                    else
+                        h = FontsLoader.Instance.GetHeightASCII(_label.Font, item, w, TEXT_ALIGN_TYPE.TS_LEFT, 0x0);
+                    width = w;
+                    height = h + 2;
+                }
+            }
+
+            foreach (var item in _items)
+            {
+                var but = new NiceButton(20, index * height + lh, width, height, ButtonAction.Activate, item, _buttongroup, TEXT_ALIGN_TYPE.TS_LEFT) { Tag = index };
+                if (_buttonimg > 0) Add(_pics[index] = new GumpPic(6, index * height + lh + 2, _buttonimg, 0));
+                but.MouseUp += Selection_MouseClick;
+                _buttons[index] = but;
+                Add(but);
                 index++;
             }
 
-            //foreach (var item in _items)
-            //{
-            //    var but = new NiceButton(20, index * height + lh, width, height, ButtonAction.Activate, item, _buttongroup, TEXT_ALIGN_TYPE.TS_LEFT) {Tag = index};
-            //    if (_buttonimg > 0)
-            //        Add(_pics[index] = new GumpPic(6, index * height + lh + 2, _buttonimg, 0));
-            //    but.MouseClick += Selection_MouseClick;
-            //    _buttons[index] = but;
-            //    Add(but);
-            //    index++;
-            //}
+            var totalHeight = _buttons.Length > 0 ? _buttons.Sum(o => o.Height) + lh : lh;
 
-            var totalHeight = Items.Sum(o => o.Height);
-
-            Height = totalHeight + lh;
+            Height = totalHeight;
 
             Parent.WantUpdateSize = true;
         }
 
         private void ClearButtons()
         {
-            //if (_buttons != null)
-            //{
-            //    for (int i = _buttons.Length - 1; i >= 0; --i)
-            //    {
-            //        _buttons[i]?.Dispose();
-            //        _buttons[i] = null;
-            //    }
-            //}
+            if (_buttons != null)
+            {
+                for (int i = _buttons.Length - 1; i >= 0; --i)
+                {
+                    _buttons[i]?.Dispose();
+                    _buttons[i] = null;
+                }
+            }
 
-            //if (_pics != null)
-            //{
-            //    for (int i = _pics.Length - 1; i >= 0; --i)
-            //    {
-            //        _pics[i]?.Dispose();
-            //        _pics[i] = null;
-            //    }
-            //}
+            if (_pics != null)
+            {
+                for (int i = _pics.Length - 1; i >= 0; --i)
+                {
+                    _pics[i]?.Dispose();
+                    _pics[i] = null;
+                }
+            }
         }
 
         private void Selection_MouseClick(object sender, MouseEventArgs e)
         {
-            SelectedIndex = (int) ((Control) sender).Tag;
+            SelectedIndex = (int)((Control)sender).Tag;
+            if (_buttongroup > 0)
+                OnGroupSelection();
+        }
+
+        private void OnGroupSelection()
+        {
+            if (Parent != null && Parent.Parent is ScrollArea area)
+            {
+                foreach (Control sai in area.Children)
+                {
+                    if (sai is ScrollAreaItem)
+                    {
+                        foreach (Control c in sai.Children)
+                        {
+                            if (c is MultiSelectionShrinkbox msb && msb._buttongroup == _buttongroup && msb != this && msb._buttons != null)
+                            {
+                                foreach (NiceButton button in msb._buttons)
+                                {
+                                    if(button != null)
+                                        button.IsSelected = false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public event EventHandler<int> OnOptionSelected;

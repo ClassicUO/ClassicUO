@@ -22,6 +22,7 @@
 using System.Xml;
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
@@ -33,6 +34,9 @@ namespace ClassicUO.Game.UI.Gumps
     {
         public RacialAbilityButton(ushort graphic) : this()
         {
+            LocalSerial = (uint) (7000 + graphic);
+            UIManager.GetGump<RacialAbilityButton>(LocalSerial)?.Dispose();
+
             Graphic = graphic;
             BuildGump();
         }

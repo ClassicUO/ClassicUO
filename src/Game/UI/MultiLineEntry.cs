@@ -36,10 +36,6 @@ namespace ClassicUO.Game.UI
 
         public int MaxLines { get; internal set; }
 
-        protected virtual void OnTextChanged()
-        {
-        }
-
         public string InsertString(string c)
         {
             if (CaretIndex < 0)

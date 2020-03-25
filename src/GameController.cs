@@ -22,6 +22,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 using ClassicUO.Configuration;
@@ -131,6 +132,7 @@ namespace ClassicUO
             base.UnloadContent();
         }
 
+        [MethodImpl(256)]
         public T GetScene<T>() where T : Scene
         {
             return _scene as T;
@@ -626,6 +628,7 @@ namespace ClassicUO
                                     if (!_scene.OnMiddleMouseDoubleClick())
                                     {
                                         _scene.OnMiddleMouseDown();
+                                        UIManager.OnMiddleMouseButtonDown();
                                     }
 
                                     break;
@@ -634,10 +637,19 @@ namespace ClassicUO
                                 Plugin.ProcessMouse(e.button.button, 0);
 
                                 _scene.OnMiddleMouseDown();
+                                UIManager.OnMiddleMouseButtonDown();
+
                                 Mouse.LastMidButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
                             else
                             {
+                                if (Mouse.LastMidButtonClickTime != 0xFFFF_FFFF)
+                                {
+                                    if (!UIManager.HadMouseDownOnGump(MouseButtonType.Middle))
+                                        _scene.OnMiddleMouseUp();
+                                    UIManager.OnMiddleMouseButtonUp();
+                                }
+
                                 Mouse.MButtonPressed = false;
                                 Mouse.End();
                             }

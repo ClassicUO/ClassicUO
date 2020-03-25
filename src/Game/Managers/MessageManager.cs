@@ -115,6 +115,7 @@ namespace ClassicUO.Game.Managers
                 case MessageType.Yell:
                 case MessageType.Regular:
                 case MessageType.Label:
+                case MessageType.Limit3Spell:
 
                     if (parent == null)
                         break;
@@ -127,66 +128,48 @@ namespace ClassicUO.Game.Managers
                         msg.X = Mouse.LastClickPosition.X;
                         msg.Y = Mouse.LastClickPosition.Y;
 
-                        Gump gump = UIManager.GetGump<Gump>(it.Container);
+                        bool found = false;
 
-                        if (gump is PaperDollGump paperDoll)
+                        for (var gump = UIManager.Gumps.Last; gump != null; gump = gump.Previous)
                         {
-                            msg.X -= paperDoll.ScreenCoordinateX;
-                            msg.Y -= paperDoll.ScreenCoordinateY;
-                            paperDoll.AddText(msg);
-                        }
-                        else if (gump is ContainerGump container)
-                        {
-                            msg.X -= container.ScreenCoordinateX;
-                            msg.Y -= container.ScreenCoordinateY;
-                            container.AddText(msg);
-                        }
-                        else
-                        {
-                            Entity ent = World.Get(it.RootContainer);
+                            var g = gump.Value;
 
-                            if (ent == null || ent.IsDestroyed)
+                            if (!g.IsDisposed)
+                            {
+                                switch (g)
+                                {
+                                    case PaperDollGump paperDoll when g.LocalSerial == it.Container:
+                                        msg.X -= paperDoll.ScreenCoordinateX;
+                                        msg.Y -= paperDoll.ScreenCoordinateY;
+                                        paperDoll.AddText(msg);
+                                        found = true;
+                                        break;
+                                    case ContainerGump container when g.LocalSerial == it.Container:
+                                        msg.X -= container.ScreenCoordinateX;
+                                        msg.Y -= container.ScreenCoordinateY;
+                                        container.AddText(msg);
+                                        found = true;
+                                        break;
+                                    case TradingGump trade when g.LocalSerial == it.Container || trade.ID1 == it.Container || trade.ID2 == it.Container:
+                                        msg.X -= trade.ScreenCoordinateX;
+                                        msg.Y -= trade.ScreenCoordinateY;
+                                        trade.AddText(msg);
+                                        found = true;
+                                        break;
+                                }
+                            }
+
+                            if (found)
                                 break;
-
-                            var trade = UIManager.GetGump<TradingGump>(ent);
-
-                            if (trade == null)
-                            {
-                                Item item = ent.Items.FirstOrDefault(s => s.Graphic == 0x1E5E);
-
-                                if (item == null)
-                                    break;
-
-                                trade = UIManager.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == item || s.ID2 == item);
-                            }
-
-                            if (trade != null)
-                            {
-                                msg.X -= trade.ScreenCoordinateX;
-                                msg.Y -= trade.ScreenCoordinateY;
-                                trade.AddText(msg);
-                            }
-                            else
-                                Log.Warn( "Missing label handler for this control: 'UNKNOWN'. Report it!!");
                         }
                     }
 
                     parent.AddMessage(msg);
 
                     break;
-
-                case MessageType.Emote:
-                    if (parent == null)
-                        break;
-
-                    msg = CreateMessage($"*{text}*", hue, font, unicode, type);
-
-                    parent.AddMessage(msg);
-
-                    break;
+      
 
                 case MessageType.Command:
-
                 case MessageType.Encoded:
                 case MessageType.System:
                 case MessageType.Party:

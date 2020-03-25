@@ -32,6 +32,7 @@ namespace ClassicUO.Game.Managers
     {
         private static readonly Dictionary<string, Action<string[]>> _commands = new Dictionary<string, Action<string[]>>();
 
+        public static byte GROUP = 0;
 
         public static void Initialize()
         {
@@ -56,6 +57,13 @@ namespace ClassicUO.Game.Managers
                     TargetManager.SetTargeting(CursorTarget.HueCommandTarget, CursorType.Target, TargetType.Neutral);
                 else
                     TargetManager.CancelTarget();
+            });
+            Register("change_anim", s =>
+            {
+                if (s.Length > 1 && byte.TryParse(s[1], out GROUP))
+                {
+
+                }
             });
         }
 

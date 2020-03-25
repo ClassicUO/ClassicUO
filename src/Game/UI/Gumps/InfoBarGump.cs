@@ -219,19 +219,19 @@ namespace ClassicUO.Game.UI.Gumps
             switch (var)
             {
                 case InfoBarVars.HP:
-                    return World.Player.Hits + "/" + World.Player.HitsMax;
+                    return $"{World.Player.Hits}/{World.Player.HitsMax}";
                 case InfoBarVars.Mana:
-                    return World.Player.Mana + "/" + World.Player.ManaMax;
+                    return $"{World.Player.Mana}/{World.Player.ManaMax}";
                 case InfoBarVars.Stamina:
-                    return World.Player.Stamina + "/" + World.Player.StaminaMax;
+                    return $"{World.Player.Stamina}/{World.Player.StaminaMax}";
                 case InfoBarVars.Weight:
-                    return World.Player.Weight + "/" + World.Player.WeightMax;
+                    return $"{World.Player.Weight}/{World.Player.WeightMax}";
                 case InfoBarVars.Followers:
-                    return World.Player.Followers + "/" + World.Player.FollowersMax;
+                    return $"{World.Player.Followers}/{World.Player.FollowersMax}";
                 case InfoBarVars.Gold:
                     return World.Player.Gold.ToString();
                 case InfoBarVars.Damage:
-                    return World.Player.DamageMin + "-" + World.Player.DamageMax;
+                    return $"{World.Player.DamageMin}-{World.Player.DamageMax}";
                 case InfoBarVars.Armor:
                     return World.Player.PhysicalResistance.ToString();
                 case InfoBarVars.Luck:
@@ -266,6 +266,8 @@ namespace ClassicUO.Game.UI.Gumps
                     return World.Player.StatsCap.ToString();
                 case InfoBarVars.NameNotoriety:
                     return World.Player.Name;
+                case InfoBarVars.TithingPoints:
+                    return World.Player.TithingPoints.ToString();
                 default:
                     return "";
             }

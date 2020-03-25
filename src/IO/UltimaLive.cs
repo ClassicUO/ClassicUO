@@ -195,7 +195,7 @@ namespace ClassicUO.IO
                             {
                                 for (int y = 0; y < 8; y++)
                                 {
-                                    GameObject obj = chunk.Tiles[x, y].FirstNode;
+                                    GameObject obj = chunk.Tiles[x, y];
 
                                     for (GameObject right = obj.Right; obj != null; obj = right, right = right?.Right)
                                     {
@@ -410,7 +410,7 @@ namespace ClassicUO.IO
                         {
                             for (int j = 0; j < 8; j++)
                             {
-                                for (GameObject obj = c.Tiles[i, j].FirstNode; obj != null; obj = obj.Right)
+                                for (GameObject obj = c.Tiles[i, j]; obj != null; obj = obj.Right)
                                 {
                                     if (obj is Land ln)
                                         ln.Destroy();

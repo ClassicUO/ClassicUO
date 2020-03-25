@@ -176,7 +176,8 @@ namespace ClassicUO.Game.Managers
         DamageChanceInc,
         SwingSpeedInc,
         StatsCap,
-        NameNotoriety
+        NameNotoriety,
+        TithingPoints
     }
 
     internal enum InfoBarVarsOutlands
@@ -204,7 +205,8 @@ namespace ClassicUO.Game.Managers
         DamageChanceInc,
         SwingSpeedInc,
         MurderCount,
-        NameNotoriety
+        NameNotoriety,
+        TithingPoints
     }
 
     [JsonObject]

@@ -437,7 +437,6 @@
     <Compile Include="Game\Managers\UIManager.cs" />
     <Compile Include="Game\Map\Map.cs" />
     <Compile Include="Game\Map\Chunk.cs" />
-    <Compile Include="Game\Map\Tile.cs" />
     <Compile Include="Game\Pathfinder.cs" />
     <Compile Include="Game\Scenes\GameScene.cs" />
     <Compile Include="Game\Scenes\LoginScene.cs" />
@@ -512,6 +511,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+    <EmbeddedResource Include="Renderer\fonts\map1_font.xnb" />
+    <EmbeddedResource Include="Renderer\fonts\map2_font.xnb" />
+    <EmbeddedResource Include="Renderer\fonts\map3_font.xnb" />
+    <EmbeddedResource Include="Renderer\fonts\map4_font.xnb" />
+    <EmbeddedResource Include="Renderer\fonts\map5_font.xnb" />
+    <EmbeddedResource Include="Renderer\fonts\map6_font.xnb" />
     <None Include="shaders\compile_shaders.bat" />
     <None Include="shaders\IsometricWorld.fx" />
     <EmbeddedResource Include="shaders\IsometricWorld.fxc" />

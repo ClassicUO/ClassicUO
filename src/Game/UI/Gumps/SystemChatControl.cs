@@ -521,6 +521,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case ChatMode.Emote:
+                        text = "*" + text + "*";    
                         GameActions.Say(text, ProfileManager.Current.EmoteHue, MessageType.Emote);
                         break;
 
@@ -634,7 +635,8 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case ChatMode.ClientCommand:
-                        CommandManager.Execute(text);
+                        string[] tt = text.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
+                        CommandManager.Execute(tt[0], tt);
 
                         break;
 

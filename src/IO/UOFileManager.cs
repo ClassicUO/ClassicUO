@@ -91,8 +91,8 @@ namespace ClassicUO.IO
                     {
                         ushort id = (ushort) (vh.BlockID - Constants.MAX_LAND_DATA_INDEX_COUNT);
 
-                        if (id < TileDataLoader.Instance.Entries.Length)
-                            TileDataLoader.Instance.Entries[id] = new UOFileIndex(verdata.StartAddress,
+                        if (id < ArtLoader.Instance.Entries.Length)
+                            ArtLoader.Instance.Entries[id] = new UOFileIndex(verdata.StartAddress,
                                                                                   (uint) verdata.Length,
                                                                                   vh.Position,
                                                                                   (int) vh.Length,

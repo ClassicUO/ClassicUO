@@ -225,6 +225,7 @@ namespace ClassicUO.Game.Scenes
             switch (e.Type)
             {
                 case MessageType.Regular:
+                case MessageType.Limit3Spell:
 
                     if (e.Parent == null || !SerialHelper.IsValid(e.Parent.Serial))
                         name = "System";
@@ -243,7 +244,7 @@ namespace ClassicUO.Game.Scenes
 
                 case MessageType.Emote:
                     name = e.Name;
-                    text = $"*{e.Text}*";
+                    text = $"{e.Text}";
 
                     if (e.Hue == 0)
                         hue = ProfileManager.Current.EmoteHue;
@@ -308,7 +309,7 @@ namespace ClassicUO.Game.Scenes
             {
             }
 
-            _renderList = null;
+            ////_renderList = null;
 
             TargetManager.ClearTargetingWithoutTargetCancelPacket();
 
@@ -383,13 +384,13 @@ namespace ClassicUO.Game.Scenes
             int testX = obj.X + 1;
             int testY = obj.Y + 1;
 
-            Tile tile = World.Map.GetTile(testX, testY);
+            var tile = World.Map.GetTile(testX, testY);
 
             if (tile != null)
             {
                 sbyte z5 = (sbyte) (obj.Z + 5);
 
-                for (GameObject o = tile.FirstNode; o != null; o = o.Right)
+                for (GameObject o = tile; o != null; o = o.Right)
                 {
                     if ((!(o is Static s) || s.ItemData.IsTransparent) &&
                         (!(o is Multi m) || m.ItemData.IsTransparent) || !o.AllowedToDraw)
@@ -511,10 +512,10 @@ namespace ClassicUO.Game.Scenes
                         if (x < minX || x > maxX || y < minY || y > maxY)
                             break;
 
-                        Tile tile = World.Map.GetTile(x, y);
+                        var tile = World.Map.GetTile(x, y);
 
                         if (tile != null)
-                            AddTileToRenderList(tile.FirstNode, x, y, _useObjectHandles, 150/*, null*/);
+                            AddTileToRenderList(tile, x, y, _useObjectHandles, 150/*, null*/);
                         x++;
                         y--;
                     }
@@ -623,6 +624,11 @@ namespace ClassicUO.Game.Scenes
             }
 
             Macros.Update();
+
+            if (((ProfileManager.Current.CorpseOpenOptions == 1 || ProfileManager.Current.CorpseOpenOptions == 3) && TargetManager.IsTargeting) ||
+                ((ProfileManager.Current.CorpseOpenOptions == 2 || ProfileManager.Current.CorpseOpenOptions == 3) && World.Player.IsHidden))
+                    _useItemQueue.ClearCorpses();
+
             _useItemQueue.Update(totalMS, frameMS);
 
             if (!IsMouseOverViewport)
@@ -653,7 +659,10 @@ namespace ClassicUO.Game.Scenes
                     ushort x, y;
                     sbyte z;
 
-                    var o = gobj.Tile?.FirstNode;
+                    int cellX = gobj.X % 8;
+                    int cellY = gobj.Y % 8;
+
+                    var o = World.Map.GetChunk(gobj.X, gobj.Y)?.Tiles[cellX, cellY];
                     if (o != null)
                     {
                         x = o.X;

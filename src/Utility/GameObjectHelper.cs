@@ -36,21 +36,27 @@ namespace ClassicUO.Utility
             {
                 case 0x0001:
                 case 0x21BC:
+                //case 0x5690:
+                    return true;
+
                 case 0x9E4C:
                 case 0x9E64:
                 case 0x9E65:
                 case 0x9E7D:
+                    ref readonly StaticTiles data = ref TileDataLoader.Instance.StaticData[g];
 
-                    return true;
+                    return data.IsBackground || data.IsSurface;
             }
 
             if (g != 0x63D3)
             {
-                if (g >= 0x2198 && g <= 0x21A4) return true;
+                if (g >= 0x2198 && g <= 0x21A4) 
+                    return true;
 
                 ref readonly StaticTiles data = ref TileDataLoader.Instance.StaticData[g];
 
-                if (!data.IsNoDiagonal || data.IsAnimated && World.Player != null && World.Player.Race == RaceType.GARGOYLE) return false;
+                if (!data.IsNoDiagonal || data.IsAnimated && World.Player != null && World.Player.Race == RaceType.GARGOYLE) 
+                    return false;
             }
 
             return true;

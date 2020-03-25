@@ -248,7 +248,7 @@ namespace ClassicUO.IO.Resources
                             {
                                 SkillEntry skill = SkillsLoader.Instance.Skills[j];
 
-                                if (strings[1] == skill.Name)
+                                if (strings[1] == skill.Name || ((SkillEntry.HardCodedName)skill.Index).ToString().ToLower() == strings[1].ToLower())
                                 {
                                     skillIndex[idx, 0] = j;
                                     int.TryParse(strings[2], out skillIndex[idx, 1]);

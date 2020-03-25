@@ -138,6 +138,7 @@ namespace ClassicUO.Network
             Handlers.Add(0x93, OpenBook);
             Handlers.Add(0x95, DyeData);
             Handlers.Add(0x97, MovePlayer);
+            Handlers.Add(0x98, UpdateName);
             Handlers.Add(0x99, MultiPlacement);
             Handlers.Add(0x9A, ASCIIPrompt);
             Handlers.Add(0x9E, SellList);
@@ -200,7 +201,7 @@ namespace ClassicUO.Network
             {
                 if (Client.Version >= Data.ClientVersion.CV_500A)
                 {
-                    while (Handlers._clilocRequests.Count != 0)
+                    if (Handlers._clilocRequests.Count != 0)
                         NetClient.Socket.Send(new PMegaClilocRequest(ref Handlers._clilocRequests));
                 }
                 else
@@ -345,124 +346,133 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
 
-            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            uint serial = p.ReadUInt();
+            Entity entity = World.Get(serial);
 
-            if (mobile == null)
+            if (entity == null)
                 return;
 
-            mobile.Name = p.ReadASCII(30);
-            mobile.Hits = p.ReadUShort();
-            mobile.HitsMax = p.ReadUShort();
-            mobile.IsRenamable = p.ReadBool();
-            byte type = p.ReadByte();
+            entity.Name = p.ReadASCII(30);
+            entity.Hits = p.ReadUShort();
+            entity.HitsMax = p.ReadUShort();
 
-            if (type > 0 && p.Position + 1 <= p.Length)
+            if (SerialHelper.IsMobile(serial))
             {
-                mobile.IsMale = !p.ReadBool();
+                Mobile mobile = entity as Mobile;
+
+                if (mobile == null)
+                    return;
+
+                mobile.IsRenamable = p.ReadBool();
+                byte type = p.ReadByte();
+
+                if (type > 0 && p.Position + 1 <= p.Length)
+                {
+                    mobile.IsMale = !p.ReadBool();
+
+                    if (mobile == World.Player)
+                    {
+                        ushort str = p.ReadUShort();
+                        ushort dex = p.ReadUShort();
+                        ushort intell = p.ReadUShort();
+                        World.Player.Stamina = p.ReadUShort();
+                        World.Player.StaminaMax = p.ReadUShort();
+                        World.Player.Mana = p.ReadUShort();
+                        World.Player.ManaMax = p.ReadUShort();
+                        World.Player.Gold = p.ReadUInt();
+                        World.Player.PhysicalResistance = (short) p.ReadUShort();
+                        World.Player.Weight = p.ReadUShort();
+
+
+                        if (World.Player.Strength != 0)
+                        {
+                            ushort currentStr = World.Player.Strength;
+                            ushort currentDex = World.Player.Dexterity;
+                            ushort currentInt = World.Player.Intelligence;
+
+                            int deltaStr = str - currentStr;
+                            int deltaDex = dex - currentDex;
+                            int deltaInt = intell - currentInt;
+
+                            if (deltaStr != 0)
+                                GameActions.Print($"Your strength has changed by {deltaStr}.  It is now {str}", 0x0170, MessageType.System, 3, false);
+
+                            if (deltaDex != 0)
+                                GameActions.Print($"Your dexterity has changed by {deltaDex}.  It is now {dex}", 0x0170, MessageType.System, 3, false);
+
+                            if (deltaInt != 0)
+                                GameActions.Print($"Your intelligence has changed by {deltaInt}.  It is now {intell}", 0x0170, MessageType.System, 3, false);
+                        }
+
+                        World.Player.Strength = str;
+                        World.Player.Dexterity = dex;
+                        World.Player.Intelligence = intell;
+
+                        if (type >= 5) //ML
+                        {
+                            World.Player.WeightMax = p.ReadUShort();
+                            byte race = p.ReadByte();
+
+                            if (race == 0)
+                                race = 1;
+                            World.Player.Race = (RaceType) race;
+                        }
+                        else
+                        {
+                            if (Client.Version >= Data.ClientVersion.CV_500A)
+                                World.Player.WeightMax = (ushort) (7 * (World.Player.Strength >> 1) + 40);
+                            else
+                                World.Player.WeightMax = (ushort) (World.Player.Strength * 4 + 25);
+                        }
+
+                        if (type >= 3) //Renaissance
+                        {
+                            World.Player.StatsCap = (short) p.ReadUShort();
+                            World.Player.Followers = p.ReadByte();
+                            World.Player.FollowersMax = p.ReadByte();
+                        }
+
+                        if (type >= 4) //AOS
+                        {
+                            World.Player.FireResistance = (short) p.ReadUShort();
+                            World.Player.ColdResistance = (short) p.ReadUShort();
+                            World.Player.PoisonResistance = (short) p.ReadUShort();
+                            World.Player.EnergyResistance = (short) p.ReadUShort();
+                            World.Player.Luck = p.ReadUShort();
+                            World.Player.DamageMin = (short) p.ReadUShort();
+                            World.Player.DamageMax = (short) p.ReadUShort();
+                            World.Player.TithingPoints = p.ReadUInt();
+                        }
+
+                        if (type >= 6)
+                        {
+                            World.Player.MaxPhysicResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.MaxFireResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.MaxColdResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.MaxPoisonResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.MaxEnergyResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.DefenseChanceIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.MaxDefenseChanceIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.HitChanceIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.SwingSpeedIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.DamageIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.LowerReagentCost = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.SpellDamageIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.FasterCastRecovery = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.FasterCasting = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                            World.Player.LowerManaCost = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
+                        }
+                    }
+                }
+
+                mobile.ProcessDelta();
 
                 if (mobile == World.Player)
                 {
-                    ushort str = p.ReadUShort();
-                    ushort dex = p.ReadUShort();
-                    ushort intell = p.ReadUShort();
-                    World.Player.Stamina = p.ReadUShort();
-                    World.Player.StaminaMax = p.ReadUShort();
-                    World.Player.Mana = p.ReadUShort();
-                    World.Player.ManaMax = p.ReadUShort();
-                    World.Player.Gold = p.ReadUInt();
-                    World.Player.PhysicalResistance = (short) p.ReadUShort();
-                    World.Player.Weight = p.ReadUShort();
-
-
-                    if (World.Player.Strength != 0)
-                    {
-                        ushort currentStr = World.Player.Strength;
-                        ushort currentDex = World.Player.Dexterity;
-                        ushort currentInt = World.Player.Intelligence;
-
-                        int deltaStr = str - currentStr;
-                        int deltaDex = dex - currentDex;
-                        int deltaInt = intell - currentInt;
-
-                        if (deltaStr != 0)
-                            GameActions.Print($"Your strength has changed by {deltaStr}.  It is now {str}", 0x0170, MessageType.System, 3, false);
-
-                        if (deltaDex != 0)
-                            GameActions.Print($"Your dexterity has changed by {deltaDex}.  It is now {dex}", 0x0170, MessageType.System, 3, false);
-
-                        if (deltaInt != 0)
-                            GameActions.Print($"Your intelligence has changed by {deltaInt}.  It is now {intell}", 0x0170, MessageType.System, 3, false);
-                    }
-
-                    World.Player.Strength = str;
-                    World.Player.Dexterity = dex;
-                    World.Player.Intelligence = intell;
-
-                    if (type >= 5) //ML
-                    {
-                        World.Player.WeightMax = p.ReadUShort();
-                        byte race = p.ReadByte();
-
-                        if (race == 0)
-                            race = 1;
-                        World.Player.Race = (RaceType) race;
-                    }
-                    else
-                    {
-                        if (Client.Version >= Data.ClientVersion.CV_500A)
-                            World.Player.WeightMax = (ushort) (7 * (World.Player.Strength >> 1) + 40);
-                        else
-                            World.Player.WeightMax = (ushort) (World.Player.Strength * 4 + 25);
-                    }
-
-                    if (type >= 3) //Renaissance
-                    {
-                        World.Player.StatsCap = (short) p.ReadUShort();
-                        World.Player.Followers = p.ReadByte();
-                        World.Player.FollowersMax = p.ReadByte();
-                    }
-
-                    if (type >= 4) //AOS
-                    {
-                        World.Player.FireResistance = (short) p.ReadUShort();
-                        World.Player.ColdResistance = (short) p.ReadUShort();
-                        World.Player.PoisonResistance = (short) p.ReadUShort();
-                        World.Player.EnergyResistance = (short) p.ReadUShort();
-                        World.Player.Luck = p.ReadUShort();
-                        World.Player.DamageMin = (short) p.ReadUShort();
-                        World.Player.DamageMax = (short) p.ReadUShort();
-                        World.Player.TithingPoints = p.ReadUInt();
-                    }
-
-                    if (type >= 6)
-                    {
-                        World.Player.MaxPhysicResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.MaxFireResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.MaxColdResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.MaxPoisonResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.MaxEnergyResistence = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.DefenseChanceIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.MaxDefenseChanceIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.HitChanceIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.SwingSpeedIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.DamageIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.LowerReagentCost = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.SpellDamageIncrease = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.FasterCastRecovery = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.FasterCasting = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                        World.Player.LowerManaCost = p.Position + 2 > p.Length ? (short) 0 : (short) p.ReadUShort();
-                    }
+                    UoAssist.SignalHits();
+                    UoAssist.SignalStamina();
+                    UoAssist.SignalMana();
                 }
-            }
-
-            mobile.ProcessDelta();
-
-
-            if (mobile == World.Player)
-            {
-                UoAssist.SignalHits();
-                UoAssist.SignalStamina();
-                UoAssist.SignalMana();
             }
         }
 
@@ -1025,7 +1035,7 @@ namespace ClassicUO.Network
                         list = list.Reverse().ToArray();
 
                     foreach (var i in list) 
-                        gump.AddItem(i.Serial, i.Graphic, i.Hue, i.Amount, (ushort) i.Price, i.Name, false);
+                        gump.AddItem(i.Serial, i.Graphic, i.Hue, i.Amount, i.Price, i.Name, false);
                 }
             }
             else
@@ -1233,24 +1243,34 @@ namespace ClassicUO.Network
 
         private static void MobileAttributes(Packet p)
         {
-            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            uint serial = p.ReadUInt();
 
-            if (mobile == null)
+            Entity entity = World.Get(serial);
+            if (entity == null)
                 return;
 
-            mobile.HitsMax = p.ReadUShort();
-            mobile.Hits = p.ReadUShort();
-            mobile.ManaMax = p.ReadUShort();
-            mobile.Mana = p.ReadUShort();
-            mobile.StaminaMax = p.ReadUShort();
-            mobile.Stamina = p.ReadUShort();
-            mobile.ProcessDelta();
+            entity.HitsMax = p.ReadUShort();
+            entity.Hits = p.ReadUShort();
 
-            if (mobile == World.Player)
+            if (SerialHelper.IsMobile(serial))
             {
-                UoAssist.SignalHits();
-                UoAssist.SignalStamina();
-                UoAssist.SignalMana();
+                Mobile mobile = entity as Mobile;
+
+                if (mobile == null)
+                    return;
+
+                mobile.ManaMax = p.ReadUShort();
+                mobile.Mana = p.ReadUShort();
+                mobile.StaminaMax = p.ReadUShort();
+                mobile.Stamina = p.ReadUShort();
+                mobile.ProcessDelta();
+
+                if (mobile == World.Player)
+                {
+                    UoAssist.SignalHits();
+                    UoAssist.SignalStamina();
+                    UoAssist.SignalMana();
+                }
             }
         }
 
@@ -1462,7 +1482,7 @@ namespace ClassicUO.Network
                             {
                                 float change = (baseVal / 10.0f) - skill.Base;
 
-                                if (change != 0.0f)
+                                if (change != 0.0f && !Single.IsNaN(change))
                                 {
                                     GameActions.Print($"Your skill in {skill.Name} has {(change < 0 ? "decreased" : "increased")} by {Math.Abs(change):F1}.  It is now {(skill.Base + change):F1}.",
                                                       0x58,
@@ -1580,13 +1600,28 @@ namespace ClassicUO.Network
             }
 
             container?.Items.ProcessDelta();
-
-            if (container != null && SerialHelper.IsItem(container.Serial))
-            {
-                UIManager.GetGump<SpellbookGump>(container)?.Update();
-            }
-
             World.Items.ProcessDelta();
+
+            if (container != null)
+            {
+                var gump = UIManager.GetGump(container.Serial);
+
+                if (gump != null && !gump.IsDisposed)
+                {
+                    if (gump is SpellbookGump sb)
+                    {
+                        sb.Update();
+                    }
+                    else if (gump is ContainerGump cont)
+                    {
+                        cont.ForceUpdate();
+                    }
+                    else if (gump is PaperDollGump paperdoll)
+                    {
+                        paperdoll.Update();
+                    }
+                }
+            }
         }
 
         private static void PersonalLightLevel(Packet p)
@@ -1667,13 +1702,13 @@ namespace ClassicUO.Network
                 GameScene scene = new GameScene();
                 Client.Game.SetScene(scene);
 
-                GameActions.OpenPaperdoll(World.Player);
+                //GameActions.OpenPaperdoll(World.Player);
                 NetClient.Socket.Send(new PStatusRequest(World.Player));
                 NetClient.Socket.Send(new POpenChat(""));
 
 
                 //NetClient.Socket.Send(new PSkillsRequest(World.Player));
-                //scene.DoubleClickDelayed(World.Player);
+                scene.DoubleClickDelayed(World.Player);
 
                 if (Client.Version >= Data.ClientVersion.CV_306E)
                     NetClient.Socket.Send(new PClientType());
@@ -2076,13 +2111,10 @@ namespace ClassicUO.Network
             {
                 byte count = p.ReadByte();
 
-                var list = container.Items /*.OrderBy(s => s.Serial.Value)*/.ToArray();
+                var list = container.Items /*.OrderBy(s => s.Serial.Value)*/.Reverse().ToArray();
 
                 if (list.Length == 0)
                     return;
-
-                if (list[0].X > 1)
-                    list = list.Reverse().ToArray();
 
 
                 foreach (Item it in list.Take(count))
@@ -2097,7 +2129,15 @@ namespace ClassicUO.Network
                         it.Name = ClilocLoader.Instance.GetString(cliloc);
                         fromcliloc = true;
                     }
-                    else if (string.IsNullOrEmpty(it.Name))
+                    else if (string.IsNullOrEmpty(name))
+                    {
+                        bool success = World.OPL.TryGetNameAndData(it.Serial, out it.Name, out _);
+                        if (!success)
+                        {
+                            it.Name = it.ItemData.Name;
+                        }
+                    }
+                    if (string.IsNullOrEmpty(it.Name))
                         it.Name = name;
 
                     gump.SetIfNameIsFromCliloc(it, fromcliloc);
@@ -2401,16 +2441,23 @@ namespace ClassicUO.Network
             {
                 if (!UIManager.GetGumpCachePosition(mobile, out Point location))
                     location = new Point(100, 100);
-                UIManager.Add(paperdoll = new PaperDollGump(mobile) {Location = location});
+                UIManager.Add(new PaperDollGump(mobile, (flags & 0x02) != 0) {Location = location});
             }
             else
             {
+                var old = paperdoll.CanLift;
+                bool newLift = (flags & 0x02) != 0;
+
+                paperdoll.CanLift = newLift;
                 paperdoll.UpdateTitle(text);
+                if (old != newLift)
+                {
+                    paperdoll.Update();
+                }
                 paperdoll.SetInScreen();
                 paperdoll.BringOnTop();
             }
 
-            paperdoll.CanLift = (flags & 0x02) != 0;
         }
 
         private static void CorpseEquipment(Packet p)
@@ -2550,6 +2597,25 @@ namespace ClassicUO.Network
             World.Player.Walk(direction & Direction.Mask, (direction & Direction.Running) != 0);
         }
 
+        private static void UpdateName(Packet p)
+        {
+            if (!World.InGame)
+                return;
+
+            uint serial = p.ReadUInt();
+            string name = p.ReadASCII();
+
+            Entity entity = World.Get(serial);
+            if (entity == null)
+                return;
+            entity.Name = name;
+
+            NameOverheadGump gump = UIManager.GetGump<NameOverheadGump>(serial);
+            if (gump == null)
+                return;
+            gump.SetName();
+        }
+
         private static void MultiPlacement(Packet p)
         {
             if (World.Player == null)
@@ -2612,6 +2678,14 @@ namespace ClassicUO.Network
                 {
                     name = ClilocLoader.Instance.GetString(clilocnum);
                     fromcliloc = true;
+                }
+                else if (string.IsNullOrEmpty(name))
+                {
+                    bool success = World.OPL.TryGetNameAndData(serial, out name, out _);
+                    if (!success)
+                    {
+                        name = TileDataLoader.Instance.StaticData[graphic].Name;
+                    }
                 }
 
                 //if (string.IsNullOrEmpty(item.Name))
@@ -2874,7 +2948,15 @@ namespace ClassicUO.Network
             for (int i = 0, index = p.Position; i < textLinesCount; i++)
             {
                 int length = ((buffer[index++] << 8) | buffer[index++]) << 1;
-                lines[i] = Encoding.BigEndianUnicode.GetString(buffer, index, length);
+                int true_length = 0;
+
+                while (true_length < length)
+                {
+                    if (((buffer[index + true_length++] << 8) | buffer[index + true_length++]) << 1 == '\0')
+                        break;
+                }
+
+                lines[i] = Encoding.BigEndianUnicode.GetString(buffer, index, true_length);
                 index += length;
             }
 
@@ -3619,7 +3701,9 @@ namespace ClassicUO.Network
             if (!FontsLoader.Instance.UnicodeFontExists((byte) font))
                 font = 0;
 
-            if (entity != null)
+            if (!(serial == 0xFFFF_FFFF || 
+                  serial == 0 || 
+                  (!string.IsNullOrEmpty(name) && name.ToLower() == "system")) && entity != null)
             {
                 //entity.Graphic = graphic;
                 entity.Name = name;
@@ -3782,6 +3866,108 @@ namespace ClassicUO.Network
         {
         }
 
+        private static readonly DataReader _reader = new DataReader();
+        private static unsafe void ReadUnsafeCustomHouseData(byte[] source, int sourcePosition, int dlen, int clen, int planeZ, int planeMode, short minX, short minY, short maxY, ref RawList<CustomBuildObject> list)
+        {
+            byte* decompressedBytes = stackalloc byte[dlen];
+
+            fixed (byte* srcPtr = &source[sourcePosition])
+                ZLib.Decompress((IntPtr) srcPtr, clen, 0, (IntPtr) decompressedBytes, dlen);
+
+            _reader.SetData(decompressedBytes, dlen);
+            {
+
+                ushort id = 0;
+                sbyte x = 0, y = 0, z = 0;
+
+                switch (planeMode)
+                {
+                    case 0:
+                        int c = dlen / 5;
+                        for (uint i = 0; i < c; i++)
+                        {
+                            id = _reader.ReadUShortReversed();
+                            x = _reader.ReadSByte();
+                            y = _reader.ReadSByte();
+                            z = _reader.ReadSByte();
+
+                            if (id != 0)
+                            {
+                                list.Add(new CustomBuildObject(id) { X = x, Y = y, Z = z });
+                            }
+                        }
+
+                        break;
+
+                    case 1:
+
+                        if (planeZ > 0)
+                            z = (sbyte) ((planeZ - 1) % 4 * 20 + 7);
+                        else
+                            z = 0;
+
+                        c = dlen >> 2;
+                        for (uint i = 0; i < c; i++)
+                        {
+                            id = _reader.ReadUShortReversed();
+                            x = _reader.ReadSByte();
+                            y = _reader.ReadSByte();
+
+                            if (id != 0)
+                            {
+                                list.Add(new CustomBuildObject(id) { X = x, Y = y, Z = z });
+                            }
+                        }
+
+                        break;
+
+                    case 2:
+                        short offX = 0, offY = 0;
+                        short multiHeight = 0;
+
+                        if (planeZ > 0)
+                            z = (sbyte) ((planeZ - 1) % 4 * 20 + 7);
+                        else
+                            z = 0;
+
+                        if (planeZ <= 0)
+                        {
+                            offX = minX;
+                            offY = minY;
+                            multiHeight = (short) (maxY - minY + 2);
+                        }
+                        else if (planeZ <= 4)
+                        {
+                            offX = (short) (minX + 1);
+                            offY = (short) (minY + 1);
+                            multiHeight = (short) (maxY - minY);
+                        }
+                        else
+                        {
+                            offX = minX;
+                            offY = minY;
+                            multiHeight = (short) (maxY - minY + 1);
+                        }
+
+                        c = dlen >> 1;
+                        for (uint i = 0; i < c; i++)
+                        {
+                            id = _reader.ReadUShortReversed();
+                            x = (sbyte) (i / multiHeight + offX);
+                            y = (sbyte) (i % multiHeight + offY);
+
+                            if (id != 0)
+                            {
+                                list.Add(new CustomBuildObject(id) { X = x, Y = y, Z = z });
+                            }
+                        }
+
+                        break;
+                }
+            }
+            _reader.ReleaseData();
+        }
+
         private static unsafe void CustomHouse(Packet p)
         {
             bool compressed = p.ReadByte() == 0x03;
@@ -3824,10 +4010,11 @@ namespace ClassicUO.Network
 
             byte planes = p.ReadByte();
 
-            DataReader stream = new DataReader();
+
             ref byte[] buffer = ref p.ToArray();
 
             RawList<CustomBuildObject> list = new RawList<CustomBuildObject>();
+
 
             for (int plane = 0; plane < planes; plane++)
             {
@@ -3837,107 +4024,12 @@ namespace ClassicUO.Network
                 int planeZ = (int) ((header & 0x0F000000) >> 24);
                 int planeMode = (int) ((header & 0xF0000000) >> 28);
 
-                if (clen <= 0) continue;
+                if (clen <= 0) 
+                    continue;
 
-                byte[] decompressedBytes = new byte[dlen];
-
-                fixed (byte* srcPtr = &buffer[p.Position], destPtr = decompressedBytes)
-                    ZLib.Decompress((IntPtr)srcPtr, clen, 0, (IntPtr)destPtr, dlen);
-
-                stream.SetData(decompressedBytes, dlen);
-                {
-                    p.Skip(clen);
-                    ushort id = 0;
-                    sbyte x = 0, y = 0, z = 0;
-
-                    switch (planeMode)
-                    {
-                        case 0:
-                            int c = dlen / 5;
-                            for (uint i = 0; i < c; i++)
-                            {
-                                id = stream.ReadUShortReversed();
-                                x = stream.ReadSByte();
-                                y = stream.ReadSByte();
-                                z = stream.ReadSByte();
-
-                                if (id != 0)
-                                {
-                                    list.Add(new CustomBuildObject(id){ X= x, Y = y, Z = z});
-                                }
-                            }
-
-                            break;
-
-                        case 1:
-
-                            if (planeZ > 0)
-                                z = (sbyte) ((planeZ - 1) % 4 * 20 + 7);
-                            else
-                                z = 0;
-
-                            c = dlen >> 2;
-                            for (uint i = 0; i < c; i++)
-                            {
-                                id = stream.ReadUShortReversed();
-                                x = stream.ReadSByte();
-                                y = stream.ReadSByte();
-
-                                if (id != 0)
-                                {
-                                    list.Add(new CustomBuildObject(id) { X = x, Y = y, Z = z });
-                                }
-                            }
-
-                            break;
-
-                        case 2:
-                            short offX = 0, offY = 0;
-                            short multiHeight = 0;
-
-                            if (planeZ > 0)
-                                z = (sbyte) ((planeZ - 1) % 4 * 20 + 7);
-                            else
-                                z = 0;
-
-                            if (planeZ <= 0)
-                            {
-                                offX = minX;
-                                offY = minY;
-                                multiHeight = (short) (maxY - minY + 2);
-                            }
-                            else if (planeZ <= 4)
-                            {
-                                offX = (short) (minX + 1);
-                                offY = (short) (minY + 1);
-                                multiHeight = (short) (maxY - minY);
-                            }
-                            else
-                            {
-                                offX = minX;
-                                offY = minY;
-                                multiHeight = (short) (maxY - minY + 1);
-                            }
-
-                            c = dlen >> 1;
-                            for (uint i = 0; i < c; i++)
-                            {
-                                id = stream.ReadUShortReversed();
-                                x = (sbyte) (i / multiHeight + offX);
-                                y = (sbyte) (i % multiHeight + offY);
-
-                                if (id != 0)
-                                {
-                                    list.Add(new CustomBuildObject(id) { X = x, Y = y, Z = z });
-                                }
-                            }
-
-                            break;
-                    }
-                }
-                stream.ReleaseData();
+                ReadUnsafeCustomHouseData(buffer, p.Position, dlen, clen, planeZ, planeMode, minX, minY, maxY, ref list);
+                p.Skip(clen);
             }
-            stream.ReleaseData();
 
             house.Fill(list);
 
@@ -4015,7 +4107,17 @@ namespace ClassicUO.Network
                 for (int i = 0, index = 0; i < linesNum; i++)
                 {
                     int length = ((decData[index++] << 8) | decData[index++]) << 1;
-                    lines[i] = Encoding.BigEndianUnicode.GetString(decData, index, length);
+
+                    int true_length = 0;
+
+                    while (true_length < length)
+                    {
+                        if (((decData[index + true_length++] << 8) | decData[index + true_length++]) << 1 == '\0')
+                            break;
+                    }
+
+                    lines[i] = Encoding.BigEndianUnicode.GetString(decData, index, true_length);
+
                     index += length;
                 }
             }
@@ -4133,7 +4235,7 @@ namespace ClassicUO.Network
                             byte map = p.ReadByte();
                             int hits = type == 1 ? 0 : p.ReadByte();
 
-                            World.WMapManager.AddOrUpdate(serial, x, y, hits, map, type == 0x02);
+                            World.WMapManager.AddOrUpdate(serial, x, y, hits, map, type == 0x02, null, true);
                         }
                     }
 

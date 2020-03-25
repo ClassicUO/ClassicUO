@@ -308,7 +308,7 @@ namespace ClassicUO.Game
                 _draggedItemTexture.Ticks = (long) totalMS;
         }
 
-        private readonly RawList<CustomBuildObject> _componentsList = new RawList<CustomBuildObject>();
+        private readonly CustomBuildObject[] _componentsList = new CustomBuildObject[10];
 
         public void Draw(UltimaBatcher2D sb)
         {
@@ -319,7 +319,8 @@ namespace ClassicUO.Game
                     if (World.CustomHouseManager != null && World.CustomHouseManager.SelectedGraphic != 0)
                     {
                         ushort hue = 0;
-                        _componentsList.Clear();
+                        
+                        Array.Clear(_componentsList, 0, 10);
 
                         if (!World.CustomHouseManager.CanBuildHere(_componentsList, out var type))
                         {
@@ -331,8 +332,11 @@ namespace ClassicUO.Game
                             _temp.ForEach(s => s.Destroy());
                             _temp.Clear();
 
-                            for (int i = 0; i < _componentsList.Count; i++)
+                            for (int i = 0; i < _componentsList.Length; i++)
                             {
+                                if (_componentsList[i].Graphic == 0)
+                                    break;
+
                                 Multi m = Multi.Create(_componentsList[i].Graphic);
                                 m.AlphaHue = 0xFF;
                                 m.Hue = hue;
@@ -341,7 +345,7 @@ namespace ClassicUO.Game
                             }
                         }
 
-                        if (_componentsList.Count != 0)
+                        if (_componentsList.Length != 0)
                         {
                             if (SelectedObject.LastObject is GameObject selectedObj)
                             {
@@ -359,9 +363,12 @@ namespace ClassicUO.Game
 
                                 GameScene gs = Client.Game.GetScene<GameScene>();
 
-                                for (int i = 0; i < _componentsList.Count; i++)
+                                for (int i = 0; i < _componentsList.Length; i++)
                                 {
                                     ref readonly CustomBuildObject item = ref _componentsList[i];
+
+                                    if (item.Graphic == 0)
+                                        break;
 
                                     _temp[i].X = (ushort) (selectedObj.X + item.X);
                                     _temp[i].Y = (ushort) (selectedObj.Y + item.Y);

@@ -492,7 +492,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public virtual void Clear()
         {
-            Children.ForEach(s => s.Dispose());
+            foreach (Control c in Children)
+            {
+                c.Dispose();
+            }
         }
 
         public T[] GetControls<T>() where T : Control
@@ -627,9 +630,9 @@ namespace ClassicUO.Game.UI.Controls
 
             Parent?.OnMouseUp(X + x, Y + y, button);
 
-            if (button == MouseButtonType.Right && !IsDisposed && !CanCloseWithRightClick && !Keyboard.Alt && !Keyboard.Shift && !Keyboard.Ctrl && ContextMenu != null && !ContextMenu.IsDisposed)
+            if (button == MouseButtonType.Right && !IsDisposed && !CanCloseWithRightClick && !Keyboard.Alt && !Keyboard.Shift && !Keyboard.Ctrl)
             {
-                ContextMenu.Show();
+                ContextMenu?.Show();
             }
         }
 
@@ -642,7 +645,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (_mouseIsDown && !_attempToDrag)
             {
-                Point offset = Mouse.LDroppedOffset;
+                Point offset = Mouse.LButtonPressed ? Mouse.LDroppedOffset : Mouse.MButtonPressed ? Mouse.MDroppedOffset : Point.Zero;
 
                 if (Math.Abs(offset.X) > Constants.MIN_GUMP_DRAG_DISTANCE
                     || Math.Abs(offset.Y) > Constants.MIN_GUMP_DRAG_DISTANCE)
@@ -800,8 +803,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             Children.Clear();
-
-            ContextMenu?.Dispose();
 
             IsDisposed = true;
         }

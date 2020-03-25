@@ -1194,6 +1194,22 @@ namespace ClassicUO.Game.GameObjects
                                 Abilities[1] = Ability.DoubleStrike;
 
                                 goto done;
+
+                            // TODO: these are the new whips. More info here: https://uo.com/wiki/ultima-online-wiki/publish-notes/publish-103/  . They needed a version check?
+                            case 0xA289: // Barbed Whip
+                                Abilities[0] = Ability.ConcussionBlow;
+                                Abilities[1] = Ability.WhirlwindAttack;
+                                goto done;
+
+                            case 0xA28A: // Spiked Whip
+                                Abilities[0] = Ability.ArmorPierce;
+                                Abilities[1] = Ability.WhirlwindAttack;
+                                goto done;
+
+                            case 0xA28B: // Bladed Whip
+                                Abilities[0] = Ability.BleedAttack;
+                                Abilities[1] = Ability.WhirlwindAttack;
+                                goto done;
                         }
                     }
                 }
@@ -1263,13 +1279,16 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Destroy()
         {
+            if (IsDestroyed)
+                return;
+
             Log.Warn( "PlayerMobile disposed!");
             base.Destroy();
         }
 
         public void CloseBank()
         {
-            var bank = Equipment[(int) Layer.Bank];
+            var bank = HasEquipment ? Equipment[(int) Layer.Bank] : null;
 
             if (bank != null)
             {
@@ -1380,14 +1399,10 @@ namespace ClassicUO.Game.GameObjects
                 (Client.Version >= ClientVersion.CV_60142 && IsParalyzed))
                 return false;
 
-            if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead)
+            run |= ProfileManager.Current.AlwaysRun;
+
+            if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead || IsHidden && ProfileManager.Current.AlwaysRunUnlessHidden)
                 run = false;
-            else if (!run)
-            {
-                if (!IsHidden ||
-                    IsHidden && !ProfileManager.Current.AlwaysRunUnlessHidden)
-                    run = ProfileManager.Current.AlwaysRun;
-            }
 
             int x = X;
             int y = Y;

@@ -156,7 +156,7 @@ namespace ClassicUO.Game.UI.Controls
                 _fakeItem = null;
                 UpdateEntity();
             }
-            else if (item != null && _mobile.Equipment[item.ItemData.Layer] == null)
+            else if (item != null && item.ItemData.Layer < _mobile.Equipment.Length && _mobile.Equipment[item.ItemData.Layer] == null)
             {
                 _fakeItem = item;
                 UpdateEntity();
