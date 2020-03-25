@@ -134,49 +134,27 @@ namespace ClassicUO.Game.Managers
                         {
                             var g = gump.Value;
 
-                            if (!g.IsDisposed && g.LocalSerial == it.Container)
+                            if (!g.IsDisposed)
                             {
                                 switch (g)
                                 {
-                                    case PaperDollGump paperDoll:
+                                    case PaperDollGump paperDoll when g.LocalSerial == it.Container:
                                         msg.X -= paperDoll.ScreenCoordinateX;
                                         msg.Y -= paperDoll.ScreenCoordinateY;
                                         paperDoll.AddText(msg);
                                         found = true;
                                         break;
-                                    case ContainerGump container:
+                                    case ContainerGump container when g.LocalSerial == it.Container:
                                         msg.X -= container.ScreenCoordinateX;
                                         msg.Y -= container.ScreenCoordinateY;
                                         container.AddText(msg);
                                         found = true;
                                         break;
-                                    default:
-                                        Entity ent = World.Get(it.RootContainer);
-
-                                        if (ent == null || ent.IsDestroyed)
-                                            break;
-
-                                        var trade = UIManager.GetGump<TradingGump>(ent);
-
-                                        if (trade == null)
-                                        {
-                                            Item item = ent.Items.FirstOrDefault(s => s.Graphic == 0x1E5E);
-
-                                            if (item == null)
-                                                break;
-
-                                            trade = UIManager.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == item || s.ID2 == item);
-                                        }
-
-                                        if (trade != null)
-                                        {
-                                            msg.X -= trade.ScreenCoordinateX;
-                                            msg.Y -= trade.ScreenCoordinateY;
-                                            trade.AddText(msg);
-                                            found = true;
-                                        }
-                                        else
-                                            Log.Warn("Missing label handler for this control: 'UNKNOWN'. Report it!!");
+                                    case TradingGump trade when g.LocalSerial == it.Container || trade.ID1 == it.Container || trade.ID2 == it.Container:
+                                        msg.X -= trade.ScreenCoordinateX;
+                                        msg.Y -= trade.ScreenCoordinateY;
+                                        trade.AddText(msg);
+                                        found = true;
                                         break;
                                 }
                             }
