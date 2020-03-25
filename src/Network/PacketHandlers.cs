@@ -2538,7 +2538,7 @@ namespace ClassicUO.Network
                     BookPageCount = p.ReadUShort(),
                     //title allows only 47 dots (. + \0) so 47 is the right number
                     BookTitle =
-                        new MultiLineBox(new MultiLineEntry(BookGump.DefaultFont, 47, 150, 150, BookGump.IsNewBook, FontStyle.None, 0), editable)
+                        new TextBox(new TextEntry(BookGump.DefaultFont, 47, 150, 150, BookGump.IsNewBook, FontStyle.None, 0), editable)
                         {
                             X = 40,
                             Y = 60,
@@ -2549,7 +2549,7 @@ namespace ClassicUO.Network
                         },
                     //as the old booktitle supports only 30 characters in AUTHOR and since the new clients only allow 29 dots (. + \0 character at end), we use 29 as a limitation
                     BookAuthor =
-                        new MultiLineBox(new MultiLineEntry(BookGump.DefaultFont, 29, 150, 150, BookGump.IsNewBook, FontStyle.None, 0), editable)
+                        new TextBox(new TextEntry(BookGump.DefaultFont, 29, 150, 150, BookGump.IsNewBook, FontStyle.None, 0), editable)
                         {
                             X = 40,
                             Y = 160,
