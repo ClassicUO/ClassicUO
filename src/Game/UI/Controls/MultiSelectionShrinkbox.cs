@@ -275,7 +275,8 @@ namespace ClassicUO.Game.UI.Controls
                             {
                                 foreach (NiceButton button in msb._buttons)
                                 {
-                                    button.IsSelected = false;
+                                    if(button != null)
+                                        button.IsSelected = false;
                                 }
                             }
                         }

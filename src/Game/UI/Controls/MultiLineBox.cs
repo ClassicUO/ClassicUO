@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Controls
             set => TxEntry.Hue = value;
         }
 
-        public string Text
+        public override string Text
         {
             get => TxEntry.Text;
             set => SetText(value);
