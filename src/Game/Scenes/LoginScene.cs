@@ -614,7 +614,7 @@ namespace ClassicUO.Game.Scenes
 
             for (ushort i = 0; i < count; i++)
             {
-                Characters[i] = p.ReadASCII(30).TrimEnd('\0');
+                Characters[i] = p.ReadUTF8StringSafe(30);
                 p.Skip(30);
             }
         }
