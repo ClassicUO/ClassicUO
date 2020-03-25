@@ -2545,7 +2545,7 @@ namespace ClassicUO.Network
                             Height = 25,
                             Width = 155,
                             IsEditable = editable,
-                            Text = oldpacket ? p.ReadUTF8StringSafe(60).Trim('\0') : p.ReadUTF8StringSafe(p.ReadUShort()).Trim('\0')
+                            Text = oldpacket ? p.ReadUTF8StringSafe(60) : p.ReadUTF8StringSafe(p.ReadUShort())
                         },
                     //as the old booktitle supports only 30 characters in AUTHOR and since the new clients only allow 29 dots (. + \0 character at end), we use 29 as a limitation
                     BookAuthor =
@@ -2556,7 +2556,7 @@ namespace ClassicUO.Network
                             Height = 25,
                             Width = 155,
                             IsEditable = editable,
-                            Text = oldpacket ? p.ReadUTF8StringSafe(30).Trim('\0') : p.ReadUTF8StringSafe(p.ReadUShort()).Trim('\0')
+                            Text = oldpacket ? p.ReadUTF8StringSafe(30) : p.ReadUTF8StringSafe(p.ReadUShort())
                         },
                     IsEditable = editable,
                     UseNewHeader = !oldpacket
@@ -2567,9 +2567,9 @@ namespace ClassicUO.Network
             {
                 p.Skip(2);
                 bgump.IsEditable = editable;
-                bgump.BookTitle.Text = oldpacket ? p.ReadASCII(60).Trim('\0') : p.ReadASCII(p.ReadUShort()).Trim('\0');
+                bgump.BookTitle.Text = oldpacket ? p.ReadUTF8StringSafe(60) : p.ReadUTF8StringSafe(p.ReadUShort());
                 bgump.BookTitle.IsEditable = editable;
-                bgump.BookAuthor.Text = oldpacket ? p.ReadASCII(30).Trim('\0') : p.ReadASCII(p.ReadUShort()).Trim('\0');
+                bgump.BookAuthor.Text = oldpacket ? p.ReadUTF8StringSafe(30) : p.ReadUTF8StringSafe(p.ReadUShort());
                 bgump.BookAuthor.IsEditable = editable;
                 bgump.UseNewHeader = !oldpacket;
             }
