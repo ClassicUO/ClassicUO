@@ -136,7 +136,7 @@ namespace ClassicUO.Network
             return _sb.ToString();
         }
 
-        public string ReadASCII(int length, bool exitIfNull = false)
+        public string ReadASCII(int length)
         {
             if (EnsureSize(length))
                 return Empty;
@@ -196,6 +196,41 @@ namespace ClassicUO.Network
                 if (StringHelper.IsSafeChar(s[i]))
                     sb.Append(s[i]);
 
+            return sb.ToString();
+        }
+
+        public string ReadUTF8StringSafe(int length)
+        {
+            if (EnsureSize(length))
+            {
+                return Empty;
+            }
+            if (Position + length > Length)
+            {
+                length = Length - Position - 1;
+            }
+            if (length <= 0)
+            {
+                return Empty;
+            }
+
+            var buffer = new byte[length];
+            for (int i = 0; i < length; i++)
+            {
+                buffer[i] = ReadByte();
+            }
+            string utf8string = Encoding.UTF8.GetString(buffer);
+
+            bool isSafe = true;
+            for (int i = 0; isSafe && i < utf8string.Length; i++) isSafe = StringHelper.IsSafeChar(utf8string[i]);
+            if (isSafe) return utf8string;
+
+            StringBuilder sb = new StringBuilder(utf8string.Length);
+            foreach (var c in utf8string)
+            {
+                if (StringHelper.IsSafeChar(c))
+                    sb.Append(c);
+            }
             return sb.ToString();
         }
 

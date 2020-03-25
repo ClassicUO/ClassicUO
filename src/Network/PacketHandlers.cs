@@ -260,7 +260,7 @@ namespace ClassicUO.Network
                 string name = string.Empty;
 
                 if (hasName && p.Position < p.Length)
-                    name = p.ReadASCII();
+                    name = p.ReadUTF8StringSafe();
 
                 UIManager.Add(new TradingGump(serial, name, id1, id2));
             }
@@ -352,7 +352,7 @@ namespace ClassicUO.Network
             if (entity == null)
                 return;
 
-            entity.Name = p.ReadASCII(30);
+            entity.Name = p.ReadUTF8StringSafe(30);
             entity.Hits = p.ReadUShort();
             entity.HitsMax = p.ReadUShort();
 
@@ -698,8 +698,8 @@ namespace ClassicUO.Network
             MessageType type = (MessageType) p.ReadByte();
             ushort hue = p.ReadUShort();
             ushort font = p.ReadUShort();
-            string name = p.ReadASCII(30);
-            string text = p.ReadASCII();
+            string name = p.ReadUTF8StringSafe(30);
+            string text = p.ReadUTF8StringSafe();
 
             if (serial == 0 && graphic == 0 && type == MessageType.Regular && font == 0xFFFF && hue == 0xFFFF && name.StartsWith("SYSTEM"))
             {
@@ -1967,7 +1967,7 @@ namespace ClassicUO.Network
                             int x = (Client.Game.Window.ClientBounds.Width >> 1) - 245;
                             int y = (Client.Game.Window.ClientBounds.Height >> 1) - 205;
 
-                            bulletinBoard = new BulletinBoardGump(item, x, y, p.ReadASCII(22));
+                            bulletinBoard = new BulletinBoardGump(item, x, y, p.ReadUTF8StringSafe(22));
                             UIManager.Add(bulletinBoard);
                         }
                     }
@@ -1986,7 +1986,7 @@ namespace ClassicUO.Network
                             uint parendID = p.ReadUInt(); 
 
                             int posterlen = p.ReadByte();
-                            var text = posterlen > 0 ? p.ReadASCII(posterlen) : string.Empty;
+                            var text = posterlen > 0 ? p.ReadUTF8StringSafe(posterlen) : string.Empty;
                             if (parendID == 0)
                                 text = "";
 
@@ -2021,13 +2021,13 @@ namespace ClassicUO.Network
                             uint serial = p.ReadUInt();
 
                             int len = p.ReadByte();
-                            string poster = len > 0 ? p.ReadASCII(len) : string.Empty;
+                            string poster = len > 0 ? p.ReadUTF8StringSafe(len) : string.Empty;
 
                             len = p.ReadByte();
                             string subject = len > 0 ? p.ReadUTF8StringSafe() : string.Empty;
 
                             len = p.ReadByte();
-                            string dataTime = len > 0 ? p.ReadASCII(len) : string.Empty;
+                            string dataTime = len > 0 ? p.ReadUTF8StringSafe(len) : string.Empty;
 
                             p.Skip(4);
 
@@ -2121,7 +2121,7 @@ namespace ClassicUO.Network
                 {
                     it.Price = p.ReadUInt();
                     byte nameLen = p.ReadByte();
-                    string name = p.ReadASCII(nameLen);
+                    string name = p.ReadUTF8StringSafe(nameLen);
                     bool fromcliloc = false;
 
                     if (int.TryParse(name, out int cliloc))
@@ -2334,7 +2334,7 @@ namespace ClassicUO.Network
 
             uint serial = p.ReadUInt();
             ushort id = p.ReadUShort();
-            string name = p.ReadASCII(p.ReadByte());
+            string name = p.ReadUTF8StringSafe(p.ReadByte());
             int count = p.ReadByte();
 
             ushort menuid = p.ReadUShort();
@@ -2354,7 +2354,7 @@ namespace ClassicUO.Network
                 {
                     ushort graphic = p.ReadUShort();
                     ushort hue = p.ReadUShort();
-                    name = p.ReadASCII(p.ReadByte());
+                    name = p.ReadUTF8StringSafe(p.ReadByte());
 
                     Rectangle rect = ArtLoader.Instance.GetTexture(graphic).Bounds;
 
@@ -2389,7 +2389,7 @@ namespace ClassicUO.Network
                 for (int i = 0; i < count; i++)
                 {
                     p.Skip(4);
-                    name = p.ReadASCII(p.ReadByte());
+                    name = p.ReadUTF8StringSafe(p.ReadByte());
 
                     int addHeight = gump.AddItem(name, offsetY);
 
@@ -2430,7 +2430,7 @@ namespace ClassicUO.Network
 
             if (mobile == null) return;
 
-            string text = p.ReadASCII(60);
+            string text = p.ReadUTF8StringSafe(60);
             byte flags = p.ReadByte();
 
             mobile.Title = text;
@@ -2603,7 +2603,7 @@ namespace ClassicUO.Network
                 return;
 
             uint serial = p.ReadUInt();
-            string name = p.ReadASCII();
+            string name = p.ReadUTF8StringSafe();
 
             Entity entity = World.Get(serial);
             if (entity == null)
@@ -2671,7 +2671,7 @@ namespace ClassicUO.Network
                 ushort hue = p.ReadUShort();
                 ushort amount = p.ReadUShort();
                 ushort price = p.ReadUShort();
-                string name = p.ReadASCII(p.ReadUShort());
+                string name = p.ReadUTF8StringSafe(p.ReadUShort());
                 bool fromcliloc = false;
 
                 if (int.TryParse(name, out int clilocnum))
@@ -2763,7 +2763,7 @@ namespace ClassicUO.Network
                 return;
 
             uint tip = p.ReadUInt();
-            string str = p.ReadASCII(p.ReadUShort());
+            string str = p.ReadUTF8StringSafe(p.ReadUShort());
 
             if (flag == 0)
             {
@@ -2805,14 +2805,14 @@ namespace ClassicUO.Network
             byte buttonID = p.ReadByte();
 
             ushort textLen = p.ReadUShort();
-            string text = p.ReadASCII(textLen);
+            string text = p.ReadUTF8StringSafe(textLen);
 
             bool haveCancel = p.ReadBool();
             byte variant = p.ReadByte();
             uint maxLength = p.ReadUInt();
 
             ushort descLen = p.ReadUShort();
-            string desc = p.ReadASCII(descLen);
+            string desc = p.ReadUTF8StringSafe(descLen);
 
             TextEntryDialogGump gump = new TextEntryDialogGump(serial, 143, 172, variant, (int) maxLength, text, desc, buttonID, parentID)
             {
@@ -2859,7 +2859,7 @@ namespace ClassicUO.Network
             ushort hue = p.ReadUShort();
             ushort font = p.ReadUShort();
             string lang = p.ReadASCII(4);
-            string name = p.ReadASCII();
+            string name = p.ReadUTF8StringSafe();
 
             if (serial == 0 && graphic == 0 && type == MessageType.Regular && font == 0xFFFF && hue == 0xFFFF && name.ToLower() == "system")
             {
@@ -3093,7 +3093,7 @@ namespace ClassicUO.Network
                 return;
 
             uint serial = p.ReadUInt();
-            string header = p.ReadASCII();
+            string header = p.ReadUTF8StringSafe();
             string footer = p.ReadUnicode();
 
             string body = p.ReadUnicode();
@@ -3286,7 +3286,7 @@ namespace ClassicUO.Network
                         if (crafterNameLen > 0)
                         {
                             strBuffer.Append("Crafted by ");
-                            strBuffer.Append(p.ReadASCII(crafterNameLen));
+                            strBuffer.Append(p.ReadUTF8StringSafe(crafterNameLen));
                         }
                     }
 
@@ -3666,8 +3666,8 @@ namespace ClassicUO.Network
             ushort font = p.ReadUShort();
             uint cliloc = p.ReadUInt();
             AffixType flags = p.ID == 0xCC ? (AffixType) p.ReadByte() : 0x00;
-            string name = p.ReadASCII(30);
-            string affix = p.ID == 0xCC ? p.ReadASCII() : string.Empty;
+            string name = p.ReadUTF8StringSafe(30);
+            string affix = p.ID == 0xCC ? p.ReadUTF8StringSafe() : string.Empty;
 
             string arguments = null;
             
