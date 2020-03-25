@@ -159,6 +159,9 @@ namespace ClassicUO.Game.UI.Gumps
             TopMost = ParseBool(xml.GetAttribute("topmost"));
             FreeView = ParseBool(xml.GetAttribute("freeview"));
             _showPartyMembers = ParseBool(xml.GetAttribute("showpartymembers"));
+
+            World.WMapManager.SetEnable(_showPartyMembers);
+
             if (int.TryParse(xml.GetAttribute("zoomindex"), out int value))
                 _zoomIndex = (value >= 0 && value < _zooms.Length) ? value : 4;
 
@@ -225,7 +228,13 @@ namespace ClassicUO.Game.UI.Gumps
             _options["flip_map"] = new ContextMenuItemEntry("Flip map", () => { _flipMap = !_flipMap; }, true, _flipMap);
             _options["top_most"] = new ContextMenuItemEntry("TopMost", () => { TopMost = !TopMost; }, true, _isTopMost);
             _options["free_view"] = new ContextMenuItemEntry("Free view", () => { FreeView = !FreeView; }, true, FreeView);
-            _options["show_party_members"] = new ContextMenuItemEntry("Show party members", () => { _showPartyMembers = !_showPartyMembers; }, true, _showPartyMembers);
+            _options["show_party_members"] = new ContextMenuItemEntry("Show party members", () =>
+            {
+                _showPartyMembers = !_showPartyMembers;
+
+                World.WMapManager.SetEnable(_showPartyMembers);
+
+            }, true, _showPartyMembers);
             _options["show_mobiles"] = new ContextMenuItemEntry("Show mobiles", () => { _showMobiles = !_showMobiles; }, true, _showMobiles);
             _options["show_multis"] = new ContextMenuItemEntry("Show houses/boats", () => { _showMultis = !_showMultis; }, true, _showMultis);
             _options["show_your_name"] = new ContextMenuItemEntry("Show your name", () => { _showPlayerName = !_showPlayerName; }, true, _showPlayerName);
