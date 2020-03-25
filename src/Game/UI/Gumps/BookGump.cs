@@ -87,7 +87,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (_activated > 0)
                     {
-                        for (int i = 0; i < Math.Min(m_Pages.Count, value.Length); i++)
+                        int min = Math.Min(m_Pages.Count, value.Length);
+                        for (int i = 0; i < min; i++)
                         {
                             m_Pages[i].IsEditable = IsEditable;
                             m_Pages[i].Text = value[i];
