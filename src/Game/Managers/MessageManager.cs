@@ -189,19 +189,9 @@ namespace ClassicUO.Game.Managers
                     parent.AddMessage(msg);
 
                     break;
-
-                case MessageType.Emote:
-                    if (parent == null)
-                        break;
-
-                    msg = CreateMessage($"{text}", hue, font, unicode, type);
-
-                    parent.AddMessage(msg);
-
-                    break;
+      
 
                 case MessageType.Command:
-
                 case MessageType.Encoded:
                 case MessageType.System:
                 case MessageType.Party:
