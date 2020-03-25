@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using ClassicUO.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -51,7 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
         private sbyte _AtEnd;
 
         private bool _scale;
-        public MultiLineBox BookTitle, BookAuthor;
+        public TextBox BookTitle, BookAuthor;
 
         private GumpPic m_Forward, m_Backward;
         public bool[] PageChanged;
@@ -167,7 +168,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Width = 155,
                     IsEditable = IsEditable,
                     Text = text,
-                    MaxLines = 8
+                    MaxLines = MaxBookLines
                 };
                 Add(tbox, page);
                 m_Pages.Add(tbox);
@@ -213,19 +214,15 @@ namespace ClassicUO.Game.UI.Gumps
         private void SetActivePage(int page)
         {
             page = Math.Min(Math.Max(page, 1), MaxPage); //clamp the value between 1..MaxPage
-            if (page <= 1)
+            if (page != ActivePage)
             {
-                page = 1;
+                Client.Game.Scene.Audio.PlaySound(0x0055);
             }
-            else if (page >= MaxPage)
-            {
-                page = MaxPage;
-            }
+
             ActivePage = page;
             UpdatePageButtonVisibility();
 
-            Client.Game.Scene.Audio.PlaySound(0x0055);
-
+            //Non-editable books only have page data sent for currently viewed pages
             if (!IsEditable)
             {
                 int leftPage = (page - 1) << 1;
@@ -593,98 +590,101 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnKeyboardReturn(int textID, string text)
         {
-            if ((MultiLineBox.PasteRetnCmdID & textID) != 0 && !string.IsNullOrEmpty(text))
+            if ((MultiLineBox.PasteRetnCmdID & textID) == 0 || string.IsNullOrEmpty(text))
             {
-                text = text.Replace("\r", string.Empty);
-                int curpage = ActiveInternalPage;
-                MultiLineBox page;
+                return;
+            }
+            Regex pattern = new Regex("[\r\t]");
+            pattern.Replace(text, string.Empty);
+            int curpage = ActiveInternalPage;
+            MultiLineBox page;
 
-                if (curpage < 0)
-                {
-                    if (BookTitle.HasKeyboardFocus)
-                        page = BookTitle;
-                    else if (BookAuthor.HasKeyboardFocus)
-                        page = BookAuthor;
-                    else
-                        return;
-                }
+            if (curpage < 0)
+            {
+                TextBox box;
+                if (BookTitle.HasKeyboardFocus)
+                    box = BookTitle;
+                else if (BookAuthor.HasKeyboardFocus)
+                    box = BookAuthor;
                 else
-                    page = m_Pages[curpage];
+                    return;
+                box.TxEntry.InsertString(text);
+                return;
+            }
+            else
+                page = m_Pages[curpage];
 
-                int oldcaretpos = page.TxEntry.CaretIndex, oldpage = curpage;
-                string original = textID == MultiLineBox.PasteCommandID ? text : page.Text;
-                text = page.TxEntry.InsertString(text);
+            int oldcaretpos = page.TxEntry.CaretIndex;
+            int oldpage = curpage;
+            string original = (textID == MultiLineBox.PasteCommandID) ? text : page.Text;
+            text = page.TxEntry.InsertString(text);
 
-                if (curpage >= 0)
+            curpage++;
+
+            if (curpage % 2 == 1)
+                SetActivePage(ActivePage + 1);
+
+            while (text != null && curpage < BookPageCount)
+            {
+                var entry = m_Pages[curpage].TxEntry;
+                RefreshShowCaretPos(0, m_Pages[curpage]);
+                /*if(text.Length==0 || text[text.Length - 1] != '\n')
+                    text = entry.InsertString(text + "\n");
+                else*/
+                text = entry.InsertString(text);
+
+                if (!string.IsNullOrEmpty(text))
                 {
                     curpage++;
 
-                    if (curpage % 2 == 1)
-                        SetActivePage(ActivePage + 1);
-
-                    while (text != null && curpage < BookPageCount)
+                    if (curpage < BookPageCount)
                     {
-                        var entry = m_Pages[curpage].TxEntry;
-                        RefreshShowCaretPos(0, m_Pages[curpage]);
-                        /*if(text.Length==0 || text[text.Length - 1] != '\n')
-                            text = entry.InsertString(text + "\n");
-                        else*/
-                        text = entry.InsertString(text);
-
-                        if (!string.IsNullOrEmpty(text))
-                        {
-                            curpage++;
-
-                            if (curpage < BookPageCount)
-                            {
-                                if (curpage % 2 == 1)
-                                    SetActivePage(ActivePage + 1);
-                            }
-                            else
-                            {
-                                --curpage;
-                                text = null;
-                            }
-                        }
-                    }
-
-                    if (MultiLineBox.RetrnCommandID == textID)
-                    {
-                        if (oldcaretpos >= m_Pages[oldpage].Text.Length && original == m_Pages[oldpage].Text && oldpage + 1 < BookPageCount)
-                        {
-                            oldcaretpos = 0;
-                            oldpage++;
-                        }
-                        else
-                            oldcaretpos++;
-
-                        RefreshShowCaretPos(oldcaretpos, m_Pages[oldpage]);
+                        if (curpage % 2 == 1)
+                            SetActivePage(ActivePage + 1);
                     }
                     else
                     {
-                        int[] linechr = m_Pages[oldpage].TxEntry.GetLinesCharsCount(original);
-
-                        foreach (int t in linechr)
-                        {
-                            oldcaretpos += t;
-
-                            if (oldcaretpos <= m_Pages[oldpage].Text.Length) continue;
-
-                            oldcaretpos = t;
-
-                            if (oldpage + 1 < BookPageCount)
-                                oldpage++;
-                            else
-                                break;
-                        }
-
-                        RefreshShowCaretPos(oldcaretpos, m_Pages[oldpage]);
+                        --curpage;
+                        text = null;
                     }
-
-                    PageChanged[oldpage + 1] = true; //for the last page we are setting the changed status, this is the page we are on with caret.
-                    SetActivePage((oldpage >> 1) + oldpage % 2 + 1);
                 }
             }
+
+            if (MultiLineBox.RetrnCommandID == textID)
+            {
+                if (oldcaretpos >= m_Pages[oldpage].Text.Length && original == m_Pages[oldpage].Text && oldpage + 1 < BookPageCount)
+                {
+                    oldcaretpos = 0;
+                    oldpage++;
+                }
+                else
+                    oldcaretpos++;
+
+                RefreshShowCaretPos(oldcaretpos, m_Pages[oldpage]);
+            }
+            else
+            {
+                int[] linechr = m_Pages[oldpage].TxEntry.GetLinesCharsCount(original);
+
+                foreach (int t in linechr)
+                {
+                    oldcaretpos += t;
+
+                    if (oldcaretpos <= m_Pages[oldpage].Text.Length) continue;
+
+                    oldcaretpos = t;
+
+                    if (oldpage + 1 < BookPageCount)
+                        oldpage++;
+                    else
+                        break;
+                }
+
+                RefreshShowCaretPos(oldcaretpos, m_Pages[oldpage]);
+            }
+
+            PageChanged[oldpage + 1] = true; //for the last page we are setting the changed status, this is the page we are on with caret.
+            SetActivePage((oldpage >> 1) + oldpage % 2 + 1);
         }
 
         private void RefreshShowCaretPos(int pos, MultiLineBox box)
