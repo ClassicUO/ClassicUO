@@ -217,9 +217,15 @@ namespace ClassicUO.Network
             var buffer = new byte[length];
             for (int i = 0; i < length; i++)
             {
-                buffer[i] = ReadByte();
+                byte b = ReadByte();
+                if (b == 0)
+                {
+                    Skip(length - i - 1);
+                    break;
+                }
+                buffer[i] = b;
             }
-            string utf8string = Encoding.UTF8.GetString(buffer);
+            string utf8string = Encoding.UTF8.GetString(buffer).Trim('\0');
 
             bool isSafe = true;
             for (int i = 0; isSafe && i < utf8string.Length; i++) isSafe = StringHelper.IsSafeChar(utf8string[i]);
