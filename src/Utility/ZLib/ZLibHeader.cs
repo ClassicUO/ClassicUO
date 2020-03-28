@@ -2,8 +2,8 @@
 
 namespace ZLibNative
 {
-	public enum FLevel
-    { 
+    public enum FLevel
+    {
         Faster = 0,
         Fast = 1,
         Default = 2,
@@ -24,8 +24,8 @@ namespace ZLibNative
             }
             set
             {
-                if (value > 15) 
-                { 
+                if (value > 15)
+                {
                     throw new ArgumentOutOfRangeException("Argument cannot be greater than 15");
                 }
                 _CompressionMethod = value;
@@ -46,7 +46,7 @@ namespace ZLibNative
                 _CompressionInfo = value;
             }
         }
-        public byte FCheck 
+        public byte FCheck
         {
             get
             {
@@ -64,7 +64,7 @@ namespace ZLibNative
         public bool FDict { get; set; }
         public FLevel FLevel { get; set; }
 
-        public ZLibHeader() 
+        public ZLibHeader()
         {
 
         }
@@ -81,18 +81,18 @@ namespace ZLibNative
             byte byteCMF = (byte)(CompressionInfo << 4);
             byteCMF |= CompressionMethod;
 
-			return byteCMF;
-		}
+            return byteCMF;
+        }
         private byte GetFLG()
         {
             byte byteFLG = (byte)(Convert.ToByte(FLevel) << 6);
             byteFLG |= (byte)(Convert.ToByte(FDict) << 5);
-			byteFLG |= FCheck;
+            byteFLG |= FCheck;
 
-			return byteFLG;
+            return byteFLG;
         }
 
-        public byte[] EncodeZlibHeader() 
+        public byte[] EncodeZlibHeader()
         {
             byte[] result = new byte[2];
 
@@ -108,19 +108,19 @@ namespace ZLibNative
         {
             ZLibHeader result = new ZLibHeader();
 
-			//Ensure that parameters are bytes
-			pCMF &= 0x0FF;
-			pFlag &= 0x0FF;
+            //Ensure that parameters are bytes
+            pCMF &= 0x0FF;
+            pFlag &= 0x0FF;
 
-			//Decode bytes
-			result.CompressionInfo = Convert.ToByte((pCMF & 0xF0) >> 4);
-			result.CompressionMethod = Convert.ToByte(pCMF & 0x0F);
+            //Decode bytes
+            result.CompressionInfo = Convert.ToByte((pCMF & 0xF0) >> 4);
+            result.CompressionMethod = Convert.ToByte(pCMF & 0x0F);
 
-			result.FCheck = Convert.ToByte(pFlag & 0x1F);
-			result.FDict = Convert.ToBoolean(Convert.ToByte((pFlag & 0x20) >> 5));
-			result.FLevel = (FLevel)Convert.ToByte((pFlag & 0xC0) >> 6);
+            result.FCheck = Convert.ToByte(pFlag & 0x1F);
+            result.FDict = Convert.ToBoolean(Convert.ToByte((pFlag & 0x20) >> 5));
+            result.FLevel = (FLevel)Convert.ToByte((pFlag & 0xC0) >> 6);
 
-			result.IsSupportedZLibStream = (result.CompressionMethod == 8) && (result.CompressionInfo == 7) && (((pCMF * 256 + pFlag) % 31 == 0)) && (result.FDict == false);
+            result.IsSupportedZLibStream = (result.CompressionMethod == 8) && (result.CompressionInfo == 7) && (((pCMF * 256 + pFlag) % 31 == 0)) && (result.FDict == false);
 
             return result;
         }

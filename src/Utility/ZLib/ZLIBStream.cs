@@ -4,7 +4,7 @@ using System.IO.Compression;
 
 namespace ZLibNative
 {
-	public sealed class ZLIBStream : Stream
+    public sealed class ZLIBStream : Stream
     {
         private CompressionMode _CompressionMode = CompressionMode.Compress;
         private CompressionLevel _CompressionLevel = CompressionLevel.NoCompression;
@@ -29,7 +29,7 @@ namespace ZLibNative
         /// <param name="stream">Stream to compress or decompress</param>
         /// <param name="compressionMode">Compression Mode</param>
         public ZLIBStream(Stream stream, CompressionMode compressionMode) : this(stream, compressionMode, false)
-        { 
+        {
         }
         /// <summary>
         /// Initializes new instance of ZLIBStream using specified stream and compression level, optionally leaves the stream open.
@@ -69,23 +69,23 @@ namespace ZLibNative
         }
         public override bool CanWrite
         {
-            get 
+            get
             {
                 return (_CompressionMode == CompressionMode.Compress) && !_Closed;
             }
         }
         public override bool CanSeek
         {
-            get 
+            get
             {
                 return false;
             }
         }
         public override long Length
         {
-            get 
-            { 
-                throw new NotImplementedException(); 
+            get
+            {
+                throw new NotImplementedException();
             }
         }
         public override long Position
@@ -285,24 +285,24 @@ namespace ZLibNative
         /// Initialize the stream
         /// </summary>
         private void InitStream()
-        { 
+        {
             switch (_CompressionMode)
             {
                 case CompressionMode.Compress:
-                    {
-                        InitZLibHeader();
-                        _DeflateStream = new DeflateStream(_RawStream, _CompressionLevel, true);
-                        break;
-                    }
+                {
+                    InitZLibHeader();
+                    _DeflateStream = new DeflateStream(_RawStream, _CompressionLevel, true);
+                    break;
+                }
                 case CompressionMode.Decompress:
+                {
+                    if (!IsZLibStream(_RawStream))
                     {
-                        if (!IsZLibStream(_RawStream))
-                        {
-                            throw new InvalidDataException();
-                        }
-                        _DeflateStream = new DeflateStream(_RawStream, CompressionMode.Decompress, true);
-                        break;
+                        throw new InvalidDataException();
                     }
+                    _DeflateStream = new DeflateStream(_RawStream, CompressionMode.Decompress, true);
+                    break;
+                }
             }
         }
         /// <summary>
@@ -322,20 +322,20 @@ namespace ZLibNative
             switch (_CompressionLevel)
             {
                 case CompressionLevel.NoCompression:
-                    {
-                        header.FLevel = FLevel.Faster;
-                        break;
-                    }
+                {
+                    header.FLevel = FLevel.Faster;
+                    break;
+                }
                 case CompressionLevel.Fastest:
-                    {
-                        header.FLevel = FLevel.Default;
-                        break;
-                    }
+                {
+                    header.FLevel = FLevel.Default;
+                    break;
+                }
                 case CompressionLevel.Optimal:
-                    {
-                        header.FLevel = FLevel.Optimal;
-                        break;
-                    }
+                {
+                    header.FLevel = FLevel.Optimal;
+                    break;
+                }
             }
 
             bytesHeader = header.EncodeZlibHeader();
