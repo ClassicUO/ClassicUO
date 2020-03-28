@@ -61,7 +61,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public void Show()
         {
-            UIManager.HideContextMenu();
+            UIManager.ShowContextMenu(null);
 
             if (_items.Count == 0)
                 return;

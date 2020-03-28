@@ -73,6 +73,19 @@ namespace ClassicUO.Game.Managers
 
         public static SystemChatControl SystemChat { get; set; }
 
+        public static PopupMenuGump PopupMenu { get; private set; }
+
+        public static void ShowGamePopup(PopupMenuGump popup)
+        {
+            PopupMenu?.Dispose();
+            PopupMenu = popup;
+
+            if (popup == null || popup.IsDisposed)
+                return;
+
+            Add(PopupMenu);
+        }
+
         public static Control KeyboardFocusControl
         {
             get
@@ -169,6 +182,8 @@ namespace ClassicUO.Game.Managers
                     }
                 }
             }
+
+            ShowGamePopup(null);
         }
 
         public static void OnLeftMouseButtonUp()
@@ -189,7 +204,6 @@ namespace ClassicUO.Game.Managers
             else
                 _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButtonType.Left);
 
-            CloseIfClickOutGumps();
             _mouseDownControls[btn] = null;
             _validForDClick = MouseOverControl;
         }
@@ -235,7 +249,7 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            CloseIfClickOutGumps();
+            ShowGamePopup(null);
         }
 
         public static void OnRightMouseButtonUp()
@@ -266,7 +280,6 @@ namespace ClassicUO.Game.Managers
                 _mouseDownControls[btn].InvokeMouseCloseGumpWithRClick();
             }
 
-            CloseIfClickOutGumps();
             _mouseDownControls[btn] = null;
         }
 
@@ -312,6 +325,8 @@ namespace ClassicUO.Game.Managers
                     }
                 }
             }
+
+            ShowGamePopup(null);
         }
 
         public static void OnMiddleMouseButtonUp()
@@ -332,7 +347,6 @@ namespace ClassicUO.Game.Managers
             else
                 _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButtonType.Middle);
 
-            CloseIfClickOutGumps();
             _mouseDownControls[btn] = null;
             _validForDClick = MouseOverControl;
         }
@@ -361,13 +375,7 @@ namespace ClassicUO.Game.Managers
         {
             GameCursor = new GameCursor();
         }
-
-        public static void CloseIfClickOutGumps()
-        {
-            foreach (Gump gump in Gumps.OfType<Gump>().Where(s => s.CloseIfClickOutside))
-                gump.Dispose();
-        }
-
+        
         public static void SavePosition(uint serverSerial, Point point)
         {
             _gumpPositionCache[serverSerial] = point;
@@ -826,13 +834,6 @@ namespace ClassicUO.Game.Managers
 
             Add(ContextMenu);
         }
-
-        public static void HideContextMenu()
-        {
-            ContextMenu?.Dispose();
-            ContextMenu = null;
-        }
-
 
         public static T GetGump<T>(uint? serial = null) where T : Control
         {
