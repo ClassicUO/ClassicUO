@@ -23,22 +23,22 @@ using System;
 using System.IO;
 using System.IO.Compression;
 
+using ZLibNative;
+
 namespace ClassicUO.Utility
 {
-    internal static class ZLib
+    public static class ZLib
     {
-        private static readonly byte[] m_ZLibCompatibleHeader = { 0x78, 0x01 };
         public static unsafe void Decompress(IntPtr source, int sourceLength, int offset, IntPtr dest, int length)
         {
-            using (UnmanagedMemoryStream stream = new UnmanagedMemoryStream((byte*)source.ToPointer(), sourceLength))
+            using (UnmanagedMemoryStream stream = new UnmanagedMemoryStream((byte*)source.ToPointer(), sourceLength - offset))
             {
-                stream.Seek(m_ZLibCompatibleHeader.Length, SeekOrigin.Begin);
-                using (DeflateStream ds = new DeflateStream(stream, CompressionMode.Decompress, false))
+                using (ZLIBStream ds = new ZLIBStream(stream, CompressionMode.Decompress))
                 {
                     byte* dstPtr = (byte*)dest.ToPointer();
-                    for (int i = 0; i < length; i++)
+                    for (int i = 0, b = ds.ReadByte(); i < length && b >= 0; i++, b = ds.ReadByte())
                     {
-                        dstPtr[i] = (byte)ds.ReadByte();
+                        dstPtr[i] = (byte)b;
                     }
                 }
             }
@@ -46,19 +46,14 @@ namespace ClassicUO.Utility
 
         public static void Compress(byte[] dest, ref int destLength, byte[] source)
         {
-            using(MemoryStream stream = new MemoryStream(source, true))
+            using (MemoryStream stream = new MemoryStream(dest, true))
             {
-                stream.Write(m_ZLibCompatibleHeader, 0, m_ZLibCompatibleHeader.Length);
-                using (DeflateStream ds = new DeflateStream(stream, CompressionMode.Compress, false))
+                using (ZLIBStream ds = new ZLIBStream(stream, CompressionMode.Compress, true))
                 {
-                    int b;
-                    destLength = 0;
-                    while((b = ds.ReadByte()) >= 0 && destLength < dest.Length)
-                    {
-                        dest[destLength] = (byte)b;
-                        destLength++;
-                    }
+                    ds.Write(source, 0, source.Length);
+                    ds.Flush();
                 }
+                destLength = (int)stream.Position;
             }
         }
     }
