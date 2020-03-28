@@ -47,6 +47,7 @@ namespace ClassicUO.Game.UI.Gumps
         protected string _name;
         protected bool _canChangeName;
         protected TextBox _textBox;
+        protected bool _outOfRange;
 
         protected BaseHealthBarGump(Entity entity) : this(0, 0)
         {
@@ -150,6 +151,7 @@ namespace ClassicUO.Game.UI.Gumps
             else if (ProfileManager.Current.SaveHealthbars)
             {
                 _name = xml.GetAttribute("name");
+                _outOfRange = true;
                 BuildGump();
             }
             else 
@@ -326,7 +328,6 @@ namespace ClassicUO.Game.UI.Gumps
 
 
         private bool _oldWarMode, _normalHits, _poisoned, _yellowHits;
-        private bool _outOfRange;
 
         internal const int HPB_WIDTH = 120;
         internal const int HPB_HEIGHT_MULTILINE = 60;
@@ -874,7 +875,6 @@ namespace ClassicUO.Game.UI.Gumps
         private int _oldHits, _oldStam, _oldMana;
 
         private bool _oldWarMode, _normalHits, _poisoned, _yellowHits;
-        private bool _outOfRange;
 
 
         public HealthBarGump(Entity entity) : this()
