@@ -995,13 +995,13 @@ namespace ClassicUO.Game.Managers
 
                 gump.InvokeMouseOver(Mouse.Position);
 
-                if (_mouseDownControls[0] == gump)
-                {
-                    if (ProfileManager.Current == null || !ProfileManager.Current.HoldAltToMoveGumps || Keyboard.Alt)
-                    {
-                        AttemptDragControl(gump, Mouse.Position);
-                    }
-                }
+                //if (_mouseDownControls[0] == gump)
+                //{
+                //    if (ProfileManager.Current == null || !ProfileManager.Current.HoldAltToMoveGumps || Keyboard.Alt)
+                //    {
+                //        AttemptDragControl(gump, Mouse.Position);
+                //    }
+                //}
             }
 
             MouseOverControl = gump;
@@ -1149,18 +1149,21 @@ namespace ClassicUO.Game.Managers
 
             if (dragTarget.CanMove)
             {
-
                 if (attemptAlwaysSuccessful || !_isDraggingControl)
                 {
                     DraggingControl = dragTarget;
-                    _dragOriginX = mousePosition.X;
-                    _dragOriginY = mousePosition.Y;
+                    _dragOriginX = Mouse.LDropPosition.X;
+                    _dragOriginY = Mouse.LDropPosition.Y;
                 }
 
                 int deltaX = mousePosition.X - _dragOriginX;
                 int deltaY = mousePosition.Y - _dragOriginY;
 
-                if (attemptAlwaysSuccessful || Math.Abs(deltaX) + Math.Abs(deltaY) > Constants.MIN_GUMP_DRAG_DISTANCE)
+                int delta = Math.Abs(deltaX) + Math.Abs(deltaY);
+
+                Console.WriteLine("DELTA: {0}", delta);
+
+                if (attemptAlwaysSuccessful || delta > Constants.MIN_GUMP_DRAG_DISTANCE)
                 {
                     _isDraggingControl = true;
                     dragTarget.InvokeDragBegin(new Point(deltaX, deltaY));
@@ -1175,6 +1178,7 @@ namespace ClassicUO.Game.Managers
 
             int deltaX = mousePosition.X - _dragOriginX;
             int deltaY = mousePosition.Y - _dragOriginY;
+
             DraggingControl.X = DraggingControl.X + deltaX;
             DraggingControl.Y = DraggingControl.Y + deltaY;
             DraggingControl.InvokeMove(deltaX, deltaY);

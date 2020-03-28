@@ -671,12 +671,12 @@ namespace ClassicUO.Game.Scenes
                             if (ProfileManager.Current.CustomBarsToggled)
                             {
                                 Rectangle rect = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
-                                UIManager.Add(customgump = new HealthBarGumpCustom(obj) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                                UIManager.Add(customgump = new HealthBarGumpCustom(obj) { X = Mouse.LDropPosition.X - (rect.Width >> 1), Y = Mouse.LDropPosition.Y - (rect.Height >> 1) });
                             }
                             else
                             {
                                 Rectangle rect = GumpsLoader.Instance.GetTexture(0x0804).Bounds;
-                                UIManager.Add(customgump = new HealthBarGump(obj) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
+                                UIManager.Add(customgump = new HealthBarGump(obj) { X = Mouse.LDropPosition.X - (rect.Width >> 1), Y = Mouse.LDropPosition.Y - (rect.Height >> 1) });
                             }
                             UIManager.AttemptDragControl(customgump, Mouse.Position, true);
                         }

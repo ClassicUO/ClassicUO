@@ -65,8 +65,8 @@ namespace ClassicUO.Game.Scenes
 
                     SplitMenuGump gump = new SplitMenuGump(item, new Point(x, y))
                     {
-                        X = Mouse.Position.X - 80,
-                        Y = Mouse.Position.Y - 40
+                        X = Mouse.LDropPosition.X - 80,
+                        Y = Mouse.LDropPosition.Y - 40
                     };
                     UIManager.Add(gump);
                     UIManager.AttemptDragControl(gump, Mouse.Position, true);
