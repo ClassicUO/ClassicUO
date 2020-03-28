@@ -20,172 +20,45 @@
 #endregion
 
 using System;
-using System.Runtime.InteropServices;
+using System.IO;
+using System.IO.Compression;
 
 namespace ClassicUO.Utility
 {
     internal static class ZLib
     {
-        // thanks ServUO :)
-
-        private static readonly ICompressor _compressor;
-
-        static ZLib()
+        private static readonly byte[] m_ZLibCompatibleHeader = { 0x78, 0x01 };
+        public static unsafe void Decompress(IntPtr source, int sourceLength, int offset, IntPtr dest, int length)
         {
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                _compressor = new Compressor64();
-            else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
-                _compressor = new CompressorUnix64();
-            else
-                throw new NotSupportedException("Zlib not support this platform");
-        }
-
-
-        public static void Decompress(byte[] source, int offset, byte[] dest, int length)
-        {
-            _compressor.Decompress(dest, ref length, source, source.Length - offset);
-        }
-
-        public static void Decompress(IntPtr source, int sourceLength, int offset, IntPtr dest, int length)
-        {
-            _compressor.Decompress(dest, ref length, source, sourceLength - offset);
-        }
-
-        private enum ZLibQuality
-        {
-            Default = -1,
-
-            None = 0,
-
-            Speed = 1,
-            Size = 9
-        }
-
-        private enum ZLibError
-        {
-            VersionError = -6,
-            BufferError = -5,
-            MemoryError = -4,
-            DataError = -3,
-            StreamError = -2,
-            FileError = -1,
-
-            Okay = 0,
-
-            StreamEnd = 1,
-            NeedDictionary = 2
-        }
-
-
-        private interface ICompressor
-        {
-            string Version { get; }
-
-            ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength);
-            ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality);
-
-            ZLibError Decompress(byte[] dest, ref int destLength, byte[] source, int sourceLength);
-            ZLibError Decompress(IntPtr dest, ref int destLength, IntPtr source, int sourceLength);
-
-        }
-
-
-
-        private sealed class Compressor64 : ICompressor
-        {
-            public string Version => SafeNativeMethods.zlibVersion();
-
-            public ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength)
+            using (UnmanagedMemoryStream stream = new UnmanagedMemoryStream((byte*)source.ToPointer(), sourceLength))
             {
-                return SafeNativeMethods.compress(dest, ref destLength, source, sourceLength);
-            }
-
-            public ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality)
-            {
-                return SafeNativeMethods.compress2(dest, ref destLength, source, sourceLength, quality);
-            }
-
-            public ZLibError Decompress(byte[] dest, ref int destLength, byte[] source, int sourceLength)
-            {
-                return SafeNativeMethods.uncompress(dest, ref destLength, source, sourceLength);
-            }
-
-            public ZLibError Decompress(IntPtr dest, ref int destLength, IntPtr source, int sourceLength)
-            {
-                return SafeNativeMethods.uncompress(dest, ref destLength, source, sourceLength);
-            }
-
-            class SafeNativeMethods
-            {
-                [DllImport("zlib")]
-                internal static extern string zlibVersion();
-
-                [DllImport("zlib")]
-                internal static extern ZLibError compress(byte[] dest, ref int destLength, byte[] source, int sourceLength);
-
-                [DllImport("zlib")]
-                internal static extern ZLibError compress2(
-                    byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality);
-
-                [DllImport("zlib")]
-                internal static extern ZLibError uncompress(byte[] dest, ref int destLen, byte[] source, int sourceLen);
-
-                [DllImport("zlib")]
-                internal static extern ZLibError uncompress(IntPtr dest, ref int destLen, IntPtr source, int sourceLen);
+                stream.Seek(m_ZLibCompatibleHeader.Length, SeekOrigin.Begin);
+                using (DeflateStream ds = new DeflateStream(stream, CompressionMode.Decompress, false))
+                {
+                    byte* dstPtr = (byte*)dest.ToPointer();
+                    for (int i = 0; i < length; i++)
+                    {
+                        dstPtr[i] = (byte)ds.ReadByte();
+                    }
+                }
             }
         }
 
-        private sealed class CompressorUnix64 : ICompressor
+        public static void Compress(byte[] dest, ref int destLength, byte[] source)
         {
-            public string Version => SafeNativeMethods.zlibVersion();
-
-            public ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength)
+            using(MemoryStream stream = new MemoryStream(source, true))
             {
-                long destLengthLong = destLength;
-                ZLibError z = SafeNativeMethods.compress(dest, ref destLengthLong, source, sourceLength);
-                destLength = (int) destLengthLong;
-
-                return z;
-            }
-
-            public ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality)
-            {
-                long destLengthLong = destLength;
-                ZLibError z = SafeNativeMethods.compress2(dest, ref destLengthLong, source, sourceLength, quality);
-                destLength = (int) destLengthLong;
-
-                return z;
-            }
-
-            public ZLibError Decompress(byte[] dest, ref int destLength, byte[] source, int sourceLength)
-            {
-                long destLengthLong = destLength;
-                ZLibError z = SafeNativeMethods.uncompress(dest, ref destLengthLong, source, sourceLength);
-                destLength = (int) destLengthLong;
-
-                return z;
-            }
-            public ZLibError Decompress(IntPtr dest, ref int destLength, IntPtr source, int sourceLength)
-            {
-                return SafeNativeMethods.uncompress(dest, ref destLength, source, sourceLength);
-            }
-
-            class SafeNativeMethods
-            {
-                [DllImport("libz")]
-                internal static extern string zlibVersion();
-
-                [DllImport("libz")]
-                internal static extern ZLibError compress(byte[] dest, ref long destLength, byte[] source, long sourceLength);
-
-                [DllImport("libz")]
-                internal static extern ZLibError compress2(byte[] dest, ref long destLength, byte[] source, long sourceLength, ZLibQuality quality);
-
-                [DllImport("libz")]
-                internal static extern ZLibError uncompress(byte[] dest, ref long destLen, byte[] source, long sourceLen);
-
-                [DllImport("libz")]
-                internal static extern ZLibError uncompress(IntPtr dest, ref int destLen, IntPtr source, int sourceLen);
+                stream.Write(m_ZLibCompatibleHeader, 0, m_ZLibCompatibleHeader.Length);
+                using (DeflateStream ds = new DeflateStream(stream, CompressionMode.Compress, false))
+                {
+                    int b;
+                    destLength = 0;
+                    while((b = ds.ReadByte()) >= 0 && destLength < dest.Length)
+                    {
+                        dest[destLength] = (byte)b;
+                        destLength++;
+                    }
+                }
             }
         }
     }
