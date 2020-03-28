@@ -29,6 +29,20 @@ namespace ClassicUO.Utility
 {
     public static class ZLib
     {
+        public static void Decompress(byte[] source, int sourceStart, int sourceLength, int offset, byte[] dest, int length)
+        {
+            using (MemoryStream stream = new MemoryStream(source, sourceStart, sourceLength - offset, true))
+            {
+                using (ZLIBStream ds = new ZLIBStream(stream, CompressionMode.Decompress))
+                {
+                    for (int i = 0, b = ds.ReadByte(); i < length && b >= 0; i++, b = ds.ReadByte())
+                    {
+                        dest[i] = (byte)b;
+                    }
+                }
+            }
+        }
+
         public static unsafe void Decompress(IntPtr source, int sourceLength, int offset, IntPtr dest, int length)
         {
             using (UnmanagedMemoryStream stream = new UnmanagedMemoryStream((byte*)source.ToPointer(), sourceLength - offset))
