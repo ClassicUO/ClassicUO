@@ -69,8 +69,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool BlockMovement { get; set; }
 
-        public bool CloseIfClickOutside { get; set; }
-
         public bool CanBeSaved => GumpType != GUMP_TYPE.NONE;
 
         public virtual GUMP_TYPE GumpType { get; }

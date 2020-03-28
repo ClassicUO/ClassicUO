@@ -3338,11 +3338,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 0x14: // display popup/context menu
-                    PopupMenuData data = PopupMenuData.Parse(p);
-
-                    UIManager.GetGump<PopupMenuGump>()?.Dispose();
-
-                    UIManager.Add(new PopupMenuGump(data)
+                    UIManager.ShowGamePopup(new PopupMenuGump(PopupMenuData.Parse(p))
                     {
                         X = DelayedObjectClickManager.X,
                         Y = DelayedObjectClickManager.Y
