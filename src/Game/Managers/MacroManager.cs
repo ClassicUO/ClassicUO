@@ -1364,6 +1364,26 @@ namespace ClassicUO.Game.Managers
                         }
                     }
                     break;
+
+                case MacroType.UseItemByGraphicId:
+                    string itemGraphicIdStr = ((MacroObjectString)macro).Text;
+
+                    try
+                    {
+                        ushort itemGraphicId = Convert.ToUInt16(itemGraphicIdStr);
+                        Item item = World.Player.FindItemByGraphic(itemGraphicId);
+
+                        if (item != null)
+                            GameActions.DoubleClick(item.Serial);
+                        else
+                            GameActions.Print("Item not found (try to open a bag that contains the item)");
+                    }
+                    catch (FormatException)
+                    {
+                        GameActions.Print("Invalid item graphic ID");
+                    }
+
+                    break;
             }
 
 
@@ -1565,6 +1585,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.SetUpdateRange:
                 case MacroType.ModifyUpdateRange:
                 case MacroType.RazorMacro:
+                case MacroType.UseItemByGraphicId:
                     obj = new MacroObjectString(code, MacroSubType.MSC_NONE);
 
                     break;
@@ -1699,6 +1720,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.SetUpdateRange:
                 case MacroType.ModifyUpdateRange:
                 case MacroType.RazorMacro:
+                case MacroType.UseItemByGraphicId:
                     SubMenuType = 2;
 
                     break;
@@ -1813,6 +1835,7 @@ namespace ClassicUO.Game.Managers
         UsePotion,
         CloseAllHealthBars,
         RazorMacro,
+        UseItemByGraphicId,
     }
 
     internal enum MacroSubType
