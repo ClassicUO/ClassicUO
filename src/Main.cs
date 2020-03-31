@@ -114,7 +114,11 @@ namespace ClassicUO
                     return;
 
             //Environment.SetEnvironmentVariable("FNA_GRAPHICS_FORCE_GLDEVICE", "ModernGLDevice");
-            Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI",  CUOEnviroment.IsHighDPI ? "1" : "0");
+            if (CUOEnviroment.IsHighDPI)
+            {
+                Log.Trace("HIGH DPI - ENABLED");
+                Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
+            }
             Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
             Environment.SetEnvironmentVariable("FNA_OPENGL_FORCE_COMPATIBILITY_PROFILE", "1");
             Environment.SetEnvironmentVariable(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
@@ -194,6 +198,10 @@ namespace ClassicUO
 
                     case "skipupdate":
                         _skipUpdates = true;
+                        break;
+
+                    case "highdpi":
+                        CUOEnviroment.IsHighDPI = true;
                         break;
 
                     case "username":
