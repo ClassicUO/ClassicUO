@@ -125,7 +125,6 @@ namespace ClassicUO.Game.Scenes
             if (Client.Game.IsWindowMaximized())
                 Client.Game.RestoreWindow();
             Client.Game.SetWindowSize(640, 480);
-            //Client.Client.SetWindowPositionBySettings();
         }
 
 
