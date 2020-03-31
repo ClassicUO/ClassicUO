@@ -173,14 +173,31 @@ namespace ClassicUO
             SDL.SDL_SetWindowPosition(Window.Handle, x, y);
         }
 
+        public GraphicsDeviceManager GraphicManager => _graphicDeviceManager;
+
         public void SetWindowSize(int width, int height)
         {
+            //width = (int) ((double) width * Client.Game.GraphicManager.PreferredBackBufferWidth / Client.Game.Window.ClientBounds.Width);
+            //height = (int) ((double) height * Client.Game.GraphicManager.PreferredBackBufferHeight / Client.Game.Window.ClientBounds.Height);
+
             _graphicDeviceManager.PreferredBackBufferWidth = width;
             _graphicDeviceManager.PreferredBackBufferHeight = height;
             _graphicDeviceManager.ApplyChanges();
 
+
+            if (CUOEnviroment.IsHighDPI)
+            {
+                width *= 2;
+                height *= 2;
+            }
+
             _buffer?.Dispose();
-            _buffer = new RenderTarget2D(GraphicsDevice, _graphicDeviceManager.PreferredBackBufferWidth, _graphicDeviceManager.PreferredBackBufferHeight, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
+            _buffer = new RenderTarget2D(GraphicsDevice,
+                                         width,
+                                         height,
+                                         false, 
+                                         SurfaceFormat.Color,
+                                         DepthFormat.Depth24Stencil8);
         }
 
         public void SetWindowBorderless(bool borderless)
@@ -269,6 +286,11 @@ namespace ClassicUO
             OnNetworkUpdate(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
             UIManager.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
             Plugin.Tick();
+
+            //var p = Microsoft.Xna.Framework.Input.Mouse.GetState();
+            //Console.WriteLine("FNA MOUSE: {0},{1}", p.X, p.Y);
+            //Console.WriteLine("SDL MOUSE: {0},{1}", Mouse.Position.X, Mouse.Position.Y);
+
 
             if (_scene != null && _scene.IsLoaded && !_scene.IsDestroyed)
             {
@@ -401,12 +423,6 @@ namespace ClassicUO
         {
             int width = Window.ClientBounds.Width;
             int height = Window.ClientBounds.Height;
-
-            if (CUOEnviroment.IsHighDPI)
-            {
-                //TODO
-                Log.Warn("HighDPI not supported yet.");
-            }
 
             if (!IsWindowMaximized())
             {
