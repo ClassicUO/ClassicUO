@@ -260,9 +260,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Client.Game.Scene.Audio.PlaySound(0x0055);
             }
 
-            ActivePage = page;
-            UpdatePageButtonVisibility();
-
             //Non-editable books only have page data sent for currently viewed pages
             if (!IsEditable)
             {
@@ -277,6 +274,27 @@ namespace ClassicUO.Game.UI.Gumps
                     NetClient.Socket.Send(new PBookPageDataRequest(LocalSerial, (ushort)rightPage));
                 }
             }
+            else
+            {
+                if (_pagesChanged[ActivePage])
+                {
+                    _pagesChanged[ActivePage] = false;
+
+                    if (ActivePage < 1)
+                    {
+
+                    }
+                    else
+                    {
+                        NetClient.Socket.Send(new PBookPageData(this, ActivePage + 1));
+                    }
+                }
+            }
+
+
+            ActivePage = page;
+            UpdatePageButtonVisibility();
+
 
             if (UIManager.KeyboardFocusControl == null || (UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl && UIManager.KeyboardFocusControl.Page != page))
             {
@@ -302,19 +320,19 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void CloseWithRightClick()
         {
-            if (_pagesChanged[0])
-            {
-                if (UseNewHeader)
-                    NetClient.Socket.Send(new PBookHeader(this));
-                else if (IsNewBook)
-                    NetClient.Socket.Send(new PBookHeaderOldUTF8(this));
-                else
-                    NetClient.Socket.Send(new PBookHeaderOld(this));
-                _pagesChanged[0] = false;
-            }
+            //if (_pagesChanged[0])
+            //{
+            //    if (UseNewHeader)
+            //        NetClient.Socket.Send(new PBookHeader(this));
+            //    else if (IsNewBook)
+            //        NetClient.Socket.Send(new PBookHeaderOldUTF8(this));
+            //    else
+            //        NetClient.Socket.Send(new PBookHeaderOld(this));
+            //    _pagesChanged[0] = false;
+            //}
 
-            if (_pagesChanged.Any(t => t)) 
-                NetClient.Socket.Send(new PBookPageData(this));
+            //if (_pagesChanged.Any(t => t)) 
+            //    NetClient.Socket.Send(new PBookPageData(this));
             base.CloseWithRightClick();
         }
 
@@ -794,6 +812,47 @@ namespace ClassicUO.Game.UI.Gumps
 
         internal sealed class PBookPageData : PacketWriter
         {
+            public PBookPageData(BookGump gump, int page) : base(0x66)
+            {
+                string text = gump.GetPageText(page);
+
+                if (text == null)
+                    text = string.Empty;
+
+                int linecount = 0;
+
+                if (text.Length != 0)
+                {
+                    for (int i = 0; i < text.Length; i++)
+                    {
+                        if (text[i] == '\n')
+                            linecount++;
+                    }
+
+                    if (text[text.Length - 1] != '\n')
+                    {
+                        linecount++;
+                    }
+                }
+
+
+                WriteUInt(gump.LocalSerial);
+                WriteUShort(0x0001);
+                WriteUShort((ushort) page);
+                WriteUShort((ushort) linecount);
+
+                for (int i = 0; i < text.Length; i++)
+                {
+                    char c = text[i];
+                    if (c == '\n')
+                        WriteByte(0);
+                    else 
+                        WriteByte((byte) c);
+                }
+
+                WriteByte(0);
+            }
+
             public PBookPageData(BookGump gump) : base(0x66)
             {
                 EnsureSize(256);
