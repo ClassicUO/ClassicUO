@@ -51,6 +51,8 @@ namespace ClassicUO
             Log.Trace("Running game...");
             using (Game = new GameController())
             {
+                // https://github.com/FNA-XNA/FNA/wiki/7:-FNA-Environment-Variables#fna_graphics_enable_highdpi
+                CUOEnviroment.IsHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
                 Game.Run();
             }
             Log.Trace("Exiting game...");
