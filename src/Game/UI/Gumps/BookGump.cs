@@ -41,7 +41,8 @@ namespace ClassicUO.Game.UI.Gumps
         private const int MaxBookLines = 8;
         private const int MaxBookChars = 53;
 
-        private readonly List<MultiLineBox> m_Pages = new List<MultiLineBox>();
+        private readonly MultiLineBox[] _pagesTextBoxes;
+
         private byte _activated;
 
         // < 0 == backward
@@ -52,15 +53,23 @@ namespace ClassicUO.Game.UI.Gumps
         private sbyte _AtEnd;
 
         private bool _scale;
-        public TextBox BookTitle, BookAuthor;
 
         private GumpPic m_Forward, m_Backward;
         public bool[] PageChanged;
 
-        public BookGump(uint serial) : base(serial, 0)
+        private TextBox _titleTextBox, _authorTextBox;
+
+        public BookGump(uint serial, ushort page_count, string title, string author, bool is_editable, bool old_packet) : base(serial, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
+
+            BookPageCount = page_count;
+            _pagesTextBoxes = new MultiLineBox[page_count];
+            IsEditable = is_editable;
+            UseNewHeader = !old_packet;
+
+            BuildGump(title, author);
         }
 
         public ushort BookPageCount { get; internal set; }
@@ -68,45 +77,43 @@ namespace ClassicUO.Game.UI.Gumps
         public bool UseNewHeader { get; set; } = true;
         public static byte DefaultFont => (byte) (IsNewBook ? 1 : 4);
 
-        public string[] BookPages
-        {
-            get
-            {
-                string[] pages = new string[BookPageCount];
-                for (int i = 0; i < pages.Length; i++) pages[i] = string.Empty;
+       
 
-                for (int i = 0; i < m_Pages.Count; i++)
-                {
-                    pages[i] = m_Pages[i].Text;
-                }
-                return pages;
-            }
-            set
-            {
-                if (value != null)
-                {
-                    if (_activated > 0)
-                    {
-                        int min = Math.Min(m_Pages.Count, value.Length);
-                        for (int i = 0; i < min; i++)
-                        {
-                            m_Pages[i].IsEditable = IsEditable;
-                            m_Pages[i].Text = value[i];
-                        }
-                    }
-                    else
-                    {
-                        BuildGump(value);
-                    }
-                }
-            }
-        }
 
         public bool IntroChanges => PageChanged[0];
         private int MaxPage => (BookPageCount >> 1) + 1;
-        private int ActiveInternalPage => IsEditable ? m_Pages.FindIndex(t => t.HasKeyboardFocus) : m_Pages.FindIndex(t => t.MouseIsOver);
 
-        private void BuildGump(string[] pages)
+        private int GetActivePage()
+        {
+            for (int i = 0; i < _pagesTextBoxes.Length; i++)
+            {
+                var p = _pagesTextBoxes[i];
+
+                if (p != null)
+                {
+                    if ((IsEditable && p.HasKeyboardFocus) || (!IsEditable && p.MouseIsOver) )
+                    {
+                        return i;
+                    }
+                }
+            }
+
+            return -1;
+        }
+
+        public void SetTile(string title, bool editable)
+        {
+            _titleTextBox.Text = title;
+            _titleTextBox.IsEditable = editable;
+        }
+
+        public void SetAuthor(string author, bool editable)
+        {
+            _authorTextBox.Text = author;
+            _authorTextBox.IsEditable = editable;
+        }
+
+        private void BuildGump(string title, string author)
         {
             CanCloseWithRightClick = true;
             Add(new GumpPic(0, 0, 0x1FE, 0)
@@ -139,9 +146,23 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             PageChanged = new bool[BookPageCount + 1];
-            Add(BookTitle, 1);
-            Add(new Label("by", true, 1) {X = BookAuthor.X, Y = BookAuthor.Y - 30}, 1);
-            Add(BookAuthor, 1);
+            Add(_titleTextBox = new TextBox(new TextEntry(DefaultFont, 47, 150, 150, IsNewBook, FontStyle.None, 0), IsEditable)
+            {
+                X = 40,
+                Y = 60,
+                Height = 25,
+                Width = 155,
+                Text = title
+            }, 1);
+            Add(new Label("by", true, 1) {X = 40, Y = 130 }, 1);
+            Add(_authorTextBox = new TextBox(new TextEntry(DefaultFont, 29, 150, 150, IsNewBook, FontStyle.None, 0), IsEditable)
+            {
+                X = 40,
+                Y = 160,
+                Height = 25,
+                Width = 155,
+                Text = author
+            }, 1);
 
             for (int k = 1; k <= BookPageCount; k++)
             {
@@ -160,28 +181,28 @@ namespace ClassicUO.Game.UI.Gumps
                     page += 1;
                 page >>= 1;
 
-                string text = k <= pages.Length ? pages[k - 1] : "";
-                MultiLineBox tbox = new MultiLineBox(new MultiLineEntry(DefaultFont, MaxBookChars * MaxBookLines, 0, 155, IsNewBook, FontStyle.ExtraHeight, 2), IsEditable)
+                MultiLineBox tbox = new MultiLineBox(new MultiLineEntry(DefaultFont, MaxBookChars * MaxBookLines, 0, 166, IsNewBook, FontStyle.ExtraHeight, 2), IsEditable)
                 {
                     X = x,
                     Y = y,
                     Height = 170,
-                    Width = 155,
+                    Width = 166,
                     IsEditable = IsEditable,
-                    Text = text,
                     MaxLines = MaxBookLines
                 };
                 Add(tbox, page);
-                m_Pages.Add(tbox);
+                _pagesTextBoxes[k - 1] = tbox;
 
                 tbox.MouseUp += (sender, e) =>
                 {
-                    if (e.Button == MouseButtonType.Left && sender is Control ctrl) OnLeftClick();
+                    if (e.Button == MouseButtonType.Left && sender is Control ctrl) 
+                        OnLeftClick();
                 };
 
                 tbox.MouseDoubleClick += (sender, e) =>
                 {
-                    if (e.Button == MouseButtonType.Left && sender is Control ctrl) OnLeftClick();
+                    if (e.Button == MouseButtonType.Left && sender is Control ctrl) 
+                        OnLeftClick();
                 };
                 Add(new Label(k.ToString(), true, 1) {X = x + 80, Y = 200}, page);
             }
@@ -210,6 +231,25 @@ namespace ClassicUO.Game.UI.Gumps
                 m_Backward.IsVisible = true;
                 m_Forward.IsVisible = true;
             }
+        }
+
+        public void SetTextToPage(string text, int page)
+        {
+            if (page >= 0 && page < _pagesTextBoxes.Length && _pagesTextBoxes[page] != null)
+            {
+                _pagesTextBoxes[page].IsEditable = IsEditable;
+                _pagesTextBoxes[page].Text = text;
+            }
+        }
+
+        public string GetPageText(int page)
+        {
+            if (page >= 0 && page < _pagesTextBoxes.Length)
+            {
+                return _pagesTextBoxes[page]?.Text;
+            }
+
+            return string.Empty;
         }
 
         private void SetActivePage(int page)
@@ -283,12 +323,12 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (!IsDisposed)
                 {
-                    if (BookAuthor.IsChanged || BookTitle.IsChanged)
+                    if (_authorTextBox.IsChanged || _titleTextBox.IsChanged)
                         PageChanged[0] = true;
 
-                    for (int i = m_Pages.Count - 1; i >= 0; --i)
+                    for (int i = _pagesTextBoxes.Length - 1; i >= 0; --i)
                     {
-                        if (m_Pages[i].IsChanged)
+                        if (_pagesTextBoxes[i].IsChanged)
                             PageChanged[i + 1] = true;
                     }
                 }
@@ -301,8 +341,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-            int curpage = ActiveInternalPage;
-            var box = curpage >= 0 ? m_Pages[curpage] : null;
+            int curpage = GetActivePage();
+
+            var box = curpage >= 0 ? _pagesTextBoxes[curpage] : null;
             var entry = box?.TxEntry;
 
             if (key == SDL.SDL_Keycode.SDLK_BACKSPACE || key == SDL.SDL_Keycode.SDLK_DELETE)
@@ -318,7 +359,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 if ((curpage + 1) % 2 == 0)
                                     SetActivePage(ActivePage - 1);
                                 curpage--;
-                                box = m_Pages[curpage];
+                                box = _pagesTextBoxes[curpage];
                                 entry = box.TxEntry;
                                 RefreshShowCaretPos(entry.Text.Length, box);
                                 _AtEnd = 1;
@@ -351,12 +392,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                             do
                             {
-                                entry = m_Pages[curpage].TxEntry;
-                                box = m_Pages[curpage];
-                                int curlen = entry.Text.Length, prevlen = m_Pages[curpage - 1].Text.Length, chonline = box.GetCharsOnLine(0), prevpage = curpage - 1;
-                                m_Pages[prevpage].TxEntry.SetCaretPosition(prevlen);
+                                entry = _pagesTextBoxes[curpage].TxEntry;
+                                box = _pagesTextBoxes[curpage];
+                                int curlen = entry.Text.Length, prevlen = _pagesTextBoxes[curpage - 1].Text.Length, chonline = box.GetCharsOnLine(0), prevpage = curpage - 1;
+                                _pagesTextBoxes[prevpage].TxEntry.SetCaretPosition(prevlen);
 
-                                for (int i = MaxBookLines - m_Pages[prevpage].LinesCount; i > 0 && prevlen > 0; --i) sb.Append('\n');
+                                for (int i = MaxBookLines - _pagesTextBoxes[prevpage].LinesCount; i > 0 && prevlen > 0; --i) sb.Append('\n');
 
                                 sb.Append(entry.Text.Substring(0, chonline));
 
@@ -367,12 +408,12 @@ namespace ClassicUO.Game.UI.Gumps
                                     entry.Text = entry.Text.Substring(chonline);
                                 }
 
-                                m_Pages[prevpage].TxEntry.InsertString(sb.ToString());
+                                _pagesTextBoxes[prevpage].TxEntry.InsertString(sb.ToString());
                                 curpage++;
                                 sb.Clear();
                             } while (curpage < BookPageCount);
 
-                            m_Pages[active].TxEntry.SetCaretPosition(caretpos);
+                            _pagesTextBoxes[active].TxEntry.SetCaretPosition(caretpos);
                         }
                     }
                 }
@@ -387,7 +428,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if ((curpage + 1) % 2 == 1)
                                 SetActivePage(ActivePage + 1);
-                            RefreshShowCaretPos(0, m_Pages[curpage + 1]);
+                            RefreshShowCaretPos(0, _pagesTextBoxes[curpage + 1]);
                             _AtEnd = -1;
                         }
                         else
@@ -409,7 +450,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if ((curpage + 1) % 2 == 0)
                                 SetActivePage(ActivePage - 1);
-                            RefreshShowCaretPos(m_Pages[curpage - 1].Text.Length, m_Pages[curpage - 1]);
+                            RefreshShowCaretPos(_pagesTextBoxes[curpage - 1].Text.Length, _pagesTextBoxes[curpage - 1]);
                             _AtEnd = 1;
                         }
                         else
@@ -431,7 +472,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if ((curpage + 1) % 2 == 0)
                                 SetActivePage(ActivePage - 1);
-                            RefreshShowCaretPos(m_Pages[curpage - 1].Text.Length, m_Pages[curpage - 1]);
+                            RefreshShowCaretPos(_pagesTextBoxes[curpage - 1].Text.Length, _pagesTextBoxes[curpage - 1]);
                             _AtEnd = 1;
                         }
                         else
@@ -453,7 +494,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if ((curpage + 1) % 2 == 1)
                                 SetActivePage(ActivePage + 1);
-                            RefreshShowCaretPos(0, m_Pages[curpage + 1]);
+                            RefreshShowCaretPos(0, _pagesTextBoxes[curpage + 1]);
                             _AtEnd = -1;
                         }
                         else
@@ -473,7 +514,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if ((curpage + 1) % 2 == 0)
                             SetActivePage(ActivePage - 1);
-                        RefreshShowCaretPos(m_Pages[curpage - 1].Text.Length, m_Pages[curpage - 1]);
+                        RefreshShowCaretPos(_pagesTextBoxes[curpage - 1].Text.Length, _pagesTextBoxes[curpage - 1]);
                         _AtEnd = 1;
 
                         return;
@@ -490,7 +531,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if ((curpage + 1) % 2 == 1)
                             SetActivePage(ActivePage + 1);
-                        RefreshShowCaretPos(0, m_Pages[curpage + 1]);
+                        RefreshShowCaretPos(0, _pagesTextBoxes[curpage + 1]);
                         _AtEnd = -1;
 
                         return;
@@ -519,7 +560,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 if (fromleft)
-                    _scale = _scale && (ActiveInternalPage > 0 || entry.CaretIndex > 0);
+                    _scale = _scale && (GetActivePage() > 0 || entry.CaretIndex > 0);
             }
 
             entry.RemoveChar(fromleft);
@@ -542,7 +583,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (caretpos == -1 && sepos <= 0 || sepos > 0 || txtlen == 0)
                     {
-                        if (entry.CaretIndex == txtlen && ActiveInternalPage + 1 < BookPageCount)
+                        if (entry.CaretIndex == txtlen && GetActivePage() + 1 < BookPageCount)
                             _AtEnd = 1;
                         entry.SetCaretPosition(txtlen);
 
@@ -560,7 +601,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (caretpos == 0 && (sepos == 0 || l + 2 == linech.Length && linech[l + 1] == 0) || sepos < 0)
                     {
-                        if (entry.CaretIndex == 0 && ActiveInternalPage > 0)
+                        if (entry.CaretIndex == 0 && GetActivePage() > 0)
                             _AtEnd = -1;
                         entry.SetCaretPosition(0);
 
@@ -579,15 +620,17 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OnLeftClick()
         {
-            var curpage = ActiveInternalPage;
+            var curpage = GetActivePage();
 
-            if (curpage >= 0 && curpage < m_Pages.Count)
+            if (curpage >= 0 && curpage < _pagesTextBoxes.Length)
             {
-                var entry = m_Pages[curpage].TxEntry;
-                var caretpos = m_Pages[curpage].TxEntry.CaretIndex;
+                var entry = _pagesTextBoxes[curpage].TxEntry;
+                var caretpos = _pagesTextBoxes[curpage].TxEntry.CaretIndex;
                 _AtEnd = (sbyte) (caretpos == 0 && curpage > 0 ? -1 : caretpos + 1 >= entry.Text.Length && curpage >= 0 && curpage < BookPageCount ? 1 : 0);
             }
         }
+
+        private static readonly Regex _regex = new Regex("[\r\t]");
 
         public override void OnKeyboardReturn(int textID, string text)
         {
@@ -595,25 +638,25 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 return;
             }
-            Regex pattern = new Regex("[\r\t]");
-            pattern.Replace(text, string.Empty);
-            int curpage = ActiveInternalPage;
+
+            _regex.Replace(text, string.Empty);
+            int curpage = GetActivePage();
             MultiLineBox page;
 
             if (curpage < 0)
             {
                 TextBox box;
-                if (BookTitle.HasKeyboardFocus)
-                    box = BookTitle;
-                else if (BookAuthor.HasKeyboardFocus)
-                    box = BookAuthor;
+                if (_titleTextBox.HasKeyboardFocus)
+                    box = _titleTextBox;
+                else if (_authorTextBox.HasKeyboardFocus)
+                    box = _authorTextBox;
                 else
                     return;
                 box.TxEntry.InsertString(text);
                 return;
             }
             else
-                page = m_Pages[curpage];
+                page = _pagesTextBoxes[curpage];
 
             int oldcaretpos = page.TxEntry.CaretIndex;
             int oldpage = curpage;
@@ -627,8 +670,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             while (text != null && curpage < BookPageCount)
             {
-                var entry = m_Pages[curpage].TxEntry;
-                RefreshShowCaretPos(0, m_Pages[curpage]);
+                var entry = _pagesTextBoxes[curpage].TxEntry;
+                RefreshShowCaretPos(0, _pagesTextBoxes[curpage]);
                 /*if(text.Length==0 || text[text.Length - 1] != '\n')
                     text = entry.InsertString(text + "\n");
                 else*/
@@ -653,7 +696,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (MultiLineBox.RetrnCommandID == textID)
             {
-                if (oldcaretpos >= m_Pages[oldpage].Text.Length && original == m_Pages[oldpage].Text && oldpage + 1 < BookPageCount)
+                if (oldcaretpos >= _pagesTextBoxes[oldpage].Text.Length && original == _pagesTextBoxes[oldpage].Text && oldpage + 1 < BookPageCount)
                 {
                     oldcaretpos = 0;
                     oldpage++;
@@ -661,17 +704,17 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                     oldcaretpos++;
 
-                RefreshShowCaretPos(oldcaretpos, m_Pages[oldpage]);
+                RefreshShowCaretPos(oldcaretpos, _pagesTextBoxes[oldpage]);
             }
             else
             {
-                int[] linechr = m_Pages[oldpage].TxEntry.GetLinesCharsCount(original);
+                int[] linechr = _pagesTextBoxes[oldpage].TxEntry.GetLinesCharsCount(original);
 
                 foreach (int t in linechr)
                 {
                     oldcaretpos += t;
 
-                    if (oldcaretpos <= m_Pages[oldpage].Text.Length) continue;
+                    if (oldcaretpos <= _pagesTextBoxes[oldpage].Text.Length) continue;
 
                     oldcaretpos = t;
 
@@ -681,7 +724,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
                 }
 
-                RefreshShowCaretPos(oldcaretpos, m_Pages[oldpage]);
+                RefreshShowCaretPos(oldcaretpos, _pagesTextBoxes[oldpage]);
             }
 
             PageChanged[oldpage + 1] = true; //for the last page we are setting the changed status, this is the page we are on with caret.
@@ -699,8 +742,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             public PBookHeader(BookGump gump) : base(0xD4)
             {
-                byte[] titleBuffer = Encoding.UTF8.GetBytes(gump.BookTitle.Text);
-                byte[] authorBuffer = Encoding.UTF8.GetBytes(gump.BookAuthor.Text);
+                byte[] titleBuffer = Encoding.UTF8.GetBytes(gump._titleTextBox.Text);
+                byte[] authorBuffer = Encoding.UTF8.GetBytes(gump._authorTextBox.Text);
                 EnsureSize(15 + titleBuffer.Length + authorBuffer.Length);
                 WriteUInt(gump.LocalSerial);
                 WriteByte(gump.BookPageCount > 0 ? (byte) 1 : (byte) 0);
@@ -727,8 +770,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 WriteUShort(gump.BookPageCount);
 
-                WriteUTF8(gump.BookTitle.Text, 60);
-                WriteUTF8(gump.BookAuthor.Text, 30);
+                WriteUTF8(gump._titleTextBox.Text, 60);
+                WriteUTF8(gump._authorTextBox.Text, 30);
             }
         }
 
@@ -743,8 +786,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 WriteUShort(gump.BookPageCount);
 
-                WriteASCII(gump.BookTitle.Text, 60);
-                WriteASCII(gump.BookAuthor.Text, 30);
+                WriteASCII(gump._titleTextBox.Text, 60);
+                WriteASCII(gump._authorTextBox.Text, 30);
             }
         }
 
@@ -768,7 +811,7 @@ namespace ClassicUO.Game.UI.Gumps
                 for (int i = changed.Count - 1; i >= 0; --i)
                 {
                     WriteUShort((ushort) changed[i]);
-                    MultiLineEntry mle = gump.m_Pages[changed[i] - 1].TxEntry;
+                    MultiLineEntry mle = gump._pagesTextBoxes[changed[i] - 1].TxEntry;
                     StringBuilder sb = new StringBuilder(mle.Text);
                     int rows = 0;
 

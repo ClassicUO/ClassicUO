@@ -1841,9 +1841,8 @@ namespace ClassicUO.Network
             var pageCnt = p.ReadUShort();
             var gump = UIManager.GetGump<BookGump>(serial);
            
-            if (gump == null) return;
-
-            var pages = gump.BookPages;
+            if (gump == null || gump.IsDisposed) 
+                return;
 
             StringBuilder sb = new StringBuilder();
 
@@ -1852,11 +1851,11 @@ namespace ClassicUO.Network
             {
                 var pageNum = p.ReadUShort();
 
-                if (pageNum <= pages.Length)
+                if (pageNum <= pageCnt)
                 {
                     var lineCnt = p.ReadUShort();
 
-                    for (int x = 0; x < lineCnt; x++)
+                    for (int line = 0; line < lineCnt; line++)
                     {
                         sb.Append(BookGump.IsNewBook ? p.ReadUTF8StringSafe() : p.ReadASCII());
                         sb.Append('\n');
@@ -1864,13 +1863,14 @@ namespace ClassicUO.Network
 
                     if (sb.Length > 0)
                         sb.Remove(sb.Length - 1, 1); //this removes the last, unwanted, newline
-                    pages[pageNum - 1] = sb.ToString();
+
+                    int index = pageNum - 1;
+
+                    gump.SetTextToPage(sb.ToString(), index);
                 }
                 else
                     Log.Error( "BOOKGUMP: The server is sending a page number GREATER than the allowed number of pages in BOOK!");
             }
-
-            gump.BookPages = pages;
         }
 
         private static void CharacterAnimation(Packet p)
@@ -2527,39 +2527,19 @@ namespace ClassicUO.Network
                 editable = p.ReadBool();
             else
                 p.Skip(1);
+
             BookGump bgump = UIManager.GetGump<BookGump>(serial);
 
             if (bgump == null || bgump.IsDisposed)
             {
-                UIManager.Add(new BookGump(serial)
+                ushort page_count = p.ReadUShort();
+                string title = oldpacket ? p.ReadUTF8StringSafe(60) : p.ReadUTF8StringSafe(p.ReadUShort());
+                string author = oldpacket ? p.ReadUTF8StringSafe(30) : p.ReadUTF8StringSafe(p.ReadUShort());
+
+                UIManager.Add(new BookGump(serial,page_count, title, author, editable, oldpacket)
                 {
                     X = 100,
-                    Y = 100,
-                    BookPageCount = p.ReadUShort(),
-                    //title allows only 47 dots (. + \0) so 47 is the right number
-                    BookTitle =
-                        new TextBox(new TextEntry(BookGump.DefaultFont, 47, 150, 150, BookGump.IsNewBook, FontStyle.None, 0), editable)
-                        {
-                            X = 40,
-                            Y = 60,
-                            Height = 25,
-                            Width = 155,
-                            IsEditable = editable,
-                            Text = oldpacket ? p.ReadUTF8StringSafe(60) : p.ReadUTF8StringSafe(p.ReadUShort())
-                        },
-                    //as the old booktitle supports only 30 characters in AUTHOR and since the new clients only allow 29 dots (. + \0 character at end), we use 29 as a limitation
-                    BookAuthor =
-                        new TextBox(new TextEntry(BookGump.DefaultFont, 29, 150, 150, BookGump.IsNewBook, FontStyle.None, 0), editable)
-                        {
-                            X = 40,
-                            Y = 160,
-                            Height = 25,
-                            Width = 155,
-                            IsEditable = editable,
-                            Text = oldpacket ? p.ReadUTF8StringSafe(30) : p.ReadUTF8StringSafe(p.ReadUShort())
-                        },
-                    IsEditable = editable,
-                    UseNewHeader = !oldpacket
+                    Y = 100
                 });
                 NetClient.Socket.Send(new PBookPageDataRequest(serial, 1));
             }
@@ -2567,10 +2547,8 @@ namespace ClassicUO.Network
             {
                 p.Skip(2);
                 bgump.IsEditable = editable;
-                bgump.BookTitle.Text = oldpacket ? p.ReadUTF8StringSafe(60) : p.ReadUTF8StringSafe(p.ReadUShort());
-                bgump.BookTitle.IsEditable = editable;
-                bgump.BookAuthor.Text = oldpacket ? p.ReadUTF8StringSafe(30) : p.ReadUTF8StringSafe(p.ReadUShort());
-                bgump.BookAuthor.IsEditable = editable;
+                bgump.SetTile(oldpacket ? p.ReadUTF8StringSafe(60) : p.ReadUTF8StringSafe(p.ReadUShort()), editable);
+                bgump.SetAuthor(oldpacket ? p.ReadUTF8StringSafe(30) : p.ReadUTF8StringSafe(p.ReadUShort()), editable);
                 bgump.UseNewHeader = !oldpacket;
             }
         }
