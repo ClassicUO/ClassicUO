@@ -71,6 +71,7 @@ namespace ClassicUO
         public Scene Scene => _scene;
         public readonly uint[] FrameDelay = new uint[2];
 
+        private SDL_EventFilter _filter;
 
         protected override void Initialize()
         {
@@ -94,6 +95,9 @@ namespace ClassicUO
 
             SetRefreshRate(Settings.GlobalSettings.FPS);
             _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice);
+
+            _filter = new SDL_EventFilter(HandleSDLEvent);
+            SDL.SDL_AddEventWatch(_filter, IntPtr.Zero);
 
             base.Initialize();
         }
@@ -413,11 +417,11 @@ namespace ClassicUO
             }
         }
 
-        public override void OnSDLEvent(ref SDL_Event ev)
-        {
-            HandleSDLEvent(ref ev);
-            base.OnSDLEvent(ref ev);
-        }
+        //public override void OnSDLEvent(ref SDL_Event ev)
+        //{
+        //    HandleSDLEvent(ref ev);
+        //    base.OnSDLEvent(ref ev);
+        //}
 
         private void WindowOnClientSizeChanged(object sender, EventArgs e)
         {
@@ -441,24 +445,26 @@ namespace ClassicUO
             }
         }
 
-        private unsafe void HandleSDLEvent(ref SDL.SDL_Event e)
+        private unsafe int HandleSDLEvent(IntPtr userdata, IntPtr ptr)
         {
-            switch (e.type)
+            SDL_Event* e = (SDL_Event*) ptr;
+
+            switch (e->type)
             {
                 case SDL.SDL_EventType.SDL_AUDIODEVICEADDED:
-                    Console.WriteLine("AUDIO ADDED: {0}", e.adevice.which);
+                    Console.WriteLine("AUDIO ADDED: {0}", e->adevice.which);
 
                     break;
 
                 case SDL.SDL_EventType.SDL_AUDIODEVICEREMOVED:
-                    Console.WriteLine("AUDIO REMOVED: {0}", e.adevice.which);
+                    Console.WriteLine("AUDIO REMOVED: {0}", e->adevice.which);
 
                     break;
 
 
                 case SDL.SDL_EventType.SDL_WINDOWEVENT:
 
-                    switch (e.window.windowEvent)
+                    switch (e->window.windowEvent)
                     {
                         case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_ENTER:
                             Mouse.MouseInWindow = true;
@@ -485,14 +491,14 @@ namespace ClassicUO
                 
                 case SDL.SDL_EventType.SDL_KEYDOWN:
                     
-                    Keyboard.OnKeyDown(e.key);
+                    Keyboard.OnKeyDown(e->key);
 
-                    if (Plugin.ProcessHotkeys((int) e.key.keysym.sym, (int) e.key.keysym.mod, true))
+                    if (Plugin.ProcessHotkeys((int) e->key.keysym.sym, (int) e->key.keysym.mod, true))
                     {
                         _ignoreNextTextInput = false;
-                        UIManager.KeyboardFocusControl?.InvokeKeyDown(e.key.keysym.sym, e.key.keysym.mod);
+                        UIManager.KeyboardFocusControl?.InvokeKeyDown(e->key.keysym.sym, e->key.keysym.mod);
 
-                        _scene.OnKeyDown(e.key);
+                        _scene.OnKeyDown(e->key);
                     }
                     else
                         _ignoreNextTextInput = true;
@@ -501,11 +507,11 @@ namespace ClassicUO
 
                 case SDL.SDL_EventType.SDL_KEYUP:
                     
-                    Keyboard.OnKeyUp(e.key);
-                    UIManager.KeyboardFocusControl?.InvokeKeyUp(e.key.keysym.sym, e.key.keysym.mod);
-                    _scene.OnKeyUp(e.key);
+                    Keyboard.OnKeyUp(e->key);
+                    UIManager.KeyboardFocusControl?.InvokeKeyUp(e->key.keysym.sym, e->key.keysym.mod);
+                    _scene.OnKeyUp(e->key);
 
-                    if (e.key.keysym.sym == SDL_Keycode.SDLK_PRINTSCREEN)
+                    if (e->key.keysym.sym == SDL_Keycode.SDLK_PRINTSCREEN)
                     {
                         string path = Path.Combine(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Data", "Client", "Screenshots"), $"screenshot_{DateTime.Now:yyyy-MM-dd_hh-mm-ss}.png");
 
@@ -524,17 +530,13 @@ namespace ClassicUO
                     if (_ignoreNextTextInput)
                         break;
 
-                    fixed (SDL_Event* ev = &e)
+                    string s = StringHelper.ReadUTF8(e->text.text);
+
+                    if (!string.IsNullOrEmpty(s))
                     {
-                        string s = StringHelper.ReadUTF8(ev->text.text);
-
-                        if (!string.IsNullOrEmpty(s))
-                        {
-                            UIManager.KeyboardFocusControl?.InvokeTextInput(s);
-                            _scene.OnTextInput(s);
-                        }
+                        UIManager.KeyboardFocusControl?.InvokeTextInput(s);
+                        _scene.OnTextInput(s);
                     }
-
                     break;
 
                 case SDL.SDL_EventType.SDL_MOUSEMOTION:
@@ -555,9 +557,9 @@ namespace ClassicUO
 
                 case SDL.SDL_EventType.SDL_MOUSEWHEEL:
                     Mouse.Update();
-                    bool isup = e.wheel.y > 0;
+                    bool isup = e->wheel.y > 0;
 
-                    Plugin.ProcessMouse(0, e.wheel.y);
+                    Plugin.ProcessMouse(0, e->wheel.y);
 
                     UIManager.OnMouseWheel(isup);
                     _scene.OnMouseWheel(isup);
@@ -567,14 +569,14 @@ namespace ClassicUO
                 case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
                 case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
                     Mouse.Update();
-                    bool isDown = e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN;
+                    bool isDown = e->type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN;
 
                     if (_dragStarted && !isDown)
                     {
                         _dragStarted = false;
                     }
 
-                    SDL.SDL_MouseButtonEvent mouse = e.button;
+                    SDL.SDL_MouseButtonEvent mouse = e->button;
 
                     switch ((uint) mouse.button)
                     {
@@ -651,7 +653,7 @@ namespace ClassicUO
                                     break;
                                 }
 
-                                Plugin.ProcessMouse(e.button.button, 0);
+                                Plugin.ProcessMouse(e->button.button, 0);
 
                                 _scene.OnMiddleMouseDown();
                                 UIManager.OnMiddleMouseButtonDown();
@@ -724,20 +726,22 @@ namespace ClassicUO
                         case SDL_BUTTON_X1:
 
                             if (isDown)
-                                Plugin.ProcessMouse(e.button.button, 0);
+                                Plugin.ProcessMouse(e->button.button, 0);
 
                             break;
 
                         case SDL_BUTTON_X2:
 
                             if (isDown)
-                                Plugin.ProcessMouse(e.button.button, 0);
+                                Plugin.ProcessMouse(e->button.button, 0);
 
                             break;
                     }
 
                     break;
             }
+
+            return 0;
         }
     }
 }
