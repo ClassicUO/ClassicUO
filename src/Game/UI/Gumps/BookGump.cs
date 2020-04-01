@@ -55,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _scale;
 
         private GumpPic m_Forward, m_Backward;
-        public bool[] PageChanged;
+        private bool[] _pagesChanged;
 
         private TextBox _titleTextBox, _authorTextBox;
 
@@ -80,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
        
 
 
-        public bool IntroChanges => PageChanged[0];
+        public bool IntroChanges => _pagesChanged[0];
         private int MaxPage => (BookPageCount >> 1) + 1;
 
         private int GetActivePage()
@@ -145,7 +145,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(1);
             };
 
-            PageChanged = new bool[BookPageCount + 1];
+            _pagesChanged = new bool[BookPageCount + 1];
             Add(_titleTextBox = new TextBox(new TextEntry(DefaultFont, 47, 150, 150, IsNewBook, FontStyle.None, 0), IsEditable)
             {
                 X = 40,
@@ -302,7 +302,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void CloseWithRightClick()
         {
-            if (PageChanged[0])
+            if (_pagesChanged[0])
             {
                 if (UseNewHeader)
                     NetClient.Socket.Send(new PBookHeader(this));
@@ -310,10 +310,11 @@ namespace ClassicUO.Game.UI.Gumps
                     NetClient.Socket.Send(new PBookHeaderOldUTF8(this));
                 else
                     NetClient.Socket.Send(new PBookHeaderOld(this));
-                PageChanged[0] = false;
+                _pagesChanged[0] = false;
             }
 
-            if (PageChanged.Any(t => t)) NetClient.Socket.Send(new PBookData(this));
+            if (_pagesChanged.Any(t => t)) 
+                NetClient.Socket.Send(new PBookPageData(this));
             base.CloseWithRightClick();
         }
 
@@ -324,12 +325,12 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!IsDisposed)
                 {
                     if (_authorTextBox.IsChanged || _titleTextBox.IsChanged)
-                        PageChanged[0] = true;
+                        _pagesChanged[0] = true;
 
                     for (int i = _pagesTextBoxes.Length - 1; i >= 0; --i)
                     {
                         if (_pagesTextBoxes[i].IsChanged)
-                            PageChanged[i + 1] = true;
+                            _pagesChanged[i + 1] = true;
                     }
                 }
             }
@@ -727,7 +728,7 @@ namespace ClassicUO.Game.UI.Gumps
                 RefreshShowCaretPos(oldcaretpos, _pagesTextBoxes[oldpage]);
             }
 
-            PageChanged[oldpage + 1] = true; //for the last page we are setting the changed status, this is the page we are on with caret.
+            _pagesChanged[oldpage + 1] = true; //for the last page we are setting the changed status, this is the page we are on with caret.
             SetActivePage((oldpage >> 1) + oldpage % 2 + 1);
         }
 
@@ -791,18 +792,18 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        internal sealed class PBookData : PacketWriter
+        internal sealed class PBookPageData : PacketWriter
         {
-            public PBookData(BookGump gump) : base(0x66)
+            public PBookPageData(BookGump gump) : base(0x66)
             {
                 EnsureSize(256);
 
                 WriteUInt(gump.LocalSerial);
                 List<int> changed = new List<int>();
 
-                for (int i = 1; i < gump.PageChanged.Length; i++)
+                for (int i = 1; i < gump._pagesChanged.Length; i++)
                 {
-                    if (gump.PageChanged[i])
+                    if (gump._pagesChanged[i])
                         changed.Add(i);
                 }
 
