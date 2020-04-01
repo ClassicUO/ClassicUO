@@ -276,11 +276,6 @@ namespace ClassicUO.Game.Map
 
         public void AddGameObject(GameObject obj, int x, int y)
         {
-            if (obj is PlayerMobile)
-            {
-
-            }
-
             obj.RemoveFromTile();
 
             short priorityZ = obj.Z;
