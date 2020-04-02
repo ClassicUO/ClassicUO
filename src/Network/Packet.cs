@@ -223,8 +223,8 @@ namespace ClassicUO.Network
             }
 
             int index = Position;
-
-            while (index < length)
+            int end = index + length;
+            while (index < end)
             {
                 byte b = _data[index++];
 
@@ -232,8 +232,7 @@ namespace ClassicUO.Network
                     break;
             }
 
-            int count = index - Position - 1;
-            string s = count <= 0 ? string.Empty : Encoding.UTF8.GetString(_data, Position, count);
+            string s = Encoding.UTF8.GetString(_data, Position, index - Position - 1);
 
             Seek(index);
 
