@@ -276,19 +276,30 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                if (_pagesChanged[ActivePage])
+                for (int i = 0; i < 2; i++)
                 {
-                    _pagesChanged[ActivePage] = false;
+                    int real_page = ((ActivePage - 1) << 1) + i;
 
-                    if (ActivePage < 1)
+                    if (real_page < _pagesChanged.Length && _pagesChanged[real_page])
                     {
+                        _pagesChanged[real_page] = false;
 
-                    }
-                    else
-                    {
-                        NetClient.Socket.Send(new PBookPageData(this, ActivePage + 1));
+                        if (real_page < 1)
+                        {
+                            if (UseNewHeader)
+                                NetClient.Socket.Send(new PBookHeader(this));
+                            else if (IsNewBook)
+                                NetClient.Socket.Send(new PBookHeaderOldUTF8(this));
+                            else
+                                NetClient.Socket.Send(new PBookHeaderOld(this));
+                        }
+                        else
+                        {
+                            NetClient.Socket.Send(new PBookPageData(this, real_page - 1));
+                        }
                     }
                 }
+                
             }
 
 
@@ -302,37 +313,16 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+
         public override void OnButtonClick(int buttonID)
         {
-            switch ((Buttons) buttonID)
-            {
-                case Buttons.Backwards:
-
-                    return;
-
-                case Buttons.Forward:
-
-                    return;
-            }
-
-            base.OnButtonClick(buttonID);
+           
         }
 
         protected override void CloseWithRightClick()
         {
-            //if (_pagesChanged[0])
-            //{
-            //    if (UseNewHeader)
-            //        NetClient.Socket.Send(new PBookHeader(this));
-            //    else if (IsNewBook)
-            //        NetClient.Socket.Send(new PBookHeaderOldUTF8(this));
-            //    else
-            //        NetClient.Socket.Send(new PBookHeaderOld(this));
-            //    _pagesChanged[0] = false;
-            //}
+            SetActivePage(0);
 
-            //if (_pagesChanged.Any(t => t)) 
-            //    NetClient.Socket.Send(new PBookPageData(this));
             base.CloseWithRightClick();
         }
 
@@ -838,7 +828,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 WriteUInt(gump.LocalSerial);
                 WriteUShort(0x0001);
-                WriteUShort((ushort) page);
+                WriteUShort((ushort) (page + 1));
                 WriteUShort((ushort) linecount);
 
                 for (int i = 0; i < text.Length; i++)
@@ -926,13 +916,6 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }
-        }
-
-        private enum Buttons
-        {
-            Closing = 0,
-            Forward = 1,
-            Backwards = 2
         }
     }
 }
