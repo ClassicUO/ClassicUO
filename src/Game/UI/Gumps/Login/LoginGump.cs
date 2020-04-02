@@ -267,10 +267,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             Add(new StbTextBox(1)
             {
-                X = 100,
-                Y = 40,
+                X = 200,
+                Y = 70,
                 Width = 200,
-                Height = 70
+                Height = 70,
+                Text = "asdaasd\nawdawd\ndwad wwadaw\n"
             });
         }
 

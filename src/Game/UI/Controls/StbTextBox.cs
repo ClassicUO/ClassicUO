@@ -20,6 +20,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private int _maxCharCount = -1;
         private Point _caretScreenPosition;
+        private bool _leftWasDown;
 
 
         public StbTextBox(byte font, int max_char_count = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE align = 0)
@@ -61,7 +62,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public float GetWidth(int index)
         {
-            return 0;
+            return _renderText.GetCharWidth(index);
         }
 
         public TextEditRow LayoutRow(int startIndex)
@@ -71,9 +72,9 @@ namespace ClassicUO.Game.UI.Controls
             Rectangle bounds = this.Bounds;
 
             r.x0 += bounds.X;
-            r.x1 += bounds.X;
+            r.x1 += bounds.Width;
             r.ymin += bounds.Y;
-            r.ymax += bounds.Y;
+            r.ymax += bounds.Height;
 
             return r;
         }
@@ -103,6 +104,7 @@ namespace ClassicUO.Game.UI.Controls
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             ControlKeys? stb_key = null;
+            bool update_caret = false;
 
             switch (key)
             {
@@ -116,6 +118,19 @@ namespace ClassicUO.Game.UI.Controls
 
                 case SDL.SDL_Keycode.SDLK_INSERT:
                     stb_key = ControlKeys.InsertMode;
+                    break;
+                case SDL.SDL_Keycode.SDLK_v when Keyboard.Ctrl:
+                    string clipboard = SDL.SDL_GetClipboardText();
+
+                    if (!string.IsNullOrEmpty(clipboard))
+                    {
+                        for (int i = 0; i < clipboard.Length && i < 2000; i++)
+                        {
+                            _stb.InputChar(clipboard[i]);
+                        }
+
+                        OnTextChanged();
+                    }
                     break;
                 case SDL.SDL_Keycode.SDLK_z when Keyboard.Ctrl:
                     stb_key = ControlKeys.Undo;
@@ -140,7 +155,8 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         stb_key = ControlKeys.Left;
                     }
-                    UpdateCaretScreenPosition();
+
+                    update_caret = true;
                     break;
                 case SDL.SDL_Keycode.SDLK_RIGHT:
                     if (Keyboard.Ctrl && Keyboard.Shift)
@@ -159,21 +175,23 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         stb_key = ControlKeys.Right;
                     }
-                    UpdateCaretScreenPosition();
+                    update_caret = true;
                     break;
                 case SDL.SDL_Keycode.SDLK_UP:
                     stb_key = ControlKeys.Up;
-                    UpdateCaretScreenPosition();
+                    update_caret = true;
                     break;
                 case SDL.SDL_Keycode.SDLK_DOWN:
                     stb_key = ControlKeys.Down;
-                    UpdateCaretScreenPosition();
+                    update_caret = true;
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
                     stb_key = ControlKeys.BackSpace;
+                    update_caret = true;
                     break;
                 case SDL.SDL_Keycode.SDLK_DELETE:
                     stb_key = ControlKeys.Delete;
+                    update_caret = true;
                     break;
                 case SDL.SDL_Keycode.SDLK_HOME:
                     if (Keyboard.Ctrl && Keyboard.Shift)
@@ -192,7 +210,7 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         stb_key = ControlKeys.LineStart;
                     }
-                    UpdateCaretScreenPosition();
+                    update_caret = true;
                     break;
                 case SDL.SDL_Keycode.SDLK_END:
                     if (Keyboard.Ctrl && Keyboard.Shift)
@@ -211,7 +229,7 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         stb_key = ControlKeys.LineEnd;
                     }
-                    UpdateCaretScreenPosition();
+                    update_caret = true;
                     break;
                 case SDL.SDL_Keycode.SDLK_RETURN:
                     _stb.InputChar('\n');
@@ -222,6 +240,11 @@ namespace ClassicUO.Game.UI.Controls
             if (stb_key != null)
             {
                 _stb.Key(stb_key.Value);
+            }
+
+            if (update_caret)
+            {
+                UpdateCaretScreenPosition();
             }
 
             base.OnKeyDown(key, mod);
@@ -256,18 +279,34 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            _stb.Click(x, y);
+            if (button == MouseButtonType.Left)
+            {
+                _leftWasDown = true;
+                _stb.Click(Mouse.Position.X, Mouse.Position.Y);
+                UpdateCaretScreenPosition();
+            }
+          
             base.OnMouseDown(x, y, button);
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
+            if (button == MouseButtonType.Left)
+            {
+                _leftWasDown = false;
+            }
+
             base.OnMouseUp(x, y, button);
         }
 
         protected override void OnMouseOver(int x, int y)
         {
             base.OnMouseOver(x, y);
+
+            if (!_leftWasDown)
+                return;
+
+            _stb.Drag(Mouse.Position.X, Mouse.Position.Y);
         }
 
 

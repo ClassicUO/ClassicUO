@@ -225,13 +225,83 @@ namespace ClassicUO.Renderer
               Text, Text.Length, Align, (ushort) FontStyle,
               Width, true, true);
             }
-          
+
+            switch (Align)
+            {
+                case TEXT_ALIGN_TYPE.TS_LEFT:
+                    r.x0 = 0;
+                    r.x1 = Width;
+                    break;
+                case TEXT_ALIGN_TYPE.TS_CENTER:
+                    r.x0 = (Width - info.Width) >> 1;
+
+                    if (r.x0 < 0)
+                        r.x0 = 0;
+
+                    r.x1 = r.x0;
+
+                    break;
+                case TEXT_ALIGN_TYPE.TS_RIGHT:
+                    r.x0 = Width;
+                    // TODO: r.x1 ???  i don't know atm :D
+                    break;
+            }
+
             while (info != null)
             {
+                if (startIndex >= info.CharStart && startIndex < info.CharStart + info.CharCount)
+                {
+                    r.num_chars = info.CharCount;
+                    r.ymax = info.MaxHeight;
+                    r.baseline_y_delta = info.MaxHeight;
+
+                    break;
+                }
                 
+                info = info.Next;
             }
 
             return r;
+        }
+
+        public float GetCharWidth(int index)
+        {
+            if (string.IsNullOrEmpty(Text))
+                return 0;
+
+            MultilinesFontInfo info;
+
+            if (IsUnicode)
+            {
+                info = FontsLoader.Instance.GetInfoUnicode(Font,
+                                                           Text, Text.Length, Align, (ushort) FontStyle,
+                                                           Width, true, true);
+            }
+            else
+            {
+                info = FontsLoader.Instance.GetInfoASCII(Font,
+                                                         Text, Text.Length, Align, (ushort) FontStyle,
+                                                         Width, true, true);
+            }
+
+            while (info != null)
+            {
+                if (index >= info.CharStart && index < info.CharStart + info.CharCount)
+                {
+                    index -= info.CharStart;
+
+                    char c = index >= info.Data.Count ? '\n' : info.Data[index].Item;
+
+                    if (IsUnicode)
+                        return FontsLoader.Instance.GetCharWidthUnicode(Font, c);
+
+                    return FontsLoader.Instance.GetCharWidthASCII(Font, c);
+                }
+
+                info = info.Next;
+            }
+
+            return 0;
         }
 
         public bool Draw(UltimaBatcher2D batcher, 

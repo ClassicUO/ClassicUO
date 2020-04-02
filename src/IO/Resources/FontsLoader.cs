@@ -255,6 +255,14 @@ namespace ClassicUO.IO.Resources
             return textLength;
         }
 
+        public int GetCharWidthASCII(byte font, char c)
+        {
+            if (font >= FontCount || c == 0)
+                return 0;
+
+            return _font[font][_fontIndex[(byte) c]].Width;
+        }
+
         public int GetWidthExASCII(byte font, string text, int maxwidth, TEXT_ALIGN_TYPE align, ushort flags)
         {
             if (font > FontCount || string.IsNullOrEmpty(text))
@@ -880,6 +888,25 @@ namespace ClassicUO.IO.Resources
             }
 
             return Math.Max(maxTextLenght, textLength);
+        }
+
+        public unsafe int GetCharWidthUnicode(byte font, char c)
+        {
+            if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || c == 0)
+                return 0;
+
+            uint* table = (uint*) _unicodeFontAddress[font];
+            uint offset = table[c];
+            if (offset != 0 && offset != 0xFFFFFFFF)
+            {
+                byte* ptr = (byte*) ((IntPtr) table + (int) offset);
+                return (sbyte) ptr[0] + (sbyte) ptr[2] + 1;
+            }
+
+            if (c == ' ')
+                return UNICODE_SPACE_WIDTH;
+
+            return 0;
         }
 
         public int GetWidthExUnicode(byte font, string text, int maxwidth, TEXT_ALIGN_TYPE align, ushort flags)
