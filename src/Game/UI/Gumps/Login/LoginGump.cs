@@ -263,6 +263,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             if (!string.IsNullOrEmpty(_textboxAccount.Text))
                 _textboxPassword.SetKeyboardFocus();
+
+
+            Add(new StbTextBox(1)
+            {
+                X = 100,
+                Y = 40,
+                Width = 200,
+                Height = 70
+            });
         }
 
 

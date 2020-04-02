@@ -297,13 +297,6 @@ namespace ClassicUO.Game.UI.Gumps
                                 NetClient.Socket.Send(new PBookHeaderChanged(LocalSerial, _titleTextBox.Text, _authorTextBox.Text));
                             else
                                 NetClient.Socket.Send(new PBookHeaderChangedOld(LocalSerial, _titleTextBox.Text, _authorTextBox.Text));
-
-                            //if (UseNewHeader)
-                            //    NetClient.Socket.Send(new PBookHeader(this));
-                            //else if (IsNewBook)
-                            //    NetClient.Socket.Send(new PBookHeaderOldUTF8(this));
-                            //else
-                            //    NetClient.Socket.Send(new PBookHeaderOld(this));
                         }
                         else
                         {
@@ -734,7 +727,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     oldcaretpos += t;
 
-                    if (oldcaretpos <= _pagesTextBoxes[oldpage].Text.Length) continue;
+                    if (oldcaretpos <= _pagesTextBoxes[oldpage].Text.Length) 
+                        continue;
 
                     oldcaretpos = t;
 

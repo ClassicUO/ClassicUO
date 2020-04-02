@@ -25,6 +25,7 @@ using ClassicUO.Data;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
+using StbTextEditSharp;
 
 namespace ClassicUO.Renderer
 {
@@ -174,6 +175,64 @@ namespace ClassicUO.Renderer
 
 
         private static Vector3 _hueVector = Vector3.Zero;
+
+        public Point GetCaretPosition(int caret_index)
+        {
+            Point p;
+
+            if (IsUnicode)
+            {
+                (p.X, p.Y) = FontsLoader.Instance.GetCaretPosUnicode(
+                    Font,
+                    Text,
+                    caret_index,
+                    Width,
+                    Align, 
+                    (ushort) FontStyle);
+            }
+            else
+            {
+                (p.X, p.Y) = FontsLoader.Instance.GetCaretPosASCII(
+                    Font,
+                    Text,
+                    caret_index,
+                    Width,
+                    Align,
+                    (ushort) FontStyle);
+            }
+
+            return p;
+        }
+
+        public TextEditRow GetLayoutRow(int startIndex)
+        {
+            TextEditRow r = new TextEditRow();
+
+            if (string.IsNullOrEmpty(Text))
+                return r;
+
+            MultilinesFontInfo info;
+
+            if (IsUnicode)
+            {
+                info = FontsLoader.Instance.GetInfoUnicode(Font,
+              Text, Text.Length, Align, (ushort) FontStyle,
+              Width, true, true);
+            }
+            else
+            {
+                info = FontsLoader.Instance.GetInfoASCII(Font,
+              Text, Text.Length, Align, (ushort) FontStyle,
+              Width, true, true);
+            }
+          
+            while (info != null)
+            {
+                
+            }
+
+            return r;
+        }
 
         public bool Draw(UltimaBatcher2D batcher, 
             int swidth, int sheight,
