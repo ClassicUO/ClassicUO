@@ -23,6 +23,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -265,7 +266,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _textboxPassword.SetKeyboardFocus();
 
 
-            Add(new StbTextBox(1)
+            Add(new StbTextBox(3, isunicode: false, align: TEXT_ALIGN_TYPE.TS_LEFT)
             {
                 X = 200,
                 Y = 70,

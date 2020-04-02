@@ -59,7 +59,7 @@ namespace StbTextEditSharp
 
 		public void PrepareSelectionAtCursor()
 		{
-			if (!(SelectStart != SelectEnd))
+			if (SelectStart == SelectEnd)
 				SelectStart = SelectEnd = CursorIndex;
 			else
 				CursorIndex = SelectEnd;
