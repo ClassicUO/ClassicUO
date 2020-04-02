@@ -1,5 +1,8 @@
+using System;
+
 namespace StbTextEditSharp
 {
+	[Flags]
 	public enum ControlKeys
 	{
 		None = 0,
