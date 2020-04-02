@@ -152,9 +152,25 @@ namespace ClassicUO.Renderer
                         Links.Clear();
                         _texture?.Dispose();
                         _texture = null;
+                        _info = null;
                     }
                     else
+                    {
                         CreateTexture();
+
+                        if (IsUnicode)
+                        {
+                            _info = FontsLoader.Instance.GetInfoUnicode(Font,
+                                                                        Text, Text.Length, Align, (ushort) FontStyle,
+                                                                        Width, true, true);
+                        }
+                        else
+                        {
+                            _info = FontsLoader.Instance.GetInfoASCII(Font,
+                                                                      Text, Text.Length, Align, (ushort) FontStyle,
+                                                                      Width, true, true);
+                        }
+                    }
                 }
             }
         }
@@ -204,6 +220,13 @@ namespace ClassicUO.Renderer
             return p;
         }
 
+        private MultilinesFontInfo _info;
+
+        public MultilinesFontInfo GetInfo()
+        {
+            return _info;
+        }
+
         public TextEditRow GetLayoutRow(int startIndex)
         {
             TextEditRow r = new TextEditRow();
@@ -211,20 +234,10 @@ namespace ClassicUO.Renderer
             if (string.IsNullOrEmpty(Text))
                 return r;
 
-            MultilinesFontInfo info;
+            MultilinesFontInfo info = _info;
 
-            if (IsUnicode)
-            {
-                info = FontsLoader.Instance.GetInfoUnicode(Font,
-              Text, Text.Length, Align, (ushort) FontStyle,
-              Width, true, true);
-            }
-            else
-            {
-                info = FontsLoader.Instance.GetInfoASCII(Font,
-              Text, Text.Length, Align, (ushort) FontStyle,
-              Width, true, true);
-            }
+            if (info == null)
+                return r;
 
             switch (Align)
             {
@@ -264,25 +277,12 @@ namespace ClassicUO.Renderer
             return r;
         }
 
-        public float GetCharWidth(int index)
+        public int GetCharWidthAtIndex(int index)
         {
             if (string.IsNullOrEmpty(Text))
                 return 0;
 
-            MultilinesFontInfo info;
-
-            if (IsUnicode)
-            {
-                info = FontsLoader.Instance.GetInfoUnicode(Font,
-                                                           Text, Text.Length, Align, (ushort) FontStyle,
-                                                           Width, true, true);
-            }
-            else
-            {
-                info = FontsLoader.Instance.GetInfoASCII(Font,
-                                                         Text, Text.Length, Align, (ushort) FontStyle,
-                                                         Width, true, true);
-            }
+            MultilinesFontInfo info = _info;
 
             while (info != null)
             {
@@ -302,6 +302,14 @@ namespace ClassicUO.Renderer
             }
 
             return 0;
+        }
+
+        public int GetCharWidth(char c)
+        {
+            if (IsUnicode)
+                return FontsLoader.Instance.GetCharWidthUnicode(Font, c);
+
+            return FontsLoader.Instance.GetCharWidthASCII(Font, c);
         }
 
         public bool Draw(UltimaBatcher2D batcher, 

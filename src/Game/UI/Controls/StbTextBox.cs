@@ -62,19 +62,17 @@ namespace ClassicUO.Game.UI.Controls
 
         public float GetWidth(int index)
         {
-            return _renderText.GetCharWidth(index);
+            return _renderText.GetCharWidthAtIndex(index);
         }
 
         public TextEditRow LayoutRow(int startIndex)
         {
             TextEditRow r = _renderText.GetLayoutRow(startIndex);
 
-            Rectangle bounds = this.Bounds;
-
-            r.x0 += bounds.X;
-            r.x1 += bounds.Width;
-            r.ymin += bounds.Y;
-            r.ymax += bounds.Height;
+            r.x0 += Bounds.X;
+            r.x1 += Bounds.Width;
+            r.ymin += Bounds.Y;
+            r.ymax += Bounds.Height;
 
             return r;
         }
@@ -266,6 +264,75 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             base.Draw(batcher, x, y);
+
+            ResetHueVector();
+
+            int selectStart = Math.Min(_stb.SelectStart, _stb.SelectEnd);
+            int selectEnd = Math.Max(_stb.SelectStart, _stb.SelectEnd);
+
+            if (selectStart < selectEnd)
+            {
+                MultilinesFontInfo info = _renderText.GetInfo();
+
+                int drawY = 0;
+
+                while (info != null && selectStart < selectEnd)
+                {
+                    // ok we are inside the selection
+                    if (selectStart >= info.CharStart && selectStart < info.CharStart + info.CharCount)
+                    {
+                        int startSelectionIndex = selectStart - info.CharStart;
+
+                        // calculate offset x
+                        int drawX = 0;
+                        for (int i = 0; i < startSelectionIndex; i++)
+                        {
+                            drawX += _renderText.GetCharWidth(info.Data[i].Item);
+                        }
+
+                        // selection is gone. Bye bye
+                        if (selectEnd >= info.CharStart && selectEnd < info.CharStart + info.CharCount)
+                        {
+                            int count = selectEnd - selectStart;
+
+                            int endX = 0;
+
+                            // calculate width 
+                            for (int k = 0; k < count; k++)
+                            {
+                                endX += _renderText.GetCharWidth(info.Data[startSelectionIndex + k].Item);
+                            }
+
+                            batcher.Draw2D(
+                                           Texture2DCache.GetTexture(Color.Magenta),
+                                           x + drawX,
+                                           y + drawY,
+                                           endX,
+                                           info.MaxHeight,
+                                           ref _hueVector);
+                            
+                            break;
+                        }
+
+
+                        // do the whole line
+                        batcher.Draw2D(
+                                       Texture2DCache.GetTexture(Color.Magenta),
+                                       x + drawX,
+                                       y + drawY,
+                                       info.Width - drawX,
+                                       info.MaxHeight,
+                                       ref _hueVector);
+
+                        // first selection is gone. M
+                        selectStart = info.CharStart + info.CharCount;
+                    }
+
+                    drawY += info.MaxHeight;
+                    info = info.Next;
+                }
+            }
+
 
             _renderText.Draw(batcher, x, y);
             
