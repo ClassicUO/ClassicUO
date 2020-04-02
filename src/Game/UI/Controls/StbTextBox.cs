@@ -98,6 +98,15 @@ namespace ClassicUO.Game.UI.Controls
             _caretScreenPosition = _renderText.GetCaretPosition(_stb.CursorIndex);
         }
 
+        private ControlKeys ApplyShiftIfNecessary(ControlKeys k)
+        {
+            if (Keyboard.Shift)
+            {
+                k |= ControlKeys.Shift;
+            }
+
+            return k;
+        }
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
@@ -176,19 +185,19 @@ namespace ClassicUO.Game.UI.Controls
                     update_caret = true;
                     break;
                 case SDL.SDL_Keycode.SDLK_UP:
-                    stb_key = ControlKeys.Up;
+                    stb_key = ApplyShiftIfNecessary(ControlKeys.Up);
                     update_caret = true;
                     break;
                 case SDL.SDL_Keycode.SDLK_DOWN:
-                    stb_key = ControlKeys.Down;
+                    stb_key = ApplyShiftIfNecessary(ControlKeys.Down);
                     update_caret = true;
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
-                    stb_key = ControlKeys.BackSpace;
+                    stb_key = ApplyShiftIfNecessary(ControlKeys.BackSpace);
                     update_caret = true;
                     break;
                 case SDL.SDL_Keycode.SDLK_DELETE:
-                    stb_key = ControlKeys.Delete;
+                    stb_key = ApplyShiftIfNecessary(ControlKeys.Delete);
                     update_caret = true;
                     break;
                 case SDL.SDL_Keycode.SDLK_HOME:
