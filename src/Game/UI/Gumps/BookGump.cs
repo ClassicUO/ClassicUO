@@ -38,11 +38,11 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class BookGump : Gump
     {
-        private const int MaxBookLines = 8;
-        private const int MaxBookChars = 53;
+        private const int MAX_BOOK_LINES = 8;
+        private const int MAX_BOOK_CHARS_PER_PAGE = 53;
+
 
         private readonly MultiLineBox[] _pagesTextBoxes;
-
         private byte _activated;
 
         // < 0 == backward
@@ -53,11 +53,10 @@ namespace ClassicUO.Game.UI.Gumps
         private sbyte _AtEnd;
 
         private bool _scale;
-
-        private GumpPic m_Forward, m_Backward;
+        private GumpPic _forwardGumpPic, _backwardGumpPic;
         private bool[] _pagesChanged;
-
         private TextBox _titleTextBox, _authorTextBox;
+
 
         public BookGump(uint serial, ushort page_count, string title, string author, bool is_editable, bool old_packet) : base(serial, 0)
         {
@@ -72,6 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump(title, author);
         }
 
+
         public ushort BookPageCount { get; internal set; }
         public static bool IsNewBook => Client.Version > ClientVersion.CV_200;
         public bool UseNewHeader { get; set; } = true;
@@ -82,6 +82,114 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool IntroChanges => _pagesChanged[0];
         private int MaxPage => (BookPageCount >> 1) + 1;
+
+
+        private void BuildGump(string title, string author)
+        {
+            CanCloseWithRightClick = true;
+            Add(new GumpPic(0, 0, 0x1FE, 0)
+            {
+                CanMove = true
+            });
+
+            Add(_backwardGumpPic = new GumpPic(0, 0, 0x1FF, 0));
+
+            Add(_forwardGumpPic = new GumpPic(356, 0, 0x200, 0));
+
+            _forwardGumpPic.MouseUp += (sender, e) =>
+            {
+                if (e.Button == MouseButtonType.Left && sender is Control ctrl)
+                    SetActivePage(ActivePage + 1);
+            };
+
+            _forwardGumpPic.MouseDoubleClick += (sender, e) =>
+            {
+                if (e.Button == MouseButtonType.Left && sender is Control ctrl)
+                    SetActivePage(MaxPage);
+            };
+
+            _backwardGumpPic.MouseUp += (sender, e) =>
+            {
+                if (e.Button == MouseButtonType.Left && sender is Control ctrl)
+                    SetActivePage(ActivePage - 1);
+            };
+
+            _backwardGumpPic.MouseDoubleClick += (sender, e) =>
+            {
+                if (e.Button == MouseButtonType.Left && sender is Control ctrl)
+                    SetActivePage(1);
+            };
+
+            _pagesChanged = new bool[BookPageCount + 1];
+            Add(_titleTextBox = new TextBox(new TextEntry(DefaultFont, 47, 150, 150, IsNewBook, FontStyle.None, 0), IsEditable)
+            {
+                X = 40,
+                Y = 60,
+                Height = 25,
+                Width = 155,
+                Text = title
+            }, 1);
+            Add(new Label("by", true, 1) { X = 40, Y = 130 }, 1);
+            Add(_authorTextBox = new TextBox(new TextEntry(DefaultFont, 29, 150, 150, IsNewBook, FontStyle.None, 0), IsEditable)
+            {
+                X = 40,
+                Y = 160,
+                Height = 25,
+                Width = 155,
+                Text = author
+            }, 1);
+
+            for (int k = 1; k <= BookPageCount; k++)
+            {
+                int x = 38;
+                int y = 34;
+
+                if (k % 2 == 1)
+                {
+                    x = 223;
+                    //right hand page
+                }
+
+                int page = k + 1;
+
+                if (page % 2 == 1)
+                    page += 1;
+                page >>= 1;
+
+                MultiLineBox tbox = new MultiLineBox(new MultiLineEntry(DefaultFont, MAX_BOOK_CHARS_PER_PAGE * MAX_BOOK_LINES, 0, 155, IsNewBook, FontStyle.ExtraHeight, 2), IsEditable)
+                {
+                    X = x,
+                    Y = y,
+                    Height = 166,
+                    Width = 160,
+                    IsEditable = IsEditable,
+                    MaxLines = MAX_BOOK_LINES
+                };
+                Add(tbox, page);
+                _pagesTextBoxes[k - 1] = tbox;
+
+                tbox.MouseUp += (sender, e) =>
+                {
+                    if (e.Button == MouseButtonType.Left && sender is Control ctrl)
+                        OnLeftClick();
+                };
+
+                tbox.MouseDoubleClick += (sender, e) =>
+                {
+                    if (e.Button == MouseButtonType.Left && sender is Control ctrl)
+                        OnLeftClick();
+                };
+                Add(new Label(k.ToString(), true, 1) { X = x + 80, Y = 200 }, page);
+            }
+
+            _activated = 1;
+            ActivePage = 1;
+            UpdatePageButtonVisibility();
+
+            Client.Game.Scene.Audio.PlaySound(0x0055);
+        }
+
+
 
         private int GetActivePage()
         {
@@ -101,6 +209,25 @@ namespace ClassicUO.Game.UI.Gumps
             return -1;
         }
 
+        private void UpdatePageButtonVisibility()
+        {
+            if (ActivePage == 1)
+            {
+                _backwardGumpPic.IsVisible = false;
+                _forwardGumpPic.IsVisible = true;
+            }
+            else if (ActivePage == MaxPage)
+            {
+                _forwardGumpPic.IsVisible = false;
+                _backwardGumpPic.IsVisible = true;
+            }
+            else
+            {
+                _backwardGumpPic.IsVisible = true;
+                _forwardGumpPic.IsVisible = true;
+            }
+        }
+
         public void SetTile(string title, bool editable)
         {
             _titleTextBox.Text = title;
@@ -111,126 +238,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _authorTextBox.Text = author;
             _authorTextBox.IsEditable = editable;
-        }
-
-        private void BuildGump(string title, string author)
-        {
-            CanCloseWithRightClick = true;
-            Add(new GumpPic(0, 0, 0x1FE, 0)
-            {
-                CanMove = true
-            });
-
-            Add(m_Backward = new GumpPic(0, 0, 0x1FF, 0));
-
-            Add(m_Forward = new GumpPic(356, 0, 0x200, 0));
-
-            m_Forward.MouseUp += (sender, e) =>
-            {
-                if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(ActivePage + 1);
-            };
-
-            m_Forward.MouseDoubleClick += (sender, e) =>
-            {
-                if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(MaxPage);
-            };
-
-            m_Backward.MouseUp += (sender, e) =>
-            {
-                if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(ActivePage - 1);
-            };
-
-            m_Backward.MouseDoubleClick += (sender, e) =>
-            {
-                if (e.Button == MouseButtonType.Left && sender is Control ctrl) SetActivePage(1);
-            };
-
-            _pagesChanged = new bool[BookPageCount + 1];
-            Add(_titleTextBox = new TextBox(new TextEntry(DefaultFont, 47, 150, 150, IsNewBook, FontStyle.None, 0), IsEditable)
-            {
-                X = 40,
-                Y = 60,
-                Height = 25,
-                Width = 155,
-                Text = title
-            }, 1);
-            Add(new Label("by", true, 1) {X = 40, Y = 130 }, 1);
-            Add(_authorTextBox = new TextBox(new TextEntry(DefaultFont, 29, 150, 150, IsNewBook, FontStyle.None, 0), IsEditable)
-            {
-                X = 40,
-                Y = 160,
-                Height = 25,
-                Width = 155,
-                Text = author
-            }, 1);
-
-            for (int k = 1; k <= BookPageCount; k++)
-            {
-                int x = 38;
-                int y = 30;
-
-                if (k % 2 == 1)
-                {
-                    x = 223;
-                    //right hand page
-                }
-
-                int page = k + 1;
-
-                if (page % 2 == 1)
-                    page += 1;
-                page >>= 1;
-
-                MultiLineBox tbox = new MultiLineBox(new MultiLineEntry(DefaultFont, MaxBookChars * MaxBookLines, 0, 166, IsNewBook, FontStyle.ExtraHeight, 2), IsEditable)
-                {
-                    X = x,
-                    Y = y,
-                    Height = 170,
-                    Width = 166,
-                    IsEditable = IsEditable,
-                    MaxLines = MaxBookLines
-                };
-                Add(tbox, page);
-                _pagesTextBoxes[k - 1] = tbox;
-
-                tbox.MouseUp += (sender, e) =>
-                {
-                    if (e.Button == MouseButtonType.Left && sender is Control ctrl) 
-                        OnLeftClick();
-                };
-
-                tbox.MouseDoubleClick += (sender, e) =>
-                {
-                    if (e.Button == MouseButtonType.Left && sender is Control ctrl) 
-                        OnLeftClick();
-                };
-                Add(new Label(k.ToString(), true, 1) {X = x + 80, Y = 200}, page);
-            }
-
-            _activated = 1;
-            ActivePage = 1;
-            UpdatePageButtonVisibility();
-
-            Client.Game.Scene.Audio.PlaySound(0x0055);
-        }
-
-        private void UpdatePageButtonVisibility()
-        {
-            if (ActivePage == 1)
-            {
-                m_Backward.IsVisible = false;
-                m_Forward.IsVisible = true;
-            }
-            else if (ActivePage == MaxPage)
-            {
-                m_Forward.IsVisible = false;
-                m_Backward.IsVisible = true;
-            }
-            else
-            {
-                m_Backward.IsVisible = true;
-                m_Forward.IsVisible = true;
-            }
         }
 
         public void SetTextToPage(string text, int page)
@@ -287,15 +294,20 @@ namespace ClassicUO.Game.UI.Gumps
                         if (real_page < 1)
                         {
                             if (UseNewHeader)
-                                NetClient.Socket.Send(new PBookHeader(this));
-                            else if (IsNewBook)
-                                NetClient.Socket.Send(new PBookHeaderOldUTF8(this));
+                                NetClient.Socket.Send(new PBookHeaderChanged(LocalSerial, _titleTextBox.Text, _authorTextBox.Text));
                             else
-                                NetClient.Socket.Send(new PBookHeaderOld(this));
+                                NetClient.Socket.Send(new PBookHeaderChangedOld(LocalSerial, _titleTextBox.Text, _authorTextBox.Text));
+
+                            //if (UseNewHeader)
+                            //    NetClient.Socket.Send(new PBookHeader(this));
+                            //else if (IsNewBook)
+                            //    NetClient.Socket.Send(new PBookHeaderOldUTF8(this));
+                            //else
+                            //    NetClient.Socket.Send(new PBookHeaderOld(this));
                         }
                         else
                         {
-                            NetClient.Socket.Send(new PBookPageData(this, real_page - 1));
+                            NetClient.Socket.Send(new PBookPageData(LocalSerial, GetPageText(real_page - 1), real_page - 1));
                         }
                     }
                 }
@@ -312,7 +324,6 @@ namespace ClassicUO.Game.UI.Gumps
                 UIManager.SystemChat.TextBoxControl.SetKeyboardFocus();
             }
         }
-
 
         public override void OnButtonClick(int buttonID)
         {
@@ -406,7 +417,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 int curlen = entry.Text.Length, prevlen = _pagesTextBoxes[curpage - 1].Text.Length, chonline = box.GetCharsOnLine(0), prevpage = curpage - 1;
                                 _pagesTextBoxes[prevpage].TxEntry.SetCaretPosition(prevlen);
 
-                                for (int i = MaxBookLines - _pagesTextBoxes[prevpage].LinesCount; i > 0 && prevlen > 0; --i) sb.Append('\n');
+                                for (int i = MAX_BOOK_LINES - _pagesTextBoxes[prevpage].LinesCount; i > 0 && prevlen > 0; --i) sb.Append('\n');
 
                                 sb.Append(entry.Text.Substring(0, chonline));
 
@@ -745,177 +756,6 @@ namespace ClassicUO.Game.UI.Gumps
             box.SetKeyboardFocus();
             box.TxEntry.SetCaretPosition(pos);
             box.TxEntry.UpdateCaretPosition();
-        }
-
-        internal sealed class PBookHeader : PacketWriter
-        {
-            public PBookHeader(BookGump gump) : base(0xD4)
-            {
-                byte[] titleBuffer = Encoding.UTF8.GetBytes(gump._titleTextBox.Text);
-                byte[] authorBuffer = Encoding.UTF8.GetBytes(gump._authorTextBox.Text);
-                EnsureSize(15 + titleBuffer.Length + authorBuffer.Length);
-                WriteUInt(gump.LocalSerial);
-                WriteByte(gump.BookPageCount > 0 ? (byte) 1 : (byte) 0);
-                WriteByte(gump.BookPageCount > 0 ? (byte) 1 : (byte) 0);
-                WriteUShort(gump.BookPageCount);
-
-                WriteUShort((ushort) (titleBuffer.Length + 1));
-                WriteBytes(titleBuffer, 0, titleBuffer.Length);
-                WriteByte(0);
-                WriteUShort((ushort) (authorBuffer.Length + 1));
-                WriteBytes(authorBuffer, 0, authorBuffer.Length);
-                WriteByte(0);
-            }
-        }
-
-        internal sealed class PBookHeaderOldUTF8 : PacketWriter
-        {
-            public PBookHeaderOldUTF8(BookGump gump) : base(0x93)
-            {
-                EnsureSize(15 + 60 + 30);
-                WriteUInt(gump.LocalSerial);
-                WriteByte(gump.BookPageCount > 0 ? (byte)1 : (byte)0);
-                WriteByte(gump.BookPageCount > 0 ? (byte)1 : (byte)0);
-
-                WriteUShort(gump.BookPageCount);
-
-                WriteUTF8(gump._titleTextBox.Text, 60);
-                WriteUTF8(gump._authorTextBox.Text, 30);
-            }
-        }
-
-        internal sealed class PBookHeaderOld : PacketWriter
-        {
-            public PBookHeaderOld(BookGump gump) : base(0x93)
-            {
-                EnsureSize(15 + 60 + 30);
-                WriteUInt(gump.LocalSerial);
-                WriteByte(gump.BookPageCount > 0 ? (byte) 1 : (byte) 0);
-                WriteByte(gump.BookPageCount > 0 ? (byte) 1 : (byte) 0);
-
-                WriteUShort(gump.BookPageCount);
-
-                WriteASCII(gump._titleTextBox.Text, 60);
-                WriteASCII(gump._authorTextBox.Text, 30);
-            }
-        }
-
-        internal sealed class PBookPageData : PacketWriter
-        {
-            public PBookPageData(BookGump gump, int page) : base(0x66)
-            {
-                string text = gump.GetPageText(page);
-
-                if (text == null)
-                    text = string.Empty;
-
-                int linecount = 0;
-
-                if (text.Length != 0)
-                {
-                    for (int i = 0; i < text.Length; i++)
-                    {
-                        if (text[i] == '\n')
-                            linecount++;
-                    }
-
-                    if (text[text.Length - 1] != '\n')
-                    {
-                        linecount++;
-                    }
-                }
-
-
-                WriteUInt(gump.LocalSerial);
-                WriteUShort(0x0001);
-                WriteUShort((ushort) (page + 1));
-                WriteUShort((ushort) linecount);
-
-                for (int i = 0; i < text.Length; i++)
-                {
-                    char c = text[i];
-                    if (c == '\n')
-                        WriteByte(0);
-                    else 
-                        WriteByte((byte) c);
-                }
-
-                WriteByte(0);
-            }
-
-            public PBookPageData(BookGump gump) : base(0x66)
-            {
-                EnsureSize(256);
-
-                WriteUInt(gump.LocalSerial);
-                List<int> changed = new List<int>();
-
-                for (int i = 1; i < gump._pagesChanged.Length; i++)
-                {
-                    if (gump._pagesChanged[i])
-                        changed.Add(i);
-                }
-
-                WriteUShort((ushort) changed.Count);
-
-                for (int i = changed.Count - 1; i >= 0; --i)
-                {
-                    WriteUShort((ushort) changed[i]);
-                    MultiLineEntry mle = gump._pagesTextBoxes[changed[i] - 1].TxEntry;
-                    StringBuilder sb = new StringBuilder(mle.Text);
-                    int rows = 0;
-
-                    if (sb.Length > 0)
-                    {
-                        var lcc = mle.GetLinesCharsCount(mle.Text);
-                        rows = Math.Min(MaxBookLines, lcc.Length);
-                        int pos = lcc.Sum();
-
-                        for (int l = rows - 1; l >= 0; --l)
-                        {
-                            if (pos > 0 && (lcc[l] == 0 || sb[pos - 1] != '\n')) sb.Insert(pos, '\n');
-                            pos -= lcc[l];
-                        }
-                    }
-
-                    var splits = sb.ToString().Split('\n');
-                    int length = splits.Length;
-                    WriteUShort((ushort) Math.Min(length, MaxBookLines));
-                    if (length > MaxBookLines && changed[i] >= gump.BookPageCount) Log.Error( $"Book page {changed[i]} split into too many lines: {length - MaxBookLines} Additional lines will be lost");
-
-                    for (int j = 0; j < length; j++)
-                    {
-                        // each line should BE < 53 chars long, even if 80 is admitted (the 'dot' is the least space demanding char, '.',
-                        // a page full of dots is 52 chars exactly, but in multibyte things might change in byte size!)
-                        if (j < MaxBookLines)
-                        {
-                            if (IsNewBook)
-                            {
-                                byte[] buf = Encoding.UTF8.GetBytes(splits[j]);
-
-                                if (buf.Length > 79)
-                                {
-                                    Log.Error( $"Book page {changed[i]} single line too LONG, total lenght -> {buf.Length} vs MAX 79 bytes allowed, some content might get lost");
-                                    splits[j] = splits[j].Substring(0, 79);
-                                }
-
-                                WriteBytes(buf, 0, buf.Length);
-                                WriteByte(0);
-                            }
-                            else
-                            {
-                                if (splits[j].Length > 79)
-                                {
-                                    Log.Error( $"Book page {changed[i]} single line too LONG, total lenght -> {splits[j].Length} vs MAX 79 bytes allowed, some content might get lost");
-                                    splits[j] = splits[j].Substring(0, 79);
-                                }
-
-                                WriteASCII(splits[j]);
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 }

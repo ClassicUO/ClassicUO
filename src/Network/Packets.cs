@@ -1161,6 +1161,76 @@ namespace ClassicUO.Network
         }
     }
 
+    internal sealed class PBookHeaderChangedOld : PacketWriter
+    {
+        public PBookHeaderChangedOld(uint serial, string title, string author) : base(0x93)
+        {
+            WriteUInt(serial);
+            WriteByte(0);
+            WriteByte(1);
+            WriteUShort(0);
+            WriteASCII(title, 60);
+            WriteASCII(author, 30);
+        }
+    }
+
+    internal sealed class PBookHeaderChanged : PacketWriter
+    {
+        public PBookHeaderChanged(uint serial, string title, string author) : base(0xD4)
+        {
+            WriteUInt(serial);
+            WriteByte(0);
+            WriteByte(0);
+            WriteUShort(0);
+            WriteUShort((ushort) (title.Length + 1));
+            WriteASCII(title);
+            WriteUShort((ushort) (author.Length + 1));
+            WriteASCII(author);
+        }
+    }
+
+
+    internal sealed class PBookPageData : PacketWriter
+    {
+        public PBookPageData(uint serial, string text, int page) : base(0x66)
+        {
+            if (text == null)
+                text = string.Empty;
+
+            int linecount = 0;
+
+            if (text.Length != 0)
+            {
+                for (int i = 0; i < text.Length; i++)
+                {
+                    if (text[i] == '\n')
+                        linecount++;
+                }
+
+                if (text[text.Length - 1] != '\n')
+                {
+                    linecount++;
+                }
+            }
+
+            WriteUInt(serial);
+            WriteUShort(0x0001);
+            WriteUShort((ushort) (page + 1));
+            WriteUShort((ushort) linecount);
+
+            for (int i = 0; i < text.Length; i++)
+            {
+                char c = text[i];
+                if (c == '\n')
+                    WriteByte(0);
+                else
+                    WriteByte((byte) c);
+            }
+
+            WriteByte(0);
+        }
+    }
+
     internal sealed class PBookPageDataRequest : PacketWriter
     {
         public PBookPageDataRequest(uint serial, ushort page) : base(0x66)
