@@ -183,18 +183,20 @@ namespace ClassicUO.Network
                     break;
             }
 
-            string s = Encoding.UTF8.GetString(_data, Position, index - Position);
+            int count = index - Position - 1;
+            string s = count <= 0 ? string.Empty : Encoding.UTF8.GetString(_data, Position, count);
 
             Seek(index);
 
             index = 0;
 
-            for (int i = 0; i < s.Length && StringHelper.IsSafeChar(s[i]); i++, index++)
+            while (index < s.Length)
             {
-
+                if (!StringHelper.IsSafeChar(s[index++]))
+                    break;
             }
 
-            if (index == s.Length - 1)
+            if (index == s.Length)
                 return s;
 
             for (int i = 0; i < s.Length; i++)
@@ -230,19 +232,22 @@ namespace ClassicUO.Network
                     break;
             }
 
-            string s = Encoding.UTF8.GetString(_data, Position, index - Position);
+            int count = index - Position - 1;
+            string s = count <= 0 ? string.Empty : Encoding.UTF8.GetString(_data, Position, count);
 
             Seek(index);
 
             index = 0;
 
-            for (int i = 0; i < s.Length && StringHelper.IsSafeChar(s[i]); i++, index++)
+            while (index < s.Length)
             {
-
+                if (!StringHelper.IsSafeChar(s[index++]))
+                    break;
             }
 
-            if (index == s.Length - 1)
+            if (index == s.Length)
                 return s;
+
 
             for (int i = 0; i < s.Length; i++)
             {
