@@ -2550,6 +2550,8 @@ namespace ClassicUO.Network
                 bgump.SetTile(oldpacket ? p.ReadUTF8StringSafe(60) : p.ReadUTF8StringSafe(p.ReadUShort()), editable);
                 bgump.SetAuthor(oldpacket ? p.ReadUTF8StringSafe(30) : p.ReadUTF8StringSafe(p.ReadUShort()), editable);
                 bgump.UseNewHeader = !oldpacket;
+                bgump.SetInScreen();
+                bgump.BringOnTop();
             }
         }
 
