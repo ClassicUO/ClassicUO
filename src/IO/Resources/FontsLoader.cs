@@ -615,7 +615,7 @@ namespace ClassicUO.IO.Resources
 
                 if (si == '\n' || ptr.Width + readWidth + fcd.Width > width)
                 {
-                    if (lastSpace == ptr.CharStart && lastSpace == 0 && si != '\n')
+                    if (lastSpace == ptr.CharStart && lastSpace == 0 && si != '\n' && !isCropped)
                         ptr.CharStart = 1;
 
                     if (si == '\n')
@@ -695,9 +695,9 @@ namespace ClassicUO.IO.Resources
                         if (ptr.MaxHeight == 0)
                             ptr.MaxHeight = 14;
 
-                        //ptr.CharCount = charCount;
-                        charCount = 0;
+                        ptr.CharCount = charCount;
                         ptr.Data.Resize((uint) ptr.CharCount);
+                        charCount = 0;
 
                         if (isFixed || isCropped)
                             break;
@@ -997,7 +997,7 @@ namespace ClassicUO.IO.Resources
 
                 if (ptr.Width + readWidth + (sbyte) data[0] + (sbyte) data[2] > width || si == '\n')
                 {
-                    if (lastSpace == ptr.CharStart && lastSpace == 0 && si != '\n')
+                    if (lastSpace == ptr.CharStart && lastSpace == 0 && si != '\n' && !isCropped)
                         ptr.CharStart = 1;
 
                     if (si == '\n')
@@ -1079,9 +1079,9 @@ namespace ClassicUO.IO.Resources
                         if (ptr.MaxHeight == 0)
                             ptr.MaxHeight = 14 + extraheight;
 
-                        //ptr.CharCount = charCount;
-                        charCount = 0;
+                        ptr.CharCount = charCount;
                         ptr.Data.Resize((uint) ptr.CharCount);
+                        charCount = 0;
 
                         if (isFixed || isCropped)
                             break;

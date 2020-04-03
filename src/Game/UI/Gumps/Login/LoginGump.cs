@@ -36,8 +36,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private readonly Checkbox _checkboxAutologin;
         private readonly Checkbox _checkboxSaveAccount;
         private readonly Button _nextArrow0;
-        private readonly TextBox _textboxAccount;
-        private readonly TextBox _textboxPassword;
+        private readonly StbTextBox _textboxAccount;
+        private readonly StbTextBox _textboxPassword;
 
         private float _time;
 
@@ -212,17 +212,27 @@ namespace ClassicUO.Game.UI.Gumps.Login
             offsetX += 7;
 
             // Text Inputs
-            Add(_textboxAccount = new TextBox(5, 16, 190, 190, false)
+            //Add(_textboxAccount = new TextBox(5, 16, 190, 190, false)
+            //{
+            //    X = offsetX,
+            //    Y = offsetY,
+            //    Width = 190,
+            //    Height = 25,
+            //    Hue = 0x034F,
+            //    SafeCharactersOnly = true
+            //});
+
+            Add(_textboxAccount = new StbTextBox(5, 16, 190, 190, true, hue: 0x034F)
             {
                 X = offsetX,
                 Y = offsetY,
                 Width = 190,
                 Height = 25,
-                Hue = 0x034F,
-                SafeCharactersOnly = true
+                Text = Settings.GlobalSettings.Username
+                //SafeCharactersOnly = true
             });
 
-            Add(_textboxPassword = new TextBox(5, 16, 190, 190, false)
+            Add(_textboxPassword = new StbTextBox(5, 16, 190, 190, false, hue: 0x034F)
             {
                 X = offsetX,
                 Y = offsetY + offtextY + 2,
@@ -230,10 +240,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Height = 25,
                 Hue = 0x034F,
                 IsPassword = true,
-                SafeCharactersOnly = true
+                Text = Crypter.Decrypt(Settings.GlobalSettings.Password)
+                //SafeCharactersOnly = true
             });
-            _textboxAccount.SetText(Settings.GlobalSettings.Username);
-            _textboxPassword.SetText(Crypter.Decrypt(Settings.GlobalSettings.Password));
 
             
             _checkboxSaveAccount.IsChecked = Settings.GlobalSettings.SaveAccount;
@@ -268,12 +277,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             Add(new StbTextBox(1, isunicode: true, align: TEXT_ALIGN_TYPE.TS_LEFT)
             {
-                X = 200,
+                X = 200, 
                 Y = 70,
                 Width = 200,
                 Height = 70,
-                IsPassword = false,
-                IsReadOnly = false,
+                IsPassword = true,
+                IsEditable = true,
+                Multiline = true,
                 Text = "AAA\r\nBBB\r\nCCC\r\n"
             });
         }

@@ -162,13 +162,13 @@ namespace ClassicUO.Renderer
                         {
                             _info = FontsLoader.Instance.GetInfoUnicode(Font,
                                                                         Text, Text.Length, Align, (ushort) FontStyle,
-                                                                        Width, true, true);
+                                                                        MaxWidth > 0 ? MaxWidth : Width, true, true);
                         }
                         else
                         {
                             _info = FontsLoader.Instance.GetInfoASCII(Font,
                                                                       Text, Text.Length, Align, (ushort) FontStyle,
-                                                                      Width, true, true);
+                                                                      MaxWidth > 0 ? MaxWidth : Width, true, true);
                         }
                     }
                 }

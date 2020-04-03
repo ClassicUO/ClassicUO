@@ -21,6 +21,7 @@ namespace ClassicUO.Game.UI.Controls
         private int _maxCharCount = -1;
         private Point _caretScreenPosition;
         private bool _leftWasDown, _isPassword;
+        private ushort _hue;
 
         private RenderedText _currentRenderedText => IsPassword ? _passwordRenderedText : _rendererText;
 
@@ -34,6 +35,8 @@ namespace ClassicUO.Game.UI.Controls
             _maxCharCount = max_char_count;
 
             _stb = new TextEdit(this);
+            _stb.SingleLine = true;
+            _hue = hue;
 
             _rendererText = RenderedText.Create(string.Empty, hue, font, isunicode, style, align, maxWidth, 30, false, false, false);
             if (maxWidth > 0)
@@ -49,6 +52,9 @@ namespace ClassicUO.Game.UI.Controls
             get => _currentRenderedText.Text;
             set
             {
+                if (_maxCharCount >= 0 && value != null && value.Length > _maxCharCount)
+                    value = value.Substring(0, _maxCharCount);
+
                 _rendererText.Text = value;
 
                 if (IsPassword)
@@ -86,7 +92,23 @@ namespace ClassicUO.Game.UI.Controls
             set => _stb.SelectEnd = value;
         }
 
-        public bool IsReadOnly { get; set; }
+        public ushort Hue
+        {
+            get => _hue;
+            set 
+            {
+                if (_currentRenderedText.Hue != value)
+                {
+                    if (_passwordRenderedText != null)
+                        _passwordRenderedText.Hue = value;
+                    _rendererText.Hue = value;
+                    _rendererCaret.Hue = value;
+
+                    _currentRenderedText.CreateTexture();
+                    _rendererCaret.CreateTexture();
+                }
+            }
+        }
 
         public bool IsPassword
         {
@@ -129,10 +151,13 @@ namespace ClassicUO.Game.UI.Controls
         {
             TextEditRow r = _currentRenderedText.GetLayoutRow(startIndex);
 
-            r.x0 += Bounds.X;
-            r.x1 += Bounds.Width;
-            r.ymin += Bounds.Y;
-            r.ymax += Bounds.Height;
+            int sx = ScreenCoordinateX;
+            int sy = ScreenCoordinateY;
+
+            r.x0 += sx;
+            r.x1 += sx;
+            r.ymin += sy;
+            r.ymax += sy;
 
             return r;
         }
@@ -162,6 +187,8 @@ namespace ClassicUO.Game.UI.Controls
             return k;
         }
 
+        private bool IsMaxCharReached(int count)
+            => _maxCharCount >= 0 && Length + count >= _maxCharCount;
 
 
 
@@ -191,7 +218,7 @@ namespace ClassicUO.Game.UI.Controls
                     SelectionEnd = 0;
                     break;
 
-                case SDL.SDL_Keycode.SDLK_INSERT when !IsReadOnly:
+                case SDL.SDL_Keycode.SDLK_INSERT when IsEditable:
                     stb_key = ControlKeys.InsertMode;
                     break;
                 case SDL.SDL_Keycode.SDLK_c when Keyboard.Ctrl:
@@ -211,18 +238,18 @@ namespace ClassicUO.Game.UI.Controls
                     if (selectStart < selectEnd)
                     {
                         SDL.SDL_SetClipboardText(Text.Substring(selectStart, selectEnd - selectStart));
-                        if (!IsReadOnly)
+                        if (IsEditable)
                             _stb.Cut();
                     }
 
                     break;
-                case SDL.SDL_Keycode.SDLK_v when Keyboard.Ctrl && !IsReadOnly:
+                case SDL.SDL_Keycode.SDLK_v when Keyboard.Ctrl && IsEditable:
                     OnTextInput(SDL.SDL_GetClipboardText());
                     break;
-                case SDL.SDL_Keycode.SDLK_z when Keyboard.Ctrl && !IsReadOnly:
+                case SDL.SDL_Keycode.SDLK_z when Keyboard.Ctrl && IsEditable:
                     stb_key = ControlKeys.Undo;
                     break;
-                case SDL.SDL_Keycode.SDLK_y when Keyboard.Ctrl && !IsReadOnly:
+                case SDL.SDL_Keycode.SDLK_y when Keyboard.Ctrl && IsEditable:
                     stb_key = ControlKeys.Redo;
                     break;
                 case SDL.SDL_Keycode.SDLK_LEFT:
@@ -272,11 +299,11 @@ namespace ClassicUO.Game.UI.Controls
                     stb_key = ApplyShiftIfNecessary(ControlKeys.Down);
                     update_caret = true;
                     break;
-                case SDL.SDL_Keycode.SDLK_BACKSPACE when !IsReadOnly:
+                case SDL.SDL_Keycode.SDLK_BACKSPACE when IsEditable:
                     stb_key = ApplyShiftIfNecessary(ControlKeys.BackSpace);
                     update_caret = true;
                     break;
-                case SDL.SDL_Keycode.SDLK_DELETE when!IsReadOnly:
+                case SDL.SDL_Keycode.SDLK_DELETE when IsEditable:
                     stb_key = ApplyShiftIfNecessary(ControlKeys.Delete);
                     update_caret = true;
                     break;
@@ -318,7 +345,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
                     update_caret = true;
                     break;
-                case SDL.SDL_Keycode.SDLK_RETURN when !IsReadOnly:
+                case SDL.SDL_Keycode.SDLK_RETURN when IsEditable && !IsMaxCharReached(0):
                     _stb.InputChar('\n');
                     OnTextChanged();
                     break;
@@ -339,14 +366,27 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnTextInput(string c)
         {
-            if (c == null || IsReadOnly)
+            if (c == null || !IsEditable)
                 return;
 
-            for (int i = 0; i < c.Length; i++)
+            int count;
+
+            if (_maxCharCount >= 0)
             {
-                // stb doesn't like the windows CR
-                if (c[i] != '\r')
-                    _stb.InputChar(c[i]);
+                int remains = _maxCharCount - Length;
+                if (remains <= 0)
+                    return;
+
+                count = Math.Min(remains, c.Length);
+            }
+            else
+            {
+                count = c.Length;
+            } 
+
+            for (int i = 0; i < count; i++)
+            {                
+                _stb.InputChar(c[i]);
             }
 
             OnTextChanged();

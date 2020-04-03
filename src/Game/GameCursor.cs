@@ -557,7 +557,7 @@ namespace ClassicUO.Game
             if (IsLoading)
                 return _cursorData[war, 13];
 
-            if (UIManager.MouseOverControl is AbstractTextBox t && t.IsEditable)
+            if (UIManager.MouseOverControl != null && UIManager.MouseOverControl.AcceptKeyboardInput && UIManager.MouseOverControl.IsEditable)
                 return _cursorData[war, 14];
 
             ushort result = _cursorData[war, 9];
