@@ -330,7 +330,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 Add(_hisCoins[1]);
 
-                _myCoinsEntries[0] = new StbTextBox(9, -1, 100, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
+                _myCoinsEntries[0] = new StbTextBox(9, -1, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
                 {
                     X = 43,
                     Y = 190,
@@ -342,7 +342,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 Add(_myCoinsEntries[0]);
 
-                _myCoinsEntries[1] = new StbTextBox(9, -1, 100, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
+                _myCoinsEntries[1] = new StbTextBox(9, -1, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
                 {
                     X = 43,
                     Y = 210,

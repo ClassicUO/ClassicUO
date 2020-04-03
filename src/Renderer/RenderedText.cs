@@ -312,6 +312,7 @@ namespace ClassicUO.Renderer
             return FontsLoader.Instance.GetCharWidthASCII(Font, c);
         }
 
+
         public bool Draw(UltimaBatcher2D batcher, 
             int swidth, int sheight,
             int dx, int dy, int dwidth, int dheight, 

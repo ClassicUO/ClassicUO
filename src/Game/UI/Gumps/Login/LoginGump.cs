@@ -212,7 +212,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             offsetX += 7;
 
             // Text Inputs
-            Add(_textboxAccount = new StbTextBox(5, 16, 190, 190, false, hue: 0x034F)
+            Add(_textboxAccount = new StbTextBox(5, 16, 190, false, hue: 0x034F)
             {
                 X = offsetX,
                 Y = offsetY,
@@ -262,7 +262,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _textboxPassword.SetKeyboardFocus();
 
 
-            Add(new StbTextBox(1, isunicode: true, align: TEXT_ALIGN_TYPE.TS_LEFT)
+            Add(new StbTextBox(1, isunicode: true, maxWidth:200, align: TEXT_ALIGN_TYPE.TS_LEFT, style: FontStyle.Fixed)
             {
                 X = 200, 
                 Y = 70,

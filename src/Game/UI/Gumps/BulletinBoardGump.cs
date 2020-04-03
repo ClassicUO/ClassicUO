@@ -259,7 +259,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (variant == 0)
                 subjectColor = 0x0008;
 
-            Add(_subjectTextbox = new StbTextBox(useUnicode ? unicodeFontIndex : (byte)9, maxWidth: 150, width: 150,
+            Add(_subjectTextbox = new StbTextBox(useUnicode ? unicodeFontIndex : (byte)9, maxWidth: 150,
                                                  isunicode: useUnicode, hue: subjectColor)
             {
                 X = 30 + text.Width,
@@ -271,7 +271,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPicTiled(30, 106, 235, 4, 0x0835)); 
 
-            _scrollArea.Add(_textBox = new StbTextBox(useUnicode ? unicodeFontIndex : (byte)9, -1, 0, 220, hue: textColor, isunicode: useUnicode)
+            _scrollArea.Add(_textBox = new StbTextBox(useUnicode ? unicodeFontIndex : (byte)9, -1, 0, hue: textColor, isunicode: useUnicode)
                 {
                     X = 40,
                     Y = 0,

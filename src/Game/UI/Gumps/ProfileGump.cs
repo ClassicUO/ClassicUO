@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
             _scrollArea.Add(c);
             AddHorizontalBar(_scrollArea, 92, 35, 220);
 
-            _textBox = new StbTextBox(1, -1, 0, 220, true, hue: 0)
+            _textBox = new StbTextBox(1, -1, 220, true, hue: 0)
             {
                 Height = FontsLoader.Instance.GetHeightUnicode(1, body, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0),
                 Width = 220,

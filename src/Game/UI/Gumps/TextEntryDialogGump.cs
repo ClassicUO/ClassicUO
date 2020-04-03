@@ -54,9 +54,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPic(60, 130, 0x0477, 0));
 
-            _textBox = new StbTextBox(1, isunicode: false, hue: 0x0386, max_char_count: maxlen, width: 200)
+            _textBox = new StbTextBox(1, isunicode: false, hue: 0x0386, max_char_count: maxlen)
             {
                 X = 71, Y = 137,
+                Width = 220,
                 NumbersOnly = variant == 2
             };
             Add(_textBox);

@@ -240,7 +240,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 Add(text);
 
-                _textBox = new StbTextBox(1, -1, 0, Width - 50, hue: 0x0481, style: FontStyle.Fixed)
+                _textBox = new StbTextBox(1, -1, Width - 50, hue: 0x0481, style: FontStyle.Fixed)
                 {
                     X = 45, 
                     Y = ROW_HEIGHT,

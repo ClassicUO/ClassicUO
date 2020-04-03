@@ -312,7 +312,7 @@ namespace ClassicUO.Game.UI.Controls
                                 Height = b.Height * 2 + 4
                             });
 
-                            StbTextBox textbox = new StbTextBox(0xFF, 80, 0, 236, true, FontStyle.BlackBorder)
+                            StbTextBox textbox = new StbTextBox(0xFF, 80, 236, true, FontStyle.BlackBorder)
                             {
                                 X = 20,
                                 Y = b.Height + 5,
@@ -377,7 +377,7 @@ namespace ClassicUO.Game.UI.Controls
                             Height = box.Height * 2 + 4
                         });
 
-                        StbTextBox textbox = new StbTextBox(0xFF, 80, 0, 236, true, FontStyle.BlackBorder)
+                        StbTextBox textbox = new StbTextBox(0xFF, 80,236, true, FontStyle.BlackBorder)
                         {
                             X = 20,
                             Y = box.Height + 5,

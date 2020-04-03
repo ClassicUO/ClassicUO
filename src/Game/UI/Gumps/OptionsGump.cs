@@ -530,7 +530,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _windowSizeArea.Add(text);
 
-                _gameWindowWidth = CreateInputField(_windowSizeArea, new StbTextBox(FONT, 5, 80, 80)
+                _gameWindowWidth = CreateInputField(_windowSizeArea, new StbTextBox(FONT, 5, 80)
                 {
                     Text = ProfileManager.Current.GameWindowSize.X.ToString(),
                     X = 30,
@@ -540,7 +540,7 @@ namespace ClassicUO.Game.UI.Gumps
                     NumbersOnly = true
                 }, "");
 
-                _gameWindowHeight = CreateInputField(_windowSizeArea, new StbTextBox(FONT, 5, 80, 80)
+                _gameWindowHeight = CreateInputField(_windowSizeArea, new StbTextBox(FONT, 5, 80)
                 {
                     Text = ProfileManager.Current.GameWindowSize.Y.ToString(),
                     X = 100,
@@ -557,7 +557,7 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _windowSizeArea.Add(text);
 
-                _gameWindowPositionX = CreateInputField(_windowSizeArea, new StbTextBox(FONT, 5, 80, 80)
+                _gameWindowPositionX = CreateInputField(_windowSizeArea, new StbTextBox(FONT, 5, 80)
                 {
                     Text = ProfileManager.Current.GameWindowPosition.X.ToString(),
                     X = 215,
@@ -567,7 +567,7 @@ namespace ClassicUO.Game.UI.Gumps
                     NumbersOnly = true
                 });
 
-                _gameWindowPositionY = CreateInputField(_windowSizeArea, new StbTextBox(FONT, 5, 80, 80)
+                _gameWindowPositionY = CreateInputField(_windowSizeArea, new StbTextBox(FONT, 5, 80)
                 {
                     Text = ProfileManager.Current.GameWindowPosition.Y.ToString(),
                     X = 285,
@@ -1019,7 +1019,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollAreaItem it = new ScrollAreaItem();
 
-            _spellFormatBox = CreateInputField(it, new StbTextBox(FONT, 30, 200, 200)
+            _spellFormatBox = CreateInputField(it, new StbTextBox(FONT, 30, 200)
             {
                 Text = ProfileManager.Current.SpellDisplayFormat,
                 X = 0,
@@ -1044,7 +1044,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollAreaItem item = new ScrollAreaItem();
 
-            _abbreviatedAmount = CreateInputField(item, new StbTextBox(FONT, -1, 80, 80)
+            _abbreviatedAmount = CreateInputField(item, new StbTextBox(FONT, -1, 80)
             {
                 X = _enableAbbreviatedAmount.X + 30,
                 Y = 10,
@@ -1060,7 +1060,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             item = new ScrollAreaItem();
 
-            _highlightAmount = CreateInputField(item, new StbTextBox(FONT, 2, 80, 80)
+            _highlightAmount = CreateInputField(item, new StbTextBox(FONT, 2, 80)
             {
                 X = _highlightOnAmount.X + 30,
                 Y = 10,
@@ -1099,7 +1099,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             item = new ScrollAreaItem();
 
-            _rows = CreateInputField(item, new StbTextBox(FONT, 5, 80, 80)
+            _rows = CreateInputField(item, new StbTextBox(FONT, 5, 80)
             {
                 X = 20,
                 Y = _cellSize.Y + _cellSize.Height + 25,
@@ -1109,7 +1109,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Text = ProfileManager.Current.CounterBarRows.ToString()
             }, "Rows:");
 
-            _columns = CreateInputField(item, new StbTextBox(FONT, 5, 80, 80)
+            _columns = CreateInputField(item, new StbTextBox(FONT, 5, 80)
             {
                 X = _rows.X + _rows.Width + 30,
                 Y = _cellSize.Y + _cellSize.Height + 25,
@@ -1150,7 +1150,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _autoOpenCorpseArea.Add(_skipEmptyCorpse);
 
-            _autoOpenCorpseRange = CreateInputField(_autoOpenCorpseArea, new StbTextBox(FONT, 2, 80, 80)
+            _autoOpenCorpseRange = CreateInputField(_autoOpenCorpseArea, new StbTextBox(FONT, 2, 80)
             {
                 X = 25,
                 Y = _skipEmptyCorpse.Y + _skipEmptyCorpse.Height,

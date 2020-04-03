@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int height = FontsLoader.Instance.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
 
-            TextBoxControl = new StbTextBox(ProfileManager.Current.ChatFont, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
+            TextBoxControl = new StbTextBox(ProfileManager.Current.ChatFont, MAX_MESSAGE_LENGHT, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
             {
                 X = 0,
                 Y = Height - height - 3,

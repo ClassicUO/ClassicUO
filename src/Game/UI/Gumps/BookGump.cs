@@ -121,7 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             _pagesChanged = new bool[BookPageCount + 1];
-            Add(_titleTextBox = new StbTextBox(DefaultFont, 47, 150, 150, IsNewBook, FontStyle.None, 0)
+            Add(_titleTextBox = new StbTextBox(DefaultFont, 47, 150, IsNewBook, FontStyle.None, 0)
             {
                 X = 40,
                 Y = 60,
@@ -131,7 +131,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Text = title
             }, 1);
             Add(new Label("by", true, 1) { X = 40, Y = 130 }, 1);
-            Add(_authorTextBox = new StbTextBox(DefaultFont, 29, 150, 150, IsNewBook, FontStyle.None, 0)
+            Add(_authorTextBox = new StbTextBox(DefaultFont, 29, 150, IsNewBook, FontStyle.None, 0)
             {
                 X = 40,
                 Y = 160,
@@ -158,7 +158,7 @@ namespace ClassicUO.Game.UI.Gumps
                     page += 1;
                 page >>= 1;
 
-                StbTextBox tbox = new StbTextBox(DefaultFont, MAX_BOOK_CHARS_PER_PAGE * MAX_BOOK_LINES, 0, 155, IsNewBook, FontStyle.ExtraHeight, 2)
+                StbTextBox tbox = new StbTextBox(DefaultFont, MAX_BOOK_CHARS_PER_PAGE * MAX_BOOK_LINES, 155, IsNewBook, FontStyle.ExtraHeight, 2)
                 {
                     X = x,
                     Y = y,

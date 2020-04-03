@@ -66,7 +66,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _okButton.MouseUp += OkButtonOnMouseClick;
 
-            Add(_textBox = new StbTextBox(1, isunicode: false, hue: 0x0386, width: 60, maxWidth: 1000)
+            Add(_textBox = new StbTextBox(1, isunicode: false, hue: 0x0386, maxWidth: 60)
             {
                 X = 29, Y = 42,
                 Width = 60,

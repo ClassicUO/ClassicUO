@@ -330,38 +330,38 @@ namespace ClassicUO.IO.Resources
             if (string.IsNullOrEmpty(str))
                 return;
 
-            if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0 || (flags & UOFONT_CROPTEXTURE) != 0)
-            {
-                if (width == 0 || string.IsNullOrEmpty(str))
-                    return;
+            //if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0 || (flags & UOFONT_CROPTEXTURE) != 0)
+            //{
+            //    if (width == 0 || string.IsNullOrEmpty(str))
+            //        return;
 
-                int realWidth = GetWidthASCII(font, str);
+            //    int realWidth = GetWidthASCII(font, str);
 
-                if (realWidth > width)
-                {
-                    string newstr = GetTextByWidthASCII(font, str, width, (flags & UOFONT_CROPPED) != 0, align, flags);
-                    if ((flags & UOFONT_CROPTEXTURE) != 0)
-                    {
-                        int totalheight = 0;
-                        while (totalheight < height)
-                        {
-                            totalheight += GetHeightASCII(font, newstr, width, align, flags);
-                            if (str.Length > newstr.Length)
-                                newstr += GetTextByWidthASCII(font, str.Substring(newstr.Length), width, (flags & UOFONT_CROPPED) != 0, align, flags);
-                            else
-                                break;
-                        }
-                    }
-                    GeneratePixelsASCII(ref texture, font, newstr, color, width, align, flags, out isPartial, saveHitmap);
+            //    if (realWidth > width)
+            //    {
+            //        string newstr = GetTextByWidthASCII(font, str, width, (flags & UOFONT_CROPPED) != 0, align, flags);
+            //        if ((flags & UOFONT_CROPTEXTURE) != 0)
+            //        {
+            //            int totalheight = 0;
+            //            while (totalheight < height)
+            //            {
+            //                totalheight += GetHeightASCII(font, newstr, width, align, flags);
+            //                if (str.Length > newstr.Length)
+            //                    newstr += GetTextByWidthASCII(font, str.Substring(newstr.Length), width, (flags & UOFONT_CROPPED) != 0, align, flags);
+            //                else
+            //                    break;
+            //            }
+            //        }
+            //        GeneratePixelsASCII(ref texture, font, newstr, color, width, align, flags, out isPartial, saveHitmap);
 
-                    return;
-                }
-            }
+            //        return;
+            //    }
+            //}
 
             GeneratePixelsASCII(ref texture, font, str, color, width, align, flags, out isPartial, saveHitmap);
         }
 
-        private string GetTextByWidthASCII(byte font, string str, int width, bool isCropped, TEXT_ALIGN_TYPE align, ushort flags)
+        public string GetTextByWidthASCII(byte font, string str, int width, bool isCropped, TEXT_ALIGN_TYPE align, ushort flags)
         {
             if (font >= FontCount || string.IsNullOrEmpty(str))
                 return string.Empty;
@@ -615,7 +615,7 @@ namespace ClassicUO.IO.Resources
 
                 if (si == '\n' || ptr.Width + readWidth + fcd.Width > width)
                 {
-                    if (lastSpace == ptr.CharStart && lastSpace == 0 && si != '\n' && !isCropped)
+                    if (lastSpace == ptr.CharStart && lastSpace == 0 && si != '\n' && !isCropped && !isFixed)
                         ptr.CharStart = 1;
 
                     if (si == '\n')
@@ -763,33 +763,33 @@ namespace ClassicUO.IO.Resources
             if (string.IsNullOrEmpty(str))
                 return;
 
-            if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0 || (flags & UOFONT_CROPTEXTURE) != 0)
-            {
-                if (width == 0 || string.IsNullOrEmpty(str))
-                    return;
+            //if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0 || (flags & UOFONT_CROPTEXTURE) != 0)
+            //{
+            //    if (width == 0 || string.IsNullOrEmpty(str))
+            //        return;
 
-                int realWidth = GetWidthUnicode(font, str);
+            //    int realWidth = GetWidthUnicode(font, str);
 
-                if (realWidth > width)
-                {
-                    string newstr = GetTextByWidthUnicode(font, str, width, (flags & UOFONT_CROPPED) != 0, align, flags);
-                    if ((flags & UOFONT_CROPTEXTURE) != 0)
-                    {
-                        int totalheight = 0;
-                        while (totalheight < height)
-                        {
-                            totalheight += GetHeightUnicode(font, newstr, width, align, flags);
-                            if (str.Length > newstr.Length)
-                                newstr += GetTextByWidthUnicode(font, str.Substring(newstr.Length), width, (flags & UOFONT_CROPPED) != 0, align, flags);
-                            else
-                                break;
-                        }
-                    }
-                    GeneratePixelsUnicode(ref texture, font, newstr, color, cell, width, align, flags, saveHitmap);
+            //    if (realWidth > width)
+            //    {
+            //        string newstr = GetTextByWidthUnicode(font, str, width, (flags & UOFONT_CROPPED) != 0, align, flags);
+            //        if ((flags & UOFONT_CROPTEXTURE) != 0)
+            //        {
+            //            int totalheight = 0;
+            //            while (totalheight < height)
+            //            {
+            //                totalheight += GetHeightUnicode(font, newstr, width, align, flags);
+            //                if (str.Length > newstr.Length)
+            //                    newstr += GetTextByWidthUnicode(font, str.Substring(newstr.Length), width, (flags & UOFONT_CROPPED) != 0, align, flags);
+            //                else
+            //                    break;
+            //            }
+            //        }
+            //        GeneratePixelsUnicode(ref texture, font, newstr, color, cell, width, align, flags, saveHitmap);
 
-                    return;
-                }
-            }
+            //        return;
+            //    }
+            //}
 
             GeneratePixelsUnicode(ref texture, font, str, color, cell, width, align, flags, saveHitmap);
         }
@@ -997,7 +997,7 @@ namespace ClassicUO.IO.Resources
 
                 if (ptr.Width + readWidth + (sbyte) data[0] + (sbyte) data[2] > width || si == '\n')
                 {
-                    if (lastSpace == ptr.CharStart && lastSpace == 0 && si != '\n' && !isCropped)
+                    if (lastSpace == ptr.CharStart && lastSpace == 0 && si != '\n' && !isCropped && !isFixed)
                         ptr.CharStart = 1;
 
                     if (si == '\n')

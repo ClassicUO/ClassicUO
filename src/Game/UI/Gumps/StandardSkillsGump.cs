@@ -299,7 +299,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int width = FontsLoader.Instance.GetWidthASCII(6, group.Name);
 
-                Add(_textbox = new StbTextBox(6, -1, 200, 200, false, FontStyle.Fixed)
+                Add(_textbox = new StbTextBox(6, -1, 200, false, FontStyle.Fixed)
                 {
                     X = 16,
                     Y = -5,

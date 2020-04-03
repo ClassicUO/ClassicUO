@@ -81,7 +81,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
             };
             Add(_down);
-            Add(_textBox = new StbTextBox(font, maxcharlength, width, width, isunicode, style, hue)
+            Add(_textBox = new StbTextBox(font, maxcharlength, width, isunicode, style, hue)
             {
                 X = 2, 
                 Y = 2, 

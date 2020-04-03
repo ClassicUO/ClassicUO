@@ -144,7 +144,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int ww = w - 94;
 
-            _textBox = new StbTextBox(0xFF, ww, ww, ww, true, FontStyle.BlackBorder | FontStyle.Fixed)
+            _textBox = new StbTextBox(0xFF, -1, ww, true, FontStyle.BlackBorder | FontStyle.Fixed)
             {
                 X = 42,
                 Y = 45 + l.Height + 7,
