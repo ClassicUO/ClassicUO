@@ -16,11 +16,13 @@ namespace ClassicUO.Game.UI.Controls
     class StbTextBox : Control, ITextEditHandler
     {
         private readonly TextEdit _stb;
-        private RenderedText _renderText, _rendererCaret;
+        private RenderedText _rendererText, _rendererCaret, _passwordRenderedText;
 
         private int _maxCharCount = -1;
         private Point _caretScreenPosition;
-        private bool _leftWasDown;
+        private bool _leftWasDown, _isPassword;
+
+        private RenderedText _currentRenderedText => IsPassword ? _passwordRenderedText : _rendererText;
 
 
         public StbTextBox(byte font, int max_char_count = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE align = 0)
@@ -33,9 +35,9 @@ namespace ClassicUO.Game.UI.Controls
 
             _stb = new TextEdit(this);
 
-            _renderText = RenderedText.Create(string.Empty, hue, font, isunicode, style, align, maxWidth, 30, false, false, false);
+            _rendererText = RenderedText.Create(string.Empty, hue, font, isunicode, style, align, maxWidth, 30, false, false, false);
             if (maxWidth > 0)
-                _renderText.FontStyle |= FontStyle.Cropped;
+                _rendererText.FontStyle |= FontStyle.Cropped;
 
             _rendererCaret = RenderedText.Create("_", hue, font, isunicode, (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None, align: align);
         }
@@ -44,8 +46,24 @@ namespace ClassicUO.Game.UI.Controls
 
         public string Text
         {
-            get => _renderText.Text;
-            set => _renderText.Text = value;
+            get => _currentRenderedText.Text;
+            set
+            {
+                _rendererText.Text = value;
+
+                if (IsPassword)
+                {
+                    char[] v = value.ToCharArray();
+
+                    for (int i = 0; i < v.Length; i++)
+                    {
+                        if (v[i] != '\n')
+                            v[i] = '*';
+                    }
+
+                    _currentRenderedText.Text = new string(v);
+                }
+            }
         }
 
         public int Length => Text?.Length ?? 0;
@@ -56,18 +74,60 @@ namespace ClassicUO.Game.UI.Controls
             set => _stb.SingleLine = !value;
         }
 
+        public int SelectionStart
+        {
+            get => _stb.SelectStart;
+            set => _stb.SelectStart = value;
+        }
+
+        public int SelectionEnd
+        {
+            get => _stb.SelectEnd;
+            set => _stb.SelectEnd = value;
+        }
+
+        public bool IsReadOnly { get; set; }
+
+        public bool IsPassword
+        {
+            get => _isPassword;
+            set
+            {
+                _isPassword = value;
+
+                if (value && (_passwordRenderedText == null || _passwordRenderedText.IsDestroyed))
+                {
+                    _passwordRenderedText = RenderedText.Create(
+                                                                "*",
+                                                                _rendererText.Hue,
+                                                                _rendererText.Font,
+                                                                _rendererText.IsUnicode,
+                                                                _rendererText.FontStyle,
+                                                                _rendererText.Align,
+                                                                _rendererText.MaxWidth,
+                                                                _rendererText.Cell,
+                                                                _rendererText.IsHTML,
+                                                                _rendererText.RecalculateWidthByInfo,
+                                                                _rendererText.SaveHitMap);
+                }
+            }
+        }
+
+
 
         public event EventHandler TextChanged;
 
 
+
+
         public float GetWidth(int index)
         {
-            return _renderText.GetCharWidthAtIndex(index);
+            return _currentRenderedText.GetCharWidthAtIndex(index);
         }
 
         public TextEditRow LayoutRow(int startIndex)
         {
-            TextEditRow r = _renderText.GetLayoutRow(startIndex);
+            TextEditRow r = _currentRenderedText.GetLayoutRow(startIndex);
 
             r.x0 += Bounds.X;
             r.x1 += Bounds.Width;
@@ -86,16 +146,10 @@ namespace ClassicUO.Game.UI.Controls
 
 
 
-        protected virtual void OnTextChanged()
-        {
-            TextChanged?.Raise();
-
-            UpdateCaretScreenPosition();
-        }
-
+        
         private void UpdateCaretScreenPosition()
         {
-            _caretScreenPosition = _renderText.GetCaretPosition(_stb.CursorIndex);
+            _caretScreenPosition = _currentRenderedText.GetCaretPosition(_stb.CursorIndex);
         }
 
         private ControlKeys ApplyShiftIfNecessary(ControlKeys k)
@@ -108,6 +162,20 @@ namespace ClassicUO.Game.UI.Controls
             return k;
         }
 
+
+
+
+        protected virtual void OnTextChanged()
+        {
+            TextChanged?.Raise();
+
+            UpdateCaretScreenPosition();
+        }
+
+
+
+
+
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             ControlKeys? stb_key = null;
@@ -119,30 +187,42 @@ namespace ClassicUO.Game.UI.Controls
                     SelectAll();
                     break;
                 case SDL.SDL_Keycode.SDLK_ESCAPE:
-                    _stb.SelectStart = 0;
-                    _stb.SelectEnd = 0;
+                    SelectionStart = 0;
+                    SelectionEnd = 0;
                     break;
 
-                case SDL.SDL_Keycode.SDLK_INSERT:
+                case SDL.SDL_Keycode.SDLK_INSERT when !IsReadOnly:
                     stb_key = ControlKeys.InsertMode;
                     break;
-                case SDL.SDL_Keycode.SDLK_v when Keyboard.Ctrl:
-                    string clipboard = SDL.SDL_GetClipboardText();
+                case SDL.SDL_Keycode.SDLK_c when Keyboard.Ctrl:
+                    int selectStart = Math.Min(_stb.SelectStart, _stb.SelectEnd);
+                    int selectEnd = Math.Max(_stb.SelectStart, _stb.SelectEnd);
 
-                    if (!string.IsNullOrEmpty(clipboard))
+                    if (selectStart < selectEnd)
                     {
-                        for (int i = 0; i < clipboard.Length && i < 2000; i++)
-                        {
-                            _stb.InputChar(clipboard[i]);
-                        }
-
-                        OnTextChanged();
+                        SDL.SDL_SetClipboardText(Text.Substring(selectStart, selectEnd - selectStart));
                     }
+
                     break;
-                case SDL.SDL_Keycode.SDLK_z when Keyboard.Ctrl:
+                case SDL.SDL_Keycode.SDLK_x when Keyboard.Ctrl:
+                    selectStart = Math.Min(_stb.SelectStart, _stb.SelectEnd);
+                    selectEnd = Math.Max(_stb.SelectStart, _stb.SelectEnd);
+
+                    if (selectStart < selectEnd)
+                    {
+                        SDL.SDL_SetClipboardText(Text.Substring(selectStart, selectEnd - selectStart));
+                        if (!IsReadOnly)
+                            _stb.Cut();
+                    }
+
+                    break;
+                case SDL.SDL_Keycode.SDLK_v when Keyboard.Ctrl && !IsReadOnly:
+                    OnTextInput(SDL.SDL_GetClipboardText());
+                    break;
+                case SDL.SDL_Keycode.SDLK_z when Keyboard.Ctrl && !IsReadOnly:
                     stb_key = ControlKeys.Undo;
                     break;
-                case SDL.SDL_Keycode.SDLK_y when Keyboard.Ctrl:
+                case SDL.SDL_Keycode.SDLK_y when Keyboard.Ctrl && !IsReadOnly:
                     stb_key = ControlKeys.Redo;
                     break;
                 case SDL.SDL_Keycode.SDLK_LEFT:
@@ -192,11 +272,11 @@ namespace ClassicUO.Game.UI.Controls
                     stb_key = ApplyShiftIfNecessary(ControlKeys.Down);
                     update_caret = true;
                     break;
-                case SDL.SDL_Keycode.SDLK_BACKSPACE:
+                case SDL.SDL_Keycode.SDLK_BACKSPACE when !IsReadOnly:
                     stb_key = ApplyShiftIfNecessary(ControlKeys.BackSpace);
                     update_caret = true;
                     break;
-                case SDL.SDL_Keycode.SDLK_DELETE:
+                case SDL.SDL_Keycode.SDLK_DELETE when!IsReadOnly:
                     stb_key = ApplyShiftIfNecessary(ControlKeys.Delete);
                     update_caret = true;
                     break;
@@ -238,7 +318,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
                     update_caret = true;
                     break;
-                case SDL.SDL_Keycode.SDLK_RETURN:
+                case SDL.SDL_Keycode.SDLK_RETURN when !IsReadOnly:
                     _stb.InputChar('\n');
                     OnTextChanged();
                     break;
@@ -259,12 +339,14 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnTextInput(string c)
         {
-            if (c == null)
+            if (c == null || IsReadOnly)
                 return;
 
             for (int i = 0; i < c.Length; i++)
             {
-                _stb.InputChar(c[i]);
+                // stb doesn't like the windows CR
+                if (c[i] != '\r')
+                    _stb.InputChar(c[i]);
             }
 
             OnTextChanged();
@@ -276,12 +358,14 @@ namespace ClassicUO.Game.UI.Controls
 
             ResetHueVector();
 
+            RenderedText renderText = _currentRenderedText;
+
             int selectStart = Math.Min(_stb.SelectStart, _stb.SelectEnd);
             int selectEnd = Math.Max(_stb.SelectStart, _stb.SelectEnd);
 
             if (selectStart < selectEnd)
             {
-                MultilinesFontInfo info = _renderText.GetInfo();
+                MultilinesFontInfo info = renderText.GetInfo();
 
                 int drawY = 0;
 
@@ -296,7 +380,7 @@ namespace ClassicUO.Game.UI.Controls
                         int drawX = 0;
                         for (int i = 0; i < startSelectionIndex; i++)
                         {
-                            drawX += _renderText.GetCharWidth(info.Data[i].Item);
+                            drawX += renderText.GetCharWidth(info.Data[i].Item);
                         }
 
                         // selection is gone. Bye bye
@@ -309,7 +393,7 @@ namespace ClassicUO.Game.UI.Controls
                             // calculate width 
                             for (int k = 0; k < count; k++)
                             {
-                                endX += _renderText.GetCharWidth(info.Data[startSelectionIndex + k].Item);
+                                endX += renderText.GetCharWidth(info.Data[startSelectionIndex + k].Item);
                             }
 
                             batcher.Draw2D(
@@ -337,13 +421,13 @@ namespace ClassicUO.Game.UI.Controls
                         selectStart = info.CharStart + info.CharCount;
                     }
 
+                    
                     drawY += info.MaxHeight;
                     info = info.Next;
                 }
             }
 
-
-            _renderText.Draw(batcher, x, y);
+            renderText.Draw(batcher, x, y);
             
             if (IsFocused)
             {
@@ -388,7 +472,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Dispose()
         {
-            _renderText?.Destroy();
+            _passwordRenderedText?.Destroy();
+            _rendererText?.Destroy();
             _rendererCaret?.Destroy();
 
             base.Dispose();

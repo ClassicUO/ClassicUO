@@ -268,7 +268,7 @@ namespace StbTextEditSharp
 
 		public bool IsWordBoundary(int idx)
 		{
-			return idx > 0 ? IsSpace(text[idx - 1]) && !IsSpace(text[idx]) : true;
+			return idx <= 0 || IsSpace(text[idx - 1]) && !IsSpace(text[idx]);
 		}
 
 		public int MoveToPreviousWord(int c)
