@@ -594,12 +594,12 @@ namespace ClassicUO.IO.Resources
             {
                 char si = str[i];
 
-                if (si == '\r' || si == '\n')
+                if (/*si == '\r' ||*/ si == '\n')
                 {
                     if (si == '\r' || isFixed || isCropped)
                         continue;
 
-                    si = '\n';
+                    //si = '\n';
                 }
 
                 if (si == ' ')
@@ -972,12 +972,12 @@ namespace ClassicUO.IO.Resources
             {
                 char si = str[i];
 
-                if (si == '\r' || si == '\n')
+                if (/*si == '\r' ||*/ si == '\n')
                 {
                     if (isFixed || isCropped)
                         si = (char) 0;
-                    else
-                        si = '\n';
+                    //else
+                    //    si = '\n';
                 }
 
                 if ((table[si] == 0 || table[si] == 0xFFFFFFFF) && si != ' ' && si != '\n')
