@@ -269,7 +269,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private bool _isMinimized;
             private readonly Button _button;
-            private readonly TextBox _textbox;
+            private readonly StbTextBox _textbox;
             private readonly GumpPicTiled _gumpPic;
             private readonly DataBox _box;
             private readonly SkillsGroup _group;
@@ -299,7 +299,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int width = FontsLoader.Instance.GetWidthASCII(6, group.Name);
 
-                Add(_textbox = new TextBox(6, -1, 200, 200, false, FontStyle.Fixed)
+                Add(_textbox = new StbTextBox(6, -1, 200, 200, false, FontStyle.Fixed)
                 {
                     X = 16,
                     Y = -5,
@@ -496,7 +496,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (string.IsNullOrWhiteSpace(text))
                 {
                     text = "No Name";
-                    _textbox.SetText(text);
+                    _textbox.Text = text;
                 }
 
                 int width = FontsLoader.Instance.GetWidthASCII(6, text);

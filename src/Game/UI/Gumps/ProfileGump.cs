@@ -32,7 +32,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly string _originalText;
         private readonly ScrollArea _scrollArea;
         private readonly ExpandableScroll _scrollExp;
-        private readonly MultiLineBox _textBox;
+        private readonly StbTextBox _textBox;
         private readonly GumpPic _gumpPic;
         private readonly HitBox _hitBox;
         private bool _isMinimized;
@@ -58,12 +58,13 @@ namespace ClassicUO.Game.UI.Gumps
             _scrollArea.Add(c);
             AddHorizontalBar(_scrollArea, 92, 35, 220);
 
-            _textBox = new MultiLineBox(new MultiLineEntry(1, -1, 0, 220, true, hue: 0), canEdit)
+            _textBox = new StbTextBox(1, -1, 0, 220, true, hue: 0)
             {
                 Height = FontsLoader.Instance.GetHeightUnicode(1, body, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0),
                 Width = 220,
                 X = 35,
                 Y = 0,
+                IsEditable = canEdit,
                 Text = _originalText = body
             };
             _scrollArea.Add(_textBox);
@@ -142,20 +143,16 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            /*WantUpdateSize = true;
+            //if (!_textBox.IsDisposed && _textBox.IsChanged)
+            //{
+            //    _textBox.Height = Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
 
-            if(_textBox.Height > 0)
-                _textBox.Height = Height - 150;*/
-            if (!_textBox.IsDisposed && _textBox.IsChanged)
-            {
-                _textBox.Height = Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
-
-                foreach (Control c in _scrollArea.Children)
-                {
-                    if (c is ScrollAreaItem)
-                        c.OnPageChanged();
-                }
-            }
+            //    foreach (Control c in _scrollArea.Children)
+            //    {
+            //        if (c is ScrollAreaItem)
+            //            c.OnPageChanged();
+            //    }
+            //}
 
             base.Update(totalMS, frameMS);
         }
@@ -194,9 +191,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void OnKeyboardReturn(int textID, string text)
-        {
-            if ((MultiLineBox.PasteRetnCmdID & textID) != 0 && !string.IsNullOrEmpty(text)) _textBox.TxEntry.InsertString(text.Replace("\r", string.Empty));
-        }
+        //public override void OnKeyboardReturn(int textID, string text)
+        //{
+        //    if ((MultiLineBox.PasteRetnCmdID & textID) != 0 && !string.IsNullOrEmpty(text)) _textBox.TxEntry.InsertString(text.Replace("\r", string.Empty));
+        //}
     }
 }

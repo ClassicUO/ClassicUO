@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
         private static UOTexture _logoTexture2D;
         private ScrollAreaItem _activeChatArea;
         private Combobox _autoOpenCorpseOptions;
-        private TextBox _autoOpenCorpseRange;
+        private StbTextBox _autoOpenCorpseRange;
         private Checkbox _buffBarTime,_castSpellsByOneClick, _queryBeforAttackCheckbox, _spellColoringCheckbox, _spellFormatCheckbox;
         private HSliderBar _cellSize;
 
@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps
         //counters
         private Checkbox _enableCounters, _highlightOnUse, _highlightOnAmount, _enableAbbreviatedAmount;
         private Checkbox _enableDragSelect, _dragSelectHumanoidsOnly;
-        private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
+        private StbTextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
         private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
@@ -75,18 +75,18 @@ namespace ClassicUO.Game.UI.Gumps
 
         // fonts
         private FontSelector _fontSelectorChat;
-        private TextBox _gameWindowHeight;
+        private StbTextBox _gameWindowHeight;
         private Checkbox _overrideAllFonts;
         private Combobox _overrideAllFontsIsUnicodeCheckbox;
         private Checkbox _forceUnicodeJournal;
 
         private Checkbox _gameWindowLock, _gameWindowFullsize;
         // GameWindowPosition
-        private TextBox _gameWindowPositionX;
-        private TextBox _gameWindowPositionY;
+        private StbTextBox _gameWindowPositionX;
+        private StbTextBox _gameWindowPositionY;
 
         // GameWindowSize
-        private TextBox _gameWindowWidth;
+        private StbTextBox _gameWindowWidth;
         private Combobox _gridLoot;
         private Checkbox _highlightObjects, /*_smoothMovements,*/ _enablePathfind, _useShiftPathfind, _alwaysRun, _alwaysRunUnlessHidden, _showHpMobile, _highlightByState, _drawRoofs, _treeToStumps, _hideVegetation, _noColorOutOfRangeObjects, _useCircleOfTransparency, _enableTopbar, _holdDownKeyTab, _holdDownKeyAlt, _closeAllAnchoredGumpsWithRClick, _chatAfterEnter, _chatAdditionalButtonsCheckbox, _chatShiftEnterCheckbox, _enableCaveBorder;
         private Combobox _hpComboBox, _healtbarType, _fieldsType, _hpComboBoxShowWhen;
@@ -117,7 +117,7 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
         private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox, _chatMessageColorPickerBox, _partyAuraColorPickerBox;
         private ColorBox _poisonColorPickerBox, _paralyzedColorPickerBox, _invulnerableColorPickerBox;
-        private TextBox _spellFormatBox;
+        private StbTextBox _spellFormatBox;
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
         private Checkbox _holdShiftForContext, _holdShiftToSplitStack, _reduceFPSWhenInactive, _sallosEasyGrab, _partyInviteGump, _objectsFading, _textFading, _holdAltToMoveGumps;
         private Checkbox _showHouseContent;
@@ -530,24 +530,24 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _windowSizeArea.Add(text);
 
-                _gameWindowWidth = CreateInputField(_windowSizeArea, new TextBox(FONT, 5, 80, 80)
+                _gameWindowWidth = CreateInputField(_windowSizeArea, new StbTextBox(FONT, 5, 80, 80)
                 {
                     Text = ProfileManager.Current.GameWindowSize.X.ToString(),
                     X = 30,
                     Y = 70,
                     Width = 50,
                     Height = 30,
-                    UNumericOnly = true
+                    NumbersOnly = true
                 }, "");
 
-                _gameWindowHeight = CreateInputField(_windowSizeArea, new TextBox(FONT, 5, 80, 80)
+                _gameWindowHeight = CreateInputField(_windowSizeArea, new StbTextBox(FONT, 5, 80, 80)
                 {
                     Text = ProfileManager.Current.GameWindowSize.Y.ToString(),
                     X = 100,
                     Y = 70,
                     Width = 50,
                     Height = 30,
-                    UNumericOnly = true
+                    NumbersOnly = true
                 });
 
                 text = new Label("Game Play Window Position: ", true, HUE_FONT)
@@ -557,24 +557,24 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 _windowSizeArea.Add(text);
 
-                _gameWindowPositionX = CreateInputField(_windowSizeArea, new TextBox(FONT, 5, 80, 80)
+                _gameWindowPositionX = CreateInputField(_windowSizeArea, new StbTextBox(FONT, 5, 80, 80)
                 {
                     Text = ProfileManager.Current.GameWindowPosition.X.ToString(),
                     X = 215,
                     Y = 70,
                     Width = 50,
                     Height = 30,
-                    NumericOnly = true
+                    NumbersOnly = true
                 });
 
-                _gameWindowPositionY = CreateInputField(_windowSizeArea, new TextBox(FONT, 5, 80, 80)
+                _gameWindowPositionY = CreateInputField(_windowSizeArea, new StbTextBox(FONT, 5, 80, 80)
                 {
                     Text = ProfileManager.Current.GameWindowPosition.Y.ToString(),
                     X = 285,
                     Y = 70,
                     Width = 50,
                     Height = 30,
-                    NumericOnly = true
+                    NumbersOnly = true
                 });
 
                 rightArea.Add(_windowSizeArea);
@@ -1019,7 +1019,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollAreaItem it = new ScrollAreaItem();
 
-            _spellFormatBox = CreateInputField(it, new TextBox(FONT, 30, 200, 200)
+            _spellFormatBox = CreateInputField(it, new StbTextBox(FONT, 30, 200, 200)
             {
                 Text = ProfileManager.Current.SpellDisplayFormat,
                 X = 0,
@@ -1044,13 +1044,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollAreaItem item = new ScrollAreaItem();
 
-            _abbreviatedAmount = CreateInputField(item, new TextBox(FONT, -1, 80, 80)
+            _abbreviatedAmount = CreateInputField(item, new StbTextBox(FONT, -1, 80, 80)
             {
                 X = _enableAbbreviatedAmount.X + 30,
                 Y = 10,
                 Width = 50,
                 Height = 30,
-                NumericOnly = true,
+                NumbersOnly = true,
                 Text = ProfileManager.Current.CounterBarAbbreviatedAmount.ToString()
             });
 
@@ -1060,13 +1060,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             item = new ScrollAreaItem();
 
-            _highlightAmount = CreateInputField(item, new TextBox(FONT, 2, 80, 80)
+            _highlightAmount = CreateInputField(item, new StbTextBox(FONT, 2, 80, 80)
             {
                 X = _highlightOnAmount.X + 30,
                 Y = 10,
                 Width = 50,
                 Height = 30,
-                NumericOnly = true,
+                NumbersOnly = true,
                 Text = ProfileManager.Current.CounterBarHighlightAmount.ToString()
             });
 
@@ -1099,23 +1099,23 @@ namespace ClassicUO.Game.UI.Gumps
 
             item = new ScrollAreaItem();
 
-            _rows = CreateInputField(item, new TextBox(FONT, 5, 80, 80)
+            _rows = CreateInputField(item, new StbTextBox(FONT, 5, 80, 80)
             {
                 X = 20,
                 Y = _cellSize.Y + _cellSize.Height + 25,
                 Width = 50,
                 Height = 30,
-                NumericOnly = true,
+                NumbersOnly = true,
                 Text = ProfileManager.Current.CounterBarRows.ToString()
             }, "Rows:");
 
-            _columns = CreateInputField(item, new TextBox(FONT, 5, 80, 80)
+            _columns = CreateInputField(item, new StbTextBox(FONT, 5, 80, 80)
             {
                 X = _rows.X + _rows.Width + 30,
                 Y = _cellSize.Y + _cellSize.Height + 25,
                 Width = 50,
                 Height = 30,
-                NumericOnly = true,
+                NumbersOnly = true,
                 Text = ProfileManager.Current.CounterBarColumns.ToString()
             }, "Columns:");
 
@@ -1150,13 +1150,13 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _autoOpenCorpseArea.Add(_skipEmptyCorpse);
 
-            _autoOpenCorpseRange = CreateInputField(_autoOpenCorpseArea, new TextBox(FONT, 2, 80, 80)
+            _autoOpenCorpseRange = CreateInputField(_autoOpenCorpseArea, new StbTextBox(FONT, 2, 80, 80)
             {
                 X = 25,
                 Y = _skipEmptyCorpse.Y + _skipEmptyCorpse.Height,
                 Width = 50,
                 Height = 30,
-                NumericOnly = true,
+                NumbersOnly = true,
                 Text = ProfileManager.Current.AutoOpenCorpseRange.ToString()
             }, "Corpse Open Range:");
 
@@ -1570,7 +1570,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _beneficColorPickerBox.SetColor(0x0059, HuesLoader.Instance.GetPolygoneColor(12, 0x0059));
                     _harmfulColorPickerBox.SetColor(0x0020, HuesLoader.Instance.GetPolygoneColor(12, 0x0020));
                     _neutralColorPickerBox.SetColor(0x03B1, HuesLoader.Instance.GetPolygoneColor(12, 0x03B1));
-                    _spellFormatBox.SetText("{power} [{spell}]");
+                    _spellFormatBox.Text = "{power} [{spell}]";
                     _spellColoringCheckbox.IsChecked = false;
                     _spellFormatCheckbox.IsChecked = false;
 
@@ -2169,7 +2169,7 @@ namespace ClassicUO.Game.UI.Gumps
             return base.Draw(batcher, x, y);
         }
 
-        private TextBox CreateInputField(ScrollAreaItem area, TextBox elem, string label = null, int maxWidth = 0)
+        private StbTextBox CreateInputField(ScrollAreaItem area, StbTextBox elem, string label = null, int maxWidth = 0)
         {
             if (label != null)
             {

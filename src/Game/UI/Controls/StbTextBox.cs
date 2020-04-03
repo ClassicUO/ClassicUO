@@ -13,17 +13,75 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Game.UI.Controls
 {
+    class StbPasswordBox : StbTextBox
+    {
+        private RenderedText _passwordRenderedText;
+
+        public StbPasswordBox(byte font, int max_char_count = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : base(font, max_char_count, maxWidth, width, isunicode, style, hue, align)
+        {
+            _passwordRenderedText = RenderedText.Create(string.Empty, hue, font, isunicode, style, align, maxWidth, 30, false, true, true);
+        }
+
+        public string PlainText { get; private set; }
+
+
+
+        protected override void OnTextInput(string c)
+        {
+
+            base.OnTextInput(c);
+        }
+
+        protected override void OnTextChanged()
+        {
+            PlainText = Text;
+
+            if (!string.IsNullOrEmpty(Text))
+            {
+                char[] v = Text.ToCharArray();
+
+                for (int i = 0; i < v.Length; i++)
+                {
+                    if (v[i] != '\n')
+                        v[i] = '*';
+                }
+                _passwordRenderedText.Text = new string(v);
+            }
+            else
+            {
+                _passwordRenderedText.Text = string.Empty;
+            }
+
+            base.OnTextChanged();
+        }
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            DrawSelection(batcher, x, y);
+
+            _passwordRenderedText.Draw(batcher, x, y);
+
+            DrawCaret(batcher, x, y);
+
+            return true;
+        }
+
+        public override void Dispose()
+        {
+            _passwordRenderedText?.Destroy();
+            base.Dispose();
+        }
+    }
+
     class StbTextBox : Control, ITextEditHandler
     {
         private readonly TextEdit _stb;
-        private RenderedText _rendererText, _rendererCaret, _passwordRenderedText;
+        private RenderedText _rendererText, _rendererCaret;
 
         private int _maxCharCount = -1;
         private Point _caretScreenPosition;
         private bool _leftWasDown, _isPassword;
         private ushort _hue;
-        private RenderedText _currentRenderedText => IsPassword ? _passwordRenderedText : _rendererText;
-
 
         public StbTextBox(byte font, int max_char_count = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE align = 0)
         {
@@ -45,11 +103,26 @@ namespace ClassicUO.Game.UI.Controls
             _rendererCaret = RenderedText.Create("_", hue, font, isunicode, (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None, align: align);
         }
 
+        public StbTextBox(List<string> parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : byte.MaxValue, 0, int.Parse(parts[3]), style: FontStyle.BlackBorder | FontStyle.CropTexture, hue: (ushort) (UInt16Converter.Parse(parts[5]) + 1))
+        {
+            X = int.Parse(parts[1]);
+            Y = int.Parse(parts[2]);
+            Width = int.Parse(parts[3]);
+            Height = int.Parse(parts[4]);
+            LocalSerial = SerialHelper.Parse(parts[6]);
 
+            int index = int.Parse(parts[7]);
+
+            if (index >= 0 && index < lines.Length)
+                Text = lines[index];
+        }
+
+
+        public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
 
         public string Text
         {
-            get => _currentRenderedText.Text;
+            get => _rendererText.Text;
             set
             {
                 if (_maxCharCount >= 0 && value != null && value.Length > _maxCharCount)
@@ -57,18 +130,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 _rendererText.Text = value;
 
-                if (IsPassword)
-                {
-                    char[] v = value.ToCharArray();
-
-                    for (int i = 0; i < v.Length; i++)
-                    {
-                        if (v[i] != '\n')
-                            v[i] = '*';
-                    }
-
-                    _currentRenderedText.Text = new string(v);
-                }
+                OnTextChanged();
             }
         }
 
@@ -81,6 +143,8 @@ namespace ClassicUO.Game.UI.Controls
             get => !_stb.SingleLine;
             set => _stb.SingleLine = !value;
         }
+
+        public bool NumbersOnly { get; set; }
 
         public int SelectionStart
         {
@@ -99,44 +163,18 @@ namespace ClassicUO.Game.UI.Controls
             get => _hue;
             set 
             {
-                if (_currentRenderedText.Hue != value)
+                if (_rendererText.Hue != value)
                 {
-                    if (_passwordRenderedText != null)
-                        _passwordRenderedText.Hue = value;
+                    if (_rendererText != null)
+                        _rendererText.Hue = value;
                     _rendererText.Hue = value;
                     _rendererCaret.Hue = value;
 
-                    _currentRenderedText.CreateTexture();
+                    _rendererText.CreateTexture();
                     _rendererCaret.CreateTexture();
                 }
             }
         }
-
-        public bool IsPassword
-        {
-            get => _isPassword;
-            set
-            {
-                _isPassword = value;
-
-                if (value && (_passwordRenderedText == null || _passwordRenderedText.IsDestroyed))
-                {
-                    _passwordRenderedText = RenderedText.Create(
-                                                                "*",
-                                                                _rendererText.Hue,
-                                                                _rendererText.Font,
-                                                                _rendererText.IsUnicode,
-                                                                _rendererText.FontStyle,
-                                                                _rendererText.Align,
-                                                                _rendererText.MaxWidth,
-                                                                _rendererText.Cell,
-                                                                _rendererText.IsHTML,
-                                                                _rendererText.RecalculateWidthByInfo,
-                                                                _rendererText.SaveHitMap);
-                }
-            }
-        }
-
 
 
         public event EventHandler TextChanged;
@@ -146,12 +184,12 @@ namespace ClassicUO.Game.UI.Controls
 
         public float GetWidth(int index)
         {
-            return _currentRenderedText.GetCharWidthAtIndex(index);
+            return _rendererText.GetCharWidthAtIndex(index);
         }
 
         public TextEditRow LayoutRow(int startIndex)
         {
-            TextEditRow r = _currentRenderedText.GetLayoutRow(startIndex);
+            TextEditRow r = _rendererText.GetLayoutRow(startIndex);
 
             int sx = ScreenCoordinateX;
             int sy = ScreenCoordinateY;
@@ -176,7 +214,7 @@ namespace ClassicUO.Game.UI.Controls
         
         private void UpdateCaretScreenPosition()
         {
-            _caretScreenPosition = _currentRenderedText.GetCaretPosition(_stb.CursorIndex);
+            _caretScreenPosition = _rendererText.GetCaretPosition(_stb.CursorIndex);
         }
 
         private ControlKeys ApplyShiftIfNecessary(ControlKeys k)
@@ -358,9 +396,20 @@ namespace ClassicUO.Game.UI.Controls
                     }
                     update_caret = true;
                     break;
-                case SDL.SDL_Keycode.SDLK_RETURN when IsEditable && !IsMaxCharReached(0):
-                    _stb.InputChar('\n');
-                    OnTextChanged();
+                case SDL.SDL_Keycode.SDLK_RETURN when IsEditable:
+                    if (Multiline)
+                    {
+                        if (!IsMaxCharReached(0))
+                        {
+                            _stb.InputChar('\n');
+                            OnTextChanged();
+                        }
+                    }
+                    else
+                    {
+                        Parent?.OnKeyboardReturn(0, Text);
+                    }
+                    
                     break;
             }
 
@@ -398,7 +447,10 @@ namespace ClassicUO.Game.UI.Controls
             } 
 
             for (int i = 0; i < count; i++)
-            {                
+            {             
+                if (NumbersOnly && !char.IsNumber(c[i]))
+                    continue;
+
                 _stb.InputChar(c[i]);
             }
 
@@ -409,16 +461,25 @@ namespace ClassicUO.Game.UI.Controls
         {
             base.Draw(batcher, x, y);
 
-            ResetHueVector();
+            DrawSelection(batcher, x, y);
 
-            RenderedText renderText = _currentRenderedText;
+            _rendererText.Draw(batcher, x, y);
+            
+            DrawCaret(batcher, x, y);
+
+            return true;
+        }
+
+        private protected void DrawSelection(UltimaBatcher2D batcher, int x, int y)
+        {
+            ResetHueVector();
 
             int selectStart = Math.Min(_stb.SelectStart, _stb.SelectEnd);
             int selectEnd = Math.Max(_stb.SelectStart, _stb.SelectEnd);
 
             if (selectStart < selectEnd)
             {
-                MultilinesFontInfo info = renderText.GetInfo();
+                MultilinesFontInfo info = _rendererText.GetInfo();
 
                 int drawY = 0;
 
@@ -433,7 +494,7 @@ namespace ClassicUO.Game.UI.Controls
                         int drawX = 0;
                         for (int i = 0; i < startSelectionIndex; i++)
                         {
-                            drawX += renderText.GetCharWidth(info.Data[i].Item);
+                            drawX += _rendererText.GetCharWidth(info.Data[i].Item);
                         }
 
                         // selection is gone. Bye bye
@@ -446,7 +507,7 @@ namespace ClassicUO.Game.UI.Controls
                             // calculate width 
                             for (int k = 0; k < count; k++)
                             {
-                                endX += renderText.GetCharWidth(info.Data[startSelectionIndex + k].Item);
+                                endX += _rendererText.GetCharWidth(info.Data[startSelectionIndex + k].Item);
                             }
 
                             batcher.Draw2D(
@@ -456,7 +517,7 @@ namespace ClassicUO.Game.UI.Controls
                                            endX,
                                            info.MaxHeight,
                                            ref _hueVector);
-                            
+
                             break;
                         }
 
@@ -474,20 +535,19 @@ namespace ClassicUO.Game.UI.Controls
                         selectStart = info.CharStart + info.CharCount;
                     }
 
-                    
+
                     drawY += info.MaxHeight;
                     info = info.Next;
                 }
             }
+        }
 
-            renderText.Draw(batcher, x, y);
-            
+        private protected void DrawCaret(UltimaBatcher2D batcher, int x, int y)
+        {
             if (IsFocused)
             {
                 _rendererCaret.Draw(batcher, x + _caretScreenPosition.X, y + _caretScreenPosition.Y);
             }
-
-            return true;
         }
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
@@ -525,7 +585,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Dispose()
         {
-            _passwordRenderedText?.Destroy();
             _rendererText?.Destroy();
             _rendererCaret?.Destroy();
 

@@ -45,7 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _myCheckbox;
         private readonly Label[] _myCoins = new Label[2];
         private readonly Label[] _hisCoins = new Label[2];
-        private readonly TextBox[] _myCoinsEntries = new TextBox[2];
+        private readonly StbTextBox[] _myCoinsEntries = new StbTextBox[2];
 
         public TradingGump(uint local, string name, uint id1, uint id2) : base(local, 0)
         {
@@ -330,40 +330,40 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 Add(_hisCoins[1]);
 
-                _myCoinsEntries[0] = new TextBox(9, -1, 100, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
+                _myCoinsEntries[0] = new StbTextBox(9, -1, 100, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
                 {
                     X = 43,
                     Y = 190,
                     Width = 100,
                     Height = 20,
-                    NumericOnly = true,
-                    Tag = 0
+                    NumbersOnly = true,
+                    Tag = 0,
+                    Text = "0"
                 };
                 Add(_myCoinsEntries[0]);
-                _myCoinsEntries[0].SetText("0");
 
-                _myCoinsEntries[1] = new TextBox(9, -1, 100, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
+                _myCoinsEntries[1] = new StbTextBox(9, -1, 100, 100, false, FontStyle.None, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
                 {
                     X = 43,
                     Y = 210,
                     Width = 100,
                     Height = 20,
-                    NumericOnly = true,
-                    Tag = 1
+                    NumbersOnly = true,
+                    Tag = 1,
+                    Text = "0"
                 };
                 Add(_myCoinsEntries[1]);
-                _myCoinsEntries[1].SetText("0");
 
 
                 void OnTextChanged(object sender, EventArgs e)
                 {
-                    TextBox entry = (TextBox) sender;
+                    StbTextBox entry = (StbTextBox) sender;
 
                     if (entry != null)
                     {
                         if (string.IsNullOrEmpty(entry.Text))
                         {
-                            entry.SetText("0");
+                            entry.Text = "0";
                         }
                         else if (uint.TryParse(entry.Text, out uint value))
                         {
@@ -382,7 +382,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 }
                             }
 
-                            entry.SetText(value.ToString());
+                            entry.Text = value.ToString();
                         }
 
                         NetClient.Socket.Send(new PTradeUpdateGold(ID1, uint.Parse(_myCoinsEntries[0].Text), uint.Parse(_myCoinsEntries[1].Text)));

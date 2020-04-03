@@ -32,7 +32,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Point _offsert;
         private readonly Button _okButton;
         private readonly HSliderBar _slider;
-        private readonly TextBox _textBox;
+        private readonly StbTextBox _textBox;
 
         private bool _firstChange;
         private int _lastValue;
@@ -66,13 +66,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             _okButton.MouseUp += OkButtonOnMouseClick;
 
-            Add(_textBox = new TextBox(1, isunicode: false, hue: 0x0386, width: 60, maxWidth: 1000)
+            Add(_textBox = new StbTextBox(1, isunicode: false, hue: 0x0386, width: 60, maxWidth: 1000)
             {
                 X = 29, Y = 42,
                 Width = 60,
-                NumericOnly = true
+                NumbersOnly = true,
+                Text = item.Amount.ToString()
             });
-            _textBox.SetText(item.Amount.ToString());
 
             _textBox.TextChanged += (sender, args) => { UpdateText(); };
             _textBox.SetKeyboardFocus();
@@ -82,13 +82,17 @@ namespace ClassicUO.Game.UI.Gumps
         private void UpdateText()
         {
             if (_slider.Value != _lastValue)
-                _textBox.SetText(_slider.Value.ToString());
+            {
+                _textBox.Text = _slider.Value.ToString();
+            }
             else
             {
                 if (_textBox.Text.Length == 0)
                     _slider.Value = _slider.MinValue;
                 else if (!int.TryParse(_textBox.Text, out int textValue))
-                    _textBox.SetText(_slider.Value.ToString());
+                {
+                    _textBox.Text = _slider.Value.ToString();
+                }
                 else
                 {
                     if (textValue != _slider.Value)
@@ -106,7 +110,7 @@ namespace ClassicUO.Game.UI.Gumps
                             else
                                 _slider.Value = _slider.MaxValue;
 
-                            _textBox.SetText(_slider.Value.ToString());
+                            _textBox.Text = _slider.Value.ToString();
                         }
                     }
                 }

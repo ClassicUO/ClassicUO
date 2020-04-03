@@ -26,7 +26,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class TextEntryDialogGump : Gump
     {
-        private readonly TextBox _textBox;
+        private readonly StbTextBox _textBox;
 
         public TextEntryDialogGump(uint serial, int x, int y, byte variant, int maxlen, string text, string description, byte buttonid, byte parentid) : base(serial, 0)
         {
@@ -54,10 +54,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPic(60, 130, 0x0477, 0));
 
-            _textBox = new TextBox(new TextEntry(1, unicode: false, hue: 0x0386, maxcharlength: maxlen, width: 200), true)
+            _textBox = new StbTextBox(1, isunicode: false, hue: 0x0386, max_char_count: maxlen, width: 200)
             {
                 X = 71, Y = 137,
-                NumericOnly = variant == 2
+                NumbersOnly = variant == 2
             };
             Add(_textBox);
 

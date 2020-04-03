@@ -167,8 +167,6 @@
     <Compile Include="Game\Managers\WorldMapEntityManager.cs" />
     <Compile Include="Game\Scenes\SceneType.cs" />
     <Compile Include="Game\SelectedObject.cs" />
-    <Compile Include="Game\UI\AbstractEntry.cs" />
-    <Compile Include="Game\UI\Controls\AbstractTextBox.cs" />
     <Compile Include="Game\UI\Controls\AlphaBlendControl.cs" />
     <Compile Include="Game\UI\Controls\ArrowNumbersTextBox.cs" />
     <Compile Include="Game\UI\Controls\ButtonTileArt.cs" />
@@ -176,13 +174,11 @@
     <Compile Include="Game\UI\Controls\ContextMenuControl.cs" />
     <Compile Include="Game\UI\Controls\InfoBarBuilderControl.cs" />
     <Compile Include="Game\UI\Controls\ColorBox.cs" />
-    <Compile Include="Game\UI\Controls\EditableLabel.cs" />
     <Compile Include="Game\UI\Controls\GumpPicWithWidth.cs" />
     <Compile Include="Game\UI\Controls\HorizontalScrollArea.cs" />
     <Compile Include="Game\UI\Controls\HotkeyBox.cs" />
     <Compile Include="Game\UI\Controls\HotkeyControl.cs" />
     <Compile Include="Game\UI\Controls\MacroControl.cs" />
-    <Compile Include="Game\UI\Controls\MultiLineBox.cs" />
     <Compile Include="Game\UI\Controls\MultiSelectionShrinkbox.cs" />
     <Compile Include="Game\UI\Controls\NiceButton.cs" />
     <Compile Include="Game\UI\Controls\ScissorControl.cs" />
@@ -202,7 +198,6 @@
     <Compile Include="Game\UI\Gumps\TextContainerGump.cs" />
     <Compile Include="Game\UI\Gumps\TipNoticeGump.cs" />
     <Compile Include="Game\UI\Gumps\UOChatGump.cs" />
-    <Compile Include="Game\UI\TextEntryRules.cs" />
     <Compile Include="Game\Weather.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Renderer\MatrixEffect.cs" />
@@ -235,7 +230,6 @@
     <Compile Include="Game\UI\Gumps\TargetLineGump.cs" />
     <Compile Include="Game\UI\Gumps\TextEntryDialogGump.cs" />
     <Compile Include="Game\UI\Gumps\UseAbilityButtonGump.cs" />
-    <Compile Include="Game\UI\MultiLineEntry.cs" />
     <Compile Include="Game\GameObjects\Views\MultiView.cs" />
     <Compile Include="Input\Keyboard.cs" />
     <Compile Include="Interfaces\IPoolable.cs" />
@@ -428,7 +422,6 @@
     <Compile Include="Game\UI\Controls\ScrollBar.cs" />
     <Compile Include="Game\UI\Controls\ScrollFlag.cs" />
     <Compile Include="Game\UI\Controls\StaticPic.cs" />
-    <Compile Include="Game\UI\Controls\TextBox.cs" />
     <Compile Include="Game\UI\Gumps\SystemChatControl.cs" />
     <Compile Include="Game\UI\Gumps\ColorPickerGump.cs" />
     <Compile Include="Game\UI\Gumps\ContainerGump.cs" />
@@ -463,7 +456,6 @@
     <Compile Include="Input\KeyboardEventType.cs" />
     <Compile Include="Input\MouseButtons.cs" />
     <Compile Include="Input\MouseEventType.cs" />
-    <Compile Include="Game\UI\TextEntry.cs" />
     <Compile Include="Interfaces\IDrawable.cs" />
     <Compile Include="Interfaces\IUpdateable.cs" />
     <Compile Include="Game\Data\ClientVersion.cs" />

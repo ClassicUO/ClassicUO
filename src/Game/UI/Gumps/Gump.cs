@@ -166,7 +166,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             break;
 
-                        case TextBox textBox:
+                        case StbTextBox textBox:
                             entries.Add(new Tuple<ushort, string>((ushort) textBox.LocalSerial, textBox.Text));
 
                             break;

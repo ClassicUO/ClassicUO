@@ -183,8 +183,8 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Button _buttonReply;
         private readonly string _datatime;
         private readonly uint _msgSerial;
-        private readonly TextBox _subjectTextbox;
-        private readonly MultiLineBox _textBox;
+        private readonly StbTextBox _subjectTextbox;
+        private readonly StbTextBox _textBox;
         private readonly ScrollArea _scrollArea;
 
         public BulletinBoardItem(uint serial, uint msgSerial, string poster, string subject, string datatime,
@@ -259,27 +259,24 @@ namespace ClassicUO.Game.UI.Gumps
             if (variant == 0)
                 subjectColor = 0x0008;
 
-            Add(_subjectTextbox = new TextBox(useUnicode ? unicodeFontIndex : (byte)9, maxWidth: 150, width: 150,
-                isunicode: useUnicode, hue: subjectColor)
+            Add(_subjectTextbox = new StbTextBox(useUnicode ? unicodeFontIndex : (byte)9, maxWidth: 150, width: 150,
+                                                 isunicode: useUnicode, hue: subjectColor)
             {
                 X = 30 + text.Width,
                 Y = 83 + unicodeFontHeightOffset,
                 Width = 150,
-                IsEditable = variant == 0 ? true : false
+                IsEditable = variant == 0,
+                Text = subject
             });
-            _subjectTextbox.SetText(subject);
 
             Add(new GumpPicTiled(30, 106, 235, 4, 0x0835)); 
 
-            _scrollArea.Add(_textBox =
-                new MultiLineBox(
-                    new MultiLineEntry(useUnicode ? unicodeFontIndex : (byte)9, -1, 0, 220, hue: textColor,
-                        unicode: useUnicode), true)
+            _scrollArea.Add(_textBox = new StbTextBox(useUnicode ? unicodeFontIndex : (byte)9, -1, 0, 220, hue: textColor, isunicode: useUnicode)
                 {
                     X = 40,
                     Y = 0,
                     Width = 220,
-                    ScissorsEnabled = true,
+                    //ScissorsEnabled = true,
                     Text = data,
                     IsEditable = variant == 0 ? true : false
                 });
@@ -337,16 +334,16 @@ namespace ClassicUO.Game.UI.Gumps
             if (_buttonRemove != null)
                 _buttonRemove.Y = Height - 50;
 
-            if (!_textBox.IsDisposed && _textBox.IsChanged)
-            {
-                _textBox.Height = System.Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
+            //if (!_textBox.IsDisposed && _textBox.IsChanged)
+            //{
+            //    _textBox.Height = System.Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
 
-                foreach (Control c in _scrollArea.Children)
-                {
-                    if (c is ScrollAreaItem)
-                        c.OnPageChanged();
-                }
-            }
+            //    foreach (Control c in _scrollArea.Children)
+            //    {
+            //        if (c is ScrollAreaItem)
+            //            c.OnPageChanged();
+            //    }
+            //}
 
             base.Update(totalMS, frameMS);
         }
@@ -402,11 +399,11 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override void OnKeyboardReturn(int textID, string text)
-        {
-            if ((MultiLineBox.PasteRetnCmdID & textID) != 0 && !string.IsNullOrEmpty(text))
-                _textBox.TxEntry.InsertString(text.Replace("\r", string.Empty));
-        }
+        //public override void OnKeyboardReturn(int textID, string text)
+        //{
+        //    //if ((MultiLineBox.PasteRetnCmdID & textID) != 0 && !string.IsNullOrEmpty(text))
+        //    //    _textBox.TxEntry.InsertString(text.Replace("\r", string.Empty));
+        //}
 
 
 

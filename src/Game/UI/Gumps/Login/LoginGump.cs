@@ -37,7 +37,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private readonly Checkbox _checkboxSaveAccount;
         private readonly Button _nextArrow0;
         private readonly StbTextBox _textboxAccount;
-        private readonly StbTextBox _textboxPassword;
+        private readonly StbPasswordBox _textboxPassword;
 
         private float _time;
 
@@ -212,36 +212,23 @@ namespace ClassicUO.Game.UI.Gumps.Login
             offsetX += 7;
 
             // Text Inputs
-            //Add(_textboxAccount = new TextBox(5, 16, 190, 190, false)
-            //{
-            //    X = offsetX,
-            //    Y = offsetY,
-            //    Width = 190,
-            //    Height = 25,
-            //    Hue = 0x034F,
-            //    SafeCharactersOnly = true
-            //});
-
-            Add(_textboxAccount = new StbTextBox(5, 16, 190, 190, true, hue: 0x034F)
+            Add(_textboxAccount = new StbTextBox(5, 16, 190, 190, false, hue: 0x034F)
             {
                 X = offsetX,
                 Y = offsetY,
                 Width = 190,
                 Height = 25,
                 Text = Settings.GlobalSettings.Username
-                //SafeCharactersOnly = true
             });
 
-            Add(_textboxPassword = new StbTextBox(5, 16, 190, 190, false, hue: 0x034F)
+            Add(_textboxPassword = new StbPasswordBox(5, 16, 190, 190, false, hue: 0x034F)
             {
                 X = offsetX,
                 Y = offsetY + offtextY + 2,
                 Width = 190,
                 Height = 25,
                 Hue = 0x034F,
-                IsPassword = true,
                 Text = Crypter.Decrypt(Settings.GlobalSettings.Password)
-                //SafeCharactersOnly = true
             });
 
             
@@ -281,7 +268,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Y = 70,
                 Width = 200,
                 Height = 70,
-                IsPassword = false,
                 AllowTAB = true,
                 Multiline = true,
                 Text = "AAA\r\nBBB\r\nCCC\r\n"
@@ -297,7 +283,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             LoginScene ls = Client.Game.GetScene<LoginScene>();
 
             if (ls.CurrentLoginStep == LoginSteps.Main)
-                ls.Connect(_textboxAccount.Text, _textboxPassword.Text);
+                ls.Connect(_textboxAccount.Text, _textboxPassword.PlainText);
         }
 
         private void SaveCheckboxStatus()
@@ -343,7 +329,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 case Buttons.NextArrow:
                     SaveCheckboxStatus();
                     if (!_textboxAccount.IsDisposed)
-                        Client.Game.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
+                        Client.Game.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.PlainText);
 
                     break;
 
