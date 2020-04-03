@@ -598,8 +598,6 @@ namespace ClassicUO.IO.Resources
                 {
                     if (si == '\r' || isFixed || isCropped)
                         continue;
-
-                    si = '\n';
                 }
 
                 if (si == ' ')

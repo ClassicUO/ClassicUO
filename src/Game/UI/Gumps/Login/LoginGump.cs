@@ -274,7 +274,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Height = 70,
                 IsPassword = false,
                 IsReadOnly = false,
-                Text = "asdaasd\r\nawdawd\r\ndwad\r\n wwadaw\r\n"
+                Text = "AB\r\nCD\r\nEF\r\n"
             });
         }
 
