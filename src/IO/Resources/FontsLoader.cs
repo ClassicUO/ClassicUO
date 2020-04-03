@@ -250,14 +250,16 @@ namespace ClassicUO.IO.Resources
             int textLength = 0;
 
             foreach (char c in str)
-                textLength += _font[font][_fontIndex[(byte) c]].Width;
+            {
+                textLength += GetCharWidthASCII(font, c);
+            }
 
             return textLength;
         }
 
         public int GetCharWidthASCII(byte font, char c)
         {
-            if (font >= FontCount || c == 0)
+            if (font >= FontCount || c == 0 || c == '\r')
                 return 0;
 
             return _font[font][_fontIndex[(byte) c]].Width;
@@ -594,7 +596,7 @@ namespace ClassicUO.IO.Resources
             {
                 char si = str[i];
 
-                if (si == '\r' || si == '\n')
+                if (/*si == '\r' ||*/ si == '\n')
                 {
                     if (si == '\r' || isFixed || isCropped)
                         continue;
@@ -716,7 +718,7 @@ namespace ClassicUO.IO.Resources
 
                 MultilinesFontData mfd = new MultilinesFontData(0xFFFFFFFF, flags, font, si, 0);
                 ptr.Data.Add(mfd);
-                readWidth += fcd.Width;
+                readWidth += si == '\r' ? 0 : fcd.Width;
 
                 if (fcd.Height > ptr.MaxHeight)
                     ptr.MaxHeight = fcd.Height;
@@ -871,14 +873,14 @@ namespace ClassicUO.IO.Resources
             {
                 uint offset = table[c];
 
-                if (offset != 0 && offset != 0xFFFFFFFF)
+                if (c != '\r' && offset != 0 && offset != 0xFFFFFFFF)
                 {
                     byte* ptr = (byte*) ((IntPtr) table + (int) offset);
                     textLength += (sbyte) ptr[0] + (sbyte) ptr[2] + 1;
                 }
                 else if (c == ' ')
                     textLength += UNICODE_SPACE_WIDTH;
-                else if (c == '\n' || c == '\r')
+                else if (c == '\n')
                 {
                     maxTextLenght = Math.Max(maxTextLenght, textLength);
                     textLength = 0;
@@ -890,7 +892,7 @@ namespace ClassicUO.IO.Resources
 
         public unsafe int GetCharWidthUnicode(byte font, char c)
         {
-            if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || c == 0)
+            if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || c == 0 || c == '\r')
                 return 0;
 
             uint* table = (uint*) _unicodeFontAddress[font];
@@ -970,15 +972,14 @@ namespace ClassicUO.IO.Resources
             {
                 char si = str[i];
 
-                if (si == '\r' || si == '\n')
+                if (si == '\n')
                 {
                     if (isFixed || isCropped)
                         si = (char) 0;
-                    else
-                        si = '\n';
                 }
+                
 
-                if ((table[si] == 0 || table[si] == 0xFFFFFFFF) && si != ' ' && si != '\n')
+                if ((table[si] == 0 || table[si] == 0xFFFFFFFF) && si != ' ' && si != '\n' && si != '\r')
                     continue;
 
                 byte* data = (byte*) ((IntPtr) table + (int) table[si]);
@@ -1056,7 +1057,7 @@ namespace ClassicUO.IO.Resources
                         {
                             MultilinesFontData mfd1 = new MultilinesFontData(current_charcolor, current_flags, current_font, si, 0);
                             ptr.Data.Add(mfd1);
-                            readWidth += (sbyte) data[0] + (sbyte) data[2] + 1;
+                            readWidth += si == '\r' ? 0 : (sbyte) data[0] + (sbyte) data[2] + 1;
 
                             if ((sbyte) data[1] + (sbyte) data[3] > ptr.MaxHeight)
                                 ptr.MaxHeight = (sbyte) data[1] + (sbyte) data[3] + extraheight;
@@ -1112,7 +1113,7 @@ namespace ClassicUO.IO.Resources
                 }
                 else
                 {
-                    readWidth += (sbyte) data[0] + (sbyte) data[2] + 1;
+                    readWidth += si == '\r' ? 0 : (sbyte) data[0] + (sbyte) data[2] + 1;
 
                     if ((sbyte) data[1] + (sbyte) data[3] > ptr.MaxHeight)
                         ptr.MaxHeight = (sbyte) data[1] + (sbyte) data[3] + extraheight;
@@ -2780,7 +2781,7 @@ namespace ClassicUO.IO.Resources
                             char ch = info.Data[i].Item;
                             uint offset = table[ch];
 
-                            if (offset != 0 && offset != 0xFFFFFFFF)
+                            if (ch != '\r' && offset != 0 && offset != 0xFFFFFFFF)
                             {
                                 byte* cptr = (byte*) ((IntPtr) table + (int) offset);
                                 width += (sbyte) cptr[0] + (sbyte) cptr[2] + 1;
@@ -2872,7 +2873,7 @@ namespace ClassicUO.IO.Resources
                         char ch = info.Data[i].Item;
                         uint offset = table[ch];
 
-                        if (offset != 0 && offset != 0xFFFFFFFF)
+                        if (ch != '\r' && offset != 0 && offset != 0xFFFFFFFF)
                         {
                             byte* cptr = (byte*) ((IntPtr) table + (int) offset);
                             x += (sbyte) cptr[0] + (sbyte) cptr[2] + 1;
@@ -2968,12 +2969,11 @@ namespace ClassicUO.IO.Resources
 
                         for (int i = 0; i < len && i < info.Data.Count; i++)
                         {
-                            byte index = _fontIndex[info.Data[i].Item];
-                            width += fd[index].Width;
+                            if (info.Data[i].Item != '\r')
+                                width += fd[_fontIndex[info.Data[i].Item]].Width;
 
                             if (width > x)
-                                break;
-
+                                break;                           
                             pos++;
                         }
 
@@ -3051,8 +3051,8 @@ namespace ClassicUO.IO.Resources
                 {
                     for (int i = 0; i < len; i++)
                     {
-                        byte index = _fontIndex[info.Data[i].Item];
-                        x += fd[index].Width;
+                        if (info.Data[i].Item != '\r')
+                            x += fd[_fontIndex[info.Data[i].Item]].Width;
 
                         if (info.CharStart + i + 1 == pos)
                             return (x, y);

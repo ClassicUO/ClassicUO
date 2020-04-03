@@ -266,7 +266,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _textboxPassword.SetKeyboardFocus();
 
 
-            Add(new StbTextBox(3, isunicode: false, align: TEXT_ALIGN_TYPE.TS_LEFT)
+            Add(new StbTextBox(1, isunicode: true, align: TEXT_ALIGN_TYPE.TS_LEFT)
             {
                 X = 200,
                 Y = 70,
@@ -274,7 +274,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Height = 70,
                 IsPassword = false,
                 IsReadOnly = false,
-                Text = "AB\r\nCD\r\nEF\r\n"
+                Text = "AAA\r\nBBB\r\nCCC\r\n"
             });
         }
 
