@@ -22,7 +22,6 @@ namespace ClassicUO.Game.UI.Controls
         private Point _caretScreenPosition;
         private bool _leftWasDown, _isPassword;
         private ushort _hue;
-
         private RenderedText _currentRenderedText => IsPassword ? _passwordRenderedText : _rendererText;
 
 
@@ -31,12 +30,13 @@ namespace ClassicUO.Game.UI.Controls
             AcceptKeyboardInput = true;
             AcceptMouseInput = true;
             CanMove = false;
+            IsEditable = true;
 
+            _hue = hue;
             _maxCharCount = max_char_count;
 
             _stb = new TextEdit(this);
             _stb.SingleLine = true;
-            _hue = hue;
 
             _rendererText = RenderedText.Create(string.Empty, hue, font, isunicode, style, align, maxWidth, 30, false, false, false);
             if (maxWidth > 0)
@@ -73,6 +73,8 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         public int Length => Text?.Length ?? 0;
+
+        public bool AllowTAB { get; set; }
 
         public bool Multiline
         {
@@ -210,6 +212,17 @@ namespace ClassicUO.Game.UI.Controls
 
             switch (key)
             {
+                case SDL.SDL_Keycode.SDLK_TAB:
+                    if (AllowTAB)
+                    {
+                        // UO does not support '\t' char in its fonts
+                        OnTextInput("   ");
+                    }
+                    else
+                    {
+                        Parent?.KeyboardTabToNextFocus(this);
+                    }
+                    break;
                 case SDL.SDL_Keycode.SDLK_a when Keyboard.Ctrl:
                     SelectAll();
                     break;

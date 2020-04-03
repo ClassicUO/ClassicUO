@@ -281,8 +281,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Y = 70,
                 Width = 200,
                 Height = 70,
-                IsPassword = true,
-                IsEditable = true,
+                IsPassword = false,
+                AllowTAB = true,
                 Multiline = true,
                 Text = "AAA\r\nBBB\r\nCCC\r\n"
             });
