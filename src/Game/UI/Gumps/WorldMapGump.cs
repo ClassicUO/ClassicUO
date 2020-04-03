@@ -120,8 +120,6 @@ namespace ClassicUO.Game.UI.Gumps
                 ShowBorder = !_isTopMost;
 
                 ControlInfo.Layer = _isTopMost ? UILayer.Over : UILayer.Default;
-
-                SetOptionValue("top_most", value);
             }
         }
 
@@ -137,8 +135,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _isScrolling = false;
                     CanMove = true;
                 }
-
-                SetOptionValue("free_view", value);
             }
         }
 
