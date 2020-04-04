@@ -88,9 +88,9 @@ namespace ClassicUO.Game.UI.Gumps
             TextBoxControl = new StbTextBox(ProfileManager.Current.ChatFont, MAX_MESSAGE_LENGHT, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
             {
                 X = 0,
-                Y = Height - height - 3,
+                Y = Height - height,
                 Width = Width,
-                Height = height - 3
+                Height = height
             };
 
             float gradientTransparency = (ProfileManager.Current != null && ProfileManager.Current.HideChatGradient) ? 1.0f : 0.5f;
@@ -308,7 +308,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int height = FontsLoader.Instance.GetHeightUnicode(ProfileManager.Current.ChatFont, "123ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
                 TextBoxControl.Y = Height - height - 3;
                 TextBoxControl.Width = IsActive ? Width : 1;
-                TextBoxControl.Height = height - 3;
+                TextBoxControl.Height = height + 3;
                 _trans.Location = TextBoxControl.Location;
                 _trans.Width = Width;
                 _trans.Height = height + 5;

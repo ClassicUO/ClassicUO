@@ -37,7 +37,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private readonly Checkbox _checkboxSaveAccount;
         private readonly Button _nextArrow0;
         private readonly StbTextBox _textboxAccount;
-        private readonly StbPasswordBox _textboxPassword;
+        private readonly StbTextBox _textboxPassword;
 
         private float _time;
 
@@ -221,14 +221,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Text = Settings.GlobalSettings.Username
             });
 
-            Add(_textboxPassword = new StbPasswordBox(5, 16, 190, 190, false, hue: 0x034F)
+            Add(_textboxPassword = new StbTextBox(5, 16, 190,false, hue: 0x034F)
             {
                 X = offsetX,
                 Y = offsetY + offtextY + 2,
                 Width = 190,
                 Height = 25,
                 Hue = 0x034F,
-                Text = Crypter.Decrypt(Settings.GlobalSettings.Password)
+                Text = Crypter.Decrypt(Settings.GlobalSettings.Password),
+                IsPassword = true
             });
 
             
@@ -267,10 +268,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 X = 200, 
                 Y = 70,
                 Width = 200,
-                Height = 70,
+                Height = 300,
                 AllowTAB = true,
                 Multiline = true,
-                Text = "AAAAAAAAAAAAAAAAAAAawdwaawghtt"
+                Text = ""
             });
         }
 

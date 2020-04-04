@@ -16,66 +16,6 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    class StbPasswordBox : StbTextBox
-    {
-        private RenderedText _passwordRenderedText;
-
-        public StbPasswordBox(byte font, int max_char_count = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : base(font, max_char_count, maxWidth, isunicode, style, hue, align)
-        {
-            _passwordRenderedText = RenderedText.Create(string.Empty, hue, font, isunicode, style, align, maxWidth, 30, false, true, true);
-        }
-
-        public string PlainText { get; private set; }
-
-
-
-        protected override void OnTextInput(string c)
-        {
-
-            base.OnTextInput(c);
-        }
-
-        protected override void OnTextChanged()
-        {
-            PlainText = Text;
-
-            if (!string.IsNullOrEmpty(Text))
-            {
-                char[] v = Text.ToCharArray();
-
-                for (int i = 0; i < v.Length; i++)
-                {
-                    if (v[i] != '\n')
-                        v[i] = '*';
-                }
-                _passwordRenderedText.Text = new string(v);
-            }
-            else
-            {
-                _passwordRenderedText.Text = string.Empty;
-            }
-
-            base.OnTextChanged();
-        }
-
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-        {
-            DrawSelection(batcher, x, y);
-
-            _passwordRenderedText.Draw(batcher, x, y);
-
-            DrawCaret(batcher, x, y);
-
-            return true;
-        }
-
-        public override void Dispose()
-        {
-            _passwordRenderedText?.Destroy();
-            base.Dispose();
-        }
-    }
-
     class StbTextBox : Control, ITextEditHandler
     {
         private readonly TextEdit _stb;
@@ -83,9 +23,10 @@ namespace ClassicUO.Game.UI.Controls
 
         private int _maxCharCount = -1;
         private Point _caretScreenPosition;
-        private bool _leftWasDown, _fromServer;
+        private bool _leftWasDown, _fromServer, _isPassword;
         private ushort _hue;
         private FontStyle _fontStyle;
+        private string _text;
 
         public StbTextBox(byte font, int max_char_count = -1, int maxWidth = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE align = 0)
         {
@@ -116,7 +57,10 @@ namespace ClassicUO.Game.UI.Controls
             _rendererText = RenderedText.Create(string.Empty, hue, font, isunicode, style, align, maxWidth, 30, false, false, false);
             _rendererCaret = RenderedText.Create("_", hue, font, isunicode, (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None, align: align);
 
-            Height = _rendererText.Height;
+            Height = _rendererCaret.Height;
+
+            if (Height < 50)
+                Height = 50;
         }
 
         public StbTextBox(List<string> parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : byte.MaxValue, int.Parse(parts[3]), style: FontStyle.BlackBorder | FontStyle.CropTexture, hue: (ushort) (UInt16Converter.Parse(parts[5]) + 1))
@@ -137,6 +81,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
 
+        public string PlainText => _text;
         public string Text
         {
             get => _rendererText.Text;
@@ -145,7 +90,24 @@ namespace ClassicUO.Game.UI.Controls
                 if (_maxCharCount >= 0 && value != null && value.Length > _maxCharCount)
                     value = value.Substring(0, _maxCharCount);
 
-                Sanitize(ref value);
+                //Sanitize(ref value);
+                _text = value;
+
+                if (IsPassword)
+                {
+                    if (!string.IsNullOrEmpty(_text))
+                    {
+                        char[] v = _text.ToCharArray();
+
+                        for (int i = 0; i < v.Length; i++)
+                        {
+                            if (v[i] != '\n')
+                                v[i] = '*';
+                        }
+                        value = new string(v);
+                    }
+                }
+               
 
                 _rendererText.Text = value;
 
@@ -192,6 +154,17 @@ namespace ClassicUO.Game.UI.Controls
                     _rendererText.CreateTexture();
                     _rendererCaret.CreateTexture();
                 }
+            }
+        }
+
+        public bool IsPassword
+        {
+            get => _isPassword;
+            set
+            {
+                _isPassword = value;
+
+                Text = _text;
             }
         }
 
@@ -278,68 +251,68 @@ namespace ClassicUO.Game.UI.Controls
                         return;
                     }
 
-                    MultilinesFontInfo info = _rendererText.IsUnicode
-                                                  ? FontsLoader.Instance.GetInfoUnicode(
-                                                                                        _rendererText.Font,
-                                                                                        text,
-                                                                                        text.Length,
-                                                                                        _rendererText.Align,
-                                                                                        (ushort) _rendererText.FontStyle,
-                                                                                        realWidth
-                                                                                       )
-                                                  : FontsLoader.Instance.GetInfoASCII(
-                                                                                      _rendererText.Font,
-                                                                                      text,
-                                                                                      text.Length,
-                                                                                      _rendererText.Align,
-                                                                                      (ushort) _rendererText.FontStyle,
-                                                                                      realWidth
-                                                                                     );
+                    //MultilinesFontInfo info = _rendererText.IsUnicode
+                    //                              ? FontsLoader.Instance.GetInfoUnicode(
+                    //                                                                    _rendererText.Font,
+                    //                                                                    text,
+                    //                                                                    text.Length,
+                    //                                                                    _rendererText.Align,
+                    //                                                                    (ushort) _rendererText.FontStyle,
+                    //                                                                    realWidth
+                    //                                                                   )
+                    //                              : FontsLoader.Instance.GetInfoASCII(
+                    //                                                                  _rendererText.Font,
+                    //                                                                  text,
+                    //                                                                  text.Length,
+                    //                                                                  _rendererText.Align,
+                    //                                                                  (ushort) _rendererText.FontStyle,
+                    //                                                                  realWidth
+                    //                                                                 );
 
 
                     if ((_fontStyle & FontStyle.CropTexture) != 0)
                     {
-                        string sb = text;
-                        int total_height = 0;
-                        int start = 0;
+                        //string sb = text;
+                        //int total_height = 0;
+                        //int start = 0;
 
-                        while (info != null)
-                        {
-                            total_height += info.MaxHeight;
+                        //while (info != null)
+                        //{
+                        //    total_height += info.MaxHeight;
 
-                            if (total_height >= Height)
-                            {
-                                if (Text != null && Text.Length <= text.Length)
-                                    text = Text;
+                        //    if (total_height >= Height)
+                        //    {
+                        //        if (Text != null && Text.Length <= text.Length)
+                        //            text = Text;
 
-                                _stb.CursorIndex = Math.Max(0, text.Length - 1);
-                                return;
-                            }
+                        //        _stb.CursorIndex = Math.Max(0, text.Length - 1);
+                        //        return;
+                        //    }
 
-                            uint count = info.Data.Count;
+                        //    uint count = info.Data.Count;
 
-                            //if (_stb.CursorIndex >= start && _stb.CursorIndex <= start + info.CharCount)
-                            {
-                                int pixel_width = 0;
+                        //    //if (_stb.CursorIndex >= start && _stb.CursorIndex <= start + info.CharCount)
+                        //    {
+                        //        int pixel_width = 0;
 
-                                for (int i = 0; i < count; i++)
-                                {
-                                    pixel_width += _rendererText.GetCharWidth(info.Data[i].Item);
+                        //        for (int i = 0; i < count; i++)
+                        //        {
+                        //            pixel_width += _rendererText.GetCharWidth(info.Data[i].Item);
 
-                                    if (pixel_width >= _rendererText.MaxWidth)
-                                    {
-                                        sb = sb.Insert(start + i, "\n");
-                                        //_stb.CursorIndex++;
-                                        pixel_width = 0;
-                                    }
-                                }
-                            }
+                        //            if (pixel_width >= _rendererText.MaxWidth)
+                        //            {
+                        //                sb = sb.Insert(start + i, "\n");
+                        //                _stb.CursorIndex = start + i + 1;
+                        //                pixel_width = 0;
+                        //            }
+                        //        }
+                        //    }
 
-                            start += (int) count;
-                            info = info.Next;
-                        }
+                        //    start += (int) count;
+                        //    info = info.Next;
+                        //}
 
-                        text = sb.ToString();
+                        //text = sb.ToString();
                     }
 
                     if ((_fontStyle & FontStyle.Cropped) != 0)
@@ -582,6 +555,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
+            ScissorStack.PushScissors(scissor);
+            batcher.EnableScissorTest(true);
+
             base.Draw(batcher, x, y);
 
             DrawSelection(batcher, x, y);
@@ -590,6 +567,8 @@ namespace ClassicUO.Game.UI.Controls
             
             DrawCaret(batcher, x, y);
 
+            batcher.EnableScissorTest(false);
+            ScissorStack.PopScissors();
             return true;
         }
 
@@ -668,7 +647,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private protected void DrawCaret(UltimaBatcher2D batcher, int x, int y)
         {
-            if (IsFocused)
+            if (HasKeyboardFocus)
             {
                 _rendererCaret.Draw(batcher, x + _caretScreenPosition.X, y + _caretScreenPosition.Y);
             }
