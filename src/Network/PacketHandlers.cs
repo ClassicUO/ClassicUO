@@ -3616,6 +3616,13 @@ namespace ClassicUO.Network
                     World.Player.SpeedMode = (CharacterSpeedType) val;
 
                     break;
+                case 0x2A:
+                    bool isfemale = p.ReadBool();
+                    byte race = p.ReadByte();
+
+                    // TODO: gump race request
+
+                    break;
                 case 0x2B:
                     serial = p.ReadUShort();
                     byte animID = p.ReadByte();
