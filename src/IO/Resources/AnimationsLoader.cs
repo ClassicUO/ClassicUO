@@ -434,7 +434,7 @@ namespace ClassicUO.IO.Resources
 
                             if (gump == 0)
                                 gump = graphic;
-                            else if (gump == 0xFFFF)
+                            else if (gump == 0xFFFF || gump == -1)
                                 gump = newGraphic;
 
                             ushort color = (ushort)defReader.ReadInt();
