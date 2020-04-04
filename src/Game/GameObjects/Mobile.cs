@@ -203,10 +203,10 @@ namespace ClassicUO.Game.GameObjects
         {
             get
             {
-                if (Client.Version >= ClientVersion.CV_70180 && HasEquipment)
+                if (HasEquipment)
                 {
                     Item m = Equipment[0x19];
-                    return m != null && m.Graphic == 0x3E96; // TODO: im not sure if each server sends this value ever
+                    return m != null && m.Graphic == 0x3E96;
                 }
 
                 return false;
