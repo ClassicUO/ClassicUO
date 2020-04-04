@@ -80,7 +80,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            return Texture != null ? Texture.Contains(x, y) : false;
+            return Texture?.Contains(x, y) ?? false;
         }
 
 
@@ -146,69 +146,5 @@ namespace ClassicUO.Game.UI.Controls
 
             WantUpdateSize = false;
         }
-
-
-
-        //protected override void OnMouseUp(int x, int y, MouseButton button)
-        //{
-        //    base.OnMouseUp(x, y, MouseButton.None); // workaround to avoid clickeddrag
-
-        //    if (button == MouseButton.Left)
-        //    {
-        //        GameScene gs = Client.Client.GetScene<GameScene>();
-
-        //        if (TargetManager.IsTargeting)
-        //        {
-        //            if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
-        //            {
-        //                if (gs == null || !ItemHold.Enabled || !gs.IsMouseOverUI) return;
-
-        //                gs.WearHeldItem(Mobile);
-
-        //                return;
-        //            }
-
-        //            switch (TargetManager.TargetingState)
-        //            {
-        //                case CursorTarget.Position:
-        //                case CursorTarget.Object:
-        //                case CursorTarget.Grab:
-        //                case CursorTarget.SetGrabBag:
-
-        //                    SelectedObject.Object = Item;
-
-
-        //                    if (Item != null)
-        //                    {
-        //                        TargetManager.TargetGameObject(Item);
-        //                        Mouse.LastLeftButtonClickTime = 0;
-        //                    }
-
-        //                    break;
-
-        //                case CursorTarget.SetTargetClientSide:
-        //                    SelectedObject.Object = Item;
-
-        //                    if (Item != null)
-        //                    {
-        //                        TargetManager.TargetGameObject(Item);
-        //                        Mouse.LastLeftButtonClickTime = 0;
-        //                        UIManager.Add(new InfoGump(Item));
-        //                    }
-
-        //                    break;
-        //            }
-        //        }
-        //        else
-        //        {
-        //            if (gs == null || !ItemHold.Enabled || !gs.IsMouseOverUI) return;
-
-        //            if (Item == Mobile.Equipment[(int) Layer.Backpack])
-        //                gs.DropHeldItemToContainer(Item);
-        //            else
-        //                gs.WearHeldItem(Mobile);
-        //        }
-        //    }
-        //}
     }
 }
