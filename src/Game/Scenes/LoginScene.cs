@@ -154,7 +154,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (loginGump != null && !loginGump.IsDisposed)
                 {
-                    loginGump.SetFakePassword(text);
+                    loginGump.Insert(text);
                 }
             }
         }

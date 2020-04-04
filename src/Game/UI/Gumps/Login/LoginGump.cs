@@ -239,23 +239,16 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Height = 25,
             };
 
-            _textboxPassword.TextChanged += (sender, e) =>
+            _passwordFake.KeyDown += (sender, e) =>
             {
-                var c = _textboxPassword.Text.ToCharArray();
-
-                for (int i = 0; i < c.Length; i++)
-                {
-                    if (c[i] != '\n')
-                    {
-                        c[i] = '*';
-                    }
-                }
-
-                _passwordFake.Text = new string(c);
+               _textboxPassword.InvokeKeyDown(e.Key, e.Mod);  
             };
+
 
             _textboxPassword.Text = Crypter.Decrypt(Settings.GlobalSettings.Password);
 
+            TransformPassword(_textboxPassword.Text);
+            
 
             _checkboxSaveAccount.IsChecked = Settings.GlobalSettings.SaveAccount;
             _checkboxAutologin.IsChecked = Settings.GlobalSettings.AutoLogin;
@@ -285,14 +278,29 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             if (!string.IsNullOrEmpty(_textboxAccount.Text))
                 _passwordFake.SetKeyboardFocus();
+            else
+                _textboxAccount.SetKeyboardFocus();
         }
 
 
-        public void SetFakePassword(string psw)
+        public void Insert(string psw)
         {
-            _textboxPassword.Text = psw;
+            _textboxPassword.Text += psw;
         }
 
+        private void TransformPassword(string text)
+        {
+            var c = text.ToCharArray();
+
+            for (int i = 0; i < c.Length; i++)
+            {
+                if (c[i] != '\n')
+                {
+                    c[i] = '*';
+                }
+            }
+            _passwordFake.Text = new string(c);
+        }
 
         public override void OnKeyboardReturn(int textID, string text)
         {
@@ -371,39 +379,20 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
             }
 
-            protected override void OnBeforeTextChange(ref string text)
+            protected override void OnTextInput(string c)
             {
-                //var t = text.ToCharArray();
+                var t = c.ToCharArray();
 
-                //for (int i = 0; i < t.Length; i++)
-                //{
-                //    if (t[i] != '\n')
-                //        t[i] = '*';
-                //}
+                for (int i = 0; i < t.Length; i++)
+                {
+                    if (t[i] != '\n')
+                        t[i] = '*';
+                }
 
-                //text = new string(t);
+                c = new string(t);
+
+                base.OnTextInput(c);
             }
-
-            //protected override void OnTextInput(string c)
-            //{
-            //    OnBeforeTextChange(ref c);
-            //    Text = c;
-            //}
-
-            //protected override void OnTextInput(string c)
-            //{
-            //    var t = c.ToCharArray();
-
-            //    for (int i = 0; i < t.Length; i++)
-            //    {
-            //        if (t[i] != '\n')
-            //            t[i] = '*';
-            //    }
-
-            //    c = new string(t);
-
-            //    base.OnTextInput(c);
-            //}
         }
 
 

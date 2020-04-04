@@ -90,7 +90,7 @@ namespace ClassicUO.Game.UI.Controls
                     value = value.Substring(0, _maxCharCount);
 
                 //Sanitize(ref value);
-                OnBeforeTextChange(ref value);
+
 
                 _rendererText.Text = value;
                 
@@ -101,6 +101,16 @@ namespace ClassicUO.Game.UI.Controls
         public int Length => Text?.Length ?? 0;
 
         public bool AllowTAB { get; set; }
+     
+        public int CaretIndex
+        {
+            get => _stb.CursorIndex;
+            set
+            {
+                _stb.CursorIndex = value;
+                UpdateCaretScreenPosition();
+            } 
+        }
 
         public bool Multiline
         {
@@ -171,8 +181,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-
-
+      
         
         private void UpdateCaretScreenPosition()
         {
@@ -301,11 +310,11 @@ namespace ClassicUO.Game.UI.Controls
             UpdateCaretScreenPosition();
         }
 
-        protected virtual void OnBeforeTextChange(ref string text)
+        internal override void OnFocusEnter()
         {
+            base.OnFocusEnter();
+            CaretIndex = Text?.Length ?? 0;
         }
-
-
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
