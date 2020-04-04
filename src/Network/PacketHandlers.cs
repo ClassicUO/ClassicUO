@@ -3679,7 +3679,16 @@ namespace ClassicUO.Network
             }
 
             if (p.Position < p.Length)
-                arguments = p.ReadUnicodeReversed(p.Length - p.Position);
+            {
+                if (p.ID == 0xCC)
+                {
+                    arguments = p.ReadUnicode(p.Length - p.Position);
+                }
+                else
+                {
+                    arguments = p.ReadUnicodeReversed(p.Length - p.Position);
+                }
+            }
 
             string text = ClilocLoader.Instance.Translate((int) cliloc, arguments);
 
