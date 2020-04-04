@@ -202,7 +202,7 @@ namespace ClassicUO.Renderer
                     Font,
                     Text,
                     caret_index,
-                    Width,
+                    MaxWidth,
                     Align, 
                     (ushort) FontStyle);
             }
@@ -212,7 +212,7 @@ namespace ClassicUO.Renderer
                     Font,
                     Text,
                     caret_index,
-                    Width,
+                    MaxWidth,
                     Align,
                     (ushort) FontStyle);
             }

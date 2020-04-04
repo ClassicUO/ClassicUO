@@ -23,10 +23,10 @@ namespace ClassicUO.Game.UI.Controls
 
         private int _maxCharCount = -1;
         private Point _caretScreenPosition;
-        private bool _leftWasDown, _fromServer, _isPassword;
+        private bool _leftWasDown, _fromServer;
         private ushort _hue;
         private FontStyle _fontStyle;
-        private string _text;
+
 
         public StbTextBox(byte font, int max_char_count = -1, int maxWidth = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE align = 0)
         {
@@ -81,7 +81,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
 
-        public string PlainText => _text;
         public string Text
         {
             get => _rendererText.Text;
@@ -91,26 +90,10 @@ namespace ClassicUO.Game.UI.Controls
                     value = value.Substring(0, _maxCharCount);
 
                 //Sanitize(ref value);
-                _text = value;
-
-                if (IsPassword)
-                {
-                    if (!string.IsNullOrEmpty(_text))
-                    {
-                        char[] v = _text.ToCharArray();
-
-                        for (int i = 0; i < v.Length; i++)
-                        {
-                            if (v[i] != '\n')
-                                v[i] = '*';
-                        }
-                        value = new string(v);
-                    }
-                }
-               
+                OnBeforeTextChange(ref value);
 
                 _rendererText.Text = value;
-
+                
                 OnTextChanged();
             }
         }
@@ -146,25 +129,12 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (_rendererText.Hue != value)
                 {
-                    if (_rendererText != null)
-                        _rendererText.Hue = value;
                     _rendererText.Hue = value;
                     _rendererCaret.Hue = value;
 
                     _rendererText.CreateTexture();
                     _rendererCaret.CreateTexture();
                 }
-            }
-        }
-
-        public bool IsPassword
-        {
-            get => _isPassword;
-            set
-            {
-                _isPassword = value;
-
-                Text = _text;
             }
         }
 
@@ -331,7 +301,9 @@ namespace ClassicUO.Game.UI.Controls
             UpdateCaretScreenPosition();
         }
 
-
+        protected virtual void OnBeforeTextChange(ref string text)
+        {
+        }
 
 
 
@@ -564,7 +536,7 @@ namespace ClassicUO.Game.UI.Controls
             DrawSelection(batcher, x, y);
 
             _rendererText.Draw(batcher, x, y);
-            
+
             DrawCaret(batcher, x, y);
 
             batcher.EnableScissorTest(false);
@@ -631,7 +603,7 @@ namespace ClassicUO.Game.UI.Controls
                                        x + drawX,
                                        y + drawY,
                                        info.Width - drawX,
-                                       info.MaxHeight,
+                                        info.MaxHeight,
                                        ref _hueVector);
 
                         // first selection is gone. M

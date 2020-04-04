@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System.Runtime.Remoting.Channels;
+
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Scenes;
@@ -37,7 +39,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private readonly Checkbox _checkboxSaveAccount;
         private readonly Button _nextArrow0;
         private readonly StbTextBox _textboxAccount;
-        private readonly StbTextBox _textboxPassword;
+        private readonly StbTextBox _textboxPassword, _passwordFake;
 
         private float _time;
 
@@ -46,7 +48,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
             CanCloseWithRightClick = false;
 
             AcceptKeyboardInput = false;
-
 
             int offsetX, offsetY, offtextY;
 
@@ -221,18 +222,41 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Text = Settings.GlobalSettings.Username
             });
 
-            Add(_textboxPassword = new StbTextBox(5, 16, 190,false, hue: 0x034F)
+            Add(_passwordFake = new PasswordStbTextBox(5, 16, 190, false, hue: 0x034F)
             {
                 X = offsetX,
                 Y = offsetY + offtextY + 2,
                 Width = 190,
                 Height = 25,
-                Hue = 0x034F,
-                Text = Crypter.Decrypt(Settings.GlobalSettings.Password),
-                IsPassword = true
             });
 
-            
+
+            _textboxPassword = new StbTextBox(5, 16, 190, false, hue: 0x034F)
+            {
+                X = offsetX,
+                Y = offsetY + offtextY + 2,
+                Width = 190,
+                Height = 25,
+            };
+
+            _textboxPassword.TextChanged += (sender, e) =>
+            {
+                var c = _textboxPassword.Text.ToCharArray();
+
+                for (int i = 0; i < c.Length; i++)
+                {
+                    if (c[i] != '\n')
+                    {
+                        c[i] = '*';
+                    }
+                }
+
+                _passwordFake.Text = new string(c);
+            };
+
+            _textboxPassword.Text = Crypter.Decrypt(Settings.GlobalSettings.Password);
+
+
             _checkboxSaveAccount.IsChecked = Settings.GlobalSettings.SaveAccount;
             _checkboxAutologin.IsChecked = Settings.GlobalSettings.AutoLogin;
 
@@ -260,22 +284,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
 
             if (!string.IsNullOrEmpty(_textboxAccount.Text))
-                _textboxPassword.SetKeyboardFocus();
-
-
-            Add(new StbTextBox(1, isunicode: false, maxWidth:100, align: TEXT_ALIGN_TYPE.TS_LEFT)
-            {
-                X = 200, 
-                Y = 70,
-                Width = 200,
-                Height = 300,
-                AllowTAB = true,
-                Multiline = true,
-                Text = ""
-            });
+                _passwordFake.SetKeyboardFocus();
         }
 
 
+        public void SetFakePassword(string psw)
+        {
+            _textboxPassword.Text = psw;
+        }
 
 
         public override void OnKeyboardReturn(int textID, string text)
@@ -284,7 +300,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             LoginScene ls = Client.Game.GetScene<LoginScene>();
 
             if (ls.CurrentLoginStep == LoginSteps.Main)
-                ls.Connect(_textboxAccount.Text, _textboxPassword.PlainText);
+                ls.Connect(_textboxAccount.Text, _textboxPassword.Text);
         }
 
         private void SaveCheckboxStatus()
@@ -292,6 +308,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Settings.GlobalSettings.SaveAccount = _checkboxSaveAccount.IsChecked;
             Settings.GlobalSettings.AutoLogin = _checkboxAutologin.IsChecked;
         }
+
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -306,13 +323,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _nextArrow0.ButtonGraphicNormal = _nextArrow0.ButtonGraphicNormal == _buttonNormal ? _buttonOver : _buttonNormal;
             }
 
-            if (_textboxPassword.HasKeyboardFocus)
+            if (_passwordFake.HasKeyboardFocus)
             {
-                if (_textboxPassword.Hue != 0x0021)
-                    _textboxPassword.Hue = 0x0021;
+                if (_passwordFake.Hue != 0x0021)
+                    _passwordFake.Hue = 0x0021;
             }
-            else if (_textboxPassword.Hue != 0)
-                _textboxPassword.Hue = 0;
+            else if (_passwordFake.Hue != 0)
+                _passwordFake.Hue = 0;
 
             if (_textboxAccount.HasKeyboardFocus)
             {
@@ -330,7 +347,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 case Buttons.NextArrow:
                     SaveCheckboxStatus();
                     if (!_textboxAccount.IsDisposed)
-                        Client.Game.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.PlainText);
+                        Client.Game.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
 
                     break;
 
@@ -340,7 +357,56 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     break;
             }
         }
-        
+
+        public override void Dispose()
+        {
+            _textboxPassword?.Dispose();
+            base.Dispose();
+        }
+
+
+        private class PasswordStbTextBox : StbTextBox
+        {
+            public PasswordStbTextBox(byte font, int max_char_count = -1, int maxWidth = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : base(font, max_char_count, maxWidth, isunicode, style, hue, align)
+            {
+            }
+
+            protected override void OnBeforeTextChange(ref string text)
+            {
+                //var t = text.ToCharArray();
+
+                //for (int i = 0; i < t.Length; i++)
+                //{
+                //    if (t[i] != '\n')
+                //        t[i] = '*';
+                //}
+
+                //text = new string(t);
+            }
+
+            //protected override void OnTextInput(string c)
+            //{
+            //    OnBeforeTextChange(ref c);
+            //    Text = c;
+            //}
+
+            //protected override void OnTextInput(string c)
+            //{
+            //    var t = c.ToCharArray();
+
+            //    for (int i = 0; i < t.Length; i++)
+            //    {
+            //        if (t[i] != '\n')
+            //            t[i] = '*';
+            //    }
+
+            //    c = new string(t);
+
+            //    base.OnTextInput(c);
+            //}
+        }
+
+
         private enum Buttons
         {
             NextArrow,
