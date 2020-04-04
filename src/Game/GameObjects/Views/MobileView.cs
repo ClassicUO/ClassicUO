@@ -158,6 +158,7 @@ namespace ClassicUO.Game.GameObjects
             bool mirror = false;
 
             ProcessSteps(out byte dir);
+            byte layerDir = dir;
 
             AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
@@ -233,7 +234,7 @@ namespace ClassicUO.Game.GameObjects
                 var equip = Equipment;
                 for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
                 {
-                    Layer layer = LayerOrder.UsedLayers[dir, i];
+                    Layer layer = LayerOrder.UsedLayers[layerDir, i];
 
                     Item item = equip[(int)layer];
 
