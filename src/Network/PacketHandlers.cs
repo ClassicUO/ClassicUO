@@ -1026,13 +1026,15 @@ namespace ClassicUO.Network
                 {
                     Item item = vendor.Equipment[(int)layer];
 
-                    var list = item.Items.ToArray();
+                    var first = item.Items.FirstOrDefault();
 
-                    if (list.Length == 0)
-                        return;
+                    if (first == null)
+                    {
+                        Log.Warn("buy item not found");
+                        continue;
+                    }
 
-                    if (list[0].X > 1)
-                        list = list.Reverse().ToArray();
+                    IEnumerable<Item> list = first.X > 1 ? item.Items.Reverse() : item.Items;
 
                     foreach (var i in list) 
                         gump.AddItem(i.Serial, i.Graphic, i.Hue, i.Amount, i.Price, i.Name, false);
@@ -2111,12 +2113,12 @@ namespace ClassicUO.Network
             {
                 byte count = p.ReadByte();
 
-                var list = container.Items /*.OrderBy(s => s.Serial.Value)*/.Reverse().ToArray();
-
-                if (list.Length == 0)
+                var first = container.Items.FirstOrDefault();
+                if (first == null)
                     return;
 
-
+                IEnumerable<Item> list = first.X > 1 ? container.Items.Reverse() : container.Items;
+                
                 foreach (Item it in list.Take(count))
                 {
                     it.Price = p.ReadUInt();
