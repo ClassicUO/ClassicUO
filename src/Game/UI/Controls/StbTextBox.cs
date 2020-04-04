@@ -132,6 +132,8 @@ namespace ClassicUO.Game.UI.Controls
             set => _stb.SelectEnd = value;
         }
 
+        public bool IsUnicode => _rendererText.IsUnicode;
+
         public ushort Hue
         {
             get => _hue;
@@ -153,6 +155,12 @@ namespace ClassicUO.Game.UI.Controls
 
 
 
+        public MultilinesFontInfo CalculateFontInfo(string text)
+        {
+            if (IsUnicode)
+                return FontsLoader.Instance.GetInfoUnicode(_rendererText.Font, text, text.Length, _rendererText.Align, (ushort) _rendererText.FontStyle, _rendererText.MaxWidth);
+            return FontsLoader.Instance.GetInfoASCII(_rendererText.Font, text, text.Length, _rendererText.Align, (ushort) _rendererText.FontStyle, _rendererText.MaxWidth);
+        }
 
         public float GetWidth(int index)
         {
@@ -305,10 +313,12 @@ namespace ClassicUO.Game.UI.Controls
 
         protected virtual void OnTextChanged()
         {
-            TextChanged?.Raise();
+            TextChanged?.Raise(this);
 
             UpdateCaretScreenPosition();
         }
+
+        protected MultilinesFontInfo GetInfo() => _rendererText.GetInfo();
 
         internal override void OnFocusEnter()
         {

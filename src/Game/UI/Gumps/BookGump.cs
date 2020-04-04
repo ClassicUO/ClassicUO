@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -28,6 +29,7 @@ using ClassicUO.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
@@ -42,17 +44,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int MAX_BOOK_CHARS_PER_PAGE = 53;
 
 
-        private readonly StbTextBox[] _pagesTextBoxes;
-        private byte _activated;
-
-        // < 0 == backward
-        // > 0 == forward
-        // 0 == invariant
-        // this is our only place to check for page movement from key
-        // or displacement of caretindex from mouse
-        private sbyte _AtEnd;
-
-        private bool _scale;
+        private readonly StbPageTextBox[] _pagesTextBoxes;
         private GumpPic _forwardGumpPic, _backwardGumpPic;
         private bool[] _pagesChanged;
         private StbTextBox _titleTextBox, _authorTextBox;
@@ -64,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
 
             BookPageCount = page_count;
-            _pagesTextBoxes = new StbTextBox[page_count];
+            _pagesTextBoxes = new StbPageTextBox[page_count];
             IsEditable = is_editable;
             UseNewHeader = !old_packet;
 
@@ -131,7 +123,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Text = title
             }, 1);
             Add(new Label("by", true, 1) { X = 40, Y = 130 }, 1);
-            Add(_authorTextBox = new StbTextBox(DefaultFont, 29, 150, IsNewBook, FontStyle.None, 0)
+            Add(_authorTextBox = new StbPageTextBox(DefaultFont, 29, 150, IsNewBook, FontStyle.None, 0)
             {
                 X = 40,
                 Y = 160,
@@ -158,22 +150,24 @@ namespace ClassicUO.Game.UI.Gumps
                     page += 1;
                 page >>= 1;
 
-                StbTextBox tbox = new StbTextBox(DefaultFont, MAX_BOOK_CHARS_PER_PAGE * MAX_BOOK_LINES, 155, IsNewBook, FontStyle.ExtraHeight, 2)
+                StbPageTextBox tbox = new StbPageTextBox(DefaultFont, MAX_BOOK_CHARS_PER_PAGE * MAX_BOOK_LINES, 155, IsNewBook, FontStyle.ExtraHeight, 2)
                 {
                     X = x,
                     Y = y,
                     Height = 166,
                     Width = 160,
                     IsEditable = IsEditable,
+                    Multiline = true,
+                    Tag = k
                     //MaxLines = MAX_BOOK_LINES
                 };
+                tbox.TextChanged += OnTextChanged;
                 Add(tbox, page);
                 _pagesTextBoxes[k - 1] = tbox;
 
                 Add(new Label(k.ToString(), true, 1) { X = x + 80, Y = 200 }, page);
             }
 
-            _activated = 1;
             ActivePage = 1;
             UpdatePageButtonVisibility();
 
@@ -181,6 +175,15 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
+        private void OnTextChanged(object sender, EventArgs e)
+        {
+            StbPageTextBox c = (StbPageTextBox) sender;
+
+            if (c != null)
+            {
+                _pagesChanged[(int) c.Tag] = true;
+            }
+        }
 
         private int GetActivePage()
         {
@@ -237,6 +240,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _pagesTextBoxes[page].IsEditable = IsEditable;
                 _pagesTextBoxes[page].Text = text;
+                _pagesChanged[page + 1] = false;
             }
         }
 
@@ -332,6 +336,36 @@ namespace ClassicUO.Game.UI.Gumps
             int curpage = GetActivePage();
 
             var box = curpage >= 0 ? _pagesTextBoxes[curpage] : null;
+        }
+
+        private class StbPageTextBox : StbTextBox
+        {
+            public StbPageTextBox(byte font, int max_char_count = -1, int maxWidth = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : base(font, max_char_count, maxWidth, isunicode, style, hue, align)
+            {
+            }
+
+
+            protected override void OnTextInput(string c)
+            {
+                MultilinesFontInfo info = CalculateFontInfo(c);
+
+                int lines = 0;
+                while (info != null) { lines++; info = info.Next; }
+
+                if (lines > 8)
+                {
+
+                }
+
+                base.OnTextInput(c);
+            }
+
+           
+
+            protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+            {
+                base.OnKeyDown(key, mod);
+            }
         }
     }
 }
