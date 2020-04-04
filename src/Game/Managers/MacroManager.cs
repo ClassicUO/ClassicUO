@@ -847,7 +847,7 @@ namespace ClassicUO.Game.Managers
                         {
                             totalCount += _spellsCountTable[spellType];
 
-                            if (spell < totalCount)
+                            if (spell <= totalCount)
                                 break;
                         }
 
