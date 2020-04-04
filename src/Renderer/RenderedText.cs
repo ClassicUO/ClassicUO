@@ -260,17 +260,18 @@ namespace ClassicUO.Renderer
                     break;
             }
 
+            int start = 0;
             while (info != null)
             {
-                if (startIndex >= info.CharStart && startIndex < info.CharStart + info.CharCount)
+                if (startIndex >= start && startIndex < start + info.CharCount)
                 {
                     r.num_chars = info.CharCount;
                     r.ymax = info.MaxHeight;
                     r.baseline_y_delta = info.MaxHeight;
-
                     break;
                 }
-                
+
+                start += info.CharCount;
                 info = info.Next;
             }
 
@@ -284,20 +285,25 @@ namespace ClassicUO.Renderer
 
             MultilinesFontInfo info = _info;
 
+            int start = 0;
             while (info != null)
             {
-                if (index >= info.CharStart && index < info.CharStart + info.CharCount)
+                if (index >= start && index < start + info.CharCount)
                 {
-                    index -= info.CharStart;
+                    int x = index - start;
 
-                    char c = index >= info.Data.Count ? '\n' : info.Data[index].Item;
+                    if (x >= 0)
+                    {
+                        char c = x >= info.Data.Count ? '\n' : info.Data[x].Item;
 
-                    if (IsUnicode)
-                        return FontsLoader.Instance.GetCharWidthUnicode(Font, c);
+                        if (IsUnicode)
+                            return FontsLoader.Instance.GetCharWidthUnicode(Font, c);
 
-                    return FontsLoader.Instance.GetCharWidthASCII(Font, c);
+                        return FontsLoader.Instance.GetCharWidthASCII(Font, c);
+                    }
                 }
 
+                start += info.CharCount;
                 info = info.Next;
             }
 

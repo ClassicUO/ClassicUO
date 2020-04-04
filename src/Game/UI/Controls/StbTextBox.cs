@@ -12,6 +12,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Utility.Logging;
+
 namespace ClassicUO.Game.UI.Controls
 {
     class StbPasswordBox : StbTextBox
@@ -83,6 +85,7 @@ namespace ClassicUO.Game.UI.Controls
         private Point _caretScreenPosition;
         private bool _leftWasDown, _fromServer;
         private ushort _hue;
+        private FontStyle _fontStyle;
 
         public StbTextBox(byte font, int max_char_count = -1, int maxWidth = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE align = 0)
         {
@@ -97,15 +100,20 @@ namespace ClassicUO.Game.UI.Controls
             _stb = new TextEdit(this);
             _stb.SingleLine = true;
 
+            if (maxWidth > 0)
+                style |= FontStyle.CropTexture;
+
+            _fontStyle = style;
+
             if ((style & (FontStyle.Fixed | FontStyle.Cropped)) != 0 && maxWidth <= 0)
             {
                 throw new Exception(nameof(maxWidth));
             }
 
-            _rendererText = RenderedText.Create(string.Empty, hue, font, isunicode, style, align, maxWidth, 30, false, false, false);
-            if (maxWidth > 0)
-                _rendererText.FontStyle |= FontStyle.Cropped;
+            // stb_textedit will handle part of these tag
+            style &= ~(FontStyle.Fixed | FontStyle.Cropped | FontStyle.CropTexture);
 
+            _rendererText = RenderedText.Create(string.Empty, hue, font, isunicode, style, align, maxWidth, 30, false, false, false);
             _rendererCaret = RenderedText.Create("_", hue, font, isunicode, (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None, align: align);
 
             Height = _rendererText.Height;
@@ -120,7 +128,6 @@ namespace ClassicUO.Game.UI.Controls
             Multiline = true;
             _fromServer = true;
             LocalSerial = SerialHelper.Parse(parts[6]);
-            _rendererText.FontStyle &= ~FontStyle.Cropped;
             int index = int.Parse(parts[7]);
 
             if (index >= 0 && index < lines.Length)
@@ -244,48 +251,101 @@ namespace ClassicUO.Game.UI.Controls
 
         private void Sanitize(ref string text)
         {
-            FontStyle style = _rendererText.FontStyle;
-
-            if ((style & FontStyle.Fixed) != 0 || (style & FontStyle.Cropped) != 0 || (style & FontStyle.CropTexture) != 0)
+            if ((_fontStyle & FontStyle.Fixed) != 0 || (_fontStyle & FontStyle.Cropped) != 0 || (_fontStyle & FontStyle.CropTexture) != 0)
             {
-                if (_rendererText.Width == 0 || string.IsNullOrEmpty(text))
+                if (_rendererText.MaxWidth == 0)
+                {
+                    Log.Warn("maxwidth must be setted.");
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(text))
                     return;
 
+
+                
                 int realWidth = _rendererText.IsUnicode
                                     ? FontsLoader.Instance.GetWidthUnicode(_rendererText.Font, text)
                                     : FontsLoader.Instance.GetWidthASCII(_rendererText.Font, text);
 
-                if (realWidth > _rendererText.Width)
+                if (realWidth > _rendererText.MaxWidth)
                 {
-                    string str = _rendererText.IsUnicode ? 
-                                     FontsLoader.Instance.GetTextByWidthUnicode(_rendererText.Font, text, _rendererText.Width, (style & FontStyle.Cropped) != 0, _rendererText.Align, (ushort) _rendererText.FontStyle)
-                                     : 
-                                     FontsLoader.Instance.GetTextByWidthASCII(_rendererText.Font, text, _rendererText.Width, (style & FontStyle.Cropped) != 0, _rendererText.Align, (ushort) _rendererText.FontStyle);
-
-                    if ((style & FontStyle.CropTexture) != 0)
+                    if ((_fontStyle & FontStyle.Fixed) != 0)
                     {
-                        int totalheight = 0;
-                        // TODO: add a '\n' to split the string
-                        while (totalheight < _rendererText.MaxHeight)
-                        {
-                            totalheight += _rendererText.IsUnicode ?
-                                               FontsLoader.Instance.GetHeightUnicode(_rendererText.Font, str, _rendererText.Width, _rendererText.Align, (ushort) _rendererText.FontStyle)
-                                               :
-                                               FontsLoader.Instance.GetHeightASCII(_rendererText.Font, str, _rendererText.Width, _rendererText.Align, (ushort) _rendererText.FontStyle);
+                        text = Text;
+                        _stb.CursorIndex = Math.Max(0, text.Length - 1);
 
-                            if (text.Length > str.Length)
-                            {
-                                str += _rendererText.IsUnicode ?
-                                           FontsLoader.Instance.GetTextByWidthUnicode(_rendererText.Font, text.Substring(str.Length), _rendererText.Width, (style & FontStyle.Cropped) != 0, _rendererText.Align, (ushort) _rendererText.FontStyle)
-                                           :
-                                           FontsLoader.Instance.GetTextByWidthASCII(_rendererText.Font, text.Substring(str.Length), _rendererText.Width, (style & FontStyle.Cropped) != 0, _rendererText.Align, (ushort) _rendererText.FontStyle);
-                            }
-                            else
-                                break;
-                        }
+                        return;
                     }
-                    
-                    text = str;
+
+                    MultilinesFontInfo info = _rendererText.IsUnicode
+                                                  ? FontsLoader.Instance.GetInfoUnicode(
+                                                                                        _rendererText.Font,
+                                                                                        text,
+                                                                                        text.Length,
+                                                                                        _rendererText.Align,
+                                                                                        (ushort) _rendererText.FontStyle,
+                                                                                        realWidth
+                                                                                       )
+                                                  : FontsLoader.Instance.GetInfoASCII(
+                                                                                      _rendererText.Font,
+                                                                                      text,
+                                                                                      text.Length,
+                                                                                      _rendererText.Align,
+                                                                                      (ushort) _rendererText.FontStyle,
+                                                                                      realWidth
+                                                                                     );
+
+
+                    if ((_fontStyle & FontStyle.CropTexture) != 0)
+                    {
+                        string sb = text;
+                        int total_height = 0;
+                        int start = 0;
+
+                        while (info != null)
+                        {
+                            total_height += info.MaxHeight;
+
+                            if (total_height >= Height)
+                            {
+                                if (Text != null && Text.Length <= text.Length)
+                                    text = Text;
+
+                                _stb.CursorIndex = Math.Max(0, text.Length - 1);
+                                return;
+                            }
+
+                            uint count = info.Data.Count;
+
+                            //if (_stb.CursorIndex >= start && _stb.CursorIndex <= start + info.CharCount)
+                            {
+                                int pixel_width = 0;
+
+                                for (int i = 0; i < count; i++)
+                                {
+                                    pixel_width += _rendererText.GetCharWidth(info.Data[i].Item);
+
+                                    if (pixel_width >= _rendererText.MaxWidth)
+                                    {
+                                        sb = sb.Insert(start + i, "\n");
+                                        //_stb.CursorIndex++;
+                                        pixel_width = 0;
+                                    }
+                                }
+                            }
+
+                            start += (int) count;
+                            info = info.Next;
+                        }
+
+                        text = sb.ToString();
+                    }
+
+                    if ((_fontStyle & FontStyle.Cropped) != 0)
+                    {
+
+                    }
                 }
             }
         }
@@ -460,8 +520,7 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         if (!_fromServer && !IsMaxCharReached(0))
                         {
-                            _stb.InputChar('\n');
-                            OnTextChanged();
+                            OnTextInput("\n");
                         }
                     }
                     else
@@ -490,6 +549,11 @@ namespace ClassicUO.Game.UI.Controls
             if (c == null || !IsEditable)
                 return;
 
+            if (SelectionStart != SelectionEnd)
+            {
+                _stb.DeleteSelection();
+            }
+
             int count;
 
             if (_maxCharCount >= 0)
@@ -507,7 +571,7 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 0; i < count; i++)
             {             
-                if (NumbersOnly && !char.IsNumber(c[i]))
+                if ((NumbersOnly && !char.IsNumber(c[i])) || c[i] == '\r')
                     continue;
 
                 _stb.InputChar(c[i]);
@@ -541,13 +605,14 @@ namespace ClassicUO.Game.UI.Controls
                 MultilinesFontInfo info = _rendererText.GetInfo();
 
                 int drawY = 0;
+                int start = 0;
 
                 while (info != null && selectStart < selectEnd)
                 {
                     // ok we are inside the selection
-                    if (selectStart >= info.CharStart && selectStart < info.CharStart + info.CharCount)
+                    if (selectStart >= start && selectStart < start + info.CharCount)
                     {
-                        int startSelectionIndex = selectStart - info.CharStart;
+                        int startSelectionIndex = selectStart - start;
 
                         // calculate offset x
                         int drawX = 0;
@@ -557,7 +622,7 @@ namespace ClassicUO.Game.UI.Controls
                         }
 
                         // selection is gone. Bye bye
-                        if (selectEnd >= info.CharStart && selectEnd < info.CharStart + info.CharCount)
+                        if (selectEnd >= start && selectEnd < start + info.CharCount)
                         {
                             int count = selectEnd - selectStart;
 
@@ -591,10 +656,10 @@ namespace ClassicUO.Game.UI.Controls
                                        ref _hueVector);
 
                         // first selection is gone. M
-                        selectStart = info.CharStart + info.CharCount;
+                        selectStart = start + info.CharCount;
                     }
 
-
+                    start += info.CharCount;
                     drawY += info.MaxHeight;
                     info = info.Next;
                 }
