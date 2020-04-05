@@ -183,7 +183,7 @@ namespace ClassicUO.Network
                     break;
             }
 
-            string s = Encoding.UTF8.GetString(_data, Position, index - Position);
+            string s = Encoding.UTF8.GetString(_data, Position, index - Position - 1);
 
             Seek(index);
 
@@ -194,7 +194,7 @@ namespace ClassicUO.Network
 
             }
 
-            if (index == s.Length - 1)
+            if (index == s.Length)
                 return s;
 
             for (int i = 0; i < s.Length; i++)
@@ -221,8 +221,9 @@ namespace ClassicUO.Network
             }
 
             int index = Position;
+            int toread = Position + length;
 
-            while (index < length)
+            while (index < toread)
             {
                 byte b = _data[index++];
 
@@ -230,9 +231,9 @@ namespace ClassicUO.Network
                     break;
             }
 
-            string s = Encoding.UTF8.GetString(_data, Position, index - Position);
+            string s = Encoding.UTF8.GetString(_data, Position, length - 1);
 
-            Seek(index);
+            Skip(length);
 
             index = 0;
 
@@ -241,7 +242,7 @@ namespace ClassicUO.Network
 
             }
 
-            if (index == s.Length - 1)
+            if (index == s.Length)
                 return s;
 
             for (int i = 0; i < s.Length; i++)

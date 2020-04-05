@@ -34,7 +34,7 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal abstract class BaseGameObject
+    internal abstract class BaseGameObject : LinkedObject
     {
         public Point RealScreenPosition;
     }
@@ -301,6 +301,7 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return;
 
+            Clear();
             RemoveFromTile();
 
             //if (Left != null || Right != null)

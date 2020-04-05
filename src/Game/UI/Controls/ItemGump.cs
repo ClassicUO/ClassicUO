@@ -322,7 +322,7 @@ namespace ClassicUO.Game.UI.Controls
             if ( !Input.Keyboard.Ctrl &&
                 ProfileManager.Current.DoubleClickToLootInsideContainers &&
                 Item != null && !Item.IsDestroyed &&
-                !Item.ItemData.IsContainer && Item.Items.Count == 0 &&
+                !Item.ItemData.IsContainer && Item.IsEmpty &&
                 (container = World.Items.Get(Item.RootContainer)) != null &&
                 container != World.Player.Equipment[(int) Layer.Backpack]
             ){

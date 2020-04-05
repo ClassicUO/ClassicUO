@@ -326,11 +326,12 @@ namespace ClassicUO.Game
                 }
             }
 
-            foreach (Item i in item.Items)
-                RemoveItem(i, forceRemove);
+            for (var i = item.Items; i != null; i = i.Next)
+            {
+                RemoveItem(i as Item, forceRemove);
+            }
 
-
-            item.Items.Clear();
+            item.Clear();
             item.Destroy();
 
             if (forceRemove)
@@ -346,10 +347,12 @@ namespace ClassicUO.Game
             if (mobile == null)
                 return false;
 
-            foreach (Item i in mobile.Items)
-                RemoveItem(i, forceRemove);
+            for (var i = mobile.Items; i != null; i = i.Next)
+            {
+                RemoveItem(i as Item, forceRemove);
+            }
 
-            mobile.Items.Clear();
+            mobile.Clear();
             mobile.Destroy();
 
             if (forceRemove)

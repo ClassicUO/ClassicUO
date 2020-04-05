@@ -678,11 +678,7 @@ namespace ClassicUO.Game.UI.Controls
         protected virtual void OnMove(int x, int y)
         {
         }
-
-        protected virtual void OnClosing()
-        {
-        }
-
+        
         internal virtual void OnFocusEnter()
         {
             IsFocused = true;

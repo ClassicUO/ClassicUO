@@ -46,6 +46,8 @@ namespace ClassicUO.Game
             if (item == null)
                 return;
 
+            Remove(item);
+
             if (Items == null)
             {
                 Items = item;
@@ -88,7 +90,11 @@ namespace ClassicUO.Game
             }
             else
             {
-                item.Previous.Next = item.Next;
+                if (item.Previous != null)
+                {
+                    item.Previous.Next = item.Next;
+                }
+
                 if (item.Next != null)
                 {
                     item.Next.Previous = item.Previous;

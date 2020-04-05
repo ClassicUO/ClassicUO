@@ -95,10 +95,7 @@ namespace ClassicUO.Game.GameObjects
                 i.LastStepTime = 0;
                 i.LastAnimationChangeTime = 0;
 
-                if (i.Items == null)
-                    i.Items = new LinkedList<Item>();
-                else if (i.Items.Count != 0)
-                    i.Items.Clear();
+                i.Clear();
 
                 i.IsClicked = false;
                 i.IsDamageable = false;

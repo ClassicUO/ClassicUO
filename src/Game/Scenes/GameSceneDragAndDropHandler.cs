@@ -130,8 +130,11 @@ namespace ClassicUO.Game.Scenes
 
                 if (SerialHelper.IsValid(item.Container))
                 {
-                    foreach (Item i in item.Items)
-                        CloseItemGumps(i);
+                    for (var i = item.Items; i != null; i = i.Next)
+                    {
+                        Item it = (Item) i;
+                        CloseItemGumps(it);
+                    }
                 }
             }
         }

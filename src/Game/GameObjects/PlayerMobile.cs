@@ -202,12 +202,14 @@ namespace ClassicUO.Game.GameObjects
             Item found = null;
             if (container != null)
             {
-                foreach (var item in container.Items)
+                for (var i = container.Items; i != null; i = i.Next)
                 {
+                    Item item = (Item) i;
+
                     if (item.Graphic == graphic)
                         return item;
 
-                    if (item.Items.Count != 0)
+                    if (!item.IsEmpty)
                     {
                         found = FindItemInContainerRecursive(item, graphic);
 

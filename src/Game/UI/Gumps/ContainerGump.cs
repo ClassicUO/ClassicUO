@@ -71,12 +71,17 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (var c in Children.OfType<ItemGump>())
                 c.Dispose();
 
-            foreach (Item i in item.Items.Where(s => s != null && s.IsLootable))
+
+            for (var i = item.Items; i != null; i = i.Next)
+            {
+                Item it = (Item) i;
                 //FIXME: this should be disabled. Server sends the right position
                 //CheckItemPosition(i);
-            {
-                var x = new ItemGump(i);
-                Add(x);
+                if (it.IsLootable)
+                {
+                    var x = new ItemGump(it);
+                    Add(x);
+                }
             }
         }
 
@@ -261,7 +266,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public void ForceUpdate()
+        public void Update()
         {
             BuildGump();
             IsMinimized = IsMinimized;
@@ -321,13 +326,13 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (ItemGump v in Children.OfType<ItemGump>())
                 v.Dispose();
 
-            foreach (uint s in World.Items.Get(LocalSerial).Items)
+
+            for (var i = World.Items.Get(LocalSerial).Items; i != null; i = i.Next)
             {
-                var item = World.Items.Get(s);
+                var item = (Item) i;
 
-                if (item == null || !item.IsLootable)
+                if (!item.IsLootable)
                     continue;
-
 
                 var itemControl = new ItemGump(item);
                 itemControl.IsVisible = !IsMinimized;
@@ -338,8 +343,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     float scale = UIManager.ContainerScale;
 
-                    itemControl.Width = (int)(itemControl.Width * scale);
-                    itemControl.Height = (int)(itemControl.Height * scale);
+                    itemControl.Width = (int) (itemControl.Width * scale);
+                    itemControl.Height = (int) (itemControl.Height * scale);
                 }
 
                 if ((_hideIfEmpty && !IsVisible))
@@ -476,10 +481,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (item != null)
             {
-                if (World.Player != null && (ProfileManager.Current?.OverrideContainerLocationSetting == 3)) UIManager.SavePosition(item, Location);
+                if (World.Player != null && (ProfileManager.Current?.OverrideContainerLocationSetting == 3))
+                    UIManager.SavePosition(item, Location);
 
-                foreach (Item child in item.Items)
+                for (var i = item.Items; i != null; i = i.Next)
                 {
+                    Item child = (Item) i;
+
                     if (child.Container == item)
                         UIManager.GetGump<ContainerGump>(child)?.Dispose();
                 }

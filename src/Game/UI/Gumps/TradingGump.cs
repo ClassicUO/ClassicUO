@@ -157,9 +157,9 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (var v in _myBox.Children)
                 v.Dispose();
 
-            foreach (Item item in container.Items)
+            for (var i = container.Items; i != null; i = i.Next)
             {
-                ItemGump g = new ItemGump(item)
+                ItemGump g = new ItemGump(i as Item)
                 {
                     HighlightOnMouseOver = true
                 };
@@ -185,8 +185,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _myBox.Add(g);
             }
-
-
+            
             container = World.Get(ID2);
 
             if (container == null)
@@ -195,9 +194,9 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (var v in _hisBox.Children)
                 v.Dispose();
 
-            foreach (Item item in container.Items)
+            for (var i = container.Items; i != null; i = i.Next)
             {
-                ItemGump g = new ItemGump(item)
+                ItemGump g = new ItemGump(i as Item)
                 {
                     HighlightOnMouseOver = true
                 };

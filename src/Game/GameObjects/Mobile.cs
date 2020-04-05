@@ -116,10 +116,7 @@ namespace ClassicUO.Game.GameObjects
                 mobile.Texture = null;
                 mobile.IsClicked = false;
 
-                if (mobile.Items == null)
-                    mobile.Items = new LinkedList<Item>();
-                else if (mobile.Items.Count != 0)
-                    mobile.Items.Clear();
+                mobile.Clear();
 
 
                 mobile.CalculateRandomIdleTime();
@@ -245,10 +242,12 @@ namespace ClassicUO.Game.GameObjects
 
         public Item GetSecureTradeBox()
         {
-            for (var i = Items.Last; i != null; i = i.Previous)
+            for (var i = Items; i != null; i = i.Next)
             {
-                if (i.Value.Graphic == 0x1E5E && i.Value.Layer == 0)
-                    return i.Value;
+                Item it = (Item) i;
+
+                if (it.Graphic == 0x1E5E && it.Layer == 0)
+                    return it;
             }
 
             return null;

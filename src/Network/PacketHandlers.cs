@@ -613,7 +613,7 @@ namespace ClassicUO.Network
             if (SerialHelper.IsValid(item.Container))
             {
                 var cont = World.Get(item.Container);
-                cont.Items.Remove(item);
+                cont.Remove(item);
             }
 
             item.Container = 0;
@@ -628,7 +628,7 @@ namespace ClassicUO.Network
             else if (item.Layer != 0)
                 UIManager.GetGump<PaperDollGump>(item)?.Update();
             else
-                UIManager.GetGump<ContainerGump>(item)?.ForceUpdate();
+                UIManager.GetGump<ContainerGump>(item)?.Update();
 
 
             if (graphic == 0x2006 && !item.IsClicked && ProfileManager.Current.ShowNewCorpseNameIncoming) GameActions.SingleClick(item);
@@ -773,9 +773,20 @@ namespace ClassicUO.Network
 
                     ContainerGump containerGump = UIManager.GetGump<ContainerGump>(cont);
                     if (containerGump != null)
-                        containerGump.ForceUpdate();
+                        containerGump.Update();
 
-                    // TODO: BULLETTIN BOARD
+
+                    if (it.Graphic == 0x0EB0)
+                    {
+                        UIManager.GetGump<BulletinBoardItem>(serial)?.Dispose();
+
+                        BulletinBoardGump bbgump = UIManager.GetGump<BulletinBoardGump>();
+
+                        if (bbgump != null)
+                        {
+                            bbgump.RemoveBulletinObject(serial);
+                        }
+                    }
                 }
             }
 
@@ -808,7 +819,7 @@ namespace ClassicUO.Network
 
                 if (cont != null)
                 {
-                    cont.Items.Remove(it);
+                    cont.Remove(it);
 
                     if (it.Layer != Layer.Invalid)
                     {
@@ -1037,7 +1048,7 @@ namespace ClassicUO.Network
                 {
                     Item item = vendor.Equipment[(int)layer];
 
-                    var first = item.Items.First;
+                    var first = item.Items;
 
                     if (first == null)
                     {
@@ -1045,7 +1056,7 @@ namespace ClassicUO.Network
                         continue;
                     }
 
-                    bool reverse = first.Value.X > 1;
+                    bool reverse = (first as Item)?.X > 1;
 
                     if (reverse)
                     {
@@ -1057,13 +1068,14 @@ namespace ClassicUO.Network
 
                     while (first != null)
                     {
+                        Item it = (Item) first;
 
-                        gump.AddItem(first.Value.Serial,
-                                     first.Value.Graphic, 
-                                     first.Value.Hue, 
-                                     first.Value.Amount, 
-                                     first.Value.Price,
-                                     first.Value.Name,
+                        gump.AddItem(it.Serial,
+                                     it.Graphic, 
+                                     it.Hue, 
+                                     it.Amount, 
+                                     it.Price,
+                                     it.Name,
                                      false);
 
                         if (reverse)
@@ -1128,6 +1140,7 @@ namespace ClassicUO.Network
             {
                 Mobile m = World.Mobiles.Get(containerSerial);
                 Item secureBox = m?.GetSecureTradeBox();
+
                 if (secureBox != null)
                 {
                     TradingGump gump = UIManager.GetTradingGump(secureBox) ?? UIManager.GetGump<TradingGump>(secureBox);
@@ -1140,16 +1153,32 @@ namespace ClassicUO.Network
             }
             else if (SerialHelper.IsItem(containerSerial))
             {
-                TradingGump gump = UIManager.GetTradingGump(containerSerial) ?? UIManager.GetGump<TradingGump>(containerSerial);
+                BulletinBoardGump bb = UIManager.GetGump<BulletinBoardGump>(containerSerial);
 
-                if (gump != null)
+                if (bb != null)
                 {
-                    gump.UpdateContent();
+                    NetClient.Socket.Send(new PBulletinBoardRequestMessageSummary(containerSerial, serial));
                 }
                 else
                 {
-                    UIManager.GetGump<ContainerGump>(containerSerial)?.ForceUpdate();
+                    SpellbookGump spellbookGump = UIManager.GetGump<SpellbookGump>(containerSerial);
+
+                    if (spellbookGump != null)
+                    {
+                        spellbookGump.Update();
+                    }
+                    else
+                    {
+                        UIManager.GetGump<ContainerGump>(containerSerial)?.Update();
+                    }
                 }
+            }
+
+            TradingGump tradingGump = UIManager.GetTradingGump(containerSerial) ?? UIManager.GetGump<TradingGump>(containerSerial);
+
+            if (tradingGump != null)
+            {
+                tradingGump.UpdateContent();
             }
         }
 
@@ -1179,7 +1208,7 @@ namespace ClassicUO.Network
                         item.Y = ItemHold.Y;
                         item.Z = ItemHold.Z;
                         item.UpdateScreenPosition();
-                        container.Items.AddLast(item);
+                        container.PushToBack(item);
 
                         World.Items.Add(item);
                         World.Items.ProcessDelta();
@@ -1216,7 +1245,7 @@ namespace ClassicUO.Network
                                 {
                                     Mobile mob = (Mobile) container;
 
-                                    mob.Items.AddLast(item);
+                                    mob.PushToBack(item);
 
                                     mob.Equipment[(int) ItemHold.Layer] = item;
                                 }
@@ -1341,7 +1370,7 @@ namespace ClassicUO.Network
 
                 if (cont != null)
                 {
-                    cont.Items.Remove(item);
+                    cont.Remove(item);
                     World.Items.Remove(item);
                     World.Items.ProcessDelta();
 
@@ -1370,7 +1399,7 @@ namespace ClassicUO.Network
             if (entity != null)
             {
                 entity.Equipment[(int) item.Layer] = item;
-                entity.Items.AddLast(item);
+                entity.PushToBack(item);
             }
 
             if (item.Layer >= Layer.ShopBuyRestock && item.Layer <= Layer.ShopSell) 
@@ -1386,7 +1415,7 @@ namespace ClassicUO.Network
 
             if (SerialHelper.IsValid(item.Container))
             {
-                UIManager.GetGump<ContainerGump>(item.Container)?.ForceUpdate();
+                UIManager.GetGump<ContainerGump>(item.Container)?.Update();
                 UIManager.GetGump<PaperDollGump>(item.Container)?.Update();
             }
         }
@@ -1582,8 +1611,6 @@ namespace ClassicUO.Network
 
             ushort count = p.ReadUShort();
 
-            Entity container = null;
-
             GridLootGump grid = null;
 
             for (int i = 0; i < count; i++)
@@ -1601,7 +1628,7 @@ namespace ClassicUO.Network
 
                 if (i == 0)
                 {
-                    container = World.Get(containerSerial);
+                    Entity container = World.Get(containerSerial);
 
                     if (container != null)
                     {
@@ -1633,13 +1660,8 @@ namespace ClassicUO.Network
                         _requestedGridLoot = 0;
                     }
                 }
-            }
 
-            World.Items.ProcessDelta();
-
-            if (container != null)
-            {
-                var gump = UIManager.GetGump(container.Serial);
+                var gump = UIManager.GetGump(containerSerial);
 
                 if (gump != null && !gump.IsDisposed)
                 {
@@ -1649,11 +1671,15 @@ namespace ClassicUO.Network
                     }
                     else if (gump is ContainerGump cont)
                     {
-                        cont.ForceUpdate();
+                        cont.Update();
                     }
                     else if (gump is PaperDollGump paperdoll)
                     {
                         paperdoll.Update();
+                    }
+                    else if (gump is BulletinBoardGump)
+                    {
+                        NetClient.Socket.Send(new PBulletinBoardRequestMessageSummary(containerSerial, serial));
                     }
                 }
             }
@@ -2020,26 +2046,19 @@ namespace ClassicUO.Network
                             uint serial = p.ReadUInt();
                             uint parendID = p.ReadUInt(); 
 
-                            int posterlen = p.ReadByte();
-                            var text = posterlen > 0 ? p.ReadASCII(posterlen) : string.Empty;
-                            if (parendID == 0)
-                                text = "";
+                            // poster
+                            int len = p.ReadByte();
+                            string text = p.ReadUTF8StringSafe(len) + " - ";
 
-                            int titlelen = p.ReadByte();
-                            if (parendID == 0)
-                            {
-                                text += titlelen > 0 ? p.ReadUTF8StringSafe() : string.Empty;
-                                p.ReadByte();
-                            }
+                            // subject
+                            len = p.ReadByte();
+                            text += p.ReadUTF8StringSafe(len) + " - ";
 
-                            if (text.Length > 34)
-                            {
-                                text = (string.IsNullOrEmpty(text)) ? text : text.Length <= 33 ? text : text.Substring(0, 33);
-                                text += "...";
-                            }
+                            // datetime
+                            len = p.ReadByte();
+                            text += p.ReadUTF8StringSafe(len);
 
-                            bulletinBoard.Add(new BulletinBoardObject(boardSerial, parendID, World.Items.Get(serial),
-                                text));
+                            bulletinBoard.AddBulletinObject(serial, text);
                         }
                     }
 
@@ -2087,10 +2106,9 @@ namespace ClassicUO.Network
                             }
 
                             var msg = sb.ToString();
-                            var variant = (byte)1;
-                            UIManager.Add(new BulletinBoardItem(boardSerial, serial, poster, subject, dataTime,
-                                msg.TrimStart(), variant)
-                            { X = 400, Y = 335 });
+                            byte variant = (byte) (1 + (poster == World.Player.Name ? 1 : 0));
+                            UIManager.Add(new BulletinBoardItem(boardSerial, serial, poster, subject, dataTime, msg.TrimStart(), variant)
+                            { X = 40, Y = 40 });
                         }
                     }
 
@@ -2146,11 +2164,11 @@ namespace ClassicUO.Network
             {
                 byte count = p.ReadByte();
 
-                var first = container.Items.First;
+                var first = container.Items;
                 if (first == null)
                     return;
 
-                bool reverse = first.Value.X > 1;
+                bool reverse = (first as Item)?.X > 1;
 
                 if (reverse)
                 {
@@ -2163,7 +2181,7 @@ namespace ClassicUO.Network
                     if (first == null)
                         break;
 
-                    var it = first.Value;
+                    Item it = (Item) first;
 
                     it.Price = p.ReadUInt();
                     byte nameLen = p.ReadByte();
@@ -2311,7 +2329,7 @@ namespace ClassicUO.Network
                 item.Graphic = itemGraphic;
                 item.Amount = 1;
                 item.Container = mobile;
-                mobile.Items.AddLast(item);
+                mobile.PushToBack(item);
 
                 if (layer < mobile.Equipment.Length)
                 {
@@ -3558,7 +3576,7 @@ namespace ClassicUO.Network
                                 {
                                     Graphic = 0x1F2E, Amount = cc, Container = spellbook
                                 };
-                                spellbook.Items.AddLast(spellItem);
+                                spellbook.PushToBack(spellItem);
                             }
                         }
                     }
@@ -4594,7 +4612,7 @@ namespace ClassicUO.Network
                 if (initcontainer != null)
                 {
                     item.Container = 0;
-                    initcontainer.Items.Remove(item);
+                    initcontainer.Remove(item);
                     initcontainer.ProcessDelta();
                 }
                 else if (SerialHelper.IsValid(item.Container)) 
@@ -4613,7 +4631,7 @@ namespace ClassicUO.Network
             item.Z = 0;
             item.Container = containerSerial;
 
-            container.Items.AddLast(item);
+            container.PushToBack(item);
             World.Items.Add(item);
         }
 

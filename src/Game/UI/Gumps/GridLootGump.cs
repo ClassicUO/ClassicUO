@@ -166,29 +166,34 @@ namespace ClassicUO.Game.UI.Gumps
             int count = 0;
             _pagesCount = 1;
 
-            foreach (Item item in _corpse.Items.Where(s => s != null && s.IsLootable))
+            for (var i = _corpse.Items; i != null; i = i.Next)
             {
-                GridLootItem gridItem = new GridLootItem(item);
+                Item it = (Item) i;
 
-                if (x >= _background.Width - 20)
+                if (it.IsLootable)
                 {
-                    x = 20;
-                    y += gridItem.Height + 20;
+                    GridLootItem gridItem = new GridLootItem(it);
 
-                    if (y >= _background.Height - 40)
+                    if (x >= _background.Width - 20)
                     {
-                        _pagesCount++;
-                        y = 20;
+                        x = 20;
+                        y += gridItem.Height + 20;
+
+                        if (y >= _background.Height - 40)
+                        {
+                            _pagesCount++;
+                            y = 20;
+                        }
                     }
-                }             
 
-                gridItem.X = x;
-                gridItem.Y = y;
-                Add(gridItem, _pagesCount);
+                    gridItem.X = x;
+                    gridItem.Y = y;
+                    Add(gridItem, _pagesCount);
 
-                x += gridItem.Width + 20;
+                    x += gridItem.Width + 20;
 
-                count++;
+                    count++;
+                }
             }
 
             if (ActivePage <= 1)

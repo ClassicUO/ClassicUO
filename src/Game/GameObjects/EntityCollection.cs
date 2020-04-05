@@ -96,8 +96,11 @@ namespace ClassicUO.Game.GameObjects
         {
             if (_entities.Remove(entity.Serial))
             {
-                foreach (Item i in entity.Items)
-                    i.Container = newSerial;
+                for (var i = entity.Items; i != null; i = i.Next)
+                {
+                    Item it = (Item) i;
+                    it.Container = newSerial;
+                }
 
                 _entities[newSerial] = entity;
                 entity.Serial = newSerial;

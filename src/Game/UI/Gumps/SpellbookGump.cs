@@ -233,8 +233,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            foreach (Item spell in item.Items)
+            for (var i = item.Items; i != null; i = i.Next)
             {
+                Item spell = (Item) i;
                 int currentCount = spell.Amount;
 
                 if (currentCount > 0 && currentCount <= maxSpellsCount)
