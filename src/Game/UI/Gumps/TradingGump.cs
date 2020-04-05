@@ -155,7 +155,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (container == null)
                 return;
 
-            foreach (ItemGump v in _myBox.Children.OfType<ItemGump>().Where(s => container.Items.Contains(World.Get(s.LocalSerial))))
+            foreach (ItemGump v in _myBox.Children.OfType<ItemGump>())
                 v.Dispose();
 
             foreach (Item item in container.Items)
@@ -193,7 +193,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (container == null)
                 return;
 
-            foreach (ItemGump v in _hisBox.Children.OfType<ItemGump>().Where(s => container.Items.Contains(World.Get(s.LocalSerial))))
+            foreach (ItemGump v in _hisBox.Children.OfType<ItemGump>())
                 v.Dispose();
 
             foreach (Item item in container.Items)
