@@ -24,7 +24,6 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Linq;
 
 using ClassicUO.Configuration;
 using ClassicUO.Data;
@@ -473,7 +472,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     Reconnect = true;
                     PopupMessage = $"Reconnect, please wait...`{_reconnectTryCounter}`\n`{StringHelper.AddSpaceBeforeCapital(e.ToString())}`";
-                    var c = UIManager.Gumps.OfType<LoadingGump>().FirstOrDefault();
+                    var c = UIManager.GetGump<LoadingGump>();
                     if (c != null)
                         c._Label.Text = PopupMessage;
                 }

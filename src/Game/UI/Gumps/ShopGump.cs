@@ -276,7 +276,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_updateTotal)
             {
-                _totalLabel.Text = _transactionItems.Sum(o => o.Value.Amount * o.Value.Price).ToString();
+                int sum = 0;
+
+                foreach (var t in _transactionItems.Values)
+                {
+                    sum += t.Amount * t.Price;
+                }
+                _totalLabel.Text = sum.ToString();
                 _updateTotal = false;
             }
 
@@ -353,7 +359,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ShopItem_MouseClick(object sender, MouseEventArgs e)
         {
-            foreach (var shopItem in _shopScrollArea.Children.SelectMany(o => o.Children).OfType<ShopItem>()) shopItem.IsSelected = shopItem == sender;
+            foreach (var shopItem in _shopScrollArea.Children.SelectMany(o => o.Children).OfType<ShopItem>()) 
+                shopItem.IsSelected = shopItem == sender;
         }
 
         public override void OnButtonClick(int buttonID)

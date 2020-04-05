@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Linq;
 using ClassicUO.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
@@ -155,7 +154,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (container == null)
                 return;
 
-            foreach (ItemGump v in _myBox.Children.OfType<ItemGump>())
+            foreach (var v in _myBox.Children)
                 v.Dispose();
 
             foreach (Item item in container.Items)
@@ -193,7 +192,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (container == null)
                 return;
 
-            foreach (ItemGump v in _hisBox.Children.OfType<ItemGump>())
+            foreach (var v in _hisBox.Children)
                 v.Dispose();
 
             foreach (Item item in container.Items)
