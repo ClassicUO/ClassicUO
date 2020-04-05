@@ -22,7 +22,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 
 using ClassicUO.Configuration;
@@ -265,13 +264,13 @@ namespace ClassicUO.Network
                 UIManager.Add(new TradingGump(serial, name, id1, id2));
             }
             else if (type == 1)
-                UIManager.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == serial || s.ID2 == serial)?.Dispose();
+                UIManager.GetTradingGump(serial)?.Dispose();
             else if (type == 2)
             {
                 uint id1 = p.ReadUInt();
                 uint id2 = p.ReadUInt();
 
-                TradingGump trading = UIManager.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == serial || s.ID2 == serial);
+                TradingGump trading = UIManager.GetTradingGump(serial);
 
                 if (trading != null)
                 {
@@ -283,7 +282,7 @@ namespace ClassicUO.Network
             }
             else if (type == 3 || type == 4)
             {           
-                TradingGump trading = UIManager.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == serial || s.ID2 == serial);
+                TradingGump trading = UIManager.GetTradingGump(serial);
 
                 if (trading != null)
                 {
@@ -614,9 +613,9 @@ namespace ClassicUO.Network
             if (SerialHelper.IsValid(item.Container))
             {
                 var cont = World.Get(item.Container);
-                cont.Items.Remove(item.Serial);
-                cont.ProcessDelta();
+                cont.Items.Remove(item);
             }
+
             item.Container = 0;
             item.CheckGraphicChange();
             item.ProcessDelta();
@@ -626,6 +625,10 @@ namespace ClassicUO.Network
 
             if (item.OnGround)
                 item.AddToTile();
+            else if (item.Layer != 0)
+                UIManager.GetGump<PaperDollGump>(item)?.Update();
+            else
+                UIManager.GetGump<ContainerGump>(item)?.ForceUpdate();
 
 
             if (graphic == 0x2006 && !item.IsClicked && ProfileManager.Current.ShowNewCorpseNameIncoming) GameActions.SingleClick(item);
@@ -749,12 +752,16 @@ namespace ClassicUO.Network
 
                     if (top != null)
                     {
-                        if (top == World.Player) updateAbilities = it.Layer == Layer.OneHanded || it.Layer == Layer.TwoHanded;
+                        if (top == World.Player)
+                        {
+                            updateAbilities = it.Layer == Layer.OneHanded || it.Layer == Layer.TwoHanded;
+                            Item tradeBoxItem = World.Player.GetSecureTradeBox();
 
-                        var tradeBox = top.Items.FirstOrDefault(s => s.Graphic == 0x1E5E && s.Layer == Layer.Invalid);
-
-                        if (tradeBox != null)
-                            UIManager.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == tradeBox || s.ID2 == tradeBox)?.UpdateContent();
+                            if (tradeBoxItem != null)
+                            {
+                                UIManager.GetTradingGump(tradeBoxItem)?.UpdateContent();
+                            }
+                        }
                     }
 
                     if (cont == World.Player && it.Layer == Layer.Invalid)
@@ -763,6 +770,12 @@ namespace ClassicUO.Network
 
                     if (it.Layer != Layer.Invalid)
                         UIManager.GetGump<PaperDollGump>(cont)?.Update();
+
+                    ContainerGump containerGump = UIManager.GetGump<ContainerGump>(cont);
+                    if (containerGump != null)
+                        containerGump.ForceUpdate();
+
+                    // TODO: BULLETTIN BOARD
                 }
             }
 
@@ -780,7 +793,6 @@ namespace ClassicUO.Network
                 // else
                 {
                     World.RemoveMobile(serial, true);
-                    m.Items.ProcessDelta();
                     World.Items.ProcessDelta();
                     World.Mobiles.ProcessDelta();
                 }
@@ -797,7 +809,6 @@ namespace ClassicUO.Network
                 if (cont != null)
                 {
                     cont.Items.Remove(it);
-                    cont.Items.ProcessDelta();
 
                     if (it.Layer != Layer.Invalid)
                     {
@@ -1026,7 +1037,7 @@ namespace ClassicUO.Network
                 {
                     Item item = vendor.Equipment[(int)layer];
 
-                    var first = item.Items.FirstOrDefault();
+                    var first = item.Items.First;
 
                     if (first == null)
                     {
@@ -1034,10 +1045,37 @@ namespace ClassicUO.Network
                         continue;
                     }
 
-                    IEnumerable<Item> list = first.X > 1 ? item.Items.Reverse() : item.Items;
+                    bool reverse = first.Value.X > 1;
 
-                    foreach (var i in list) 
-                        gump.AddItem(i.Serial, i.Graphic, i.Hue, i.Amount, i.Price, i.Name, false);
+                    if (reverse)
+                    {
+                        while (first?.Next != null)
+                        {
+                            first = first.Next;
+                        }
+                    }
+
+                    while (first != null)
+                    {
+
+                        gump.AddItem(first.Value.Serial,
+                                     first.Value.Graphic, 
+                                     first.Value.Hue, 
+                                     first.Value.Amount, 
+                                     first.Value.Price,
+                                     first.Value.Name,
+                                     false);
+
+                        if (reverse)
+                        {
+                            first = first.Previous;
+                        }
+                        else
+                        {
+                            first = first.Next;
+                        }
+                    }
+
                 }
             }
             else
@@ -1083,7 +1121,6 @@ namespace ClassicUO.Network
 
             AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
 
-            World.Get(containerSerial)?.Items.ProcessDelta();
             World.Items.ProcessDelta();
 
 
@@ -1093,16 +1130,26 @@ namespace ClassicUO.Network
                 Item secureBox = m?.GetSecureTradeBox();
                 if (secureBox != null)
                 {
-                    var gump = UIManager.Gumps.OfType<TradingGump>().SingleOrDefault(s => s.LocalSerial == secureBox || s.ID1 == secureBox || s.ID2 == secureBox);
-
-                    if (gump != null) gump.UpdateContent();
+                    TradingGump gump = UIManager.GetTradingGump(secureBox) ?? UIManager.GetGump<TradingGump>(secureBox);
+                    gump?.UpdateContent();
+                }
+                else
+                {
+                    UIManager.GetGump<PaperDollGump>(containerSerial)?.Update();
                 }
             }
             else if (SerialHelper.IsItem(containerSerial))
             {
-                var gump = UIManager.Gumps.OfType<TradingGump>().SingleOrDefault(s => s.LocalSerial == containerSerial || s.ID1 == containerSerial || s.ID2 == containerSerial);
+                TradingGump gump = UIManager.GetTradingGump(containerSerial) ?? UIManager.GetGump<TradingGump>(containerSerial);
 
-                if (gump != null) gump.UpdateContent();
+                if (gump != null)
+                {
+                    gump.UpdateContent();
+                }
+                else
+                {
+                    UIManager.GetGump<ContainerGump>(containerSerial)?.ForceUpdate();
+                }
             }
         }
 
@@ -1132,7 +1179,7 @@ namespace ClassicUO.Network
                         item.Y = ItemHold.Y;
                         item.Z = ItemHold.Z;
                         item.UpdateScreenPosition();
-                        container.Items.Add(item);
+                        container.Items.AddLast(item);
 
                         World.Items.Add(item);
                         World.Items.ProcessDelta();
@@ -1169,7 +1216,7 @@ namespace ClassicUO.Network
                                 {
                                     Mobile mob = (Mobile) container;
 
-                                    mob.Items.Add(item);
+                                    mob.Items.AddLast(item);
 
                                     mob.Equipment[(int) ItemHold.Layer] = item;
                                 }
@@ -1184,7 +1231,6 @@ namespace ClassicUO.Network
 
                         World.Items.Add(item);
                         item.ProcessDelta();
-                        container?.Items.ProcessDelta();
                         container?.ProcessDelta();
                         World.Items.ProcessDelta();
 
@@ -1286,16 +1332,16 @@ namespace ClassicUO.Network
             Item item = World.GetOrCreateItem(serial);
 
 
-            if (item.Graphic != 0 && item.Layer != Layer.Backpack) item.Items.Clear();
+            if (item.Graphic != 0 && item.Layer != Layer.Backpack) 
+                item.Clear();
 
-            if (item.Container != 0)
+            if (SerialHelper.IsValid(item.Container))
             {
                 Entity cont = World.Get(item.Container);
 
                 if (cont != null)
                 {
                     cont.Items.Remove(item);
-                    cont.Items.ProcessDelta();
                     World.Items.Remove(item);
                     World.Items.ProcessDelta();
 
@@ -1310,36 +1356,39 @@ namespace ClassicUO.Network
 
             item.RemoveFromTile();
 
-            //if (item.Graphic != 0)
-            //    World.RemoveItem(item);
-
-
             item.Graphic = (ushort) (p.ReadUShort() + p.ReadSByte());
             item.Layer = (Layer) p.ReadByte();
             item.Container = p.ReadUInt();
             item.FixHue(p.ReadUShort());
             item.Amount = 1;
-            Mobile mobile = World.Mobiles.Get(item.Container);
+
+            Entity entity = World.Get(item.Container);
 
             World.Items.Add(item);
             World.Items.ProcessDelta();
 
-            if (mobile != null)
+            if (entity != null)
             {
-                mobile.Equipment[(int) item.Layer] = item;
-                mobile.Items.Add(item);
-                mobile.Items.ProcessDelta();
+                entity.Equipment[(int) item.Layer] = item;
+                entity.Items.AddLast(item);
             }
 
-            if (item.Layer >= Layer.ShopBuyRestock && item.Layer <= Layer.ShopSell) item.Items.Clear();
+            if (item.Layer >= Layer.ShopBuyRestock && item.Layer <= Layer.ShopSell) 
+                item.Clear();
 
 
-            if (mobile == World.Player && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded))
+            if (entity == World.Player && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded))
                 World.Player?.UpdateAbilities();
 
 
             if (ItemHold.Serial == item.Serial)
-                ItemHold.Clear();      
+                ItemHold.Clear();
+
+            if (SerialHelper.IsValid(item.Container))
+            {
+                UIManager.GetGump<ContainerGump>(item.Container)?.ForceUpdate();
+                UIManager.GetGump<PaperDollGump>(item.Container)?.Update();
+            }
         }
 
         private static void Swing(Packet p)
@@ -1558,26 +1607,11 @@ namespace ClassicUO.Network
                     {
                         if (container.Graphic == 0x2006)
                         {
-                            container.Items
-                                     .Where(s => s.Layer == Layer.Invalid)
-                                     .ToList()
-                                     .ForEach(s =>
-                                      {
-                                          s.Container = 0;
-                                          container.Items.Remove(s);
-                                          World.Items.Remove(s);
-                                      });
+                            container.ClearUnequipped();
                         }
                         else
                         {
-                            container.Items
-                                     .ToList()
-                                     .ForEach(s =>
-                                      {
-                                          s.Container = 0;
-                                          container.Items.Remove(s);
-                                          World.Items.Remove(s);
-                                      });
+                           container.Clear();
                         }
 
                         container.ProcessDelta();
@@ -1601,7 +1635,6 @@ namespace ClassicUO.Network
                 }
             }
 
-            container?.Items.ProcessDelta();
             World.Items.ProcessDelta();
 
             if (container != null)
@@ -2113,14 +2146,25 @@ namespace ClassicUO.Network
             {
                 byte count = p.ReadByte();
 
-                var first = container.Items.FirstOrDefault();
+                var first = container.Items.First;
                 if (first == null)
                     return;
 
-                IEnumerable<Item> list = first.X > 1 ? container.Items.Reverse() : container.Items;
-                
-                foreach (Item it in list.Take(count))
+                bool reverse = first.Value.X > 1;
+
+                if (reverse)
                 {
+                    while (first?.Next != null)
+                        first = first.Next;
+                }
+
+                for (int i = 0; i < count; i++)
+                {
+                    if (first == null)
+                        break;
+
+                    var it = first.Value;
+
                     it.Price = p.ReadUInt();
                     byte nameLen = p.ReadByte();
                     string name = p.ReadASCII(nameLen);
@@ -2143,7 +2187,17 @@ namespace ClassicUO.Network
                         it.Name = name;
 
                     gump.SetIfNameIsFromCliloc(it, fromcliloc);
+
+                    if (reverse)
+                    {
+                        first = first.Previous;
+                    }
+                    else
+                    {
+                        first = first.Next;
+                    }
                 }
+
             }
         }
 
@@ -2257,7 +2311,7 @@ namespace ClassicUO.Network
                 item.Graphic = itemGraphic;
                 item.Amount = 1;
                 item.Container = mobile;
-                mobile.Items.Add(item);
+                mobile.Items.AddLast(item);
 
                 if (layer < mobile.Equipment.Length)
                 {
@@ -3224,18 +3278,27 @@ namespace ClassicUO.Network
                     uint ser = p.ReadUInt();
                     int button = (int) p.ReadUInt();
 
-                    var gumpToClose = UIManager.Gumps.OfType<Gump>()
-                                     .FirstOrDefault(s => !s.IsDisposed && s.ServerSerial == ser);
-
-                    if (gumpToClose != null)
+                    for (var gump = UIManager.Gumps.First; gump != null;)
                     {
-                        if (button != 0)
-                            gumpToClose.OnButtonClick(button);
-                        else
-                            UIManager.SavePosition(ser, gumpToClose.Location);
-                        gumpToClose.Dispose();
-                    }
+                        var nextGump = gump.Next;
 
+                        if (gump.Value.ServerSerial == ser)
+                        {
+                            if (button != 0)
+                            {
+                                (gump.Value as Gump)?.OnButtonClick(button);
+                            }
+                            else
+                            {
+                                UIManager.SavePosition(ser, gump.Value.Location);
+                            }
+
+                            gump.Value.Dispose();
+                        }
+
+                        gump = nextGump;
+                    }
+                    
                     break;
 
                 //===========================================================================================
@@ -3495,11 +3558,10 @@ namespace ClassicUO.Network
                                 {
                                     Graphic = 0x1F2E, Amount = cc, Container = spellbook
                                 };
-                                spellbook.Items.Add(spellItem);
+                                spellbook.Items.AddLast(spellItem);
                             }
                         }
                     }
-                    spellbook.Items.ProcessDelta();
                     UIManager.GetGump<SpellbookGump>(spellbook)?.Update();
 
                     break;
@@ -3681,9 +3743,12 @@ namespace ClassicUO.Network
             
             if (cliloc == 1008092 || cliloc == 1005445) // value for "You notify them you don't want to join the party" || "You have been added to the party"
             {
-                foreach (var PartyInviteGump in UIManager.Gumps.OfType<PartyInviteGump>())
+                for (var g = UIManager.Gumps.Last; g != null; g = g.Previous)
                 {
-                    PartyInviteGump.Dispose();
+                    if (g.Value is PartyInviteGump pg)
+                    {
+                        pg.Dispose();
+                    }
                 }
             }
 
@@ -4501,9 +4566,7 @@ namespace ClassicUO.Network
 
         private static void AddItemToContainer(uint serial, ushort graphic, ushort amount, ushort x, ushort y, ushort hue, uint containerSerial)
         {
-            GameScene gs = Client.Game.GetScene<GameScene>();
-
-            if (gs != null && ItemHold.Serial == serial && ItemHold.Dropped)
+            if (ItemHold.Serial == serial && ItemHold.Dropped)
                 ItemHold.Clear();
 
             Entity container = World.Get(containerSerial);
@@ -4517,7 +4580,8 @@ namespace ClassicUO.Network
 
             Item item = World.Items.Get(serial);
 
-            if (SerialHelper.IsMobile(serial)) Log.Warn( "AddItemToContainer function adds mobile as Item");
+            if (SerialHelper.IsMobile(serial)) 
+                Log.Warn( "AddItemToContainer function adds mobile as Item");
 
             if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
             {
@@ -4549,7 +4613,7 @@ namespace ClassicUO.Network
             item.Z = 0;
             item.Container = containerSerial;
 
-            container.Items.Add(item);
+            container.Items.AddLast(item);
             World.Items.Add(item);
         }
 

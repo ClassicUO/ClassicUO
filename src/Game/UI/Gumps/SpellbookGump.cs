@@ -143,10 +143,6 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-         
-            item.Items.Added += ItemsOnAdded;
-            item.Items.Removed += ItemsOnRemoved;
-
             AssignGraphic(item);
             GetBookInfo(_spellBookType, out ushort bookGraphic, out ushort minimizedGraphic, out ushort iconStartGraphic, out int maxSpellsCount, out int spellsOnPage, out int dictionaryPagesCount);
             Add(_picBase = new GumpPic(0, 0, bookGraphic, 0));
@@ -204,14 +200,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            Item item = World.Items.Get(LocalSerial);
-
-            if (item != null)
-            {
-                item.Items.Added -= ItemsOnAdded;
-                item.Items.Removed -= ItemsOnRemoved;
-            }
-
             Client.Game.Scene.Audio.PlaySound(0x0055);
             UIManager.SavePosition(LocalSerial, Location);
             base.Dispose();

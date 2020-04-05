@@ -43,8 +43,6 @@ namespace ClassicUO.Game.UI.Gumps
         public BulletinBoardGump(Item item, int x, int y, string name) : base(item, 0)
         {
             _item = item;
-            _item.Items.Added += ItemsOnAdded;
-            _item.Items.Removed += ItemsOnRemoved;
 
             X = x;
             Y = y;
@@ -161,17 +159,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _elements.Clear();
                 _indexMax = 0;
             }
-        }
-
-        public override void Dispose()
-        {
-            if (_item != null)
-            {
-                _item.Items.Added -= ItemsOnAdded;
-                _item.Items.Removed -= ItemsOnRemoved;
-            }
-
-            base.Dispose();
         }
     }
    

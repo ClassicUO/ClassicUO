@@ -50,8 +50,6 @@ namespace ClassicUO.Game.UI.Controls
             _paperDollGump = paperDollGump;
             Mobile = mobile;
             AcceptMouseInput = false;
-            mobile.Items.Added += ItemsOnAdded;
-            mobile.Items.Removed += ItemsOnRemoved;
         }
 
         public Mobile Mobile
@@ -77,8 +75,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Dispose()
         {
-            Mobile.Items.Added -= ItemsOnAdded;
-            Mobile.Items.Removed -= ItemsOnRemoved;
             if (_pgumps[(int) Layer.Backpack] != null) _pgumps[(int) Layer.Backpack].MouseDoubleClick -= OnDoubleclickBackpackGump;
             base.Dispose();
         }
@@ -143,6 +139,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public void Update()
         {
+            _fakeItem = null;
             UpdateEntity();
         }
 

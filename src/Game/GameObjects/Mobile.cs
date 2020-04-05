@@ -117,8 +117,11 @@ namespace ClassicUO.Game.GameObjects
                 mobile.Texture = null;
                 mobile.IsClicked = false;
 
-                if (mobile.Items == null || mobile.Items.Count != 0)
-                    mobile.Items = new EntityCollection<Item>();
+                if (mobile.Items == null)
+                    mobile.Items = new LinkedList<Item>();
+                else if (mobile.Items.Count != 0)
+                    mobile.Items.Clear();
+
 
                 mobile.CalculateRandomIdleTime();
 
@@ -243,7 +246,13 @@ namespace ClassicUO.Game.GameObjects
 
         public Item GetSecureTradeBox()
         {
-            return Items.FirstOrDefault(s => s.Graphic == 0x1E5E && s.Layer == Layer.Invalid);
+            for (var i = Items.Last; i != null; i = i.Previous)
+            {
+                if (i.Value.Graphic == 0x1E5E && i.Value.Layer == 0)
+                    return i.Value;
+            }
+
+            return null;
         }
 
         public void SetSAPoison(bool value)

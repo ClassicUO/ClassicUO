@@ -127,12 +127,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
                 return;
             }
-
-            item.Items.Added -= ItemsOnAdded;
-            item.Items.Removed -= ItemsOnRemoved;
-            item.Items.Added += ItemsOnAdded;
-            item.Items.Removed += ItemsOnRemoved;
-
+            
             float scale = UIManager.ContainerScale;
 
             _data = ContainerManager.Get(Graphic);
@@ -170,7 +165,7 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _gumpPicContainer.Width = (int)(_gumpPicContainer.Width * scale);
             Height = _gumpPicContainer.Height = (int) (_gumpPicContainer.Height * scale);
 
-            ContainerGump gg = UIManager.Gumps.OfType<ContainerGump>().FirstOrDefault(s => s.LocalSerial == LocalSerial);
+            ContainerGump gg = UIManager.GetGump<ContainerGump>(LocalSerial);
 
             if (gg == null)
             {
@@ -270,7 +265,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             BuildGump();
             IsMinimized = IsMinimized;
-            ItemsOnAdded(null, new CollectionChangedEventArgs<uint>(FindControls<ItemGump>().Select(s => s.LocalSerial)));
+            ItemsOnAdded();
         }
         
         public override void Save(BinaryWriter writer)
@@ -319,19 +314,14 @@ namespace ClassicUO.Game.UI.Gumps
             Dispose();
         }
 
-      
-        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<uint> e)
-        {
-            foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.LocalSerial)))
-                v.Dispose();
-        }
+        
 
-        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<uint> e)
+        private void ItemsOnAdded()
         {
-            foreach (ItemGump v in Children.OfType<ItemGump>().Where(s => e.Contains(s.LocalSerial)))
+            foreach (ItemGump v in Children.OfType<ItemGump>())
                 v.Dispose();
 
-            foreach (uint s in e)
+            foreach (uint s in World.Items.Get(LocalSerial).Items)
             {
                 var item = World.Items.Get(s);
 
@@ -486,9 +476,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (item != null)
             {
-                item.Items.Added -= ItemsOnAdded;
-                item.Items.Removed -= ItemsOnRemoved;
-
                 if (World.Player != null && (ProfileManager.Current?.OverrideContainerLocationSetting == 3)) UIManager.SavePosition(item, Location);
 
                 foreach (Item child in item.Items)

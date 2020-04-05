@@ -20,6 +20,8 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -38,7 +40,7 @@ namespace ClassicUO.Game.GameObjects
         protected Entity(uint serial)
         {
             Serial = serial;
-            Items = new EntityCollection<Item>();
+            Items = new LinkedList<Item>();
         }
 
 
@@ -46,7 +48,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected long LastAnimationChangeTime;
 
-        public EntityCollection<Item> Items { get; protected set; }
+        public LinkedList<Item> Items { get; protected set; }
 
         public bool HasEquipment => _equipment != null;
 
@@ -173,6 +175,28 @@ namespace ClassicUO.Game.GameObjects
             return item;
         }
 
+        public Item GetItemByGraphic(ushort graphic, bool deepsearch = false)
+        {
+            foreach (var item in Items)
+            {
+                if (item.Graphic == graphic)
+                    return item;
+
+                if (deepsearch && item.Items.Count != 0)
+                {
+                    foreach (Item childItem in item.Items)
+                    {
+                        Item res = childItem.GetItemByGraphic(graphic, deepsearch);
+
+                        if (res != null)
+                            return res;
+                    }
+                }
+            }
+
+            return null;
+        }
+
         public Item FindItemByLayer(Layer layer)
         {
             foreach (Item i in Items)
@@ -184,9 +208,67 @@ namespace ClassicUO.Game.GameObjects
             return null;
         }
 
+        public void Clear()
+        {
+            if (Items.Count != 0)
+            {
+                var obj = Items.First;
+
+                while (obj != null)
+                {
+                    var next = obj.Next;
+
+                    obj.Value.Container = 0;
+                    World.Items.Remove(obj.Value);
+                    Items.Remove(obj);
+
+                    obj = next;
+                }
+            }
+        }
+
+        public void ClearUnequipped()
+        {
+            if (Items.Count != 0)
+            {
+                LinkedListNode<Item> new_first = null;
+                var obj = Items.First;
+
+                while (obj != null)
+                {
+                    var next = obj.Next;
+
+                    if (obj.Value.Layer != 0)
+                    {
+                        if (new_first == null)
+                        {
+                            new_first = obj;
+                        }
+                    }
+                    else
+                    {
+                        obj.Value.Container = 0;
+                        World.Items.Remove(obj.Value);
+                        Items.Remove(obj);
+                    }
+                    
+                    obj = next;
+                }
+
+                Debug.Assert(Items.First != new_first);
+
+                if (new_first != null)
+                {
+                    Items.Remove(new_first);
+                    Items.AddFirst(new_first);
+                }
+
+            }
+        }
+
         public void ProcessDelta()
         {
-            Items.ProcessDelta();
+            //Items.ProcessDelta();
         }
 
         public override void Destroy()

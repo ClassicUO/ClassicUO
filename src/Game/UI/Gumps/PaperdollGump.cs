@@ -153,17 +153,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        protected override void OnMouseOver(int x, int y)
-        {
-            base.OnMouseOver(x, y);
-
-            if (ItemHold.Enabled)
-            {
-
-            }
-
-        }
-
         private void BuildGump()
         {
             _picBase?.Dispose();
@@ -332,6 +321,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
 
             gs.WearHeldItem(Mobile);
+            Update();
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)

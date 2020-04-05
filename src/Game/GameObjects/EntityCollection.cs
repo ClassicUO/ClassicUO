@@ -49,19 +49,19 @@ namespace ClassicUO.Game.GameObjects
 
         public void ProcessDelta()
         {
-            if (_added.Count != 0)
-            {
-                CollectionChangedEventArgs<uint> list = new CollectionChangedEventArgs<uint>(_added);
-                _added.Clear();
-                Added.Raise(list);
-            }
+            //if (_added.Count != 0)
+            //{
+            //    CollectionChangedEventArgs<uint> list = new CollectionChangedEventArgs<uint>(_added);
+            //    _added.Clear();
+            //    Added.Raise(list);
+            //}
 
-            if (_removed.Count != 0)
-            {
-                CollectionChangedEventArgs<uint> list = new CollectionChangedEventArgs<uint>(_removed);
-                _removed.Clear();
-                Removed.Raise(list);
-            }
+            //if (_removed.Count != 0)
+            //{
+            //    CollectionChangedEventArgs<uint> list = new CollectionChangedEventArgs<uint>(_removed);
+            //    _removed.Clear();
+            //    Removed.Raise(list);
+            //}
         }
 
         public bool Contains(uint serial)

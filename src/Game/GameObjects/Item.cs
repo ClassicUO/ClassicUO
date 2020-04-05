@@ -94,8 +94,12 @@ namespace ClassicUO.Game.GameObjects
                 i.HitsMax = 0;
                 i.LastStepTime = 0;
                 i.LastAnimationChangeTime = 0;
-                if (i.Items == null || i.Items.Count != 0)
-                    i.Items = new EntityCollection<Item>();
+
+                if (i.Items == null)
+                    i.Items = new LinkedList<Item>();
+                else if (i.Items.Count != 0)
+                    i.Items.Clear();
+
                 i.IsClicked = false;
                 i.IsDamageable = false;
                 i.Offset = Vector3.Zero;

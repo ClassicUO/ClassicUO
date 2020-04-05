@@ -101,9 +101,6 @@ namespace ClassicUO.Game.UI.Gumps
                 X = Width / 2 - 5,
                 Y = Height - 20,
             });
-
-            _corpse.Items.Added += Items_Added;
-            _corpse.Items.Removed += Items_Removed;      
         }
 
         private void Items_Removed(object sender, CollectionChangedEventArgs<uint> e)
@@ -229,9 +226,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_corpse == SelectedObject.CorpseObject)
                     SelectedObject.CorpseObject = null;
-
-                _corpse.Items.Added -= Items_Added;
-                _corpse.Items.Removed -= Items_Removed;
             }
 
             _lastX = X;

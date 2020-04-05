@@ -183,7 +183,8 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            ShowGamePopup(null);
+            if (PopupMenu != null && !PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y))
+                ShowGamePopup(null);
         }
 
         public static void OnLeftMouseButtonUp()
@@ -773,6 +774,19 @@ namespace ClassicUO.Game.Managers
             gump.SetInScreen();
 
             return gump;
+        }
+
+        public static TradingGump GetTradingGump(uint serial)
+        {
+            for (var g = Gumps.Last; g != null; g = g.Previous)
+            {
+                if (g.Value != null && !g.Value.IsDisposed && g.Value is TradingGump trading && (trading.ID1 == serial || trading.ID2 == serial))
+                {
+                    return trading;
+                }
+            }
+
+            return null;
         }
 
         public static void SetTargetLineGump(uint mob)
