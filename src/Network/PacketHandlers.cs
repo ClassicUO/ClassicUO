@@ -1034,7 +1034,11 @@ namespace ClassicUO.Network
                         continue;
                     }
 
-                    IEnumerable<Item> list = first.X > 1 ? item.Items.Reverse() : item.Items;
+                    IEnumerable<Item> list = item.Items.Reverse();
+                    if (first.Y <= 1)
+                    {
+                        list = list.OrderBy(o => o.X);
+                    }
 
                     foreach (var i in list) 
                         gump.AddItem(i.Serial, i.Graphic, i.Hue, i.Amount, i.Price, i.Name, false);
@@ -2117,7 +2121,11 @@ namespace ClassicUO.Network
                 if (first == null)
                     return;
 
-                IEnumerable<Item> list = first.X > 1 ? container.Items.Reverse() : container.Items;
+                IEnumerable<Item> list = container.Items.Reverse();
+                if (first.Y <= 1)
+                {
+                    list = list.OrderBy(o => o.X);
+                }
                 
                 foreach (Item it in list.Take(count))
                 {
