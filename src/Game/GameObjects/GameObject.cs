@@ -304,11 +304,6 @@ namespace ClassicUO.Game.GameObjects
             Clear();
             RemoveFromTile();
 
-            //if (Left != null || Right != null)
-            //{
-            //    World.Map.GetChunk(X, Y, false)?.RemoveGameObject(this, X % 8, Y % 8);
-            //}
-
             TextContainer?.Clear();
 
             IsDestroyed = true;
