@@ -1176,8 +1176,6 @@ namespace ClassicUO.Game.Managers
 
                 int delta = Math.Abs(deltaX) + Math.Abs(deltaY);
 
-                Console.WriteLine("DELTA: {0}", delta);
-
                 if (attemptAlwaysSuccessful || delta > Constants.MIN_GUMP_DRAG_DISTANCE)
                 {
                     _isDraggingControl = true;
