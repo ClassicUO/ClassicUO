@@ -3536,7 +3536,7 @@ namespace ClassicUO.Network
                     p.Skip(2);
                     Item spellbook = World.GetOrCreateItem(p.ReadUInt());
                     spellbook.Graphic = p.ReadUShort();
-                    spellbook.Items.Clear();
+                    spellbook.Clear();
                     ushort type = p.ReadUShort();
 
                     for (int j = 0; j < 2; j++)
