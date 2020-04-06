@@ -1106,8 +1106,29 @@ namespace ClassicUO.Network
                             return;
                     }
 
-                    UIManager.GetGump<ContainerGump>(serial)?.Dispose();
-                    UIManager.Add(new ContainerGump(item, graphic));
+                    ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
+
+                    int x, y;
+                    if (container != null)
+                    {
+                        x = container.ScreenCoordinateX;
+                        y = container.ScreenCoordinateY;
+                        container.Dispose();
+                    }
+                    else
+                    {
+                        ContainerManager.CalculateContainerPosition(serial, graphic);
+                        x = ContainerManager.X;
+                        y = ContainerManager.Y;
+                    }
+
+                    UIManager.Add(new ContainerGump(item, graphic)
+                    {
+                        X = x,
+                        Y = y
+                    });
+
+                    UIManager.RemovePosition(serial);
                 }
                 else 
                     Log.Error( "[OpenContainer]: item not found");

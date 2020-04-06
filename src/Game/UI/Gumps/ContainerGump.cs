@@ -154,58 +154,9 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _gumpPicContainer.Width = (int)(_gumpPicContainer.Width * scale);
             Height = _gumpPicContainer.Height = (int) (_gumpPicContainer.Height * scale);
 
-            ContainerGump gg = UIManager.GetGump<ContainerGump>(LocalSerial);
-
-            if (gg == null)
-            {
-                if (UIManager.GetGumpCachePosition(LocalSerial, out Point location))
-                    Location = location;
-                else
-                {
-                    if (ProfileManager.Current.OverrideContainerLocation)
-                    {
-                        switch (ProfileManager.Current.OverrideContainerLocationSetting)
-                        {
-                            case 0:
-                                SetPositionNearGameObject(g, item);
-                                break;
-                            case 1:
-                                SetPositionTopRight();
-                                break;
-                            case 2:
-                            case 3:
-                                SetPositionByLastDragged();
-                                break;
-                        }
-
-                        if ((X + Width) > Client.Game.Window.ClientBounds.Width)
-                        {
-                            X -= Width;
-                        }
-
-                        if ((Y + Height) > Client.Game.Window.ClientBounds.Height)
-                        {
-                            Y -= Height;
-                        }
-                    }
-                    else
-                    {
-                        ContainerManager.CalculateContainerPosition(g);
-                        X = ContainerManager.X;
-                        Y = ContainerManager.Y;
-                    }
-                }
-            }
-            else
-            {
-                X = gg.X;
-                Y = gg.Y;
-            }
 
             if (_data.OpenSound != 0)
                 Client.Game.Scene.Audio.PlaySound(_data.OpenSound);
-
-            UIManager.RemovePosition(LocalSerial);
         }
 
         private void HitBoxOnMouseUp(object sender, MouseEventArgs e)
@@ -404,60 +355,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void SetPositionNearGameObject(ushort g, Item item)
-        {
-            if (World.Player.Equipment[(int)Layer.Bank] != null && item.Serial == World.Player.Equipment[(int)Layer.Bank])
-            {
-                // open bank near player
-                X = World.Player.RealScreenPosition.X + ProfileManager.Current.GameWindowPosition.X + 40;
-                Y = World.Player.RealScreenPosition.Y + ProfileManager.Current.GameWindowPosition.Y - (Height >> 1);
-            }
-            else if (item.OnGround)
-            {
-                // item is in world
-                X = item.RealScreenPosition.X + ProfileManager.Current.GameWindowPosition.X + 40;
-                Y = item.RealScreenPosition.Y + ProfileManager.Current.GameWindowPosition.Y - (Height >> 1);
-            }
-            else if (SerialHelper.IsMobile(item.Container))
-            {
-                // pack animal, snooped player, npc vendor
-                Mobile mobile = World.Mobiles.Get(item.Container);
-                if (mobile != null)
-                {
-                    X = mobile.RealScreenPosition.X + ProfileManager.Current.GameWindowPosition.X + 40;
-                    Y = mobile.RealScreenPosition.Y + ProfileManager.Current.GameWindowPosition.Y - (Height >> 1);
-                }
-            }
-            else
-            {
-                // in a container, open near the container
-                ContainerGump parentContainer = UIManager.Gumps.OfType<ContainerGump>().FirstOrDefault(s => s.LocalSerial == item.Container);
-                if (parentContainer != null)
-                {
-                    X = parentContainer.X + (Width >> 1);
-                    Y = parentContainer.Y;
-                }
-                else
-                {
-                    // I don't think we ever get here?
-                    ContainerManager.CalculateContainerPosition(g);
-                    X = ContainerManager.X;
-                    Y = ContainerManager.Y;
-                }
-            }
-        }
-
-        private void SetPositionTopRight()
-        {
-            X = Client.Game.Window.ClientBounds.Width - Width;
-            Y = 0;
-        }
-
-        private void SetPositionByLastDragged()
-        {
-            X = ProfileManager.Current.OverrideContainerLocationPosition.X - (Width >> 1);
-            Y = ProfileManager.Current.OverrideContainerLocationPosition.Y - (Height >> 1);
-        }
+      
 
         public override void Dispose()
         {
