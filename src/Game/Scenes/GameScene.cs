@@ -387,7 +387,7 @@ namespace ClassicUO.Game.Scenes
             {
                 sbyte z5 = (sbyte) (obj.Z + 5);
 
-                for (GameObject o = tile; o != null; o = o.Right)
+                for (GameObject o = tile; o != null; o = o.TNext)
                 {
                     if ((!(o is Static s) || s.ItemData.IsTransparent) &&
                         (!(o is Multi m) || m.ItemData.IsTransparent) || !o.AllowedToDraw)

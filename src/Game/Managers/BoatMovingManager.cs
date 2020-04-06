@@ -282,7 +282,7 @@ namespace ClassicUO.Game.Managers
                             continue;
                         }
 
-                        if (item.Right != null || item.Left != null)
+                        if (item.TNext != null || item.TPrevious != null)
                             item.AddToTile();
                 
                         house?.Generate(true, true, true);
@@ -356,7 +356,7 @@ namespace ClassicUO.Game.Managers
                         entity.Offset.Y = 0;
                         entity.Offset.Z = 0;
 
-                        if (entity.Left != null || entity.Right != null)
+                        if (entity.TPrevious != null || entity.TNext != null)
                             entity.AddToTile();             
                     }
                     else

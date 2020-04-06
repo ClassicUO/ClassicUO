@@ -268,8 +268,8 @@ namespace ClassicUO.Game.Map
         {
             var obj = Tiles[x, y];
 
-            while (obj?.Left != null)
-                obj = obj.Left;
+            while (obj?.TPrevious != null)
+                obj = obj.TPrevious;
 
             return obj;
         }
@@ -349,16 +349,16 @@ namespace ClassicUO.Game.Map
             if (Tiles[x, y] == null)
             {
                 Tiles[x, y] = obj;
-                obj.Left = null;
-                obj.Right = null;
+                obj.TPrevious = null;
+                obj.TNext = null;
 
                 return;
             }
 
             GameObject o = Tiles[x, y];
 
-            while (o?.Left != null)
-                o = o.Left;
+            while (o?.TPrevious != null)
+                o = o.TPrevious;
 
             GameObject found = null;
             GameObject start = o;
@@ -373,24 +373,24 @@ namespace ClassicUO.Game.Map
                     break;
 
                 found = o;
-                o = o.Right;
+                o = o.TNext;
             }
 
             if (found != null)
             {
-                obj.Left = found;
-                GameObject next = found.Right;
-                obj.Right = next;
-                found.Right = obj;
+                obj.TPrevious = found;
+                GameObject next = found.TNext;
+                obj.TNext = next;
+                found.TNext = obj;
 
                 if (next != null)
-                    next.Left = obj;
+                    next.TPrevious = obj;
             }
             else if (start != null)
             {
-                obj.Right = start;
-                start.Left = obj;
-                obj.Left = null;
+                obj.TNext = start;
+                start.TPrevious = obj;
+                obj.TPrevious = null;
             }
         }
 
@@ -402,16 +402,16 @@ namespace ClassicUO.Game.Map
                 return;
 
             if (firstNode == obj)
-                firstNode = obj.Right;
+                firstNode = obj.TNext;
 
-            if (obj.Right != null)
-                obj.Right.Left = obj.Left;
+            if (obj.TNext != null)
+                obj.TNext.TPrevious = obj.TPrevious;
 
-            if (obj.Left != null)
-                obj.Left.Right = obj.Right;
+            if (obj.TPrevious != null)
+                obj.TPrevious.TNext = obj.TNext;
 
-            obj.Left = null;
-            obj.Right = null;
+            obj.TPrevious = null;
+            obj.TNext = null;
         }
 
 
@@ -433,9 +433,9 @@ namespace ClassicUO.Game.Map
                         if (first != World.Player)
                             first.Destroy();
 
-                        var next = first.Right;
-                        first.Left = null;
-                        first.Right = null;
+                        var next = first.TNext;
+                        first.TPrevious = null;
+                        first.TNext = null;
                         first = next;
                     }
 
@@ -465,9 +465,9 @@ namespace ClassicUO.Game.Map
                         if (first != World.Player)
                             first.Destroy();
 
-                        var next = first.Right;
-                        first.Left = null;
-                        first.Right = null;
+                        var next = first.TNext;
+                        first.TPrevious = null;
+                        first.TNext = null;
                         first = next;
                     }
 
@@ -484,7 +484,7 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    for (var obj = GetHeadObject(i, j); obj != null; obj = obj.Right)
+                    for (var obj = GetHeadObject(i, j); obj != null; obj = obj.TNext)
                     {
                         if (!(obj is Land) && !(obj is Static) /*&& !(obj is Multi)*/)
                             return false;

@@ -140,7 +140,7 @@ namespace ClassicUO.Game.Map
                     groundZ = obj.Z;
                 else if (staticZ < obj.Z)
                     staticZ = obj.Z;
-                obj = obj.Right;
+                obj = obj.TNext;
             }
         }
 
@@ -163,7 +163,7 @@ namespace ClassicUO.Game.Map
             {
                 GameObject obj = chunk.Tiles[x % 8, y % 8];
 
-                for (; obj != null; obj = obj.Right)
+                for (; obj != null; obj = obj.TNext)
                 {
                     if (!(obj is Static) && !(obj is Multi))
                         continue;

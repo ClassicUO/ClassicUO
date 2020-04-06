@@ -51,8 +51,8 @@ namespace ClassicUO.Game.GameObjects
         public int CurrentRenderIndex;
         public byte UseInRender;
         public short PriorityZ;
-        public GameObject Left;
-        public GameObject Right;
+        public GameObject TPrevious;
+        public GameObject TNext;
         public Vector3 Offset;
         // FIXME: remove it
         public sbyte FoliageIndex = -1;
@@ -121,14 +121,14 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         public void RemoveFromTile()
         {
-            if (Left != null)
-                Left.Right = Right;
+            if (TPrevious != null)
+                TPrevious.TNext = TNext;
 
-            if (Right != null)
-                Right.Left = Left;
+            if (TNext != null)
+                TNext.TPrevious = TPrevious;
 
-            Right = null;
-            Left = null;
+            TNext = null;
+            TPrevious = null;
         }
 
         public virtual void UpdateGraphicBySeason()

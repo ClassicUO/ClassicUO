@@ -834,7 +834,7 @@ namespace ClassicUO.Game.GameObjects
                             return;
                         }
 
-                        if (Right != null || Left != null)
+                        if (TNext != null || TPrevious != null)
                             AddToTile();
 
                         LastStepTime = Time.Ticks;
@@ -854,8 +854,8 @@ namespace ClassicUO.Game.GameObjects
                 {
                     GameObject start = this;
 
-                    while (start?.Left != null)
-                        start = start.Left;
+                    while (start?.TPrevious != null)
+                        start = start.TPrevious;
 
                     while (start != null && result == 0)
                     {
@@ -981,7 +981,7 @@ namespace ClassicUO.Game.GameObjects
                             }
                         }
 
-                        start = start.Right;
+                        start = start.TNext;
                     }
                 }
 
