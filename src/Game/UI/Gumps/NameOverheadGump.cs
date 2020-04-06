@@ -63,6 +63,8 @@ namespace ClassicUO.Game.UI.Gumps
             _renderedText = RenderedText.Create(String.Empty, entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort) 0x0481, 0xFF, true, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, 100, 30, true);
 
             SetTooltip(entity);
+
+            BuildGump();
         }
 
         public bool SetName()
