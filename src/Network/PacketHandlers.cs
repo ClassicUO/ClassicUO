@@ -1364,6 +1364,12 @@ namespace ClassicUO.Network
 
             item.RemoveFromTile();
 
+            if (SerialHelper.IsValid(item.Container))
+            {
+                UIManager.GetGump<ContainerGump>(item.Container)?.RequestUpdateContents();
+                UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
+            }
+
             item.Graphic = (ushort) (p.ReadUShort() + p.ReadSByte());
             item.Layer = (Layer) p.ReadByte();
             item.Container = p.ReadUInt();
@@ -1383,20 +1389,15 @@ namespace ClassicUO.Network
 
             if (item.Layer >= Layer.ShopBuyRestock && item.Layer <= Layer.ShopSell) 
                 item.Clear();
-
+            else if (SerialHelper.IsValid(item.Container) && item.Layer < Layer.Mount)
+            {
+                UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
+            }
 
             if (entity == World.Player && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded))
                 World.Player?.UpdateAbilities();
-
-
             if (ItemHold.Serial == item.Serial)
                 ItemHold.Clear();
-
-            if (SerialHelper.IsValid(item.Container))
-            {
-                UIManager.GetGump<ContainerGump>(item.Container)?.RequestUpdateContents();
-                UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
-            }
         }
 
         private static void Swing(Packet p)
