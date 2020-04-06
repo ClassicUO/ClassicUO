@@ -47,6 +47,7 @@ namespace ClassicUO.Game
 
         public static bool Enabled { get; set; }
         public static bool Dropped { get; set; }
+        public static bool UpdatedInWorld { get; set; }
 
         public static void Set(Item item, ushort amount, Point? offset = null)
         {
@@ -87,6 +88,7 @@ namespace ClassicUO.Game
 
             Dropped = false;
             Enabled = false;
+            UpdatedInWorld = false;
         }
     }
 }
