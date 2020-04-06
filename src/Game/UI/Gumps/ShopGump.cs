@@ -242,9 +242,9 @@ namespace ClassicUO.Game.UI.Gumps
             shopItem.MouseUp += ShopItem_MouseClick;
             shopItem.MouseDoubleClick += ShopItem_MouseDoubleClick;
             _shopItems.Add(serial, shopItem);
-            var it = World.Items.Get(serial);
-
-            Console.WriteLine("ITEM: name: {0}  - tiledata name: {1}  - price: {2}   - X,Y= {3},{4}", name, TileDataLoader.Instance.StaticData[graphic].Name, price, it.X, it.Y);
+           
+            //var it = World.Items.Get(serial);
+            //Console.WriteLine("ITEM: name: {0}  - tiledata name: {1}  - price: {2}   - X,Y= {3},{4}", name, TileDataLoader.Instance.StaticData[graphic].Name, price, it.X, it.Y);
         }
 
         public void SetNameTo(Item item, string name)
