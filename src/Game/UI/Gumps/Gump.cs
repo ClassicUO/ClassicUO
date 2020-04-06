@@ -73,6 +73,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public virtual GUMP_TYPE GumpType { get; }
 
+        public bool InvalidateContents { get; set; }
+
+
         public override bool CanMove
         {
             get => !BlockMovement && base.CanMove;
@@ -81,8 +84,15 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (InvalidateContents)
+            {
+                UpdateContents();
+                InvalidateContents = false;
+            }
+
             if (ActivePage == 0)
                 ActivePage = 1;
+
             base.Update(totalMS, frameMS);
         }
 
@@ -121,6 +131,14 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         public virtual void Restore(XmlElement xml)
+        {
+
+        }
+
+        public void RequestUpdateContents()
+            => InvalidateContents = true;
+
+        protected virtual void UpdateContents()
         {
 
         }

@@ -425,7 +425,8 @@ namespace ClassicUO.Game.Managers
                     Y = y,
                     CanMove = true,
                     CanCloseWithRightClick = true,
-                    CanCloseWithEsc = true
+                    CanCloseWithEsc = true,
+                    InvalidateContents = false
                 };
             int group = 0;
             int page = 0;

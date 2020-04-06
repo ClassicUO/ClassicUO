@@ -147,7 +147,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public void UpdateContent()
+        protected override void UpdateContents()
         {
             Entity container = World.Get(ID1);
 
@@ -185,7 +185,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _myBox.Add(g);
             }
-            
+
             container = World.Get(ID2);
 
             if (container == null)
@@ -444,7 +444,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             SetCheckboxes();
 
-            UpdateContent();
+            RequestUpdateContents();
 
             _myBox.MouseUp += (sender, e) =>
             {

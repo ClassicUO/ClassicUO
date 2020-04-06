@@ -103,16 +103,7 @@ namespace ClassicUO.Game.UI.Gumps
             });
         }
 
-        private void Items_Removed(object sender, CollectionChangedEventArgs<uint> e)
-        {
-            RedrawItems();
-        }
-
-        private void Items_Added(object sender, CollectionChangedEventArgs<uint> e)
-        {
-            RedrawItems();
-        }
-
+      
         public override void OnButtonClick(int buttonID)
         {
             if (buttonID == 0)
@@ -156,12 +147,15 @@ namespace ClassicUO.Game.UI.Gumps
                 base.OnButtonClick(buttonID);
         }
 
-        public void RedrawItems()
+
+
+        protected override void UpdateContents()
         {
             int x = 20;
             int y = 20;
 
-            foreach (GridLootItem gridLootItem in Children.OfType<GridLootItem>()) gridLootItem.Dispose();
+            foreach (GridLootItem gridLootItem in Children.OfType<GridLootItem>())
+                gridLootItem.Dispose();
 
             int count = 0;
             _pagesCount = 1;

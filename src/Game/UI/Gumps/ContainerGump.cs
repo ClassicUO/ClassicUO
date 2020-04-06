@@ -67,22 +67,6 @@ namespace ClassicUO.Game.UI.Gumps
             Graphic = gumpid;
 
             BuildGump();
-
-            foreach (var c in Children.OfType<ItemGump>())
-                c.Dispose();
-
-
-            for (var i = item.Items; i != null; i = i.Next)
-            {
-                Item it = (Item) i;
-                //FIXME: this should be disabled. Server sends the right position
-                //CheckItemPosition(i);
-                if (it.IsLootable)
-                {
-                    var x = new ItemGump(it);
-                    Add(x);
-                }
-            }
         }
 
         public ushort Graphic { get; }
@@ -266,13 +250,15 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public void Update()
+
+        protected override void UpdateContents()
         {
+            Clear();
             BuildGump();
             IsMinimized = IsMinimized;
             ItemsOnAdded();
         }
-        
+
         public override void Save(BinaryWriter writer)
         {
             base.Save(writer);

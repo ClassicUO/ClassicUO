@@ -147,6 +147,8 @@ namespace ClassicUO.Game.Scenes
 
         public override void Update(double totalMS, double frameMS)
         {
+            base.Update(totalMS, frameMS);
+
             if (_lastLoginStep != CurrentLoginStep)
             {
                 UIManager.GameCursor.IsLoading = false;
@@ -191,8 +193,6 @@ namespace ClassicUO.Game.Scenes
 
                 _pingTime = Time.Ticks + 60000;
             }
-
-            base.Update(totalMS, frameMS);
         }
 
         private Gump GetGumpForStep()
@@ -472,9 +472,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     Reconnect = true;
                     PopupMessage = $"Reconnect, please wait...`{_reconnectTryCounter}`\n`{StringHelper.AddSpaceBeforeCapital(e.ToString())}`";
-                    var c = UIManager.GetGump<LoadingGump>();
-                    if (c != null)
-                        c._Label.Text = PopupMessage;
+                    UIManager.GetGump<LoadingGump>()?.SetText(PopupMessage);
                 }
                 else
                     PopupMessage = $"Connection lost:\n`{StringHelper.AddSpaceBeforeCapital(e.ToString())}`";

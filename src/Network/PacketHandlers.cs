@@ -277,7 +277,7 @@ namespace ClassicUO.Network
                     trading.ImAccepting = id1 != 0;
                     trading.HeIsAccepting = id2 != 0;
 
-                    trading.UpdateContent();
+                    trading.RequestUpdateContents();
                 }
             }
             else if (type == 3 || type == 4)
@@ -626,9 +626,9 @@ namespace ClassicUO.Network
             if (item.OnGround)
                 item.AddToTile();
             else if (item.Layer != 0)
-                UIManager.GetGump<PaperDollGump>(item)?.Update();
+                UIManager.GetGump<PaperDollGump>(item)?.RequestUpdateContents();
             else
-                UIManager.GetGump<ContainerGump>(item)?.Update();
+                UIManager.GetGump<ContainerGump>(item)?.RequestUpdateContents();
 
 
             if (graphic == 0x2006 && !item.IsClicked && ProfileManager.Current.ShowNewCorpseNameIncoming) GameActions.SingleClick(item);
@@ -759,7 +759,7 @@ namespace ClassicUO.Network
 
                             if (tradeBoxItem != null)
                             {
-                                UIManager.GetTradingGump(tradeBoxItem)?.UpdateContent();
+                                UIManager.GetTradingGump(tradeBoxItem)?.RequestUpdateContents();
                             }
                         }
                     }
@@ -769,11 +769,11 @@ namespace ClassicUO.Network
 
 
                     if (it.Layer != Layer.Invalid)
-                        UIManager.GetGump<PaperDollGump>(cont)?.Update();
+                        UIManager.GetGump<PaperDollGump>(cont)?.RequestUpdateContents();
 
                     ContainerGump containerGump = UIManager.GetGump<ContainerGump>(cont);
                     if (containerGump != null)
-                        containerGump.Update();
+                        containerGump.RequestUpdateContents();
 
 
                     if (it.Graphic == 0x0EB0)
@@ -823,7 +823,7 @@ namespace ClassicUO.Network
 
                     if (it.Layer != Layer.Invalid)
                     {
-                        UIManager.GetGump<PaperDollGump>(cont)?.Update();
+                        UIManager.GetGump<PaperDollGump>(cont)?.RequestUpdateContents();
                     }
                 }
 
@@ -1144,11 +1144,11 @@ namespace ClassicUO.Network
                 if (secureBox != null)
                 {
                     TradingGump gump = UIManager.GetTradingGump(secureBox) ?? UIManager.GetGump<TradingGump>(secureBox);
-                    gump?.UpdateContent();
+                    gump?.RequestUpdateContents();
                 }
                 else
                 {
-                    UIManager.GetGump<PaperDollGump>(containerSerial)?.Update();
+                    UIManager.GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
                 }
             }
             else if (SerialHelper.IsItem(containerSerial))
@@ -1165,11 +1165,11 @@ namespace ClassicUO.Network
 
                     if (spellbookGump != null)
                     {
-                        spellbookGump.Update();
+                        spellbookGump.RequestUpdateContents();
                     }
                     else
                     {
-                        UIManager.GetGump<ContainerGump>(containerSerial)?.Update();
+                        UIManager.GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
                     }
                 }
             }
@@ -1178,7 +1178,7 @@ namespace ClassicUO.Network
 
             if (tradingGump != null)
             {
-                tradingGump.UpdateContent();
+                tradingGump.RequestUpdateContents();
             }
         }
 
@@ -1264,7 +1264,7 @@ namespace ClassicUO.Network
                         World.Items.ProcessDelta();
 
                         if (item.Layer != 0)
-                            UIManager.GetGump<PaperDollGump>(item.Container)?.Update();
+                            UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
                     }
                 }
 
@@ -1415,8 +1415,8 @@ namespace ClassicUO.Network
 
             if (SerialHelper.IsValid(item.Container))
             {
-                UIManager.GetGump<ContainerGump>(item.Container)?.Update();
-                UIManager.GetGump<PaperDollGump>(item.Container)?.Update();
+                UIManager.GetGump<ContainerGump>(item.Container)?.RequestUpdateContents();
+                UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
             }
         }
 
@@ -1665,21 +1665,13 @@ namespace ClassicUO.Network
 
                 if (gump != null && !gump.IsDisposed)
                 {
-                    if (gump is SpellbookGump sb)
-                    {
-                        sb.Update();
-                    }
-                    else if (gump is ContainerGump cont)
-                    {
-                        cont.Update();
-                    }
-                    else if (gump is PaperDollGump paperdoll)
-                    {
-                        paperdoll.Update();
-                    }
-                    else if (gump is BulletinBoardGump)
+                    if (gump is BulletinBoardGump)
                     {
                         NetClient.Socket.Send(new PBulletinBoardRequestMessageSummary(containerSerial, serial));
+                    }
+                    else
+                    {
+                        gump.RequestUpdateContents();
                     }
                 }
             }
@@ -2387,8 +2379,7 @@ namespace ClassicUO.Network
             if (mobile != World.Player && !mobile.IsClicked && ProfileManager.Current.ShowNewMobileNameIncoming)
                 GameActions.SingleClick(mobile);
 
-            UIManager.GetGump<PaperDollGump>(mobile)?.Update();
-
+            UIManager.GetGump<PaperDollGump>(mobile)?.RequestUpdateContents();
 
             if (mobile == World.Player)
             {
@@ -2526,7 +2517,7 @@ namespace ClassicUO.Network
                 paperdoll.UpdateTitle(text);
                 if (old != newLift)
                 {
-                    paperdoll.Update();
+                    paperdoll.RequestUpdateContents();
                 }
                 paperdoll.SetInScreen();
                 paperdoll.BringOnTop();
@@ -3532,7 +3523,7 @@ namespace ClassicUO.Network
                                 World.Player.DexLock = (Lock) ((state >> 2) & 3);
                                 World.Player.IntLock = (Lock) (state & 3);
 
-                                StatusGumpBase.GetStatusGump()?.UpdateLocksAfterPacket();
+                                StatusGumpBase.GetStatusGump()?.RequestUpdateContents();
                             }
 
                             break;
@@ -3580,7 +3571,7 @@ namespace ClassicUO.Network
                             }
                         }
                     }
-                    UIManager.GetGump<SpellbookGump>(spellbook)?.Update();
+                    UIManager.GetGump<SpellbookGump>(spellbook)?.RequestUpdateContents();
 
                     break;
 

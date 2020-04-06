@@ -42,6 +42,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private readonly ItemGumpPaperdoll[] _pgumps = new ItemGumpPaperdoll[(int) Layer.Mount]; // _backpackGump;
         private readonly PaperDollGump _paperDollGump;
+        private bool _updateUI;
 
         public PaperDollInteractable(int x, int y, Mobile mobile, PaperDollGump paperDollGump)
         {
@@ -50,6 +51,8 @@ namespace ClassicUO.Game.UI.Controls
             _paperDollGump = paperDollGump;
             Mobile = mobile;
             AcceptMouseInput = false;
+
+            _updateUI = true;
         }
 
         public Mobile Mobile
@@ -60,7 +63,7 @@ namespace ClassicUO.Game.UI.Controls
                 if (value != _mobile)
                 {
                     _mobile = value;
-                    UpdateEntity();
+                    _updateUI = true;
                 }
             }
         }
@@ -68,6 +71,13 @@ namespace ClassicUO.Game.UI.Controls
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
+
+            if (_updateUI)
+            {
+                UpdateUI();
+
+                _updateUI = false;
+            }
 
             if (_mobile == null || _mobile.IsDestroyed)
                 Dispose();
@@ -101,8 +111,8 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-         
-            UpdateEntity();
+
+            _updateUI = true;
         }
 
         private void ItemsOnAdded(object sender, CollectionChangedEventArgs<uint> e)
@@ -134,33 +144,32 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            UpdateEntity();
+            _updateUI = true;
         }
+
 
         public void Update()
         {
             _fakeItem = null;
-            UpdateEntity();
+            _updateUI = true;
         }
 
-
-        
 
         public void AddFakeDress(Item item)
         {
             if (item == null && _fakeItem != null)
             {
                 _fakeItem = null;
-                UpdateEntity();
+                _updateUI = true;
             }
             else if (item != null && item.ItemData.Layer < _mobile.Equipment.Length && _mobile.Equipment[item.ItemData.Layer] == null)
             {
                 _fakeItem = item;
-                UpdateEntity();
+                _updateUI = true;
             }
         }
 
-        private void UpdateEntity()
+        private void UpdateUI()
         {
             if (Mobile == null || Mobile.IsDestroyed)
             {

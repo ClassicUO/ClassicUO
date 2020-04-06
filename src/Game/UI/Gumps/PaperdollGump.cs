@@ -321,7 +321,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
 
             gs.WearHeldItem(Mobile);
-            Update();
+            RequestUpdateContents();
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
@@ -445,7 +445,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
         }
 
-        public void Update()
+
+        protected override void UpdateContents()
         {
             _paperDollInteractable.Update();
         }
