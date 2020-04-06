@@ -1044,8 +1044,6 @@ namespace ClassicUO.Network
                 ShopGump gump = new ShopGump(serial, true, 150, 5);
                 UIManager.Add(gump);
 
-                List<Item> items = new List<Item>();
-
                 for (Layer layer = Layer.ShopBuyRestock; layer < Layer.ShopBuy + 1; layer++)
                 {
                     Item item = vendor.Equipment[(int)layer];
