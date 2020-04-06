@@ -1056,7 +1056,7 @@ namespace ClassicUO.Network
                         continue;
                     }
 
-                    bool reverse = (first as Item)?.Y <= 1;
+                    bool reverse = (first as Item)?.X != 1;
 
                     if (reverse)
                     {
@@ -2181,7 +2181,7 @@ namespace ClassicUO.Network
                 if (first == null)
                     return;
 
-                bool reverse = (first as Item)?.Y <= 1;
+                bool reverse = (first as Item)?.X != 1;
 
                 if (reverse)
                 {
