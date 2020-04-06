@@ -338,7 +338,7 @@ namespace ClassicUO.Game.UI.Controls
                         }
 
                         bool isNew = false;
-                        if (itemGump != null)
+                        if (itemGump != null && !itemGump.IsDisposed)
                         {
                             itemGump.IsVisible = true;
                         }
