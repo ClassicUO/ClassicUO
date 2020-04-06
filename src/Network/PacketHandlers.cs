@@ -603,23 +603,9 @@ namespace ClassicUO.Network
             if (graphic != 0x2006) 
                 graphic += graphicInc;
 
-            //item.Graphic = graphic;
-            //item.Amount = count;
-            //item.X = x;
-            //item.Y = y;
-            //item.Z = z;
-            //item.UpdateScreenPosition();
-            //item.FixHue(hue);
-            //item.Flags = (Flags) flags;
-            //item.Direction = (Direction) direction;
-
             if (graphic >= 0x4000)
             {
                 graphic -= 0x4000;
-                //item.Graphic -= 0x4000;
-                //item.WantUpdateMulti = true;
-                //item.IsMulti = true;
-
                 type = 2;
             }
 
@@ -637,32 +623,6 @@ namespace ClassicUO.Network
                              count,
                              type,
                              1);
-
-            //item.LightID = direction;
-            //if (SerialHelper.IsValid(item.Container))
-            //{
-            //    var cont = World.Get(item.Container);
-            //    cont.Remove(item);
-            //}
-
-            //item.Container = 0;
-            //item.CheckGraphicChange();
-            //item.ProcessDelta();
-
-
-            //if (World.Items.Add(item)) World.Items.ProcessDelta();
-
-            //if (item.OnGround)
-            //    item.AddToTile();
-            //else if (item.Layer != 0)
-            //    UIManager.GetGump<PaperDollGump>(item)?.RequestUpdateContents();
-            //else
-            //    UIManager.GetGump<ContainerGump>(item)?.RequestUpdateContents();
-
-
-            if (graphic == 0x2006 && !item.IsClicked && ProfileManager.Current.ShowNewCorpseNameIncoming) GameActions.SingleClick(item);
-
-            if (graphic == 0x2006 && ProfileManager.Current.AutoOpenCorpses) World.Player.TryOpenCorpses();
         }
 
         private static void EnterWorld(Packet p)
