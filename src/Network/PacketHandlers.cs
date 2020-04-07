@@ -1083,7 +1083,8 @@ namespace ClassicUO.Network
                     UIManager.Add(new ContainerGump(item, graphic, playsound)
                     {
                         X = x,
-                        Y = y
+                        Y = y,
+                        InvalidateContents = true
                     });
 
                     UIManager.RemovePosition(serial);
@@ -4395,11 +4396,11 @@ namespace ClassicUO.Network
 
                         if (ProfileManager.Current.GridLootType > 0)
                         {
-                            GridLootGump gridGump = UIManager.GetGump<GridLootGump>(containerSerial);
+                            gump = UIManager.GetGump<GridLootGump>(containerSerial);
 
-                            if (gridGump != null)
+                            if (gump != null)
                             {
-                                gridGump.RequestUpdateContents();
+                                gump.RequestUpdateContents();
                             }
                             else if (SerialHelper.IsValid(_requestedGridLoot) && _requestedGridLoot == containerSerial)
                             {
