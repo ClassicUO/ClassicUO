@@ -260,7 +260,7 @@ namespace ClassicUO.Game.Managers
 
                 if (texture != null)
                 {
-                    float scale = Client.Game.GetScene<GameScene>()?.Scale ?? 1;
+                    float scale = UIManager.ContainerScale;
 
                     int width = (int) (texture.Width * scale);
                     int height = (int) (texture.Height * scale);
