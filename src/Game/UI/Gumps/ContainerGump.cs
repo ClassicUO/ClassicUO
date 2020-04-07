@@ -53,9 +53,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
         }
 
-        public ContainerGump(uint serial, ushort gumpid, bool playsound) : this()
+        public ContainerGump(uint serial, ushort gumpid, bool playsound) : base(serial, 0)
         {
-            LocalSerial = serial;
             Item item = World.Items.Get(serial);
 
             if (item == null)
@@ -179,6 +178,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
+            if (IsDisposed)
+                return;
+
             Item item = World.Items.Get(LocalSerial);
 
             if (item == null || item.IsDestroyed)
@@ -186,8 +188,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
                 return;
             }
-
-            if (IsDisposed) return;
 
             if (_isCorspeContainer && _corpseEyeTicks < totalMS)
             {
@@ -259,11 +259,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ItemsOnAdded()
         {
-            foreach (ItemGump v in Children.OfType<ItemGump>())
-                v.Dispose();
+            Entity container = World.Get(LocalSerial);
 
+            if (container == null)
+                return;
 
-            for (var i = World.Items.Get(LocalSerial).Items; i != null; i = i.Next)
+            for (var i = container.Items; i != null; i = i.Next)
             {
                 var item = (Item) i;
 

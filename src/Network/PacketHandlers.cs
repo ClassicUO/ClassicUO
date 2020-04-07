@@ -1118,84 +1118,62 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            Item item = World.Items.Get(ItemHold.Serial);
+            Item firstItem = World.Items.Get(ItemHold.Serial);
 
-            if (ItemHold.Enabled || ItemHold.Dropped && item == null)
+            if (ItemHold.Enabled || ItemHold.Dropped && (firstItem == null || firstItem.AllowedToDraw))
             {
                 if (!ItemHold.UpdatedInWorld)
                 {
                     if (ItemHold.Layer == Layer.Invalid && SerialHelper.IsValid(ItemHold.Container))
                     {
+                        AddItemToContainer(ItemHold.Serial,
+                                           ItemHold.Graphic,
+                                           ItemHold.Amount,
+                                           ItemHold.X,
+                                           ItemHold.Y,
+                                           ItemHold.Hue,
+                                           ItemHold.Container);
+
+                        UIManager.GetGump<ContainerGump>(ItemHold.Serial)?.RequestUpdateContents();
+                    }
+                    else
+                    {
+                        Item item = World.GetOrCreateItem(ItemHold.Serial);
+
+                        item.Graphic = ItemHold.Graphic;
+                        item.FixHue(ItemHold.Hue);
+                        item.Amount = ItemHold.Amount;
+                        item.Flags = ItemHold.Flags;
+                        item.Layer = ItemHold.Layer;
+                        item.Container = ItemHold.Container;
+                        item.X = ItemHold.X;
+                        item.Y = ItemHold.Y;
+                        item.Z = ItemHold.Z;
+                        item.CheckGraphicChange();
+                        item.UpdateScreenPosition();
+
+
                         Entity container = World.Get(ItemHold.Container);
 
                         if (container != null)
                         {
-                            item = World.GetOrCreateItem(ItemHold.Serial);
-                            item.Graphic = ItemHold.Graphic;
-                            item.FixHue(ItemHold.Hue);
-                            item.Amount = ItemHold.Amount;
-                            item.Flags = ItemHold.Flags;
-                            item.Layer = ItemHold.Layer;
-                            item.Container = ItemHold.Container;
-                            item.X = ItemHold.X;
-                            item.Y = ItemHold.Y;
-                            item.Z = ItemHold.Z;
-                            item.UpdateScreenPosition();
-                            container.PushToBack(item);
-
-                            World.Items.Add(item);
-
-                            container.ProcessDelta();
-                        }
-                    }
-                    else
-                    {
-                        item = World.GetOrCreateItem(ItemHold.Serial);
-
-                        //if (item != null)
-                        {
-                            item.Graphic = ItemHold.Graphic;
-                            item.FixHue(ItemHold.Hue);
-                            item.Amount = ItemHold.Amount;
-                            item.Flags = ItemHold.Flags;
-                            item.Layer = ItemHold.Layer;
-                            item.Container = ItemHold.Container;
-                            item.X = ItemHold.X;
-                            item.Y = ItemHold.Y;
-                            item.Z = ItemHold.Z;
-                            item.UpdateScreenPosition();
-
-
-                            Entity container = null;
-                            if (!ItemHold.OnGround)
+                            if (SerialHelper.IsMobile(container.Serial))
                             {
-                                container = World.Get(item.Container);
-
-                                if (container != null)
-                                {
-                                    if (SerialHelper.IsMobile(container.Serial))
-                                    {
-                                        Mobile mob = (Mobile) container;
-
-                                        mob.PushToBack(item);
-
-                                        mob.Equipment[(int) ItemHold.Layer] = item;
-                                    }
-                                    else
-                                        Log.Warn("SOMETHING WRONG WITH CONTAINER (should be a mobile)");
-                                }
-                                else
-                                    Log.Warn("SOMETHING WRONG WITH CONTAINER (is null)");
+                                container.Equipment[(int) ItemHold.Layer] = item;
+                                container.PushToBack(item);
+                                UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
                             }
                             else
-                                item.AddToTile();
-
-                            World.Items.Add(item);
-                            item.ProcessDelta();
-                            container?.ProcessDelta();
-
-                            if (item.Layer != 0)
-                                UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
+                            {
+                                RemoveItemFromContainer(item);
+                                World.Items.Remove(item.Serial);
+                                //item = null;
+                            }
+                        }
+                        else
+                        {
+                            RemoveItemFromContainer(item);
+                            item.AddToTile();
                         }
                     }
                 }
@@ -1205,14 +1183,15 @@ namespace ClassicUO.Network
             else
                 Log.Warn( "There was a problem with ItemHold object. It was cleared before :|");
 
-            if (item != null)
-            {
-                item.AllowedToDraw = true;
-            }
+            var result = World.Items.Get(ItemHold.Serial);
+
+            if (result != null && !result.IsDestroyed)
+                result.AllowedToDraw = true;
 
             byte code = p.ReadByte();
 
-            if (code < 5) MessageManager.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 1001, MessageType.System, 3);
+            if (code < 5)
+                MessageManager.HandleMessage(null, ServerErrorMessages.GetError(p.ID, code), string.Empty, 1001, MessageType.System, 3);
         }
 
         private static void EndDraggingItem(Packet p)
@@ -1296,25 +1275,7 @@ namespace ClassicUO.Network
             if (item.Graphic != 0 && item.Layer != Layer.Backpack) 
                 item.Clear();
 
-            if (SerialHelper.IsValid(item.Container))
-            {
-                Entity cont = World.Get(item.Container);
-
-                if (cont != null)
-                {
-                    cont.Remove(item);
-                    World.Items.Remove(item);
-
-                    if (cont.HasEquipment && item.Layer != Layer.Invalid)
-                    {
-                        cont.Equipment[(int) item.Layer] = null;
-                    }
-                }
-
-                item.Container = 0;
-            }
-
-            item.RemoveFromTile();
+            RemoveItemFromContainer(item);
 
             if (SerialHelper.IsValid(item.Container))
             {
@@ -1332,7 +1293,7 @@ namespace ClassicUO.Network
 
             World.Items.Add(item);
 
-            if (entity != null)
+            if (entity != null && (int) item.Layer < entity.Equipment.Length)
             {
                 entity.Equipment[(int) item.Layer] = item;
                 entity.PushToBack(item);
@@ -4374,21 +4335,17 @@ namespace ClassicUO.Network
 
             if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
             {
-                UIManager.GetGump(item.Serial)?.Dispose();
-
-                item.Destroy();
-
                 Entity initcontainer = World.Get(item.Container);
 
                 if (initcontainer != null)
                 {
                     item.Container = 0;
                     initcontainer.Remove(item);
-                    initcontainer.ProcessDelta();
                 }
                 else if (SerialHelper.IsValid(item.Container)) 
                     Log.Warn( $"This item ({item.Serial}) has a container ({item.Container}), but cannot be found. :|");
 
+                item.Destroy();
                 World.Items.Remove(item);
             }
 
@@ -4747,6 +4704,11 @@ namespace ClassicUO.Network
 
                 if (container != null)
                 {
+                    if (container.HasEquipment && (int) obj.Layer < container.Equipment.Length)
+                    {
+                        container.Equipment[(int) obj.Layer] = null;
+                    }
+
                     container.Remove(obj);
                 }
                 else
