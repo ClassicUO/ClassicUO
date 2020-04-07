@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
         }
 
-        public ContainerGump(uint serial, ushort gumpid) : this()
+        public ContainerGump(uint serial, ushort gumpid, bool playsound) : this()
         {
             LocalSerial = serial;
             Item item = World.Items.Get(serial);
@@ -67,6 +67,9 @@ namespace ClassicUO.Game.UI.Gumps
             Graphic = gumpid;
 
             BuildGump();
+
+            if (_data.OpenSound != 0 && playsound)
+                Client.Game.Scene.Audio.PlaySound(_data.OpenSound);
         }
 
         public ushort Graphic { get; }
@@ -153,10 +156,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             Width = _gumpPicContainer.Width = (int)(_gumpPicContainer.Width * scale);
             Height = _gumpPicContainer.Height = (int) (_gumpPicContainer.Height * scale);
-
-
-            if (_data.OpenSound != 0)
-                Client.Game.Scene.Audio.PlaySound(_data.OpenSound);
         }
 
         private void HitBoxOnMouseUp(object sender, MouseEventArgs e)
@@ -375,12 +374,17 @@ namespace ClassicUO.Game.UI.Gumps
                     if (child.Container == item)
                         UIManager.GetGump<ContainerGump>(child)?.Dispose();
                 }
-
-                if (_data.ClosedSound != 0)
-                    Client.Game.Scene.Audio.PlaySound(_data.ClosedSound);
             }
 
             base.Dispose();
+        }
+
+        protected override void CloseWithRightClick()
+        {
+            base.CloseWithRightClick();
+
+            if (_data.ClosedSound != 0)
+                Client.Game.Scene.Audio.PlaySound(_data.ClosedSound);
         }
 
         protected override void OnDragEnd(int x, int y)

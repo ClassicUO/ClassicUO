@@ -1064,7 +1064,7 @@ namespace ClassicUO.Network
                     }
 
                     ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
-
+                    bool playsound = false;
                     int x, y;
                     if (container != null)
                     {
@@ -1077,9 +1077,10 @@ namespace ClassicUO.Network
                         ContainerManager.CalculateContainerPosition(serial, graphic);
                         x = ContainerManager.X;
                         y = ContainerManager.Y;
+                        playsound = true;
                     }
 
-                    UIManager.Add(new ContainerGump(item, graphic)
+                    UIManager.Add(new ContainerGump(item, graphic, playsound)
                     {
                         X = x,
                         Y = y
