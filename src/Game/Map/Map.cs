@@ -124,15 +124,16 @@ namespace ClassicUO.Game.Map
 
         public void GetMapZ(int x, int y, out sbyte groundZ, out sbyte staticZ)
         {
-            var tile = GetTile(x, y);
+            var chunk = GetChunk(x, y);
+            //var obj = GetTile(x, y);
             groundZ = staticZ = 0;
 
-            if (tile == null)
+            if (chunk == null)
             {
                 return;
             }
-            
-            var obj = tile;
+
+            var obj = chunk.Tiles[x % 8, y % 8];
 
             while (obj != null)
             {

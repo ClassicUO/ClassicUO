@@ -122,7 +122,7 @@ namespace ClassicUO.Game.Map
                         land.Y = tileY;
                         land.Z = z;
                         land.UpdateScreenPosition();
-
+                            
                         AddGameObject(land, x, y);
                     }
                 }
@@ -250,7 +250,7 @@ namespace ClassicUO.Game.Map
                         land.Y = tileY;
                         land.Z = z;
                         land.UpdateScreenPosition();
-                       
+
                         AddGameObject(land, x, y);
                     }
                 }
@@ -276,11 +276,6 @@ namespace ClassicUO.Game.Map
 
         public void AddGameObject(GameObject obj, int x, int y)
         {
-            if (obj is PlayerMobile)
-            {
-
-            }
-
             obj.RemoveFromTile();
 
             short priorityZ = obj.Z;
@@ -355,7 +350,18 @@ namespace ClassicUO.Game.Map
                 return;
             }
 
+
             GameObject o = Tiles[x, y];
+
+            if (o == obj)
+            {
+                if (o.Previous != null)
+                    o = (GameObject) o.Previous;
+                else if (o.Next != null)
+                    o = (GameObject) o.Next;
+                else
+                    return;
+            }
 
             while (o?.TPrevious != null)
                 o = o.TPrevious;

@@ -776,6 +776,11 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     }
+                    case 0x3ECE: // serpentine dragon
+                    {
+
+                        break;
+                    }
 
                     case 0x3EC5: // 16069
                     case 0x3F3A: // 16186 snow bear ???

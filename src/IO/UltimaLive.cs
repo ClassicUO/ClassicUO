@@ -167,7 +167,8 @@ namespace ClassicUO.IO
                     int length = (int) p.ReadUInt();
                     int totallen = length * 7;
 
-                    if (p.Length < totallen + 15) return;
+                    if (p.Length < totallen + 15) 
+                        return;
 
                     p.Seek(14);
                     int mapID = p.ReadByte();
@@ -182,8 +183,7 @@ namespace ClassicUO.IO
                     }
                     else if (World.Map == null || mapID != World.Map.Index) return;
 
-                    byte[] staticsData = new byte[totallen];
-                    for (int i = 0; i < totallen; i++) staticsData[i] = p.ReadByte();
+                    byte[] staticsData = p.ReadArray(totallen);
 
                     if (block >= 0 && block < MapLoader.Instance.MapBlocksSize[mapID, 0] * MapLoader.Instance.MapBlocksSize[mapID, 1])
                     {
@@ -191,18 +191,20 @@ namespace ClassicUO.IO
 
                         if (chunk != null)
                         {
-                            for (int x = 0; x < 8; x++)
+                            for (int i = 0; i < staticsData.Length; i++)
                             {
-                                for (int y = 0; y < 8; y++)
-                                {
-                                    GameObject obj = chunk.Tiles[x, y];
+                                ushort tileID = (ushort) ((staticsData[i] & 0x00FF) | ((staticsData[i + 1] & 0xFF00) >> 8));
+                                byte tileX = staticsData[i + 2];
+                                byte tileY = staticsData[i + 3];
+                                sbyte tileZ = (sbyte) staticsData[i + 4];
+                                ushort tileHue = (ushort) ((staticsData[i + 5] & 0x00FF) | ((staticsData[i + 6] & 0xFF00) >> 8));
 
-                                    for (GameObject right = obj.TNext; obj != null; obj = right, right = right?.TNext)
-                                    {
-                                        if (obj is Static)
-                                            obj.Destroy();
-                                    }
-                                }
+                                Static staticTile = Static.Create(tileID, tileHue, i);
+                                staticTile.X = (ushort) (chunk.X + tileX);
+                                staticTile.Y = (ushort) (chunk.Y + tileY);
+                                staticTile.Z = tileZ;
+                                staticTile.UpdateScreenPosition();
+                                chunk.AddGameObject(staticTile, tileX, tileY);
                             }
                         }
 
@@ -247,7 +249,8 @@ namespace ClassicUO.IO
                         }
 
                         _UL._ULMap.ReloadBlock(mapID, block);
-                        chunk?.LoadStatics(mapID);
+
+
                         UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
                         //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                         //also the server should always send FIRST the landdata packet, and only AFTER land the statics packet
@@ -369,7 +372,8 @@ namespace ClassicUO.IO
         {
             int block = (int) p.ReadUInt();
             byte[] landData = new byte[LandBlockLenght];
-            for (int i = 0; i < LandBlockLenght; i++) landData[i] = p.ReadByte();
+            for (int i = 0; i < LandBlockLenght; i++) 
+                landData[i] = p.ReadByte();
             p.Seek(200);
             byte mapID = p.ReadByte();
 
@@ -384,41 +388,42 @@ namespace ClassicUO.IO
                 _UL._filesMap[mapID].WriteArray(block * 196 + 4, landData);
                 //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                 _UL.MapCRCs[mapID][block] = ushort.MaxValue;
-                Chunk[] chunks = new Chunk[9];
+                
                 int blockX = block / mapHeightInBlocks, blockY = block % mapHeightInBlocks;
                 int minx = Math.Max(0, blockX - 1), miny = Math.Max(0, blockY - 1);
                 blockX = Math.Min(mapWidthInBlocks, blockX + 1);
                 blockY = Math.Min(mapHeightInBlocks, blockY + 1);
-                int pos = 0;
 
-                for (; blockX >= minx; --blockX)
+
+                int worldX = Math.Min(mapWidthInBlocks, blockX + 1) << 3;
+                int worldY = Math.Min(mapHeightInBlocks, blockY + 1) << 3;
+                Chunk c = World.Map.Chunks[block];
+
+                int i = 0;
+                for (int x = 0; x < 8; x++)
                 {
-                    for (int y = blockY; y >= miny; --y)
+                    for (int y = 0; y < 8; y++)
                     {
-                        block = blockX * mapHeightInBlocks + y;
-                        chunks[pos++] = World.Map.Chunks[block];
-                    }
-                }
-
-                for (--pos; pos >= 0; --pos)
-                {
-                    Chunk c = chunks[pos];
-
-                    if (c != null)
-                    {
-                        for (int i = 0; i < 8; i++)
+                        for (; i + 2 < landData.Length; i += 3) //64 * 3 = 192 bytes
                         {
-                            for (int j = 0; j < 8; j++)
-                            {
-                                for (GameObject obj = c.Tiles[i, j]; obj != null; obj = obj.TNext)
-                                {
-                                    if (obj is Land ln)
-                                        ln.Destroy();
-                                }
-                            }
-                        }
+                            ushort tileID = (ushort) ((landData[i] & 0x00FF) | ((landData[i + 1] & 0xFF00) >> 8));
+                            sbyte tileZ = (sbyte) landData[i + 2];
 
-                        c.LoadLand(mapID);
+                            Land land = Land.Create(tileID);
+                            land.AverageZ = tileZ;
+                            land.MinZ = tileZ;
+
+                            ushort tX = (ushort) (worldX + x);
+                            ushort tY = (ushort) (worldY + y);
+
+                            land.ApplyStrech(tX, tY, tileZ);
+                            land.X = tX;
+                            land.Y = tY;
+                            land.Z = tileZ;
+                            land.UpdateScreenPosition();
+
+                            c.AddGameObject(land, x, y);
+                        }
                     }
                 }
 
