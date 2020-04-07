@@ -89,63 +89,63 @@ namespace ClassicUO.Game.UI.Controls
             base.Dispose();
         }
 
-        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<uint> e)
-        {
-            foreach (uint serial in e)
-            {
-                Item item = World.Items.Get(serial);
+        //private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<uint> e)
+        //{
+        //    foreach (uint serial in e)
+        //    {
+        //        Item item = World.Items.Get(serial);
 
-                if (item != null && item.Layer >= 0 && (int) item.Layer < _pgumps.Length)
-                {
-                    if (Mobile == World.Player && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded))
-                    {
-                        World.Player.UpdateAbilities();
-                    }
+        //        if (item != null && item.Layer >= 0 && (int) item.Layer < _pgumps.Length)
+        //        {
+        //            if (Mobile == World.Player && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded))
+        //            {
+        //                World.Player.UpdateAbilities();
+        //            }
 
-                    // this fix is necessary to clean paperdoll
-                    if (Mobile.HasEquipment && item.Layer >= 0 && (int)item.Layer < Mobile.Equipment.Length)
-                        Mobile.Equipment[(int)item.Layer] = null;
+        //            // this fix is necessary to clean paperdoll
+        //            if (Mobile.HasEquipment && item.Layer >= 0 && (int)item.Layer < Mobile.Equipment.Length)
+        //                Mobile.Equipment[(int)item.Layer] = null;
 
-                    _pgumps[(int )item.Layer]?.Dispose();
-                    _pgumps[(int) item.Layer] = null;
-                }
-            }
+        //            _pgumps[(int )item.Layer]?.Dispose();
+        //            _pgumps[(int) item.Layer] = null;
+        //        }
+        //    }
 
 
-            _updateUI = true;
-        }
+        //    _updateUI = true;
+        //}
 
-        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<uint> e)
-        {
-            if (_fakeItem != null)
-            {
-                foreach (uint item in e)
-                {
-                    if (item == _fakeItem.Serial)
-                    {
-                        Item i = World.Items.Get(item);
+        //private void ItemsOnAdded(object sender, CollectionChangedEventArgs<uint> e)
+        //{
+        //    if (_fakeItem != null)
+        //    {
+        //        foreach (uint item in e)
+        //        {
+        //            if (item == _fakeItem.Serial)
+        //            {
+        //                Item i = World.Items.Get(item);
 
-                        if (i != null && i.Layer >= 0 && (int)i.Layer < _pgumps.Length)
-                        {
-                            if (Mobile == World.Player && (i.Layer == Layer.OneHanded || i.Layer == Layer.TwoHanded))
-                            {
-                                World.Player.UpdateAbilities();
-                            }
+        //                if (i != null && i.Layer >= 0 && (int)i.Layer < _pgumps.Length)
+        //                {
+        //                    if (Mobile == World.Player && (i.Layer == Layer.OneHanded || i.Layer == Layer.TwoHanded))
+        //                    {
+        //                        World.Player.UpdateAbilities();
+        //                    }
 
-                            _pgumps[(int) i.Layer]?.Dispose();
-                            _pgumps[(int) i.Layer] = null;
+        //                    _pgumps[(int) i.Layer]?.Dispose();
+        //                    _pgumps[(int) i.Layer] = null;
 
-                        }
+        //                }
 
-                        _fakeItem = null;
+        //                _fakeItem = null;
 
-                        break;
-                    }
-                }
-            }
+        //                break;
+        //            }
+        //        }
+        //    }
 
-            _updateUI = true;
-        }
+        //    _updateUI = true;
+        //}
 
 
         public void Update()

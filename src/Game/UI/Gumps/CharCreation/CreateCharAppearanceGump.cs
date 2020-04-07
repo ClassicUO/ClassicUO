@@ -470,7 +470,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             item.Hue = hue;
             item.Layer = layer;
             World.Items.Add(item);
-            World.Items.ProcessDelta();
             //
 
             return item;

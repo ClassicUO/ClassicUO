@@ -227,7 +227,6 @@ namespace ClassicUO.Game
                     for (int i = 0; i < _toRemove.Count; i++)
                         Mobiles.Remove(_toRemove[i]);
 
-                    Mobiles.ProcessDelta();
                     _toRemove.Clear();
                 }
 
@@ -255,7 +254,6 @@ namespace ClassicUO.Game
                     for (int i = 0; i < _toRemove.Count; i++)
                         Items.Remove(_toRemove[i]);
 
-                    Items.ProcessDelta();
                     _toRemove.Clear();
                 }
 
