@@ -4630,7 +4630,7 @@ namespace ClassicUO.Network
                 if (serial != World.Player)
                 {
                     Direction cleaned_dir = direction & Direction.Up;
-                    bool isrun = (cleaned_dir & Direction.Running) != 0;
+                    bool isrun = (direction & Direction.Running) != 0;
 
                     if (World.Get(mobile) == null || (mobile.X == 0xFFFF && mobile.Y == 0xFFFF))
                     {
