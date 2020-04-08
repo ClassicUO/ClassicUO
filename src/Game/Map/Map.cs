@@ -73,16 +73,18 @@ namespace ClassicUO.Game.Map
                 if (!load)
                     return null;
 
-                _usedIndices.AddLast(block);
+                var node =_usedIndices.AddLast(block);
                 chunk = Chunk.Create((ushort) cellX, (ushort) cellY);
                 chunk.Load(Index);
+                chunk.Node = node;
             }
             else if (chunk.IsDestroyed)
             {
-                _usedIndices.AddLast(block);
+                var node = _usedIndices.AddLast(block);
                 chunk.X = (ushort) cellX;
                 chunk.Y = (ushort) cellY;
                 chunk.Load(Index);
+                chunk.Node = node;
             }
 
             chunk.LastAccessTime = Time.Ticks;
@@ -233,7 +235,6 @@ namespace ClassicUO.Game.Map
                 if (block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
                     block.Clear();
-                    _usedIndices.Remove(first);
 
                     if (++count >= Constants.MAX_MAP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
                         break;
@@ -243,9 +244,13 @@ namespace ClassicUO.Game.Map
 
         public void Destroy()
         {
-            for (var first = _usedIndices.First; first != null; first = first.Next)
+            var first = _usedIndices.First;
+
+            while (first != null)
             {
+                var next = first.Next;
                 Chunks[first.Value].Destroy();
+                first = next;
             }
 
             _usedIndices.Clear();

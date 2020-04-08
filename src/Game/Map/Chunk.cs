@@ -86,6 +86,8 @@ namespace ClassicUO.Game.Map
 
         public long LastAccessTime { get; set; }
 
+        public LinkedListNode<int> Node;
+
 
         [MethodImpl(256)]
         public unsafe void Load(int map)
@@ -449,6 +451,7 @@ namespace ClassicUO.Game.Map
                 }
             }
 
+            Node.List.Remove(Node);
             IsDestroyed = true;
             _pool.Enqueue(this);
         }
@@ -481,6 +484,7 @@ namespace ClassicUO.Game.Map
                 }
             }
 
+            Node.List.Remove(Node);
             IsDestroyed = true;
         }
 
