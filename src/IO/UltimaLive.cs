@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.IO;
 using System.IO.MemoryMappedFiles;
@@ -48,7 +49,7 @@ namespace ClassicUO.IO
 
         private static UltimaLive _UL;
 
-        private static readonly char[] _pathSeparatorChars = {Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar};
+        private static readonly char[] _pathSeparatorChars = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
         private uint[] _EOF;
         private ULFileMul[] _filesIdxStatics;
         private ULFileMul[] _filesMap;
@@ -67,7 +68,7 @@ namespace ClassicUO.IO
 
         internal static void Enable()
         {
-            Log.Trace( "Setup packet for UltimaLive");
+            Log.Trace("Setup packet for UltimaLive");
             PacketHandlers.Handlers.Add(0x3F, OnUltimaLivePacket);
             PacketHandlers.Handlers.Add(0x40, OnUpdateTerrainPacket);
         }
@@ -86,7 +87,7 @@ namespace ClassicUO.IO
                     if (_UL == null || p.Length < 15) return;
 
                     p.Seek(3);
-                    int block = (int) p.ReadUInt();
+                    int block = (int)p.ReadUInt();
                     p.Seek(14);
                     int mapID = p.ReadByte();
 
@@ -130,7 +131,7 @@ namespace ClassicUO.IO
                             int yBlockItr = (blockY + y) % mapHeightInBlocks;
                             if (yBlockItr < 0) yBlockItr += mapHeightInBlocks;
 
-                            uint blocknum = (uint) (xBlockItr * mapHeightInBlocks + yBlockItr);
+                            uint blocknum = (uint)(xBlockItr * mapHeightInBlocks + yBlockItr);
 
                             if (blocknum < blocks)
                             {
@@ -152,7 +153,7 @@ namespace ClassicUO.IO
                         }
                     }
 
-                    NetClient.Socket.Send(new UltimaLiveHashResponse((uint) block, (byte) mapID, tosendCRCs));
+                    NetClient.Socket.Send(new UltimaLiveHashResponse((uint)block, (byte)mapID, tosendCRCs));
 
                     break;
                 }
@@ -163,11 +164,11 @@ namespace ClassicUO.IO
                     if (_UL == null || p.Length < 15) return;
 
                     p.Seek(3);
-                    int block = (int) p.ReadUInt();
-                    int length = (int) p.ReadUInt();
+                    int block = (int)p.ReadUInt();
+                    int length = (int)p.ReadUInt();
                     int totallen = length * 7;
 
-                    if (p.Length < totallen + 15) 
+                    if (p.Length < totallen + 15)
                         return;
 
                     p.Seek(14);
@@ -191,17 +192,17 @@ namespace ClassicUO.IO
 
                         if (chunk != null)
                         {
-                            for (int i = 0; i < staticsData.Length; i++)
+                            for (int i = 0; i + 6 < staticsData.Length; i += 7)
                             {
-                                ushort tileID = (ushort) ((staticsData[i] & 0x00FF) | ((staticsData[i + 1] & 0xFF00) >> 8));
+                                ushort tileID = (ushort)(staticsData[i] | (staticsData[i + 1] << 8));
                                 byte tileX = staticsData[i + 2];
                                 byte tileY = staticsData[i + 3];
-                                sbyte tileZ = (sbyte) staticsData[i + 4];
-                                ushort tileHue = (ushort) ((staticsData[i + 5] & 0x00FF) | ((staticsData[i + 6] & 0xFF00) >> 8));
+                                sbyte tileZ = (sbyte)staticsData[i + 4];
+                                ushort tileHue = (ushort)(staticsData[i + 5] | (staticsData[i + 6] << 8));
 
                                 Static staticTile = Static.Create(tileID, tileHue, i);
-                                staticTile.X = (ushort) (chunk.X + tileX);
-                                staticTile.Y = (ushort) (chunk.Y + tileY);
+                                staticTile.X = (ushort)(chunk.X + tileX);
+                                staticTile.Y = (ushort)(chunk.Y + tileY);
                                 staticTile.Z = tileZ;
                                 staticTile.UpdateScreenPosition();
                                 chunk.AddGameObject(staticTile, tileX, tileY);
@@ -213,8 +214,8 @@ namespace ClassicUO.IO
                         if (totallen <= 0)
                         {
                             //update index lookup AND static size on disk (first 4 bytes lookup, next 4 is statics size)
-                            _UL._filesIdxStatics[mapID].WriteArray(index, new byte[8] {0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00});
-                            Log.Trace( $"writing zero length statics to index at 0x{index:X8}");
+                            _UL._filesIdxStatics[mapID].WriteArray(index, new byte[8] { 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00 });
+                            Log.Trace($"writing zero length statics to index at 0x{index:X8}");
                         }
                         else
                         {
@@ -224,26 +225,26 @@ namespace ClassicUO.IO
 
                             //Do we have enough room to write the statics into the existing location?
                             if (existingStaticsLength >= totallen && lookup != 0xFFFFFFFF)
-                                Log.Trace( $"writing statics to existing file location at 0x{lookup:X8}, length:{totallen}");
+                                Log.Trace($"writing statics to existing file location at 0x{lookup:X8}, length:{totallen}");
                             else
                             {
                                 lookup = _UL._EOF[mapID];
-                                _UL._EOF[mapID] += (uint) totallen;
-                                Log.Trace( $"writing statics to end of file at 0x{lookup:X8}, length:{totallen}");
+                                _UL._EOF[mapID] += (uint)totallen;
+                                Log.Trace($"writing statics to end of file at 0x{lookup:X8}, length:{totallen}");
                             }
 
                             _UL._filesStatics[mapID].WriteArray(lookup, staticsData);
                             _UL._writequeue.Enqueue((mapID, lookup, staticsData));
                             //update lookup AND index length on disk
                             byte[] idxdata = new byte[8];
-                            idxdata[0] = (byte) lookup;
-                            idxdata[1] = (byte) (lookup >> 8);
-                            idxdata[2] = (byte) (lookup >> 16);
-                            idxdata[3] = (byte) (lookup >> 24);
-                            idxdata[4] = (byte) totallen;
-                            idxdata[5] = (byte) (totallen >> 8);
-                            idxdata[6] = (byte) (totallen >> 16);
-                            idxdata[7] = (byte) (totallen >> 24);
+                            idxdata[0] = (byte)lookup;
+                            idxdata[1] = (byte)(lookup >> 8);
+                            idxdata[2] = (byte)(lookup >> 16);
+                            idxdata[3] = (byte)(lookup >> 24);
+                            idxdata[4] = (byte)totallen;
+                            idxdata[5] = (byte)(totallen >> 8);
+                            idxdata[6] = (byte)(totallen >> 16);
+                            idxdata[7] = (byte)(totallen >> 24);
                             //update lookup AND index length on disk
                             _UL._filesIdxStatics[mapID].WriteArray(block * 12, idxdata);
                         }
@@ -301,8 +302,8 @@ namespace ClassicUO.IO
                     for (int i = 0; i < maps; i++)
                     {
                         int mapnum = p.ReadByte();
-                        _UL.MapSizeWrapSize[mapnum, 0] = Math.Min((ushort) MapLoader.Instance.MapsDefaultSize[0, 0], p.ReadUShort());
-                        _UL.MapSizeWrapSize[mapnum, 1] = Math.Min((ushort) MapLoader.Instance.MapsDefaultSize[0, 1], p.ReadUShort());
+                        _UL.MapSizeWrapSize[mapnum, 0] = Math.Min((ushort)MapLoader.Instance.MapsDefaultSize[0, 0], p.ReadUShort());
+                        _UL.MapSizeWrapSize[mapnum, 1] = Math.Min((ushort)MapLoader.Instance.MapsDefaultSize[0, 1], p.ReadUShort());
                         _UL.MapSizeWrapSize[mapnum, 2] = Math.Min(p.ReadUShort(), _UL.MapSizeWrapSize[mapnum, 0]);
                         _UL.MapSizeWrapSize[mapnum, 3] = Math.Min(p.ReadUShort(), _UL.MapSizeWrapSize[mapnum, 1]);
                     }
@@ -359,7 +360,6 @@ namespace ClassicUO.IO
                     //TODO: create shard directory, copy map and statics to that directory, use that files instead of the original ones
                     break;
                 }
-
                 /*case 0x03://Refresh client VIEW - after an update the server will usually send this packet to refresh the client view, this packet has been discontinued after ultimalive 0.96 and isn't necessary anymore
                     {
                         break;
@@ -370,9 +370,9 @@ namespace ClassicUO.IO
         [MethodImpl(256)]
         private static void OnUpdateTerrainPacket(Packet p)
         {
-            int block = (int) p.ReadUInt();
+            int block = (int)p.ReadUInt();
             byte[] landData = new byte[LandBlockLenght];
-            for (int i = 0; i < LandBlockLenght; i++) 
+            for (int i = 0; i < LandBlockLenght; i++)
                 landData[i] = p.ReadByte();
             p.Seek(200);
             byte mapID = p.ReadByte();
@@ -380,51 +380,45 @@ namespace ClassicUO.IO
             if (World.Map == null || mapID != World.Map.Index)
                 return;
 
-            int mapWidthInBlocks = MapLoader.Instance.MapBlocksSize[mapID, 0];
-            int mapHeightInBlocks = MapLoader.Instance.MapBlocksSize[mapID, 1];
+            ushort mapWidthInBlocks = (ushort)MapLoader.Instance.MapBlocksSize[mapID, 0];
+            ushort mapHeightInBlocks = (ushort)MapLoader.Instance.MapBlocksSize[mapID, 1];
 
             if (block >= 0 && block < mapWidthInBlocks * mapHeightInBlocks)
             {
                 _UL._filesMap[mapID].WriteArray(block * 196 + 4, landData);
                 //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                 _UL.MapCRCs[mapID][block] = ushort.MaxValue;
-                
-                int blockX = block / mapHeightInBlocks, blockY = block % mapHeightInBlocks;
-                int minx = Math.Max(0, blockX - 1), miny = Math.Max(0, blockY - 1);
-                blockX = Math.Min(mapWidthInBlocks, blockX + 1);
-                blockY = Math.Min(mapHeightInBlocks, blockY + 1);
 
-
-                int worldX = Math.Min(mapWidthInBlocks, blockX + 1) << 3;
-                int worldY = Math.Min(mapHeightInBlocks, blockY + 1) << 3;
+                ushort blockX = (ushort)(block / mapHeightInBlocks), blockY = (ushort)(block % mapHeightInBlocks);
+                blockX = Math.Min(mapWidthInBlocks, blockX);
+                blockY = Math.Min(mapHeightInBlocks, blockY);
+                int worldX = blockX << 3;
+                int worldY = blockY << 3;
                 Chunk c = World.Map.Chunks[block];
+                if (c == null)
+                    return;
 
-                int i = 0;
+                List<GameObject> queue = new List<GameObject>();
                 for (int x = 0; x < 8; x++)
                 {
                     for (int y = 0; y < 8; y++)
                     {
-                        for (; i + 2 < landData.Length; i += 3) //64 * 3 = 192 bytes
+                        GameObject obj = c.GetHeadObject(x, y), cur;
+                        while (obj != null && !(obj is Land) && !(obj is Static))
                         {
-                            ushort tileID = (ushort) ((landData[i] & 0x00FF) | ((landData[i + 1] & 0xFF00) >> 8));
-                            sbyte tileZ = (sbyte) landData[i + 2];
-
-                            Land land = Land.Create(tileID);
-                            land.AverageZ = tileZ;
-                            land.MinZ = tileZ;
-
-                            ushort tX = (ushort) (worldX + x);
-                            ushort tY = (ushort) (worldY + y);
-
-                            land.ApplyStrech(tX, tY, tileZ);
-                            land.X = tX;
-                            land.Y = tY;
-                            land.Z = tileZ;
-                            land.UpdateScreenPosition();
-
-                            c.AddGameObject(land, x, y);
+                            queue.Add(obj);
+                            cur = obj;
+                            obj = obj.TNext;
+                            cur.RemoveFromTile();
                         }
                     }
+                }
+                c.Clear();
+                c = World.Map.GetChunk(blockX, blockY, true);
+                foreach (GameObject obj in queue)
+                {
+                    c.AddGameObject(obj, obj.X % 8, obj.Y % 8);
+                    obj.UpdateScreenPosition();
                 }
 
                 UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
