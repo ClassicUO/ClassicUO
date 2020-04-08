@@ -228,17 +228,22 @@ namespace ClassicUO.Game.Map
 
             var first = _usedIndices.First;
 
-            for (var right = first.Next; first != null; first = right, right = right?.Next)
+            while (first != null)
             {
-                Chunk block = Chunks[first.Value];
+                var next = first.Next;
+
+                ref Chunk block = ref Chunks[first.Value];
 
                 if (block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
-                    block.Clear();
+                    block.Destroy();
+                    block = null;
 
                     if (++count >= Constants.MAX_MAP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
                         break;
                 }
+
+                first = next;
             }
         }
 
@@ -249,7 +254,9 @@ namespace ClassicUO.Game.Map
             while (first != null)
             {
                 var next = first.Next;
-                Chunks[first.Value].Destroy();
+                ref var c = ref Chunks[first.Value];
+                c.Destroy();
+                c = null;
                 first = next;
             }
 

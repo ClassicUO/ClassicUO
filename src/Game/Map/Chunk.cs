@@ -356,7 +356,6 @@ namespace ClassicUO.Game.Map
 
             if (Node.Next != null || Node.Previous != null)
                 Node.List?.Remove(Node);
-
             IsDestroyed = true;
             _pool.Enqueue(this);
         }
