@@ -838,7 +838,6 @@ namespace ClassicUO.Game.GameObjects
                             AddToTile();
 
                         LastStepTime = Time.Ticks;
-                        ProcessDelta();
                     }
                 }
             }

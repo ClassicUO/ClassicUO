@@ -273,10 +273,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void ProcessDelta()
-        {
-            //Items.ProcessDelta();
-        }
 
         public override void Destroy()
         {

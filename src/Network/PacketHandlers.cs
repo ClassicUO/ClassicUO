@@ -464,8 +464,6 @@ namespace ClassicUO.Network
                     }
                 }
 
-                mobile.ProcessDelta();
-
                 if (mobile == World.Player)
                 {
                     UoAssist.SignalHits();
@@ -531,8 +529,6 @@ namespace ClassicUO.Network
 
                 mobile.Flags = (Flags) flags;
             }
-
-            mobile.ProcessDelta();
         }
 
         private static void UpdateItem(Packet p)
@@ -670,7 +666,6 @@ namespace ClassicUO.Network
 
             GameActions.SingleClick(World.Player);
             NetClient.Socket.Send(new PSkillsRequest(World.Player));
-            World.Player.ProcessDelta();
 
             if (World.Player.IsDead)
                 World.ChangeSeason(Seasons.Desolation, 42);
@@ -705,7 +700,6 @@ namespace ClassicUO.Network
                 {
                     if (string.IsNullOrEmpty(entity.Name))
                         entity.Name = name;
-                    entity.ProcessDelta();
                 }
             }
 
@@ -868,7 +862,6 @@ namespace ClassicUO.Network
 
             World.Player.Walker.DenyWalk(seq, x, y, z);
             World.Player.Direction = direction;
-            World.Player.ProcessDelta();
 
             Client.Game.GetScene<GameScene>()?.Weather?.Reset();
         }
@@ -886,7 +879,6 @@ namespace ClassicUO.Network
 
             World.Player.NotorietyFlag = (NotorietyFlag) noto;
             World.Player.Walker.ConfirmWalk(seq);
-            World.Player.ProcessDelta();
 
             World.Player.AddToTile();
         }
@@ -1254,7 +1246,6 @@ namespace ClassicUO.Network
                 mobile.Mana = p.ReadUShort();
                 mobile.StaminaMax = p.ReadUShort();
                 mobile.Stamina = p.ReadUShort();
-                mobile.ProcessDelta();
 
                 if (mobile == World.Player)
                 {
@@ -1483,8 +1474,6 @@ namespace ClassicUO.Network
                         break;
                 }
             }
-
-            World.Player.ProcessDelta();
         }
 
         private static void Pathfinding(Packet p)
@@ -1981,7 +1970,6 @@ namespace ClassicUO.Network
                 return;
 
             World.Player.InWarMode = p.ReadBool();
-            World.Player.ProcessDelta();
         }
 
         private static void Ping(Packet p)
@@ -2239,7 +2227,6 @@ namespace ClassicUO.Network
                 }
 
                 item.CheckGraphicChange();
-                item.ProcessDelta();
                 World.Items.Add(item);
             }
 
@@ -2642,7 +2629,6 @@ namespace ClassicUO.Network
 
             entity.HitsMax = p.ReadUShort();
             entity.Hits = p.ReadUShort();
-            entity.ProcessDelta();
 
             if (entity == World.Player)
                 UoAssist.SignalHits();
@@ -2656,9 +2642,9 @@ namespace ClassicUO.Network
 
             mobile.ManaMax = p.ReadUShort();
             mobile.Mana = p.ReadUShort();
-            mobile.ProcessDelta();
 
-            if (mobile == World.Player) UoAssist.SignalMana();
+            if (mobile == World.Player) 
+                UoAssist.SignalMana();
         }
 
         private static void UpdateStamina(Packet p)
@@ -2669,9 +2655,9 @@ namespace ClassicUO.Network
 
             mobile.StaminaMax = p.ReadUShort();
             mobile.Stamina = p.ReadUShort();
-            mobile.ProcessDelta();
 
-            if (mobile == World.Player) UoAssist.SignalStamina();
+            if (mobile == World.Player) 
+                UoAssist.SignalStamina();
         }
 
         private static void OpenUrl(Packet p)
@@ -2826,7 +2812,6 @@ namespace ClassicUO.Network
                 {
                     if (string.IsNullOrEmpty(entity.Name))
                         entity.Name = name;
-                    entity.ProcessDelta();
                 }           
             }
 
@@ -3666,7 +3651,6 @@ namespace ClassicUO.Network
             {
                 //entity.Graphic = graphic;
                 entity.Name = name;
-                entity.ProcessDelta();
             }
 
             MessageManager.HandleMessage(entity, text, name, hue, type, (byte) font, true);
