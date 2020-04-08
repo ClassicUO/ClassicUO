@@ -37,11 +37,9 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ItemGump : Control
     {
-        protected bool _clickedCanDrag;
-
+        private bool _clickedCanDrag;
         private float _picUpTime;
-        //private float _sClickTime;
-        //private bool _sendClickIfNotDClick;
+
 
         public ItemGump(Item item)
         {
@@ -93,14 +91,6 @@ namespace ClassicUO.Game.UI.Controls
                 _clickedCanDrag = false;
                 AttempPickUp();
             }
-
-            //if (_sendClickIfNotDClick && totalMS >= _sClickTime)
-            //{
-            //    if (!World.ClientFeatures.TooltipsEnabled) 
-            //        GameActions.SingleClick(LocalSerial);
-            //    GameActions.OpenPopupMenu(LocalSerial);
-            //    _sendClickIfNotDClick = false;
-            //}
 
             base.Update(totalMS, frameMS);
         }
@@ -258,15 +248,13 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (!ItemHold.Enabled || !gs.IsMouseOverUI)
                     {
-                        //if (_clickedCanDrag)
-                        //{
-                        //    _clickedCanDrag = false;
-                        //    _sendClickIfNotDClick = true;
-                        //    _sClickTime = Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                        //}
                         if (!DelayedObjectClickManager.IsEnabled)
                         {
-                            DelayedObjectClickManager.Set(Item.Serial, Mouse.Position.X, Mouse.Position.Y, Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                            var p = RootParent;
+                             DelayedObjectClickManager.Set(Item.Serial, 
+                                                          Mouse.Position.X - p.ScreenCoordinateX,
+                                                          Mouse.Position.Y - p.ScreenCoordinateY, 
+                                                          Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                         }
                     }
                     else

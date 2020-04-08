@@ -70,13 +70,22 @@ namespace ClassicUO.Game.Managers
             IsEnabled = true;
         }
 
-        public static void Clear(uint serial = 0)
+        public static void Clear()
         {
-            if (Serial == serial || serial == 0)
+            IsEnabled = false;
+            Serial = 0xFFFF_FFFF;
+            Timer = 0;
+        }
+
+        public static void Clear(uint serial)
+        {
+            if (Serial == serial)
             {
                 Timer = 0;
                 Serial = 0;
                 IsEnabled = false;
+                X = 0;
+                Y = 0;
             }
         }
     }

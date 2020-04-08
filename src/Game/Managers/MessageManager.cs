@@ -125,8 +125,8 @@ namespace ClassicUO.Game.Managers
 
                     if (parent is Item it && !it.OnGround)
                     {
-                        msg.X = Mouse.LastClickPosition.X;
-                        msg.Y = Mouse.LastClickPosition.Y;
+                        msg.X = DelayedObjectClickManager.X;
+                        msg.Y = DelayedObjectClickManager.Y;
 
                         bool found = false;
 
@@ -139,20 +139,14 @@ namespace ClassicUO.Game.Managers
                                 switch (g)
                                 {
                                     case PaperDollGump paperDoll when g.LocalSerial == it.Container:
-                                        msg.X -= paperDoll.ScreenCoordinateX;
-                                        msg.Y -= paperDoll.ScreenCoordinateY;
                                         paperDoll.AddText(msg);
                                         found = true;
                                         break;
                                     case ContainerGump container when g.LocalSerial == it.Container:
-                                        msg.X -= container.ScreenCoordinateX;
-                                        msg.Y -= container.ScreenCoordinateY;
                                         container.AddText(msg);
                                         found = true;
                                         break;
                                     case TradingGump trade when g.LocalSerial == it.Container || trade.ID1 == it.Container || trade.ID2 == it.Container:
-                                        msg.X -= trade.ScreenCoordinateX;
-                                        msg.Y -= trade.ScreenCoordinateY;
                                         trade.AddText(msg);
                                         found = true;
                                         break;

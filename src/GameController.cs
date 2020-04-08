@@ -624,8 +624,6 @@ namespace ClassicUO
                                 }
                                 Mouse.LButtonPressed = false;
                                 Mouse.End();
-
-                                Mouse.LastClickPosition = Mouse.Position;
                             }
 
                             break;
