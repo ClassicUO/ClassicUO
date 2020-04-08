@@ -231,12 +231,16 @@ namespace ClassicUO.IO
                             if (c == null)
                                 return;
 
+                            var linkedList = c.Node?.List;
+
                             ushort mapWidthInBlocks = (ushort)MapLoader.Instance.MapBlocksSize[mapID, 0];
                             ushort mapHeightInBlocks = (ushort)MapLoader.Instance.MapBlocksSize[mapID, 1];
                             ushort blockX = (ushort)(block / mapHeightInBlocks), blockY = (ushort)(block % mapHeightInBlocks);
                             blockX = Math.Min(mapWidthInBlocks, blockX);
                             blockY = Math.Min(mapHeightInBlocks, blockY);
+
                             List<GameObject> lst = new List<GameObject>();
+
                             for (int x = 0; x < 8; x++)
                             {
                                 for (int y = 0; y < 8; y++)
@@ -254,32 +258,16 @@ namespace ClassicUO.IO
                                     }
                                 }
                             }
+
                             c.Clear();
-                            c = World.Map.GetChunk(blockX, blockY, true);
+                            c.Load(mapID);
+
+                            linkedList?.AddLast(c.Node);
+
                             foreach (GameObject obj in lst)
                             {
                                 c.AddGameObject(obj, obj.X % 8, obj.Y % 8);
                             }
-                            /*Chunk chunk = World.Map.Chunks[block];
-
-                            if (chunk != null)
-                            {
-                                for (int i = 0; i + 6 < staticsData.Length; i += 7)
-                                {
-                                    ushort tileID = (ushort)(staticsData[i] | (staticsData[i + 1] << 8));
-                                    byte tileX = staticsData[i + 2];
-                                    byte tileY = staticsData[i + 3];
-                                    sbyte tileZ = (sbyte)staticsData[i + 4];
-                                    ushort tileHue = (ushort)(staticsData[i + 5] | (staticsData[i + 6] << 8));
-
-                                    Static staticTile = Static.Create(tileID, tileHue, i);
-                                    staticTile.X = (ushort)(chunk.X + tileX);
-                                    staticTile.Y = (ushort)(chunk.Y + tileY);
-                                    staticTile.Z = tileZ;
-                                    staticTile.UpdateScreenPosition();
-                                    chunk.AddGameObject(staticTile, tileX, tileY);
-                                }
-                            }*/
                         }
 
                         //_UL._ULMap.ReloadBlock(mapID, block);
@@ -432,6 +420,8 @@ namespace ClassicUO.IO
                 if (c == null)
                     return;
 
+                var linkedList = c.Node?.List;
+
                 List<GameObject> lst = new List<GameObject>();
                 for (int x = 0; x < 8; x++)
                 {
@@ -450,8 +440,12 @@ namespace ClassicUO.IO
                         }
                     }
                 }
+
                 c.Clear();
-                c = World.Map.GetChunk(blockX, blockY, true);
+                c.Load(mapID);
+
+                linkedList?.AddLast(c.Node);
+
                 foreach (GameObject obj in lst)
                 {
                     c.AddGameObject(obj, obj.X % 8, obj.Y % 8);
