@@ -260,6 +260,7 @@ namespace ClassicUO.IO
                             }
 
                             c.Clear();
+                            _UL._ULMap.ReloadBlock(mapID, block);
                             c.Load(mapID);
 
                             linkedList?.AddLast(c.Node);
@@ -270,7 +271,6 @@ namespace ClassicUO.IO
                             }
                         }
 
-                        //_UL._ULMap.ReloadBlock(mapID, block);
 
 
                         UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
