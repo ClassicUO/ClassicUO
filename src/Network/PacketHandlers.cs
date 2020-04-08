@@ -2168,6 +2168,7 @@ namespace ClassicUO.Network
             if (obj == null)
                 return;
 
+
             if (SerialHelper.IsMobile(serial))
             {
                 Mobile mob = (Mobile) obj;
@@ -4336,16 +4337,7 @@ namespace ClassicUO.Network
 
             if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
             {
-                Entity initcontainer = World.Get(item.Container);
-
-                if (initcontainer != null)
-                {
-                    item.Container = 0;
-                    initcontainer.Remove(item);
-                }
-                else if (SerialHelper.IsValid(item.Container)) 
-                    Log.Warn( $"This item ({item.Serial}) has a container ({item.Container}), but cannot be found. :|");
-
+                RemoveItemFromContainer(item);
                 item.Destroy();
                 World.Items.Remove(item);
             }
@@ -4712,10 +4704,10 @@ namespace ClassicUO.Network
 
                     container.Remove(obj);
                 }
-                else
-                {
-                    obj.Container = 0xFFFF_FFFF;
-                }
+
+                obj.Next = null;
+                obj.Previous = null;
+                obj.Container = 0xFFFF_FFFF;
             }
             else
             {
