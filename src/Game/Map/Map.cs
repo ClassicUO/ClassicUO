@@ -234,7 +234,7 @@ namespace ClassicUO.Game.Map
 
                 if (block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
-                    block.Destroy();
+                    block.Clear();
 
                     if (++count >= Constants.MAX_MAP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
                         break;
