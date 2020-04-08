@@ -112,7 +112,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (hue > 0)
                     {
-                        if (hue == 0x00FFFFFF)
+                        if (hue == 0x00FFFFFF || hue == 0xFFFF || hue == 0xFF)
                             htmlColor = 0xFFFFFFFE;
                         else
                             htmlColor = (HuesHelper.Color16To32((ushort) hue) << 8) | 0xFF;
