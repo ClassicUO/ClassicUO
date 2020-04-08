@@ -230,10 +230,18 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left)
             {
-                if (World.Player.InWarMode && SerialHelper.IsMobile(LocalSerial))
-                    GameActions.Attack(LocalSerial);
-                else if (SerialHelper.IsItem(LocalSerial) && !GameActions.OpenCorpse(LocalSerial))
-                    GameActions.DoubleClick(LocalSerial);
+                if (SerialHelper.IsMobile(LocalSerial))
+                {
+                    if (World.Player.InWarMode)
+                        GameActions.Attack(LocalSerial);
+                    else
+                        GameActions.DoubleClick(LocalSerial);
+                }
+                else
+                {
+                    if (!GameActions.OpenCorpse(LocalSerial))
+                        GameActions.DoubleClick(LocalSerial);
+                }
 
                 return true;
             }
