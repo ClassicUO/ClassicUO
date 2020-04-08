@@ -188,27 +188,6 @@ namespace ClassicUO.IO
 
                     if (block >= 0 && block < MapLoader.Instance.MapBlocksSize[mapID, 0] * MapLoader.Instance.MapBlocksSize[mapID, 1])
                     {
-                        Chunk chunk = World.Map.Chunks[block];
-
-                        if (chunk != null)
-                        {
-                            for (int i = 0; i + 6 < staticsData.Length; i += 7)
-                            {
-                                ushort tileID = (ushort)(staticsData[i] | (staticsData[i + 1] << 8));
-                                byte tileX = staticsData[i + 2];
-                                byte tileY = staticsData[i + 3];
-                                sbyte tileZ = (sbyte)staticsData[i + 4];
-                                ushort tileHue = (ushort)(staticsData[i + 5] | (staticsData[i + 6] << 8));
-
-                                Static staticTile = Static.Create(tileID, tileHue, i);
-                                staticTile.X = (ushort)(chunk.X + tileX);
-                                staticTile.Y = (ushort)(chunk.Y + tileY);
-                                staticTile.Z = tileZ;
-                                staticTile.UpdateScreenPosition();
-                                chunk.AddGameObject(staticTile, tileX, tileY);
-                            }
-                        }
-
                         int index = block * 12;
 
                         if (totallen <= 0)
@@ -247,9 +226,63 @@ namespace ClassicUO.IO
                             idxdata[7] = (byte)(totallen >> 24);
                             //update lookup AND index length on disk
                             _UL._filesIdxStatics[mapID].WriteArray(block * 12, idxdata);
+
+                            Chunk c = World.Map.Chunks[block];
+                            if (c == null)
+                                return;
+
+                            ushort mapWidthInBlocks = (ushort)MapLoader.Instance.MapBlocksSize[mapID, 0];
+                            ushort mapHeightInBlocks = (ushort)MapLoader.Instance.MapBlocksSize[mapID, 1];
+                            ushort blockX = (ushort)(block / mapHeightInBlocks), blockY = (ushort)(block % mapHeightInBlocks);
+                            blockX = Math.Min(mapWidthInBlocks, blockX);
+                            blockY = Math.Min(mapHeightInBlocks, blockY);
+                            List<GameObject> lst = new List<GameObject>();
+                            for (int x = 0; x < 8; x++)
+                            {
+                                for (int y = 0; y < 8; y++)
+                                {
+                                    GameObject obj = c.GetHeadObject(x, y), cur;
+                                    while (obj != null)
+                                    {
+                                        cur = obj;
+                                        obj = obj.TNext;
+                                        if (!(cur is Land) && !(cur is Static))
+                                        {
+                                            lst.Add(cur);
+                                            cur.RemoveFromTile();
+                                        }
+                                    }
+                                }
+                            }
+                            c.Clear();
+                            c = World.Map.GetChunk(blockX, blockY, true);
+                            foreach (GameObject obj in lst)
+                            {
+                                c.AddGameObject(obj, obj.X % 8, obj.Y % 8);
+                            }
+                            /*Chunk chunk = World.Map.Chunks[block];
+
+                            if (chunk != null)
+                            {
+                                for (int i = 0; i + 6 < staticsData.Length; i += 7)
+                                {
+                                    ushort tileID = (ushort)(staticsData[i] | (staticsData[i + 1] << 8));
+                                    byte tileX = staticsData[i + 2];
+                                    byte tileY = staticsData[i + 3];
+                                    sbyte tileZ = (sbyte)staticsData[i + 4];
+                                    ushort tileHue = (ushort)(staticsData[i + 5] | (staticsData[i + 6] << 8));
+
+                                    Static staticTile = Static.Create(tileID, tileHue, i);
+                                    staticTile.X = (ushort)(chunk.X + tileX);
+                                    staticTile.Y = (ushort)(chunk.Y + tileY);
+                                    staticTile.Z = tileZ;
+                                    staticTile.UpdateScreenPosition();
+                                    chunk.AddGameObject(staticTile, tileX, tileY);
+                                }
+                            }*/
                         }
 
-                        _UL._ULMap.ReloadBlock(mapID, block);
+                        //_UL._ULMap.ReloadBlock(mapID, block);
 
 
                         UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
@@ -390,35 +423,38 @@ namespace ClassicUO.IO
                 _UL.MapCRCs[mapID][block] = ushort.MaxValue;
 
                 ushort blockX = (ushort)(block / mapHeightInBlocks), blockY = (ushort)(block % mapHeightInBlocks);
+                //int minx = Math.Max(0, blockX - 1), miny = Math.Max(0, blockY - 1);
                 blockX = Math.Min(mapWidthInBlocks, blockX);
                 blockY = Math.Min(mapHeightInBlocks, blockY);
-                int worldX = blockX << 3;
-                int worldY = blockY << 3;
+                /*int worldX = blockX << 3;
+                int worldY = blockY << 3;*/
                 Chunk c = World.Map.Chunks[block];
                 if (c == null)
                     return;
 
-                List<GameObject> queue = new List<GameObject>();
+                List<GameObject> lst = new List<GameObject>();
                 for (int x = 0; x < 8; x++)
                 {
                     for (int y = 0; y < 8; y++)
                     {
                         GameObject obj = c.GetHeadObject(x, y), cur;
-                        while (obj != null && !(obj is Land) && !(obj is Static))
+                        while (obj != null)
                         {
-                            queue.Add(obj);
                             cur = obj;
                             obj = obj.TNext;
-                            cur.RemoveFromTile();
+                            if (!(cur is Land) && !(cur is Static))
+                            {
+                                lst.Add(cur);
+                                cur.RemoveFromTile();
+                            }
                         }
                     }
                 }
                 c.Clear();
                 c = World.Map.GetChunk(blockX, blockY, true);
-                foreach (GameObject obj in queue)
+                foreach (GameObject obj in lst)
                 {
                     c.AddGameObject(obj, obj.X % 8, obj.Y % 8);
-                    obj.UpdateScreenPosition();
                 }
 
                 UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
