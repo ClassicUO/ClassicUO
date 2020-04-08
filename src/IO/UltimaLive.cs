@@ -82,7 +82,6 @@ namespace ClassicUO.IO
             switch (command)
             {
                 case 0xFF: //hash query, for the blocks around us
-
                 {
                     if (_UL == null || p.Length < 15) return;
 
@@ -142,7 +141,7 @@ namespace ClassicUO.IO
                                     if (xBlockItr >= mapWidthInBlocks || yBlockItr >= mapHeightInBlocks)
                                         crc = 0;
                                     else
-                                        crc = GetBlockCrc(blocknum, xBlockItr, yBlockItr);
+                                        crc = GetBlockCrc(blocknum);
                                     _UL.MapCRCs[mapID][blocknum] = crc;
                                 }
 
@@ -157,9 +156,7 @@ namespace ClassicUO.IO
 
                     break;
                 }
-
                 case 0x00: //statics update
-
                 {
                     if (_UL == null || p.Length < 15) return;
 
@@ -232,15 +229,7 @@ namespace ClassicUO.IO
                                 return;
 
                             var linkedList = c.Node?.List;
-
-                            ushort mapWidthInBlocks = (ushort)MapLoader.Instance.MapBlocksSize[mapID, 0];
-                            ushort mapHeightInBlocks = (ushort)MapLoader.Instance.MapBlocksSize[mapID, 1];
-                            ushort blockX = (ushort)(block / mapHeightInBlocks), blockY = (ushort)(block % mapHeightInBlocks);
-                            blockX = Math.Min(mapWidthInBlocks, blockX);
-                            blockY = Math.Min(mapHeightInBlocks, blockY);
-
                             List<GameObject> lst = new List<GameObject>();
-
                             for (int x = 0; x < 8; x++)
                             {
                                 for (int y = 0; y < 8; y++)
@@ -281,9 +270,7 @@ namespace ClassicUO.IO
 
                     break;
                 }
-
                 case 0x01: //map definition update
-
                 {
                     if (_UL == null)
                         return;
@@ -355,7 +342,6 @@ namespace ClassicUO.IO
 
                     break;
                 }
-
                 case 0x02: //Live login confirmation
                 {
                     if (p.Length < 43) //fixed size
@@ -410,12 +396,6 @@ namespace ClassicUO.IO
                 //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                 _UL.MapCRCs[mapID][block] = ushort.MaxValue;
 
-                ushort blockX = (ushort)(block / mapHeightInBlocks), blockY = (ushort)(block % mapHeightInBlocks);
-                //int minx = Math.Max(0, blockX - 1), miny = Math.Max(0, blockY - 1);
-                blockX = Math.Min(mapWidthInBlocks, blockX);
-                blockY = Math.Min(mapHeightInBlocks, blockY);
-                /*int worldX = blockX << 3;
-                int worldY = blockY << 3;*/
                 Chunk c = World.Map.Chunks[block];
                 if (c == null)
                     return;
@@ -455,7 +435,7 @@ namespace ClassicUO.IO
             }
         }
 
-        internal static ushort GetBlockCrc(uint block, int xblock, int yblock)
+        internal static ushort GetBlockCrc(uint block)
         {
             int mapID = World.Map.Index;
             _UL._filesIdxStatics[mapID].Seek(block * 12);
@@ -490,7 +470,6 @@ namespace ClassicUO.IO
             }
 
             ushort crc = Fletcher16(blockData);
-            blockData = null;
 
             return crc;
         }
