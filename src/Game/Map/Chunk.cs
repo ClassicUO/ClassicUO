@@ -451,7 +451,9 @@ namespace ClassicUO.Game.Map
                 }
             }
 
-            Node.List.Remove(Node);
+            if (Node.Next != null || Node.Previous != null)
+                Node.List?.Remove(Node);
+
             IsDestroyed = true;
             _pool.Enqueue(this);
         }
@@ -484,7 +486,8 @@ namespace ClassicUO.Game.Map
                 }
             }
 
-            Node.List.Remove(Node);
+            if (Node.Next != null || Node.Previous != null)
+                Node.List?.Remove(Node);
             IsDestroyed = true;
         }
 
