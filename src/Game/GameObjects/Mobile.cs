@@ -52,7 +52,7 @@ namespace ClassicUO.Game.GameObjects
 
         static Mobile()
         {
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < Constants.PREDICTABLE_CHUNKS; i++)
                 _pool.Enqueue(new Mobile(0));
         }
 

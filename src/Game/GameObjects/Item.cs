@@ -47,7 +47,7 @@ namespace ClassicUO.Game.GameObjects
 
         static Item()
         {
-            for (int i = 0; i < 5000; i++)
+            for (int i = 0; i < Constants.PREDICTABLE_TILE_COUNT; i++)
                 _pool.Enqueue(new Item(0));
         }
 
