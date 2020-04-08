@@ -1111,7 +1111,9 @@ namespace ClassicUO.Network
             uint containerSerial = p.ReadUInt();
             ushort hue = p.ReadUShort();
 
+            Console.WriteLine("######### START UpdateContainedItem #########");
             AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
+            Console.WriteLine("######### END UpdateContainedItem #########");
         }
 
         private static void DenyMoveItem(Packet p)
@@ -1503,6 +1505,7 @@ namespace ClassicUO.Network
                 return;
 
             ushort count = p.ReadUShort();
+            Console.WriteLine("######### START UpdateContainedItems #########");
 
             for (int i = 0; i < count; i++)
             {
@@ -1532,12 +1535,13 @@ namespace ClassicUO.Network
                            container.Clear();
                         }
 
-                        container.ProcessDelta();
+                        UIManager.GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
                     }
                 }
 
                 AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
             }
+            Console.WriteLine("######### END UpdateContainedItems #########");
         }
 
         private static void PersonalLightLevel(Packet p)
@@ -2168,6 +2172,23 @@ namespace ClassicUO.Network
             if (obj == null)
                 return;
 
+            if (!obj.IsEmpty)
+            {
+                var o = obj.Items;
+
+                while (o != null)
+                {
+                    var next = (Item) o.Next;
+
+                    if (next != null && next.Layer != Layer.Backpack)
+                    {
+                        RemoveItemFromContainer(next);
+                        World.Items.Remove(next.Serial);
+                    }
+
+                    o = next;
+                }
+            }
 
             if (SerialHelper.IsMobile(serial))
             {
@@ -4318,6 +4339,8 @@ namespace ClassicUO.Network
 
         private static void AddItemToContainer(uint serial, ushort graphic, ushort amount, ushort x, ushort y, ushort hue, uint containerSerial)
         {
+            Console.WriteLine("ADDING: {0} --> Container: {1}", serial, containerSerial);
+
             if (ItemHold.Serial == serial && ItemHold.Dropped)
                 ItemHold.Clear();
 
@@ -4349,6 +4372,11 @@ namespace ClassicUO.Network
             item.X = x;
             item.Y = y;
             item.Z = 0;
+
+            if (SerialHelper.IsValid(item.Container))
+            {
+                RemoveItemFromContainer(item);
+            }
             item.Container = containerSerial;
 
             container.PushToBack(item);
@@ -4385,6 +4413,7 @@ namespace ClassicUO.Network
                     if (gump == null)
                     {
                         gump = UIManager.GetGump<ContainerGump>(containerSerial);
+                        gump?.RequestUpdateContents();
 
                         if (ProfileManager.Current.GridLootType > 0)
                         {

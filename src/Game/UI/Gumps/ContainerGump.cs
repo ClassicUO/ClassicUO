@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -203,6 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void UpdateContents()
         {
+            Console.WriteLine("REFRESHED: {0}", LocalSerial);
             Clear();
             BuildGump();
             IsMinimized = IsMinimized;
