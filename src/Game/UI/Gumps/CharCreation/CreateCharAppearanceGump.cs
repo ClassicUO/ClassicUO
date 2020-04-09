@@ -211,6 +211,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 }
             }
 
+            World.Mobiles.Add(character);
 
             return character;
         }

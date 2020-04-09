@@ -43,34 +43,20 @@ namespace ClassicUO.Game.UI.Controls
             Layer.Ring, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Skirt, Layer.Robe, Layer.Waist, Layer.Necklace,
             Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
         };
-        private Mobile _mobile;
 
         private readonly PaperDollGump _paperDollGump;
         private bool _updateUI;
 
-        public PaperDollInteractable(int x, int y, Mobile mobile, PaperDollGump paperDollGump)
+        public PaperDollInteractable(int x, int y, uint serial, PaperDollGump paperDollGump)
         {
             X = x;
             Y = y;
             _paperDollGump = paperDollGump;
-            Mobile = mobile;
             AcceptMouseInput = false;
-
+            LocalSerial = serial;
             _updateUI = true;
         }
 
-        public Mobile Mobile
-        {
-            get => _mobile;
-            set
-            {
-                if (value != _mobile)
-                {
-                    _mobile = value;
-                    _updateUI = true;
-                }
-            }
-        }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -82,9 +68,6 @@ namespace ClassicUO.Game.UI.Controls
 
                 _updateUI = false;
             }
-
-            if (_mobile == null || _mobile.IsDestroyed)
-                Dispose();
         }
 
 
@@ -99,7 +82,12 @@ namespace ClassicUO.Game.UI.Controls
 
         private void UpdateUI()
         {
-            if (Mobile == null || Mobile.IsDestroyed)
+            if (IsDisposed)
+                return;
+
+            Mobile mobile = World.Mobiles.Get(LocalSerial);
+
+            if (mobile == null || mobile.IsDestroyed)
             {
                 Dispose();
 
@@ -111,17 +99,17 @@ namespace ClassicUO.Game.UI.Controls
             // Add the base gump - the semi-naked paper doll.
             ushort body;
 
-            if (Mobile.Graphic == 0x0191 || Mobile.Graphic == 0x0193)
+            if (mobile.Graphic == 0x0191 || mobile.Graphic == 0x0193)
                 body = 0x000D;
-            else if (Mobile.Graphic == 0x025D)
+            else if (mobile.Graphic == 0x025D)
                 body = 0x000E;
-            else if (Mobile.Graphic == 0x025E)
+            else if (mobile.Graphic == 0x025E)
                 body = 0x000F;
-            else if (Mobile.Graphic == 0x029A || Mobile.Graphic == 0x02B6)
+            else if (mobile.Graphic == 0x029A || mobile.Graphic == 0x02B6)
                 body = 0x029A;
-            else if (Mobile.Graphic == 0x029B || Mobile.Graphic == 0x02B7)
+            else if (mobile.Graphic == 0x029B || mobile.Graphic == 0x02B7)
                 body = 0x0299;
-            else if (Mobile.Graphic == 0x03DB)
+            else if (mobile.Graphic == 0x03DB)
             {
                 body = 0x000C;
                 Add(new GumpPic(0, 0, body, 0x03EA)
@@ -141,7 +129,7 @@ namespace ClassicUO.Game.UI.Controls
 
 
             // body
-            Add(new GumpPic(0, 0, body, _mobile.Hue));
+            Add(new GumpPic(0, 0, body, mobile.Hue));
 
             // equipment
             Item equipItem;
@@ -149,16 +137,16 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Layer layer = _layerOrder[i];
 
-                equipItem = _mobile.Equipment[(int) layer];
+                equipItem = mobile.Equipment[(int) layer];
 
                 if (equipItem != null)
                 {
-                    if (Mobile.IsCovered(_mobile, layer))
+                    if (Mobile.IsCovered(mobile, layer))
                         continue;
 
-                    ushort id = GetAnimID(_mobile.Graphic, equipItem.ItemData.AnimID, !_mobile.IsMale);
+                    ushort id = GetAnimID(mobile.Graphic, equipItem.ItemData.AnimID, !mobile.IsMale);
 
-                    Add(new GumpPicEquipment(_mobile.Serial, equipItem.Serial, 0, 0, id, (ushort) (equipItem.Hue & 0x3FFF), layer)
+                    Add(new GumpPicEquipment(mobile.Serial, equipItem.Serial, 0, 0, id, (ushort) (equipItem.Hue & 0x3FFF), layer)
                     {
                         AcceptMouseInput = true,
                         IsPartialHue = equipItem.ItemData.IsPartialHue,
@@ -169,8 +157,8 @@ namespace ClassicUO.Game.UI.Controls
                 }
                 else if (HasFakeItem && ItemHold.Enabled && (byte) layer == ItemHold.ItemData.Layer && ItemHold.ItemData.AnimID != 0)
                 {
-                    ushort id = GetAnimID(_mobile.Graphic, ItemHold.ItemData.AnimID, !_mobile.IsMale);
-                    Add(new GumpPicEquipment(_mobile.Serial, 0, 0, 0, id, (ushort) (ItemHold.Hue & 0x3FFF), ItemHold.Layer)
+                    ushort id = GetAnimID(mobile.Graphic, ItemHold.ItemData.AnimID, !mobile.IsMale);
+                    Add(new GumpPicEquipment(mobile.Serial, 0, 0, 0, id, (ushort) (ItemHold.Hue & 0x3FFF), ItemHold.Layer)
                     {
                         AcceptMouseInput = true,
                         IsPartialHue = ItemHold.IsPartialHue,
@@ -180,7 +168,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
 
-            equipItem = _mobile.Equipment[(int) Layer.Backpack];
+            equipItem = mobile.Equipment[(int) Layer.Backpack];
 
             if (equipItem != null && equipItem.ItemData.AnimID != 0)
             {
@@ -193,7 +181,7 @@ namespace ClassicUO.Game.UI.Controls
                     bx = 6;
                 }
 
-                Add(new GumpPicEquipment(_mobile.Serial, equipItem.Serial ,- bx, 0, backpackGraphic, (ushort) (equipItem.Hue & 0x3FFF), Layer.Backpack)
+                Add(new GumpPicEquipment(mobile.Serial, equipItem.Serial ,- bx, 0, backpackGraphic, (ushort) (equipItem.Hue & 0x3FFF), Layer.Backpack)
                 {
                     AcceptMouseInput = true,
                 });
@@ -201,7 +189,6 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         public void Update() => _updateUI = true;
-
 
 
         private static ushort GetAnimID(ushort graphic, ushort animID, bool isfemale)
@@ -237,11 +224,6 @@ namespace ClassicUO.Game.UI.Controls
                 animID = (ushort) (animID + MALE_OFFSET);
 
             return animID;
-        }
-
-        protected override void OnMouseUp(int x, int y, MouseButtonType button)
-        {
-            base.OnMouseUp(x, y, button);
         }
 
         private class GumpPicEquipment : GumpPic
