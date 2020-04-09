@@ -44,6 +44,13 @@ namespace ClassicUO.Game.UI.Controls
             Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
         };
 
+        private static readonly Layer[] _layerOrder_quiver_fix =
+        {
+            Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Arms, Layer.Torso, Layer.Tunic,
+            Layer.Ring, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Skirt, Layer.Robe, Layer.Cloak,  Layer.Waist, Layer.Necklace,
+            Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
+        };
+
         private readonly PaperDollGump _paperDollGump;
         private bool _updateUI;
 
@@ -131,11 +138,16 @@ namespace ClassicUO.Game.UI.Controls
             // body
             Add(new GumpPic(0, 0, body, mobile.Hue));
 
+             
+            
             // equipment
-            Item equipItem;
-            for (int i = 0; i < _layerOrder.Length; i++)
+            Item equipItem = mobile.Equipment[(int) Layer.Cloak];
+
+            Layer[] layers = equipItem != null && equipItem.ItemData.IsContainer ? _layerOrder_quiver_fix : _layerOrder;
+
+            for (int i = 0; i < layers.Length; i++)
             {
-                Layer layer = _layerOrder[i];
+                Layer layer = layers[i];
 
                 equipItem = mobile.Equipment[(int) layer];
 
