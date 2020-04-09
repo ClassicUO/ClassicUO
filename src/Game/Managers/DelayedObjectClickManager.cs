@@ -20,6 +20,7 @@
 #endregion
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Input;
 
 
 namespace ClassicUO.Game.Managers
@@ -31,7 +32,8 @@ namespace ClassicUO.Game.Managers
         public static uint Timer { get; private set; }
         public static int X { get; private set; }
         public static int Y { get; private set; }
-
+        public static int LastMouseX { get; private set; }
+        public static int LastMouseY { get; private set; }
 
 
         public static void Update()
@@ -64,6 +66,8 @@ namespace ClassicUO.Game.Managers
         public static void Set(uint serial, int x, int y, uint timer)
         {
             Serial = serial;
+            LastMouseX = Mouse.Position.X;
+            LastMouseY = Mouse.Position.Y;
             X = x;
             Y = y;
             Timer = timer;
@@ -86,6 +90,8 @@ namespace ClassicUO.Game.Managers
                 IsEnabled = false;
                 X = 0;
                 Y = 0;
+                LastMouseX = 0;
+                LastMouseY = 0;
             }
         }
     }

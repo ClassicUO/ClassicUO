@@ -34,6 +34,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -3270,8 +3271,8 @@ namespace ClassicUO.Network
                 case 0x14: // display popup/context menu
                     UIManager.ShowGamePopup(new PopupMenuGump(PopupMenuData.Parse(p))
                     {
-                        X = DelayedObjectClickManager.X,
-                        Y = DelayedObjectClickManager.Y
+                        X = DelayedObjectClickManager.LastMouseX,
+                        Y = DelayedObjectClickManager.LastMouseY
                     });
 
                     break;

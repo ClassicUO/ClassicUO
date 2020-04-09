@@ -198,8 +198,7 @@ namespace ClassicUO.Game.Managers
             {
                 if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
                     MouseOverControl.InvokeMouseUp(Mouse.Position, MouseButtonType.Left);
-
-                if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
+                else if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
                     _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButtonType.Left);
             }
             else
@@ -363,7 +362,7 @@ namespace ClassicUO.Game.Managers
         public static bool HadMouseDownOnGump(MouseButtonType button)
         {
             var c = LastControlMouseDown(button);
-            return c != null && !c.IsDisposed && !(c is WorldViewport) /*&& !(c is ItemGump)*/;
+            return c != null && !c.IsDisposed && !(c is WorldViewport) && !ItemHold.Enabled;
         }
 
         public static Control LastControlMouseDown(MouseButtonType button)

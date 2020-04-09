@@ -127,7 +127,10 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             if (Texture.Contains(x, y))
+            {
+                SelectedObject.Object = Item;
                 return true;
+            }
 
             if (Item == null || Item.IsDestroyed)
             {
@@ -140,7 +143,10 @@ namespace ClassicUO.Game.UI.Controls
             if (!Item.IsCoin && Item.Amount > 1 && Item.ItemData.IsStackable)
             {
                 if (Texture.Contains(x - 5, y - 5))
+                {
+                    SelectedObject.Object = Item;
                     return true;
+                }
             }
 
             return false;
@@ -163,15 +169,13 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            base.OnMouseUp(x, y, button);
-
             if (button == MouseButtonType.Left)
             {
                 GameScene gs = Client.Game.GetScene<GameScene>();
                 if (gs == null)
                     return;
 
-                if (Item == null || Item.IsDestroyed)
+                if (Item == null || Item.IsDestroyed || !Item.AllowedToDraw)
                 {
                     Dispose();
                 }
@@ -257,7 +261,7 @@ namespace ClassicUO.Game.UI.Controls
                                                           Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                         }
                     }
-                    else
+                    else if (Item != null && Item.AllowedToDraw)
                     {
                         SelectedObject.Object = Item;
 

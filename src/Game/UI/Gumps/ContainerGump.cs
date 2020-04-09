@@ -133,7 +133,7 @@ namespace ClassicUO.Game.UI.Gumps
             _hitBox.MouseUp += HitBoxOnMouseUp;
             Add(_hitBox);
 
-            Add(_gumpPicContainer = new GumpPicContainer(0, 0, g, 0, item));
+            Add(_gumpPicContainer = new GumpPicContainer(0, 0, g, 0));
             _gumpPicContainer.MouseDoubleClick += GumpPicContainerOnMouseDoubleClick;
             if (_isCorspeContainer)
             {
@@ -172,6 +172,94 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 IsMinimized = false;
                 e.Result = true;
+            }
+        }
+
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
+        {
+            if (button != MouseButtonType.Left)
+                return;
+
+            uint serial = SelectedObject.Object is Entity it ? it.Serial : 0;
+            uint dropcontainer = LocalSerial;
+
+            if (TargetManager.IsTargeting && !ItemHold.Enabled && SerialHelper.IsValid(serial))
+            {
+                TargetManager.Target(serial);
+                Mouse.CancelDoubleClick = true;
+            }
+            else
+            {
+                Entity thisCont = World.Items.Get(dropcontainer);
+                if (thisCont == null)
+                    return;
+
+                thisCont = World.Get(((Item) thisCont).RootContainer);
+
+                bool candrop = thisCont.Distance <= Constants.DRAG_ITEMS_DISTANCE;
+
+                if (candrop && SerialHelper.IsValid(serial))
+                {
+                    candrop = false;
+
+                    if (ItemHold.Enabled)
+                    {
+                        candrop = true;
+
+                        Item target = World.Items.Get(serial);
+
+                        if (target != null)
+                        {
+                            if (target.ItemData.IsContainer)
+                            {
+                                dropcontainer = target.Serial;
+                            }
+                            else if (target.ItemData.IsStackable && target.Graphic == ItemHold.Graphic)
+                            {
+                                dropcontainer = target.Serial;
+                            }
+                            else
+                            {
+                                switch (target.Graphic)
+                                {
+                                    case 0x0EFA:
+                                    case 0x2253:
+                                    case 0x2252:
+                                    case 0x238C:
+                                    case 0x23A0:
+                                    case 0x2D50:
+                                    {
+                                        dropcontainer = target.Serial;
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (!candrop && ItemHold.Enabled)
+                {
+                    Client.Game.Scene.Audio.PlaySound(0x0051);
+                }
+
+                if (candrop && ItemHold.Enabled)
+                {
+                    ((GameScene) Client.Game.Scene).DropHeldItemToContainer(World.Items.Get(dropcontainer), x, y);
+                    Mouse.CancelDoubleClick = true;
+                }
+                else if (!ItemHold.Enabled && SerialHelper.IsValid(serial))
+                {
+                    if (!DelayedObjectClickManager.IsEnabled)
+                    {
+                        DelayedObjectClickManager.Set(serial,
+                                                      Mouse.Position.X - ScreenCoordinateX,
+                                                      Mouse.Position.Y - ScreenCoordinateY,
+                                                      Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                    }
+                }
             }
         }
 
@@ -312,11 +400,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (item.Y < boundY)
                 item.Y = boundY;
 
-            if (item.X > boundX + boundWidth)
-                item.X = (ushort) (boundX + boundWidth);
+            if (item.X > boundWidth)
+                item.X = boundWidth;
 
-            if (item.Y > boundY + boundHeight)
-                item.Y = (ushort) (boundY + boundHeight);
+            if (item.Y > boundHeight)
+                item.Y = boundHeight;
 
 
             //float scale = UIManager.ContainerScale;
@@ -422,6 +510,44 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             base.OnDragEnd(x, y);
+        }
+
+        private class GumpPicContainer : GumpPic
+        {
+            public GumpPicContainer(int x, int y, ushort graphic, ushort hue) : base(x, y, graphic, hue)
+            {
+            }
+
+            //protected override void OnMouseUp(int x, int y, MouseButtonType button)
+            //{
+            //    base.OnMouseUp(x, y, button);
+
+            //    //if (button != MouseButtonType.Left)
+            //    //    return;
+
+            //    //GameScene gs = Client.Game.GetScene<GameScene>();
+
+            //    //if (!ItemHold.Enabled || !gs.IsMouseOverUI)
+            //    //    return;
+
+            //    //if (Item.Layer == Layer.Backpack || !Item.OnGround || Item.Distance < Constants.DRAG_ITEMS_DISTANCE)
+            //    //{
+            //    //    SelectedObject.Object = Item;
+            //    //    gs.DropHeldItemToContainer(Item, x, y);
+            //    //}
+            //    //else
+            //    //    gs.Audio.PlaySound(0x0051);
+            //}
+
+            public override bool Contains(int x, int y)
+            {
+                float scale = UIManager.ContainerScale;
+
+                x = (int) (x / scale);
+                y = (int) (y / scale);
+
+                return base.Contains(x, y);
+            }
         }
     }
 }
