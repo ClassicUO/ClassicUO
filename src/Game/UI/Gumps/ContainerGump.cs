@@ -393,7 +393,6 @@ namespace ClassicUO.Game.UI.Gumps
             ushort boundWidth = (ushort) (bounds.Width);
             ushort boundHeight = (ushort) (bounds.Height);
 
-
             if (item.X < boundX)
                 item.X = boundX;
 
@@ -405,67 +404,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (item.Y > boundHeight)
                 item.Y = boundHeight;
-
-
-            //float scale = UIManager.ContainerScale;
-
-            //int x = (int) (itemGump.X * scale);
-            //int y = (int) (itemGump.Y * scale);
-
-            //ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
-
-            //int boundX = (int)(_data.Bounds.X * scale);
-            //int boundY = (int)(_data.Bounds.Y * scale);
-
-            //if (texture != null && !texture.IsDisposed)
-            //{
-            //    int boundW = (int)(_data.Bounds.Width * scale);
-            //    int boundH = (int)(_data.Bounds.Height * scale);
-
-            //    int textureW, textureH;
-
-            //    if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
-            //    {
-            //        textureW = (int)(texture.Width * scale);
-            //        textureH = (int)(texture.Height * scale);
-            //    }
-            //    else
-            //    {
-            //        textureW = texture.Width;
-            //        textureH = texture.Height;
-            //    }
-
-            //    if (x < boundX)
-            //        x = boundX;
-
-            //    if (y < boundY)
-            //        y = boundY;
-
-
-            //    if (x + textureW > boundW)
-            //        x = boundW - textureW;
-
-            //    if (y + textureH > boundH)
-            //        y = boundH - textureH;
-            //}
-            //else
-            //{
-            //    x = boundX;
-            //    y = boundY;
-            //}
-
-            //if (x < 0)
-            //    x = 0;
-
-            //if (y < 0)
-            //    y = 0;
-
-
-            //if (x != itemGump.X || y != itemGump.Y)
-            //{
-            //    itemGump.X = x;
-            //    itemGump.Y = y;
-            //}
         }
 
       

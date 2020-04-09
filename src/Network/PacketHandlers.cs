@@ -1309,8 +1309,10 @@ namespace ClassicUO.Network
                 entity.PushToBack(item);
             }
 
-            if (item.Layer >= Layer.ShopBuyRestock && item.Layer <= Layer.ShopSell) 
-                item.Clear();
+            if (item.Layer >= Layer.ShopBuyRestock && item.Layer <= Layer.ShopSell)
+            {
+                //item.Clear();
+            }
             else if (SerialHelper.IsValid(item.Container) && item.Layer < Layer.Mount)
             {
                 UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
@@ -1537,7 +1539,7 @@ namespace ClassicUO.Network
                         }
                         else
                         {
-                           container.Clear();
+                           ClearContainerAndRemoveItems(container);
                         }
 
                         UIManager.GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
@@ -4747,6 +4749,25 @@ namespace ClassicUO.Network
             else
             {
                 obj.RemoveFromTile();
+            }
+        }
+
+        private static void ClearContainerAndRemoveItems(Entity container)
+        {
+            if (container == null || container.IsEmpty)
+                return;
+
+            var first = container.Items;
+
+            while (first != null)
+            {
+                var next = first.Next;
+                Item it = (Item) first;
+                it.RemoveFromTile();
+                it.Container = 0xFFFF_FFFF;
+                World.Items.Remove(it);
+                first.Next = null;
+                first = next;
             }
         }
 
