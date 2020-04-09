@@ -22,6 +22,7 @@
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -83,6 +84,10 @@ namespace ClassicUO.Game.UI.Controls
             return Texture?.Contains(x, y) ?? false;
         }
 
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
+        {
+            return base.OnMouseDoubleClick(x, y, button);
+        }
 
         public void Update(Item item, bool transparent = false)
         {

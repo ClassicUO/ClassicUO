@@ -38,8 +38,6 @@ namespace ClassicUO.Game.UI.Controls
     internal class ItemGump : Control
     {
         private bool _clickedCanDrag;
-        private float _picUpTime;
-
 
         public ItemGump(Item item)
         {
@@ -86,10 +84,13 @@ namespace ClassicUO.Game.UI.Controls
 
             Texture.Ticks = (long) totalMS;
 
-            if (_clickedCanDrag && totalMS >= _picUpTime)
+            if (_clickedCanDrag )
             {
-                _clickedCanDrag = false;
-                AttempPickUp();
+                if (Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks)
+                {
+                    _clickedCanDrag = false;
+                    AttempPickUp();
+                }
             }
 
             base.Update(totalMS, frameMS);
@@ -164,7 +165,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             _clickedCanDrag = true;
-            _picUpTime = Time.Ticks + 500f;
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
@@ -175,13 +175,13 @@ namespace ClassicUO.Game.UI.Controls
                 if (gs == null)
                     return;
 
-                if (Item == null || Item.IsDestroyed || !Item.AllowedToDraw)
-                {
-                    Dispose();
-                }
+                //if (Item == null || Item.IsDestroyed)
+                //{
+                //    Dispose();
+                //}
 
-                if (IsDisposed)
-                    return;
+                //if (IsDisposed)
+                //    return;
 
                 if (TargetManager.IsTargeting)
                 {
@@ -203,7 +203,7 @@ namespace ClassicUO.Game.UI.Controls
                             if (SerialHelper.IsItem(Item.Container))
                                 gs.DropHeldItemToContainer(World.Items.Get(Item.Container), X + (Mouse.Position.X - ScreenCoordinateX), Y + (Mouse.Position.Y - ScreenCoordinateY));
                         }
-
+                        Mouse.CancelDoubleClick = true;
                         return;
                     }
 
@@ -261,19 +261,17 @@ namespace ClassicUO.Game.UI.Controls
                                                           Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
                         }
                     }
-                    else if (Item != null && Item.AllowedToDraw)
+                    else if (Item != null)
                     {
-                        SelectedObject.Object = Item;
-
                         if (Item.ItemData.IsContainer)
                             gs.DropHeldItemToContainer(Item);
                         else if (ItemHold.Graphic == Item.Graphic && ItemHold.IsStackable)
                             gs.MergeHeldItem(Item);
-                        else
-                        {
-                            if (SerialHelper.IsItem(Item.Container))
+                        else if (SerialHelper.IsItem(Item.Container))
                                 gs.DropHeldItemToContainer(World.Items.Get(Item.Container), X + (Mouse.Position.X - ScreenCoordinateX), Y + (Mouse.Position.Y - ScreenCoordinateY));
-                        }
+                        else 
+                            base.OnMouseUp(x, y, button);
+                        Mouse.CancelDoubleClick = true;
                     }                   
                 }
 
@@ -317,15 +315,13 @@ namespace ClassicUO.Game.UI.Controls
                 !Item.ItemData.IsContainer && Item.IsEmpty &&
                 (container = World.Items.Get(Item.RootContainer)) != null &&
                 container != World.Player.Equipment[(int) Layer.Backpack]
-            ){
+            )
+            {
                 GameActions.GrabItem(Item, Item.Amount);
-            } else
+            }
+            else
                 GameActions.DoubleClick(LocalSerial);
- 
-            //_sendClickIfNotDClick = false;
-            //_clickedCanDrag = false;
-            //_sClickTime = _picUpTime = Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-
+            
             return true;
         }
 

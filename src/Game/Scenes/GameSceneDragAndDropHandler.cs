@@ -161,6 +161,16 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
+        public void DropHeldItemToContainer(uint container, int x = 0xFFFF, int y = 0xFFFF)
+        {
+            if (ItemHold.Enabled && ItemHold.Serial != container)
+            {
+                GameActions.DropItem(ItemHold.Serial, x, y, 0, container);
+                ItemHold.Enabled = false;
+                ItemHold.Dropped = true;
+            }
+        }
+
         public void DropHeldItemToContainer(Item container, int x = 0xFFFF, int y = 0xFFFF)
         {
             if (ItemHold.Enabled && container != null && ItemHold.Serial != container.Serial)
@@ -225,11 +235,14 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        public void WearHeldItem(Mobile target)
+        public void WearHeldItem(uint serial = 0)
         {
             if (ItemHold.Enabled && ItemHold.IsWearable)
             {
-                GameActions.Equip(ItemHold.Serial, (Layer) TileDataLoader.Instance.StaticData[ItemHold.Graphic].Layer, target);
+                if (!SerialHelper.IsValid(serial))
+                    serial = World.Player;
+
+                GameActions.Equip(ItemHold.Serial, (Layer) TileDataLoader.Instance.StaticData[ItemHold.Graphic].Layer, serial);
                 ItemHold.Enabled = false;
                 ItemHold.Dropped = true;
             }

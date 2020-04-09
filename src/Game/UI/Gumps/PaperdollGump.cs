@@ -138,21 +138,6 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        protected override void OnMouseExit(int x, int y)
-        {
-            _paperDollInteractable.AddFakeDress(null);
-        }
-
-        protected override void OnMouseEnter(int x, int y)
-        {
-            if (ItemHold.Enabled)
-            {
-                Item it = new Item(ItemHold.Serial) { Graphic = ItemHold.Graphic, Hue = ItemHold.Hue };
-
-                _paperDollInteractable.AddFakeDress(it);
-            }
-        }
-
         private void BuildGump()
         {
             _picBase?.Dispose();
@@ -313,22 +298,7 @@ namespace ClassicUO.Game.UI.Gumps
             _titleLabel.Text = text;
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButtonType button)
-        {
-            GameScene gs = Client.Game.GetScene<GameScene>();
-
-            if (!ItemHold.Enabled || !gs.IsMouseOverUI || _paperDollInteractable.IsOverBackpack)
-                return;
-
-            gs.WearHeldItem(Mobile);
-            RequestUpdateContents();
-        }
-
-        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
-        {
-            return true;
-        }
-
+     
         private void VirtueMenu_MouseDoubleClickEvent(object sender, MouseDoubleClickEventArgs args)
         {
             if (args.Button == MouseButtonType.Left)
@@ -345,7 +315,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void Profile_MouseDoubleClickEvent(object o, MouseDoubleClickEventArgs args)
         {
-            if (args.Button == MouseButtonType.Left) GameActions.RequestProfile(Mobile.Serial);
+            if (args.Button == MouseButtonType.Left) 
+                GameActions.RequestProfile(Mobile.Serial);
         }
 
         private void PartyManifest_MouseDoubleClickEvent(object sender, MouseDoubleClickEventArgs args)
@@ -387,11 +358,29 @@ namespace ClassicUO.Game.UI.Gumps
                 _warModeBtn.ButtonGraphicOver = btngumps[2];
             }
 
-
             base.Update(totalMS, frameMS);
         }
 
+        protected override void OnMouseOver(int x, int y)
+        {
+            if (_paperDollInteractable != null && !_paperDollInteractable.HasFakeItem && ItemHold.Enabled && UIManager.MouseOverControl?.RootParent == this)
+            {
+                if (ItemHold.ItemData.AnimID != 0)
+                {
+                    if (!Mobile.HasEquipment || Mobile.Equipment[ItemHold.ItemData.Layer] == null)
+                    {
+                        _paperDollInteractable.SetFakeItem(true);
+                    }
+                }
+            }
+            else
+                base.OnMouseOver(x, y);
+        }
 
+        protected override void OnMouseExit(int x, int y)
+        {
+            _paperDollInteractable?.SetFakeItem(false);
+        }
 
 
         public override void Save(BinaryWriter writer)
