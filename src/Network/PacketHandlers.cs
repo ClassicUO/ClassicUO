@@ -4746,13 +4746,16 @@ namespace ClassicUO.Network
             {
                 var next = first.Next;
                 Item it = (Item) first;
-                it.RemoveFromTile();
-                it.Container = 0xFFFF_FFFF;
+
+                RemoveItemFromContainer(it);
                 World.Items.Remove(it);
-                first.Next = null;
+
                 first = next;
             }
+
+            container.Items = null;
         }
+
 
         [Flags]
         private enum AffixType
