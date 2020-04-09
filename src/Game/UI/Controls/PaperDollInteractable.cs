@@ -264,7 +264,9 @@ namespace ClassicUO.Game.UI.Controls
 
             protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
             {
-                GameActions.DoubleClick(LocalSerial);
+                // this check is necessary to avoid crashes during character creation
+                if (World.InGame)
+                    GameActions.DoubleClick(LocalSerial);
 
                 return true;
             }

@@ -501,7 +501,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             public int SelectedIndex { get; }
 
-            public ushort SelectedHue => Pallet != null ? (ushort) (Pallet[SelectedIndex] + 1) : (ushort) 0;
+            public ushort SelectedHue => Pallet != null && SelectedIndex >= 0 && SelectedIndex < Pallet.Length ? (ushort) (Pallet[SelectedIndex] + 1) : (ushort) 0;
         }
 
         private class CustomColorPicker : Control
