@@ -1265,11 +1265,10 @@ namespace ClassicUO.Network
 
             Item item = World.GetOrCreateItem(serial);
 
+            //if (item.Graphic != 0 && item.Layer != Layer.Backpack) 
+            //    item.Clear();
 
-            if (item.Graphic != 0 && item.Layer != Layer.Backpack) 
-                item.Clear();
-
-            RemoveItemFromContainer(item);
+            //RemoveItemFromContainer(item);
 
             if (SerialHelper.IsValid(item.Container))
             {
