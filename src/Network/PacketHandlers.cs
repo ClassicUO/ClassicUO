@@ -1266,11 +1266,26 @@ namespace ClassicUO.Network
 
             Item item = World.GetOrCreateItem(serial);
 
+            //if (item.Graphic != 0 && item.Layer != Layer.Backpack)
+            //{
+            //    if (!item.IsEmpty)
+            //    {
+            //        var f = item.Items;
 
-            if (item.Graphic != 0 && item.Layer != Layer.Backpack) 
-                item.Clear();
+            //        while (f != null)
+            //        {
+            //            var next = f.Next;
 
-            RemoveItemFromContainer(item);
+            //            Item it = (Item) f;
+            //            RemoveItemFromContainer(it);
+            //            World.Items.Remove(it);
+
+            //            f = next;
+            //        }
+
+            //        item.Items = null;
+            //    }
+            //}
 
             if (SerialHelper.IsValid(item.Container))
             {
