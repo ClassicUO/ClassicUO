@@ -159,7 +159,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (var i = container.Items; i != null; i = i.Next)
             {
-                ItemGump g = new ItemGump(i as Item)
+                Item it = (Item) i;
+
+                ItemGump g = new ItemGump(it.Serial, it.Graphic, it.Hue, it.X, it.Y)
                 {
                     HighlightOnMouseOver = true
                 };
@@ -196,7 +198,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (var i = container.Items; i != null; i = i.Next)
             {
-                ItemGump g = new ItemGump(i as Item)
+                Item it = (Item) i;
+
+                ItemGump g = new ItemGump(it.Serial, it.Graphic, it.Hue, it.X, it.Y)
                 {
                     HighlightOnMouseOver = true
                 };

@@ -361,7 +361,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!item.IsLootable)
                     continue;
 
-                var itemControl = new ItemGump(item);
+                var itemControl = new ItemGump(item.Serial, item.Graphic, item.Hue, item.X, item.Y);
                 itemControl.IsVisible = !IsMinimized;
 
                 float scale = UIManager.ContainerScale;

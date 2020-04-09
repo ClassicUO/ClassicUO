@@ -894,14 +894,18 @@ namespace ClassicUO.Game.Managers
 
             var first = Gumps.First;
 
-            for (var right = first.Next; first != null; first = right, right = right?.Next)
+            while (first != null)
             {
+                var next = first.Next;
+
                 Control g = first.Value;
 
                 g.Update(totalMS, frameMS);
 
                 if (g.IsDisposed)
                     Gumps.Remove(first);
+
+                first = next;
             }
 
             GameCursor?.Update(totalMS, frameMS);
@@ -922,7 +926,6 @@ namespace ClassicUO.Game.Managers
                 var g = last.Value;
                 g.Draw(batcher, g.X, g.Y);
             }
-
 
             GameCursor?.Draw(batcher);
 
@@ -1009,14 +1012,6 @@ namespace ClassicUO.Game.Managers
                 }
 
                 gump.InvokeMouseOver(Mouse.Position);
-
-                //if (_mouseDownControls[0] == gump)
-                //{
-                //    if (ProfileManager.Current == null || !ProfileManager.Current.HoldAltToMoveGumps || Keyboard.Alt)
-                //    {
-                //        AttemptDragControl(gump, Mouse.Position);
-                //    }
-                //}
             }
 
             MouseOverControl = gump;
@@ -1076,39 +1071,6 @@ namespace ClassicUO.Game.Managers
                 }
             }
         }
-
-        public static void MakeTopMostGumpOverAnother(Control control, Control overed)
-        {
-            //Control c = control;
-
-            //while (c.Parent != null)
-            //    c = c.Parent;
-
-            //Control c1 = overed;
-
-            //while (c1.Parent != null)
-            //    c1 = c1.Parent;
-
-            //int index = 0;
-
-            //for (int i = Gumps.Count - 1; i >= 1; i--)
-            //{
-            //    if (Gumps[i] == c)
-            //    {
-            //        Control cm = Gumps[i];
-            //        Gumps.RemoveAt(i);
-
-            //        if (index == 0)
-            //            index = i;
-
-            //        Gumps.Insert(index - 1, cm);
-            //        _needSort = true;
-            //    }
-            //    else if (Gumps[i] == c1)
-            //        index = i;
-            //}
-        }
-
 
         private static void SortControlsByInfo()
         {

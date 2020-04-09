@@ -91,8 +91,8 @@ namespace ClassicUO.Game.UI.Controls
         private bool _hasFakeItem;
         public void SetFakeItem(bool value)
         {
+            _updateUI = (_hasFakeItem && !value) || (!_hasFakeItem && value);
             _hasFakeItem = value;
-            _updateUI = true;
         }
 
         public bool HasFakeItem => _hasFakeItem;
@@ -162,7 +162,9 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         AcceptMouseInput = true,
                         IsPartialHue = equipItem.ItemData.IsPartialHue,
-                        CanLift = World.InGame && !World.Player.IsDead && (_paperDollGump.CanLift || LocalSerial == World.Player)
+                        CanLift = World.InGame && 
+                                  !World.Player.IsDead && layer != Layer.Beard && layer != Layer.Hair && 
+                                  (_paperDollGump.CanLift || LocalSerial == World.Player)
                     });
                 }
                 else if (HasFakeItem && ItemHold.Enabled && (byte) layer == ItemHold.ItemData.Layer && ItemHold.ItemData.AnimID != 0)
@@ -198,22 +200,8 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-
         public void Update() => _updateUI = true;
 
-        internal bool IsOverBackpack
-        {
-            get
-            {
-                //if (_mobile != null && _mobile.HasEquipment)
-                //{
-                //    var gump = _pgumps[(int)Layer.Backpack];
-                //    if (gump != null && !gump.IsDisposed)
-                //        return gump.MouseIsOver;
-                //}
-                return false;
-            }
-        }
 
 
         private static ushort GetAnimID(ushort graphic, ushort animID, bool isfemale)
@@ -249,6 +237,11 @@ namespace ClassicUO.Game.UI.Controls
                 animID = (ushort) (animID + MALE_OFFSET);
 
             return animID;
+        }
+
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
+        {
+            base.OnMouseUp(x, y, button);
         }
 
         private class GumpPicEquipment : GumpPic
@@ -329,9 +322,7 @@ namespace ClassicUO.Game.UI.Controls
                             Client.Game.Scene.Audio.PlayMusic(0x0051);
                         }
                     }
-
                 }
-
 
                 if (!ItemHold.Enabled && container != null)
                 {
@@ -359,29 +350,22 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            protected override void OnMouseOver(int x, int y)
+            protected override void OnDragBegin(int x, int y)
             {
-                if (Mouse.LButtonPressed && Mouse.IsDragging && CanLift && 
-                    Mouse.LastLeftButtonClickTime < Time.Ticks)
+                if (Mouse.LButtonPressed && Mouse.IsDragging && CanLift && !ItemHold.Enabled)
                 {
                     Point offset = Mouse.LDroppedOffset;
 
-                    if (!ItemHold.Enabled)
+                    if (offset != Point.Zero)
                     {
-                        if (Math.Abs(offset.X) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS ||
-                            Math.Abs(offset.Y) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
-                        {
-                            Rectangle bounds = ArtLoader.Instance.GetTexture(Graphic)?.Bounds ?? Rectangle.Empty;
-                            int centerX = bounds.Width >> 1;
-                            int centerY = bounds.Height >> 1;
-                            GameActions.PickUp(LocalSerial, centerX, centerY);
-                            Dispose();
-                        }
+                        Rectangle bounds = ArtLoader.Instance.GetTexture(Graphic)?.Bounds ?? Rectangle.Empty;
+                        int centerX = bounds.Width >> 1;
+                        int centerY = bounds.Height >> 1;
+                        GameActions.PickUp(LocalSerial, centerX, centerY);
                     }
                 }
-                //else
-                //    base.OnMouseOver(x, y);
             }
+
         }
     }
 }

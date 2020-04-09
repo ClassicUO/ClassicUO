@@ -359,29 +359,58 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             base.Update(totalMS, frameMS);
-        }
 
-        protected override void OnMouseOver(int x, int y)
-        {
-            if (_paperDollInteractable != null && !_paperDollInteractable.HasFakeItem && ItemHold.Enabled && UIManager.MouseOverControl?.RootParent == this)
+
+            if (_paperDollInteractable != null)
             {
-                if (ItemHold.ItemData.AnimID != 0)
+                if (_paperDollInteractable.HasFakeItem && !ItemHold.Enabled)
                 {
-                    if (!Mobile.HasEquipment || Mobile.Equipment[ItemHold.ItemData.Layer] == null)
+                    _paperDollInteractable?.SetFakeItem(false);
+                }
+                else if (!_paperDollInteractable.HasFakeItem && ItemHold.Enabled && UIManager.MouseOverControl?.RootParent == this)
+                {
+                    if (ItemHold.ItemData.AnimID != 0)
                     {
-                        _paperDollInteractable.SetFakeItem(true);
+                        if (!Mobile.HasEquipment || Mobile.Equipment[ItemHold.ItemData.Layer] == null)
+                        {
+                            _paperDollInteractable.SetFakeItem(true);
+                        }
                     }
                 }
             }
-            else
-                base.OnMouseOver(x, y);
         }
 
+   
         protected override void OnMouseExit(int x, int y)
         {
             _paperDollInteractable?.SetFakeItem(false);
         }
 
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
+        {
+            if (button == MouseButtonType.Left)
+            {
+                Mobile container = World.Mobiles.Get(LocalSerial);
+
+                if (ItemHold.Enabled && SerialHelper.IsValid(LocalSerial))
+                {
+                    if (ItemHold.ItemData.IsWearable)
+                    {
+                        Item equipment = container.FindItemByLayer(ItemHold.Layer);
+
+                        if (equipment == null)
+                        {
+                            ((GameScene) Client.Game.Scene).WearHeldItem(LocalSerial != World.Player ? container : World.Player);
+                            Mouse.CancelDoubleClick = true;
+                            Mouse.LastLeftButtonClickTime = 0;
+                        }
+
+                    }
+                }
+            }
+            else
+                base.OnMouseUp(x, y, button);
+        }
 
         public override void Save(BinaryWriter writer)
         {
@@ -633,7 +662,7 @@ namespace ClassicUO.Game.UI.Gumps
                 private readonly Point _point;
                 private readonly Rectangle _rect;
 
-                public ItemGumpFixed(Item item, int w, int h) : base(item)
+                public ItemGumpFixed(Item item, int w, int h) : base(item.Serial, item.Graphic, item.Hue, item.X, item.Y)
                 {
                     Width = w;
                     Height = h;
