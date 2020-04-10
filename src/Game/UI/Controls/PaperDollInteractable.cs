@@ -346,22 +346,28 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            protected override void OnDragBegin(int x, int y)
+            public override void Update(double totalMS, double frameMS)
             {
-                if (Mouse.LButtonPressed && Mouse.IsDragging && CanLift && !ItemHold.Enabled)
-                {
-                    Point offset = Mouse.LDroppedOffset;
+                base.Update(totalMS, frameMS);
 
-                    if (offset != Point.Zero)
-                    {
-                        Rectangle bounds = ArtLoader.Instance.GetTexture(Graphic)?.Bounds ?? Rectangle.Empty;
-                        int centerX = bounds.Width >> 1;
-                        int centerY = bounds.Height >> 1;
-                        GameActions.PickUp(LocalSerial, centerX, centerY);
-                    }
+                if (CanLift && !ItemHold.Enabled &&
+                   Mouse.LButtonPressed &&
+                   UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
+                   ((Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF &&
+                   Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks) ||
+                   Mouse.LDroppedOffset != Point.Zero))
+                {
+                    Rectangle bounds = ArtLoader.Instance.GetTexture(Graphic)?.Bounds ?? Rectangle.Empty;
+                    int centerX = bounds.Width >> 1;
+                    int centerY = bounds.Height >> 1;
+                    GameActions.PickUp(LocalSerial, centerX, centerY);
                 }
             }
 
+            protected override void OnMouseOver(int x, int y)
+            {
+                
+            }
         }
     }
 }

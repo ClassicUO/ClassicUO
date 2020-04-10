@@ -37,8 +37,6 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ItemGump : StaticPic
     {
-        private bool _clickedCanDrag;
-
         public ItemGump(uint serial, ushort graphic, ushort hue, int x, int y) : base(graphic, hue)
         {
             AcceptMouseInput = true;
@@ -55,7 +53,6 @@ namespace ClassicUO.Game.UI.Controls
 
 
         public bool HighlightOnMouseOver { get; set; }
-
         public bool CanPickUp { get; set; }
 
 
@@ -66,13 +63,12 @@ namespace ClassicUO.Game.UI.Controls
 
             base.Update(totalMS, frameMS);
 
-            if (_clickedCanDrag)
+            if (CanPickUp && !ItemHold.Enabled && Mouse.LButtonPressed &&
+                UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
+                ((Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF && Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks) ||
+                CanPickup()))
             {
-                if (Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks)
-                {
-                    _clickedCanDrag = false;
-                    AttempPickUp();
-                }
+                AttempPickUp();
             }
         }
 
@@ -136,8 +132,6 @@ namespace ClassicUO.Game.UI.Controls
                 if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
                     return;
             }
-
-            _clickedCanDrag = true;
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
@@ -148,22 +142,12 @@ namespace ClassicUO.Game.UI.Controls
                 if (gs == null)
                     return;
 
-                //if (Item == null || Item.IsDestroyed)
-                //{
-                //    Dispose();
-                //}
-
-                //if (IsDisposed)
-                //    return;
-
                 Item item = World.Items.Get(LocalSerial);
                 if (item == null)
                     return;
 
                 if (TargetManager.IsTargeting)
                 {
-                    _clickedCanDrag = false;
-
                     if (Mouse.IsDragging && CanPickup())
                     {
                         if (!ItemHold.Enabled || !gs.IsMouseOverUI) 
@@ -245,31 +229,30 @@ namespace ClassicUO.Game.UI.Controls
                         Mouse.CancelDoubleClick = true;
                     }                   
                 }
-
-                _clickedCanDrag = false;
             }
         }
 
         protected override void OnMouseOver(int x, int y)
         {
-            if (_clickedCanDrag)
-            {
-                if (CanPickup())
-                {
-                    _clickedCanDrag = false;
-                    AttempPickUp();
-                }
-            }
         }
 
         private bool CanPickup()
         {
             Point offset = Mouse.LDroppedOffset;
+            if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS &&
+                Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+                return false;
+
             var split = UIManager.GetGump<SplitMenuGump>(LocalSerial);
+            if (split == null)
+                return true;
 
-            split?.Dispose();
+            split.X = Mouse.Position.X - 80;
+            split.Y = Mouse.Position.Y - 40;
+            UIManager.AttemptDragControl(split, Mouse.Position, true);
+            split.BringOnTop();
 
-            return (split != null || (Math.Abs(offset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS || Math.Abs(offset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS));
+            return false;
         }
 
 
@@ -306,28 +289,21 @@ namespace ClassicUO.Game.UI.Controls
                 int centerX = bounds.Width >> 1;
                 int centerY = bounds.Height >> 1;
 
-                //if (this is ItemGumpPaperdoll)
-                //{
-                //    GameActions.PickUp(LocalSerial, centerX, centerY);
-                //}
-                //else
+                if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
                 {
-                    if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
-                    {
-                        float scale = UIManager.ContainerScale;
-                        centerX = (int) (centerX * scale);
-                        centerY = (int) (centerY * scale);
-                    }
+                    float scale = UIManager.ContainerScale;
+                    centerX = (int) (centerX * scale);
+                    centerY = (int) (centerY * scale);
+                }
 
-                    if (ProfileManager.Current != null && ProfileManager.Current.RelativeDragAndDropItems)
-                    {
-                        Point p = new Point(centerX - (Mouse.Position.X - ScreenCoordinateX), centerY - (Mouse.Position.Y - ScreenCoordinateY));
-                        GameActions.PickUp(LocalSerial, centerX, centerY, offset: p);
-                    }
-                    else
-                    {
-                        GameActions.PickUp(LocalSerial, centerX, centerY);
-                    }
+                if (ProfileManager.Current != null && ProfileManager.Current.RelativeDragAndDropItems)
+                {
+                    Point p = new Point(centerX - (Mouse.Position.X - ScreenCoordinateX), centerY - (Mouse.Position.Y - ScreenCoordinateY));
+                    GameActions.PickUp(LocalSerial, centerX, centerY, offset: p);
+                }
+                else
+                {
+                    GameActions.PickUp(LocalSerial, centerX, centerY);
                 }
             }
         }

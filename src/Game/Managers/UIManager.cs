@@ -1131,6 +1131,9 @@ namespace ClassicUO.Game.Managers
                     DraggingControl = dragTarget;
                     _dragOriginX = Mouse.LDropPosition.X;
                     _dragOriginY = Mouse.LDropPosition.Y;
+
+                    for (int i = 0; i < 5; i++)
+                        _mouseDownControls[i] = null;
                 }
 
                 int deltaX = mousePosition.X - _dragOriginX;

@@ -53,17 +53,21 @@ namespace ClassicUO.Game.Scenes
 
         private bool PickupItemBegin(Item item, int x, int y, int? amount = null, Point? offset = null)
         {
-            if (World.Player.IsDead || item == null || item.IsDestroyed || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
+            if (World.Player.IsDead || ItemHold.Enabled || item == null || item.IsDestroyed || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
                 return false;
 
             if (!amount.HasValue && item.Amount > 1 && item.ItemData.IsStackable)
             {
                 if (ProfileManager.Current.HoldShiftToSplitStack == Keyboard.Shift)
                 {
-                    if (UIManager.GetGump<SplitMenuGump>(item) != null)
+                    SplitMenuGump gump = UIManager.GetGump<SplitMenuGump>(item);
+                   
+                    if (gump != null)
+                    {
                         return false;
+                    }
 
-                    SplitMenuGump gump = new SplitMenuGump(item, new Point(x, y))
+                    gump = new SplitMenuGump(item, new Point(x, y))
                     {
                         X = Mouse.LDropPosition.X - 80,
                         Y = Mouse.LDropPosition.Y - 40
