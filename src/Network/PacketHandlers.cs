@@ -1116,7 +1116,7 @@ namespace ClassicUO.Network
 
             Item firstItem = World.Items.Get(ItemHold.Serial);
 
-            if (ItemHold.Enabled || ItemHold.Dropped && (firstItem == null || firstItem.AllowedToDraw))
+            if (ItemHold.Enabled || ItemHold.Dropped && (firstItem == null || !firstItem.AllowedToDraw))
             {
                 if (!ItemHold.UpdatedInWorld)
                 {
@@ -1130,7 +1130,7 @@ namespace ClassicUO.Network
                                            ItemHold.Hue,
                                            ItemHold.Container);
 
-                        UIManager.GetGump<ContainerGump>(ItemHold.Serial)?.RequestUpdateContents();
+                        UIManager.GetGump<ContainerGump>(ItemHold.Container)?.RequestUpdateContents();
                     }
                     else
                     {
