@@ -780,7 +780,7 @@ namespace ClassicUO.Game.Managers
         {
             for (var g = Gumps.Last; g != null; g = g.Previous)
             {
-                if (g.Value != null && !g.Value.IsDisposed && g.Value is TradingGump trading && (trading.ID1 == serial || trading.ID2 == serial))
+                if (g.Value != null && !g.Value.IsDisposed && g.Value is TradingGump trading && (trading.ID1 == serial || trading.ID2 == serial || trading.LocalSerial == serial))
                 {
                     return trading;
                 }
