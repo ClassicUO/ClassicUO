@@ -549,7 +549,6 @@ namespace ClassicUO.Network
                 count = 1;
             }
 
-            Item item = World.GetOrCreateItem(serial);
             ushort graphic = p.ReadUShort();
 
             if ((graphic & 0x8000) != 0)
@@ -4375,8 +4374,7 @@ namespace ClassicUO.Network
 
                 if (secureBox != null)
                 {
-                    TradingGump gump = UIManager.GetTradingGump(secureBox) ?? UIManager.GetGump<TradingGump>(secureBox);
-                    gump?.RequestUpdateContents();
+                    UIManager.GetTradingGump(secureBox)?.RequestUpdateContents();
                 }
                 else
                 {
@@ -4405,7 +4403,6 @@ namespace ClassicUO.Network
                             ((ContainerGump) gump).CheckItemControlPosition(item);
                         }
                         
-
                         if (ProfileManager.Current.GridLootType > 0)
                         {
                             gump = UIManager.GetGump<GridLootGump>(containerSerial);
@@ -4426,12 +4423,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            TradingGump tradingGump = UIManager.GetTradingGump(containerSerial) ?? UIManager.GetGump<TradingGump>(containerSerial);
-
-            if (tradingGump != null)
-            {
-                tradingGump.RequestUpdateContents();
-            }
+            UIManager.GetTradingGump(containerSerial)?.RequestUpdateContents();
         }
 
         private static void UpdateGameObject(uint serial, ushort graphic, byte graphic_inc,
@@ -4506,9 +4498,10 @@ namespace ClassicUO.Network
 
                     if (SerialHelper.IsValid(item.Container))
                     {
-                        RemoveItemFromContainer(item);
-                        item.Container = 0xFFFF_FFFF;
-                        World.Items.Add(item);
+                        Console.WriteLine("======= UpdateObject function: item: {0:X8}, container: {1:X8}", item.Serial, item.Container);
+                        //RemoveItemFromContainer(item);
+                        //item.Container = 0xFFFF_FFFF;
+                        //World.Items.Add(item);
                     }
                 }
                 else if (SerialHelper.IsMobile(serial))
