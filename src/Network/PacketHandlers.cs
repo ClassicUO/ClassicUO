@@ -2166,12 +2166,13 @@ namespace ClassicUO.Network
 
                 while (o != null)
                 {
-                    var next = (Item) o.Next;
+                    var next = o.Next;
+                    Item it = (Item) o;
 
-                    if (next != null && next.Layer != Layer.Backpack)
+                    if (it.Layer != Layer.Backpack)
                     {
-                        RemoveItemFromContainer(next);
-                        World.Items.Remove(next.Serial);
+                        RemoveItemFromContainer(it);
+                        World.Items.Remove(it.Serial);
                     }
 
                     o = next;
