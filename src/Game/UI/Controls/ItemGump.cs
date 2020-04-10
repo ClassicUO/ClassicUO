@@ -138,98 +138,113 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button == MouseButtonType.Left && UIManager.MouseOverControl?.RootParent == RootParent)
             {
-                GameScene gs = Client.Game.GetScene<GameScene>();
-                if (gs == null)
-                    return;
-
-                Item item = World.Items.Get(LocalSerial);
-                if (item == null)
-                    return;
-
-                if (TargetManager.IsTargeting)
+                Point offset = Mouse.LDroppedOffset;
+                if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS &&
+                    Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                 {
-                    if (Mouse.IsDragging && CanPickup())
+                    GameScene gs = Client.Game.GetScene<GameScene>();
+                    if (gs != null)
                     {
-                        if (!ItemHold.Enabled || !gs.IsMouseOverUI) 
-                            return;
-
-                        if (item.ItemData.IsContainer)
-                            gs.DropHeldItemToContainer(item);
-                        else if (ItemHold.Graphic == item.Graphic && ItemHold.IsStackable)
-                            gs.MergeHeldItem(item);
-                        else
+                        Item item = World.Items.Get(LocalSerial);
+                        if (item != null)
                         {
-                            if (SerialHelper.IsItem(item.Container))
-                                gs.DropHeldItemToContainer(World.Items.Get(item.Container), X + (Mouse.Position.X - ScreenCoordinateX), Y + (Mouse.Position.Y - ScreenCoordinateY));
-                        }
-                        Mouse.CancelDoubleClick = true;
-                        return;
-                    }
-
-                    switch (TargetManager.TargetingState)
-                    {
-                        case CursorTarget.Position:
-                        case CursorTarget.Object:
-                        case CursorTarget.Grab:
-                        case CursorTarget.SetGrabBag:
-
-                            if (item != null)
+                            if (TargetManager.IsTargeting)
                             {
-                                TargetManager.Target(item);
-                                Mouse.LastLeftButtonClickTime = 0;
+                                if (Mouse.IsDragging && CanPickup())
+                                {
+                                    if (ItemHold.Enabled && gs.IsMouseOverUI)
+                                    {
+                                        if (item.ItemData.IsContainer)
+                                            gs.DropHeldItemToContainer(item);
+                                        else if (ItemHold.Graphic == item.Graphic && ItemHold.IsStackable)
+                                            gs.MergeHeldItem(item);
+                                        else
+                                        {
+                                            if (SerialHelper.IsItem(item.Container))
+                                                gs.DropHeldItemToContainer(World.Items.Get(item.Container), X + (Mouse.Position.X - ScreenCoordinateX), Y + (Mouse.Position.Y - ScreenCoordinateY));
+                                        }
+
+                                        Mouse.CancelDoubleClick = true;
+
+                                        return;
+                                    }                              
+                                }
+
+                                switch (TargetManager.TargetingState)
+                                {
+                                    case CursorTarget.Position:
+                                    case CursorTarget.Object:
+                                    case CursorTarget.Grab:
+                                    case CursorTarget.SetGrabBag:
+
+                                        if (item != null)
+                                        {
+                                            TargetManager.Target(item);
+                                            Mouse.LastLeftButtonClickTime = 0;
+                                        }
+
+                                        break;
+
+                                    case CursorTarget.SetTargetClientSide:
+
+                                        if (item != null)
+                                        {
+                                            TargetManager.Target(item);
+                                            Mouse.LastLeftButtonClickTime = 0;
+                                            UIManager.Add(new InspectorGump(item));
+                                        }
+
+                                        break;
+
+                                    case CursorTarget.HueCommandTarget:
+
+                                        if (item != null)
+                                        {
+                                            CommandManager.OnHueTarget(item);
+                                        }
+
+                                        break;
+                                }
+
+                                return;
                             }
-
-                            break;
-
-                        case CursorTarget.SetTargetClientSide:
-
-                            if (item != null)
+                            else
                             {
-                                TargetManager.Target(item);
-                                Mouse.LastLeftButtonClickTime = 0;
-                                UIManager.Add(new InspectorGump(item));
+                                if (!ItemHold.Enabled || !gs.IsMouseOverUI)
+                                {
+                                    if (!DelayedObjectClickManager.IsEnabled)
+                                    {
+                                        var p = RootParent;
+                                        DelayedObjectClickManager.Set(LocalSerial,
+                                                                     Mouse.Position.X - p.ScreenCoordinateX,
+                                                                     Mouse.Position.Y - p.ScreenCoordinateY,
+                                                                     Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+
+                                        return;
+                                    }
+                                }
+                                else if (item != null)
+                                {
+                                    if (item.ItemData.IsContainer)
+                                        gs.DropHeldItemToContainer(item);
+                                    else if (ItemHold.Graphic == item.Graphic && ItemHold.IsStackable)
+                                        gs.MergeHeldItem(item);
+                                    else if (SerialHelper.IsItem(item.Container))
+                                        gs.DropHeldItemToContainer(World.Items.Get(item.Container), X + (Mouse.Position.X - ScreenCoordinateX), Y + (Mouse.Position.Y - ScreenCoordinateY));
+                                    else
+                                        base.OnMouseUp(x, y, button);
+
+                                    Mouse.CancelDoubleClick = true;
+
+                                    return;
+                                }
                             }
-
-                            break;
-
-                        case CursorTarget.HueCommandTarget:
-
-                            if (item != null)
-                            {
-                                CommandManager.OnHueTarget(item);
-                            }
-
-                            break;
-
+                        }    
                     }
-                }
-                else
-                {
-                    if (!ItemHold.Enabled || !gs.IsMouseOverUI)
-                    {
-                        if (!DelayedObjectClickManager.IsEnabled)
-                        {
-                            var p = RootParent;
-                             DelayedObjectClickManager.Set(LocalSerial, 
-                                                          Mouse.Position.X - p.ScreenCoordinateX,
-                                                          Mouse.Position.Y - p.ScreenCoordinateY, 
-                                                          Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
-                        }
-                    }
-                    else if (item != null)
-                    {
-                        if (item.ItemData.IsContainer)
-                            gs.DropHeldItemToContainer(item);
-                        else if (ItemHold.Graphic == item.Graphic && ItemHold.IsStackable)
-                            gs.MergeHeldItem(item);
-                        else if (SerialHelper.IsItem(item.Container))
-                                gs.DropHeldItemToContainer(World.Items.Get(item.Container), X + (Mouse.Position.X - ScreenCoordinateX), Y + (Mouse.Position.Y - ScreenCoordinateY));
-                        else 
-                            base.OnMouseUp(x, y, button);
-                        Mouse.CancelDoubleClick = true;
-                    }                   
                 }
             }
+
+            base.OnMouseUp(x, y, button);
         }
 
         protected override void OnMouseOver(int x, int y)
