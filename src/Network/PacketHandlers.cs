@@ -1442,11 +1442,11 @@ namespace ClassicUO.Network
                         {
                             if (isSingleUpdate)
                             {
-                                float change = (baseVal / 10.0f) - skill.Base;
+                                float change = (realVal / 10.0f) - skill.Value;
 
                                 if (change != 0.0f && !Single.IsNaN(change))
                                 {
-                                    GameActions.Print($"Your skill in {skill.Name} has {(change < 0 ? "decreased" : "increased")} by {Math.Abs(change):F1}.  It is now {(skill.Base + change):F1}.",
+                                    GameActions.Print($"Your skill in {skill.Name} has {(change < 0 ? "decreased" : "increased")} by {Math.Abs(change):F1}.  It is now {(skill.Value + change):F1}.",
                                                       0x58,
                                                       MessageType.System,
                                                       3, 
