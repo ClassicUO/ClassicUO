@@ -261,6 +261,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         it.Container = 0;
                         World.Items.Remove(it);
+                        it.Destroy();
                         Remove(obj);
                     }
                     

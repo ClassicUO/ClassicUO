@@ -45,7 +45,7 @@ namespace ClassicUO.Game.Managers
 
             if (entity != null)
             {
-                if (!World.ClientFeatures.TooltipsEnabled || 
+                if (!World.ClientFeatures.TooltipsEnabled ||
                     (SerialHelper.IsItem(Serial) &&
                     ((Item) entity).IsLocked &&
                     ((Item) entity).ItemData.Weight == 255 &&

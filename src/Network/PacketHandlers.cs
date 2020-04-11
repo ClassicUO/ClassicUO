@@ -34,7 +34,6 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -550,7 +549,6 @@ namespace ClassicUO.Network
                 count = 1;
             }
 
-            Item item = World.GetOrCreateItem(serial);
             ushort graphic = p.ReadUShort();
 
             if ((graphic & 0x8000) != 0)
@@ -750,20 +748,15 @@ namespace ClassicUO.Network
                     if (cont == World.Player && it.Layer == Layer.Invalid)
                         ItemHold.Enabled = false;
 
-
                     if (it.Layer != Layer.Invalid)
                         UIManager.GetGump<PaperDollGump>(cont)?.RequestUpdateContents();
-                    else
+
+                    UIManager.GetGump<ContainerGump>(cont)?.RequestUpdateContents();
+
+                    if (top != null && top.Graphic == 0x2006 && (ProfileManager.Current.GridLootType == 1 || ProfileManager.Current.GridLootType == 2))
                     {
-                        UIManager.GetGump<ContainerGump>(cont)?.RequestUpdateContents();
-
-                        if (top != null && top.Graphic == 0x2006 && (ProfileManager.Current.GridLootType == 1 || ProfileManager.Current.GridLootType == 2))
-                        {
-                            UIManager.GetGump<GridLootGump>(cont)?.RequestUpdateContents();
-                        }
+                        UIManager.GetGump<GridLootGump>(cont)?.RequestUpdateContents();
                     }
-                   
-
 
                     if (it.Graphic == 0x0EB0)
                     {
@@ -1163,6 +1156,7 @@ namespace ClassicUO.Network
                             {
                                 RemoveItemFromContainer(item);
                                 World.Items.Remove(item.Serial);
+                                item.Destroy();
                                 //item = null;
                             }
                         }
@@ -1266,26 +1260,10 @@ namespace ClassicUO.Network
 
             Item item = World.GetOrCreateItem(serial);
 
-            //if (item.Graphic != 0 && item.Layer != Layer.Backpack)
-            //{
-            //    if (!item.IsEmpty)
-            //    {
-            //        var f = item.Items;
+            //if (item.Graphic != 0 && item.Layer != Layer.Backpack) 
+            //    item.Clear();
 
-            //        while (f != null)
-            //        {
-            //            var next = f.Next;
-
-            //            Item it = (Item) f;
-            //            RemoveItemFromContainer(it);
-            //            World.Items.Remove(it);
-
-            //            f = next;
-            //        }
-
-            //        item.Items = null;
-            //    }
-            //}
+            //RemoveItemFromContainer(item);
 
             if (SerialHelper.IsValid(item.Container))
             {
@@ -2184,12 +2162,14 @@ namespace ClassicUO.Network
 
                 while (o != null)
                 {
-                    var next = (Item) o.Next;
+                    var next = o.Next;
+                    Item it = (Item) o;
 
-                    if (next != null && next.Layer != Layer.Backpack)
+                    if (it.Layer != Layer.Backpack)
                     {
-                        RemoveItemFromContainer(next);
-                        World.Items.Remove(next.Serial);
+                        RemoveItemFromContainer(it);
+                        World.Items.Remove(it.Serial);
+                        it.Destroy();
                     }
 
                     o = next;
@@ -4363,8 +4343,8 @@ namespace ClassicUO.Network
             if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
             {
                 RemoveItemFromContainer(item);
-                item.Destroy();
                 World.Items.Remove(item);
+                item.Destroy();
             }
 
             item = World.GetOrCreateItem(serial);
@@ -4392,8 +4372,7 @@ namespace ClassicUO.Network
 
                 if (secureBox != null)
                 {
-                    TradingGump gump = UIManager.GetTradingGump(secureBox) ?? UIManager.GetGump<TradingGump>(secureBox);
-                    gump?.RequestUpdateContents();
+                    UIManager.GetTradingGump(secureBox)?.RequestUpdateContents();
                 }
                 else
                 {
@@ -4422,7 +4401,6 @@ namespace ClassicUO.Network
                             ((ContainerGump) gump).CheckItemControlPosition(item);
                         }
                         
-
                         if (ProfileManager.Current.GridLootType > 0)
                         {
                             gump = UIManager.GetGump<GridLootGump>(containerSerial);
@@ -4443,12 +4421,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            TradingGump tradingGump = UIManager.GetTradingGump(containerSerial) ?? UIManager.GetGump<TradingGump>(containerSerial);
-
-            if (tradingGump != null)
-            {
-                tradingGump.RequestUpdateContents();
-            }
+            UIManager.GetTradingGump(containerSerial)?.RequestUpdateContents();
         }
 
         private static void UpdateGameObject(uint serial, ushort graphic, byte graphic_inc,
@@ -4523,9 +4496,10 @@ namespace ClassicUO.Network
 
                     if (SerialHelper.IsValid(item.Container))
                     {
-                        RemoveItemFromContainer(item);
-                        item.Container = 0xFFFF_FFFF;
-                        World.Items.Add(item);
+                        Console.WriteLine("======= UpdateObject function: item: {0:X8}, container: {1:X8}", item.Serial, item.Container);
+                        //RemoveItemFromContainer(item);
+                        //item.Container = 0xFFFF_FFFF;
+                        //World.Items.Add(item);
                     }
                 }
                 else if (SerialHelper.IsMobile(serial))
@@ -4746,10 +4720,8 @@ namespace ClassicUO.Network
                 obj.Previous = null;
                 obj.Container = 0xFFFF_FFFF;
             }
-            else
-            {
-                obj.RemoveFromTile();
-            }
+
+            obj.RemoveFromTile();
         }
 
         private static void ClearContainerAndRemoveItems(Entity container)
@@ -4766,12 +4738,13 @@ namespace ClassicUO.Network
 
                 RemoveItemFromContainer(it);
                 World.Items.Remove(it);
-
+                it.Destroy();
                 first = next;
             }
 
             container.Items = null;
         }
+
 
         [Flags]
         private enum AffixType

@@ -252,7 +252,7 @@ namespace ClassicUO.IO
                             _UL._ULMap.ReloadBlock(mapID, block);
                             c.Load(mapID);
 
-                            linkedList?.AddLast(c.Node);
+                            //linkedList?.AddLast(c.Node);
 
                             foreach (GameObject obj in lst)
                             {
@@ -263,6 +263,7 @@ namespace ClassicUO.IO
 
 
                         UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
+                        //UIManager.GetGump<WorldMapGump>()?.UpdateMap();
                         //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                         //also the server should always send FIRST the landdata packet, and only AFTER land the statics packet
                         _UL.MapCRCs[mapID][block] = ushort.MaxValue;
@@ -392,46 +393,56 @@ namespace ClassicUO.IO
 
             if (block >= 0 && block < mapWidthInBlocks * mapHeightInBlocks)
             {
-                _UL._filesMap[mapID].WriteArray(block * 196 + 4, landData);
+                _UL._filesMap[mapID].WriteArray((block * 196) + 4, landData);
                 //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                 _UL.MapCRCs[mapID][block] = ushort.MaxValue;
-
-                Chunk c = World.Map.Chunks[block];
-                if (c == null)
-                    return;
-
-                var linkedList = c.Node?.List;
-
-                List<GameObject> lst = new List<GameObject>();
-                for (int x = 0; x < 8; x++)
+                int blockX = block / mapHeightInBlocks, blockY = block % mapHeightInBlocks;
+                int minx = Math.Max(0, blockX - 1), miny = Math.Max(0, blockY - 1);
+                blockX = Math.Min(mapWidthInBlocks, blockX + 1);
+                blockY = Math.Min(mapHeightInBlocks, blockY + 1);
+                for (; blockX >= minx; --blockX)
                 {
-                    for (int y = 0; y < 8; y++)
+                    for (int by = blockY; by >= miny; --by)
                     {
-                        GameObject obj = c.GetHeadObject(x, y), cur;
-                        while (obj != null)
+                        Chunk c = World.Map.Chunks[(blockX * mapHeightInBlocks) + by];
+                        if (c == null)
+                            continue;
+
+                        var linkedList = c.Node?.List;
+
+                        List<GameObject> lst = new List<GameObject>();
+                        for (int x = 0; x < 8; x++)
                         {
-                            cur = obj;
-                            obj = obj.TNext;
-                            if (!(cur is Land) && !(cur is Static))
+                            for (int y = 0; y < 8; y++)
                             {
-                                lst.Add(cur);
-                                cur.RemoveFromTile();
+                                GameObject obj = c.GetHeadObject(x, y), cur;
+                                while (obj != null)
+                                {
+                                    cur = obj;
+                                    obj = obj.TNext;
+                                    if (!(cur is Land) && !(cur is Static))
+                                    {
+                                        lst.Add(cur);
+                                        cur.RemoveFromTile();
+                                    }
+                                }
                             }
+                        }
+
+                        c.Clear();
+                        c.Load(mapID);
+
+                        //linkedList?.AddLast(c.Node);
+
+                        foreach (GameObject obj in lst)
+                        {
+                            c.AddGameObject(obj, obj.X % 8, obj.Y % 8);
                         }
                     }
                 }
 
-                c.Clear();
-                c.Load(mapID);
-
-                linkedList?.AddLast(c.Node);
-
-                foreach (GameObject obj in lst)
-                {
-                    c.AddGameObject(obj, obj.X % 8, obj.Y % 8);
-                }
-
                 UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
+                //UIManager.GetGump<WorldMapGump>()?.UpdateMap();
             }
         }
 

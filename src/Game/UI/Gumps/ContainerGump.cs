@@ -354,6 +354,14 @@ namespace ClassicUO.Game.UI.Gumps
             if (container == null)
                 return;
 
+            if (container.Previous != null && container.Previous is Item it && it.Layer != Layer.Bank)
+            {
+                var c = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Container: {0}  - LEFT FOUND: {1}", LocalSerial, ((Item) container.Previous)?.Serial);
+                Console.ForegroundColor = c;
+            }
+
             for (var i = container.Items; i != null; i = i.Next)
             {
                 var item = (Item) i;
@@ -393,20 +401,46 @@ namespace ClassicUO.Game.UI.Gumps
             ushort boundWidth = (ushort) (bounds.Width);
             ushort boundHeight = (ushort) (bounds.Height);
 
+            ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
+
+            if (texture != null)
+            {
+                boundWidth -= (ushort)  (texture.Width  / UIManager.ContainerScale);
+                boundHeight -= (ushort) (texture.Height / UIManager.ContainerScale);
+            }
+
             if (item.X < boundX)
                 item.X = boundX;
+            else if (item.X > boundWidth)
+                item.X = boundWidth;
 
             if (item.Y < boundY)
                 item.Y = boundY;
-
-            if (item.X > boundWidth)
-                item.X = boundWidth;
-
-            if (item.Y > boundHeight)
+            else if (item.Y > boundHeight)
                 item.Y = boundHeight;
         }
 
-      
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            base.Draw(batcher, x, y);
+
+            if (CUOEnviroment.Debug)
+            {
+                var bounds = _data.Bounds;
+                float scale = UIManager.ContainerScale;
+                ushort boundX = (ushort) (bounds.X * scale);
+                ushort boundY = (ushort) (bounds.Y * scale);
+                ushort boundWidth = (ushort) (bounds.Width * scale);
+                ushort boundHeight = (ushort) (bounds.Height * scale);
+
+                ResetHueVector();
+                batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Red), x + boundX, y + boundY, boundWidth - boundX, boundHeight - boundY, ref _hueVector);
+            }
+
+            return true;
+        }
+
 
         public override void Dispose()
         {
