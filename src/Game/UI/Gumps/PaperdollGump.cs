@@ -61,6 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
         private GumpPic _picBase;
         private HitBox _hitBox;
         private Label _titleLabel;
+        private readonly EquipmentSlot[] _slots = new EquipmentSlot[6];
 
 
         public PaperDollGump() : base(0, 0)
@@ -253,12 +254,12 @@ namespace ClassicUO.Game.UI.Gumps
             _virtueMenuPic.MouseDoubleClick += VirtueMenu_MouseDoubleClickEvent;
 
             // Equipment slots for hat/earrings/neck/ring/bracelet
-            Add(new EquipmentSlot(0, 2, 75, LocalSerial, Layer.Helmet, this));
-            Add(new EquipmentSlot(0, 2, 75 + 21, LocalSerial, Layer.Earrings, this));
-            Add(new EquipmentSlot(0, 2, 75 + 21 * 2, LocalSerial, Layer.Necklace, this));
-            Add(new EquipmentSlot(0, 2, 75 + 21 * 3, LocalSerial, Layer.Ring, this));
-            Add(new EquipmentSlot(0, 2, 75 + 21 * 4, LocalSerial, Layer.Bracelet, this));
-            Add(new EquipmentSlot(0, 2, 75 + 21 * 5, LocalSerial, Layer.Tunic, this));
+            Add(_slots[0] = new EquipmentSlot(0, 2, 75, LocalSerial, Layer.Helmet, this));
+            Add(_slots[1] = new EquipmentSlot(0, 2, 75 + 21, LocalSerial, Layer.Earrings, this));
+            Add(_slots[2] = new EquipmentSlot(0, 2, 75 + 21 * 2, LocalSerial, Layer.Necklace, this));
+            Add(_slots[3] = new EquipmentSlot(0, 2, 75 + 21 * 3, LocalSerial, Layer.Ring, this));
+            Add(_slots[4] = new EquipmentSlot(0, 2, 75 + 21 * 4, LocalSerial, Layer.Bracelet, this));
+            Add(_slots[5] = new EquipmentSlot(0, 2, 75 + 21 * 5, LocalSerial, Layer.Tunic, this));
 
             // Paperdoll control!
             _paperDollInteractable = new PaperDollInteractable(8, 19, LocalSerial, this);
@@ -469,6 +470,16 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             _paperDollInteractable.Update();
+
+            if (mobile != null)
+            {
+                for (int i = 0; i < _slots.Length; i++)
+                {
+                    int idx = (int) _slots[i].Layer;
+                    if (idx < mobile.Equipment.Length)
+                        _slots[i].LocalSerial = mobile.Equipment[idx]?.Serial ?? 0;
+                }
+            }
         }
 
         public override void OnButtonClick(int buttonID)
@@ -620,50 +631,47 @@ namespace ClassicUO.Game.UI.Gumps
                 WantUpdateSize = false;
             }
 
+            public Layer Layer => _layer;
+            
             public override void Update(double totalMS, double frameMS)
             {
                 Item item = World.Items.Get(LocalSerial);
 
-                if (item != null && item.IsDestroyed)
+                if (item == null || item.IsDestroyed)
                 {
-                    _itemGump.Dispose();
+                    _itemGump?.Dispose();
                     _itemGump = null;
                 }
-                else
+
+                Mobile mobile = World.Mobiles.Get(_parentSerial);
+
+                if (mobile != null)
                 {
-                    Mobile mobile = World.Mobiles.Get(_parentSerial);
-
-                    if (mobile != null)
+                    if (item != mobile.Equipment[(int) _layer] || _itemGump == null)
                     {
-                        if (item != mobile.Equipment[(int) _layer])
+                        if (_itemGump != null)
                         {
-                            if (_itemGump != null)
+                            _itemGump.Dispose();
+                            _itemGump = null;
+                        }
+
+                        item = mobile.Equipment[(int) _layer];
+
+                        if (item != null)
+                        {
+                            LocalSerial = mobile.Equipment[(int) _layer].Serial;
+
+                            Add(_itemGump = new ItemGumpFixed(item, 18, 18)
                             {
-                                _itemGump.Dispose();
-                                _itemGump = null;
-                            }
-
-                            item = mobile.Equipment[(int) _layer];
-
-                            if (item != null)
-                            {
-                                LocalSerial = mobile.Equipment[(int) _layer].Serial;
-
-                                Add(_itemGump = new ItemGumpFixed(item, 18, 18)
-                                {
-                                    X = 0,
-                                    Y = 0,
-                                    Width = 18,
-                                    Height = 18,
-                                    HighlightOnMouseOver = false,
-                                    CanPickUp = World.InGame && (World.Player == _parentSerial || _paperDollGump.CanLift),
-                                });
-                            }
-                            else if (LocalSerial != 0)
-                                LocalSerial = 0;
+                                X = 0,
+                                Y = 0,
+                                Width = 18,
+                                Height = 18,
+                                HighlightOnMouseOver = false,
+                                CanPickUp = World.InGame && (World.Player == _parentSerial || _paperDollGump.CanLift),
+                            });
                         }
                     }
-
                 }
 
                 base.Update(totalMS, frameMS);
