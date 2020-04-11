@@ -313,20 +313,42 @@ namespace ClassicUO.Game.UI.Gumps
             ushort boundWidth = (ushort) (bounds.Width);
             ushort boundHeight = (ushort) (bounds.Height);
 
+
+            ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
+
+            if (texture != null)
+            {
+                boundWidth -= (ushort) texture.Width;
+                boundHeight -= (ushort) texture.Height;
+            }
+
             if (item.X < boundX)
                 item.X = boundX;
+            else if (item.X > boundWidth)
+                item.X = boundWidth;
 
             if (item.Y < boundY)
                 item.Y = boundY;
-
-            if (item.X > boundWidth)
-                item.X = boundWidth;
-
-            if (item.Y > boundHeight)
+            else if (item.Y > boundHeight)
                 item.Y = boundHeight;
         }
 
-      
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            var bounds = _data.Bounds;
+
+            ushort boundX = (ushort) (bounds.X);
+            ushort boundY = (ushort) (bounds.Y);
+            ushort boundWidth = (ushort) (bounds.Width);
+            ushort boundHeight = (ushort) (bounds.Height);
+
+            base.Draw(batcher, x, y);
+            ResetHueVector();
+            batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Red), x + boundX, y + boundY,  boundWidth - boundX, boundHeight - boundY, ref _hueVector);
+            return true;
+        }
+
 
         public override void Dispose()
         {
