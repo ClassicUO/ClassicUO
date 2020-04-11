@@ -145,7 +145,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 NetClient.Socket.Send(new PVirtueGumpReponse(World.Player, Graphic));
 
-                return false;
+                return true;
             }
 
             return base.OnMouseDoubleClick(x, y, button);
