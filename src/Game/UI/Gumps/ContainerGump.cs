@@ -313,13 +313,12 @@ namespace ClassicUO.Game.UI.Gumps
             ushort boundWidth = (ushort) (bounds.Width);
             ushort boundHeight = (ushort) (bounds.Height);
 
-
             ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
 
             if (texture != null)
             {
-                boundWidth -= (ushort) texture.Width;
-                boundHeight -= (ushort) texture.Height;
+                boundWidth -= (ushort)  (texture.Width  / UIManager.ContainerScale);
+                boundHeight -= (ushort) (texture.Height / UIManager.ContainerScale);
             }
 
             if (item.X < boundX)
@@ -334,20 +333,25 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        //public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-        //{
-        //    var bounds = _data.Bounds;
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            base.Draw(batcher, x, y);
 
-        //    ushort boundX = (ushort) (bounds.X);
-        //    ushort boundY = (ushort) (bounds.Y);
-        //    ushort boundWidth = (ushort) (bounds.Width);
-        //    ushort boundHeight = (ushort) (bounds.Height);
+            if (CUOEnviroment.Debug)
+            {
+                var bounds = _data.Bounds;
+                float scale = UIManager.ContainerScale;
+                ushort boundX = (ushort) (bounds.X * scale);
+                ushort boundY = (ushort) (bounds.Y * scale);
+                ushort boundWidth = (ushort) (bounds.Width * scale);
+                ushort boundHeight = (ushort) (bounds.Height * scale);
 
-        //    base.Draw(batcher, x, y);
-        //    ResetHueVector();
-        //    batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Red), x + boundX, y + boundY,  boundWidth - boundX, boundHeight - boundY, ref _hueVector);
-        //    return true;
-        //}
+                ResetHueVector();
+                batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Red), x + boundX, y + boundY, boundWidth - boundX, boundHeight - boundY, ref _hueVector);
+            }
+
+            return true;
+        }
 
 
         public override void Dispose()
