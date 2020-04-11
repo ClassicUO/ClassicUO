@@ -334,20 +334,20 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-        {
-            var bounds = _data.Bounds;
+        //public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        //{
+        //    var bounds = _data.Bounds;
 
-            ushort boundX = (ushort) (bounds.X);
-            ushort boundY = (ushort) (bounds.Y);
-            ushort boundWidth = (ushort) (bounds.Width);
-            ushort boundHeight = (ushort) (bounds.Height);
+        //    ushort boundX = (ushort) (bounds.X);
+        //    ushort boundY = (ushort) (bounds.Y);
+        //    ushort boundWidth = (ushort) (bounds.Width);
+        //    ushort boundHeight = (ushort) (bounds.Height);
 
-            base.Draw(batcher, x, y);
-            ResetHueVector();
-            batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Red), x + boundX, y + boundY,  boundWidth - boundX, boundHeight - boundY, ref _hueVector);
-            return true;
-        }
+        //    base.Draw(batcher, x, y);
+        //    ResetHueVector();
+        //    batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Red), x + boundX, y + boundY,  boundWidth - boundX, boundHeight - boundY, ref _hueVector);
+        //    return true;
+        //}
 
 
         public override void Dispose()
