@@ -252,7 +252,7 @@ namespace ClassicUO.IO
                             _UL._ULMap.ReloadBlock(mapID, block);
                             c.Load(mapID);
 
-                            linkedList?.AddLast(c.Node);
+                            //linkedList?.AddLast(c.Node);
 
                             foreach (GameObject obj in lst)
                             {
@@ -263,6 +263,7 @@ namespace ClassicUO.IO
 
 
                         UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
+                        //UIManager.GetGump<WorldMapGump>()?.UpdateMap();
                         //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                         //also the server should always send FIRST the landdata packet, and only AFTER land the statics packet
                         _UL.MapCRCs[mapID][block] = ushort.MaxValue;
@@ -431,7 +432,7 @@ namespace ClassicUO.IO
                         c.Clear();
                         c.Load(mapID);
 
-                        linkedList?.AddLast(c.Node);
+                        //linkedList?.AddLast(c.Node);
 
                         foreach (GameObject obj in lst)
                         {
