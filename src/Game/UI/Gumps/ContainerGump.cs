@@ -266,6 +266,14 @@ namespace ClassicUO.Game.UI.Gumps
             if (container == null)
                 return;
 
+            if (container.Previous != null && container.Previous is Item it && it.Layer != Layer.Bank)
+            {
+                var c = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Container: {0}  - LEFT FOUND: {1}", LocalSerial, ((Item) container.Previous)?.Serial);
+                Console.ForegroundColor = c;
+            }
+
             for (var i = container.Items; i != null; i = i.Next)
             {
                 var item = (Item) i;
