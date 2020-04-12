@@ -341,10 +341,11 @@ namespace ClassicUO.Game.Map
 
                     while (first != null)
                     {
+                        var next = first.TNext;
+
                         if (first != World.Player)
                             first.Destroy();
 
-                        var next = first.TNext;
                         first.TPrevious = null;
                         first.TNext = null;
                         first = next;
@@ -375,10 +376,11 @@ namespace ClassicUO.Game.Map
 
                     while (first != null)
                     {
+                        var next = first.TNext;
+
                         if (first != World.Player)
                             first.Destroy();
 
-                        var next = first.TNext;
                         first.TPrevious = null;
                         first.TNext = null;
                         first = next;
