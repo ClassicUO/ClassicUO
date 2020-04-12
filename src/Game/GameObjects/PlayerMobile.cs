@@ -1292,8 +1292,11 @@ namespace ClassicUO.Game.GameObjects
         {
             var bank = HasEquipment ? Equipment[(int) Layer.Bank] : null;
 
-            if (bank != null)
+            if (bank != null && bank.Opened)
             {
+                Remove(bank);
+                bank.Clear();
+                bank.Opened = false;
                 UIManager.GetGump<ContainerGump>(bank)?.Dispose();
             }
         }

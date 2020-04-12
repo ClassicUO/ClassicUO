@@ -84,7 +84,7 @@ namespace ClassicUO.Game.GameObjects
                 i._force = false;
                 i.MultiInfo = null;
                 i.MultiGraphic = 0;
-
+                
                 i.AlphaHue = 0;
                 i.Name = null;
                 i.Direction = 0;
@@ -101,6 +101,7 @@ namespace ClassicUO.Game.GameObjects
                 i.IsDamageable = false;
                 i.Offset = Vector3.Zero;
 
+                i.Opened = false;
                 i.TextContainer?.Clear();
                 i.IsFlipped = false;
                 i.Bounds = Rectangle.Empty;
@@ -126,9 +127,19 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return;
 
-            if (SerialHelper.IsItem(Serial))
+            if (Opened)
             {
-                UIManager.GetGump<Gump>(Serial)?.Dispose();
+                UIManager.GetGump<ContainerGump>(Serial)?.Dispose();
+                UIManager.GetGump<SpellbookGump>(Serial)?.Dispose();
+                UIManager.GetGump<MapGump>(Serial)?.Dispose();
+
+                if (IsCorpse)
+                    UIManager.GetGump<GridLootGump>(Serial)?.Dispose();
+
+                UIManager.GetGump<BulletinBoardGump>(Serial)?.Dispose();
+                UIManager.GetGump<SplitMenuGump>(Serial)?.Dispose();
+
+                Opened = false;
             }
 
             base.Destroy();
@@ -141,6 +152,7 @@ namespace ClassicUO.Game.GameObjects
         public uint Container;
         public Layer Layer;
         public bool UsedLayer;
+        public bool Opened;
 
         public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
 
