@@ -351,6 +351,60 @@ namespace ClassicUO.Game.Managers
             _validForDClick = MouseOverControl;
         }
 
+        public static void OnExtraMouseButtonDown(int btn)
+        {
+            HandleMouseInput();
+            if (MouseOverControl != null)
+            {
+                MakeTopMostGump(MouseOverControl);
+                MouseOverControl.InvokeMouseDown(Mouse.Position, (MouseButtonType)btn);
+
+                if (MouseOverControl.IsEnabled && MouseOverControl.IsVisible)
+                {
+                    if (_lastFocus != MouseOverControl)
+                    {
+                        _lastFocus?.OnFocusLeft();
+                        MouseOverControl.OnFocusEnter();
+                        _lastFocus = MouseOverControl;
+                    }
+                }
+
+                _mouseDownControls[btn] = MouseOverControl;
+            }
+            else
+            {
+                foreach (Control s in Gumps)
+                {
+                    if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
+                    {
+                        s.Dispose();
+                        Mouse.CancelDoubleClick = true;
+                    }
+                }
+            }
+
+            ShowGamePopup(null);
+        }
+
+        public static void OnExtraMouseButtonUp(int btn)
+        {
+            HandleMouseInput();
+            EndDragControl(Mouse.Position);
+
+            if (MouseOverControl != null)
+            {
+                if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
+                    MouseOverControl.InvokeMouseUp(Mouse.Position, (MouseButtonType)btn);
+
+                if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
+                    _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, (MouseButtonType)btn);
+            }
+            else
+                _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, (MouseButtonType)btn);
+
+            _mouseDownControls[btn] = null;
+            _validForDClick = MouseOverControl;
+        }
 
         public static void OnMouseWheel(bool isup)
         {

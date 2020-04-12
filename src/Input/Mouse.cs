@@ -45,6 +45,8 @@ namespace ClassicUO.Input
 
         public static bool MButtonPressed { get; set; }
 
+        public static bool XButtonPressed { get; set; }
+
         public static bool IsDragging { get; set; }
 
         public static Point Position;
