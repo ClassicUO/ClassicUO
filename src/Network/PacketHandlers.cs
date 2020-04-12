@@ -1511,16 +1511,7 @@ namespace ClassicUO.Network
 
                     if (container != null)
                     {
-                        if (container.Graphic == 0x2006)
-                        {
-                            container.ClearUnequipped();
-                        }
-                        else
-                        {
-                           ClearContainerAndRemoveItems(container);
-                        }
-
-                        UIManager.GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
+                        ClearContainerAndRemoveItems(container, container.Graphic == 0x2006);
                     }
                 }
 
@@ -4724,25 +4715,37 @@ namespace ClassicUO.Network
             obj.RemoveFromTile();
         }
 
-        private static void ClearContainerAndRemoveItems(Entity container)
+        private static void ClearContainerAndRemoveItems(Entity container, bool remove_unequipped = false)
         {
             if (container == null || container.IsEmpty)
                 return;
 
             var first = container.Items;
+            LinkedObject new_first = null;
 
             while (first != null)
             {
                 var next = first.Next;
                 Item it = (Item) first;
 
-                RemoveItemFromContainer(it);
-                World.Items.Remove(it);
-                it.Destroy();
+                if (remove_unequipped && it.Layer != 0)
+                {
+                    if (new_first == null)
+                    {
+                        new_first = first;
+                    }
+                }
+                else
+                {
+                    RemoveItemFromContainer(it);
+                    World.Items.Remove(it);
+                    it.Destroy();
+                }
+
                 first = next;
             }
 
-            container.Items = null;
+            container.Items = remove_unequipped ? new_first : null;
         }
 
 
