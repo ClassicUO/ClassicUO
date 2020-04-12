@@ -273,7 +273,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (ItemHold.Enabled || LocalSerial == 0)
                     {
-                        if (_layer != Layer.Backpack && container != null)
+                        if (container != null)
                         {
                             GameScene scene = Client.Game.GetScene<GameScene>();
                             if (scene == null)
