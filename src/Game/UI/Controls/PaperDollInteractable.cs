@@ -273,11 +273,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (ItemHold.Enabled || LocalSerial == 0)
                     {
-                        bool canwear = !(_layer != Layer.Backpack &&
-                                         _parentSerial != World.Player &&
-                                         container != null && container.Distance >= Constants.DRAG_ITEMS_DISTANCE);
-
-                        if (canwear && container != null)
+                        if (_layer != Layer.Backpack && container != null)
                         {
                             GameScene scene = Client.Game.GetScene<GameScene>();
                             if (scene == null)
@@ -315,7 +311,7 @@ namespace ClassicUO.Game.UI.Controls
                         }
                         else
                         {
-                            Client.Game.Scene.Audio.PlayMusic(0x0051);
+                            Client.Game.Scene.Audio.PlaySound(0x0051);
                         }
                     }
                 }
