@@ -30,6 +30,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
@@ -230,12 +231,19 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            animID = (ushort) (animID + offset);
+            ushort gump_graphic = (ushort) (animID + offset);
 
-            if (isfemale && GumpsLoader.Instance.GetTexture(animID) == null)
-                animID = (ushort) (animID + MALE_OFFSET);
+            if (isfemale && GumpsLoader.Instance.GetTexture(gump_graphic) == null)
+            {
+                gump_graphic = (ushort) (animID + MALE_OFFSET);
 
-            return animID;
+                if (GumpsLoader.Instance.GetTexture(gump_graphic) == null)
+                {
+                    Log.Error($"Texture not found in paperdoll: gump_graphic: {gump_graphic}");
+                }
+            }
+
+            return gump_graphic;
         }
 
         private class GumpPicEquipment : GumpPic
