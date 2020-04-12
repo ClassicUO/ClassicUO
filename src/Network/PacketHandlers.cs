@@ -4625,7 +4625,7 @@ namespace ClassicUO.Network
                 mobile.Flags = flagss;
             }
 
-            if (created && !obj.IsClicked && string.IsNullOrEmpty(obj.Name))
+            if (created && !obj.IsClicked)
             {
                 if (SerialHelper.IsMobile(serial))
                 {
