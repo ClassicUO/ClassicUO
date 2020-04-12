@@ -689,7 +689,7 @@ namespace ClassicUO.Game.UI.Gumps
                 private readonly Point _point;
                 private readonly Rectangle _rect;
 
-                public ItemGumpFixed(Item item, int w, int h) : base(item.Serial, item.Graphic, item.Hue, item.X, item.Y)
+                public ItemGumpFixed(Item item, int w, int h) : base(item.Serial, item.DisplayedGraphic, item.Hue, item.X, item.Y)
                 {
                     Width = w;
                     Height = h;
