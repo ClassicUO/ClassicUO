@@ -301,9 +301,11 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return;
 
+            Next = null;
+            Previous = null;
+
             Clear();
             RemoveFromTile();
-
             TextContainer?.Clear();
 
             IsDestroyed = true;
