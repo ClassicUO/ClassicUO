@@ -137,14 +137,14 @@ namespace ClassicUO.Game.UI.Gumps
             _gumpPicContainer.MouseDoubleClick += GumpPicContainerOnMouseDoubleClick;
             if (_isCorspeContainer)
             {
-                if (World.Player.ManualOpenedCorpses.Contains(LocalSerial))
-                    World.Player.ManualOpenedCorpses.Remove(LocalSerial);
-                else if(World.Player.AutoOpenedCorpses.Contains(LocalSerial) &&
-                ProfileManager.Current != null && ProfileManager.Current.SkipEmptyCorpse)
-                {
-                    IsVisible = false;
-                    _hideIfEmpty = true;
-                }
+                //if (World.Player.ManualOpenedCorpses.Contains(LocalSerial))
+                //    World.Player.ManualOpenedCorpses.Remove(LocalSerial);
+                //else if(World.Player.AutoOpenedCorpses.Contains(LocalSerial) &&
+                //ProfileManager.Current != null && ProfileManager.Current.SkipEmptyCorpse)
+                //{
+                //    IsVisible = false;
+                //    _hideIfEmpty = true;
+                //}
 
                 _eyeGumpPic?.Dispose();
                 Add(_eyeGumpPic = new GumpPic((int) (45 * scale), (int) (30 * scale), 0x0045, 0));
@@ -296,8 +296,8 @@ namespace ClassicUO.Game.UI.Gumps
                 itemControl.X = (int) (item.X * scale);
                 itemControl.Y = (int) (item.Y * scale);
 
-                if ((_hideIfEmpty && !IsVisible))
-                    IsVisible = true;
+                //if ((_hideIfEmpty && !IsVisible))
+                //    IsVisible = true;
 
                 Add(itemControl);
             }
