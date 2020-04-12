@@ -177,7 +177,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button != MouseButtonType.Left)
+            if (button != MouseButtonType.Left || UIManager.IsMouseOverWorld)
                 return;
 
             uint serial = SelectedObject.Object is Entity it ? it.Serial : 0;

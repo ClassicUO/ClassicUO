@@ -174,7 +174,7 @@ namespace ClassicUO.Game.UI.Controls
                     {
                         AcceptMouseInput = true,
                         IsPartialHue = ItemHold.IsPartialHue,
-                        Alpha = 0.3f
+                        Alpha = 0.5f
                     });
                 }
             }
