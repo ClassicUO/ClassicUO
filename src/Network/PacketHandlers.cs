@@ -1184,6 +1184,7 @@ namespace ClassicUO.Network
                     }
                 }
 
+                UIManager.GetGump<SplitMenuGump>(ItemHold.Serial)?.Dispose();
                 ItemHold.Clear();
             }
             else
@@ -4639,13 +4640,30 @@ namespace ClassicUO.Network
             if (graphic == 0x2006 && ProfileManager.Current.AutoOpenCorpses)
                 World.Player.TryOpenCorpses();
 
-            obj.AddToTile();
-            obj.UpdateScreenPosition();
+
 
             if (SerialHelper.IsMobile(serial) && mobile != null)
+            {
                 World.Mobiles.Add(mobile);
+                mobile.AddToTile();
+                mobile.UpdateScreenPosition();
+            }
             else if (SerialHelper.IsItem(serial) && item != null)
+            {
                 World.Items.Add(item);
+
+                if (item.OnGround)
+                {
+                    if (ItemHold.Serial == serial && ItemHold.Dropped)
+                    {
+                        ItemHold.Enabled = false;
+                        ItemHold.Dropped = false;
+                    }
+
+                    item.AddToTile();
+                    item.UpdateScreenPosition();
+                }
+            }
         }
 
         private static void UpdatePlayer(uint serial, ushort graphic, byte graph_inc,
