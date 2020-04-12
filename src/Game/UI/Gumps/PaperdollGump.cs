@@ -484,6 +484,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
+            if (ItemHold.Enabled)
+            {
+                OnMouseUp(0, 0, MouseButtonType.Left);
+                return;
+            }
+
             switch ((Buttons)buttonID)
             {
                 case Buttons.Help:
