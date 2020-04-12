@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
@@ -94,6 +95,16 @@ namespace ClassicUO.Game.UI.Gumps
                 ActivePage = 1;
 
             base.Update(totalMS, frameMS);
+        }
+
+        public override void Dispose()
+        {
+            Item it = World.Items.Get(LocalSerial);
+
+            if (it != null && it.Opened)
+                it.Opened = false;
+
+            base.Dispose();
         }
 
         public virtual void Save(BinaryWriter writer)
@@ -205,6 +216,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (ServerSerial != 0)
                 OnButtonClick(0);
+
             base.CloseWithRightClick();
         }
 

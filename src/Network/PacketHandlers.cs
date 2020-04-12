@@ -1078,6 +1078,22 @@ namespace ClassicUO.Network
                 else 
                     Log.Error( "[OpenContainer]: item not found");
             }
+
+
+            if (graphic != 0x0030)
+            {
+                Item it = World.Items.Get(serial);
+
+                if (it != null)
+                {
+                    it.Opened = true;
+
+                    if (!it.IsCorpse && graphic != 0xFFFF)
+                    {
+                        ClearContainerAndRemoveItems(it);
+                    }
+                }
+            }
         }
 
         private static void UpdateContainedItem(Packet p)
@@ -1865,6 +1881,8 @@ namespace ClassicUO.Network
 
                             bulletinBoard = new BulletinBoardGump(item, x, y, p.ReadASCII(22));
                             UIManager.Add(bulletinBoard);
+
+                            item.Opened = true;
                         }
                     }
 
@@ -2424,6 +2442,13 @@ namespace ClassicUO.Network
                 gump.SetMapTexture(MultiMapLoader.Instance.LoadMap(width, height, startX, startY, endX, endY));
 
             UIManager.Add(gump);
+
+            Item it = World.Items.Get(serial);
+
+            if (it != null)
+            {
+                it.Opened = true;
+            }
         }
 
         private static void OpenBook(Packet p)
@@ -4388,17 +4413,16 @@ namespace ClassicUO.Network
 
                         if (gump != null)
                         {
-                            gump.RequestUpdateContents();
                             ((ContainerGump) gump).CheckItemControlPosition(item);
                         }
                         
                         if (ProfileManager.Current.GridLootType > 0)
                         {
-                            gump = UIManager.GetGump<GridLootGump>(containerSerial);
+                            var tradingGump = UIManager.GetGump<GridLootGump>(containerSerial);
 
-                            if (gump != null)
+                            if (tradingGump != null)
                             {
-                                gump.RequestUpdateContents();
+                                tradingGump.RequestUpdateContents();
                             }
                             else if (SerialHelper.IsValid(_requestedGridLoot) && _requestedGridLoot == containerSerial)
                             {
@@ -4408,7 +4432,15 @@ namespace ClassicUO.Network
                         }
                     }
 
-                    gump?.RequestUpdateContents();
+                    if (gump != null)
+                    {
+                        if (SerialHelper.IsItem(containerSerial))
+                        {
+                            ((Item) container).Opened = true;
+                        }
+
+                        gump.RequestUpdateContents();
+                    }
                 }
             }
 
