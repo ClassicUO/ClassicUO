@@ -3155,27 +3155,30 @@ namespace ClassicUO.Network
                     uint ser = p.ReadUInt();
                     int button = (int) p.ReadUInt();
 
-                    for (var gump = UIManager.Gumps.First; gump != null;)
-                    {
-                        var nextGump = gump.Next;
 
-                        if (gump.Value.ServerSerial == ser)
+                    var first = UIManager.Gumps.First;
+
+                    while (first != null)
+                    {
+                        var nextGump = first.Next;
+
+                        if (first.Value.ServerSerial == ser && ser != 0)
                         {
                             if (button != 0)
                             {
-                                (gump.Value as Gump)?.OnButtonClick(button);
+                                (first.Value as Gump)?.OnButtonClick(button);
                             }
                             else
                             {
-                                UIManager.SavePosition(ser, gump.Value.Location);
+                                UIManager.SavePosition(ser, first.Value.Location);
                             }
 
-                            gump.Value.Dispose();
+                            first.Value.Dispose();
                         }
 
-                        gump = nextGump;
+                        first = nextGump;
                     }
-                    
+
                     break;
 
                 //===========================================================================================
