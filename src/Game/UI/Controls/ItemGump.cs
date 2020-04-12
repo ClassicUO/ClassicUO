@@ -126,9 +126,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button == MouseButtonType.Left && UIManager.MouseOverControl?.RootParent == RootParent)
             {
-                Point offset = Mouse.LDroppedOffset;
-                if (Math.Abs(offset.X) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS ||
-                    Math.Abs(offset.Y) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+                //Point offset = Mouse.LDroppedOffset;
+                //Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS &&
+                //    Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS
                 {
                     GameScene gs = Client.Game.GetScene<GameScene>();
                     if (gs != null)
@@ -198,7 +198,7 @@ namespace ClassicUO.Game.UI.Controls
                             }
                             else
                             {
-                                if (!ItemHold.Enabled || !gs.IsMouseOverUI)
+                                if ((!ItemHold.Enabled || !gs.IsMouseOverUI))
                                 {
                                     if (!DelayedObjectClickManager.IsEnabled)
                                     {
