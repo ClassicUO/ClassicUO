@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (IsDisposed)
+            if (IsDisposed || (ItemHold.Enabled && ItemHold.Serial == LocalSerial))
                 return false;
 
             base.Draw(batcher, x, y);
@@ -120,18 +120,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             return false;
-        }
-
-        protected override void OnMouseDown(int x, int y, MouseButtonType button)
-        {
-            if (button != MouseButtonType.Left)
-                return;
-
-            if (TargetManager.IsTargeting)
-            {
-                if (Mouse.IsDragging && Mouse.LDroppedOffset != Point.Zero)
-                    return;
-            }
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)

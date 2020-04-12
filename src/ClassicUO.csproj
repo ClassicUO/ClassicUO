@@ -407,7 +407,6 @@
     <Compile Include="Game\UI\Controls\HtmlControl.cs" />
     <Compile Include="Game\UI\Controls\ScrollBarBase.cs" />
     <Compile Include="Game\UI\Controls\ItemGump.cs" />
-    <Compile Include="Game\UI\Controls\ItemGumpPaperdoll.cs" />
     <Compile Include="Game\UI\Controls\Label.cs" />
     <Compile Include="Game\UI\Controls\Panel.cs" />
     <Compile Include="Game\UI\Controls\PaperDollInteractable.cs" />
