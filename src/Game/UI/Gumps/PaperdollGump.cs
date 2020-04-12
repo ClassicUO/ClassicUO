@@ -346,7 +346,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             // This is to update the state of the war mode button.
-            if (_isWarMode != mobile.InWarMode && LocalSerial == World.Player)
+            if (mobile != null && _isWarMode != mobile.InWarMode && LocalSerial == World.Player)
             {
                 _isWarMode = mobile.InWarMode;
                 ushort[] btngumps = _isWarMode ? WarModeBtnGumps : PeaceModeBtnGumps;
