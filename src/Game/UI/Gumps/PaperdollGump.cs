@@ -368,7 +368,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (ItemHold.ItemData.AnimID != 0)
                     {
-                        if (!mobile.HasEquipment || mobile.Equipment[ItemHold.ItemData.Layer] == null)
+                        if (mobile != null && (!mobile.HasEquipment || mobile.Equipment[ItemHold.ItemData.Layer] == null))
                         {
                             _paperDollInteractable.SetFakeItem(true);
                         }
