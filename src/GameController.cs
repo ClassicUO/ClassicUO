@@ -510,7 +510,7 @@ namespace ClassicUO
                     Keyboard.OnKeyUp(e->key);
                     UIManager.KeyboardFocusControl?.InvokeKeyUp(e->key.keysym.sym, e->key.keysym.mod);
                     _scene.OnKeyUp(e->key);
-                    //Plugin.ProcessHotkeys(0, 0, false);
+                    Plugin.ProcessHotkeys(0, 0, false);
 
                     if (e->key.keysym.sym == SDL_Keycode.SDLK_PRINTSCREEN)
                     {
