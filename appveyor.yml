@@ -48,7 +48,7 @@ deploy:
     secure: JaSH/LFfqcrUBZ5USwkYozDFFZUmyRZJyxsB/LSNOlI=
   password:
     secure: 4MpoM3vP2gdRcg6YktGA9g==
-  folder: /dev/deploy
+  folder: /www.classicuo.eu/dev/deploy
   artifact: ClassicUO-dev-preview-release.zip
   active_mode: false
   beta: true
