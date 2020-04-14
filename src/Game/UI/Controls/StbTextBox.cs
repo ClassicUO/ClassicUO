@@ -61,6 +61,14 @@ namespace ClassicUO.Game.UI.Controls
 
             if (Height < 50)
                 Height = 50;
+
+            FocusLost += StbTextBox_FocusLost;
+        }
+
+        private void StbTextBox_FocusLost(object sender, EventArgs e)
+        {
+            if (_stb != null)
+                _stb.SelectStart = _stb.SelectEnd = 0;
         }
 
         public StbTextBox(List<string> parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : byte.MaxValue, int.Parse(parts[3]), style: FontStyle.BlackBorder | FontStyle.CropTexture, hue: (ushort) (UInt16Converter.Parse(parts[5]) + 1))
@@ -679,7 +687,6 @@ namespace ClassicUO.Game.UI.Controls
 
             _stb.Drag(Mouse.Position.X, Mouse.Position.Y);
         }
-
 
         public override void Dispose()
         {
