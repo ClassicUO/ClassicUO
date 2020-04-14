@@ -44,7 +44,7 @@ namespace ClassicUO.Game.GameObjects
 
         static Multi()
         {
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < Constants.PREDICTABLE_MULTIS; i++)
                 _pool.Enqueue(new Multi());
         }
 

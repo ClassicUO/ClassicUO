@@ -183,17 +183,15 @@ namespace ClassicUO.Network
                     break;
             }
 
-            int count = index - Position - 1;
-            string s = count <= 0 ? string.Empty : Encoding.UTF8.GetString(_data, Position, count);
+            string s = Encoding.UTF8.GetString(_data, Position, index - Position - 1);
 
             Seek(index);
 
             index = 0;
 
-            while (index < s.Length)
+            for (int i = 0; i < s.Length && StringHelper.IsSafeChar(s[i]); i++, index++)
             {
-                if (!StringHelper.IsSafeChar(s[index++]))
-                    break;
+
             }
 
             if (index == s.Length)
@@ -223,8 +221,9 @@ namespace ClassicUO.Network
             }
 
             int index = Position;
-            int end = index + length;
-            while (index < end)
+            int toread = Position + length;
+
+            while (index < toread)
             {
                 byte b = _data[index++];
 
@@ -232,21 +231,19 @@ namespace ClassicUO.Network
                     break;
             }
 
-            string s = Encoding.UTF8.GetString(_data, Position, index - Position - 1);
+            string s = Encoding.UTF8.GetString(_data, Position, length - 1);
 
-            Seek(index);
+            Skip(length);
 
             index = 0;
 
-            while (index < s.Length)
+            for (int i = 0; i < s.Length && StringHelper.IsSafeChar(s[i]); i++, index++)
             {
-                if (!StringHelper.IsSafeChar(s[index++]))
-                    break;
+
             }
 
             if (index == s.Length)
                 return s;
-
 
             for (int i = 0; i < s.Length; i++)
             {

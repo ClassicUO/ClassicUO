@@ -34,7 +34,7 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal abstract class BaseGameObject
+    internal abstract class BaseGameObject : LinkedObject
     {
         public Point RealScreenPosition;
     }
@@ -51,8 +51,8 @@ namespace ClassicUO.Game.GameObjects
         public int CurrentRenderIndex;
         public byte UseInRender;
         public short PriorityZ;
-        public GameObject Left;
-        public GameObject Right;
+        public GameObject TPrevious;
+        public GameObject TNext;
         public Vector3 Offset;
         // FIXME: remove it
         public sbyte FoliageIndex = -1;
@@ -121,14 +121,14 @@ namespace ClassicUO.Game.GameObjects
         [MethodImpl(256)]
         public void RemoveFromTile()
         {
-            if (Left != null)
-                Left.Right = Right;
+            if (TPrevious != null)
+                TPrevious.TNext = TNext;
 
-            if (Right != null)
-                Right.Left = Left;
+            if (TNext != null)
+                TNext.TPrevious = TPrevious;
 
-            Right = null;
-            Left = null;
+            TNext = null;
+            TPrevious = null;
         }
 
         public virtual void UpdateGraphicBySeason()
@@ -301,13 +301,11 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return;
 
+            Next = null;
+            Previous = null;
+
+            Clear();
             RemoveFromTile();
-
-            //if (Left != null || Right != null)
-            //{
-            //    World.Map.GetChunk(X, Y, false)?.RemoveGameObject(this, X % 8, Y % 8);
-            //}
-
             TextContainer?.Clear();
 
             IsDestroyed = true;

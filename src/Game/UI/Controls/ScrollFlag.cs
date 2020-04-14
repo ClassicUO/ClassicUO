@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
+
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -29,7 +31,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ScrollFlag : ScrollBarBase
     {
-        private const int TIME_BETWEEN_CLICKS = 150;
+        private const int TIME_BETWEEN_CLICKS = 2;
         private readonly UOTexture _downButton;
 
         private readonly bool _showButtons;
@@ -78,29 +80,26 @@ namespace ClassicUO.Game.UI.Controls
 
             if (MaxValue <= MinValue)
                 Value = MaxValue = MinValue;
-            _sliderPosition = GetSliderYPosition();
 
+            _sliderPosition = GetSliderYPosition();
 
             if (_btUpClicked || _btDownClicked)
             {
-                if (_timeUntilNextClick <= 0f)
+                if (_timeUntilNextClick < Time.Ticks)
                 {
-                    _timeUntilNextClick += TIME_BETWEEN_CLICKS;
+                    _timeUntilNextClick = Time.Ticks + TIME_BETWEEN_CLICKS;
 
                     if (_btUpClicked)
-                        Value -= ScrollStep + _StepChanger;
+                        Value -= 1 + _StepChanger;
+                    else if (_btDownClicked)
+                        Value += 1 + _StepChanger;
 
-                    if (_btDownClicked)
-                        Value += ScrollStep + _StepChanger;
                     _StepsDone++;
 
-                    if (_StepsDone % 4 == 0)
+                    if (_StepsDone % 8 == 0)
                         _StepChanger++;
                 }
-
-                _timeUntilNextClick -= (float) frameMS;
             }
-
 
             Texture.Ticks = _upButton.Ticks = _downButton.Ticks = (long) totalMS;
         }
@@ -169,8 +168,15 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (sliderY > scrollableArea)
                         sliderY = scrollableArea;
+
                     _clickPosition = new Point(x, y);
-                    _value = (int) (sliderY / scrollableArea * (MaxValue - MinValue) + MinValue);
+
+                    if (sliderY == 0 && _clickPosition.Y < (Texture.Height >> 1))
+                        _clickPosition.Y = (Texture.Height >> 1);
+                    else if (sliderY == scrollableArea && _clickPosition.Y > Height - (Texture.Height >> 1))
+                        _clickPosition.Y = Height - (Texture.Height >> 1);
+
+                    _value = (int) Math.Round(sliderY / scrollableArea * (MaxValue - MinValue) + MinValue);
                     _sliderPosition = sliderY;
                 }
             }

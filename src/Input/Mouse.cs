@@ -45,6 +45,8 @@ namespace ClassicUO.Input
 
         public static bool MButtonPressed { get; set; }
 
+        public static bool XButtonPressed { get; set; }
+
         public static bool IsDragging { get; set; }
 
         public static Point Position;
@@ -56,8 +58,6 @@ namespace ClassicUO.Input
         public static Point RDropPosition;
 
         public static Point MDropPosition;
-
-        public static Point LastClickPosition;
 
         public static Point LDroppedOffset => LButtonPressed ? RealPosition - LDropPosition : Point.Zero;
 

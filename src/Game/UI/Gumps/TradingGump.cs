@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Linq;
 using ClassicUO.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
@@ -148,19 +147,21 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public void UpdateContent()
+        protected override void UpdateContents()
         {
             Entity container = World.Get(ID1);
 
             if (container == null)
                 return;
 
-            foreach (ItemGump v in _myBox.Children.OfType<ItemGump>().Where(s => container.Items.Contains(s.LocalSerial)))
+            foreach (var v in _myBox.Children)
                 v.Dispose();
 
-            foreach (Item item in container.Items)
+            for (var i = container.Items; i != null; i = i.Next)
             {
-                ItemGump g = new ItemGump(item)
+                Item it = (Item) i;
+
+                ItemGump g = new ItemGump(it.Serial, it.DisplayedGraphic, it.Hue, it.X, it.Y)
                 {
                     HighlightOnMouseOver = true
                 };
@@ -187,18 +188,19 @@ namespace ClassicUO.Game.UI.Gumps
                 _myBox.Add(g);
             }
 
-
             container = World.Get(ID2);
 
             if (container == null)
                 return;
 
-            foreach (ItemGump v in _hisBox.Children.OfType<ItemGump>().Where(s => container.Items.Contains(s.LocalSerial)))
+            foreach (var v in _hisBox.Children)
                 v.Dispose();
 
-            foreach (Item item in container.Items)
+            for (var i = container.Items; i != null; i = i.Next)
             {
-                ItemGump g = new ItemGump(item)
+                Item it = (Item) i;
+
+                ItemGump g = new ItemGump(it.Serial, it.DisplayedGraphic, it.Hue, it.X, it.Y)
                 {
                     HighlightOnMouseOver = true
                 };
@@ -446,7 +448,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             SetCheckboxes();
 
-            UpdateContent();
+            RequestUpdateContents();
 
             _myBox.MouseUp += (sender, e) =>
             {

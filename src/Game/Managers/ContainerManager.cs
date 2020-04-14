@@ -23,8 +23,16 @@ using System.Collections.Generic;
 using ClassicUO.Renderer;
 using ClassicUO.Game.Data;
 using System.IO;
+
+using ClassicUO.Configuration;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Utility;
 using ClassicUO.IO.Resources;
+
+using Microsoft.Xna.Framework;
+using ClassicUO.Game.UI.Gumps;
+using System.Linq;
 
 namespace ClassicUO.Game.Managers
 {
@@ -239,45 +247,132 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public static void CalculateContainerPosition(ushort g)
+        public static void CalculateContainerPosition(uint serial, ushort g)
         {
-            UOTexture texture = GumpsLoader.Instance.GetTexture(g);
-
-            int passed = 0;
-
-            for (int i = 0; i < 4 && passed == 0; i++)
+            if (UIManager.GetGumpCachePosition(serial, out Point location))
             {
-                if (X + texture.Width + Constants.CONTAINER_RECT_STEP > Client.Game.Window.ClientBounds.Width)
-                {
-                    X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
-
-                    if (Y + texture.Height + Constants.CONTAINER_RECT_LINESTEP > Client.Game.Window.ClientBounds.Height)
-                        Y = Constants.CONTAINER_RECT_DEFAULT_POSITION;
-                    else
-                        Y += Constants.CONTAINER_RECT_LINESTEP;
-                }
-                else if (Y + texture.Height + Constants.CONTAINER_RECT_STEP > Client.Game.Window.ClientBounds.Height)
-                {
-                    if (X + texture.Width + Constants.CONTAINER_RECT_LINESTEP > Client.Game.Window.ClientBounds.Width)
-                        X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
-                    else
-                        X += Constants.CONTAINER_RECT_LINESTEP;
-
-                    Y = Constants.CONTAINER_RECT_DEFAULT_POSITION;
-                }
-                else
-                    passed = i + 1;
+                X = location.X;
+                Y = location.Y;
             }
+            else
+            {
+                UOTexture texture = GumpsLoader.Instance.GetTexture(g);
 
-            if (passed == 0)
-            {
-                X = DefaultX;
-                Y = DefaultY;
+                if (texture != null)
+                {
+                    float scale = UIManager.ContainerScale;
+
+                    int width = (int) (texture.Width * scale);
+                    int height = (int) (texture.Height * scale);
+
+                    if (ProfileManager.Current.OverrideContainerLocation)
+                    {
+                        switch (ProfileManager.Current.OverrideContainerLocationSetting)
+                        {
+                            case 0:
+                                SetPositionNearGameObject(g, serial, width, height);
+                                break;
+                            case 1:
+                                X = Client.Game.Window.ClientBounds.Width - width;
+                                Y = 0;
+                                break;
+                            case 2:
+                            case 3:
+                                X = ProfileManager.Current.OverrideContainerLocationPosition.X - (width >> 1);
+                                Y = ProfileManager.Current.OverrideContainerLocationPosition.Y - (height >> 1);
+                                break;
+                        }
+
+                        if ((X + width) > Client.Game.Window.ClientBounds.Width)
+                        {
+                            X -= width;
+                        }
+
+                        if ((Y + height) > Client.Game.Window.ClientBounds.Height)
+                        {
+                            Y -= height;
+                        }
+                    }
+                    else
+                    {
+                        int passed = 0;
+
+                        for (int i = 0; i < 4 && passed == 0; i++)
+                        {
+                            if (X + texture.Width + Constants.CONTAINER_RECT_STEP > Client.Game.Window.ClientBounds.Width)
+                            {
+                                X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
+
+                                if (Y + texture.Height + Constants.CONTAINER_RECT_LINESTEP > Client.Game.Window.ClientBounds.Height)
+                                    Y = Constants.CONTAINER_RECT_DEFAULT_POSITION;
+                                else
+                                    Y += Constants.CONTAINER_RECT_LINESTEP;
+                            }
+                            else if (Y + texture.Height + Constants.CONTAINER_RECT_STEP > Client.Game.Window.ClientBounds.Height)
+                            {
+                                if (X + texture.Width + Constants.CONTAINER_RECT_LINESTEP > Client.Game.Window.ClientBounds.Width)
+                                    X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
+                                else
+                                    X += Constants.CONTAINER_RECT_LINESTEP;
+
+                                Y = Constants.CONTAINER_RECT_DEFAULT_POSITION;
+                            }
+                            else
+                                passed = i + 1;
+                        }
+
+                        if (passed == 0)
+                        {
+                            X = DefaultX;
+                            Y = DefaultY;
+                        }
+                        else if (passed == 1)
+                        {
+                            X += Constants.CONTAINER_RECT_STEP;
+                            Y += Constants.CONTAINER_RECT_STEP;
+                        }
+                    }
+                }
             }
-            else if (passed == 1)
+        }
+
+        private static void SetPositionNearGameObject(ushort g, uint serial, int width, int height)
+        {
+            Item item = World.Items.Get(serial);
+            if (item == null)
+                return;
+
+            if (World.Player.Equipment[(int) Layer.Bank] != null && serial == World.Player.Equipment[(int) Layer.Bank])
             {
-                X += Constants.CONTAINER_RECT_STEP;
-                Y += Constants.CONTAINER_RECT_STEP;
+                // open bank near player
+                X = World.Player.RealScreenPosition.X + ProfileManager.Current.GameWindowPosition.X + 40;
+                Y = World.Player.RealScreenPosition.Y + ProfileManager.Current.GameWindowPosition.Y - (height >> 1);
+            }
+            else if (item.OnGround)
+            {
+                // item is in world
+                X = item.RealScreenPosition.X + ProfileManager.Current.GameWindowPosition.X + 40;
+                Y = item.RealScreenPosition.Y + ProfileManager.Current.GameWindowPosition.Y - (height >> 1);
+            }
+            else if (SerialHelper.IsMobile(item.Container))
+            {
+                // pack animal, snooped player, npc vendor
+                Mobile mobile = World.Mobiles.Get(item.Container);
+                if (mobile != null)
+                {
+                    X = mobile.RealScreenPosition.X + ProfileManager.Current.GameWindowPosition.X + 40;
+                    Y = mobile.RealScreenPosition.Y + ProfileManager.Current.GameWindowPosition.Y - (height >> 1);
+                }
+            }
+            else
+            {
+                // in a container, open near the container
+                ContainerGump parentContainer = UIManager.GetGump<ContainerGump>(item.Container);
+                if (parentContainer != null)
+                {
+                    X = parentContainer.X + (width >> 1);
+                    Y = parentContainer.Y;
+                }
             }
         }
     }

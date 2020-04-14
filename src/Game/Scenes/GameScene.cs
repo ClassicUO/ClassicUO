@@ -64,8 +64,8 @@ namespace ClassicUO.Game.Scenes
         private long _timePing;
         private UseItemQueue _useItemQueue = new UseItemQueue();
         private Vector4 _vectorClear = new Vector4(Vector3.Zero, 1);
-        private WorldViewport _viewPortGump;
         private Weather _weather;
+
 
 
         public GameScene() : base((int) SceneType.Game,
@@ -75,7 +75,6 @@ namespace ClassicUO.Game.Scenes
         {
 
         }
-
 
         public bool UpdateDrawPosition { get; set; }
 
@@ -173,8 +172,6 @@ namespace ClassicUO.Game.Scenes
 
             if (!ProfileManager.Current.TopbarGumpIsDisabled)
                 TopBarGump.Create();
-
-            _viewPortGump = viewport.FindControls<WorldViewport>().SingleOrDefault();
 
             GameActions.Initialize(PickupItemBegin);
 
@@ -390,7 +387,7 @@ namespace ClassicUO.Game.Scenes
             {
                 sbyte z5 = (sbyte) (obj.Z + 5);
 
-                for (GameObject o = tile; o != null; o = o.Right)
+                for (GameObject o = tile; o != null; o = o.TNext)
                 {
                     if ((!(o is Static s) || s.ItemData.IsTransparent) &&
                         (!(o is Multi m) || m.ItemData.IsTransparent) || !o.AllowedToDraw)
@@ -635,13 +632,8 @@ namespace ClassicUO.Game.Scenes
                 SelectedObject.Object = SelectedObject.LastObject = null;
             else
             {
-                if (_viewPortGump != null)
-                {
-                    SelectedObject.TranslatedMousePositionByViewport.X = (int) ((Mouse.Position.X - _viewPortGump.ScreenCoordinateX) * Scale);
-                    SelectedObject.TranslatedMousePositionByViewport.Y = (int) ((Mouse.Position.Y - _viewPortGump.ScreenCoordinateY) * Scale);
-                }
-                else
-                    SelectedObject.TranslatedMousePositionByViewport = Point.Zero;
+                SelectedObject.TranslatedMousePositionByViewport.X = (int) ((Mouse.Position.X - (ProfileManager.Current.GameWindowPosition.X + 5)) * Scale);
+                SelectedObject.TranslatedMousePositionByViewport.Y = (int) ((Mouse.Position.Y - (ProfileManager.Current.GameWindowPosition.Y + 5)) * Scale);
             }
 
             if (TargetManager.IsTargeting && TargetManager.TargetingState == CursorTarget.MultiPlacement && World.CustomHouseManager == null && TargetManager.MultiTargetInfo != null)

@@ -2142,7 +2142,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 foreach (ContainerGump resizableGump in UIManager.Gumps.OfType<ContainerGump>())
                 {
-                    resizableGump.ForceUpdate();
+                    resizableGump.RequestUpdateContents();
                 }
             }
 

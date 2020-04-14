@@ -93,6 +93,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             bool isHuman = IsHuman;
+            bool isGargoyle = Client.Version >= ClientVersion.CV_7000 && (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
 
 
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
@@ -157,6 +158,7 @@ namespace ClassicUO.Game.GameObjects
             bool mirror = false;
 
             ProcessSteps(out byte dir);
+            byte layerDir = dir;
 
             AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
@@ -224,6 +226,7 @@ namespace ClassicUO.Game.GameObjects
 
             AnimationsLoader.Instance.AnimGroup = animGroup;
 
+
             DrawInternal(batcher, this, null, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman);
 
             if (HasEquipment)
@@ -231,7 +234,7 @@ namespace ClassicUO.Game.GameObjects
                 var equip = Equipment;
                 for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
                 {
-                    Layer layer = LayerOrder.UsedLayers[dir, i];
+                    Layer layer = LayerOrder.UsedLayers[layerDir, i];
 
                     Item item = equip[(int)layer];
 
@@ -250,10 +253,19 @@ namespace ClassicUO.Game.GameObjects
                         {
                             graphic = item.ItemData.AnimID;
 
-                            //if (graphic == 469)
-                            //{
-                            //    graphic = 342;
-                            //}
+                            if (isGargoyle)
+                            {
+                                if (graphic == 469)
+                                {
+                                    // gargoyle robe
+                                    graphic = 342;
+                                }
+                                else if (graphic == 0x03CA)
+                                {
+                                    // gargoyle dead shroud
+                                    graphic = 0x0223;
+                                }
+                            }
 
                             if (AnimationsLoader.Instance.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
                             {
@@ -331,13 +343,6 @@ namespace ClassicUO.Game.GameObjects
 
             ushort hueFromFile = _viewHue;
             byte animGroup = AnimationsLoader.Instance.AnimGroup;
-
-            // NOTE: i'm not sure this is the right way. This code patch the dead shroud for gargoyles.
-            if (Client.Version >= ClientVersion.CV_7000 &&
-                id == 0x03CA && (owner.Graphic == 0x02B7 || owner.Graphic == 0x02B6)) // dead gargoyle graphics
-            {
-                id = 0x0223;
-            }
 
             AnimationDirection direction = AnimationsLoader.Instance.GetBodyAnimationGroup(ref id, ref animGroup, ref hueFromFile, isParent).Direction[AnimationsLoader.Instance.Direction];
             AnimationsLoader.Instance.AnimID = id;

@@ -110,7 +110,7 @@ namespace ClassicUO.Game.Scenes
                 int pz14 = playerZ + 14;
                 int pz16 = playerZ + 16;
 
-                for (GameObject obj = chunk.GetHeadObject(x, y); obj != null; obj = obj.Right)
+                for (GameObject obj = chunk.GetHeadObject(x, y); obj != null; obj = obj.TNext)
                 {
                     sbyte tileZ = obj.Z;
 
@@ -164,7 +164,7 @@ namespace ClassicUO.Game.Scenes
                     x = playerX % 8;
                     y = playerY % 8;
 
-                    for (GameObject obj2 = chunk.GetHeadObject(x, y); obj2 != null; obj2 = obj2.Right)
+                    for (GameObject obj2 = chunk.GetHeadObject(x, y); obj2 != null; obj2 = obj2.TNext)
                     {
                         //if (obj is Item it && !it.ItemData.IsRoof || !(obj is Static) && !(obj is Multi))
                         //    continue;
@@ -245,7 +245,7 @@ namespace ClassicUO.Game.Scenes
 
             if (tile != null)
             {
-                for (GameObject obj = tile; obj != null; obj = obj.Right)
+                for (GameObject obj = tile; obj != null; obj = obj.TNext)
                 {
                     ushort testGraphic = obj.Graphic;
 
@@ -272,7 +272,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }*/
 
-            for (; obj != null; obj = obj.Right)
+            for (; obj != null; obj = obj.TNext)
             {
                 if (obj.CurrentRenderIndex == _renderIndex || !obj.AllowedToDraw)
                     continue;

@@ -847,7 +847,7 @@ namespace ClassicUO.Game.Managers
                         {
                             totalCount += _spellsCountTable[spellType];
 
-                            if (spell < totalCount)
+                            if (spell <= totalCount)
                                 break;
                         }
 
@@ -1364,6 +1364,28 @@ namespace ClassicUO.Game.Managers
                         }
                     }
                     break;
+
+                case MacroType.ToggleDrawRoofs:
+                    ProfileManager.Current.DrawRoofs = !ProfileManager.Current.DrawRoofs;
+
+                    break;
+
+                case MacroType.ToggleTreeStumps:
+                    StaticFilters.CleanTreeTextures();
+                    ProfileManager.Current.TreeToStumps = !ProfileManager.Current.TreeToStumps;
+
+                    break;
+
+                case MacroType.ToggleVegetation:
+                    ProfileManager.Current.HideVegetation = !ProfileManager.Current.HideVegetation;
+
+                    break;
+
+                case MacroType.ToggleCaveTiles:
+                    StaticFilters.CleanCaveTextures();
+                    ProfileManager.Current.EnableCaveBorder = !ProfileManager.Current.EnableCaveBorder;
+
+                    break;
             }
 
 
@@ -1813,6 +1835,10 @@ namespace ClassicUO.Game.Managers
         UsePotion,
         CloseAllHealthBars,
         RazorMacro,
+        ToggleDrawRoofs,
+        ToggleTreeStumps,
+        ToggleVegetation,
+        ToggleCaveTiles,
     }
 
     internal enum MacroSubType

@@ -107,6 +107,8 @@ namespace ClassicUO.Game.Scenes
         internal virtual void OnMiddleMouseUp() { }
         internal virtual void OnMiddleMouseDown() { }
 
+        internal virtual void OnExtraMouseUp(int button) { }
+        internal virtual void OnExtraMouseDown(int button) { }
 
         internal virtual bool OnLeftMouseDoubleClick() => false;
         internal virtual bool OnRightMouseDoubleClick() => false;

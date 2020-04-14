@@ -29,13 +29,13 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class AnchorableGump : Gump
+    abstract class AnchorableGump : Gump
     {
         private GumpPic _lockGumpPic;
         private int _prevX, _prevY;
         private AnchorableGump _anchorCandidate;
 
-        public AnchorableGump(uint local, uint server) : base(local, server)
+        protected AnchorableGump(uint local, uint server) : base(local, server)
         {
         }
 

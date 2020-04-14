@@ -281,10 +281,10 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 GameObject obj = block.Tiles[x, y];
 
-                                while (obj?.Right != null)
-                                    obj = obj.Right;
+                                while (obj?.TNext != null)
+                                    obj = obj.TNext;
 
-                                for (; obj != null; obj = obj.Left)
+                                for (; obj != null; obj = obj.TPrevious)
                                 {
                                     if (obj is Multi)
                                     {

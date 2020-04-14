@@ -101,21 +101,9 @@ namespace ClassicUO.Game.UI.Gumps
                 X = Width / 2 - 5,
                 Y = Height - 20,
             });
-
-            _corpse.Items.Added += Items_Added;
-            _corpse.Items.Removed += Items_Removed;      
         }
 
-        private void Items_Removed(object sender, CollectionChangedEventArgs<uint> e)
-        {
-            RedrawItems();
-        }
-
-        private void Items_Added(object sender, CollectionChangedEventArgs<uint> e)
-        {
-            RedrawItems();
-        }
-
+      
         public override void OnButtonClick(int buttonID)
         {
             if (buttonID == 0)
@@ -159,39 +147,47 @@ namespace ClassicUO.Game.UI.Gumps
                 base.OnButtonClick(buttonID);
         }
 
-        public void RedrawItems()
+
+
+        protected override void UpdateContents()
         {
             int x = 20;
             int y = 20;
 
-            foreach (GridLootItem gridLootItem in Children.OfType<GridLootItem>()) gridLootItem.Dispose();
+            foreach (GridLootItem gridLootItem in Children.OfType<GridLootItem>())
+                gridLootItem.Dispose();
 
             int count = 0;
             _pagesCount = 1;
 
-            foreach (Item item in _corpse.Items.Where(s => s != null && s.IsLootable))
+            for (var i = _corpse.Items; i != null; i = i.Next)
             {
-                GridLootItem gridItem = new GridLootItem(item);
+                Item it = (Item) i;
 
-                if (x >= _background.Width - 20)
+                if (it.IsLootable)
                 {
-                    x = 20;
-                    y += gridItem.Height + 20;
+                    GridLootItem gridItem = new GridLootItem(it);
 
-                    if (y >= _background.Height - 40)
+                    if (x >= _background.Width - 20)
                     {
-                        _pagesCount++;
-                        y = 20;
+                        x = 20;
+                        y += gridItem.Height + 20;
+
+                        if (y >= _background.Height - 40)
+                        {
+                            _pagesCount++;
+                            y = 20;
+                        }
                     }
-                }             
 
-                gridItem.X = x;
-                gridItem.Y = y;
-                Add(gridItem, _pagesCount);
+                    gridItem.X = x;
+                    gridItem.Y = y;
+                    Add(gridItem, _pagesCount);
 
-                x += gridItem.Width + 20;
+                    x += gridItem.Width + 20;
 
-                count++;
+                    count++;
+                }
             }
 
             if (ActivePage <= 1)
@@ -229,9 +225,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_corpse == SelectedObject.CorpseObject)
                     SelectedObject.CorpseObject = null;
-
-                _corpse.Items.Added -= Items_Added;
-                _corpse.Items.Removed -= Items_Removed;
             }
 
             _lastX = X;
