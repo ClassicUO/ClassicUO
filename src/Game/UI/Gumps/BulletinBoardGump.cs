@@ -221,6 +221,7 @@ namespace ClassicUO.Game.UI.Gumps
                     IsEditable = variant == 0,
                     Multiline = true
                 });
+            _textBox.TextChanged += _textBox_TextChanged;
             Add(_scrollArea);
             switch (variant)
             {
@@ -263,6 +264,18 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
         }
+
+        private void _textBox_TextChanged(object sender, System.EventArgs e)
+        {
+            _textBox.Height = System.Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 5, 20);
+
+            foreach (Control c in _scrollArea.Children)
+            {
+                if (c is ScrollAreaItem)
+                    c.OnPageChanged();
+            }
+        }
+
         public override void Update(double totalMS, double frameMS)
         {
            
