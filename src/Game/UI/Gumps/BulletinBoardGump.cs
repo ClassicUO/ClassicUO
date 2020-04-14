@@ -216,8 +216,10 @@ namespace ClassicUO.Game.UI.Gumps
                     X = 40,
                     Y = 0,
                     Width = 220,
+                    Height = 300,
                     Text = data,
-                    IsEditable = variant == 0
+                    IsEditable = variant == 0,
+                    Multiline = true
                 });
             Add(_scrollArea);
             switch (variant)
