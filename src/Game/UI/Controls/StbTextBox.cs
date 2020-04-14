@@ -547,19 +547,23 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
-            ScissorStack.PushScissors(scissor);
-            batcher.EnableScissorTest(true);
 
-            base.Draw(batcher, x, y);
+            if (ScissorStack.PushScissors(scissor))
+            {
+                batcher.EnableScissorTest(true);
 
-            DrawSelection(batcher, x, y);
+                base.Draw(batcher, x, y);
 
-            _rendererText.Draw(batcher, x, y);
+                DrawSelection(batcher, x, y);
 
-            DrawCaret(batcher, x, y);
+                _rendererText.Draw(batcher, x, y);
 
-            batcher.EnableScissorTest(false);
-            ScissorStack.PopScissors();
+                DrawCaret(batcher, x, y);
+
+                batcher.EnableScissorTest(false);
+                ScissorStack.PopScissors();
+            }
+         
             return true;
         }
 
