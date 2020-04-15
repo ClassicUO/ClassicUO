@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if ((style & (FontStyle.Fixed | FontStyle.Cropped)) != 0 && maxWidth <= 0)
             {
-                throw new Exception(nameof(maxWidth));
+                Debug.Assert((style & (FontStyle.Fixed | FontStyle.Cropped)) != 0 && maxWidth <= 0);
             }
 
             // stb_textedit will handle part of these tag
