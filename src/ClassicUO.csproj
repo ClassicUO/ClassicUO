@@ -585,4 +585,7 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>$(SolutionDir)tools\ManifestCreator\bin\Release\net47\ManifestCreator.exe  $(TargetDir)  "1.0.0.0"  "hello world"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

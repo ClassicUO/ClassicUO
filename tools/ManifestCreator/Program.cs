@@ -83,10 +83,14 @@ namespace ManifestCreator
         static void Main(string[] args)
         {
             string cuopath = args[0];
+            Console.WriteLine("CUOPATH: {0}", cuopath);
+          
             string new_version = args[1];
-            string name = args[2];
+            Console.WriteLine("VERSION: {0}", new_version);
 
-            Console.WriteLine("args: {0}", Environment.CommandLine);
+            string name = args[2];
+            Console.WriteLine("NAME: {0}", name);
+
 
             Console.WriteLine("Starting to create manifest");
             List<ManifestRelease> releases = CreateManifestReleaseList(cuopath, new_version, name);
