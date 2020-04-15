@@ -65,8 +65,10 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 35,
                 Y = 0,
                 IsEditable = canEdit,
-                Text = _originalText = body
+                Text = _originalText = body,
+                Multiline = true
             };
+            _textBox.TextChanged += _textBox_TextChanged;
             _scrollArea.Add(_textBox);
             AddHorizontalBar(_scrollArea, 95, 35, 220);
 
@@ -81,6 +83,16 @@ namespace ClassicUO.Game.UI.Gumps
             _hitBox.MouseUp += _hitBox_MouseUp;
         }
 
+        private void _textBox_TextChanged(object sender, EventArgs e)
+        {
+            _textBox.Height = Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 5, 20);
+
+            foreach (Control c in _scrollArea.Children)
+            {
+                if (c is ScrollAreaItem)
+                    c.OnPageChanged();
+            }
+        }
 
         public bool IsMinimized
         {
