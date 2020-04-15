@@ -19,15 +19,14 @@ environment:
 build_script:
 - cmd: >-
     nuget restore
-
-
     msbuild "c:\projects\classicuo\ClassicUO.sln" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:Configuration=Release /p:Platform=x64 /p:DefineConstants="DEV_BUILD"
-
-
     7z a ClassicUO-dev-preview-release.zip "c:\projects\classicuo\bin\Release\*"
+    7z a ClassicUO-dev-preview-{APPVEYOR_BUILD_VERSION}-release.zip "c:\projects\classicuo\bin\Release\*"
 artifacts:
 - path: ClassicUO-dev-preview-release.zip
   name: ClassicUO
+- path: ClassicUO-dev-preview-{APPVEYOR_BUILD_VERSION}-release.zip
+  name: ClassicUO-vers
 deploy:
 - provider: GitHub
   tag: ClassicUO-dev-preview
@@ -49,7 +48,7 @@ deploy:
   password:
     secure: 4MpoM3vP2gdRcg6YktGA9g==
   folder: /www.classicuo.eu/dev/deploy
-  artifact: ClassicUO-dev-preview-release.zip
+  artifact: ClassicUO-vers
   active_mode: false
   beta: true
   debug: false
