@@ -19,8 +19,13 @@ environment:
 build_script:
 - cmd: >-
     nuget restore
+
+
     msbuild "c:\projects\classicuo\ClassicUO.sln" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:Configuration=Release /p:Platform=x64 /p:DefineConstants="DEV_BUILD"
+
+
     7z a ClassicUO-dev-preview-release.zip "c:\projects\classicuo\bin\Release\*"
+
     7z a ClassicUO-dev-preview-{APPVEYOR_BUILD_VERSION}-release.zip "c:\projects\classicuo\bin\Release\*"
 artifacts:
 - path: ClassicUO-dev-preview-release.zip
