@@ -26,11 +26,11 @@ build_script:
 
     7z a ClassicUO-dev-preview-release.zip "c:\projects\classicuo\bin\Release\*"
 
-    7z a ClassicUO-dev-preview-{APPVEYOR_BUILD_VERSION}-release.zip "c:\projects\classicuo\bin\Release\*"
+    7z a ClassicUO-dev-preview-%APPVEYOR_BUILD_VERSION%-release.zip "c:\projects\classicuo\bin\Release\*"
 artifacts:
 - path: ClassicUO-dev-preview-release.zip
   name: ClassicUO
-- path: ClassicUO-dev-preview-{APPVEYOR_BUILD_VERSION}-release.zip
+- path: ClassicUO-dev-preview-{version}-release.zip
   name: ClassicUO-vers
 deploy:
 - provider: GitHub
