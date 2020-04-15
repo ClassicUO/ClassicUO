@@ -30,7 +30,7 @@ build_script:
 artifacts:
 - path: ClassicUO-dev-preview-release.zip
   name: ClassicUO
-- path: ClassicUO-dev-preview-{version}-release.zip
+- path: ClassicUO-dev-preview-$(APPVEYOR_BUILD_VERSION)-release.zip
   name: ClassicUO-vers
 deploy:
 - provider: GitHub
