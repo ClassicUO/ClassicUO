@@ -2028,7 +2028,13 @@ namespace ClassicUO.IO.Resources
 
             for (; i < len; i++)
             {
-                if (str[i] == ' ' || str[i] == '>')
+                // special case for single <{TAG}/>
+                if (str[i] == '/')
+                {
+                    endTag = true;
+                    break;
+                }
+                else if (str[i] == ' ' || str[i] == '>')
                     break;
             }
 

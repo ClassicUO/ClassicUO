@@ -20,6 +20,8 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -38,7 +40,6 @@ namespace ClassicUO.Game.GameObjects
         protected Entity(uint serial)
         {
             Serial = serial;
-            Items = new EntityCollection<Item>();
         }
 
 
@@ -46,7 +47,6 @@ namespace ClassicUO.Game.GameObjects
 
         protected long LastAnimationChangeTime;
 
-        public EntityCollection<Item> Items { get; protected set; }
 
         public bool HasEquipment => _equipment != null;
 
@@ -130,20 +130,22 @@ namespace ClassicUO.Game.GameObjects
             {
                 var minColor = 0xFFFF;
 
-                foreach (Item i in Items)
+                for (var i = Items; i != null; i = i.Next)
                 {
-                    if (i.Graphic == graphic)
+                    Item it = (Item) i;
+
+                    if (it.Graphic == graphic)
                     {
-                        if (i.Hue < minColor)
+                        if (it.Hue < minColor)
                         {
-                            item = i;
-                            minColor = i.Hue;
+                            item = it;
+                            minColor = it.Hue;
                         }
                     }
 
-                    if (SerialHelper.IsValid(i.Container))
+                    if (SerialHelper.IsValid(it.Container))
                     {
-                        Item found = i.FindItem(graphic, hue);
+                        Item found = it.FindItem(graphic, hue);
 
                         if (found != null && found.Hue < minColor)
                         {
@@ -155,14 +157,16 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                foreach (Item i in Items)
+                for (var i = Items; i != null; i = i.Next)
                 {
-                    if (i.Graphic == graphic && i.Hue == hue)
-                        item = i;
+                    Item it = (Item) i;
 
-                    if (SerialHelper.IsValid(i.Container))
+                    if (it.Graphic == graphic && it.Hue == hue)
+                        item = it;
+
+                    if (SerialHelper.IsValid(it.Container))
                     {
-                        Item found = i.FindItem(graphic, hue);
+                        Item found = it.FindItem(graphic, hue);
 
                         if (found != null)
                             item = found;
@@ -173,21 +177,103 @@ namespace ClassicUO.Game.GameObjects
             return item;
         }
 
-        public Item FindItemByLayer(Layer layer)
+        public Item GetItemByGraphic(ushort graphic, bool deepsearch = false)
         {
-            foreach (Item i in Items)
+            for (var i = Items; i != null; i = i.Next)
             {
-                if (i.Layer == layer)
-                    return i;
+                Item item = (Item) i;
+
+                if (item.Graphic == graphic)
+                    return item;
+
+                if (deepsearch && !item.IsEmpty)
+                {
+                    for (var ic = Items; ic != null; ic = ic.Next)
+                    {
+                        Item childItem = (Item) ic;
+
+                        Item res = childItem.GetItemByGraphic(graphic, deepsearch);
+
+                        if (res != null)
+                            return res;
+                    }
+                }
             }
 
             return null;
         }
 
-        public void ProcessDelta()
+        public Item FindItemByLayer(Layer layer)
         {
-            Items.ProcessDelta();
+            for (var i = Items; i != null; i = i.Next)
+            {
+                Item it = (Item) i;
+
+                if (it.Layer == layer)
+                    return it;
+            }
+
+            return null;
         }
+
+        //public new void Clear()
+        //{
+        //    if (!IsEmpty)
+        //    {
+        //        var obj = Items;
+
+        //        while (obj != null)
+        //        {
+        //            var next = obj.Next;
+        //            Item it = (Item) obj;
+
+        //            it.Container = 0;
+        //            World.Items.Remove(it);
+
+        //            Remove(obj);
+
+        //            obj = next;
+        //        }
+        //    }
+        //}
+
+        public void ClearUnequipped()
+        {
+            if (!IsEmpty)
+            {
+                LinkedObject new_first = null;
+                var obj = Items;
+
+                while (obj != null)
+                {
+                    var next = obj.Next;
+
+                    Item it = (Item) obj;
+
+                    if (it.Layer != 0)
+                    {
+                        if (new_first == null)
+                        {
+                            new_first = obj;
+                        }
+                    }
+                    else
+                    {
+                        it.Container = 0;
+                        World.Items.Remove(it);
+                        it.Destroy();
+                        Remove(obj);
+                    }
+                    
+                    obj = next;
+                }
+
+
+                Items = new_first;
+
+            }
+        }
+
 
         public override void Destroy()
         {

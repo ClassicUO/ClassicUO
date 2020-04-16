@@ -24,19 +24,19 @@ namespace ClassicUO.Game
 {
     abstract class LinkedObject
     {
-        public LinkedObject Left, Right, First;
-        public bool IsEmpty => First == null;
+        public LinkedObject Previous, Next, Items;
+        public bool IsEmpty => Items == null;
 
         ~LinkedObject()
         {
             Clear();
 
-            var item = Right;
+            var item = Next;
 
             while (item != null && item != this)
             {
-                var next = item.Right;
-                item.Right = null;
+                var next = item.Next;
+                item.Next = null;
                 item = next;
             }
         }
@@ -46,20 +46,22 @@ namespace ClassicUO.Game
             if (item == null)
                 return;
 
-            if (First == null)
+            Remove(item);
+
+            if (Items == null)
             {
-                First = item;
+                Items = item;
             }
             else
             {
-                var current = First;
-                while (current.Right != null)
+                var current = Items;
+                while (current.Next != null)
                 {
-                    current = current.Right;
+                    current = current.Next;
                 }
 
-                current.Right = item;
-                item.Left = current;
+                current.Next = item;
+                item.Previous = current;
             }
         }
 
@@ -69,8 +71,8 @@ namespace ClassicUO.Game
                 return;
 
             Unlink(item);
-            item.Right = null;
-            item.Left = null;
+            item.Next = null;
+            item.Previous = null;
         }
 
         public void Unlink(LinkedObject item)
@@ -78,20 +80,24 @@ namespace ClassicUO.Game
             if (item == null)
                 return;
 
-            if (item == First)
+            if (item == Items)
             {
-                First = First.Right;
-                if (First != null)
+                Items = Items.Next;
+                if (Items != null)
                 {
-                    First.Left = null;
+                    Items.Previous = null;
                 }
             }
             else
             {
-                item.Left.Right = item.Right;
-                if (item.Right != null)
+                if (item.Previous != null)
                 {
-                    item.Right.Left = item.Left;
+                    item.Previous.Next = item.Next;
+                }
+
+                if (item.Next != null)
+                {
+                    item.Next.Previous = item.Previous;
                 }
             }
         }
@@ -100,43 +106,43 @@ namespace ClassicUO.Game
         {
             if (first == null)
             {
-                item.Right = First;
-                item.Left = null;
+                item.Next = Items;
+                item.Previous = null;
 
-                if (First != null)
+                if (Items != null)
                 {
-                    First.Left = item;
+                    Items.Previous = item;
                 }
-                First = item;
+                Items = item;
             }
             else
             {
-                var next = first.Right;
-                item.Right = next;
-                item.Left = first;
-                first.Right = item;
+                var next = first.Next;
+                item.Next = next;
+                item.Previous = first;
+                first.Next = item;
 
                 if (next != null)
                 {
-                    next.Left = item;
+                    next.Previous = item;
                 }
             }
         }
 
         public void MoveToFront(LinkedObject item)
         {
-            if (item != null && item != First)
+            if (item != null && item != Items)
             {
                 Unlink(item);
 
-                if (First != null)
+                if (Items != null)
                 {
-                    First.Left = item;
+                    Items.Previous = item;
                 }
 
-                item.Right = First;
-                item.Left = null;
-                First = item;
+                item.Next = Items;
+                item.Previous = null;
+                Items = item;
             }
         }
 
@@ -149,25 +155,25 @@ namespace ClassicUO.Game
 
                 if (last == null)
                 {
-                    First = item;
+                    Items = item;
                 }
                 else
                 {
-                    last.Right = item;
+                    last.Next = item;
                 }
 
-                item.Left = last;
-                item.Right = null;
+                item.Previous = last;
+                item.Next = null;
             }
         }
 
         public LinkedObject GetLast()
         {
-            var last = First;
+            var last = Items;
 
-            while (last != null && last.Right != null)
+            while (last != null && last.Next != null)
             {
-                last = last.Right;
+                last = last.Next;
             }
 
             return last;
@@ -175,15 +181,15 @@ namespace ClassicUO.Game
 
         public void Clear()
         {
-            if (First != null)
+            if (Items != null)
             {
-                var item = First;
-                First = null;
+                var item = Items;
+                Items = null;
 
                 while (item != null)
                 {
-                    var next = item.Right;
-                    item.Right = null;
+                    var next = item.Next;
+                    item.Next = null;
                     item = next;
                 }
             }

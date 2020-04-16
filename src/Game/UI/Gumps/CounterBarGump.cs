@@ -426,8 +426,10 @@ namespace ClassicUO.Game.UI.Gumps
                 if (parent == null)
                     return;
 
-                foreach (Item item in parent.Items)
+                for (var i = parent.Items; i != null; i = i.Next)
                 {
+                    Item item = (Item) i;
+
                     GetAmount(item, graphic, hue, ref amount);
 
                     if (item.Graphic == graphic && item.Hue == hue && item.Exists)

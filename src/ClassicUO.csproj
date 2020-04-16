@@ -88,7 +88,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\api\cuoapi.dll</HintPath>
     </Reference>
-    <Reference Include="FNA, Version=19.12.1.0, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="FNA, Version=20.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\FNA\FNA.dll</HintPath>
     </Reference>
@@ -348,7 +348,6 @@
     <Compile Include="Game\UI\Gumps\QuestionGump.cs" />
     <Compile Include="Game\UI\Gumps\HealthBarGump.cs" />
     <Compile Include="Game\UI\Gumps\OptionsGump.cs" />
-    <Compile Include="Game\UI\Gumps\PartyGumpAdvanced.cs" />
     <Compile Include="Game\UI\Gumps\PopupMenuGump.cs" />
     <Compile Include="Game\UI\Gumps\SkillButtonGump.cs" />
     <Compile Include="Game\UI\Gumps\SplitMenuGump.cs" />
@@ -403,13 +402,11 @@
     <Compile Include="Game\UI\Controls\Control.cs" />
     <Compile Include="Game\UI\Controls\GumpControlInfo.cs" />
     <Compile Include="Game\UI\Controls\GumpPic.cs" />
-    <Compile Include="Game\UI\Controls\GumpPicContainer.cs" />
     <Compile Include="Game\UI\Controls\GumpPicTiled.cs" />
     <Compile Include="Game\UI\Controls\HSliderBar.cs" />
     <Compile Include="Game\UI\Controls\HtmlControl.cs" />
     <Compile Include="Game\UI\Controls\ScrollBarBase.cs" />
     <Compile Include="Game\UI\Controls\ItemGump.cs" />
-    <Compile Include="Game\UI\Controls\ItemGumpPaperdoll.cs" />
     <Compile Include="Game\UI\Controls\Label.cs" />
     <Compile Include="Game\UI\Controls\Panel.cs" />
     <Compile Include="Game\UI\Controls\PaperDollInteractable.cs" />

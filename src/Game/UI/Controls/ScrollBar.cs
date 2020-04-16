@@ -230,9 +230,9 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (sliderY == 0 && _clickPosition.Y < _textureUpButton[0].Height + (_textureSlider.Height >> 1))
                     _clickPosition.Y = _textureUpButton[0].Height + (_textureSlider.Height >> 1);
-
-                if (sliderY == scrollableArea && _clickPosition.Y > Height - _textureDownButton[0].Height - (_textureSlider.Height >> 1))
+                else if (sliderY == scrollableArea && _clickPosition.Y > Height - _textureDownButton[0].Height - (_textureSlider.Height >> 1))
                     _clickPosition.Y = Height - _textureDownButton[0].Height - (_textureSlider.Height >> 1);
+               
                 _value = (int) Math.Round (sliderY / scrollableArea * (MaxValue - MinValue) + MinValue);
                 _sliderPosition = sliderY;
             }

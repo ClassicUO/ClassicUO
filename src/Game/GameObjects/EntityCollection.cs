@@ -30,7 +30,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal class EntityCollection<T> : IEnumerable<T> where T : Entity
     {
-        private readonly List<uint> _added = new List<uint>(), _removed = new List<uint>();
         private readonly Dictionary<uint, T> _entities = new Dictionary<uint, T>();
 
         public int Count => _entities.Count;
@@ -45,24 +44,7 @@ namespace ClassicUO.Game.GameObjects
             return _entities.Values.GetEnumerator();
         }
 
-        public event EventHandler<CollectionChangedEventArgs<uint>> Added, Removed;
-
-        public void ProcessDelta()
-        {
-            if (_added.Count != 0)
-            {
-                CollectionChangedEventArgs<uint> list = new CollectionChangedEventArgs<uint>(_added);
-                _added.Clear();
-                Added.Raise(list);
-            }
-
-            if (_removed.Count != 0)
-            {
-                CollectionChangedEventArgs<uint> list = new CollectionChangedEventArgs<uint>(_removed);
-                _removed.Clear();
-                Removed.Raise(list);
-            }
-        }
+      
 
         public bool Contains(uint serial)
         {
@@ -82,22 +64,24 @@ namespace ClassicUO.Game.GameObjects
                 return false;
 
             _entities[entity.Serial] = entity;
-            _added.Add(entity.Serial);
 
             return true;
         }
 
         public void Remove(uint serial)
         {
-            if (_entities.Remove(serial)) _removed.Add(serial);
+            _entities.Remove(serial);
         }
 
         public void Replace(T entity, uint newSerial)
         {
             if (_entities.Remove(entity.Serial))
             {
-                foreach (Item i in entity.Items)
-                    i.Container = newSerial;
+                for (var i = entity.Items; i != null; i = i.Next)
+                {
+                    Item it = (Item) i;
+                    it.Container = newSerial;
+                }
 
                 _entities[newSerial] = entity;
                 entity.Serial = newSerial;
@@ -106,31 +90,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void Clear()
         {
-            _removed.AddRange(this.Select(s => s.Serial));
             _entities.Clear();
-            ProcessDelta();
-        }
-    }
-
-    internal class CollectionChangedEventArgs<T> : EventArgs, IEnumerable<T>
-    {
-        private readonly List<T> _data;
-
-        public CollectionChangedEventArgs(IEnumerable<T> list)
-        {
-            _data = list.ToList();
-        }
-
-        public int Count => _data.Count;
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public IEnumerator<T> GetEnumerator()
-        {
-            return _data.GetEnumerator();
         }
     }
 }

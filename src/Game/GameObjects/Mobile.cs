@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using ClassicUO.Configuration;
 using ClassicUO.Data;
@@ -53,7 +52,7 @@ namespace ClassicUO.Game.GameObjects
 
         static Mobile()
         {
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < Constants.PREDICTABLE_CHUNKS; i++)
                 _pool.Enqueue(new Mobile(0));
         }
 
@@ -117,8 +116,8 @@ namespace ClassicUO.Game.GameObjects
                 mobile.Texture = null;
                 mobile.IsClicked = false;
 
-                if (mobile.Items == null || mobile.Items.Count != 0)
-                    mobile.Items = new EntityCollection<Item>();
+                mobile.Clear();
+
 
                 mobile.CalculateRandomIdleTime();
 
@@ -203,10 +202,10 @@ namespace ClassicUO.Game.GameObjects
         {
             get
             {
-                if (Client.Version >= ClientVersion.CV_70331 && HasEquipment)
+                if (HasEquipment)
                 {
                     Item m = Equipment[0x19];
-                    return m != null && m.Graphic == 0x3E96; // TODO: im not sure if each server sends this value ever
+                    return m != null && m.Graphic == 0x3E96;
                 }
 
                 return false;
@@ -243,7 +242,15 @@ namespace ClassicUO.Game.GameObjects
 
         public Item GetSecureTradeBox()
         {
-            return Items.FirstOrDefault(s => s.Graphic == 0x1E5E && s.Layer == Layer.Invalid);
+            for (var i = Items; i != null; i = i.Next)
+            {
+                Item it = (Item) i;
+
+                if (it.Graphic == 0x1E5E && it.Layer == 0)
+                    return it;
+            }
+
+            return null;
         }
 
         public void SetSAPoison(bool value)
@@ -827,11 +834,10 @@ namespace ClassicUO.Game.GameObjects
                             return;
                         }
 
-                        if (Right != null || Left != null)
+                        if (TNext != null || TPrevious != null)
                             AddToTile();
 
                         LastStepTime = Time.Ticks;
-                        ProcessDelta();
                     }
                 }
             }
@@ -847,8 +853,8 @@ namespace ClassicUO.Game.GameObjects
                 {
                     GameObject start = this;
 
-                    while (start?.Left != null)
-                        start = start.Left;
+                    while (start?.TPrevious != null)
+                        start = start.TPrevious;
 
                     while (start != null && result == 0)
                     {
@@ -974,7 +980,7 @@ namespace ClassicUO.Game.GameObjects
                             }
                         }
 
-                        start = start.Right;
+                        start = start.TNext;
                     }
                 }
 

@@ -214,7 +214,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public void UpdateLocksAfterPacket()
+        protected override void UpdateContents()
         {
             if (Settings.GlobalSettings.ShardType != 1)
             {

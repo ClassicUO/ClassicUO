@@ -33,9 +33,10 @@ namespace ClassicUO.Game.UI.Gumps
     {
         public PopupMenuGump(PopupMenuData data) : base(0, 0)
         {
-            CloseIfClickOutside = true;
             CanMove = false;
             CanCloseWithRightClick = true;
+
+
             ResizePic pic = new ResizePic(0x0A3C)
             {
                 Alpha = 0.25f
@@ -45,8 +46,10 @@ namespace ClassicUO.Game.UI.Gumps
             bool arrowAdded = false;
             int width = 0, height = 20;
 
-            foreach (PopupMenuItem item in data.Items)
+            for (int i = 0; i < data.Items.Length; i++)
             {
+                ref readonly var item = ref data.Items[i];
+
                 string text = ClilocLoader.Instance.GetString(item.Cliloc);
 
                 ushort hue = item.Hue;
@@ -66,7 +69,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Label label = new Label(text, true, hue, font: 1)
                 {
-                    X = 10, Y = offsetY
+                    X = 10,
+                    Y = offsetY
                 };
                 FontsLoader.Instance.SetUseHTML(false);
 
@@ -94,7 +98,8 @@ namespace ClassicUO.Game.UI.Gumps
                     // TODO: wat?
                     Add(new Button(0, 0x15E6, 0x15E2, 0x15E2)
                     {
-                        X = 20, Y = offsetY
+                        X = 20,
+                        Y = offsetY
                     });
                     height += 20;
                 }
@@ -118,8 +123,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 pic.Width = width;
                 pic.Height = height;
-                foreach (HitBox box in FindControls<HitBox>()) box.Width = width - 20;
+                foreach (HitBox box in FindControls<HitBox>())
+                    box.Width = width - 20;
             }
         }
+
+
     }
 }

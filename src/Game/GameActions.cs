@@ -20,7 +20,6 @@
 #endregion
 
 using System;
-using System.Linq;
 
 using ClassicUO.Configuration;
 using ClassicUO.Data;
@@ -184,7 +183,8 @@ namespace ClassicUO.Game
         public static void RequestPartyAccept(uint serial)
         {
             Socket.Send(new PPartyAccept(serial));
-            UIManager.Gumps.OfType<PartyInviteGump>().FirstOrDefault()?.Dispose();
+
+            UIManager.GetGump<PartyInviteGump>()?.Dispose();
         }
 
         public static void RequestPartyRemoveMember(uint serial)
@@ -348,7 +348,11 @@ namespace ClassicUO.Game
                 if (mobile != World.Player)
                     Socket.Send(new PClickRequest(mobile));
 
-            foreach (Item item in World.Items.Where(s => s.IsCorpse)) Socket.Send(new PClickRequest(item));
+            foreach (Item item in World.Items)
+            {
+                if (item.IsCorpse)
+                    Socket.Send(new PClickRequest(item));
+            }
         }
 
         public static void OpenDoor()

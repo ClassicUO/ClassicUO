@@ -95,7 +95,6 @@ namespace ClassicUO.Configuration
 
         // visual
         [JsonProperty] public bool EnabledCriminalActionQuery { get; set; } = true;
-        [JsonProperty] public bool ShowIncomingNames { get; set; } = true;
         [JsonProperty] public bool EnableStatReport { get; set; } = true;
         [JsonProperty] public bool EnableSkillReport { get; set; } = true;
         [JsonProperty] public bool UseOldStatusGump { get; set; }
@@ -261,6 +260,23 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool SaveHealthbars { get; set; }
         [JsonProperty] public bool TextFading { get; set; } = true;
 
+
+        [JsonProperty] public int WorldMapWidth { get; set; } = 400;
+        [JsonProperty] public int WorldMapHeight { get; set; } = 400;
+        [JsonProperty] public int WorldMapFont { get; set; } = 3;
+        [JsonProperty] public bool WorldMapFlipMap { get; set; } = true;
+        [JsonProperty] public bool WorldMapTopMost { get; set; }
+        [JsonProperty] public bool WorldMapFreeView { get; set; }
+        [JsonProperty] public bool WorldMapShowParty { get; set; } = true;
+        [JsonProperty] public int WorldMapZoomIndex { get; set; } = 4;
+        [JsonProperty] public bool WorldMapShowCoordinates { get; set; } = true;
+        [JsonProperty] public bool WorldMapShowMobiles { get; set; } = true;
+        [JsonProperty] public bool WorldMapShowPlayerName { get; set; } = true;
+        [JsonProperty] public bool WorldMapShowPlayerBar { get; set; } = true;
+        [JsonProperty] public bool WorldMapShowGroupName { get; set; } = true;
+        [JsonProperty] public bool WorldMapShowGroupBar { get; set; } = true;
+        [JsonProperty] public bool WorldMapShowMarkers { get; set; } = true;
+        [JsonProperty] public bool WorldMapShowMultis { get; set; } = true;
 
         internal static string ProfilePath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data");

@@ -73,16 +73,24 @@ namespace ClassicUO.Game.Map
                 if (!load)
                     return null;
 
-                _usedIndices.AddLast(block);
+                var node =_usedIndices.AddLast(block);
                 chunk = Chunk.Create((ushort) cellX, (ushort) cellY);
                 chunk.Load(Index);
+                chunk.Node = node;
             }
             else if (chunk.IsDestroyed)
             {
-                _usedIndices.AddLast(block);
+                // make sure node is clear
+                if (chunk.Node != null && (chunk.Node.Previous != null || chunk.Node.Next != null))
+                {
+                    chunk.Node.List?.Remove(chunk.Node);
+                }
+
+                var node = _usedIndices.AddLast(block);
                 chunk.X = (ushort) cellX;
                 chunk.Y = (ushort) cellY;
                 chunk.Load(Index);
+                chunk.Node = node;
             }
 
             chunk.LastAccessTime = Time.Ticks;
@@ -124,15 +132,16 @@ namespace ClassicUO.Game.Map
 
         public void GetMapZ(int x, int y, out sbyte groundZ, out sbyte staticZ)
         {
-            var tile = GetTile(x, y);
+            var chunk = GetChunk(x, y);
+            //var obj = GetTile(x, y);
             groundZ = staticZ = 0;
 
-            if (tile == null)
+            if (chunk == null)
             {
                 return;
             }
-            
-            var obj = tile;
+
+            var obj = chunk.Tiles[x % 8, y % 8];
 
             while (obj != null)
             {
@@ -140,7 +149,7 @@ namespace ClassicUO.Game.Map
                     groundZ = obj.Z;
                 else if (staticZ < obj.Z)
                     staticZ = obj.Z;
-                obj = obj.Right;
+                obj = obj.TNext;
             }
         }
 
@@ -163,7 +172,7 @@ namespace ClassicUO.Game.Map
             {
                 GameObject obj = chunk.Tiles[x % 8, y % 8];
 
-                for (; obj != null; obj = obj.Right)
+                for (; obj != null; obj = obj.TNext)
                 {
                     if (!(obj is Static) && !(obj is Multi))
                         continue;
@@ -225,26 +234,36 @@ namespace ClassicUO.Game.Map
 
             var first = _usedIndices.First;
 
-            for (var right = first.Next; first != null; first = right, right = right?.Next)
+            while (first != null)
             {
-                Chunk block = Chunks[first.Value];
+                var next = first.Next;
+
+                ref Chunk block = ref Chunks[first.Value];
 
                 if (block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
-                    block.Clear();
-                    _usedIndices.Remove(first);
+                    block.Destroy();
+                    block = null;
 
                     if (++count >= Constants.MAX_MAP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
                         break;
                 }
+
+                first = next;
             }
         }
 
         public void Destroy()
         {
-            for (var first = _usedIndices.First; first != null; first = first.Next)
+            var first = _usedIndices.First;
+
+            while (first != null)
             {
-                Chunks[first.Value].Destroy();
+                var next = first.Next;
+                ref var c = ref Chunks[first.Value];
+                c.Destroy();
+                c = null;
+                first = next;
             }
 
             _usedIndices.Clear();

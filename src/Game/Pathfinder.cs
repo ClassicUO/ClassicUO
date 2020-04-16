@@ -85,10 +85,10 @@ namespace ClassicUO.Game
 
             GameObject obj = tile;
 
-            while (obj.Left != null)
-                obj = obj.Left;
+            while (obj.TPrevious != null)
+                obj = obj.TPrevious;
 
-            for (; obj != null; obj = obj.Right)
+            for (; obj != null; obj = obj.TNext)
             {
                 if (World.CustomHouseManager != null && obj.Z < World.Player.Z)
                     continue;

@@ -21,10 +21,18 @@
 
 using System;
 
+using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Input;
+using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -36,502 +44,333 @@ namespace ClassicUO.Game.UI.Controls
             Layer.Ring, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Skirt, Layer.Robe, Layer.Waist, Layer.Necklace,
             Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
         };
-        private Item _fakeItem;
-        private Mobile _mobile;
-        private GumpPic _body, _unk;
 
-        private readonly ItemGumpPaperdoll[] _pgumps = new ItemGumpPaperdoll[(int) Layer.Mount]; // _backpackGump;
+        private static readonly Layer[] _layerOrder_quiver_fix =
+        {
+            Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Arms, Layer.Torso, Layer.Tunic,
+            Layer.Ring, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Skirt, Layer.Robe, Layer.Cloak,  Layer.Waist, Layer.Necklace,
+            Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
+        };
+
         private readonly PaperDollGump _paperDollGump;
+        private bool _updateUI;
 
-        public PaperDollInteractable(int x, int y, Mobile mobile, PaperDollGump paperDollGump)
+        public PaperDollInteractable(int x, int y, uint serial, PaperDollGump paperDollGump)
         {
             X = x;
             Y = y;
             _paperDollGump = paperDollGump;
-            Mobile = mobile;
             AcceptMouseInput = false;
-            mobile.Items.Added += ItemsOnAdded;
-            mobile.Items.Removed += ItemsOnRemoved;
+            LocalSerial = serial;
+            _updateUI = true;
         }
 
-        public Mobile Mobile
-        {
-            get => _mobile;
-            set
-            {
-                if (value != _mobile)
-                {
-                    _mobile = value;
-                    UpdateEntity();
-                }
-            }
-        }
 
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
 
-            if (_mobile == null || _mobile.IsDestroyed)
-                Dispose();
-        }
-
-        public override void Dispose()
-        {
-            Mobile.Items.Added -= ItemsOnAdded;
-            Mobile.Items.Removed -= ItemsOnRemoved;
-            if (_pgumps[(int) Layer.Backpack] != null) _pgumps[(int) Layer.Backpack].MouseDoubleClick -= OnDoubleclickBackpackGump;
-            base.Dispose();
-        }
-
-        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<uint> e)
-        {
-            foreach (uint serial in e)
+            if (_updateUI)
             {
-                Item item = World.Items.Get(serial);
+                UpdateUI();
 
-                if (item != null && item.Layer >= 0 && (int) item.Layer < _pgumps.Length)
-                {
-                    if (Mobile == World.Player && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded))
-                    {
-                        World.Player.UpdateAbilities();
-                    }
-
-                    // this fix is necessary to clean paperdoll
-                    if (Mobile.HasEquipment && item.Layer >= 0 && (int)item.Layer < Mobile.Equipment.Length)
-                        Mobile.Equipment[(int)item.Layer] = null;
-
-                    _pgumps[(int )item.Layer]?.Dispose();
-                    _pgumps[(int) item.Layer] = null;
-                }
-            }
-
-         
-            UpdateEntity();
-        }
-
-        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<uint> e)
-        {
-            if (_fakeItem != null)
-            {
-                foreach (uint item in e)
-                {
-                    if (item == _fakeItem.Serial)
-                    {
-                        Item i = World.Items.Get(item);
-
-                        if (i != null && i.Layer >= 0 && (int)i.Layer < _pgumps.Length)
-                        {
-                            if (Mobile == World.Player && (i.Layer == Layer.OneHanded || i.Layer == Layer.TwoHanded))
-                            {
-                                World.Player.UpdateAbilities();
-                            }
-
-                            _pgumps[(int) i.Layer]?.Dispose();
-                            _pgumps[(int) i.Layer] = null;
-
-                        }
-
-                        _fakeItem = null;
-
-                        break;
-                    }
-                }
-            }
-
-            UpdateEntity();
-        }
-
-        public void Update()
-        {
-            UpdateEntity();
-        }
-
-
-        
-
-        public void AddFakeDress(Item item)
-        {
-            if (item == null && _fakeItem != null)
-            {
-                _fakeItem = null;
-                UpdateEntity();
-            }
-            else if (item != null && item.ItemData.Layer < _mobile.Equipment.Length && _mobile.Equipment[item.ItemData.Layer] == null)
-            {
-                _fakeItem = item;
-                UpdateEntity();
+                _updateUI = false;
             }
         }
 
-        private void UpdateEntity()
+
+        private bool _hasFakeItem;
+        public void SetFakeItem(bool value)
         {
-            if (Mobile == null || Mobile.IsDestroyed)
+            _updateUI = (_hasFakeItem && !value) || (!_hasFakeItem && value);
+            _hasFakeItem = value;
+        }
+
+        public bool HasFakeItem => _hasFakeItem;
+
+        private void UpdateUI()
+        {
+            if (IsDisposed)
+                return;
+
+            Mobile mobile = World.Mobiles.Get(LocalSerial);
+
+            if (mobile == null || mobile.IsDestroyed)
             {
                 Dispose();
 
                 return;
             }
 
-            //Clear();
+            Clear();
 
             // Add the base gump - the semi-naked paper doll.
-            ushort body = 0;
+            ushort body;
 
-            bool isGM = false;
-
-            if (Mobile.IsElfMale)
-                body = 0x000E;
-            else if (Mobile.IsElfFemale)
-                body = 0x000F;
-            else if (Mobile.Graphic == 0x029A || Mobile.Graphic == 0x02B6)
-                body = 0x029A;
-            else if (Mobile.Graphic == 0x029B || Mobile.Graphic == 0x02B7)
-                body = 0x0299;
-            else if (Mobile.IsMale)
-                body = 0x000C;
-            else 
+            if (mobile.Graphic == 0x0191 || mobile.Graphic == 0x0193)
                 body = 0x000D;
-
-            if (Mobile.Graphic == 0x03DB)
-                isGM = true;
-
-            if (isGM)
+            else if (mobile.Graphic == 0x025D)
+                body = 0x000E;
+            else if (mobile.Graphic == 0x025E)
+                body = 0x000F;
+            else if (mobile.Graphic == 0x029A || mobile.Graphic == 0x02B6)
+                body = 0x029A;
+            else if (mobile.Graphic == 0x029B || mobile.Graphic == 0x02B7)
+                body = 0x0299;
+            else if (mobile.Graphic == 0x03DB)
             {
-                if (_body == null)
+                body = 0x000C;
+                Add(new GumpPic(0, 0, body, 0x03EA)
                 {
-                    Add(_body = new GumpPic(0, 0, body, 0x03EA)
-                    {
-                        AcceptMouseInput = true,
-                        IsPartialHue = true
-                    });
-                }
-                else
-                    _body.Graphic = body;
+                    AcceptMouseInput = true,
+                    IsPartialHue = true
+                });
 
-                if (_unk == null)
+                Add(new GumpPic(0, 0, 0xC72B, 0)
                 {
-                    Add(_unk = new GumpPic(0, 0, 0xC72B, 0)
-                    {
-                        AcceptMouseInput = true,
-                        IsPartialHue = true
-                    });
-                }
-                else
-                    _unk.Graphic = 0xC72B;
+                    AcceptMouseInput = true,
+                    IsPartialHue = true
+                });
             }
             else
-            {
-                if (_unk != null)
-                {
-                    _unk.Dispose();
-                    _unk = null;
-                }
+                body = 0x000C;
 
-                if (_body == null)
+
+            // body
+            Add(new GumpPic(0, 0, body, mobile.Hue));
+
+             
+            
+            // equipment
+            Item equipItem = mobile.Equipment[(int) Layer.Cloak];
+
+            Layer[] layers = equipItem != null && equipItem.ItemData.IsContainer ? _layerOrder_quiver_fix : _layerOrder;
+
+            for (int i = 0; i < layers.Length; i++)
+            {
+                Layer layer = layers[i];
+
+                equipItem = mobile.Equipment[(int) layer];
+
+                if (equipItem != null)
                 {
-                    Add(_body = new GumpPic(0, 0, body, _mobile.Hue)
+                    if (Mobile.IsCovered(mobile, layer))
+                        continue;
+
+                    ushort id = GetAnimID(mobile.Graphic, equipItem.ItemData.AnimID, !mobile.IsMale);
+
+                    Add(new GumpPicEquipment(mobile.Serial, equipItem.Serial, 0, 0, id, (ushort) (equipItem.Hue & 0x3FFF), layer)
                     {
                         AcceptMouseInput = true,
-                        IsPartialHue = true
+                        IsPartialHue = equipItem.ItemData.IsPartialHue,
+                        CanLift = World.InGame && 
+                                  !World.Player.IsDead && layer != Layer.Beard && layer != Layer.Hair && 
+                                  (_paperDollGump.CanLift || LocalSerial == World.Player)
                     });
                 }
-                else
+                else if (HasFakeItem && ItemHold.Enabled && (byte) layer == ItemHold.ItemData.Layer && ItemHold.ItemData.AnimID != 0)
                 {
-                    _body.Graphic = body;
-                    _body.Hue = _mobile.Hue;
+                    ushort id = GetAnimID(mobile.Graphic, ItemHold.ItemData.AnimID, !mobile.IsMale);
+                    Add(new GumpPicEquipment(mobile.Serial, 0, 0, 0, id, (ushort) (ItemHold.Hue & 0x3FFF), ItemHold.Layer)
+                    {
+                        AcceptMouseInput = true,
+                        IsPartialHue = ItemHold.IsPartialHue,
+                        Alpha = 0.5f
+                    });
+                }
+            }
+
+
+            equipItem = mobile.Equipment[(int) Layer.Backpack];
+
+            if (equipItem != null && equipItem.ItemData.AnimID != 0)
+            {
+                ushort backpackGraphic = (ushort) (equipItem.ItemData.AnimID + 50000);
+
+                int bx = 0;
+
+                if (World.ClientFeatures.PaperdollBooks)
+                {
+                    bx = 6;
                 }
 
-
-                if (Mobile.HasEquipment)
+                Add(new GumpPicEquipment(mobile.Serial, equipItem.Serial ,- bx, 0, backpackGraphic, (ushort) (equipItem.Hue & 0x3FFF), Layer.Backpack)
                 {
-                    ItemGumpPaperdoll g = null;
+                    AcceptMouseInput = true,
+                });
+            }
+        }
+
+        public void Update() => _updateUI = true;
 
 
-                    bool invertTunicWithArms = false;
-                    bool isQuiver = false;
+        private static ushort GetAnimID(ushort graphic, ushort animID, bool isfemale)
+        {  
+            const int MALE_OFFSET = 50000;
+            const int FEMALE_OFFSET = 60000;
 
-                    var torso = Mobile.Equipment[(int) Layer.Torso];
-                    var quiver = Mobile.Equipment[(int) Layer.Cloak];
+            int offset = isfemale ? FEMALE_OFFSET : MALE_OFFSET;
 
-                    if (torso == null && _fakeItem != null && _fakeItem.ItemData.Layer == (int)Layer.Torso)
+            if (Client.Version >= ClientVersion.CV_7000 &&
+                animID == 0x03CA       // graphic for dead shroud
+                && (graphic == 0x02B7 || graphic == 0x02B6)) // dead gargoyle graphics
+            {
+                animID = 0x0223;
+            }
+
+            AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic);
+
+            if (AnimationsLoader.Instance.EquipConversions.TryGetValue(graphic, out var dict))
+            {
+                if (dict.TryGetValue(animID, out EquipConvData data))
+                {
+                    if (data.Gump > MALE_OFFSET)
+                        animID = (ushort) (data.Gump >= FEMALE_OFFSET ? data.Gump - FEMALE_OFFSET : data.Gump - MALE_OFFSET);
+                    else
+                        animID = data.Gump;
+                }
+            }
+
+            ushort gump_graphic = (ushort) (animID + offset);
+
+            if (isfemale && GumpsLoader.Instance.GetTexture(gump_graphic) == null)
+            {
+                gump_graphic = (ushort) (animID + MALE_OFFSET);
+
+                if (GumpsLoader.Instance.GetTexture(gump_graphic) == null)
+                {
+                    Log.Error($"Texture not found in paperdoll: gump_graphic: {gump_graphic}");
+                }
+            }
+
+            return gump_graphic;
+        }
+
+        private class GumpPicEquipment : GumpPic
+        {
+            private readonly Layer _layer;
+            private readonly uint _parentSerial;
+
+            public GumpPicEquipment(uint parent, uint serial, int x, int y, ushort graphic, ushort hue, Layer layer) : base(x, y, graphic, hue)
+            {
+                _parentSerial = parent;
+                LocalSerial = serial;
+                CanMove = false;
+                _layer = layer;
+
+                if (SerialHelper.IsValid(serial))
+                    SetTooltip(serial);
+            }
+
+            public bool CanLift { get; set; }
+
+            protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
+            {
+                // this check is necessary to avoid crashes during character creation
+                if (World.InGame)
+                    GameActions.DoubleClick(LocalSerial);
+
+                return true;
+            }
+
+            protected override void OnMouseUp(int x, int y, MouseButtonType button)
+            {
+                Mobile container = World.Mobiles.Get(_parentSerial);
+
+                if (MouseIsOver)
+                {
+                    if (ItemHold.Enabled || LocalSerial == 0)
                     {
-                        torso = _fakeItem;
-                    }
-
-                    if (quiver == null && _fakeItem != null && _fakeItem.ItemData.Layer == (int)Layer.Cloak)
-                    {
-                        quiver = _fakeItem;
-                    }
-
-                    if (torso != null && (torso.Graphic == 0x13BF || torso.Graphic == 0x13C4)) // chainmail tunic
-                    {
-                        invertTunicWithArms = true;
-                    }
-
-                    if (quiver != null && (quiver.Graphic == 0x2FB7 // elven
-                                           || quiver.Graphic == 0x2B02 // infinity
-                                           ))
-                    {
-                        isQuiver = true;
-                    }
-
-                    for (int i = 0; i < _layerOrder.Length; i++)
-                    {
-                        Layer layerIndex = _layerOrder[i];
-
-                        if (invertTunicWithArms)
+                        if (container != null)
                         {
-                            if (layerIndex == Layer.Arms)
-                                layerIndex = Layer.Torso;
-                            else if (layerIndex == Layer.Torso)
+                            GameScene scene = Client.Game.GetScene<GameScene>();
+                            if (scene == null)
+                                return;
+
+                            if (_layer == Layer.Backpack)
                             {
-                                layerIndex = Layer.Arms;
-                                invertTunicWithArms = false;
-                            }
-                        }
+                                Item equipment = container.FindItemByLayer(_layer);
 
-                        if (isQuiver)
-                        {
-                            if (layerIndex == Layer.Cloak)
+                                if (equipment != null)
+                                {
+                                    if (_layer == Layer.Backpack)
+                                    {
+                                        scene.DropHeldItemToContainer(LocalSerial != World.Player.Serial ? container.Serial : equipment.Serial);
+                                    }
+
+                                    Mouse.CancelDoubleClick = true;
+                                    Mouse.LastLeftButtonClickTime = 0;
+                                    return;
+                                }
+                            }
+                            else if (ItemHold.ItemData.IsWearable)
                             {
-                                // skip
-                                continue;
+                                Item equipment = container.FindItemByLayer(ItemHold.Layer);
+
+                                if (equipment == null)
+                                {
+                                    scene.WearHeldItem(_parentSerial != World.Player ? container : World.Player);
+                                    Mouse.CancelDoubleClick = true;
+                                    Mouse.LastLeftButtonClickTime = 0;
+                                    return;
+                                }
+
                             }
-
-                            if (layerIndex == Layer.Torso) // insert here the quiver if needed
-                            {
-                                layerIndex = Layer.Cloak;
-                                i--;
-                                isQuiver = false;
-                            }
-                        }
-
-
-
-                        Item item = _mobile.Equipment[(int) layerIndex];
-                        bool isfake = false;
-                        bool canPickUp = World.InGame && 
-                                         !World.Player.IsDead && 
-                                         (_mobile == World.Player || (_paperDollGump != null && _paperDollGump.CanLift)) &&
-                                         layerIndex != Layer.Hair && 
-                                         layerIndex != Layer.Beard;
-
-                        var itemGump = _pgumps[(int)layerIndex];
-
-                        if (_fakeItem != null && _fakeItem.ItemData.Layer == (int) layerIndex)
-                        {
-                            item = _fakeItem;
-                            isfake = true;
-                            canPickUp = false;
-                        }
-                        else if (item == null || item.IsDestroyed)
-                        {
-                            itemGump?.Dispose();
-                            _pgumps[(int)layerIndex] = null;
-                            continue;
-                        }
-
-                        bool isNew = false;
-                        if (itemGump != null)
-                        {
-                            itemGump.IsVisible = true;
                         }
                         else
                         {
-                            Add(itemGump = new ItemGumpPaperdoll(0, 0, item, Mobile, isfake)
+                            Client.Game.Scene.Audio.PlaySound(0x0051);
+                        }
+                    }
+                }
+
+                if (!ItemHold.Enabled && container != null)
+                {
+                    Item equipment = container.FindItemByLayer(_layer);
+
+                    if (equipment != null)
+                    {
+                        if (TargetManager.IsTargeting)
+                        {
+                            TargetManager.Target(equipment.Serial);
+                            Mouse.CancelDoubleClick = true;
+                            Mouse.LastLeftButtonClickTime = 0;
+                        }
+                        else
+                        {
+                            if (!DelayedObjectClickManager.IsEnabled)
                             {
-                                CanPickUp = canPickUp
-                            });
-                            _pgumps[(int) layerIndex] = itemGump;
-                            isNew = true;
-                        }
-
-                        if (Mobile.IsCovered(_mobile, layerIndex))
-                        {
-                            itemGump.IsVisible = false;
-                            continue;
-                        }
-
-                        g = _pgumps[(int) layerIndex];
-
-
-                        switch (layerIndex)
-                        {
-                            case Layer.Hair:
-                            case Layer.Beard:
-                                canPickUp = false;
-
-                                break;
-
-                            case Layer.Torso:
-
-                                //if (item.Graphic == 0x13BF || item.Graphic == 0x13C4) // chainmail tunic
-                                //{
-
-                                //}
-
-                                //g = _pgumps[(int) Layer.Arms];
-
-                                //if (g != null && !g.IsDisposed)
-                                //{
-                                //    if (item.Graphic != 0x13BF && item.Graphic != 0x13C4 && //chainmail tunic
-                                //        g.Item.Graphic != 0x1410 && g.Item.Graphic != 0x1417) //platemail arms
-                                //        g = null;
-                                //}
-
-                                goto case Layer.Arms;
-
-                            case Layer.Arms:
-                                var robe = _mobile.Equipment[(int)Layer.Robe];
-
-                                if (robe != null)
-                                {
-                                    itemGump.IsVisible = false;
-
-                                    continue;
-                                }
-
-                                break;
-
-                            case Layer.Helmet:
-                                robe = _mobile.Equipment[(int) Layer.Robe];
-
-                                if (robe != null)
-                                {
-                                    if (robe.Graphic > 0x3173)
-                                    {
-                                        if (robe.Graphic == 0x4B9D || robe.Graphic == 0x7816)
-                                        {
-                                            itemGump.IsVisible = false;
-
-                                            continue;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (robe.Graphic <= 0x2687)
-                                        {
-                                            if (robe.Graphic < 0x2683)
-                                                if (robe.Graphic < 0x204E || robe.Graphic > 0x204F)
-                                                    break;
-
-                                            itemGump.IsVisible = false;
-
-                                            continue;
-                                        }
-
-                                        if (robe.Graphic == 0x2FB9 || robe.Graphic == 0x3173)
-                                        {
-                                            itemGump.IsVisible = false;
-
-                                            continue;
-                                        }
-                                    }
-                                }
-
-                                break;
-                        }
-
-
-                        if (!isNew || isfake)
-                        {
-                            itemGump.Update(item, isfake);
-                            itemGump.CanPickUp = canPickUp;
-                        }
-
-
-                        if (g != null)
-                        {
-                            Children.Remove(g);
-                            Children.Add(g); //move to top
-                            g = null;
+                                DelayedObjectClickManager.Set(LocalSerial,
+                                                              Mouse.Position.X - ScreenCoordinateX,
+                                                              Mouse.Position.Y - ScreenCoordinateY,
+                                                              Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                            }
                         }
                     }
                 }
             }
 
-            if (_mobile.HasEquipment)
+            public override void Update(double totalMS, double frameMS)
             {
-                Item backpack = _mobile.Equipment[(int) Layer.Backpack];
+                base.Update(totalMS, frameMS);
 
-                if (backpack != null)
+                if (CanLift && !ItemHold.Enabled &&
+                   Mouse.LButtonPressed &&
+                   UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
+                   ((Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF &&
+                   Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks) ||
+                   Mouse.LDroppedOffset != Point.Zero))
                 {
-                    ref var backpackGump = ref _pgumps[(int) Layer.Backpack];
-                    if (backpackGump == null)
-                    {
-                        int bx = 0;
-
-                        if (World.ClientFeatures.PaperdollBooks)
-                        {
-                            bx = 6;
-                        }
-
-                        Add(backpackGump = new ItemGumpPaperdoll(-bx, 0, backpack, Mobile)
-                        {
-                            AcceptMouseInput = true,
-                            CanPickUp = false
-                        });
-                        backpackGump.MouseDoubleClick -= OnDoubleclickBackpackGump;
-                        backpackGump.MouseDoubleClick += OnDoubleclickBackpackGump;
-                    }
-                    else
-                    {
-                        backpackGump.Update(backpack);
-
-                        Children.Remove(backpackGump);
-                        Children.Add(backpackGump); //move to top
-                    }
-
+                    Rectangle bounds = ArtLoader.Instance.GetTexture(Graphic)?.Bounds ?? Rectangle.Empty;
+                    int centerX = bounds.Width >> 1;
+                    int centerY = bounds.Height >> 1;
+                    GameActions.PickUp(LocalSerial, centerX, centerY);
                 }
             }
-        }
 
-        internal bool IsOverBackpack
-        {
-            get
+            protected override void OnMouseOver(int x, int y)
             {
-                if (_mobile != null && _mobile.HasEquipment)
-                {
-                    var gump = _pgumps[(int)Layer.Backpack];
-                    if (gump != null && !gump.IsDisposed)
-                        return gump.MouseIsOver;
-                }
-                return false;
-            }
-        }
-
-        public bool Fix(int itemID)
-        {
-            if (itemID == 0x1410 || itemID == 0x1417) // platemail arms
-                return true;
-
-            if (itemID == 0x13BF || itemID == 0x13C4) // chainmail tunic
-                return true;
-
-            if (itemID == 0x1C08 || itemID == 0x1C09) // leather skirt
-                return true;
-
-            if (itemID == 0x1C00 || itemID == 0x1C01) // leather shorts
-                return true;
-
-            return false;
-        }
-
-        private void OnDoubleclickBackpackGump(object sender, EventArgs args)
-        {
-            if (_mobile != null && !_mobile.IsDestroyed && _mobile.HasEquipment)
-            {
-                Item backpack = _mobile.Equipment[(int) Layer.Backpack];
-
-                ContainerGump backpackGump = UIManager.GetGump<ContainerGump>(backpack);
-
-                if (backpackGump == null)
-                    GameActions.DoubleClick(backpack);
-                else
-                {
-                    backpackGump.SetInScreen();
-                    backpackGump.BringOnTop();
-                }
+                
             }
         }
     }

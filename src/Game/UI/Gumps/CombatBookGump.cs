@@ -229,8 +229,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             UseAbilityButtonGump gump = new UseAbilityButtonGump(def, true)
             {
-                X = Mouse.Position.X - 22,
-                Y = Mouse.Position.Y - 22
+                X = Mouse.LDropPosition.X - 22,
+                Y = Mouse.LDropPosition.Y - 22
             };
             UIManager.Add(gump);
             UIManager.AttemptDragControl(gump, Mouse.Position, true);
@@ -245,8 +245,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             UseAbilityButtonGump gump = new UseAbilityButtonGump(def, false)
             {
-                X = Mouse.Position.X - 22,
-                Y = Mouse.Position.Y - 22
+                X = Mouse.LDropPosition.X - 22,
+                Y = Mouse.LDropPosition.Y - 22
             };
             UIManager.Add(gump);
             UIManager.AttemptDragControl(gump, Mouse.Position, true);

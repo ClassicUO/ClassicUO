@@ -765,7 +765,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == control.Macro)?.Dispose();
 
-                        MacroButtonGump macroButtonGump = new MacroButtonGump(control.Macro, Mouse.Position.X, Mouse.Position.Y);
+                        MacroButtonGump macroButtonGump = new MacroButtonGump(control.Macro, Mouse.LDropPosition.X, Mouse.LDropPosition.Y);
                         UIManager.Add(macroButtonGump);
                         UIManager.AttemptDragControl(macroButtonGump, new Point(Mouse.Position.X + (macroButtonGump.Width >> 1), Mouse.Position.Y + (macroButtonGump.Height >> 1)), true);
                     };
@@ -849,7 +849,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == macro)?.Dispose();
 
-                    MacroButtonGump macroButtonGump = new MacroButtonGump(macro, Mouse.Position.X, Mouse.Position.Y);
+                    MacroButtonGump macroButtonGump = new MacroButtonGump(macro, Mouse.LDropPosition.X, Mouse.LDropPosition.Y);
                     UIManager.Add(macroButtonGump);
                     UIManager.AttemptDragControl(macroButtonGump, new Point(Mouse.Position.X + (macroButtonGump.Width >> 1), Mouse.Position.Y + (macroButtonGump.Height >> 1)), true);
                 };
@@ -2142,7 +2142,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 foreach (ContainerGump resizableGump in UIManager.Gumps.OfType<ContainerGump>())
                 {
-                    resizableGump.ForceUpdate();
+                    resizableGump.RequestUpdateContents();
                 }
             }
 

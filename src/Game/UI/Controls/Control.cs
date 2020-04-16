@@ -240,32 +240,6 @@ namespace ClassicUO.Game.UI.Controls
                 _activePage = value;
 
                 OnPageChanged();
-
-                //if (UIManager.KeyboardFocusControl != null)
-                //{
-                //    if (Children.Contains(UIManager.KeyboardFocusControl))
-                //    {
-                //        if (UIManager.KeyboardFocusControl.Page != 0)
-                //            UIManager.KeyboardFocusControl = null;
-                //    }
-                //}
-
-                // When ActivePage changes, check to see if there are new text input boxes
-                // that we should redirect text input to.
-                
-                //if (UIManager.KeyboardFocusControl == null)
-                //{
-                //    foreach (Control c in Children)
-                //    {
-                //        if (c.HandlesKeyboardFocus && c.Page == _activePage)
-                //        {
-                //            UIManager.KeyboardFocusControl = c;
-
-                //            break;
-                //        }
-                //    }
-                //}
-
             }
         }
 
@@ -704,11 +678,7 @@ namespace ClassicUO.Game.UI.Controls
         protected virtual void OnMove(int x, int y)
         {
         }
-
-        protected virtual void OnClosing()
-        {
-        }
-
+        
         internal virtual void OnFocusEnter()
         {
             IsFocused = true;

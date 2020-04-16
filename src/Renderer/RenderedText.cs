@@ -66,7 +66,7 @@ namespace ClassicUO.Renderer
             {
                 r = _pool.Dequeue();
                 r.IsDestroyed = false;
-                r.Links.Clear();
+                r.Links.Count = 0;
             }
             else
             {

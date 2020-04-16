@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Controls
             Texture = ArtLoader.Instance.GetTexture(graphic);
             Width = Texture.Width;
             Height = Texture.Height;
-
+            Graphic = graphic;
             WantUpdateSize = false;
         }
 
@@ -49,11 +49,17 @@ namespace ClassicUO.Game.UI.Controls
             Y = int.Parse(parts[2]);
         }
 
+
         public ushort Hue { get; set; }
+        public bool IsPartialHue => _isPartial;
+        public ushort Graphic { get; }
+
+
 
         public override void Update(double totalMS, double frameMS)
         {
-            Texture.Ticks = (long) totalMS;
+            if (Texture != null)
+                Texture.Ticks = (long) totalMS;
             base.Update(totalMS, frameMS);
         }
 
@@ -62,7 +68,7 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
             ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, _isPartial, 0);
 
-            batcher.Draw2D(Texture, x, y, /*Width, Height,*/ ref _hueVector);
+            batcher.Draw2D(Texture, x, y, Width, Height, ref _hueVector);
 
             return base.Draw(batcher, x, y);
         }

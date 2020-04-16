@@ -73,6 +73,19 @@ namespace ClassicUO.Game.Managers
 
         public static SystemChatControl SystemChat { get; set; }
 
+        public static PopupMenuGump PopupMenu { get; private set; }
+
+        public static void ShowGamePopup(PopupMenuGump popup)
+        {
+            PopupMenu?.Dispose();
+            PopupMenu = popup;
+
+            if (popup == null || popup.IsDisposed)
+                return;
+
+            Add(PopupMenu);
+        }
+
         public static Control KeyboardFocusControl
         {
             get
@@ -169,6 +182,9 @@ namespace ClassicUO.Game.Managers
                     }
                 }
             }
+
+            if (PopupMenu != null && !PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y))
+                ShowGamePopup(null);
         }
 
         public static void OnLeftMouseButtonUp()
@@ -182,14 +198,12 @@ namespace ClassicUO.Game.Managers
             {
                 if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
                     MouseOverControl.InvokeMouseUp(Mouse.Position, MouseButtonType.Left);
-
-                if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
+                else if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
                     _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButtonType.Left);
             }
             else
                 _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButtonType.Left);
 
-            CloseIfClickOutGumps();
             _mouseDownControls[btn] = null;
             _validForDClick = MouseOverControl;
         }
@@ -235,7 +249,7 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            CloseIfClickOutGumps();
+            ShowGamePopup(null);
         }
 
         public static void OnRightMouseButtonUp()
@@ -266,7 +280,6 @@ namespace ClassicUO.Game.Managers
                 _mouseDownControls[btn].InvokeMouseCloseGumpWithRClick();
             }
 
-            CloseIfClickOutGumps();
             _mouseDownControls[btn] = null;
         }
 
@@ -312,6 +325,8 @@ namespace ClassicUO.Game.Managers
                     }
                 }
             }
+
+            ShowGamePopup(null);
         }
 
         public static void OnMiddleMouseButtonUp()
@@ -332,11 +347,64 @@ namespace ClassicUO.Game.Managers
             else
                 _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButtonType.Middle);
 
-            CloseIfClickOutGumps();
             _mouseDownControls[btn] = null;
             _validForDClick = MouseOverControl;
         }
 
+        public static void OnExtraMouseButtonDown(int btn)
+        {
+            HandleMouseInput();
+            if (MouseOverControl != null)
+            {
+                MakeTopMostGump(MouseOverControl);
+                MouseOverControl.InvokeMouseDown(Mouse.Position, (MouseButtonType)btn);
+
+                if (MouseOverControl.IsEnabled && MouseOverControl.IsVisible)
+                {
+                    if (_lastFocus != MouseOverControl)
+                    {
+                        _lastFocus?.OnFocusLeft();
+                        MouseOverControl.OnFocusEnter();
+                        _lastFocus = MouseOverControl;
+                    }
+                }
+
+                _mouseDownControls[btn] = MouseOverControl;
+            }
+            else
+            {
+                foreach (Control s in Gumps)
+                {
+                    if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl)
+                    {
+                        s.Dispose();
+                        Mouse.CancelDoubleClick = true;
+                    }
+                }
+            }
+
+            ShowGamePopup(null);
+        }
+
+        public static void OnExtraMouseButtonUp(int btn)
+        {
+            HandleMouseInput();
+            EndDragControl(Mouse.Position);
+
+            if (MouseOverControl != null)
+            {
+                if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
+                    MouseOverControl.InvokeMouseUp(Mouse.Position, (MouseButtonType)btn);
+
+                if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
+                    _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, (MouseButtonType)btn);
+            }
+            else
+                _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, (MouseButtonType)btn);
+
+            _mouseDownControls[btn] = null;
+            _validForDClick = MouseOverControl;
+        }
 
         public static void OnMouseWheel(bool isup)
         {
@@ -348,7 +416,7 @@ namespace ClassicUO.Game.Managers
         public static bool HadMouseDownOnGump(MouseButtonType button)
         {
             var c = LastControlMouseDown(button);
-            return c != null && !(c is WorldViewport) && !(c is ItemGump);
+            return c != null && !c.IsDisposed && !(c is WorldViewport) && !ItemHold.Enabled;
         }
 
         public static Control LastControlMouseDown(MouseButtonType button)
@@ -361,13 +429,7 @@ namespace ClassicUO.Game.Managers
         {
             GameCursor = new GameCursor();
         }
-
-        public static void CloseIfClickOutGumps()
-        {
-            foreach (Gump gump in Gumps.OfType<Gump>().Where(s => s.CloseIfClickOutside))
-                gump.Dispose();
-        }
-
+        
         public static void SavePosition(uint serverSerial, Point point)
         {
             _gumpPositionCache[serverSerial] = point;
@@ -416,7 +478,8 @@ namespace ClassicUO.Game.Managers
                     Y = y,
                     CanMove = true,
                     CanCloseWithRightClick = true,
-                    CanCloseWithEsc = true
+                    CanCloseWithEsc = true,
+                    InvalidateContents = false
                 };
             int group = 0;
             int page = 0;
@@ -767,6 +830,19 @@ namespace ClassicUO.Game.Managers
             return gump;
         }
 
+        public static TradingGump GetTradingGump(uint serial)
+        {
+            for (var g = Gumps.Last; g != null; g = g.Previous)
+            {
+                if (g.Value != null && !g.Value.IsDisposed && g.Value is TradingGump trading && (trading.ID1 == serial || trading.ID2 == serial || trading.LocalSerial == serial))
+                {
+                    return trading;
+                }
+            }
+
+            return null;
+        }
+
         public static void SetTargetLineGump(uint mob)
         {
             if (TargetLine != null && !TargetLine.IsDisposed && TargetLine.Mobile == mob)
@@ -827,13 +903,6 @@ namespace ClassicUO.Game.Managers
             Add(ContextMenu);
         }
 
-        public static void HideContextMenu()
-        {
-            ContextMenu?.Dispose();
-            ContextMenu = null;
-        }
-
-
         public static T GetGump<T>(uint? serial = null) where T : Control
         {
             if (serial.HasValue)
@@ -879,14 +948,18 @@ namespace ClassicUO.Game.Managers
 
             var first = Gumps.First;
 
-            for (var right = first.Next; first != null; first = right, right = right?.Next)
+            while (first != null)
             {
+                var next = first.Next;
+
                 Control g = first.Value;
 
                 g.Update(totalMS, frameMS);
 
                 if (g.IsDisposed)
                     Gumps.Remove(first);
+
+                first = next;
             }
 
             GameCursor?.Update(totalMS, frameMS);
@@ -907,7 +980,6 @@ namespace ClassicUO.Game.Managers
                 var g = last.Value;
                 g.Draw(batcher, g.X, g.Y);
             }
-
 
             GameCursor?.Draw(batcher);
 
@@ -994,14 +1066,6 @@ namespace ClassicUO.Game.Managers
                 }
 
                 gump.InvokeMouseOver(Mouse.Position);
-
-                if (_mouseDownControls[0] == gump)
-                {
-                    if (ProfileManager.Current == null || !ProfileManager.Current.HoldAltToMoveGumps || Keyboard.Alt)
-                    {
-                        AttemptDragControl(gump, Mouse.Position);
-                    }
-                }
             }
 
             MouseOverControl = gump;
@@ -1062,39 +1126,6 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void MakeTopMostGumpOverAnother(Control control, Control overed)
-        {
-            //Control c = control;
-
-            //while (c.Parent != null)
-            //    c = c.Parent;
-
-            //Control c1 = overed;
-
-            //while (c1.Parent != null)
-            //    c1 = c1.Parent;
-
-            //int index = 0;
-
-            //for (int i = Gumps.Count - 1; i >= 1; i--)
-            //{
-            //    if (Gumps[i] == c)
-            //    {
-            //        Control cm = Gumps[i];
-            //        Gumps.RemoveAt(i);
-
-            //        if (index == 0)
-            //            index = i;
-
-            //        Gumps.Insert(index - 1, cm);
-            //        _needSort = true;
-            //    }
-            //    else if (Gumps[i] == c1)
-            //        index = i;
-            //}
-        }
-
-
         private static void SortControlsByInfo()
         {
             if (_needSort)
@@ -1149,18 +1180,22 @@ namespace ClassicUO.Game.Managers
 
             if (dragTarget.CanMove)
             {
-
                 if (attemptAlwaysSuccessful || !_isDraggingControl)
                 {
                     DraggingControl = dragTarget;
-                    _dragOriginX = mousePosition.X;
-                    _dragOriginY = mousePosition.Y;
+                    _dragOriginX = Mouse.LDropPosition.X;
+                    _dragOriginY = Mouse.LDropPosition.Y;
+
+                    for (int i = 0; i < 5; i++)
+                        _mouseDownControls[i] = null;
                 }
 
                 int deltaX = mousePosition.X - _dragOriginX;
                 int deltaY = mousePosition.Y - _dragOriginY;
 
-                if (attemptAlwaysSuccessful || Math.Abs(deltaX) + Math.Abs(deltaY) > Constants.MIN_GUMP_DRAG_DISTANCE)
+                int delta = Math.Abs(deltaX) + Math.Abs(deltaY);
+
+                if (attemptAlwaysSuccessful || delta > Constants.MIN_GUMP_DRAG_DISTANCE)
                 {
                     _isDraggingControl = true;
                     dragTarget.InvokeDragBegin(new Point(deltaX, deltaY));
@@ -1175,6 +1210,7 @@ namespace ClassicUO.Game.Managers
 
             int deltaX = mousePosition.X - _dragOriginX;
             int deltaY = mousePosition.Y - _dragOriginY;
+
             DraggingControl.X = DraggingControl.X + deltaX;
             DraggingControl.Y = DraggingControl.Y + deltaY;
             DraggingControl.InvokeMove(deltaX, deltaY);

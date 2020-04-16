@@ -37,7 +37,7 @@ namespace ClassicUO.Game.GameObjects
         private static readonly Queue<Static> _pool = new Queue<Static>();
         static Static()
         {
-            for (int i = 0; i < Constants.PREDICTABLE_TILE_COUNT; i++)
+            for (int i = 0; i < Constants.PREDICTABLE_STATICS; i++)
                 _pool.Enqueue(new Static());
         }
 
