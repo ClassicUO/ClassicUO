@@ -25,7 +25,9 @@ using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
@@ -1077,7 +1079,10 @@ namespace ClassicUO.Game.GameObjects
             base.Destroy();
 
             if (!(this is PlayerMobile))
+            {
+                UIManager.GetGump<PaperDollGump>(Serial)?.Dispose();
                 _pool.Enqueue(this);
+            }
         }
 
         internal struct Step
