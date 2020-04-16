@@ -18,7 +18,7 @@ environment:
   DEV_BUILD: true
 build_script:
 - cmd: >-
- nuget restore
+    nuget restore
 
 
     msbuild "c:\projects\classicuo\ClassicUO.sln" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:Configuration=Release /p:Platform=x64 /p:DefineConstants="DEV_BUILD"
