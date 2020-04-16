@@ -1,8 +1,7 @@
 {
   "profiles": {
     "ManifestCreator": {
-      "commandName": "Project",
-      "commandLineArgs": "\"D:\\Progetti\\ClassicUO\\client\\bin\\Release\" \"1.0.0.0\" \"cuo-test-vers\""
+      "commandName": "Project"
     }
   }
 }
