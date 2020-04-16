@@ -10,6 +10,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{36371756-8DD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassicUO", "src\ClassicUO.csproj", "{71F289FA-0EF8-4F72-A26E-A8280C0931C5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{FD7202D2-B96B-4425-8C61-F0D5254A06F7}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\ClassicUO = scripts\ClassicUO
+		scripts\ClassicUO-mono.sh = scripts\ClassicUO-mono.sh
+		scripts\ClassicUO.bin.osx = scripts\ClassicUO.bin.osx
+		scripts\ClassicUO.bin.x86_64 = scripts\ClassicUO.bin.x86_64
+		scripts\monoconfig = scripts\monoconfig
+		scripts\monomachineconfig = scripts\monomachineconfig
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
