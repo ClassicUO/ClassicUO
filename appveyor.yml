@@ -43,7 +43,7 @@ deploy:
     branch: dev
 - provider: FTP
   host: ftp.classicuo.eu
-  protocol: ftps
+  protocol: ftp
   username:
     secure: JaSH/LFfqcrUBZ5USwkYozDFFZUmyRZJyxsB/LSNOlI=
   password:
