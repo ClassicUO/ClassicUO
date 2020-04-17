@@ -105,8 +105,6 @@ namespace ManifestCreator
             }
 
             Console.WriteLine("Manifest created!");
-
-            Console.ReadLine();
         }
 
         private static List<ManifestRelease> CreateManifestReleaseList(string cuo_path, string version, string name)
