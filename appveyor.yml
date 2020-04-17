@@ -28,10 +28,13 @@ build_script:
 
 
     dotnet run --project "c:\projects\classicuo\tools\ManifestCreator\ManifestCreator.csproj" "c:\projects\classicuo\bin\Release" "dev-preview" "ClassicUO-dev-preview-release.zip"
+
+
+    copy "c:\projects\classicuo\tools\ManifestCreator\bin\Release\manifest.xml" "manifest.xml"
 artifacts:
 - path: ClassicUO-dev-preview-release.zip
   name: ClassicUO
-- path: c:\projects\classicuo\tools\ManifestCreator\bin\Release\manifest.xml
+- path: manifest.xml
   name: manifest
 deploy:
 - provider: GitHub
