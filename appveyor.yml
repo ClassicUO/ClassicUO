@@ -31,6 +31,8 @@ build_script:
 artifacts:
 - path: ClassicUO-dev-preview-release.zip
   name: ClassicUO
+- path: c:\projects\classicuo\tools\ManifestCreator\bin\Release\manifest.xml
+  name: manifest
 deploy:
 - provider: GitHub
   tag: ClassicUO-dev-preview
@@ -52,7 +54,7 @@ deploy:
   password:
     secure: 4MpoM3vP2gdRcg6YktGA9g==
   folder: /www.classicuo.eu/dev/deploy
-  artifact: ClassicUO-dev-preview-release.zip
+  artifact: ClassicUO-dev-preview-release.zip, manifest
   active_mode: false
   beta: false
   debug: false
