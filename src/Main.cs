@@ -28,6 +28,7 @@ using System.Text;
 using System.Threading;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -103,9 +104,12 @@ namespace ClassicUO
 #endif
 
 #if DEV_BUILD
-            Updater updater = new Updater();
-            if (updater.Check())
-                return;
+            if (!_skipUpdates)
+            {
+                Updater updater = new Updater();
+                if (updater.Check())
+                    return;
+            }
 #endif
             ReadSettingsFromArgs(args);
 
@@ -134,7 +138,12 @@ namespace ClassicUO
                 {
                     // TODO: 
                     Settings.GlobalSettings.Save();
-                    return;
+
+                    if (!Directory.Exists(Settings.GlobalSettings.UltimaOnlineDirectory) || 
+                        !ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out _))
+                    {
+                        return;
+                    }
                 }
             }
 
@@ -321,10 +330,7 @@ namespace ClassicUO
                         break;
 
                     case "plugins":
-                        if (!string.IsNullOrWhiteSpace(value))
-                        {
-                            Settings.GlobalSettings.Plugins = value.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
-                        }
+                        Settings.GlobalSettings.Plugins = value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                         break;
 
                 }

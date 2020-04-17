@@ -91,13 +91,13 @@ namespace ClassicUO
             }
 
             // try to load the client version
-            if (!ClientVersionHelper.TryParse(clientVersionText, out ClientVersion clientVersion))
+            if (!ClientVersionHelper.IsClientVersionValid(clientVersionText, out ClientVersion clientVersion))
             {
                 Log.Warn($"Client version [{clientVersionText}] is invalid, let's try to read the client.exe");
 
                 // mmm something bad happened, try to load from client.exe
                 if (!ClientVersionHelper.TryParseFromFile(Path.Combine(clientPath, "client.exe"), out clientVersionText) ||
-                    !ClientVersionHelper.TryParse(clientVersionText, out clientVersion))
+                    !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
                 {
                     Log.Error("Invalid client version: " + clientVersionText);
                     ShowErrorMessage($"Impossible to define the client version.\nClient version: '{clientVersionText}'");
