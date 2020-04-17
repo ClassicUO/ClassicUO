@@ -102,13 +102,16 @@ namespace ClassicUO
                 }
             };
 #endif
+            ReadSettingsFromArgs(args);
 
 #if DEV_BUILD
-            Updater updater = new Updater();
-            if (updater.Check())
-                return;
+            if (!_skipUpdates)
+            {
+                Updater updater = new Updater();
+                if (updater.Check())
+                    return;
+            }
 #endif
-            ReadSettingsFromArgs(args);
 
             if (!_skipUpdates)
                 if (CheckUpdate(args))
@@ -327,10 +330,7 @@ namespace ClassicUO
                         break;
 
                     case "plugins":
-                        if (!string.IsNullOrWhiteSpace(value))
-                        {
-                            Settings.GlobalSettings.Plugins = value.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
-                        }
+                        Settings.GlobalSettings.Plugins = value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                         break;
 
                 }
