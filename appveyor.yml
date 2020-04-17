@@ -30,7 +30,7 @@ build_script:
     dotnet run --configuration Release --project "c:\projects\classicuo\tools\ManifestCreator\ManifestCreator.csproj" "c:\projects\classicuo\bin\Release" "dev-preview" "ClassicUO-dev-preview-release.zip"
 
 
-    copy "c:\projects\classicuo\tools\ManifestCreator\bin\Release\net47\manifest.xml" "manifest.xml"
+    copy "c:\projects\classicuo\tools\ManifestCreator\manifest.xml" "manifest.xml"
 artifacts:
 - path: ClassicUO-dev-preview-release.zip
   name: ClassicUO
