@@ -104,9 +104,12 @@ namespace ClassicUO
 #endif
 
 #if DEV_BUILD
-            Updater updater = new Updater();
-            if (updater.Check())
-                return;
+            if (!_skipUpdates)
+            {
+                Updater updater = new Updater();
+                if (updater.Check())
+                    return;
+            }
 #endif
             ReadSettingsFromArgs(args);
 
