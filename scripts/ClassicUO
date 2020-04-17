@@ -1,0 +1,25 @@
+#!/bin/bash
+cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    which -s brew
+    if [[ $? != 0 ]] ; then
+        # Install Homebrew
+        ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    fi
+    if ! brew ls --version zlib > /dev/null; then
+        brew install zlib
+    fi
+    if ! brew ls --version mono-libgdiplus > /dev/null; then
+        brew install mono-libgdiplus
+    fi
+    if ! [[ -x ClassicUO.bin.osx ]]; then
+        chmod +x ClassicUO.bin.osx
+    fi
+    ./ClassicUO.bin.osx "$@"
+else
+    if ! [[ -x ClassicUO.bin.x86_64 ]]; then
+        chmod +x ClassicUO.bin.x86_64
+    fi
+    ./ClassicUO.bin.x86_64 "$@"
+fi

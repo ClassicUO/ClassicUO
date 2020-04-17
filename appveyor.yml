@@ -41,3 +41,17 @@ deploy:
   force_update: true
   on:
     branch: dev
+- provider: FTP
+  host: ftp.classicuo.eu
+  protocol: ftp
+  username:
+    secure: JaSH/LFfqcrUBZ5USwkYozDFFZUmyRZJyxsB/LSNOlI=
+  password:
+    secure: 4MpoM3vP2gdRcg6YktGA9g==
+  folder: /www.classicuo.eu/dev/deploy
+  artifact: ClassicUO-dev-preview-release.zip
+  active_mode: false
+  beta: false
+  debug: false
+  on:
+    branch: dev
