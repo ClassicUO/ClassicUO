@@ -583,7 +583,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if "$(DefineConstants.Contains('NO_MANIFEST'))" == "True"    $(SolutionDir)tools\ManifestCreator\bin\Release\net47\ManifestCreator.exe  $(TargetDir)  "1.0.0.0"  "hello world"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>
