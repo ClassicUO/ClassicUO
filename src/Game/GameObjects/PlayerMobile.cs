@@ -1290,14 +1290,20 @@ namespace ClassicUO.Game.GameObjects
 
         public void CloseBank()
         {
-            var bank = HasEquipment ? Equipment[(int) Layer.Bank] : null;
+            Item bank = HasEquipment ? Equipment[(int) Layer.Bank] : null;
 
             if (bank != null && bank.Opened)
             {
-                Remove(bank);
-                bank.Clear();
-                bank.Opened = false;
-                UIManager.GetGump<ContainerGump>(bank)?.Dispose();
+                while (bank != null)
+                {
+                    var next = (Item) bank.Next;
+
+                    World.Items.Remove(bank);
+                    bank.Destroy();
+                    bank.Clear();
+
+                    bank = next;
+                }
             }
         }
 
@@ -1338,19 +1344,25 @@ namespace ClassicUO.Game.GameObjects
 
                         break;
                     case ContainerGump _:
+                        distance = int.MaxValue;
 
                         ent = World.Get(gump.LocalSerial);
-                        distance = int.MaxValue;
+
+                        while (ent != null && ent is Item it && SerialHelper.IsValid(it.Container))
+                        {
+                            ent = World.Get(it.Container);
+                        }
+
                         if (ent != null)
                         {
-                            if (SerialHelper.IsItem(ent.Serial))
-                            {
-                                var top = World.Get(((Item) ent).RootContainer);
+                            //if (SerialHelper.IsItem(ent.Serial))
+                            //{
+                            //    //var top = World.Get(((Item) ent).RootContainer);
 
-                                if (top != null)
-                                    distance = top.Distance;
-                            }
-                            else
+                            //    //if (top != null)
+                            //        distance = top.Distance;
+                            //}
+                            //else
                                 distance = ent.Distance;
                         }
 
