@@ -145,10 +145,20 @@ namespace ClassicUO.Game.UI.Controls
             Item equipItem = mobile.Equipment[(int) Layer.Cloak];
 
             Layer[] layers = equipItem != null && equipItem.ItemData.IsContainer ? _layerOrder_quiver_fix : _layerOrder;
+            bool switch_arms_with_torso = mobile.Equipment[(int) Layer.Arms] != null && mobile.Equipment[(int) Layer.Arms].Graphic == 0x1410;
+
 
             for (int i = 0; i < layers.Length; i++)
             {
                 Layer layer = layers[i];
+
+                if (switch_arms_with_torso)
+                {
+                    if (layer == Layer.Arms)
+                        layer = Layer.Torso;
+                    else if (layer == Layer.Torso)
+                        layer = Layer.Arms;
+                }
 
                 equipItem = mobile.Equipment[(int) layer];
 
