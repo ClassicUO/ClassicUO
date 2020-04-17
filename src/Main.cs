@@ -102,6 +102,7 @@ namespace ClassicUO
                 }
             };
 #endif
+            ReadSettingsFromArgs(args);
 
 #if DEV_BUILD
             if (!_skipUpdates)
@@ -111,7 +112,6 @@ namespace ClassicUO
                     return;
             }
 #endif
-            ReadSettingsFromArgs(args);
 
             if (!_skipUpdates)
                 if (CheckUpdate(args))
