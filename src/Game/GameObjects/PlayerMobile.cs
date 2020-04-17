@@ -1348,21 +1348,16 @@ namespace ClassicUO.Game.GameObjects
 
                         ent = World.Get(gump.LocalSerial);
 
-                        while (ent != null && ent is Item it && SerialHelper.IsValid(it.Container))
-                        {
-                            ent = World.Get(it.Container);
-                        }
-
                         if (ent != null)
                         {
-                            //if (SerialHelper.IsItem(ent.Serial))
-                            //{
-                            //    //var top = World.Get(((Item) ent).RootContainer);
+                            if (SerialHelper.IsItem(ent.Serial))
+                            {
+                                var top = World.Get(((Item) ent).RootContainer);
 
-                            //    //if (top != null)
-                            //        distance = top.Distance;
-                            //}
-                            //else
+                                if (top != null)
+                                    distance = top.Distance;
+                            }
+                            else
                                 distance = ent.Distance;
                         }
 
