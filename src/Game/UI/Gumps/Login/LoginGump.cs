@@ -285,7 +285,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public void Insert(string psw)
         {
-            _textboxPassword.Text += psw;
+            if (_passwordFake.HasKeyboardFocus)
+                _textboxPassword.Text += psw;
         }
 
         private void TransformPassword(string text)
