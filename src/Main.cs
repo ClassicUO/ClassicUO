@@ -28,6 +28,7 @@ using System.Text;
 using System.Threading;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -134,7 +135,12 @@ namespace ClassicUO
                 {
                     // TODO: 
                     Settings.GlobalSettings.Save();
-                    return;
+
+                    if (!Directory.Exists(Settings.GlobalSettings.UltimaOnlineDirectory) || 
+                        !ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out _))
+                    {
+                        return;
+                    }
                 }
             }
 
