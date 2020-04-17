@@ -1339,7 +1339,7 @@ namespace ClassicUO.Game.GameObjects
                                 distance = ent.Distance;
                         }
 
-                        if (distance > 18)
+                        if (distance > Constants.MIN_VIEW_RANGE)
                             gump.Dispose();
 
                         break;
@@ -1361,7 +1361,7 @@ namespace ClassicUO.Game.GameObjects
                                 distance = ent.Distance;
                         }
 
-                        if (distance > 3)
+                        if (distance > Constants.MAX_CONTAINER_OPENED_ON_GROUND_RANGE)
                             gump.Dispose();
                         break;
                 }
