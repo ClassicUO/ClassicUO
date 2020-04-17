@@ -23,9 +23,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{D5E764E7-2719-4937-AC10-0D2D789A1134}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManifestCreator", "tools\ManifestCreator\ManifestCreator.csproj", "{71196848-ED41-4A9A-944C-F5776A9EFA07}"
-	ProjectSection(ProjectDependencies) = postProject
-		{71F289FA-0EF8-4F72-A26E-A8280C0931C5} = {71F289FA-0EF8-4F72-A26E-A8280C0931C5}
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,7 +55,6 @@ Global
 		{71196848-ED41-4A9A-944C-F5776A9EFA07}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71196848-ED41-4A9A-944C-F5776A9EFA07}.Release|Any CPU.Build.0 = Release|Any CPU
 		{71196848-ED41-4A9A-944C-F5776A9EFA07}.Release|x64.ActiveCfg = Release|Any CPU
-		{71196848-ED41-4A9A-944C-F5776A9EFA07}.Release|x64.Build.0 = Release|Any CPU
 		{71196848-ED41-4A9A-944C-F5776A9EFA07}.Release|x86.ActiveCfg = Release|Any CPU
 		{71196848-ED41-4A9A-944C-F5776A9EFA07}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection

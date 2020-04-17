@@ -25,9 +25,14 @@ build_script:
 
 
     7z a ClassicUO-dev-preview-release.zip "c:\projects\classicuo\bin\Release\*"
+
+
+    dotnet run --configuration Release --project "c:\projects\classicuo\tools\ManifestCreator\ManifestCreator.csproj" "c:\projects\classicuo\bin\Release" "dev-preview" "ClassicUO-dev-preview-release.zip"
 artifacts:
 - path: ClassicUO-dev-preview-release.zip
   name: ClassicUO
+- path: manifest.xml
+  name: manifest
 deploy:
 - provider: GitHub
   tag: ClassicUO-dev-preview
@@ -49,7 +54,7 @@ deploy:
   password:
     secure: 4MpoM3vP2gdRcg6YktGA9g==
   folder: /www.classicuo.eu/dev/deploy
-  artifact: ClassicUO-dev-preview-release.zip
+  artifact: ClassicUO-dev-preview-release.zip, manifest
   active_mode: false
   beta: false
   debug: false
