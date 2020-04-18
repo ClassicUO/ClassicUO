@@ -63,17 +63,25 @@ namespace ClassicUO.Network
         {
             get
             {
-                IPHostEntry localEntry = Dns.GetHostEntry(Dns.GetHostName());
                 uint address;
 
-                if (localEntry.AddressList.Length > 0)
+                try
                 {
-#pragma warning disable 618
-                    address = (uint)localEntry.AddressList.FirstOrDefault(s => s.AddressFamily == AddressFamily.InterNetwork).Address;
-#pragma warning restore 618
+                    IPHostEntry localEntry = Dns.GetHostEntry(Dns.GetHostName());
+
+                    if (localEntry.AddressList.Length > 0)
+                    {
+    #pragma warning disable 618
+                        address = (uint)localEntry.AddressList.FirstOrDefault(s => s.AddressFamily == AddressFamily.InterNetwork).Address;
+    #pragma warning restore 618
+                    }
+                    else
+                        address = 0x100007f;
                 }
-                else
+                catch (SocketException e)
+                {
                     address = 0x100007f;
+                }
 
                 return ((address & 0xff) << 0x18) | ((address & 65280) << 8) | ((address >> 8) & 65280) | ((address >> 0x18) & 0xff);
             }
