@@ -46,7 +46,9 @@ namespace ClassicUO
 
         private static bool _skipUpdates;
 
+        private static readonly Mutex _mutex = new Mutex(true, "CLASSICUO_MUTEX");
 
+        [STAThread]
         static void Main(string[] args)
         {
             // - check for update
@@ -116,7 +118,7 @@ namespace ClassicUO
             if (!_skipUpdates)
                 if (CheckUpdate(args))
                     return;
-
+            
             //Environment.SetEnvironmentVariable("FNA_GRAPHICS_FORCE_GLDEVICE", "ModernGLDevice");
             if (CUOEnviroment.IsHighDPI)
             {
