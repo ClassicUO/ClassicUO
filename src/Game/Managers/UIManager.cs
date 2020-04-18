@@ -830,19 +830,6 @@ namespace ClassicUO.Game.Managers
             return gump;
         }
 
-        public static TradingGump GetTradingGump(uint serial)
-        {
-            for (var g = Gumps.Last; g != null; g = g.Previous)
-            {
-                if (g.Value != null && !g.Value.IsDisposed && g.Value is TradingGump trading && (trading.ID1 == serial || trading.ID2 == serial || trading.LocalSerial == serial))
-                {
-                    return trading;
-                }
-            }
-
-            return null;
-        }
-
         public static void SetTargetLineGump(uint mob)
         {
             if (TargetLine != null && !TargetLine.IsDisposed && TargetLine.Mobile == mob)
@@ -941,6 +928,18 @@ namespace ClassicUO.Game.Managers
             return null;
         }
 
+        public static TradingGump GetTradingGump(uint serial)
+        {
+            for (var g = Gumps.Last; g != null; g = g.Previous)
+            {
+                if (g.Value != null && !g.Value.IsDisposed && g.Value is TradingGump trading && (trading.ID1 == serial || trading.ID2 == serial || trading.LocalSerial == serial))
+                {
+                    return trading;
+                }
+            }
+
+            return null;
+        }
 
         public static void Update(double totalMS, double frameMS)
         {
