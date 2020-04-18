@@ -423,7 +423,7 @@ namespace ClassicUO.Network
             if (_socket == null)
                 return;
 
-            if (data != null || data.Length == 0 || length <= 0)
+            if (data != null && data.Length != 0 && length > 0)
             {
                 try
                 {
