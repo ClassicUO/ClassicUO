@@ -1883,7 +1883,7 @@ namespace ClassicUO.Network
                             int x = (Client.Game.Window.ClientBounds.Width >> 1) - 245;
                             int y = (Client.Game.Window.ClientBounds.Height >> 1) - 205;
 
-                            bulletinBoard = new BulletinBoardGump(item, x, y, p.ReadASCII(22));
+                            bulletinBoard = new BulletinBoardGump(item, x, y, p.ReadUTF8StringSafe(22));//p.ReadASCII(22));
                             UIManager.Add(bulletinBoard);
 
                             item.Opened = true;

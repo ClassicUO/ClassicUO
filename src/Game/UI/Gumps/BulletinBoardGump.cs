@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPic(0, 0, 0x087A, 0));
 
-            Label label = new Label(name, false, 0x0386, 170, 2, align: TEXT_ALIGN_TYPE.TS_CENTER)
+            Label label = new Label(name, true, 1, 170, 1, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 X = 159,
                 Y = 36
