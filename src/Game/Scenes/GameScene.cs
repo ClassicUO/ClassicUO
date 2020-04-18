@@ -129,7 +129,6 @@ namespace ClassicUO.Game.Scenes
                     X = ProfileManager.Current.DebugGumpPosition.X,
                     Y = ProfileManager.Current.DebugGumpPosition.Y
                 });
-                //Engine.DropFpsMinMaxValues();
             }
 
             if (ProfileManager.Current.ShowNetworkStats)
@@ -202,7 +201,6 @@ namespace ClassicUO.Game.Scenes
                 h = Math.Max(480, h);
 
                 Client.Game.SetWindowSize(w, h);
-                //Client.Client.SetWindowPositionBySettings();
             }
 
             CircleOfTransparency.Create(ProfileManager.Current.CircleOfTransparencyRadius);
