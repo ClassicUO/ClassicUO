@@ -652,12 +652,13 @@ namespace ClassicUO.Network
             World.RangeSize.X = x;
             World.RangeSize.Y = y;
 
-            if (ProfileManager.Current.UseCustomLightLevel)
+            if (ProfileManager.Current != null && ProfileManager.Current.UseCustomLightLevel)
                 World.Light.Overall = ProfileManager.Current.LightLevel;
 
             if (Client.Version >= Data.ClientVersion.CV_200)
             {
-                NetClient.Socket.Send(new PGameWindowSize((uint) ProfileManager.Current.GameWindowSize.X, (uint) ProfileManager.Current.GameWindowSize.Y));
+                if (ProfileManager.Current != null)
+                    NetClient.Socket.Send(new PGameWindowSize((uint) ProfileManager.Current.GameWindowSize.X, (uint) ProfileManager.Current.GameWindowSize.Y));
                 NetClient.Socket.Send(new PLanguage("ENU"));
             }
 
