@@ -1132,13 +1132,15 @@ namespace ClassicUO.Network
                 {
                     if (ItemHold.Layer == Layer.Invalid && SerialHelper.IsValid(ItemHold.Container))
                     {
-                        AddItemToContainer(ItemHold.Serial,
-                                           ItemHold.Graphic,
-                                           ItemHold.Amount,
-                                           ItemHold.X,
-                                           ItemHold.Y,
-                                           ItemHold.Hue,
-                                           ItemHold.Container);
+                        // Server should sends an UpdateContainedItem after this packet.
+
+                        //AddItemToContainer(ItemHold.Serial,
+                        //                   ItemHold.Graphic,
+                        //                   ItemHold.Amount,
+                        //                   ItemHold.X,
+                        //                   ItemHold.Y,
+                        //                   ItemHold.Hue,
+                        //                   ItemHold.Container);
 
                         UIManager.GetGump<ContainerGump>(ItemHold.Container)?.RequestUpdateContents();
                     }
