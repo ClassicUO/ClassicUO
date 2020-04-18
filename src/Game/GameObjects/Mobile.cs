@@ -360,7 +360,7 @@ namespace ClassicUO.Game.GameObjects
         public void SetAnimation(byte id, byte interval = 0, byte frameCount = 0, byte repeatCount = 0, bool repeat = false, bool frameDirection = false)
         {
             AnimationGroup = id;
-            AnimIndex = 0;
+            AnimIndex = (sbyte) (frameDirection ? 0 : frameCount);
             AnimationInterval = interval;
             AnimationFrameCount = frameCount;
             AnimationRepeatMode = repeatCount;

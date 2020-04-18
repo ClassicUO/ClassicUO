@@ -1798,7 +1798,6 @@ namespace ClassicUO.Network
 
             ushort action = p.ReadUShort();
             ushort frameCount = p.ReadUShort();
-            frameCount = 0;
             ushort repeatMode = p.ReadUShort();
             bool frameDirection = !p.ReadBool();
             bool repeat = p.ReadBool();
