@@ -98,9 +98,13 @@ namespace ClassicUO.Game.UI.Gumps
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
             if (!ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt)
+            {
                 GameActions.UseSkill(_skill.Index);
 
-            return true;
+                return true;
+            }
+            
+            return false;
         }
 
         public override void Save(BinaryWriter writer)

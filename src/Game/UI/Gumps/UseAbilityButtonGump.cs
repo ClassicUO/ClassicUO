@@ -86,9 +86,11 @@ namespace ClassicUO.Game.UI.Gumps
                     GameActions.UsePrimaryAbility();
                 else
                     GameActions.UseSecondaryAbility();
+
+                return true;
             }
 
-            return true;
+            return false;
         }
 
 
