@@ -306,9 +306,10 @@ namespace ClassicUO.Game.Scenes
             {
             }
 
-            ////_renderList = null;
-
             TargetManager.ClearTargetingWithoutTargetCancelPacket();
+
+            // special case for wmap. this allow us to save settings
+            UIManager.GetGump<WorldMapGump>()?.Dispose();
 
             ProfileManager.Current?.Save(UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
             Macros.Save();
@@ -325,7 +326,6 @@ namespace ClassicUO.Game.Scenes
 
             CommandManager.UnRegisterAll();
             _weather.Reset();
-
             UIManager.Clear();
             World.Clear();
             UOChatManager.Clear();
