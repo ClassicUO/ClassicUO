@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (IsDisposed || (ItemHold.Enabled && ItemHold.Serial == LocalSerial))
+            if (IsDisposed || ((ItemHold.Enabled || ItemHold.Dropped) && ItemHold.Serial == LocalSerial))
                 return false;
 
             base.Draw(batcher, x, y);
@@ -164,6 +164,14 @@ namespace ClassicUO.Game.UI.Controls
 
                                         if (item != null)
                                         {
+                                            var p = RootParent;
+
+                                            if (p != null)
+                                            {
+                                                DelayedObjectClickManager.X = Mouse.Position.X - p.ScreenCoordinateX;
+                                                DelayedObjectClickManager.Y = Mouse.Position.Y - p.ScreenCoordinateY;
+                                            }
+
                                             TargetManager.Target(item);
                                             Mouse.LastLeftButtonClickTime = 0;
                                         }
@@ -204,10 +212,11 @@ namespace ClassicUO.Game.UI.Controls
                                     if (!DelayedObjectClickManager.IsEnabled)
                                     {
                                         var p = RootParent;
-                                        DelayedObjectClickManager.Set(LocalSerial,
-                                                                     Mouse.Position.X - p.ScreenCoordinateX,
-                                                                     Mouse.Position.Y - p.ScreenCoordinateY,
-                                                                     Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
+                                        if (p != null)
+                                            DelayedObjectClickManager.Set(LocalSerial,
+                                                                         Mouse.Position.X - p.ScreenCoordinateX,
+                                                                         Mouse.Position.Y - p.ScreenCoordinateY,
+                                                                         Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK);
 
                                         return;
                                     }

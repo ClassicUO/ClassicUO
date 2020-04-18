@@ -48,17 +48,16 @@ namespace ClassicUO.Game.UI.Gumps
         public UseAbilityButtonGump(AbilityDefinition def, bool primary) : this()
         {
             _isPrimary = primary;
-            UIManager.GetGump<UseAbilityButtonGump>(2000 + (uint) def.Index)?.Dispose();
             _definition = def;
             BuildGump();
         }
 
         public override GUMP_TYPE GumpType => GUMP_TYPE.GT_ABILITYBUTTON;
 
+        public int AbilityID => _definition.Index;
+
         private void BuildGump()
         {
-            LocalSerial = 2000 + (uint) _definition.Index;
-
             _button = new GumpPic(0, 0, _definition.Icon, 0)
             {
                 AcceptMouseInput = false
@@ -87,9 +86,11 @@ namespace ClassicUO.Game.UI.Gumps
                     GameActions.UsePrimaryAbility();
                 else
                     GameActions.UseSecondaryAbility();
+
+                return true;
             }
 
-            return true;
+            return false;
         }
 
 

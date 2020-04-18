@@ -652,12 +652,13 @@ namespace ClassicUO.Network
             World.RangeSize.X = x;
             World.RangeSize.Y = y;
 
-            if (ProfileManager.Current.UseCustomLightLevel)
+            if (ProfileManager.Current != null && ProfileManager.Current.UseCustomLightLevel)
                 World.Light.Overall = ProfileManager.Current.LightLevel;
 
             if (Client.Version >= Data.ClientVersion.CV_200)
             {
-                NetClient.Socket.Send(new PGameWindowSize((uint) ProfileManager.Current.GameWindowSize.X, (uint) ProfileManager.Current.GameWindowSize.Y));
+                if (ProfileManager.Current != null)
+                    NetClient.Socket.Send(new PGameWindowSize((uint) ProfileManager.Current.GameWindowSize.X, (uint) ProfileManager.Current.GameWindowSize.Y));
                 NetClient.Socket.Send(new PLanguage("ENU"));
             }
 
@@ -1131,13 +1132,15 @@ namespace ClassicUO.Network
                 {
                     if (ItemHold.Layer == Layer.Invalid && SerialHelper.IsValid(ItemHold.Container))
                     {
-                        AddItemToContainer(ItemHold.Serial,
-                                           ItemHold.Graphic,
-                                           ItemHold.Amount,
-                                           ItemHold.X,
-                                           ItemHold.Y,
-                                           ItemHold.Hue,
-                                           ItemHold.Container);
+                        // Server should sends an UpdateContainedItem after this packet.
+
+                        //AddItemToContainer(ItemHold.Serial,
+                        //                   ItemHold.Graphic,
+                        //                   ItemHold.Amount,
+                        //                   ItemHold.X,
+                        //                   ItemHold.Y,
+                        //                   ItemHold.Hue,
+                        //                   ItemHold.Container);
 
                         UIManager.GetGump<ContainerGump>(ItemHold.Container)?.RequestUpdateContents();
                     }
@@ -1795,7 +1798,6 @@ namespace ClassicUO.Network
 
             ushort action = p.ReadUShort();
             ushort frameCount = p.ReadUShort();
-            frameCount = 0;
             ushort repeatMode = p.ReadUShort();
             bool frameDirection = !p.ReadBool();
             bool repeat = p.ReadBool();

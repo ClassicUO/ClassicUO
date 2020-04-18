@@ -134,6 +134,7 @@ namespace ClassicUO.Game.Managers
                 deque.AddToBack(step);
             }
 
+            ClearEntities(serial);
             _timePacket = Time.Ticks;
         }
 
@@ -170,6 +171,14 @@ namespace ClassicUO.Game.Managers
                 }
 
                 deque.Clear();
+            }
+        }
+
+        public static void ClearEntities(uint serial)
+        {
+            if (_items.TryGetValue(serial, out var list))
+            {
+                list.Clear();
             }
         }
 

@@ -30,10 +30,10 @@ namespace ClassicUO.Game.Managers
         public static uint Serial { get; private set; }
         public static bool IsEnabled { get; private set; }
         public static uint Timer { get; private set; }
-        public static int X { get; private set; }
-        public static int Y { get; private set; }
-        public static int LastMouseX { get; private set; }
-        public static int LastMouseY { get; private set; }
+        public static int X { get; set; }
+        public static int Y { get; set; }
+        public static int LastMouseX { get; set; }
+        public static int LastMouseY { get; set; }
 
 
         public static void Update()

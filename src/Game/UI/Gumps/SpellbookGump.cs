@@ -703,6 +703,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (def == null)
                 return;
 
+            GetSpellFloatingButton(def.ID)?.Dispose();
+
             UseSpellButtonGump gump = new UseSpellButtonGump(def)
             {
                 X = Mouse.LDropPosition.X - 22,
@@ -713,6 +715,16 @@ namespace ClassicUO.Game.UI.Gumps
             UIManager.AttemptDragControl(gump, Mouse.Position, true);
         }
 
+        private static UseSpellButtonGump GetSpellFloatingButton(int id)
+        {
+            for (var i = UIManager.Gumps.Last; i != null; i = i.Previous)
+            {
+                if (i.Value is UseSpellButtonGump g && g.SpellID == id)
+                    return g;
+            }
+            
+            return null;
+        }
 
         private SpellDefinition GetSpellDefinition(uint serial)
         {

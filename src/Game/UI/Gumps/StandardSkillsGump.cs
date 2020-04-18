@@ -755,14 +755,27 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
 
                 UIManager.GameCursor.IsDraggingCursorForced = false;
-
-                if (UIManager.IsMouseOverWorld && UIManager.LastControlMouseDown(MouseButtonType.Left) == this)
+                
+                if (UIManager.IsMouseOverWorld && UIManager.LastControlMouseDown(MouseButtonType.Left) == this && World.Player.Skills[Index].IsClickable)
                 {
-                    UIManager.GetGump<SkillButtonGump>(World.Player.Serial + (uint) Index + 1)?.Dispose();
+                    GetSpellFloatingButton(Index)?.Dispose();
 
                     if (Index >= 0 && Index < World.Player.Skills.Length)
+                    {
                         UIManager.Add(new SkillButtonGump(World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22));
+                    }
                 }
+            }
+
+            private static SkillButtonGump GetSpellFloatingButton(int id)
+            {
+                for (var i = UIManager.Gumps.Last; i != null; i = i.Previous)
+                {
+                    if (i.Value is SkillButtonGump g && g.SkillID == id)
+                        return g;
+                }
+
+                return null;
             }
 
             protected override void OnMouseDown(int x, int y, MouseButtonType button)
