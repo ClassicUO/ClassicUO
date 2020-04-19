@@ -3173,7 +3173,10 @@ namespace ClassicUO.Network
                             }
                             else
                             {
-                                UIManager.SavePosition(ser, first.Value.Location);
+                                if (first.Value.CanMove)
+                                    UIManager.SavePosition(ser, first.Value.Location);
+                                else
+                                    UIManager.RemovePosition(ser);
                             }
 
                             first.Value.Dispose();

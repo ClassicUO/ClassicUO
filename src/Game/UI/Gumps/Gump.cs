@@ -204,7 +204,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, switches.ToArray(), entries.ToArray());
 
-                UIManager.SavePosition(ServerSerial, Location);
+                if (CanMove)
+                    UIManager.SavePosition(ServerSerial, Location);
+                else
+                    UIManager.RemovePosition(ServerSerial);
+
                 Dispose();
             }
         }
