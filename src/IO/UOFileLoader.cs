@@ -64,43 +64,54 @@ namespace ClassicUO.IO
 
     internal abstract class UOFileLoader<T> : UOFileLoader where T : UOTexture
     {
-        private readonly List<uint> _texturesToClear = new List<uint>();
+        private readonly LinkedList<uint> _usedTextures = new LinkedList<uint>();
 
+        protected UOFileLoader(int max)
+        {
+            Resources = new T[max];
+        }
 
-        protected Dictionary<uint, T> ResourceDictionary { get; } = new Dictionary<uint, T>();
+        protected readonly T[] Resources;
         public abstract T GetTexture(uint id);
 
+        protected void SaveID(uint id)
+            => _usedTextures.AddLast(id);
 
         public virtual void CleaUnusedResources(int count)
         {
-            ClearUnusedResources(ResourceDictionary, count);
+            ClearUnusedResources(Resources, count);
         }
 
-        public void ClearUnusedResources<T1>(Dictionary<uint, T1> dict, int maxCount) where T1 : UOTexture
+        public void ClearUnusedResources<T1>(T1[] dict, int maxCount) where T1 : UOTexture
         {
             long ticks = Time.Ticks - Constants.CLEAR_TEXTURES_DELAY;
-
             int count = 0;
-            foreach (var p in dict)
+
+            var first = _usedTextures.First;
+
+            while (first != null)
             {
-                if (p.Value.Ticks < ticks)
+                var next = first.Next;
+
+                uint idx = first.Value;
+
+                if (idx < dict.Length && dict[idx] != null)
                 {
-                    if (count++ >= maxCount)
-                        break;
+                    if (dict[idx].Ticks < ticks)
+                    {
+                        if (count++ >= maxCount)
+                            break;
 
-                    _texturesToClear.Add(p.Key);
+                        dict[idx].Dispose();
+                        dict[idx] = null;
+                        _usedTextures.Remove(first);
+                    }
                 }
-            }
 
-            foreach (uint key in _texturesToClear)
-            {
-                dict[key].Dispose();
-                dict.Remove(key);
+                first = next;
             }
-
-            if (_texturesToClear.Count != 0)
-                _texturesToClear.Clear();
         }
+
 
         public virtual bool TryGetEntryInfo(int entry, out long address, out long size, out long compressedsize)
         {

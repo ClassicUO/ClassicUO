@@ -58,7 +58,7 @@ namespace ClassicUO.IO.Resources
         private readonly List<AnimationDirection> _usedTextures = new List<AnimationDirection>();
 
 
-        private AnimationsLoader()
+        private AnimationsLoader(int count) : base(count)
         {
             
         }
@@ -70,7 +70,7 @@ namespace ClassicUO.IO.Resources
             {
                 if (_instance == null)
                 {
-                    _instance = new AnimationsLoader();
+                    _instance = new AnimationsLoader(Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT);
                 }
 
                 return _instance;
@@ -925,12 +925,12 @@ namespace ClassicUO.IO.Resources
             return _animationSequenceReplacing.TryGetValue(graphic, out type);
         }
 
-        public override AnimationFrameTexture GetTexture(uint id)
-        {
-            ResourceDictionary.TryGetValue(id, out AnimationFrameTexture aft);
+        //public override AnimationFrameTexture GetTexture(uint id)
+        //{
+        //    ResourceDictionary.TryGetValue(id, out AnimationFrameTexture aft);
 
-            return aft;
-        }
+        //    return aft;
+        //}
 
         public override void CleanResources()
         {

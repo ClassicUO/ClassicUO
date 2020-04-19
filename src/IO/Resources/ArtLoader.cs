@@ -42,7 +42,7 @@ namespace ClassicUO.IO.Resources
         private UOFile _file;
         private ushort _graphicMask;
 
-        private ArtLoader()
+        private ArtLoader(int count) : base(count)
         {
             _graphicMask = Client.IsUOPInstallation ? (ushort) 0xFFFF : (ushort) 0x3FFF;
         }
@@ -54,7 +54,7 @@ namespace ClassicUO.IO.Resources
             {
                 if (_instance == null)
                 {
-                    _instance = new ArtLoader();
+                    _instance = new ArtLoader(Constants.MAX_STATIC_DATA_INDEX_COUNT);
                 }
 
                 return _instance;
@@ -90,11 +90,16 @@ namespace ClassicUO.IO.Resources
 
         public override ArtTexture GetTexture(uint g)
         {
-            if (!ResourceDictionary.TryGetValue(g, out ArtTexture texture) || texture.IsDisposed)
+            if (g >= Resources.Length)
+                return null;
+
+            ref var texture = ref Resources[g];
+
+            if (texture == null || texture.IsDisposed)
             {
                 ReadStaticArt(ref texture, (ushort) g);
-                ResourceDictionary.Add(g, texture);
             }
+
             return texture;
         }
 
