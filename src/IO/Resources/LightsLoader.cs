@@ -83,6 +83,8 @@ namespace ClassicUO.IO.Resources
 
                 texture = new UOTexture16(w, h);
                 texture.PushData(pixels);
+
+                SaveID(id);
             }
 
             return texture;

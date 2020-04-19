@@ -64,7 +64,7 @@ namespace ClassicUO.IO
 
     internal abstract class UOFileLoader<T> : UOFileLoader where T : UOTexture
     {
-        private readonly LinkedList<uint> _usedTextures = new LinkedList<uint>();
+        protected readonly LinkedList<uint> _usedTextures = new LinkedList<uint>();
 
         protected UOFileLoader(int max)
         {
@@ -82,7 +82,30 @@ namespace ClassicUO.IO
             ClearUnusedResources(Resources, count);
         }
 
-        public void ClearUnusedResources<T1>(T1[] dict, int maxCount) where T1 : UOTexture
+        public override void CleanResources()
+        {
+            var first = _usedTextures.First;
+
+            while (first != null)
+            {
+                var next = first.Next;
+
+                uint idx = first.Value;
+
+                if (idx < Resources.Length)
+                {
+                    ref var texture = ref Resources[idx];
+                    texture?.Dispose();
+                    texture = null;
+                }
+
+                _usedTextures.Remove(first);
+
+                first = next;
+            }
+        }
+
+        public void ClearUnusedResources<T1>(T1[] resource_cache, int maxCount) where T1 : UOTexture
         {
             long ticks = Time.Ticks - Constants.CLEAR_TEXTURES_DELAY;
             int count = 0;
@@ -95,15 +118,15 @@ namespace ClassicUO.IO
 
                 uint idx = first.Value;
 
-                if (idx < dict.Length && dict[idx] != null)
+                if (idx < resource_cache.Length && resource_cache[idx] != null)
                 {
-                    if (dict[idx].Ticks < ticks)
+                    if (resource_cache[idx].Ticks < ticks)
                     {
                         if (count++ >= maxCount)
                             break;
 
-                        dict[idx].Dispose();
-                        dict[idx] = null;
+                        resource_cache[idx].Dispose();
+                        resource_cache[idx] = null;
                         _usedTextures.Remove(first);
                     }
                 }
