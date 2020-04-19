@@ -365,8 +365,9 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!item.IsLootable)
                     continue;
 
-                var itemControl = new ItemGump(item.Serial, 
-                                               (ushort) (item.DisplayedGraphic - (is_chessboard ? 0 : 0)), 
+                var itemControl = new ItemGump(item.Serial,
+                                               item.DisplayedGraphic,
+                                               //(ushort) (item.DisplayedGraphic - (is_chessboard ? 0 : 0)), 
                                                item.Hue, 
                                                item.X, 
                                                item.Y);
