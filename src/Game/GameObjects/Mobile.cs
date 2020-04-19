@@ -867,11 +867,6 @@ namespace ClassicUO.Game.GameObjects
                             //if (start is Multi || start is Mobile)
                             //    graphic = 0;
 
-                            if (graphic == 0x4C1E)
-                            {
-
-                            }
-
                             switch (graphic)
                             {
                                 case 0x0459:
