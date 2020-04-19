@@ -3096,7 +3096,7 @@ namespace ClassicUO.Network
                 season = 0;
 
 
-            if (World.Player.IsDead && season != 4)
+            if (World.Player.IsDead && season == 4)
                 return;
 
             World.OldSeason = (Seasons) season;
