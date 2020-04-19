@@ -222,7 +222,7 @@ namespace ClassicUO.IO.Resources
                         _files[i] = new UOFileMul(pathmul, pathidx, un[i], i == 0 ? 6 : -1);
                     }
 
-                    if (i > 0 && Client.Version >= ClientVersion.CV_7000)
+                    if (i > 0 && Client.IsUOPInstallation)
                     {
                         string pathuop = UOFileManager.GetUOFilePath($"AnimationFrame{i}.uop");
 

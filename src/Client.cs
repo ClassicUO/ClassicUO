@@ -112,7 +112,7 @@ namespace ClassicUO
 
             Version = clientVersion;
             ClientPath = clientPath;
-            IsUOPInstallation = Version >= ClientVersion.CV_70240;
+            IsUOPInstallation = Version >= ClientVersion.CV_7000 && File.Exists(UOFileManager.GetUOFilePath("MainMisc.uop"));
             Protocol = ClientFlags.CF_T2A;
 
             if (Version >= ClientVersion.CV_200)
