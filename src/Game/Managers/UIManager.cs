@@ -447,6 +447,12 @@ namespace ClassicUO.Game.Managers
 
         public static Control Create(uint sender, uint gumpID, int x, int y, string layout, string[] lines)
         {
+            List<string> cmdlist = _parser.GetTokens(layout);
+            int cmdlen = cmdlist.Count;
+
+            if (cmdlen <= 0)
+                return null;
+            
             Gump gump = null;
             bool mustBeAdded = true;
 
@@ -484,8 +490,7 @@ namespace ClassicUO.Game.Managers
             int group = 0;
             int page = 0;
 
-            List<string> cmdlist = _parser.GetTokens(layout);
-            int cmdlen = cmdlist.Count;
+           
             bool applyCheckerTrans = false;
             bool textBoxFocused = false;
 

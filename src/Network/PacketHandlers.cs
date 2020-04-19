@@ -4055,11 +4055,10 @@ namespace ClassicUO.Network
             p.Skip((int)clen);
 
             uint linesNum = p.ReadUInt();
+            string[] lines = new string[linesNum];
 
-            if (linesNum > 0)
+            if (linesNum != 0)
             {
-                string[] lines = new string[linesNum];
-
                 clen = p.ReadUInt() - 4;
                 dlen = (int) p.ReadUInt();
                 decData = new byte[dlen];
@@ -4088,9 +4087,9 @@ namespace ClassicUO.Network
 
                     index += length;
                 }
-
-                UIManager.Create(sender, gumpID, (int) x, (int) y, layout, lines);
             }
+
+            UIManager.Create(sender, gumpID, (int) x, (int) y, layout, lines);
         }
 
         private static void UpdateMobileStatus(Packet p)
