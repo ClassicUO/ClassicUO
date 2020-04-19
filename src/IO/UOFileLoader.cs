@@ -64,43 +64,77 @@ namespace ClassicUO.IO
 
     internal abstract class UOFileLoader<T> : UOFileLoader where T : UOTexture
     {
-        private readonly List<uint> _texturesToClear = new List<uint>();
+        protected readonly LinkedList<uint> _usedTextures = new LinkedList<uint>();
 
+        protected UOFileLoader(int max)
+        {
+            Resources = new T[max];
+        }
 
-        protected Dictionary<uint, T> ResourceDictionary { get; } = new Dictionary<uint, T>();
+        protected readonly T[] Resources;
         public abstract T GetTexture(uint id);
 
+        protected void SaveID(uint id)
+            => _usedTextures.AddLast(id);
 
         public virtual void CleaUnusedResources(int count)
         {
-            ClearUnusedResources(ResourceDictionary, count);
+            ClearUnusedResources(Resources, count);
         }
 
-        public void ClearUnusedResources<T1>(Dictionary<uint, T1> dict, int maxCount) where T1 : UOTexture
+        public override void CleanResources()
+        {
+            var first = _usedTextures.First;
+
+            while (first != null)
+            {
+                var next = first.Next;
+
+                uint idx = first.Value;
+
+                if (idx < Resources.Length)
+                {
+                    ref var texture = ref Resources[idx];
+                    texture?.Dispose();
+                    texture = null;
+                }
+
+                _usedTextures.Remove(first);
+
+                first = next;
+            }
+        }
+
+        public void ClearUnusedResources<T1>(T1[] resource_cache, int maxCount) where T1 : UOTexture
         {
             long ticks = Time.Ticks - Constants.CLEAR_TEXTURES_DELAY;
-
             int count = 0;
-            foreach (var p in dict)
+
+            var first = _usedTextures.First;
+
+            while (first != null)
             {
-                if (p.Value.Ticks < ticks)
+                var next = first.Next;
+
+                uint idx = first.Value;
+
+                if (idx < resource_cache.Length && resource_cache[idx] != null)
                 {
-                    if (count++ >= maxCount)
-                        break;
+                    if (resource_cache[idx].Ticks < ticks)
+                    {
+                        if (count++ >= maxCount)
+                            break;
 
-                    _texturesToClear.Add(p.Key);
+                        resource_cache[idx].Dispose();
+                        resource_cache[idx] = null;
+                        _usedTextures.Remove(first);
+                    }
                 }
-            }
 
-            foreach (uint key in _texturesToClear)
-            {
-                dict[key].Dispose();
-                dict.Remove(key);
+                first = next;
             }
-
-            if (_texturesToClear.Count != 0)
-                _texturesToClear.Clear();
         }
+
 
         public virtual bool TryGetEntryInfo(int entry, out long address, out long size, out long compressedsize)
         {

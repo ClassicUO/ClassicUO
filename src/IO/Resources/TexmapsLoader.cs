@@ -35,7 +35,7 @@ namespace ClassicUO.IO.Resources
         private readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
         private UOFile _file;
 
-        private TexmapsLoader()
+        private TexmapsLoader(int count) : base(count) 
         {
 
         }
@@ -47,7 +47,7 @@ namespace ClassicUO.IO.Resources
             {
                 if (_instance == null)
                 {
-                    _instance = new TexmapsLoader();
+                    _instance = new TexmapsLoader(Constants.MAX_LAND_TEXTURES_DATA_INDEX_COUNT);
                 }
 
                 return _instance;
@@ -141,7 +141,12 @@ namespace ClassicUO.IO.Resources
 
         public override UOTexture GetTexture(uint g)
         {
-            if (!ResourceDictionary.TryGetValue(g, out UOTexture texture) || texture.IsDisposed)
+            if (g >= Resources.Length)
+                return null;
+
+            ref var texture = ref Resources[g];
+
+            if (texture == null || texture.IsDisposed)
             {
                 ushort[] pixels = GetTextmapTexture((ushort) g, out int size);
 
@@ -150,53 +155,17 @@ namespace ClassicUO.IO.Resources
 
                 texture = new UOTexture16(size, size);
                 texture.SetData(pixels);
-                //_usedIndex.Add(g);
-                ResourceDictionary.Add(g, texture);
-            }
-            //else
-            //    texture.Ticks = Time.Ticks + 3000;
 
+                SaveID(g);
+            }
+ 
             return texture;
         }
 
         public override void CleanResources()
         {
-            throw new NotImplementedException();
+            
         }
-
-        //public void ClearUnusedTextures()
-        //{
-        //    int count = 0;
-        //    long ticks = Time.Ticks - 3000;
-
-        //    for (int i = 0; i < _usedIndex.Count; i++)
-        //    {
-        //        uint g = _usedIndex[i];
-        //        UOTexture texture = ResourceDictionary[g];
-
-        //        if (texture.Ticks < ticks)
-        //        {
-        //            texture.Dispose();
-        //            _usedIndex.RemoveAt(i--);
-        //            ResourceDictionary.Remove(g);
-
-        //            if (++count >= 20)
-        //                break;
-        //        }
-        //    }
-        //}
-
-        //public void Clear()
-        //{
-        //    for (int i = 0; i < _usedIndex.Count; i++)
-        //    {
-        //        uint g = _usedIndex[i];
-        //        UOTexture texture = ResourceDictionary[g];
-        //        texture.Dispose();
-        //        _usedIndex.RemoveAt(i--);
-        //        ResourceDictionary.Remove(g);
-        //    }
-        //}
 
         private ushort[] GetTextmapTexture(ushort index, out int size)
         {

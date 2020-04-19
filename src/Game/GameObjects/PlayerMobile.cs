@@ -1294,16 +1294,24 @@ namespace ClassicUO.Game.GameObjects
 
             if (bank != null && bank.Opened)
             {
-                while (bank != null)
+                if (!bank.IsEmpty)
                 {
-                    var next = (Item) bank.Next;
+                    var first = (Item) bank.Items;
 
-                    World.Items.Remove(bank);
-                    bank.Destroy();
-                    bank.Clear();
+                    while (first != null)
+                    {
+                        var next = (Item) first.Next;
 
-                    bank = next;
+                        World.RemoveItem(first, true);
+
+                        first = next;
+                    }
+
+                    bank.Items = null;
                 }
+
+                UIManager.GetGump<ContainerGump>(bank.Serial)?.Dispose();
+                bank.Opened = false;
             }
         }
 

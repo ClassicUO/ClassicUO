@@ -33,7 +33,7 @@ namespace ClassicUO.IO.Resources
     {
         private UOFile _file;
 
-        private GumpsLoader()
+        private GumpsLoader(int count) : base(count)
         {
 
         }
@@ -45,7 +45,7 @@ namespace ClassicUO.IO.Resources
             {
                 if (_instance == null)
                 {
-                    _instance = new GumpsLoader();
+                    _instance = new GumpsLoader(Constants.MAX_GUMP_DATA_INDEX_COUNT);
                 }
 
                 return _instance;
@@ -114,7 +114,12 @@ namespace ClassicUO.IO.Resources
 
         public override UOTexture16 GetTexture(uint g)
         {
-            if (!ResourceDictionary.TryGetValue(g, out UOTexture16 texture) || texture.IsDisposed)
+            if (g >= Resources.Length)
+                return null;
+
+            ref var texture = ref Resources[g];
+
+            if (texture == null || texture.IsDisposed)
             {
                 ushort[] pixels = GetGumpPixels(g, out int w, out int h);
 
@@ -123,7 +128,8 @@ namespace ClassicUO.IO.Resources
 
                 texture = new UOTexture16(w, h);
                 texture.PushData(pixels);
-                ResourceDictionary.Add(g, texture);
+
+                SaveID(g);
             }
 
             return texture;
