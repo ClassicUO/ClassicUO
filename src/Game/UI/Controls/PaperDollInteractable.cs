@@ -117,6 +117,8 @@ namespace ClassicUO.Game.UI.Controls
                 body = 0x029A;
             else if (mobile.Graphic == 0x029B || mobile.Graphic == 0x02B7)
                 body = 0x0299;
+            else if (mobile.Graphic == 0x04E5)
+                body = 0xC835;
             else if (mobile.Graphic == 0x03DB)
             {
                 body = 0x000C;

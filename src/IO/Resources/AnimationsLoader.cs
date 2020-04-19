@@ -193,7 +193,15 @@ namespace ClassicUO.IO.Resources
             new SittingInfoData(0x35EE, 0, 2, 4, 6, 0, 0, false),
 
             new SittingInfoData(0x3DFF, 0, -1, 4, -1, 2, 2, false),
-            new SittingInfoData(0x3E00, -1, 2, -1, 6, 2, 2, false)
+            new SittingInfoData(0x3E00, -1, 2, -1, 6, 2, 2, false),
+
+            // TODO: new expansion
+            new SittingInfoData(0x4C8D, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x4C8E, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x4C8F, 4, 4, 4, 4, 4, 4, false),
+
+            new SittingInfoData(0x4C1E, 2, 2, 2, 2, 6, 6, false),
+            //new SittingInfoData(0x4C1F, 2, 2, 2, 2, 6, 6, false),
         };
 
 
