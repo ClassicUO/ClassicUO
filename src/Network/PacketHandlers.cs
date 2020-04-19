@@ -2721,9 +2721,6 @@ namespace ClassicUO.Network
 
         private static void AttackCharacter(Packet p)
         {
-            UIManager.RemoveTargetLineGump(TargetManager.LastTarget);
-            UIManager.RemoveTargetLineGump(TargetManager.LastAttack);
-
             TargetManager.LastAttack = p.ReadUInt();
 
             if (TargetManager.LastAttack != 0 && World.InGame)

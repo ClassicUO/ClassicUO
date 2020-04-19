@@ -147,11 +147,11 @@ namespace ClassicUO.Game.GameObjects
                 if (isAttack || isUnderMouse)
                     _viewHue = Notoriety.GetHue(NotorietyFlag);
 
-                if (this == TargetManager.LastTarget)
-                {
-                    UIManager.SetTargetLineGump(this);
-                    //needHpLine = true;
-                }
+                //if (this == TargetManager.LastTarget)
+                //{
+                //    UIManager.SetTargetLineGump(this);
+                //    //needHpLine = true;
+                //}
             }
 
 
