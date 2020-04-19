@@ -1302,9 +1302,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         var next = (Item) first.Next;
 
-                        World.Items.Remove(first);
-                        first.Destroy();
-                        first.Clear();
+                        World.RemoveItem(first, true);
 
                         first = next;
                     }
