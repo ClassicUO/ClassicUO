@@ -1030,7 +1030,8 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.AttackLast:
-                    GameActions.Attack(TargetManager.LastTarget);
+                    if (SerialHelper.IsValid(TargetManager.LastTarget))
+                        GameActions.Attack(TargetManager.LastTarget);
 
                     break;
 
@@ -1090,8 +1091,8 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.UseSelectedTarget:
-
-                    GameActions.DoubleClick(TargetManager.SelectedTarget);
+                    if (SerialHelper.IsValid(TargetManager.SelectedTarget))
+                        GameActions.DoubleClick(TargetManager.SelectedTarget);
                     break;
 
                 case MacroType.CurrentTarget:
