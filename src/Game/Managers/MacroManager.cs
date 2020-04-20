@@ -1012,19 +1012,21 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.TargetNext:
 
-                    if (SerialHelper.IsMobile(TargetManager.LastTarget))
+                    uint sel_obj = World.SearchObject(TargetManager.LastTarget, SCAN_TYPE_OBJECT.STO_MOBILES, SCAN_MODE_OBJECT.SMO_NEXT);
+
+                    if (SerialHelper.IsValid(sel_obj))
                     {
-                        Mobile mob = World.Mobiles.Get(TargetManager.LastTarget);
+                        Entity ent = World.Get(sel_obj);
 
-                        if (mob == null)
-                            break;
+                        if (ent != null && SerialHelper.IsMobile(sel_obj) && ent.HitsMax == 0)
+                        {
+                            NetClient.Socket.Send(new PStatusRequest(sel_obj));
+                        }
 
-                        if (mob.HitsMax == 0)
-                            NetClient.Socket.Send(new PStatusRequest(mob));
-
-                        TargetManager.LastAttack = mob.Serial;
+                        TargetManager.LastTarget = sel_obj;
+                        TargetManager.LastAttack = sel_obj;
                     }
-
+                    
                     break;
 
                 case MacroType.AttackLast:
@@ -1243,7 +1245,7 @@ namespace ClassicUO.Game.Managers
                     // 4 - Mobile (any mobiles)
                     int scantype = macro.SubCode - MacroSubType.Hostile;
 
-                    SetLastTarget(World.SearchObject((SCAN_TYPE_OBJECT) scantype, (SCAN_MODE_OBJECT) scanRange));
+                    SetLastTarget(World.SearchObject(TargetManager.SelectedTarget, (SCAN_TYPE_OBJECT) scantype, (SCAN_MODE_OBJECT) scanRange));
 
                     break;
 

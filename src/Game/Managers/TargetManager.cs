@@ -175,8 +175,6 @@ namespace ClassicUO.Game.Managers
 
                         if (entity != World.Player)
                         {
-                            //UIManager.RemoveTargetLineGump(LastAttack);
-                            //UIManager.RemoveTargetLineGump(LastTarget);
                             LastTarget = entity.Serial;
                         }
 
