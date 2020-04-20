@@ -177,6 +177,7 @@ namespace ClassicUO.Game.UI.Gumps
             _showGroupBar = ProfileManager.Current.WorldMapShowGroupBar;
             _showMarkers = ProfileManager.Current.WorldMapShowMarkers;
             _showMultis = ProfileManager.Current.WorldMapShowMultis;
+            _showMarkerNames = ProfileManager.Current.WorldMapShowMarkersNames;
         }
 
         private void SaveSettings()
@@ -203,6 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.WorldMapShowGroupBar = _showGroupBar;
             ProfileManager.Current.WorldMapShowMarkers = _showMarkers;
             ProfileManager.Current.WorldMapShowMultis = _showMultis;
+            ProfileManager.Current.WorldMapShowMarkersNames = _showMarkerNames;
         }
 
         private bool ParseBool(string boolStr)
@@ -213,7 +215,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGump()
         {
             BuildContextMenu();
-
+            _coords?.Dispose();
             Add(_coords = new Label("", true, 1001, font: 1, style: FontStyle.BlackBorder)
             {
                 X = 10,
