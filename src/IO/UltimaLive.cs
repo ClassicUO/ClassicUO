@@ -317,7 +317,7 @@ namespace ClassicUO.IO
                         _UL.MapSizeWrapSize[mapnum, 3] = Math.Min(p.ReadUShort(), _UL.MapSizeWrapSize[mapnum, 1]);
                     }
                     //previously there were a minor amount of maps
-                    if (_UL._ValidMaps.Count == 0 || !_UL._ValidMaps.TrueForAll(i => valid.Contains(i)))
+                    if (_UL._ValidMaps.Count == 0 || valid.Count > _UL._ValidMaps.Count || !valid.TrueForAll(i => _UL._ValidMaps.Contains(i)))
                     {
                         _UL._ValidMaps = valid;
                         Constants.MAPS_COUNT = sbyte.MaxValue;
