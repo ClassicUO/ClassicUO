@@ -107,13 +107,17 @@ namespace ClassicUO.Game
 
                     if (Map != null)
                     {
-                        if (MapIndex >= 0) Map.Destroy();
+                        if (MapIndex >= 0) 
+                            Map.Destroy();
 
                         ushort x = Player.X;
                         ushort y = Player.Y;
                         sbyte z = Player.Z;
 
                         Map = null;
+
+                        if (value >= Constants.MAPS_COUNT)
+                            value = 0;
 
                         Map = new Map.Map(value)
                         {
