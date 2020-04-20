@@ -2701,9 +2701,6 @@ namespace ClassicUO.Network
 
         private static void AttackCharacter(Packet p)
         {
-            UIManager.RemoveTargetLineGump(TargetManager.LastTarget);
-            UIManager.RemoveTargetLineGump(TargetManager.LastAttack);
-
             TargetManager.LastAttack = p.ReadUInt();
 
             if (TargetManager.LastAttack != 0 && World.InGame)
@@ -3079,7 +3076,7 @@ namespace ClassicUO.Network
                 season = 0;
 
 
-            if (World.Player.IsDead && season != 4)
+            if (World.Player.IsDead && season == 4)
                 return;
 
             World.OldSeason = (Seasons) season;
@@ -3153,7 +3150,10 @@ namespace ClassicUO.Network
                             }
                             else
                             {
-                                UIManager.SavePosition(ser, first.Value.Location);
+                                if (first.Value.CanMove)
+                                    UIManager.SavePosition(ser, first.Value.Location);
+                                else
+                                    UIManager.RemovePosition(ser);
                             }
 
                             first.Value.Dispose();
@@ -4034,7 +4034,7 @@ namespace ClassicUO.Network
             uint linesNum = p.ReadUInt();
             string[] lines = new string[linesNum];
 
-            if (linesNum > 0)
+            if (linesNum != 0)
             {
                 clen = p.ReadUInt() - 4;
                 dlen = (int) p.ReadUInt();

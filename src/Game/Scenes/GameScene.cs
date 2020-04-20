@@ -575,7 +575,7 @@ namespace ClassicUO.Game.Scenes
             if (!World.InGame)
                 return;
 
-
+            _healthLinesManager.Update();
             World.Update(totalMS, frameMS);
             BoatMovingManager.Update();
             Pathfinder.ProcessAutoWalk();

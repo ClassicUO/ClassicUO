@@ -227,7 +227,6 @@
     <Compile Include="Game\UI\Gumps\ProfileGump.cs" />
     <Compile Include="Game\UI\Gumps\QuestArrowGump.cs" />
     <Compile Include="Game\UI\Gumps\RacialAbilitiesBookGump.cs" />
-    <Compile Include="Game\UI\Gumps\TargetLineGump.cs" />
     <Compile Include="Game\UI\Gumps\TextEntryDialogGump.cs" />
     <Compile Include="Game\UI\Gumps\UseAbilityButtonGump.cs" />
     <Compile Include="Game\GameObjects\Views\MultiView.cs" />

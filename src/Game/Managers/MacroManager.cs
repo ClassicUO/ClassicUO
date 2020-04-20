@@ -1403,11 +1403,7 @@ namespace ClassicUO.Game.Managers
                     if (ent != null)
                     {
                         GameActions.MessageOverhead($"Target: {ent.Name}", Notoriety.GetHue(((Mobile) ent).NotorietyFlag), World.Player);
-                        UIManager.RemoveTargetLineGump(TargetManager.LastTarget);
-                        UIManager.RemoveTargetLineGump(TargetManager.LastAttack);
                         TargetManager.SelectedTarget = TargetManager.LastTarget = serial;
-                        UIManager.SetTargetLineGump(serial);
-
                         return;
                     }
                 }
@@ -1416,8 +1412,6 @@ namespace ClassicUO.Game.Managers
                     if (ent != null)
                     {
                         GameActions.MessageOverhead($"Target: {ent.Name}", 992, World.Player);
-                        UIManager.RemoveTargetLineGump(TargetManager.LastTarget);
-                        UIManager.RemoveTargetLineGump(TargetManager.LastAttack);
                         TargetManager.SelectedTarget = TargetManager.LastTarget = serial;
 
                         return;

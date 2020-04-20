@@ -120,7 +120,7 @@ namespace ClassicUO.IO.Resources
                 {
                     string path = UOFileManager.GetUOFilePath($"map{i}LegacyMUL.uop");
 
-                    if (File.Exists(path))
+                    if (Client.IsUOPInstallation && File.Exists(path))
                     {
                         _filesMap[i] = new UOFileUop(path, $"build/map{i}legacymul/{{0:D8}}.dat");
                         Entries[i] = new UOFileIndex[((UOFileUop) _filesMap[i]).TotalEntriesCount];

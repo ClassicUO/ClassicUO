@@ -69,7 +69,7 @@ namespace ClassicUO.IO.Resources
             {
                 string filepath = UOFileManager.GetUOFilePath("artLegacyMUL.uop");
 
-                if (File.Exists(filepath))
+                if (Client.IsUOPInstallation && File.Exists(filepath))
                 {
                     _file = new UOFileUop(filepath, "build/artlegacymul/{0:D8}.tga");
                     Entries = new UOFileIndex[Constants.MAX_STATIC_DATA_INDEX_COUNT];

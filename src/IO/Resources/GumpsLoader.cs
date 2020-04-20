@@ -58,7 +58,7 @@ namespace ClassicUO.IO.Resources
 
                 string path = UOFileManager.GetUOFilePath("gumpartLegacyMUL.uop");
 
-                if (File.Exists(path))
+                if (Client.IsUOPInstallation && File.Exists(path))
                 {
                     _file = new UOFileUop(path, "build/gumpartlegacymul/{0:D8}.tga", true);
                     Entries = new UOFileIndex[Constants.MAX_GUMP_DATA_INDEX_COUNT];
