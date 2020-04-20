@@ -310,7 +310,7 @@ namespace ClassicUO.IO
 
                     for (int i = 0; i < maps; i++)
                     {
-                        int mapnum = p.ReadByte();
+                        int mapnum = Math.Min((byte)Math.Max(0, maps - 1), p.ReadByte());
                         _UL.MapSizeWrapSize[mapnum, 0] = Math.Min((ushort)MapLoader.Instance.MapsDefaultSize[0, 0], p.ReadUShort());
                         _UL.MapSizeWrapSize[mapnum, 1] = Math.Min((ushort)MapLoader.Instance.MapsDefaultSize[0, 1], p.ReadUShort());
                         _UL.MapSizeWrapSize[mapnum, 2] = Math.Min(p.ReadUShort(), _UL.MapSizeWrapSize[mapnum, 0]);

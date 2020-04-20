@@ -261,7 +261,7 @@ namespace ClassicUO.Game.Map
             {
                 var next = first.Next;
                 ref var c = ref Chunks[first.Value];
-                c.Destroy();
+                c?.Destroy();
                 c = null;
                 first = next;
             }
