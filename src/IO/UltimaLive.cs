@@ -46,6 +46,7 @@ namespace ClassicUO.IO
         private const int CRCLength = 25;
         private const int LandBlockLenght = 192;
         private uint _SentWarning = 0;
+        private List<int> _ValidMaps = new List<int>();
 
         private static UltimaLive _UL;
 
@@ -300,42 +301,44 @@ namespace ClassicUO.IO
                     if (p.Length < maps * 9 + 15) //the packet has padding inside, so it's usually larger or equal than what we expect
                         return;
 
-                    int oldlen = 0;
-
-                    if (_UL.MapCRCs != null)
+                    /*if (_UL.MapCRCs != null)
                         oldlen = _UL.MapCRCs.Length;
-                    if (_UL.MapCRCs == null || _UL.MapCRCs.Length < maps) _UL.MapCRCs = new ushort[maps][];
+                    if (_UL.MapCRCs == null || _UL.MapCRCs.Length < maps)*/ _UL.MapCRCs = new ushort[sbyte.MaxValue][];
                     _UL.MapSizeWrapSize = new ushort[maps, 4]; //we always need to reinitialize this, as it could change from login to login even on the same server, in case of map changes (a change could happen on the fly with a client kick or on reboot)
                     p.Seek(15); //byte 15 to end of packet, the map definitions
-
+                    List<int> valid = new List<int>();
                     for (int i = 0; i < maps; i++)
                     {
-                        int mapnum = Math.Min((byte)Math.Max(0, maps - 1), p.ReadByte());
+                        int mapnum = p.ReadByte();
+                        valid.Add(mapnum);
                         _UL.MapSizeWrapSize[mapnum, 0] = Math.Min((ushort)MapLoader.Instance.MapsDefaultSize[0, 0], p.ReadUShort());
                         _UL.MapSizeWrapSize[mapnum, 1] = Math.Min((ushort)MapLoader.Instance.MapsDefaultSize[0, 1], p.ReadUShort());
                         _UL.MapSizeWrapSize[mapnum, 2] = Math.Min(p.ReadUShort(), _UL.MapSizeWrapSize[mapnum, 0]);
                         _UL.MapSizeWrapSize[mapnum, 3] = Math.Min(p.ReadUShort(), _UL.MapSizeWrapSize[mapnum, 1]);
                     }
-
                     //previously there were a minor amount of maps
-                    if (oldlen == 0 || maps > oldlen)
+                    if (_UL._ValidMaps.Count == 0 || !_UL._ValidMaps.TrueForAll(i => valid.Contains(i)))
                     {
-                        Constants.MAPS_COUNT = (int)maps;
-                        ULMapLoader loader = new ULMapLoader(maps);
-                        for (int i = 0; i < maps; i++)
-                            loader.CheckForShardMapFile(i);
+                        _UL._ValidMaps = valid;
+                        Constants.MAPS_COUNT = sbyte.MaxValue;
+                        ULMapLoader loader = new ULMapLoader((uint)Constants.MAPS_COUNT);
+                        //for (int i = 0; i < maps; i++)
+                        for (int i = 0; i < valid.Count; i++)
+                        {
+                            loader.CheckForShardMapFile(valid[i]);
+                        }
                         loader.Load().Wait();
                         _UL._ULMap = loader;
-                        _UL._filesMap = new ULFileMul[maps];
-                        _UL._filesIdxStatics = new ULFileMul[maps];
-                        _UL._filesStatics = new ULFileMul[maps];
+                        _UL._filesMap = new ULFileMul[Constants.MAPS_COUNT];
+                        _UL._filesIdxStatics = new ULFileMul[Constants.MAPS_COUNT];
+                        _UL._filesStatics = new ULFileMul[Constants.MAPS_COUNT];
                         var refs = loader.GetFilesReference;
 
-                        for (int i = 0; i < maps; i++)
+                        for (int i = 0; i < valid.Count; i++)
                         {
-                            _UL._filesMap[i] = refs.Item1[i] as ULFileMul;
-                            _UL._filesIdxStatics[i] = refs.Item2[i] as ULFileMul;
-                            _UL._filesStatics[i] = refs.Item3[i] as ULFileMul;
+                            _UL._filesMap[valid[i]] = refs.Item1[valid[i]] as ULFileMul;
+                            _UL._filesIdxStatics[valid[i]] = refs.Item2[valid[i]] as ULFileMul;
+                            _UL._filesStatics[valid[i]] = refs.Item3[valid[i]] as ULFileMul;
                         }
 
                         _UL._writequeue = loader._writer._toWrite;
@@ -684,8 +687,9 @@ namespace ClassicUO.IO
                     _filesStaticsStream = new FileStream[NumMaps];
                     bool foundedOneMap = false;
 
-                    for (int i = 0; i < NumMaps; i++)
+                    for (int x = 0; x < _UL._ValidMaps.Count; x++)
                     {
+                        int i = _UL._ValidMaps[x];
                         string path = Path.Combine(_UL.ShardName, $"map{i}.mul");
 
                         if (File.Exists(path))
@@ -723,8 +727,9 @@ namespace ClassicUO.IO
                     if (!foundedOneMap)
                         throw new FileNotFoundException($"No maps, staidx or statics found on {_UL.ShardName}.");
 
-                    for (int i = 0; i < NumMaps; i++)
+                    for (int x = 0; x < _UL._ValidMaps.Count; x++)
                     {
+                        int i = _UL._ValidMaps[x];
                         MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
                         MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
                         //on ultimalive map always preload
