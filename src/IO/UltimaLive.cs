@@ -320,7 +320,7 @@ namespace ClassicUO.IO
                     //previously there were a minor amount of maps
                     if (oldlen == 0 || maps > oldlen)
                     {
-                        MapLoader.MAPS_COUNT = (int)maps;
+                        Constants.MAPS_COUNT = (int)maps;
                         ULMapLoader loader = new ULMapLoader(maps);
                         for (int i = 0; i < maps; i++)
                             loader.CheckForShardMapFile(i);
@@ -736,7 +736,7 @@ namespace ClassicUO.IO
             internal void CheckForShardMapFile(int mapID)
             {
                 if (Entries == null)
-                    Entries = new UOFileIndex[MapLoader.MAPS_COUNT][];
+                    Entries = new UOFileIndex[Constants.MAPS_COUNT][];
                 string oldmap = UOFileManager.GetUOFilePath($"map{mapID}.mul");
                 string oldstaidx = UOFileManager.GetUOFilePath($"staidx{mapID}.mul");
                 string oldstatics = UOFileManager.GetUOFilePath($"statics{mapID}.mul");

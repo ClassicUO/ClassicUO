@@ -276,6 +276,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool WorldMapShowGroupName { get; set; } = true;
         [JsonProperty] public bool WorldMapShowGroupBar { get; set; } = true;
         [JsonProperty] public bool WorldMapShowMarkers { get; set; } = true;
+        [JsonProperty] public bool WorldMapShowMarkersNames { get; set; } = true;
         [JsonProperty] public bool WorldMapShowMultis { get; set; } = true;
 
         internal static string ProfilePath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");

@@ -503,6 +503,7 @@ namespace ClassicUO.Network
         public POpenDoor() : base(0x12)
         {
             WriteByte(0x58);
+            WriteByte(0x00);
         }
     }
 

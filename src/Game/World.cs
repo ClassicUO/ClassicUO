@@ -107,13 +107,17 @@ namespace ClassicUO.Game
 
                     if (Map != null)
                     {
-                        if (MapIndex >= 0) Map.Destroy();
+                        if (MapIndex >= 0) 
+                            Map.Destroy();
 
                         ushort x = Player.X;
                         ushort y = Player.Y;
                         sbyte z = Player.Z;
 
                         Map = null;
+
+                        if (value >= Constants.MAPS_COUNT)
+                            value = 0;
 
                         Map = new Map.Map(value)
                         {
@@ -372,7 +376,7 @@ namespace ClassicUO.Game
             _effectManager.Add(type, source, target, graphic, hue, srcX, srcY, srcZ, targetX, targetY, targetZ, speed, duration, fixedDir, doesExplode, hasparticles, blendmode);
         }
 
-        public static uint SearchObject(SCAN_TYPE_OBJECT scanType, SCAN_MODE_OBJECT scanMode)
+        public static uint SearchObject(uint serial, SCAN_TYPE_OBJECT scanType, SCAN_MODE_OBJECT scanMode)
         {
             Entity first = null, selected = null;
             int distance = int.MaxValue;
@@ -399,12 +403,12 @@ namespace ClassicUO.Game
                     if (item.IsMulti || item.IsDestroyed || !item.OnGround)
                         continue;
 
-                    if (TargetManager.SelectedTarget == 0)
+                    if (!SerialHelper.IsValid(serial))
                         return item;
 
                     if (scanMode == SCAN_MODE_OBJECT.SMO_NEXT)
                     {
-                        if (TargetManager.SelectedTarget == item)
+                        if (serial == item)
                         {
                             currentTargetFound = true;
                             continue;
@@ -424,7 +428,7 @@ namespace ClassicUO.Game
                         if (!currentTargetFound && first != null)
                             selected = first;
 
-                        if (TargetManager.SelectedTarget == item)
+                        if (serial == item)
                         {
                             currentTargetFound = true;
                             continue;
@@ -437,7 +441,7 @@ namespace ClassicUO.Game
                         if (item.Distance > distance)
                             continue;
 
-                        if (TargetManager.SelectedTarget == item.Serial)
+                        if (serial == item.Serial)
                         {
                             currentTargetFound = true;
                             continue;
@@ -531,7 +535,7 @@ namespace ClassicUO.Game
                             }
                         }
 
-                        if (TargetManager.SelectedTarget == mobile)
+                        if (serial == mobile)
                         {
                             currentTargetFound = true;
                             continue;
@@ -577,7 +581,7 @@ namespace ClassicUO.Game
                         if (!currentTargetFound && first != null)
                             selected = first;
 
-                        if (TargetManager.SelectedTarget == mobile)
+                        if (serial == mobile)
                         {
                             currentTargetFound = true;
                             continue;
@@ -616,7 +620,7 @@ namespace ClassicUO.Game
                         if (mobile.Distance > distance)
                             continue;
 
-                        if (TargetManager.SelectedTarget == mobile.Serial)
+                        if (serial == mobile.Serial)
                         {
                             currentTargetFound = true;
                             continue;
@@ -643,7 +647,7 @@ namespace ClassicUO.Game
 
             return selected?.Serial ?? 0;
         }
-
+        
         public static void Clear()
         {
             foreach (Mobile mobile in Mobiles)
@@ -686,7 +690,6 @@ namespace ClassicUO.Game
             ActiveSpellIcons.Clear();
 
             SkillsRequested = false;
-
         }
 
         private static void InternalMapChangeClear(bool noplayer)
