@@ -4271,7 +4271,11 @@ namespace ClassicUO.Network
             ushort y = p.ReadUShort();
             ushort z = p.ReadUShort();
 
-            BoatMovingManager.AddStep(serial, boatSpeed, movingDirection, facingDirection, x, y, (sbyte) z);
+            BoatMovingManager.AddStep(serial, 
+                                      boatSpeed, 
+                                      movingDirection, 
+                                      facingDirection, 
+                                      x, y, (sbyte) z);
 
             int count = p.ReadUShort();
 
@@ -4288,8 +4292,8 @@ namespace ClassicUO.Network
                     World.RangeSize.Y = cy;
                 }
 
-
-                BoatMovingManager.PushItemToList(
+                if (World.Contains(cSerial))
+                    BoatMovingManager.PushItemToList(
                     serial,
                     cSerial, 
                     x - cx, 

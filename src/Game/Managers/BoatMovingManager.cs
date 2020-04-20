@@ -30,7 +30,6 @@ namespace ClassicUO.Game.Managers
         }
 
 
-
         private static readonly Dictionary<uint, Deque<BoatStep>> _steps = new Dictionary<uint, Deque<BoatStep>>();
         private static readonly List<uint> _toRemove = new List<uint>();
         private static readonly Dictionary<uint, RawList<ItemInside>> _items = new Dictionary<uint, RawList<ItemInside>>();
@@ -62,6 +61,7 @@ namespace ClassicUO.Game.Managers
             _timePacket = Time.Ticks;
         }
 
+
         public static void AddStep(uint serial, byte speed, Direction movingDir, Direction facingDir, ushort x, ushort y, sbyte z)
         {
             Item item = World.Items.Get(serial);
@@ -76,7 +76,7 @@ namespace ClassicUO.Game.Managers
                 _steps[serial] = deque;
             }
 
-            while (deque.Count >= Constants.MAX_STEP_COUNT)
+            while (deque.Count >= 2)
             {
                 deque.RemoveFromFront();
             }
@@ -167,7 +167,7 @@ namespace ClassicUO.Game.Managers
                         ent.Offset.Z = 0;
                     }
 
-                    list.Clear();
+                    list.Count = 0;
                 }
 
                 deque.Clear();
@@ -176,11 +176,14 @@ namespace ClassicUO.Game.Managers
 
         public static void ClearEntities(uint serial)
         {
-            if (_items.TryGetValue(serial, out var list))
-            {
-                list.Clear();
-            }
+            _items.Remove(serial);
+
+            //if (_items.TryGetValue(serial, out var list))
+            //{
+            //    list.Clear();
+            //}
         }
+
 
         public static void PushItemToList(uint serial, uint objSerial, int x, int y, int z)
         {
@@ -194,6 +197,9 @@ namespace ClassicUO.Game.Managers
             for (int i = 0; i < list.Count; i++)
             {
                 ref var item = ref list[i];
+
+                if(!SerialHelper.IsValid(item.Serial))
+                    break;
 
                 if (item.Serial == objSerial)
                 {
@@ -230,24 +236,7 @@ namespace ClassicUO.Game.Managers
                     }
 
                     bool drift = step.MovingDir != step.FacingDir;
-
-                    var maxDelay = Math.Max(step.Time, 25);
-
-
-                    //switch (step.Speed)
-                    //{
-                    //    case 0x02:
-                    //        maxDelay = SLOW_INTERVAL;
-                    //        break;
-                    //    default:
-                    //    case 0x03:
-                    //        maxDelay = NORMAL_INTERVAL;
-                    //        break;
-                    //    case 0x04:
-                    //        maxDelay = FAST_INTERVAL;
-                    //        break;
-                    //}
-
+                    var maxDelay = step.Time;
 
                     int delay = (int) Time.Ticks - (int) item.LastStepTime;
                     bool removeStep = delay >= maxDelay;
@@ -257,13 +246,20 @@ namespace ClassicUO.Game.Managers
                     if (/*step.FacingDir == step.MovingDir &&*/
                         (item.X != step.X || item.Y != step.Y))
                     {
-                        float steps = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
-                        float x = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;
-                        float y = x;
-                        item.Offset.Z = (sbyte) ((step.Z - item.Z) * x * (4.0f / steps));
-                        MovementSpeed.GetPixelOffset((byte) step.MovingDir, ref x, ref y, steps);
-                        item.Offset.X = (sbyte) x;
-                        item.Offset.Y = (sbyte) y;
+                        if (maxDelay != 0)
+                        {
+                            float steps = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
+                            float x = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;
+                            float y = x;
+                            item.Offset.Z = (sbyte) ((step.Z - item.Z) * x * (4.0f / steps));
+                            MovementSpeed.GetPixelOffset((byte) step.MovingDir, ref x, ref y, steps);
+                            item.Offset.X = (sbyte) x;
+                            item.Offset.Y = (sbyte) y;
+                        }
+                        else
+                        {
+                            removeStep = true;
+                        }
                     }
                     else
                     {
@@ -347,10 +343,12 @@ namespace ClassicUO.Game.Managers
                 {
                     ref var it = ref list[i];
 
+                    //if (!SerialHelper.IsValid(it.Serial))
+                    //    break;
+
                     Entity entity = World.Get(it.Serial);
                     if (entity == null || entity.IsDestroyed)
                     {
-                        list.RemoveAt((uint) i--);
                         continue;
                     }
 
