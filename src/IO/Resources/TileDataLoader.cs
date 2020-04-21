@@ -270,6 +270,9 @@ namespace ClassicUO.IO.Resources
 
                             int[] group = reader.ReadGroup();
 
+                            if (group == null)
+                                continue;
+
                             for (int i = 0; i < group.Length; i++)
                             {
                                 int checkIndex = group[i];

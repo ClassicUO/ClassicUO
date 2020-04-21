@@ -602,6 +602,9 @@ namespace ClassicUO.IO.Resources
                                 continue;
 
                             int[] group = defReader.ReadGroup();
+
+                            if (group == null)
+                                continue;
                             int color = defReader.ReadInt();
 
                             for (int i = 0; i < group.Length; i++)
@@ -635,6 +638,9 @@ namespace ClassicUO.IO.Resources
                                 continue;
 
                             int[] group = defReader.ReadGroup();
+
+                            if (group == null)
+                                continue;
 
                             ushort color = (ushort)defReader.ReadInt();
 
