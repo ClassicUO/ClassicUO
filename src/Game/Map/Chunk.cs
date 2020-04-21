@@ -186,6 +186,8 @@ namespace ClassicUO.Game.Map
             short priorityZ = obj.Z;
             sbyte state = -1;
 
+            ushort graphic = obj.Graphic;
+
             switch (obj)
             {
                 case Land tile:
@@ -204,10 +206,19 @@ namespace ClassicUO.Game.Map
 
                     break;
 
-                case Item item when item.IsCorpse:
-                    priorityZ++;
+                case Item item:
 
-                    break;
+                    if (item.IsCorpse)
+                    {
+                        priorityZ++;
+                        break;
+                    }
+                    else if (item.IsMulti)
+                    {
+                        graphic = item.MultiGraphic;
+                    }
+
+                    goto default;
 
                 case GameEffect _:
                     priorityZ += 2;
@@ -230,15 +241,21 @@ namespace ClassicUO.Game.Map
                         priorityZ++;
                     }
 
+                    if (m.IsMovable)
+                        priorityZ++;
+
                     goto default;
 
                 default:
-                    ref readonly StaticTiles data = ref TileDataLoader.Instance.StaticData[obj.Graphic];
+                    ref readonly StaticTiles data = ref TileDataLoader.Instance.StaticData[graphic];
 
                     if (data.IsBackground)
                         priorityZ--;
 
                     if (data.Height != 0)
+                        priorityZ++;
+
+                    if (data.IsMultiMovable)
                         priorityZ++;
 
                     break;

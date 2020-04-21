@@ -4291,6 +4291,22 @@ namespace ClassicUO.Network
             ushort y = p.ReadUShort();
             ushort z = p.ReadUShort();
 
+            Item multi = World.Items.Get(serial);
+            if (multi == null)
+                return;
+
+            //multi.LastX = x;
+            //multi.LastY = y;
+
+            //if (World.HouseManager.TryGetHouse(serial, out var house))
+            //{
+            //    foreach (Multi component in house.Components)
+            //    {
+            //        component.LastX = (ushort) (x + component.MultiOffsetX);
+            //        component.LastY = (ushort) (y + component.MultiOffsetY);
+            //    }
+            //}
+
             BoatMovingManager.AddStep(serial, 
                                       boatSpeed, 
                                       movingDirection, 
@@ -4312,13 +4328,32 @@ namespace ClassicUO.Network
                     World.RangeSize.Y = cy;
                 }
 
-                if (World.Contains(cSerial))
-                    BoatMovingManager.PushItemToList(
-                    serial,
-                    cSerial, 
-                    x - cx, 
-                    y - cy,
-                    (sbyte) (z - cz));
+                Entity ent = World.Get(cSerial);
+                if (ent == null)
+                    continue;
+
+                //if (SerialHelper.IsMobile(cSerial))
+                //{
+                //    Mobile m = (Mobile) ent;
+
+                //    if (m.Steps.Count != 0)
+                //    {
+                //        ref var step = ref m.Steps.Back();
+
+                //        step.X = cx;
+                //        step.Y = cy;
+                //    }
+                //}
+
+                //ent.LastX = cx;
+                //ent.LastY = cy;
+
+                BoatMovingManager.PushItemToList(
+                serial,
+                cSerial, 
+                x - cx, 
+                y - cy,
+                (sbyte) (z - cz));
             }
         }
 
