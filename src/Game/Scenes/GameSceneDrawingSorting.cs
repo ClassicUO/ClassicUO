@@ -353,7 +353,7 @@ namespace ClassicUO.Game.Scenes
 
                         //if (GameObjectHelper.TryGetStaticData(obj, out itemData))
                         {
-                            if (itemData.IsFoliage && World.Season >= Seasons.Winter)
+                            if (itemData.IsFoliage && !itemData.IsMultiMovable && World.Season >= Seasons.Winter)
                             {
                                 continue;
                             }
@@ -370,7 +370,7 @@ namespace ClassicUO.Game.Scenes
                             }
 
                             //we avoid to hide impassable foliage or bushes, if present...
-                            if ((ProfileManager.Current.TreeToStumps && itemData.IsFoliage) || 
+                            if ((ProfileManager.Current.TreeToStumps && itemData.IsFoliage && !itemData.IsMultiMovable && !(obj is Multi)) || 
                                 (ProfileManager.Current.HideVegetation && ((obj is Multi mm && mm.IsVegetation) || (obj is Static st && st.IsVegetation))))
                                 continue;
 
