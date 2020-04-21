@@ -80,7 +80,17 @@ namespace ClassicUO.Game.GameObjects
                         x = step.X;
                         y = step.Y;
                     }
+                    //else if (LastX != 0xFFFF && LastY != 0xFFFF)
+                    //{
+                    //    x = LastX;
+                    //    y = LastY;
+                    //}
                 }
+                //else if (LastX != 0xFFFF && LastY != 0xFFFF)
+                //{
+                //    x = LastX;
+                //    y = LastY;
+                //}
 
                 int fx = World.RangeSize.X;
                 int fy = World.RangeSize.Y;
@@ -89,6 +99,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        //public ushort LastX = 0xFFFF, LastY = 0xFFFF;
 
         public virtual void Update(double totalMS, double frameMS)
         {
@@ -297,6 +308,9 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsDestroyed)
                 return;
+
+            //LastX = 0xFFFF;
+            //LastY = 0xFFFF;
 
             Next = null;
             Previous = null;

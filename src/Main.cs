@@ -332,7 +332,7 @@ namespace ClassicUO
                         break;
 
                     case "plugins":
-                        Settings.GlobalSettings.Plugins = value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                        Settings.GlobalSettings.Plugins = string.IsNullOrEmpty(value) ? new string[0] : value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                         break;
 
                 }

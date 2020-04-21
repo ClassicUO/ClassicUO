@@ -144,6 +144,8 @@ namespace ClassicUO.Game.GameObjects
                         s.Z = (sbyte) (item.Z + s.MultiOffsetZ);
                         s.UpdateScreenPosition();
                         s.Offset = Vector3.Zero;
+                        //s.LastX = s.X;
+                        //s.LastY = s.Y;
                     }
 
 
