@@ -73,7 +73,7 @@ namespace ClassicUO.Game.Managers
         public long WaitForTargetTimer { get; set; }
 
         public bool WaitingBandageTarget { get; set; }
-
+        private uint _ArmDelay;
 
 
 
@@ -962,18 +962,24 @@ namespace ClassicUO.Game.Managers
                 case MacroType.ArmDisarm:
                     int handIndex = 1 - (macro.SubCode - MacroSubType.LeftHand);
                     GameScene gs = Client.Game.GetScene<GameScene>();
-
+                    GameActions.Print("You must wait to perform another action.", 0x38, MessageType.System, 1, true);
+                    
                     if (handIndex < 0 || handIndex > 1 || ItemHold.Enabled)
+                        break;
+                    
+                    if (_ArmDelay > Time.Ticks)
                         break;
 
                     if (_itemsInHand[handIndex] != 0)
                     {
                         Item item = World.Items.Get(_itemsInHand[handIndex]);
-
+                        _ArmDelay = Time.Ticks + 3000;
+                        
                         if (item != null)
                         {
                             GameActions.PickUp(item, 1);
                             gs.WearHeldItem(World.Player);
+                            _ArmDelay = Time.Ticks + 3000;
                         }
 
                         _itemsInHand[handIndex] = 0;
@@ -986,13 +992,14 @@ namespace ClassicUO.Game.Managers
                             break;
 
                         Item item = World.Player.Equipment[(int) Layer.OneHanded + handIndex];
-
+                        _ArmDelay = Time.Ticks + 3000;
                         if (item != null)
                         {
                             _itemsInHand[handIndex] = item.Serial;
 
                             GameActions.PickUp(item, 1);
                             gs.MergeHeldItem(backpack);
+                            _ArmDelay = Time.Ticks + 3000;
                         }
                     }
 
