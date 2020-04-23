@@ -156,9 +156,17 @@ namespace ClassicUO.Data
                                 start++;
                                 index++;
                             }
+
+                            extra = index;
                         }
 
-                        version = (ClientVersion) (((major & 0xFF) << 24) | ((minor & 0xFF) << 16) | ((build & 0xFF) << 8) | (extra & 0xFF));
+                        if (extra_index == 2)
+                        {
+                            build = num_extra;
+                            num_extra = extra;
+                        }
+
+                        version = (ClientVersion) (((major & 0xFF) << 24) | ((minor & 0xFF) << 16) | ((build & 0xFF) << 8) | (num_extra & 0xFF));
 
                         return true;
                     }

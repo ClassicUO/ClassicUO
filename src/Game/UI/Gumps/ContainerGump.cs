@@ -195,6 +195,8 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
 
                 thisCont = World.Get(((Item) thisCont).RootContainer);
+                if (thisCont == null)
+                    return;
 
                 bool candrop = thisCont.Distance <= Constants.DRAG_ITEMS_DISTANCE;
 

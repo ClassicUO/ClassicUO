@@ -97,7 +97,7 @@ namespace ClassicUO.Game.Scenes
                 //item.Container = Serial.INVALID;
                 //entity.Items.Remove(item);
 
-                if (entity.HasEquipment)
+                if (entity != null && entity.HasEquipment)
                     entity.Equipment[(int) item.Layer] = null;
 
                 //entity.Items.ProcessDelta();
