@@ -145,19 +145,6 @@ namespace ClassicUO.Game.Scenes
             base.Unload();
         }
 
-        internal override void OnTextInput(string text)
-        {
-            if (CurrentLoginStep == LoginSteps.Main)
-            {
-                var loginGump = UIManager.GetGump<LoginGump>();
-
-                if (loginGump != null && !loginGump.IsDisposed)
-                {
-                    loginGump.Insert(text);
-                }
-            }
-        }
-
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);

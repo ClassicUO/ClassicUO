@@ -35,7 +35,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public ArrowNumbersTextBox(int x, int y, int width, int raiseamount, int minvalue, int maxvalue, byte font = 0, int maxcharlength = -1, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
         {
-            int height = 30;
+            int height = 20;
             X = x;
             Y = y;
             Width = width;

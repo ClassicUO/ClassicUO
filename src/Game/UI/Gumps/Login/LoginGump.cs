@@ -19,8 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using System.Runtime.Remoting.Channels;
-
+using System;
+using System.IO;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Scenes;
@@ -28,6 +28,9 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Input;
+using Microsoft.Xna.Framework;
+using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
@@ -39,7 +42,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private readonly Checkbox _checkboxSaveAccount;
         private readonly Button _nextArrow0;
         private readonly StbTextBox _textboxAccount;
-        private readonly StbTextBox _textboxPassword, _passwordFake;
+        private readonly PasswordStbTextBox _passwordFake;
 
         private float _time;
 
@@ -119,7 +122,16 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     Y = 453
                 });
 
-                Add(new Label($"ClassicUO Version {CUOEnviroment.Version}", false, 0x034E, font: 9)
+                string patch = "-1";
+                if (File.Exists(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "runuoi.log")))
+                {
+                    using (StreamReader reader = new StreamReader(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "runuoi.log")))
+                    {
+                        patch = reader.ReadLine();
+                    }
+                }
+
+                Add(new Label($"ClassicUO Version {CUOEnviroment.Version} (patch {patch})", false, 0x034E, font: 9)
                 {
                     X = 286,
                     Y = 465
@@ -171,7 +183,16 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     Y = 453
                 });
 
-                Add(new Label($"ClassicUO Version {CUOEnviroment.Version}", false, 0x0481, font: 9)
+                string patch = "-1";
+                if (File.Exists(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "runuoi.log")))
+                {
+                    using (StreamReader reader = new StreamReader(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "runuoi.log")))
+                    {
+                        patch = reader.ReadLine();
+                    }
+                }
+
+                Add(new Label($"ClassicUO Version {CUOEnviroment.Version} (patch {patch})", false, 0x034E, font: 9)
                 {
                     X = 286,
                     Y = 465
@@ -230,31 +251,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Height = 25,
             });
 
-
-            _textboxPassword = new StbTextBox(5, 16, 190, false, hue: 0x034F)
-            {
-                X = offsetX,
-                Y = offsetY + offtextY + 2,
-                Width = 190,
-                Height = 25,
-            };
-
-            _passwordFake.KeyDown += (sender, e) =>
-            {
-               _textboxPassword.InvokeKeyDown(e.Key, e.Mod);  
-            };
-
-
-            _textboxPassword.Text = Crypter.Decrypt(Settings.GlobalSettings.Password);
-
-            TransformPassword(_textboxPassword.Text);
-            
+            _passwordFake.RealText = Crypter.Decrypt(Settings.GlobalSettings.Password);
 
             _checkboxSaveAccount.IsChecked = Settings.GlobalSettings.SaveAccount;
             _checkboxAutologin.IsChecked = Settings.GlobalSettings.AutoLogin;
 
 
-            int htmlX = 130;
+            /*int htmlX = 130;
             int htmlY = 442;
 
             Add(new HtmlControl(htmlX, htmlY, 300, 100,
@@ -273,7 +276,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                                            false, false,
                                            false,
                                            text: "<body link=\"#6a6a62\" vlink=\"#00FF00\" ><a href=\"https://discord.gg/VdyCpjQ\">CUO Discord",
-                                           0x32, true, isunicode: true, style: FontStyle.Cropped));
+                                           0x32, true, isunicode: true, style: FontStyle.Cropped));*/
 
 
             if (!string.IsNullOrEmpty(_textboxAccount.Text))
@@ -282,34 +285,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _textboxAccount.SetKeyboardFocus();
         }
 
-
-        public void Insert(string psw)
-        {
-            if (_passwordFake.HasKeyboardFocus)
-                _textboxPassword.Text += psw;
-        }
-
-        private void TransformPassword(string text)
-        {
-            var c = text.ToCharArray();
-
-            for (int i = 0; i < c.Length; i++)
-            {
-                if (c[i] != '\n')
-                {
-                    c[i] = '*';
-                }
-            }
-            _passwordFake.Text = new string(c);
-        }
-
         public override void OnKeyboardReturn(int textID, string text)
         {
             SaveCheckboxStatus();
             LoginScene ls = Client.Game.GetScene<LoginScene>();
 
             if (ls.CurrentLoginStep == LoginSteps.Main)
-                ls.Connect(_textboxAccount.Text, _textboxPassword.Text);
+                ls.Connect(_textboxAccount.Text, _passwordFake.RealText);
         }
 
         private void SaveCheckboxStatus()
@@ -317,7 +299,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Settings.GlobalSettings.SaveAccount = _checkboxSaveAccount.IsChecked;
             Settings.GlobalSettings.AutoLogin = _checkboxAutologin.IsChecked;
         }
-
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -356,7 +337,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 case Buttons.NextArrow:
                     SaveCheckboxStatus();
                     if (!_textboxAccount.IsDisposed)
-                        Client.Game.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
+                        Client.Game.GetScene<LoginScene>().Connect(_textboxAccount.Text, _passwordFake.RealText);
 
                     break;
 
@@ -367,32 +348,118 @@ namespace ClassicUO.Game.UI.Gumps.Login
             }
         }
 
-        public override void Dispose()
-        {
-            _textboxPassword?.Dispose();
-            base.Dispose();
-        }
-
-
         private class PasswordStbTextBox : StbTextBox
         {
             public PasswordStbTextBox(byte font, int max_char_count = -1, int maxWidth = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : base(font, max_char_count, maxWidth, isunicode, style, hue, align)
             {
+                _rendererText = RenderedText.Create(string.Empty, hue, font, isunicode, style, align, maxWidth, 30, false, false, false);
+                _rendererCaret = RenderedText.Create("_", hue, font, isunicode, (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None, align: align);
+            }
+
+            internal string RealText
+            {
+                get
+                {
+                    return Text;
+                }
+                set
+                {
+                    Text = value;
+                }
+            }
+
+            protected override void DrawCaret(UltimaBatcher2D batcher, int x, int y)
+            {
+                if (HasKeyboardFocus)
+                {
+                    _rendererCaret.Draw(batcher, x + _caretScreenPosition.X, y + _caretScreenPosition.Y);
+                }
+            }
+            private Point _caretScreenPosition;
+            protected override void OnMouseDown(int x, int y, MouseButtonType button)
+            {
+                if (button == MouseButtonType.Left)
+                {
+                    UpdateCaretScreenPosition();
+                }
+            }
+
+            protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+            {
+                base.OnKeyDown(key, mod);
+                UpdateCaretScreenPosition();
+            }
+
+            protected override void OnMouseUp(int x, int y, MouseButtonType button)
+            {
+            }
+
+            protected override void OnMouseOver(int x, int y)
+            {
+            }
+
+            public override void Dispose()
+            {
+                _rendererText?.Destroy();
+                _rendererCaret?.Destroy();
+
+                base.Dispose();
+            }
+
+            public ushort Hue
+            {
+                get => _rendererText.Hue;
+                set
+                {
+                    if (_rendererText.Hue != value)
+                    {
+                        _rendererText.Hue = value;
+                        _rendererCaret.Hue = value;
+
+                        _rendererText.CreateTexture();
+                        _rendererCaret.CreateTexture();
+                    }
+                }
             }
 
             protected override void OnTextInput(string c)
             {
-                var t = c.ToCharArray();
+                 base.OnTextInput(c);
+            }
 
-                for (int i = 0; i < t.Length; i++)
+            protected override void OnTextChanged()
+            {
+                if (Text.Length > 0)
+                    _rendererText.Text = new string('*', Text.Length);
+                else
+                    _rendererText.Text = string.Empty;
+                base.OnTextChanged();
+            }
+
+            private void UpdateCaretScreenPosition()
+            {
+                _caretScreenPosition = _rendererText.GetCaretPosition(Stb.CursorIndex);
+            }
+
+            private RenderedText _rendererText, _rendererCaret;
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
+
+                if (ScissorStack.PushScissors(scissor))
                 {
-                    if (t[i] != '\n')
-                        t[i] = '*';
+                    batcher.EnableScissorTest(true);
+                    DrawSelection(batcher, x, y);
+
+                    _rendererText.Draw(batcher, x, y);
+
+                    DrawCaret(batcher, x, y);
+
+                    batcher.EnableScissorTest(false);
+                    ScissorStack.PopScissors();
                 }
 
-                c = new string(t);
-
-                base.OnTextInput(c);
+                return true;
             }
         }
 

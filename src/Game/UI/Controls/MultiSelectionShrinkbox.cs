@@ -33,7 +33,7 @@ namespace ClassicUO.Game.UI.Controls
     internal class MultiSelectionShrinkbox : Control
     {
         private readonly int _buttongroup;
-        private readonly ushort _buttonimg;
+        private readonly ushort _buttonimg, _pressedbuttonimg;
         private readonly Label _label;
         //this particular list will be used when inside a scroll area or similar situations where you want to nest a multi selection shrinkbox inside another one,
         //so that when the parent is deactivated, all the child will be made non visible
@@ -41,28 +41,29 @@ namespace ClassicUO.Game.UI.Controls
         private readonly GumpPic _arrow;
         private NiceButton[] _buttons;
         private readonly bool _useArrow2;
-        private int[] _correspondence;
         private string[] _items;
         private bool _opened;
-        private GumpPic[] _pics;
+        private Button[] _pics;
         private int _selectedIndex;
 
-        public MultiSelectionShrinkbox(int x, int y, int width, string indextext, string[] items, ushort hue = 0x0453, bool unicode = false, byte font = 9, int group = 0, ushort button = 0, bool useArrow2 = false) : this(x, y, width, indextext, hue, unicode, font, group, button, useArrow2)
+        public MultiSelectionShrinkbox(int x, int y, int width, string indextext, string[] items, ushort hue = 0x0453, bool unicode = false, byte font = 9, int group = 0, ushort button = 0, ushort pressedbutton = 0, bool useArrow2 = false) : this(x, y, width, indextext, hue, unicode, font, group, button, pressedbutton, useArrow2)
         {
             SetItemsValue(items);
         }
 
-        public MultiSelectionShrinkbox(int x, int y, int width, string indextext, Dictionary<int, string> items, ushort hue = 0x0453, bool unicode = false, byte font = 9, int group = 0, ushort button = 0, bool useArrow2 = false) : this(x, y, width, indextext, hue, unicode, font, group, button, useArrow2)
-        {
-            SetItemsValue(items);
-        }
-
-        private MultiSelectionShrinkbox(int x, int y, int width, string indextext, ushort hue, bool unicode, byte font, int group, ushort button, bool userArrow2 = false)
+        private MultiSelectionShrinkbox(int x, int y, int width, string indextext, ushort hue, bool unicode, byte font, int group, ushort button, ushort pressedbutton, bool userArrow2 = false)
         {
             WantUpdateSize = false;
             X = x;
             Y = y;
-            _buttonimg = button;
+            if (button > 0)
+            {
+                _buttonimg = button;
+                if (pressedbutton > 0)
+                    _pressedbuttonimg = pressedbutton;
+                else
+                    _pressedbuttonimg = button;
+            }
             _buttongroup = group;
             Width = width;
             _useArrow2 = userArrow2;
@@ -121,20 +122,23 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public int SelectedIndex
-        {
-            get => _selectedIndex;
-            set
-            {
-                _selectedIndex = value;
+        public int SelectedIndex => _selectedIndex;
 
-                if (_items != null && _selectedIndex >= 0 && _selectedIndex < _items.Length) OnOptionSelected?.Invoke(this, value);
+        public string SelectedName
+        {
+            get
+            {
+                if (_items != null && _selectedIndex >= 0 && _selectedIndex < _items.Length)
+                    return _items[_selectedIndex];
+                return null;
             }
         }
 
-        public int SelectedItem => _correspondence != null && _selectedIndex >= 0 && _selectedIndex < _correspondence.Length ? _correspondence[_selectedIndex] : _selectedIndex;
-
         internal uint GetItemsLength => (uint)_items.Length;
+
+        public string Name => _label == null ? null : _label.Text;
+
+        public MultiSelectionShrinkbox ParentBox { get; private set; }
 
         internal bool NestBox(MultiSelectionShrinkbox box)
         {
@@ -153,6 +157,7 @@ namespace ClassicUO.Game.UI.Controls
                     area.Add(box);
                     if (!_opened) box.IsVisible = false;
                     box.OnPageChanged();
+                    box.ParentBox = this;
 
                     return true;
                 }
@@ -166,8 +171,6 @@ namespace ClassicUO.Game.UI.Controls
         internal void SetItemsValue(string[] items)
         {
             _items = items;
-            _correspondence = null;
-
             if (_opened)
                 GenerateButtons();
             _arrow.IsVisible = items.Length > 0 || _nestedBoxes.Count > 0;
@@ -176,8 +179,6 @@ namespace ClassicUO.Game.UI.Controls
         internal void SetItemsValue(Dictionary<int, string> items)
         {
             _items = items.Select(o => o.Value).ToArray();
-            _correspondence = items.Select(o => o.Key).ToArray();
-
             if (_opened)
                 GenerateButtons();
             _arrow.IsVisible = items.Count > 0 || _nestedBoxes.Count > 0;
@@ -189,7 +190,7 @@ namespace ClassicUO.Game.UI.Controls
             _buttons = new NiceButton[_items.Length];
 
             if (_buttonimg > 0)
-                _pics = new GumpPic[_items.Length];
+                _pics = new Button[_items.Length];
 
             var index = 0;
             int width = 0;
@@ -219,7 +220,11 @@ namespace ClassicUO.Game.UI.Controls
             foreach (var item in _items)
             {
                 var but = new NiceButton(20, index * height + lh, width, height, ButtonAction.Activate, item, _buttongroup, TEXT_ALIGN_TYPE.TS_LEFT) { Tag = index };
-                if (_buttonimg > 0) Add(_pics[index] = new GumpPic(6, index * height + lh + 2, _buttonimg, 0));
+                if (_buttonimg > 0)
+                {
+                    Add(_pics[index] = new Button(index, _buttonimg, _pressedbuttonimg) { X = 6, Y = index * height + lh + 2, ButtonAction = (ButtonAction)0xBEEF, Tag = index });
+                    _pics[index].MouseUp += Selection_MouseClick;
+                }
                 but.MouseUp += Selection_MouseClick;
                 _buttons[index] = but;
                 Add(but);
@@ -256,9 +261,15 @@ namespace ClassicUO.Game.UI.Controls
 
         private void Selection_MouseClick(object sender, MouseEventArgs e)
         {
-            SelectedIndex = (int)((Control)sender).Tag;
-            if (_buttongroup > 0)
-                OnGroupSelection();
+            if (sender is Control c)
+            {
+                _selectedIndex = (int)c.Tag;
+                if (sender is Button)
+                    _buttons[SelectedIndex].IsSelected = true;
+                if (_buttongroup > 0)
+                    OnGroupSelection();
+                if (_items != null && _selectedIndex >= 0 && _selectedIndex < _items.Length) OnOptionSelected?.Invoke(this, c);
+            }
         }
 
         private void OnGroupSelection()
@@ -285,7 +296,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public event EventHandler<int> OnOptionSelected;
+        public event EventHandler<Control> OnOptionSelected;
         public event EventHandler OnBeforeContextMenu;
         public event EventHandler OnAfterContextMenu;
 
@@ -300,12 +311,6 @@ namespace ClassicUO.Game.UI.Controls
         public override void OnPageChanged()
         {
             Parent?.OnPageChanged();
-        }
-
-        public void SetIndexText(string text)
-        {
-            if (!string.IsNullOrEmpty(text))
-                _label.Text = text;
         }
     }
 }

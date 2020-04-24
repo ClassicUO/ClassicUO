@@ -19,6 +19,7 @@ namespace ClassicUO.Game.UI.Controls
     class StbTextBox : Control, ITextEditHandler
     {
         private readonly TextEdit _stb;
+        protected TextEdit Stb => _stb;
         private RenderedText _rendererText, _rendererCaret;
 
         private int _maxCharCount = -1;
@@ -158,10 +159,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-
         public event EventHandler TextChanged;
-
-
 
         public MultilinesFontInfo CalculateFontInfo(string text)
         {
@@ -196,9 +194,6 @@ namespace ClassicUO.Game.UI.Controls
             _stb.SelectEnd = Length;
         }
 
-
-      
-        
         private void UpdateCaretScreenPosition()
         {
             _caretScreenPosition = _rendererText.GetCaretPosition(_stb.CursorIndex);
@@ -648,7 +643,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        private protected void DrawCaret(UltimaBatcher2D batcher, int x, int y)
+        protected virtual void DrawCaret(UltimaBatcher2D batcher, int x, int y)
         {
             if (HasKeyboardFocus)
             {
