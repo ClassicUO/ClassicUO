@@ -380,6 +380,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 if (button == MouseButtonType.Left)
                 {
+                    Stb.Click(Mouse.Position.X, Mouse.Position.Y);
                     UpdateCaretScreenPosition();
                 }
             }
@@ -388,14 +389,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 base.OnKeyDown(key, mod);
                 UpdateCaretScreenPosition();
-            }
-
-            protected override void OnMouseUp(int x, int y, MouseButtonType button)
-            {
-            }
-
-            protected override void OnMouseOver(int x, int y)
-            {
             }
 
             public override void Dispose()
@@ -434,6 +427,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 else
                     _rendererText.Text = string.Empty;
                 base.OnTextChanged();
+                UpdateCaretScreenPosition();
+            }
+
+            internal override void OnFocusEnter()
+            {
+                base.OnFocusEnter();
+                CaretIndex = Text?.Length ?? 0;
+                UpdateCaretScreenPosition();
             }
 
             private void UpdateCaretScreenPosition()
