@@ -66,8 +66,8 @@ namespace ClassicUO.IO.Resources
                 }
                 else
                 {
-                    path = UOFileManager.GetUOFilePath("Gumpart.mul");
-                    string pathidx = UOFileManager.GetUOFilePath("Gumpidx.mul");
+                    path = UOFileManager.GetUOFilePath("gumpart.mul");
+                    string pathidx = UOFileManager.GetUOFilePath("gumpidx.mul");
 
                     if (File.Exists(path) && File.Exists(pathidx))
                     {
