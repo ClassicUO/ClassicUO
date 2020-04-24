@@ -354,6 +354,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 _rendererText = RenderedText.Create(string.Empty, hue, font, isunicode, style, align, maxWidth, 30, false, false, false);
                 _rendererCaret = RenderedText.Create("_", hue, font, isunicode, (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None, align: align);
+                NoSelection = true;
             }
 
             internal string RealText
@@ -375,12 +376,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     _rendererCaret.Draw(batcher, x + _caretScreenPosition.X, y + _caretScreenPosition.Y);
                 }
             }
+
             private Point _caretScreenPosition;
             protected override void OnMouseDown(int x, int y, MouseButtonType button)
             {
+                base.OnMouseDown(x, y, button);
                 if (button == MouseButtonType.Left)
                 {
-                    Stb.Click(Mouse.Position.X, Mouse.Position.Y);
                     UpdateCaretScreenPosition();
                 }
             }

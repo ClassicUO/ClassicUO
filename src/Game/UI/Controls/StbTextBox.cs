@@ -110,6 +110,7 @@ namespace ClassicUO.Game.UI.Controls
         public int Length => Text?.Length ?? 0;
 
         public bool AllowTAB { get; set; }
+        public bool NoSelection { get; set; }
      
         public int CaretIndex
         {
@@ -201,7 +202,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private ControlKeys ApplyShiftIfNecessary(ControlKeys k)
         {
-            if (Keyboard.Shift)
+            if (Keyboard.Shift && !NoSelection)
             {
                 k |= ControlKeys.Shift;
             }
@@ -347,7 +348,7 @@ namespace ClassicUO.Game.UI.Controls
                         Parent?.KeyboardTabToNextFocus(this);
                     }
                     break;
-                case SDL.SDL_Keycode.SDLK_a when Keyboard.Ctrl:
+                case SDL.SDL_Keycode.SDLK_a when Keyboard.Ctrl && !NoSelection:
                     SelectAll();
                     break;
                 case SDL.SDL_Keycode.SDLK_ESCAPE:
@@ -358,7 +359,7 @@ namespace ClassicUO.Game.UI.Controls
                 case SDL.SDL_Keycode.SDLK_INSERT when IsEditable:
                     stb_key = ControlKeys.InsertMode;
                     break;
-                case SDL.SDL_Keycode.SDLK_c when Keyboard.Ctrl:
+                case SDL.SDL_Keycode.SDLK_c when Keyboard.Ctrl && !NoSelection:
                     int selectStart = Math.Min(_stb.SelectStart, _stb.SelectEnd);
                     int selectEnd = Math.Max(_stb.SelectStart, _stb.SelectEnd);
 
@@ -368,7 +369,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
 
                     break;
-                case SDL.SDL_Keycode.SDLK_x when Keyboard.Ctrl:
+                case SDL.SDL_Keycode.SDLK_x when Keyboard.Ctrl && !NoSelection:
                     selectStart = Math.Min(_stb.SelectStart, _stb.SelectEnd);
                     selectEnd = Math.Max(_stb.SelectStart, _stb.SelectEnd);
 
@@ -392,11 +393,13 @@ namespace ClassicUO.Game.UI.Controls
                 case SDL.SDL_Keycode.SDLK_LEFT:
                     if (Keyboard.Ctrl && Keyboard.Shift)
                     {
-                        stb_key = ControlKeys.Shift | ControlKeys.WordLeft;
+                        if (!NoSelection)
+                            stb_key = ControlKeys.Shift | ControlKeys.WordLeft;
                     }
                     else if (Keyboard.Shift)
                     {
-                        stb_key = ControlKeys.Shift | ControlKeys.Left;
+                        if (!NoSelection)
+                            stb_key = ControlKeys.Shift | ControlKeys.Left;
                     }
                     else if (Keyboard.Ctrl)
                     {
@@ -412,11 +415,13 @@ namespace ClassicUO.Game.UI.Controls
                 case SDL.SDL_Keycode.SDLK_RIGHT:
                     if (Keyboard.Ctrl && Keyboard.Shift)
                     {
-                        stb_key = ControlKeys.Shift | ControlKeys.WordRight;
+                        if (!NoSelection)
+                            stb_key = ControlKeys.Shift | ControlKeys.WordRight;
                     }
                     else if (Keyboard.Shift)
                     {
-                        stb_key = ControlKeys.Shift | ControlKeys.Right;
+                        if (!NoSelection)
+                            stb_key = ControlKeys.Shift | ControlKeys.Right;
                     }
                     else if (Keyboard.Ctrl)
                     {
@@ -447,11 +452,13 @@ namespace ClassicUO.Game.UI.Controls
                 case SDL.SDL_Keycode.SDLK_HOME:
                     if (Keyboard.Ctrl && Keyboard.Shift)
                     {
-                        stb_key = ControlKeys.Shift | ControlKeys.TextStart;
+                        if (!NoSelection)
+                            stb_key = ControlKeys.Shift | ControlKeys.TextStart;
                     }
                     else if (Keyboard.Shift)
                     {
-                        stb_key = ControlKeys.Shift | ControlKeys.LineStart;
+                        if(!NoSelection)
+                            stb_key = ControlKeys.Shift | ControlKeys.LineStart;
                     }
                     else if (Keyboard.Ctrl)
                     {
@@ -466,11 +473,13 @@ namespace ClassicUO.Game.UI.Controls
                 case SDL.SDL_Keycode.SDLK_END:
                     if (Keyboard.Ctrl && Keyboard.Shift)
                     {
-                        stb_key = ControlKeys.Shift | ControlKeys.TextEnd;
+                        if (!NoSelection)
+                            stb_key = ControlKeys.Shift | ControlKeys.TextEnd;
                     }
                     else if (Keyboard.Shift)
                     {
-                        stb_key = ControlKeys.Shift | ControlKeys.LineEnd;
+                        if (!NoSelection)
+                            stb_key = ControlKeys.Shift | ControlKeys.LineEnd;
                     }
                     else if (Keyboard.Ctrl)
                     {
@@ -655,7 +664,8 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button == MouseButtonType.Left)
             {
-                _leftWasDown = true;
+                if (!NoSelection)
+                    _leftWasDown = true;
                 _stb.Click(Mouse.Position.X, Mouse.Position.Y);
                 UpdateCaretScreenPosition();
             }
