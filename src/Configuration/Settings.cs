@@ -100,6 +100,12 @@ namespace ClassicUO.Configuration
         [JsonProperty(propertyName: "run_mouse_in_separate_thread")]
         public bool RunMouseInASeparateThread { get; set; } = true;
 
+        [JsonProperty(propertyName: "use_verdata")]
+        public bool UseVerdata { get; set; }
+
+        [JsonProperty(propertyName: "encryption")]
+        public byte Encryption { get; set; }
+
         [JsonProperty(PropertyName = "plugins")]
         public string[] Plugins { get; set; } = {@"./Assistant/Razor.dll"};
 
