@@ -328,6 +328,17 @@ namespace ClassicUO.Game.UI.Controls
                                 }
 
                             }
+                            else
+                            {
+                                Item cont = container.FindItemByLayer(_layer);
+                                if (cont != null && cont.ItemData.IsContainer)
+                                {
+                                    scene.DropHeldItemToContainer(cont);
+                                    Mouse.CancelDoubleClick = true;
+                                    Mouse.LastLeftButtonClickTime = 0;
+                                    return;
+                                }
+                            }
                         }
                         else
                         {
