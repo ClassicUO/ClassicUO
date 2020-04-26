@@ -50,12 +50,21 @@ namespace ClassicUO.Utility
         {
             IntPtr sdl;
 
-            if (Environment.OSVersion.Platform == PlatformID.MacOSX)
-                sdl = Native.LoadLibrary("libSDL2-2.0.0.dylib");
-            else if (Environment.OSVersion.Platform == PlatformID.Unix)
-                sdl = Native.LoadLibrary("libSDL2-2.0.so.0");
-            else
-                sdl = Native.LoadLibrary("SDL2.dll");
+            switch(SDL.SDL_GetPlatform())
+            {
+                //as defined in https://wiki.libsdl.org/SDL_GetPlatform
+                case "Linux":
+                    sdl = Native.LoadLibrary("libSDL2-2.0.so.0");
+                    break;
+                case "Windows":
+                    sdl = Native.LoadLibrary("SDL2.dll");
+                    break;
+                case "Mac OS X":
+                    sdl = Native.LoadLibrary("libSDL2-2.0.0.dylib");
+                    break;
+                default:
+                    throw new Exception("Your Platform is currently NOT supported");
+            }
 
             IntPtr loadLib = Native.GetProcessAddress(sdl, "SDL_LoadObject");
             _loadObject = Marshal.GetDelegateForFunctionPointer<OnSDLLoadObject>(loadLib);
