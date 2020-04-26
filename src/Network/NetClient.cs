@@ -42,16 +42,18 @@ namespace ClassicUO.Network
         private SocketAsyncEventArgs _recvEventArgs;
         private ConcurrentQueue<Packet> _recvQueue = new ConcurrentQueue<Packet>();
         private bool _connectAsync;
+        private readonly bool _is_login_socket;
 
-        private NetClient(bool connectAsync)
+        private NetClient(bool connectAsync, bool is_login_socket)
         {
+            _is_login_socket = is_login_socket;
             _connectAsync = connectAsync;
             Statistics = new NetStatistics();
         }
 
-        public static NetClient LoginSocket { get; } = new NetClient(true);
+        public static NetClient LoginSocket { get; } = new NetClient(true, true);
 
-        public static NetClient Socket { get; } = new NetClient(false);
+        public static NetClient Socket { get; } = new NetClient(false, false);
 
         public bool IsConnected => _socket != null && _socket.Connected;
 
@@ -238,11 +240,11 @@ namespace ClassicUO.Network
             if (Plugin.ProcessSendPacket(ref data, ref length))
             {
                 PacketSent.Raise(p);
-                Send(data, length);
+                Send(data, length, false);
             }
         }
 
-        public void Send(byte[] data, bool ignorePlugin = false)
+        public void Send(byte[] data, bool ignorePlugin = false, bool skip_encryption = false)
         {
             int length = data.Length;
 
@@ -252,7 +254,7 @@ namespace ClassicUO.Network
             }
             
             PacketSent.Raise(new PacketWriter(data));
-            Send(data, length);
+            Send(data, length, skip_encryption);
         }
 
         public void Update()
@@ -280,6 +282,9 @@ namespace ClassicUO.Network
                 while (length > 0 && IsConnected)
                 {
                     byte id = _circularBuffer.GetID();
+                    if (id == 0xFF)
+                        break;
+
                     int packetlength = PacketsTable.GetPacketLength(id);
 
                     if (packetlength == -1)
@@ -426,7 +431,7 @@ namespace ClassicUO.Network
         }
 #endif
 
-        private void Send(byte[] data, int length)
+        private void Send(byte[] data, int length, bool skip_encryption)
         {
             if (_socket == null)
                 return;
@@ -438,6 +443,12 @@ namespace ClassicUO.Network
 #if !DEBUG
                     //LogPacket(data, true);
 #endif
+
+                    if (!skip_encryption)
+                        EncryptionHelper.Encrypt(_is_login_socket,
+                                                 ref data,
+                                                 ref data,
+                                                 length);
 
                     int sent = _socket.Send(data, 0, length, SocketFlags.None);
 
@@ -515,6 +526,11 @@ namespace ClassicUO.Network
                         Statistics.TotalBytesReceived += (uint) bytesLen;
 
                         byte[] buffer = _recvBuffer;
+
+                        if (!_is_login_socket)
+                        {
+                            EncryptionHelper.Decrypt(ref buffer, ref buffer, bytesLen);
+                        }
 
                         if (_isCompressionEnabled)
                         {

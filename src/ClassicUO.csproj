@@ -200,6 +200,10 @@
     <Compile Include="Game\UI\Gumps\UOChatGump.cs" />
     <Compile Include="Game\Weather.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="Network\Encryption\BlowfishBehaviour.cs" />
+    <Compile Include="Network\Encryption\Encryption.cs" />
+    <Compile Include="Network\Encryption\LoginCryptBehaviour.cs" />
+    <Compile Include="Network\Encryption\TwofishBehaviour.cs" />
     <Compile Include="Renderer\MatrixEffect.cs" />
     <Compile Include="Time.cs" />
     <Compile Include="Utility\Collections\RawList.cs" />
@@ -585,6 +589,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
