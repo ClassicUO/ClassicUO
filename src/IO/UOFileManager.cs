@@ -71,9 +71,12 @@ namespace ClassicUO.IO
                 Log.Panic("Loading files timeout.");
             }
 
-            bool use_verdata = Client.Version < ClientVersion.CV_500A;
 
-            if (!Settings.GlobalSettings.UseVerdata)
+            UOFileMul verdata = Verdata.File;
+
+            bool use_verdata = Client.Version < ClientVersion.CV_500A || (verdata != null && verdata.Length != 0 && Verdata.Patches.Length != 0);
+
+            if (!Settings.GlobalSettings.UseVerdata && use_verdata)
             {
                 Settings.GlobalSettings.UseVerdata = use_verdata;
             }
@@ -82,8 +85,6 @@ namespace ClassicUO.IO
 
             if (Settings.GlobalSettings.UseVerdata)
             {
-                var verdata = Verdata.File;
-
                 if (verdata != null && Verdata.Patches.Length != 0)
                 {
                     Log.Info(">> PATCHING WITH VERDATA.MUL");
