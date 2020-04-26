@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,9 +14,10 @@ namespace ClassicUO.Network.Encryption
         private byte _send_pos;
         private byte[] _cipher_table, _xor_data;
 
-        public TwofishEncryption(uint seed, bool use_md5)
-		{
-			int keyLen = 128;
+
+        public void Initialize(uint seed, bool use_md5)
+        {
+            int keyLen = 128;
             _cipher_table = new byte[0x100];
             byte[] key = new byte[16];
             key[0] = key[4] = key[8] = key[12] = (byte) ((seed >> 24) & 0xff);
@@ -57,26 +59,23 @@ namespace ClassicUO.Network.Encryption
             if (use_md5)
             {
                 MD5 md5 = new MD5CryptoServiceProvider();
-                _xor_data = md5.ComputeHash(_cipher_table);
+                _xor_data = md5.ComputeHash(_cipher_table, 0, 256);
                 md5.Dispose();
-			}
+            }
 		}
 
-        public unsafe void Encrypt(ref byte[] src, ref byte[] dst, int size)
+        public void Encrypt(ref byte[] src, ref byte[] dst, int size)
         {
-			//byte* tmp_buff = stackalloc byte[0x100];
-
-			for (int i = 0; i < size; ++i)
+            for (int i = 0; i < size; ++i)
             {
                 // Recalculate table
                 if (_rect_pos >= 0x100)
                 {
-                    //byte[] tmpBuffer = new byte[0x100];
                     refreshCipherTable();
                 }
 
 				// Simple XOR operation
-                dst[i] ^= _cipher_table[_send_pos++];
+                dst[i] = (byte) (src[i] ^ _cipher_table[_rect_pos++]);
             }
 		}
 
@@ -84,20 +83,26 @@ namespace ClassicUO.Network.Encryption
         {
             for (int i = 0; i < size; ++i)
             {
-                dst[i] = (byte) (src[i] ^ _xor_data[_send_pos++]);
-                _send_pos &= 0x0F; // Maximum Value is 0xF = 15, then 0xF + 1 = 0 again
+                dst[i] = (byte) (src[i] ^ _xor_data[_send_pos]);
+                _send_pos++;
+				_send_pos &= 0x0F; // Maximum Value is 0xF = 15, then 0xF + 1 = 0 again
             }
-		}
+        }
+
+        private uint[] _block_cache = new uint[4];
 
         private void refreshCipherTable()
         {
-            uint[] block = new uint[4];
+            int i;
 
-            for (int i = 0; i < 256; i += 16)
+            for (i = 0; i < 4; i++)
+                _block_cache[i] = 0;
+
+			for (i = 0; i < 256; i += 16)
             {
-                Buffer.BlockCopy(_cipher_table, i, block, 0, 16);
-                blockEncrypt(ref block);
-                Buffer.BlockCopy(block, 0, _cipher_table, i, 16);
+                Buffer.BlockCopy(_cipher_table, i, _block_cache, 0, 16);
+                blockEncrypt(ref _block_cache);
+                Buffer.BlockCopy(_block_cache, 0, _cipher_table, i, 16);
             }
 
             _rect_pos = 0;
@@ -393,7 +398,7 @@ namespace ClassicUO.Network.Encryption
 				x.CopyTo(xtemp, 0);
 			}
 
-			for (int i = 0; i < BLOCK_SIZE / 32; i++)   /* copy in the block, add whitening */
+			for (int i = 0; i < BLOCK_HALF_SIZE; i++)   /* copy in the block, add whitening */
 				x[i] ^= subKeys[OUTPUT_WHITEN + i];
 
 			for (int r = rounds - 1; r >= 0; r--)           /* main Twofish decryption loop */
@@ -417,7 +422,7 @@ namespace ClassicUO.Network.Encryption
 				}
 			}
 
-			for (int i = 0; i < BLOCK_SIZE / 32; i++)   /* copy out, with whitening */
+			for (int i = 0; i < BLOCK_HALF_SIZE; i++)   /* copy out, with whitening */
 			{
 				x[i] ^= subKeys[INPUT_WHITEN + i];
 				if (cipherMode == CipherMode.CBC)
@@ -432,7 +437,7 @@ namespace ClassicUO.Network.Encryption
 		{
 			uint t0, t1, tmp;
 
-			for (int i = 0; i < BLOCK_SIZE / 32; i++)   /* copy in the block, add whitening */
+			for (int i = 0; i < BLOCK_HALF_SIZE; i++)   /* copy in the block, add whitening */
 			{
 				x[i] ^= subKeys[INPUT_WHITEN + i];
 				if (cipherMode == CipherMode.CBC)
@@ -474,7 +479,7 @@ namespace ClassicUO.Network.Encryption
 			x[2] = ROR(x[2],8);
 			x[3] = ROL(x[3],8);
 #endif
-			for (int i = 0; i < BLOCK_SIZE / 32; i++)   /* copy out, with whitening */
+            for (int i = 0; i < BLOCK_HALF_SIZE; i++)   /* copy out, with whitening */
 			{
 				x[i] ^= subKeys[OUTPUT_WHITEN + i];
 				if (cipherMode == CipherMode.CBC)
@@ -507,6 +512,7 @@ namespace ClassicUO.Network.Encryption
 		*	without lookup tables.
 		*
 		-****************************************************************************/
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private uint RS_MDS_Encode(uint k0, uint k1)
 		{
 			uint i, j;
@@ -532,6 +538,7 @@ namespace ClassicUO.Network.Encryption
 
 		#region These are all the definitions that were found in AES.H
 		static private readonly int BLOCK_SIZE = 128;   /* number of bits per block */
+        private static readonly int BLOCK_HALF_SIZE = BLOCK_SIZE >> 5;
 		static private readonly int MAX_ROUNDS = 16;    /* max # rounds (for allocating subkey array) */
 		static private readonly int ROUNDS_128 = 16;    /* default number of rounds for 128-bit keys*/
 		static private readonly int ROUNDS_192 = 16;    /* default number of rounds for 192-bit keys*/
@@ -562,6 +569,8 @@ namespace ClassicUO.Network.Encryption
 		g(x) = x**4 + (a + 1/a) x**3 + a x**2 + (a + 1/a) x + 1
 		where a = primitive root of field generator 0x14D */
 		static private readonly uint RS_GF_FDBK = 0x14D;        /* field generator */
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private void RS_rem(ref uint x)
 		{
 			byte b = (byte) (x >> 24);
@@ -596,11 +605,14 @@ namespace ClassicUO.Network.Encryption
 		*               17+ 18+ 19+ 20+ 21+ 22+ 23+ 24+ 25+ 26+
 		*/
 		static private readonly int MDS_GF_FDBK = 0x169;    /* primitive polynomial for GF(256)*/
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int LFSR1(int x)
 		{
 			return (((x) >> 1) ^ ((((x) & 0x01) == 0x01) ? MDS_GF_FDBK / 2 : 0));
 		}
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int LFSR2(int x)
 		{
 			return (((x) >> 2) ^ ((((x) & 0x02) == 0x02) ? MDS_GF_FDBK / 2 : 0) ^
@@ -608,97 +620,134 @@ namespace ClassicUO.Network.Encryption
 		}
 
 		// TODO: not the most efficient use of code but it allows us to update the code a lot quicker we can possibly optimize this code once we have got it all working
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int Mx_1(int x)
 		{
 			return x; /* force result to int so << will work */
 		}
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int Mx_X(int x)
 		{
 			return x ^ LFSR2(x);    /* 5B */
 		}
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int Mx_Y(int x)
 		{
 			return x ^ LFSR1(x) ^ LFSR2(x); /* EF */
 		}
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int M00(int x)
 		{
 			return Mul_1(x);
 		}
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int M01(int x)
 		{
 			return Mul_Y(x);
 		}
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int M02(int x)
 		{
 			return Mul_X(x);
 		}
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int M03(int x)
 		{
 			return Mul_X(x);
 		}
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int M10(int x)
 		{
 			return Mul_X(x);
 		}
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int M11(int x)
 		{
 			return Mul_Y(x);
 		}
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int M12(int x)
 		{
 			return Mul_Y(x);
 		}
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int M13(int x)
 		{
 			return Mul_1(x);
 		}
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int M20(int x)
 		{
 			return Mul_Y(x);
 		}
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int M21(int x)
 		{
 			return Mul_X(x);
 		}
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int M22(int x)
 		{
 			return Mul_1(x);
 		}
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int M23(int x)
 		{
 			return Mul_Y(x);
 		}
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int M30(int x)
 		{
 			return Mul_Y(x);
 		}
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int M31(int x)
 		{
 			return Mul_1(x);
 		}
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int M32(int x)
 		{
 			return Mul_Y(x);
 		}
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int M33(int x)
 		{
 			return Mul_X(x);
 		}
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int Mul_1(int x)
 		{
 			return Mx_1(x);
 		}
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int Mul_X(int x)
 		{
 			return Mx_X(x);
 		}
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static private int Mul_Y(int x)
 		{
 			return Mx_Y(x);
@@ -837,33 +886,42 @@ namespace ClassicUO.Network.Encryption
 
 		#region These are all the definitions that were found in PLATFORM.H that we need
 		// left rotation
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static uint ROL(uint x, int n)
 		{
 			return (((x) << ((n) & 0x1F)) | (x) >> (32 - ((n) & 0x1F)));
 		}
 
 		// right rotation
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static uint ROR(uint x, int n)
 		{
 			return (((x) >> ((n) & 0x1F)) | ((x) << (32 - ((n) & 0x1F))));
 		}
 
 		// first byte
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected static byte b0(uint x)
 		{
 			return (byte) (x);//& 0xFF);
 		}
+
 		// second byte
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected static byte b1(uint x)
 		{
 			return (byte) ((x >> 8));// & (0xFF));
 		}
+
 		// third byte
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected static byte b2(uint x)
 		{
 			return (byte) ((x >> 16));// & (0xFF));
 		}
+
 		// fourth byte
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected static byte b3(uint x)
 		{
 			return (byte) ((x >> 24));// & (0xFF));

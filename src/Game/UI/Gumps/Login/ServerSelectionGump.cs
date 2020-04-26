@@ -130,19 +130,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 X = 150, Y = 90, Width = 393 - 14, Height = 271
             });
             // Sever Scroll Area
-            ScrollArea scrollArea = new ScrollArea(150, 100, 383, 271, true);
+            ScrollArea scrollArea = new ScrollArea(150, 90, 393, 271, true);
             LoginScene loginScene = Client.Game.GetScene<LoginScene>();
+
+            scrollArea.ScissorRectangle.Y = 16;
+            scrollArea.ScissorRectangle.Height = -(scrollArea.ScissorRectangle.Y + 32);
 
             foreach (ServerListEntry server in loginScene.Servers)
             {
-                HoveredLabel label;
-                scrollArea.Add(label = new HoveredLabel($"{server.Name}                         -           -", false, NORMAL_COLOR, SELECTED_COLOR, NORMAL_COLOR,font: 5)
-                {
-                    X = 74,
-                    //Y = 250
-                });
-
-                label.MouseUp += (sender, e) => { OnButtonClick((int) (Buttons.Server + server.Index)); };
+                scrollArea.Add(new ServerEntryGump(server, 5, NORMAL_COLOR, SELECTED_COLOR));
             }
 
             Add(scrollArea);
@@ -161,21 +157,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     X = 243,
                     Y = 420
                 });
-
-                //if (loginScene.Servers.Last().Index < loginScene.Servers.Count())
-                //{
-                //    Add(new Label(loginScene.Servers.Last().Name, false, 0x0481, font: 9)
-                //    {
-                //        X = 243, Y = 420
-                //    });
-                //}
-                //else
-                //{
-                //    Add(new Label(loginScene.Servers.First().Name, false, 0x0481, font: 9)
-                //    {
-                //        X = 243, Y = 420
-                //    });
-                //}
             }
 
             AcceptKeyboardInput = true;
@@ -255,19 +236,37 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Server = 99
         }
 
-        private class ServerEntryGump : Control
+        private class ServerEntryGump : ScrollAreaItem
         {
             private readonly int _buttonId;
 
             private readonly HoveredLabel _serverName;
+            private readonly HoveredLabel _server_ping;
+            private readonly HoveredLabel _server_packet_loss;
+            private readonly ServerListEntry _entry;
 
-            public ServerEntryGump(ServerListEntry entry)
+            public ServerEntryGump(ServerListEntry entry, byte font, ushort normal_hue, ushort selected_hue)
             {
+                _entry = entry;
+
                 _buttonId = entry.Index;
 
-                Add(_serverName = new HoveredLabel($"{entry.Name}     -      -" , false, NORMAL_COLOR, SELECTED_COLOR, NORMAL_COLOR,font: 5));
-                _serverName.X = 74;
-                _serverName.Y = 250;
+                Add(_serverName = new HoveredLabel(entry.Name, false, normal_hue, selected_hue, selected_hue, font: font)
+                {
+                    X = 74,
+                    AcceptMouseInput = false
+                });
+                Add(_server_ping = new HoveredLabel("-", false, normal_hue, selected_hue, selected_hue, font: font)
+                {
+                    X = 250,
+                    AcceptMouseInput = false
+                });
+                Add(_server_packet_loss = new HoveredLabel("-", false, normal_hue, selected_hue, selected_hue, font: font)
+                {
+                    X = 320,
+                    AcceptMouseInput = false
+                });
+
 
                 AcceptMouseInput = true;
                 Width = 393;
@@ -276,23 +275,28 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 WantUpdateSize = false;
             }
 
-            protected override void OnMouseOver(int x, int y)
+            protected override void OnMouseEnter(int x, int y)
             {
-                _serverName.Hue = SELECTED_COLOR;
+                base.OnMouseEnter(x, y);
 
-                base.OnMouseOver(x, y);
+                _serverName.IsSelected = true;
+                _server_packet_loss.IsSelected = true;
+                _server_ping.IsSelected = true;
             }
 
             protected override void OnMouseExit(int x, int y)
             {
-                _serverName.Hue = 0;
-
                 base.OnMouseExit(x, y);
+
+                _serverName.IsSelected = false;
+                _server_packet_loss.IsSelected = false;
+                _server_ping.IsSelected = false;
             }
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
             {
-                if (button == MouseButtonType.Left) OnButtonClick((int)Buttons.Server + _buttonId);
+                if (button == MouseButtonType.Left) 
+                    OnButtonClick((int)Buttons.Server + _buttonId);
             }
         }
     }

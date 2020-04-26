@@ -8,32 +8,35 @@ namespace ClassicUO.Network.Encryption
 {
     sealed class LoginCryptBehaviour
     {
-        private readonly uint _k1, _k2, _k3;
-        private readonly uint[] _key = new uint[2];
-        private readonly byte[] _seed = new byte[4];
+        private uint _k1, _k2, _k3;
+        private uint[] _key = new uint[2];
+        private byte[] _seed = new byte[4];
 
-        public LoginCryptBehaviour(uint seed)
+
+
+        public void Initialize(uint seed, uint k1, uint k2, uint k3)
         {
-            //for (int i = 0; i < 4; i++)
-            //    _seed[i] = buff_seed[i];
+            _seed[0] = (byte) (seed >> 24);
+            _seed[1] = (byte) (seed >> 16);
+            _seed[2] = (byte) (seed >> 8);
+            _seed[3] = (byte) seed;
 
+            _k1 = k1;
+            _k2 = k2;
+            _k3 = k3;
 
-            _k1 = EncryptionHelper.KEY_1;
-            _k2 = EncryptionHelper.KEY_2;
-            _k3 = EncryptionHelper.KEY_3;
-
-            uint seed_key = 0;// TODO:
+            const uint seed_key = 0x0000_1357;
 
             _key[0] = (((~seed) ^ seed_key) << 16) | ((seed ^ 0xffffaaaa) & 0x0000ffff);
             _key[1] = ((seed ^ 0x43210000) >> 16) | (((~seed) ^ 0xabcdffff) & 0xffff0000);
         }
 
 
-        public void Encrypt(byte[] src, byte[] dst, int size)
+        public void Encrypt(ref byte[] src, ref byte[] dst, int size)
         {
             for (int i = 0; i < size; i++)
             {
-                dst[i] = (byte) (src[i] ^ (byte) (_key[0]));
+                dst[i] = (byte) (src[i] ^ _key[0]);
 
                 uint table0 = _key[0];
                 uint table1 = _key[1];
@@ -43,7 +46,7 @@ namespace ClassicUO.Network.Encryption
             }
         }
 
-        public void Encrypt_OLD(byte[] src, byte[] dst, int size)
+        public void Encrypt_OLD(ref byte[] src, ref byte[] dst, int size)
         {
             for (int i = 0; i < size; i++)
             {
@@ -57,7 +60,7 @@ namespace ClassicUO.Network.Encryption
             }
         }
 
-        public void Encrypt_1_25_36(byte[] src, byte[] dst, int size)
+        public void Encrypt_1_25_36(ref byte[] src, ref byte[] dst, int size)
         {
             for (int i = 0; i < size; i++)
             {
