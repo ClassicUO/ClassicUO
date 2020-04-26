@@ -22,6 +22,7 @@
 using System;
 
 using ClassicUO.Configuration;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -35,6 +36,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Hue = hue;
             Graphic = graphic;
+            AllowedToDraw = !GameObjectHelper.IsNoDrawable(graphic);
             Load();
         }
 
