@@ -405,8 +405,7 @@ namespace ClassicUO
                     UseShellExecute = false,
                 };
 
-                if (Environment.OSVersion.Platform == PlatformID.MacOSX ||
-                    Environment.OSVersion.Platform == PlatformID.Unix)
+                if (SDL.SDL_GetPlatform() != "Windows")
                 {
                     processStartInfo.FileName = "mono";
                     processStartInfo.Arguments = $"\"{Path.Combine(path, "ClassicUO.exe")}\" --source \"{currentPath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup";

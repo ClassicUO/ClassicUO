@@ -38,7 +38,7 @@ namespace ClassicUO
         public static uint CurrentRefreshRate;
         public static bool SkipLoginScreen;
 
-        public static readonly bool IsUnix = Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX;
+        public static readonly bool IsUnix = SDL2.SDL.SDL_GetPlatform() != "Windows";
         public static readonly Version Version = Assembly.GetExecutingAssembly().GetName().Version;
         public static readonly string ExecutablePath = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
 
