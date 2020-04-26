@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using ClassicUO.Utility;
+
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class AnimatedItemEffect : GameEffect
@@ -28,6 +30,7 @@ namespace ClassicUO.Game.GameObjects
             Graphic = graphic;
             Hue = hue;
             Duration = duration > 0 ? Time.Ticks + duration : -1;
+            AllowedToDraw = !GameObjectHelper.IsNoDrawable(graphic);
             Load();
         }
 
