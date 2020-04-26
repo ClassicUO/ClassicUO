@@ -405,7 +405,7 @@ namespace ClassicUO
                     UseShellExecute = false,
                 };
 
-                if (SDL.SDL_GetPlatform() != "Windows")
+                if (CUOEnviroment.IsUnix)
                 {
                     processStartInfo.FileName = "mono";
                     processStartInfo.Arguments = $"\"{Path.Combine(path, "ClassicUO.exe")}\" --source \"{currentPath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup";
