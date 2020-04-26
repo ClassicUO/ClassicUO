@@ -302,6 +302,8 @@ namespace ClassicUO.Game.Scenes
 
             Log.Trace( $"Start login to: {Settings.GlobalSettings.IP},{Settings.GlobalSettings.Port}");
 
+            EncryptionHelper.Initialize(true, NetClient.LoginSocket.ClientAddress, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
+
             if (!NetClient.LoginSocket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port))
             {
                 PopupMessage = "Check your internet connection and try again";
@@ -437,11 +439,13 @@ namespace ClassicUO.Game.Scenes
                 byte minor = (byte) (clientVersion >> 16);
                 byte build = (byte) (clientVersion >> 8);
                 byte extra = (byte) clientVersion;
-
-                NetClient.LoginSocket.Send(new PSeed(NetClient.LoginSocket.ClientAddress, major, minor, build, extra));
+                
+                NetClient.LoginSocket.Send(new PSeed(NetClient.LoginSocket.ClientAddress, major, minor, build, extra).ToArray(), true, true);
             }
             else
-                NetClient.LoginSocket.Send(BitConverter.GetBytes(NetClient.LoginSocket.ClientAddress));
+            {
+                NetClient.LoginSocket.Send(BitConverter.GetBytes(NetClient.LoginSocket.ClientAddress), true, true);
+            }
 
             NetClient.LoginSocket.Send(new PFirstLogin(Account, Password));
         }
@@ -602,10 +606,13 @@ namespace ClassicUO.Game.Scenes
             ushort port = p.ReadUShort();
             uint seed = p.ReadUInt();
             NetClient.LoginSocket.Disconnect();
+
+            EncryptionHelper.Initialize(false, seed, (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption);
+
             NetClient.Socket.Connect(new IPAddress(ip), port);
             NetClient.Socket.EnableCompression();
             byte[] ss = new byte[4] {(byte) (seed >> 24), (byte) (seed >> 16), (byte) (seed >> 8), (byte) seed};
-            NetClient.Socket.Send(ss);
+            NetClient.Socket.Send(ss, true, true);
             NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
         }
 
