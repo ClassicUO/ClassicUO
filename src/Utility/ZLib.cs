@@ -32,12 +32,22 @@ namespace ClassicUO.Utility
 
         static ZLib()
         {
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                _compressor = new Compressor64();
-            else if (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
-                _compressor = new CompressorUnix64();
-            else
-                throw new NotSupportedException("Zlib not support this platform");
+            switch(SDL2.SDL.SDL_GetPlatform())
+            {
+                case "Mac OS X":
+                case "Linux":
+                    if (Environment.Is64BitProcess)
+                        _compressor = new CompressorUnix64();
+                    else
+                        goto default;
+                    break;
+                case "Windows" when Environment.Is64BitProcess:
+                    _compressor = new Compressor64();
+                    break;
+                default:
+                    _compressor = new ManagedUniversal();
+                    break;
+            }
         }
 
 
@@ -186,6 +196,37 @@ namespace ClassicUO.Utility
 
                 [DllImport("libz")]
                 internal static extern ZLibError uncompress(IntPtr dest, ref int destLen, IntPtr source, int sourceLen);
+            }
+        }
+
+        private sealed class ManagedUniversal : ICompressor
+        {
+            public string Version => "1.2.11";
+
+            public ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength)
+            {
+                ZLibManaged.Compress(dest, ref destLength, source);
+
+                return ZLibError.Okay;
+            }
+
+            public ZLibError Compress(byte[] dest, ref int destLength, byte[] source, int sourceLength, ZLibQuality quality)
+            {
+                return Compress(dest, ref destLength, source, sourceLength);
+            }
+
+            public ZLibError Decompress(byte[] dest, ref int destLength, byte[] source, int sourceLength)
+            {
+                ZLibManaged.Decompress(source, 0, sourceLength, 0, dest, destLength);
+
+                return ZLibError.Okay;
+            }
+
+            public ZLibError Decompress(IntPtr dest, ref int destLength, IntPtr source, int sourceLength)
+            {
+                ZLibManaged.Decompress(source, sourceLength, 0, dest, destLength);
+
+                return ZLibError.Okay;
             }
         }
     }

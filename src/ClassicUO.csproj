@@ -492,6 +492,10 @@
     <Compile Include="Utility\TextFileParser.cs" />
     <Compile Include="Utility\UnsafeMemoryManager.cs" />
     <Compile Include="Utility\ZLib.cs" />
+    <Compile Include="Utility\ZLib\Adler32.cs" />
+    <Compile Include="Utility\ZLib\ZLibManaged.cs" />
+    <Compile Include="Utility\ZLib\ZLibHeader.cs" />
+    <Compile Include="Utility\ZLib\ZLIBStream.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
