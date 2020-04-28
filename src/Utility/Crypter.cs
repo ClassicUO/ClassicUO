@@ -28,7 +28,7 @@ namespace ClassicUO.Utility
     {
         public static string Encrypt(string source)
         {
-            if (source == null)
+            if (string.IsNullOrEmpty(source))
                 return string.Empty;
 
             byte[] buff = Encoding.ASCII.GetBytes(source);
@@ -54,7 +54,7 @@ namespace ClassicUO.Utility
 
         public static string Decrypt(string source)
         {
-            if (source == null)
+            if (string.IsNullOrEmpty(source))
                 return string.Empty;
 
             byte[] buff = null;
