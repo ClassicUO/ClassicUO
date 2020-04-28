@@ -187,7 +187,7 @@ namespace ClassicUO
                     continue;
 
                 cmd = cmd.Remove(0, 1);
-                string value = null;
+                string value = string.Empty;
 
                 if (i < args.Length - 1)
                 {

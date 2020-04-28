@@ -117,9 +117,10 @@ namespace ClassicUO.Game.GameObjects
                 mobile.AllowedToDraw = true;
                 mobile.Texture = null;
                 mobile.IsClicked = false;
-
+                mobile.RemoveFromTile();
                 mobile.Clear();
-
+                mobile.Next = null;
+                mobile.Previous = null;
 
                 mobile.CalculateRandomIdleTime();
 
