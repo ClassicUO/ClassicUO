@@ -457,7 +457,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
                     else if (Keyboard.Shift)
                     {
-                        if(!NoSelection)
+                        if (!NoSelection)
                             stb_key = ControlKeys.Shift | ControlKeys.LineStart;
                     }
                     else if (Keyboard.Ctrl)
@@ -491,19 +491,22 @@ namespace ClassicUO.Game.UI.Controls
                     }
                     update_caret = true;
                     break;
-                case SDL.SDL_Keycode.SDLK_RETURN when IsEditable:
-                    if (Multiline)
+                case SDL.SDL_Keycode.SDLK_KP_ENTER:
+                case SDL.SDL_Keycode.SDLK_RETURN:
+                    if (IsEditable)
                     {
-                        if (!_fromServer && !IsMaxCharReached(0))
+                        if (Multiline)
                         {
-                            OnTextInput("\n");
+                            if (!_fromServer && !IsMaxCharReached(0))
+                            {
+                                OnTextInput("\n");
+                            }
+                        }
+                        else
+                        {
+                            Parent?.OnKeyboardReturn(0, Text);
                         }
                     }
-                    else
-                    {
-                        Parent?.OnKeyboardReturn(0, Text);
-                    }
-                    
                     break;
             }
 
