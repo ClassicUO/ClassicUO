@@ -4527,7 +4527,7 @@ namespace ClassicUO.Network
             {
                 created = true;
 
-                if ((serial & 0x40000000) == 0 && type != 3)
+                if (SerialHelper.IsMobile(serial) && type != 3)
                 {
                     mobile = World.GetOrCreateMobile(serial);
 
@@ -4678,14 +4678,8 @@ namespace ClassicUO.Network
                 {
                     if (ProfileManager.Current.ShowNewCorpseNameIncoming)
                         GameActions.SingleClick(serial);
-
                 }
             }
-
-            if (graphic == 0x2006 && ProfileManager.Current.AutoOpenCorpses)
-                World.Player.TryOpenCorpses();
-
-
 
             if (SerialHelper.IsMobile(serial) && mobile != null)
             {
@@ -4707,6 +4701,9 @@ namespace ClassicUO.Network
 
                     item.AddToTile();
                     item.UpdateScreenPosition();
+
+                    if (graphic == 0x2006 && ProfileManager.Current.AutoOpenCorpses)
+                        World.Player.TryOpenCorpses();
                 }
             }
         }
