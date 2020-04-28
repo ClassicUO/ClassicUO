@@ -240,7 +240,7 @@ namespace ClassicUO.Game.Map
 
                 ref Chunk block = ref Chunks[first.Value];
 
-                if (block.LastAccessTime < ticks && block.HasNoExternalData())
+                if (block != null && block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
                     block.Destroy();
                     block = null;
@@ -261,7 +261,7 @@ namespace ClassicUO.Game.Map
             {
                 var next = first.Next;
                 ref var c = ref Chunks[first.Value];
-                c.Destroy();
+                c?.Destroy();
                 c = null;
                 first = next;
             }

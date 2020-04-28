@@ -115,7 +115,9 @@ namespace ClassicUO.Game.Managers
             IsTargeting = cursorType < TargetType.Cancel;
 
             if (IsTargeting)
-                UIManager.RemoveTargetLineGump(LastTarget);
+            {
+                //UIManager.RemoveTargetLineGump(LastTarget);
+            }
             else if (lastTargetting)
             {
                 CancelTarget();
@@ -173,8 +175,6 @@ namespace ClassicUO.Game.Managers
 
                         if (entity != World.Player)
                         {
-                            UIManager.RemoveTargetLineGump(LastAttack);
-                            UIManager.RemoveTargetLineGump(LastTarget);
                             LastTarget = entity.Serial;
                         }
 

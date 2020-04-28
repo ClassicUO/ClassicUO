@@ -98,6 +98,8 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             CanCloseWithRightClick = false;
 
+            LoadSettings();
+
             GameActions.Print("WorldMap loading...", 0x35);
             Load();
             OnResize();
@@ -145,18 +147,17 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(xml);
 
-            LoadSettings();
             BuildGump();
         }
 
         private void LoadSettings()
         {
-            int width = ProfileManager.Current.WorldMapWidth;
-            int height = ProfileManager.Current.WorldMapHeight;
+            Width = ProfileManager.Current.WorldMapWidth;
+            Height = ProfileManager.Current.WorldMapHeight;
 
             SetFont(ProfileManager.Current.WorldMapFont);
 
-            ResizeWindow(new Point(width, height));
+            ResizeWindow(new Point(Width, Height));
 
             _flipMap = ProfileManager.Current.WorldMapFlipMap;
             TopMost = ProfileManager.Current.WorldMapTopMost;
@@ -176,10 +177,14 @@ namespace ClassicUO.Game.UI.Gumps
             _showGroupBar = ProfileManager.Current.WorldMapShowGroupBar;
             _showMarkers = ProfileManager.Current.WorldMapShowMarkers;
             _showMultis = ProfileManager.Current.WorldMapShowMultis;
+            _showMarkerNames = ProfileManager.Current.WorldMapShowMarkersNames;
         }
 
         private void SaveSettings()
         {
+            if (ProfileManager.Current == null)
+                return;
+
             ProfileManager.Current.WorldMapWidth = Width;
             ProfileManager.Current.WorldMapHeight = Height;
 
@@ -199,9 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.WorldMapShowGroupBar = _showGroupBar;
             ProfileManager.Current.WorldMapShowMarkers = _showMarkers;
             ProfileManager.Current.WorldMapShowMultis = _showMultis;
-
-            ProfileManager.Current?.Save(UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse()
-                .ToList());
+            ProfileManager.Current.WorldMapShowMarkersNames = _showMarkerNames;
         }
 
         private bool ParseBool(string boolStr)
@@ -212,7 +215,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGump()
         {
             BuildContextMenu();
-
+            _coords?.Dispose();
             Add(_coords = new Label("", true, 1001, font: 1, style: FontStyle.BlackBorder)
             {
                 X = 10,
@@ -245,11 +248,7 @@ namespace ClassicUO.Game.UI.Gumps
             _options["show_party_healthbar"] = new ContextMenuItemEntry("Show group healthbar", () => { _showGroupBar = !_showGroupBar; }, true, _showGroupBar);
             _options["show_coordinates"] = new ContextMenuItemEntry("Show your coordinates", () => { _showCoordinates = !_showCoordinates; }, true, _showCoordinates);
 
-            _options["saveclose"] = new ContextMenuItemEntry("Save & Close", () =>
-            {
-                SaveSettings();
-                Dispose();
-            });
+            _options["saveclose"] = new ContextMenuItemEntry("Save & Close", Dispose);
         }
 
         private void BuildContextMenu()
@@ -462,8 +461,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _mapTexture = new UOTexture32(realWidth, realHeight);
                     _mapTexture.SetData(buffer);
-
-                    LoadSettings();
 
                     GameActions.Print("WorldMap loaded!", 0x48);
                 }
@@ -1372,6 +1369,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
+            SaveSettings();
             World.WMapManager.SetEnable(false);
 
             UIManager.GameCursor.IsDraggingCursorForced = false;

@@ -16,7 +16,8 @@ namespace ClassicUO.Game.Managers
     {   
         struct BoatStep
         {
-            public uint Serial, Time;
+            public uint Serial;
+            public int TimeDiff;
             public ushort X, Y;
             public sbyte Z;
             public byte Speed;
@@ -28,7 +29,6 @@ namespace ClassicUO.Game.Managers
             public uint Serial;
             public int X, Y, Z;
         }
-
 
 
         private static readonly Dictionary<uint, Deque<BoatStep>> _steps = new Dictionary<uint, Deque<BoatStep>>();
@@ -62,6 +62,7 @@ namespace ClassicUO.Game.Managers
             _timePacket = Time.Ticks;
         }
 
+
         public static void AddStep(uint serial, byte speed, Direction movingDir, Direction facingDir, ushort x, ushort y, sbyte z)
         {
             Item item = World.Items.Get(serial);
@@ -76,65 +77,50 @@ namespace ClassicUO.Game.Managers
                 _steps[serial] = deque;
             }
 
-            while (deque.Count >= Constants.MAX_STEP_COUNT)
+            bool empty = deque.Count == 0;
+
+            while (deque.Count > 5)
             {
                 deque.RemoveFromFront();
             }
 
+            //deque.Clear();
 
-            GetEndPosition(
-                item,
-                deque,
-                out ushort currX,
-                out ushort currY,
-                out sbyte currZ,
-                out Direction endDir);
 
-            if (currX == x && currY == y && currZ == z && endDir == movingDir)
-            {
-                return;
-            }
+            //GetEndPosition(
+            //    item,
+            //    deque,
+            //    out ushort currX,
+            //    out ushort currY,
+            //    out sbyte currZ,
+            //    out Direction endDir);
 
-            if (deque.Count == 0)
+            //if (currX == x && currY == y && currZ == z && endDir == movingDir)
+            //{
+            //    return;
+            //}
+
+            if (empty)
             {
                 item.LastStepTime = Time.Ticks;
             }
 
-            Direction moveDir = DirectionHelper.CalculateDirection(currX, currY, x, y);
+            //Direction moveDir = DirectionHelper.CalculateDirection(currX, currY, x, y);
 
             BoatStep step = new BoatStep();
             step.Serial = serial;
-            step.Time = _timePacket == 0 || deque.Count == 0 ? (uint) GetVelocity(speed) : Time.Ticks - _timePacket;
+            step.TimeDiff = _timePacket == 0 || empty ? GetVelocity(speed) : (int) (Time.Ticks - _timePacket);
+            
             step.Speed = speed;
+            step.X = x;
+            step.Y = y;
+            step.Z = z;
+            step.MovingDir = movingDir;
+            deque.AddToBack(step);
 
-            if (moveDir != Direction.NONE)
-            {
-                if (moveDir != endDir)
-                {
-                    step.X = currX;
-                    step.Y = currY;
-                    step.Z = currZ;
-                    step.MovingDir = moveDir;
-                    deque.AddToBack(step);
-                }
-
-                step.X = x;
-                step.Y = y;
-                step.Z = z;
-                step.MovingDir = moveDir;
-                deque.AddToBack(step);
-            }
-
-            if (moveDir != movingDir)
-            {
-                step.X = x;
-                step.Y = y;
-                step.Z = z;
-                step.MovingDir = movingDir;
-                deque.AddToBack(step);
-            }
-
+            ClearEntities(serial);
             _timePacket = Time.Ticks;
+            Console.WriteLine("CURRENT PACKET TIME: {0}", _timePacket);
         }
 
         public static void ClearSteps(uint serial)
@@ -166,12 +152,23 @@ namespace ClassicUO.Game.Managers
                         ent.Offset.Z = 0;
                     }
 
-                    list.Clear();
+                    list.Count = 0;
                 }
 
                 deque.Clear();
             }
         }
+
+        public static void ClearEntities(uint serial)
+        {
+            _items.Remove(serial);
+
+            //if (_items.TryGetValue(serial, out var list))
+            //{
+            //    list.Clear();
+            //}
+        }
+
 
         public static void PushItemToList(uint serial, uint objSerial, int x, int y, int z)
         {
@@ -185,6 +182,9 @@ namespace ClassicUO.Game.Managers
             for (int i = 0; i < list.Count; i++)
             {
                 ref var item = ref list[i];
+
+                if(!SerialHelper.IsValid(item.Serial))
+                    break;
 
                 if (item.Serial == objSerial)
                 {
@@ -221,25 +221,8 @@ namespace ClassicUO.Game.Managers
                     }
 
                     bool drift = step.MovingDir != step.FacingDir;
-
-                    var maxDelay = Math.Max(step.Time, 25);
-
-
-                    //switch (step.Speed)
-                    //{
-                    //    case 0x02:
-                    //        maxDelay = SLOW_INTERVAL;
-                    //        break;
-                    //    default:
-                    //    case 0x03:
-                    //        maxDelay = NORMAL_INTERVAL;
-                    //        break;
-                    //    case 0x04:
-                    //        maxDelay = FAST_INTERVAL;
-                    //        break;
-                    //}
-
-
+                    var maxDelay = step.TimeDiff /*- (int) Client.Game.FrameDelay[1]*/;
+                    
                     int delay = (int) Time.Ticks - (int) item.LastStepTime;
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
@@ -248,19 +231,28 @@ namespace ClassicUO.Game.Managers
                     if (/*step.FacingDir == step.MovingDir &&*/
                         (item.X != step.X || item.Y != step.Y))
                     {
-                        float steps = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
-                        float x = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;
-                        float y = x;
-                        item.Offset.Z = (sbyte) ((step.Z - item.Z) * x * (4.0f / steps));
-                        MovementSpeed.GetPixelOffset((byte) step.MovingDir, ref x, ref y, steps);
-                        item.Offset.X = (sbyte) x;
-                        item.Offset.Y = (sbyte) y;
+                        if (maxDelay != 0)
+                        {
+                            float steps = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
+                            float x = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;
+                            float y = x;
+                            item.Offset.Z = (sbyte) ((step.Z - item.Z) * x * (4.0f / steps));
+                            MovementSpeed.GetPixelOffset((byte) step.MovingDir, ref x, ref y, steps);
+                            item.Offset.X = (sbyte) x;
+                            item.Offset.Y = (sbyte) y;
+                        }
+                        else
+                        {
+                            //removeStep = true;
+                        }
                     }
                     else
                     {
                         directionChange = true;
                         removeStep = true;
                     }
+
+                    //item.BoatDirection = step.MovingDir;
 
                     World.HouseManager.TryGetHouse(item, out House house);
 
@@ -277,16 +269,12 @@ namespace ClassicUO.Game.Managers
 
                         deques.RemoveFromFront();
 
-                        if (directionChange)
-                        {
-                            continue;
-                        }
 
                         if (item.TNext != null || item.TPrevious != null)
                             item.AddToTile();
                 
                         house?.Generate(true, true, true);
-                        UpdateEntitiesInside(item, removeStep, step.X, step.Y, step.Z);
+                        UpdateEntitiesInside(item, removeStep, step.X, step.Y, step.Z, step.MovingDir);
 
                         item.LastStepTime = Time.Ticks;
                     }
@@ -295,8 +283,9 @@ namespace ClassicUO.Game.Managers
                         if (house != null)
                         {
                             bool preview = step.MovingDir != Direction.West &&
-                                    step.MovingDir != Direction.Up &&
-                                    step.MovingDir != Direction.North;
+                                           step.MovingDir != Direction.Up &&
+                                           step.MovingDir != Direction.North;
+                            //preview = false;
 
                             foreach (var c in house.Components)
                             {
@@ -307,11 +296,11 @@ namespace ClassicUO.Game.Managers
                             }
                         }                      
 
-                        UpdateEntitiesInside(item, removeStep, item.X, item.Y, item.Z);
+                        UpdateEntitiesInside(item, removeStep, item.X, item.Y, item.Z, step.MovingDir);
                     }
 
-
-                    break;
+                    if (!directionChange)
+                        break;
                 }
             }
 
@@ -328,7 +317,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        private static void UpdateEntitiesInside(uint serial, bool removeStep, int x, int y, int z)
+        private static void UpdateEntitiesInside(uint serial, bool removeStep, int x, int y, int z, Direction direction)
         {
             if (_items.TryGetValue(serial, out var list))
             {
@@ -338,12 +327,16 @@ namespace ClassicUO.Game.Managers
                 {
                     ref var it = ref list[i];
 
+                    //if (!SerialHelper.IsValid(it.Serial))
+                    //    break;
+
                     Entity entity = World.Get(it.Serial);
                     if (entity == null || entity.IsDestroyed)
                     {
-                        list.RemoveAt((uint) i--);
                         continue;
                     }
+
+                    //entity.BoatDirection = direction;
 
                     if (removeStep)
                     {                    

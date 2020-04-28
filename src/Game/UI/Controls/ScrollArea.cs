@@ -78,6 +78,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         public ScrollbarBehaviour ScrollbarBehaviour;
+        public Rectangle ScissorRectangle;
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -110,12 +111,12 @@ namespace ClassicUO.Game.UI.Controls
             var scrollbar = Children[0];
             scrollbar.Draw(batcher, x + scrollbar.X, y + scrollbar.Y);
 
-            Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width - 14, Height);
+            Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x + ScissorRectangle.X, y + ScissorRectangle.Y, (Width - 14) + ScissorRectangle.Width, Height + ScissorRectangle.Height);
 
             if (ScissorStack.PushScissors(scissor))
             {
                 batcher.EnableScissorTest(true);
-                int height = 0;
+                int height = ScissorRectangle.Y;
 
                 for (int i = 1; i < Children.Count; i++)
                 {
@@ -124,7 +125,7 @@ namespace ClassicUO.Game.UI.Controls
                     if (!child.IsVisible)
                         continue;
 
-                    child.Y = height - _scrollBar.Value /*+ (_isNormalScroll ? 20 : 0)*/;
+                    child.Y = height - _scrollBar.Value;
 
                     if (height + child.Height <= _scrollBar.Value)
                     {
@@ -199,7 +200,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             _scrollBar.Height = _scrollbarHeight >= 0 ? _scrollbarHeight : Height;
             bool maxValue = _scrollBar.Value == _scrollBar.MaxValue && _scrollBar.MaxValue != 0;
-            int height = 0;
+            int height = ScissorRectangle.Y;
 
             for (int i = 1; i < Children.Count; i++)
             {
@@ -208,6 +209,8 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             height -= _scrollBar.Height;
+
+            height -= ScissorRectangle.Y + ScissorRectangle.Height;
 
             //if (_isNormalScroll)
             //    height += 40;

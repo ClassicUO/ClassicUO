@@ -117,9 +117,10 @@ namespace ClassicUO.Game.GameObjects
                 mobile.AllowedToDraw = true;
                 mobile.Texture = null;
                 mobile.IsClicked = false;
-
+                mobile.RemoveFromTile();
                 mobile.Clear();
-
+                mobile.Next = null;
+                mobile.Previous = null;
 
                 mobile.CalculateRandomIdleTime();
 
@@ -195,7 +196,7 @@ namespace ClassicUO.Game.GameObjects
                                (Graphic >= 0x025D && Graphic <= 0x0260) ||
                                Graphic == 0x029A || Graphic == 0x029B ||
                                Graphic == 0x02B6 || Graphic == 0x02B7 ||
-                               Graphic == 0x03DB || Graphic == 0x03DF || Graphic == 0x03E2 || Graphic == 0x02E8 || Graphic == 0x02E9; // Vampiric
+                               Graphic == 0x03DB || Graphic == 0x03DF || Graphic == 0x03E2 || Graphic == 0x02E8 || Graphic == 0x02E9|| Graphic == 0x04E5; 
         public bool IsGargoyle => Client.Version >= ClientVersion.CV_7000 && Graphic == 0x029A || Graphic == 0x029B;
 
         public bool IsMounted => HasEquipment && Equipment[0x19] != null && !IsDrivingBoat && Equipment[0x19].GetGraphicForAnimation() != 0xFFFF;
@@ -360,7 +361,7 @@ namespace ClassicUO.Game.GameObjects
         public void SetAnimation(byte id, byte interval = 0, byte frameCount = 0, byte repeatCount = 0, bool repeat = false, bool frameDirection = false)
         {
             AnimationGroup = id;
-            AnimIndex = 0;
+            AnimIndex = (sbyte) (frameDirection ? 0 : frameCount);
             AnimationInterval = interval;
             AnimationFrameCount = frameCount;
             AnimationRepeatMode = repeatCount;
@@ -967,8 +968,13 @@ namespace ClassicUO.Game.GameObjects
                                 case 0x35EE:
                                 case 0x3DFF:
                                 case 0x3E00:
+                                case 0x4C8D:
+                                case 0x4C8E:
+                                case 0x4C8F:
+                                case 0x4C1E:
+                                //case 0x4C1F:
 
-                                    for (int i = 0; i < 98; i++)
+                                    for (int i = 0; i < AnimationsLoader.Instance.SittingInfos.Length; i++)
                                     {
                                         if (AnimationsLoader.Instance.SittingInfos[i].Graphic == graphic)
                                         {

@@ -407,6 +407,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _amount = 0;
                         GetAmount(World.Player.Equipment[(int)Layer.Backpack], _graphic, _hue, ref _amount);
+                        GetAmount(World.Player.Equipment[(int) Layer.Cloak], _graphic, _hue, ref _amount);
 
                         if (ProfileManager.Current.CounterBarDisplayAbbreviatedAmount)
                         {

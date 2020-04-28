@@ -91,13 +91,13 @@ namespace ClassicUO
             }
 
             // try to load the client version
-            if (!ClientVersionHelper.TryParse(clientVersionText, out ClientVersion clientVersion))
+            if (!ClientVersionHelper.IsClientVersionValid(clientVersionText, out ClientVersion clientVersion))
             {
                 Log.Warn($"Client version [{clientVersionText}] is invalid, let's try to read the client.exe");
 
                 // mmm something bad happened, try to load from client.exe
                 if (!ClientVersionHelper.TryParseFromFile(Path.Combine(clientPath, "client.exe"), out clientVersionText) ||
-                    !ClientVersionHelper.TryParse(clientVersionText, out clientVersion))
+                    !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
                 {
                     Log.Error("Invalid client version: " + clientVersionText);
                     ShowErrorMessage($"Impossible to define the client version.\nClient version: '{clientVersionText}'");
@@ -112,7 +112,7 @@ namespace ClassicUO
 
             Version = clientVersion;
             ClientPath = clientPath;
-            IsUOPInstallation = Version >= ClientVersion.CV_70240;
+            IsUOPInstallation = Version >= ClientVersion.CV_7000 && File.Exists(UOFileManager.GetUOFilePath("MainMisc.uop"));
             Protocol = ClientFlags.CF_T2A;
 
             if (Version >= ClientVersion.CV_200)
@@ -142,6 +142,20 @@ namespace ClassicUO
             //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
             UltimaLive.Enable();
             PacketsTable.AdjustPacketSizeByVersion(Version);
+
+            if (Settings.GlobalSettings.Encryption != 0)
+            {
+                Log.Trace("Calculating encryption by client version...");
+                EncryptionHelper.CalculateEncryption(Version);
+                Log.Trace($"encryption: {EncryptionHelper.Type}");
+
+                if (EncryptionHelper.Type != (ENCRYPTION_TYPE) Settings.GlobalSettings.Encryption)
+                {
+                    Log.Warn($"Encryption found: {EncryptionHelper.Type}");
+                    Settings.GlobalSettings.Encryption = (byte) EncryptionHelper.Type;
+                }
+            }
+
             Log.Trace("Done!");
 
             Log.Trace("Loading plugins...");

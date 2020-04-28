@@ -117,6 +117,8 @@ namespace ClassicUO.Game.UI.Controls
                 body = 0x029A;
             else if (mobile.Graphic == 0x029B || mobile.Graphic == 0x02B7)
                 body = 0x0299;
+            else if (mobile.Graphic == 0x04E5)
+                body = 0xC835;
             else if (mobile.Graphic == 0x03DB)
             {
                 body = 0x000C;
@@ -145,10 +147,20 @@ namespace ClassicUO.Game.UI.Controls
             Item equipItem = mobile.Equipment[(int) Layer.Cloak];
 
             Layer[] layers = equipItem != null && equipItem.ItemData.IsContainer ? _layerOrder_quiver_fix : _layerOrder;
+            bool switch_arms_with_torso = mobile.Equipment[(int) Layer.Arms] != null && mobile.Equipment[(int) Layer.Arms].Graphic == 0x1410;
+
 
             for (int i = 0; i < layers.Length; i++)
             {
                 Layer layer = layers[i];
+
+                if (switch_arms_with_torso)
+                {
+                    if (layer == Layer.Arms)
+                        layer = Layer.Torso;
+                    else if (layer == Layer.Torso)
+                        layer = Layer.Arms;
+                }
 
                 equipItem = mobile.Equipment[(int) layer];
 
@@ -315,6 +327,17 @@ namespace ClassicUO.Game.UI.Controls
                                     return;
                                 }
 
+                            }
+                            else
+                            {
+                                Item cont = container.FindItemByLayer(_layer);
+                                if (cont != null && cont.ItemData.IsContainer)
+                                {
+                                    scene.DropHeldItemToContainer(cont);
+                                    Mouse.CancelDoubleClick = true;
+                                    Mouse.LastLeftButtonClickTime = 0;
+                                    return;
+                                }
                             }
                         }
                         else

@@ -129,7 +129,6 @@ namespace ClassicUO.Game.Scenes
                     X = ProfileManager.Current.DebugGumpPosition.X,
                     Y = ProfileManager.Current.DebugGumpPosition.Y
                 });
-                //Engine.DropFpsMinMaxValues();
             }
 
             if (ProfileManager.Current.ShowNetworkStats)
@@ -202,7 +201,6 @@ namespace ClassicUO.Game.Scenes
                 h = Math.Max(480, h);
 
                 Client.Game.SetWindowSize(w, h);
-                //Client.Client.SetWindowPositionBySettings();
             }
 
             CircleOfTransparency.Create(ProfileManager.Current.CircleOfTransparencyRadius);
@@ -306,9 +304,10 @@ namespace ClassicUO.Game.Scenes
             {
             }
 
-            ////_renderList = null;
-
             TargetManager.ClearTargetingWithoutTargetCancelPacket();
+
+            // special case for wmap. this allow us to save settings
+            UIManager.GetGump<WorldMapGump>()?.Dispose();
 
             ProfileManager.Current?.Save(UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
             Macros.Save();
@@ -325,7 +324,6 @@ namespace ClassicUO.Game.Scenes
 
             CommandManager.UnRegisterAll();
             _weather.Reset();
-
             UIManager.Clear();
             World.Clear();
             UOChatManager.Clear();
@@ -577,7 +575,7 @@ namespace ClassicUO.Game.Scenes
             if (!World.InGame)
                 return;
 
-
+            _healthLinesManager.Update();
             World.Update(totalMS, frameMS);
             BoatMovingManager.Update();
             Pathfinder.ProcessAutoWalk();

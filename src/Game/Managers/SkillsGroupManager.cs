@@ -526,7 +526,7 @@ namespace ClassicUO.Game.Managers
                     {
                         int grp = bin.ReadInt32();
 
-                        if (grp < groups.Length && skillidx + 1 < SkillsLoader.Instance.SkillsCount)
+                        if (grp < groups.Length && skillidx < SkillsLoader.Instance.SkillsCount)
                         {
                             groups[grp].Add(skillidx++);
                         }

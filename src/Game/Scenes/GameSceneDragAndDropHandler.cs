@@ -97,7 +97,7 @@ namespace ClassicUO.Game.Scenes
                 //item.Container = Serial.INVALID;
                 //entity.Items.Remove(item);
 
-                if (entity.HasEquipment)
+                if (entity != null && entity.HasEquipment)
                     entity.Equipment[(int) item.Layer] = null;
 
                 //entity.Items.ProcessDelta();
@@ -183,6 +183,11 @@ namespace ClassicUO.Game.Scenes
 
                 if (gump != null && (x != 0xFFFF || y != 0xFFFF))
                 {
+                    bool is_chessboard = gump.Graphic == 0x091A || gump.Graphic == 0x092E;
+
+                    if (is_chessboard)
+                        y += 20;
+
                     Rectangle bounds = ContainerManager.Get(gump.Graphic).Bounds;
                     ArtTexture texture = ArtLoader.Instance.GetTexture(ItemHold.DisplayedGraphic);
                     float scale = UIManager.ContainerScale;
@@ -190,7 +195,7 @@ namespace ClassicUO.Game.Scenes
                     bounds.X = (int) (bounds.X * scale);
                     bounds.Y = (int) (bounds.Y * scale);
                     bounds.Width = (int) (bounds.Width * scale);
-                    bounds.Height = (int) (bounds.Height * scale);
+                    bounds.Height = (int) ((bounds.Height + (is_chessboard ? 20 : 0)) * scale);
 
                     if (texture != null && !texture.IsDisposed)
                     {

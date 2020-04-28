@@ -227,6 +227,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             ref readonly AbilityDefinition def = ref AbilityData.Abilities[((byte) World.Player.PrimaryAbility & 0x7F) - 1];
 
+            GetSpellFloatingButton(def.Index)?.Dispose();
+
             UseAbilityButtonGump gump = new UseAbilityButtonGump(def, true)
             {
                 X = Mouse.LDropPosition.X - 22,
@@ -242,6 +244,8 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
 
             ref readonly AbilityDefinition def = ref AbilityData.Abilities[((byte) World.Player.SecondaryAbility & 0x7F) - 1];
+          
+            GetSpellFloatingButton(def.Index)?.Dispose();
 
             UseAbilityButtonGump gump = new UseAbilityButtonGump(def, false)
             {
@@ -250,6 +254,17 @@ namespace ClassicUO.Game.UI.Gumps
             };
             UIManager.Add(gump);
             UIManager.AttemptDragControl(gump, Mouse.Position, true);
+        }
+
+        private static UseAbilityButtonGump GetSpellFloatingButton(int id)
+        {
+            for (var i = UIManager.Gumps.Last; i != null; i = i.Previous)
+            {
+                if (i.Value is UseAbilityButtonGump g && g.AbilityID == id)
+                    return g;
+            }
+
+            return null;
         }
 
         public override void Update(double totalMS, double frameMS)

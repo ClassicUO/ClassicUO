@@ -24,7 +24,6 @@ using System.Runtime.CompilerServices;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
-using ClassicUO.Game.Map;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -68,22 +67,30 @@ namespace ClassicUO.Game.GameObjects
                 if (World.Player == null)
                     return ushort.MaxValue;
 
-                if (this == World.Player)
-                    return 0;
+                int x = X, y = Y;
 
-                int x, y;
+                if (this is Mobile mobile)
+                {
+                    if (mobile == World.Player)
+                        return 0;
 
-                if (this is Mobile m && m.Steps.Count != 0)
-                {
-                    ref var step = ref m.Steps.Back();
-                    x = step.X;
-                    y = step.Y;
+                    if (mobile.Steps.Count != 0)
+                    {
+                        ref var step = ref mobile.Steps.Back();
+                        x = step.X;
+                        y = step.Y;
+                    }
+                    //else if (LastX != 0xFFFF && LastY != 0xFFFF)
+                    //{
+                    //    x = LastX;
+                    //    y = LastY;
+                    //}
                 }
-                else
-                {
-                    x = X;
-                    y = Y;
-                }
+                //else if (LastX != 0xFFFF && LastY != 0xFFFF)
+                //{
+                //    x = LastX;
+                //    y = LastY;
+                //}
 
                 int fx = World.RangeSize.X;
                 int fy = World.RangeSize.Y;
@@ -92,6 +99,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        //public ushort LastX = 0xFFFF, LastY = 0xFFFF;
 
         public virtual void Update(double totalMS, double frameMS)
         {
@@ -300,6 +308,9 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsDestroyed)
                 return;
+
+            //LastX = 0xFFFF;
+            //LastY = 0xFFFF;
 
             Next = null;
             Previous = null;

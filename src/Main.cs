@@ -28,6 +28,7 @@ using System.Text;
 using System.Threading;
 
 using ClassicUO.Configuration;
+using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -45,7 +46,9 @@ namespace ClassicUO
 
         private static bool _skipUpdates;
 
+        private static readonly Mutex _mutex = new Mutex(true, "CLASSICUO_MUTEX");
 
+        [STAThread]
         static void Main(string[] args)
         {
             // - check for update
@@ -101,18 +104,21 @@ namespace ClassicUO
                 }
             };
 #endif
+            ReadSettingsFromArgs(args);
 
 #if DEV_BUILD
-            Updater updater = new Updater();
-            if (updater.Check())
-                return;
+            if (!_skipUpdates)
+            {
+                Updater updater = new Updater();
+                if (updater.Check())
+                    return;
+            }
 #endif
-            ReadSettingsFromArgs(args);
 
             if (!_skipUpdates)
                 if (CheckUpdate(args))
                     return;
-
+            
             //Environment.SetEnvironmentVariable("FNA_GRAPHICS_FORCE_GLDEVICE", "ModernGLDevice");
             if (CUOEnviroment.IsHighDPI)
             {
@@ -134,7 +140,12 @@ namespace ClassicUO
                 {
                     // TODO: 
                     Settings.GlobalSettings.Save();
-                    return;
+
+                    if (!Directory.Exists(Settings.GlobalSettings.UltimaOnlineDirectory) || 
+                        !ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out _))
+                    {
+                        return;
+                    }
                 }
             }
 
@@ -176,7 +187,7 @@ namespace ClassicUO
                     continue;
 
                 cmd = cmd.Remove(0, 1);
-                string value = null;
+                string value = string.Empty;
 
                 if (i < args.Length - 1)
                 {
@@ -321,10 +332,15 @@ namespace ClassicUO
                         break;
 
                     case "plugins":
-                        if (!string.IsNullOrWhiteSpace(value))
-                        {
-                            Settings.GlobalSettings.Plugins = value.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
-                        }
+                        Settings.GlobalSettings.Plugins = string.IsNullOrEmpty(value) ? new string[0] : value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                        break;
+
+                    case "use_verdata":
+                        Settings.GlobalSettings.UseVerdata = bool.Parse(value);
+                        break;
+
+                    case "encryption":
+                        Settings.GlobalSettings.Encryption = byte.Parse(value);
                         break;
 
                 }
@@ -389,8 +405,7 @@ namespace ClassicUO
                     UseShellExecute = false,
                 };
 
-                if (Environment.OSVersion.Platform == PlatformID.MacOSX ||
-                    Environment.OSVersion.Platform == PlatformID.Unix)
+                if (CUOEnviroment.IsUnix)
                 {
                     processStartInfo.FileName = "mono";
                     processStartInfo.Arguments = $"\"{Path.Combine(path, "ClassicUO.exe")}\" --source \"{currentPath}\" --pid {Process.GetCurrentProcess().Id} --action cleanup";

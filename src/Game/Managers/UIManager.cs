@@ -47,7 +47,7 @@ namespace ClassicUO.Game.Managers
         private static readonly Control[] _mouseDownControls = new Control[5];
 
 
-        private static readonly Dictionary<uint, TargetLineGump> _targetLineGumps = new Dictionary<uint, TargetLineGump>();
+        //private static readonly Dictionary<uint, TargetLineGump> _targetLineGumps = new Dictionary<uint, TargetLineGump>();
         private static int _dragOriginX, _dragOriginY;
         private static bool _isDraggingControl;
         private static Control _keyboardFocusControl, _validForDClick, _lastFocus;
@@ -120,9 +120,6 @@ namespace ClassicUO.Game.Managers
         }
 
         public static bool IsDragging => _isDraggingControl && DraggingControl != null;
-
-        public static TargetLineGump TargetLine { get; set; }
-
 
         public static bool ValidForDClick() => !(_validForDClick is WorldViewport);
 
@@ -447,6 +444,12 @@ namespace ClassicUO.Game.Managers
 
         public static Control Create(uint sender, uint gumpID, int x, int y, string layout, string[] lines)
         {
+            List<string> cmdlist = _parser.GetTokens(layout);
+            int cmdlen = cmdlist.Count;
+
+            if (cmdlen <= 0)
+                return null;
+            
             Gump gump = null;
             bool mustBeAdded = true;
 
@@ -484,8 +487,7 @@ namespace ClassicUO.Game.Managers
             int group = 0;
             int page = 0;
 
-            List<string> cmdlist = _parser.GetTokens(layout);
-            int cmdlen = cmdlist.Count;
+           
             bool applyCheckerTrans = false;
             bool textBoxFocused = false;
 
@@ -829,66 +831,7 @@ namespace ClassicUO.Game.Managers
 
             return gump;
         }
-
-        public static TradingGump GetTradingGump(uint serial)
-        {
-            for (var g = Gumps.Last; g != null; g = g.Previous)
-            {
-                if (g.Value != null && !g.Value.IsDisposed && g.Value is TradingGump trading && (trading.ID1 == serial || trading.ID2 == serial || trading.LocalSerial == serial))
-                {
-                    return trading;
-                }
-            }
-
-            return null;
-        }
-
-        public static void SetTargetLineGump(uint mob)
-        {
-            if (TargetLine != null && !TargetLine.IsDisposed && TargetLine.Mobile == mob)
-                return;
-
-            TargetLine?.Dispose();
-            GetGump<TargetLineGump>()?.Dispose();
-            TargetLine = null;
-
-            if (TargetLine == null || TargetLine.IsDisposed)
-            {
-                Mobile mobile = World.Mobiles.Get(mob);
-
-                if (mobile != null)
-                {
-                    TargetLine = new TargetLineGump(mobile);
-                    Add(TargetLine);
-                }
-            }
-
-            //if (!_targetLineGumps.TryGetValue(mob, out TargetLineGump gump))
-            //{
-            //    Mobile m = World.Mobiles.Get(mob);
-            //    if (m == null)
-            //        return;
-
-            //    gump = new TargetLineGump(m);
-            //    _targetLineGumps[mob] = gump;
-            //    UIManager.Add(gump);
-            //}
-        }
-
-        public static void RemoveTargetLineGump(uint serial)
-        {
-            TargetLine?.Dispose();
-            GetGump<TargetLineGump>()?.Dispose();
-            TargetLine = null;
-
-            //if (_targetLineGumps.TryGetValue(serial, out TargetLineGump gump))
-            //{
-            //    gump?.Dispose();
-            //    _targetLineGumps.Remove(serial);
-            //}
-        }
-
-
+        
         public static ContextMenuShowMenu ContextMenu { get; private set; }
 
         public static void ShowContextMenu(ContextMenuShowMenu menu)
@@ -941,6 +884,18 @@ namespace ClassicUO.Game.Managers
             return null;
         }
 
+        public static TradingGump GetTradingGump(uint serial)
+        {
+            for (var g = Gumps.Last; g != null; g = g.Previous)
+            {
+                if (g.Value != null && !g.Value.IsDisposed && g.Value is TradingGump trading && (trading.ID1 == serial || trading.ID2 == serial || trading.LocalSerial == serial))
+                {
+                    return trading;
+                }
+            }
+
+            return null;
+        }
 
         public static void Update(double totalMS, double frameMS)
         {

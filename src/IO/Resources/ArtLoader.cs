@@ -37,14 +37,15 @@ namespace ClassicUO.IO.Resources
     internal class ArtLoader : UOFileLoader<ArtTexture>
     {
         private static readonly ushort[] _empty = { };
-
-        private readonly Dictionary<uint, UOTexture16> _landDictionary = new Dictionary<uint, UOTexture16>();
         private UOFile _file;
         private ushort _graphicMask;
+        private readonly UOTexture16[] _land_resources;
+        private readonly LinkedList<uint> _used_land_textures_ids = new LinkedList<uint>();
 
-        private ArtLoader()
+        private ArtLoader(int static_count, int land_count) : base(static_count)
         {
             _graphicMask = Client.IsUOPInstallation ? (ushort) 0xFFFF : (ushort) 0x3FFF;
+            _land_resources = new UOTexture16[land_count];
         }
 
         private static ArtLoader _instance;
@@ -54,7 +55,7 @@ namespace ClassicUO.IO.Resources
             {
                 if (_instance == null)
                 {
-                    _instance = new ArtLoader();
+                    _instance = new ArtLoader(Constants.MAX_STATIC_DATA_INDEX_COUNT, Constants.MAX_LAND_DATA_INDEX_COUNT);
                 }
 
                 return _instance;
@@ -68,7 +69,7 @@ namespace ClassicUO.IO.Resources
             {
                 string filepath = UOFileManager.GetUOFilePath("artLegacyMUL.uop");
 
-                if (File.Exists(filepath))
+                if (Client.IsUOPInstallation && File.Exists(filepath))
                 {
                     _file = new UOFileUop(filepath, "build/artlegacymul/{0:D8}.tga");
                     Entries = new UOFileIndex[Constants.MAX_STATIC_DATA_INDEX_COUNT];
@@ -90,21 +91,33 @@ namespace ClassicUO.IO.Resources
 
         public override ArtTexture GetTexture(uint g)
         {
-            if (!ResourceDictionary.TryGetValue(g, out ArtTexture texture) || texture.IsDisposed)
+            if (g >= Resources.Length)
+                return null;
+
+            ref var texture = ref Resources[g];
+
+            if (texture == null || texture.IsDisposed)
             {
                 ReadStaticArt(ref texture, (ushort) g);
-                ResourceDictionary.Add(g, texture);
+                SaveID(g);
             }
+
             return texture;
         }
 
         public UOTexture16 GetLandTexture(uint g)
         {
-            if (!_landDictionary.TryGetValue(g, out UOTexture16 texture) || texture.IsDisposed)
+            if (g >= _land_resources.Length)
+                return null;
+
+            ref var texture = ref _land_resources[g];
+
+            if (texture == null || texture.IsDisposed)
             {
                 ReadLandArt(ref texture, (ushort) g);
-                _landDictionary.Add(g, texture);
+                _used_land_textures_ids.AddLast(g);
             }
+
             return texture;
         }
 
@@ -128,23 +141,33 @@ namespace ClassicUO.IO.Resources
 
         public override void CleanResources()
         {
-            ResourceDictionary.ToList().ForEach(s =>
-            {
-                s.Value.Dispose();
-                ResourceDictionary.Remove(s.Key);
-            });
+            base.CleanResources();
 
-            _landDictionary.ToList().ForEach(s =>
+            var first = _used_land_textures_ids.First;
+
+            while (first != null)
             {
-                s.Value.Dispose();
-                _landDictionary.Remove(s.Key);
-            });
+                var next = first.Next;
+
+                uint idx = first.Value;
+
+                if (idx < _land_resources.Length)
+                {
+                    ref var texture = ref _land_resources[idx];
+                    texture?.Dispose();
+                    texture = null;
+                }
+
+                _used_land_textures_ids.Remove(first);
+
+                first = next;
+            }
         }
 
         public override void CleaUnusedResources(int count)
         {
             base.CleaUnusedResources(count);
-            ClearUnusedResources(_landDictionary, count);
+            ClearUnusedResources(_land_resources, count);
         }
 
         public unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height, out Rectangle imageRectangle)

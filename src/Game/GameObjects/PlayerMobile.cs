@@ -1290,14 +1290,28 @@ namespace ClassicUO.Game.GameObjects
 
         public void CloseBank()
         {
-            var bank = HasEquipment ? Equipment[(int) Layer.Bank] : null;
+            Item bank = HasEquipment ? Equipment[(int) Layer.Bank] : null;
 
             if (bank != null && bank.Opened)
             {
-                Remove(bank);
-                bank.Clear();
+                if (!bank.IsEmpty)
+                {
+                    var first = (Item) bank.Items;
+
+                    while (first != null)
+                    {
+                        var next = (Item) first.Next;
+
+                        World.RemoveItem(first, true);
+
+                        first = next;
+                    }
+
+                    bank.Items = null;
+                }
+
+                UIManager.GetGump<ContainerGump>(bank.Serial)?.Dispose();
                 bank.Opened = false;
-                UIManager.GetGump<ContainerGump>(bank)?.Dispose();
             }
         }
 
@@ -1333,14 +1347,15 @@ namespace ClassicUO.Game.GameObjects
                                 distance = ent.Distance;
                         }
 
-                        if (distance > 18)
+                        if (distance > Constants.MIN_VIEW_RANGE)
                             gump.Dispose();
 
                         break;
                     case ContainerGump _:
+                        distance = int.MaxValue;
 
                         ent = World.Get(gump.LocalSerial);
-                        distance = int.MaxValue;
+
                         if (ent != null)
                         {
                             if (SerialHelper.IsItem(ent.Serial))
@@ -1354,7 +1369,7 @@ namespace ClassicUO.Game.GameObjects
                                 distance = ent.Distance;
                         }
 
-                        if (distance > 3)
+                        if (distance > Constants.MAX_CONTAINER_OPENED_ON_GROUND_RANGE)
                             gump.Dispose();
                         break;
                 }

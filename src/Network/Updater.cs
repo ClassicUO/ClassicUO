@@ -240,8 +240,7 @@ namespace ClassicUO.Network
                         UseShellExecute = false,
                     };
                     
-                    if (Environment.OSVersion.Platform == PlatformID.MacOSX || 
-                        Environment.OSVersion.Platform == PlatformID.Unix)
+                    if (CUOEnviroment.IsUnix)
                     {
                         processStartInfo.FileName = "mono";
                         processStartInfo.Arguments = $"\"{Path.Combine(tempPath, "ClassicUO.exe")}\" --source \"{CUOEnviroment.ExecutablePath}\" --pid {Process.GetCurrentProcess().Id} --action update";

@@ -42,7 +42,6 @@ namespace ClassicUO.Game.UI.Gumps
             _skill = skill;
 
             BuildGump();
-            LocalSerial = (uint) (World.Player.Serial + _skill.Index + 1);
         }
 
         public SkillButtonGump() : base(0, 0)
@@ -60,6 +59,8 @@ namespace ClassicUO.Game.UI.Gumps
 
 
         public override GUMP_TYPE GumpType => GUMP_TYPE.GT_SKILLBUTTON;
+
+        public int SkillID => _skill.Index;
 
         private void BuildGump()
         {
@@ -97,9 +98,13 @@ namespace ClassicUO.Game.UI.Gumps
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
             if (!ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt)
+            {
                 GameActions.UseSkill(_skill.Index);
 
-            return true;
+                return true;
+            }
+            
+            return false;
         }
 
         public override void Save(BinaryWriter writer)

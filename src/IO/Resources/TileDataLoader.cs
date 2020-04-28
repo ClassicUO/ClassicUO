@@ -270,6 +270,9 @@ namespace ClassicUO.IO.Resources
 
                             int[] group = reader.ReadGroup();
 
+                            if (group == null)
+                                continue;
+
                             for (int i = 0; i < group.Length; i++)
                             {
                                 int checkIndex = group[i];
@@ -378,6 +381,7 @@ namespace ClassicUO.IO.Resources
             IsLight = (Flags & TileFlag.LightSource) != 0;
             IsNoShoot = (Flags & TileFlag.NoShoot) != 0;
             IsWeapon = (Flags & TileFlag.Weapon) != 0;
+            IsMultiMovable = (Flags & TileFlag.MultiMovable) != 0;
         }
 
         public readonly TileFlag Flags;
@@ -411,6 +415,7 @@ namespace ClassicUO.IO.Resources
         public readonly bool IsLight;
         public readonly bool IsNoShoot;
         public readonly bool IsWeapon;
+        public readonly bool IsMultiMovable;
     }
 
     // old

@@ -33,15 +33,14 @@ namespace ClassicUO.IO.Resources
 {
     internal class MapLoader : UOFileLoader
     {
-        internal static int MAPS_COUNT = 6;
-        private protected readonly UOFileMul[] _filesIdxStatics = new UOFileMul[MAPS_COUNT];
-        private protected readonly UOFile[] _filesMap = new UOFile[MAPS_COUNT];
-        private protected readonly UOFileMul[] _filesStatics = new UOFileMul[MAPS_COUNT];
-        private readonly UOFileMul[] _mapDif = new UOFileMul[MAPS_COUNT];
-        private readonly UOFileMul[] _mapDifl = new UOFileMul[MAPS_COUNT];
-        private readonly UOFileMul[] _staDif = new UOFileMul[MAPS_COUNT];
-        private readonly UOFileMul[] _staDifi = new UOFileMul[MAPS_COUNT];
-        private readonly UOFileMul[] _staDifl = new UOFileMul[MAPS_COUNT];
+        private protected readonly UOFileMul[] _filesIdxStatics = new UOFileMul[Constants.MAPS_COUNT];
+        private protected readonly UOFile[] _filesMap = new UOFile[Constants.MAPS_COUNT];
+        private protected readonly UOFileMul[] _filesStatics = new UOFileMul[Constants.MAPS_COUNT];
+        private readonly UOFileMul[] _mapDif = new UOFileMul[Constants.MAPS_COUNT];
+        private readonly UOFileMul[] _mapDifl = new UOFileMul[Constants.MAPS_COUNT];
+        private readonly UOFileMul[] _staDif = new UOFileMul[Constants.MAPS_COUNT];
+        private readonly UOFileMul[] _staDifi = new UOFileMul[Constants.MAPS_COUNT];
+        private readonly UOFileMul[] _staDifl = new UOFileMul[Constants.MAPS_COUNT];
 
         public MapLoader()
         {
@@ -69,11 +68,11 @@ namespace ClassicUO.IO.Resources
 
 
 
-        public new UOFileIndex[][] Entries = new UOFileIndex[MAPS_COUNT][]; 
+        public new UOFileIndex[][] Entries = new UOFileIndex[Constants.MAPS_COUNT][]; 
 
-        public IndexMap[][] BlockData { get; private set; } = new IndexMap[MAPS_COUNT][];
+        public IndexMap[][] BlockData { get; private set; } = new IndexMap[Constants.MAPS_COUNT][];
 
-        public int[,] MapBlocksSize { get; private set; } = new int[MAPS_COUNT, 2];
+        public int[,] MapBlocksSize { get; private set; } = new int[Constants.MAPS_COUNT, 2];
 
         public int[,] MapsDefaultSize { get; private protected set; } = new int[6, 2]
         {
@@ -99,8 +98,8 @@ namespace ClassicUO.IO.Resources
 
         public int PatchesCount { get; private set; }
 
-        public int[] MapPatchCount { get; } = new int[MAPS_COUNT];
-        public int[] StaticPatchCount { get; } = new int[MAPS_COUNT];
+        public int[] MapPatchCount { get; } = new int[Constants.MAPS_COUNT];
+        public int[] StaticPatchCount { get; } = new int[Constants.MAPS_COUNT];
 
         protected static UOFile GetMapFile(int map)
         {
@@ -116,11 +115,11 @@ namespace ClassicUO.IO.Resources
             {
                 bool foundOneMap = false;
 
-                for (int i = 0; i < MAPS_COUNT; i++)
+                for (int i = 0; i < Constants.MAPS_COUNT; i++)
                 {
                     string path = UOFileManager.GetUOFilePath($"map{i}LegacyMUL.uop");
 
-                    if (File.Exists(path))
+                    if (Client.IsUOPInstallation && File.Exists(path))
                     {
                         _filesMap[i] = new UOFileUop(path, $"build/map{i}legacymul/{{0:D8}}.dat");
                         Entries[i] = new UOFileIndex[((UOFileUop) _filesMap[i]).TotalEntriesCount];
@@ -173,7 +172,7 @@ namespace ClassicUO.IO.Resources
                 }
 
                 //for (int i = 0; i < MAPS_COUNT; i++)
-                Parallel.For(0, MAPS_COUNT, i =>
+                Parallel.For(0, Constants.MAPS_COUNT, i =>
                 {
                     MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
                     MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
@@ -192,7 +191,7 @@ namespace ClassicUO.IO.Resources
 
         internal unsafe void LoadMap(int i)
         {
-            if (i < 0 || i + 1 > MAPS_COUNT || _filesMap[i] == null)
+            if (i < 0 || i + 1 > Constants.MAPS_COUNT || _filesMap[i] == null)
                 i = 0;
 
             if (BlockData[i] != null || _filesMap[i] == null)
@@ -300,8 +299,8 @@ namespace ClassicUO.IO.Resources
             if (PatchesCount < 0)
                 PatchesCount = 0;
 
-            if (PatchesCount > MAPS_COUNT)
-                PatchesCount = MAPS_COUNT;
+            if (PatchesCount > Constants.MAPS_COUNT)
+                PatchesCount = Constants.MAPS_COUNT;
 
             Array.Clear(MapPatchCount, 0, MapPatchCount.Length);
             Array.Clear(StaticPatchCount, 0, StaticPatchCount.Length);
@@ -414,7 +413,7 @@ namespace ClassicUO.IO.Resources
 
         private void ResetPatchesInBlockTable()
         {
-            for (int i = 0; i < MAPS_COUNT; i++)
+            for (int i = 0; i < Constants.MAPS_COUNT; i++)
             {
                 var list = BlockData[i];
 

@@ -195,6 +195,8 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
 
                 thisCont = World.Get(((Item) thisCont).RootContainer);
+                if (thisCont == null)
+                    return;
 
                 bool candrop = thisCont.Distance <= Constants.DRAG_ITEMS_DISTANCE;
 
@@ -354,13 +356,9 @@ namespace ClassicUO.Game.UI.Gumps
             if (container == null)
                 return;
 
-            if (container.Previous != null && container.Previous is Item it && it.Layer != Layer.Bank)
-            {
-                var c = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Container: {0}  - LEFT FOUND: {1}", LocalSerial, ((Item) container.Previous)?.Serial);
-                Console.ForegroundColor = c;
-            }
+            bool is_chessboard = Graphic == 0x091A || Graphic == 0x092E;
+            const ushort CHESSBOARD_OFFSET = 11369;
+
 
             for (var i = container.Items; i != null; i = i.Next)
             {
@@ -369,20 +367,28 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!item.IsLootable)
                     continue;
 
-                var itemControl = new ItemGump(item.Serial, item.DisplayedGraphic, item.Hue, item.X, item.Y);
+                var itemControl = new ItemGump(item.Serial,
+                                               item.DisplayedGraphic,
+                                               //(ushort) (item.DisplayedGraphic - (is_chessboard ? 0 : 0)), 
+                                               item.Hue, 
+                                               item.X, 
+                                               item.Y);
+
+                if (is_chessboard)
+                    itemControl.IsPartialHue = false;
+
                 itemControl.IsVisible = !IsMinimized;
 
                 float scale = UIManager.ContainerScale;
 
                 if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
                 {
-
                     itemControl.Width = (int) (itemControl.Width * scale);
                     itemControl.Height = (int) (itemControl.Height * scale);
                 }
 
                 itemControl.X = (int) (item.X * scale);
-                itemControl.Y = (int) (item.Y * scale);
+                itemControl.Y = (int) ((item.Y - (is_chessboard ? 20 : 0)) * scale);
 
                 //if ((_hideIfEmpty && !IsVisible))
                 //    IsVisible = true;
@@ -395,11 +401,12 @@ namespace ClassicUO.Game.UI.Gumps
         public void CheckItemControlPosition(Item item)
         {
             var bounds = _data.Bounds;
+            bool is_chessboard = Graphic == 0x091A || Graphic == 0x092E;
 
             ushort boundX = (ushort) (bounds.X);
             ushort boundY = (ushort) (bounds.Y);
             ushort boundWidth = (ushort) (bounds.Width);
-            ushort boundHeight = (ushort) (bounds.Height);
+            ushort boundHeight = (ushort) (bounds.Height + (is_chessboard ? 20 : 0));
 
             ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
 

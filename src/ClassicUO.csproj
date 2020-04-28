@@ -204,6 +204,10 @@
     <Compile Include="Game\UI\TextEntryRules.cs" />
     <Compile Include="Game\Weather.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="Network\Encryption\BlowfishBehaviour.cs" />
+    <Compile Include="Network\Encryption\Encryption.cs" />
+    <Compile Include="Network\Encryption\LoginCryptBehaviour.cs" />
+    <Compile Include="Network\Encryption\TwofishBehaviour.cs" />
     <Compile Include="Renderer\MatrixEffect.cs" />
     <Compile Include="Time.cs" />
     <Compile Include="Utility\Collections\RawList.cs" />
@@ -231,7 +235,6 @@
     <Compile Include="Game\UI\Gumps\ProfileGump.cs" />
     <Compile Include="Game\UI\Gumps\QuestArrowGump.cs" />
     <Compile Include="Game\UI\Gumps\RacialAbilitiesBookGump.cs" />
-    <Compile Include="Game\UI\Gumps\TargetLineGump.cs" />
     <Compile Include="Game\UI\Gumps\TextEntryDialogGump.cs" />
     <Compile Include="Game\UI\Gumps\UseAbilityButtonGump.cs" />
     <Compile Include="Game\UI\MultiLineEntry.cs" />
@@ -493,6 +496,10 @@
     <Compile Include="Utility\TextFileParser.cs" />
     <Compile Include="Utility\UnsafeMemoryManager.cs" />
     <Compile Include="Utility\ZLib.cs" />
+    <Compile Include="Utility\ZLib\Adler32.cs" />
+    <Compile Include="Utility\ZLib\ZLibManaged.cs" />
+    <Compile Include="Utility\ZLib\ZLibHeader.cs" />
+    <Compile Include="Utility\ZLib\ZLIBStream.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -581,5 +588,14 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
 </Project>

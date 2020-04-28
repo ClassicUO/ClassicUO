@@ -107,18 +107,15 @@ namespace ClassicUO.Game.GameObjects
 
             if (UseObjectHandles && !ObjectHandlesOpened)
             {
-                //NameOverheadGump gump = UIManager.GetByLocalSerial<NameOverheadGump>(Serial);
+                // TODO: this is not sent by client. There is a particular situation when standard client sends it. Disabled for the moment
+                //if (SerialHelper.IsMobile(Serial) && string.IsNullOrEmpty(Name))
+                //{
+                //    Socket.Send(new PNameRequest(Serial));
+                //}
 
-                //if (gump == null)
-                {
-                    if (SerialHelper.IsMobile(Serial))
-                    {
-                        Socket.Send(new PNameRequest(Serial));
-                    }
-                    UIManager.Add(new NameOverheadGump(this));
+                UIManager.Add(new NameOverheadGump(this));
 
-                    ObjectHandlesOpened = true;
-                }
+                ObjectHandlesOpened = true;
             }
         }
 

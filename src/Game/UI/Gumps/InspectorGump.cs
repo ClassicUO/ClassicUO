@@ -19,15 +19,21 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
+
+using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -36,11 +42,13 @@ namespace ClassicUO.Game.UI.Gumps
         private const int WIDTH = 500;
         private const int HEIGHT = 400;
         private readonly ScrollArea _scrollArea;
+        private GameObject _obj;
 
         public InspectorGump(GameObject obj) : base(0, 0)
         {
             X = 200;
             Y = 100;
+            _obj = obj;
             CanMove = true;
             AcceptMouseInput = false;
             CanCloseWithRightClick = true;
@@ -57,6 +65,10 @@ namespace ClassicUO.Game.UI.Gumps
             });
             Add(new Label("Object Information", true, 1153, font: 3) {X = 20, Y = 10});
             Add(new Line(20, 30, WIDTH - 50, 1, 0xFFFFFFFF));
+            Add(new NiceButton(WIDTH - 115, 5, 100, 25, ButtonAction.Activate, "Dump")
+            {
+                ButtonParameter = 0
+            });
 
             _scrollArea = new ScrollArea(20, 35, WIDTH - 40, HEIGHT - 45, true)
             {
@@ -82,8 +94,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                     label = new Label(item.Value, true, 1153, font: 1, style: FontStyle.BlackBorder, maxwidth: WIDTH - 65 - 200)
                     {
-                        X = 200
+                        X = 200,
+                        AcceptMouseInput = true
                     };
+                    label.MouseUp += OnLabelClick;
 
                     if (label.Height > 0)
                         height = label.Height;
@@ -95,23 +109,40 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
         }
-    }
 
-    internal class InfoGumpEntry : Control
-    {
-        public readonly Label Entry;
-
-        public InfoGumpEntry(Label entry)
+        public override void OnButtonClick(int buttonID)
         {
-            Entry = entry;
-            Entry.X = 20;
-            Add(Entry);
+            if (buttonID == 0) // dump
+            {
+                Dictionary<string, string> dict = ReflectionHolder.GetGameObjectProperties(_obj);
+
+                if (dict != null)
+                {
+                    using (LogFile writer = new LogFile(CUOEnviroment.ExecutablePath, "dump_gameobject.txt"))
+                    {
+                        writer.Write("###################################################");
+                        writer.Write($"CUO version: {CUOEnviroment.Version}");
+                        writer.Write($"OBJECT TYPE: {_obj.GetType()}");
+                        foreach (KeyValuePair<string, string> item in dict.OrderBy(s => s.Key))
+                        {
+                            writer.Write($"{item.Key} = {item.Value}");
+                        }
+                        writer.Write("###################################################");
+                        writer.Write("");
+                    }
+
+                }
+            }
         }
 
-
-        public override void Update(double totalMS, double frameMS)
+        private static void OnLabelClick(object sender, EventArgs e)
         {
-            base.Update(totalMS, frameMS);
+            Label l = (Label) sender;
+
+            if (l != null)
+            {
+                SDL.SDL_SetClipboardText(l.Text);
+            }
         }
     }
 }

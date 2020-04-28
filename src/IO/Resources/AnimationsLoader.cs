@@ -37,7 +37,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
-    internal class AnimationsLoader : UOFileLoader<AnimationFrameTexture>
+    internal class AnimationsLoader : UOFileLoader
     {
         private readonly Dictionary<ushort, byte> _animationSequenceReplacing = new Dictionary<ushort, byte>();
         private readonly Dictionary<ushort, Rectangle> _animDimensionCache = new Dictionary<ushort, Rectangle>();
@@ -55,8 +55,7 @@ namespace ClassicUO.IO.Resources
         private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly UOFileMul[] _files = new UOFileMul[5];
         private readonly UOFileUop[] _filesUop = new UOFileUop[4];
-        private readonly List<AnimationDirection> _usedTextures = new List<AnimationDirection>();
-
+        private readonly LinkedList<AnimationDirection> _usedTextures = new LinkedList<AnimationDirection>();
 
         private AnimationsLoader()
         {
@@ -194,7 +193,15 @@ namespace ClassicUO.IO.Resources
             new SittingInfoData(0x35EE, 0, 2, 4, 6, 0, 0, false),
 
             new SittingInfoData(0x3DFF, 0, -1, 4, -1, 2, 2, false),
-            new SittingInfoData(0x3E00, -1, 2, -1, 6, 2, 2, false)
+            new SittingInfoData(0x3E00, -1, 2, -1, 6, 2, 2, false),
+
+            // TODO: new expansion
+            new SittingInfoData(0x4C8D, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x4C8E, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x4C8F, 4, 4, 4, 4, 4, 4, false),
+
+            new SittingInfoData(0x4C1E, 2, 2, 2, 2, 6, 6, false),
+            //new SittingInfoData(0x4C1F, 2, 2, 2, 2, 6, 6, false),
         };
 
 
@@ -215,7 +222,7 @@ namespace ClassicUO.IO.Resources
                         _files[i] = new UOFileMul(pathmul, pathidx, un[i], i == 0 ? 6 : -1);
                     }
 
-                    if (i > 0 && Client.Version >= ClientVersion.CV_7000)
+                    if (i > 0 && Client.IsUOPInstallation)
                     {
                         string pathuop = UOFileManager.GetUOFilePath($"AnimationFrame{i}.uop");
 
@@ -595,6 +602,9 @@ namespace ClassicUO.IO.Resources
                                 continue;
 
                             int[] group = defReader.ReadGroup();
+
+                            if (group == null)
+                                continue;
                             int color = defReader.ReadInt();
 
                             for (int i = 0; i < group.Length; i++)
@@ -628,6 +638,9 @@ namespace ClassicUO.IO.Resources
                                 continue;
 
                             int[] group = defReader.ReadGroup();
+
+                            if (group == null)
+                                continue;
 
                             ushort color = (ushort)defReader.ReadInt();
 
@@ -923,13 +936,6 @@ namespace ClassicUO.IO.Resources
         public bool IsReplacedByAnimationSequence(ushort graphic, out byte type)
         {
             return _animationSequenceReplacing.TryGetValue(graphic, out type);
-        }
-
-        public override AnimationFrameTexture GetTexture(uint id)
-        {
-            ResourceDictionary.TryGetValue(id, out AnimationFrameTexture aft);
-
-            return aft;
         }
 
         public override void CleanResources()
@@ -1396,7 +1402,7 @@ namespace ClassicUO.IO.Resources
                     animDirection.Frames[i] = f;
                 }
 
-                _usedTextures.Add(animDirection);
+                _usedTextures.AddLast(animDirection);
 
                 _reader.ReleaseData();
             }
@@ -1483,7 +1489,7 @@ namespace ClassicUO.IO.Resources
                 animDir.Frames[i] = f;
             }
 
-            _usedTextures.Add(animDir);
+            _usedTextures.AddLast(animDir);
         }
 
         public void GetAnimationDimensions(sbyte animIndex, ushort graphic, byte dir, byte animGroup, bool ismounted, byte frameIndex, out int centerX, out int centerY, out int width, out int height)
@@ -1625,22 +1631,22 @@ namespace ClassicUO.IO.Resources
                 x = y = w = h = 0;
         }
 
-        public override void CleaUnusedResources(int maxCount)
+        public void CleaUnusedResources(int maxCount)
         {
             int count = 0;
             long ticks = Time.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
-            for (int i = 0; i < _usedTextures.Count; i++)
-            {
-                var t = _usedTextures[i];
+            var first = _usedTextures.First;
 
-                if (t == null)
-                    _usedTextures.RemoveAt(i--);
-                else if (t.LastAccessTime != 0 && t.LastAccessTime < ticks)
+            while (first != null)
+            {
+                var next = first.Next;
+
+                if (first.Value.LastAccessTime != 0 && first.Value.LastAccessTime < ticks)
                 {
-                    for (int j = 0; j < t.FrameCount; j++)
+                    for (int j = 0; j < first.Value.FrameCount; j++)
                     {
-                        ref var texture = ref t.Frames[j];
+                        ref var texture = ref first.Value.Frames[j];
 
                         if (texture != null)
                         {
@@ -1649,49 +1655,54 @@ namespace ClassicUO.IO.Resources
                         }
                     }
 
-                    t.FrameCount = 0;
-                    t.Frames = null;
-                    t.LastAccessTime = 0;
+                    first.Value.FrameCount = 0;
+                    first.Value.Frames = null;
+                    first.Value.LastAccessTime = 0;
 
-                    _usedTextures.RemoveAt(i--);
+                    _usedTextures.Remove(first);
 
                     if (++count >= maxCount)
                         break;
                 }
+
+                first = next;
             }
         }
 
-        public void Clear()
-        {
-            for (int i = 0; i < _usedTextures.Count; i++)
-            {
-                var t = _usedTextures[i];
+        //public void Clear()
+        //{
+        //    var first = _usedTextures.First;
 
-                if (t == null)
-                {
-                }
-                else if (t.LastAccessTime != 0)
-                {
-                    for (int j = 0; j < t.FrameCount; j++)
-                    {
-                        ref var texture = ref t.Frames[j];
+        //    while (first != null)
+        //    {
+        //        var next = first.Next;
 
-                        if (texture != null)
-                        {
-                            texture.Dispose();
-                            texture = null;
-                        }
-                    }
+        //        if (first.Value.LastAccessTime != 0)
+        //        {
+        //            for (int j = 0; j < first.Value.FrameCount; j++)
+        //            {
+        //                ref var texture = ref first.Value.Frames[j];
 
-                    t.FrameCount = 0;
-                    t.Frames = null;
-                    t.LastAccessTime = 0;
-                }
-            }
+        //                if (texture != null)
+        //                {
+        //                    texture.Dispose();
+        //                    texture = null;
+        //                }
+        //            }
 
-            if (_usedTextures.Count != 0)
-                _usedTextures.Clear();
-        }
+        //            first.Value.FrameCount = 0;
+        //            first.Value.Frames = null;
+        //            first.Value.LastAccessTime = 0;
+
+        //            _usedTextures.Remove(first);
+        //        }
+
+        //        first = next;
+        //    }
+
+        //    if (_usedTextures.Count != 0)
+        //        _usedTextures.Clear();
+        //}
 
         public readonly struct SittingInfoData
         {

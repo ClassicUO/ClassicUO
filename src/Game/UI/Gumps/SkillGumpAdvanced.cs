@@ -295,15 +295,24 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_skill.IsClickable && Mouse.LButtonPressed)
             {
-                uint serial = (uint) (World.Player + _skill.Index + 1);
-
-                UIManager.GetGump<SkillButtonGump>(serial)?.Dispose();
+                GetSpellFloatingButton(_skill.Index)?.Dispose();
 
                 SkillButtonGump skillButtonGump = new SkillButtonGump(_skill, Mouse.LDropPosition.X, Mouse.LDropPosition.Y);
                 UIManager.Add(skillButtonGump);
                 Rectangle rect = GumpsLoader.Instance.GetTexture(0x24B8).Bounds;
                 UIManager.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
             }
+        }
+
+        private static SkillButtonGump GetSpellFloatingButton(int id)
+        {
+            for (var i = UIManager.Gumps.Last; i != null; i = i.Previous)
+            {
+                if (i.Value is SkillButtonGump g && g.SkillID == id)
+                    return g;
+            }
+
+            return null;
         }
 
         public override void OnButtonClick(int buttonID)
