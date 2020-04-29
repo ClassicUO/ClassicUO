@@ -685,9 +685,9 @@ namespace ClassicUO.Game.Scenes
                             }
                             UIManager.AttemptDragControl(customgump, Mouse.Position, true);
                         }
-                        else
+                        else if (obj is Item item)
                         {
-                            PickupItemBegin(obj as Item, Mouse.Position.X, Mouse.Position.Y);
+                            PickupItemBegin(item, Mouse.Position.X, Mouse.Position.Y);
                         }
                     }
 
