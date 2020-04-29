@@ -1212,6 +1212,15 @@ namespace ClassicUO.Game.GameObjects
                                 Abilities[0] = Ability.BleedAttack;
                                 Abilities[1] = Ability.WhirlwindAttack;
                                 goto done;
+
+                            case 0x08FF: // Boomerang
+                                Abilities[0] = Ability.MysticArc;
+                                Abilities[1] = Ability.ConcussionBlow;
+                                break;
+                            case 0x090A: // Soul Glaive
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.MortalStrike;
+                                break;
                         }
                     }
                 }

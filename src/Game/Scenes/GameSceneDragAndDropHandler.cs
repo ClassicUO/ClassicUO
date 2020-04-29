@@ -51,9 +51,14 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private bool PickupItemBegin(Item item, int x, int y, int? amount = null, Point? offset = null)
+        private bool PickupItemBegin(uint serial, int x, int y, int? amount = null, Point? offset = null)
         {
-            if (World.Player.IsDead || ItemHold.Enabled || item == null || item.IsDestroyed || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
+            if (World.Player.IsDead || ItemHold.Enabled)
+                return false;
+
+            Item item = World.Items.Get(serial);
+
+            if (item == null || item.IsDestroyed || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
                 return false;
 
             if (!amount.HasValue && item.Amount > 1 && item.ItemData.IsStackable)

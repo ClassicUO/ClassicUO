@@ -152,7 +152,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            _okButton.MouseUp -= OkButtonOnMouseClick;
+            if (_okButton != null)
+                _okButton.MouseUp -= OkButtonOnMouseClick;
 
             base.Dispose();
         }
