@@ -68,6 +68,7 @@ namespace ClassicUO.Network
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnPacketSendRecv_new _recv_new, _send_new, _onRecv_new, _onSend_new;
 
         private delegate void OnInstall(void* header);
+        
         private delegate bool OnPacketSendRecv_new([In, Out] byte[] data, ref int length);
 
         struct PluginHeader
