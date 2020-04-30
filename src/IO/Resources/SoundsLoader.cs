@@ -34,7 +34,66 @@ namespace ClassicUO.IO.Resources
     {
         private static readonly char[] _mConfigFileDelimiters = {' ', ',', '\t'};
         private static readonly Dictionary<int, Tuple<string, bool>> _mMusicData = new Dictionary<int, Tuple<string, bool>>();
-        private readonly Dictionary<int, Sound> _sounds = new Dictionary<int, Sound>(), _musics = new Dictionary<int, Sound>();
+        private readonly Dictionary<int, Sound> _sounds = new Dictionary<int, Sound>(), _musics = new Dictionary<int, Sound>(), _midi_music = new Dictionary<int, Sound>()
+        {
+            {0,  new UOMidMusic(0, "oldult01", true) },
+            {1,  new UOMidMusic(1, "oldult02", true) },
+            {2,  new UOMidMusic(2, "oldult05", true) },
+            {3,  new UOMidMusic(3, "britain1", true) },
+            {4,  new UOMidMusic(4, "jhelom", false) },
+            {5,  new UOMidMusic(5, "magincia", true) },
+            {6,  new UOMidMusic(6, "samlethe", false) },
+            {7,  new UOMidMusic(7, "trinsic", true) },
+            {8,  new UOMidMusic(8, "yew", true) },
+            {9,  new UOMidMusic(9, "forest_a", false) },
+            {10, new UOMidMusic(10, "mountn_a", false) },
+            {11, new UOMidMusic(11, "swamp_a", false) },
+            {12, new UOMidMusic(12, "tavern03", false) },
+            {13, new UOMidMusic(13, "combat2", false) },
+            {14, new UOMidMusic(14, "death", false) },
+            {15, new UOMidMusic(15, "nujelm", true) },
+            {16, new UOMidMusic(16, "moonglow", true) },
+            {17, new UOMidMusic(17, "oldult04", false) },
+            {18, new UOMidMusic(18, "approach", false) },
+            {19, new UOMidMusic(19, "create1", false) },
+            {20, new UOMidMusic(20, "oldult03", true) },
+            {21, new UOMidMusic(21, "oldult06", true) },
+            {22, new UOMidMusic(22, "britain2", true) },
+            {23, new UOMidMusic(23, "lbcastle", false) },
+            {24, new UOMidMusic(24, "minoc", true) },
+            {25, new UOMidMusic(25, "serpents", true) },
+            {26, new UOMidMusic(26, "vesper", true) },
+            {27, new UOMidMusic(27, "cave01", false) },
+            {28, new UOMidMusic(28, "intown01", false) },
+            {29, new UOMidMusic(29, "plains_a", false) },
+            {30, new UOMidMusic(30, "tavern01", false) },
+            {31, new UOMidMusic(31, "tavern04", false) },
+            {32, new UOMidMusic(32, "combat3", false) },
+            {33, new UOMidMusic(33, "victory", false) },
+            {34, new UOMidMusic(34, "dungeon2", false) },
+            {35, new UOMidMusic(35, "oldult02", false) },
+            {36, new UOMidMusic(36, "dragflit", false) },
+            {37, new UOMidMusic(37, "combat3", false) },
+            {38, new UOMidMusic(38, "dragflit", false) },
+            {39, new UOMidMusic(39, "oldult04", true) },
+            {40, new UOMidMusic(40, "stones2", true) },
+            {41, new UOMidMusic(41, "bucsden", true) },
+            {42, new UOMidMusic(42, "linelle", false) },
+            {43, new UOMidMusic(43, "ocllo", true) },
+            {44, new UOMidMusic(44, "skarabra", true) },
+            {45, new UOMidMusic(45, "wind", true) },
+            {46, new UOMidMusic(46, "dungeon9", false) },
+            {47, new UOMidMusic(47, "jungle_a", false) },
+            {48, new UOMidMusic(48, "sailing", false) },
+            {49, new UOMidMusic(49, "tavern02", false) },
+            {50, new UOMidMusic(50, "combat1", false) },
+            {51, new UOMidMusic(51, "approach", false) },
+            {52, new UOMidMusic(52, "btcastle", false) },
+            {53, new UOMidMusic(53, "cove", true) },
+            {54, new UOMidMusic(54, "serpents", true) },
+            {55, new UOMidMusic(55, "create1", false) },
+            {56, new UOMidMusic(56, "jungle_a", false) },
+        };
         private UOFile _file;
 
         private SoundsLoader()
@@ -297,10 +356,19 @@ namespace ClassicUO.IO.Resources
 
         public Sound GetMusic(int index)
         {
-            if (!_musics.TryGetValue(index, out Sound music) && TryGetMusicData(index, out string name, out bool loop))
+            Sound music;
+
+            if (Client.Version >= ClientVersion.CV_306E)
             {
-                music = new UOMusic(index, name, loop);
-                _musics.Add(index, music);
+                if (!_musics.TryGetValue(index, out music) && TryGetMusicData(index, out string name, out bool loop))
+                {
+                    music = new UOMusic(index, name, loop);
+                    _musics.Add(index, music);
+                }
+            }
+            else if (_midi_music.TryGetValue(index, out music))
+            {
+                // nothing
             }
 
             return music;

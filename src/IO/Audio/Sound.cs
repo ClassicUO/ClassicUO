@@ -64,7 +64,7 @@ namespace ClassicUO.IO.Audio
             private set
             {
                 if (!IsNullOrEmpty(value))
-                    m_Name = value.Replace(".mp3", "");
+                    m_Name = value.Replace(".mp3", "").Replace(".mid", "");
                 else
                     m_Name = Empty;
             }
@@ -146,6 +146,11 @@ namespace ClassicUO.IO.Audio
 
         protected virtual void BeforePlay()
         {
+        }
+
+        public virtual void Update()
+        {
+
         }
 
         /// <summary>

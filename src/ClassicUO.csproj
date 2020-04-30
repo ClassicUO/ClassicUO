@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{71F289FA-0EF8-4F72-A26E-A8280C0931C5}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>ClassicUO</RootNamespace>
     <AssemblyName>ClassicUO</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
@@ -14,6 +14,7 @@
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
     <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseSharedCompilation>false</UseSharedCompilation>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -28,7 +29,6 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <UseSharedCompilation>false</UseSharedCompilation>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -203,6 +203,9 @@
     <Compile Include="Game\UI\Gumps\UOChatGump.cs" />
     <Compile Include="Game\UI\TextEntryRules.cs" />
     <Compile Include="Game\Weather.cs" />
+    <Compile Include="IO\Audio\Midi\MidiFile.cs" />
+    <Compile Include="IO\Audio\Midi\MidiLoader.cs" />
+    <Compile Include="IO\Audio\Midi\MidiSaver.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Network\Encryption\BlowfishBehaviour.cs" />
     <Compile Include="Network\Encryption\Encryption.cs" />

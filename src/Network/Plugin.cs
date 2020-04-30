@@ -65,8 +65,39 @@ namespace ClassicUO.Network
         [MarshalAs(UnmanagedType.FunctionPtr)] private RequestMove _requestMove;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnSetTitle _setTitle;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnTick _tick;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private OnPacketSendRecv_new _recv_new, _send_new, _onRecv_new, _onSend_new;
 
 
+        delegate bool OnPacketSendRecv_new([In, Out] byte[] data, ref int length);
+
+        struct PluginHeader
+        {
+            public int ClientVersion;
+            public IntPtr HWND;
+            public IntPtr OnRecv;
+            public IntPtr OnSend;
+            public IntPtr OnHotkeyPressed;
+            public IntPtr OnMouse;
+            public IntPtr OnPlayerPositionChanged;
+            public IntPtr OnClientClosing;
+            public IntPtr OnInitialize;
+            public IntPtr OnConnected;
+            public IntPtr OnDisconnected;
+            public IntPtr OnFocusGained;
+            public IntPtr OnFocusLost;
+            public IntPtr GetUOFilePath;
+            public IntPtr Recv;
+            public IntPtr Send;
+            public IntPtr GetPacketLength;
+            public IntPtr GetPlayerPosition;
+            public IntPtr CastSpell;
+            public IntPtr GetStaticImage;
+            public IntPtr Tick;
+            public IntPtr RequestMove;
+            public IntPtr SetTitle;
+
+            public IntPtr OnRecv_new, OnSend_new, Recv_new, Send_new;
+        }
 
         private Plugin(string path)
         {
@@ -235,8 +266,18 @@ namespace ClassicUO.Network
 
             if (header.Tick != IntPtr.Zero)
                 _tick = Marshal.GetDelegateForFunctionPointer<OnTick>(header.Tick);
-            IsValid = true;
 
+
+            if (header.OnRecv_new != IntPtr.Zero)
+                _onRecv_new = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv_new>(header.OnRecv_new);
+            if (header.OnSend_new != IntPtr.Zero)
+                _onSend_new = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv_new>(header.OnSend_new);
+            if (header.Recv_new != IntPtr.Zero)
+                _recv_new = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv_new>(header.Recv_new);
+            if (header.Send_new != IntPtr.Zero)
+                _send_new = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv_new>(header.Send_new);
+
+            IsValid = true;
 
             _onInitialize?.Invoke();
         }
@@ -299,13 +340,39 @@ namespace ClassicUO.Network
 
             foreach (Plugin plugin in _plugins)
             {
-                if (plugin._onRecv != null && !plugin._onRecv(ref data, ref length))
+                if (plugin._onRecv_new != null)
+                {
+                    if (!plugin._onRecv_new(data, ref length))
+                    {
+                        result = false;
+                    }
+                }
+                else if (plugin._onRecv != null && !plugin._onRecv(ref data, ref length))
                     result = false;
             }
 
             return result;
         }
 
+        internal static bool ProcessSendPacket(ref byte[] data, ref int length)
+        {
+            bool result = true;
+
+            foreach (Plugin plugin in _plugins)
+            {
+                if (plugin._onSend_new != null)
+                {
+                    if (!plugin._onSend_new(data, ref length))
+                    {
+                        result = false;
+                    }
+                }
+                else if (plugin._onSend != null && !plugin._onSend(ref data, ref length))
+                    result = false;
+            }
+
+            return result;
+        }
 
         internal static void OnClosing()
         {
@@ -341,20 +408,7 @@ namespace ClassicUO.Network
             foreach (Plugin t in _plugins)
                 t._onDisconnected?.Invoke();
         }
-
-        internal static bool ProcessSendPacket(ref byte[] data, ref int length)
-        {
-            bool result = true;
-
-            foreach (Plugin plugin in _plugins)
-            {
-                if (plugin._onSend != null && !plugin._onSend(ref data, ref length))
-                    result = false;
-            }
-
-            return result;
-        }
-
+        
         internal static bool ProcessHotkeys(int key, int mod, bool ispressed)
         {
             bool result = true;

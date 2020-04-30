@@ -32,7 +32,7 @@ namespace ClassicUO.Game.Managers
 {
     internal class AudioManager
     {
-        private UOMusic[] _currentMusic = { null, null };
+        private Sound[] _currentMusic = { null, null };
         private List<UOSound> _currentSounds;
         private bool _canReproduceAudio = true;
 
@@ -169,7 +169,7 @@ namespace ClassicUO.Game.Managers
 
                 int idx = iswarmode ? 1 : 0;
                 _currentMusicIndices[idx] = music;
-                _currentMusic[idx] = (UOMusic) m;
+                _currentMusic[idx] = m;
                 _currentMusic[idx].Play(false, volume: volume);
             }
         }
