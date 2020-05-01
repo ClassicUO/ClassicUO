@@ -24,10 +24,13 @@ build_script:
     msbuild "c:\projects\classicuo\ClassicUO.sln" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /p:Configuration=Release /p:Platform=x64 /p:DefineConstants="DEV_BUILD"
 
 
+    xcopy "c:\projects\classicuo\tools\monokickstart\*.*" "c:\projects\classicuo\bin\Release" /Y
+
+
     7z a ClassicUO-dev-preview-release.zip "c:\projects\classicuo\bin\Release\*"
 
 
-    dotnet run --configuration Release --project "c:\projects\classicuo\tools\ManifestCreator\ManifestCreator.csproj" "c:\projects\classicuo\bin\Release" "dev-preview" "ClassicUO-dev-preview-release.zip"
+    dotnet run --project "c:\projects\classicuo\tools\ManifestCreator\ManifestCreator.csproj" "c:\projects\classicuo\bin\Release" "dev-preview" "ClassicUO-dev-preview-release.zip"
 artifacts:
 - path: ClassicUO-dev-preview-release.zip
   name: ClassicUO
