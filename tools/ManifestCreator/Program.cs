@@ -73,6 +73,7 @@ namespace ManifestCreator
             "System.dll",
             "System.Drawing.dll",
             "System.IO.Compression.dll",
+            "System.IO.Compression.FileSystem.dll",
             "System.Numerics.dll",
             "System.Runtime.Serialization.dll",
             "System.Windows.Forms.dll",
