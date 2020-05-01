@@ -49,26 +49,8 @@ namespace ClassicUO.Network
 
         static Updater()
         {
-            try
-            {
-                ServicePointManager.ServerCertificateValidationCallback = delegate
-                {
-                    return true;
-                };
-            }
-            catch
-            {
-
-            }
-
-            try
-            {
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-            }
-            catch
-            {
-
-            }
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
         }
 
         public Updater()
