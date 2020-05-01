@@ -39,7 +39,7 @@ namespace ManifestCreator
             "libs/lib64/libmojoshader.so",
             "libs/lib64/libMonoPosixHelper.so",
             "libs/lib64/libMonoSupportW.so",
-            "libs/lib64/lib/libSDL2-2.0.so.0",
+            "libs/lib64/libSDL2-2.0.so.0",
             "libs/lib64/libSDL2_image-2.0.so.0",
             "libs/lib64/libtheorafile.so",
             "libs/lib64/libz.so",
