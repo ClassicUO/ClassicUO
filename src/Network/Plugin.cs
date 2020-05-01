@@ -65,11 +65,13 @@ namespace ClassicUO.Network
         [MarshalAs(UnmanagedType.FunctionPtr)] private RequestMove _requestMove;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnSetTitle _setTitle;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnTick _tick;
-        [MarshalAs(UnmanagedType.FunctionPtr)] private OnPacketSendRecv_new _recv_new, _send_new, _onRecv_new, _onSend_new;
-
+        [MarshalAs(UnmanagedType.FunctionPtr)] private OnPacketSendRecv_new  _onRecv_new, _onSend_new;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private OnPacketSendRecv_new_intptr _recv_new, _send_new;
         private delegate void OnInstall(void* header);
         
-        private delegate bool OnPacketSendRecv_new([In, Out] byte[] data, ref int length);
+        private delegate bool OnPacketSendRecv_new(byte[] data, ref int length);
+        private delegate bool OnPacketSendRecv_new_intptr(IntPtr data, ref int length);
+
 
         struct PluginHeader
         {
@@ -173,7 +175,9 @@ namespace ClassicUO.Network
                 HWND = hwnd,
                 GetUOFilePath = Marshal.GetFunctionPointerForDelegate(_getUoFilePath),
                 RequestMove = Marshal.GetFunctionPointerForDelegate(_requestMove),
-                SetTitle = Marshal.GetFunctionPointerForDelegate(_setTitle)
+                SetTitle = Marshal.GetFunctionPointerForDelegate(_setTitle),
+                Recv_new = Marshal.GetFunctionPointerForDelegate(_recv_new),
+                Send_new = Marshal.GetFunctionPointerForDelegate(_send_new),
             };
 
             void* func = &header;
@@ -277,10 +281,7 @@ namespace ClassicUO.Network
                 _onRecv_new = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv_new>(header.OnRecv_new);
             if (header.OnSend_new != IntPtr.Zero)
                 _onSend_new = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv_new>(header.OnSend_new);
-            if (header.Recv_new != IntPtr.Zero)
-                _recv_new = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv_new>(header.Recv_new);
-            if (header.Send_new != IntPtr.Zero)
-                _send_new = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv_new>(header.Send_new);
+
 
             IsValid = true;
 
@@ -478,15 +479,20 @@ namespace ClassicUO.Network
             return true;
         }
 
-        private static bool OnPluginRecv_new(byte[] data, ref int length)
+        private static bool OnPluginRecv_new(IntPtr buffer, ref int length)
         {
+            byte[] data = new byte[length];
+            Marshal.Copy(buffer, data, 0, length);
             NetClient.EnqueuePacketFromPlugin(data, length);
 
             return true;
         }
 
-        private static bool OnPluginSend_new(byte[] data, ref int length)
+        private static bool OnPluginSend_new(IntPtr buffer, ref int length)
         {
+            byte[] data = new byte[length];
+            Marshal.Copy(buffer, data, 0, length);
+
             if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
                 NetClient.Socket.Send(data, true);
             else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected)

@@ -24,6 +24,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{D5E764E7
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManifestCreator", "tools\ManifestCreator\ManifestCreator.csproj", "{71196848-ED41-4A9A-944C-F5776A9EFA07}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "monokickstart", "monokickstart", "{D7DD340F-1EE2-4F8A-AA3E-A8FC76098AD6}"
+	ProjectSection(SolutionItems) = preProject
+		tools\monokickstart\Mono.Posix.dll = tools\monokickstart\Mono.Posix.dll
+		tools\monokickstart\Mono.Security.dll = tools\monokickstart\Mono.Security.dll
+		tools\monokickstart\mscorlib.dll = tools\monokickstart\mscorlib.dll
+		tools\monokickstart\Newtonsoft.Json.dll = tools\monokickstart\Newtonsoft.Json.dll
+		tools\monokickstart\System.Core.dll = tools\monokickstart\System.Core.dll
+		tools\monokickstart\System.dll = tools\monokickstart\System.dll
+		tools\monokickstart\System.IO.Compression.dll = tools\monokickstart\System.IO.Compression.dll
+		tools\monokickstart\System.IO.Compression.FileSystem.dll = tools\monokickstart\System.IO.Compression.FileSystem.dll
+		tools\monokickstart\System.Xml.dll = tools\monokickstart\System.Xml.dll
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +77,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{71F289FA-0EF8-4F72-A26E-A8280C0931C5} = {36371756-8DDA-41A4-BB9A-B7651459ADC1}
 		{71196848-ED41-4A9A-944C-F5776A9EFA07} = {D5E764E7-2719-4937-AC10-0D2D789A1134}
+		{D7DD340F-1EE2-4F8A-AA3E-A8FC76098AD6} = {D5E764E7-2719-4937-AC10-0D2D789A1134}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0A99E91A-ADAB-45C3-8170-2656140F6EFA}
