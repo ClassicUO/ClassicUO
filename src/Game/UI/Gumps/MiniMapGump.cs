@@ -160,8 +160,11 @@ namespace ClassicUO.Game.UI.Gumps
                 int w = Width >> 1;
                 int h = Height >> 1;
 
-                foreach (Mobile mob in World.Mobiles.Where(s => s != World.Player))
+                foreach (Mobile mob in World.Mobiles)
                 {
+                    if (mob == World.Player)
+                        continue;
+
                     int xx = mob.X - World.Player.X;
                     int yy = mob.Y - World.Player.Y;
 
@@ -194,7 +197,7 @@ namespace ClassicUO.Game.UI.Gumps
             return false;
         }
 
-        public void ForceUpdate()
+        protected override void UpdateContents()
         {
             CreateMap();
         }

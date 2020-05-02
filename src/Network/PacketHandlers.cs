@@ -807,6 +807,10 @@ namespace ClassicUO.Network
                         UIManager.GetGump<PaperDollGump>(cont)?.RequestUpdateContents();
                     }
                 }
+                else if (it.IsMulti)
+                {
+                    UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
+                }
 
                 World.RemoveItem(it, true);
 
@@ -3461,7 +3465,7 @@ namespace ClassicUO.Network
                     {
                         house.Generate();
                         BoatMovingManager.ClearSteps(serial);
-                        UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
+                        UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
                         if (World.HouseManager.EntityIntoHouse(serial, World.Player))
                             Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
                     }
@@ -4003,7 +4007,7 @@ namespace ClassicUO.Network
                 UIManager.GetGump<HouseCustomizationGump>(house.Serial)?.Update();
             }
 
-            UIManager.GetGump<MiniMapGump>()?.ForceUpdate();
+            UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
 
             if (World.HouseManager.EntityIntoHouse(serial, World.Player))
                 Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);

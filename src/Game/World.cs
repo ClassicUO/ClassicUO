@@ -24,6 +24,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility.Platforms;
 
 using Microsoft.Xna.Framework;
@@ -181,6 +182,8 @@ namespace ClassicUO.Game
                 }
             }
 
+            UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
+
             Client.Game.Scene.Audio.PlayMusic(music, true);
         }
 
@@ -242,7 +245,10 @@ namespace ClassicUO.Game
                         if (item.IsMulti)
                         {
                             if (HouseManager.TryToRemove(item, ClientViewRange))
+                            {
+                                UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
                                 RemoveItem(item);
+                            }
                         }
                         else
                             RemoveItem(item);
