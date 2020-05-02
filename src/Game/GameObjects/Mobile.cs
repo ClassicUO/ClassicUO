@@ -738,7 +738,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (Steps.Count > 1 && !IsMounted)
                     {
-                        ref var last_st = ref Steps.Back();
+                        var last_st = Steps[1];
 
                         //if (last_st.Time - step.Time <= 80)
                         {
