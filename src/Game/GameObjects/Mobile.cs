@@ -296,13 +296,11 @@ namespace ClassicUO.Game.GameObjects
             if (endX == x && endY == y && endZ == z && endDir == direction) 
                 return true;
 
-            uint time = Time.Ticks;
-
             if (Steps.Count == 0)
             {
                 if (!IsWalking)
                     SetAnimation(0xFF);
-                LastStepTime = time;
+                LastStepTime = Time.Ticks;
             }
 
             Direction moveDir = DirectionHelper.CalculateDirection(endX, endY, x, y);
@@ -317,7 +315,6 @@ namespace ClassicUO.Game.GameObjects
                     step.Z = endZ;
                     step.Direction = (byte) moveDir;
                     step.Run = run;
-                    step.Time = time;
                     Steps.AddToBack(step);
                 }
 
@@ -326,7 +323,6 @@ namespace ClassicUO.Game.GameObjects
                 step.Z = z;
                 step.Direction = (byte) moveDir;
                 step.Run = run;
-                step.Time = time;
                 Steps.AddToBack(step);
             }
 
@@ -337,14 +333,13 @@ namespace ClassicUO.Game.GameObjects
                 step.Z = z;
                 step.Direction = (byte) direction;
                 step.Run = run;
-                step.Time = time;
                 Steps.AddToBack(step);
             }
 
             return true;
         }
 
-        internal bool GetEndPosition(out int x, out int y, out sbyte z, out Direction dir)
+        internal void GetEndPosition(out int x, out int y, out sbyte z, out Direction dir)
         {
             if (Steps.Count == 0)
             {
@@ -352,17 +347,15 @@ namespace ClassicUO.Game.GameObjects
                 y = Y;
                 z = Z;
                 dir = Direction;
-
-                return false;
             }
-
-            ref Step step = ref Steps.Back();
-            x = step.X;
-            y = step.Y;
-            z = step.Z;
-            dir = (Direction) step.Direction;
-
-            return true;
+            else
+            {
+                ref Step step = ref Steps.Back();
+                x = step.X;
+                y = step.Y;
+                z = step.Z;
+                dir = (Direction) step.Direction;
+            }
         }
 
 
@@ -739,29 +732,30 @@ namespace ClassicUO.Game.GameObjects
                     if (AnimationFromServer)
                         SetAnimation(0xFF);
 
-                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run);
-
-                    bool ok = false;
-                    if (Steps.Count > 1 /*&& !IsMounted*/)
+                    int delay = (int) Time.Ticks - (int) LastStepTime;
+                    if (this != World.Player && !IsMounted)
                     {
-                        var last_st = Steps.Back();
-                        int new_max_delay = Math.Abs(maxDelay - (int) Math.Abs(last_st.Time - step.Time));
+                        const int HIGH_MOUNT_SPEED = MovementSpeed.STEP_DELAY_RUN - (MovementSpeed.STEP_DELAY_MOUNT_RUN >> 2);
+                        const int HIGH_FOOT_SPEED = MovementSpeed.STEP_DELAY_WALK - (MovementSpeed.STEP_DELAY_MOUNT_RUN >> 1);
 
-                        //if (new_max_delay >= 50)
+                        if (step.Run)
                         {
-                            maxDelay = new_max_delay;
-                            //ok = true;
+                            if (delay <= HIGH_MOUNT_SPEED)
+                                SpeedMode = CharacterSpeedType.FastUnmount;
+                            else
+                                SpeedMode = CharacterSpeedType.Normal;
+                        }
+                        else
+                        {
+                            if (delay <= HIGH_FOOT_SPEED)
+                                SpeedMode = CharacterSpeedType.FastUnmount;
+                            else
+                                SpeedMode = CharacterSpeedType.Normal;
                         }
                     }
+                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (int) Client.Game.FrameDelay[1];
 
-                    //maxDelay -= (int) Client.Game.FrameDelay[1];
-
-                    if (maxDelay <= 0)
-                        maxDelay = 1;
-
-
-                    int delay = (int) Time.Ticks - (int) LastStepTime;
-                    bool removeStep = delay >= maxDelay || ok;
+                    bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
 
                     if (X != step.X || Y != step.Y)
@@ -1121,7 +1115,6 @@ namespace ClassicUO.Game.GameObjects
 
         internal struct Step
         {
-            public uint Time;
             public int X, Y;
             public sbyte Z;
             public byte Direction;
