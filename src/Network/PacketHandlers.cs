@@ -2857,7 +2857,8 @@ namespace ClassicUO.Network
 
 
             byte group = AnimationsLoader.Instance.GetDieGroupIndex(owner.Graphic, running != 0, true);
-            owner.SetAnimation(group, 0, 5, 1);
+            owner.SetAnimation(group, 0, 5, 1, false, false);
+            owner.AnimIndex = 0;
 
             if (ProfileManager.Current.AutoOpenCorpses)
                 World.Player.TryOpenCorpses();
