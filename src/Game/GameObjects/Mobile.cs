@@ -314,6 +314,7 @@ namespace ClassicUO.Game.GameObjects
                     step.Z = endZ;
                     step.Direction = (byte) moveDir;
                     step.Run = run;
+                    step.Time = Time.Ticks;
                     Steps.AddToBack(step);
                 }
 
@@ -322,6 +323,7 @@ namespace ClassicUO.Game.GameObjects
                 step.Z = z;
                 step.Direction = (byte) moveDir;
                 step.Run = run;
+                step.Time = Time.Ticks;
                 Steps.AddToBack(step);
             }
 
@@ -332,6 +334,7 @@ namespace ClassicUO.Game.GameObjects
                 step.Z = z;
                 step.Direction = (byte) direction;
                 step.Run = run;
+                step.Time = Time.Ticks;
                 Steps.AddToBack(step);
             }
 
@@ -731,7 +734,24 @@ namespace ClassicUO.Game.GameObjects
                     if (AnimationFromServer)
                         SetAnimation(0xFF);
 
-                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (int) Client.Game.FrameDelay[1];
+                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run);
+
+                    if (Steps.Count > 1 && !IsMounted)
+                    {
+                        ref var last_st = ref Steps.Back();
+
+                        //if (last_st.Time - step.Time <= 80)
+                        {
+                            maxDelay = (int) (last_st.Time - step.Time); //step.Run ? 100 : 200;
+                            //LastStepTime = last_st.Time;
+                        }
+                    }
+
+                    maxDelay -= (int) Client.Game.FrameDelay[1];
+
+                    if (maxDelay <= 0)
+                        maxDelay = 1;
+
                     int delay = (int) Time.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
@@ -1093,6 +1113,7 @@ namespace ClassicUO.Game.GameObjects
 
         internal struct Step
         {
+            public uint Time;
             public int X, Y;
             public sbyte Z;
             public byte Direction;
