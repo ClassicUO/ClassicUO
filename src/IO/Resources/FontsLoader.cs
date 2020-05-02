@@ -1213,7 +1213,7 @@ namespace ClassicUO.IO.Resources
             uint[] pData = new uint[blocksize];
             //uint* pData = stackalloc uint[blocksize];
             uint* table = (uint*) _unicodeFontAddress[font];
-            int lineOffsY = 1 + _topMargin;
+            int lineOffsY = _topMargin;
             MultilinesFontInfo ptr = info;
             uint datacolor = 0;
 
