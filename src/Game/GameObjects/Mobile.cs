@@ -293,7 +293,8 @@ namespace ClassicUO.Game.GameObjects
 
             GetEndPosition(out int endX, out int endY, out sbyte endZ, out Direction endDir);
 
-            if (endX == x && endY == y && endZ == z && endDir == direction) return true;
+            if (endX == x && endY == y && endZ == z && endDir == direction) 
+                return true;
 
             if (Steps.Count == 0)
             {
@@ -731,8 +732,34 @@ namespace ClassicUO.Game.GameObjects
                     if (AnimationFromServer)
                         SetAnimation(0xFF);
 
-                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (int) Client.Game.FrameDelay[1];
                     int delay = (int) Time.Ticks - (int) LastStepTime;
+                    bool mounted = IsMounted ||
+                                  SpeedMode == CharacterSpeedType.FastUnmount ||
+                                  SpeedMode == CharacterSpeedType.FastUnmountAndCantRun ||
+                                  IsFlying;
+                    bool run = step.Run;
+
+                    if (this != World.Player && Steps.Count > 1)
+                    {
+                        if (run)
+                        {
+                            if (delay <= MovementSpeed.STEP_DELAY_MOUNT_RUN)
+                            {
+                                mounted = true;
+                            }
+                        }
+                        else
+                        {
+                            if (delay <= MovementSpeed.STEP_DELAY_MOUNT_WALK)
+                            {
+                                mounted = true;
+                            }
+                        }
+                    }
+
+                    
+                    int maxDelay = MovementSpeed.TimeToCompleteMovement(run, mounted) - (int) Client.Game.FrameDelay[1];
+
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
 
