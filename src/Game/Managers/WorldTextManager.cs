@@ -315,7 +315,7 @@ namespace ClassicUO.Game.Managers
                     if (_damages.TryGetValue(tuple.Item1, out var dmg))
                     {
                         _damages.Remove(tuple.Item1);
-                        _damages.Add(tuple.Item2, dmg);
+                        _damages[tuple.Item2] = dmg;
                     }
                 }
 
