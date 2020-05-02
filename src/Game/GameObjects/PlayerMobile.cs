@@ -1470,7 +1470,12 @@ namespace ClassicUO.Game.GameObjects
                     x = newX;
                     y = newY;
                     z = newZ;
-                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(this, run);
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(run,
+                                                                             IsMounted || 
+                                                                             SpeedMode == CharacterSpeedType.FastUnmount || 
+                                                                             SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || 
+                                                                             IsFlying
+                                                                             );
                 }
             }
             else
@@ -1491,7 +1496,11 @@ namespace ClassicUO.Game.GameObjects
                     x = newX;
                     y = newY;
                     z = newZ;
-                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(this, run);
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(run,
+                                                                             IsMounted ||
+                                                                             SpeedMode == CharacterSpeedType.FastUnmount ||
+                                                                             SpeedMode == CharacterSpeedType.FastUnmountAndCantRun ||
+                                                                             IsFlying);
                 }
 
                 direction = newDir;
