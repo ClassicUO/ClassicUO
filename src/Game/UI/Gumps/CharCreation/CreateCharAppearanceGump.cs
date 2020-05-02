@@ -471,7 +471,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             item.Graphic = (ushort)id;
             item.Hue = hue;
             item.Layer = layer;
-            World.Items.Add(item);
             //
 
             return item;

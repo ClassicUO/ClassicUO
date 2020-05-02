@@ -670,7 +670,7 @@ namespace ClassicUO.Network
             if (World.Player.IsDead)
                 World.ChangeSeason(Seasons.Desolation, 42);
 
-            if (Client.Version >= Data.ClientVersion.CV_70796)
+            if (Client.Version >= Data.ClientVersion.CV_70796 && ProfileManager.Current != null)
             {
                 NetClient.Socket.Send(new PShowPublicHouseContent(ProfileManager.Current.ShowHouseContent));
             }
@@ -1303,8 +1303,6 @@ namespace ClassicUO.Network
             item.Amount = 1;
 
             Entity entity = World.Get(item.Container);
-
-            World.Items.Add(item);
 
             if (entity != null && (int) item.Layer < entity.Equipment.Length)
             {
@@ -2242,7 +2240,6 @@ namespace ClassicUO.Network
                 }
 
                 item.CheckGraphicChange();
-                World.Items.Add(item);
             }
 
             if (serial == World.Player)
@@ -4428,8 +4425,6 @@ namespace ClassicUO.Network
             item.Container = containerSerial;
 
             container.PushToBack(item);
-            World.Items.Add(item);
-
 
             if (SerialHelper.IsMobile(containerSerial))
             {
@@ -4539,10 +4534,10 @@ namespace ClassicUO.Network
                     {
                         return;
                     }
-                    
+
                     obj = mobile;
                     mobile.Graphic = (ushort) (graphic + graphic_inc);
-                    mobile.Direction = direction;
+                    mobile.Direction = direction & Direction.Up;
                     mobile.FixHue(hue);
                     mobile.X = x;
                     mobile.Y = y;
@@ -4572,7 +4567,6 @@ namespace ClassicUO.Network
                         Console.WriteLine("======= UpdateObject function: item: {0:X8}, container: {1:X8}", item.Serial, item.Container);
                         //RemoveItemFromContainer(item);
                         //item.Container = 0xFFFF_FFFF;
-                        //World.Items.Add(item);
                     }
                 }
                 else if (SerialHelper.IsMobile(serial))
@@ -4687,14 +4681,11 @@ namespace ClassicUO.Network
 
             if (SerialHelper.IsMobile(serial) && mobile != null)
             {
-                World.Mobiles.Add(mobile);
                 mobile.AddToTile();
                 mobile.UpdateScreenPosition();
             }
             else if (SerialHelper.IsItem(serial) && item != null)
             {
-                World.Items.Add(item);
-
                 if (item.OnGround)
                 {
                     if (ItemHold.Serial == serial && ItemHold.Dropped)

@@ -24,7 +24,6 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
-using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility.Platforms;
 
 using Microsoft.Xna.Framework;
@@ -108,7 +107,7 @@ namespace ClassicUO.Game
 
                     if (Map != null)
                     {
-                        if (MapIndex >= 0) 
+                        if (MapIndex >= 0)
                             Map.Destroy();
 
                         ushort x = Player.X;
@@ -152,7 +151,10 @@ namespace ClassicUO.Game
 
         public static IsometricLight Light { get; } = new IsometricLight
         {
-            Overall = 0, Personal = 0, RealOverall = 0, RealPersonal = 0
+            Overall = 0,
+            Personal = 0,
+            RealOverall = 0,
+            RealPersonal = 0
         };
 
         public static LockedFeatures ClientLockedFeatures { get; } = new LockedFeatures();
@@ -181,8 +183,6 @@ namespace ClassicUO.Game
                     }
                 }
             }
-
-            UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
 
             Client.Game.Scene.Audio.PlayMusic(music, true);
         }
@@ -245,10 +245,7 @@ namespace ClassicUO.Game
                         if (item.IsMulti)
                         {
                             if (HouseManager.TryToRemove(item, ClientViewRange))
-                            {
-                                UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
                                 RemoveItem(item);
-                            }
                         }
                         else
                             RemoveItem(item);
@@ -275,14 +272,16 @@ namespace ClassicUO.Game
 
         public static bool Contains(uint serial)
         {
-            if (SerialHelper.IsItem(serial)) return Items.Contains(serial);
+            if (SerialHelper.IsItem(serial))
+                return Items.Contains(serial);
 
             return SerialHelper.IsMobile(serial) && Mobiles.Contains(serial);
         }
 
         public static Entity Get(uint serial)
         {
-            if (SerialHelper.IsItem(serial)) return Items.Get(serial);
+            if (SerialHelper.IsItem(serial))
+                return Items.Get(serial);
 
             return SerialHelper.IsMobile(serial) ? Mobiles.Get(serial) : null;
         }
@@ -293,8 +292,8 @@ namespace ClassicUO.Game
 
             if (item == null /*|| item.IsDestroyed*/)
             {
-                //Items.Remove(serial);
                 item = Item.Create(serial);
+                Items.Add(item);
             }
 
             return item;
@@ -306,8 +305,8 @@ namespace ClassicUO.Game
 
             if (mob == null /*|| mob.IsDestroyed*/)
             {
-                //Mobiles.Remove(serial);
                 mob = Mobile.Create(serial);
+                Mobiles.Add(mob);
             }
 
             return mob;
@@ -374,7 +373,7 @@ namespace ClassicUO.Game
         }
 
         public static void AddEffect(GraphicEffectType type, uint source, uint target,
-                                     ushort graphic, ushort hue, 
+                                     ushort graphic, ushort hue,
                                      ushort srcX, ushort srcY, sbyte srcZ,
                                      ushort targetX, ushort targetY, sbyte targetZ,
                                      byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode)
@@ -462,7 +461,7 @@ namespace ClassicUO.Game
                             break;
                         }
                     }
-                    else 
+                    else
                         break;
                 }
             }
@@ -524,8 +523,8 @@ namespace ClassicUO.Game
                         }
                         else if (scanType == SCAN_TYPE_OBJECT.STO_FOLLOWERS)
                         {
-                            if (!(mobile.IsRenamable && 
-                                mobile.NotorietyFlag != NotorietyFlag.Invulnerable && 
+                            if (!(mobile.IsRenamable &&
+                                mobile.NotorietyFlag != NotorietyFlag.Invulnerable &&
                                 mobile.NotorietyFlag != NotorietyFlag.Enemy))
                             {
                                 continue;
@@ -537,7 +536,7 @@ namespace ClassicUO.Game
                                 mobile.NotorietyFlag == NotorietyFlag.Innocent ||
                                 mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
                             {
-                               continue;
+                                continue;
                             }
                         }
 
@@ -641,7 +640,7 @@ namespace ClassicUO.Game
                             break;
                         }
                     }
-                    else 
+                    else
                         break;
                 }
             }
@@ -653,7 +652,7 @@ namespace ClassicUO.Game
 
             return selected?.Serial ?? 0;
         }
-        
+
         public static void Clear()
         {
             foreach (Mobile mobile in Mobiles)
@@ -716,14 +715,12 @@ namespace ClassicUO.Game
                         continue;
                 }
 
-                RemoveItem(item);
-
                 _toRemove.Add(item);
             }
 
             foreach (var serial in _toRemove)
             {
-                Items.Remove(serial);
+                RemoveItem(serial, true);
             }
 
             _toRemove.Clear();
@@ -736,14 +733,12 @@ namespace ClassicUO.Game
                         continue;
                 }
 
-                RemoveMobile(mob);
-
                 _toRemove.Add(mob);
             }
 
             foreach (var serial in _toRemove)
             {
-                Mobiles.Remove(serial);
+                RemoveMobile(serial, true);
             }
 
             _toRemove.Clear();
