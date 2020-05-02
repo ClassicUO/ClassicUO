@@ -735,8 +735,8 @@ namespace ClassicUO.Game.GameObjects
                     int delay = (int) Time.Ticks - (int) LastStepTime;
                     if (this != World.Player && !IsMounted)
                     {
-                        const int HIGH_MOUNT_SPEED = MovementSpeed.STEP_DELAY_RUN - (MovementSpeed.STEP_DELAY_MOUNT_RUN >> 2);
-                        const int HIGH_FOOT_SPEED = MovementSpeed.STEP_DELAY_WALK - (MovementSpeed.STEP_DELAY_MOUNT_RUN >> 1);
+                        const int HIGH_MOUNT_SPEED = MovementSpeed.STEP_DELAY_MOUNT_RUN - (MovementSpeed.STEP_DELAY_MOUNT_RUN >> 2);
+                        const int HIGH_FOOT_SPEED = MovementSpeed.STEP_DELAY_MOUNT_WALK - (MovementSpeed.STEP_DELAY_MOUNT_RUN >> 1);
 
                         if (step.Run)
                         {
