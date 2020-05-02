@@ -32,8 +32,7 @@
 	<dllmap dll="i:odbc32.dll" target="libodbc.so.2" os="!windows,osx"/>
 	<dllmap dll="oci" target="libclntsh.so" os="!windows,osx"/>
 	<dllmap dll="db2cli" target="libdb2_36.so" os="!windows,osx"/>
-
-  <dllmap dll="i:msvcrt" target="libc.so.6" os="!windows,osx"/>
+	<dllmap dll="i:msvcrt" target="libc.so.6" os="!windows,osx"/>
 	<dllmap dll="i:msvcrt.dll" target="libc.so.6" os="!windows,osx"/>
 	<dllmap dll="sqlite" target="libsqlite.so.0" os="!windows,osx"/>
 	<dllmap dll="sqlite3" target="libsqlite3.so.0" os="!windows,osx"/>
@@ -58,7 +57,6 @@
 	<dllmap dll="i:odbc32.dll" target="libiodbc.dylib" os="osx"/>
 	<dllmap dll="oci" target="libclntsh.dylib" os="osx"/>
 	<dllmap dll="db2cli" target="libdb2_36.dylib" os="osx"/>
-	<dllmap dll="libmono-btls-shared" target="$mono_libdir/libmono-btls-shared.dylib" os="osx"/>
 	<dllmap dll="i:msvcrt" target="libc.dylib" os="osx"/>
 	<dllmap dll="i:msvcrt.dll" target="libc.dylib" os="osx"/>
 	<dllmap dll="sqlite" target="libsqlite.0.dylib" os="osx"/>
