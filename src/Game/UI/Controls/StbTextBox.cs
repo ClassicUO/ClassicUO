@@ -593,7 +593,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 MultilinesFontInfo info = _rendererText.GetInfo();
 
-                int drawY = 0;
+                int drawY = 1;
                 int start = 0;
 
                 while (info != null && selectStart < selectEnd)
@@ -628,7 +628,7 @@ namespace ClassicUO.Game.UI.Controls
                                            x + drawX,
                                            y + drawY,
                                            endX,
-                                           info.MaxHeight,
+                                           info.MaxHeight + 1,
                                            ref _hueVector);
 
                             break;
@@ -641,7 +641,7 @@ namespace ClassicUO.Game.UI.Controls
                                        x + drawX,
                                        y + drawY,
                                        info.Width - drawX,
-                                        info.MaxHeight,
+                                        info.MaxHeight + 1,
                                        ref _hueVector);
 
                         // first selection is gone. M
