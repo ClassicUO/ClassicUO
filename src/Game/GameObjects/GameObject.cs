@@ -64,7 +64,7 @@ namespace ClassicUO.Game.GameObjects
             [MethodImpl(256)]
             get
             {
-                if (World.Player == null || IsDestroyed)
+                if (World.Player == null /*|| IsDestroyed*/)
                     return ushort.MaxValue;
 
                 if (this == World.Player)
