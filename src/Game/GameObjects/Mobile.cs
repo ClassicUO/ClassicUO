@@ -690,7 +690,7 @@ namespace ClassicUO.Game.GameObjects
                                 if ((Serial & 0x80000000) != 0)
                                 {
                                     World.CorpseManager.Remove(0, Serial);
-                                    World.RemoveMobile(Serial, true);
+                                    World.RemoveMobile(Serial);
                                 }
                             }
                         }
@@ -700,13 +700,13 @@ namespace ClassicUO.Game.GameObjects
                     else if ((Serial & 0x80000000) != 0)
                     {
                         World.CorpseManager.Remove(0, Serial);
-                        World.RemoveMobile(Serial, true);
+                        World.RemoveMobile(Serial);
                     }
                 }
                 else if ((Serial & 0x80000000) != 0)
                 {
                     World.CorpseManager.Remove(0, Serial);
-                    World.RemoveMobile(Serial, true);
+                    World.RemoveMobile(Serial);
                 }
 
                 LastAnimationChangeTime = Time.Ticks + currentDelay;
