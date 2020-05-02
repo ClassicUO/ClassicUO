@@ -27,15 +27,13 @@ namespace ClassicUO.Game.Data
 {
     internal static class MovementSpeed
     {
-        private const int STEP_DELAY_MOUNT_RUN = 100;
-        private const int STEP_DELAY_MOUNT_WALK = 200;
-        private const int STEP_DELAY_RUN = 200;
-        private const int STEP_DELAY_WALK = 400;
+        public const int STEP_DELAY_MOUNT_RUN = 100;
+        public const int STEP_DELAY_MOUNT_WALK = 200;
+        public const int STEP_DELAY_RUN = 200;
+        public const int STEP_DELAY_WALK = 400;
 
-        public static int TimeToCompleteMovement(Mobile mobile, bool run)
+        public static int TimeToCompleteMovement(bool run, bool mounted)
         {
-            bool mounted = mobile.IsMounted || mobile.SpeedMode == CharacterSpeedType.FastUnmount || mobile.SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || mobile.IsFlying;
-
             if (mounted) return run ? STEP_DELAY_MOUNT_RUN : STEP_DELAY_MOUNT_WALK;
 
             return run ? STEP_DELAY_RUN : STEP_DELAY_WALK;

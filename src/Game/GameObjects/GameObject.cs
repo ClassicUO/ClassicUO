@@ -64,33 +64,20 @@ namespace ClassicUO.Game.GameObjects
             [MethodImpl(256)]
             get
             {
-                if (World.Player == null)
+                if (World.Player == null || IsDestroyed)
                     return ushort.MaxValue;
+
+                if (this == World.Player)
+                    return 0;
 
                 int x = X, y = Y;
 
-                if (this is Mobile mobile)
+                if (this is Mobile mobile && mobile.Steps.Count != 0)
                 {
-                    if (mobile == World.Player)
-                        return 0;
-
-                    if (mobile.Steps.Count != 0)
-                    {
-                        ref var step = ref mobile.Steps.Back();
-                        x = step.X;
-                        y = step.Y;
-                    }
-                    //else if (LastX != 0xFFFF && LastY != 0xFFFF)
-                    //{
-                    //    x = LastX;
-                    //    y = LastY;
-                    //}
+                    ref var step = ref mobile.Steps.Back();
+                    x = step.X;
+                    y = step.Y;
                 }
-                //else if (LastX != 0xFFFF && LastY != 0xFFFF)
-                //{
-                //    x = LastX;
-                //    y = LastY;
-                //}
 
                 int fx = World.RangeSize.X;
                 int fy = World.RangeSize.Y;
@@ -98,8 +85,6 @@ namespace ClassicUO.Game.GameObjects
                 return Math.Max(Math.Abs(x - fx), Math.Abs(y - fy));
             }
         }
-
-        //public ushort LastX = 0xFFFF, LastY = 0xFFFF;
 
         public virtual void Update(double totalMS, double frameMS)
         {
@@ -125,7 +110,7 @@ namespace ClassicUO.Game.GameObjects
             AddToTile(X, Y);
         }
 
-      
+
         [MethodImpl(256)]
         public void RemoveFromTile()
         {
@@ -254,7 +239,7 @@ namespace ClassicUO.Game.GameObjects
             int width = isunicode ? FontsLoader.Instance.GetWidthUnicode(font, msg) : FontsLoader.Instance.GetWidthASCII(font, msg);
 
             if (width > 200)
-                width = isunicode ? FontsLoader.Instance.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder) : FontsLoader.Instance.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder);
+                width = isunicode ? FontsLoader.Instance.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder) : FontsLoader.Instance.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
             else
                 width = 0;
 
@@ -281,7 +266,7 @@ namespace ClassicUO.Game.GameObjects
                 if (delay < 10)
                     delay = 10;
 
-                timeToLive = (long)(4000 * rtext.LinesCount * delay / 100.0f);
+                timeToLive = (long) (4000 * rtext.LinesCount * delay / 100.0f);
             }
             else
             {
@@ -309,9 +294,6 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return;
 
-            //LastX = 0xFFFF;
-            //LastY = 0xFFFF;
-
             Next = null;
             Previous = null;
 
@@ -335,7 +317,7 @@ namespace ClassicUO.Game.GameObjects
             Bounds = Rectangle.Empty;
             FrameInfo = Rectangle.Empty;
             DrawTransparent = false;
-            
+
             Texture = null;
         }
     }
