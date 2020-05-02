@@ -4681,8 +4681,12 @@ namespace ClassicUO.Network
 
             if (SerialHelper.IsMobile(serial) && mobile != null)
             {
-                mobile.AddToTile();
-                mobile.UpdateScreenPosition();
+                if (!mobile.GetEndPosition(out int endX, out int endY, out sbyte endZ, out Direction endDir) || 
+                    (endX == x && endY == y && endZ == z && endDir == direction))
+                {
+                    mobile.AddToTile();
+                    mobile.UpdateScreenPosition();
+                }
             }
             else if (SerialHelper.IsItem(serial) && item != null)
             {
