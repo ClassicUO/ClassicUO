@@ -733,27 +733,32 @@ namespace ClassicUO.Game.GameObjects
                         SetAnimation(0xFF);
 
                     int delay = (int) Time.Ticks - (int) LastStepTime;
-                    if (this != World.Player && !IsMounted)
-                    {
-                        const int HIGH_MOUNT_SPEED = MovementSpeed.STEP_DELAY_RUN - (MovementSpeed.STEP_DELAY_MOUNT_RUN >> 1);
-                        const int HIGH_FOOT_SPEED = MovementSpeed.STEP_DELAY_WALK - MovementSpeed.STEP_DELAY_MOUNT_RUN;
+                    bool mounted = IsMounted ||
+                                  SpeedMode == CharacterSpeedType.FastUnmount ||
+                                  SpeedMode == CharacterSpeedType.FastUnmountAndCantRun ||
+                                  IsFlying;
+                    bool run = step.Run;
 
-                        if (step.Run)
+                    if (this != World.Player && Steps.Count > 1)
+                    {
+                        if (run)
                         {
-                            if (delay <= HIGH_MOUNT_SPEED)
-                                SpeedMode = CharacterSpeedType.FastUnmount;
-                            else
-                                SpeedMode = CharacterSpeedType.Normal;
+                            if (delay <= MovementSpeed.STEP_DELAY_MOUNT_RUN)
+                            {
+                                mounted = true;
+                            }
                         }
                         else
                         {
-                            if (delay <= HIGH_FOOT_SPEED)
-                                SpeedMode = CharacterSpeedType.FastUnmount;
-                            else
-                                SpeedMode = CharacterSpeedType.Normal;
+                            if (delay <= MovementSpeed.STEP_DELAY_MOUNT_WALK)
+                            {
+                                mounted = true;
+                            }
                         }
                     }
-                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (int) Client.Game.FrameDelay[1];
+
+                    
+                    int maxDelay = MovementSpeed.TimeToCompleteMovement(run, mounted) - (int) Client.Game.FrameDelay[1];
 
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
