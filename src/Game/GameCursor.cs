@@ -404,7 +404,7 @@ namespace ClassicUO.Game
                     int hotX = _cursorOffset[0, id];
                     int hotY = _cursorOffset[1, id];
 
-                    switch (TargetManager.TargeringType)
+                    switch (TargetManager.TargetingType)
                     {
                         case TargetType.Neutral:
                             _auraVector.X = 0x03B2;

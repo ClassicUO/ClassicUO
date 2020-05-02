@@ -65,8 +65,42 @@ namespace ClassicUO.Network
         [MarshalAs(UnmanagedType.FunctionPtr)] private RequestMove _requestMove;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnSetTitle _setTitle;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnTick _tick;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private OnPacketSendRecv_new  _onRecv_new, _onSend_new;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private OnPacketSendRecv_new_intptr _recv_new, _send_new;
+        private delegate void OnInstall(void* header);
+        
+        private delegate bool OnPacketSendRecv_new(byte[] data, ref int length);
+        private delegate bool OnPacketSendRecv_new_intptr(IntPtr data, ref int length);
 
 
+        struct PluginHeader
+        {
+            public int ClientVersion;
+            public IntPtr HWND;
+            public IntPtr OnRecv;
+            public IntPtr OnSend;
+            public IntPtr OnHotkeyPressed;
+            public IntPtr OnMouse;
+            public IntPtr OnPlayerPositionChanged;
+            public IntPtr OnClientClosing;
+            public IntPtr OnInitialize;
+            public IntPtr OnConnected;
+            public IntPtr OnDisconnected;
+            public IntPtr OnFocusGained;
+            public IntPtr OnFocusLost;
+            public IntPtr GetUOFilePath;
+            public IntPtr Recv;
+            public IntPtr Send;
+            public IntPtr GetPacketLength;
+            public IntPtr GetPlayerPosition;
+            public IntPtr CastSpell;
+            public IntPtr GetStaticImage;
+            public IntPtr Tick;
+            public IntPtr RequestMove;
+            public IntPtr SetTitle;
+
+            public IntPtr OnRecv_new, OnSend_new, Recv_new, Send_new;
+        }
 
         private Plugin(string path)
         {
@@ -82,24 +116,24 @@ namespace ClassicUO.Network
 
             if (!File.Exists(path))
             {
-                Log.Error( $"Plugin '{path}' not found.");
+                Log.Error($"Plugin '{path}' not found.");
 
                 return null;
             }
 
-            Log.Trace( $"Loading plugin: {path}");
+            Log.Trace($"Loading plugin: {path}");
 
             Plugin p = new Plugin(path);
             p.Load();
 
             if (!p.IsValid)
             {
-                Log.Warn( $"Invalid plugin: {path}");
+                Log.Warn($"Invalid plugin: {path}");
 
                 return null;
             }
 
-            Log.Trace( $"Plugin: {path} loaded.");
+            Log.Trace($"Plugin: {path} loaded.");
             _plugins.Add(p);
 
             return p;
@@ -110,6 +144,8 @@ namespace ClassicUO.Network
         {
             _recv = OnPluginRecv;
             _send = OnPluginSend;
+            _recv_new = OnPluginRecv_new;
+            _send_new = OnPluginSend_new;
             _getPacketLength = PacketsTable.GetPacketLength;
             _getPlayerPosition = GetPlayerPosition;
             _castSpell = GameActions.CastSpell;
@@ -139,7 +175,9 @@ namespace ClassicUO.Network
                 HWND = hwnd,
                 GetUOFilePath = Marshal.GetFunctionPointerForDelegate(_getUoFilePath),
                 RequestMove = Marshal.GetFunctionPointerForDelegate(_requestMove),
-                SetTitle = Marshal.GetFunctionPointerForDelegate(_setTitle)
+                SetTitle = Marshal.GetFunctionPointerForDelegate(_setTitle),
+                Recv_new = Marshal.GetFunctionPointerForDelegate(_recv_new),
+                Send_new = Marshal.GetFunctionPointerForDelegate(_send_new),
             };
 
             void* func = &header;
@@ -148,17 +186,19 @@ namespace ClassicUO.Network
             {
                 IntPtr assptr = Native.LoadLibrary(_path);
 
-                Log.Trace( $"assembly: {assptr}");
+                Log.Trace($"assembly: {assptr}");
 
-                if (assptr == IntPtr.Zero) throw new Exception("Invalid Assembly, Attempting managed load.");
+                if (assptr == IntPtr.Zero)
+                    throw new Exception("Invalid Assembly, Attempting managed load.");
 
-                Log.Trace( $"Searching for 'Install' entry point  -  {assptr}");
+                Log.Trace($"Searching for 'Install' entry point  -  {assptr}");
 
                 IntPtr installPtr = Native.GetProcessAddress(assptr, "Install");
 
-                Log.Trace( $"Entry point: {installPtr}");
+                Log.Trace($"Entry point: {installPtr}");
 
-                if (installPtr == IntPtr.Zero) throw new Exception("Invalid Entry Point, Attempting managed load.");
+                if (installPtr == IntPtr.Zero)
+                    throw new Exception("Invalid Entry Point, Attempting managed load.");
 
                 Marshal.GetDelegateForFunctionPointer<OnInstall>(installPtr)(func);
 
@@ -183,12 +223,12 @@ namespace ClassicUO.Network
 
                     if (meth == null)
                     {
-                        Log.Error( "Engine class missing public static Install method Needs 'public static unsafe void Install(PluginHeader *plugin)' ");
+                        Log.Error("Engine class missing public static Install method Needs 'public static unsafe void Install(PluginHeader *plugin)' ");
 
                         return;
                     }
 
-                    meth.Invoke(null, new object[] {(IntPtr) func});
+                    meth.Invoke(null, new object[] { (IntPtr) func });
                 }
                 catch (Exception err)
                 {
@@ -235,8 +275,15 @@ namespace ClassicUO.Network
 
             if (header.Tick != IntPtr.Zero)
                 _tick = Marshal.GetDelegateForFunctionPointer<OnTick>(header.Tick);
-            IsValid = true;
 
+
+            if (header.OnRecv_new != IntPtr.Zero)
+                _onRecv_new = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv_new>(header.OnRecv_new);
+            if (header.OnSend_new != IntPtr.Zero)
+                _onSend_new = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv_new>(header.OnSend_new);
+
+
+            IsValid = true;
 
             _onInitialize?.Invoke();
         }
@@ -299,13 +346,39 @@ namespace ClassicUO.Network
 
             foreach (Plugin plugin in _plugins)
             {
-                if (plugin._onRecv != null && !plugin._onRecv(ref data, ref length))
+                if (plugin._onRecv_new != null)
+                {
+                    if (!plugin._onRecv_new(data, ref length))
+                    {
+                        result = false;
+                    }
+                }
+                else if (plugin._onRecv != null && !plugin._onRecv(ref data, ref length))
                     result = false;
             }
 
             return result;
         }
 
+        internal static bool ProcessSendPacket(ref byte[] data, ref int length)
+        {
+            bool result = true;
+
+            foreach (Plugin plugin in _plugins)
+            {
+                if (plugin._onSend_new != null)
+                {
+                    if (!plugin._onSend_new(data, ref length))
+                    {
+                        result = false;
+                    }
+                }
+                else if (plugin._onSend != null && !plugin._onSend(ref data, ref length))
+                    result = false;
+            }
+
+            return result;
+        }
 
         internal static void OnClosing()
         {
@@ -342,27 +415,14 @@ namespace ClassicUO.Network
                 t._onDisconnected?.Invoke();
         }
 
-        internal static bool ProcessSendPacket(ref byte[] data, ref int length)
-        {
-            bool result = true;
-
-            foreach (Plugin plugin in _plugins)
-            {
-                if (plugin._onSend != null && !plugin._onSend(ref data, ref length))
-                    result = false;
-            }
-
-            return result;
-        }
-
         internal static bool ProcessHotkeys(int key, int mod, bool ispressed)
         {
             bool result = true;
 
 
-            if (!World.InGame || 
-                (ProfileManager.Current != null && 
-                ProfileManager.Current.ActivateChatAfterEnter && 
+            if (!World.InGame ||
+                (ProfileManager.Current != null &&
+                ProfileManager.Current.ActivateChatAfterEnter &&
                 UIManager.SystemChat?.IsActive == true) ||
                 UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
             {
@@ -380,7 +440,8 @@ namespace ClassicUO.Network
 
         internal static void ProcessMouse(int button, int wheel)
         {
-            foreach (Plugin plugin in _plugins) plugin._onMouse?.Invoke(button, wheel);
+            foreach (Plugin plugin in _plugins)
+                plugin._onMouse?.Invoke(button, wheel);
         }
 
         internal static void UpdatePlayerPosition(int x, int y, int z)
@@ -396,7 +457,7 @@ namespace ClassicUO.Network
                 }
                 catch
                 {
-                    Log.Error( "Plugin initialization failed, please re login");
+                    Log.Error("Plugin initialization failed, please re login");
                 }
             }
         }
@@ -418,6 +479,27 @@ namespace ClassicUO.Network
             return true;
         }
 
-        private delegate void OnInstall(void* header);
+        private static bool OnPluginRecv_new(IntPtr buffer, ref int length)
+        {
+            byte[] data = new byte[length];
+            Marshal.Copy(buffer, data, 0, length);
+            NetClient.EnqueuePacketFromPlugin(data, length);
+
+            return true;
+        }
+
+        private static bool OnPluginSend_new(IntPtr buffer, ref int length)
+        {
+            byte[] data = new byte[length];
+            Marshal.Copy(buffer, data, 0, length);
+
+            if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
+                NetClient.Socket.Send(data, true);
+            else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected)
+                NetClient.LoginSocket.Send(data, true);
+
+            return true;
+        }
+
     }
 }

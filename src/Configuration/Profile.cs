@@ -95,6 +95,7 @@ namespace ClassicUO.Configuration
 
         // visual
         [JsonProperty] public bool EnabledCriminalActionQuery { get; set; } = true;
+        [JsonProperty] public bool EnabledBeneficialCriminalActionQuery { get; set; } = false;
         [JsonProperty] public bool EnableStatReport { get; set; } = true;
         [JsonProperty] public bool EnableSkillReport { get; set; } = true;
         [JsonProperty] public bool UseOldStatusGump { get; set; }

@@ -17,7 +17,7 @@ namespace ManifestCreator
             "ClassicUO.exe",
             "ClassicUO",
             "ClassicUO.bin.osx",
-            "ClassicUO.bin.x86_x64",
+            "ClassicUO.bin.x86_64",
             //"ClassicUO.exe.config"              // to verify
             //"ClassicUO.pdb",                    // to verify
             "cuoapi.dll",
@@ -39,7 +39,7 @@ namespace ManifestCreator
             "libs/lib64/libmojoshader.so",
             "libs/lib64/libMonoPosixHelper.so",
             "libs/lib64/libMonoSupportW.so",
-            "libs/lib64/lib/libSDL2-2.0.so.0",
+            "libs/lib64/libSDL2-2.0.so.0",
             "libs/lib64/libSDL2_image-2.0.so.0",
             "libs/lib64/libtheorafile.so",
             "libs/lib64/libz.so",
@@ -73,6 +73,7 @@ namespace ManifestCreator
             "System.dll",
             "System.Drawing.dll",
             "System.IO.Compression.dll",
+            "System.IO.Compression.FileSystem.dll",
             "System.Numerics.dll",
             "System.Runtime.Serialization.dll",
             "System.Windows.Forms.dll",

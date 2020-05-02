@@ -945,6 +945,9 @@ namespace ClassicUO.Game.UI.Gumps
             if (marker.MapId != World.MapIndex)
                 return;
 
+            if (_zoomIndex < marker.ZoomIndex && marker.Color == Color.Transparent)
+                return;
+
             ResetHueVector();
 
             int sx = marker.X - _center.X;
@@ -975,30 +978,19 @@ namespace ClassicUO.Game.UI.Gumps
                 if (Mouse.Position.X >= rotX - DOT_SIZE && Mouse.Position.X <= rotX + DOT_SIZE_HALF &&
                     Mouse.Position.Y >= rotY - DOT_SIZE && Mouse.Position.Y <= rotY + DOT_SIZE_HALF)
                 {
-                    _hueVector.X = 0;
-                    _hueVector.Y = 1;
-                    batcher.DrawString(_markerFont, marker.Name, rotX - 16, rotY - 16, ref _hueVector);
-                    ResetHueVector();
-                    batcher.DrawString(_markerFont, marker.Name, rotX - 15, rotY - 15, ref _hueVector);
+                    showMarkerName = true;
                 }
             }
             else
             {
-                rotX -= marker.MarkerIcon.Width >> 1;
-                rotY -= marker.MarkerIcon.Height >> 1;
-
-                batcher.Draw2D(marker.MarkerIcon, rotX - DOT_SIZE_HALF, rotY - DOT_SIZE_HALF, ref _hueVector);
+                batcher.Draw2D(marker.MarkerIcon, rotX - (marker.MarkerIcon.Width >> 1), rotY - (marker.MarkerIcon.Height >> 1), ref _hueVector);
 
                 if (!showMarkerName)
                 {
                     if (Mouse.Position.X >= rotX - (marker.MarkerIcon.Width >> 1) && Mouse.Position.X <= rotX + (marker.MarkerIcon.Width >> 1) &&
                         Mouse.Position.Y >= rotY - (marker.MarkerIcon.Height >> 1) && Mouse.Position.Y <= rotY + (marker.MarkerIcon.Height >> 1))
                     {
-                        _hueVector.X = 0;
-                        _hueVector.Y = 1;
-                        batcher.DrawString(_markerFont, marker.Name, rotX - 16, rotY - 16, ref _hueVector);
-                        ResetHueVector();
-                        batcher.DrawString(_markerFont, marker.Name, rotX - 15, rotY - 15, ref _hueVector);
+                        showMarkerName = true;
                     }
                 }
             }
@@ -1025,7 +1017,7 @@ namespace ClassicUO.Game.UI.Gumps
                     rotY = y + (int) size.Y;
                 }
                 int xx = (int) (rotX - size.X / 2);
-                int yy = (int) (rotY - size.Y);
+                int yy = (int) (rotY - size.Y - 5);
 
                 _hueVector.X = 0;
                 _hueVector.Y = 1;
@@ -1400,6 +1392,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (name.Equals("white", StringComparison.OrdinalIgnoreCase))
                 return Color.White;
+
+            if (name.Equals("none", StringComparison.OrdinalIgnoreCase))
+                return Color.Transparent;
 
             return Color.White;
         }

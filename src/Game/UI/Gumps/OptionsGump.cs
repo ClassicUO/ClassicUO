@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ScrollAreaItem _activeChatArea;
         private Combobox _autoOpenCorpseOptions;
         private StbTextBox _autoOpenCorpseRange;
-        private Checkbox _buffBarTime,_castSpellsByOneClick, _queryBeforAttackCheckbox, _spellColoringCheckbox, _spellFormatCheckbox;
+        private Checkbox _buffBarTime,_castSpellsByOneClick, _queryBeforAttackCheckbox, _queryBeforeBeneficialCheckbox, _spellColoringCheckbox, _spellFormatCheckbox;
         private HSliderBar _cellSize;
 
         // video
@@ -1001,6 +1001,8 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
             _queryBeforAttackCheckbox = CreateCheckBox(rightArea, "Query before attack", ProfileManager.Current.EnabledCriminalActionQuery, 0, 0);
+            _queryBeforeBeneficialCheckbox = CreateCheckBox(rightArea, "Query before beneficial criminal action", ProfileManager.Current.EnabledBeneficialCriminalActionQuery, 0, 0);
+            _queryBeforeBeneficialCheckbox.SetTooltip("Query before performing beneficial acts on Murderers, Criminals, Grays (Monsters/Animals)");
             _spellFormatCheckbox = CreateCheckBox(rightArea, "Enable Overhead Spell Format", ProfileManager.Current.EnabledSpellFormat, 0, 0);
             _spellColoringCheckbox = CreateCheckBox(rightArea, "Enable Overhead Spell Hue", ProfileManager.Current.EnabledSpellHue, 0, 0);
             _castSpellsByOneClick = CreateCheckBox(rightArea, "Cast spells by one click", ProfileManager.Current.CastSpellsByOneClick, 0, 0);
@@ -1565,6 +1567,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _murdererColorPickerBox.SetColor(0x0023, HuesLoader.Instance.GetPolygoneColor(12, 0x0023));
                     _enemyColorPickerBox.SetColor(0x0031, HuesLoader.Instance.GetPolygoneColor(12, 0x0031));
                     _queryBeforAttackCheckbox.IsChecked = true;
+                    _queryBeforeBeneficialCheckbox.IsChecked = false;
                     _castSpellsByOneClick.IsChecked = false;
                     _buffBarTime.IsChecked = false;
                     _beneficColorPickerBox.SetColor(0x0059, HuesLoader.Instance.GetPolygoneColor(12, 0x0059));
@@ -1924,6 +1927,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.EnemyHue = _enemyColorPickerBox.Hue;
             ProfileManager.Current.MurdererHue = _murdererColorPickerBox.Hue;
             ProfileManager.Current.EnabledCriminalActionQuery = _queryBeforAttackCheckbox.IsChecked;
+            ProfileManager.Current.EnabledBeneficialCriminalActionQuery = _queryBeforeBeneficialCheckbox.IsChecked;
             ProfileManager.Current.CastSpellsByOneClick = _castSpellsByOneClick.IsChecked;
             ProfileManager.Current.BuffBarTime = _buffBarTime.IsChecked;
 
