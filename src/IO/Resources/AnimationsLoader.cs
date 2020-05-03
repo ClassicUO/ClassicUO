@@ -614,9 +614,13 @@ namespace ClassicUO.IO.Resources
                                 if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                     continue;
 
+                                if (DataIndex[index].ReadFromBodyDef)
+                                    break;
+
                                 DataIndex[index].Graphic = (ushort)checkIndex;
                                 DataIndex[index].Color = (ushort)color;
                                 DataIndex[index].IsValidMUL = true;
+                                DataIndex[index].ReadFromBodyDef = true;
 
                                 break;
                             }
@@ -651,9 +655,13 @@ namespace ClassicUO.IO.Resources
                                 if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                     continue;
 
+                                if (DataIndex[index].ReadFromCorpseDef)
+                                    break;
+
                                 DataIndex[index].CorpseGraphic = (ushort)checkIndex;
                                 DataIndex[index].CorpseColor = color;
                                 DataIndex[index].IsValidMUL = true;
+                                DataIndex[index].ReadFromCorpseDef = true;
 
                                 break;
                             }
@@ -1894,6 +1902,8 @@ namespace ClassicUO.IO.Resources
         public AnimationGroup[] Groups;
 
         public bool IsValidMUL;
+        public bool ReadFromBodyDef;
+        public bool ReadFromCorpseDef;
         public sbyte MountedHeightOffset;
 
         public ANIMATION_GROUPS_TYPE Type = ANIMATION_GROUPS_TYPE.UNKNOWN;
