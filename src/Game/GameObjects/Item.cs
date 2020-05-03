@@ -229,10 +229,16 @@ namespace ClassicUO.Game.GameObjects
 
         public ref readonly StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[IsMulti ? MultiGraphic : Graphic];
 
-        public bool IsLootable =>
-            ItemData.Layer != (int) Layer.Hair &&
-            ItemData.Layer != (int) Layer.Beard &&
-            ItemData.Layer != (int) Layer.Face;
+        public bool IsLootable
+        {
+            get
+            {
+                return ItemData.Layer != (int)Layer.Hair &&
+                ItemData.Layer != (int)Layer.Beard &&
+                ItemData.Layer != (int)Layer.Face &&
+                !(X == 0 && Y == 0);
+            }
+        }
 
         private static readonly DataReader _reader = new DataReader();
 
