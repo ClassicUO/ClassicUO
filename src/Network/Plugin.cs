@@ -72,6 +72,9 @@ namespace ClassicUO.Network
         private delegate bool OnPacketSendRecv_new(byte[] data, ref int length);
         private delegate bool OnPacketSendRecv_new_intptr(IntPtr data, ref int length);
 
+        [DllImport("kernel32", CharSet = CharSet.Unicode, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool DeleteFile(string name);
 
         struct PluginHeader
         {
@@ -181,6 +184,9 @@ namespace ClassicUO.Network
             };
 
             void* func = &header;
+            
+            if(Environment.OSVersion.Platform != PlatformID.Unix && Environment.OSVersion.Platform != PlatformID.MacOSX)
+                UnblockPath(Path.GetDirectoryName(_path));
 
             try
             {
@@ -499,6 +505,29 @@ namespace ClassicUO.Network
                 NetClient.LoginSocket.Send(data, true);
 
             return true;
+        }
+        
+        //Code from https://stackoverflow.com/questions/6374673/unblock-file-from-within-net-4-c-sharp
+        private static void UnblockPath(string path)
+        {
+            string[] files = System.IO.Directory.GetFiles(path);
+            string[] dirs = System.IO.Directory.GetDirectories(path);
+
+            foreach (string file in files)
+            {
+                if(file.EndsWith("dll") || file.EndsWith("exe"))
+                    UnblockFile(file);
+            }
+
+            foreach (string dir in dirs)
+            {
+                UnblockPath(dir);
+            }
+        }
+
+        private static bool UnblockFile(string fileName)
+        {
+            return DeleteFile(fileName + ":Zone.Identifier");
         }
 
     }
