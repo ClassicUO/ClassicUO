@@ -654,12 +654,12 @@ namespace ClassicUO.Game
         {
             foreach (Mobile mobile in Mobiles)
             {
-                mobile.Destroy();
+                RemoveMobile(mobile);
             }
 
             foreach (Item item in Items)
             {
-                item.Destroy();
+                RemoveItem(item);
             }
 
             HouseManager?.Clear();
