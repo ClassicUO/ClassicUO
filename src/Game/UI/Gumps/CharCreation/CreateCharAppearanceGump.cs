@@ -366,6 +366,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private void ColorPicker_ColorSelected(object sender, ColorSelectedEventArgs e)
         {
+            if (e.SelectedIndex == 0xFFFF)
+                return;
+
             CurrentColorOption[e.Layer] = new Tuple<int, ushort>(e.SelectedIndex, e.SelectedHue);
 
             if (e.Layer != Layer.Invalid)
@@ -525,7 +528,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             public int SelectedIndex { get; }
 
-            public ushort SelectedHue => Pallet != null && SelectedIndex >= 0 && SelectedIndex < Pallet.Length ? (ushort) (Pallet[SelectedIndex] + 1) : (ushort) 0;
+            public ushort SelectedHue => Pallet != null && SelectedIndex >= 0 && SelectedIndex < Pallet.Length ? (ushort) (Pallet[SelectedIndex] + 1) : (ushort) 0xFFFF;
         }
 
         private class CustomColorPicker : Control
@@ -579,7 +582,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 int column = e.X / _cellW;
                 int row = e.Y / _cellH;
                 var selectedIndex = row * _columns + column;
-                ColorSelected?.Invoke(this, new ColorSelectedEventArgs(_layer, _colorPickerBox.Hues, selectedIndex));
+
+                if (selectedIndex >= 0 && selectedIndex < _colorPickerBox.Hues.Length)
+                    ColorSelected?.Invoke(this, new ColorSelectedEventArgs(_layer, _colorPickerBox.Hues, selectedIndex));
             }
 
             public event EventHandler<ColorSelectedEventArgs> ColorSelected;
