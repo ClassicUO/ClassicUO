@@ -82,7 +82,6 @@ namespace ClassicUO.Game.GameObjects
                 mobile.IsRenamable = false;
                 mobile.Flags = 0;
                 mobile.InWarMode = false;
-                mobile.Equipment = null;
                 mobile.IsRunning = false;
                 mobile.AnimationInterval = 0;
                 mobile.AnimationFrameCount = 0;
@@ -199,19 +198,28 @@ namespace ClassicUO.Game.GameObjects
                                Graphic == 0x03DB || Graphic == 0x03DF || Graphic == 0x03E2 || Graphic == 0x02E8 || Graphic == 0x02E9|| Graphic == 0x04E5; 
         public bool IsGargoyle => Client.Version >= ClientVersion.CV_7000 && Graphic == 0x029A || Graphic == 0x029B;
 
-        public bool IsMounted => HasEquipment && Equipment[0x19] != null && !IsDrivingBoat && Equipment[0x19].GetGraphicForAnimation() != 0xFFFF;
+        public bool IsMounted
+        {
+            get
+            {
+                Item it = FindItemByLayer(Layer.Mount);
+
+                if (it != null && !IsDrivingBoat && it.GetGraphicForAnimation() != 0xFFFF)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
 
         public bool IsDrivingBoat
         {
             get
             {
-                if (HasEquipment)
-                {
-                    Item m = Equipment[0x19];
-                    return m != null && m.Graphic == 0x3E96;
-                }
+                Item it = FindItemByLayer(Layer.Mount);
 
-                return false;
+                return it != null && it.Graphic == 0x3E96;
             }
         }
 
@@ -1102,12 +1110,6 @@ namespace ClassicUO.Game.GameObjects
         {
             HitsTexture?.Destroy();
             HitsTexture = null;
-
-            if (HasEquipment)
-            {
-                for (int i = 0; i < Equipment.Length; i++)
-                    Equipment[i] = null;
-            }
 
             base.Destroy();
 

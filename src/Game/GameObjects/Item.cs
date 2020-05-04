@@ -88,7 +88,6 @@ namespace ClassicUO.Game.GameObjects
                 i.AlphaHue = 0;
                 i.Name = null;
                 i.Direction = 0;
-                i.Equipment = null;
                 i.AnimIndex = 0;
                 i.Hits = 0;
                 i.HitsMax = 0;

@@ -300,7 +300,7 @@ namespace ClassicUO.Game
                     stepState = (int) PATH_STEP_STATE.PSS_FLYING;
                 else
                 {
-                    Item mount = World.Player.Equipment[(int) Layer.Mount];
+                    Item mount = World.Player.FindItemByLayer(Layer.Mount);
 
                     if (mount != null && mount.Graphic == 0x3EB3) // sea horse
                         stepState = (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE;

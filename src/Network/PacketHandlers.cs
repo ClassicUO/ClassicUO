@@ -994,7 +994,7 @@ namespace ClassicUO.Network
 
                 for (Layer layer = Layer.ShopBuyRestock; layer < Layer.ShopBuy + 1; layer++)
                 {
-                    Item item = vendor.Equipment[(int)layer];
+                    Item item = vendor.FindItemByLayer(layer);
 
                     var first = item.Items;
 
@@ -1171,7 +1171,6 @@ namespace ClassicUO.Network
                         {
                             if (SerialHelper.IsMobile(container.Serial))
                             {
-                                container.Equipment[(int) ItemHold.Layer] = item;
                                 container.PushToBack(item);
                                 UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
                             }
@@ -1304,11 +1303,7 @@ namespace ClassicUO.Network
 
             Entity entity = World.Get(item.Container);
 
-            if (entity != null && (int) item.Layer < entity.Equipment.Length)
-            {
-                entity.Equipment[(int) item.Layer] = item;
-                entity.PushToBack(item);
-            }
+            entity.PushToBack(item);
 
             if (item.Layer >= Layer.ShopBuyRestock && item.Layer <= Layer.ShopSell)
             {
@@ -2201,9 +2196,6 @@ namespace ClassicUO.Network
                     GameActions.RequestMobileStatus(serial);
             }
 
-            if (!alreadyExists)
-                obj.Equipment = null;
-
             if (p.ID != 0x78)
                 p.Skip(6);
 
@@ -2258,15 +2250,13 @@ namespace ClassicUO.Network
                 item.Container = serial;
                 
 
-                if (obj.Equipment != null && layer < obj.Equipment.Length)
-                {
+                //{
                     item.Layer = (Layer) layer;
-                    obj.Equipment[layer] = item;
-                }
-                else
-                {
-                    Log.Warn($"Invalid layer in UpdateObject(). Layer: {layer}. Already exists? {alreadyExists}");
-                }
+               // }
+                //else
+                //{
+                //    Log.Warn($"Invalid layer in UpdateObject(). Layer: {layer}. Already exists? {alreadyExists}");
+                //}
 
                 item.CheckGraphicChange();
 
@@ -2442,8 +2432,10 @@ namespace ClassicUO.Network
 
                 if (item != null && item.Container == corpse)
                 {
+                    RemoveItemFromContainer(item);
+                    item.Container = corpse;
+                    corpse.PushToBack(item);
                     item.Layer = layer;
-                    corpse.Equipment[(int) layer] = item;
                 }
 
                 layer = (Layer) p.ReadByte();
@@ -4820,11 +4812,6 @@ namespace ClassicUO.Network
 
                 if (container != null)
                 {
-                    if (container.HasEquipment && (int) obj.Layer < container.Equipment.Length)
-                    {
-                        container.Equipment[(int) obj.Layer] = null;
-                    }
-
                     container.Remove(obj);
                 }
 

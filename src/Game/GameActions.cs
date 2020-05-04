@@ -411,16 +411,21 @@ namespace ClassicUO.Game
         {
             Socket.Send(new PPickUpRequest(serial, amount));
 
+            Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
+
+            if (backpack == null)
+                return;
+
             if(bag == 0)
                 bag = ProfileManager.Current.GrabBagSerial == 0
-                    ? World.Player.Equipment[(int) Layer.Backpack].Serial
+                    ? backpack.Serial
                     : ProfileManager.Current.GrabBagSerial;
 
             if (!World.Items.Contains(bag))
             {
-                GameActions.Print("Grab Bag not found, setting to Backpack.");
+                Print("Grab Bag not found, setting to Backpack.");
                 ProfileManager.Current.GrabBagSerial = 0;
-                bag = World.Player.Equipment[(int) Layer.Backpack].Serial;
+                bag = backpack.Serial;
             }
             DropItem(serial, 0xFFFF, 0xFFFF, 0, bag);
         }

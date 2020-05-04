@@ -1024,7 +1024,7 @@ namespace ClassicUO.Game.GameObjects
                 default:
 
                 {
-                    Item hand2 = mobile.HasEquipment ? mobile.Equipment[(int) Layer.TwoHanded] : null;
+                    Item hand2 = mobile.FindItemByLayer(Layer.TwoHanded);
 
                     if (!isWalking)
                     {
@@ -1080,7 +1080,7 @@ namespace ClassicUO.Game.GameObjects
                                 unsafe
                                 {
                                     ushort* handAnimIDs = stackalloc ushort[2];
-                                    Item hand1 = mobile.HasEquipment ? mobile.Equipment[(int) Layer.OneHanded] : null;
+                                    Item hand1 = mobile.FindItemByLayer( Layer.OneHanded);
 
                                     if (hand1 != null)
                                         handAnimIDs[0] = hand1.ItemData.AnimID;
@@ -1176,7 +1176,7 @@ namespace ClassicUO.Game.GameObjects
                                             result = 2;
 
                                             if (mobile.IsGargoyle)
-                                                hand2 = mobile.HasEquipment ? mobile.Equipment[(int) Layer.OneHanded] : null;
+                                                hand2 = mobile.FindItemByLayer(Layer.OneHanded);
                                         }
                                     }
                                     else

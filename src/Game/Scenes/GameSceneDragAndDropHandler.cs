@@ -98,12 +98,12 @@ namespace ClassicUO.Game.Scenes
 
             if (!item.OnGround)
             {
-                Entity entity = World.Get(item.Container);
+                //Entity entity = World.Get(item.Container);
                 //item.Container = Serial.INVALID;
                 //entity.Items.Remove(item);
 
-                if (entity != null && entity.HasEquipment)
-                    entity.Equipment[(int) item.Layer] = null;
+                //if (entity != null && entity.HasEquipment)
+                //    entity.FindItemByLayer( item.Layer] = null;
 
                 //entity.Items.ProcessDelta();
             }

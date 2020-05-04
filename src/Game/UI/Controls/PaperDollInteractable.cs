@@ -139,15 +139,19 @@ namespace ClassicUO.Game.UI.Controls
 
 
             // body
-            Add(new GumpPic(0, 0, body, mobile.Hue));
+            Add(new GumpPic(0, 0, body, mobile.Hue)
+            {
+                IsPartialHue = true
+            });
 
              
             
             // equipment
-            Item equipItem = mobile.Equipment[(int) Layer.Cloak];
+            Item equipItem = mobile.FindItemByLayer(Layer.Cloak);
+            Item arms = mobile.FindItemByLayer(Layer.Arms);
 
             Layer[] layers = equipItem != null && equipItem.ItemData.IsContainer ? _layerOrder_quiver_fix : _layerOrder;
-            bool switch_arms_with_torso = mobile.Equipment[(int) Layer.Arms] != null && mobile.Equipment[(int) Layer.Arms].Graphic == 0x1410;
+            bool switch_arms_with_torso = arms != null && arms.Graphic == 0x1410;
 
 
             for (int i = 0; i < layers.Length; i++)
@@ -162,7 +166,7 @@ namespace ClassicUO.Game.UI.Controls
                         layer = Layer.Arms;
                 }
 
-                equipItem = mobile.Equipment[(int) layer];
+                equipItem = mobile.FindItemByLayer(layer);
 
                 if (equipItem != null)
                 {
@@ -193,7 +197,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
 
-            equipItem = mobile.Equipment[(int) Layer.Backpack];
+            equipItem = mobile.FindItemByLayer(Layer.Backpack);
 
             if (equipItem != null && equipItem.ItemData.AnimID != 0)
             {
@@ -270,7 +274,7 @@ namespace ClassicUO.Game.UI.Controls
                 CanMove = false;
                 _layer = layer;
 
-                if (SerialHelper.IsValid(serial))
+                if (SerialHelper.IsValid(serial) && World.InGame)
                     SetTooltip(serial);
             }
 
@@ -287,6 +291,12 @@ namespace ClassicUO.Game.UI.Controls
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
             {
+                if (!World.InGame)
+                {
+                    base.OnMouseUp(x, y, button);
+                    return;
+                }
+
                 Mobile container = World.Mobiles.Get(_parentSerial);
 
                 if (MouseIsOver)
@@ -377,17 +387,20 @@ namespace ClassicUO.Game.UI.Controls
             {
                 base.Update(totalMS, frameMS);
 
-                if (CanLift && !ItemHold.Enabled &&
-                   Mouse.LButtonPressed &&
-                   UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
-                   ((Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF &&
-                   Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks) ||
-                   Mouse.LDroppedOffset != Point.Zero))
+                if (World.InGame)
                 {
-                    Rectangle bounds = ArtLoader.Instance.GetTexture(Graphic)?.Bounds ?? Rectangle.Empty;
-                    int centerX = bounds.Width >> 1;
-                    int centerY = bounds.Height >> 1;
-                    GameActions.PickUp(LocalSerial, centerX, centerY);
+                    if (CanLift && !ItemHold.Enabled &&
+                        Mouse.LButtonPressed &&
+                        UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
+                        ((Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF &&
+                          Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks) ||
+                         Mouse.LDroppedOffset != Point.Zero))
+                    {
+                        Rectangle bounds = ArtLoader.Instance.GetTexture(Graphic)?.Bounds ?? Rectangle.Empty;
+                        int centerX = bounds.Width >> 1;
+                        int centerY = bounds.Height >> 1;
+                        GameActions.PickUp(LocalSerial, centerX, centerY);
+                    }
                 }
             }
 

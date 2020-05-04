@@ -342,7 +342,9 @@ namespace ClassicUO.Game.Managers
             if (item == null)
                 return;
 
-            if (World.Player.Equipment[(int) Layer.Bank] != null && serial == World.Player.Equipment[(int) Layer.Bank])
+            Item bank = World.Player.FindItemByLayer(Layer.Bank);
+
+            if (bank != null && serial == bank)
             {
                 // open bank near player
                 X = World.Player.RealScreenPosition.X + ProfileManager.Current.GameWindowPosition.X + 40;
