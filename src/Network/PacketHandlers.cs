@@ -2171,25 +2171,25 @@ namespace ClassicUO.Network
             if (obj == null)
                 return;
 
-            if (!obj.IsEmpty)
-            {
-                var o = obj.Items;
+            //if (!obj.IsEmpty)
+            //{
+            //    var o = obj.Items;
 
-                while (o != null)
-                {
-                    var next = o.Next;
-                    Item it = (Item) o;
+            //    while (o != null)
+            //    {
+            //        var next = o.Next;
+            //        Item it = (Item) o;
 
-                    if (it.Layer != Layer.Backpack)
-                    {
-                        RemoveItemFromContainer(it);
-                        World.Items.Remove(it.Serial);
-                        it.Destroy();
-                    }
+            //        if (!it.Opened && it.Layer != Layer.Backpack)
+            //        {
+            //            RemoveItemFromContainer(it);
+            //            World.Items.Remove(it.Serial);
+            //            it.Destroy();
+            //        }
 
-                    o = next;
-                }
-            }
+            //        o = next;
+            //    }
+            //}
 
             if (SerialHelper.IsMobile(serial))
             {
@@ -2201,45 +2201,78 @@ namespace ClassicUO.Network
                     GameActions.RequestMobileStatus(serial);
             }
 
-            obj.Equipment = null;
+            if (!alreadyExists)
+                obj.Equipment = null;
 
             if (p.ID != 0x78)
                 p.Skip(6);
 
-            uint itemSerial;
+            uint itemSerial = p.ReadUInt();
 
-            while ((itemSerial = p.ReadUInt()) != 0)
+            while (itemSerial != 0 && p.Position < p.Length)
             {
-                Item item = World.GetOrCreateItem(itemSerial);
+                if (!SerialHelper.IsItem(itemSerial))
+                    break;
+
                 ushort itemGraphic = p.ReadUShort();
                 byte layer = p.ReadByte();
-                item.Layer = (Layer) layer;
+                ushort item_hue = 0;
 
-                if (Client.Version >= Data.ClientVersion.CV_70331)
-                    item.FixHue(p.ReadUShort());
-                else if ((itemGraphic & 0x8000) != 0)
+
+                if ((itemGraphic & 0x8000) != 0)
                 {
                     itemGraphic &= 0x7FFF;
-                    item.FixHue(p.ReadUShort());
+                    item_hue = p.ReadUShort();
                 }
-                //else
-                //    itemGraphic &= 0x3FFF;
+                else if (Client.Version >= Data.ClientVersion.CV_70331)
+                {
+                    item_hue = p.ReadUShort();
+                }
+
+                if (Client.Version >= Data.ClientVersion.CV_70331)
+                    itemGraphic &= 0xFFFF;
+                else if (Client.Version >= Data.ClientVersion.CV_7090)
+                    itemGraphic &= 0x7FFF;
+                else
+                    itemGraphic &= 0x3FFF;
+
+                //if (layer > 0x1D)
+                //{
+                //    layer = (byte) ((layer & 0x1D) + 1);
+                //}
+
+                Item item = World.GetOrCreateItem(itemSerial);
+
+                //if (alreadyExists)
+                //{
+                //    if (layer > 0x1D)
+                //    {
+
+                //    }
+                //}
 
                 item.Graphic = itemGraphic;
+                item.FixHue(item_hue);
                 item.Amount = 1;
+                RemoveItemFromContainer(item);
                 item.Container = serial;
-                obj.PushToBack(item);
+                
 
-                if (layer < obj.Equipment.Length)
+                if (obj.Equipment != null && layer < obj.Equipment.Length)
                 {
+                    item.Layer = (Layer) layer;
                     obj.Equipment[layer] = item;
                 }
                 else
                 {
-                    Log.Warn($"Invalid layer in UpdateObject(). Layer: {layer}");
+                    Log.Warn($"Invalid layer in UpdateObject(). Layer: {layer}. Already exists? {alreadyExists}");
                 }
 
                 item.CheckGraphicChange();
+
+                obj.PushToBack(item);
+
+                itemSerial = p.ReadUInt();
             }
 
             if (serial == World.Player)
