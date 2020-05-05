@@ -308,11 +308,8 @@ namespace ClassicUO.Game.Managers
 
             if (graphic == 0)
             {
-                if (TargetingType == TargetType.Beneficial)
+                if ((TargetingType == TargetType.Beneficial || TargetingType == TargetType.Harmful) && !wet)
                     return;
-
-                //if (TargetingType != TargetType.Neutral && !wet)
-                //    return;
             }
             else
             {
