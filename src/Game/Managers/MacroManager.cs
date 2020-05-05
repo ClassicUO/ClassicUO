@@ -1144,7 +1144,12 @@ namespace ClassicUO.Game.Managers
                                 WaitForTargetTimer = Time.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
 
                             if (TargetManager.IsTargeting)
-                                TargetManager.Target(macro.Code == MacroType.BandageSelf ? World.Player : TargetManager.LastTargetInfo.Serial);
+                            {
+                                if (macro.Code == MacroType.BandageSelf)
+                                    TargetManager.Target(World.Player);
+                                else if (TargetManager.LastTargetInfo.IsEntity)
+                                    TargetManager.Target(TargetManager.LastTargetInfo.Serial);
+                            }
                             else
                                 result = 1;
 
