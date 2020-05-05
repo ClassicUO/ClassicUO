@@ -1149,12 +1149,17 @@ namespace ClassicUO.Game.Managers
                                     TargetManager.Target(World.Player);
                                 else if (TargetManager.LastTargetInfo.IsEntity)
                                     TargetManager.Target(TargetManager.LastTargetInfo.Serial);
+
+                                WaitingBandageTarget = false;
+                                WaitForTargetTimer = 0;
+                            }
+                            else if (WaitForTargetTimer < Time.Ticks)
+                            {
+                                WaitingBandageTarget = false;
+                                WaitForTargetTimer = 0;
                             }
                             else
                                 result = 1;
-
-                            WaitingBandageTarget = false;
-                            WaitForTargetTimer = 0;
                         }
                         else
                         {
