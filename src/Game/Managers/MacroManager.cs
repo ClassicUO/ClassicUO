@@ -893,8 +893,8 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.LastObject:
 
-                    if (World.Get(GameActions.LastObject) != null)
-                        GameActions.DoubleClick(GameActions.LastObject);
+                    if (World.Get(World.LastObject) != null)
+                        GameActions.DoubleClick(World.LastObject);
 
                     break;
 
@@ -928,9 +928,16 @@ namespace ClassicUO.Game.Managers
                         {
                             TargetManager.TargetLast();
                         }
+                        else if (TargetManager.LastTargetInfo.IsEntity)
+                        {
+                            TargetManager.Target(TargetManager.LastTargetInfo.Serial);
+                        }
                         else
                         {
-                            TargetManager.Target(TargetManager.LastTarget);
+                            TargetManager.Target(TargetManager.LastTargetInfo.Graphic, 
+                                                 TargetManager.LastTargetInfo.X,
+                                                 TargetManager.LastTargetInfo.Y,
+                                                 TargetManager.LastTargetInfo.Z);
                         }
 
                         WaitForTargetTimer = 0;
@@ -1012,7 +1019,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.TargetNext:
 
-                    uint sel_obj = World.SearchObject(TargetManager.LastTarget, SCAN_TYPE_OBJECT.STO_MOBILES, SCAN_MODE_OBJECT.SMO_NEXT);
+                    uint sel_obj = World.SearchObject(TargetManager.LastTargetInfo.Serial, SCAN_TYPE_OBJECT.STO_MOBILES, SCAN_MODE_OBJECT.SMO_NEXT);
 
                     if (SerialHelper.IsValid(sel_obj))
                     {
@@ -1023,15 +1030,15 @@ namespace ClassicUO.Game.Managers
                             NetClient.Socket.Send(new PStatusRequest(sel_obj));
                         }
 
-                        TargetManager.LastTarget = sel_obj;
+                        TargetManager.LastTargetInfo.SetEntity(sel_obj);
                         TargetManager.LastAttack = sel_obj;
                     }
                     
                     break;
 
                 case MacroType.AttackLast:
-                    if (SerialHelper.IsValid(TargetManager.LastTarget))
-                        GameActions.Attack(TargetManager.LastTarget);
+                    if (TargetManager.LastTargetInfo.IsEntity)
+                        GameActions.Attack(TargetManager.LastTargetInfo.Serial);
 
                     break;
 
@@ -1137,7 +1144,7 @@ namespace ClassicUO.Game.Managers
                                 WaitForTargetTimer = Time.Ticks + Constants.WAIT_FOR_TARGET_DELAY;
 
                             if (TargetManager.IsTargeting)
-                                TargetManager.Target(macro.Code == MacroType.BandageSelf ? World.Player : TargetManager.LastTarget);
+                                TargetManager.Target(macro.Code == MacroType.BandageSelf ? World.Player : TargetManager.LastTargetInfo.Serial);
                             else
                                 result = 1;
 
@@ -1406,7 +1413,8 @@ namespace ClassicUO.Game.Managers
                     if (ent != null)
                     {
                         GameActions.MessageOverhead($"Target: {ent.Name}", Notoriety.GetHue(((Mobile) ent).NotorietyFlag), World.Player);
-                        TargetManager.SelectedTarget = TargetManager.LastTarget = serial;
+                        TargetManager.SelectedTarget = serial;
+                        TargetManager.LastTargetInfo.SetEntity(serial);
                         return;
                     }
                 }
@@ -1415,8 +1423,8 @@ namespace ClassicUO.Game.Managers
                     if (ent != null)
                     {
                         GameActions.MessageOverhead($"Target: {ent.Name}", 992, World.Player);
-                        TargetManager.SelectedTarget = TargetManager.LastTarget = serial;
-
+                        TargetManager.SelectedTarget = serial;
+                        TargetManager.LastTargetInfo.SetEntity(serial);
                         return;
                     }
                 }

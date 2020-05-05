@@ -87,6 +87,8 @@ namespace ClassicUO.Game
 
         public static ActiveSpellIconsManager ActiveSpellIcons = new ActiveSpellIconsManager();
 
+        public static uint LastObject;
+
 
         public static int MapIndex
         {
@@ -662,6 +664,7 @@ namespace ClassicUO.Game
                 RemoveItem(item);
             }
 
+            LastObject = 0;
             HouseManager?.Clear();
             Items.Clear();
             Mobiles.Clear();

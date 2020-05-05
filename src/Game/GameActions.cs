@@ -44,8 +44,6 @@ namespace ClassicUO.Game
         public static int LastSpellIndex { get; set; } = 1;
         public static int LastSkillIndex { get; set; } = 1;
 
-        public static uint LastObject { get; set; }
-
         internal static void Initialize(Func<uint, int, int, int?, Point?, bool> onPickUpAction)
         {
             _pickUpAction = onPickUpAction;
@@ -137,9 +135,12 @@ namespace ClassicUO.Game
             else
             {
                 Socket.Send(new PDoubleClickRequest(serial));
-                if (SerialHelper.IsItem(serial))
-                    LastObject = serial;
             }
+
+            if (SerialHelper.IsItem(serial))
+                World.LastObject = serial;
+            else
+                World.LastObject = 0;
         }
 
         public static void SingleClick(uint serial)
