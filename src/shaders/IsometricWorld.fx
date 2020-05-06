@@ -45,7 +45,9 @@ struct PS_INPUT
 
 float3 get_rgb(float red, float hue)
 {
-	float p = floor((hue / Hues_count_double) * 100000.0f) / 100000.0f;
+	//float p = floor((hue / Hues_count_double) * 1000000.0f) / 1000000.0f;
+
+	float p = hue / 6000.0f;
 
 	return tex2D(HueSampler0, float2(red, p)).rgb;
 }
