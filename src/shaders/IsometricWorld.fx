@@ -15,7 +15,7 @@ float4x4 MatrixTransform;
 float4x4 WorldMatrix;
 float2 Viewport;
 float Brightlight;
-int Hues_count;
+float Hues_count;
 float Hues_count_double;
 
 
@@ -50,9 +50,10 @@ float3 get_rgb(float red, float hue, bool swap)
 	{
 		/*if (swap)
 			hue += Hues_count;*/
-		float p = hue * (1.0 / Hues_count);
 
-		return tex2D(HueSampler0, float2(red, p)).rgb;
+		float p = floor((hue / Hues_count) * 10000.0f) / 10000.0f;
+
+		return tex2D(HueSampler0, float2(red, p )).rgb;
 	}
 	//return  float3(1, 0, 0); //tex2D(HueSampler1, float2(red, hue)).rgb;
 }

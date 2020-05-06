@@ -116,13 +116,13 @@ namespace ClassicUO.IO.Resources
                         Palette[idx].Palette[idx1 + 1] = ((c >> 5) & 0x1F) / 31.0f;
                         Palette[idx].Palette[idx1 + 2] = (c & 0x1F) / 31.0f;
 
-                        //p[(idx * 96) + idx1 + 0] = Palette[idx].Palette[idx1];
-                        //p[(idx * 96) + idx1 + 1] = Palette[idx].Palette[idx1 + 1];
-                        //p[(idx * 96) + idx1 + 2] = Palette[idx].Palette[idx1 + 2];
+                        p[(idx * 96) + idx1 + 0] = Palette[idx].Palette[idx1];
+                        p[(idx * 96) + idx1 + 1] = Palette[idx].Palette[idx1 + 1];
+                        p[(idx * 96) + idx1 + 2] = Palette[idx].Palette[idx1 + 2];
 
-                        p[iddd++] = Palette[idx].Palette[idx1];
-                        p[iddd++] = Palette[idx].Palette[idx1 + 1];
-                        p[iddd++] = Palette[idx].Palette[idx1 + 2];
+                        //p[iddd++] = Palette[idx].Palette[idx1];
+                        //p[iddd++] = Palette[idx].Palette[idx1 + 1];
+                        //p[iddd++] = Palette[idx].Palette[idx1 + 2];
                     }
                 }
             }

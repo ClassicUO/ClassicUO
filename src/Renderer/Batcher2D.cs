@@ -1702,7 +1702,7 @@ namespace ClassicUO.Renderer
                 ColorCount = Parameters["Hues_count"];
                 ColorDCount = Parameters["Hues_count_double"];
 
-               
+                ColorCount.SetValue(_color_count);
                 ColorDCount.SetValue(_color_count * 2.0f);
             }
 
@@ -1717,7 +1717,6 @@ namespace ClassicUO.Renderer
             public override void ApplyStates()
             {
                 WorldMatrix.SetValue(_matrix);
-                ColorCount.SetValue((int) _color_count);
 
                 _viewPort.X = GraphicsDevice.Viewport.Width;
                 _viewPort.Y = GraphicsDevice.Viewport.Height;
