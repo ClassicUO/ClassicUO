@@ -107,21 +107,10 @@ namespace ClassicUO
             uint[] hues = HuesLoader.Instance.CreateShaderColors();
             int size = HuesLoader.Instance.HuesCount;
 
-            //var huesf = HuesLoader.Instance.CreateHuesPalette();
-
-            //Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size);
-            //texture0.SetData(huesf);
-            //Texture2D texture1 = new Texture2D(GraphicsDevice, 32 * 3, size);
-            //texture0.SetData(huesf, 0, size);
-
-            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size);
-            texture0.SetData(hues);
-
-            Texture2D texture1 = new Texture2D(GraphicsDevice, 32, size);
-            texture1.SetData(hues, size, size);
+            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size * 2);
+            texture0.SetData(hues, 0, size * 2);
 
             GraphicsDevice.Textures[1] = texture0;
-            GraphicsDevice.Textures[2] = texture1;
 
             _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice, HuesLoader.Instance.HuesCount);
 
