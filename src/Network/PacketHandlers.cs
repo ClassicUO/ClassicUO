@@ -1303,7 +1303,7 @@ namespace ClassicUO.Network
 
             Entity entity = World.Get(item.Container);
 
-            entity.PushToBack(item);
+            entity?.PushToBack(item);
 
             if (item.Layer >= Layer.ShopBuyRestock && item.Layer <= Layer.ShopSell)
             {
