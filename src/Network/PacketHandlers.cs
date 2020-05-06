@@ -994,7 +994,7 @@ namespace ClassicUO.Network
 
                 for (Layer layer = Layer.ShopBuyRestock; layer < Layer.ShopBuy + 1; layer++)
                 {
-                    Item item = vendor.Equipment[(int)layer];
+                    Item item = vendor.FindItemByLayer(layer);
 
                     var first = item.Items;
 
@@ -1171,7 +1171,6 @@ namespace ClassicUO.Network
                         {
                             if (SerialHelper.IsMobile(container.Serial))
                             {
-                                container.Equipment[(int) ItemHold.Layer] = item;
                                 container.PushToBack(item);
                                 UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
                             }
@@ -1304,11 +1303,7 @@ namespace ClassicUO.Network
 
             Entity entity = World.Get(item.Container);
 
-            if (entity != null && (int) item.Layer < entity.Equipment.Length)
-            {
-                entity.Equipment[(int) item.Layer] = item;
-                entity.PushToBack(item);
-            }
+            entity?.PushToBack(item);
 
             if (item.Layer >= Layer.ShopBuyRestock && item.Layer <= Layer.ShopSell)
             {
@@ -2171,25 +2166,25 @@ namespace ClassicUO.Network
             if (obj == null)
                 return;
 
-            if (!obj.IsEmpty)
-            {
-                var o = obj.Items;
+            //if (!obj.IsEmpty)
+            //{
+            //    var o = obj.Items;
 
-                while (o != null)
-                {
-                    var next = o.Next;
-                    Item it = (Item) o;
+            //    while (o != null)
+            //    {
+            //        var next = o.Next;
+            //        Item it = (Item) o;
 
-                    if (it.Layer != Layer.Backpack)
-                    {
-                        RemoveItemFromContainer(it);
-                        World.Items.Remove(it.Serial);
-                        it.Destroy();
-                    }
+            //        if (!it.Opened && it.Layer != Layer.Backpack)
+            //        {
+            //            RemoveItemFromContainer(it);
+            //            World.Items.Remove(it.Serial);
+            //            it.Destroy();
+            //        }
 
-                    o = next;
-                }
-            }
+            //        o = next;
+            //    }
+            //}
 
             if (SerialHelper.IsMobile(serial))
             {
@@ -2201,45 +2196,73 @@ namespace ClassicUO.Network
                     GameActions.RequestMobileStatus(serial);
             }
 
-            obj.Equipment = null;
-
             if (p.ID != 0x78)
                 p.Skip(6);
 
-            uint itemSerial;
+            uint itemSerial = p.ReadUInt();
 
-            while ((itemSerial = p.ReadUInt()) != 0)
+            while (itemSerial != 0 && p.Position < p.Length)
             {
-                Item item = World.GetOrCreateItem(itemSerial);
+                if (!SerialHelper.IsItem(itemSerial))
+                    break;
+
                 ushort itemGraphic = p.ReadUShort();
                 byte layer = p.ReadByte();
-                item.Layer = (Layer) layer;
+                ushort item_hue = 0;
 
-                if (Client.Version >= Data.ClientVersion.CV_70331)
-                    item.FixHue(p.ReadUShort());
-                else if ((itemGraphic & 0x8000) != 0)
+
+                if ((itemGraphic & 0x8000) != 0)
                 {
                     itemGraphic &= 0x7FFF;
-                    item.FixHue(p.ReadUShort());
+                    item_hue = p.ReadUShort();
                 }
-                //else
-                //    itemGraphic &= 0x3FFF;
+                else if (Client.Version >= Data.ClientVersion.CV_70331)
+                {
+                    item_hue = p.ReadUShort();
+                }
+
+                if (Client.Version >= Data.ClientVersion.CV_70331)
+                    itemGraphic &= 0xFFFF;
+                else if (Client.Version >= Data.ClientVersion.CV_7090)
+                    itemGraphic &= 0x7FFF;
+                else
+                    itemGraphic &= 0x3FFF;
+
+                //if (layer > 0x1D)
+                //{
+                //    layer = (byte) ((layer & 0x1D) + 1);
+                //}
+
+                Item item = World.GetOrCreateItem(itemSerial);
+
+                //if (alreadyExists)
+                //{
+                //    if (layer > 0x1D)
+                //    {
+
+                //    }
+                //}
 
                 item.Graphic = itemGraphic;
+                item.FixHue(item_hue);
                 item.Amount = 1;
+                RemoveItemFromContainer(item);
                 item.Container = serial;
-                obj.PushToBack(item);
+                
 
-                if (layer < obj.Equipment.Length)
-                {
-                    obj.Equipment[layer] = item;
-                }
-                else
-                {
-                    Log.Warn($"Invalid layer in UpdateObject(). Layer: {layer}");
-                }
+                //{
+                    item.Layer = (Layer) layer;
+               // }
+                //else
+                //{
+                //    Log.Warn($"Invalid layer in UpdateObject(). Layer: {layer}. Already exists? {alreadyExists}");
+                //}
 
                 item.CheckGraphicChange();
+
+                obj.PushToBack(item);
+
+                itemSerial = p.ReadUInt();
             }
 
             if (serial == World.Player)
@@ -2409,8 +2432,10 @@ namespace ClassicUO.Network
 
                 if (item != null && item.Container == corpse)
                 {
+                    RemoveItemFromContainer(item);
+                    item.Container = corpse;
+                    corpse.PushToBack(item);
                     item.Layer = layer;
-                    corpse.Equipment[(int) layer] = item;
                 }
 
                 layer = (Layer) p.ReadByte();
@@ -2837,7 +2862,8 @@ namespace ClassicUO.Network
 
 
             byte group = AnimationsLoader.Instance.GetDieGroupIndex(owner.Graphic, running != 0, true);
-            owner.SetAnimation(group, 0, 5, 1);
+            owner.SetAnimation(group, 0, 5, 1, false, false);
+            owner.AnimIndex = 0;
 
             if (ProfileManager.Current.AutoOpenCorpses)
                 World.Player.TryOpenCorpses();
@@ -4766,11 +4792,6 @@ namespace ClassicUO.Network
 
                 if (container != null)
                 {
-                    if (container.HasEquipment && (int) obj.Layer < container.Equipment.Length)
-                    {
-                        container.Equipment[(int) obj.Layer] = null;
-                    }
-
                     container.Remove(obj);
                 }
 

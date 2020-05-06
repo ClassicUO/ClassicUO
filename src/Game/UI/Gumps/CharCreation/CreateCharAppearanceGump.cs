@@ -155,14 +155,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private void CreateCharacter(bool isFemale, RaceType race)
         {
-            if (_character != null)
-                World.Mobiles.Remove(_character);
-
-            _character = new PlayerMobile(0)
+            if (_character == null)
             {
-                Race = race
-            };
-            World.Mobiles.Add(_character);
+                _character = new PlayerMobile(1);
+                World.Mobiles.Add(_character);
+            }
+
+            _character.Clear();
+            _character.Race = race;
 
             if (isFemale)
                 _character.Flags |= Flags.Female;
@@ -172,23 +172,29 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 case RaceType.GARGOYLE:
                     _character.Graphic = isFemale ? (ushort) 0x029B : (ushort) 0x029A;
 
-                    _character.Equipment[(int) Layer.Robe] = CreateItem(0x4001, CurrentColorOption[Layer.Shirt].Item2, Layer.Robe);
+                    Item it  = CreateItem(0x4001, CurrentColorOption[Layer.Shirt].Item2, Layer.Robe);
+                    _character.PushToBack(it);
 
                     break;
 
                 case RaceType.ELF when isFemale:
                     _character.Graphic = 0x025E;
-                    _character.Equipment[(int) Layer.Shoes] = CreateItem(0x1710, 0x0384, Layer.Shoes);
-                    _character.Equipment[(int) Layer.Skirt] = CreateItem(0x1531, CurrentColorOption[Layer.Pants].Item2, Layer.Skirt);
-                    _character.Equipment[(int) Layer.Shirt] = CreateItem(0x1518, CurrentColorOption[Layer.Shirt].Item2, Layer.Shirt);
-
+                    it = CreateItem(0x1710, 0x0384, Layer.Shoes);
+                    _character.PushToBack(it);
+                    it = CreateItem(0x1531, CurrentColorOption[Layer.Pants].Item2, Layer.Skirt);
+                    _character.PushToBack(it);
+                    it = CreateItem(0x1518, CurrentColorOption[Layer.Shirt].Item2, Layer.Shirt);
+                    _character.PushToBack(it);
                     break;
 
                 case RaceType.ELF:
                     _character.Graphic = 0x025D;
-                    _character.Equipment[(int) Layer.Shoes] = CreateItem(0x1710, 0x0384, Layer.Shoes);
-                    _character.Equipment[(int) Layer.Pants] = CreateItem(0x152F, CurrentColorOption[Layer.Pants].Item2, Layer.Pants);
-                    _character.Equipment[(int) Layer.Shirt] = CreateItem(0x1518, CurrentColorOption[Layer.Shirt].Item2, Layer.Shirt);
+                    it = CreateItem(0x1710, 0x0384, Layer.Shoes);
+                    _character.PushToBack(it);
+                    it = CreateItem(0x152F, CurrentColorOption[Layer.Pants].Item2, Layer.Pants);
+                    _character.PushToBack(it);
+                    it = CreateItem(0x1518, CurrentColorOption[Layer.Shirt].Item2, Layer.Shirt);
+                    _character.PushToBack(it);
 
                     break;
 
@@ -198,16 +204,22 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     if (isFemale)
                     {
                         _character.Graphic = 0x0191;
-                        _character.Equipment[(int) Layer.Shoes] = CreateItem(0x1710, 0x0384, Layer.Shoes);
-                        _character.Equipment[(int) Layer.Skirt] = CreateItem(0x1531, CurrentColorOption[Layer.Pants].Item2, Layer.Skirt);
-                        _character.Equipment[(int) Layer.Shirt] = CreateItem(0x1518, CurrentColorOption[Layer.Shirt].Item2, Layer.Shirt);
+                        it = CreateItem(0x1710, 0x0384, Layer.Shoes);
+                        _character.PushToBack(it);
+                        it = CreateItem(0x1531, CurrentColorOption[Layer.Pants].Item2, Layer.Skirt);
+                        _character.PushToBack(it);
+                        it = CreateItem(0x1518, CurrentColorOption[Layer.Shirt].Item2, Layer.Shirt);
+                        _character.PushToBack(it);
                     }
                     else
                     {
                         _character.Graphic = 0x0190;
-                        _character.Equipment[(int) Layer.Shoes] = CreateItem(0x1710, 0x0384, Layer.Shoes);
-                        _character.Equipment[(int) Layer.Pants] = CreateItem(0x152F, CurrentColorOption[Layer.Pants].Item2, Layer.Pants);
-                        _character.Equipment[(int) Layer.Shirt] = CreateItem(0x1518, CurrentColorOption[Layer.Shirt].Item2, Layer.Shirt);
+                        it = CreateItem(0x1710, 0x0384, Layer.Shoes);
+                        _character.PushToBack(it);
+                        it = CreateItem(0x152F, CurrentColorOption[Layer.Pants].Item2, Layer.Pants);
+                        _character.PushToBack(it);
+                        it = CreateItem(0x1518, CurrentColorOption[Layer.Shirt].Item2, Layer.Shirt);
+                        _character.PushToBack(it);
                     }
 
                     break;
@@ -227,12 +239,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             {
                 layer = Layer.Beard;
                 content = CharacterCreationValues.GetFacialHairComboContent(race);
-                _character.Equipment[(int) layer] = CreateItem(content.GetGraphic(CurrentOption[layer]), CurrentColorOption[layer].Item2, layer);
+                Item iti = CreateItem(content.GetGraphic(CurrentOption[layer]), CurrentColorOption[layer].Item2, layer);
+                _character.PushToBack(iti);
             }
 
             layer = Layer.Hair;
             content = CharacterCreationValues.GetHairComboContent(isFemale, race);
-            _character.Equipment[(int) layer] = CreateItem(content.GetGraphic(CurrentOption[layer]), CurrentColorOption[layer].Item2, layer);
+            Item it = CreateItem(content.GetGraphic(CurrentOption[layer]), CurrentColorOption[layer].Item2, layer);
+            _character.PushToBack(it);
         }
 
         private void Race_ValueChanged(object sender, EventArgs e)
@@ -351,6 +365,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private void ColorPicker_ColorSelected(object sender, ColorSelectedEventArgs e)
         {
+            if (e.SelectedIndex == 0xFFFF)
+                return;
+
             CurrentColorOption[e.Layer] = new Tuple<int, ushort>(e.SelectedIndex, e.SelectedHue);
 
             if (e.Layer != Layer.Invalid)
@@ -358,9 +375,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 Item item;
 
                 if (_character.Race == RaceType.GARGOYLE && e.Layer == Layer.Shirt)
-                    item = _character.Equipment[(int) Layer.Robe];
+                    item = _character.FindItemByLayer(Layer.Robe);
                 else
-                    item = _character.Equipment[(int) e.Layer];
+                    item = _character.FindItemByLayer(e.Layer);
 
                 if (item != null)
                     item.Hue = e.SelectedHue;
@@ -464,12 +481,21 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             if (id == 0)
                 return null;
 
+            Item existsItem = _character.FindItemByLayer(layer);
+
+            if (existsItem != null)
+            {
+                World.RemoveItem(existsItem, true);
+                _character.Remove(existsItem);
+            }
+
             // This is a workaround to avoid to see naked guy
             // We are simulating server objects into World.Items map.
-            var item = World.GetOrCreateItem((uint)layer); // use layer as unique Serial
+            var item = World.GetOrCreateItem(0x4000_0000 + (uint)layer); // use layer as unique Serial
             item.Graphic = (ushort)id;
             item.Hue = hue;
             item.Layer = layer;
+            item.Container = _character;
             //
 
             return item;
@@ -501,7 +527,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             public int SelectedIndex { get; }
 
-            public ushort SelectedHue => Pallet != null && SelectedIndex >= 0 && SelectedIndex < Pallet.Length ? (ushort) (Pallet[SelectedIndex] + 1) : (ushort) 0;
+            public ushort SelectedHue => Pallet != null && SelectedIndex >= 0 && SelectedIndex < Pallet.Length ? (ushort) (Pallet[SelectedIndex] + 1) : (ushort) 0xFFFF;
         }
 
         private class CustomColorPicker : Control
@@ -555,7 +581,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 int column = e.X / _cellW;
                 int row = e.Y / _cellH;
                 var selectedIndex = row * _columns + column;
-                ColorSelected?.Invoke(this, new ColorSelectedEventArgs(_layer, _colorPickerBox.Hues, selectedIndex));
+
+                if (selectedIndex >= 0 && selectedIndex < _colorPickerBox.Hues.Length)
+                    ColorSelected?.Invoke(this, new ColorSelectedEventArgs(_layer, _colorPickerBox.Hues, selectedIndex));
             }
 
             public event EventHandler<ColorSelectedEventArgs> ColorSelected;

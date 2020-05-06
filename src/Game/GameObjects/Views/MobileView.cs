@@ -170,7 +170,7 @@ namespace ClassicUO.Game.GameObjects
             AnimationsLoader.Instance.Direction = dir;
             AnimationsLoader.Instance.AnimGroup = animGroup;
 
-            Item mount = HasEquipment ? Equipment[(int) Layer.Mount] : null;
+            Item mount = FindItemByLayer(Layer.Mount);
 
             if (isHuman && mount != null)
             {
@@ -229,82 +229,79 @@ namespace ClassicUO.Game.GameObjects
 
             DrawInternal(batcher, this, null, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman);
 
-            if (HasEquipment)
+            for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
-                var equip = Equipment;
-                for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
+                Layer layer = LayerOrder.UsedLayers[layerDir, i];
+
+                Item item = FindItemByLayer(layer);
+
+                if (item == null)
+                    continue;
+
+                if (IsDead && (layer == Layer.Hair || layer == Layer.Beard))
+                    continue;
+
+                if (isHuman)
                 {
-                    Layer layer = LayerOrder.UsedLayers[layerDir, i];
-
-                    Item item = equip[(int)layer];
-
-                    if (item == null)
+                    if (IsCovered(this, layer))
                         continue;
 
-                    if (IsDead && (layer == Layer.Hair || layer == Layer.Beard))
-                        continue;
-
-                    if (isHuman)
+                    if (item.ItemData.AnimID != 0)
                     {
-                        if (IsCovered(this, layer))
-                            continue;
+                        graphic = item.ItemData.AnimID;
 
-                        if (item.ItemData.AnimID != 0)
+                        if (isGargoyle)
                         {
-                            graphic = item.ItemData.AnimID;
+                            if (graphic == 469)
+                            {
+                                // gargoyle robe
+                                graphic = 342;
+                            }
+                            else if (graphic == 0x03CA)
+                            {
+                                // gargoyle dead shroud
+                                graphic = 0x0223;
+                            }
+                        }
 
-                            if (isGargoyle)
+                        if (AnimationsLoader.Instance.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
+                        {
+                            if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
                             {
-                                if (graphic == 469)
-                                {
-                                    // gargoyle robe
-                                    graphic = 342;
-                                }
-                                else if (graphic == 0x03CA)
-                                {
-                                    // gargoyle dead shroud
-                                    graphic = 0x0223;
-                                }
+                                _equipConvData = data;
+                                graphic = data.Graphic;
                             }
+                        }
 
-                            if (AnimationsLoader.Instance.EquipConversions.TryGetValue(Graphic, out Dictionary<ushort, EquipConvData> map))
-                            {
-                                if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
-                                {
-                                    _equipConvData = data;
-                                    graphic = data.Graphic;
-                                }
-                            }
-
-                            if (AnimationsLoader.Instance.SittingValue == 0 && IsGargoyle && item.ItemData.IsWeapon)
-                            {
-                                AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, graphic);
-                                DrawInternal(batcher, this, item, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman, false);
-                                AnimationsLoader.Instance.AnimGroup = animGroup;
-                            }
-                            else
-                            {
-                                DrawInternal(batcher, this, item, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman, false);
-                            }
+                        if (AnimationsLoader.Instance.SittingValue == 0 && IsGargoyle && item.ItemData.IsWeapon)
+                        {
+                            AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, graphic);
+                            DrawInternal(batcher, this, item, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman, false);
+                            AnimationsLoader.Instance.AnimGroup = animGroup;
                         }
                         else
                         {
-                            if (item.ItemData.IsLight)
-                                Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
+                            DrawInternal(batcher, this, item, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman, false);
                         }
-
-                        _equipConvData = null;
                     }
                     else
                     {
                         if (item.ItemData.IsLight)
-                        {
                             Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
-                            break;
-                        }
+                    }
+
+                    _equipConvData = null;
+                }
+                else
+                {
+                    if (item.ItemData.IsLight)
+                    {
+                        Client.Game.GetScene<GameScene>().AddLight(this, this, drawX, drawY);
+                        break;
                     }
                 }
             }
+
             //if (FileManager.Animations.SittingValue != 0)
             //{
             //    ref var sittingData = ref FileManager.Animations.SittingInfos[FileManager.Animations.SittingValue - 1];
@@ -547,20 +544,20 @@ namespace ClassicUO.Game.GameObjects
 
         internal static bool IsCovered(Mobile mobile, Layer layer)
         {
-            if (!mobile.HasEquipment)
+            if (mobile.IsEmpty)
                 return false;
 
             switch (layer)
             {
                 case Layer.Shoes:
-                    Item pants = mobile.Equipment[(int) Layer.Pants];
+                    Item pants = mobile.FindItemByLayer(Layer.Pants);
                     Item robe;
 
-                    if (mobile.HasEquipment && mobile.Equipment[(int) Layer.Legs] != null || pants != null && (pants.Graphic == 0x1411 || pants.Graphic == 0x141A))
+                    if (mobile.FindItemByLayer(Layer.Legs) != null || pants != null && (pants.Graphic == 0x1411 || pants.Graphic == 0x141A))
                         return true;
                     else
                     {
-                        robe = mobile.Equipment[(int) Layer.Robe];
+                        robe = mobile.FindItemByLayer(Layer.Robe);
 
                         if (pants != null && (pants.Graphic == 0x0513 || pants.Graphic == 0x0514) || robe != null && robe.Graphic == 0x0504)
                             return true;
@@ -570,15 +567,15 @@ namespace ClassicUO.Game.GameObjects
 
                 case Layer.Pants:
                     Item skirt;
-                    robe = mobile.Equipment[(int) Layer.Robe];
-                    pants = mobile.Equipment[(int) Layer.Pants];
+                    robe = mobile.FindItemByLayer(Layer.Robe);
+                    pants = mobile.FindItemByLayer(Layer.Pants);
 
-                    if (mobile.Equipment[(int) Layer.Legs] != null || robe != null && robe.Graphic == 0x0504)
+                    if (mobile.FindItemByLayer(Layer.Legs) != null || robe != null && robe.Graphic == 0x0504)
                         return true;
 
                     if (pants != null && (pants.Graphic == 0x01EB || pants.Graphic == 0x03E5 || pants.Graphic == 0x03eB))
                     {
-                        skirt = mobile.Equipment[(int) Layer.Skirt];
+                        skirt = mobile.FindItemByLayer(Layer.Skirt);
 
                         if (skirt != null && skirt.Graphic != 0x01C7 && skirt.Graphic != 0x01E4)
                             return true;
@@ -590,8 +587,8 @@ namespace ClassicUO.Game.GameObjects
                     break;
 
                 case Layer.Tunic:
-                    robe = mobile.Equipment[(int) Layer.Robe];
-                    Item tunic = mobile.Equipment[(int) Layer.Tunic];
+                    robe = mobile.FindItemByLayer(Layer.Robe);
+                    Item tunic = mobile.FindItemByLayer(Layer.Tunic);
 
                     /*if (robe != null && robe.Graphic != 0)
                         return true;
@@ -602,13 +599,13 @@ namespace ClassicUO.Game.GameObjects
                     break;
 
                 case Layer.Torso:
-                    robe = mobile.Equipment[(int) Layer.Robe];
+                    robe = mobile.FindItemByLayer(Layer.Robe);
 
                     if (robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986)
                         return true;
                     else
                     {
-                        Item torso = mobile.Equipment[(int) Layer.Torso];
+                        Item torso = mobile.FindItemByLayer(Layer.Torso);
 
                         if (torso != null && (torso.Graphic == 0x782A || torso.Graphic == 0x782B))
                             return true;
@@ -617,13 +614,13 @@ namespace ClassicUO.Game.GameObjects
                     break;
 
                 case Layer.Arms:
-                    robe = mobile.Equipment[(int) Layer.Robe];
+                    robe = mobile.FindItemByLayer(Layer.Robe);
 
                     return robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986;
 
                 case Layer.Helmet:
                 case Layer.Hair:
-                    robe = mobile.Equipment[(int) Layer.Robe];
+                    robe = mobile.FindItemByLayer(Layer.Robe);
 
                     if (robe != null)
                     {
@@ -649,7 +646,7 @@ namespace ClassicUO.Game.GameObjects
 
                     break;
                 /*case Layer.Skirt:
-                    skirt = mobile.Equipment[(int) Layer.Skirt];
+                    skirt = mobile.FindItemByLayer( Layer.Skirt];
 
                     break;*/
             }

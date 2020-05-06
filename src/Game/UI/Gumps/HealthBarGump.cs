@@ -531,9 +531,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _bars[0].IsVisible = true;
                 }
 
-                if (TargetManager.LastTarget != World.Player && !_outOfRange && mobile != null)
+                if (TargetManager.LastTargetInfo.Serial != World.Player && !_outOfRange && mobile != null)
                 {
-                    if (mobile == TargetManager.LastTarget)
+                    if (mobile == TargetManager.LastTargetInfo.Serial)
                     {
                         _border[0].LineColor = HPB_COLOR_RED;
 
@@ -542,7 +542,7 @@ namespace ClassicUO.Game.UI.Gumps
                             _border[1].LineColor = _border[2].LineColor = _border[3].LineColor = HPB_COLOR_RED;
                         }
                     }
-                    else if (mobile != TargetManager.LastTarget)
+                    else if (mobile != TargetManager.LastTargetInfo.Serial)
                     {
                         _border[0].LineColor = HPB_COLOR_BLACK;
 

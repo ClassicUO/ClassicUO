@@ -125,7 +125,7 @@ namespace ClassicUO.Game.UI
             if (_serial == 0 || serial != _serial)
             {
                 uint revision2 = 0;
-                if (_serial == 0 || (World.OPL.TryGetRevision(_serial, out uint revision) && World.OPL.TryGetRevision(serial, out revision2) && revision != revision2))
+                if (_serial == 0 || (_serial != serial) || (World.OPL.TryGetRevision(_serial, out uint revision) && World.OPL.TryGetRevision(serial, out revision2) && revision != revision2))
                 {
                     _maxWidth = 0;
                     _serial = serial;

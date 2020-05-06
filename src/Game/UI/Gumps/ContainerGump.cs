@@ -160,9 +160,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void HitBoxOnMouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtonType.Left && !IsMinimized)
+            if (e.Button == MouseButtonType.Left && !IsMinimized && !ItemHold.Enabled)
             {
-                IsMinimized = true;
+                Point offset = Mouse.LDroppedOffset;
+
+                if (Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS &&
+                    Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+                    IsMinimized = true;
             }
         }
 
@@ -432,7 +436,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Draw(batcher, x, y);
 
-            if (CUOEnviroment.Debug)
+            if (CUOEnviroment.Debug && !IsMinimized)
             {
                 var bounds = _data.Bounds;
                 float scale = UIManager.ContainerScale;

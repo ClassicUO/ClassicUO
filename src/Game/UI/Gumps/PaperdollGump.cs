@@ -368,7 +368,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (ItemHold.ItemData.AnimID != 0)
                     {
-                        if (mobile != null && (!mobile.HasEquipment || mobile.Equipment[ItemHold.ItemData.Layer] == null))
+                        if (mobile != null && mobile.FindItemByLayer((Layer) ItemHold.ItemData.Layer) == null)
                         {
                             _paperDollInteractable.SetFakeItem(true);
                         }
@@ -476,8 +476,7 @@ namespace ClassicUO.Game.UI.Gumps
                 for (int i = 0; i < _slots.Length; i++)
                 {
                     int idx = (int) _slots[i].Layer;
-                    if (idx < mobile.Equipment.Length)
-                        _slots[i].LocalSerial = mobile.Equipment[idx]?.Serial ?? 0;
+                    _slots[i].LocalSerial = mobile.FindItemByLayer((Layer) idx)?.Serial ?? 0;
                 }
             }
         }
@@ -653,7 +652,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (mobile != null)
                 {
-                    if (item != mobile.Equipment[(int) _layer] || _itemGump == null)
+                    Item it_at_layer = mobile.FindItemByLayer(_layer);
+
+                    if (item != it_at_layer || _itemGump == null)
                     {
                         if (_itemGump != null)
                         {
@@ -661,11 +662,11 @@ namespace ClassicUO.Game.UI.Gumps
                             _itemGump = null;
                         }
 
-                        item = mobile.Equipment[(int) _layer];
+                        item = it_at_layer;
 
                         if (item != null)
                         {
-                            LocalSerial = mobile.Equipment[(int) _layer].Serial;
+                            LocalSerial = it_at_layer.Serial;
 
                             Add(_itemGump = new ItemGumpFixed(item, 18, 18)
                             {

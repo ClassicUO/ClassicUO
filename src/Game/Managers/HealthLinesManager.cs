@@ -77,8 +77,8 @@ namespace ClassicUO.Game.Managers
             int screenW = ProfileManager.Current.GameWindowSize.X;
             int screenH = ProfileManager.Current.GameWindowSize.Y;
 
-            if (SerialHelper.IsMobile(TargetManager.LastTarget))
-                DrawHealthLineWithMath(batcher, TargetManager.LastTarget, screenX, screenY, screenW, screenH, scale);
+            if (SerialHelper.IsMobile(TargetManager.LastTargetInfo.Serial))
+                DrawHealthLineWithMath(batcher, TargetManager.LastTargetInfo.Serial, screenX, screenY, screenW, screenH, scale);
             if (SerialHelper.IsMobile(TargetManager.SelectedTarget))
                 DrawHealthLineWithMath(batcher, TargetManager.SelectedTarget, screenX, screenY, screenW, screenH, scale);
             if (SerialHelper.IsMobile(TargetManager.LastAttack))
@@ -191,10 +191,10 @@ namespace ClassicUO.Game.Managers
                 if (y < screenY || y > screenY + screenH - BAR_HEIGHT)
                     continue;
 
-                if (mode >= 1 && TargetManager.LastTarget != mobile)
+                if (mode >= 1 && TargetManager.LastTargetInfo.Serial != mobile)
                 {
                     // already done
-                    if (mobile == TargetManager.LastTarget || 
+                    if (mobile == TargetManager.LastTargetInfo.Serial || 
                         mobile == TargetManager.SelectedTarget ||
                         mobile == TargetManager.LastAttack)
                         continue;

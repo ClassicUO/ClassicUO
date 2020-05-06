@@ -216,11 +216,12 @@ namespace ClassicUO.Game.GameObjects
                 if (color == 0)
                     color = Hue;
             }
-            else if (HasEquipment && ishuman)
+            else if (ishuman)
             {
-                Item itemEquip = Equipment[(int) layer];
+                Item itemEquip = FindItemByLayer(layer);
 
-                if (itemEquip == null) return;
+                if (itemEquip == null) 
+                    return;
 
                 graphic = itemEquip.ItemData.AnimID;
                 ispartialhue = itemEquip.ItemData.IsPartialHue;

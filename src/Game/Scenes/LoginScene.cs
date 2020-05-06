@@ -197,8 +197,14 @@ namespace ClassicUO.Game.Scenes
 
         private Gump GetGumpForStep()
         {
-            World.Items.Clear();
+            foreach (var item in World.Items)
+                World.RemoveItem(item);
+
+            foreach (Mobile mobile in World.Mobiles)
+                World.RemoveMobile(mobile);
+
             World.Mobiles.Clear();
+            World.Items.Clear();
 
             switch (CurrentLoginStep)
             {

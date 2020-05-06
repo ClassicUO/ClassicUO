@@ -69,6 +69,53 @@ namespace ClassicUO.Game.Managers
         }
     }
 
+    class LastTargetInfo
+    {
+        public uint Serial;
+        public ushort Graphic;
+        public ushort X, Y;
+        public sbyte Z;
+
+        public bool IsEntity => SerialHelper.IsValid(Serial);
+        public bool IsStatic => !IsEntity && Graphic != 0 && Graphic != 0xFFFF;
+        public bool IsLand => !IsStatic;
+
+
+        public void SetEntity(uint serial)
+        {
+            Serial = serial;
+            Graphic = 0xFFFF;
+            X = Y = 0xFFFF;
+            Z = sbyte.MinValue;
+        }
+
+        public void SetStatic(ushort graphic, ushort x, ushort y, sbyte z)
+        {
+            Serial = 0;
+            Graphic = graphic;
+            X = x;
+            Y = y;
+            Z = z;
+        }
+
+        public void SetLand(ushort x, ushort y, sbyte z)
+        {
+            Serial = 0;
+            Graphic = 0xFFFF;
+            X = x;
+            Y = y;
+            Z = z;
+        }
+
+        public void Clear()
+        {
+            Serial = 0;
+            Graphic = 0xFFFF;
+            X = Y = 0xFFFF;
+            Z = sbyte.MinValue;
+        }
+    }
+
     internal static class TargetManager
     {
         private static uint _targetCursorId;
@@ -80,11 +127,13 @@ namespace ClassicUO.Game.Managers
 
         public static CursorTarget TargetingState { get; private set; } = CursorTarget.Invalid;
 
-        public static uint LastTarget, LastAttack, SelectedTarget;
+        public static uint LastAttack, SelectedTarget;
 
         public static bool IsTargeting { get; private set; }
 
         public static TargetType TargetingType { get; private set; }
+
+        public static readonly LastTargetInfo LastTargetInfo = new LastTargetInfo();
 
         public static void ClearTargetingWithoutTargetCancelPacket()
         {
@@ -175,7 +224,7 @@ namespace ClassicUO.Game.Managers
 
                         if (entity != World.Player)
                         {
-                            LastTarget = entity.Serial;
+                            LastTargetInfo.SetEntity(serial);
                         }
 
                         if (SerialHelper.IsMobile(serial) && serial != World.Player &&
@@ -259,8 +308,8 @@ namespace ClassicUO.Game.Managers
 
             if (graphic == 0)
             {
-                //if (TargetingType != TargetType.Neutral && !wet)
-                //    return;
+                if ((TargetingType == TargetType.Beneficial || TargetingType == TargetType.Harmful) && !wet)
+                    return;
             }
             else
             {
@@ -274,6 +323,8 @@ namespace ClassicUO.Game.Managers
                     z += itemData.Height;
                 }
             }
+
+            LastTargetInfo.SetStatic(graphic, x, y, (sbyte) z);
 
             TargetPacket(graphic, x, y, (sbyte) z);
         }

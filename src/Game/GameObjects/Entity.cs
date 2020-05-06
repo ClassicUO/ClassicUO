@@ -35,7 +35,6 @@ namespace ClassicUO.Game.GameObjects
     internal abstract class Entity : GameObject, IEquatable<Entity>
     {
         private Direction _direction;
-        private Item[] _equipment;
 
         protected Entity(uint serial)
         {
@@ -44,25 +43,11 @@ namespace ClassicUO.Game.GameObjects
 
 
         public uint LastStepTime;
-
         protected long LastAnimationChangeTime;
-
-
-        public bool HasEquipment => _equipment != null;
-
-        public Item[] Equipment
-        {
-            get => _equipment ?? (_equipment = new Item[(int) Layer.Bank + 0x11]);
-            set => _equipment = value;
-        }
-
         public uint Serial;
         public bool IsClicked;
-
         public ushort Hits;
-
         public ushort HitsMax;
-
         public string Name;
 
         public bool IsHidden => (Flags & Flags.Hidden) != 0;
@@ -269,13 +254,6 @@ namespace ClassicUO.Game.GameObjects
                 Items = new_first;
 
             }
-        }
-
-
-        public override void Destroy()
-        {
-            _equipment = null;
-            base.Destroy();
         }
 
 

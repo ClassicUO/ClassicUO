@@ -483,13 +483,10 @@ namespace ClassicUO.Game.UI.Gumps
                                 originalGroup.UpdateSkillsPosition();
                             }
                         }
-
                     }
                 }
-
                 base.OnMouseOver(x, y);
             }
-
 
             public override void OnKeyboardReturn(int textID, string text)
             {
@@ -756,13 +753,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                 UIManager.GameCursor.IsDraggingCursorForced = false;
                 
-                if (UIManager.IsMouseOverWorld && UIManager.LastControlMouseDown(MouseButtonType.Left) == this && World.Player.Skills[Index].IsClickable)
+                if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this && World.Player.Skills[Index].IsClickable)
                 {
-                    GetSpellFloatingButton(Index)?.Dispose();
-
-                    if (Index >= 0 && Index < World.Player.Skills.Length)
+                    if (UIManager.MouseOverControl == null || UIManager.MouseOverControl.RootParent != this.RootParent)
                     {
-                        UIManager.Add(new SkillButtonGump(World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22));
+                        GetSpellFloatingButton(Index)?.Dispose();
+
+                        if (Index >= 0 && Index < World.Player.Skills.Length)
+                        {
+                            UIManager.Add(new SkillButtonGump(World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22));
+                        }
                     }
                 }
             }

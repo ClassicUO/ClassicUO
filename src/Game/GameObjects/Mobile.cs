@@ -82,7 +82,6 @@ namespace ClassicUO.Game.GameObjects
                 mobile.IsRenamable = false;
                 mobile.Flags = 0;
                 mobile.InWarMode = false;
-                mobile.Equipment = null;
                 mobile.IsRunning = false;
                 mobile.AnimationInterval = 0;
                 mobile.AnimationFrameCount = 0;
@@ -199,19 +198,28 @@ namespace ClassicUO.Game.GameObjects
                                Graphic == 0x03DB || Graphic == 0x03DF || Graphic == 0x03E2 || Graphic == 0x02E8 || Graphic == 0x02E9|| Graphic == 0x04E5; 
         public bool IsGargoyle => Client.Version >= ClientVersion.CV_7000 && Graphic == 0x029A || Graphic == 0x029B;
 
-        public bool IsMounted => HasEquipment && Equipment[0x19] != null && !IsDrivingBoat && Equipment[0x19].GetGraphicForAnimation() != 0xFFFF;
+        public bool IsMounted
+        {
+            get
+            {
+                Item it = FindItemByLayer(Layer.Mount);
+
+                if (it != null && !IsDrivingBoat && it.GetGraphicForAnimation() != 0xFFFF)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
 
         public bool IsDrivingBoat
         {
             get
             {
-                if (HasEquipment)
-                {
-                    Item m = Equipment[0x19];
-                    return m != null && m.Graphic == 0x3E96;
-                }
+                Item it = FindItemByLayer(Layer.Mount);
 
-                return false;
+                return it != null && it.Graphic == 0x3E96;
             }
         }
 
@@ -999,6 +1007,39 @@ namespace ClassicUO.Game.GameObjects
                                 case 0x4C8E:
                                 case 0x4C8F:
                                 case 0x4C1E:
+                                case 0xA05F:
+                                case 0xA05E:
+                                case 0xA05D:
+                                case 0xA05C:
+                                case 0x9EA2:
+                                case 0x9EA1:
+                                case 0x9E9F:
+                                case 0x9EA0:
+                                case 0x9E91:
+                                case 0x9E90:
+                                case 0x9E8F:
+                                case 0x9E8E:
+                                case 0x9C62:
+                                case 0x9C61:
+                                case 0x9C60:
+                                case 0x9C5F:
+                                case 0x9C5E:
+                                case 0x9C5D:
+                                case 0x9C5A:
+                                case 0x9C59:
+                                case 0x9C58:
+                                case 0x9C57:
+                                case 0x402A:
+                                case 0x4029:
+                                case 0x4028:
+                                case 0x4027:
+                                case 0x4023:
+                                case 0x4024:
+                                case 0x4C1B:
+                                case 0x7132:
+                                case 0x71C2:
+                                case 0x9977:
+                                case 0x996C:
                                 //case 0x4C1F:
 
                                     for (int i = 0; i < AnimationsLoader.Instance.SittingInfos.Length; i++)
@@ -1102,12 +1143,6 @@ namespace ClassicUO.Game.GameObjects
         {
             HitsTexture?.Destroy();
             HitsTexture = null;
-
-            if (HasEquipment)
-            {
-                for (int i = 0; i < Equipment.Length; i++)
-                    Equipment[i] = null;
-            }
 
             base.Destroy();
 

@@ -44,6 +44,7 @@ namespace ClassicUO.Game
 
         public static bool IsPointInMobile(Mobile mobile, int xx, int yy)
         {
+            /*
             bool mirror = false;
             byte dir = (byte) mobile.GetDirectionForAnimation();
             AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
@@ -61,7 +62,7 @@ namespace ClassicUO.Game
                     graphic = mobile.GetGraphicForAnimation();
                 else if (mobile.HasEquipment)
                 {
-                    Item item = mobile.Equipment[(int) layer];
+                    Item item = mobile.FindItemByLayer( layer];
 
                     if (item == null)
                         continue;
@@ -138,13 +139,13 @@ namespace ClassicUO.Game
                 }
             }
 
-
+            */
             return false;
         }
 
         public static bool IsPointInCorpse(Item corpse, int xx, int yy)
         {
-            if (corpse == null || World.CorpseManager.Exists(corpse.Serial, 0))
+            /*if (corpse == null || World.CorpseManager.Exists(corpse.Serial, 0))
                 return false;
 
             byte dir = (byte) ((byte) corpse.Layer & 0x7F & 7);
@@ -172,7 +173,7 @@ namespace ClassicUO.Game
                          MathHelper.InRange(corpse.Amount, 0x02B6, 0x02B7) ||
                          corpse.Amount == 0x03DB || corpse.Amount == 0x03DF || corpse.Amount == 0x03E2 || corpse.Amount == 0x02E8 || corpse.Amount == 0x02E9)
                 {
-                    Item itemEquip = corpse.Equipment[(int) layer];
+                    Item itemEquip = corpse.FindItemByLayer( layer];
 
                     if (itemEquip == null)
                         continue;
@@ -229,7 +230,8 @@ namespace ClassicUO.Game
                     if (frame.Contains(x, y))
                         return true;
                 }
-            }
+            }            
+            */
 
             return false;
         }

@@ -207,7 +207,9 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Inventory:
-                    Item backpack = World.Player.Equipment[(int) Layer.Backpack];
+                    Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
+                    if (backpack == null)
+                        return;
 
                     ContainerGump backpackGump = UIManager.GetGump<ContainerGump>(backpack);
 

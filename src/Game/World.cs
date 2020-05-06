@@ -87,6 +87,8 @@ namespace ClassicUO.Game
 
         public static ActiveSpellIconsManager ActiveSpellIcons = new ActiveSpellIconsManager();
 
+        public static uint LastObject;
+
 
         public static int MapIndex
         {
@@ -319,16 +321,13 @@ namespace ClassicUO.Game
             if (item == null)
                 return false;
 
-            if (item.Layer != Layer.Invalid)
+            if (SerialHelper.IsValid(item.Container))
             {
-                Entity e = Get(item.RootContainer);
+                Entity ent = Get(item.Container);
 
-                if (e != null && e.HasEquipment)
+                if (ent != null)
                 {
-                    int index = (int) item.Layer;
-
-                    if (index >= 0 && index < e.Equipment.Length)
-                        e.Equipment[index] = null;
+                    ent.Remove(item);
                 }
             }
 
@@ -657,28 +656,28 @@ namespace ClassicUO.Game
         {
             foreach (Mobile mobile in Mobiles)
             {
-                mobile.Destroy();
+                RemoveMobile(mobile);
             }
 
             foreach (Item item in Items)
             {
-                item.Destroy();
+                RemoveItem(item);
             }
 
-            HouseManager.Clear();
+            LastObject = 0;
+            HouseManager?.Clear();
             Items.Clear();
             Mobiles.Clear();
-            Player.Destroy();
+            Player?.Destroy();
             Player = null;
-            Map.Destroy();
+            Map?.Destroy();
             Map = null;
             Light.Overall = Light.RealOverall = 0;
             Light.Personal = Light.RealPersonal = 0;
             ClientFeatures.SetFlags(0);
             ClientLockedFeatures.SetFlags(0);
-            HouseManager.Clear();
-            Party.Clear();
-            ServerName = string.Empty;
+            HouseManager?.Clear();
+            Party?.Clear();
             TargetManager.LastAttack = 0;
             MessageManager.PromptData = default;
             _effectManager.Clear();

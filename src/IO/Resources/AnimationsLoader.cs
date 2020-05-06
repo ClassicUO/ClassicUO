@@ -202,6 +202,76 @@ namespace ClassicUO.IO.Resources
 
             new SittingInfoData(0x4C1E, 2, 2, 2, 2, 6, 6, false),
             //new SittingInfoData(0x4C1F, 2, 2, 2, 2, 6, 6, false),
+
+            new SittingInfoData(0x4C8B, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x4C8C, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x4C8D, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x4C8E, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x4C8F, 4, 4, 4, 4, 4, 4, false),
+
+            new SittingInfoData(0x4C1E, 2, 2, 2, 2, 6, 6, false),
+            new SittingInfoData(0x4C80, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x4C81, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x4C82, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x4C83, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x4C84, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x4C85, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x4C86, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x4C87, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x4C88, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x4C89, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x4C8A, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x4C8B, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x4C8C, 2, 2, 2, 2, 0, 0, false),
+            new SittingInfoData(0x4C8D, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x4C8E, 4, 4, 4, 4, 4, 4, false),
+            new SittingInfoData(0x4C8F, 4, 4, 4, 4, 4, 4, false),
+            //new SittingInfoData(0x4C1F, 2, 2, 2, 2, 6, 6, false),
+
+            // thanks Tony!
+            new SittingInfoData(0xA05F, 2, 2, 2, 2, 0, 0, false), // EAST ONLY
+            new SittingInfoData(0xA05E, 0, 0, 0, 0, 4, 4, false), // NORTH ONLY
+            new SittingInfoData(0xA05D, 4, 4, 4, 4, 4, 4, false), // SOUTH ONLY
+            new SittingInfoData(0xA05C, 6, 6, 6, 6, 6, 4, false), // WEST ONLY
+
+            new SittingInfoData(0x9EA2, 2, 2, 2, 2, 0, 0, false), // EAST ONLY
+            new SittingInfoData(0x9EA1, 4, 4, 4, 4, 4, 4, false), // SOUTH ONLY
+            new SittingInfoData(0x9E9F, 0, 0, 0, 0, 4, 4, false), // NORTH ONLY
+            new SittingInfoData(0x9EA0, 6, 6, 6, 6, 6, 4, false), // WEST ONLY
+
+            new SittingInfoData(0x9E91, 4, 4, 4, 4, 4, 4, false), // SOUTH ONLY
+            new SittingInfoData(0x9E90, 2, 2, 2, 2, 0, 0, false), // EAST ONLY
+            new SittingInfoData(0x9E8F, 6, 6, 6, 6, 6, 4, false), // WEST ONLY
+            new SittingInfoData(0x9E8E, 0, 0, 0, 0, 4, 4, false), // NORTH ONLY
+
+            new SittingInfoData(0x9C62, 0, 0, 0, 0, 4, 4, false), // NORTH ONLY
+            new SittingInfoData(0x9C61, 0, 0, 0, 0, 4, 4, false), // NORTH ONLY
+            new SittingInfoData(0x9C60, 0, 0, 0, 0, 4, 4, false), // NORTH ONLY
+
+            new SittingInfoData(0x9C5F, 6, 6, 6, 6, 6, 4, false), // WEST ONLY
+            new SittingInfoData(0x9C5E, 6, 6, 6, 6, 6, 4, false), // WEST ONLY
+            new SittingInfoData(0x9C5D, 6, 6, 6, 6, 6, 4, false), // WEST ONLY
+
+            new SittingInfoData(0x9C5A, 0, 0, 0, 0, 4, 4, false), // NORTH ONLY
+            new SittingInfoData(0x9C59, 0, 0, 0, 0, 4, 4, false), // NORTH ONLY
+
+            new SittingInfoData(0x9C58, 6, 6, 6, 6, 6, 4, false), // WEST ONLY
+            new SittingInfoData(0x9C57, 6, 6, 6, 6, 6, 4, false), // WEST ONLY
+
+            new SittingInfoData(0x402A, 2, 2, 2, 2, 0, 0, false), // EAST ONLY
+            new SittingInfoData(0x4029, 2, 2, 2, 2, 0, 0, false), // EAST ONLY
+
+            new SittingInfoData(0x4028, 4, 4, 4, 4, 4, 4, false), // SOUTH ONLY
+            new SittingInfoData(0x4027, 4, 4, 4, 4, 4, 4, false), // SOUTH ONLY
+            new SittingInfoData(0x4023, 4, 4, 4, 4, 4, 4, false), // SOUTH ONLY
+            new SittingInfoData(0x4024, 2, 2, 2, 2, 0, 0, false), // EAST ONLY
+            new SittingInfoData(0x4C1E, 2, 2, 2, 2, 0, 0, false), // EAST ONLY
+            new SittingInfoData(0x4C1B, 4, 4, 4, 4, 4, 4, false), // SOUTH ONLY
+            new SittingInfoData(0x7132, 2, 2, 2, 2, 0, 0, false), // EAST ONLY
+            new SittingInfoData(0x71C2, 4, 4, 4, 4, 4, 4, false), // SOUTH ONLY
+
+            new SittingInfoData(0x9977, 2, 2, 2, 2, 0, 0, false), // EAST ONLY
+            new SittingInfoData(0x996C, 4, 4, 4, 4, 4, 4, false), // SOUTH ONLY
         };
 
 
