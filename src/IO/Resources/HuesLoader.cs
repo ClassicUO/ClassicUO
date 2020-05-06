@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -93,11 +94,13 @@ namespace ClassicUO.IO.Resources
             // nothing to clear
         }
 
-        public void CreateHuesPalette()
+        public float[] CreateHuesPalette()
         {
+            float[] p = new float[32 * 3 * HuesCount];
+
             Palette = new FloatHues[HuesCount];
             int entrycount = HuesCount >> 3;
-
+            int iddd = 0;
             for (int i = 0; i < entrycount; i++)
             {
                 for (int j = 0; j < 8; j++)
@@ -112,14 +115,24 @@ namespace ClassicUO.IO.Resources
                         Palette[idx].Palette[idx1] = ((c >> 10) & 0x1F) / 31.0f;
                         Palette[idx].Palette[idx1 + 1] = ((c >> 5) & 0x1F) / 31.0f;
                         Palette[idx].Palette[idx1 + 2] = (c & 0x1F) / 31.0f;
+
+                        //p[(idx * 96) + idx1 + 0] = Palette[idx].Palette[idx1];
+                        //p[(idx * 96) + idx1 + 1] = Palette[idx].Palette[idx1 + 1];
+                        //p[(idx * 96) + idx1 + 2] = Palette[idx].Palette[idx1 + 2];
+
+                        p[iddd++] = Palette[idx].Palette[idx1];
+                        p[iddd++] = Palette[idx].Palette[idx1 + 1];
+                        p[iddd++] = Palette[idx].Palette[idx1 + 2];
                     }
                 }
             }
+
+            return p;
         }
 
         public uint[] CreateShaderColors()
         {
-            uint[] hues = new uint[32 * 2 * HuesCount];
+            uint[] hues = new uint[32 * 1 * HuesCount];
             int len = HuesRange.Length;
 
             int idx = 0;
@@ -128,23 +141,24 @@ namespace ClassicUO.IO.Resources
             {
                 for (int y = 0; y < 8; y++)
                 {
-                    for (int x = 0; x < 32; x++) hues[idx++] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
+                    for (int x = 0; x < 32; x++) 
+                        hues[idx++] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
                 }
             }
 
-            for (int r = 0; r < len; r++)
-            {
-                for (int y = 0; y < 8; y++)
-                {
-                    for (int x = 0; x < 32; x++)
-                    {
-                        if (x == 0)
-                            hues[idx++] = HuesHelper.Color16To32(HuesRange[0].Entries[0].ColorTable[0]);
-                        else
-                            hues[idx++] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
-                    }
-                }
-            }
+            //for (int r = 0; r < len; r++)
+            //{
+            //    for (int y = 0; y < 8; y++)
+            //    {
+            //        for (int x = 0; x < 32; x++)
+            //        {
+            //            if (x == 0)
+            //                hues[idx++] = HuesHelper.Color16To32(HuesRange[0].Entries[0].ColorTable[0]);
+            //            else
+            //                hues[idx++] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
+            //        }
+            //    }
+            //}
 
             return hues;
         }

@@ -93,7 +93,6 @@ namespace ClassicUO
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0f / 250);
 
             SetRefreshRate(Settings.GlobalSettings.FPS);
-            _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice);
 
             _filter = new SDL_EventFilter(HandleSDLEvent);
             SDL.SDL_AddEventWatch(_filter, IntPtr.Zero);
@@ -106,15 +105,25 @@ namespace ClassicUO
             Client.Load();
 
             uint[] hues = HuesLoader.Instance.CreateShaderColors();
-
             int size = HuesLoader.Instance.HuesCount;
 
-            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size * 2);
-            texture0.SetData(hues, 0, size * 2);
+            var huesf = HuesLoader.Instance.CreateHuesPalette();
+
+            //Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size * 3);
+            //texture0.SetData(huesf);
+            //Texture2D texture1 = new Texture2D(GraphicsDevice, 32 * 3, size);
+            //texture0.SetData(huesf, 0, size);
+
+            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size);
+            texture0.SetData(hues, 0, size);
+
             Texture2D texture1 = new Texture2D(GraphicsDevice, 32, size);
             texture1.SetData(hues, size, size);
+
             GraphicsDevice.Textures[1] = texture0;
             GraphicsDevice.Textures[2] = texture1;
+
+            _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice, HuesLoader.Instance.HuesCount);
 
             AuraManager.CreateAuraTexture();
             UIManager.InitializeGameCursor();

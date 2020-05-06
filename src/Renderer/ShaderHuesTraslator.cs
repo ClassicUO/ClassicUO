@@ -21,6 +21,8 @@
 
 using System.Runtime.CompilerServices;
 
+using ClassicUO.IO.Resources;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer

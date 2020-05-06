@@ -51,7 +51,7 @@ namespace ClassicUO.Renderer
         private BoundingBox _drawingArea;
         private int _numSprites;
 
-        public UltimaBatcher2D(GraphicsDevice device)
+        public UltimaBatcher2D(GraphicsDevice device, float color_count)
         {
             GraphicsDevice = device;
             _textureInfo = new Texture2D[MAX_SPRITES];
@@ -74,7 +74,7 @@ namespace ClassicUO.Renderer
 
             _stencil = Stencil;
 
-            DefaultEffect = new IsometricEffect(device);
+            DefaultEffect = new IsometricEffect(device, color_count);
         }
 
 
@@ -1688,18 +1688,22 @@ namespace ClassicUO.Renderer
         {
             private Vector2 _viewPort;
             private Matrix _matrix = Matrix.Identity;
+            private float _color_count;
 
-            public IsometricEffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.IsometricEffect)
+            public IsometricEffect(GraphicsDevice graphicsDevice, float color_count) : base(graphicsDevice, Resources.IsometricEffect)
             {
+                _color_count = color_count;
                 WorldMatrix = Parameters["WorldMatrix"];
                 Viewport = Parameters["Viewport"];
                 Brighlight = Parameters["Brightlight"];
 
                 CurrentTechnique = Techniques["HueTechnique"];
-            }
 
-            protected IsometricEffect(Effect cloneSource) : base(cloneSource)
-            {
+                ColorCount = Parameters["Hues_count"];
+                ColorDCount = Parameters["Hues_count_double"];
+
+               
+                ColorDCount.SetValue(_color_count * 2.0f);
             }
 
 
@@ -1707,10 +1711,13 @@ namespace ClassicUO.Renderer
             public EffectParameter Viewport { get; }
             public EffectParameter Brighlight { get; }
 
+            public EffectParameter ColorCount { get; }
+            public EffectParameter ColorDCount { get; }
 
             public override void ApplyStates()
             {
                 WorldMatrix.SetValue(_matrix);
+                ColorCount.SetValue((int) _color_count);
 
                 _viewPort.X = GraphicsDevice.Viewport.Width;
                 _viewPort.Y = GraphicsDevice.Viewport.Height;

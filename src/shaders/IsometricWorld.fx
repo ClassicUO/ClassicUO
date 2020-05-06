@@ -10,12 +10,16 @@
 #define LIGHTS 13
 #define COLOR_SWAP 32
 
+
 float4x4 MatrixTransform;
 float4x4 WorldMatrix;
 float2 Viewport;
 float Brightlight;
+int Hues_count;
+float Hues_count_double;
 
-const static int HUES_DELTA = 3000;
+
+
 const static float3 LIGHT_DIRECTION = float3(-1.0f, -1.0f, .5f);
 const static float3 VEC3_ZERO = float3(0, 0, 0);
 
@@ -39,6 +43,28 @@ struct PS_INPUT
 	float3 Hue		: TEXCOORD2;
 };
 
+
+float3 get_rgb(float red, float hue, bool swap)
+{
+	//if (hue < Hues_count)
+	{
+		/*if (swap)
+			hue += Hues_count;*/
+		float p = hue * (1.0 / Hues_count);
+
+		return tex2D(HueSampler0, float2(red, p)).rgb;
+	}
+	//return  float3(1, 0, 0); //tex2D(HueSampler1, float2(red, hue)).rgb;
+}
+
+float3 get_light(float3 norm)
+{
+	float3 light = normalize(LIGHT_DIRECTION);
+	float3 normal = normalize(norm);
+	return max((dot(normal, light) + 0.5f), 0.0f);
+}
+
+
 PS_INPUT VertexShaderFunction(VS_INPUT IN)
 {
 	PS_INPUT OUT;
@@ -50,24 +76,6 @@ PS_INPUT VertexShaderFunction(VS_INPUT IN)
 	OUT.Hue = IN.Hue;
 	
     return OUT;
-}
-
-float3 get_rgb(float red, float hue, bool swap)
-{
-	if (hue < HUES_DELTA)
-	{
-		if (swap)
-			hue += HUES_DELTA;
-		return tex2D(HueSampler0, float2(red, hue / 6000.0f)).rgb;
-	}
-	return tex2D(HueSampler1, float2(red, (hue - 3000.0f) / 3000.0f)).rgb;
-}
-
-float3 get_light(float3 norm)
-{
-	float3 light = normalize(LIGHT_DIRECTION);
-	float3 normal = normalize(norm);
-	return max((dot(normal, light) + 0.5f), 0.0f);
 }
 
 float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
