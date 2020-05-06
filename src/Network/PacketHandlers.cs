@@ -1118,9 +1118,7 @@ namespace ClassicUO.Network
             uint containerSerial = p.ReadUInt();
             ushort hue = p.ReadUShort();
 
-            Console.WriteLine("######### START UpdateContainedItem #########");
             AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
-            Console.WriteLine("######### END UpdateContainedItem #########");
         }
 
         private static void DenyMoveItem(Packet p)
@@ -1508,7 +1506,6 @@ namespace ClassicUO.Network
                 return;
 
             ushort count = p.ReadUShort();
-            Console.WriteLine("######### START UpdateContainedItems #########");
 
             for (int i = 0; i < count; i++)
             {
@@ -1535,7 +1532,6 @@ namespace ClassicUO.Network
 
                 AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
             }
-            Console.WriteLine("######### END UpdateContainedItems #########");
         }
 
         private static void PersonalLightLevel(Packet p)
@@ -4410,8 +4406,6 @@ namespace ClassicUO.Network
 
         private static void AddItemToContainer(uint serial, ushort graphic, ushort amount, ushort x, ushort y, ushort hue, uint containerSerial)
         {
-            Console.WriteLine("ADDING: {0} --> Container: {1}", serial, containerSerial);
-
             if (ItemHold.Serial == serial && ItemHold.Dropped)
                 ItemHold.Clear();
 
