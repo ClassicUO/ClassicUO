@@ -130,9 +130,8 @@ namespace ClassicUO.IO.Resources
         //    return p;
         //}
 
-        public uint[] CreateShaderColors()
+        public void CreateShaderColors(uint[] buffer)
         {
-            uint[] hues = new uint[32 * HuesCount];
             int len = HuesRange.Length;
 
             int idx = 0;
@@ -141,8 +140,8 @@ namespace ClassicUO.IO.Resources
             {
                 for (int y = 0; y < 8; y++)
                 {
-                    for (int x = 0; x < 32; x++) 
-                        hues[idx++] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
+                    for (int x = 0; x < 32; x++)
+                        buffer[idx++] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
                 }
             }
 
@@ -159,8 +158,6 @@ namespace ClassicUO.IO.Resources
             //        }
             //    }
             //}
-
-            return hues;
         }
 
         //public float[] GetColorForShader(ushort color)

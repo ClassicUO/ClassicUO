@@ -110,27 +110,22 @@ namespace ClassicUO
 
             Client.Load();
 
+            uint[] buffer = new uint[32 * 3000 * 2];
+            HuesLoader.Instance.CreateShaderColors(buffer);
 
-            uint[] hues = HuesLoader.Instance.CreateShaderColors();
-            int size = HuesLoader.Instance.HuesCount;
 
-            if (hues.Length < (32 * 3000) * 2)
-                Array.Resize(ref hues, (32 * 3000) * 2);
-
-            //float[] hues = HuesLoader.Instance.CreateHuesPalette();
             _hues_sampler[0] = new Texture2D(
                                           GraphicsDevice,
                                           32,
                                           3000);
-            _hues_sampler[0].SetData(hues, 0, hues.Length / 2);
+            _hues_sampler[0].SetData(buffer, 0, buffer.Length / 2);
            
-            //Thread.Sleep(1000);
            
             _hues_sampler[1] = new Texture2D(
                                           GraphicsDevice,
                                           32,
                                           3000);
-            _hues_sampler[1].SetData(hues, (hues.Length / 2) - 1, hues.Length / 2 - 1);
+            _hues_sampler[1].SetData(buffer, (buffer.Length / 2) - 1, buffer.Length / 2 - 1);
 
 
             GraphicsDevice.Textures[1] = _hues_sampler[0];
