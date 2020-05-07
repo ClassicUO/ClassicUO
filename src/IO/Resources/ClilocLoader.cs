@@ -156,10 +156,19 @@ namespace ClassicUO.IO.Resources
 
                 string a = index >= arguments.Count ? string.Empty : arguments[index];
 
-                if (a.Length > 1 && a[0] == '#')
+                if (a.Length != 0)
                 {
-                    if (int.TryParse(a.Substring(1), out int id1))
-                        arguments[index] = GetString(id1) ?? string.Empty;
+                    if (a[0] == '#')
+                    {
+                        if (int.TryParse(a.Substring(1), out int id1))
+                            arguments[index] = GetString(id1) ?? string.Empty;
+                        else
+                            arguments[index] = a;
+                    }
+                    else if (int.TryParse(a, out int clil))
+                    {
+                        arguments[index] = GetString(clil) ?? string.Empty;
+                    }
                     else
                         arguments[index] = a;
                 }
