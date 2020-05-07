@@ -51,7 +51,7 @@ namespace ClassicUO.Renderer
         private BoundingBox _drawingArea;
         private int _numSprites;
 
-        public UltimaBatcher2D(GraphicsDevice device, float color_count)
+        public UltimaBatcher2D(GraphicsDevice device)
         {
             GraphicsDevice = device;
             _textureInfo = new Texture2D[MAX_SPRITES];
@@ -74,7 +74,7 @@ namespace ClassicUO.Renderer
 
             _stencil = Stencil;
 
-            DefaultEffect = new IsometricEffect(device, color_count);
+            DefaultEffect = new IsometricEffect(device);
         }
 
 
@@ -1530,7 +1530,6 @@ namespace ClassicUO.Renderer
             GraphicsDevice.DepthStencilState = _stencil;
             GraphicsDevice.RasterizerState = _useScissor ? _rasterizerState : RasterizerState.CullNone;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
-
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
 
@@ -1688,22 +1687,14 @@ namespace ClassicUO.Renderer
         {
             private Vector2 _viewPort;
             private Matrix _matrix = Matrix.Identity;
-            private float _color_count;
 
-            public IsometricEffect(GraphicsDevice graphicsDevice, float color_count) : base(graphicsDevice, Resources.IsometricEffect)
+            public IsometricEffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.IsometricEffect)
             {
-                _color_count = color_count;
                 WorldMatrix = Parameters["WorldMatrix"];
                 Viewport = Parameters["Viewport"];
                 Brighlight = Parameters["Brightlight"];
 
                 CurrentTechnique = Techniques["HueTechnique"];
-
-                ColorCount = Parameters["Hues_count"];
-                ColorDCount = Parameters["Hues_count_double"];
-
-                ColorCount.SetValue(_color_count);
-                ColorDCount.SetValue(_color_count * 2.0f);
             }
 
 
@@ -1711,8 +1702,6 @@ namespace ClassicUO.Renderer
             public EffectParameter Viewport { get; }
             public EffectParameter Brighlight { get; }
 
-            public EffectParameter ColorCount { get; }
-            public EffectParameter ColorDCount { get; }
 
             public override void ApplyStates()
             {

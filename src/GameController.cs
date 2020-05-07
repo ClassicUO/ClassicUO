@@ -84,6 +84,7 @@ namespace ClassicUO
             _graphicDeviceManager.SynchronizeWithVerticalRetrace = false; // TODO: V-Sync option
             _graphicDeviceManager.ApplyChanges();
 
+
             Window.ClientSizeChanged += WindowOnClientSizeChanged;
             Window.AllowUserResizing = true;
             Window.Title = $"ClassicUO - {CUOEnviroment.Version}";
@@ -93,6 +94,7 @@ namespace ClassicUO
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0f / 250);
 
             SetRefreshRate(Settings.GlobalSettings.FPS);
+            _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice);
 
             _filter = new SDL_EventFilter(HandleSDLEvent);
             SDL.SDL_AddEventWatch(_filter, IntPtr.Zero);
@@ -100,24 +102,44 @@ namespace ClassicUO
             base.Initialize();
         }
 
+        private readonly Texture2D[] _hues_sampler = new Texture2D[2];
+
         protected override void LoadContent()
         {
+            base.LoadContent();
+
             Client.Load();
+
 
             uint[] hues = HuesLoader.Instance.CreateShaderColors();
             int size = HuesLoader.Instance.HuesCount;
 
-            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size * 2);
-            texture0.SetData(hues, 0, size * 2);
+            if (hues.Length < (32 * 3000) * 2)
+                Array.Resize(ref hues, (32 * 3000) * 2);
 
-            GraphicsDevice.Textures[1] = texture0;
+            //float[] hues = HuesLoader.Instance.CreateHuesPalette();
+            _hues_sampler[0] = new Texture2D(
+                                          GraphicsDevice,
+                                          32,
+                                          3000);
+            _hues_sampler[0].SetData(hues, 0, hues.Length / 2);
+           
+            //Thread.Sleep(1000);
+           
+            _hues_sampler[1] = new Texture2D(
+                                          GraphicsDevice,
+                                          32,
+                                          3000);
+            _hues_sampler[1].SetData(hues, (hues.Length / 2) - 1, hues.Length / 2 - 1);
 
-            _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice, HuesLoader.Instance.HuesCount);
+
+            GraphicsDevice.Textures[1] = _hues_sampler[0];
+            GraphicsDevice.Textures[2] = _hues_sampler[1];
 
             AuraManager.CreateAuraTexture();
             UIManager.InitializeGameCursor();
 
-            base.LoadContent();
+
 
             SetScene(new LoginScene());
             SetWindowPositionBySettings();
