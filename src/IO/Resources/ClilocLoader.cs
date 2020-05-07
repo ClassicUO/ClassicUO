@@ -156,7 +156,7 @@ namespace ClassicUO.IO.Resources
 
                 string a = index >= arguments.Count ? string.Empty : arguments[index];
 
-                if (a.Length != 0)
+                if (a.Length > 1)
                 {
                     if (a[0] == '#')
                     {
@@ -167,7 +167,8 @@ namespace ClassicUO.IO.Resources
                     }
                     else if (int.TryParse(a, out int clil))
                     {
-                        arguments[index] = GetString(clil) ?? string.Empty;
+                        if (_entries.TryGetValue(clil, out string value) && !string.IsNullOrEmpty(value))
+                            arguments[index] = value;
                     }
                     else
                         arguments[index] = a;

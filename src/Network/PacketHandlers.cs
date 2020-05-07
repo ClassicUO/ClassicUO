@@ -3673,7 +3673,7 @@ namespace ClassicUO.Network
                 }
                 else
                 {
-                    arguments = p.ReadUnicodeReversed(p.Length - p.Position);
+                    arguments = p.ReadUnicodeReversed(p.Length - p.Position, false);
                 }
             }
 
@@ -3761,6 +3761,10 @@ namespace ClassicUO.Network
 
             uint serial = p.ReadUInt();
 
+            if (serial == 1113989719)
+            {
+
+            }
             p.Skip(2);
             uint revision = p.ReadUInt();
 
