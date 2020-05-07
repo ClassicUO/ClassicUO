@@ -4420,8 +4420,11 @@ namespace ClassicUO.Network
 
             Item item = World.Items.Get(serial);
 
-            if (SerialHelper.IsMobile(serial)) 
+            if (SerialHelper.IsMobile(serial))
+            {
+                World.RemoveMobile(serial, true);
                 Log.Warn( "AddItemToContainer function adds mobile as Item");
+            }
 
             if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
             {
