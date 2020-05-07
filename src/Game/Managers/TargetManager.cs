@@ -308,8 +308,11 @@ namespace ClassicUO.Game.Managers
 
             if (graphic == 0)
             {
-                if ((TargetingType == TargetType.Beneficial || TargetingType == TargetType.Harmful) && !wet)
-                    return;
+                //TODO: some servers [mainly sphere/pol] client allows you to target ground with targettype harfmul or beneficial
+                //      instead runuo doesn't.
+
+                //if ((TargetingType == TargetType.Beneficial || TargetingType == TargetType.Harmful) && !wet)
+                //    return;
             }
             else
             {
