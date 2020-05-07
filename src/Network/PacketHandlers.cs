@@ -2206,14 +2206,13 @@ namespace ClassicUO.Network
                 byte layer = p.ReadByte();
                 ushort item_hue = 0;
 
-
-                if ((itemGraphic & 0x8000) != 0)
+                if(Client.Version >= Data.ClientVersion.CV_70331)
                 {
-                    itemGraphic &= 0x7FFF;
                     item_hue = p.ReadUShort();
                 }
-                else if (Client.Version >= Data.ClientVersion.CV_70331)
+                else if ((itemGraphic & 0x8000) != 0)
                 {
+                    itemGraphic &= 0x7FFF;
                     item_hue = p.ReadUShort();
                 }
 
@@ -3761,10 +3760,6 @@ namespace ClassicUO.Network
 
             uint serial = p.ReadUInt();
 
-            if (serial == 1113989719)
-            {
-
-            }
             p.Skip(2);
             uint revision = p.ReadUInt();
 
