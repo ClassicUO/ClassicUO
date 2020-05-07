@@ -401,7 +401,6 @@ namespace ClassicUO.Game.UI.Gumps
                             Mouse.CancelDoubleClick = true;
                             Mouse.LastLeftButtonClickTime = 0;
                         }
-
                     }
                 }
             }

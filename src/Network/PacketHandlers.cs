@@ -215,7 +215,7 @@ namespace ClassicUO.Network
             }
         }
 
-        private static void AddMegaClilocRequest(uint serial)
+        public static void AddMegaClilocRequest(uint serial)
         {
             foreach (uint s in Handlers._clilocRequests)
             {
