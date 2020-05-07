@@ -256,7 +256,7 @@ namespace ClassicUO.Game.Scenes
                 if (!SerialHelper.IsValid(serial))
                     serial = World.Player;
 
-                GameActions.Equip(ItemHold.Serial, (Layer) TileDataLoader.Instance.StaticData[ItemHold.Graphic].Layer, serial);
+                GameActions.Equip(ItemHold.Serial, (Layer) ItemHold.ItemData.Layer, serial);
                 ItemHold.Enabled = false;
                 ItemHold.Dropped = true;
             }

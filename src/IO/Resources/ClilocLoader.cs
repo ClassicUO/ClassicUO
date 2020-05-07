@@ -170,8 +170,6 @@ namespace ClassicUO.IO.Resources
                         if (_entries.TryGetValue(clil, out string value) && !string.IsNullOrEmpty(value))
                             arguments[index] = value;
                     }
-                    else
-                        arguments[index] = a;
                 }
 
                 baseCliloc = baseCliloc.Remove(pos, pos2 - pos + 1).Insert(pos, index >= arguments.Count ? string.Empty : arguments[index]);

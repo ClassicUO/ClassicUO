@@ -313,7 +313,7 @@ namespace ClassicUO.Network
 
             for (; i < length; i += 2)
             {
-                if (ReadUShortReversed() == '\u0000')
+                if (ReadUShortReversed() == 0)
                 {
                     break;
                 }
