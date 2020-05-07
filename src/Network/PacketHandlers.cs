@@ -3478,6 +3478,13 @@ namespace ClassicUO.Network
                     serial = p.ReadUInt();
                     uint revision = p.ReadUInt();
 
+                    Item multi = World.Items.Get(serial);
+
+                    if (multi == null)
+                    {
+                        World.HouseManager.Remove(serial);
+                    }
+
                     if (!World.HouseManager.TryGetHouse(serial, out House house) || !house.IsCustom || house.Revision != revision)
                         NetClient.Socket.Send(new PCustomHouseDataRequest(serial));
                     else
