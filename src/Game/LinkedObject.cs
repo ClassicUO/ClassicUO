@@ -20,6 +20,9 @@
 #endregion
 
 
+using ClassicUO.Utility.Logging;
+using System;
+
 namespace ClassicUO.Game
 {
     abstract class LinkedObject
@@ -179,6 +182,18 @@ namespace ClassicUO.Game
             return last;
         }
 
+        public LinkedObject GetFirst()
+        {
+            var first = Items;
+
+            while (first != null && first.Previous != null)
+            {
+                first = first.Previous;
+            }
+
+            return first;
+        }
+
         public void Clear()
         {
             if (Items != null)
@@ -192,6 +207,90 @@ namespace ClassicUO.Game
                     item.Next = null;
                     item = next;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Sort the contents of this LinkedObject using merge sort.
+        /// Adapted from Simon Tatham's C implementation: https://www.chiark.greenend.org.uk/~sgtatham/algorithms/listsort.html
+        /// </summary>
+        /// <typeparam name="T">Type of the objects being compared.</typeparam>
+        /// <param name="comparison">Comparison function to use when sorting.</param>
+        public LinkedObject SortContents<T>(Comparison<T> comparison) where T : LinkedObject
+        {
+            if (Items == null)
+                return null;
+
+            int unitsize = 1; //size of the components we are merging; 1 for first iteration, multiplied by 2 after each iteration
+            T p = null, q = null, e = null, head = (T) Items, tail = null;
+
+            while (true)
+            {
+                p = head;
+                int nmerges = 0; //number of merges done this pass
+                int psize, qsize; //lengths of the components we are merging
+                head = null;
+                tail = null;
+
+                while (p != null)
+                {
+                    nmerges++;
+                    q = p;
+                    psize = 0;
+                    for (int i = 0; i < unitsize; i++)
+                    {
+                        psize++;
+                        q = (T) q.Next;
+                        if (q == null)
+                            break;
+                    }
+
+                    qsize = unitsize;
+                    while (psize > 0 || (qsize > 0 && q != null))
+                    {
+                        if (psize == 0)
+                        {
+                            e = q;
+                            q = (T) q.Next;
+                            qsize--;
+                        }
+                        else if (qsize == 0 || q == null)
+                        {
+                            e = p;
+                            p = (T) p.Next;
+                            psize--;
+                        }
+                        else if (comparison(p, q) <= 0)
+                        {
+                            e = p;
+                            p = (T)p.Next;
+                            psize--;
+                        }
+                        else
+                        {
+                            e = q;
+                            q = (T) q.Next;
+                            qsize--;
+                        }
+
+                        if (tail != null)
+                        {
+                            tail.Next = e;
+                        }
+                        else
+                        {
+                            head = e;
+                        }
+                        e.Previous = tail;
+                        tail = e;
+                    }
+                    p = q;
+                }
+                tail.Next = null;
+                if (nmerges <= 1)
+                    return head;
+                else
+                    unitsize *= 2;
             }
         }
 
