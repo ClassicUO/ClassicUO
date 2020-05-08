@@ -185,6 +185,8 @@ namespace ClassicUO.Network
             Handlers.Add(0xDF, BuffDebuff);
             Handlers.Add(0xE2, NewCharacterAnimation);
             Handlers.Add(0xE3, KREncryptionResponse);
+            Handlers.Add(0xE5, DisplayWaypoint);
+            Handlers.Add(0xE6, RemoveWaypoint);
             Handlers.Add(0xF0, KrriosClientSpecial);
             Handlers.Add(0xF1, FreeshardListR);
             Handlers.Add(0xF3, UpdateItemSA);
@@ -4205,6 +4207,24 @@ namespace ClassicUO.Network
 
         private static void KREncryptionResponse(Packet p)
         {
+        }
+
+        private static void DisplayWaypoint(Packet p)
+        {
+            uint serial = p.ReadUInt();
+            ushort x = p.ReadUShort();
+            ushort y = p.ReadUShort();
+            sbyte z = p.ReadSByte();
+            byte map = p.ReadByte();
+            WaypointsType type = (WaypointsType) p.ReadUShort();
+            bool ignoreobject = p.ReadUShort() != 0;
+            uint cliloc = p.ReadUInt();
+            string name = p.ReadUnicodeReversed();
+        }
+
+        private static void RemoveWaypoint(Packet p)
+        {
+            uint serial = p.ReadUInt();
         }
 
         private static void KrriosClientSpecial(Packet p)
