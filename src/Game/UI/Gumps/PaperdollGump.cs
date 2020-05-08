@@ -393,7 +393,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (ItemHold.ItemData.IsWearable)
                     {
-                        Item equipment = container.FindItemByLayer(ItemHold.Layer);
+                        Item equipment = container.FindItemByLayer((Layer) ItemHold.ItemData.Layer);
 
                         if (equipment == null)
                         {
@@ -401,7 +401,6 @@ namespace ClassicUO.Game.UI.Gumps
                             Mouse.CancelDoubleClick = true;
                             Mouse.LastLeftButtonClickTime = 0;
                         }
-
                     }
                 }
             }

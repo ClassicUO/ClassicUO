@@ -356,16 +356,32 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 Add(_myCoinsEntries[1]);
 
+                uint my_gold_entry = 0, my_plat_entry = 0;
 
                 void OnTextChanged(object sender, EventArgs e)
                 {
                     StbTextBox entry = (StbTextBox) sender;
+                    bool send = false;
 
                     if (entry != null)
                     {
                         if (string.IsNullOrEmpty(entry.Text))
                         {
                             entry.Text = "0";
+
+                            if ((int) entry.Tag == 0)
+                            {
+                                if (my_gold_entry != 0)
+                                {
+                                    my_gold_entry = 0;
+                                    send = true;
+                        }
+                            }
+                            else if (my_plat_entry != 0)
+                            {
+                                my_plat_entry = 0;
+                                send = true;
+                            }
                         }
                         else if (uint.TryParse(entry.Text, out uint value))
                         {
@@ -374,20 +390,36 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (value > Gold)
                                 {
                                     value = Gold;
+                                    send = true;
                                 }
+
+                                if (my_gold_entry != value)
+                                    send = true;
+
+                                my_gold_entry = value;
                             }
                             else // platinum
                             {
                                 if (value > Platinum)
                                 {
                                     value = Platinum;
+                                    send = true;
                                 }
+
+                                if (my_plat_entry != value)
+                                    send = true;
+
+                                my_plat_entry = value;
                             }
 
-                            entry.Text = value.ToString();
+                            if (send)
+                            {
+                                entry.Text = value.ToString();
+                            }
                         }
 
-                        NetClient.Socket.Send(new PTradeUpdateGold(ID1, uint.Parse(_myCoinsEntries[0].Text), uint.Parse(_myCoinsEntries[1].Text)));
+                        if (send)
+                            NetClient.Socket.Send(new PTradeUpdateGold(ID1, my_gold_entry, my_plat_entry));
                     }
                 }
 

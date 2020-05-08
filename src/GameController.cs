@@ -19,7 +19,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-#define DEV_BUILD
 
 using System;
 using System.IO;
@@ -94,7 +93,6 @@ namespace ClassicUO
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0f / 250);
 
             SetRefreshRate(Settings.GlobalSettings.FPS);
-            _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice);
 
             _filter = new SDL_EventFilter(HandleSDLEvent);
             SDL.SDL_AddEventWatch(_filter, IntPtr.Zero);
@@ -107,15 +105,14 @@ namespace ClassicUO
             Client.Load();
 
             uint[] hues = HuesLoader.Instance.CreateShaderColors();
-
             int size = HuesLoader.Instance.HuesCount;
 
             Texture2D texture0 = new Texture2D(GraphicsDevice, 32, size * 2);
             texture0.SetData(hues, 0, size * 2);
-            Texture2D texture1 = new Texture2D(GraphicsDevice, 32, size);
-            texture1.SetData(hues, size, size);
+
             GraphicsDevice.Textures[1] = texture0;
-            GraphicsDevice.Textures[2] = texture1;
+
+            _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice, HuesLoader.Instance.HuesCount);
 
             AuraManager.CreateAuraTexture();
             UIManager.InitializeGameCursor();
@@ -355,7 +352,7 @@ namespace ClassicUO
             if (_scene != null && _scene.IsLoaded && !_scene.IsDestroyed)
                 _scene.Draw(_uoSpriteBatch);
 
-            GraphicsDevice.SetRenderTarget(_buffer);
+            //GraphicsDevice.SetRenderTarget(_buffer);
             UIManager.Draw(_uoSpriteBatch);
 
             base.Draw(gameTime);
@@ -363,10 +360,10 @@ namespace ClassicUO
             Profiler.ExitContext("RenderFrame");
             Profiler.EnterContext("OutOfContext");
 
-            GraphicsDevice.SetRenderTarget(null);
-            _uoSpriteBatch.Begin();
-            _uoSpriteBatch.Draw2D(_buffer, 0, 0, ref _hueVector);
-            _uoSpriteBatch.End();
+            //GraphicsDevice.SetRenderTarget(null);
+            //_uoSpriteBatch.Begin();
+            //_uoSpriteBatch.Draw2D(_buffer, 0, 0, ref _hueVector);
+            //_uoSpriteBatch.End();
 
             UpdateWindowCaption(gameTime);
         }

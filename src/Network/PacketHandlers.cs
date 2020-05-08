@@ -215,7 +215,7 @@ namespace ClassicUO.Network
             }
         }
 
-        private static void AddMegaClilocRequest(uint serial)
+        public static void AddMegaClilocRequest(uint serial)
         {
             foreach (uint s in Handlers._clilocRequests)
             {
@@ -1118,9 +1118,7 @@ namespace ClassicUO.Network
             uint containerSerial = p.ReadUInt();
             ushort hue = p.ReadUShort();
 
-            Console.WriteLine("######### START UpdateContainedItem #########");
             AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
-            Console.WriteLine("######### END UpdateContainedItem #########");
         }
 
         private static void DenyMoveItem(Packet p)
@@ -1508,7 +1506,6 @@ namespace ClassicUO.Network
                 return;
 
             ushort count = p.ReadUShort();
-            Console.WriteLine("######### START UpdateContainedItems #########");
 
             for (int i = 0; i < count; i++)
             {
@@ -1535,7 +1532,6 @@ namespace ClassicUO.Network
 
                 AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
             }
-            Console.WriteLine("######### END UpdateContainedItems #########");
         }
 
         private static void PersonalLightLevel(Packet p)
@@ -2210,14 +2206,13 @@ namespace ClassicUO.Network
                 byte layer = p.ReadByte();
                 ushort item_hue = 0;
 
-
-                if ((itemGraphic & 0x8000) != 0)
+                if(Client.Version >= Data.ClientVersion.CV_70331)
                 {
-                    itemGraphic &= 0x7FFF;
                     item_hue = p.ReadUShort();
                 }
-                else if (Client.Version >= Data.ClientVersion.CV_70331)
+                else if ((itemGraphic & 0x8000) != 0)
                 {
+                    itemGraphic &= 0x7FFF;
                     item_hue = p.ReadUShort();
                 }
 
@@ -3135,7 +3130,10 @@ namespace ClassicUO.Network
         private static void ExtendedCommand(Packet p)
         {
             ushort cmd = p.ReadUShort();
+            if(cmd == 0x11)
+            {
 
+            }
             switch (cmd)
             {
                 case 0:
@@ -3292,7 +3290,11 @@ namespace ClassicUO.Network
                     NetClient.Socket.Send(new PMegaClilocRequestOld(item));
 
                     break;
+                //===========================================================================================
+                //===========================================================================================
+                case 0x11:
 
+                    break;
                 //===========================================================================================
                 //===========================================================================================
                 case 0x14: // display popup/context menu
@@ -3412,8 +3414,21 @@ namespace ClassicUO.Network
                         case 5:
                             Mobile character = World.Mobiles.Get(serial);
 
-                            if (character != null && p.Length == 19)
-                                character.IsDead = p.ReadBool();
+                            if (character != null)
+                            {
+                                if (p.Length == 19)
+                                {
+                                    character.IsDead = p.ReadBool();
+                                }
+                                else if(p.Length == 17)//still animation
+                                {
+                                    p.Skip(4);
+                                    byte animid = p.ReadByte();
+                                    p.Skip(1);
+                                    byte frameid = p.ReadByte();
+                                    character.SetAnimation(animid, frameid);
+                                }
+                            }
 
                             break;
                     }
@@ -3461,6 +3476,13 @@ namespace ClassicUO.Network
                 case 0x1D: // house revision state
                     serial = p.ReadUInt();
                     uint revision = p.ReadUInt();
+
+                    Item multi = World.Items.Get(serial);
+
+                    if (multi == null)
+                    {
+                        World.HouseManager.Remove(serial);
+                    }
 
                     if (!World.HouseManager.TryGetHouse(serial, out House house) || !house.IsCustom || house.Revision != revision)
                         NetClient.Socket.Send(new PCustomHouseDataRequest(serial));
@@ -3650,7 +3672,7 @@ namespace ClassicUO.Network
                 }
                 else
                 {
-                    arguments = p.ReadUnicodeReversed(p.Length - p.Position);
+                    arguments = p.ReadUnicodeReversed(p.Length - p.Position, false);
                 }
             }
 
@@ -4390,8 +4412,6 @@ namespace ClassicUO.Network
 
         private static void AddItemToContainer(uint serial, ushort graphic, ushort amount, ushort x, ushort y, ushort hue, uint containerSerial)
         {
-            Console.WriteLine("ADDING: {0} --> Container: {1}", serial, containerSerial);
-
             if (ItemHold.Serial == serial && ItemHold.Dropped)
                 ItemHold.Clear();
 
@@ -4406,8 +4426,11 @@ namespace ClassicUO.Network
 
             Item item = World.Items.Get(serial);
 
-            if (SerialHelper.IsMobile(serial)) 
+            if (SerialHelper.IsMobile(serial))
+            {
+                World.RemoveMobile(serial, true);
                 Log.Warn( "AddItemToContainer function adds mobile as Item");
+            }
 
             if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
             {
@@ -4570,9 +4593,7 @@ namespace ClassicUO.Network
 
                     if (SerialHelper.IsValid(item.Container))
                     {
-                        Console.WriteLine("======= UpdateObject function: item: {0:X8}, container: {1:X8}", item.Serial, item.Container);
-                        //RemoveItemFromContainer(item);
-                        //item.Container = 0xFFFF_FFFF;
+                        RemoveItemFromContainer(item);
                     }
                 }
                 else if (SerialHelper.IsMobile(serial))
@@ -4797,7 +4818,7 @@ namespace ClassicUO.Network
 
                 obj.Next = null;
                 obj.Previous = null;
-                obj.Container = 0xFFFF_FFFF;
+                obj.Container = 0;
             }
 
             obj.RemoveFromTile();

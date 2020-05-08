@@ -594,14 +594,14 @@ namespace ClassicUO.Game.GameObjects
                         return true;
                     else*/
                     if (tunic != null && tunic.Graphic == 0x0238)
-                        return robe != null && robe.Graphic != 0x9985 && robe.Graphic != 0x9986;
+                        return robe != null && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 && robe.Graphic != 0xA412;
 
                     break;
 
                 case Layer.Torso:
                     robe = mobile.FindItemByLayer(Layer.Robe);
 
-                    if (robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986)
+                    if (robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 && robe.Graphic != 0xA412)
                         return true;
                     else
                     {
@@ -616,7 +616,7 @@ namespace ClassicUO.Game.GameObjects
                 case Layer.Arms:
                     robe = mobile.FindItemByLayer(Layer.Robe);
 
-                    return robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986;
+                    return robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986 && robe.Graphic != 0xA412;
 
                 case Layer.Helmet:
                 case Layer.Hair:

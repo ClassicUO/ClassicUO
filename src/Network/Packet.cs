@@ -306,7 +306,7 @@ namespace ClassicUO.Network
             return array;
         }
 
-        public string ReadUnicodeReversed(int length)
+        public string ReadUnicodeReversed(int length, bool safe = true)
         {
             if (EnsureSize(length))
                 return Empty;
@@ -315,10 +315,21 @@ namespace ClassicUO.Network
             {
                 length = Length - Position - 2;
             }
-            int start = Position;
-            Position += length;
 
-            return length <= 0 ? Empty : Encoding.Unicode.GetString(_data, start, length);
+            int start = Position;
+            int i = 0;
+
+            for (; i < length; i += 2)
+            {
+                if (ReadUShortReversed() == 0)
+                {
+                    break;
+                }
+            }
+
+            Seek(start + length);
+
+            return i <= 0 ? Empty : Encoding.Unicode.GetString(_data, start, i);
         }
 
         public string ReadUnicodeReversed()

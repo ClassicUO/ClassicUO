@@ -32,7 +32,7 @@ namespace ClassicUO.Game.Data
         LordBlackthornsRevenge = 0x8,
         AgeOfShadows = 0x10,
         CharacterSlot6 = 0x20,
-        SameraiEmpire = 0x40,
+        SamuraiEmpire = 0x40,
         MondainsLegacy = 0x80,
         Splash8 = 0x100,
         Splash9 = 0x200, // Ninth Age splash screen, crystal/shadow housing tiles
@@ -64,7 +64,7 @@ namespace ClassicUO.Game.Data
 
         public bool CharSlots6 => Flags.HasFlag(LockedFeatureFlags.CharacterSlot6);
 
-        public bool SE => Flags.HasFlag(LockedFeatureFlags.SameraiEmpire);
+        public bool SE => Flags.HasFlag(LockedFeatureFlags.SamuraiEmpire);
 
         public bool ML => Flags.HasFlag(LockedFeatureFlags.MondainsLegacy);
 
