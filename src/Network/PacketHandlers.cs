@@ -4593,9 +4593,7 @@ namespace ClassicUO.Network
 
                     if (SerialHelper.IsValid(item.Container))
                     {
-                        Console.WriteLine("======= UpdateObject function: item: {0:X8}, container: {1:X8}", item.Serial, item.Container);
-                        //RemoveItemFromContainer(item);
-                        //item.Container = 0xFFFF_FFFF;
+                        RemoveItemFromContainer(item);
                     }
                 }
                 else if (SerialHelper.IsMobile(serial))
@@ -4820,7 +4818,7 @@ namespace ClassicUO.Network
 
                 obj.Next = null;
                 obj.Previous = null;
-                obj.Container = 0xFFFF_FFFF;
+                obj.Container = 0;
             }
 
             obj.RemoveFromTile();
