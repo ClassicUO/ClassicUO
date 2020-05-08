@@ -181,18 +181,6 @@ namespace ClassicUO.Game
             return last;
         }
 
-        public LinkedObject GetFirst()
-        {
-            var first = Items;
-
-            while (first != null && first.Previous != null)
-            {
-                first = first.Previous;
-            }
-
-            return first;
-        }
-
         public void Clear()
         {
             if (Items != null)
