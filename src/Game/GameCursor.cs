@@ -32,6 +32,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 
 using Microsoft.Xna.Framework;
@@ -43,19 +44,22 @@ namespace ClassicUO.Game
 {
     internal sealed class GameCursor
     {
-        private static readonly ushort[,] _cursorData = new ushort[2, 16]
+        private static readonly ushort[,] _cursorData = new ushort[3, 16]
         {
             {
                 0x206A, 0x206B, 0x206C, 0x206D, 0x206E, 0x206F, 0x2070, 0x2071, 0x2072, 0x2073, 0x2074, 0x2075, 0x2076, 0x2077, 0x2078, 0x2079
             },
             {
                 0x2053, 0x2054, 0x2055, 0x2056, 0x2057, 0x2058, 0x2059, 0x205A, 0x205B, 0x205C, 0x205D, 0x205E, 0x205F, 0x2060, 0x2061, 0x2062
+            },
+            {
+                0x206A, 0x206B, 0x206C, 0x206D, 0x206E, 0x206F, 0x2070, 0x2071, 0x2072, 0x2073, 0x2074, 0x2075, 0x2076, 0x2077, 0x2078, 0x2079
             }
         };
 
         private readonly Texture2D _aura;
         private readonly int[,] _cursorOffset = new int[2, 16];
-        private readonly IntPtr[,] _cursorPixels = new IntPtr[2, 16];
+        private readonly IntPtr[,] _cursors_ptr = new IntPtr[3, 16];
         private readonly Tooltip _tooltip;
         private Vector3 _auraVector = new Vector3(0, 13, 0);
         private readonly RenderedText _targetDistanceText = RenderedText.Create(String.Empty, 0x0481, style: FontStyle.BlackBorder);
@@ -93,7 +97,7 @@ namespace ClassicUO.Game
 
             _tooltip = new Tooltip();
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 16; j++)
                 {
@@ -212,6 +216,7 @@ namespace ClassicUO.Game
                             //    offY = -1;
                             //}
 
+
                             _cursorOffset[0, j] = (int) offX;
                             _cursorOffset[1, j] = (int) offY;
                         }
@@ -221,19 +226,43 @@ namespace ClassicUO.Game
                             _cursorOffset[1, j] = 0;
                         }
                     }
-
                     if (pixels != null && pixels.Length != 0)
                     {
                         unsafe
                         {
                             fixed (ushort* ptr = pixels)
                             {
-                                IntPtr surface = SDL.SDL_CreateRGBSurfaceWithFormatFrom((IntPtr) ptr, w, h, 16, 2 * w, SDL.SDL_PIXELFORMAT_ARGB1555);
+                                SDL.SDL_Surface* surface = (SDL.SDL_Surface*) SDL.SDL_CreateRGBSurfaceWithFormatFrom((IntPtr) ptr, w, h, 16, 2 * w, SDL.SDL_PIXELFORMAT_ARGB1555);
+                                
+                                if (i == 2)
+                                {
+                                    int stride = surface->pitch >> 1;
+                                    ushort* pixels_ptr = (ushort*) surface->pixels;
+                                    ushort* p_line_end = pixels_ptr + w;
+                                    ushort* p_img_end = pixels_ptr + (stride * h);
+                                    int delta = stride - w;
+
+                                    while (pixels_ptr < p_img_end)
+                                    {
+                                        while (pixels_ptr < p_line_end)
+                                        {
+                                            if (*pixels_ptr != 0)
+                                            {
+                                                *pixels_ptr = (ushort) (HuesLoader.Instance.GetColor16(*pixels_ptr, 0x0033) | 0x8000);
+                                            }
+
+                                            ++pixels_ptr;
+                                        }
+
+                                        pixels_ptr += delta;
+                                        p_line_end += stride;
+                                    }
+                                }
 
                                 int hotX = -_cursorOffset[0, j];
                                 int hotY = -_cursorOffset[1, j];
 
-                                _cursorPixels[i, j] = SDL.SDL_CreateColorCursor(surface, hotX, hotY);
+                                _cursors_ptr[i, j] = SDL.SDL_CreateColorCursor((IntPtr) surface, hotX, hotY);
                             }
                         }
                     }
@@ -293,9 +322,9 @@ namespace ClassicUO.Game
                         id -= 0x2053;
                     else
                         id -= 0x206A;
-                    int war = World.InGame && World.Player.InWarMode ? 1 : 0;
+                    int war = World.InGame && World.Player.InWarMode ? 1 : World.InGame && World.MapIndex != 0 ? 2 : 0;
 
-                    ref IntPtr ptrCursor = ref _cursorPixels[war, id];
+                    ref IntPtr ptrCursor = ref _cursors_ptr[war, id];
 
                     if (ptrCursor != IntPtr.Zero)
                     {
@@ -482,6 +511,17 @@ namespace ClassicUO.Game
 
                 int offX = _cursorOffset[0, graphic];
                 int offY = _cursorOffset[1, graphic];
+
+                if (World.InGame && World.MapIndex != 0)
+                {
+                    _vec.X = 0x0033;
+                    _vec.Y = 1;
+                    _vec.Z = 0;
+                }
+                else
+                {
+                    _vec = Vector3.Zero;
+                }
 
                 sb.Draw2D(ArtLoader.Instance.GetTexture(Graphic), Mouse.Position.X + offX, Mouse.Position.Y + offY, ref _vec);
             }
