@@ -264,13 +264,15 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        for (int i = 0; i < 10; i++)
-                        {
-                            if (World.Party.Members[i] != null && World.Party.Members[i].Serial != 0)
-                            {
-                                NetClient.Socket.Send(new PPartyRemoveRequest(World.Party.Members[i].Serial));
-                            }
-                        }
+                       // NetClient.Socket.Send(new PPartyRemoveRequest(World.Player));
+                       GameActions.RequestPartyQuit();
+                        //for (int i = 0; i < 10; i++)
+                        //{
+                        //    if (World.Party.Members[i] != null && World.Party.Members[i].Serial != 0)
+                        //    {
+                        //        NetClient.Socket.Send(new PPartyRemoveRequest(World.Party.Members[i].Serial));
+                        //    }
+                        //}
                     }
                     break;
                 case Buttons.Add:
