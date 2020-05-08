@@ -744,6 +744,9 @@ namespace ClassicUO.Game.Managers
                             {
                                 string args = gparams[2];
 
+                                for (int i = 3; i < gparams.Count; i++)
+                                    args += '\t' + gparams[i];
+
                                 if (args.Length != 0)
                                     text = ClilocLoader.Instance.Translate(text, args, true);
                                 else
