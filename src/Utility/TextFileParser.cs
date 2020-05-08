@@ -152,7 +152,17 @@ namespace ClassicUO.Utility
                 }
 
                 if (_string[_pos] != '\r' && (!_trim || _string[_pos] != ' ' && _string[_pos] != '\t'))
+                {
+                    for (int i = 0; i < _quotes.Length; i++)
+                    {
+                        if (_string[_pos] == _quotes[i])
+                        {
+                            return result.ToString();
+                        }
+                    }
+
                     result.Append(_string[_pos]);
+                }
 
                 _pos++;
             }
@@ -164,7 +174,7 @@ namespace ClassicUO.Utility
         {
             bool exit = false;
             string result = "";
-            
+
             for (int i = 0; i < _quotes.Length; i += 2)
             {
                 if (_string[_pos] == _quotes[i])
@@ -204,7 +214,9 @@ namespace ClassicUO.Utility
             }
 
             if (!exit)
+            {
                 result = ObtainData();
+            }
 
             return result;
         }

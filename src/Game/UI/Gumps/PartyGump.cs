@@ -56,7 +56,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool CanLoot;
 
-        public void Update()
+
+        protected override void UpdateContents()
         {
             Clear();
             BuildGump();
@@ -70,26 +71,23 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 480
             });
 
-            Label text = new Label("Tell", false, 0x0386, font: 1)
+            Add(new Label("Tell", false, 0x0386, font: 1)
             {
                 X = 40,
                 Y = 30
-            };
-            Add(text);
+            });
 
-            text = new Label("Kick", false, 0x0386, font: 1)
+            Add(new Label("Kick", false, 0x0386, font: 1)
             {
                 X = 80,
                 Y = 30
-            };
-            Add(text);
+            });
 
-            text = new Label("Party Manifest", false, 0x0386, font: 2)
+            Add(new Label("Party Manifest", false, 0x0386, font: 2)
             {
                 X = 153,
                 Y = 20
-            };
-            Add(text);
+            });
 
             bool isLeader = World.Party.Leader == 0 || World.Party.Leader == World.Player;
             bool isMemeber = World.Party.Leader != 0 && World.Party.Leader != World.Player;
@@ -122,12 +120,11 @@ namespace ClassicUO.Game.UI.Gumps
                 if (World.Party.Members[i] != null && World.Party.Members[i].Name != null)
                     name = World.Party.Members[i].Name;
 
-                text = new Label(name, false, 0x0386, font: 2, maxwidth: 250, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                Add(new Label(name, false, 0x0386, font: 2, maxwidth: 250, align: TEXT_ALIGN_TYPE.TS_CENTER)
                 {
                     X = 140,
                     Y = yPtr + 1
-                };
-                Add(text);
+                });
 
                 yPtr += 25;
             }
@@ -139,12 +136,11 @@ namespace ClassicUO.Game.UI.Gumps
                 ButtonAction = ButtonAction.Activate,
             });
 
-            text = new Label("Send the party a message", false, 0x0386, font: 2)
+            Add(new Label("Send the party a message", false, 0x0386, font: 2)
             {
                 X = 110,
                 Y = 307
-            };
-            Add(text);
+            });
 
             if (CanLoot)
             {
@@ -155,12 +151,11 @@ namespace ClassicUO.Game.UI.Gumps
                     ButtonAction = ButtonAction.Activate,
                 });
 
-                text = new Label("Party can loot me", false, 0x0386, font: 2)
+                Add(new Label("Party can loot me", false, 0x0386, font: 2)
                 {
                     X = 110,
                     Y = 334
-                };
-                Add(text);
+                });
             }
             else
             {
@@ -171,12 +166,11 @@ namespace ClassicUO.Game.UI.Gumps
                     ButtonAction = ButtonAction.Activate,
                 });
 
-                text = new Label("Party CANNOT loot me", false, 0x0386, font: 2)
+                Add(new Label("Party CANNOT loot me", false, 0x0386, font: 2)
                 {
                     X = 110,
                     Y = 334
-                };
-                Add(text);
+                });
             }
 
 
@@ -189,21 +183,19 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (isMemeber)
             {
-                text = new Label("Leave the party", false, 0x0386, font: 2)
+                Add(new Label("Leave the party", false, 0x0386, font: 2)
                 {
                     X = 110,
                     Y = 360
-                };
-                Add(text);
+                });
             }
             else
             {
-                text = new Label("Disband the party", false, 0x0386, font: 2)
+                Add(new Label("Disband the party", false, 0x0386, font: 2)
                 {
                     X = 110,
                     Y = 360
-                };
-                Add(text);
+                });
             }
 
             if (isLeader)
@@ -215,12 +207,11 @@ namespace ClassicUO.Game.UI.Gumps
                     ButtonAction = ButtonAction.Activate,
                 });
 
-                text = new Label("Add New Member", false, 0x0386, font: 2)
+                Add(new Label("Add New Member", false, 0x0386, font: 2)
                 {
                     X = 110,
                     Y = 385
-                };
-                Add(text);
+                });
             }
 
             Add(new Button((int) (Buttons.OK), 0x00F9, 0x00F8, 0x00F7)
@@ -264,7 +255,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
                 case Buttons.LootType:
                     CanLoot = !CanLoot;
-                    Update();
+                    RequestUpdateContents();
                     break;
                 case Buttons.Leave:
                     if (World.Party.Leader == 0)
@@ -273,13 +264,15 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        for (int i = 0; i < 10; i++)
-                        {
-                            if (World.Party.Members[i] != null && World.Party.Members[i].Serial != 0)
-                            {
-                                NetClient.Socket.Send(new PPartyRemoveRequest(World.Party.Members[i].Serial));
-                            }
-                        }
+                       // NetClient.Socket.Send(new PPartyRemoveRequest(World.Player));
+                       GameActions.RequestPartyQuit();
+                        //for (int i = 0; i < 10; i++)
+                        //{
+                        //    if (World.Party.Members[i] != null && World.Party.Members[i].Serial != 0)
+                        //    {
+                        //        NetClient.Socket.Send(new PPartyRemoveRequest(World.Party.Members[i].Serial));
+                        //    }
+                        //}
                     }
                     break;
                 case Buttons.Add:

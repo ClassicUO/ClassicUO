@@ -744,13 +744,30 @@ namespace ClassicUO.Game.Managers
                             {
                                 string args = gparams[2];
 
-                                if (args.Length > 1)
-                                    text = ClilocLoader.Instance.Translate(text, args);
+                                for (int i = 3; i < gparams.Count; i++)
+                                    args += '\t' + gparams[i];
+
+                                if (args.Length != 0)
+                                    text = ClilocLoader.Instance.Translate(text, args, true);
                                 else
                                     Log.Error($"String '{args}' too short, something wrong with gump tooltip: {text}");
                             }
 
-                            gump.Children.LastOrDefault()?.SetTooltip(text);
+                            var last = gump.Children.LastOrDefault();
+
+                            if (last != null)
+                            {
+                                if (last.HasTooltip)
+                                {
+                                    if (last.Tooltip is string s)
+                                    {
+                                        s += '\n' + text;
+                                        last.SetTooltip(s);
+                                    }
+                                }
+                                else 
+                                    last.SetTooltip(text);
+                            }
                         }
 
                         break;
