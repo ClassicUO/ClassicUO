@@ -2865,7 +2865,7 @@ namespace ClassicUO.Network
 
             Mobile owner = World.Mobiles.Get(serial);
 
-            if (owner == null)
+            if (owner == null || serial == World.Player)
                 return;
 
             serial |= 0x80000000;
