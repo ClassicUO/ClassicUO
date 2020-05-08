@@ -92,8 +92,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected abstract void BuildGump();
 
-        public abstract void Update();
-
 
         public override void Dispose()
         {
@@ -104,6 +102,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (SelectedObject.HealthbarObject == entity && entity != null)
                 SelectedObject.HealthbarObject = null;
+            _textBox?.Dispose();
+            _textBox = null;
             base.Dispose();
         }
 
@@ -367,7 +367,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override void Update()
+        protected override void UpdateContents()
         {
             Clear();
             Children.Clear();
@@ -912,7 +912,7 @@ namespace ClassicUO.Game.UI.Gumps
             protected set { }
         }
 
-        public override void Update()
+        protected override void UpdateContents()
         {
             Clear();
             Children.Clear();
