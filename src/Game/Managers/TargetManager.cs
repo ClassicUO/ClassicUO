@@ -308,7 +308,7 @@ namespace ClassicUO.Game.Managers
 
             if (graphic == 0)
             {
-                if ((TargetingType == TargetType.Beneficial || TargetingType == TargetType.Harmful) && !wet)
+                if (TargetingState == CursorTarget.Object)
                     return;
             }
             else

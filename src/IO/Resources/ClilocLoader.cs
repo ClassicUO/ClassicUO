@@ -156,12 +156,20 @@ namespace ClassicUO.IO.Resources
 
                 string a = index >= arguments.Count ? string.Empty : arguments[index];
 
-                if (a.Length > 1 && a[0] == '#')
+                if (a.Length > 1)
                 {
-                    if (int.TryParse(a.Substring(1), out int id1))
-                        arguments[index] = GetString(id1) ?? string.Empty;
-                    else
-                        arguments[index] = a;
+                    if (a[0] == '#')
+                    {
+                        if (int.TryParse(a.Substring(1), out int id1))
+                            arguments[index] = GetString(id1) ?? string.Empty;
+                        else
+                            arguments[index] = a;
+                    }
+                    else if (int.TryParse(a, out int clil))
+                    {
+                        if (_entries.TryGetValue(clil, out string value) && !string.IsNullOrEmpty(value))
+                            arguments[index] = value;
+                    }
                 }
 
                 baseCliloc = baseCliloc.Remove(pos, pos2 - pos + 1).Insert(pos, index >= arguments.Count ? string.Empty : arguments[index]);

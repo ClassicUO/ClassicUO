@@ -74,29 +74,43 @@ namespace ClassicUO.Game.Managers
                                 if (code == 2)
                                     Members[i].Serial = 0;
 
-                                gump.Update();
+                                gump.RequestUpdateContents();
                             }
                         }
 
                         Clear();
-                        UIManager.GetGump<PartyGump>()?.Update();
+                        UIManager.GetGump<PartyGump>()?.RequestUpdateContents();
 
                         break;
                     }
 
                     Clear();
 
+                    uint to_remove = 0xFFFF_FFFF;
                     if (!add)
                     {
-                        UIManager.GetGump<BaseHealthBarGump>(p.ReadUInt())?.Update();
+                        to_remove = p.ReadUInt();
+                        UIManager.GetGump<BaseHealthBarGump>(to_remove)?.RequestUpdateContents();
                     }
 
+                    bool remove_all = !add && to_remove == World.Player;
+                    int done = 0;
                     for (int i = 0; i < count; i++)
                     {
                         uint serial = p.ReadUInt();
-                        Members[i] = new PartyMember(serial);
+                        bool remove = !add && (/*count <= 2 || */serial == to_remove);
 
-                        if (i == 0)
+                        if (remove && serial == to_remove && i == 0)
+                            remove_all = true;
+
+                        if (!remove && !remove_all)
+                        {
+                            if (!Contains(serial))
+                                Members[i] = new PartyMember(serial);
+                            done++;
+                        }
+
+                        if (i == 0 && !remove && !remove_all)
                             Leader = serial;
 
                         BaseHealthBarGump gump = UIManager.GetGump<BaseHealthBarGump>(serial);
@@ -104,7 +118,7 @@ namespace ClassicUO.Game.Managers
                         if (gump != null)
                         {
                             GameActions.RequestMobileStatus(serial);
-                            gump.Update();
+                            gump.RequestUpdateContents();
                         }
                         else
                         {
@@ -114,7 +128,24 @@ namespace ClassicUO.Game.Managers
                         }
                     }
 
-                    UIManager.GetGump<PartyGump>()?.Update();
+                    if (done <= 1 && !add)
+                    {
+                        for (int i = 0; i < PARTY_SIZE; i++)
+                        {
+                            if (Members[i] != null && SerialHelper.IsValid(Members[i].Serial))
+                            {
+                                uint serial = Members[i].Serial;
+                                Members[i] = null;
+
+                                UIManager.GetGump<BaseHealthBarGump>(serial)?.RequestUpdateContents();
+                            }
+                        }
+
+                        Clear();
+                    }
+
+
+                    UIManager.GetGump<PartyGump>()?.RequestUpdateContents();
 
                     break;
                 

@@ -30,6 +30,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
@@ -42,7 +43,7 @@ namespace ClassicUO.Game.Managers
     internal static class UIManager
     {
         private static readonly TextFileParser _parser = new TextFileParser(string.Empty, new[] { ' ' }, new char[] { }, new[] { '{', '}' });
-        private static readonly TextFileParser _cmdparser = new TextFileParser(string.Empty, new[] { ' ' }, new char[] { }, new char[] { '@', '@' });
+        private static readonly TextFileParser _cmdparser = new TextFileParser(string.Empty, new[] { ' ', ',' }, new char[] { }, new char[] { '@', '@', });
         private static readonly Dictionary<uint, Point> _gumpPositionCache = new Dictionary<uint, Point>();
         private static readonly Control[] _mouseDownControls = new Control[5];
 
@@ -743,13 +744,30 @@ namespace ClassicUO.Game.Managers
                             {
                                 string args = gparams[2];
 
-                                if (args.Length > 1)
-                                    text = ClilocLoader.Instance.Translate(text, args);
+                                for (int i = 3; i < gparams.Count; i++)
+                                    args += '\t' + gparams[i];
+
+                                if (args.Length != 0)
+                                    text = ClilocLoader.Instance.Translate(text, args, true);
                                 else
                                     Log.Error($"String '{args}' too short, something wrong with gump tooltip: {text}");
                             }
 
-                            gump.Children.LastOrDefault()?.SetTooltip(text);
+                            var last = gump.Children.LastOrDefault();
+
+                            if (last != null)
+                            {
+                                if (last.HasTooltip)
+                                {
+                                    if (last.Tooltip is string s)
+                                    {
+                                        s += '\n' + text;
+                                        last.SetTooltip(s);
+                                    }
+                                }
+                                else 
+                                    last.SetTooltip(text);
+                            }
                         }
 
                         break;
@@ -759,6 +777,11 @@ namespace ClassicUO.Game.Managers
                         if (World.ClientFeatures.TooltipsEnabled)
                         {
                             gump.Children.LastOrDefault()?.SetTooltip(SerialHelper.Parse(gparams[1]));
+
+                            if (uint.TryParse(gparams[1], out uint s) && !World.OPL.Contains(s))
+                            {
+                                PacketHandlers.AddMegaClilocRequest(s);
+                            }
                         }
 
                         break;

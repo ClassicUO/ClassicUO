@@ -72,7 +72,11 @@ namespace ClassicUO.Game.UI.Controls
 
         public TextEntry TxEntry { get; private set; }
 
-        public bool IsChanged => TxEntry.IsChanged;
+        public bool IsChanged
+        {
+            get => TxEntry.IsChanged;
+            set => TxEntry.IsChanged = value;
+        }
 
         public ushort Hue
         {

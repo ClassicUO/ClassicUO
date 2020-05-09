@@ -1236,6 +1236,9 @@ namespace ClassicUO.IO.Resources
         [MethodImpl(256)]
         public byte GetDieGroupIndex(ushort id, bool second, bool isRunning = false)
         {
+            if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                return 0;
+
             ANIMATION_FLAGS flags = DataIndex[id].Flags;
 
             switch (DataIndex[id].Type)

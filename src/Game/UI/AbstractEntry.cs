@@ -78,7 +78,7 @@ namespace ClassicUO.Game.UI
         public bool IsChanged
         {
             get => _isChanged;
-            protected set
+            set
             {
                 _selectionArea = (0, 0);
                 _isChanged = value;
