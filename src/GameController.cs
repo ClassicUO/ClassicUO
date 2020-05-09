@@ -369,7 +369,7 @@ namespace ClassicUO
             if (_scene != null && _scene.IsLoaded && !_scene.IsDestroyed)
                 _scene.Draw(_uoSpriteBatch);
 
-            //GraphicsDevice.SetRenderTarget(_buffer);
+            GraphicsDevice.SetRenderTarget(_buffer);
             UIManager.Draw(_uoSpriteBatch);
 
             base.Draw(gameTime);
@@ -377,10 +377,10 @@ namespace ClassicUO
             Profiler.ExitContext("RenderFrame");
             Profiler.EnterContext("OutOfContext");
 
-            //GraphicsDevice.SetRenderTarget(null);
-            //_uoSpriteBatch.Begin();
-            //_uoSpriteBatch.Draw2D(_buffer, 0, 0, ref _hueVector);
-            //_uoSpriteBatch.End();
+            GraphicsDevice.SetRenderTarget(null);
+            _uoSpriteBatch.Begin();
+            _uoSpriteBatch.Draw2D(_buffer, 0, 0, ref _hueVector);
+            _uoSpriteBatch.End();
 
             UpdateWindowCaption(gameTime);
         }
