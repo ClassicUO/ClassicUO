@@ -791,7 +791,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     case 0x3ECE: // serpentine dragon
                     {
-
+                        graphic = 0x059A;
                         break;
                     }
 

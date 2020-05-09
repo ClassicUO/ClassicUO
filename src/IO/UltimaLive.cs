@@ -303,8 +303,9 @@ namespace ClassicUO.IO
 
                     /*if (_UL.MapCRCs != null)
                         oldlen = _UL.MapCRCs.Length;
-                    if (_UL.MapCRCs == null || _UL.MapCRCs.Length < maps)*/ _UL.MapCRCs = new ushort[sbyte.MaxValue][];
-                    _UL.MapSizeWrapSize = new ushort[maps, 4]; //we always need to reinitialize this, as it could change from login to login even on the same server, in case of map changes (a change could happen on the fly with a client kick or on reboot)
+                    if (_UL.MapCRCs == null || _UL.MapCRCs.Length < maps)*/
+                    _UL.MapCRCs = new ushort[sbyte.MaxValue][];
+                    _UL.MapSizeWrapSize = new ushort[sbyte.MaxValue, 4]; //we always need to reinitialize this, as it could change from login to login even on the same server, in case of map changes (a change could happen on the fly with a client kick or on reboot)
                     p.Seek(15); //byte 15 to end of packet, the map definitions
                     List<int> valid = new List<int>();
                     for (int i = 0; i < maps; i++)

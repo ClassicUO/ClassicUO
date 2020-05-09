@@ -8,16 +8,13 @@
 #define SPECTRAL 10
 #define SHADOW 12
 #define LIGHTS 13
-#define COLOR_SWAP 32
+#define GUMP 20
 
 
 float4x4 MatrixTransform;
 float4x4 WorldMatrix;
 float2 Viewport;
 float Brightlight;
-float Hues_count;
-float Hues_count_double;
-
 
 
 const static float3 LIGHT_DIRECTION = float3(-1.0f, -1.0f, .5f);
@@ -25,6 +22,7 @@ const static float3 VEC3_ZERO = float3(0, 0, 0);
 
 sampler DrawSampler : register(s0);
 sampler HueSampler0 : register(s1);
+sampler HueSampler1 : register(s2);
 
 struct VS_INPUT
 {
@@ -46,10 +44,18 @@ struct PS_INPUT
 float3 get_rgb(float red, float hue)
 {
 	//float p = floor((hue / Hues_count_double) * 1000000.0f) / 1000000.0f;
+	if (hue <= 3000)
+	{
+		float2 texcoord = float2(red % 32, hue / 3000);
 
-	float p = hue / 6000.0f;
+		return tex2D(HueSampler0, texcoord).rgb;
+	}
+	else
+	{
+		float2 texcoord = float2(red % 32, (hue - 3000) / 3000);
 
-	return tex2D(HueSampler0, float2(red, p)).rgb;
+		return tex2D(HueSampler1, texcoord).rgb;
+	}
 }
 
 float3 get_light(float3 norm)
@@ -82,27 +88,30 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 
 	int mode = int(IN.Hue.y);
 	float alpha = 1 - IN.Hue.z;
+	float red = color.r;
 
 	if (mode > NOCOLOR)
 	{
 		float hue = IN.Hue.x;
 
-		if (mode >= COLOR_SWAP)
+		if (mode >= GUMP)
 		{
-			mode -= COLOR_SWAP;
-			hue += Hues_count;
+			mode -= GUMP;
+
+			if (color.r < 0.02f)
+			{
+				hue = 0;
+			}
 		}
 
 		if (mode == COLOR || (mode == PARTIAL_COLOR && color.r == color.g && color.r == color.b))
 		{
-			color.rgb = get_rgb(color.r, hue);
+			color.rgb = get_rgb(red, hue);
 		}
 		else if (mode > 5)
 		{
 			if (mode > 9)
 			{
-				float red = color.r;
-
 				if (mode > 10)
 				{
 					if (mode > 11)
@@ -137,7 +146,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 
 				if (mode > 6)
 				{
-					color.rgb = get_rgb(color.r, hue) * norm;
+					color.rgb = get_rgb(red, hue) * norm;
 				}
 				else
 				{
@@ -147,7 +156,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 		}
 		else if (mode == 4 || (mode == 3 && (color.r > 0.08 || color.g > 0.08 || color.b > 0.08)) || (mode == 5 && color.r > 0.08))
 		{
-			color.rgb = get_rgb(color.r + 90, hue);
+			color.rgb = get_rgb(31, hue);
 		}
 	}
 
