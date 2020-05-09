@@ -680,7 +680,7 @@ namespace ClassicUO.IO.Resources
                             int color = defReader.ReadInt();
 
 
-                            //TODO: Placeholder logic to match perceived original client behaviour.
+                            //Yes, this is actually how this is supposed to work.
                             int checkIndex;
                             if (group.Length >= 3)
                                 checkIndex = group[2];
@@ -691,24 +691,6 @@ namespace ClassicUO.IO.Resources
                             DataIndex[index].Color = (ushort)color;
                             DataIndex[index].IsValidMUL = true;
                             DataIndex[index].ReadFromBodyDef = true;
-
-                            //for (int i = 0; i < group.Length; i++)
-                            //{
-                            //    int checkIndex = group[i];
-
-                            //    if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                            //        continue;
-
-                            //    if (DataIndex[index].ReadFromBodyDef)
-                            //        break;
-
-                            //    DataIndex[index].Graphic = (ushort)checkIndex;
-                            //    DataIndex[index].Color = (ushort)color;
-                            //    DataIndex[index].IsValidMUL = true;
-                            //    DataIndex[index].ReadFromBodyDef = true;
-
-                            //    break;
-                            //}
                         }
                     }
                 }
@@ -735,7 +717,7 @@ namespace ClassicUO.IO.Resources
                             int color = defReader.ReadInt();
 
 
-                            //TODO: Placeholder logic to match perceived original client behaviour.
+                            //Yes, this is actually how this is supposed to work.
                             int checkIndex;
                             if (group.Length >= 3)
                                 checkIndex = group[2];
@@ -746,24 +728,6 @@ namespace ClassicUO.IO.Resources
                             DataIndex[index].CorpseColor = (ushort)color;
                             DataIndex[index].IsValidMUL = true;
                             DataIndex[index].ReadFromCorpseDef = true;
-
-                            //for (int i = 0; i < group.Length; i++)
-                            //{
-                            //    int checkIndex = group[i];
-
-                            //    if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                            //        continue;
-
-                            //    if (DataIndex[index].ReadFromCorpseDef)
-                            //        break;
-
-                            //    DataIndex[index].CorpseGraphic = (ushort)checkIndex;
-                            //    DataIndex[index].CorpseColor = (ushort)color;
-                            //    DataIndex[index].IsValidMUL = true;
-                            //    DataIndex[index].ReadFromCorpseDef = true;
-
-                            //    break;
-                            //}
                         }
                     }
                 }
