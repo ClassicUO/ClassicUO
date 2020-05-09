@@ -88,6 +88,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 
 	int mode = int(IN.Hue.y);
 	float alpha = 1 - IN.Hue.z;
+	float red = color.r;
 
 	if (mode > NOCOLOR)
 	{
@@ -97,22 +98,20 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 		{
 			mode -= GUMP;
 
-			if (color.r <= 0.08f /*&& color.r == color.g && color.r == color.b*/)
+			if (color.r < 0.02f)
 			{
-				hue = 0;
+				hue = 1;
 			}
 		}
 
 		if (mode == COLOR || (mode == PARTIAL_COLOR && color.r == color.g && color.r == color.b))
 		{
-			color.rgb = get_rgb(color.r, hue);	
+			color.rgb = get_rgb(red, hue);
 		}
 		else if (mode > 5)
 		{
 			if (mode > 9)
 			{
-				float red = color.r;
-
 				if (mode > 10)
 				{
 					if (mode > 11)
@@ -147,7 +146,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 
 				if (mode > 6)
 				{
-					color.rgb = get_rgb(color.r, hue) * norm;
+					color.rgb = get_rgb(red, hue) * norm;
 				}
 				else
 				{
