@@ -125,7 +125,7 @@ namespace ClassicUO
                                           GraphicsDevice,
                                           32,
                                           3000);
-            _hues_sampler[1].SetData(buffer, (buffer.Length / 2) - 1, buffer.Length / 2 - 1);
+            _hues_sampler[1].SetData(buffer, (buffer.Length / 2) - 1, buffer.Length / 2);
 
 
             GraphicsDevice.Textures[1] = _hues_sampler[0];
