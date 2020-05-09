@@ -100,7 +100,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 
 			if (color.r < 0.02f)
 			{
-				hue = 1;
+				hue = 0;
 			}
 		}
 
