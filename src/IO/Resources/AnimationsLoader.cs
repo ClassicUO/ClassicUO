@@ -670,6 +670,8 @@ namespace ClassicUO.IO.Resources
 
                             if (index >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                 continue;
+                            if (DataIndex[index].ReadFromBodyDef)
+                                continue;
 
                             int[] group = defReader.ReadGroup();
 
@@ -677,6 +679,8 @@ namespace ClassicUO.IO.Resources
                                 continue;
                             int color = defReader.ReadInt();
 
+
+                            //TODO: Placeholder logic to match perceived original client behaviour.
                             int checkIndex;
                             if (group.Length >= 3)
                                 checkIndex = group[2];
@@ -717,35 +721,49 @@ namespace ClassicUO.IO.Resources
                     {
                         while (defReader.Next())
                         {
-                            ushort index = (ushort)defReader.ReadInt();
+                            int index = defReader.ReadInt();
 
                             if (index >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                                continue;
+                            if (DataIndex[index].ReadFromCorpseDef)
                                 continue;
 
                             int[] group = defReader.ReadGroup();
 
                             if (group == null)
                                 continue;
+                            int color = defReader.ReadInt();
 
-                            ushort color = (ushort)defReader.ReadInt();
 
-                            for (int i = 0; i < group.Length; i++)
-                            {
-                                int checkIndex = group[i];
+                            //TODO: Placeholder logic to match perceived original client behaviour.
+                            int checkIndex;
+                            if (group.Length >= 3)
+                                checkIndex = group[2];
+                            else
+                                checkIndex = group[0];
 
-                                if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                                    continue;
+                            DataIndex[index].CorpseGraphic = (ushort)checkIndex;
+                            DataIndex[index].CorpseColor = (ushort)color;
+                            DataIndex[index].IsValidMUL = true;
+                            DataIndex[index].ReadFromCorpseDef = true;
 
-                                if (DataIndex[index].ReadFromCorpseDef)
-                                    break;
+                            //for (int i = 0; i < group.Length; i++)
+                            //{
+                            //    int checkIndex = group[i];
 
-                                DataIndex[index].CorpseGraphic = (ushort)checkIndex;
-                                DataIndex[index].CorpseColor = color;
-                                DataIndex[index].IsValidMUL = true;
-                                DataIndex[index].ReadFromCorpseDef = true;
+                            //    if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                            //        continue;
 
-                                break;
-                            }
+                            //    if (DataIndex[index].ReadFromCorpseDef)
+                            //        break;
+
+                            //    DataIndex[index].CorpseGraphic = (ushort)checkIndex;
+                            //    DataIndex[index].CorpseColor = (ushort)color;
+                            //    DataIndex[index].IsValidMUL = true;
+                            //    DataIndex[index].ReadFromCorpseDef = true;
+
+                            //    break;
+                            //}
                         }
                     }
                 }
