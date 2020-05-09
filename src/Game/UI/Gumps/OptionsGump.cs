@@ -69,6 +69,7 @@ namespace ClassicUO.Game.UI.Gumps
         //experimental
         private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
         private Combobox _overrideContainerLocationSetting;
+        private Checkbox _use_smooth_boat_movement;
 
         // sounds
         private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
@@ -1131,6 +1132,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 10;
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
+            _use_smooth_boat_movement = CreateCheckBox(rightArea, "Smooth boat movements", ProfileManager.Current.UseSmoothBoatMovement, 0, 0);
             _enableSelectionArea = CreateCheckBox(rightArea, "Enable Text Selection Area", ProfileManager.Current.EnableSelectionArea, 0, 0);
 
             _debugGumpIsDisabled = CreateCheckBox(rightArea, "Disable Debug Gump", ProfileManager.Current.DebugGumpIsDisabled, 0, 0);
@@ -1593,6 +1595,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case 10:
+                    _use_smooth_boat_movement.IsChecked = false;
                     _enableSelectionArea.IsChecked = false;
                     _debugGumpIsDisabled.IsChecked = false;
                     _restoreLastGameSize.IsChecked = false;
@@ -1974,6 +1977,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             // experimental
+            ProfileManager.Current.UseSmoothBoatMovement = _use_smooth_boat_movement.IsChecked;
             ProfileManager.Current.EnableSelectionArea = _enableSelectionArea.IsChecked;
             ProfileManager.Current.RestoreLastGameSize = _restoreLastGameSize.IsChecked;
 

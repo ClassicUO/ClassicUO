@@ -4356,11 +4356,17 @@ namespace ClassicUO.Network
             //    }
             //}
 
-            BoatMovingManager.AddStep(serial, 
-                                      boatSpeed, 
-                                      movingDirection, 
-                                      facingDirection, 
-                                      x, y, (sbyte) z);
+            bool smooth = ProfileManager.Current != null && ProfileManager.Current.UseSmoothBoatMovement;
+
+            if (smooth)
+                BoatMovingManager.AddStep(serial, 
+                                          boatSpeed, 
+                                          movingDirection, 
+                                          facingDirection, 
+                                          x, y, (sbyte) z);
+            else 
+                UpdateGameObject(serial, multi.Graphic, 0, multi.Amount, x, y, (sbyte) z, facingDirection, multi.Hue, multi.Flags, 0, 2, 1);
+
 
             int count = p.ReadUShort();
 
@@ -4397,12 +4403,30 @@ namespace ClassicUO.Network
                 //ent.LastX = cx;
                 //ent.LastY = cy;
 
-                BoatMovingManager.PushItemToList(
-                serial,
-                cSerial, 
-                x - cx, 
-                y - cy,
-                (sbyte) (z - cz));
+                if (smooth)
+                    BoatMovingManager.PushItemToList(
+                    serial,
+                    cSerial, 
+                    x - cx, 
+                    y - cy,
+                    (sbyte) (z - cz));
+                else
+                {
+                    UpdateGameObject(cSerial,
+                                     ent.Graphic,
+                                     0, 
+                                     0,
+                                     cx,
+                                     cy,
+                                     (sbyte) cz,
+                                     SerialHelper.IsMobile(ent) ?
+                                         ((Mobile) ent).Direction : 0,
+                                     ent.Hue,
+                                     ent.Flags,
+                                     0,
+                                     0,
+                                     1);
+                }
             }
         }
 
