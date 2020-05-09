@@ -1133,6 +1133,7 @@ namespace ClassicUO.Game.UI.Gumps
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
             _use_smooth_boat_movement = CreateCheckBox(rightArea, "Smooth boat movements", ProfileManager.Current.UseSmoothBoatMovement, 0, 0);
+            _use_smooth_boat_movement.IsVisible = Client.Version >= ClientVersion.CV_7090; 
             _enableSelectionArea = CreateCheckBox(rightArea, "Enable Text Selection Area", ProfileManager.Current.EnableSelectionArea, 0, 0);
 
             _debugGumpIsDisabled = CreateCheckBox(rightArea, "Disable Debug Gump", ProfileManager.Current.DebugGumpIsDisabled, 0, 0);
