@@ -607,23 +607,34 @@ namespace ClassicUO.IO.Resources
                                 continue;
                             int color = defReader.ReadInt();
 
-                            for (int i = 0; i < group.Length; i++)
-                            {
-                                int checkIndex = group[i];
+                            int checkIndex;
+                            if (group.Length >= 3)
+                                checkIndex = group[2];
+                            else
+                                checkIndex = group[0];
 
-                                if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                                    continue;
+                            DataIndex[index].Graphic = (ushort)checkIndex;
+                            DataIndex[index].Color = (ushort)color;
+                            DataIndex[index].IsValidMUL = true;
+                            DataIndex[index].ReadFromBodyDef = true;
 
-                                if (DataIndex[index].ReadFromBodyDef)
-                                    break;
+                            //for (int i = 0; i < group.Length; i++)
+                            //{
+                            //    int checkIndex = group[i];
 
-                                DataIndex[index].Graphic = (ushort)checkIndex;
-                                DataIndex[index].Color = (ushort)color;
-                                DataIndex[index].IsValidMUL = true;
-                                DataIndex[index].ReadFromBodyDef = true;
+                            //    if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                            //        continue;
 
-                                break;
-                            }
+                            //    if (DataIndex[index].ReadFromBodyDef)
+                            //        break;
+
+                            //    DataIndex[index].Graphic = (ushort)checkIndex;
+                            //    DataIndex[index].Color = (ushort)color;
+                            //    DataIndex[index].IsValidMUL = true;
+                            //    DataIndex[index].ReadFromBodyDef = true;
+
+                            //    break;
+                            //}
                         }
                     }
                 }
