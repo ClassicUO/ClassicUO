@@ -261,6 +261,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool SaveHealthbars { get; set; }
         [JsonProperty] public bool TextFading { get; set; } = true;
 
+        [JsonProperty] public bool UseSmoothBoatMovement { get; set; } = false;
 
         [JsonProperty] public int WorldMapWidth { get; set; } = 400;
         [JsonProperty] public int WorldMapHeight { get; set; } = 400;

@@ -134,6 +134,10 @@ namespace ClassicUO.Game.UI.Controls
                     IsPartialHue = true
                 });
             }
+            else if (!mobile.IsMale)
+            {
+                body = 0x000D;
+            }
             else
                 body = 0x000C;
 

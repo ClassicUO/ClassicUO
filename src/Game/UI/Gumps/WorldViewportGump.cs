@@ -88,7 +88,10 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _worldWidth + BORDER_WIDTH * 2;
             Height = _worldHeight + BORDER_HEIGHT * 2;
             _borderControl = new BorderControl(0, 0, Width, Height, 4);
-            _borderControl.DragEnd += (sender, e) => { UIManager.GetGump<OptionsGump>()?.UpdateVideo(); };
+            _borderControl.DragEnd += (sender, e) =>
+            {
+                UIManager.GetGump<OptionsGump>()?.UpdateVideo();
+            };
             _viewport = new WorldViewport(_scene, BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
 
             UIManager.SystemChat = _systemChatControl = new SystemChatControl(BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
@@ -168,6 +171,7 @@ namespace ClassicUO.Game.UI.Gumps
             Location = position;
 
             ProfileManager.Current.GameWindowPosition = position;
+            UIManager.GetGump<OptionsGump>()?.UpdateVideo();
 
             UpdateGameWindowPos();
         }

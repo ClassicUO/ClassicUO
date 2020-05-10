@@ -4356,11 +4356,41 @@ namespace ClassicUO.Network
             //    }
             //}
 
-            BoatMovingManager.AddStep(serial, 
-                                      boatSpeed, 
-                                      movingDirection, 
-                                      facingDirection, 
-                                      x, y, (sbyte) z);
+            bool smooth = ProfileManager.Current != null && ProfileManager.Current.UseSmoothBoatMovement;
+
+            if (smooth)
+                BoatMovingManager.AddStep(serial, 
+                                          boatSpeed, 
+                                          movingDirection, 
+                                          facingDirection, 
+                                          x, y, (sbyte) z);
+            else
+            {
+
+                //UpdateGameObject(serial, 
+                //                 multi.Graphic, 
+                //                 0,
+                //                 multi.Amount, 
+                //                 x, 
+                //                 y, 
+                //                 (sbyte) z,
+                //                 facingDirection,
+                //                 multi.Hue, 
+                //                 multi.Flags, 
+                //                 0, 
+                //                 2, 
+                //                 1);
+                multi.X = x;
+                multi.Y = y;
+                multi.Z = (sbyte) z;
+                multi.AddToTile();
+                multi.UpdateScreenPosition();
+                if (World.HouseManager.TryGetHouse(serial, out var house))
+                {
+                    house.Generate(true, true, true);
+                }
+            }
+
 
             int count = p.ReadUShort();
 
@@ -4397,12 +4427,46 @@ namespace ClassicUO.Network
                 //ent.LastX = cx;
                 //ent.LastY = cy;
 
-                BoatMovingManager.PushItemToList(
-                serial,
-                cSerial, 
-                x - cx, 
-                y - cy,
-                (sbyte) (z - cz));
+                if (smooth)
+                    BoatMovingManager.PushItemToList(
+                    serial,
+                    cSerial, 
+                    x - cx, 
+                    y - cy,
+                    (sbyte) (z - cz));
+                else
+                {
+                    if (cSerial == World.Player)
+                    {
+                        UpdatePlayer(cSerial, 
+                                     ent.Graphic,
+                                     0, 
+                                     ent.Hue,
+                                     ent.Flags, 
+                                     cx, 
+                                     cy,
+                                     (sbyte) cz,
+                                     0, 
+                                     World.Player.Direction);
+                    }
+                    else
+                    {
+                        UpdateGameObject(cSerial,
+                                         ent.Graphic,
+                                         0,
+                                         0,
+                                         cx,
+                                         cy,
+                                         (sbyte) cz,
+                                         SerialHelper.IsMobile(ent) ?
+                                             ((Mobile) ent).Direction : 0,
+                                         ent.Hue,
+                                         ent.Flags,
+                                         0,
+                                         0,
+                                         1);
+                    }
+                }
             }
         }
 
