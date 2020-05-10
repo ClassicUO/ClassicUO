@@ -2226,12 +2226,12 @@ namespace ClassicUO.Network
                     item_hue = p.ReadUShort();
                 }
 
-                if (Client.Version >= Data.ClientVersion.CV_70331)
-                    itemGraphic &= 0xFFFF;
-                else if (Client.Version >= Data.ClientVersion.CV_7090)
-                    itemGraphic &= 0x7FFF;
-                else
-                    itemGraphic &= 0x3FFF;
+                //if (Client.Version >= Data.ClientVersion.CV_70331)
+                //    itemGraphic &= 0xFFFF;
+                //else if (Client.Version >= Data.ClientVersion.CV_7090)
+                //    itemGraphic &= 0x7FFF;
+                //else
+                //    itemGraphic &= 0x3FFF;
 
                 //if (layer > 0x1D)
                 //{
