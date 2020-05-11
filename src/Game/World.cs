@@ -203,11 +203,14 @@ namespace ClassicUO.Game
 
                     if (rem != null)
                     {
-                        Mobile mob = Mobiles.Get(rem.Container);
                         RemoveItem(rem, true);
-                        if (mob != null)
+                        if (SerialHelper.IsMobile(rem.Container))
                         {
-                            UIManager.GetGump<PaperDollGump>(mob)?.RequestUpdateContents();
+                            UIManager.GetGump<PaperDollGump>(rem.Container)?.RequestUpdateContents();
+                        }
+                        else if (SerialHelper.IsItem(rem.Container))
+                        {
+                            UIManager.GetGump<ContainerGump>(rem.Container)?.RequestUpdateContents();
                         }
                     }
                 }

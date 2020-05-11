@@ -341,7 +341,6 @@ namespace ClassicUO.Game.UI.Controls
                                     Mouse.LDropPosition = Mouse.Position;
                                     return;
                                 }
-
                             }
                             else
                             {

@@ -399,7 +399,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             ((GameScene) Client.Game.Scene).WearHeldItem(LocalSerial != World.Player ? container : World.Player);
                             Mouse.CancelDoubleClick = true;
-                            Mouse.LastLeftButtonClickTime = 0;
+                            Mouse.LDropPosition = Mouse.Position;
                         }
                     }
                 }
