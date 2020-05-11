@@ -2052,25 +2052,21 @@ namespace ClassicUO.Network
                     it.Price = p.ReadUInt();
                     byte nameLen = p.ReadByte();
                     string name = p.ReadASCII(nameLen);
-                    bool fromcliloc = false;
 
-                    if (int.TryParse(name, out int cliloc))
+                    if (World.OPL.TryGetNameAndData(it.Serial, out string s, out _))
                     {
-                        it.Name = ClilocLoader.Instance.GetString(cliloc);
-                        fromcliloc = true;
+                        it.Name = s;
+                    }
+                    else if (int.TryParse(name, out int cliloc))
+                    {
+                        it.Name = ClilocLoader.Instance.Translate(cliloc, $"\t{it.ItemData.Name}: \t{it.Amount}", true);
                     }
                     else if (string.IsNullOrEmpty(name))
                     {
-                        bool success = World.OPL.TryGetNameAndData(it.Serial, out it.Name, out _);
-                        if (!success)
-                        {
-                            it.Name = it.ItemData.Name;
-                        }
+                        it.Name = it.ItemData.Name;
                     }
-                    if (string.IsNullOrEmpty(it.Name))
+                    else
                         it.Name = name;
-
-                    gump.SetIfNameIsFromCliloc(it, fromcliloc);
 
                     if (reverse)
                     {
