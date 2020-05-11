@@ -1015,13 +1015,6 @@ namespace ClassicUO.Network
                             first = first.Next;
                         }
                     }
-                    else
-                    {
-                        while (first?.Previous != null)
-                        {
-                            first = first.Previous;
-                        }
-                    }
 
                     while (first != null)
                     {
