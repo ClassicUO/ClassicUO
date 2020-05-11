@@ -24,6 +24,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility.Platforms;
 
 using Microsoft.Xna.Framework;
@@ -87,7 +88,7 @@ namespace ClassicUO.Game
 
         public static ActiveSpellIconsManager ActiveSpellIcons = new ActiveSpellIconsManager();
 
-        public static uint LastObject;
+        public static uint LastObject, ObjectToRemove;
 
 
         public static int MapIndex
@@ -194,6 +195,23 @@ namespace ClassicUO.Game
         {
             if (Player != null)
             {
+
+                if (SerialHelper.IsValid(ObjectToRemove))
+                {
+                    Item rem = Items.Get(ObjectToRemove);
+                    ObjectToRemove = 0;
+
+                    if (rem != null)
+                    {
+                        Mobile mob = Mobiles.Get(rem.Container);
+                        RemoveItem(rem, true);
+                        if (mob != null)
+                        {
+                            UIManager.GetGump<PaperDollGump>(mob)?.RequestUpdateContents();
+                        }
+                    }
+                }
+
                 foreach (Mobile mob in Mobiles)
                 {
                     mob.Update(totalMS, frameMS);
@@ -664,6 +682,7 @@ namespace ClassicUO.Game
                 RemoveItem(item);
             }
 
+            ObjectToRemove = 0;
             LastObject = 0;
             HouseManager?.Clear();
             Items.Clear();

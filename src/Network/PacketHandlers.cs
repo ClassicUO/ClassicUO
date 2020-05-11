@@ -1139,19 +1139,24 @@ namespace ClassicUO.Network
 
             if (ItemHold.Enabled || ItemHold.Dropped && (firstItem == null || !firstItem.AllowedToDraw))
             {
+                if (World.ObjectToRemove == ItemHold.Serial)
+                {
+                    World.ObjectToRemove = 0;
+                }
+
                 if (!ItemHold.UpdatedInWorld)
                 {
                     if (ItemHold.Layer == Layer.Invalid && SerialHelper.IsValid(ItemHold.Container))
                     {
                         // Server should sends an UpdateContainedItem after this packet.
-
-                        //AddItemToContainer(ItemHold.Serial,
-                        //                   ItemHold.Graphic,
-                        //                   ItemHold.Amount,
-                        //                   ItemHold.X,
-                        //                   ItemHold.Y,
-                        //                   ItemHold.Hue,
-                        //                   ItemHold.Container);
+                        Console.WriteLine("=== DENY === ADD TO CONTAINER");
+                        AddItemToContainer(ItemHold.Serial,
+                                           ItemHold.Graphic,
+                                           ItemHold.TotalAmount,
+                                           ItemHold.X,
+                                           ItemHold.Y,
+                                           ItemHold.Hue,
+                                           ItemHold.Container);
 
                         UIManager.GetGump<ContainerGump>(ItemHold.Container)?.RequestUpdateContents();
                     }
@@ -1160,17 +1165,14 @@ namespace ClassicUO.Network
                         Item item = World.GetOrCreateItem(ItemHold.Serial);
 
                         item.Graphic = ItemHold.Graphic;
-                        item.FixHue(ItemHold.Hue);
-                        item.Amount = ItemHold.Amount;
+                        item.Hue = ItemHold.Hue;
+                        item.Amount = ItemHold.TotalAmount;
                         item.Flags = ItemHold.Flags;
                         item.Layer = ItemHold.Layer;
-                        item.Container = ItemHold.Container;
                         item.X = ItemHold.X;
                         item.Y = ItemHold.Y;
                         item.Z = ItemHold.Z;
                         item.CheckGraphicChange();
-                        item.UpdateScreenPosition();
-
 
                         Entity container = World.Get(ItemHold.Container);
 
@@ -1178,21 +1180,28 @@ namespace ClassicUO.Network
                         {
                             if (SerialHelper.IsMobile(container.Serial))
                             {
+                                Console.WriteLine("=== DENY === ADD TO PAPERDOLL");
+
+                                RemoveItemFromContainer(item);
                                 container.PushToBack(item);
+                                item.Container = container.Serial;
                                 UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
                             }
                             else
                             {
+                                Console.WriteLine("=== DENY === SOMETHING WRONG");
+
                                 RemoveItemFromContainer(item);
-                                World.Items.Remove(item.Serial);
-                                item.Destroy();
-                                //item = null;
+                                World.RemoveItem(item, true);
                             }
                         }
                         else
                         {
+                            Console.WriteLine("=== DENY === ADD TO TERRAIN");
+
                             RemoveItemFromContainer(item);
                             item.AddToTile();
+                            item.UpdateScreenPosition();
                         }
                     }
                 }
@@ -1201,12 +1210,14 @@ namespace ClassicUO.Network
                 ItemHold.Clear();
             }
             else
+            {
                 Log.Warn( "There was a problem with ItemHold object. It was cleared before :|");
+            }
 
-            var result = World.Items.Get(ItemHold.Serial);
+            //var result = World.Items.Get(ItemHold.Serial);
 
-            if (result != null && !result.IsDestroyed)
-                result.AllowedToDraw = true;
+            //if (result != null && !result.IsDestroyed)
+            //    result.AllowedToDraw = true;
 
             byte code = p.ReadByte();
 
@@ -1230,6 +1241,8 @@ namespace ClassicUO.Network
 
             ItemHold.Enabled = false;
             ItemHold.Dropped = false;
+
+            Console.WriteLine("PACKET - ITEM DROP OK!");
         }
 
         private static void DeathScreen(Packet p)
@@ -1323,8 +1336,13 @@ namespace ClassicUO.Network
 
             if (entity == World.Player && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded))
                 World.Player?.UpdateAbilities();
-            if (ItemHold.Serial == item.Serial)
-                ItemHold.Clear();
+
+            //if (ItemHold.Serial == item.Serial)
+            //{
+            //    Console.WriteLine("PACKET - ITEM EQUIP");
+            //    ItemHold.Enabled = false;
+            //    ItemHold.Dropped = true;
+            //}
         }
 
         private static void Swing(Packet p)
@@ -4508,7 +4526,10 @@ namespace ClassicUO.Network
         private static void AddItemToContainer(uint serial, ushort graphic, ushort amount, ushort x, ushort y, ushort hue, uint containerSerial)
         {
             if (ItemHold.Serial == serial && ItemHold.Dropped)
+            {
+                Console.WriteLine("ADD ITEM TO CONTAINER -- CLEAR HOLD");
                 ItemHold.Clear();
+            }
 
             Entity container = World.Get(containerSerial);
 
@@ -4810,11 +4831,10 @@ namespace ClassicUO.Network
             {
                 if (item.OnGround)
                 {
-                    if (ItemHold.Serial == serial && ItemHold.Dropped)
-                    {
-                        ItemHold.Enabled = false;
-                        ItemHold.Dropped = false;
-                    }
+                    //if (ItemHold.Serial == serial && ItemHold.Dropped)
+                    //{
+                    //    ItemHold.Enabled = false;
+                    //}
 
                     item.AddToTile();
                     item.UpdateScreenPosition();

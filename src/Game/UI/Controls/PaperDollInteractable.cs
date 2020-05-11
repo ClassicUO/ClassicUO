@@ -305,7 +305,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (MouseIsOver)
                 {
-                    if (ItemHold.Enabled || LocalSerial == 0)
+                    if (ItemHold.Enabled /*|| LocalSerial == 0*/)
                     {
                         if (container != null)
                         {
@@ -325,7 +325,8 @@ namespace ClassicUO.Game.UI.Controls
                                     }
 
                                     Mouse.CancelDoubleClick = true;
-                                    Mouse.LastLeftButtonClickTime = 0;
+                                    Mouse.LDropPosition = Mouse.Position;
+
                                     return;
                                 }
                             }
@@ -337,7 +338,7 @@ namespace ClassicUO.Game.UI.Controls
                                 {
                                     scene.WearHeldItem(_parentSerial != World.Player ? container : World.Player);
                                     Mouse.CancelDoubleClick = true;
-                                    Mouse.LastLeftButtonClickTime = 0;
+                                    Mouse.LDropPosition = Mouse.Position;
                                     return;
                                 }
 
@@ -349,7 +350,7 @@ namespace ClassicUO.Game.UI.Controls
                                 {
                                     scene.DropHeldItemToContainer(cont);
                                     Mouse.CancelDoubleClick = true;
-                                    Mouse.LastLeftButtonClickTime = 0;
+                                    Mouse.LDropPosition = Mouse.Position;
                                     return;
                                 }
                             }
@@ -404,6 +405,7 @@ namespace ClassicUO.Game.UI.Controls
                         int centerX = bounds.Width >> 1;
                         int centerY = bounds.Height >> 1;
                         GameActions.PickUp(LocalSerial, centerX, centerY);
+                        Mouse.LDropPosition = Mouse.Position;
                     }
                 }
             }
