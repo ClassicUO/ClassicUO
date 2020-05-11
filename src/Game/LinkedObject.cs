@@ -275,7 +275,10 @@ namespace ClassicUO.Game
                 }
                 tail.Next = null;
                 if (nmerges <= 1)
+                {
+                    Items = head;
                     return head;
+                }
                 else
                     unitsize *= 2;
             }
