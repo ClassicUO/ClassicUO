@@ -1325,6 +1325,7 @@ namespace ClassicUO.IO.Resources
 
         private readonly DataReader _reader = new DataReader();
         private byte[] _buffer = new byte[0x800000];
+        private UOPFrameData[] _uop_frame_pixels_offsets = new UOPFrameData[100];
 
         private unsafe bool ReadUOPAnimationFrame(ref AnimationDirection animDirection)
         {
@@ -1354,8 +1355,6 @@ namespace ClassicUO.IO.Resources
                 int dataStart = _reader.ReadInt();
                 _reader.Seek(dataStart);
 
-                UOPFrameData* pixelDataOffsets = stackalloc UOPFrameData[frameCount];
-
                 for (int i = 0; i < frameCount; i++)
                 {
                     uint start = (uint) _reader.Position;
@@ -1365,7 +1364,7 @@ namespace ClassicUO.IO.Resources
                     uint pixelOffset = _reader.ReadUInt();
                     //int vsize = pixelDataOffsets.Count;
 
-                    ref UOPFrameData data = ref pixelDataOffsets[i];
+                    ref UOPFrameData data = ref _uop_frame_pixels_offsets[i];
                     data.DataStart = start;
                     data.PixelDataOffset = pixelOffset;
 
@@ -1405,7 +1404,7 @@ namespace ClassicUO.IO.Resources
                     if (animDirection.Frames[i] != null)
                         continue;
 
-                    ref UOPFrameData frameData = ref pixelDataOffsets[i + dirFrameStartIdx];
+                    ref UOPFrameData frameData = ref _uop_frame_pixels_offsets[i + dirFrameStartIdx];
 
                     if (frameData.DataStart == 0)
                         continue;
