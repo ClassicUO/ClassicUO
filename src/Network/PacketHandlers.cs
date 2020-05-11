@@ -1148,7 +1148,7 @@ namespace ClassicUO.Network
                 {
                     if (ItemHold.Layer == Layer.Invalid && SerialHelper.IsValid(ItemHold.Container))
                     {
-                        // Server should sends an UpdateContainedItem after this packet.
+                        // Server should send an UpdateContainedItem after this packet.
                         Console.WriteLine("=== DENY === ADD TO CONTAINER");
                         AddItemToContainer(ItemHold.Serial,
                                            ItemHold.Graphic,
@@ -4829,13 +4829,20 @@ namespace ClassicUO.Network
             }
             else if (SerialHelper.IsItem(serial) && item != null)
             {
+                if (ItemHold.Serial == serial)
+                {
+                    Console.WriteLine("ITEM FOUND TO CLEAR");
+                    if (ItemHold.Dropped)
+                    {
+                        Console.WriteLine("....AND IT IS DROPPED!");
+                    }
+
+                    ItemHold.Enabled = false;
+                    ItemHold.Dropped = false;
+                }
+
                 if (item.OnGround)
                 {
-                    //if (ItemHold.Serial == serial && ItemHold.Dropped)
-                    //{
-                    //    ItemHold.Enabled = false;
-                    //}
-
                     item.AddToTile();
                     item.UpdateScreenPosition();
 
