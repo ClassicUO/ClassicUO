@@ -470,7 +470,7 @@ namespace ClassicUO.Game.Scenes
                     case Static st:
                         string name = st.Name;
                         if (string.IsNullOrEmpty(name))
-                            name = ClilocLoader.Instance.GetString(1020000 + st.Graphic);
+                            name = ClilocLoader.Instance.GetString(1020000 + st.Graphic, st.ItemData.Name);
                         obj.AddMessage(MessageType.Label, name, 3, 1001, false);
 
 
@@ -482,7 +482,7 @@ namespace ClassicUO.Game.Scenes
                         name = multi.Name;
 
                         if (string.IsNullOrEmpty(name))
-                            name = ClilocLoader.Instance.GetString(1020000 + multi.Graphic);
+                            name = ClilocLoader.Instance.GetString(1020000 + multi.Graphic, multi.ItemData.Name);
                         obj.AddMessage(MessageType.Label, name, 3, 1001, false);
 
                         if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)

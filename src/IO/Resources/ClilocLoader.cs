@@ -108,6 +108,29 @@ namespace ClassicUO.IO.Resources
             return text;
         }
 
+        public string GetString(int number, string replace)
+        {
+            string s = GetString(number);
+
+            if (string.IsNullOrEmpty(s))
+                s = replace;
+
+            return s;
+        }
+
+        public string GetString(int number, bool camelcase, string replace = "")
+        {
+            string s = GetString(number);
+
+            if (string.IsNullOrEmpty(s) && !string.IsNullOrEmpty(replace))
+                s = replace;
+
+            if (camelcase && !string.IsNullOrEmpty(s))
+                s = StringHelper.CapitalizeAllWords(s);
+
+            return s;
+        }
+
         public string Translate(int baseCliloc, string arg = "", bool capitalize = false)
         {
             return Translate(GetString(baseCliloc), arg, capitalize);

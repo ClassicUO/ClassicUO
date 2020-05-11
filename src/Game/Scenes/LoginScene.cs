@@ -255,22 +255,22 @@ namespace ClassicUO.Game.Scenes
                 switch (CurrentLoginStep)
                 {
                     case LoginSteps.Connecting:
-                        labelText = ClilocLoader.Instance.GetString(3000002); // "Connecting..."
+                        labelText = ClilocLoader.Instance.GetString(3000002, "Connecting..."); // "Connecting..."
 
                         break;
 
                     case LoginSteps.VerifyingAccount:
-                        labelText = ClilocLoader.Instance.GetString(3000003); // "Verifying Account..."
+                        labelText = ClilocLoader.Instance.GetString(3000003, "Verifying Account..."); // "Verifying Account..."
                         showButtons = LoginButtons.Cancel;
                         break;
 
                     case LoginSteps.LoginInToServer:
-                        labelText = ClilocLoader.Instance.GetString(3000053); // logging into shard
+                        labelText = ClilocLoader.Instance.GetString(3000053, "Logging into Shard"); // logging into shard
 
                         break;
 
                     case LoginSteps.EnteringBritania:
-                        labelText = ClilocLoader.Instance.GetString(3000001); // Entering Britania...
+                        labelText = ClilocLoader.Instance.GetString(3000001, "Entering Britannia..."); // Entering Britania...
 
                         break;
                     case LoginSteps.CharacterCreationDone:

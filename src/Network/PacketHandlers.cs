@@ -3249,7 +3249,7 @@ namespace ClassicUO.Network
 
                     if (cliloc > 0)
                     {
-                        str = ClilocLoader.Instance.Translate(ClilocLoader.Instance.GetString((int) cliloc), capitalize: true);
+                        str = ClilocLoader.Instance.GetString((int) cliloc, true);
 
                         if (!string.IsNullOrEmpty(str))
                             item.Name = str;
