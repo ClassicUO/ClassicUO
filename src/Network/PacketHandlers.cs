@@ -3647,7 +3647,7 @@ namespace ClassicUO.Network
                     //}
                     
                     break;
-                case 0x051B: // ClassicUO commands
+                case 0xBEEF: // ClassicUO commands
 
                     type = p.ReadUShort();
                     
@@ -4759,6 +4759,7 @@ namespace ClassicUO.Network
 
                 item.Amount = count;
                 item.Flags = flagss;
+                item.Direction = direction;
                 item.CheckGraphicChange(item.AnimIndex);
             }
             else

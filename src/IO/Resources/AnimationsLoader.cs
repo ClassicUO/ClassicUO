@@ -77,10 +77,10 @@ namespace ClassicUO.IO.Resources
         }
 
 
-        public ushort Color { get; set; }
-        public byte AnimGroup { get; set; }
-        public byte Direction { get; set; }
-        public ushort AnimID { get; set; }
+        public ushort Color;
+        public byte AnimGroup;
+        public byte Direction;
+        public ushort AnimID;
         public int SittingValue { get; set; }
 
         public IndexAnimation[] DataIndex { get; } = new IndexAnimation[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT];
