@@ -4529,8 +4529,8 @@ namespace ClassicUO.Network
             if (container == null)
             {
                 Log.Warn( $"No container ({containerSerial}) found");
-
-                return;
+                container = World.GetOrCreateItem(containerSerial);
+                //return;
             }
 
             Item item = World.Items.Get(serial);

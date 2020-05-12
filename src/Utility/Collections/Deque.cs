@@ -576,6 +576,8 @@ namespace ClassicUO.Utility.Collections
             }
         }
 
+        public ref T GetAt(int index) => ref _buffer[DequeIndexToBufferIndex(index)];
+
         public ref T Front()
         {
             return ref DoGetItem(0);
