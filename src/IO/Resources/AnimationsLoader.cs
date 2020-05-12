@@ -1325,7 +1325,7 @@ namespace ClassicUO.IO.Resources
 
         private readonly DataReader _reader = new DataReader();
         private byte[] _buffer = new byte[0x800000];
-        private UOPFrameData[] _uop_frame_pixels_offsets = new UOPFrameData[100];
+        private UOPFrameData[] _uop_frame_pixels_offsets = new UOPFrameData[1000];
 
         private unsafe bool ReadUOPAnimationFrame(ref AnimationDirection animDirection)
         {
