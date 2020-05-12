@@ -2223,8 +2223,8 @@ namespace ClassicUO.Network
 
             while (itemSerial != 0 && p.Position < p.Length)
             {
-                if (!SerialHelper.IsItem(itemSerial))
-                    break;
+                //if (!SerialHelper.IsItem(itemSerial))
+                //    break;
 
                 ushort itemGraphic = p.ReadUShort();
                 byte layer = p.ReadByte();
