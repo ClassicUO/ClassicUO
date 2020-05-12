@@ -1141,6 +1141,10 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Destroy()
         {
+            uint serial = Serial & 0x3FFFFFFF;
+
+            ClearSteps();
+
             HitsTexture?.Destroy();
             HitsTexture = null;
 
@@ -1148,7 +1152,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (!(this is PlayerMobile))
             {
-                UIManager.GetGump<PaperDollGump>(Serial)?.Dispose();
+                UIManager.GetGump<PaperDollGump>(serial)?.Dispose();
                 _pool.Enqueue(this);
             }
         }
