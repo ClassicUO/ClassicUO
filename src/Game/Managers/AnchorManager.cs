@@ -87,7 +87,7 @@ namespace ClassicUO.Game.Managers
 
         public void DropControl(AnchorableGump draggedControl, AnchorableGump host)
         {
-            if (host.AnchorGroupName == draggedControl.AnchorGroupName && this[draggedControl] == null)
+            if (host.AnchorType == draggedControl.AnchorType && this[draggedControl] == null)
             {
                 (Point? relativePosition, _) = GetAnchorDirection(draggedControl, host);
 
@@ -107,7 +107,7 @@ namespace ClassicUO.Game.Managers
 
         public Point GetCandidateDropLocation(AnchorableGump draggedControl, AnchorableGump host)
         {
-            if (host.AnchorGroupName == draggedControl.AnchorGroupName && this[draggedControl] == null)
+            if (host.AnchorType == draggedControl.AnchorType && this[draggedControl] == null)
             {
                 (Point? relativePosition, AnchorableGump g) = GetAnchorDirection(draggedControl, host);
 
@@ -235,8 +235,31 @@ namespace ClassicUO.Game.Managers
             AnchorableGump closestControl = null;
             int closestDistance = 99999;
 
-            var hosts = UIManager.Gumps.OfType<AnchorableGump>().Where(s => s.AnchorGroupName == control.AnchorGroupName);
-            foreach (AnchorableGump host in hosts)
+            foreach (var c in UIManager.Gumps)
+            {
+                if (c is AnchorableGump host)
+                {
+                    if (IsOverlapping(control, host))
+                    {
+                        int dirtyDistance = Math.Abs(control.X - host.X) + Math.Abs(control.Y - host.Y);
+                        if (dirtyDistance < closestDistance)
+                        {
+                            closestDistance = dirtyDistance;
+                            closestControl = host;
+                        }
+                    }
+                }
+            }
+
+            return closestControl;
+        }
+
+        public AnchorableGump ClosestOverlappingControl(AnchorableGump control, List<AnchorableGump> gumps)
+        {
+            AnchorableGump closestControl = null;
+            int closestDistance = 99999;
+
+            foreach (var host in gumps)
             {
                 if (IsOverlapping(control, host))
                 {
@@ -340,23 +363,62 @@ namespace ClassicUO.Game.Managers
 
                 ResizeMatrix((int) xCount, (int) yCount, 0, 0);
 
-                for (int x = 0; x < controlMatrix.GetLength(0); x++)
+                var candidates = new List<AnchorableGump>(gumps
+                                                             .OfType<AnchorableGump>());
+
+                int l0 = controlMatrix.GetLength(0);
+                int l1 = controlMatrix.GetLength(1);
+
+                int index = 0;
+                AnchorableGump first = null;
+
+                for (int x = 0; x < l0; x++)
                 {
-                    for (int y = 0; y < controlMatrix.GetLength(1); y++)
+                    for (int y = 0; y < l1; y++)
                     {
                         uint serial = reader.ReadUInt32();
 
                         if (serial != 0)
                         {
-                            var gump = gumps.Where(o => o.LocalSerial == serial)
-                                            .OfType<AnchorableGump>().SingleOrDefault();
-
-                            if (gump != null)
-                            {
-                                groupGumps.Add(gump);
-                                controlMatrix[x, y] = gump;
-                            }
+                            var g = candidates.FirstOrDefault(s => s.LocalSerial == serial);
+                            groupGumps.Add(g);
+                            controlMatrix[x, y] = g;
                         }
+                        else
+                        {
+
+                        }
+
+                        //if (index < candidates.Count)
+                        //{
+                        //    if (first == null)
+                        //    {
+                        //        first = candidates[index];
+
+                        //        groupGumps.Add(first);
+                        //        controlMatrix[x, y] = first;
+                        //    }
+                        //    else
+                        //    {
+                        //        foreach (AnchorableGump gump in candidates.Skip(index))
+                        //        {
+                        //            //AnchorableGump candidate = UIManager.AnchorManager.GetCandidateDropLocation(gump, first);
+                        //            gump.Update(0, 0);
+
+                        //            var point = UIManager.AnchorManager.GetCandidateDropLocation(gump, first);
+
+                        //            if (point == first.Location)
+                        //            {
+                        //                first = gump;
+                        //                groupGumps.Add(first);
+                        //                controlMatrix[x, y] = first;
+                        //                break;
+                        //            }
+                        //        }
+
+                        //        index++;
+                        //    }
+                        //}
                     }
                 }
 

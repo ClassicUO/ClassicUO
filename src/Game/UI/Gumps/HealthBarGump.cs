@@ -73,7 +73,7 @@ namespace ClassicUO.Game.UI.Gumps
         protected BaseHealthBarGump(uint local, uint server) : base(local, server)
         {
             CanMove = true;
-            AnchorGroupName = "healthbar";
+            AnchorType = ANCHOR_TYPE.HEALTHBAR;
         }
 
         public override int GroupMatrixWidth

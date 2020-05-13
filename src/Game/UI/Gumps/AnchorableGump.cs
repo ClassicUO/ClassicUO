@@ -29,6 +29,13 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
+    enum ANCHOR_TYPE
+    {
+        NONE,
+        SPELL,
+        HEALTHBAR
+    }
+
     abstract class AnchorableGump : Gump
     {
         private GumpPic _lockGumpPic;
@@ -39,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
         }
 
-        public string AnchorGroupName { get; protected set; }
+        public ANCHOR_TYPE AnchorType { get; protected set; }
         public virtual int GroupMatrixWidth { get; protected set; }
         public virtual int GroupMatrixHeight { get; protected set; }
         public int WidthMultiplier { get; protected set; } = 1;
@@ -73,7 +80,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseOver(int x, int y)
         {
-
             if (UIManager.IsDragging && UIManager.DraggingControl == this)
                 _anchorCandidate = UIManager.AnchorManager.GetAnchorableControlUnder(this);
 

@@ -46,7 +46,6 @@ namespace ClassicUO.Game.UI.Gumps
             X = x;
             Y = y;
             _macro = macro;
-
             BuildGump();
         }
 
@@ -56,11 +55,11 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
             WantUpdateSize = false;
-            AnchorGroupName = "spell";
             WidthMultiplier = 2;
             HeightMultiplier = 1;
             GroupMatrixWidth = 44;
             GroupMatrixHeight = 44;
+            AnchorType = ANCHOR_TYPE.SPELL;
         }
 
         public override GUMP_TYPE GumpType => GUMP_TYPE.GT_MACROBUTTON;
@@ -139,39 +138,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             base.Draw(batcher, x, y);
             return true;
-        }
-
-        public override void Save(BinaryWriter writer)
-        {
-            if(_macro != null)
-            {
-                int macroid = Client.Game.GetScene<GameScene>().Macros.GetAllMacros().IndexOf(_macro);
-
-                LocalSerial = (uint) macroid + 1000;
-
-                base.Save(writer);
-                writer.Write((byte) 0); //version
-                writer.Write(_macro.Name);
-                writer.Write(LocalSerial);
-            }
-        }
-
-        public override void Restore(BinaryReader reader)
-        {
-            base.Restore(reader);
-
-            byte version = reader.ReadByte();
-            string name = reader.ReadString();
-            LocalSerial = reader.ReadUInt32();
-
-            Macro macro = Client.Game.GetScene<GameScene>().Macros.FindMacro(name);
-
-            if (macro != null)
-            {
-                _macro = macro;
-                BuildGump();
-            }
-
         }
 
         public override void Save(XmlTextWriter writer)

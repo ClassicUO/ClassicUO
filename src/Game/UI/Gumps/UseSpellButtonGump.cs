@@ -75,9 +75,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             WantUpdateSize = true;
             AcceptMouseInput = true;
-            AnchorGroupName = "spell";
             GroupMatrixWidth = 44;
             GroupMatrixHeight = 44;
+            AnchorType = ANCHOR_TYPE.SPELL;
         }
 
         private static int GetSpellTooltip(int id)

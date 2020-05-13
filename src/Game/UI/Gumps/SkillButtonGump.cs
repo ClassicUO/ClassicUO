@@ -50,11 +50,11 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
             WantUpdateSize = false;
-            AnchorGroupName = "spell";
             WidthMultiplier = 2;
             HeightMultiplier = 1;
             GroupMatrixWidth = 44;
             GroupMatrixHeight = 44;
+            AnchorType = ANCHOR_TYPE.SPELL;
         }
 
 
