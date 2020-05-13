@@ -406,6 +406,11 @@ namespace ClassicUO.Game.UI.Controls
                         int centerY = bounds.Height >> 1;
                         GameActions.PickUp(LocalSerial, centerX, centerY);
                         Mouse.LDropPosition = Mouse.Position;
+
+                        if (_layer == Layer.OneHanded || _layer == Layer.TwoHanded)
+                        {
+                            World.Player.UpdateAbilities();
+                        }
                     }
                 }
             }

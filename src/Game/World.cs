@@ -195,7 +195,6 @@ namespace ClassicUO.Game
         {
             if (Player != null)
             {
-
                 if (SerialHelper.IsValid(ObjectToRemove))
                 {
                     Item rem = Items.Get(ObjectToRemove);

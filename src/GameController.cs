@@ -305,11 +305,6 @@ namespace ClassicUO
             UIManager.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.TotalMilliseconds);
             Plugin.Tick();
 
-            //var p = Microsoft.Xna.Framework.Input.Mouse.GetState();
-            //Console.WriteLine("FNA MOUSE: {0},{1}", p.X, p.Y);
-            //Console.WriteLine("SDL MOUSE: {0},{1}", Mouse.Position.X, Mouse.Position.Y);
-
-
             if (_scene != null && _scene.IsLoaded && !_scene.IsDestroyed)
             {
                 Profiler.EnterContext("Update");
@@ -633,16 +628,8 @@ namespace ClassicUO
                             {
                                 if (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF)
                                 {
-                                    bool ok = false;
-
-                                    //if (!UIManager.HadMouseDownOnGump(MouseButtonType.Left))
-                                    {
-                                        ok = _scene.OnLeftMouseUp();
-                                    }
-
-                                    if (!ok)
+                                    if (!_scene.OnLeftMouseUp() || UIManager.LastControlMouseDown(MouseButtonType.Left) != null)
                                         UIManager.OnLeftMouseButtonUp();
-
                                 }
                                 Mouse.LButtonPressed = false;
                                 Mouse.End();
@@ -664,10 +651,16 @@ namespace ClassicUO
                                 {
                                     Mouse.LastMidButtonClickTime = 0;
 
-                                    if (!_scene.OnMiddleMouseDoubleClick())
+                                    bool res = _scene.OnMiddleMouseDoubleClick() || UIManager.OnMiddleMouseDoubleClick();
+
+                                    if (!res)
                                     {
                                         if (!_scene.OnMiddleMouseDown())
                                             UIManager.OnMiddleMouseButtonDown();
+                                    }
+                                    else
+                                    {
+                                        Mouse.LastMidButtonClickTime = 0xFFFF_FFFF;
                                     }
 
                                     break;
@@ -684,11 +677,7 @@ namespace ClassicUO
                             {
                                 if (Mouse.LastMidButtonClickTime != 0xFFFF_FFFF)
                                 {
-                                    bool ok = false;
-
-                                    //if (!UIManager.HadMouseDownOnGump(MouseButtonType.Middle))
-                                        ok = _scene.OnMiddleMouseUp();
-                                    if (!ok)
+                                    if (!_scene.OnMiddleMouseUp())
                                         UIManager.OnMiddleMouseButtonUp();
                                 }
 
@@ -736,10 +725,7 @@ namespace ClassicUO
                             {
                                 if (Mouse.LastRightButtonClickTime != 0xFFFF_FFFF)
                                 {
-                                    bool ok = false;
-                                    //if (!UIManager.HadMouseDownOnGump(MouseButtonType.Right))
-                                        ok = _scene.OnRightMouseUp();
-                                    if (!ok)
+                                    if (!_scene.OnRightMouseUp())
                                         UIManager.OnRightMouseButtonUp();
                                 }
                                 Mouse.RButtonPressed = false;
@@ -758,14 +744,12 @@ namespace ClassicUO
                                 Plugin.ProcessMouse(e->button.button, 0);
                                 if (!_scene.OnExtraMouseDown(mouse.button - 1))
                                     UIManager.OnExtraMouseButtonDown(mouse.button - 1);
+
+                                // TODO: doubleclick?
                             }
                             else
                             {
-                                bool ok = false;
-
-                                //if (!UIManager.HadMouseDownOnGump(MouseButtonType.XButton1) && !UIManager.HadMouseDownOnGump(MouseButtonType.XButton2))
-                                    ok = _scene.OnExtraMouseUp(mouse.button - 1);
-                                if (!ok)
+                                if (!_scene.OnExtraMouseUp(mouse.button - 1))
                                     UIManager.OnExtraMouseButtonUp(mouse.button - 1);
 
                                 Mouse.XButtonPressed = false;

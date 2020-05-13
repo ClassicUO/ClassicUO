@@ -26,6 +26,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
@@ -1233,6 +1234,19 @@ namespace ClassicUO.Game.GameObjects
             {
                 Abilities[0] = Ability.Disarm;
                 Abilities[1] = Ability.ParalyzingBlow;
+            }
+
+            int max = 0;
+            foreach (Control control in UIManager.Gumps)
+            {
+                if (control is UseAbilityButtonGump s)
+                {
+                    s.RequestUpdateContents();
+                    max++;
+                }
+
+                if (max >= 2)
+                    break;
             }
         }
 

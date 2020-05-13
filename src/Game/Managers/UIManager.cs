@@ -349,6 +349,14 @@ namespace ClassicUO.Game.Managers
             _validForDClick = MouseOverControl;
         }
 
+        public static bool OnMiddleMouseDoubleClick()
+        {
+            if (MouseOverControl != null && IsMouseOverAControl)
+                return MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButtonType.Middle);
+
+            return false;
+        }
+
         public static void OnExtraMouseButtonDown(int btn)
         {
             HandleMouseInput();
