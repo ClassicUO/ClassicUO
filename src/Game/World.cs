@@ -203,6 +203,10 @@ namespace ClassicUO.Game
                     if (rem != null)
                     {
                         RemoveItem(rem, true);
+
+                        if (rem.Layer == Layer.OneHanded || rem.Layer == Layer.TwoHanded)
+                            Player.UpdateAbilities();
+
                         if (SerialHelper.IsMobile(rem.Container))
                         {
                             UIManager.GetGump<PaperDollGump>(rem.Container)?.RequestUpdateContents();
