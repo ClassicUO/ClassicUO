@@ -598,9 +598,6 @@ namespace ClassicUO.Game.Scenes
             if (UIManager.PopupMenu != null && !UIManager.PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y))
                 UIManager.ShowGamePopup(null);
 
-            if (!IsMouseOverViewport)
-                return false;
-
             _rightMousePressed = false;
 
             if (_boatIsMoving)
@@ -609,7 +606,7 @@ namespace ClassicUO.Game.Scenes
                 BoatMovingManager.MoveRequest(World.Player.Direction, 0);
             }
 
-            return true;
+            return !IsMouseOverViewport;
         }
 
 
