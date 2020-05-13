@@ -361,7 +361,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
                 }
 
-                if (!ItemHold.Enabled && container != null)
+                if (!ItemHold.Enabled && container != null && UIManager.LastControlMouseDown(MouseButtonType.Left) == this)
                 {
                     Item equipment = container.FindItemByLayer(_layer);
 
@@ -397,6 +397,7 @@ namespace ClassicUO.Game.UI.Controls
                         Mouse.LButtonPressed &&
                         UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
                         ((Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF &&
+                          Mouse.LastLeftButtonClickTime != 0 &&
                           Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks) ||
                          Mouse.LDroppedOffset != Point.Zero))
                     {
