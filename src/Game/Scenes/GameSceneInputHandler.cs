@@ -606,7 +606,7 @@ namespace ClassicUO.Game.Scenes
                 BoatMovingManager.MoveRequest(World.Player.Direction, 0);
             }
 
-            return !IsMouseOverViewport;
+            return !IsMouseOverUI;
         }
 
 
