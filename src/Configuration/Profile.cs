@@ -672,15 +672,19 @@ namespace ClassicUO.Configuration
                                 {
                                     gump.LocalSerial = serial;
                                     gump.Restore(xml);
-                                    //gump.Update(0, 0);
                                     gump.X = x;
                                     gump.Y = y;
 
                                     if (!gump.IsDisposed)
                                     {
-                                        gumps.Add(gump);
-                                        ancoGroup.AddControlToMatrix(matrix_x, matrix_y, gump);
-                                        UIManager.AnchorManager[gump] = ancoGroup;
+                                        if (UIManager.AnchorManager[gump] == null && ancoGroup.IsEmptyDirection(matrix_x, matrix_y))
+                                        {
+                                            gumps.Add(gump);
+                                            UIManager.AnchorManager[gump] = ancoGroup;
+                                            ancoGroup.AddControlToMatrix(matrix_x, matrix_y, gump);
+                                        }
+                                        else 
+                                            gump.Dispose();
                                     }
                                 }
                             }

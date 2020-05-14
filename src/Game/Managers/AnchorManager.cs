@@ -95,7 +95,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void AttachControl(AnchorableGump host, AnchorableGump control)
+        /*public void AttachControl(AnchorableGump host, AnchorableGump control)
         {
             if (host.AnchorType == control.AnchorType && this[control] == null)
             {
@@ -105,7 +105,7 @@ namespace ClassicUO.Game.Managers
                 this[host].AnchorControlAt(control, host, control.Location);
                 this[control] = this[host];
             }
-        }
+        }*/
 
         public void DropControl(AnchorableGump draggedControl, AnchorableGump host)
         {

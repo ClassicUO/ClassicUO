@@ -91,6 +91,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
+            base.OnMouseUp(x, y, button);
+
             if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt)
                 GameActions.UseSkill(_skill.Index);
         }

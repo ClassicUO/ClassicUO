@@ -97,6 +97,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
+            base.OnMouseUp(x, y, MouseButtonType.Left);
+
             Point offset = Mouse.LDroppedOffset;
 
             if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt && Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
