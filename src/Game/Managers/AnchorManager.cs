@@ -23,7 +23,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 
@@ -76,12 +78,32 @@ namespace ClassicUO.Game.Managers
                 return group;
             }
 
-            private set
+            set
             {
                 if (reverseMap.ContainsKey(control) && value == null)
                     reverseMap.Remove(control);
                 else
                     reverseMap.Add(control, value);
+            }
+        }
+
+        public void Save(XmlTextWriter writer)
+        {
+            foreach (AnchorGroup value in reverseMap.Values.Distinct())
+            {
+                value.Save(writer);
+            }
+        }
+
+        public void AttachControl(AnchorableGump host, AnchorableGump control)
+        {
+            if (host.AnchorType == control.AnchorType && this[control] == null)
+            {
+                if (this[host] == null)
+                    this[host] = new AnchorGroup(host);
+
+                this[host].AnchorControlAt(control, host, control.Location);
+                this[control] = this[host];
             }
         }
 
@@ -164,35 +186,14 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void Save(BinaryWriter writer)
+        public List<AnchorableGump> GetGumps(AnchorableGump control)
         {
-            const int VERSION = 1;
-            var groups = reverseMap.Values.Distinct().ToList();
-
-            writer.Write(VERSION);
-            writer.Write(groups.Count);
-
-            foreach (var group in groups)
-                group.Save(writer);
-        }
-
-        public void Restore(BinaryReader reader, List<Gump> gumps)
-        {
-            var version = reader.ReadInt32();
-            var count = reader.ReadInt32();
-
-            for (int i = 0; i < count; i++)
+            if (this[control] != null)
             {
-                var group = new AnchorGroup();
-                var groupGumps = group.Restore(reader, gumps);
-
-                // Rebuild reverse map, skip if group count is <= 1
-                if (groupGumps.Count > 1)
-                {
-                    foreach (var g in groupGumps)
-                        this[g] = group;
-                }
+                return reverseMap.Where(o => o.Value == this[control]).Select(o => o.Key).ToList();
             }
+
+            return null;
         }
 
         private (Point?, AnchorableGump) GetAnchorDirection(AnchorableGump draggedControl, AnchorableGump host)
@@ -305,31 +306,48 @@ namespace ClassicUO.Game.Managers
                 controlMatrix = new AnchorableGump[0, 0];
             }
 
-            private void AddControlToMatrix(int xinit, int yInit, AnchorableGump control)
+            public void AddControlToMatrix(int xinit, int yInit, AnchorableGump control)
             {
                 for (int x = 0; x < control.WidthMultiplier; x++)
                 {
-                    for (int y = 0; y < control.HeightMultiplier; y++) controlMatrix[x + xinit, y + yInit] = control;
+                    for (int y = 0; y < control.HeightMultiplier; y++) 
+                        controlMatrix[x + xinit, y + yInit] = control;
                 }
             }
 
-            public void Save(BinaryWriter writer)
+            public void Save(XmlTextWriter writer)
             {
-                writer.Write(controlMatrix.GetLength(0));
-                writer.Write(controlMatrix.GetLength(1));
+                writer.WriteStartElement("anchored_group_gump");
 
-                for (int x = 0; x < controlMatrix.GetLength(0); x++)
+                writer.WriteAttributeString("matrix_w", controlMatrix.GetLength(0).ToString());
+                writer.WriteAttributeString("matrix_h", controlMatrix.GetLength(1).ToString());
+
+                for (int y = 0; y < controlMatrix.GetLength(1); y++)
                 {
-                    for (int y = 0; y < controlMatrix.GetLength(1); y++)
+                    for (int x = 0; x < controlMatrix.GetLength(0); x++)
                     {
-                        if (controlMatrix[x, y] != null)
-                            writer.Write(controlMatrix[x, y].LocalSerial);
-                        else
-                            writer.Write(0);
+                        var gump = controlMatrix[x, y];
+
+                        if (gump != null)
+                        {
+                            writer.WriteStartElement("gump");
+                            gump.Save(writer);
+                            writer.WriteAttributeString("matrix_x", x.ToString());
+                            writer.WriteAttributeString("matrix_y", y.ToString());
+                            writer.WriteEndElement();
+                        }
                     }
                 }
+
+                writer.WriteEndElement();
             }
 
+            public void Load(AnchorableGump control)
+            {
+                
+            }
+
+         
             public void MakeTopMost()
             {
                 for (int x = 0; x < controlMatrix.GetLength(0); x++)
@@ -352,77 +370,6 @@ namespace ClassicUO.Game.Managers
                             controlMatrix[x, y] = null;
                     }
                 }
-            }
-
-            public List<AnchorableGump> Restore(BinaryReader reader, List<Gump> gumps)
-            {
-                HashSet<AnchorableGump> groupGumps = new HashSet<AnchorableGump>();
-
-                uint xCount = reader.ReadUInt32();
-                uint yCount = reader.ReadUInt32();
-
-                ResizeMatrix((int) xCount, (int) yCount, 0, 0);
-
-                var candidates = new List<AnchorableGump>(gumps
-                                                             .OfType<AnchorableGump>());
-
-                int l0 = controlMatrix.GetLength(0);
-                int l1 = controlMatrix.GetLength(1);
-
-                int index = 0;
-                AnchorableGump first = null;
-
-                for (int x = 0; x < l0; x++)
-                {
-                    for (int y = 0; y < l1; y++)
-                    {
-                        uint serial = reader.ReadUInt32();
-
-                        if (serial != 0)
-                        {
-                            var g = candidates.FirstOrDefault(s => s.LocalSerial == serial);
-                            groupGumps.Add(g);
-                            controlMatrix[x, y] = g;
-                        }
-                        else
-                        {
-
-                        }
-
-                        //if (index < candidates.Count)
-                        //{
-                        //    if (first == null)
-                        //    {
-                        //        first = candidates[index];
-
-                        //        groupGumps.Add(first);
-                        //        controlMatrix[x, y] = first;
-                        //    }
-                        //    else
-                        //    {
-                        //        foreach (AnchorableGump gump in candidates.Skip(index))
-                        //        {
-                        //            //AnchorableGump candidate = UIManager.AnchorManager.GetCandidateDropLocation(gump, first);
-                        //            gump.Update(0, 0);
-
-                        //            var point = UIManager.AnchorManager.GetCandidateDropLocation(gump, first);
-
-                        //            if (point == first.Location)
-                        //            {
-                        //                first = gump;
-                        //                groupGumps.Add(first);
-                        //                controlMatrix[x, y] = first;
-                        //                break;
-                        //            }
-                        //        }
-
-                        //        index++;
-                        //    }
-                        //}
-                    }
-                }
-
-                return groupGumps.ToList();
             }
 
             public void UpdateLocation(Control control, int deltaX, int deltaY)
@@ -536,7 +483,7 @@ namespace ClassicUO.Game.Managers
                 return null;
             }
 
-            private void ResizeMatrix(int xCount, int yCount, int xInitial, int yInitial)
+            public void ResizeMatrix(int xCount, int yCount, int xInitial, int yInitial)
             {
                 AnchorableGump[,] newMatrix = new AnchorableGump[xCount, yCount];
 
