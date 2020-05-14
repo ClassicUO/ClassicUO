@@ -286,6 +286,9 @@ namespace ClassicUO.Game.UI.Controls
 
             protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
             {
+                if (button != MouseButtonType.Left)
+                    return false;
+
                 // this check is necessary to avoid crashes during character creation
                 if (World.InGame)
                     GameActions.DoubleClick(LocalSerial);
@@ -295,7 +298,7 @@ namespace ClassicUO.Game.UI.Controls
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
             {
-                if (!World.InGame)
+                if (!World.InGame || button != MouseButtonType.Left)
                 {
                     base.OnMouseUp(x, y, button);
                     return;
