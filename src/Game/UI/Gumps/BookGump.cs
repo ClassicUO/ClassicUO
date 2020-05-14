@@ -505,23 +505,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void Scale(MultiLineEntry entry, bool fromleft)
         {
-            var linech = entry.GetLinesCharsCount(entry.Text);
-            int caretpos = entry.CaretIndex;
-            (int, int) selection = entry.GetSelectionArea();
-            bool multilinesel = selection.Item1 != -1;
-
-            if (!multilinesel)
-            {
-                for (int l = 0; l < linech.Length && !_scale; l++)
-                {
-                    caretpos -= linech[l];
-                    _scale = fromleft ? caretpos == -linech[l] : caretpos == 0;
-                }
-
-                if (fromleft)
-                    _scale = _scale && (ActiveInternalPage > 0 || entry.CaretIndex > 0);
-            }
-
             entry.RemoveChar(fromleft);
         }
 

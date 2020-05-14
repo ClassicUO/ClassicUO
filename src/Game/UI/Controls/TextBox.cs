@@ -209,13 +209,6 @@ namespace ClassicUO.Game.UI.Controls
                         return;
                     }
                 }
-                else if (!TxEntry.IsPassword && Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && (key == SDL.SDL_Keycode.SDLK_x || key == SDL.SDL_Keycode.SDLK_c))
-                {
-                    if (!IsEditable)
-                        key = SDL.SDL_Keycode.SDLK_c;
-                    string txt = TxEntry.GetSelectionText(key == SDL.SDL_Keycode.SDLK_x);
-                    SDL.SDL_SetClipboardText(txt);
-                }
                 else
                 {
                     switch (key)

@@ -53,13 +53,6 @@ namespace ClassicUO.Game.UI.Controls
             base.OnMouseUp(x, y, button);
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-        {
-            EntryValue?.OnDraw(batcher, ScreenCoordinateX, ScreenCoordinateY);
-
-            return base.Draw(batcher, x, y);
-        }
-
         public override void Dispose()
         {
             base.Dispose();

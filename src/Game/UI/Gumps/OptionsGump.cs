@@ -67,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
+        private Checkbox  _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
         private Combobox _overrideContainerLocationSetting;
         private Checkbox _use_smooth_boat_movement;
 
@@ -1157,7 +1157,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             _use_smooth_boat_movement = CreateCheckBox(rightArea, "Smooth boat movements", ProfileManager.Current.UseSmoothBoatMovement, 0, 0);
             _use_smooth_boat_movement.IsVisible = Client.Version >= ClientVersion.CV_7090; 
-            _enableSelectionArea = CreateCheckBox(rightArea, "Enable Text Selection Area", ProfileManager.Current.EnableSelectionArea, 0, 0);
 
             _debugGumpIsDisabled = CreateCheckBox(rightArea, "Disable Debug Gump", ProfileManager.Current.DebugGumpIsDisabled, 0, 0);
             _restoreLastGameSize = CreateCheckBox(rightArea, "Disable automatic maximize. Restore windows size after re-login", ProfileManager.Current.RestoreLastGameSize, 0, 0);
@@ -1623,7 +1622,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case 10:
                     _use_smooth_boat_movement.IsChecked = false;
-                    _enableSelectionArea.IsChecked = false;
                     _debugGumpIsDisabled.IsChecked = false;
                     _restoreLastGameSize.IsChecked = false;
                     _disableDefaultHotkeys.IsChecked = false;
@@ -2005,7 +2003,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             // experimental
             ProfileManager.Current.UseSmoothBoatMovement = _use_smooth_boat_movement.IsChecked;
-            ProfileManager.Current.EnableSelectionArea = _enableSelectionArea.IsChecked;
             ProfileManager.Current.RestoreLastGameSize = _restoreLastGameSize.IsChecked;
 
             // Reset nested checkboxes if parent checkbox is unchecked

@@ -164,7 +164,6 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool HoldAltToMoveGumps { get; set; }
 
         // Experimental
-        [JsonProperty] public bool EnableSelectionArea { get; set; }
         [JsonProperty] public bool DebugGumpIsDisabled { get; set; }
         [JsonProperty] public Point DebugGumpPosition { get; set; } = new Point(25, 25);
         [JsonProperty] public bool DebugGumpIsMinimized { get; set; } = true;
