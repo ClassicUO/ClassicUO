@@ -369,7 +369,7 @@ namespace ClassicUO.Network
 
                 if (type > 0 && p.Position + 1 <= p.Length)
                 {
-                    mobile.IsMale = !p.ReadBool();
+                    mobile.IsFemale = p.ReadBool();
 
                     if (mobile == World.Player)
                     {
@@ -635,6 +635,7 @@ namespace ClassicUO.Network
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
             p.Skip(4);
             World.Player.Graphic = p.ReadUShort();
+            World.Player.CheckGraphicChange();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
             sbyte z = (sbyte) p.ReadUShort();
@@ -2160,6 +2161,7 @@ namespace ClassicUO.Network
             {
                 oldDead = World.Player.IsDead;
                 World.Player.Graphic = graphic;
+                World.Player.CheckGraphicChange();
                 World.Player.FixHue(hue);
                 World.Player.Flags = flags;
             }
@@ -2267,7 +2269,6 @@ namespace ClassicUO.Network
                 item.Amount = 1;
                 RemoveItemFromContainer(item);
                 item.Container = serial;
-                
 
                 //{
                     item.Layer = (Layer) layer;

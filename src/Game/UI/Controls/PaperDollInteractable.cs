@@ -134,7 +134,7 @@ namespace ClassicUO.Game.UI.Controls
                     IsPartialHue = true
                 });
             }
-            else if (!mobile.IsMale)
+            else if (mobile.IsFemale)
             {
                 body = 0x000D;
             }
@@ -177,7 +177,7 @@ namespace ClassicUO.Game.UI.Controls
                     if (Mobile.IsCovered(mobile, layer))
                         continue;
 
-                    ushort id = GetAnimID(mobile.Graphic, equipItem.ItemData.AnimID, !mobile.IsMale);
+                    ushort id = GetAnimID(mobile.Graphic, equipItem.ItemData.AnimID, mobile.IsFemale);
 
                     Add(new GumpPicEquipment(mobile.Serial, equipItem.Serial, 0, 0, id, (ushort) (equipItem.Hue & 0x3FFF), layer)
                     {
@@ -190,7 +190,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
                 else if (HasFakeItem && ItemHold.Enabled && (byte) layer == ItemHold.ItemData.Layer && ItemHold.ItemData.AnimID != 0)
                 {
-                    ushort id = GetAnimID(mobile.Graphic, ItemHold.ItemData.AnimID, !mobile.IsMale);
+                    ushort id = GetAnimID(mobile.Graphic, ItemHold.ItemData.AnimID, mobile.IsFemale);
                     Add(new GumpPicEquipment(mobile.Serial, 0, 0, 0, id, (ushort) (ItemHold.Hue & 0x3FFF), ItemHold.Layer)
                     {
                         AcceptMouseInput = true,
@@ -251,19 +251,17 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            ushort gump_graphic = (ushort) (animID + offset);
-
-            if (isfemale && GumpsLoader.Instance.GetTexture(gump_graphic) == null)
+            if (isfemale && GumpsLoader.Instance.GetTexture((ushort) (animID + offset)) == null)
             {
-                gump_graphic = (ushort) (animID + MALE_OFFSET);
-
-                if (GumpsLoader.Instance.GetTexture(gump_graphic) == null)
-                {
-                    Log.Error($"Texture not found in paperdoll: gump_graphic: {gump_graphic}");
-                }
+                offset = MALE_OFFSET;
             }
 
-            return gump_graphic;
+            if (GumpsLoader.Instance.GetTexture((ushort) (animID + offset)) == null)
+            {
+                Log.Error($"Texture not found in paperdoll: gump_graphic: {(ushort) (animID + offset)}");
+            }
+
+            return (ushort) (animID + offset);
         }
 
         private class GumpPicEquipment : GumpPic

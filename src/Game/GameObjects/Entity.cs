@@ -86,6 +86,11 @@ namespace ClassicUO.Game.GameObjects
             Hue = fixedColor;
         }
 
+        public virtual void CheckGraphicChange(sbyte animIndex = 0)
+        {
+
+        }
+
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);

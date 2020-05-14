@@ -70,7 +70,6 @@ namespace ClassicUO.Game.GameObjects
                 mobile.Offset = Vector3.Zero;
                 mobile.SpeedMode = CharacterSpeedType.Normal;
                 mobile.DeathScreenTimer = 0;
-                mobile._isMale = false;
                 mobile.Race = 0;
                 mobile.Hits = 0;
                 mobile.HitsMax = 0;
@@ -81,6 +80,7 @@ namespace ClassicUO.Game.GameObjects
                 mobile.NotorietyFlag = 0;
                 mobile.IsRenamable = false;
                 mobile.Flags = 0;
+                mobile.IsFemale = false;
                 mobile.InWarMode = false;
                 mobile.IsRunning = false;
                 mobile.AnimationInterval = 0;
@@ -138,18 +138,20 @@ namespace ClassicUO.Game.GameObjects
 
         public long DeathScreenTimer;
 
-        private bool _isMale;
+        //private bool _isMale;
 
-        public bool IsMale
-        {
-            get => _isMale || (Flags & Flags.Female) == 0 || IsOtherMale || IsElfMale || (Graphic < 900 && Graphic % 2 == 0 && !IsOtherFemale && !IsElfFemale && IsHuman);
-            set => _isMale = value;
-        }
+        //public bool IsMale
+        //{
+        //    get => _isMale || (Flags & Flags.Female) == 0 || IsOtherMale || IsElfMale || (Graphic < 900 && Graphic % 2 == 0 && !IsOtherFemale && !IsElfFemale && IsHuman);
+        //    set => _isMale = value;
+        //}
 
-        public bool IsOtherMale => Graphic == 183 || Graphic == 185;
-        public bool IsElfMale => Graphic == 605 || Graphic == 607;
-        public bool IsOtherFemale => Graphic == 184 || Graphic == 186;
-        public bool IsElfFemale => Graphic == 606 || Graphic == 608;
+        //public bool IsOtherMale => Graphic == 183 || Graphic == 185;
+        //public bool IsElfMale => Graphic == 605 || Graphic == 607;
+        //public bool IsOtherFemale => Graphic == 184 || Graphic == 186;
+        //public bool IsElfFemale => Graphic == 606 || Graphic == 608;
+
+        public bool IsFemale;
 
         public RaceType Race;
 
@@ -1137,6 +1139,53 @@ namespace ClassicUO.Game.GameObjects
             }
 
             FixTextCoordinatesInScreen();
+        }
+
+        public override void CheckGraphicChange(sbyte animIndex = 0)
+        {
+            switch (Graphic)
+            {
+                case 0x0190:
+                case 0x0192:
+                {
+                    IsFemale = false;
+                    Race = RaceType.HUMAN;
+                    break;
+                }
+                case 0x0191:
+                case 0x0193:
+                {
+                    IsFemale = true;
+                    Race = RaceType.HUMAN;
+                    break;
+                }
+                case 0x025D:
+                {
+                    IsFemale = false;
+                    Race = RaceType.ELF;
+                    break;
+                }
+                case 0x025E:
+                {
+                    IsFemale = true;
+                    Race = RaceType.ELF;
+                    break;
+                }
+                case 0x029A:
+                {
+                    IsFemale = false;
+                    Race = RaceType.GARGOYLE;
+                    break;
+                }
+                case 0x029B:
+                {
+                    IsFemale = true;
+                    Race = RaceType.GARGOYLE;
+                    break;
+                }
+                default:
+                    break;
+            }
         }
 
         public override void Destroy()
