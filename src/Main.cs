@@ -46,7 +46,6 @@ namespace ClassicUO
 
         private static bool _skipUpdates;
 
-        private static readonly Mutex _mutex = new Mutex(true, "CLASSICUO_MUTEX");
 
         [STAThread]
         static void Main(string[] args)
