@@ -659,6 +659,7 @@ namespace ClassicUO.IO.Resources
                 }
 
                 file = UOFileManager.GetUOFilePath("Body.def");
+                Dictionary<int, bool> filter = new Dictionary<int, bool>();
 
                 if (File.Exists(file))
                 {
@@ -671,30 +672,38 @@ namespace ClassicUO.IO.Resources
                             if (index >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                 continue;
 
+                            if (filter.TryGetValue(index, out bool b) && b)
+                            {
+                                continue;
+                            }
+
                             int[] group = defReader.ReadGroup();
 
                             if (group == null)
                                 continue;
                             int color = defReader.ReadInt();
 
-                            for (int i = 0; i < group.Length; i++)
-                            {
-                                int checkIndex = group[i];
+                            int checkIndex;
 
-                                if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                                    continue;
+                            //Yes, this is actually how this is supposed to work.
+                            if (group.Length >= 3)
+                                checkIndex = group[2];
+                            else
+                                checkIndex = group[0];
 
-                                DataIndex[index].Graphic = (ushort)checkIndex;
-                                DataIndex[index].Color = (ushort)color;
-                                DataIndex[index].IsValidMUL = true;
+                            if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                                continue;
 
-                                break;
-                            }
+                            DataIndex[index].Graphic = (ushort) checkIndex;
+                            DataIndex[index].Color = (ushort) color;
+                            DataIndex[index].IsValidMUL = true;
+                            filter[index] = true;
                         }
                     }
                 }
 
                 file = UOFileManager.GetUOFilePath("Corpse.def");
+                filter.Clear();
 
                 if (File.Exists(file))
                 {
@@ -702,31 +711,37 @@ namespace ClassicUO.IO.Resources
                     {
                         while (defReader.Next())
                         {
-                            ushort index = (ushort)defReader.ReadInt();
+                            int index = defReader.ReadInt();
 
                             if (index >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                 continue;
+
+                            if (filter.TryGetValue(index, out var b) && b)
+                            {
+                                continue;
+                            }
 
                             int[] group = defReader.ReadGroup();
 
                             if (group == null)
                                 continue;
 
-                            ushort color = (ushort)defReader.ReadInt();
+                            int color = defReader.ReadInt();
 
-                            for (int i = 0; i < group.Length; i++)
-                            {
-                                int checkIndex = group[i];
+                            int checkIndex;
 
-                                if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                                    continue;
+                            if (group.Length >= 3)
+                                checkIndex = group[2];
+                            else
+                                checkIndex = group[0];
 
-                                DataIndex[index].CorpseGraphic = (ushort)checkIndex;
-                                DataIndex[index].CorpseColor = color;
-                                DataIndex[index].IsValidMUL = true;
+                            if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                                continue;
 
-                                break;
-                            }
+                            DataIndex[index].CorpseGraphic = (ushort) checkIndex;
+                            DataIndex[index].CorpseColor = (ushort) color;
+                            DataIndex[index].IsValidMUL = true;
+                            filter[index] = true;
                         }
                     }
                 }
