@@ -258,7 +258,7 @@ namespace ClassicUO.Game.UI.Gumps
         public void SetNameTo(Item item, string name)
         {
             if (!string.IsNullOrEmpty(name) && _shopItems.TryGetValue(item, out ShopItem shopItem)) 
-                shopItem.SetName(name, true);
+                shopItem.SetName(name, false);
         }
 
 
