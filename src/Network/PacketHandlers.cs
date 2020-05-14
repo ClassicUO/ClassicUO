@@ -4692,6 +4692,7 @@ namespace ClassicUO.Network
 
                     obj = mobile;
                     mobile.Graphic = (ushort) (graphic + graphic_inc);
+                    mobile.CheckGraphicChange();
                     mobile.Direction = direction & Direction.Up;
                     mobile.FixHue(hue);
                     mobile.X = x;
