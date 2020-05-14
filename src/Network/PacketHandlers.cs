@@ -4162,47 +4162,63 @@ namespace ClassicUO.Network
             if (iconID < BuffTable.Table.Length)
             {
                 BuffGump gump = UIManager.GetGump<BuffGump>();
-                ushort mode = p.ReadUShort();
+                ushort count = p.ReadUShort();
 
-                if (mode != 0)
-                {
-                    p.Skip(12);
-                    ushort timer = p.ReadUShort();
-                    p.Skip(3);
-                    uint titleCliloc = p.ReadUInt();
-                    uint descriptionCliloc = p.ReadUInt();
-                    uint wtfCliloc = p.ReadUInt();
-                    p.Skip(4);
-                    string title = ClilocLoader.Instance.GetString((int) titleCliloc);
-                    string description = string.Empty;
-                    string wtf = string.Empty;
-
-                    if (descriptionCliloc != 0)
-                    {
-                        string args = p.ReadUnicodeReversed();
-                        description = "\n" + ClilocLoader.Instance.Translate((int) descriptionCliloc, args, true);
-
-                        if (description.Length < 2)
-                            description = string.Empty;
-                    }
-
-                    if (wtfCliloc != 0)
-                    {
-                        wtf = ClilocLoader.Instance.GetString((int) wtfCliloc);
-                        if (!string.IsNullOrWhiteSpace(wtf))
-                            wtf = $"\n{wtf}";
-                    }
-
-                    string text = $"<left>{title}{description}{wtf}</left>";
-                    bool alreadyExists = World.Player.IsBuffIconExists(ic);
-                    World.Player.AddBuff(ic, BuffTable.Table[iconID], timer, text);
-                    if (!alreadyExists)
-                        gump?.AddBuff(ic);
-                }
-                else
+                if (count == 0)
                 {
                     World.Player.RemoveBuff(ic);
                     gump?.RemoveBuff(ic);
+                }
+                else
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        ushort source_type = p.ReadUShort();
+                        p.Skip(2);
+                        ushort icon = p.ReadUShort();
+                        ushort queue_index = p.ReadUShort();
+                        p.Skip(4);
+                        ushort timer = p.ReadUShort();
+                        p.Skip(3);
+
+                        uint titleCliloc = p.ReadUInt();
+                        uint descriptionCliloc = p.ReadUInt();
+                        uint wtfCliloc = p.ReadUInt();
+
+                        ushort arg_length = p.ReadUShort();
+                        string args = p.ReadUnicodeReversed();
+                        string title = ClilocLoader.Instance.Translate((int) titleCliloc, args, true);
+
+                        arg_length = p.ReadUShort();
+                        args = p.ReadUnicodeReversed();
+                        string description = string.Empty;
+
+                        if (descriptionCliloc != 0)
+                        {
+                            description = "\n" + ClilocLoader.Instance.Translate((int) descriptionCliloc, args, true);
+
+                            if (description.Length < 2)
+                                description = string.Empty;
+                        }
+
+                        arg_length = p.ReadUShort();
+                        args = p.ReadUnicodeReversed();
+                        string wtf = string.Empty;
+
+                        if (wtfCliloc != 0)
+                        {
+                            wtf = ClilocLoader.Instance.Translate((int) wtfCliloc, args, true);
+                            if (!string.IsNullOrWhiteSpace(wtf))
+                                wtf = $"\n{wtf}";
+                        }
+
+
+                        string text = $"<left>{title}{description}{wtf}</left>";
+                        bool alreadyExists = World.Player.IsBuffIconExists(ic);
+                        World.Player.AddBuff(ic, BuffTable.Table[iconID], timer, text);
+                        if (!alreadyExists)
+                            gump?.AddBuff(ic);
+                    }
                 }
             }
         }
