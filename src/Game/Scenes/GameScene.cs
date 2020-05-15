@@ -232,7 +232,7 @@ namespace ClassicUO.Game.Scenes
                     break;
 
                 case MessageType.System:
-                    name = "System";
+                    name = string.IsNullOrEmpty(e.Name) || e.Name.ToLowerInvariant() == "system" ? "System" : e.Name;
                     text = e.Text;
 
                     break;

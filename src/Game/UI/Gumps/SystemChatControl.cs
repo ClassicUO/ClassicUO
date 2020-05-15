@@ -233,8 +233,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case MessageType.Regular when e.Parent == null || !SerialHelper.IsValid(e.Parent.Serial):
                 case MessageType.System:
-                    AddLine(e.Text, e.Font, e.Hue, e.IsUnicode);
-                    
+                    if (!string.IsNullOrEmpty(e.Name) && e.Name.ToLowerInvariant() != "system")
+                        AddLine($"{e.Name}: {e.Text}", e.Font, e.Hue, e.IsUnicode);
+                    else
+                        AddLine(e.Text, e.Font, e.Hue, e.IsUnicode);
+
                     break;
                 case MessageType.Label when e.Parent == null || !SerialHelper.IsValid(e.Parent.Serial):
                     AddLine(e.Text, e.Font, e.Hue, e.IsUnicode);
