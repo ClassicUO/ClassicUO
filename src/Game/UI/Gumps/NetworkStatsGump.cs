@@ -19,38 +19,43 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System.IO;
+using System.Text;
+using System.Xml;
+
 using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class NetworkStatsGump : Gump
     {
-
-        private readonly Label _label;
         private readonly AlphaBlendControl _trans;
 
-        private bool _fullDisplayMode;
-
         private uint _ping, _deltaBytesReceived, _deltaBytesSent;
+        private uint _time_to_update;
+        private static Point _last_position = new Point(-1, -1);
+        private StringBuilder _sb = new StringBuilder();
 
-        public NetworkStatsGump() : base(0, 0)
+        public NetworkStatsGump(int x, int y) : base(0, 0)
         {
             CanMove = true;
             CanCloseWithEsc = false;
-            CanCloseWithRightClick = false;
+            CanCloseWithRightClick = true;
             AcceptMouseInput = true;
             AcceptKeyboardInput = false;
 
             _ping = _deltaBytesReceived = _deltaBytesSent = 0;
 
-            _fullDisplayMode = !ProfileManager.Current.NetworkStatsMinimized;
-
-            Width = 200;
-            Height = 200;
+            X = _last_position.X <= 0 ? x : _last_position.X;
+            Y = _last_position.Y <= 0 ? y : _last_position.Y;
+            Width = 100;
+            Height = 30;
 
             Add(_trans = new AlphaBlendControl(.3f)
             {
@@ -58,32 +63,21 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = Height
             });
 
-            Add(_label = new Label("", true, 0x35, font: 1, style: FontStyle.BlackBorder)
-            {
-                X = 10,
-                Y = 10
-            });
 
             ControlInfo.Layer = UILayer.Over;
 
             WantUpdateSize = false;
         }
 
-        public bool FullDisplayMode
-        {
-            get => _fullDisplayMode;
-            set
-            {
-                _fullDisplayMode = value;
-                ProfileManager.Current.NetworkStatsMinimized = !_fullDisplayMode;
-            }
-        }
+        public override GUMP_TYPE GumpType => GUMP_TYPE.GT_NETSTATS;
+
+        public bool IsMinimized { get; set; }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
             if (button == MouseButtonType.Left)
             {
-                FullDisplayMode = !FullDisplayMode;
+                IsMinimized = !IsMinimized;
 
                 return true;
             }
@@ -93,47 +87,91 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            _trans.Width = Width = _label.Width + 20;
-            _trans.Height = Height = _label.Height + 20;
-
-            if (!NetClient.Socket.IsConnected)
-            {
-                _ping = NetClient.LoginSocket.Statistics.Ping;
-                _deltaBytesReceived = NetClient.LoginSocket.Statistics.DeltaBytesReceived;
-                _deltaBytesSent = NetClient.LoginSocket.Statistics.DeltaBytesSent;
-            }
-            else if (!NetClient.Socket.IsDisposed)
-            {
-                _ping = NetClient.Socket.Statistics.Ping;
-                _deltaBytesReceived = NetClient.Socket.Statistics.DeltaBytesReceived;
-                _deltaBytesSent = NetClient.Socket.Statistics.DeltaBytesSent;
-            }
-
             base.Update(totalMS, frameMS);
+
+            if (Time.Ticks > _time_to_update)
+            {
+                _sb.Clear();
+
+                _time_to_update = Time.Ticks + 100;
+
+                if (!NetClient.Socket.IsConnected)
+                {
+                    _ping = NetClient.LoginSocket.Statistics.Ping;
+                    _deltaBytesReceived = NetClient.LoginSocket.Statistics.DeltaBytesReceived;
+                    _deltaBytesSent = NetClient.LoginSocket.Statistics.DeltaBytesSent;
+                }
+                else if (!NetClient.Socket.IsDisposed)
+                {
+                    _ping = NetClient.Socket.Statistics.Ping;
+                    _deltaBytesReceived = NetClient.Socket.Statistics.DeltaBytesReceived;
+                    _deltaBytesSent = NetClient.Socket.Statistics.DeltaBytesSent;
+                }
+
+                if (IsMinimized)
+                    _sb.Append($"Ping: {_ping} ms");
+                else
+                    _sb.Append($"Ping: {_ping} ms\n{"In:"} {NetStatistics.GetSizeAdaptive(_deltaBytesReceived),-6} {"Out:"} {NetStatistics.GetSizeAdaptive(_deltaBytesSent),-6}");
+
+
+                var size = Fonts.Bold.MeasureString(_sb.ToString());
+
+                _trans.Width = Width = (int) (size.X + 20);
+                _trans.Height = Height = (int) (size.Y + 20);
+                WantUpdateSize = true;
+            }
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            if (!base.Draw(batcher, x, y))
+                return false;
+
+            ResetHueVector();
 
             if (_ping < 100)
-                _label.Hue = 0x44; // green
+                _hueVector.X = 0x44; // green
             else if (_ping < 150)
-                _label.Hue = 0x34; // yellow
+                _hueVector.X = 0x34; // yellow
             else if (_ping < 200)
-                _label.Hue = 0x31; // orange
+                _hueVector.X = 0x31; // orange
             else
-                _label.Hue = 0x20; // red
+                _hueVector.X = 0x20; // red
+            _hueVector.Y = 1;
 
-            if (FullDisplayMode) _label.Text = $"Ping: {_ping} ms\n{"In:"} {NetStatistics.GetSizeAdaptive(_deltaBytesReceived),-6} {"Out:"} {NetStatistics.GetSizeAdaptive(_deltaBytesSent),-6}";
-            else _label.Text = $"Ping: {_ping} ms";
+            batcher.DrawString(Fonts.Bold, _sb.ToString(), x + 10, y + 10, ref _hueVector);
 
-            return base.Draw(batcher, x, y);
+            return true;
+        }
+
+        public override void Save(XmlTextWriter writer)
+        {
+            base.Save(writer);
+
+            writer.WriteAttributeString("minimized", IsMinimized.ToString());
+        }
+
+        public override void Restore(XmlElement xml)
+        {
+            base.Restore(xml);
+
+            bool.TryParse(xml.GetAttribute("minimized"), out bool b);
+            IsMinimized = b;
         }
 
         protected override void OnDragEnd(int x, int y)
         {
             base.OnDragEnd(x, y);
-            ProfileManager.Current.NetworkStatsPosition = Location;
+            _last_position.X = ScreenCoordinateX;
+            _last_position.Y = ScreenCoordinateY;
+        }
+
+        protected override void OnMove(int x, int y)
+        {
+            base.OnMove(x, y);
+
+            _last_position.X = ScreenCoordinateX;
+            _last_position.Y = ScreenCoordinateY;
         }
     }
 }

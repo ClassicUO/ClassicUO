@@ -164,10 +164,6 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool HoldAltToMoveGumps { get; set; }
 
         // Experimental
-        [JsonProperty] public bool DebugGumpIsDisabled { get; set; }
-        [JsonProperty] public Point DebugGumpPosition { get; set; } = new Point(25, 25);
-        [JsonProperty] public bool DebugGumpIsMinimized { get; set; } = true;
-        [JsonProperty] public bool RestoreLastGameSize { get; set; }
         [JsonProperty] public bool CastSpellsByOneClick { get; set; }
         [JsonProperty] public bool BuffBarTime { get; set; }
         [JsonProperty] public bool AutoOpenDoors { get; set; }
@@ -218,9 +214,6 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool ShadowsEnabled { get; set; } = true;
         [JsonProperty] public int AuraUnderFeetType { get; set; } // 0 = NO, 1 = in warmode, 2 = ctrl+shift, 3 = always
         [JsonProperty] public bool AuraOnMouse { get; set; } = true;
-        [JsonProperty] public bool ShowNetworkStats { get; set; }
-        [JsonProperty] public bool NetworkStatsMinimized { get; set; } = false;
-        [JsonProperty] public Point NetworkStatsPosition { get; set; } = new Point(25, 50);
 
         [JsonProperty] public bool PartyAura { get; set; }
 
@@ -261,6 +254,8 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool TextFading { get; set; } = true;
 
         [JsonProperty] public bool UseSmoothBoatMovement { get; set; } = false;
+
+        [JsonProperty] public bool IgnoreStaminaCheck { get; set; } = false;
 
         [JsonProperty] public int WorldMapWidth { get; set; } = 400;
         [JsonProperty] public int WorldMapHeight { get; set; } = 400;
@@ -595,6 +590,12 @@ namespace ClassicUO.Configuration
                                     break;
                                 case GUMP_TYPE.GT_WORLDMAP:
                                     gump = new WorldMapGump();
+                                    break;
+                                case GUMP_TYPE.GT_DEBUG:
+                                    gump = new DebugGump(100, 100);
+                                    break;
+                                case GUMP_TYPE.GT_NETSTATS:
+                                    gump = new NetworkStatsGump(100, 100);
                                     break;
                             }
 

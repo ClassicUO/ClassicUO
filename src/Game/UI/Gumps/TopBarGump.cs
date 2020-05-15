@@ -82,12 +82,13 @@ namespace ClassicUO.Game.UI.Gumps
                 new [] {1, (int) Buttons.WorldMap },
                 new [] {0, (int) Buttons.Info },
                 new [] {0, (int) Buttons.Debug },
+                new [] {1, (int) Buttons.NetStats },
 
                 new [] {1, (int) Buttons.UOStore },
                 new [] {1, (int) Buttons.GlobalChat },
             };
 
-            string[] texts = {"Map", "Paperdoll", "Inventory", "Journal", "Chat", "Help", "World Map", "< ? >", "Debug", "UOStore", "Global Chat"};
+            string[] texts = {"Map", "Paperdoll", "Inventory", "Journal", "Chat", "Help", "World Map", "< ? >", "Debug", "NetStats", "UOStore", "Global Chat"};
 
             bool hasUOStore = Client.Version >= ClientVersion.CV_706400;
 
@@ -106,6 +107,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0; i < textTable.Length; i++)
             {
+                if (!hasUOStore && i >= (int) Buttons.UOStore)
+                    break;
+
                 ushort graphic = (ushort) (textTable[i][0] != 0 ? 0x098D : 0x098B);
 
                 Add(new RighClickableButton(textTable[i][1], graphic, graphic, graphic, texts[i], 1, true, 0, 0x0036)
@@ -118,9 +122,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 startX += (textTable[i][0] != 0 ? largeWidth : smallWidth) + 1;
                 background.Width = startX;
-
-                if (!hasUOStore && i >= 8)
-                    break;
             }
 
             background.Width = startX + 1;
@@ -279,12 +280,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (debugGump == null)
                     {
-                        debugGump = new DebugGump
-                        {
-                            X = ProfileManager.Current.DebugGumpPosition.X,
-                            Y = ProfileManager.Current.DebugGumpPosition.Y
-                        };
-
+                        debugGump = new DebugGump(100, 100);
                         UIManager.Add(debugGump);
                     }
                     else
@@ -293,7 +289,20 @@ namespace ClassicUO.Game.UI.Gumps
                         debugGump.SetInScreen();
                     }
 
-                    //Engine.DropFpsMinMaxValues();
+                    break;
+                case Buttons.NetStats:
+                    NetworkStatsGump netstatsgump = UIManager.GetGump<NetworkStatsGump>();
+
+                    if (netstatsgump == null)
+                    {
+                        netstatsgump = new NetworkStatsGump(100, 100);
+                        UIManager.Add(netstatsgump);
+                    }
+                    else
+                    {
+                        netstatsgump.IsVisible = !netstatsgump.IsVisible;
+                        netstatsgump.SetInScreen();
+                    }
 
                     break;
                 case Buttons.WorldMap:
@@ -325,6 +334,7 @@ namespace ClassicUO.Game.UI.Gumps
             WorldMap,
             Info,
             Debug,
+            NetStats,
             UOStore,
             GlobalChat,
         }

@@ -67,10 +67,7 @@ namespace ClassicUO.Game
         public static bool BlockMoving { get; set; }
 
         public static bool FastRotation { get; set; }
-
-        public static bool IgnoreStaminaCheck { get; set; }
-
-
+        
 
 
         private static bool CreateItemList(List<PathObject> list, int x, int y, int stepState)
@@ -80,7 +77,7 @@ namespace ClassicUO.Game
             if (tile == null)
                 return false;
 
-            bool ignoreGameCharacters = IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Map.Index == 0);
+            bool ignoreGameCharacters = ProfileManager.Current.IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Map.Index == 0);
             bool isGM = World.Player.Graphic == 0x03DB;
 
             GameObject obj = tile;
