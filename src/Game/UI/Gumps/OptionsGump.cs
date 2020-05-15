@@ -517,7 +517,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _enableSounds.ValueChanged += (sender, e) => { _soundsVolume.IsVisible = _enableSounds.IsChecked; };
             item.Add(_enableSounds);
-            _soundsVolume = new HSliderBar(90, 0, 180, 0, 100, ProfileManager.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+            _soundsVolume = new HSliderBar(90, 5, 180, 0, 100, ProfileManager.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             item.Add(_soundsVolume);
             rightArea.Add(item);
 
@@ -526,11 +526,12 @@ namespace ClassicUO.Game.UI.Gumps
             item.Y = SPACE_Y;
             _enableMusic = new Checkbox(0x00D2, 0x00D3, "Music", FONT, HUE_FONT)
             {
-                IsChecked = ProfileManager.Current.EnableMusic
+                IsChecked = ProfileManager.Current.EnableMusic,
+                Y = SPACE_Y
             };
             _enableMusic.ValueChanged += (sender, e) => { _musicVolume.IsVisible = _enableMusic.IsChecked; };
             item.Add(_enableMusic);
-            _musicVolume = new HSliderBar(90, 0, 180, 0, 100, ProfileManager.Current.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+            _musicVolume = new HSliderBar(90, SPACE_Y + 5, 180, 0, 100, ProfileManager.Current.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             item.Add(_musicVolume);
             rightArea.Add(item);
 
@@ -539,11 +540,12 @@ namespace ClassicUO.Game.UI.Gumps
             item.Y = SPACE_Y;
             _loginMusic = new Checkbox(0x00D2, 0x00D3, "Login music", FONT, HUE_FONT)
             {
-                IsChecked = Settings.GlobalSettings.LoginMusic
+                IsChecked = Settings.GlobalSettings.LoginMusic,
+                Y = SPACE_Y
             };
             _loginMusic.ValueChanged += (sender, e) => { _loginMusicVolume.IsVisible = _loginMusic.IsChecked; };
             item.Add(_loginMusic);
-            _loginMusicVolume = new HSliderBar(90, 0, 180, 0, 100, Settings.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+            _loginMusicVolume = new HSliderBar(90, SPACE_Y + 5, 180, 0, 100, Settings.GlobalSettings.LoginMusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             item.Add(_loginMusicVolume);
             rightArea.Add(item);
 
@@ -1209,11 +1211,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             // [BLOCK] disable hotkeys
             {
-                _disableDefaultHotkeys = new Checkbox(0x00D2, 0x00D3, "Disable default UO hotkeys", FONT, HUE_FONT)
-                {
-                    Y = 0,
-                    IsChecked = ProfileManager.Current.DisableDefaultHotkeys
-                };
+                _disableDefaultHotkeys = CreateCheckBox(rightArea, "Disable default UO hotkeys", ProfileManager.Current.DisableDefaultHotkeys, 0, SPACE_Y);
                 _disableDefaultHotkeys.ValueChanged += (sender, e) => { _defaultHotkeysArea.IsVisible = _disableDefaultHotkeys.IsChecked; };
 
                 rightArea.Add(_disableDefaultHotkeys);
@@ -1256,13 +1254,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _defaultHotkeysArea.IsVisible = _disableDefaultHotkeys.IsChecked;
             }
 
-           
-          
-
-
+            
             Add(rightArea, PAGE);
-
-       
         }
 
         private void BuildInfoBar()
@@ -1344,6 +1337,7 @@ namespace ClassicUO.Game.UI.Gumps
             _overrideContainerLocation = new Checkbox(0x00D2, 0x00D3, "Override container gump location", FONT, HUE_FONT, true)
             {
                 IsChecked = ProfileManager.Current.OverrideContainerLocation,
+                Y = SPACE_Y
             };
             _overrideContainerLocationSetting = new Combobox(_overrideContainerLocation.Width + 20, 0, 200, new[] { "Near container position", "Top right", "Last dragged position", "Remember every container" }, ProfileManager.Current.OverrideContainerLocationSetting);
 
