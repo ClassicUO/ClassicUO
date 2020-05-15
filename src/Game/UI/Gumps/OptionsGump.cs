@@ -513,11 +513,12 @@ namespace ClassicUO.Game.UI.Gumps
            
             _enableSounds = new Checkbox(0x00D2, 0x00D3, "Sounds", FONT, HUE_FONT)
             {
-                IsChecked = ProfileManager.Current.EnableSound
+                IsChecked = ProfileManager.Current.EnableSound,
+                Y = SPACE_Y
             };
             _enableSounds.ValueChanged += (sender, e) => { _soundsVolume.IsVisible = _enableSounds.IsChecked; };
             item.Add(_enableSounds);
-            _soundsVolume = new HSliderBar(90, 5, 180, 0, 100, ProfileManager.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+            _soundsVolume = new HSliderBar(90, SPACE_Y + 5, 180, 0, 100, ProfileManager.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             item.Add(_soundsVolume);
             rightArea.Add(item);
 
