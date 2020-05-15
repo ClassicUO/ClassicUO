@@ -510,7 +510,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             ScrollAreaItem item = new ScrollAreaItem();
-
+           
             _enableSounds = new Checkbox(0x00D2, 0x00D3, "Sounds", FONT, HUE_FONT)
             {
                 IsChecked = ProfileManager.Current.EnableSound
@@ -523,7 +523,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             item = new ScrollAreaItem();
-
+            item.Y = SPACE_Y;
             _enableMusic = new Checkbox(0x00D2, 0x00D3, "Music", FONT, HUE_FONT)
             {
                 IsChecked = ProfileManager.Current.EnableMusic
@@ -536,7 +536,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             item = new ScrollAreaItem();
-
+            item.Y = SPACE_Y;
             _loginMusic = new Checkbox(0x00D2, 0x00D3, "Login music", FONT, HUE_FONT)
             {
                 IsChecked = Settings.GlobalSettings.LoginMusic
@@ -757,7 +757,7 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(item);
 
             _partyAura = CreateCheckBox(rightArea, "Custom color aura for party members", ProfileManager.Current.PartyAura, 0, SPACE_Y);
-            _partyAuraColorPickerBox = CreateClickableColorBox(rightArea, 20, 5, ProfileManager.Current.PartyAuraHue, "Party Aura Color", 40, SPACE_Y);
+            _partyAuraColorPickerBox = CreateClickableColorBox(rightArea, 20, SPACE_Y, ProfileManager.Current.PartyAuraHue, "Party Aura Color", 40, SPACE_Y);
             _runMouseInSeparateThread = CreateCheckBox(rightArea, "Run mouse in a separate thread", Settings.GlobalSettings.RunMouseInASeparateThread, 0, SPACE_Y);
             _auraMouse = CreateCheckBox(rightArea, "Aura on mouse target", ProfileManager.Current.AuraOnMouse, 0, SPACE_Y);
             _xBR = CreateCheckBox(rightArea, "Use xBR effect [BETA]", ProfileManager.Current.UseXBR, 0, SPACE_Y);
@@ -994,8 +994,7 @@ namespace ClassicUO.Game.UI.Gumps
             item.Add(_sliderSpeechDelay);
             rightArea.Add(item);
 
-            _saveJournalCheckBox = CreateCheckBox(rightArea, "Save Journal to file in game folder", false, 0, SPACE_Y);
-            _saveJournalCheckBox.IsChecked = ProfileManager.Current.SaveJournalToFile;
+            _saveJournalCheckBox = CreateCheckBox(rightArea, "Save Journal to file in game folder", ProfileManager.Current.SaveJournalToFile, 0, SPACE_Y);
 
             if (!ProfileManager.Current.SaveJournalToFile)
             {
@@ -1004,11 +1003,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             // [BLOCK] activate chat
             {
-                _chatAfterEnter = new Checkbox(0x00D2, 0x00D3, "Press `Enter` to activate chat", FONT, HUE_FONT)
-                {
-                    Y = 0,
-                    IsChecked = ProfileManager.Current.ActivateChatAfterEnter
-                };
+                _chatAfterEnter = CreateCheckBox(rightArea, "Active chat when pressing ENTER", ProfileManager.Current.ActivateChatAfterEnter, 0, SPACE_Y);
                 _chatAfterEnter.ValueChanged += (sender, e) => { _activeChatArea.IsVisible = _chatAfterEnter.IsChecked; };
                 rightArea.Add(_chatAfterEnter);
 
@@ -1035,12 +1030,9 @@ namespace ClassicUO.Game.UI.Gumps
                 rightArea.Add(_activeChatArea);
             }
 
-            _speechColorPickerBox = CreateClickableColorBox(rightArea, 0, 20 + SPACE_Y, ProfileManager.Current.SpeechHue, "Speech Color", 20, 20 + SPACE_Y);
-            _emoteColorPickerBox = CreateClickableColorBox(rightArea, 0, SPACE_Y, ProfileManager.Current.EmoteHue, "Emote Color", 20, SPACE_Y);
-            _yellColorPickerBox = CreateClickableColorBox(rightArea, 0, SPACE_Y, ProfileManager.Current.YellHue, "Yell Color", 20, SPACE_Y);
-            _whisperColorPickerBox = CreateClickableColorBox(rightArea, 0, SPACE_Y, ProfileManager.Current.WhisperHue, "Whisper Color", 20, SPACE_Y);
+            
 
-            _randomizeColorsButton = new NiceButton(0, 10, 140, 25, ButtonAction.Activate, "Randomize speech hues") { ButtonParameter = (int)Buttons.Disabled };
+            _randomizeColorsButton = new NiceButton(0, 20 + SPACE_Y, 140, 25, ButtonAction.Activate, "Randomize speech hues") { ButtonParameter = (int)Buttons.Disabled };
             _randomizeColorsButton.MouseUp += (sender, e) =>
             {
                 if (e.Button != MouseButtonType.Left)
@@ -1061,7 +1053,12 @@ namespace ClassicUO.Game.UI.Gumps
             };
             rightArea.Add(_randomizeColorsButton);
 
-            _partyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, SPACE_Y, ProfileManager.Current.PartyMessageHue, "Party Message Color", 20, 0);
+            _speechColorPickerBox = CreateClickableColorBox(rightArea, 0, SPACE_Y, ProfileManager.Current.SpeechHue, "Speech Color", 20, 20 + SPACE_Y);
+            _emoteColorPickerBox = CreateClickableColorBox(rightArea, 0, SPACE_Y, ProfileManager.Current.EmoteHue, "Emote Color", 20, SPACE_Y);
+            _yellColorPickerBox = CreateClickableColorBox(rightArea, 0, SPACE_Y, ProfileManager.Current.YellHue, "Yell Color", 20, SPACE_Y);
+            _whisperColorPickerBox = CreateClickableColorBox(rightArea, 0, SPACE_Y, ProfileManager.Current.WhisperHue, "Whisper Color", 20, SPACE_Y);
+
+            _partyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 20 + SPACE_Y, ProfileManager.Current.PartyMessageHue, "Party Message Color", 20, 0);
             _guildMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, SPACE_Y, ProfileManager.Current.GuildMessageHue, "Guild Message Color", 20, 0);
             _allyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, SPACE_Y, ProfileManager.Current.AllyMessageHue, "Alliance Message Color", 20, 0);
             _chatMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, SPACE_Y, ProfileManager.Current.ChatMessageHue, "Chat Message Color", 20, 0);
@@ -2153,10 +2150,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             item.Add(new Label(text, true, HUE_FONT)
             {
-                X = labelX, Y = labelY
+                X = box.X + box.Width + 5,
+                Y = y,
             });
-            item.X = x;
-            item.Y = y;
             area.Add(item);
 
             return box;
