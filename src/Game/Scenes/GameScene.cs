@@ -70,7 +70,7 @@ namespace ClassicUO.Game.Scenes
 
         public GameScene() : base((int) SceneType.Game,
             true,
-            !ProfileManager.Current.RestoreLastGameSize,
+            true,
             true)
         {
 
@@ -184,25 +184,7 @@ namespace ClassicUO.Game.Scenes
 
                 Client.Game.SetWindowSize(w, h);
             }
-
-            if (!ProfileManager.Current.DebugGumpIsDisabled)
-            {
-                UIManager.Add(new DebugGump
-                {
-                    X = ProfileManager.Current.DebugGumpPosition.X,
-                    Y = ProfileManager.Current.DebugGumpPosition.Y
-                });
-            }
-
-            if (ProfileManager.Current.ShowNetworkStats)
-            {
-                UIManager.Add(new NetworkStatsGump
-                {
-                    X = ProfileManager.Current.NetworkStatsPosition.X,
-                    Y = ProfileManager.Current.NetworkStatsPosition.Y
-                });
-            }
-
+            
             CircleOfTransparency.Create(ProfileManager.Current.CircleOfTransparencyRadius);
             Plugin.OnConnected();
         }

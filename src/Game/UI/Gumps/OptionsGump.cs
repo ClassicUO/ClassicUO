@@ -67,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
         private TextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox  _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
+        private Checkbox  _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
         private Combobox _overrideContainerLocationSetting;
         private Checkbox _use_smooth_boat_movement;
 
@@ -216,7 +216,6 @@ namespace ClassicUO.Game.UI.Gumps
             BuildTooltip();
             BuildCounters();
             BuildExperimental();
-            BuildNetwork();
             BuildInfoBar();
             BuildContainers();
 
@@ -1158,9 +1157,6 @@ namespace ClassicUO.Game.UI.Gumps
             _use_smooth_boat_movement = CreateCheckBox(rightArea, "Smooth boat movements", ProfileManager.Current.UseSmoothBoatMovement, 0, 0);
             _use_smooth_boat_movement.IsVisible = Client.Version >= ClientVersion.CV_7090; 
 
-            _debugGumpIsDisabled = CreateCheckBox(rightArea, "Disable Debug Gump", ProfileManager.Current.DebugGumpIsDisabled, 0, 0);
-            _restoreLastGameSize = CreateCheckBox(rightArea, "Disable automatic maximize. Restore windows size after re-login", ProfileManager.Current.RestoreLastGameSize, 0, 0);
-
             _autoOpenDoors = CreateCheckBox(rightArea, "Auto Open Doors", ProfileManager.Current.AutoOpenDoors, 0, 0);
             _smoothDoors = CreateCheckBox(rightArea, "Smooth doors", ProfileManager.Current.SmoothDoors, 20, 5);
 
@@ -1325,20 +1321,9 @@ namespace ClassicUO.Game.UI.Gumps
             _dragSelectArea.IsVisible = _enableDragSelect.IsChecked;
         }
 
-        private void BuildNetwork()
-        {
-            const int PAGE = 11;
-
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
-
-            _showNetStats = CreateCheckBox(rightArea, "Show network stats", ProfileManager.Current.ShowNetworkStats, 0, 0);
-
-            Add(rightArea, PAGE);
-        }
-
         private void BuildInfoBar()
         {
-            const int PAGE = 12;
+            const int PAGE = 11;
 
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
@@ -1393,7 +1378,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildContainers()
         {
-            const int PAGE = 13;
+            const int PAGE = 12;
 
             ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
 
@@ -1622,8 +1607,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case 10:
                     _use_smooth_boat_movement.IsChecked = false;
-                    _debugGumpIsDisabled.IsChecked = false;
-                    _restoreLastGameSize.IsChecked = false;
                     _disableDefaultHotkeys.IsChecked = false;
                     _disableArrowBtn.IsChecked = false;
                     _disableTabBtn.IsChecked = false;
@@ -2003,7 +1986,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             // experimental
             ProfileManager.Current.UseSmoothBoatMovement = _use_smooth_boat_movement.IsChecked;
-            ProfileManager.Current.RestoreLastGameSize = _restoreLastGameSize.IsChecked;
 
             // Reset nested checkboxes if parent checkbox is unchecked
             if (!_disableDefaultHotkeys.IsChecked)
@@ -2020,37 +2002,6 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.DisableTabBtn = _disableTabBtn.IsChecked;
             ProfileManager.Current.DisableCtrlQWBtn = _disableCtrlQWBtn.IsChecked;
             ProfileManager.Current.DisableAutoMove = _disableAutoMove.IsChecked;
-
-            if (ProfileManager.Current.DebugGumpIsDisabled != _debugGumpIsDisabled.IsChecked)
-            {
-                DebugGump debugGump = UIManager.GetGump<DebugGump>();
-
-                if (_debugGumpIsDisabled.IsChecked)
-                {
-                    if (debugGump != null)
-                        debugGump.IsVisible = false;
-                }
-                else
-                {
-                    if (debugGump == null)
-                    {
-                        debugGump = new DebugGump
-                        {
-                            X = ProfileManager.Current.DebugGumpPosition.X,
-                            Y = ProfileManager.Current.DebugGumpPosition.Y
-                        };
-                        UIManager.Add(debugGump);
-                    }
-                    else
-                    {
-                        debugGump.IsVisible = true;
-                        debugGump.SetInScreen();
-                    }
-                }
-
-                ProfileManager.Current.DebugGumpIsDisabled = _debugGumpIsDisabled.IsChecked;
-            }
-
             ProfileManager.Current.AutoOpenDoors = _autoOpenDoors.IsChecked;
             ProfileManager.Current.SmoothDoors = _smoothDoors.IsChecked;
             ProfileManager.Current.AutoOpenCorpses = _autoOpenCorpse.IsChecked;
@@ -2097,31 +2048,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             ProfileManager.Current.CBBlackBGToggled = _customBarsBBG.IsChecked;
             ProfileManager.Current.SaveHealthbars = _saveHealthbars.IsChecked;
-
-            // network
-            ProfileManager.Current.ShowNetworkStats = _showNetStats.IsChecked;
-
-            NetworkStatsGump networkStatsGump = UIManager.GetGump<NetworkStatsGump>();
-
-            if (ProfileManager.Current.ShowNetworkStats)
-            {
-                if (networkStatsGump == null)
-                {
-                    UIManager.Add(new NetworkStatsGump() { X = ProfileManager.Current.NetworkStatsPosition.X, Y = ProfileManager.Current.NetworkStatsPosition.Y });
-                }
-                else
-                {
-                    networkStatsGump.IsVisible = true;
-                    networkStatsGump.SetInScreen();
-                }
-            }
-            else
-            {
-                if (networkStatsGump != null)
-                {
-                    networkStatsGump.Dispose();
-                }
-            }
 
 
             // infobar
