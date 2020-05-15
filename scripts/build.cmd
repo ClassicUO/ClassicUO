@@ -14,6 +14,6 @@ SET "REF_NEWTONSOFTJSON=%root_path%tools\monokickstart\Newtonsoft.Json.dll"
 SET "REF_SYSCOMPRESSION=%root_path%tools\monokickstart\System.IO.Compression.dll"
 SET "REF_SYSCOMPRESSION_FS=%root_path%tools\monokickstart\System.IO.Compression.FileSystem.dll"
 
-msbuild %cuo_proj%\ClassicUO.csproj /t:Clean;Build
-
+msbuild %cuo_proj%\ClassicUO.csproj /t:Clean;Build /p:Configuration=Release
+pause
 ::%CSCPATH%csc /target:exe /out:%cuo_output%  /r:%REF_FNA%  /r:%REF_CUOAPI%  /r:%REF_NEWTONSOFTJSON%  /r:%REF_SYSCOMPRESSION%  /r:%REF_SYSCOMPRESSION_FS%  /recurse:"%cuo_proj%*.cs" /d:ClassicUO /d:DEV_BUILD /unsafe /optimize
