@@ -122,24 +122,6 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
-            if (!ProfileManager.Current.DebugGumpIsDisabled)
-            {
-                UIManager.Add(new DebugGump
-                {
-                    X = ProfileManager.Current.DebugGumpPosition.X,
-                    Y = ProfileManager.Current.DebugGumpPosition.Y
-                });
-            }
-
-            if (ProfileManager.Current.ShowNetworkStats)
-            {
-                UIManager.Add(new NetworkStatsGump
-                {
-                    X = ProfileManager.Current.NetworkStatsPosition.X,
-                    Y = ProfileManager.Current.NetworkStatsPosition.Y
-                });
-            }
-
             ItemHold.Clear();
             Hotkeys = new HotkeysManager();
             Macros = new MacroManager();
@@ -201,6 +183,24 @@ namespace ClassicUO.Game.Scenes
                 h = Math.Max(480, h);
 
                 Client.Game.SetWindowSize(w, h);
+            }
+
+            if (!ProfileManager.Current.DebugGumpIsDisabled)
+            {
+                UIManager.Add(new DebugGump
+                {
+                    X = ProfileManager.Current.DebugGumpPosition.X,
+                    Y = ProfileManager.Current.DebugGumpPosition.Y
+                });
+            }
+
+            if (ProfileManager.Current.ShowNetworkStats)
+            {
+                UIManager.Add(new NetworkStatsGump
+                {
+                    X = ProfileManager.Current.NetworkStatsPosition.X,
+                    Y = ProfileManager.Current.NetworkStatsPosition.Y
+                });
             }
 
             CircleOfTransparency.Create(ProfileManager.Current.CircleOfTransparencyRadius);
@@ -307,7 +307,7 @@ namespace ClassicUO.Game.Scenes
             TargetManager.ClearTargetingWithoutTargetCancelPacket();
 
             // special case for wmap. this allow us to save settings
-            UIManager.GetGump<WorldMapGump>()?.Dispose();
+            UIManager.GetGump<WorldMapGump>()?.SaveSettings();
 
             ProfileManager.Current?.Save(UIManager.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList());
             Macros.Save();

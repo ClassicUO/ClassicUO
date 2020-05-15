@@ -383,7 +383,7 @@ namespace ClassicUO.Game.GameObjects
             BoatMovingManager.ClearSteps(Serial);
         }
 
-        public void CheckGraphicChange(sbyte animIndex = 0)
+        public override void CheckGraphicChange(sbyte animIndex = 0)
         {
             if (!IsMulti)
             {

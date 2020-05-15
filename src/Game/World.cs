@@ -24,6 +24,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility.Platforms;
 
 using Microsoft.Xna.Framework;
@@ -87,7 +88,7 @@ namespace ClassicUO.Game
 
         public static ActiveSpellIconsManager ActiveSpellIcons = new ActiveSpellIconsManager();
 
-        public static uint LastObject;
+        public static uint LastObject, ObjectToRemove;
 
 
         public static int MapIndex
@@ -194,6 +195,29 @@ namespace ClassicUO.Game
         {
             if (Player != null)
             {
+                if (SerialHelper.IsValid(ObjectToRemove))
+                {
+                    Item rem = Items.Get(ObjectToRemove);
+                    ObjectToRemove = 0;
+
+                    if (rem != null)
+                    {
+                        RemoveItem(rem, true);
+
+                        if (rem.Layer == Layer.OneHanded || rem.Layer == Layer.TwoHanded)
+                            Player.UpdateAbilities();
+
+                        if (SerialHelper.IsMobile(rem.Container))
+                        {
+                            UIManager.GetGump<PaperDollGump>(rem.Container)?.RequestUpdateContents();
+                        }
+                        else if (SerialHelper.IsItem(rem.Container))
+                        {
+                            UIManager.GetGump<ContainerGump>(rem.Container)?.RequestUpdateContents();
+                        }
+                    }
+                }
+
                 foreach (Mobile mob in Mobiles)
                 {
                     mob.Update(totalMS, frameMS);
@@ -331,9 +355,15 @@ namespace ClassicUO.Game
                 }
             }
 
-            for (var i = item.Items; i != null; i = i.Next)
+            var first = item.Items;
+
+            while (first != null)
             {
-                RemoveItem(i as Item, forceRemove);
+                var next = first.Next;
+
+                RemoveItem(first as Item, forceRemove);
+
+                first = next;
             }
 
             item.Clear();
@@ -352,9 +382,15 @@ namespace ClassicUO.Game
             if (mobile == null)
                 return false;
 
-            for (var i = mobile.Items; i != null; i = i.Next)
+            var first = mobile.Items;
+
+            while (first != null)
             {
-                RemoveItem(i as Item, forceRemove);
+                var next = first.Next;
+
+                RemoveItem(first as Item, forceRemove);
+
+                first = next;
             }
 
             mobile.Clear();
@@ -664,6 +700,7 @@ namespace ClassicUO.Game
                 RemoveItem(item);
             }
 
+            ObjectToRemove = 0;
             LastObject = 0;
             HouseManager?.Clear();
             Items.Clear();

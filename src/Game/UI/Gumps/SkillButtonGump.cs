@@ -50,11 +50,11 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
             WantUpdateSize = false;
-            AnchorGroupName = "spell";
             WidthMultiplier = 2;
             HeightMultiplier = 1;
             GroupMatrixWidth = 44;
             GroupMatrixHeight = 44;
+            AnchorType = ANCHOR_TYPE.SPELL;
         }
 
 
@@ -91,6 +91,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
+            base.OnMouseUp(x, y, button);
+
             if (ProfileManager.Current.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt)
                 GameActions.UseSkill(_skill.Index);
         }

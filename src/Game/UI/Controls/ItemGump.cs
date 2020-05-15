@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (CanPickUp && !ItemHold.Enabled && Mouse.LButtonPressed &&
                 UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
-                ((Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF && Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks) ||
+                ((Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF && Mouse.LastLeftButtonClickTime != 0 && Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks) ||
                 CanPickup()))
             {
                 AttempPickUp();
@@ -124,8 +124,9 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button == MouseButtonType.Left && UIManager.MouseOverControl?.RootParent == RootParent)
+            if (button == MouseButtonType.Left)
             {
+                if (UIManager.MouseOverControl?.RootParent == RootParent)
                 {
                     GameScene gs = Client.Game.GetScene<GameScene>();
                     if (gs != null)
@@ -241,8 +242,8 @@ namespace ClassicUO.Game.UI.Controls
                     }
                 }
             }
-
-            base.OnMouseUp(x, y, button);
+            else
+                base.OnMouseUp(x, y, button);
         }
 
         protected override void OnMouseOver(int x, int y)
@@ -271,7 +272,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (button != MouseButtonType.Left)
+            if (button != MouseButtonType.Left || TargetManager.IsTargeting)
                 return false;
 
             Item item = World.Items.Get(LocalSerial);

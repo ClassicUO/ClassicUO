@@ -134,7 +134,7 @@ namespace ClassicUO.Game.UI.Controls
                     IsPartialHue = true
                 });
             }
-            else if (!mobile.IsMale)
+            else if (mobile.IsFemale)
             {
                 body = 0x000D;
             }
@@ -177,7 +177,7 @@ namespace ClassicUO.Game.UI.Controls
                     if (Mobile.IsCovered(mobile, layer))
                         continue;
 
-                    ushort id = GetAnimID(mobile.Graphic, equipItem.ItemData.AnimID, !mobile.IsMale);
+                    ushort id = GetAnimID(mobile.Graphic, equipItem.ItemData.AnimID, mobile.IsFemale);
 
                     Add(new GumpPicEquipment(mobile.Serial, equipItem.Serial, 0, 0, id, (ushort) (equipItem.Hue & 0x3FFF), layer)
                     {
@@ -190,7 +190,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
                 else if (HasFakeItem && ItemHold.Enabled && (byte) layer == ItemHold.ItemData.Layer && ItemHold.ItemData.AnimID != 0)
                 {
-                    ushort id = GetAnimID(mobile.Graphic, ItemHold.ItemData.AnimID, !mobile.IsMale);
+                    ushort id = GetAnimID(mobile.Graphic, ItemHold.ItemData.AnimID, mobile.IsFemale);
                     Add(new GumpPicEquipment(mobile.Serial, 0, 0, 0, id, (ushort) (ItemHold.Hue & 0x3FFF), ItemHold.Layer)
                     {
                         AcceptMouseInput = true,
@@ -251,19 +251,17 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            ushort gump_graphic = (ushort) (animID + offset);
-
-            if (isfemale && GumpsLoader.Instance.GetTexture(gump_graphic) == null)
+            if (isfemale && GumpsLoader.Instance.GetTexture((ushort) (animID + offset)) == null)
             {
-                gump_graphic = (ushort) (animID + MALE_OFFSET);
-
-                if (GumpsLoader.Instance.GetTexture(gump_graphic) == null)
-                {
-                    Log.Error($"Texture not found in paperdoll: gump_graphic: {gump_graphic}");
-                }
+                offset = MALE_OFFSET;
             }
 
-            return gump_graphic;
+            if (GumpsLoader.Instance.GetTexture((ushort) (animID + offset)) == null)
+            {
+                Log.Error($"Texture not found in paperdoll: gump_graphic: {(ushort) (animID + offset)}");
+            }
+
+            return (ushort) (animID + offset);
         }
 
         private class GumpPicEquipment : GumpPic
@@ -286,6 +284,9 @@ namespace ClassicUO.Game.UI.Controls
 
             protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
             {
+                if (button != MouseButtonType.Left)
+                    return false;
+
                 // this check is necessary to avoid crashes during character creation
                 if (World.InGame)
                     GameActions.DoubleClick(LocalSerial);
@@ -295,7 +296,7 @@ namespace ClassicUO.Game.UI.Controls
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
             {
-                if (!World.InGame)
+                if (!World.InGame || button != MouseButtonType.Left)
                 {
                     base.OnMouseUp(x, y, button);
                     return;
@@ -305,7 +306,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (MouseIsOver)
                 {
-                    if (ItemHold.Enabled || LocalSerial == 0)
+                    if (ItemHold.Enabled /*|| LocalSerial == 0*/)
                     {
                         if (container != null)
                         {
@@ -325,7 +326,8 @@ namespace ClassicUO.Game.UI.Controls
                                     }
 
                                     Mouse.CancelDoubleClick = true;
-                                    Mouse.LastLeftButtonClickTime = 0;
+                                    Mouse.LDropPosition = Mouse.Position;
+
                                     return;
                                 }
                             }
@@ -337,10 +339,9 @@ namespace ClassicUO.Game.UI.Controls
                                 {
                                     scene.WearHeldItem(_parentSerial != World.Player ? container : World.Player);
                                     Mouse.CancelDoubleClick = true;
-                                    Mouse.LastLeftButtonClickTime = 0;
+                                    Mouse.LDropPosition = Mouse.Position;
                                     return;
                                 }
-
                             }
                             else
                             {
@@ -349,7 +350,7 @@ namespace ClassicUO.Game.UI.Controls
                                 {
                                     scene.DropHeldItemToContainer(cont);
                                     Mouse.CancelDoubleClick = true;
-                                    Mouse.LastLeftButtonClickTime = 0;
+                                    Mouse.LDropPosition = Mouse.Position;
                                     return;
                                 }
                             }
@@ -361,7 +362,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
                 }
 
-                if (!ItemHold.Enabled && container != null)
+                if (!ItemHold.Enabled && container != null && UIManager.LastControlMouseDown(MouseButtonType.Left) == this)
                 {
                     Item equipment = container.FindItemByLayer(_layer);
 
@@ -397,6 +398,7 @@ namespace ClassicUO.Game.UI.Controls
                         Mouse.LButtonPressed &&
                         UIManager.LastControlMouseDown(MouseButtonType.Left) == this &&
                         ((Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF &&
+                          Mouse.LastLeftButtonClickTime != 0 &&
                           Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks) ||
                          Mouse.LDroppedOffset != Point.Zero))
                     {
@@ -404,6 +406,12 @@ namespace ClassicUO.Game.UI.Controls
                         int centerX = bounds.Width >> 1;
                         int centerY = bounds.Height >> 1;
                         GameActions.PickUp(LocalSerial, centerX, centerY);
+                        Mouse.LDropPosition = Mouse.Position;
+
+                        if (_layer == Layer.OneHanded || _layer == Layer.TwoHanded)
+                        {
+                            World.Player.UpdateAbilities();
+                        }
                     }
                 }
             }

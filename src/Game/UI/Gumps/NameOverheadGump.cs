@@ -81,7 +81,7 @@ namespace ClassicUO.Game.UI.Gumps
                     t = StringHelper.CapitalizeAllWords(item.ItemData.Name);
 
                     if (string.IsNullOrEmpty(t))
-                        t = ClilocLoader.Instance.Translate(1020000 + item.Graphic, capitalize: true);
+                        t = ClilocLoader.Instance.GetString(1020000 + item.Graphic, true, t);
                 }
 
                 if (string.IsNullOrEmpty(t))

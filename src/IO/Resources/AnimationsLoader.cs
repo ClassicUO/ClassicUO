@@ -77,10 +77,10 @@ namespace ClassicUO.IO.Resources
         }
 
 
-        public ushort Color { get; set; }
-        public byte AnimGroup { get; set; }
-        public byte Direction { get; set; }
-        public ushort AnimID { get; set; }
+        public ushort Color;
+        public byte AnimGroup;
+        public byte Direction;
+        public ushort AnimID;
         public int SittingValue { get; set; }
 
         public IndexAnimation[] DataIndex { get; } = new IndexAnimation[Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT];
@@ -659,6 +659,7 @@ namespace ClassicUO.IO.Resources
                 }
 
                 file = UOFileManager.GetUOFilePath("Body.def");
+                Dictionary<int, bool> filter = new Dictionary<int, bool>();
 
                 if (File.Exists(file))
                 {
@@ -671,30 +672,38 @@ namespace ClassicUO.IO.Resources
                             if (index >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                 continue;
 
+                            if (filter.TryGetValue(index, out bool b) && b)
+                            {
+                                continue;
+                            }
+
                             int[] group = defReader.ReadGroup();
 
                             if (group == null)
                                 continue;
                             int color = defReader.ReadInt();
 
-                            for (int i = 0; i < group.Length; i++)
-                            {
-                                int checkIndex = group[i];
+                            int checkIndex;
 
-                                if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                                    continue;
+                            //Yes, this is actually how this is supposed to work.
+                            if (group.Length >= 3)
+                                checkIndex = group[2];
+                            else
+                                checkIndex = group[0];
 
-                                DataIndex[index].Graphic = (ushort)checkIndex;
-                                DataIndex[index].Color = (ushort)color;
-                                DataIndex[index].IsValidMUL = true;
+                            if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                                continue;
 
-                                break;
-                            }
+                            DataIndex[index].Graphic = (ushort) checkIndex;
+                            DataIndex[index].Color = (ushort) color;
+                            DataIndex[index].IsValidMUL = true;
+                            filter[index] = true;
                         }
                     }
                 }
 
                 file = UOFileManager.GetUOFilePath("Corpse.def");
+                filter.Clear();
 
                 if (File.Exists(file))
                 {
@@ -702,31 +711,37 @@ namespace ClassicUO.IO.Resources
                     {
                         while (defReader.Next())
                         {
-                            ushort index = (ushort)defReader.ReadInt();
+                            int index = defReader.ReadInt();
 
                             if (index >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                 continue;
+
+                            if (filter.TryGetValue(index, out var b) && b)
+                            {
+                                continue;
+                            }
 
                             int[] group = defReader.ReadGroup();
 
                             if (group == null)
                                 continue;
 
-                            ushort color = (ushort)defReader.ReadInt();
+                            int color = defReader.ReadInt();
 
-                            for (int i = 0; i < group.Length; i++)
-                            {
-                                int checkIndex = group[i];
+                            int checkIndex;
 
-                                if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                                    continue;
+                            if (group.Length >= 3)
+                                checkIndex = group[2];
+                            else
+                                checkIndex = group[0];
 
-                                DataIndex[index].CorpseGraphic = (ushort)checkIndex;
-                                DataIndex[index].CorpseColor = color;
-                                DataIndex[index].IsValidMUL = true;
+                            if (checkIndex >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                                continue;
 
-                                break;
-                            }
+                            DataIndex[index].CorpseGraphic = (ushort) checkIndex;
+                            DataIndex[index].CorpseColor = (ushort) color;
+                            DataIndex[index].IsValidMUL = true;
+                            filter[index] = true;
                         }
                     }
                 }
@@ -867,19 +882,19 @@ namespace ClassicUO.IO.Resources
 
 
 
-        public static uint CalculatePeopleGroupOffset(ushort graphic)
+        public static unsafe uint CalculatePeopleGroupOffset(ushort graphic)
         {
-            return (uint)(((graphic - 400) * 175 + 35000) * UnsafeMemoryManager.SizeOf<AnimIdxBlock>());
+            return (uint)(((graphic - 400) * 175 + 35000) * sizeof(AnimIdxBlock));
         }
 
-        public static uint CalculateHighGroupOffset(ushort graphic)
+        public static unsafe uint CalculateHighGroupOffset(ushort graphic)
         {
-            return (uint)(graphic * 110 * UnsafeMemoryManager.SizeOf<AnimIdxBlock>());
+            return (uint)(graphic * 110 * sizeof(AnimIdxBlock));
         }
 
-        public static uint CalculateLowGroupOffset(ushort graphic)
+        public static unsafe uint CalculateLowGroupOffset(ushort graphic)
         {
-            return (uint)(((graphic - 200) * 65 + 22000) * UnsafeMemoryManager.SizeOf<AnimIdxBlock>());
+            return (uint)(((graphic - 200) * 65 + 22000) * sizeof(AnimIdxBlock));
         }
 
         private ANIMATION_GROUPS_TYPE CalculateTypeByGraphic(ushort graphic)
@@ -1325,6 +1340,7 @@ namespace ClassicUO.IO.Resources
 
         private readonly DataReader _reader = new DataReader();
         private byte[] _buffer = new byte[0x800000];
+        private UOPFrameData[] _uop_frame_pixels_offsets = new UOPFrameData[1000];
 
         private unsafe bool ReadUOPAnimationFrame(ref AnimationDirection animDirection)
         {
@@ -1354,8 +1370,6 @@ namespace ClassicUO.IO.Resources
                 int dataStart = _reader.ReadInt();
                 _reader.Seek(dataStart);
 
-                UOPFrameData* pixelDataOffsets = stackalloc UOPFrameData[frameCount];
-
                 for (int i = 0; i < frameCount; i++)
                 {
                     uint start = (uint) _reader.Position;
@@ -1365,7 +1379,7 @@ namespace ClassicUO.IO.Resources
                     uint pixelOffset = _reader.ReadUInt();
                     //int vsize = pixelDataOffsets.Count;
 
-                    ref UOPFrameData data = ref pixelDataOffsets[i];
+                    ref UOPFrameData data = ref _uop_frame_pixels_offsets[i];
                     data.DataStart = start;
                     data.PixelDataOffset = pixelOffset;
 
@@ -1405,7 +1419,7 @@ namespace ClassicUO.IO.Resources
                     if (animDirection.Frames[i] != null)
                         continue;
 
-                    ref UOPFrameData frameData = ref pixelDataOffsets[i + dirFrameStartIdx];
+                    ref UOPFrameData frameData = ref _uop_frame_pixels_offsets[i + dirFrameStartIdx];
 
                     if (frameData.DataStart == 0)
                         continue;

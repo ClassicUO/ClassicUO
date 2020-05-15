@@ -180,7 +180,7 @@ namespace ClassicUO.Game.UI.Gumps
             _showMarkerNames = ProfileManager.Current.WorldMapShowMarkersNames;
         }
 
-        private void SaveSettings()
+        public void SaveSettings()
         {
             if (ProfileManager.Current == null)
                 return;

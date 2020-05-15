@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             ClilocLoader localization = ClilocLoader.Instance;
 
-            Add(new Label(localization.Translate(3000326), false, 0x0386, font: 2)
+            Add(new Label(localization.GetString(3000326, "Choose a Trade for Your Character"), false, 0x0386, font: 2)
             {
                 X = 158,
                 Y = 132
@@ -145,11 +145,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 Width = 175,
                 Height = 34
             };
-            background.SetTooltip(localization.Translate(info.Description), 250);
+            background.SetTooltip(localization.GetString(info.Description), 250);
 
             Add(background);
 
-            Add(new Label(localization.Translate(info.Localization), true, 0x00, font: 1)
+            Add(new Label(localization.GetString(info.Localization), true, 0x00, font: 1)
             {
                 X = 7,
                 Y = 8

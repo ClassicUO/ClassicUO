@@ -19,6 +19,10 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
+using System.Diagnostics;
+using System.Linq;
+
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
@@ -39,23 +43,23 @@ namespace ClassicUO.Game
         public static ushort DisplayedGraphic { get; private set; }
         public static ushort Hue { get; private set; }
         public static ushort Amount { get; private set; }
+        public static ushort TotalAmount { get; private set; }
         public static bool IsStackable { get; private set; }
         public static bool IsPartialHue { get; private set; }
         public static bool IsWearable { get; private set; }
         public static bool HasAlpha { get; private set; }
         public static Layer Layer { get; private set; }
         public static Flags Flags { get; private set; }
-
         public static bool Enabled { get; set; }
         public static bool Dropped { get; set; }
         public static bool UpdatedInWorld { get; set; }
-
         public static ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
+
+
 
         public static void Set(Item item, ushort amount, Point? offset = null)
         {
             Enabled = true;
-
             Serial = item.Serial;
             Graphic = item.Graphic;
             DisplayedGraphic = item.IsCoin && amount == 1 ? item.Graphic : item.DisplayedGraphic;
@@ -66,6 +70,7 @@ namespace ClassicUO.Game
             Container = item.Container;
             Hue = item.Hue;
             Amount = amount;
+            TotalAmount = item.Amount;
             IsStackable = item.ItemData.IsStackable;
             IsPartialHue = item.ItemData.IsPartialHue;
             HasAlpha = item.ItemData.IsTranslucent;

@@ -283,7 +283,7 @@ namespace ClassicUO.IO.Resources
 
                     {
                         int.TryParse(strings[1], out nameClilocID);
-                        name = ClilocLoader.Instance.GetString(nameClilocID);
+                        name = ClilocLoader.Instance.GetString(nameClilocID, true, name);
 
                         break;
                     }

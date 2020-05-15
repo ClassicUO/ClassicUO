@@ -975,13 +975,8 @@ namespace ClassicUO.Game.Managers
 
                     if (_itemsInHand[handIndex] != 0)
                     {
-                        Item item = World.Items.Get(_itemsInHand[handIndex]);
-
-                        if (item != null)
-                        {
-                            GameActions.PickUp(item, 1);
-                            gs.WearHeldItem(World.Player);
-                        }
+                        GameActions.PickUp(_itemsInHand[handIndex], 1);
+                        gs.WearHeldItem(World.Player);
 
                         _itemsInHand[handIndex] = 0;
                     }

@@ -112,6 +112,9 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
+            if (button != MouseButtonType.Left)
+                return;
+
             OnBeforeContextMenu?.Invoke(this, null);
 
             var contextMenu = new ComboboxContextMenu(this, _items, Width, _maxHeight)

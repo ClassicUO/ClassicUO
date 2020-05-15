@@ -369,7 +369,7 @@ namespace ClassicUO.Network
 
                 if (type > 0 && p.Position + 1 <= p.Length)
                 {
-                    mobile.IsMale = !p.ReadBool();
+                    mobile.IsFemale = p.ReadBool();
 
                     if (mobile == World.Player)
                     {
@@ -635,6 +635,7 @@ namespace ClassicUO.Network
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
             p.Skip(4);
             World.Player.Graphic = p.ReadUShort();
+            World.Player.CheckGraphicChange();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
             sbyte z = (sbyte) p.ReadUShort();
@@ -1002,11 +1003,11 @@ namespace ClassicUO.Network
 
                     if (first == null)
                     {
-                        Log.Warn("buy item not found");
+                        //Log.Warn("buy item not found");
                         continue;
                     }
 
-                    bool reverse = (first as Item)?.X != 1;
+                    bool reverse = item.Graphic != 0x2AF8; //hardcoded logic in original client that we must match
 
                     if (reverse)
                     {
@@ -1132,19 +1133,24 @@ namespace ClassicUO.Network
 
             if (ItemHold.Enabled || ItemHold.Dropped && (firstItem == null || !firstItem.AllowedToDraw))
             {
+                if (World.ObjectToRemove == ItemHold.Serial)
+                {
+                    World.ObjectToRemove = 0;
+                }
+
                 if (!ItemHold.UpdatedInWorld)
                 {
                     if (ItemHold.Layer == Layer.Invalid && SerialHelper.IsValid(ItemHold.Container))
                     {
-                        // Server should sends an UpdateContainedItem after this packet.
-
-                        //AddItemToContainer(ItemHold.Serial,
-                        //                   ItemHold.Graphic,
-                        //                   ItemHold.Amount,
-                        //                   ItemHold.X,
-                        //                   ItemHold.Y,
-                        //                   ItemHold.Hue,
-                        //                   ItemHold.Container);
+                        // Server should send an UpdateContainedItem after this packet.
+                        Console.WriteLine("=== DENY === ADD TO CONTAINER");
+                        AddItemToContainer(ItemHold.Serial,
+                                           ItemHold.Graphic,
+                                           ItemHold.TotalAmount,
+                                           ItemHold.X,
+                                           ItemHold.Y,
+                                           ItemHold.Hue,
+                                           ItemHold.Container);
 
                         UIManager.GetGump<ContainerGump>(ItemHold.Container)?.RequestUpdateContents();
                     }
@@ -1153,17 +1159,14 @@ namespace ClassicUO.Network
                         Item item = World.GetOrCreateItem(ItemHold.Serial);
 
                         item.Graphic = ItemHold.Graphic;
-                        item.FixHue(ItemHold.Hue);
-                        item.Amount = ItemHold.Amount;
+                        item.Hue = ItemHold.Hue;
+                        item.Amount = ItemHold.TotalAmount;
                         item.Flags = ItemHold.Flags;
                         item.Layer = ItemHold.Layer;
-                        item.Container = ItemHold.Container;
                         item.X = ItemHold.X;
                         item.Y = ItemHold.Y;
                         item.Z = ItemHold.Z;
                         item.CheckGraphicChange();
-                        item.UpdateScreenPosition();
-
 
                         Entity container = World.Get(ItemHold.Container);
 
@@ -1171,21 +1174,28 @@ namespace ClassicUO.Network
                         {
                             if (SerialHelper.IsMobile(container.Serial))
                             {
+                                Console.WriteLine("=== DENY === ADD TO PAPERDOLL");
+
+                                RemoveItemFromContainer(item);
                                 container.PushToBack(item);
+                                item.Container = container.Serial;
                                 UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
                             }
                             else
                             {
+                                Console.WriteLine("=== DENY === SOMETHING WRONG");
+
                                 RemoveItemFromContainer(item);
-                                World.Items.Remove(item.Serial);
-                                item.Destroy();
-                                //item = null;
+                                World.RemoveItem(item, true);
                             }
                         }
                         else
                         {
+                            Console.WriteLine("=== DENY === ADD TO TERRAIN");
+
                             RemoveItemFromContainer(item);
                             item.AddToTile();
+                            item.UpdateScreenPosition();
                         }
                     }
                 }
@@ -1194,12 +1204,14 @@ namespace ClassicUO.Network
                 ItemHold.Clear();
             }
             else
+            {
                 Log.Warn( "There was a problem with ItemHold object. It was cleared before :|");
+            }
 
-            var result = World.Items.Get(ItemHold.Serial);
+            //var result = World.Items.Get(ItemHold.Serial);
 
-            if (result != null && !result.IsDestroyed)
-                result.AllowedToDraw = true;
+            //if (result != null && !result.IsDestroyed)
+            //    result.AllowedToDraw = true;
 
             byte code = p.ReadByte();
 
@@ -1223,6 +1235,8 @@ namespace ClassicUO.Network
 
             ItemHold.Enabled = false;
             ItemHold.Dropped = false;
+
+            Console.WriteLine("PACKET - ITEM DROP OK!");
         }
 
         private static void DeathScreen(Packet p)
@@ -1316,8 +1330,13 @@ namespace ClassicUO.Network
 
             if (entity == World.Player && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded))
                 World.Player?.UpdateAbilities();
-            if (ItemHold.Serial == item.Serial)
-                ItemHold.Clear();
+
+            //if (ItemHold.Serial == item.Serial)
+            //{
+            //    Console.WriteLine("PACKET - ITEM EQUIP");
+            //    ItemHold.Enabled = false;
+            //    ItemHold.Dropped = true;
+            //}
         }
 
         private static void Swing(Packet p)
@@ -2019,12 +2038,20 @@ namespace ClassicUO.Network
                 if (first == null)
                     return;
 
-                bool reverse = (first as Item)?.X != 1;
-
-                if (reverse)
+                bool reverse = false;
+                if (container.Graphic == 0x2AF8) //hardcoded logic in original client that we must match
                 {
+                    //sort the contents
+                    first = container.SortContents<Item>((x, y) => x.X - y.X);
+                }
+                else
+                {
+                    //skip to last item and read in reverse later
+                    reverse = true;
                     while (first?.Next != null)
-                        first = first.Next;
+                    {
+                        first = first.Next; 
+                    }
                 }
 
                 for (int i = 0; i < count; i++)
@@ -2037,25 +2064,21 @@ namespace ClassicUO.Network
                     it.Price = p.ReadUInt();
                     byte nameLen = p.ReadByte();
                     string name = p.ReadASCII(nameLen);
-                    bool fromcliloc = false;
 
-                    if (int.TryParse(name, out int cliloc))
+                    if (World.OPL.TryGetNameAndData(it.Serial, out string s, out _))
                     {
-                        it.Name = ClilocLoader.Instance.GetString(cliloc);
-                        fromcliloc = true;
+                        it.Name = s;
+                    }
+                    else if (int.TryParse(name, out int cliloc))
+                    {
+                        it.Name = ClilocLoader.Instance.Translate(cliloc, $"\t{it.ItemData.Name}: \t{it.Amount}", true);
                     }
                     else if (string.IsNullOrEmpty(name))
                     {
-                        bool success = World.OPL.TryGetNameAndData(it.Serial, out it.Name, out _);
-                        if (!success)
-                        {
-                            it.Name = it.ItemData.Name;
-                        }
+                        it.Name = it.ItemData.Name;
                     }
-                    if (string.IsNullOrEmpty(it.Name))
+                    else
                         it.Name = name;
-
-                    gump.SetIfNameIsFromCliloc(it, fromcliloc);
 
                     if (reverse)
                     {
@@ -2138,6 +2161,7 @@ namespace ClassicUO.Network
             {
                 oldDead = World.Player.IsDead;
                 World.Player.Graphic = graphic;
+                World.Player.CheckGraphicChange();
                 World.Player.FixHue(hue);
                 World.Player.Flags = flags;
             }
@@ -2201,8 +2225,8 @@ namespace ClassicUO.Network
 
             while (itemSerial != 0 && p.Position < p.Length)
             {
-                if (!SerialHelper.IsItem(itemSerial))
-                    break;
+                //if (!SerialHelper.IsItem(itemSerial))
+                //    break;
 
                 ushort itemGraphic = p.ReadUShort();
                 byte layer = p.ReadByte();
@@ -2218,12 +2242,12 @@ namespace ClassicUO.Network
                     item_hue = p.ReadUShort();
                 }
 
-                if (Client.Version >= Data.ClientVersion.CV_70331)
-                    itemGraphic &= 0xFFFF;
-                else if (Client.Version >= Data.ClientVersion.CV_7090)
-                    itemGraphic &= 0x7FFF;
-                else
-                    itemGraphic &= 0x3FFF;
+                //if (Client.Version >= Data.ClientVersion.CV_70331)
+                //    itemGraphic &= 0xFFFF;
+                //else if (Client.Version >= Data.ClientVersion.CV_7090)
+                //    itemGraphic &= 0x7FFF;
+                //else
+                //    itemGraphic &= 0x3FFF;
 
                 //if (layer > 0x1D)
                 //{
@@ -2245,7 +2269,6 @@ namespace ClassicUO.Network
                 item.Amount = 1;
                 RemoveItemFromContainer(item);
                 item.Container = serial;
-                
 
                 //{
                     item.Layer = (Layer) layer;
@@ -3224,7 +3247,7 @@ namespace ClassicUO.Network
 
                     if (cliloc > 0)
                     {
-                        str = ClilocLoader.Instance.Translate(ClilocLoader.Instance.GetString((int) cliloc), capitalize: true);
+                        str = ClilocLoader.Instance.GetString((int) cliloc, true);
 
                         if (!string.IsNullOrEmpty(str))
                             item.Name = str;
@@ -3625,7 +3648,7 @@ namespace ClassicUO.Network
                     //}
                     
                     break;
-                case 0x051B: // ClassicUO commands
+                case 0xBEEF: // ClassicUO commands
 
                     type = p.ReadUShort();
                     
@@ -4139,47 +4162,63 @@ namespace ClassicUO.Network
             if (iconID < BuffTable.Table.Length)
             {
                 BuffGump gump = UIManager.GetGump<BuffGump>();
-                ushort mode = p.ReadUShort();
+                ushort count = p.ReadUShort();
 
-                if (mode != 0)
-                {
-                    p.Skip(12);
-                    ushort timer = p.ReadUShort();
-                    p.Skip(3);
-                    uint titleCliloc = p.ReadUInt();
-                    uint descriptionCliloc = p.ReadUInt();
-                    uint wtfCliloc = p.ReadUInt();
-                    p.Skip(4);
-                    string title = ClilocLoader.Instance.GetString((int) titleCliloc);
-                    string description = string.Empty;
-                    string wtf = string.Empty;
-
-                    if (descriptionCliloc != 0)
-                    {
-                        string args = p.ReadUnicodeReversed();
-                        description = "\n" + ClilocLoader.Instance.Translate((int) descriptionCliloc, args, true);
-
-                        if (description.Length < 2)
-                            description = string.Empty;
-                    }
-
-                    if (wtfCliloc != 0)
-                    {
-                        wtf = ClilocLoader.Instance.GetString((int) wtfCliloc);
-                        if (!string.IsNullOrWhiteSpace(wtf))
-                            wtf = $"\n{wtf}";
-                    }
-
-                    string text = $"<left>{title}{description}{wtf}</left>";
-                    bool alreadyExists = World.Player.IsBuffIconExists(ic);
-                    World.Player.AddBuff(ic, BuffTable.Table[iconID], timer, text);
-                    if (!alreadyExists)
-                        gump?.AddBuff(ic);
-                }
-                else
+                if (count == 0)
                 {
                     World.Player.RemoveBuff(ic);
                     gump?.RemoveBuff(ic);
+                }
+                else
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        ushort source_type = p.ReadUShort();
+                        p.Skip(2);
+                        ushort icon = p.ReadUShort();
+                        ushort queue_index = p.ReadUShort();
+                        p.Skip(4);
+                        ushort timer = p.ReadUShort();
+                        p.Skip(3);
+
+                        uint titleCliloc = p.ReadUInt();
+                        uint descriptionCliloc = p.ReadUInt();
+                        uint wtfCliloc = p.ReadUInt();
+
+                        ushort arg_length = p.ReadUShort();
+                        string args = p.ReadUnicodeReversed();
+                        string title = ClilocLoader.Instance.Translate((int) titleCliloc, args, true);
+
+                        arg_length = p.ReadUShort();
+                        args = p.ReadUnicodeReversed();
+                        string description = string.Empty;
+
+                        if (descriptionCliloc != 0)
+                        {
+                            description = "\n" + ClilocLoader.Instance.Translate((int) descriptionCliloc, args, true);
+
+                            if (description.Length < 2)
+                                description = string.Empty;
+                        }
+
+                        arg_length = p.ReadUShort();
+                        args = p.ReadUnicodeReversed();
+                        string wtf = string.Empty;
+
+                        if (wtfCliloc != 0)
+                        {
+                            wtf = ClilocLoader.Instance.Translate((int) wtfCliloc, args, true);
+                            if (!string.IsNullOrWhiteSpace(wtf))
+                                wtf = $"\n{wtf}";
+                        }
+
+
+                        string text = $"<left>{title}{description}{wtf}</left>";
+                        bool alreadyExists = World.Player.IsBuffIconExists(ic);
+                        World.Player.AddBuff(ic, BuffTable.Table[iconID], timer, text);
+                        if (!alreadyExists)
+                            gump?.AddBuff(ic);
+                    }
                 }
             }
         }
@@ -4497,15 +4536,18 @@ namespace ClassicUO.Network
         private static void AddItemToContainer(uint serial, ushort graphic, ushort amount, ushort x, ushort y, ushort hue, uint containerSerial)
         {
             if (ItemHold.Serial == serial && ItemHold.Dropped)
+            {
+                Console.WriteLine("ADD ITEM TO CONTAINER -- CLEAR HOLD");
                 ItemHold.Clear();
+            }
 
             Entity container = World.Get(containerSerial);
 
             if (container == null)
             {
                 Log.Warn( $"No container ({containerSerial}) found");
-
-                return;
+                container = World.GetOrCreateItem(containerSerial);
+                //return;
             }
 
             Item item = World.Items.Get(serial);
@@ -4650,6 +4692,7 @@ namespace ClassicUO.Network
 
                     obj = mobile;
                     mobile.Graphic = (ushort) (graphic + graphic_inc);
+                    mobile.CheckGraphicChange();
                     mobile.Direction = direction & Direction.Up;
                     mobile.FixHue(hue);
                     mobile.X = x;
@@ -4734,6 +4777,7 @@ namespace ClassicUO.Network
 
                 item.Amount = count;
                 item.Flags = flagss;
+                item.Direction = direction;
                 item.CheckGraphicChange(item.AnimIndex);
             }
             else
@@ -4797,14 +4841,20 @@ namespace ClassicUO.Network
             }
             else if (SerialHelper.IsItem(serial) && item != null)
             {
-                if (item.OnGround)
+                if (ItemHold.Serial == serial)
                 {
-                    if (ItemHold.Serial == serial && ItemHold.Dropped)
+                    Console.WriteLine("ITEM FOUND TO CLEAR");
+                    if (ItemHold.Dropped)
                     {
-                        ItemHold.Enabled = false;
-                        ItemHold.Dropped = false;
+                        Console.WriteLine("....AND IT IS DROPPED!");
                     }
 
+                    ItemHold.Enabled = false;
+                    ItemHold.Dropped = false;
+                }
+
+                if (item.OnGround)
+                {
                     item.AddToTile();
                     item.UpdateScreenPosition();
 

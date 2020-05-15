@@ -23,15 +23,23 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps
 {
+    enum ANCHOR_TYPE
+    {
+        NONE,
+        SPELL,
+        HEALTHBAR
+    }
+
     abstract class AnchorableGump : Gump
     {
-        private GumpPic _lockGumpPic;
+        //private GumpPic _lockGumpPic;
         private int _prevX, _prevY;
         private AnchorableGump _anchorCandidate;
 
@@ -39,11 +47,13 @@ namespace ClassicUO.Game.UI.Gumps
         {
         }
 
-        public string AnchorGroupName { get; protected set; }
+        public ANCHOR_TYPE AnchorType { get; protected set; }
         public virtual int GroupMatrixWidth { get; protected set; }
         public virtual int GroupMatrixHeight { get; protected set; }
         public int WidthMultiplier { get; protected set; } = 1;
         public int HeightMultiplier { get; protected set; } = 1;
+
+        public bool ShowLock => Keyboard.Alt && UIManager.AnchorManager[this] != null;
 
         protected override void OnMove(int x, int y)
         {
@@ -73,7 +83,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseOver(int x, int y)
         {
-
             if (UIManager.IsDragging && UIManager.DraggingControl == this)
                 _anchorCandidate = UIManager.AnchorManager.GetAnchorableControlUnder(this);
 
@@ -92,42 +101,51 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnDragEnd(x, y);
         }
 
-        public override void Update(double totalMS, double frameMS)
+
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            base.Update(totalMS, frameMS);
-
-            if (Keyboard.Alt && UIManager.AnchorManager[this] != null)
+            if (button == MouseButtonType.Left && ShowLock)
             {
-                if (_lockGumpPic == null)
-                {
-                    _lockGumpPic = new GumpPic(0, 0, 0x082C, 0);
-                    _lockGumpPic.Update(totalMS, frameMS);
-                    _lockGumpPic.AcceptMouseInput = true;
-                    _lockGumpPic.X = Width - _lockGumpPic.Width;
-                    _lockGumpPic.Y = 0;
-                    _lockGumpPic.MouseUp += _lockGumpPic_MouseClick;
+                Texture2D lock_texture = GumpsLoader.Instance.GetTexture(0x082C);
 
-                    Add(_lockGumpPic);
-                }
+                if (lock_texture != null)
+                    if (x >= Width - lock_texture.Width && x < Width &&
+                        y >= 0 && y <= lock_texture.Height)
+                    {
+                        UIManager.AnchorManager.DetachControl(this);
 
-                if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
-                    _lockGumpPic.Hue = 34;
-                else
-                    _lockGumpPic.Hue = 0;
-
+                    }
             }
-            else if ((!Keyboard.Alt || UIManager.AnchorManager[this] == null) && _lockGumpPic != null)
-            {
-                Remove(_lockGumpPic);
-                _lockGumpPic.MouseUp += _lockGumpPic_MouseClick;
-                _lockGumpPic.Dispose();
-                _lockGumpPic = null;
-            }
+
+            base.OnMouseUp(x, y, button);
         }
+
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             base.Draw(batcher, x, y);
+
+            if (ShowLock)
+            {
+                ResetHueVector();
+
+                UOTexture lock_texture = GumpsLoader.Instance.GetTexture(0x082C);
+
+                if (lock_texture != null)
+                {
+                    lock_texture.Ticks = Time.Ticks;
+
+                    if (UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
+                    {
+                        _hueVector.X = 34;
+                        _hueVector.Y = 1;
+                    }
+
+                    batcher.Draw2D(lock_texture, x + (Width - lock_texture.Width), y, ref _hueVector);
+                }
+            }
+
+            ResetHueVector();
 
             if (_anchorCandidate != null)
             {
@@ -158,12 +176,6 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.AnchorManager.DisposeAllControls(this);
                 base.CloseWithRightClick();
             }
-        }
-
-        private void _lockGumpPic_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtonType.Left)
-                UIManager.AnchorManager.DetachControl(this);
         }
 
         public override void Dispose()

@@ -34,7 +34,7 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -67,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
         private StbTextBox _rows, _columns, _highlightAmount, _abbreviatedAmount;
 
         //experimental
-        private Checkbox _enableSelectionArea, _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
+        private Checkbox  _debugGumpIsDisabled, _restoreLastGameSize, _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
         private Combobox _overrideContainerLocationSetting;
         private Checkbox _use_smooth_boat_movement;
 
@@ -108,6 +108,7 @@ namespace ClassicUO.Game.UI.Gumps
         // speech
         private Checkbox _scaleSpeechDelay, _saveJournalCheckBox;
         private Combobox _shardType, _auraType;
+        private NiceButton _randomizeColorsButton;
 
         // network
         private Checkbox _showNetStats;
@@ -985,6 +986,28 @@ namespace ClassicUO.Game.UI.Gumps
             _emoteColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.EmoteHue, "Emote Color", 20, 0);
             _yellColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.YellHue, "Yell Color", 20, 0);
             _whisperColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.WhisperHue, "Whisper Color", 20, 0);
+
+            _randomizeColorsButton = new NiceButton(0, 0, 140, 25, ButtonAction.Activate, "Randomize speech hues") { ButtonParameter = (int)Buttons.Disabled };
+            _randomizeColorsButton.MouseUp += (sender, e) =>
+            {
+                if (e.Button != MouseButtonType.Left)
+                    return;
+                var speechHue = (ushort)RandomHelper.GetValue(2, 1001); //this seems to be the acceptable hue range for chat messages,
+                var emoteHue = (ushort)RandomHelper.GetValue(2, 1001); //taken from POL source code.
+                var yellHue = (ushort)RandomHelper.GetValue(2, 1001);
+                var whisperHue = (ushort)RandomHelper.GetValue(2, 1001);
+                ProfileManager.Current.SpeechHue = speechHue;
+                _speechColorPickerBox.SetColor(speechHue, HuesLoader.Instance.GetPolygoneColor(12, speechHue));
+                ProfileManager.Current.EmoteHue = emoteHue;
+                _emoteColorPickerBox.SetColor(emoteHue, HuesLoader.Instance.GetPolygoneColor(12, emoteHue));
+                ProfileManager.Current.YellHue = yellHue;
+                _yellColorPickerBox.SetColor(yellHue, HuesLoader.Instance.GetPolygoneColor(12, yellHue));
+                ProfileManager.Current.WhisperHue = whisperHue;
+                _whisperColorPickerBox.SetColor(whisperHue, HuesLoader.Instance.GetPolygoneColor(12, whisperHue));
+
+            };
+            rightArea.Add(_randomizeColorsButton);
+
             _partyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.PartyMessageHue, "Party Message Color", 20, 0);
             _guildMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.GuildMessageHue, "Guild Message Color", 20, 0);
             _allyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, ProfileManager.Current.AllyMessageHue, "Alliance Message Color", 20, 0);
@@ -1134,7 +1157,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             _use_smooth_boat_movement = CreateCheckBox(rightArea, "Smooth boat movements", ProfileManager.Current.UseSmoothBoatMovement, 0, 0);
             _use_smooth_boat_movement.IsVisible = Client.Version >= ClientVersion.CV_7090; 
-            _enableSelectionArea = CreateCheckBox(rightArea, "Enable Text Selection Area", ProfileManager.Current.EnableSelectionArea, 0, 0);
 
             _debugGumpIsDisabled = CreateCheckBox(rightArea, "Disable Debug Gump", ProfileManager.Current.DebugGumpIsDisabled, 0, 0);
             _restoreLastGameSize = CreateCheckBox(rightArea, "Disable automatic maximize. Restore windows size after re-login", ProfileManager.Current.RestoreLastGameSize, 0, 0);
@@ -1402,6 +1424,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             switch ((Buttons) buttonID)
             {
+                case Buttons.Disabled:
+                    break;
+
                 case Buttons.Cancel:
                     Dispose();
 
@@ -1597,7 +1622,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case 10:
                     _use_smooth_boat_movement.IsChecked = false;
-                    _enableSelectionArea.IsChecked = false;
                     _debugGumpIsDisabled.IsChecked = false;
                     _restoreLastGameSize.IsChecked = false;
                     _disableDefaultHotkeys.IsChecked = false;
@@ -1979,7 +2003,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             // experimental
             ProfileManager.Current.UseSmoothBoatMovement = _use_smooth_boat_movement.IsChecked;
-            ProfileManager.Current.EnableSelectionArea = _enableSelectionArea.IsChecked;
             ProfileManager.Current.RestoreLastGameSize = _restoreLastGameSize.IsChecked;
 
             // Reset nested checkboxes if parent checkbox is unchecked
@@ -2254,6 +2277,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private enum Buttons
         {
+            Disabled, //no action will be done on these buttons, at least not by OnButtonClick()
             Cancel,
             Apply,
             Default,

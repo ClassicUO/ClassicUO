@@ -89,11 +89,15 @@ namespace ClassicUO.Game.Scenes
 
         private bool PickupItemDirectly(Item item, int x, int y, int amount, Point? offset)
         {
-            if (World.Player.IsDead || ItemHold.Enabled || item == null || item.IsDestroyed /*|| (!ItemHold.Enabled && ItemHold.Dropped && ItemHold.Serial.IsValid)*/)
+            if (World.Player.IsDead || ItemHold.Enabled || item == null || item.IsDestroyed)
                 return false;
 
+            if (amount <= 0)
+                amount = item.Amount;
+
             ItemHold.Clear();
-            ItemHold.Set(item, amount <= 0 ? item.Amount : (ushort) amount);
+            ItemHold.Set(item, (ushort) amount);
+            NetClient.Socket.Send(new PPickUpRequest(item, (ushort) amount));
             UIManager.GameCursor.SetDraggedItem(offset);
 
             if (!item.OnGround)
@@ -118,7 +122,9 @@ namespace ClassicUO.Game.Scenes
             //World.Items.ProcessDelta();
             //CloseItemGumps(item);
 
-            NetClient.Socket.Send(new PPickUpRequest(item, (ushort) amount));
+            //World.RemoveItem(item.Serial, true);
+
+            World.ObjectToRemove = item.Serial;
 
             return true;
         }

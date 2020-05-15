@@ -176,12 +176,14 @@ namespace ClassicUO.Game.GameObjects
             posX += 22;
             posY += 22;
 
-            byte dir = (byte) ((byte) Layer & 0x7F & 7);
+            AnimationsLoader.Instance.Direction = (byte) (((byte) Layer & 0x7F) & 7);
             bool mirror = false;
-            AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
+            AnimationsLoader.Instance.GetAnimDirection(ref AnimationsLoader.Instance.Direction, ref mirror);
             IsFlipped = mirror;
-            AnimationsLoader.Instance.Direction = dir;
             byte animIndex = (byte) AnimIndex;
+            ushort graphic = GetGraphicForAnimation();
+            AnimationsLoader.Instance.ConvertBodyIfNeeded(ref graphic);
+            AnimationsLoader.Instance.AnimGroup = AnimationsLoader.Instance.GetDieGroupIndex(graphic, UsedLayer);
 
             bool ishuman = MathHelper.InRange(Amount, 0x0190, 0x0193) ||
                            MathHelper.InRange(Amount, 0x00B7, 0x00BA) ||
@@ -190,12 +192,12 @@ namespace ClassicUO.Game.GameObjects
                            MathHelper.InRange(Amount, 0x02B6, 0x02B7) ||
                            Amount == 0x03DB || Amount == 0x03DF || Amount == 0x03E2 || Amount == 0x02E8 || Amount == 0x02E9;
 
-            DrawLayer(batcher, posX, posY, Layer.Invalid, animIndex, ishuman);
+            DrawLayer(batcher, posX, posY, Layer.Invalid, animIndex, ishuman, Hue);
 
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
-                Layer layer = LayerOrder.UsedLayers[dir, i];
-                DrawLayer(batcher, posX, posY, layer, animIndex, ishuman);
+                Layer layer = LayerOrder.UsedLayers[AnimationsLoader.Instance.Direction, i];
+                DrawLayer(batcher, posX, posY, layer, animIndex, ishuman, 0);
             }
 
             return true;
@@ -203,19 +205,16 @@ namespace ClassicUO.Game.GameObjects
 
         private static EquipConvData? _equipConvData;
 
-        private void DrawLayer(UltimaBatcher2D batcher, int posX, int posY, Layer layer, byte animIndex, bool ishuman)
+        private void DrawLayer(UltimaBatcher2D batcher, int posX, int posY, Layer layer, byte animIndex, bool ishuman, ushort color)
         {
             _equipConvData = null;
-            ushort graphic;
-            ushort color = 0;
             bool ispartialhue = false;
+
+            ushort graphic;
+            
             if (layer == Layer.Invalid)
             {
                 graphic = GetGraphicForAnimation();
-                AnimationsLoader.Instance.AnimGroup = AnimationsLoader.Instance.GetDieGroupIndex(graphic, UsedLayer);
-
-                if (color == 0)
-                    color = Hue;
             }
             else if (ishuman)
             {
@@ -227,10 +226,7 @@ namespace ClassicUO.Game.GameObjects
                 graphic = itemEquip.ItemData.AnimID;
                 ispartialhue = itemEquip.ItemData.IsPartialHue;
 
-                ushort mobGraphic = Amount;
-                AnimationsLoader.Instance.ConvertBodyIfNeeded(ref mobGraphic);
-
-                if (AnimationsLoader.Instance.EquipConversions.TryGetValue(mobGraphic, out Dictionary<ushort, EquipConvData> map))
+                if (AnimationsLoader.Instance.EquipConversions.TryGetValue(graphic, out Dictionary<ushort, EquipConvData> map))
                 {
                     if (map.TryGetValue(graphic, out EquipConvData data))
                     {
@@ -243,8 +239,6 @@ namespace ClassicUO.Game.GameObjects
             }
             else
                 return;
-
-
 
             byte animGroup = AnimationsLoader.Instance.AnimGroup;
             ushort newHue = 0;

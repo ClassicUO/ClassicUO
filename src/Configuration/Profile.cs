@@ -164,7 +164,6 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool HoldAltToMoveGumps { get; set; }
 
         // Experimental
-        [JsonProperty] public bool EnableSelectionArea { get; set; }
         [JsonProperty] public bool DebugGumpIsDisabled { get; set; }
         [JsonProperty] public Point DebugGumpPosition { get; set; } = new Point(25, 25);
         [JsonProperty] public bool DebugGumpIsMinimized { get; set; } = true;
@@ -326,19 +325,32 @@ namespace ClassicUO.Configuration
                 xml.WriteStartDocument(true);
                 xml.WriteStartElement("gumps");
 
-                foreach (Gump gump in gumps)
+                UIManager.AnchorManager.Save(xml);
+
+                for (int i = 0; i < gumps.Count; i++)
                 {
-                    xml.WriteStartElement("gump");
-                    gump.Save(xml);
-                    xml.WriteEndElement();
+                    var gump = gumps[i];
+
+                    if (gump.IsDisposed)
+                        continue;
+
+                    if (gump is AnchorableGump anchored && UIManager.AnchorManager[anchored] != null)
+                    {
+                        // do nothing
+                    }
+                    else
+                    {
+                        xml.WriteStartElement("gump");
+                        gump.Save(xml);
+                        xml.WriteEndElement();
+                    }
                 }
 
                 xml.WriteEndElement();
                 xml.WriteEndDocument();
             }
 
-            using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "anchors.bin"))))
-                UIManager.AnchorManager.Save(writer);
+           
 
             SkillsGroupManager.Save();
         }
@@ -490,8 +502,10 @@ namespace ClassicUO.Configuration
 
                 if (root != null)
                 {
-                    foreach (XmlElement xml in root.GetElementsByTagName("gump"))
+                    foreach (XmlElement xml in root.ChildNodes/*.GetElementsByTagName("gump")*/)
                     {
+                        if (xml.Name != "gump")
+                            continue;
                         try
                         {
                             GUMP_TYPE type = (GUMP_TYPE) int.Parse(xml.GetAttribute("type"));
@@ -608,26 +622,79 @@ namespace ClassicUO.Configuration
                             Log.Error(ex.ToString());
                         }
                     }
+
+                    foreach (XmlElement group in root.GetElementsByTagName("anchored_group_gump"))
+                    {
+                        int matrix_width = int.Parse(group.GetAttribute("matrix_w"));
+                        int matrix_height = int.Parse(group.GetAttribute("matrix_h"));
+
+                        AnchorManager.AnchorGroup ancoGroup = new AnchorManager.AnchorGroup();
+                        ancoGroup.ResizeMatrix(matrix_width, matrix_height, 0, 0);
+
+                        foreach (XmlElement xml in group.GetElementsByTagName("gump"))
+                        {
+                            try
+                            {
+                                GUMP_TYPE type = (GUMP_TYPE) int.Parse(xml.GetAttribute("type"));
+                                int x = int.Parse(xml.GetAttribute("x"));
+                                int y = int.Parse(xml.GetAttribute("y"));
+                                uint serial = uint.Parse(xml.GetAttribute("serial"));
+
+                                int matrix_x = int.Parse(xml.GetAttribute("matrix_x"));
+                                int matrix_y = int.Parse(xml.GetAttribute("matrix_y"));
+
+                                AnchorableGump gump = null;
+
+                                switch (type)
+                                {
+                                    case GUMP_TYPE.GT_SPELLBUTTON:
+                                        gump = new UseSpellButtonGump();
+                                        break;
+                                    case GUMP_TYPE.GT_SKILLBUTTON:
+                                        gump = new SkillButtonGump();
+                                        break;
+                                    case GUMP_TYPE.GT_HEALTHBAR:
+                                        if (CustomBarsToggled)
+                                            gump = new HealthBarGumpCustom();
+                                        else
+                                            gump = new HealthBarGump();
+                                        break;
+                                    case GUMP_TYPE.GT_ABILITYBUTTON:
+                                        gump = new UseAbilityButtonGump();
+                                        break;
+                                    case GUMP_TYPE.GT_MACROBUTTON:
+                                        gump = new MacroButtonGump();
+                                        break;
+                                }
+
+                                if (gump != null)
+                                {
+                                    gump.LocalSerial = serial;
+                                    gump.Restore(xml);
+                                    gump.X = x;
+                                    gump.Y = y;
+
+                                    if (!gump.IsDisposed)
+                                    {
+                                        if (UIManager.AnchorManager[gump] == null && ancoGroup.IsEmptyDirection(matrix_x, matrix_y))
+                                        {
+                                            gumps.Add(gump);
+                                            UIManager.AnchorManager[gump] = ancoGroup;
+                                            ancoGroup.AddControlToMatrix(matrix_x, matrix_y, gump);
+                                        }
+                                        else 
+                                            gump.Dispose();
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Error(ex.ToString());
+                            }
+                        }
+                    }
                 }
             }
-
-          
-            // load anchors
-            string anchorsPath = Path.Combine(path, "anchors.bin");
-
-            if (File.Exists(anchorsPath))
-            {
-                try
-                {
-                    using (BinaryReader reader = new BinaryReader(File.OpenRead(anchorsPath)))
-                        UIManager.AnchorManager.Restore(reader, gumps);
-                }
-                catch (Exception e)
-                {
-                    Log.Error( e.StackTrace);
-                }
-            }
-
 
             return gumps;
         }

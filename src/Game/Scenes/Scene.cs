@@ -98,23 +98,23 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-        internal virtual void OnLeftMouseUp() { }
-        internal virtual void OnLeftMouseDown() { }
+        internal virtual bool OnLeftMouseUp() => false;
+        internal virtual bool OnLeftMouseDown() => false;
 
-        internal virtual void OnRightMouseUp() { }
-        internal virtual void OnRightMouseDown() { }
+        internal virtual bool OnRightMouseUp() => false;
+        internal virtual bool OnRightMouseDown() => false;
 
-        internal virtual void OnMiddleMouseUp() { }
-        internal virtual void OnMiddleMouseDown() { }
+        internal virtual bool OnMiddleMouseUp() => false;
+        internal virtual bool OnMiddleMouseDown() => false;
 
-        internal virtual void OnExtraMouseUp(int button) { }
-        internal virtual void OnExtraMouseDown(int button) { }
+        internal virtual bool OnExtraMouseUp(int button) => false;
+        internal virtual bool OnExtraMouseDown(int button) => false;
 
         internal virtual bool OnLeftMouseDoubleClick() => false;
         internal virtual bool OnRightMouseDoubleClick() => false;
         internal virtual bool OnMiddleMouseDoubleClick() => false;
-        internal virtual void OnMouseWheel(bool up) { }
-        internal virtual void OnMouseDragging() { }
+        internal virtual bool OnMouseWheel(bool up) => false;
+        internal virtual bool OnMouseDragging() => false;
         internal virtual void OnTextInput(string text) { }
         internal virtual void OnKeyDown(SDL.SDL_KeyboardEvent e) { }
         internal virtual void OnKeyUp(SDL.SDL_KeyboardEvent e) { }
