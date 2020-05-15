@@ -355,9 +355,15 @@ namespace ClassicUO.Game
                 }
             }
 
-            for (var i = item.Items; i != null; i = i.Next)
+            var first = item.Items;
+
+            while (first != null)
             {
-                RemoveItem(i as Item, forceRemove);
+                var next = first.Next;
+
+                RemoveItem(first as Item, forceRemove);
+
+                first = next;
             }
 
             item.Clear();
@@ -376,9 +382,15 @@ namespace ClassicUO.Game
             if (mobile == null)
                 return false;
 
-            for (var i = mobile.Items; i != null; i = i.Next)
+            var first = mobile.Items;
+
+            while (first != null)
             {
-                RemoveItem(i as Item, forceRemove);
+                var next = first.Next;
+
+                RemoveItem(first as Item, forceRemove);
+
+                first = next;
             }
 
             mobile.Clear();

@@ -750,23 +750,23 @@ namespace ClassicUO.Game.GameObjects
                     bool run = step.Run;
 
                     // seems like it makes characterd naked for some reason
-                    //if (Serial != World.Player && Steps.Count > 1)
-                    //{
-                    //    if (run)
-                    //    {
-                    //        if (delay <= MovementSpeed.STEP_DELAY_MOUNT_RUN)
-                    //        {
-                    //            mounted = true;
-                    //        }
-                    //    }
-                    //    else
-                    //    {
-                    //        if (delay <= MovementSpeed.STEP_DELAY_MOUNT_WALK)
-                    //        {
-                    //            mounted = true;
-                    //        }
-                    //    }
-                    //}
+                    if (Serial != World.Player && Steps.Count > 1)
+                    {
+                        if (run)
+                        {
+                            if (delay <= MovementSpeed.STEP_DELAY_MOUNT_RUN)
+                            {
+                                mounted = true;
+                            }
+                        }
+                        else
+                        {
+                            if (delay <= MovementSpeed.STEP_DELAY_MOUNT_WALK)
+                            {
+                                mounted = true;
+                            }
+                        }
+                    }
 
 
                     int maxDelay = MovementSpeed.TimeToCompleteMovement(run, mounted) - (int) Client.Game.FrameDelay[1];
