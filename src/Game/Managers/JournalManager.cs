@@ -75,7 +75,7 @@ namespace ClassicUO.Game.Managers
 
         private void CreateWriter()
         {
-            if (_fileWriter == null && ProfileManager.Current.SaveJournalToFile)
+            if (_fileWriter == null && ProfileManager.Current != null && ProfileManager.Current.SaveJournalToFile)
             {
                 try
                 {
