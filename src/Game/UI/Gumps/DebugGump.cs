@@ -35,12 +35,14 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class DebugGump : Gump
     {
-        private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2}), Scale: {3}, Total Objs: {4}\n";
+        private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2}), Zoom: {3}, Total Objs: {4}\n";
         private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
         private const string DEBUG_STRING_2 = "- CharPos: {0}\n- Mouse: {1}\n- InGamePos: {2}\n";
         private const string DEBUG_STRING_3 = "- Selected: {0}";
 
-        private const string DEBUG_STRING_SMALL = "FPS: {0}";
+        private const string DEBUG_STRING_SMALL = "FPS: {0}\nZoom: {1}";
+        private const string DEBUG_STRING_SMALL_NO_ZOOM = "FPS: {0}";
+
         private readonly StringBuilder _sb = new StringBuilder();
         private readonly AlphaBlendControl _trans;
         private uint _time_to_update;
@@ -104,8 +106,15 @@ namespace ClassicUO.Game.UI.Gumps
                     _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0");
                     _sb.AppendFormat(DEBUG_STRING_3, ReadObject(SelectedObject.Object));
                 }
+                else if (scene != null && scene.ScalePos != 5)
+                {
+                    _sb.AppendFormat(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, !World.InGame ? 1f : scene.Scale);
+                }
                 else
-                    _sb.AppendFormat(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate);
+                {
+                    _sb.AppendFormat(DEBUG_STRING_SMALL_NO_ZOOM, CUOEnviroment.CurrentRefreshRate);
+                }
+
 
                 var size = Fonts.Bold.MeasureString(_sb.ToString());
 
