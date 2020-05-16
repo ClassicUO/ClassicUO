@@ -637,7 +637,7 @@ namespace ClassicUO.Game.Managers
                         break;
 
                     case "xmfhtmlgump":
-                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", ClilocLoader.Instance.GetString(int.Parse(gparams[5])), 0, true), page);
+                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", ClilocLoader.Instance.GetString(int.Parse(gparams[5].Replace("#", ""))), 0, true), page);
 
                         break;
 
@@ -646,7 +646,7 @@ namespace ClassicUO.Game.Managers
 
                         if (color == 0x7FFF)
                             color = 0x00FFFFFF;
-                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", ClilocLoader.Instance.GetString(int.Parse(gparams[5])), color, true), page);
+                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", ClilocLoader.Instance.GetString(int.Parse(gparams[5].Replace("#", ""))), color, true), page);
 
                         break;
 
@@ -657,19 +657,18 @@ namespace ClassicUO.Game.Managers
                             color = 0x00FFFFFF;
                         StringBuilder sb = null;
 
-                        if (gparams.Count > 9)
+                        if (gparams.Count >= 9)
                         {
                             sb = new StringBuilder();
-                            sb.Append(gparams[9]);
 
-                            for (int i = 10; i < gparams.Count; i++)
+                            for (int i = 9; i < gparams.Count; i++)
                             {
-                                sb.Append(' ');
+                                sb.Append('\t');
                                 sb.Append(gparams[i]);
                             }
                         }
 
-                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[5]) == 1, int.Parse(gparams[6]) != 0, gparams[5] != "0" && gparams[6] == "2", sb == null ? ClilocLoader.Instance.GetString(int.Parse(gparams[8])) : ClilocLoader.Instance.Translate(ClilocLoader.Instance.GetString(int.Parse(gparams[8])), sb.ToString().Trim('@').Replace('@', '\t')), color, true), page);
+                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[5]) == 1, int.Parse(gparams[6]) != 0, gparams[5] != "0" && gparams[6] == "2", sb == null ? ClilocLoader.Instance.GetString(int.Parse(gparams[8].Replace("#", ""))) : ClilocLoader.Instance.Translate(int.Parse(gparams[8].Replace("#", "")), sb.ToString().Trim('@').Replace('@', '\t')), color, true), page);
 
                         break;
 
