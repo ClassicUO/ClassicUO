@@ -41,131 +41,225 @@ namespace ClassicUO.Game.Managers
         private static readonly Dictionary<ushort, ContainerData> _data = new Dictionary<ushort, ContainerData>
         {
             {
-                0x9, new ContainerData(0x0009, 0x0000, 0x0000, 20, 85, 124, 196)
+                0x0007, new ContainerData(0x0007, 0x0000, 0x0000, 30, 30, 270, 170)
             },
             {
-                0x3C, new ContainerData(0x003C, 0x0048, 0x0058, 44, 65, 186, 159, 0x50, 105, 162)
+                0x0009, new ContainerData(0x0009, 0x0000, 0x0000, 20, 85, 124, 196)
             },
             {
-                0x3D, new ContainerData(0x003D, 0x0048, 0x0058, 29, 34, 137, 128)
+                0x003C, new ContainerData(0x003C, 0x0048, 0x0058, 44, 65, 186, 159)
             },
             {
-                0x3E, new ContainerData(0x003E, 0x002F, 0x002E, 33, 36, 142, 148)
+                0x003D, new ContainerData(0x003D, 0x0048, 0x0058, 29, 34, 137, 128)
             },
             {
-                0x3F, new ContainerData(0x003F, 0x004F, 0x0058, 19, 47, 182, 123)
+                0x003E, new ContainerData(0x003E, 0x002F, 0x002E, 33, 36, 142, 148)
             },
             {
-                0x40, new ContainerData(0x0040, 0x002D, 0x002C, 16, 51, 150, 140)
+                0x003F, new ContainerData(0x003F, 0x004F, 0x0058, 19, 47, 182, 123)
             },
             {
-                0x41, new ContainerData(0x0041, 0x004F, 0x0058, 35, 38, 145, 116)
+                0x0040, new ContainerData(0x0040, 0x002D, 0x002C, 16, 38, 152, 125)
             },
             {
-                0x42, new ContainerData(0x0042, 0x002D, 0x002C, 18, 105, 162, 178)
+                0x0041, new ContainerData(0x0041, 0x004F, 0x0058, 40, 30, 139, 123)
             },
             {
-                0x43, new ContainerData(0x0043, 0x002D, 0x002C, 16, 51, 181, 124)
+                0x0042, new ContainerData(0x0042, 0x002D, 0x002C, 18, 105, 162, 178)
             },
             {
-                0x44, new ContainerData(0x0044, 0x002D, 0x002C, 20, 10, 170, 100)
+                0x0043, new ContainerData(0x0043, 0x002D, 0x002C, 16, 51, 184, 124)
             },
             {
-                0x48, new ContainerData(0x0048, 0x002F, 0x002E, 16, 10, 154, 94)
+                0x0044, new ContainerData(0x0044, 0x002D, 0x002C, 20, 10, 170, 100)
             },
             {
-                0x49, new ContainerData(0x0049, 0x002D, 0x002C, 18, 105, 162, 178)
+                0x0047, new ContainerData(0x0047, 0x0000, 0x0000, 16, 10, 148, 138)
             },
             {
-                0x4A, new ContainerData(0x004A, 0x002D, 0x002C, 18, 105, 162, 178)
+                0x0048, new ContainerData(0x0048, 0x002F, 0x002E, 16, 10, 154, 94)
             },
             {
-                0x4B, new ContainerData(0x004B, 0x002D, 0x002C, 16, 51, 184, 124)
+                0x0049, new ContainerData(0x0049, 0x002D, 0x002C, 18, 105, 162, 178)
             },
             {
-                0x4C, new ContainerData(0x004C, 0x002D, 0x002C, 46, 74, 196, 184)
+                0x004A, new ContainerData(0x004A, 0x002D, 0x002C, 18, 105, 162, 178)
             },
             {
-                0x4D, new ContainerData(0x004D, 0x002F, 0x002E, 76, 12, 140, 68)
+                0x004B, new ContainerData(0x004B, 0x002D, 0x002C, 16, 51, 184, 124)
             },
             {
-                0x4E, new ContainerData(0x004E, 0x002D, 0x002C, 24, 18, 100, 152)
+                0x004C, new ContainerData(0x004C, 0x002D, 0x002C, 46, 74, 196, 184)
             },
             {
-                0x4F, new ContainerData(0x004F, 0x002D, 0x002C, 24, 18, 100, 152)
+                0x004D, new ContainerData(0x004D, 0x002F, 0x002E, 76, 12, 140, 68)
             },
             {
-                0x51, new ContainerData(0x0051, 0x002F, 0x002E, 16, 10, 154, 94)
+                0x004E, new ContainerData(0x004E, 0x002D, 0x002C, 24, 96, 140, 152)
             },
             {
-                0x91A, new ContainerData(0x091A, 0x0000, 0x0000, 1, 13, 260, 199)
+                0x004F, new ContainerData(0x004F, 0x002D, 0x002C, 24, 96, 140, 152)
             },
             {
-                0x92E, new ContainerData(0x092E, 0x0000, 0x0000, 1, 13, 260, 199)
+                0x0051, new ContainerData(0x0051, 0x002F, 0x002E, 16, 10, 154, 94)
             },
             {
-                0x103, new ContainerData(0x0103, 0x0048, 0x0058, 29, 34, 137, 128)
+                0x0052, new ContainerData(0x0052, 0x0000, 0x0000, 0, 0, 110, 62)
             },
             {
-                0x104, new ContainerData(0x0104, 0x002F, 0x002E, 0, 20, 168, 115)
+                0x0102, new ContainerData(0x0102, 0x004F, 0x0058, 35, 10, 190, 95)
             },
             {
-                0x105, new ContainerData(0x0105, 0x002F, 0x002E, 0, 20, 168, 115)
+                0x0103, new ContainerData(0x0103, 0x0048, 0x0058, 41, 21, 173, 104)
             },
             {
-                0x106, new ContainerData(0x0106, 0x002F, 0x002E, 0, 20, 168, 115)
+                0x0104, new ContainerData(0x0104, 0x002F, 0x002E, 10, 10, 160, 105)
             },
             {
-                0x107, new ContainerData(0x0107, 0x002F, 0x002E, 0, 20, 168, 115)
+                0x0105, new ContainerData(0x0105, 0x002F, 0x002E, 10, 10, 160, 105)
             },
             {
-                0x108, new ContainerData(0x0108, 0x004F, 0x0058, 0, 35, 150, 105)
+                0x0106, new ContainerData(0x0106, 0x002F, 0x002E, 10, 10, 160, 105)
             },
             {
-                0x109, new ContainerData(0x0109, 0x002F, 0x002E, 0, 20, 175, 105)
+                0x0107, new ContainerData(0x0107, 0x002F, 0x002E, 10, 10, 160, 105)
             },
             {
-                0x10A, new ContainerData(0x010A, 0x002F, 0x002E, 0, 20, 175, 105)
+                0x0108, new ContainerData(0x0108, 0x004F, 0x0058, 10, 10, 160, 105)
             },
             {
-                0x10B, new ContainerData(0x010B, 0x002F, 0x002E, 0, 20, 175, 105)
+                0x0109, new ContainerData(0x0109, 0x002D, 0x002C, 10, 10, 160, 105)
             },
             {
-                0x10C, new ContainerData(0x010C, 0x002F, 0x002E, 0, 20, 168, 115)
+                0x010A, new ContainerData(0x010A, 0x002D, 0x002C, 10, 10, 160, 105)
             },
             {
-                0x10D, new ContainerData(0x010D, 0x002F, 0x002E, 0, 20, 168, 115)
+                0x010B, new ContainerData(0x010B, 0x002D, 0x002C, 10, 10, 160, 105)
             },
             {
-                0x10E, new ContainerData(0x010E, 0x002F, 0x002E, 0, 20, 168, 115)
+                0x010C, new ContainerData(0x010C, 0x002F, 0x002E, 10, 10, 160, 105)
             },
             {
-                0x102, new ContainerData(0x0102, 0x004F, 0x0058, 15, 10, 210, 110)
+                0x010D, new ContainerData(0x010D, 0x002F, 0x002E, 10, 10, 160, 105)
             },
             {
-                0x11B, new ContainerData(0x011B, 0x004F, 0x0058, 15, 10, 220, 120)
+                0x010E, new ContainerData(0x010E, 0x002F, 0x002E, 10, 10, 160, 105)
             },
             {
-                0x11C, new ContainerData(0x011C, 0x004F, 0x0058, 10, 10, 220, 145)
+                0x0116, new ContainerData(0x0116, 0x0000, 0x0000, 40, 25, 140, 110)
             },
             {
-                0x11D, new ContainerData(0x011D, 0x004F, 0x0058, 10, 10, 220, 130)
+                0x011A, new ContainerData(0x011A, 0x0000, 0x0000, 10, 65, 125, 160)
             },
             {
-                0x11E, new ContainerData(0x011E, 0x004F, 0x0058, 15, 10, 290, 130)
+                0x011B, new ContainerData(0x011B, 0x0000, 0x0000, 45, 10, 175, 95)
             },
             {
-                0x11F, new ContainerData(0x011F, 0x004F, 0x0058, 15, 10, 220, 120)
+                0x011C, new ContainerData(0x011C, 0x0000, 0x0000, 37, 10, 175, 105)
             },
             {
-                0x58E, new ContainerData(0x058E, 0x002D, 0x002C, 16, 51, 184, 124)
+                0x011D, new ContainerData(0x011D, 0x0000, 0x0000, 43, 10, 165, 110)
             },
             {
-                0x484, new ContainerData(0x0484, 0x064F, 0x0000, 5, 43, 160, 100)
+                0x011E, new ContainerData(0x011E, 0x0000, 0x0000, 30, 22, 263, 106)
             },
             {
-                0x2A63, new ContainerData(0x2A63, 0x0187, 0x01c9, 29, 34, 137, 128)//for this particular gump area is bugged also in original client, as it is similar to the bag, probably this is an unfinished one
-            }
+                0x011F, new ContainerData(0x011F, 0x0000, 0x0000, 45, 10, 175, 95)
+            },
+            {
+                0x0120, new ContainerData(0x0120, 0x0000, 0x0000, 56, 30, 160, 107)
+            },
+            {
+                0x0121, new ContainerData(0x0121, 0x0000, 0x0000, 77, 32, 162, 107)
+            },
+            {
+                0x0123, new ContainerData(0x0123, 0x0000, 0x0000, 36, 19, 111, 157)
+            },
+            {
+                0x0484, new ContainerData(0x0484, 0x0000, 0x0000, 0, 45, 175, 125)
+            },
+            {
+                0x058E, new ContainerData(0x058E, 0x0000, 0x0000, 50, 150, 348, 250)
+            },
+            {
+                0x06D3, new ContainerData(0x06D3, 0x0000, 0x0000, 10, 65, 125, 160)
+            },
+            {
+                0x06D4, new ContainerData(0x06D4, 0x0000, 0x0000, 10, 65, 125, 160)
+            },
+            {
+                0x06D5, new ContainerData(0x06D5, 0x0000, 0x0000, 10, 65, 125, 160)
+            },
+            {
+                0x06D6, new ContainerData(0x06D6, 0x0000, 0x0000, 10, 65, 125, 160)
+            },
+            {
+                0x06E5, new ContainerData(0x06E5, 0x0000, 0x0000, 66, 74, 306, 520)
+            },
+            {
+                0x06E6, new ContainerData(0x06E6, 0x0000, 0x0000, 66, 74, 306, 520)
+            },
+            {
+                0x06E7, new ContainerData(0x06E7, 0x0000, 0x0000, 50, 60, 548, 308)
+            },
+            {
+                0x06E8, new ContainerData(0x06E8, 0x0000, 0x0000, 50, 60, 548, 308)
+            },
+            {
+                0x06E9, new ContainerData(0x06E9, 0x0000, 0x0000, 60, 80, 318, 324)
+            },
+            {
+                0x06EA, new ContainerData(0x06EA, 0x0000, 0x0000, 50, 60, 548, 308)
+            },
+            {
+                0x091A, new ContainerData(0x091A, 0x0000, 0x0000, 0, 0, 282, 230)
+            },
+            {
+                0x092E, new ContainerData(0x092E, 0x0000, 0x0000, 0, 0, 282, 210)
+            },
+            {
+                0x266A, new ContainerData(0x266A, 0x0000, 0x0000, 16, 51, 184, 124)
+            },
+            {
+                0x266B, new ContainerData(0x266B, 0x0000, 0x0000, 16, 51, 184, 124)
+            },
+            {
+                0x2A63, new ContainerData(0x2A63, 0x0187, 0x01C9, 60, 33, 460, 348)
+            },
+            {
+                0x4D0C, new ContainerData(0x4D0C, 0x0000, 0x0000, 25, 65, 220, 155)
+            },
+            {
+                0x777A, new ContainerData(0x777A, 0x0000, 0x0000, 32, 40, 184, 116)
+            },
+            {
+                0x9CD9, new ContainerData(0x9CD9, 0x0000, 0x0000, 10, 10, 160, 105)
+            },
+            {
+                0x9CDB, new ContainerData(0x9CDB, 0x0000, 0x0000, 50, 60, 548, 308)
+            },
+            {
+                0x9CDD, new ContainerData(0x9CDD, 0x0000, 0x0000, 50, 60, 548, 308)
+            },
+            {
+                0x9CDF, new ContainerData(0x9CDF, 0x0000, 0x0000, 50, 60, 548, 308)
+            },
+            {
+                0x9CE3, new ContainerData(0x9CE3, 0x0000, 0x0000, 50, 60, 548, 308)
+            },
+            {
+                0x9CE4, new ContainerData(0x9CE4, 0x0000, 0x0000, 44, 65, 186, 159)
+            },
+            {
+                0x9CE5, new ContainerData(0x9CE5, 0x0000, 0x0000, 44, 65, 186, 159)
+            },
+            {
+                0x9CE7, new ContainerData(0x9CE7, 0x0000, 0x0000, 44, 65, 186, 159)
+            },
+
+            //{
+            //    0x2A63, new ContainerData(0x2A63, 0x0187, 0x01c9, 29, 34, 137, 128)//for this particular gump area is bugged also in original client, as it is similar to the bag, probably this is an unfinished one
+            //}
         };
 
         static ContainerManager()
@@ -203,12 +297,12 @@ namespace ClassicUO.Game.Managers
                 var ss = containersParser.ReadTokens();
                 if (ss != null && ss.Count != 0)
                 {
-                    if (ushort.TryParse(ss[0], out ushort graphic) && 
+                    if (ushort.TryParse(ss[0], out ushort graphic) &&
                         ushort.TryParse(ss[1], out ushort open_sound_id) &&
                         ushort.TryParse(ss[2], out ushort close_sound_id) &&
-                        int.TryParse(ss[3], out int x) && 
+                        int.TryParse(ss[3], out int x) &&
                         int.TryParse(ss[4], out int y) &&
-                        int.TryParse(ss[5], out int w) && 
+                        int.TryParse(ss[5], out int w) &&
                         int.TryParse(ss[6], out int h))
                     {
                         ushort iconized_graphic = 0;
