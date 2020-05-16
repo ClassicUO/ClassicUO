@@ -1060,6 +1060,50 @@ namespace ClassicUO.Network
                     ContainerGump container = UIManager.GetGump<ContainerGump>(serial);
                     bool playsound = false;
                     int x, y;
+
+                    // TODO: check client version ?
+                    if (Client.Version >= Data.ClientVersion.CV_706000 && ProfileManager.Current != null && ProfileManager.Current.UseLargeContainerGumps)
+                    {
+                        GumpsLoader loader = GumpsLoader.Instance;
+
+                        switch (graphic)
+                        {
+                            case 0x0048:
+                                if (loader.GetTexture(0x06E8) != null)
+                                    graphic = 0x06E8;
+                                break;
+                            case 0x0051:
+                                if (loader.GetTexture(0x06E7) != null)
+                                    graphic = 0x06E7;
+                                break;
+                            case 0x003E:
+                                if (loader.GetTexture(0x06E9) != null)
+                                    graphic = 0x06E9;
+                                break;
+                            case 0x004D:
+                                if (loader.GetTexture(0x06EA) != null)
+                                    graphic = 0x06EA;
+                                break;
+                            case 0x004E:
+                                if (loader.GetTexture(0x06E6) != null)
+                                    graphic = 0x06E6;
+                                break;
+                            case 0x004F:
+                                if (loader.GetTexture(0x06E5) != null)
+                                    graphic = 0x06E5;
+                                break;
+                            case 0x004A:
+                                if (loader.GetTexture(0x9CDD) != null)
+                                    graphic = 0x9CDD;
+                                break;
+                            case 0x0044:
+                                if (loader.GetTexture(0x9CE3) != null)
+                                    graphic = 0x9CE3;
+                                break;
+                        }
+                    }
+
+
                     if (container != null)
                     {
                         x = container.ScreenCoordinateX;
@@ -1074,6 +1118,7 @@ namespace ClassicUO.Network
                         playsound = true;
                     }
 
+                   
                     UIManager.Add(new ContainerGump(item, graphic, playsound)
                     {
                         X = x,

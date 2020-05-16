@@ -131,7 +131,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         // containers
         private HSliderBar _containersScale;
-        private Checkbox _containerScaleItems, _containerDoubleClickToLoot, _relativeDragAnDropItems;
+        private Checkbox _containerScaleItems, _containerDoubleClickToLoot, _relativeDragAnDropItems, _useLargeContianersGumps;
 
         public OptionsGump() : base(0, 0)
         {
@@ -1331,7 +1331,9 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(item);
 
             _containerScaleItems = CreateCheckBox(rightArea, "Scale items inside containers", ProfileManager.Current.ScaleItemsInsideContainers, 0, 20 + SPACE_Y);
-            _containerDoubleClickToLoot = CreateCheckBox(rightArea, "Double click to loot items inside containers", ProfileManager.Current.DoubleClickToLootInsideContainers, 0, SPACE_Y);
+            _useLargeContianersGumps = CreateCheckBox(rightArea, "Use large containers gump", ProfileManager.Current.UseLargeContainerGumps, 0, SPACE_Y);
+            _useLargeContianersGumps.IsVisible = Client.Version >= ClientVersion.CV_706000;
+             _containerDoubleClickToLoot = CreateCheckBox(rightArea, "Double click to loot items inside containers", ProfileManager.Current.DoubleClickToLootInsideContainers, 0, SPACE_Y);
             _relativeDragAnDropItems = CreateCheckBox(rightArea, "Relative drag and drop items in containers", ProfileManager.Current.RelativeDragAndDropItems, 0, SPACE_Y);
 
             ScrollAreaItem _containerGumpLocation = new ScrollAreaItem();
@@ -1576,6 +1578,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case 11: // containers
                     _containersScale.Value = 100;
                     _containerScaleItems.IsChecked = false;
+                    _useLargeContianersGumps.IsChecked = false;
                     _containerDoubleClickToLoot.IsChecked = false;
                     _relativeDragAnDropItems.IsChecked = false;
                     _overrideContainerLocation.IsChecked = false;
@@ -2055,6 +2058,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            ProfileManager.Current.UseLargeContainerGumps = _useLargeContianersGumps.IsChecked;
             ProfileManager.Current.DoubleClickToLootInsideContainers = _containerDoubleClickToLoot.IsChecked;
             ProfileManager.Current.RelativeDragAndDropItems = _relativeDragAnDropItems.IsChecked;
 

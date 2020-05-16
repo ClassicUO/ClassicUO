@@ -298,7 +298,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void UpdateContents()
         {
-            Console.WriteLine("REFRESHED: {0}", LocalSerial);
             Clear();
             BuildGump();
             IsMinimized = IsMinimized;

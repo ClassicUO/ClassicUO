@@ -247,6 +247,8 @@ namespace ClassicUO.Configuration
 
         [JsonProperty] public bool DoubleClickToLootInsideContainers { get; set; }
 
+        [JsonProperty] public bool UseLargeContainerGumps { get; set; } = false;
+
         [JsonProperty] public bool RelativeDragAndDropItems { get; set; }
 
         [JsonProperty] public bool ShowHouseContent { get; set; }
