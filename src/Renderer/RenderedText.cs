@@ -57,6 +57,12 @@ namespace ClassicUO.Renderer
 
         }
 
+        static RenderedText()
+        {
+            for (int i = 0; i < 1000; i++)
+                _pool.Enqueue(new RenderedText());
+        }
+
         public static RenderedText Create(string text, ushort hue = 0xFFFF, byte font = 0xFF, bool isunicode = true, FontStyle style = 0, TEXT_ALIGN_TYPE align = 0, 
                                           int maxWidth = 0, byte cell = 30, bool isHTML = false, 
                                           bool recalculateWidthByInfo = false, bool saveHitmap = false)

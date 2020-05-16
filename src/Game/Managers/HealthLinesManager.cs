@@ -199,6 +199,7 @@ namespace ClassicUO.Game.Managers
                         mobile == TargetManager.LastAttack)
                         continue;
 
+
                     DrawHealthLine(batcher, mobile, x, y, mobile != World.Player);
 
                     //if (max > 0)
