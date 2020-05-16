@@ -340,6 +340,11 @@ namespace ClassicUO.Game.Scenes
                 return false;
             }
 
+            if (UIManager.SystemChat != null && !UIManager.SystemChat.IsFocused)
+            {
+                UIManager.SystemChat.SetFocus();
+            }
+
             if (!ProfileManager.Current.DisableAutoMove && _rightMousePressed)
                 _continueRunning = true;
 
