@@ -112,7 +112,8 @@ namespace ClassicUO.Game.UI
                 _renderedText.Hue = hue;
                 _renderedText.Text = _textHTML;
             }
-            else if (_renderedText.Texture == null)
+
+            if (_renderedText.Texture == null)
                 return false;
 
             int z_width = (_renderedText.Width + 8) * 1;
