@@ -66,6 +66,7 @@ namespace ClassicUO.Game.UI
             byte font = 1;
             float alpha = 0.3f;
             ushort hue = 0;
+            float zoom = 1;
             if (ProfileManager.Current != null)
             {
                 font = ProfileManager.Current.TooltipFont;
@@ -75,6 +76,7 @@ namespace ClassicUO.Game.UI
                     alpha = 1f;
 
                 hue = ProfileManager.Current.TooltipTextHue;
+                zoom = ProfileManager.Current.TooltipDisplayZoom / 100f;
             }
 
             if (_renderedText == null)
@@ -110,24 +112,34 @@ namespace ClassicUO.Game.UI
                 _renderedText.Hue = hue;
                 _renderedText.Text = _textHTML;
             }
+            else if (_renderedText.Texture == null)
+                return false;
+
+            int z_width = (_renderedText.Width + 8) * 1;
+            int z_height = (_renderedText.Height + 8) * 1;
 
             if (x < 0)
                 x = 0;
-            else if (x > Client.Game.Window.ClientBounds.Width - (_renderedText.Width + 8))
-                x = Client.Game.Window.ClientBounds.Width - (_renderedText.Width + 8);
+            else if (x > Client.Game.Window.ClientBounds.Width - z_width)
+                x = Client.Game.Window.ClientBounds.Width - z_width;
 
             if (y < 0)
                 y = 0;
-            else if (y > Client.Game.Window.ClientBounds.Height - (_renderedText.Height + 8))
-                y = Client.Game.Window.ClientBounds.Height - (_renderedText.Height + 8);
+            else if (y > Client.Game.Window.ClientBounds.Height - z_height)
+                y = Client.Game.Window.ClientBounds.Height - z_height;
 
 
             Vector3 hue_vec = Vector3.Zero;
             ShaderHuesTraslator.GetHueVector(ref hue_vec, 0, false, alpha);
-            batcher.Draw2D(Texture2DCache.GetTexture(Color.Black), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue_vec);
-            batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue_vec);
+            batcher.Draw2D(Texture2DCache.GetTexture(Color.Black), x - 4, y - 2, z_width * zoom, z_height * zoom, ref hue_vec);
+            batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x - 4, y - 2, (int) (z_width * zoom), (int) (z_height * zoom), ref hue_vec);
 
-            return _renderedText.Draw(batcher, x + 3, y);
+           
+
+            return batcher.Draw2D(_renderedText.Texture,
+
+                           x + 3, y + 3, z_width * zoom, z_height * zoom,
+                           0, 0, z_width, z_height, ref hue_vec);
         }
 
         public void Clear()

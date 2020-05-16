@@ -959,7 +959,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = SPACE_Y + 10
             };
             item.Add(text);
-            _tooltip_zoom = new HSliderBar(20, text.Y + text.Height + SPACE_Y, 200, 0, 200, ProfileManager.Current.TooltipDisplayZoom, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
+            _tooltip_zoom = new HSliderBar(20, text.Y + text.Height + SPACE_Y, 200, 100, 200, ProfileManager.Current.TooltipDisplayZoom, HSliderBarStyle.MetalWidgetRecessedBar, true, FONT, HUE_FONT);
             item.Add(_tooltip_zoom);
             rightArea.Add(item);
 
