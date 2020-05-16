@@ -92,39 +92,44 @@ namespace ClassicUO.Game.Managers
                         alpha = 1f - 0x7F / 255f;
                 }
 
-                if (o.RenderedText.Texture.Contains( mouseX - startX - o.RealScreenPosition.X, mouseY - startY - o.RealScreenPosition.Y))
+                if (o.RenderedText.Texture.Contains(mouseX - startX - o.RealScreenPosition.X, mouseY - startY - o.RealScreenPosition.Y))
                 {
                     SelectedObject.Object = o;
                     last = o;
-                }
 
-                if (!isGump && SelectedObject.LastObject == o)
-                {
-                    hue = 0x35;
+                    if (!isGump && o.Owner is Entity)
+                    {
+                        hue = 0x0035;
+                    }
                 }
 
                 o.RenderedText.Draw(batcher, startX + o.RealScreenPosition.X, startY + o.RealScreenPosition.Y, alpha, hue);
             }
 
-            if (last != null)
-            {
-                if (last.DRight != null)
-                    last.DRight.DLeft = last.DLeft;
+            MoveToTop(last);
+        }
 
-                if (last.DLeft != null)
-                    last.DLeft.DRight = last.DRight;
+        public void MoveToTop(TextOverhead obj)
+        {
+            if (obj == null)
+                return;
 
-                last.DLeft = last.DRight = null;
+            if (obj.DRight != null)
+                obj.DRight.DLeft = obj.DLeft;
+
+            if (obj.DLeft != null)
+                obj.DLeft.DRight = obj.DRight;
+
+            obj.DLeft = obj.DRight = null;
 
 
-                var next = _firstNode.DRight;
-                _firstNode.DRight = last;
-                last.DLeft = _firstNode;
-                last.DRight = next;
+            var next = _firstNode.DRight;
+            _firstNode.DRight = obj;
+            obj.DLeft = _firstNode;
+            obj.DRight = next;
 
-                if (next != null)
-                    next.DLeft = last;
-            }
+            if (next != null)
+                next.DLeft = obj;
         }
 
         public void ProcessWorldText(bool doit)
