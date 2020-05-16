@@ -3004,27 +3004,27 @@ namespace ClassicUO.Network
                     UOChatManager.CurrentChannelName = channelName;
                     UOChatManager.AddChannel(channelName, hasPassword);
 
-                    UIManager.GetGump<UOChatGump>()?.Update();
+                    UIManager.GetGump<UOChatGump>()?.RequestUpdateContents();
                     break;
                 case 0x03E9: // destroy conference
                     p.Skip(4);
                     channelName = p.ReadUnicode();
                     UOChatManager.RemoveChannel(channelName);
 
-                    UIManager.GetGump<UOChatGump>()?.Update();
+                    UIManager.GetGump<UOChatGump>()?.RequestUpdateContents();
                     break;
                 case 0x03EB: // display enter username window
-                    
+                    UOChatManager.ChatIsEnabled = CHAT_STATUS.ENABLED_USER_REQUEST;
                     break;
                 case 0x03EC: // close chat
                     UOChatManager.Clear();
-                    UOChatManager.ChatIsEnabled = false;
+                    UOChatManager.ChatIsEnabled = CHAT_STATUS.DISABLED;
                     UIManager.GetGump<UOChatGump>()?.Dispose();
                     break;
                 case 0x03ED: // username accepted, display chat
                     p.Skip(4);
                     string username = p.ReadUnicode();
-                    UOChatManager.ChatIsEnabled = true;
+                    UOChatManager.ChatIsEnabled = CHAT_STATUS.ENABLED;
                     NetClient.Socket.Send(new PChatJoinCommand("General"));
                     break;
                 case 0x03EE: // add user
@@ -3141,7 +3141,7 @@ namespace ClassicUO.Network
                 flags = p.ReadUShort();
             World.ClientLockedFeatures.SetFlags((LockedFeatureFlags) flags);
 
-            UOChatManager.ChatIsEnabled = World.ClientLockedFeatures.T2A;
+            UOChatManager.ChatIsEnabled = World.ClientLockedFeatures.T2A ? CHAT_STATUS.ENABLED : 0;
 
             AnimationsLoader.Instance.UpdateAnimationTable(flags);
         }

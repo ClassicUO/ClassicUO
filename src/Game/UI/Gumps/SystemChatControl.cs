@@ -377,7 +377,7 @@ namespace ClassicUO.Game.UI.Gumps
                             Mode = ChatMode.ClientCommand;
                             break;
 
-                        case ',' when UOChatManager.ChatIsEnabled:
+                        case ',' when UOChatManager.ChatIsEnabled == CHAT_STATUS.ENABLED:
                             Mode = ChatMode.UOChat;
                             break;
 

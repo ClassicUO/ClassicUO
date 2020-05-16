@@ -1072,6 +1072,7 @@ namespace ClassicUO.Network
         public POpenChat(string name) : base(0xB5)
         {
             int len = name.Length;
+            WriteByte(0);
 
             if (len > 0)
             {
