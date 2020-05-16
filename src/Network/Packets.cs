@@ -1203,39 +1203,27 @@ namespace ClassicUO.Network
 
     internal sealed class PBookPageData : PacketWriter
     {
-        public PBookPageData(uint serial, string text, int page) : base(0x66)
+        public PBookPageData(uint serial, string text, int page, List<int> chars) : base(0x66)
         {
             if (text == null)
                 text = string.Empty;
 
-            int linecount = 0;
-
-            if (text.Length != 0)
-            {
-                for (int i = 0; i < text.Length; i++)
-                {
-                    if (text[i] == '\n')
-                        linecount++;
-                }
-
-                if (text[text.Length - 1] != '\n')
-                {
-                    linecount++;
-                }
-            }
-
             WriteUInt(serial);
             WriteUShort(0x0001);
-            WriteUShort((ushort) (page + 1));
-            WriteUShort((ushort) linecount);
+            WriteUShort((ushort)(page + 1));
+            WriteUShort((ushort)chars.Count);//pages are always 8, unless something changes in the future
 
-            for (int i = 0; i < text.Length; i++)
+            for (int i = 0, l = 0, x = 0; i < text.Length && l < chars.Count; i++, x++)
             {
                 char c = text[i];
-                if (c == '\n')
+                if (x >= chars[l])
+                {
+                    l++;
+                    x = 0;
                     WriteByte(0);
+                }
                 else
-                    WriteByte((byte) c);
+                    WriteByte((byte)c);
             }
 
             WriteByte(0);

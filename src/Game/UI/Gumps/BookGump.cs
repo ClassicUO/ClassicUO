@@ -67,9 +67,9 @@ namespace ClassicUO.Game.UI.Gumps
         public ushort BookPageCount { get; internal set; }
         public static bool IsNewBook => Client.Version > ClientVersion.CV_200;
         public bool UseNewHeader { get; set; } = true;
-        public static byte DefaultFont => (byte) (IsNewBook ? 1 : 4);
+        public static byte DefaultFont => (byte)(IsNewBook ? 1 : 4);
 
-       
+
 
 
         public bool IntroChanges => _pagesChanged[0];
@@ -150,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps
                     page += 1;
                 page >>= 1;
 
-                StbPageTextBox tbox = new StbPageTextBox(DefaultFont, MAX_BOOK_CHARS_PER_PAGE * MAX_BOOK_LINES, 155, IsNewBook, FontStyle.ExtraHeight, 2)
+                StbPageTextBox tbox = new StbPageTextBox(DefaultFont, MAX_BOOK_CHARS_PER_PAGE * MAX_BOOK_LINES, 155, IsNewBook, FontStyle.ExtraHeight, 2, this)
                 {
                     X = x,
                     Y = y,
@@ -177,11 +177,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OnTextChanged(object sender, EventArgs e)
         {
-            StbPageTextBox c = (StbPageTextBox) sender;
+            StbPageTextBox c = (StbPageTextBox)sender;
 
             if (c != null)
             {
-                _pagesChanged[(int) c.Tag] = true;
+                _pagesChanged[(int)c.Tag] = true;
             }
         }
 
@@ -193,7 +193,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (p != null)
                 {
-                    if ((IsEditable && p.HasKeyboardFocus) || (!IsEditable && p.MouseIsOver) )
+                    if ((IsEditable && p.HasKeyboardFocus) || (!IsEditable && p.MouseIsOver))
                     {
                         return i;
                     }
@@ -295,11 +295,20 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            NetClient.Socket.Send(new PBookPageData(LocalSerial, GetPageText(real_page - 1), real_page - 1));
+                            var bp = _pagesTextBoxes[real_page - 1];
+                            MultilinesFontInfo info = bp.CalculateFontInfo(bp.Text);
+                            List<int> chars = new List<int>(8);
+                            while (info != null)
+                            {
+                                chars.Add(info.CharCount);
+                                info = info.Next;
+                            }
+
+                            NetClient.Socket.Send(new PBookPageData(LocalSerial, bp.Text, real_page - 1, chars));
                         }
                     }
                 }
-                
+
             }
 
 
@@ -315,7 +324,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-           
+
         }
 
         protected override void CloseWithRightClick()
@@ -340,31 +349,119 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class StbPageTextBox : StbTextBox
         {
-            public StbPageTextBox(byte font, int max_char_count = -1, int maxWidth = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : base(font, max_char_count, maxWidth, isunicode, style, hue, align)
+            private BookGump _bookGump;
+            public StbPageTextBox(byte font, int max_char_count = -1, int maxWidth = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, BookGump gump = null) : base(font, max_char_count, maxWidth, isunicode, style, hue, TEXT_ALIGN_TYPE.TS_LEFT)
             {
+                _bookGump = gump;
             }
-
 
             protected override void OnTextInput(string c)
             {
-                MultilinesFontInfo info = CalculateFontInfo(c);
-
-                int lines = 0;
-                while (info != null) { lines++; info = info.Next; }
-
-                if (lines > 8)
-                {
-
-                }
-
                 base.OnTextInput(c);
-            }
+                if (_bookGump != null && !_bookGump.IsDisposed)
+                {
+                    int curpage = (int)Tag - 1;
+                    MultilinesFontInfo info = CalculateFontInfo(Text);
+                    int lines = 0, xlength = 0;
+                    while (info != null)
+                    {
+                        lines++;
+                        if (lines > 8)
+                            xlength += info.CharCount;
+                        info = info.Next;
+                    }
 
-           
+                    if (lines > 8)
+                    {
+                        curpage++;
+                        if (curpage < _bookGump.BookPageCount)
+                        {
+                            bool change = CaretIndex >= Text.Length;
+                            c = Text.Remove(0, Text.Length - xlength);
+                            Text = Text.Substring(0, Text.Length - xlength);
+                            if (change)
+                            {
+                                _bookGump.SetActivePage((curpage + 2 + (curpage % 2)) / 2);
+                                _bookGump._pagesTextBoxes[curpage].SetKeyboardFocus();
+                            }
+                            _bookGump._pagesTextBoxes[curpage].CaretIndex = 0;
+                            _bookGump._pagesTextBoxes[curpage].OnTextInput(c);
+                        }
+                        else
+                        {
+                            Text = Text.Remove(0, Text.Length - xlength);
+                        }
+                        //extra lines in latest page are lost for good
+                    }
+                }
+            }
 
             protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
             {
+                if ((key == SDL.SDL_Keycode.SDLK_z || key == SDL.SDL_Keycode.SDLK_y) && Keyboard.Ctrl)
+                    return;//not supported
+                if (_bookGump == null || _bookGump.IsDisposed)
+                {
+                    base.OnKeyDown(key, mod);
+                    return;
+                }
+                int selectStart = Math.Min(SelectionStart, SelectionEnd), selectEnd = Math.Max(SelectionStart, SelectionEnd);
+                bool selection = !NoSelection;
+                int caret = CaretIndex;
+                int curpage = (int)Tag;
+                string text = Text;
                 base.OnKeyDown(key, mod);
+                
+                switch (key)
+                {
+                    case SDL.SDL_Keycode.SDLK_x when Keyboard.Ctrl && selection:
+                        text = SDL.SDL_GetClipboardText();
+                        break;
+                    case SDL.SDL_Keycode.SDLK_HOME:
+                        CaretIndex = 0;
+                        goto case SDL.SDL_Keycode.SDLK_UP;
+                    case SDL.SDL_Keycode.SDLK_UP:
+                    case SDL.SDL_Keycode.SDLK_LEFT:
+                        if (caret == 0)
+                        {
+                            if (curpage - 2 >= 0)
+                            {
+                                if ((curpage % 2) == 0)
+                                    _bookGump.SetActivePage(_bookGump.ActivePage - 1);
+                                _bookGump._pagesTextBoxes[curpage - 2].SetKeyboardFocus();
+                                _bookGump._pagesTextBoxes[curpage - 2].CaretIndex = _bookGump._pagesTextBoxes[curpage - 2].Text.Length;
+                            }
+                        }
+                        break;
+                    case SDL.SDL_Keycode.SDLK_END:
+                        CaretIndex = Text.Length;
+                        goto case SDL.SDL_Keycode.SDLK_DOWN;
+                    case SDL.SDL_Keycode.SDLK_DOWN:
+                    case SDL.SDL_Keycode.SDLK_RIGHT:
+                        if (caret >= Text.Length)
+                        {
+                            if (curpage < _bookGump._pagesTextBoxes.Length)
+                            {
+                                if ((curpage % 2) != 0)
+                                    _bookGump.SetActivePage(_bookGump.ActivePage + 1);
+                                _bookGump._pagesTextBoxes[curpage].SetKeyboardFocus();
+                                _bookGump._pagesTextBoxes[curpage].CaretIndex = 0;
+                            }
+                        }
+                        break;
+                    case SDL.SDL_Keycode.SDLK_BACKSPACE when IsEditable:
+                        
+                        break;
+                    case SDL.SDL_Keycode.SDLK_DELETE when IsEditable:
+                        
+                        break;
+                    case SDL.SDL_Keycode.SDLK_PAGEUP:
+                        caret = 0;
+                        goto case SDL.SDL_Keycode.SDLK_UP;
+                    case SDL.SDL_Keycode.SDLK_PAGEDOWN:
+                        caret = Text.Length;
+                        goto case SDL.SDL_Keycode.SDLK_DOWN;
+                }
             }
         }
     }

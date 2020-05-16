@@ -1129,6 +1129,7 @@ namespace ClassicUO.IO.Resources
             {
                 ptr.Width = 1;
                 ptr.MaxHeight = 14;
+                ptr.CharCount += newlineval;
             }
 
             return info;
