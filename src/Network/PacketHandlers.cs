@@ -1791,7 +1791,11 @@ namespace ClassicUO.Network
                         sb.Append(BookGump.IsNewBook ? p.ReadUTF8StringSafe() : p.ReadASCII());
                         sb.Append('\n');
                     }
-
+                    if(lineCnt < BookGump.MAX_BOOK_LINES)
+                    {
+                        for (int line = lineCnt; line < BookGump.MAX_BOOK_LINES; line++)
+                            sb.Append('\n');
+                    }
                     if (sb.Length > 0)
                         sb.Remove(sb.Length - 1, 1); //this removes the last, unwanted, newline
 

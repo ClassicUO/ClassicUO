@@ -1211,12 +1211,12 @@ namespace ClassicUO.Network
             WriteUInt(serial);
             WriteUShort(0x0001);
             WriteUShort((ushort)(page + 1));
-            WriteUShort((ushort)chars.Count);//pages are always 8, unless something changes in the future
+            WriteUShort((ushort)chars.Count);
 
             for (int i = 0, l = 0, x = 0; i < text.Length && l < chars.Count; i++, x++)
             {
                 char c = text[i];
-                if (x >= chars[l])
+                if (x >= chars[l] || c == '\n')
                 {
                     l++;
                     x = 0;

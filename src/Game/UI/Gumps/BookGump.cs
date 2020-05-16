@@ -40,7 +40,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class BookGump : Gump
     {
-        private const int MAX_BOOK_LINES = 8;
+        internal const int MAX_BOOK_LINES = 8;
         private const int MAX_BOOK_CHARS_PER_PAGE = 53;
 
 
@@ -391,7 +391,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             Text = Text.Remove(0, Text.Length - xlength);
                         }
-                        //extra lines in latest page are lost for good
+                        //extra lines on last page are lost for good
                     }
                 }
             }
@@ -399,13 +399,12 @@ namespace ClassicUO.Game.UI.Gumps
             protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
             {
                 if ((key == SDL.SDL_Keycode.SDLK_z || key == SDL.SDL_Keycode.SDLK_y) && Keyboard.Ctrl)
-                    return;//not supported
+                    return;//not supported on books ATM
                 if (_bookGump == null || _bookGump.IsDisposed)
                 {
                     base.OnKeyDown(key, mod);
                     return;
                 }
-                int selectStart = Math.Min(SelectionStart, SelectionEnd), selectEnd = Math.Max(SelectionStart, SelectionEnd);
                 bool selection = !NoSelection;
                 int caret = CaretIndex;
                 int curpage = (int)Tag;
@@ -414,8 +413,38 @@ namespace ClassicUO.Game.UI.Gumps
                 
                 switch (key)
                 {
+                    case SDL.SDL_Keycode.SDLK_BACKSPACE:
+                    case SDL.SDL_Keycode.SDLK_DELETE:
                     case SDL.SDL_Keycode.SDLK_x when Keyboard.Ctrl && selection:
-                        text = SDL.SDL_GetClipboardText();
+                        if (IsEditable)
+                        {
+                            if(key == SDL.SDL_Keycode.SDLK_BACKSPACE && caret == 0)
+                            {
+                                if(curpage - 2 >= 0)
+                                {
+                                    if ((curpage % 2) == 0)
+                                        _bookGump.SetActivePage(_bookGump.ActivePage - 1);
+                                    _bookGump._pagesTextBoxes[curpage - 2].SetKeyboardFocus();
+                                    _bookGump._pagesTextBoxes[curpage - 2].CaretIndex = _bookGump._pagesTextBoxes[curpage - 2].Text.Length;
+                                    _bookGump._pagesTextBoxes[curpage - 2].OnKeyDown(key, mod);
+                                    return;
+                                }
+                            }
+                            MultilinesFontInfo info = CalculateFontInfo(text);
+                            int lines = 0;
+                            while (info != null)
+                            {
+                                lines++;
+                                info = info.Next;
+                            }
+                            info = CalculateFontInfo(Text);
+                            while (info != null)
+                            {
+                                lines--;
+                                info = info.Next;
+                            }
+                            CascadeUpdate(curpage - 1, lines);
+                        }
                         break;
                     case SDL.SDL_Keycode.SDLK_HOME:
                         CaretIndex = 0;
@@ -449,18 +478,50 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                         }
                         break;
-                    case SDL.SDL_Keycode.SDLK_BACKSPACE when IsEditable:
-                        
-                        break;
-                    case SDL.SDL_Keycode.SDLK_DELETE when IsEditable:
-                        
-                        break;
                     case SDL.SDL_Keycode.SDLK_PAGEUP:
                         caret = 0;
                         goto case SDL.SDL_Keycode.SDLK_UP;
                     case SDL.SDL_Keycode.SDLK_PAGEDOWN:
                         caret = Text.Length;
                         goto case SDL.SDL_Keycode.SDLK_DOWN;
+                }
+            }
+
+            private void CascadeUpdate(int topage, int grablines)
+            {
+                if (grablines > 0 && topage + 1 < _bookGump._pagesTextBoxes.Length)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    int frompage = topage + 1;
+                    while (frompage < _bookGump._pagesTextBoxes.Length)
+                    {
+                        MultilinesFontInfo info = CalculateFontInfo(_bookGump._pagesTextBoxes[frompage].Text);
+                        int chars = 0, lines = 0;
+                        while (info != null && lines < grablines)
+                        {
+                            lines++;
+                            chars += info.CharCount;
+                            info = info.Next;
+                        }
+                        if(chars > 0)
+                        {
+                            lines = 0;
+                            info = CalculateFontInfo(_bookGump._pagesTextBoxes[frompage - 1].Text);
+                            while (info != null)
+                            {
+                                lines++;
+                                info = info.Next;
+                            }
+                            sb.Append(_bookGump._pagesTextBoxes[frompage - 1].Text);
+                            for (; lines + grablines < MAX_BOOK_LINES; lines++)
+                                sb.Append('\n');
+                            sb.Append(_bookGump._pagesTextBoxes[frompage].Text.Substring(0, chars));
+                            _bookGump._pagesTextBoxes[frompage - 1].Text = sb.ToString();
+                            _bookGump._pagesTextBoxes[frompage].Text = _bookGump._pagesTextBoxes[frompage].Text.Remove(0, chars);
+                            sb.Clear();
+                        }
+                        frompage++;
+                    }
                 }
             }
         }
