@@ -124,9 +124,12 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool EnableBlackWhiteEffect { get; set; } = true;
 
         // tooltip
-        [JsonProperty] public bool EnableTooltip { get; set; } = true;
-        [JsonProperty] public int DelayShowTooltip { get; set; } = 250;
+        [JsonProperty] public bool UseTooltip { get; set; } = true;
         [JsonProperty] public ushort TooltipTextHue { get; set; } = 0xFFFF;
+        [JsonProperty] public int TooltipDelayBeforeDisplay { get; set; } = 250;
+        [JsonProperty] public int TooltipDisplayZoom { get; set; } = 100;
+        [JsonProperty] public int TooltipBackgroundOpacity { get; set; } = 70;
+        [JsonProperty] public byte TooltipFont { get; set; } = 1;
 
         // movements
         [JsonProperty] public bool EnablePathfind { get; set; }
@@ -276,6 +279,9 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool WorldMapShowMarkers { get; set; } = true;
         [JsonProperty] public bool WorldMapShowMarkersNames { get; set; } = true;
         [JsonProperty] public bool WorldMapShowMultis { get; set; } = true;
+
+
+
 
         internal static string ProfilePath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
         internal static string DataPath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data");

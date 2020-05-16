@@ -21,6 +21,7 @@
 
 using System.Text;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
@@ -61,9 +62,24 @@ namespace ClassicUO.Game.UI
             if (_lastHoverTime > Time.Ticks)
                 return false;
 
+
+            byte font = 1;
+            float alpha = 0.3f;
+            ushort hue = 0;
+            if (ProfileManager.Current != null)
+            {
+                font = ProfileManager.Current.TooltipFont;
+                alpha = 1f - ProfileManager.Current.TooltipBackgroundOpacity / 100f;
+
+                if (float.IsNaN(alpha))
+                    alpha = 1f;
+
+                hue = ProfileManager.Current.TooltipTextHue;
+            }
+
             if (_renderedText == null)
             {
-                _renderedText = RenderedText.Create(string.Empty,font: 1, isunicode: true, style: FontStyle.BlackBorder, cell: 5, isHTML: true, align: TEXT_ALIGN_TYPE.TS_CENTER, recalculateWidthByInfo: true);
+                _renderedText = RenderedText.Create(string.Empty, font: font, isunicode: true, style: FontStyle.BlackBorder, cell: 5, isHTML: true, align: TEXT_ALIGN_TYPE.TS_CENTER, recalculateWidthByInfo: true, hue: hue);
             }
             else if (_renderedText.Text != Text)
             {
@@ -72,12 +88,12 @@ namespace ClassicUO.Game.UI
                     FontsLoader.Instance.SetUseHTML(true);
                     FontsLoader.Instance.RecalculateWidthByInfo = true;
 
-                    int width = FontsLoader.Instance.GetWidthUnicode(1, Text);
+                    int width = FontsLoader.Instance.GetWidthUnicode(font, Text);
 
                     if (width > 600)
                         width = 600;
 
-                    width = FontsLoader.Instance.GetWidthExUnicode(1, Text, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) FontStyle.BlackBorder);
+                    width = FontsLoader.Instance.GetWidthExUnicode(font, Text, width, TEXT_ALIGN_TYPE.TS_CENTER, (ushort) FontStyle.BlackBorder);
 
                     if (width > 600)
                         width = 600;
@@ -90,6 +106,8 @@ namespace ClassicUO.Game.UI
                 else
                     _renderedText.MaxWidth = _maxWidth;
 
+                _renderedText.Font = font;
+                _renderedText.Hue = hue;
                 _renderedText.Text = _textHTML;
             }
 
@@ -103,11 +121,11 @@ namespace ClassicUO.Game.UI
             else if (y > Client.Game.Window.ClientBounds.Height - (_renderedText.Height + 8))
                 y = Client.Game.Window.ClientBounds.Height - (_renderedText.Height + 8);
 
-            Vector3 hue = Vector3.Zero;
-            ShaderHuesTraslator.GetHueVector(ref hue, 0, false, 0.3f, true);
 
-            batcher.Draw2D(Texture2DCache.GetTexture(Color.Black), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue);
-            batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue);
+            Vector3 hue_vec = Vector3.Zero;
+            ShaderHuesTraslator.GetHueVector(ref hue_vec, 0, false, alpha);
+            batcher.Draw2D(Texture2DCache.GetTexture(Color.Black), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue_vec);
+            batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x - 4, y - 2, _renderedText.Width + 8, _renderedText.Height + 4, ref hue_vec);
 
             return _renderedText.Draw(batcher, x + 3, y);
         }
@@ -131,7 +149,7 @@ namespace ClassicUO.Game.UI
                     _serial = serial;
                     _hash = revision2;
                     Text = ReadProperties(serial, out _textHTML);
-                    _lastHoverTime = Time.Ticks + 250;
+                    _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.Current != null ? ProfileManager.Current.TooltipDelayBeforeDisplay : 250));
                 }
             }
         }
@@ -192,12 +210,14 @@ namespace ClassicUO.Game.UI
 
         public void SetText(string text, int maxWidth = 0)
         {
+            if (ProfileManager.Current != null && !ProfileManager.Current.UseTooltip)
+                return;
             //if (Text != text)
             {
                 _maxWidth = maxWidth;
                 _serial = 0;
                 Text = _textHTML = text;
-                _lastHoverTime = Time.Ticks + 250;
+                _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.Current != null ? ProfileManager.Current.TooltipDelayBeforeDisplay : 250));
             }
         }
     }
