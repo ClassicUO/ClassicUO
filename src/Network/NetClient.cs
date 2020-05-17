@@ -472,7 +472,8 @@ namespace ClassicUO.Network
 
         private void StartRecv()
         {
-            _socket.BeginReceive(_recvBuffer, 0, BUFF_SIZE, SocketFlags.None, ProcessRecv, null);
+            if (IsConnected && !IsDisposed)
+                _socket.BeginReceive(_recvBuffer, 0, BUFF_SIZE, SocketFlags.None, ProcessRecv, null);
         }
 
 
@@ -511,15 +512,14 @@ namespace ClassicUO.Network
                         _circularBuffer.Enqueue(buffer, 0, bytesLen);
 
                     ExtractPackets();
+
+                    StartRecv();
                 }
                 else
                 {
                     Log.Warn("Server sent 0 bytes. Closing connection");
-                    //Disconnect();
+                    Disconnect(SocketError.SocketError);
                 }
-
-                if (IsConnected && !IsDisposed)
-                    StartRecv();
             }
             catch (SocketException socketException)
             {
