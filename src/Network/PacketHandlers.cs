@@ -597,12 +597,12 @@ namespace ClassicUO.Network
             if (flags != 0) 
                 flags = p.ReadByte();
 
-            if (graphic != 0x2006) 
-                graphic += graphicInc;
+            //if (graphic != 0x2006) 
+            //    graphic += graphicInc;
 
             if (graphic >= 0x4000)
             {
-                graphic -= 0x4000;
+                //graphic -= 0x4000;
                 type = 2;
             }
 
@@ -2165,6 +2165,10 @@ namespace ClassicUO.Network
             if (serial == World.Player)
             {
                 mobile.Flags = flags;
+                mobile.Graphic = graphic;
+                mobile.CheckGraphicChange();
+                mobile.FixHue(hue);
+                // TODO: x,y,z, direction cause elastic effect, ignore 'em for the moment
             }
             else
             {
