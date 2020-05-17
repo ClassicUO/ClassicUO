@@ -211,7 +211,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             return bool.TryParse(boolStr, out bool value) && value;
         }
-        
+
         private void BuildGump()
         {
             BuildContextMenu();
@@ -342,40 +342,39 @@ namespace ClassicUO.Game.UI.Gumps
                     Color[] buffer = new Color[size];
                     sbyte[] allZ = new sbyte[size];
 
+                    int bx, by, mapX, mapY, x, y;
 
-                    for (int bx = 0; bx < fixedWidth; bx++)
+
+                    for (bx = 0; bx < fixedWidth; bx++)
                     {
-                        int mapX = bx << 3;
+                        mapX = bx << 3;
 
-                        for (int by = 0; by < fixedHeight; by++)
+                        for (by = 0; by < fixedHeight; by++)
                         {
-                            int mapY = by << 3;
-
                             ref IndexMap indexMap = ref World.Map.GetIndex(bx, by);
 
                             if (indexMap.MapAddress == 0)
                                 continue;
 
-                            MapBlock* mapBlock = (MapBlock*)indexMap.MapAddress;
-                            MapCells* cells = (MapCells*)&mapBlock->Cells;
+                            MapBlock* mapBlock = (MapBlock*) indexMap.MapAddress;
+                            MapCells* cells = (MapCells*) &mapBlock->Cells;
 
                             int pos = 0;
+                            mapY = by << 3;
 
-                            for (int y = 0; y < 8; y++)
+                            for (y = 0; y < 8; y++)
                             {
-                                int block = (mapY + y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX +
-                                            OFFSET_PIX_HALF;
+                                int block = (mapY + y + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
 
-                                for (int x = 0; x < 8; x++)
+                                for (x = 0; x < 8; x++)
                                 {
                                     ref MapCells cell = ref cells[pos];
 
-                                    var color =
-                                        (ushort)(0x8000 | HuesLoader.Instance.GetRadarColorData(cell.TileID));
+                                    ushort color = (ushort) (0x8000 | HuesLoader.Instance.GetRadarColorData(cell.TileID));
 
-                                    buffer[block] = new Color((((color >> 10) & 31) / 31f),
-                                        (((color >> 5) & 31) / 31f),
-                                        ((color & 31) / 31f));
+                                    ref var cc = ref buffer[block];
+                                    cc.PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
+
                                     allZ[block] = cell.Z;
 
                                     block++;
@@ -384,35 +383,35 @@ namespace ClassicUO.Game.UI.Gumps
                             }
 
 
-                            StaticsBlock* sb = (StaticsBlock*)indexMap.StaticAddress;
+                            StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
                             if (sb != null)
                             {
-                                int count = (int)indexMap.StaticCount;
+                                int count = (int) indexMap.StaticCount;
 
                                 for (int c = 0; c < count; c++)
                                 {
                                     ref readonly StaticsBlock staticBlock = ref sb[c];
 
-                                    if (staticBlock.Color != 0 && staticBlock.Color != 0xFFFF &&
-                                        !GameObjectHelper.IsNoDrawable(staticBlock.Color))
+                                    if (staticBlock.Color != 0 && staticBlock.Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(staticBlock.Color))
                                     {
                                         pos = (staticBlock.Y << 3) + staticBlock.X;
                                         ref MapCells cell = ref cells[pos];
 
                                         if (cell.Z <= staticBlock.Z)
                                         {
-                                            var color = (ushort)(0x8000 | (staticBlock.Hue > 0
-                                                                      ? HuesLoader.Instance.GetColor16(16384,
-                                                                          staticBlock.Hue)
-                                                                      : HuesLoader.Instance.GetRadarColorData(
-                                                                          staticBlock.Color + 0x4000)));
+                                            ushort color = (ushort) (0x8000 | (staticBlock.Hue > 0
+                                                                                  ? HuesLoader.Instance.GetColor16(16384,
+                                                                                                                   staticBlock.Hue)
+                                                                                  : HuesLoader.Instance.GetRadarColorData(
+                                                                                                                          staticBlock.Color + 0x4000)));
 
                                             int block = (mapY + staticBlock.Y + OFFSET_PIX_HALF) *
                                                         (realWidth + OFFSET_PIX) + (mapX + staticBlock.X) +
                                                         OFFSET_PIX_HALF;
-                                            buffer[block] = new Color((((color >> 10) & 31) / 31f),
-                                                (((color >> 5) & 31) / 31f),
-                                                ((color & 31) / 31f));
+
+                                            ref var cc = ref buffer[block];
+                                            cc.PackedValue = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
+
                                             allZ[block] = staticBlock.Z;
                                         }
                                     }
@@ -421,35 +420,56 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
 
+                    int real_width_less_one = realHeight - 1;
+                    int real_height_less_one = realHeight - 1;
+                    const float MAG_0 = 80f / 100f;
+                    const float MAG_1 = 100f / 80f;
 
-                    for (int mapY = 1; mapY < realHeight - 1; mapY++)
+                    int mapY_plus_one;
+                    int r, g, b;
+
+                    for (mapY = 1; mapY < real_height_less_one; mapY++)
                     {
-                        for (int mapX = 1; mapX < realWidth - 1; mapX++)
+                        mapY_plus_one = mapY + 1;
+
+                        for (mapX = 1; mapX < real_width_less_one; mapX++)
                         {
-                            int blockCurrent = ((mapY) + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + (mapX) +
-                                               OFFSET_PIX_HALF;
-                            int blockNext = ((mapY + 1) + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + (mapX - 1) +
-                                            OFFSET_PIX_HALF;
+                            int blockCurrent = (mapY + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + mapX + OFFSET_PIX_HALF;
+                            int blockNext = (mapY_plus_one + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + (mapX - 1) + OFFSET_PIX_HALF;
 
-                            sbyte z0 = allZ[blockCurrent];
-                            sbyte z1 = allZ[blockNext];
+                            ref sbyte z0 = ref allZ[blockCurrent];
+                            ref sbyte z1 = ref allZ[blockNext];
 
-                            int block = ((mapY + 1) + OFFSET_PIX_HALF) * (realWidth + OFFSET_PIX) + (mapX + 1) +
-                                        OFFSET_PIX_HALF;
-                            ref Color cc = ref buffer[block];
+                            if (z0 == z1)
+                                continue;
+
+                            ref Color cc = ref buffer[blockCurrent];
 
                             if (z0 < z1)
                             {
-                                cc.R = (byte)(cc.R * 80 / 100);
-                                cc.G = (byte)(cc.G * 80 / 100);
-                                cc.B = (byte)(cc.B * 80 / 100);
+                                r = (int) (cc.R * MAG_0);
+                                g = (int) (cc.G * MAG_0);
+                                b = (int) (cc.B * MAG_0);
                             }
-                            else if (z0 > z1)
+                            else
                             {
-                                cc.R = (byte)(cc.R * 100 / 80);
-                                cc.G = (byte)(cc.G * 100 / 80);
-                                cc.B = (byte)(cc.B * 100 / 80);
+                                r = (int) (cc.R * MAG_1);
+                                g = (int) (cc.G * MAG_1);
+                                b = (int) (cc.B * MAG_1);
                             }
+
+                            if (r > 255)
+                                r = 255;
+
+                            if (g > 255)
+                                g = 255;
+
+                            if (b > 255)
+                                b = 255;
+
+                            cc.R = (byte) (r);
+                            cc.G = (byte) (g);
+                            cc.B = (byte) (b);
                         }
                     }
 
@@ -553,7 +573,8 @@ namespace ClassicUO.Game.UI.Gumps
                                         string line = reader.ReadLine();
 
                                         // ignore empty lines, and if UOAM, ignore the first line that always has a 3
-                                        if (string.IsNullOrEmpty(line) || line.Equals("3")) continue;
+                                        if (string.IsNullOrEmpty(line) || line.Equals("3"))
+                                            continue;
 
                                         // Check for UOAM file
                                         if (line.Substring(0, 1).Equals("+") || line.Substring(0, 1).Equals("-"))
@@ -564,7 +585,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                                             string[] splits = line.Split(' ');
 
-                                            if (splits.Length <= 1) continue;
+                                            if (splits.Length <= 1)
+                                                continue;
 
                                             WMapMarker marker = new WMapMarker
                                             {
@@ -595,11 +617,13 @@ namespace ClassicUO.Game.UI.Gumps
                                     {
                                         string line = reader.ReadLine();
 
-                                        if (string.IsNullOrEmpty(line)) return;
+                                        if (string.IsNullOrEmpty(line))
+                                            return;
 
                                         string[] splits = line.Split(',');
 
-                                        if (splits.Length <= 1) continue;
+                                        if (splits.Length <= 1)
+                                            continue;
 
                                         WMapMarker marker = new WMapMarker
                                         {
@@ -1112,24 +1136,24 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (rotX + size.X / 2 > x + Width - 8)
                 {
-                    rotX = x + Width - 8 - (int)(size.X / 2);
+                    rotX = x + Width - 8 - (int) (size.X / 2);
                 }
                 else if (rotX - size.X / 2 < x)
                 {
-                    rotX = x + (int)(size.X / 2);
+                    rotX = x + (int) (size.X / 2);
                 }
 
                 if (rotY + size.Y > y + Height)
                 {
-                    rotY = y + Height - (int)(size.Y);
+                    rotY = y + Height - (int) (size.Y);
                 }
                 else if (rotY - size.Y < y)
                 {
-                    rotY = y + (int)size.Y;
+                    rotY = y + (int) size.Y;
                 }
 
-                int xx = (int)(rotX - size.X / 2);
-                int yy = (int)(rotY - size.Y);
+                int xx = (int) (rotX - size.X / 2);
+                int yy = (int) (rotY - size.Y);
 
                 _hueVector.X = 0;
                 _hueVector.Y = 1;
@@ -1297,14 +1321,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         private (int, int) RotatePoint(int x, int y, float zoom, int dist, float angle = 45f)
         {
-            x = (int)(x * zoom);
-            y = (int)(y * zoom);
+            x = (int) (x * zoom);
+            y = (int) (y * zoom);
 
             if (angle == 0.0f)
                 return (x, y);
 
-            return ((int)Math.Round(Math.Cos(dist * Math.PI / 4.0) * x - Math.Sin(dist * Math.PI / 4.0) * y),
-                (int)Math.Round(Math.Sin(dist * Math.PI / 4.0) * x + Math.Cos(dist * Math.PI / 4.0) * y));
+            return ((int) Math.Round(Math.Cos(dist * Math.PI / 4.0) * x - Math.Sin(dist * Math.PI / 4.0) * y),
+                (int) Math.Round(Math.Sin(dist * Math.PI / 4.0) * x + Math.Cos(dist * Math.PI / 4.0) * y));
         }
 
         private void AdjustPosition(int x, int y, int centerX, int centerY, out int newX, out int newY)
