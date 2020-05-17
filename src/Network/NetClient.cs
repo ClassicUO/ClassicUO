@@ -170,10 +170,12 @@ namespace ClassicUO.Network
                     Statistics.ConnectedFrom = DateTime.Now;
                     StartRecv();
                 }
+                else 
+                    Log.Error("socket not connected");
             }
             catch (SocketException e)
             {
-                Log.Error(e.ToString());
+                Log.Error($"Socket error when connecting:\n{e}");
                 Disconnect(e.SocketErrorCode);
             }
         }
@@ -208,6 +210,8 @@ namespace ClassicUO.Network
             catch
             {
             }
+
+            Log.Trace($"Disconnected [{(_is_login_socket ? "login socket" : "game socket")}]");
 
             _incompletePacketBuffer = null;
             _incompletePacketLength = 0;
@@ -259,29 +263,32 @@ namespace ClassicUO.Network
 
             if (data != null && data.Length != 0 && length > 0)
             {
-                try
-                {
+                if (!skip_encryption)
+                    EncryptionHelper.Encrypt(_is_login_socket,
+                                             ref data,
+                                             ref data,
+                                             length);
+
 #if !DEBUG
                     //LogPacket(data, true);
 #endif
 
-                    if (!skip_encryption)
-                        EncryptionHelper.Encrypt(_is_login_socket,
-                                                 ref data,
-                                                 ref data,
-                                                 length);
-
-                    int sent = _socket.Send(data, 0, length, SocketFlags.None);
-
-                    if (sent > 0)
+                try
+                {
+                    lock (_socket)
                     {
-                        Statistics.TotalBytesSent += (uint) sent;
-                        Statistics.TotalPacketsSent++;
+                        int sent = _socket.Send(data, 0, length, SocketFlags.None);
+
+                        if (sent > 0)
+                        {
+                            Statistics.TotalBytesSent += (uint) sent;
+                            Statistics.TotalPacketsSent++;
+                        }
                     }
                 }
                 catch (SocketException ex)
                 {
-                    Log.Error("SOCKET ERROR: " + ex);
+                    Log.Error("socket error when sending:\n" + ex);
                     Disconnect(ex.SocketErrorCode);
                 }
             }
@@ -471,54 +478,57 @@ namespace ClassicUO.Network
 
         private void ProcessRecv(IAsyncResult e)
         {
-            if (_socket == null || IsDisposed)
+            if (IsDisposed)
                 return;
+
+            if (!IsConnected && !IsDisposed)
+            {
+                Disconnect();
+                return;
+            }
 
             try
             {
                 int bytesLen = _socket.EndReceive(e);
 
-                if (_circularBuffer != null)
+                if (bytesLen > 0)
                 {
-                    if (bytesLen > 0)
+                    Statistics.TotalBytesReceived += (uint) bytesLen;
+
+                    byte[] buffer = _recvBuffer;
+
+                    if (!_is_login_socket)
                     {
-                        Statistics.TotalBytesReceived += (uint) bytesLen;
-
-                        byte[] buffer = _recvBuffer;
-
-                        if (!_is_login_socket)
-                        {
-                            EncryptionHelper.Decrypt(ref buffer, ref buffer, bytesLen);
-                        }
-
-                        if (_isCompressionEnabled)
-                        {
-                            DecompressBuffer(ref buffer, ref bytesLen);
-                        }
-
-                        lock (_circularBuffer)
-                            _circularBuffer.Enqueue(buffer, 0, bytesLen);
-
-                        ExtractPackets();
-                    }
-                    else
-                    {
-                        Log.Warn("Server sent 0 bytes. Closing connection");
-                        Disconnect();
+                        EncryptionHelper.Decrypt(ref buffer, ref buffer, bytesLen);
                     }
 
-                    if (IsConnected && !IsDisposed)
-                        StartRecv();
+                    if (_isCompressionEnabled)
+                    {
+                        DecompressBuffer(ref buffer, ref bytesLen);
+                    }
+
+                    lock (_circularBuffer)
+                        _circularBuffer.Enqueue(buffer, 0, bytesLen);
+
+                    ExtractPackets();
                 }
+                else
+                {
+                    Log.Warn("Server sent 0 bytes. Closing connection");
+                    //Disconnect();
+                }
+
+                if (IsConnected && !IsDisposed)
+                    StartRecv();
             }
             catch (SocketException socketException)
             {
-                Log.Error(socketException.ToString());
+                Log.Error("socket error when receiving:\n" + socketException);
                 Disconnect(socketException.SocketErrorCode);
             }
             catch (Exception ex)
             {
-                Log.Error(ex.ToString());
+                Log.Error("fatal error when receiving:\n" + ex);
                 Disconnect();
             }
            
