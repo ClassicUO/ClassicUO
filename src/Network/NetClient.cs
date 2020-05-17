@@ -471,7 +471,7 @@ namespace ClassicUO.Network
 
         private void ProcessRecv(IAsyncResult e)
         {
-            if (_socket == null)
+            if (_socket == null || IsDisposed)
                 return;
 
             try
@@ -500,14 +500,15 @@ namespace ClassicUO.Network
                             _circularBuffer.Enqueue(buffer, 0, bytesLen);
 
                         ExtractPackets();
-
-
-                        StartRecv();
                     }
                     else
                     {
-                        Disconnect(SocketError.ConnectionAborted);
+                        Log.Warn("Server sent 0 bytes. Closing connection");
+                        Disconnect();
                     }
+
+                    if (IsConnected && !IsDisposed)
+                        StartRecv();
                 }
             }
             catch (SocketException socketException)
