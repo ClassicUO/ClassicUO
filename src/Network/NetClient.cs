@@ -254,7 +254,7 @@ namespace ClassicUO.Network
 
         private void Send(byte[] data, int length, bool skip_encryption)
         {
-            if (_socket == null)
+            if (_socket == null || IsDisposed)
                 return;
 
             if (data != null && data.Length != 0 && length > 0)
