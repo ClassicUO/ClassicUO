@@ -162,11 +162,11 @@ namespace ClassicUO.Game.UI.Controls
 
         public event EventHandler TextChanged;
 
-        public MultilinesFontInfo CalculateFontInfo(string text)
+        public MultilinesFontInfo CalculateFontInfo(string text, bool countret = true)
         {
             if (IsUnicode)
-                return FontsLoader.Instance.GetInfoUnicode(_rendererText.Font, text, text.Length, _rendererText.Align, (ushort) _rendererText.FontStyle, _rendererText.MaxWidth, true);
-            return FontsLoader.Instance.GetInfoASCII(_rendererText.Font, text, text.Length, _rendererText.Align, (ushort) _rendererText.FontStyle, _rendererText.MaxWidth, true);
+                return FontsLoader.Instance.GetInfoUnicode(_rendererText.Font, text, text.Length, _rendererText.Align, (ushort) _rendererText.FontStyle, _rendererText.MaxWidth, countret);
+            return FontsLoader.Instance.GetInfoASCII(_rendererText.Font, text, text.Length, _rendererText.Align, (ushort) _rendererText.FontStyle, _rendererText.MaxWidth, countret);
         }
 
         public float GetWidth(int index)

@@ -1210,22 +1210,17 @@ namespace ClassicUO.Network
 
             WriteUInt(serial);
             WriteUShort(0x0001);
-            WriteUShort((ushort)(page + 1));
+            WriteUShort((ushort)page);
             WriteUShort((ushort)chars.Count);
-
-            for (int i = 0, l = 0, x = 0; i < text.Length && l < chars.Count; i++, x++)
+            for(int i = 0, x = 0; i < chars.Count; i++)
             {
-                char c = text[i];
-                if (x >= chars[l] || c == '\n')
+                if (chars[i] > 0)
                 {
-                    l++;
-                    x = 0;
-                    WriteByte(0);
+                    WriteBytes(Encoding.UTF8.GetBytes(text.Substring(x, chars[i])));
+                    x += chars[i];
                 }
-                else
-                    WriteByte((byte)c);
+                WriteByte(0);
             }
-
             WriteByte(0);
         }
     }

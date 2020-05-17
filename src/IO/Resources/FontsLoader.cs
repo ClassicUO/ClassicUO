@@ -1125,11 +1125,18 @@ namespace ClassicUO.IO.Resources
             ptr.Width += readWidth;
             ptr.CharCount += charCount;
 
-            if (readWidth == 0 && len != 0 && (str[len - 1] == '\n' || str[len - 1] == '\r'))
+            if (readWidth == 0 && len != 0)
             {
-                ptr.Width = 1;
-                ptr.MaxHeight = 14;
-                ptr.CharCount += newlineval;
+                switch(str[len - 1])
+                {
+                    case '\n':
+                        ptr.CharCount += newlineval;
+                        goto case '\r';
+                    case '\r':
+                        ptr.Width = 1;
+                        ptr.MaxHeight = 14;
+                        break;
+                }
             }
 
             return info;

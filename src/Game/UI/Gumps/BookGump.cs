@@ -150,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps
                     page += 1;
                 page >>= 1;
 
-                StbPageTextBox tbox = new StbPageTextBox(DefaultFont, MAX_BOOK_CHARS_PER_PAGE * MAX_BOOK_LINES, 155, IsNewBook, FontStyle.ExtraHeight, 2, this)
+                StbPageTextBox tbox = new StbPageTextBox(DefaultFont, MAX_BOOK_CHARS_PER_PAGE * MAX_BOOK_LINES, 160, IsNewBook, FontStyle.ExtraHeight, 2, this)
                 {
                     X = x,
                     Y = y,
@@ -278,15 +278,12 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                for (int i = 0; i < 2; i++)
+                for(int i = 0; i < _pagesChanged.Length; i++)
                 {
-                    int real_page = ((ActivePage - 1) << 1) + i;
-
-                    if (real_page < _pagesChanged.Length && _pagesChanged[real_page])
+                    if(_pagesChanged[i])
                     {
-                        _pagesChanged[real_page] = false;
-
-                        if (real_page < 1)
+                        _pagesChanged[i] = false;
+                        if(i < 1)
                         {
                             if (UseNewHeader)
                                 NetClient.Socket.Send(new PBookHeaderChanged(LocalSerial, _titleTextBox.Text, _authorTextBox.Text));
@@ -295,26 +292,25 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            var bp = _pagesTextBoxes[real_page - 1];
-                            MultilinesFontInfo info = bp.CalculateFontInfo(bp.Text);
-                            List<int> chars = new List<int>(8);
-                            while (info != null)
+                            var bp = _pagesTextBoxes[i - 1];
+                            if (bp.Text != null)
                             {
-                                chars.Add(info.CharCount);
-                                info = info.Next;
+                                MultilinesFontInfo info = bp.CalculateFontInfo(bp.Text, false);
+                                List<int> chars = new List<int>(8);
+                                while (info != null)
+                                {
+                                    chars.Add(info.CharCount);
+                                    info = info.Next;
+                                }
+                                NetClient.Socket.Send(new PBookPageData(LocalSerial, bp.Text.Replace("\n", ""), i, chars));
                             }
-
-                            NetClient.Socket.Send(new PBookPageData(LocalSerial, bp.Text, real_page - 1, chars));
                         }
                     }
                 }
-
             }
-
 
             ActivePage = page;
             UpdatePageButtonVisibility();
-
 
             if (UIManager.KeyboardFocusControl == null || (UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl && UIManager.KeyboardFocusControl.Page != page))
             {
@@ -361,7 +357,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_bookGump != null && !_bookGump.IsDisposed)
                 {
                     int curpage = (int)Tag - 1;
-                    MultilinesFontInfo info = CalculateFontInfo(Text);
+                    MultilinesFontInfo info = _bookGump._pagesTextBoxes[curpage].CalculateFontInfo(Text);
                     int lines = 0, xlength = 0;
                     while (info != null)
                     {
