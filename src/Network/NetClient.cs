@@ -39,7 +39,6 @@ namespace ClassicUO.Network
         private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer;
         private Socket _socket;
         private CircularBuffer _circularBuffer;
-        private SocketAsyncEventArgs _recvEventArgs;
         private ConcurrentQueue<Packet> _recvQueue = new ConcurrentQueue<Packet>();
         private bool _connectAsync;
         private readonly bool _is_login_socket;
@@ -134,15 +133,12 @@ namespace ClassicUO.Network
 
         private void Connect(IPEndPoint endpoint)
         {
-            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) { ReceiveBufferSize = BUFF_SIZE };
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp) { ReceiveBufferSize = BUFF_SIZE, SendBufferSize = BUFF_SIZE};
             _socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, 1);
             _recvBuffer = new byte[BUFF_SIZE];
             _incompletePacketBuffer = new byte[BUFF_SIZE];
             _decompBuffer = new byte[BUFF_SIZE];
             _circularBuffer = new CircularBuffer();
-            _recvEventArgs = new SocketAsyncEventArgs();
-            _recvEventArgs.Completed += IO_Socket;
-            _recvEventArgs.SetBuffer(_recvBuffer, 0, _recvBuffer.Length);
             _recvQueue = new ConcurrentQueue<Packet>();
             Statistics.Reset();
 
@@ -218,7 +214,6 @@ namespace ClassicUO.Network
             _recvBuffer = null;
             _isCompressionEnabled = false;
             _socket = null;
-            _recvEventArgs = null;
             _circularBuffer = null;
 
             if (error != 0)
@@ -256,6 +251,42 @@ namespace ClassicUO.Network
             PacketSent.Raise(new PacketWriter(data));
             Send(data, length, skip_encryption);
         }
+
+        private void Send(byte[] data, int length, bool skip_encryption)
+        {
+            if (_socket == null)
+                return;
+
+            if (data != null && data.Length != 0 && length > 0)
+            {
+                try
+                {
+#if !DEBUG
+                    //LogPacket(data, true);
+#endif
+
+                    if (!skip_encryption)
+                        EncryptionHelper.Encrypt(_is_login_socket,
+                                                 ref data,
+                                                 ref data,
+                                                 length);
+
+                    int sent = _socket.Send(data, 0, length, SocketFlags.None);
+
+                    if (sent > 0)
+                    {
+                        Statistics.TotalBytesSent += (uint) sent;
+                        Statistics.TotalPacketsSent++;
+                    }
+                }
+                catch (SocketException ex)
+                {
+                    Log.Error("SOCKET ERROR: " + ex);
+                    Disconnect(ex.SocketErrorCode);
+                }
+            }
+        }
+
 
         public void Update()
         {
@@ -431,97 +462,25 @@ namespace ClassicUO.Network
         }
 #endif
 
-        private void Send(byte[] data, int length, bool skip_encryption)
+
+        private void StartRecv()
+        {
+            _socket.BeginReceive(_recvBuffer, 0, BUFF_SIZE, SocketFlags.None, ProcessRecv, null);
+        }
+
+
+        private void ProcessRecv(IAsyncResult e)
         {
             if (_socket == null)
                 return;
 
-            if (data != null && data.Length != 0 && length > 0)
-            {
-                try
-                {
-#if !DEBUG
-                    //LogPacket(data, true);
-#endif
-
-                    if (!skip_encryption)
-                        EncryptionHelper.Encrypt(_is_login_socket,
-                                                 ref data,
-                                                 ref data,
-                                                 length);
-
-                    int sent = _socket.Send(data, 0, length, SocketFlags.None);
-
-                    if (sent > 0)
-                    {
-                        Statistics.TotalBytesSent += (uint) sent;
-                        Statistics.TotalPacketsSent++;
-                    }
-                }
-                catch (SocketException ex)
-                {
-                    Log.Error("SOCKET ERROR: " + ex);
-                    Disconnect(ex.SocketErrorCode);
-                }
-            }
-        }
-
-        private void IO_Socket(object sender, SocketAsyncEventArgs e)
-        {
-            switch (e.LastOperation)
-            {
-                case SocketAsyncOperation.Receive:
-                    ProcessRecv(e);
-                    if (!IsDisposed) StartRecv();
-
-                    break;
-
-                case SocketAsyncOperation.Send: // should not enter here
-
-                    break;
-                default:
-
-                    Log.Panic("The last operation completed on the socket was not a receive or send");
-
-                    break;
-            }
-        }
-
-        private void StartRecv()
-        {
             try
             {
-                bool ok = false;
+                int bytesLen = _socket.EndReceive(e);
 
-                do
+                if (_circularBuffer != null)
                 {
-                    ok = !_socket.ReceiveAsync(_recvEventArgs);
-
-                    if (ok)
-                        ProcessRecv(_recvEventArgs);
-                } while (ok);
-            }
-            catch (SocketException ex)
-            {
-                Log.Error("SOCKET ERROR: " + ex);
-                Disconnect(ex.SocketErrorCode);
-            }
-            catch (Exception e)
-            {
-                Disconnect(SocketError.SocketError);
-            }
-        }
-
-
-        private void ProcessRecv(SocketAsyncEventArgs e)
-        {
-            int bytesLen = e.BytesTransferred;
-
-            if (_circularBuffer != null)
-            {
-                if (bytesLen > 0)
-                {
-                    if (e.SocketError == SocketError.Success)
+                    if (bytesLen > 0)
                     {
                         Statistics.TotalBytesReceived += (uint) bytesLen;
 
@@ -541,17 +500,27 @@ namespace ClassicUO.Network
                             _circularBuffer.Enqueue(buffer, 0, bytesLen);
 
                         ExtractPackets();
+
+
+                        StartRecv();
                     }
                     else
                     {
-                        Disconnect(e.SocketError);
+                        Disconnect(SocketError.ConnectionAborted);
                     }
                 }
-                else
-                {
-                    Disconnect(SocketError.ConnectionAborted);
-                }
             }
+            catch (SocketException socketException)
+            {
+                Log.Error(socketException.ToString());
+                Disconnect(socketException.SocketErrorCode);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+                Disconnect();
+            }
+           
         }
 
         private void DecompressBuffer(ref byte[] buffer, ref int length)
