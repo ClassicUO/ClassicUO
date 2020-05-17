@@ -64,6 +64,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly string _mapFilesPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
         private readonly string _mapIconsPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "MapIcons");
 
+        private static Point _last_position = new Point(100, 100);
 
 
 
@@ -97,6 +98,8 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = false;
+            X = _last_position.X;
+            Y = _last_position.Y;
 
             LoadSettings();
 
@@ -107,7 +110,7 @@ namespace ClassicUO.Game.UI.Gumps
             LoadMarkers();
 
             World.WMapManager.SetEnable(true);
-
+            
             BuildGump();
         }
 
@@ -184,6 +187,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (ProfileManager.Current == null)
                 return;
+
 
             ProfileManager.Current.WorldMapWidth = Width;
             ProfileManager.Current.WorldMapHeight = Height;
@@ -1309,6 +1313,13 @@ namespace ClassicUO.Game.UI.Gumps
             TopMost = !TopMost;
 
             return true;
+        }
+
+        protected override void OnMove(int x, int y)
+        {
+            base.OnMove(x, y);
+            _last_position.X = ScreenCoordinateX;
+            _last_position.Y = ScreenCoordinateY;
         }
 
         #endregion
