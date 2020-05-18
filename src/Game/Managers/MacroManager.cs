@@ -542,7 +542,7 @@ namespace ClassicUO.Game.Managers
                                     break;
 
                                 case MacroSubType.Chat:
-                                    if (!UOChatManager.ChatIsEnabled)
+                                    if (UOChatManager.ChatIsEnabled != CHAT_STATUS.ENABLED)
                                     {
                                         break;
                                     }

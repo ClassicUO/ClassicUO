@@ -82,6 +82,7 @@ namespace ClassicUO.Game.Managers
         {
             if (from_packet)
             {
+                _can_send = true;
                 _lastPacketRecv = Time.Ticks + 10000;
             }
             else if (_lastPacketRecv < Time.Ticks)
@@ -159,6 +160,7 @@ namespace ClassicUO.Game.Managers
             return entity;
         }
 
+        private bool _can_send;
 
         public void RequestServerPartyGuildInfo(bool force = false)
         {
@@ -167,7 +169,14 @@ namespace ClassicUO.Game.Managers
 
             if (World.InGame && _lastPacketSend < Time.Ticks)
             {
-                _lastPacketSend = Time.Ticks + (uint) (_lastPacketRecv < Time.Ticks ? 2000 : 250);
+                _lastPacketSend = Time.Ticks + 250;
+
+                if (!force && !_can_send)
+                {
+                    return;
+                }
+
+                _can_send = false;
 
                 NetClient.Socket.Send(new PQueryGuildPosition());
 

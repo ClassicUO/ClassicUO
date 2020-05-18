@@ -28,80 +28,37 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
-    class TextContainer
+    class TextContainer : LinkedObject
     {
-        public TextOverhead Items;
-
         public int Size, MaxSize = 5;
 
         public void Add(TextOverhead obj)
         {
-            if (obj != null)
-            {
-                if (Items == null)
-                    Items = obj;
-                else
-                {
-                    var curr = Items;
-
-                    while (curr.ListRight != null)
-                    {
-                        curr = curr.ListRight;
-                    }
-
-                    curr.ListRight = obj;
-                    obj.ListLeft = curr;
-                }
-            }
+            PushToBack(obj);
 
             if (Size >= MaxSize)
             {
-                if (Items != null)
-                {
-                    var items = Items;
-
-                    Items = Items.ListRight;
-
-                    if (Items != null)
-                        Items.ListLeft = null;
-
-                    items.ListRight = null;
-                    items.ListLeft = null;
-                    items.RenderedText?.Destroy();
-
-                    if (items.Right != null)
-                        items.Right.Left = items.Left;
-
-                    if (items.Left != null)
-                        items.Left.Right = items.Right;
-                    items.Left = null;
-                    items.Right = null;
-                }
+                ((TextOverhead) Items)?.Destroy();
+                Remove(Items);
             }
             else
                 Size++;
         }
 
 
-        public void Clear()
+        public new void Clear()
         {
-            var item = Items;
+            var item = (TextOverhead) Items;
             Items = null;
 
             while (item != null)
             {
-                if (item.Right != null)
-                    item.Right.Left = item.Left;
+                var next = (TextOverhead) item.Next;
+                item.Next = null;
+                item.Destroy();
+                Remove(item);
 
-                if (item.Left != null)
-                    item.Left.Right = item.Right;
-
-                item.Left = item.Right = null;
-                
-                var next = item.ListRight;
-                item.ListRight = null;
-                item.RenderedText?.Destroy();
-                item = next;
+                item =  next;
             }
 
             Size = 0;

@@ -50,7 +50,7 @@ namespace ClassicUO.Game.Managers
             int mouseX = Mouse.Position.X;
             int mouseY = Mouse.Position.Y;
 
-            for (var item = _drawPointer; item != null; item = item.Left)
+            for (var item = _drawPointer; item != null; item = item.DLeft)
             {
                 if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null)
                     continue;
@@ -77,7 +77,7 @@ namespace ClassicUO.Game.Managers
 
             TextOverhead last = null;
 
-            for (var o = _drawPointer; o != null; o = o.Left)
+            for (var o = _drawPointer; o != null; o = o.DLeft)
             {
                 if (o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < Time.Ticks || (o.Owner.UseInRender != renderIndex && !isGump))
                     continue;
@@ -92,39 +92,44 @@ namespace ClassicUO.Game.Managers
                         alpha = 1f - 0x7F / 255f;
                 }
 
-                if (o.RenderedText.Texture.Contains( mouseX - startX - o.RealScreenPosition.X, mouseY - startY - o.RealScreenPosition.Y))
+                if (o.RenderedText.Texture.Contains(mouseX - startX - o.RealScreenPosition.X, mouseY - startY - o.RealScreenPosition.Y))
                 {
                     SelectedObject.Object = o;
                     last = o;
-                }
 
-                if (!isGump && SelectedObject.LastObject == o)
-                {
-                    hue = 0x35;
+                    if (!isGump && o.Owner is Entity)
+                    {
+                        hue = 0x0035;
+                    }
                 }
 
                 o.RenderedText.Draw(batcher, startX + o.RealScreenPosition.X, startY + o.RealScreenPosition.Y, alpha, hue);
             }
 
-            if (last != null)
-            {
-                if (last.Right != null)
-                    last.Right.Left = last.Left;
+            MoveToTop(last);
+        }
 
-                if (last.Left != null)
-                    last.Left.Right = last.Right;
+        public void MoveToTop(TextOverhead obj)
+        {
+            if (obj == null)
+                return;
 
-                last.Left = last.Right = null;
+            if (obj.DRight != null)
+                obj.DRight.DLeft = obj.DLeft;
+
+            if (obj.DLeft != null)
+                obj.DLeft.DRight = obj.DRight;
+
+            obj.DLeft = obj.DRight = null;
 
 
-                var next = _firstNode.Right;
-                _firstNode.Right = last;
-                last.Left = _firstNode;
-                last.Right = next;
+            var next = _firstNode.DRight;
+            _firstNode.DRight = obj;
+            obj.DLeft = _firstNode;
+            obj.DRight = next;
 
-                if (next != null)
-                    next.Left = last;
-            }
+            if (next != null)
+                next.DLeft = obj;
         }
 
         public void ProcessWorldText(bool doit)
@@ -135,13 +140,13 @@ namespace ClassicUO.Game.Managers
                     _bounds.Clear();
             }
 
-            for (_drawPointer = _firstNode; _drawPointer != null; _drawPointer = _drawPointer.Right)
+            for (_drawPointer = _firstNode; _drawPointer != null; _drawPointer = _drawPointer.DRight)
             {
                 var t = _drawPointer;
 
                 if (doit)
                 {
-                    if (t.Time >= Time.Ticks && !t.RenderedText.IsDestroyed)
+                    if (t.Time >= Time.Ticks && t.RenderedText != null && !t.RenderedText.IsDestroyed)
                     {
                         if (t.Owner != null)
                         {
@@ -151,7 +156,7 @@ namespace ClassicUO.Game.Managers
                     }
                 }
 
-                if (_drawPointer.Right == null)
+                if (_drawPointer.DRight == null)
                     break;
             }
         }
@@ -217,20 +222,20 @@ namespace ClassicUO.Game.Managers
 
             if (item != null)
             {
-                if (item.Right != null)
+                if (item.DRight != null)
                 {
-                    var next = item.Right;
+                    var next = item.DRight;
 
-                    item.Right = obj;
-                    obj.Left = item;
-                    obj.Right = next;
-                    next.Left = obj;
+                    item.DRight = obj;
+                    obj.DLeft = item;
+                    obj.DRight = next;
+                    next.DLeft = obj;
                 }
                 else
                 {
-                    item.Right = obj;
-                    obj.Left = item;
-                    obj.Right = null;
+                    item.DRight = obj;
+                    obj.DLeft = item;
+                    obj.DRight = null;
                 }
             }
         }
