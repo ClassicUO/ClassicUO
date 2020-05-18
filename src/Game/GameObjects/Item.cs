@@ -863,6 +863,12 @@ namespace ClassicUO.Game.GameObjects
                         break;
                     }
 
+                    case 0x3ED2: // war boar
+                    {
+                        graphic = 0x05F6;
+                        break;
+                    }
+
                     case 0x3ECD: //Palomino
                     {
                         graphic = 0x0580;

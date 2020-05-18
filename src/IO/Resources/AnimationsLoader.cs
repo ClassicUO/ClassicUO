@@ -592,8 +592,7 @@ namespace ClassicUO.IO.Resources
 
                                 if (index == 0x0115 || index == 0x00C0)
                                     mountedHeightOffset = 0;
-
-                                if (index == 0x042D)
+                                else if (index == 0x042D)
                                 {
                                     mountedHeightOffset = 3;
                                 }
@@ -611,7 +610,8 @@ namespace ClassicUO.IO.Resources
                                 if (addressOffset < currentIdxFile.Length)
                                 {
                                     DataIndex[index].Type = realType;
-                                    DataIndex[index].MountedHeightOffset = mountedHeightOffset;
+                                    if (DataIndex[index].MountedHeightOffset == 0)
+                                        DataIndex[index].MountedHeightOffset = mountedHeightOffset;
                                     DataIndex[index].GraphicConversion = (ushort)(realAnimID | 0x8000);
                                     DataIndex[index].FileIndex = (byte)animFile;
 
@@ -844,35 +844,22 @@ namespace ClassicUO.IO.Resources
 
                     if (frameCount == 0 && DataIndex[animID] != null)
                     {
-                        if (animID == 0x04E7)
-                        {
-                            DataIndex[animID].MountedHeightOffset = 18;
-                        }
-
-                        if (animID == 0x04E6)
-                        {
-                            DataIndex[animID].MountedHeightOffset = 18;
-                        }
-
-                        if (animID == 0x01B0)
-                        {
-                            DataIndex[animID].MountedHeightOffset = 9;
-                        }
-
-                        if (animID == 0x042D)
-                        {
-                            DataIndex[animID].MountedHeightOffset = 18;
-                        }
-
-                        if (animID == 0x0579)
-                        {
-                            DataIndex[animID].MountedHeightOffset = 9;
-                        }
-
                         DataIndex[animID].ReplaceUopGroup((byte)oldGroup, (byte)newGroup);
                     }
 
                     reader.Skip(60);
+                }
+
+                if (DataIndex[animID] != null)
+                {
+                    if (animID == 0x04E7 || animID == 0x042D || animID == 0x04E6)
+                    {
+                        DataIndex[animID].MountedHeightOffset = 18;
+                    }
+                    else if (animID == 0x01B0 || animID == 0x0579 || animID == 0x05F6 || animID == 0x05A0)
+                    {
+                        DataIndex[animID].MountedHeightOffset = 9;
+                    }
                 }
             }
 
