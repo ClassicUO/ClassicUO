@@ -56,10 +56,12 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _cellSize;
 
         // video
-        private Checkbox _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient;
+        private Checkbox _use_old_status_gump, _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _auraMouse, _xBR, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient;
         private ScrollAreaItem _defaultHotkeysArea, _autoOpenCorpseArea, _dragSelectArea;
         private Combobox _dragSelectModifierKey;
         private HSliderBar _brighlight, _sliderZoom;
+        private Combobox _auraType;
+
 
         //counters
         private Checkbox _enableCounters, _highlightOnUse, _highlightOnAmount, _enableAbbreviatedAmount;
@@ -107,7 +109,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         // speech
         private Checkbox _scaleSpeechDelay, _saveJournalCheckBox;
-        private Combobox _shardType, _auraType;
         private NiceButton _randomizeColorsButton;
 
         // general
@@ -683,24 +684,27 @@ namespace ClassicUO.Game.UI.Gumps
 
             _enableDeathScreen = CreateCheckBox(rightArea, "Enable Death Screen", ProfileManager.Current.EnableDeathScreen, 0, SPACE_Y + 10);
             _enableBlackWhiteEffect = CreateCheckBox(rightArea, "Black & White mode for dead player", ProfileManager.Current.EnableBlackWhiteEffect, 0, SPACE_Y);
+            _use_old_status_gump = CreateCheckBox(rightArea, "Use old status gump", ProfileManager.Current.UseOldStatusGump, 0, SPACE_Y);
+            _use_old_status_gump.IsVisible = !CUOEnviroment.IsOutlands; // outlands
+
+            //ScrollAreaItem item = new ScrollAreaItem();
+
+            //text = new Label("- Status gump type:", true, HUE_FONT)
+            //{
+            //    Y = 30
+            //};
+
+            //item.Add(text);
+
+            //_shardType = new Combobox(text.Width + 20, text.Y, 100, new[] {"Modern", "Old", "Outlands"})
+            //{
+            //    SelectedIndex = Settings.GlobalSettings.ShardType
+            //};
+            //_shardType.IsVisible = Settings.GlobalSettings.ShardType == 2;
+            //item.Add(_shardType);
+            //rightArea.Add(item);
 
             ScrollAreaItem item = new ScrollAreaItem();
-
-            text = new Label("- Status gump type:", true, HUE_FONT)
-            {
-                Y = 30
-            };
-
-            item.Add(text);
-
-            _shardType = new Combobox(text.Width + 20, text.Y, 100, new[] {"Modern", "Old", "Outlands"})
-            {
-                SelectedIndex = Settings.GlobalSettings.ShardType
-            };
-            item.Add(_shardType);
-            rightArea.Add(item);
-
-            item = new ScrollAreaItem();
             item.Y = 30;
             text = new Label("- Brighlight:", true, HUE_FONT)
             {
@@ -1537,7 +1541,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _zoomCheckbox.IsChecked = false;
                     _savezoomCheckbox.IsChecked = false;
                     _restorezoomCheckbox.IsChecked = false;
-                    _shardType.SelectedIndex = 0;
+                    _use_old_status_gump.IsChecked = false;
                     _gameWindowWidth.Text = "600";
                     _gameWindowHeight.Text = "480";
                     _gameWindowPositionX.Text = "20";
@@ -1830,18 +1834,19 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.EnableMousewheelScaleZoom = _zoomCheckbox.IsChecked;
             ProfileManager.Current.RestoreScaleAfterUnpressCtrl = _restorezoomCheckbox.IsChecked;
 
-            if (Settings.GlobalSettings.ShardType != _shardType.SelectedIndex)
+            if (!CUOEnviroment.IsOutlands && _use_old_status_gump.IsChecked != ProfileManager.Current.UseOldStatusGump)
             {
                 var status = StatusGumpBase.GetStatusGump();
 
-                Settings.GlobalSettings.ShardType = _shardType.SelectedIndex;
+                ProfileManager.Current.UseOldStatusGump = _use_old_status_gump.IsChecked;
 
                 if (status != null)
                 {
                     status.Dispose();
-                    StatusGumpBase.AddStatusGump(status.ScreenCoordinateX, status.ScreenCoordinateY);
+                    UIManager.Add(StatusGumpBase.AddStatusGump(status.ScreenCoordinateX, status.ScreenCoordinateY));
                 }
             }
+
 
             int.TryParse(_gameWindowWidth.Text, out int gameWindowSizeWidth);
             int.TryParse(_gameWindowHeight.Text, out int gameWindowSizeHeight);

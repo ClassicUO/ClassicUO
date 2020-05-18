@@ -146,6 +146,7 @@ namespace ClassicUO
             }
 
             Settings.GlobalSettings = ConfigurationResolver.Load<Settings>(globalSettingsPath);
+            CUOEnviroment.IsOutlands = Settings.GlobalSettings.ShardType == 2;
 
             ReadSettingsFromArgs(args);
 
@@ -312,10 +313,17 @@ namespace ClassicUO
 
                         break;
 
+
+                    // ======= [SHARD_TYPE_FIX] =======
+                    // TODO old. maintain it for retrocompatibility
                     case "shard_type":
                     case "shard":
                         Settings.GlobalSettings.ShardType = int.Parse(value);
+                        break;
+                    // ================================
 
+                    case "outlands":
+                        CUOEnviroment.IsOutlands = true;
                         break;
 
                     case "fixed_time_step":
