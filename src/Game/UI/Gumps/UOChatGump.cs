@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     class UOChatGumpChooseName : Gump
     {
-        private readonly TextBox _textBox;
+        private readonly StbTextBox _textBox;
 
         public UOChatGumpChooseName() : base(0, 0)
         {
@@ -79,7 +79,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(text);
 
             int x = text.X + text.Width + 2;
-            _textBox = new TextBox(1, -1, 0, Width - x - 17, hue: 0x0481, style: FontStyle.Fixed)
+            _textBox = new StbTextBox(1, -1, Width - x - 17, true, FontStyle.Fixed, 0x0481)
             {
                 X = x,
                 Y = text.Y,

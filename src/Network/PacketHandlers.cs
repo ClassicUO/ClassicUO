@@ -5289,7 +5289,7 @@ namespace ClassicUO.Network
 
                     case "textentrylimited":
                     case "textentry":
-                        TextBox textBox = new TextBox(gparams, lines);
+                        StbTextBox textBox = new StbTextBox(gparams, lines);
 
                         if (!textBoxFocused)
                         {
