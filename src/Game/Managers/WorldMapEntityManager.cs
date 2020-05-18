@@ -176,8 +176,6 @@ namespace ClassicUO.Game.Managers
                     return;
                 }
 
-                _can_send = false;
-
                 NetClient.Socket.Send(new PQueryGuildPosition());
 
                 if (World.Party != null && World.Party.Leader != 0)

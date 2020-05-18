@@ -211,8 +211,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else if (_canChangeName)
             {
-                _textBox.IsEditable = false;
-                UIManager.SystemChat.SetFocus();
+                if (_textBox != null)
+                    _textBox.IsEditable = false;
+                UIManager.SystemChat?.SetFocus();
             }
 
             base.OnMouseDown(x, y, button);
@@ -236,7 +237,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    StatusGumpBase.AddStatusGump(ScreenCoordinateX, ScreenCoordinateY);
+                    UIManager.Add(StatusGumpBase.AddStatusGump(ScreenCoordinateX, ScreenCoordinateY));
                     Dispose();
                 }
             }

@@ -463,7 +463,9 @@ namespace ClassicUO.Game.Managers
                                 case MacroSubType.Status:
 
                                     if (StatusGumpBase.GetStatusGump() == null)
-                                        StatusGumpBase.AddStatusGump(100, 100);
+                                    {
+                                        UIManager.Add(StatusGumpBase.AddStatusGump(100, 100));
+                                    }
 
                                     break;
 
@@ -708,8 +710,7 @@ namespace ClassicUO.Game.Managers
 
                                             if (healthbar != null)
                                             {
-                                                StatusGumpBase.AddStatusGump(healthbar.ScreenCoordinateX, healthbar.ScreenCoordinateY);
-
+                                               UIManager.Add(StatusGumpBase.AddStatusGump(healthbar.ScreenCoordinateX, healthbar.ScreenCoordinateY));
                                             }
                                         }
                                     }

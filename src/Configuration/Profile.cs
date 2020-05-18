@@ -559,27 +559,7 @@ namespace ClassicUO.Configuration
                                     gump = new SpellbookGump();
                                     break;
                                 case GUMP_TYPE.GT_STATUSGUMP:
-                                    switch (Settings.GlobalSettings.ShardType)
-                                    {
-                                        default:
-                                        case 0: // modern
-
-                                            gump = new StatusGumpModern();
-
-                                            break;
-
-                                        case 1: // old
-
-                                            gump = new StatusGumpOld();
-
-                                            break;
-
-                                        case 2: // outlands
-
-                                            gump = new StatusGumpOutlands();
-
-                                            break;
-                                    }
+                                    gump = StatusGumpBase.AddStatusGump(0, 0);
                                     break;
                                 //case GUMP_TYPE.GT_TIPNOTICE: 
                                 //    gump = new TipNoticeGump();
