@@ -437,7 +437,7 @@ namespace ClassicUO.Game.Scenes
             Log.Info("Connected!");
             CurrentLoginStep = LoginSteps.VerifyingAccount;
 
-            if (Client.Version > ClientVersion.CV_6040)
+            if (Client.Version >= ClientVersion.CV_6040)
             {
                 uint clientVersion = (uint) Client.Version;
 
