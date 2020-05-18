@@ -1400,6 +1400,7 @@ namespace ClassicUO.IO.Resources
                     Log.Panic("MEMORY LEAK UOP ANIM");
 
                 animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
+                long end = (long) _reader.StartAddress + _reader.Length;
 
                 for (int i = 0; i < animDirection.FrameCount; i++)
                 {
@@ -1431,7 +1432,8 @@ namespace ClassicUO.IO.Resources
                     uint header = _reader.ReadUInt();
 
                     long pos = _reader.Position;
-                    long end = (long) _reader.StartAddress + _reader.Length;
+
+                    int sum = imageCenterY + imageHeight;
 
                     while (header != 0x7FFF7FFF && pos < end)
                     {
@@ -1446,7 +1448,7 @@ namespace ClassicUO.IO.Resources
                             y |= unchecked((int) 0xFFFFFE00);
 
                         x += imageCenterX;
-                        y += imageCenterY + imageHeight;
+                        y += sum;
 
                         int block = y * imageWidth + x;
 
@@ -1503,6 +1505,7 @@ namespace ClassicUO.IO.Resources
 
 
             animDir.Frames = new AnimationFrameTexture[frameCount];
+            long end = (long) reader.StartAddress + reader.Length;
 
             for (int i = 0; i < frameCount; i++)
             {
@@ -1524,7 +1527,6 @@ namespace ClassicUO.IO.Resources
                 uint header = reader.ReadUInt();
 
                 long pos = reader.Position;
-                long end = (long) reader.StartAddress + reader.Length;
 
                 while (header != 0x7FFF7FFF && pos < end)
                 {
