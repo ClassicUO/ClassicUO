@@ -4322,6 +4322,9 @@ namespace ClassicUO.Network
 
             switch (type)
             {
+                case 0x00: // accepted
+                    Log.Trace("Krrios special packet accepted");
+                    break;
                 case 0x01: // custom party info
                 case 0x02: // guild track info
                     bool locations = type == 0x01 || p.ReadBool();
@@ -4343,6 +4346,10 @@ namespace ClassicUO.Network
 
                     World.WMapManager.RemoveUnupdatedWEntity();
 
+                    break;
+                case 0x03: // runebook contents
+                    break;
+                case 0x04: // guardline data
                     break;
                 case 0xF0:
                     break;
