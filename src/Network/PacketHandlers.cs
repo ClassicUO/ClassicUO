@@ -1072,6 +1072,10 @@ namespace ClassicUO.Network
                                 if (loader.GetTexture(0x06E8) != null)
                                     graphic = 0x06E8;
                                 break;
+                            case 0x0049:
+                                if (loader.GetTexture(0x9CDF) != null)
+                                    graphic = 0x9CDF;
+                                break;
                             case 0x0051:
                                 if (loader.GetTexture(0x06E7) != null)
                                     graphic = 0x06E7;

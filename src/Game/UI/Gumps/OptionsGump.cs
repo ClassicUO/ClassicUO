@@ -1343,7 +1343,12 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(_infoBarHighlightScrollArea);
 
 
-            NiceButton nb = new NiceButton(0, 10, 90, 20, ButtonAction.Activate, "+ Add item", 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT) { ButtonParameter = 999 };
+            NiceButton nb = new NiceButton(0, 10, 90, 20, ButtonAction.Activate, "+ Add item", 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT)
+            {
+                ButtonParameter = -1,
+                IsSelectable = true,
+                IsSelected = true,
+            };
             nb.MouseUp += (sender, e) =>
             {
                 InfoBarBuilderControl ibbc = new InfoBarBuilderControl(new InfoBarItem("", InfoBarVars.HP, 0x3B9));
@@ -1402,7 +1407,7 @@ namespace ClassicUO.Game.UI.Gumps
              _containerDoubleClickToLoot = CreateCheckBox(rightArea, "Double click to loot items inside containers", ProfileManager.Current.DoubleClickToLootInsideContainers, 0, SPACE_Y);
             _relativeDragAnDropItems = CreateCheckBox(rightArea, "Relative drag and drop items in containers", ProfileManager.Current.RelativeDragAndDropItems, 0, SPACE_Y);
 
-            ScrollAreaItem _containerGumpLocation = new ScrollAreaItem();
+            item = new ScrollAreaItem();
             _overrideContainerLocation = new Checkbox(0x00D2, 0x00D3, "Override container gump location", FONT, HUE_FONT, true)
             {
                 IsChecked = ProfileManager.Current.OverrideContainerLocation,
@@ -1410,10 +1415,24 @@ namespace ClassicUO.Game.UI.Gumps
             };
             _overrideContainerLocationSetting = new Combobox(_overrideContainerLocation.Width + 20, 0, 200, new[] { "Near container position", "Top right", "Last dragged position", "Remember every container" }, ProfileManager.Current.OverrideContainerLocationSetting);
 
-            _containerGumpLocation.Add(_overrideContainerLocation);
-            _containerGumpLocation.Add(_overrideContainerLocationSetting);
+            item.Add(_overrideContainerLocation);
+            item.Add(_overrideContainerLocationSetting);
+            rightArea.Add(item);
 
-            rightArea.Add(_containerGumpLocation);
+
+            item = new ScrollAreaItem();
+            NiceButton button = new NiceButton(0, SPACE_Y + 30, 130, 30, ButtonAction.Activate, "Rebuild containers.txt", 0)
+            {
+                ButtonParameter = -1,
+                IsSelectable = true,
+                IsSelected = true
+            };
+            button.MouseUp += (sender, e) =>
+            {
+                ContainerManager.BuildContainerFile(true);
+            };
+            item.Add(button);
+            rightArea.Add(item);
 
             Add(rightArea, PAGE);
         }
