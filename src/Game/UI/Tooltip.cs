@@ -135,7 +135,9 @@ namespace ClassicUO.Game.UI
             batcher.Draw2D(Texture2DCache.GetTexture(Color.Black), x - 4, y - 2, z_width * zoom, z_height * zoom, ref hue_vec);
             batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x - 4, y - 2, (int) (z_width * zoom), (int) (z_height * zoom), ref hue_vec);
 
-           
+            hue_vec.X = 0;
+            hue_vec.Y = 0;
+            hue_vec.Z = 0;
 
             return batcher.Draw2D(_renderedText.Texture,
 

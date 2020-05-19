@@ -110,22 +110,29 @@ namespace ClassicUO
 
             Client.Load();
 
-            uint[] buffer = new uint[32 * 3000 * 2];
+            const int TEXTURE_WIDHT = 32;
+            const int TEXTURE_HEIGHT = 2048 * 1;
+
+            uint[] buffer = new uint[TEXTURE_WIDHT * TEXTURE_HEIGHT * 2];
             HuesLoader.Instance.CreateShaderColors(buffer);
 
 
             _hues_sampler[0] = new Texture2D(
                                           GraphicsDevice,
-                                          32,
-                                          3000);
-            _hues_sampler[0].SetData(buffer, 0, buffer.Length / 2);
+                                          TEXTURE_WIDHT,
+                                          TEXTURE_HEIGHT);
+            _hues_sampler[0].SetData(buffer, 0, TEXTURE_WIDHT * TEXTURE_HEIGHT);
            
            
+
+
             _hues_sampler[1] = new Texture2D(
                                           GraphicsDevice,
-                                          32,
-                                          3000);
-            _hues_sampler[1].SetData(buffer, (buffer.Length / 2) - 1, buffer.Length / 2);
+                                          TEXTURE_WIDHT,
+                                          TEXTURE_HEIGHT);
+            _hues_sampler[1].SetData(buffer, TEXTURE_WIDHT * TEXTURE_HEIGHT, TEXTURE_WIDHT * TEXTURE_HEIGHT);
+
+
 
 
             GraphicsDevice.Textures[1] = _hues_sampler[0];
@@ -133,8 +140,6 @@ namespace ClassicUO
 
             AuraManager.CreateAuraTexture();
             UIManager.InitializeGameCursor();
-
-
 
             SetScene(new LoginScene());
             SetWindowPositionBySettings();

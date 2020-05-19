@@ -984,7 +984,7 @@ namespace ClassicUO.Network
 
                 Client.Game.Scene.Audio.PlaySound(0x0055);
             }
-            else if (graphic == 0x30)
+            else if (graphic == 0x0030)
             {
                 Mobile vendor = World.Mobiles.Get(serial);
 
@@ -1583,6 +1583,7 @@ namespace ClassicUO.Network
 
                 if (Client.Version >= Data.ClientVersion.CV_6017)
                     p.Skip(1);
+
                 uint containerSerial = p.ReadUInt();
                 ushort hue = p.ReadUShort();
 
@@ -2493,7 +2494,8 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            Entity corpse = World.Get(p.ReadUInt());
+            uint serial = p.ReadUInt();
+            Entity corpse = World.Get(serial);
             if (corpse == null)
                 return;
 
@@ -2501,15 +2503,14 @@ namespace ClassicUO.Network
 
             while (layer != Layer.Invalid && p.Position < p.Length)
             {
-                Item item = World.Items.Get(p.ReadUInt());
+                uint item_serial = p.ReadUInt();
 
-                if (item != null && item.Container == corpse)
-                {
-                    RemoveItemFromContainer(item);
-                    item.Container = corpse;
-                    corpse.PushToBack(item);
-                    item.Layer = layer;
-                }
+                Item item = World.GetOrCreateItem(item_serial);
+
+                RemoveItemFromContainer(item);
+                item.Container = serial;
+                item.Layer = layer;
+                corpse.PushToBack(item);
 
                 layer = (Layer) p.ReadByte();
             }
@@ -4326,6 +4327,9 @@ namespace ClassicUO.Network
 
             switch (type)
             {
+                case 0x00: // accepted
+                    Log.Trace("Krrios special packet accepted");
+                    break;
                 case 0x01: // custom party info
                 case 0x02: // guild track info
                     bool locations = type == 0x01 || p.ReadBool();
@@ -4347,6 +4351,10 @@ namespace ClassicUO.Network
 
                     World.WMapManager.RemoveUnupdatedWEntity();
 
+                    break;
+                case 0x03: // runebook contents
+                    break;
+                case 0x04: // guardline data
                     break;
                 case 0xF0:
                     break;
@@ -4600,8 +4608,8 @@ namespace ClassicUO.Network
             if (container == null)
             {
                 Log.Warn( $"No container ({containerSerial}) found");
-                container = World.GetOrCreateItem(containerSerial);
-                //return;
+                //container = World.GetOrCreateItem(containerSerial);
+                return;
             }
 
             Item item = World.Items.Get(serial);

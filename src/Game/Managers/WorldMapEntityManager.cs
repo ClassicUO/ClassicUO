@@ -171,10 +171,10 @@ namespace ClassicUO.Game.Managers
             {
                 _lastPacketSend = Time.Ticks + 250;
 
-                if (!force && !_can_send)
-                {
-                    return;
-                }
+                //if (!force && !_can_send)
+                //{
+                //    return;
+                //}
 
                 NetClient.Socket.Send(new PQueryGuildPosition());
 
