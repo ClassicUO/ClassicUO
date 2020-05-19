@@ -155,13 +155,11 @@ namespace ClassicUO.Game.GameObjects
             }
 
 
-            bool mirror = false;
 
             ProcessSteps(out byte dir);
             byte layerDir = dir;
 
-            AnimationsLoader.Instance.GetAnimDirection(ref dir, ref mirror);
-            IsFlipped = mirror;
+            AnimationsLoader.Instance.GetAnimDirection(ref dir, ref IsFlipped);
 
             ushort graphic = GetGraphicForAnimation();
             byte animGroup = GetGroupForAnimation(this, graphic, true);
@@ -182,14 +180,14 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (hasShadow)
                     {
-                        DrawInternal(batcher, this, null, drawX, drawY + 10, mirror, ref animIndex, true, graphic, isHuman);
+                        DrawInternal(batcher, this, null, drawX, drawY + 10, IsFlipped, ref animIndex, true, graphic, isHuman);
                         AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, mountGraphic);
-                        DrawInternal(batcher, this, mount, drawX, drawY, mirror, ref animIndex, true, mountGraphic, isHuman);
+                        DrawInternal(batcher, this, mount, drawX, drawY, IsFlipped, ref animIndex, true, mountGraphic, isHuman);
                     }
                     else
                         AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, mountGraphic);
 
-                    drawY += DrawInternal(batcher, this, mount, drawX, drawY, mirror, ref animIndex, false, mountGraphic, isHuman, isMount: true);
+                    drawY += DrawInternal(batcher, this, mount, drawX, drawY, IsFlipped, ref animIndex, false, mountGraphic, isHuman, isMount: true);
                 }
             }
             else
@@ -201,7 +199,7 @@ namespace ClassicUO.Game.GameObjects
 
                     ProcessSteps(out dir);
                     AnimationsLoader.Instance.Direction = dir;
-                    AnimationsLoader.Instance.FixSittingDirection(ref dir, ref mirror, ref drawX, ref drawY);
+                    AnimationsLoader.Instance.FixSittingDirection(ref dir, ref IsFlipped, ref drawX, ref drawY);
 
                     if (AnimationsLoader.Instance.Direction == 3)
                     {
@@ -221,13 +219,13 @@ namespace ClassicUO.Game.GameObjects
                         _transform = true;
                 }
                 else if (hasShadow)
-                    DrawInternal(batcher, this, null, drawX, drawY, mirror, ref animIndex, true, graphic, isHuman);
+                    DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, ref animIndex, true, graphic, isHuman);
             }
 
             AnimationsLoader.Instance.AnimGroup = animGroup;
 
 
-            DrawInternal(batcher, this, null, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman);
+            DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, ref animIndex, false, graphic, isHuman);
 
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
@@ -276,12 +274,12 @@ namespace ClassicUO.Game.GameObjects
                         if (AnimationsLoader.Instance.SittingValue == 0 && IsGargoyle && item.ItemData.IsWeapon)
                         {
                             AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, graphic);
-                            DrawInternal(batcher, this, item, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman, false);
+                            DrawInternal(batcher, this, item, drawX, drawY, IsFlipped, ref animIndex, false, graphic, isHuman, false);
                             AnimationsLoader.Instance.AnimGroup = animGroup;
                         }
                         else
                         {
-                            DrawInternal(batcher, this, item, drawX, drawY, mirror, ref animIndex, false, graphic, isHuman, false);
+                            DrawInternal(batcher, this, item, drawX, drawY, IsFlipped, ref animIndex, false, graphic, isHuman, false);
                         }
                     }
                     else
