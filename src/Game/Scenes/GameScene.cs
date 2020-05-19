@@ -187,6 +187,9 @@ namespace ClassicUO.Game.Scenes
             
             CircleOfTransparency.Create(ProfileManager.Current.CircleOfTransparencyRadius);
             Plugin.OnConnected();
+
+           // UIManager.Add(new Hues_gump());
+
         }
 
         private void ChatOnMessageReceived(object sender, UOMessageEventArgs e)
