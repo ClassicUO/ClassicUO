@@ -83,7 +83,7 @@ namespace ClassicUO.Renderer
                 type |= 20;
             }
 
-            hueVector.X = hue;
+            hueVector.X = hue - 1;
             hueVector.Y = type;
             hueVector.Z = alpha;
         }

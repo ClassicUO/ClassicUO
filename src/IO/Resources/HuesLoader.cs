@@ -141,7 +141,12 @@ namespace ClassicUO.IO.Resources
                 for (int y = 0; y < 8; y++)
                 {
                     for (int x = 0; x < 32; x++)
-                        buffer[idx++] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
+                    {
+                        buffer[idx++] = HuesHelper.Color16To32(HuesRange[r].Entries[y].ColorTable[x]) | 0xFF_00_00_00;
+
+                        if (idx >= buffer.Length)
+                            return;
+                    }
                 }
             }
 
