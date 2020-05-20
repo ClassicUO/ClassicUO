@@ -1468,8 +1468,9 @@ namespace ClassicUO.Game.GameObjects
                     switch (action)
                     {
                         default:
-
-                            if (AnimationsLoader.Instance.AnimationExists(mobile.Graphic, 31))
+                            if (mobile.IsGargoyle && mobile.IsFlying && AnimationsLoader.Instance.AnimationExists(mobile.Graphic, 71))
+                                return 71;
+                            else if (AnimationsLoader.Instance.AnimationExists(mobile.Graphic, 31))
                                 return 31;
                             break;
 
@@ -1486,7 +1487,8 @@ namespace ClassicUO.Game.GameObjects
                             return 12;
 
                         case 7:
-
+                            if (mobile.IsGargoyle && mobile.IsFlying && AnimationsLoader.Instance.AnimationExists(mobile.Graphic, 72))
+                                return 72;
                             return 13;
 
                         case 8:
@@ -1588,6 +1590,9 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (type > ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
+                    if (mobile.IsGargoyle && mobile.IsFlying && AnimationsLoader.Instance.AnimationExists(mobile.Graphic, 77))
+                        return 77;
+
                     if (mobile.IsMounted)
                         return 0xFF;
 
