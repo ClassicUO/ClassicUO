@@ -342,17 +342,17 @@ namespace ClassicUO.IO.Resources
                             {
                                 line = line.Trim();
 
-                                if (line.Length == 0 || line[0] == '#')
+                                if (line.Length == 0 || line[0] == '#' || !char.IsNumber(line[0]))
                                     continue;
 
                                 string[] parts = line.Split(new[]
                                 {
                                 '\t', ' '
-                            }, StringSplitOptions.RemoveEmptyEntries);
+                                }, StringSplitOptions.RemoveEmptyEntries);
 
                                 if (parts.Length < 3)
                                     continue;
-
+                                
                                 int id = int.Parse(parts[0]);
 
                                 if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
@@ -367,7 +367,6 @@ namespace ClassicUO.IO.Resources
                                     continue;
 
                                 uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
-
 
                                 for (int i = 0; i < 5; i++)
                                 {

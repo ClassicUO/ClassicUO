@@ -83,7 +83,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseOver(int x, int y)
         {
-            if (UIManager.IsDragging && UIManager.DraggingControl == this)
+            if (!IsDisposed && UIManager.IsDragging && UIManager.DraggingControl == this)
                 _anchorCandidate = UIManager.AnchorManager.GetAnchorableControlUnder(this);
 
             base.OnMouseOver(x, y);

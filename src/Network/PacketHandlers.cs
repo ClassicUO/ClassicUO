@@ -1072,6 +1072,10 @@ namespace ClassicUO.Network
                                 if (loader.GetTexture(0x06E8) != null)
                                     graphic = 0x06E8;
                                 break;
+                            case 0x0049:
+                                if (loader.GetTexture(0x9CDF) != null)
+                                    graphic = 0x9CDF;
+                                break;
                             case 0x0051:
                                 if (loader.GetTexture(0x06E7) != null)
                                     graphic = 0x06E7;
@@ -2509,7 +2513,7 @@ namespace ClassicUO.Network
 
                 RemoveItemFromContainer(item);
                 item.Container = serial;
-                item.Layer = layer;
+                item.Layer = layer - 1;
                 corpse.PushToBack(item);
 
                 layer = (Layer) p.ReadByte();
@@ -4604,7 +4608,6 @@ namespace ClassicUO.Network
             }
 
             Entity container = World.Get(containerSerial);
-
             if (container == null)
             {
                 Log.Warn( $"No container ({containerSerial}) found");
