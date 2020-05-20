@@ -186,16 +186,6 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public List<AnchorableGump> GetGumps(AnchorableGump control)
-        {
-            if (this[control] != null)
-            {
-                return reverseMap.Where(o => o.Value == this[control]).Select(o => o.Key).ToList();
-            }
-
-            return null;
-        }
-
         private (Point?, AnchorableGump) GetAnchorDirection(AnchorableGump draggedControl, AnchorableGump host)
         {
             int xdistancescale = Math.Abs(draggedControl.X - host.X)*100 / host.Width;
@@ -233,12 +223,15 @@ namespace ClassicUO.Game.Managers
 
         public AnchorableGump ClosestOverlappingControl(AnchorableGump control)
         {
+            if (control == null || control.IsDisposed)
+                return null;
+
             AnchorableGump closestControl = null;
             int closestDistance = 99999;
 
             foreach (var c in UIManager.Gumps)
             {
-                if (c is AnchorableGump host)
+                if (!c.IsDisposed && c is AnchorableGump host && host.AnchorType == control.AnchorType)
                 {
                     if (IsOverlapping(control, host))
                     {
@@ -248,27 +241,6 @@ namespace ClassicUO.Game.Managers
                             closestDistance = dirtyDistance;
                             closestControl = host;
                         }
-                    }
-                }
-            }
-
-            return closestControl;
-        }
-
-        public AnchorableGump ClosestOverlappingControl(AnchorableGump control, List<AnchorableGump> gumps)
-        {
-            AnchorableGump closestControl = null;
-            int closestDistance = 99999;
-
-            foreach (var host in gumps)
-            {
-                if (IsOverlapping(control, host))
-                {
-                    int dirtyDistance = Math.Abs(control.X - host.X) + Math.Abs(control.Y - host.Y);
-                    if (dirtyDistance < closestDistance)
-                    {
-                        closestDistance = dirtyDistance;
-                        closestControl = host;
                     }
                 }
             }

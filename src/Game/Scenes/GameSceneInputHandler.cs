@@ -685,6 +685,8 @@ namespace ClassicUO.Game.Scenes
             if (!IsMouseOverViewport)
                 return false;
 
+            bool ok = true;
+
             if (Mouse.LButtonPressed && !ItemHold.Enabled)
             {
                 Point offset = Mouse.LDroppedOffset;
@@ -722,7 +724,9 @@ namespace ClassicUO.Game.Scenes
                                 Rectangle rect = GumpsLoader.Instance.GetTexture(0x0804).Bounds;
                                 UIManager.Add(customgump = new HealthBarGump(obj) { X = Mouse.LDropPosition.X - (rect.Width >> 1), Y = Mouse.LDropPosition.Y - (rect.Height >> 1) });
                             }
+
                             UIManager.AttemptDragControl(customgump, Mouse.Position, true);
+                            ok = false;
                         }
                         else if (obj is Item item)
                         {
@@ -734,7 +738,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            return true;
+            return ok;
         }
       
         internal override void OnKeyDown(SDL.SDL_KeyboardEvent e)

@@ -409,19 +409,12 @@ namespace ClassicUO.Game.Scenes
                         ref readonly var data = ref TileDataLoader.Instance.StaticData[obj.Graphic];
                         light.ID = data.Layer;
                     }
-                    //else if (GameObjectHelper.TryGetStaticData(lightObject, out StaticTiles data))
-                    //    light.ID = data.Layer;
-
-                    //else
-                    //    return;
                 }
-
 
                 if (light.ID >= Constants.MAX_LIGHTS_DATA_INDEX_COUNT)
                     return;
 
                 light.Color = ProfileManager.Current.UseColoredLights ? LightColors.GetHue(graphic) : (ushort) 0;
-
                 light.DrawX = x;
                 light.DrawY = y;
                 _lightCount++;
@@ -844,6 +837,8 @@ namespace ClassicUO.Game.Scenes
             batcher.SetBlendState(BlendState.Additive);
 
             Vector3 hue = Vector3.Zero;
+            hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
+            hue.Z = 0;
 
             for (int i = 0; i < _lightCount; i++)
             {
@@ -852,9 +847,7 @@ namespace ClassicUO.Game.Scenes
                 UOTexture texture = LightsLoader.Instance.GetTexture(l.ID);
 
                 hue.X = l.Color;
-                hue.Y = ShaderHuesTraslator.SHADER_LIGHTS;
-                hue.Z = 0;
-
+                
                 batcher.DrawSprite(texture, l.DrawX - (texture.Width >> 1), l.DrawY - (texture.Height >> 1), false, ref hue);
             }
 
