@@ -4329,6 +4329,8 @@ namespace ClassicUO.Network
             {
                 case 0x00: // accepted
                     Log.Trace("Krrios special packet accepted");
+                    World.WMapManager.SetACKReceived();
+                    World.WMapManager.SetEnable(true);
                     break;
                 case 0x01: // custom party info
                 case 0x02: // guild track info
