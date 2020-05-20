@@ -353,11 +353,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             protected override void OnTextInput(string c)
             {
+                int startidx = CaretIndex;
+                int curpage = (int)Tag - 1;
+                //MultilinesFontInfo oldinfo = _bookGump._pagesTextBoxes[curpage].CalculateFontInfo(Text);
                 base.OnTextInput(c);
                 if (_bookGump != null && !_bookGump.IsDisposed)
                 {
-                    int curpage = (int)Tag - 1;
-                    MultilinesFontInfo info = _bookGump._pagesTextBoxes[curpage].CalculateFontInfo(Text);
+                    MultilinesFontInfo info = CalculateFontInfo(Text);
                     int lines = 0, xlength = 0;
                     while (info != null)
                     {
@@ -372,12 +374,12 @@ namespace ClassicUO.Game.UI.Gumps
                         curpage++;
                         if (curpage < _bookGump.BookPageCount)
                         {
-                            bool change = CaretIndex >= Text.Length;
-                            c = Text.Remove(0, Text.Length - xlength);
+                            bool changepage = CaretIndex >= Text.Length - xlength;
+                            c = Text.Substring(Text.Length - xlength);
                             Text = Text.Substring(0, Text.Length - xlength);
-                            if (change)
+                            if (changepage)
                             {
-                                _bookGump.SetActivePage((curpage + 2 + (curpage % 2)) / 2);
+                                _bookGump.SetActivePage(_bookGump._pagesTextBoxes[curpage].Page);//(curpage + 2 + (curpage % 2)) / 2);
                                 _bookGump._pagesTextBoxes[curpage].SetKeyboardFocus();
                             }
                             _bookGump._pagesTextBoxes[curpage].CaretIndex = 0;
@@ -385,7 +387,12 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            Text = Text.Remove(0, Text.Length - xlength);
+                            c = "";
+                            if (startidx > 0)
+                                 c = Text.Substring(0, startidx);
+                            if (startidx == 0 || (Text.Length - (xlength + startidx)) > 0)
+                                c += Text.Substring(startidx, Text.Length - (xlength + startidx));
+                            Text = c;
                         }
                         //extra lines on last page are lost for good
                     }
@@ -483,7 +490,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            private void CascadeUpdate(int topage, int grablines)
+            private void CascadeUpdate(int topage, int grablines, int grabchars = 0)
             {
                 if (grablines > 0 && topage + 1 < _bookGump._pagesTextBoxes.Length)
                 {
@@ -518,6 +525,10 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         frompage++;
                     }
+                }
+                else
+                {
+
                 }
             }
         }
