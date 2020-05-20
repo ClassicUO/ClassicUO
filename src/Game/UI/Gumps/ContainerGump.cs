@@ -361,42 +361,42 @@ namespace ClassicUO.Game.UI.Gumps
 
             bool is_chessboard = Graphic == 0x091A || Graphic == 0x092E;
             const ushort CHESSBOARD_OFFSET = 11369;
-
+            bool is_corpse = container.Graphic == 0x2006;
 
             for (var i = container.Items; i != null; i = i.Next)
             {
                 var item = (Item) i;
 
-                if (!item.IsLootable)
-                    continue;
-
-                var itemControl = new ItemGump(item.Serial,
-                                               item.DisplayedGraphic,
-                                               //(ushort) (item.DisplayedGraphic - (is_chessboard ? 0 : 0)), 
-                                               item.Hue, 
-                                               item.X, 
-                                               item.Y);
-
-                if (is_chessboard)
-                    itemControl.IsPartialHue = false;
-
-                itemControl.IsVisible = !IsMinimized;
-
-                float scale = UIManager.ContainerScale;
-
-                if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
+                if (item.Layer == 0 || (is_corpse && Constants.BAD_CONTAINER_LAYERS[(int) item.Layer] && item.Amount > 0))
                 {
-                    itemControl.Width = (int) (itemControl.Width * scale);
-                    itemControl.Height = (int) (itemControl.Height * scale);
+                    var itemControl = new ItemGump(item.Serial,
+                                                   item.DisplayedGraphic,
+                                                   //(ushort) (item.DisplayedGraphic - (is_chessboard ? 0 : 0)), 
+                                                   item.Hue,
+                                                   item.X,
+                                                   item.Y);
+
+                    if (is_chessboard)
+                        itemControl.IsPartialHue = false;
+
+                    itemControl.IsVisible = !IsMinimized;
+
+                    float scale = UIManager.ContainerScale;
+
+                    if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
+                    {
+                        itemControl.Width = (int) (itemControl.Width * scale);
+                        itemControl.Height = (int) (itemControl.Height * scale);
+                    }
+
+                    itemControl.X = (int) (item.X * scale);
+                    itemControl.Y = (int) ((item.Y - (is_chessboard ? 20 : 0)) * scale);
+
+                    //if ((_hideIfEmpty && !IsVisible))
+                    //    IsVisible = true;
+
+                    Add(itemControl);
                 }
-
-                itemControl.X = (int) (item.X * scale);
-                itemControl.Y = (int) ((item.Y - (is_chessboard ? 20 : 0)) * scale);
-
-                //if ((_hideIfEmpty && !IsVisible))
-                //    IsVisible = true;
-
-                Add(itemControl);
             }
         }
     

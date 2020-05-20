@@ -126,5 +126,15 @@ namespace ClassicUO.Game
         public const int PREDICTABLE_TILE_COUNT = 64 * PREDICTABLE_CHUNKS;
         public const int PREDICTABLE_STATICS = PREDICTABLE_TILE_COUNT * 2;
         public const int PREDICTABLE_MULTIS = PREDICTABLE_TILE_COUNT * 4;
+
+        public static readonly bool[] BAD_CONTAINER_LAYERS =
+        {
+            false, // invalid [body]
+            true, true, true, true, true, true, true, true,
+            true, true, false, true, true, true, false, false,
+            true, true, true, true,
+            false, // backpack
+            true, true, true, false, false, false, false, false
+        };
     }
 }

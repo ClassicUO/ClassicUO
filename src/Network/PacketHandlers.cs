@@ -2509,7 +2509,7 @@ namespace ClassicUO.Network
 
                 RemoveItemFromContainer(item);
                 item.Container = serial;
-                item.Layer = layer;
+                item.Layer = layer - 1;
                 corpse.PushToBack(item);
 
                 layer = (Layer) p.ReadByte();
@@ -4604,7 +4604,6 @@ namespace ClassicUO.Network
             }
 
             Entity container = World.Get(containerSerial);
-
             if (container == null)
             {
                 Log.Warn( $"No container ({containerSerial}) found");
