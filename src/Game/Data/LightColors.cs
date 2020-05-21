@@ -98,7 +98,7 @@ namespace ClassicUO.Game.Data
                                                     color = 60;
                                             }
                                             else
-                                                color = 60;
+                                                color = 51;
                                         }
                                         else
                                             color = 61;
@@ -212,7 +212,7 @@ namespace ClassicUO.Game.Data
                                 color = 31;
                         }
                         else
-                            color = 31;
+                            color = 40;
                     }
                     else
                         color = 6;
@@ -221,7 +221,7 @@ namespace ClassicUO.Game.Data
                     color = 40;
             }
             else
-                color = 62;
+                color = 0;
 
             return color;
         }
