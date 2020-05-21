@@ -412,7 +412,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int curpage = (int)Tag;
                 string text = Text;
                 base.OnKeyDown(key, mod);
-
+                
                 switch (key)
                 {
                     case SDL.SDL_Keycode.SDLK_BACKSPACE:
@@ -447,7 +447,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     chars -= info.CharCount;
                                 info = info.Next;
                             }
-                            if (!selection && lines == 0)
+                            if (!selection && lines == 0 && chars == 0 && (key == SDL.SDL_Keycode.SDLK_BACKSPACE || key == SDL.SDL_Keycode.SDLK_DELETE))
                                 chars = 1;
                             CascadeUpdate(curpage - 1, lines, chars);
                         }
@@ -490,6 +490,10 @@ namespace ClassicUO.Game.UI.Gumps
                     case SDL.SDL_Keycode.SDLK_PAGEDOWN:
                         caret = Text.Length;
                         goto case SDL.SDL_Keycode.SDLK_DOWN;
+                    default:
+                        if (!Keyboard.Ctrl && !Keyboard.Alt && Text != text)
+                            goto case SDL.SDL_Keycode.SDLK_DELETE;
+                        break;
                 }
             }
 
