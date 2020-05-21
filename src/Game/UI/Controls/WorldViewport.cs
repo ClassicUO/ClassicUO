@@ -61,7 +61,7 @@ namespace ClassicUO.Game.UI.Controls
             _scene = scene;
             AcceptMouseInput = true;
 
-            _xBR = new XBREffect(Client.Game.GraphicsDevice);
+           // _xBR = new XBREffect(Client.Game.GraphicsDevice);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -77,20 +77,20 @@ namespace ClassicUO.Game.UI.Controls
 
                 ResetHueVector();
 
-                if (ProfileManager.Current != null && ProfileManager.Current.UseXBR)
-                {
-                    // draw regular world
-                    _xBR.SetSize(_scene.ViewportTexture.Width, _scene.ViewportTexture.Height);
+                //if (ProfileManager.Current != null && ProfileManager.Current.UseXBR)
+                //{
+                //    // draw regular world
+                //    _xBR.SetSize(_scene.ViewportTexture.Width, _scene.ViewportTexture.Height);
 
-                    batcher.End();
+                //    batcher.End();
 
-                    batcher.Begin(_xBR);
-                    batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _hueVector);
-                    batcher.End();
+                //    batcher.Begin(_xBR);
+                //    batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _hueVector);
+                //    batcher.End();
 
-                    batcher.Begin();
-                }
-                else
+                //    batcher.Begin();
+                //}
+                //else
                     batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _hueVector);
 
 
