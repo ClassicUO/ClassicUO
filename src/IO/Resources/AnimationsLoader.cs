@@ -456,6 +456,9 @@ namespace ClassicUO.IO.Resources
                         while (defReader.Next())
                         {
                             ushort group = (ushort)defReader.ReadInt();
+                            if (group == 0xFFFF)
+                                continue;
+
                             int replace = defReader.ReadGroupInt();
                             GroupReplaces[0].Add(new Tuple<ushort, byte>(group, (byte)replace));
                         }
@@ -471,6 +474,8 @@ namespace ClassicUO.IO.Resources
                         while (defReader.Next())
                         {
                             ushort group = (ushort)defReader.ReadInt();
+                            if (group == 0xFFFF)
+                                continue;
                             int replace = defReader.ReadGroupInt();
                             GroupReplaces[1].Add(new Tuple<ushort, byte>(group, (byte)replace));
                         }

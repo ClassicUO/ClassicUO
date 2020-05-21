@@ -116,7 +116,8 @@ namespace ClassicUO.IO
                                                                                        vh.Position,
                                                                                        (int) vh.Length,
                                                                                       0,
-                                                                                      (int) vh.GumpData);
+                                                                                      (short) (vh.GumpData >> 16),
+                                                                                       (short) (vh.GumpData & 0xFFFF));
                         }
                         else if (vh.FileID == 14 && vh.BlockID < MultiLoader.Instance.Count)
                         {

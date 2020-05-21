@@ -95,8 +95,9 @@ namespace ClassicUO.IO.Resources
         {
             ref readonly var entry = ref GetValidRefEntry((int) idx);
 
-            width = entry.Extra & 0xFFFF;
-            height = (entry.Extra >> 16) & 0xFFFF;
+            width = entry.Width;
+            height = entry.Height;
+
             ushort[] pixels = new ushort[width * height];
 
             _file.Seek(entry.Offset);
