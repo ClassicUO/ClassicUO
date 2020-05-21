@@ -164,6 +164,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             _character.Clear();
             _character.Race = race;
+            _character.IsFemale = isFemale;
 
             if (isFemale)
                 _character.Flags |= Flags.Female;
