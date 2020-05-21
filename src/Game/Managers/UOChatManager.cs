@@ -35,10 +35,17 @@ namespace ClassicUO.Game.Managers
         public readonly bool HasPassword;
     }
 
+    enum CHAT_STATUS : byte
+    {
+        DISABLED,
+        ENABLED,
+        ENABLED_USER_REQUEST
+    }
+
     static class UOChatManager
     {
         public static readonly Dictionary<string, UOChatChannel> Channels = new Dictionary<string, UOChatChannel>();
-        public static bool ChatIsEnabled;
+        public static CHAT_STATUS ChatIsEnabled;
         public static string CurrentChannelName = string.Empty;
 
         private static readonly string[] _messages =

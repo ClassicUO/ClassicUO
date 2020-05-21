@@ -35,9 +35,32 @@ namespace ClassicUO.Game.GameObjects
         public MessageType Type;
         public int X, Y, OffsetY;
         public GameObject Owner;
+        public TextOverhead DLeft, DRight;
+        public bool IsDestroyed;
 
-        public TextOverhead Left, Right;
+        ~TextOverhead()
+        {
+           Destroy();
+        }
 
-        public TextOverhead ListLeft, ListRight;
+        public void Destroy()
+        {
+            if (IsDestroyed)
+                return;
+
+            if (DLeft != null)
+                DLeft.DRight = DRight;
+
+            if (DRight != null)
+                DRight.DLeft = DLeft;
+
+            DRight = null;
+            DLeft = null;
+
+            IsDestroyed = true;
+            RenderedText?.Destroy();
+            RenderedText = null;
+            Owner = null;
+        }
     }
 }

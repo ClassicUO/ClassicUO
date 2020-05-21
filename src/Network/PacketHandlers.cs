@@ -597,12 +597,12 @@ namespace ClassicUO.Network
             if (flags != 0) 
                 flags = p.ReadByte();
 
-            if (graphic != 0x2006) 
-                graphic += graphicInc;
+            //if (graphic != 0x2006) 
+            //    graphic += graphicInc;
 
             if (graphic >= 0x4000)
             {
-                graphic -= 0x4000;
+                //graphic -= 0x4000;
                 type = 2;
             }
 
@@ -984,7 +984,7 @@ namespace ClassicUO.Network
 
                 Client.Game.Scene.Audio.PlaySound(0x0055);
             }
-            else if (graphic == 0x30)
+            else if (graphic == 0x0030)
             {
                 Mobile vendor = World.Mobiles.Get(serial);
 
@@ -1071,6 +1071,10 @@ namespace ClassicUO.Network
                             case 0x0048:
                                 if (loader.GetTexture(0x06E8) != null)
                                     graphic = 0x06E8;
+                                break;
+                            case 0x0049:
+                                if (loader.GetTexture(0x9CDF) != null)
+                                    graphic = 0x9CDF;
                                 break;
                             case 0x0051:
                                 if (loader.GetTexture(0x06E7) != null)
@@ -1583,6 +1587,7 @@ namespace ClassicUO.Network
 
                 if (Client.Version >= Data.ClientVersion.CV_6017)
                     p.Skip(1);
+
                 uint containerSerial = p.ReadUInt();
                 ushort hue = p.ReadUShort();
 
@@ -2169,6 +2174,10 @@ namespace ClassicUO.Network
             if (serial == World.Player)
             {
                 mobile.Flags = flags;
+                mobile.Graphic = graphic;
+                mobile.CheckGraphicChange();
+                mobile.FixHue(hue);
+                // TODO: x,y,z, direction cause elastic effect, ignore 'em for the moment
             }
             else
             {
@@ -2489,7 +2498,8 @@ namespace ClassicUO.Network
             if (!World.InGame)
                 return;
 
-            Entity corpse = World.Get(p.ReadUInt());
+            uint serial = p.ReadUInt();
+            Entity corpse = World.Get(serial);
             if (corpse == null)
                 return;
 
@@ -2497,15 +2507,14 @@ namespace ClassicUO.Network
 
             while (layer != Layer.Invalid && p.Position < p.Length)
             {
-                Item item = World.Items.Get(p.ReadUInt());
+                uint item_serial = p.ReadUInt();
 
-                if (item != null && item.Container == corpse)
-                {
-                    RemoveItemFromContainer(item);
-                    item.Container = corpse;
-                    corpse.PushToBack(item);
-                    item.Layer = layer;
-                }
+                Item item = World.GetOrCreateItem(item_serial);
+
+                RemoveItemFromContainer(item);
+                item.Container = serial;
+                item.Layer = layer - 1;
+                corpse.PushToBack(item);
 
                 layer = (Layer) p.ReadByte();
             }
@@ -2972,7 +2981,7 @@ namespace ClassicUO.Network
                 index += length;
             }
 
-            UIManager.Create(sender, gumpID, x, y, cmd, lines);
+            CreateGump(sender, gumpID, x, y, cmd, lines);
         }
 
         private static void ChatMessage(Packet p)
@@ -2988,26 +2997,27 @@ namespace ClassicUO.Network
                     UOChatManager.CurrentChannelName = channelName;
                     UOChatManager.AddChannel(channelName, hasPassword);
 
-                    UIManager.GetGump<UOChatGump>()?.Update();
+                    UIManager.GetGump<UOChatGump>()?.RequestUpdateContents();
                     break;
                 case 0x03E9: // destroy conference
                     p.Skip(4);
                     channelName = p.ReadUnicode();
                     UOChatManager.RemoveChannel(channelName);
 
-                    UIManager.GetGump<UOChatGump>()?.Update();
+                    UIManager.GetGump<UOChatGump>()?.RequestUpdateContents();
                     break;
                 case 0x03EB: // display enter username window
+                    UOChatManager.ChatIsEnabled = CHAT_STATUS.ENABLED_USER_REQUEST;
                     break;
                 case 0x03EC: // close chat
                     UOChatManager.Clear();
-                    UOChatManager.ChatIsEnabled = false;
+                    UOChatManager.ChatIsEnabled = CHAT_STATUS.DISABLED;
                     UIManager.GetGump<UOChatGump>()?.Dispose();
                     break;
                 case 0x03ED: // username accepted, display chat
                     p.Skip(4);
                     string username = p.ReadUnicode();
-                    UOChatManager.ChatIsEnabled = true;
+                    UOChatManager.ChatIsEnabled = CHAT_STATUS.ENABLED;
                     NetClient.Socket.Send(new PChatJoinCommand("General"));
                     break;
                 case 0x03EE: // add user
@@ -3124,7 +3134,7 @@ namespace ClassicUO.Network
                 flags = p.ReadUShort();
             World.ClientLockedFeatures.SetFlags((LockedFeatureFlags) flags);
 
-            UOChatManager.ChatIsEnabled = World.ClientLockedFeatures.T2A;
+            UOChatManager.ChatIsEnabled = World.ClientLockedFeatures.T2A ? CHAT_STATUS.ENABLED : 0;
 
             AnimationsLoader.Instance.UpdateAnimationTable(flags);
         }
@@ -4189,7 +4199,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            UIManager.Create(sender, gumpID, (int) x, (int) y, layout, lines);
+            CreateGump(sender, gumpID, (int) x, (int) y, layout, lines);
         }
 
         private static void UpdateMobileStatus(Packet p)
@@ -4321,6 +4331,11 @@ namespace ClassicUO.Network
 
             switch (type)
             {
+                case 0x00: // accepted
+                    Log.Trace("Krrios special packet accepted");
+                    World.WMapManager.SetACKReceived();
+                    World.WMapManager.SetEnable(true);
+                    break;
                 case 0x01: // custom party info
                 case 0x02: // guild track info
                     bool locations = type == 0x01 || p.ReadBool();
@@ -4342,6 +4357,10 @@ namespace ClassicUO.Network
 
                     World.WMapManager.RemoveUnupdatedWEntity();
 
+                    break;
+                case 0x03: // runebook contents
+                    break;
+                case 0x04: // guardline data
                     break;
                 case 0xF0:
                     break;
@@ -4591,12 +4610,11 @@ namespace ClassicUO.Network
             }
 
             Entity container = World.Get(containerSerial);
-
             if (container == null)
             {
                 Log.Warn( $"No container ({containerSerial}) found");
-                container = World.GetOrCreateItem(containerSerial);
-                //return;
+                //container = World.GetOrCreateItem(containerSerial);
+                return;
             }
 
             Item item = World.Items.Get(serial);
@@ -5039,6 +5057,421 @@ namespace ClassicUO.Network
 
             container.Items = remove_unequipped ? new_first : null;
         }
+
+
+        private static readonly TextFileParser _parser = new TextFileParser(string.Empty, new[] { ' ' }, new char[] { }, new[] { '{', '}' });
+        private static readonly TextFileParser _cmdparser = new TextFileParser(string.Empty, new[] { ' ', ',' }, new char[] { }, new char[] { '@', '@', });
+        private static Control CreateGump(uint sender, uint gumpID, int x, int y, string layout, string[] lines)
+        {
+            List<string> cmdlist = _parser.GetTokens(layout);
+            int cmdlen = cmdlist.Count;
+
+            if (cmdlen <= 0)
+                return null;
+
+            Gump gump = null;
+            bool mustBeAdded = true;
+
+            if (UIManager.GetGumpCachePosition(gumpID, out Point pos))
+            {
+                x = pos.X;
+                y = pos.Y;
+
+                for (var last = UIManager.Gumps.Last; last != null; last = last.Previous)
+                {
+                    var g = last.Value;
+
+                    if (!g.IsDisposed && g.LocalSerial == sender && g.ServerSerial == gumpID)
+                    {
+                        g.Clear();
+                        gump = g as Gump;
+                        mustBeAdded = false;
+                        break;
+                    }
+                }
+            }
+            else
+                UIManager.SavePosition(gumpID, new Point(x, y));
+
+            if (gump == null)
+                gump = new Gump(sender, gumpID)
+                {
+                    X = x,
+                    Y = y,
+                    CanMove = true,
+                    CanCloseWithRightClick = true,
+                    CanCloseWithEsc = true,
+                    InvalidateContents = false
+                };
+            int group = 0;
+            int page = 0;
+
+
+            bool applyCheckerTrans = false;
+            bool textBoxFocused = false;
+
+            for (int cnt = 0; cnt < cmdlen; cnt++)
+            {
+                List<string> gparams = _cmdparser.GetTokens(cmdlist[cnt], false);
+
+                if (gparams.Count == 0)
+                    continue;
+
+                switch (gparams[0].ToLower())
+                {
+                    case "button":
+                        gump.Add(new Button(gparams), page);
+
+                        break;
+
+                    case "buttontileart":
+
+                        gump.Add(new ButtonTileArt(gparams), page);
+
+                        break;
+
+                    case "checkertrans":
+                        applyCheckerTrans = true;
+                        gump.Add(new CheckerTrans(gparams), page);
+
+                        break;
+
+                    case "croppedtext":
+                        gump.Add(new CroppedText(gparams, lines), page);
+
+                        break;
+
+                    case "gumppic":
+
+                        GumpPic pic = new GumpPic(gparams);
+
+                        if (gparams.Count >= 6 && gparams[5].ToLower().Contains("virtuegumpitem"))
+                        {
+                            pic.ContainsByBounds = true;
+                            pic.IsVirtue = true;
+
+                            string s, lvl;
+
+                            switch (pic.Hue)
+                            {
+                                case 2403:
+                                    lvl = "";
+                                    break;
+                                case 1154:
+                                case 1547:
+                                case 2213:
+                                case 235:
+                                case 18:
+                                case 2210:
+                                case 1348:
+                                    lvl = "Seeker of ";
+                                    break;
+                                case 2404:
+                                case 1552:
+                                case 2216:
+                                case 2302:
+                                case 2118:
+                                case 618:
+                                case 2212:
+                                case 1352:
+                                    lvl = "Follower of ";
+                                    break;
+                                case 43:
+                                case 53:
+                                case 1153:
+                                case 33:
+                                case 318:
+                                case 67:
+                                case 98:
+                                    lvl = "Knight of ";
+                                    break;
+                                case 2406:
+                                    if (pic.Graphic == 0x6F)
+                                        lvl = "Seeker of ";
+                                    else
+                                        lvl = "Knight of ";
+                                    break;
+                                default:
+                                    lvl = "";
+                                    break;
+                            }
+
+                            switch (pic.Graphic)
+                            {
+                                case 0x69:
+                                    s = ClilocLoader.Instance.GetString(1051000 + 2);
+                                    break;
+                                case 0x6A:
+                                    s = ClilocLoader.Instance.GetString(1051000 + 7);
+                                    break;
+                                case 0x6B:
+                                    s = ClilocLoader.Instance.GetString(1051000 + 5);
+                                    break;
+                                case 0x6D:
+                                    s = ClilocLoader.Instance.GetString(1051000 + 6);
+                                    break;
+                                case 0x6E:
+                                    s = ClilocLoader.Instance.GetString(1051000 + 1);
+                                    break;
+                                case 0x6F:
+                                    s = ClilocLoader.Instance.GetString(1051000 + 3);
+                                    break;
+                                case 0x70:
+                                    s = ClilocLoader.Instance.GetString(1051000 + 4);
+                                    break;
+
+                                case 0x6C:
+                                default:
+                                    s = ClilocLoader.Instance.GetString(1051000);
+                                    break;
+                            }
+
+                            if (string.IsNullOrEmpty(s))
+                                s = "Unknown virtue";
+
+                            pic.SetTooltip(lvl + s, 100);
+                        }
+
+                        gump.Add(pic, page);
+
+                        break;
+
+                    case "gumppictiled":
+                        gump.Add(new GumpPicTiled(gparams), page);
+
+                        break;
+
+                    case "htmlgump":
+                        gump.Add(new HtmlControl(gparams, lines), page);
+
+                        break;
+
+                    case "xmfhtmlgump":
+                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", ClilocLoader.Instance.GetString(int.Parse(gparams[5].Replace("#", ""))), 0, true), page);
+
+                        break;
+
+                    case "xmfhtmlgumpcolor":
+                        int color = int.Parse(gparams[8]);
+
+                        if (color == 0x7FFF)
+                            color = 0x00FFFFFF;
+                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", ClilocLoader.Instance.GetString(int.Parse(gparams[5].Replace("#", ""))), color, true), page);
+
+                        break;
+
+                    case "xmfhtmltok":
+                        color = int.Parse(gparams[7]);
+
+                        if (color == 0x7FFF)
+                            color = 0x00FFFFFF;
+                        StringBuilder sb = null;
+
+                        if (gparams.Count >= 9)
+                        {
+                            sb = new StringBuilder();
+
+                            for (int i = 9; i < gparams.Count; i++)
+                            {
+                                sb.Append('\t');
+                                sb.Append(gparams[i]);
+                            }
+                        }
+
+                        gump.Add(new HtmlControl(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[5]) == 1, int.Parse(gparams[6]) != 0, gparams[5] != "0" && gparams[6] == "2", sb == null ? ClilocLoader.Instance.GetString(int.Parse(gparams[8].Replace("#", ""))) : ClilocLoader.Instance.Translate(int.Parse(gparams[8].Replace("#", "")), sb.ToString().Trim('@').Replace('@', '\t')), color, true), page);
+
+                        break;
+
+                    case "page":
+
+                        if (gparams.Count >= 2)
+                            page = int.Parse(gparams[1]);
+
+                        break;
+
+                    case "resizepic":
+                        gump.Add(new ResizePic(gparams), page);
+
+                        break;
+
+                    case "text":
+                        if (gparams.Count >= 5)
+                            gump.Add(new Label(gparams, lines), page);
+
+                        break;
+
+                    case "textentrylimited":
+                    case "textentry":
+                        StbTextBox textBox = new StbTextBox(gparams, lines);
+
+                        if (!textBoxFocused)
+                        {
+                            textBox.SetKeyboardFocus();
+                            textBoxFocused = true;
+                        }
+
+                        gump.Add(textBox, page);
+
+                        break;
+
+                    case "tilepichue":
+                    case "tilepic":
+                        gump.Add(new StaticPic(gparams), page);
+
+                        break;
+
+                    case "noclose":
+                        gump.CanCloseWithRightClick = false;
+
+                        break;
+
+                    case "nodispose":
+                        gump.CanCloseWithEsc = false;
+
+                        break;
+
+                    case "nomove":
+                        gump.BlockMovement = true;
+
+                        break;
+
+                    case "group":
+                    case "endgroup":
+                        group++;
+
+                        break;
+
+                    case "radio":
+                        gump.Add(new RadioButton(group, gparams, lines), page);
+
+                        break;
+
+                    case "checkbox":
+                        gump.Add(new Checkbox(gparams, lines), page);
+
+                        break;
+
+                    case "tooltip":
+
+                        if (World.ClientFeatures.TooltipsEnabled)
+                        {
+                            string text = ClilocLoader.Instance.GetString(int.Parse(gparams[1]));
+
+                            if (gparams.Count > 2 && gparams[2].Length != 0)
+                            {
+                                string args = gparams[2];
+
+                                for (int i = 3; i < gparams.Count; i++)
+                                    args += '\t' + gparams[i];
+
+                                if (args.Length != 0)
+                                    text = ClilocLoader.Instance.Translate(text, args, true);
+                                else
+                                    Log.Error($"String '{args}' too short, something wrong with gump tooltip: {text}");
+                            }
+
+                            var last = gump.Children.Count != 0 ? gump.Children[gump.Children.Count - 1] : null;
+
+                            if (last != null)
+                            {
+                                if (last.HasTooltip)
+                                {
+                                    if (last.Tooltip is string s)
+                                    {
+                                        s += '\n' + text;
+                                        last.SetTooltip(s);
+                                    }
+                                }
+                                else
+                                    last.SetTooltip(text);
+                            }
+                        }
+
+                        break;
+
+                    case "itemproperty":
+
+                        if (World.ClientFeatures.TooltipsEnabled && gump.Children.Count != 0)
+                        {
+                            gump.Children[gump.Children.Count - 1].SetTooltip(SerialHelper.Parse(gparams[1]));
+
+                            if (uint.TryParse(gparams[1], out uint s) && !World.OPL.Contains(s))
+                            {
+                                AddMegaClilocRequest(s);
+                            }
+                        }
+
+                        break;
+
+                    case "noresize":
+
+                        break;
+
+                    case "mastergump":
+                        Log.Warn("Gump part 'mastergump' not handled.");
+
+                        break;
+                    default:
+                        Log.Warn(gparams[0]);
+                        break;
+                }
+            }
+
+            if (applyCheckerTrans)
+            {
+                bool applyTrans(int ii, int current_page)
+                {
+                    bool transparent = false;
+                    for (; ii < gump.Children.Count; ii++)
+                    {
+                        var child = gump.Children[ii];
+
+                        if (current_page == 0)
+                            current_page = child.Page;
+
+                        bool canDraw = /*current_page == 0 || child.Page == 0 ||*/
+                            current_page == child.Page;
+
+                        if (canDraw && child.IsVisible && child is CheckerTrans)
+                        {
+                            transparent = true;
+                            continue;
+                        }
+
+                        child.Alpha = transparent ? 0.5f : 0;
+                    }
+
+                    return transparent;
+                }
+
+
+                bool trans = applyTrans(0, 0);
+                float alpha = trans ? 0.5f : 0;
+                for (int i = 0; i < gump.Children.Count; i++)
+                {
+                    var cc = gump.Children[i];
+
+                    if (cc is CheckerTrans)
+                    {
+                        trans = applyTrans(i + 1, cc.Page);
+                        alpha = trans ? 0.5f : 0;
+                    }
+                    else
+                    {
+                        cc.Alpha = alpha;
+                    }
+                }
+            }
+
+            if (mustBeAdded)
+                UIManager.Add(gump);
+
+            gump.Update(Time.Ticks, 0);
+            gump.SetInScreen();
+
+            return gump;
+        }
+
 
 
         [Flags]

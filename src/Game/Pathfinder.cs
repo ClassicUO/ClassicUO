@@ -122,6 +122,9 @@ namespace ClassicUO.Game
 
                         break;
 
+                    case GameEffect _:
+                        break;
+
                     default:
                         bool canBeAdd = true;
                         bool dropFlags = false;

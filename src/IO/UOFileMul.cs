@@ -49,12 +49,22 @@ namespace ClassicUO.IO
             entries = new UOFileIndex[count];
 
             for (int i = 0; i < count; i++)
-                entries[i] = new UOFileIndex(StartAddress,          // .mul mmf address
-                                             (uint) Length,         // .mul mmf length
-                                             file.ReadInt(),  // .idx offset
-                                             file.ReadInt(),  // .idx length
-                                             0,           // UNUSED HERE --> .UOP
-                                             file.ReadInt());  // extra [gump]
+            {
+                ref var e = ref entries[i];
+                e.Address = StartAddress;       // .mul mmf address
+                e.FileSize = (uint) Length;     // .mul mmf length
+                e.Offset = file.ReadUInt();     // .idx offset
+                e.Length = file.ReadInt();      // .idx length
+                e.DecompressedLength = 0;       // UNUSED HERE --> .UOP
+
+                int size = file.ReadInt();
+
+                if (size != 0)
+                {
+                    e.Width = (short) (size >> 16);
+                    e.Height = (short) (size & 0xFFFF);
+                }
+            }
         }
 
         public override void Dispose()

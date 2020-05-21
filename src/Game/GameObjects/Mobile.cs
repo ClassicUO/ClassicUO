@@ -1072,10 +1072,10 @@ namespace ClassicUO.Game.GameObjects
             if (TextContainer == null)
                 return;
 
-            var last = TextContainer.Items;
+            var last = (TextOverhead) TextContainer.Items;
 
-            while (last?.ListRight != null)
-                last = last.ListRight;
+            while (last?.Next != null)
+                last = (TextOverhead) last.Next;
 
             if (last == null)
                 return;
@@ -1123,7 +1123,7 @@ namespace ClassicUO.Game.GameObjects
             x = (int) (x / scale);
             y = (int) (y / scale);
 
-            for (; last != null; last = last.ListLeft)
+            for (; last != null; last = (TextOverhead) last.Previous)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                 {
@@ -1194,10 +1194,7 @@ namespace ClassicUO.Game.GameObjects
             uint serial = Serial & 0x3FFFFFFF;
 
             ClearSteps();
-
-            HitsTexture?.Destroy();
-            HitsTexture = null;
-
+            
             base.Destroy();
 
             if (!(this is PlayerMobile))

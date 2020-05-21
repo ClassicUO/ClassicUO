@@ -552,7 +552,7 @@ namespace ClassicUO.Game.UI.Gumps
                         StatusGumpBase status = StatusGumpBase.GetStatusGump();
 
                         if (status == null)
-                            StatusGumpBase.AddStatusGump(Mouse.Position.X - 100, Mouse.Position.Y - 25);
+                            UIManager.Add(StatusGumpBase.AddStatusGump(Mouse.Position.X - 100, Mouse.Position.Y - 25));
                         else
                             status.BringOnTop();
                     }

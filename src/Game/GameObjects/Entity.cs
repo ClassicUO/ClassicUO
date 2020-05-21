@@ -27,6 +27,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
+using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 using static ClassicUO.Network.NetClient;
 
@@ -86,9 +87,33 @@ namespace ClassicUO.Game.GameObjects
             Hue = fixedColor;
         }
 
+
+        public byte HitsPercentage;
+        public RenderedText HitsTexture;
+
+        public void UpdateHits(byte perc)
+        {
+            if (perc != HitsPercentage || (HitsTexture == null || HitsTexture.IsDestroyed))
+            {
+                HitsPercentage = perc;
+
+                ushort color = 0x0044;
+
+                if (perc < 30)
+                    color = 0x0021;
+                else if (perc < 50)
+                    color = 0x0030;
+                else if (perc < 80)
+                    color = 0x0058;
+
+                HitsTexture?.Destroy();
+                HitsTexture = RenderedText.Create($"[{perc}%]", color, 3, false);
+            }
+        }
+
         public virtual void CheckGraphicChange(sbyte animIndex = 0)
         {
-
+            
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -108,6 +133,30 @@ namespace ClassicUO.Game.GameObjects
 
                 ObjectHandlesOpened = true;
             }
+
+
+
+            if (HitsMax > 0)
+            {
+                int hits_max = HitsMax;
+
+                hits_max = Hits * 100 / hits_max;
+
+                if (hits_max > 100)
+                    hits_max = 100;
+                else if (hits_max < 1)
+                    hits_max = 0;
+
+                UpdateHits((byte) hits_max);
+            }
+        }
+
+        public override void Destroy()
+        {
+            base.Destroy();
+
+            HitsTexture?.Destroy();
+            HitsTexture = null;
         }
 
         public Item FindItem(ushort graphic, ushort hue = 0xFFFF)

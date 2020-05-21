@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
+
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -33,24 +35,14 @@ namespace ClassicUO.Game.Managers
     internal class HealthLinesManager
     {
         const int BAR_WIDTH = 34; //28;
-        const int BAR_HEIGHT = 3;
+        const int BAR_HEIGHT = 8;
         const int BAR_WIDTH_HALF = BAR_WIDTH >> 1;
         const int BAR_HEIGHT_HALF = BAR_HEIGHT >> 1;
 
         public bool IsEnabled => ProfileManager.Current != null && ProfileManager.Current.ShowMobilesHP;
-
-
         private Vector3 _vectorHue = Vector3.Zero;
 
 
-        //private static readonly Texture2D _edge, _back; 
-        //static HealthLinesManager()
-        //{
-        //    //_edge = Texture2DCache.GetTexture(Color.Black);
-        //    //_back = Texture2DCache.GetTexture(Color.Red);
-
-
-        //}
 
         private readonly UOTexture16 _background_texture, _hp_texture;
 
@@ -89,8 +81,6 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-
-            //Color color;
 
             int mode = ProfileManager.Current.MobileHPType;
 
@@ -157,19 +147,7 @@ namespace ClassicUO.Game.Managers
                         yy -= (int) ((height + centerY + 28) / scale);
 
 
-                        int ww = mobile.HitsMax;
-
-                        if (ww > 0)
-                        {
-                            ww = mobile.Hits * 100 / ww;
-
-                            if (ww > 100)
-                                ww = 100;
-                            else if (ww < 1)
-                                ww = 0;
-
-                            mobile.UpdateHits((byte) ww);
-                        }
+                       
 
                         if (mobile.HitsPercentage != 0)
                         {
@@ -199,37 +177,9 @@ namespace ClassicUO.Game.Managers
                         mobile == TargetManager.LastAttack)
                         continue;
 
+
                     DrawHealthLine(batcher, mobile, x, y, mobile != World.Player);
-
-                    //if (max > 0)
-                    //{
-                    //    max = current * 100 / max;
-
-                    //    if (max > 100)
-                    //        max = 100;
-
-                    //    if (max > 1)
-                    //        max = BAR_WIDTH * max / 100;
-                    //}
-
-
-
-                    //batcher.Draw2D(_edge, x - 1, y - 1, BAR_WIDTH + 2, BAR_HEIGHT + 2, ref _vectorHue);
-                    //batcher.Draw2D(_back, x, y, BAR_WIDTH, BAR_HEIGHT, ref _vectorHue);
-
-                    //if (mobile.IsParalyzed)
-                    //    color = Color.AliceBlue;
-                    //else if (mobile.IsYellowHits)
-                    //    color = Color.Orange;
-                    //else if (mobile.IsPoisoned)
-                    //    color = Color.LimeGreen;
-                    //else
-                    //    color = Color.CornflowerBlue;
-
-                    //batcher.Draw2D(Texture2DCache.GetTexture(color), x, y, max, BAR_HEIGHT, ref _vectorHue);
                 }
-
-               
             }
         }
 
@@ -272,74 +222,68 @@ namespace ClassicUO.Game.Managers
             if (mobile == null)
                 return;
 
-            int per = mobile.HitsMax;
+            int per = BAR_WIDTH * mobile.HitsPercentage / 100;
 
-            if (per > 0)
-            {
-                per = mobile.Hits * 100 / per;
-
-                if (per > 100)
-                    per = 100;
-
-                if (per < 1)
-                    per = 0;
-                else
-                    per = 34 * per / 100;
-            }
-
-            _vectorHue.X = 0;
-            _vectorHue.Y = 0;
-            _vectorHue.Z = 0;
 
             float alpha = passive ? 0.5f : 0.0f;
 
-            ShaderHuesTraslator.GetHueVector(ref _vectorHue, Notoriety.GetHue(mobile.NotorietyFlag), false, alpha);
+            _vectorHue.X = Notoriety.GetHue(mobile.NotorietyFlag);
+            _vectorHue.Y = 1;
+            _vectorHue.Z = alpha;
+
+
+            const int MULTIPLER = 1;
 
             batcher.Draw2D(_background_texture,
                            x, y,
-                           _background_texture.Width,
-                           _background_texture.Height,
+                           _background_texture.Width * MULTIPLER,
+                           _background_texture.Height * MULTIPLER,
                            ref _vectorHue);
 
-            _vectorHue.X = 0;
-            _vectorHue.Y = 0;
-            _vectorHue.Z = 0;
 
-            ushort hue = 23;
-
-            alpha = passive ? 0.5f : 0.0f;
-
-            ShaderHuesTraslator.GetHueVector(ref _vectorHue, hue, false, alpha);
-
-            batcher.Draw2DTiled(_hp_texture,
-                                x, y,
-                                BAR_WIDTH,
-                                _hp_texture.Height,
-                                ref _vectorHue);
-
-            _vectorHue.X = 0;
-            _vectorHue.Y = 0;
-            _vectorHue.Z = 0;
+            _vectorHue.X = 0x21;
 
 
-            if (mobile.IsPoisoned)
+
+            if (mobile.Hits != mobile.HitsMax || mobile.HitsMax == 0)
             {
-                hue = 63;
+                int offset = 2;
+
+                if (per >> 2 == 0)
+                {
+                    offset = per;
+                }
+
+                batcher.Draw2DTiled(_hp_texture,
+                                    x + per * MULTIPLER - offset, y,
+                                    (BAR_WIDTH - per) * MULTIPLER - offset / 2,
+                                    _hp_texture.Height * MULTIPLER,
+                                    ref _vectorHue);
             }
-            else if (mobile.IsYellowHits)
+            
+            ushort hue = 90;
+
+            if (per > 0)
             {
-                hue = 53;
+                if (mobile.IsPoisoned)
+                {
+                    hue = 63;
+                }
+                else if (mobile.IsYellowHits)
+                {
+                    hue = 53;
+                }
+
+                _vectorHue.X = hue;
+
+
+                batcher.Draw2DTiled(_hp_texture,
+                               x, y,
+                               per * MULTIPLER,
+                               _hp_texture.Height * MULTIPLER,
+                               ref _vectorHue);
             }
-            else
-                hue = 90;
-
-            ShaderHuesTraslator.GetHueVector(ref _vectorHue, hue, false, alpha);
-
-            batcher.Draw2DTiled(_hp_texture,
-                                x, y,
-                                per,
-                                _hp_texture.Height,
-                                ref _vectorHue);
+           
         }
     }
 }

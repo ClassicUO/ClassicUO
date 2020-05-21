@@ -15,6 +15,7 @@ float4x4 MatrixTransform;
 float4x4 WorldMatrix;
 float2 Viewport;
 float Brightlight;
+const float HuesPerTexture = 2048;
 
 
 const static float3 LIGHT_DIRECTION = float3(-1.0f, -1.0f, .5f);
@@ -44,15 +45,15 @@ struct PS_INPUT
 float3 get_rgb(float red, float hue)
 {
 	//float p = floor((hue / Hues_count_double) * 1000000.0f) / 1000000.0f;
-	if (hue <= 3000)
+	if (hue < HuesPerTexture)
 	{
-		float2 texcoord = float2(red % 32, hue / 3000);
+		float2 texcoord = float2(red % 32, hue / HuesPerTexture);
 
 		return tex2D(HueSampler0, texcoord).rgb;
 	}
 	else
 	{
-		float2 texcoord = float2(red % 32, (hue - 3000) / 3000);
+		float2 texcoord = float2(red % 32, (hue - HuesPerTexture) / HuesPerTexture);
 
 		return tex2D(HueSampler1, texcoord).rgb;
 	}

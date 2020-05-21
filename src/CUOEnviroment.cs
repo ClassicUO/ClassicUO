@@ -37,6 +37,7 @@ namespace ClassicUO
         public static bool IsHighDPI;
         public static uint CurrentRefreshRate;
         public static bool SkipLoginScreen;
+        public static bool IsOutlands;
 
         public static readonly bool IsUnix = Environment.OSVersion.Platform != PlatformID.Win32NT &&
                                              Environment.OSVersion.Platform != PlatformID.Win32Windows &&

@@ -342,17 +342,17 @@ namespace ClassicUO.IO.Resources
                             {
                                 line = line.Trim();
 
-                                if (line.Length == 0 || line[0] == '#')
+                                if (line.Length == 0 || line[0] == '#' || !char.IsNumber(line[0]))
                                     continue;
 
                                 string[] parts = line.Split(new[]
                                 {
                                 '\t', ' '
-                            }, StringSplitOptions.RemoveEmptyEntries);
+                                }, StringSplitOptions.RemoveEmptyEntries);
 
                                 if (parts.Length < 3)
                                     continue;
-
+                                
                                 int id = int.Parse(parts[0]);
 
                                 if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
@@ -367,7 +367,6 @@ namespace ClassicUO.IO.Resources
                                     continue;
 
                                 uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
-
 
                                 for (int i = 0; i < 5; i++)
                                 {
@@ -457,6 +456,9 @@ namespace ClassicUO.IO.Resources
                         while (defReader.Next())
                         {
                             ushort group = (ushort)defReader.ReadInt();
+                            if (group == 0xFFFF)
+                                continue;
+
                             int replace = defReader.ReadGroupInt();
                             GroupReplaces[0].Add(new Tuple<ushort, byte>(group, (byte)replace));
                         }
@@ -472,6 +474,8 @@ namespace ClassicUO.IO.Resources
                         while (defReader.Next())
                         {
                             ushort group = (ushort)defReader.ReadInt();
+                            if (group == 0xFFFF)
+                                continue;
                             int replace = defReader.ReadGroupInt();
                             GroupReplaces[1].Add(new Tuple<ushort, byte>(group, (byte)replace));
                         }
@@ -592,8 +596,7 @@ namespace ClassicUO.IO.Resources
 
                                 if (index == 0x0115 || index == 0x00C0)
                                     mountedHeightOffset = 0;
-
-                                if (index == 0x042D)
+                                else if (index == 0x042D)
                                 {
                                     mountedHeightOffset = 3;
                                 }
@@ -611,7 +614,8 @@ namespace ClassicUO.IO.Resources
                                 if (addressOffset < currentIdxFile.Length)
                                 {
                                     DataIndex[index].Type = realType;
-                                    DataIndex[index].MountedHeightOffset = mountedHeightOffset;
+                                    if (DataIndex[index].MountedHeightOffset == 0)
+                                        DataIndex[index].MountedHeightOffset = mountedHeightOffset;
                                     DataIndex[index].GraphicConversion = (ushort)(realAnimID | 0x8000);
                                     DataIndex[index].FileIndex = (byte)animFile;
 
@@ -844,35 +848,22 @@ namespace ClassicUO.IO.Resources
 
                     if (frameCount == 0 && DataIndex[animID] != null)
                     {
-                        if (animID == 0x04E7)
-                        {
-                            DataIndex[animID].MountedHeightOffset = 18;
-                        }
-
-                        if (animID == 0x04E6)
-                        {
-                            DataIndex[animID].MountedHeightOffset = 18;
-                        }
-
-                        if (animID == 0x01B0)
-                        {
-                            DataIndex[animID].MountedHeightOffset = 9;
-                        }
-
-                        if (animID == 0x042D)
-                        {
-                            DataIndex[animID].MountedHeightOffset = 18;
-                        }
-
-                        if (animID == 0x0579)
-                        {
-                            DataIndex[animID].MountedHeightOffset = 9;
-                        }
-
                         DataIndex[animID].ReplaceUopGroup((byte)oldGroup, (byte)newGroup);
                     }
 
                     reader.Skip(60);
+                }
+
+                if (DataIndex[animID] != null)
+                {
+                    if (animID == 0x04E7 || animID == 0x042D || animID == 0x04E6)
+                    {
+                        DataIndex[animID].MountedHeightOffset = 18;
+                    }
+                    else if (animID == 0x01B0 || animID == 0x0579 || animID == 0x05F6 || animID == 0x05A0)
+                    {
+                        DataIndex[animID].MountedHeightOffset = 9;
+                    }
                 }
             }
 
@@ -1413,6 +1404,7 @@ namespace ClassicUO.IO.Resources
                     Log.Panic("MEMORY LEAK UOP ANIM");
 
                 animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
+                long end = (long) _reader.StartAddress + _reader.Length;
 
                 for (int i = 0; i < animDirection.FrameCount; i++)
                 {
@@ -1444,7 +1436,8 @@ namespace ClassicUO.IO.Resources
                     uint header = _reader.ReadUInt();
 
                     long pos = _reader.Position;
-                    long end = (long) _reader.StartAddress + _reader.Length;
+
+                    int sum = imageCenterY + imageHeight;
 
                     while (header != 0x7FFF7FFF && pos < end)
                     {
@@ -1459,7 +1452,7 @@ namespace ClassicUO.IO.Resources
                             y |= unchecked((int) 0xFFFFFE00);
 
                         x += imageCenterX;
-                        y += imageCenterY + imageHeight;
+                        y += sum;
 
                         int block = y * imageWidth + x;
 
@@ -1516,6 +1509,7 @@ namespace ClassicUO.IO.Resources
 
 
             animDir.Frames = new AnimationFrameTexture[frameCount];
+            long end = (long) reader.StartAddress + reader.Length;
 
             for (int i = 0; i < frameCount; i++)
             {
@@ -1537,7 +1531,6 @@ namespace ClassicUO.IO.Resources
                 uint header = reader.ReadUInt();
 
                 long pos = reader.Position;
-                long end = (long) reader.StartAddress + reader.Length;
 
                 while (header != 0x7FFF7FFF && pos < end)
                 {

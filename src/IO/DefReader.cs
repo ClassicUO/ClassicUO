@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -253,7 +254,21 @@ namespace ClassicUO.IO
 
         private int ReadInt(int line, int index)
         {
-            return int.Parse(TokenAt(line, index));
+            string token = TokenAt(line, index);
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                if (token.StartsWith("0x"))
+                    return int.Parse(token.Remove(0, 2), NumberStyles.HexNumber);
+
+                if (token.Length > 1 && token[0] == '-')
+                    return int.Parse(token);
+
+                return int.Parse(token);
+
+            }
+
+            return -1;
         }
 
         private uint ReadUInt(int line, int index)

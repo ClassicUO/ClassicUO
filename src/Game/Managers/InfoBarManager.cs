@@ -56,9 +56,9 @@ namespace ClassicUO.Game.Managers
             return infoBarItems;
         }
 
-        public static string[] GetVars(int shardtype)
+        public static string[] GetVars()
         {
-            if (shardtype != 2)
+            if (!CUOEnviroment.IsOutlands)
                 return Enum.GetNames(typeof(InfoBarVars));
             else
                 return Enum.GetNames(typeof(InfoBarVarsOutlands));

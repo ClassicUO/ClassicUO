@@ -171,7 +171,7 @@ namespace ClassicUO.Game.GameObjects
             int minY = ProfileManager.Current.GameWindowPosition.Y;
             //int maxY = minY + ProfileManager.Current.GameWindowSize.Y - 6;
 
-            for (var item = TextContainer.Items; item != null; item = item.ListRight)
+            for (var item = (TextOverhead) TextContainer.Items; item != null; item = (TextOverhead) item.Next)
             {
                 if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null || item.Time < Time.Ticks)
                     continue;

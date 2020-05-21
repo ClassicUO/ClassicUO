@@ -241,7 +241,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Chat:
-                    if (UOChatManager.ChatIsEnabled)
+                    if (UOChatManager.ChatIsEnabled == CHAT_STATUS.ENABLED)
                     {
                         UOChatGump chatGump = UIManager.GetGump<UOChatGump>();
 
@@ -255,6 +255,21 @@ namespace ClassicUO.Game.UI.Gumps
                             chatGump.BringOnTop();
                         }
                     }
+                    else if (UOChatManager.ChatIsEnabled == CHAT_STATUS.ENABLED_USER_REQUEST)
+                    {
+                        UOChatGumpChooseName chatGump = UIManager.GetGump<UOChatGumpChooseName>();
+
+                        if (chatGump == null)
+                        {
+                            UIManager.Add(new UOChatGumpChooseName());
+                        }
+                        else
+                        {
+                            chatGump.SetInScreen();
+                            chatGump.BringOnTop();
+                        }
+                    }
+
                     break;
 
                 case Buttons.GlobalChat:

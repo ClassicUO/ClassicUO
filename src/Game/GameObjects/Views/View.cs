@@ -38,7 +38,7 @@ namespace ClassicUO.Game.GameObjects
         public Rectangle Bounds;
         public Rectangle FrameInfo;
 
-        protected bool IsFlipped { get; set; }
+        protected bool IsFlipped;
 
         public bool UseObjectHandles { get; set; }
 

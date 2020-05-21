@@ -353,11 +353,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             protected override void OnTextInput(string c)
             {
+                int startidx = CaretIndex;
+                int curpage = (int)Tag - 1;
                 base.OnTextInput(c);
                 if (_bookGump != null && !_bookGump.IsDisposed)
                 {
-                    int curpage = (int)Tag - 1;
-                    MultilinesFontInfo info = _bookGump._pagesTextBoxes[curpage].CalculateFontInfo(Text);
+                    MultilinesFontInfo info = CalculateFontInfo(Text);
                     int lines = 0, xlength = 0;
                     while (info != null)
                     {
@@ -372,12 +373,12 @@ namespace ClassicUO.Game.UI.Gumps
                         curpage++;
                         if (curpage < _bookGump.BookPageCount)
                         {
-                            bool change = CaretIndex >= Text.Length;
-                            c = Text.Remove(0, Text.Length - xlength);
+                            bool changepage = CaretIndex >= Text.Length - xlength;
+                            c = Text.Substring(Text.Length - xlength);
                             Text = Text.Substring(0, Text.Length - xlength);
-                            if (change)
+                            if (changepage)
                             {
-                                _bookGump.SetActivePage((curpage + 2 + (curpage % 2)) / 2);
+                                _bookGump.SetActivePage(_bookGump._pagesTextBoxes[curpage].Page);//(curpage + 2 + (curpage % 2)) / 2);
                                 _bookGump._pagesTextBoxes[curpage].SetKeyboardFocus();
                             }
                             _bookGump._pagesTextBoxes[curpage].CaretIndex = 0;
@@ -385,7 +386,12 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            Text = Text.Remove(0, Text.Length - xlength);
+                            c = "";
+                            if (startidx > 0)
+                                 c = Text.Substring(0, startidx);
+                            if (startidx == 0 || (Text.Length - (xlength + startidx)) > 0)
+                                c += Text.Substring(startidx, Text.Length - (xlength + startidx));
+                            Text = c;
                         }
                         //extra lines on last page are lost for good
                     }
@@ -401,12 +407,12 @@ namespace ClassicUO.Game.UI.Gumps
                     base.OnKeyDown(key, mod);
                     return;
                 }
-                bool selection = !NoSelection;
-                int caret = CaretIndex;
+                bool selection = SelectionStart >= 0 && SelectionEnd >= 0 && SelectionStart != SelectionEnd;
+                int caret = selection ? SelectionStart : CaretIndex, chars = selection ? SelectionEnd - SelectionStart : 0;
                 int curpage = (int)Tag;
                 string text = Text;
                 base.OnKeyDown(key, mod);
-                
+
                 switch (key)
                 {
                     case SDL.SDL_Keycode.SDLK_BACKSPACE:
@@ -419,27 +425,31 @@ namespace ClassicUO.Game.UI.Gumps
                                 if(curpage - 2 >= 0)
                                 {
                                     if ((curpage % 2) == 0)
-                                        _bookGump.SetActivePage(_bookGump.ActivePage - 1);
+                                        _bookGump.SetActivePage(_bookGump._pagesTextBoxes[curpage - 2].Page);
                                     _bookGump._pagesTextBoxes[curpage - 2].SetKeyboardFocus();
                                     _bookGump._pagesTextBoxes[curpage - 2].CaretIndex = _bookGump._pagesTextBoxes[curpage - 2].Text.Length;
                                     _bookGump._pagesTextBoxes[curpage - 2].OnKeyDown(key, mod);
                                     return;
                                 }
                             }
-                            MultilinesFontInfo info = CalculateFontInfo(text);
+                            MultilinesFontInfo info = CalculateFontInfo(Text);
                             int lines = 0;
-                            while (info != null)
-                            {
-                                lines++;
-                                info = info.Next;
-                            }
-                            info = CalculateFontInfo(Text);
                             while (info != null)
                             {
                                 lines--;
                                 info = info.Next;
                             }
-                            CascadeUpdate(curpage - 1, lines);
+                            info = CalculateFontInfo(text);
+                            while (info != null)
+                            {
+                                lines++;
+                                if (lines > 0 && selection)
+                                    chars -= info.CharCount;
+                                info = info.Next;
+                            }
+                            if (!selection && lines == 0)
+                                chars = 1;
+                            CascadeUpdate(curpage - 1, lines, chars);
                         }
                         break;
                     case SDL.SDL_Keycode.SDLK_HOME:
@@ -483,9 +493,9 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            private void CascadeUpdate(int topage, int grablines)
+            private void CascadeUpdate(int topage, int grablines, int grabchars)
             {
-                if (grablines > 0 && topage + 1 < _bookGump._pagesTextBoxes.Length)
+                if (grabchars > 0 && topage + 1 < _bookGump._pagesTextBoxes.Length)
                 {
                     StringBuilder sb = new StringBuilder();
                     int frompage = topage + 1;
@@ -499,7 +509,7 @@ namespace ClassicUO.Game.UI.Gumps
                             chars += info.CharCount;
                             info = info.Next;
                         }
-                        if(chars > 0)
+                        if(chars + grabchars > 0)
                         {
                             lines = 0;
                             info = CalculateFontInfo(_bookGump._pagesTextBoxes[frompage - 1].Text);
@@ -512,12 +522,22 @@ namespace ClassicUO.Game.UI.Gumps
                             for (; lines + grablines < MAX_BOOK_LINES; lines++)
                                 sb.Append('\n');
                             sb.Append(_bookGump._pagesTextBoxes[frompage].Text.Substring(0, chars));
+                            if (chars + grabchars < _bookGump._pagesTextBoxes[frompage].Text.Length)
+                            {
+                                sb.Append(_bookGump._pagesTextBoxes[frompage].Text.Substring(chars, grabchars));
+                                chars += grabchars;
+                                grabchars = 0;//this should only happen on the first instance
+                            }
                             _bookGump._pagesTextBoxes[frompage - 1].Text = sb.ToString();
-                            _bookGump._pagesTextBoxes[frompage].Text = _bookGump._pagesTextBoxes[frompage].Text.Remove(0, chars);
+                            _bookGump._pagesTextBoxes[frompage].Text = _bookGump._pagesTextBoxes[frompage].Text.Remove(0,  chars);
                             sb.Clear();
                         }
                         frompage++;
                     }
+                }
+                else
+                {
+
                 }
             }
         }
