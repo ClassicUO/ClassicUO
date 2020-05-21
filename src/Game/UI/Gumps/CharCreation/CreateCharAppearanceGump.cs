@@ -226,7 +226,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                     break;
                 }
-            } ;
+            }
         }
 
         private void UpdateEquipments()
