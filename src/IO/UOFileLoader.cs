@@ -41,7 +41,7 @@ namespace ClassicUO.IO
             if (index < 0 || Entries == null || index >= Entries.Length)
                 return ref UOFileIndex.Invalid;
 
-            ref readonly UOFileIndex entry = ref Entries[index];
+            ref UOFileIndex entry = ref Entries[index];
 
             if (entry.Offset < 0 || entry.Length <= 0)
                 return ref UOFileIndex.Invalid;

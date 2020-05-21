@@ -116,6 +116,8 @@ namespace ClassicUO.IO.Resources
 
                             Entries[ingump] = Entries[checkIndex];
 
+                            Entries[ingump].Hue = (ushort) defReader.ReadInt();
+
                             break;
                         }
                     }
@@ -165,6 +167,7 @@ namespace ClassicUO.IO.Resources
 
             width = (entry.Extra >> 16) & 0xFFFF;
             height = entry.Extra & 0xFFFF;
+            ushort color = entry.Hue;
 
             if (width == 0 || height == 0)
                 return null;
@@ -178,26 +181,35 @@ namespace ClassicUO.IO.Resources
             ushort[] pixels = new ushort[width * height];
             int* lookuplist = (int*) dataStart;
 
+            int gsize;
+
             for (int y = 0; y < height; y++)
             {
-                int gsize = 0;
-
                 if (y < height - 1)
                     gsize = lookuplist[y + 1] - lookuplist[y];
                 else
                     gsize = (entry.Length >> 2) - lookuplist[y];
+               
                 GumpBlock* gmul = (GumpBlock*) (dataStart + (lookuplist[y] << 2));
+               
                 int pos = y * width;
 
                 for (int i = 0; i < gsize; i++)
                 {
                     ushort val = gmul[i].Value;
-                    ushort hue = (ushort) ((val != 0 ? 0x8000 : 0) | val);
+
+                    if (color != 0 && val != 0)
+                    {
+                        val = HuesLoader.Instance.GetColor16(val, color);
+                    }
+
+                    if (val != 0)
+                        val = (ushort) (0x8000 | val);
 
                     int count = gmul[i].Run;
 
                     for (int j = 0; j < count; j++)
-                        pixels[pos++] = hue == 0 && count == 1 ? (ushort)1 : hue;//avoid single zero pixels
+                        pixels[pos++] = val;
                 }
             }
 
