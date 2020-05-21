@@ -157,7 +157,7 @@ namespace ClassicUO.IO.Resources
         {
             ref readonly var entry = ref GetValidRefEntry((int) index);
 
-            if (entry.Extra == -1)
+            if (entry.Width <= 0 && entry.Height <= 0)
             {
                 width = 0;
                 height = 0;
@@ -165,8 +165,8 @@ namespace ClassicUO.IO.Resources
                 return null;
             }
 
-            width = (entry.Extra >> 16) & 0xFFFF;
-            height = entry.Extra & 0xFFFF;
+            width = entry.Width;
+            height = entry.Height;
             ushort color = entry.Hue;
 
             if (width == 0 || height == 0)

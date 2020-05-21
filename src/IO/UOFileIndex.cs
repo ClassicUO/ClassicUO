@@ -27,14 +27,15 @@ namespace ClassicUO.IO
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     internal struct UOFileIndex
     {
-        public UOFileIndex(IntPtr address, uint fileSize, long offset, int length, int decompressed, int extra = 0, ushort hue = 0)
+        public UOFileIndex(IntPtr address, uint fileSize, long offset, int length, int decompressed, short width = 0, short height = 0, ushort hue = 0)
         {
             Address = address;
             FileSize = fileSize;
             Offset = offset;
             Length = length;
             DecompressedLength = decompressed;
-            Extra = extra;
+            Width = width;
+            Height = height;
             Hue = hue;
         }
 
@@ -43,7 +44,7 @@ namespace ClassicUO.IO
         public long Offset;
         public int Length;
         public int DecompressedLength;
-        public int Extra;
+        public short Width, Height;
         public ushort Hue;
 
         public static UOFileIndex Invalid = new UOFileIndex(IntPtr.Zero, 0, 0, 0, 0, 0, 0);

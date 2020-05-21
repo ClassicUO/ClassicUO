@@ -89,15 +89,15 @@ namespace ClassicUO.IO
                     {
                         long curpos = Position;
                         Seek(offset);
-                        int extra1 = ReadInt();
-                        int extra2 = ReadInt();
+                        short extra1 = (short) ReadInt();
+                        short extra2 = (short) ReadInt();
 
-                        _hashes.Add(hash, new UOFileIndex(StartAddress, (uint) Length, offset + 8, compressedLength - 8, decompressedLength, (extra1 << 16) | extra2));
+                        _hashes.Add(hash, new UOFileIndex(StartAddress, (uint) Length, offset + 8, compressedLength - 8, decompressedLength, extra1, extra2));
 
                         Seek(curpos);
                     }
                     else
-                        _hashes.Add(hash, new UOFileIndex(StartAddress, (uint) Length, offset, compressedLength, decompressedLength, 0));
+                        _hashes.Add(hash, new UOFileIndex(StartAddress, (uint) Length, offset, compressedLength, decompressedLength));
                 }
 
                 Seek(nextBlock);
