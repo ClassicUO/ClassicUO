@@ -20,7 +20,7 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly TextEdit _stb;
         protected TextEdit Stb => _stb;
-        private RenderedText _rendererText, _rendererCaret;
+        protected RenderedText _rendererText, _rendererCaret;
 
         private int _maxCharCount = -1;
         private Point _caretScreenPosition;

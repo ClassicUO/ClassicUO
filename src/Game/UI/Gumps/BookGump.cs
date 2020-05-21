@@ -355,7 +355,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 int startidx = CaretIndex;
                 int curpage = (int)Tag - 1;
-                //MultilinesFontInfo oldinfo = _bookGump._pagesTextBoxes[curpage].CalculateFontInfo(Text);
                 base.OnTextInput(c);
                 if (_bookGump != null && !_bookGump.IsDisposed)
                 {
