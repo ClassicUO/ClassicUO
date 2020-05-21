@@ -44,29 +44,7 @@ namespace ClassicUO.Game.GameObjects
         private static int _characterFrameHeight;
 
 
-        public byte HitsPercentage;
-        public RenderedText HitsTexture;
-
-        public void UpdateHits(byte perc)
-        {
-            if (perc != HitsPercentage || (HitsTexture == null || HitsTexture.IsDestroyed))
-            {
-                HitsPercentage = perc;
-
-                ushort color = 0x0044;
-
-                if (perc < 30)
-                    color = 0x0021;
-                else if (perc < 50)
-                    color = 0x0030;
-                else if (perc < 80)
-                    color = 0x0058;
-
-                HitsTexture?.Destroy();
-                HitsTexture = RenderedText.Create($"[{perc}%]", color, 3, false);
-            }
-        }
-
+       
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {

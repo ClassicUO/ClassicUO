@@ -1194,10 +1194,7 @@ namespace ClassicUO.Game.GameObjects
             uint serial = Serial & 0x3FFFFFFF;
 
             ClearSteps();
-
-            HitsTexture?.Destroy();
-            HitsTexture = null;
-
+            
             base.Destroy();
 
             if (!(this is PlayerMobile))
