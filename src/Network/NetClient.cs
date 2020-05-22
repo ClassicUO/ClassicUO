@@ -336,15 +336,19 @@ namespace ClassicUO.Network
                     if (length < packetlength)
                         break;
 
-                    byte[] data = new byte[packetlength];
-                    packetlength = _circularBuffer.Dequeue(data, 0, packetlength);
+
+                    if (packetlength > 0)
+                    {
+                        byte[] data = new byte[packetlength];
+                        packetlength = _circularBuffer.Dequeue(data, 0, packetlength);
 
 #if !DEBUG
                     //LogPacket(data, false);
 #endif
-                    _recvQueue.Enqueue(new Packet(data, packetlength));
-                    Statistics.TotalPacketsReceived++;
-
+                        _recvQueue.Enqueue(new Packet(data, packetlength));
+                        Statistics.TotalPacketsReceived++;
+                    }
+                    
                     length = _circularBuffer.Length;
                 }
             }
