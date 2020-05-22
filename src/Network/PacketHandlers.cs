@@ -3841,6 +3841,7 @@ namespace ClassicUO.Network
             uint serial = p.ReadUInt();
 
             p.Skip(2);
+
             uint revision = p.ReadUInt();
 
             Entity entity = World.Mobiles.Get(serial);
@@ -3852,86 +3853,91 @@ namespace ClassicUO.Network
                 entity = World.Items.Get(serial);
             }
 
-            //if (entity != null)
+            List<string> list = new List<string>();
+
+            while (p.Position < p.Length)
             {
-                int cliloc;
+                int cliloc = (int) p.ReadUInt();
+                if (cliloc == 0)
+                    break;
 
-                List<string> list = new List<string>();
+                ushort length = p.ReadUShort();
 
-                while ((cliloc = (int) p.ReadUInt()) != 0)
+                string argument = string.Empty;
+
+                if (length != 0)
                 {
-                    string argument = p.ReadUnicodeReversed(p.ReadUShort());
+                    argument = p.ReadUnicodeReversed(length);
+                }
 
-                    string str = ClilocLoader.Instance.Translate(cliloc, argument, true);
+                string str = ClilocLoader.Instance.Translate(cliloc, argument, true);
 
+                for (int i = 0; i < list.Count; i++)
+                {
+                    var tempstr = list[i];
 
-                    for (int i = 0; i < list.Count; i++)
+                    if (tempstr == str)
                     {
-                        var tempstr = list[i];
-
-                        if (tempstr == str)
-                        {
-                            list.RemoveAt(i);
-                            break;
-                        }
-                    }
-
-                    list.Add(str);
-                }
-
-                Item container = null;
-
-                if (entity is Item it && SerialHelper.IsValid(it.Container))
-                {
-                    container = World.Items.Get(it.Container);
-                }
-
-                bool inBuyList = false;
-
-                if (container != null)
-                {
-                    inBuyList = container.Layer == Layer.ShopBuy ||
-                                container.Layer == Layer.ShopBuyRestock ||
-                                container.Layer == Layer.ShopSell;
-                }
-
-
-                bool first = true;
-
-                string name = string.Empty;
-                string data = string.Empty;
-
-                if (list.Count != 0)
-                {
-                    foreach (string str in list)
-                    {
-                        if (first)
-                        {
-                            name = str;
-
-                            if (entity != null && !SerialHelper.IsMobile(serial))
-                            {
-                                entity.Name = str;
-                            }
-
-                            first = false;
-                        }
-                        else
-                        {
-                            if (data.Length != 0)
-                                data += "\n";
-
-                            data += str;
-                        }
+                        list.RemoveAt(i);
+                        break;
                     }
                 }
 
-                World.OPL.Add(serial, revision, name, data);
+                list.Add(str);
+            }
 
-                if (inBuyList && container != null && SerialHelper.IsValid(container.Serial))
+            Item container = null;
+
+            if (entity is Item it && SerialHelper.IsValid(it.Container))
+            {
+                container = World.Items.Get(it.Container);
+            }
+
+            bool inBuyList = false;
+
+            if (container != null)
+            {
+                inBuyList = container.Layer == Layer.ShopBuy ||
+                            container.Layer == Layer.ShopBuyRestock ||
+                            container.Layer == Layer.ShopSell;
+            }
+
+
+            bool first = true;
+
+            string name = string.Empty;
+            string data = string.Empty;
+
+            if (list.Count != 0)
+            {
+                foreach (string str in list)
                 {
-                    UIManager.GetGump<ShopGump>(container.RootContainer)?.SetNameTo((Item)entity, name);
+                    if (first)
+                    {
+                        name = str;
+
+                        if (entity != null && !SerialHelper.IsMobile(serial))
+                        {
+                            entity.Name = str;
+                        }
+
+                        first = false;
+                    }
+                    else
+                    {
+                        if (data.Length != 0)
+                            data += "\n";
+
+                        data += str;
+                    }
                 }
+            }
+
+            World.OPL.Add(serial, revision, name, data);
+
+            if (inBuyList && container != null && SerialHelper.IsValid(container.Serial))
+            {
+                UIManager.GetGump<ShopGump>(container.RootContainer)?.SetNameTo((Item) entity, name);
             }
         }
 

@@ -147,22 +147,37 @@ namespace ClassicUO.IO.Resources
 
             List<string> arguments = new List<string>();
 
-            while (true)
+
+            for (int i = 0; i < arg.Length; i++)
             {
-                int pos = arg.IndexOf('\t');
-
-                if (pos != -1)
+                if (arg[i] == '\t')
                 {
-                    arguments.Add(arg.Substring(0, pos));
-                    arg = arg.Substring(pos + 1);
-                }
-                else
-                {
-                    arguments.Add(arg);
-
-                    break;
+                    arguments.Add(arg.Substring(0, i));
+                    arg = arg.Substring(i + 1);
+                    i = 0;
                 }
             }
+
+            bool has_arguments = arguments.Count != 0;
+
+            arguments.Add(arg);
+
+            //while (true)
+            //{
+            //    int pos = arg.IndexOf('\t');
+
+            //    if (pos != -1)
+            //    {
+            //        arguments.Add(arg.Substring(0, pos));
+            //        arg = arg.Substring(pos + 1);
+            //    }
+            //    else
+            //    {
+            //        arguments.Add(arg);
+
+            //        break;
+            //    }
+            //}
 
             int index = 0;
             while (true)
@@ -188,7 +203,7 @@ namespace ClassicUO.IO.Resources
                         else
                             arguments[index] = a;
                     }
-                    else if (int.TryParse(a, out int clil))
+                    else if (has_arguments && int.TryParse(a, out int clil))
                     {
                         if (_entries.TryGetValue(clil, out string value) && !string.IsNullOrEmpty(value))
                             arguments[index] = value;
