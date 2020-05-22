@@ -1651,9 +1651,9 @@ namespace ClassicUO.IO.Resources
                 char si = htmlData[i].Char;
                 uint* table = (uint*) _unicodeFontAddress[htmlData[i].Font];
 
-                if ((byte) si == 0x000D || si == '\n')
+                if (si == 0x000D || si == '\n')
                 {
-                    if ((byte) si == 0x000D || isFixed || isCropped)
+                    if (si == 0x000D || isFixed || isCropped)
                         si = (char) 0;
                     else
                         si = '\n';
