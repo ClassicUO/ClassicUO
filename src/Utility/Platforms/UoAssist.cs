@@ -83,7 +83,7 @@ namespace ClassicUO.Utility.Platforms
 
         private class CustomWindow : IDisposable
         {
-            enum UOAMessage
+            enum UOAMessage : uint
             {
                 First = REGISTER,
 
@@ -126,7 +126,7 @@ namespace ClassicUO.Utility.Platforms
             }
 
             private const int ERROR_CLASS_ALREADY_EXISTS = 1410;
-            public const int WM_USER = 0x400;
+            public const uint WM_USER = 0x400;
 
             private readonly Dictionary<int, WndRegEnt> _wndRegs = new Dictionary<int, WndRegEnt>();
 
