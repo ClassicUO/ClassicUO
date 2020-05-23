@@ -30,6 +30,7 @@ using System.Threading;
 using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game;
+using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -137,11 +138,7 @@ namespace ClassicUO
                     // TODO: 
                     Settings.GlobalSettings.Save();
 
-                    if (!Directory.Exists(Settings.GlobalSettings.UltimaOnlineDirectory) || 
-                        !ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out _))
-                    {
-                        return;
-                    }
+                    
                 }
             }
 
@@ -167,7 +164,63 @@ namespace ClassicUO
                 Settings.GlobalSettings.UltimaOnlineDirectory = CUOEnviroment.ExecutablePath;
 
 
-            Client.Run();
+
+            const uint INVALID_UO_DIRECTORY = 0x100;
+            const uint INVALID_UO_VERSION = 0x200;
+
+            uint flags = 0;
+
+
+            if (!Directory.Exists(Settings.GlobalSettings.UltimaOnlineDirectory) || !File.Exists(UOFileManager.GetUOFilePath("tiledata.mul")))
+                flags |= INVALID_UO_DIRECTORY;
+
+
+            string clientVersionText = Settings.GlobalSettings.ClientVersion;
+
+            if (!ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out var clientVersion))
+            {
+                Log.Warn($"Client version [{clientVersionText}] is invalid, let's try to read the client.exe");
+
+                // mmm something bad happened, try to load from client.exe [windows only]
+                if (!ClientVersionHelper.TryParseFromFile(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "client.exe"), out clientVersionText) ||
+                    !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
+                {
+                    Log.Error("Invalid client version: " + clientVersionText);
+
+                    flags |= INVALID_UO_VERSION;
+                }
+                else
+                {
+                    Log.Trace($"Found a valid client.exe [{clientVersionText} - {clientVersion}]");
+
+                    // update the wrong/missing client version in settings.json
+                    Settings.GlobalSettings.ClientVersion = clientVersionText;
+                }
+            }
+
+
+            if (flags != 0)
+            {
+                if ((flags & INVALID_UO_DIRECTORY) != 0)
+                {
+                    Client.ShowErrorMessage("Your Ultima Online directory seems to be invalid.\nDownload the official Launcher to setup and run your game.\n\nLink: classicuo.eu");
+                }
+                else if ((flags & INVALID_UO_VERSION) != 0)
+                {
+                    Client.ShowErrorMessage("Your Ultima Online client version seems to be invalid.\nDownload the official Launcher to setup and run your game.\n\nLink: classicuo.eu");
+                }
+
+                try
+                {
+                    Process.Start("https://classicuo.eu");
+                }
+                catch { }
+            }
+            else
+            {
+                Client.Run();
+            }
+            
 
             Log.Trace("Closing...");
         }

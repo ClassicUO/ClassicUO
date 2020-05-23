@@ -60,8 +60,7 @@ namespace ClassicUO
 
         public static void ShowErrorMessage(string msg)
         {
-            if (Game != null && Game.Window.Handle != IntPtr.Zero)
-                SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "ERROR", msg, Game.Window.Handle);
+            SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "ERROR", msg, IntPtr.Zero);
         }
 
 
