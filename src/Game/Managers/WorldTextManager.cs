@@ -43,6 +43,11 @@ namespace ClassicUO.Game.Managers
             _firstNode = this;
         }
 
+        public override void Destroy()
+        {
+            //Clear();
+        }
+
         public virtual void Update(double totalMS, double frameMS)
         {
             ProcessWorldText(false);

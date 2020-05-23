@@ -93,12 +93,11 @@ namespace ClassicUO.Game.GameObjects
 
         public void Add(int damage)
         {
-            _messages.AddToFront(new TextObject
-            {
-                RenderedText = RenderedText.Create(damage.ToString(), (ushort) (Parent == World.Player ? 0x0034 : 0x0021), 3, false),
-                Time = Time.Ticks + 1500
-            });
+            TextObject text_obj = TextObject.Create();
+            text_obj.RenderedText = RenderedText.Create(damage.ToString(), (ushort) (Parent == World.Player ? 0x0034 : 0x0021), 3, false);
+            text_obj.Time = Time.Ticks + 1500;
 
+            _messages.AddToFront(text_obj);
 
             if (_messages.Count > 10)
                 _messages.RemoveFromBack()?.RenderedText?.Destroy();

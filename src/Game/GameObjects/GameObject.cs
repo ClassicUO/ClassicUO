@@ -24,6 +24,7 @@ using System.Runtime.CompilerServices;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -206,7 +207,7 @@ namespace ClassicUO.Game.GameObjects
             if (string.IsNullOrEmpty(text))
                 return;
 
-            var msg = CreateMessage(text, hue, font, isunicode, type);
+            var msg = MessageManager.CreateMessage(text, hue, font, isunicode, type);
             AddMessage(msg);
         }
 
@@ -227,57 +228,6 @@ namespace ClassicUO.Game.GameObjects
                 IsPositionChanged = true;
                 World.WorldTextManager.AddMessage(msg);
             }
-        }
-        private static TextObject CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type)
-        {
-            if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
-            {
-                font = ProfileManager.Current.ChatFont;
-                isunicode = ProfileManager.Current.OverrideAllFontsIsUnicode;
-            }
-
-            int width = isunicode ? FontsLoader.Instance.GetWidthUnicode(font, msg) : FontsLoader.Instance.GetWidthASCII(font, msg);
-
-            if (width > 200)
-                width = isunicode ? FontsLoader.Instance.GetWidthExUnicode(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder) : FontsLoader.Instance.GetWidthExASCII(font, msg, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
-            else
-                width = 0;
-
-            RenderedText rtext = RenderedText.Create(msg, hue, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, width, 30, false, false, true);
-
-            return new TextObject
-            {
-                Alpha = 255,
-                RenderedText = rtext,
-                Time = CalculateTimeToLive(rtext),
-                Type = type,
-                Hue = hue,
-            };
-        }
-
-        private static long CalculateTimeToLive(RenderedText rtext)
-        {
-            long timeToLive;
-
-            if (ProfileManager.Current.ScaleSpeechDelay)
-            {
-                int delay = ProfileManager.Current.SpeechDelay;
-
-                if (delay < 10)
-                    delay = 10;
-
-                timeToLive = (long) (4000 * rtext.LinesCount * delay / 100.0f);
-            }
-            else
-            {
-                long delay = (5497558140000 * ProfileManager.Current.SpeechDelay) >> 32 >> 5;
-
-                timeToLive = (delay >> 31) + delay;
-            }
-
-            timeToLive += Time.Ticks;
-
-            return timeToLive;
         }
 
 
