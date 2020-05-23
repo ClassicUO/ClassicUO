@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
@@ -176,9 +177,7 @@ namespace ClassicUO.Game.Managers
                     if (parent == null)
                         break;
 
-                    msg = CreateMessage(text, hue, font, unicode, type);
-
-                    parent.AddMessage(msg);
+                    parent.AddMessage(type, text, font, hue, unicode);
 
                     break;
             }
