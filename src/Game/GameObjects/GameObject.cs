@@ -171,7 +171,7 @@ namespace ClassicUO.Game.GameObjects
             int minY = ProfileManager.Current.GameWindowPosition.Y;
             //int maxY = minY + ProfileManager.Current.GameWindowSize.Y - 6;
 
-            for (var item = (TextOverhead) TextContainer.Items; item != null; item = (TextOverhead) item.Next)
+            for (var item = (TextObject) TextContainer.Items; item != null; item = (TextObject) item.Next)
             {
                 if (item.RenderedText == null || item.RenderedText.IsDestroyed || item.RenderedText.Texture == null || item.Time < Time.Ticks)
                     continue;
@@ -210,7 +210,7 @@ namespace ClassicUO.Game.GameObjects
             AddMessage(msg);
         }
 
-        public void AddMessage(TextOverhead msg)
+        public void AddMessage(TextObject msg)
         {
             if (TextContainer == null)
                 TextContainer = new TextContainer();
@@ -228,7 +228,7 @@ namespace ClassicUO.Game.GameObjects
                 World.WorldTextManager.AddMessage(msg);
             }
         }
-        private static TextOverhead CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type)
+        private static TextObject CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type)
         {
             if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
             {
@@ -245,7 +245,7 @@ namespace ClassicUO.Game.GameObjects
 
             RenderedText rtext = RenderedText.Create(msg, hue, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, width, 30, false, false, true);
 
-            return new TextOverhead
+            return new TextObject
             {
                 Alpha = 255,
                 RenderedText = rtext,

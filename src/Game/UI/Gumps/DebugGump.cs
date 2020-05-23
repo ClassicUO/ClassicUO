@@ -161,7 +161,7 @@ namespace ClassicUO.Game.UI.Gumps
                     case GameEffect effect:
                         return "GameEffect";
 
-                    case TextOverhead overhead:
+                    case TextObject overhead:
 
                         return $"TextOverhead type: {overhead.Type}  hue: 0x{overhead.Hue:X4}";
 

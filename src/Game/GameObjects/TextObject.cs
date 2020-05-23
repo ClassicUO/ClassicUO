@@ -20,11 +20,12 @@
 #endregion
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal class TextOverhead : BaseGameObject
+    internal class TextObject : BaseGameObject
     {
         public byte Alpha;
         public ushort Hue;
@@ -35,10 +36,11 @@ namespace ClassicUO.Game.GameObjects
         public MessageType Type;
         public int X, Y, OffsetY;
         public GameObject Owner;
-        public TextOverhead DLeft, DRight;
+        public TextObject DLeft, DRight;
         public bool IsDestroyed;
+        public bool IsTextGump;
 
-        ~TextOverhead()
+        ~TextObject()
         {
            Destroy();
         }
@@ -48,19 +50,40 @@ namespace ClassicUO.Game.GameObjects
             if (IsDestroyed)
                 return;
 
-            if (DLeft != null)
-                DLeft.DRight = DRight;
-
-            if (DRight != null)
-                DRight.DLeft = DLeft;
-
-            DRight = null;
-            DLeft = null;
+            UnlinkD();
 
             IsDestroyed = true;
             RenderedText?.Destroy();
             RenderedText = null;
             Owner = null;
+        }
+
+        public void UnlinkD()
+        {
+            if (DRight != null)
+                DRight.DLeft = DLeft;
+
+            if (DLeft != null)
+                DLeft.DRight = DRight;
+
+            DRight = null;
+            DLeft = null;
+        }
+
+        public void ToTopD()
+        {
+            var obj = this;
+
+            while (obj != null)
+            {
+                if (obj.DLeft == null)
+                    break;
+
+                obj = obj.DLeft;
+            }
+
+            var next = (TextRenderer) obj;
+            next.MoveToTop(this);
         }
     }
 }
