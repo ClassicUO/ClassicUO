@@ -116,7 +116,7 @@ namespace ClassicUO.Game.Data
                                 color = 0;
                         }
                         else
-                            color = 666;
+                            color = 0;
                     }
                     else
                         color = 0;
