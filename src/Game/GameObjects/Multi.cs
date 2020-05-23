@@ -116,7 +116,7 @@ namespace ClassicUO.Game.GameObjects
         public bool IsVegetation;
         public bool IsMovable;
 
-        public ref readonly StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
+        public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
 
         public override void UpdateGraphicBySeason()
         {
@@ -129,10 +129,10 @@ namespace ClassicUO.Game.GameObjects
             if (TextContainer == null)
                 return;
 
-            var last = (TextOverhead) TextContainer.Items;
+            var last = (TextObject) TextContainer.Items;
 
             while (last?.Next != null)
-                last = (TextOverhead) last.Next;
+                last = (TextObject) last.Next;
 
             if (last == null)
                 return;
@@ -158,7 +158,7 @@ namespace ClassicUO.Game.GameObjects
             x += (int) Offset.X;
             y += (int) (Offset.Y - Offset.Z);
 
-            for (; last != null; last = (TextOverhead) last.Previous)
+            for (; last != null; last = (TextObject) last.Previous)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                 {

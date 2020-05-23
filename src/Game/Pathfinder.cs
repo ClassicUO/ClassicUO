@@ -177,7 +177,7 @@ namespace ClassicUO.Game
 
                             if (!(obj is Mobile))
                             {
-                                ref readonly StaticTiles itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
+                                ref StaticTiles itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
 
                                 if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
                                 {

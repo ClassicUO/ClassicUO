@@ -366,11 +366,16 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add(_autoOpenCorpseArea);
 
 
+            _drawRoofs = CreateCheckBox(rightArea, "Hide roof tiles", !ProfileManager.Current.DrawRoofs, 0, SPACE_Y);
+            _treeToStumps = CreateCheckBox(rightArea, "Tree to stumps", ProfileManager.Current.TreeToStumps, 0, SPACE_Y);
+            _hideVegetation = CreateCheckBox(rightArea, "Hide vegetation", ProfileManager.Current.HideVegetation, 0, SPACE_Y);
+            _enableCaveBorder = CreateCheckBox(rightArea, "Mark cave tiles", ProfileManager.Current.EnableCaveBorder, 0, SPACE_Y);
+
+
             ScrollAreaItem item = new ScrollAreaItem();
-            item.Y = SPACE_Y;
             _useCircleOfTransparency = new Checkbox(0x00D2, 0x00D3, "Enable circle of transparency", FONT, HUE_FONT)
             {
-                Y = 0,
+                Y = 20 + SPACE_Y,
                 IsChecked = ProfileManager.Current.UseCircleOfTransparency
             };
             item.Add(_useCircleOfTransparency);
@@ -380,7 +385,7 @@ namespace ClassicUO.Game.UI.Gumps
             var textT = new Label("Transparency type:", true, HUE_FONT)
             {
                 X = 20,
-                Y = _circleOfTranspRadius.Y + 5
+                Y = _circleOfTranspRadius.Y + _circleOfTranspRadius.Height + SPACE_Y
             };
             item.Add(textT);
 
@@ -395,13 +400,7 @@ namespace ClassicUO.Game.UI.Gumps
             _useCircleOfTransparency.ValueChanged += (sender, e) => { textT.IsVisible = _cotType.IsVisible = _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked; };
             textT.IsVisible = _cotType.IsVisible = _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked;
             rightArea.Add(item);
-
-
-            _drawRoofs = CreateCheckBox(rightArea, "Hide roof tiles", !ProfileManager.Current.DrawRoofs, 0, SPACE_Y);
-            _treeToStumps = CreateCheckBox(rightArea, "Tree to stumps", ProfileManager.Current.TreeToStumps, 0, SPACE_Y);
-            _hideVegetation = CreateCheckBox(rightArea, "Hide vegetation", ProfileManager.Current.HideVegetation, 0, SPACE_Y);
-            _enableCaveBorder = CreateCheckBox(rightArea, "Mark cave tiles", ProfileManager.Current.EnableCaveBorder, 0, SPACE_Y);
-
+            _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked;
 
             fpsItem = new ScrollAreaItem();
 
@@ -493,7 +492,6 @@ namespace ClassicUO.Game.UI.Gumps
             hpAreaItem.Add(_fieldsType);
             rightArea.Add(hpAreaItem);
 
-            _circleOfTranspRadius.IsVisible = _useCircleOfTransparency.IsChecked;
 
             hpAreaItem = new ScrollAreaItem();
             Control c = new Label("Shop Gump Size (multiple of 60): ", true, HUE_FONT) {Y = 10};

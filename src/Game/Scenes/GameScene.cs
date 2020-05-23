@@ -870,12 +870,11 @@ namespace ClassicUO.Game.Scenes
             if (renderIndex < 1)
                 renderIndex = 99;
 
+            if (!IsMouseOverViewport)
+                SelectedObject.Object = null;
 
             World.WorldTextManager.ProcessWorldText(true);
             World.WorldTextManager.Draw(batcher, x, y, renderIndex);
-
-            if (!IsMouseOverViewport)
-                SelectedObject.Object = null;
 
             SelectedObject.LastObject = SelectedObject.Object;
         }

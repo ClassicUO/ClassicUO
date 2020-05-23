@@ -98,7 +98,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsVegetation;
 
-        public ref readonly StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
+        public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
 
         public void SetGraphic(ushort g)
         {
@@ -125,10 +125,10 @@ namespace ClassicUO.Game.GameObjects
             if (TextContainer == null)
                 return;
 
-            var last = (TextOverhead) TextContainer.Items;
+            var last = (TextObject) TextContainer.Items;
 
             while (last?.Next != null)
-                last = (TextOverhead) last.Next;
+                last = (TextObject) last.Next;
 
             if (last == null)
                 return;
@@ -151,7 +151,7 @@ namespace ClassicUO.Game.GameObjects
             x = (int)(x / scale);
             y = (int)(y / scale);
 
-            for (; last != null; last = (TextOverhead) last.Previous)
+            for (; last != null; last = (TextObject) last.Previous)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                 {

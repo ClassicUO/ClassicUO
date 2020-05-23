@@ -416,7 +416,7 @@ namespace ClassicUO.Game.Scenes
                     case CursorTarget.MultiPlacement when World.CustomHouseManager == null:
                     {
                         var obj = SelectedObject.Object;
-                        if (obj is TextOverhead ov)
+                        if (obj is TextObject ov)
                             obj = ov.Owner;
                         else if (obj is GameEffect eff && eff.Source != null)
                             obj = eff.Source;
@@ -441,7 +441,7 @@ namespace ClassicUO.Game.Scenes
                     case CursorTarget.SetTargetClientSide:
                     {
                         var obj = SelectedObject.Object;
-                        if (obj is TextOverhead ov)
+                        if (obj is TextObject ov)
                             obj = ov.Owner;
                         else if (obj is GameEffect eff && eff.Source != null)
                             obj = eff.Source;
@@ -563,7 +563,7 @@ namespace ClassicUO.Game.Scenes
                             GameActions.DoubleClick(mob);
                         break;
 
-                    case TextOverhead msg when msg.Owner is Entity entity:
+                    case TextObject msg when msg.Owner is Entity entity:
                         result = true;
                         GameActions.DoubleClick(entity);
                         break;

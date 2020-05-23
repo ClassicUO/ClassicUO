@@ -104,7 +104,7 @@ namespace ClassicUO.Game.GameObjects
             //Engine.DebugInfo.EffectsRendered++;
             base.Draw(batcher, posX, posY);
 
-            ref readonly StaticTiles data = ref TileDataLoader.Instance.StaticData[_displayedGraphic];
+            ref StaticTiles data = ref TileDataLoader.Instance.StaticData[_displayedGraphic];
 
             if (data.IsLight && Source != null)
             {
