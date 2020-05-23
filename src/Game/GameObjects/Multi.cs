@@ -116,7 +116,7 @@ namespace ClassicUO.Game.GameObjects
         public bool IsVegetation;
         public bool IsMovable;
 
-        public ref readonly StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
+        public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
 
         public override void UpdateGraphicBySeason()
         {

@@ -98,7 +98,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsVegetation;
 
-        public ref readonly StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
+        public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[Graphic];
 
         public void SetGraphic(ushort g)
         {

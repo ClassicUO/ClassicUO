@@ -108,7 +108,7 @@ namespace ClassicUO.Game.GameObjects
                 Bounds.Y = Texture.Height - 44 + (int) (Offset.Z - Offset.Y);
             }
 
-            ref readonly StaticTiles data = ref TileDataLoader.Instance.StaticData[Graphic];
+            ref StaticTiles data = ref TileDataLoader.Instance.StaticData[Graphic];
 
 
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)

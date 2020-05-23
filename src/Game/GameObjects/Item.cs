@@ -226,7 +226,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public ref readonly StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[IsMulti ? MultiGraphic : Graphic];
+        public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[IsMulti ? MultiGraphic : Graphic];
 
         public bool IsLootable =>
             ItemData.Layer != (int) Layer.Hair &&

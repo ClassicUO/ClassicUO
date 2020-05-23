@@ -54,8 +54,8 @@ namespace ClassicUO.IO.Resources
         private static StaticTiles[] _staticData;
         private static LandTiles[] _landData;
 
-        public ref readonly LandTiles[] LandData => ref _landData;
-        public ref readonly StaticTiles[] StaticData => ref _staticData;
+        public ref LandTiles[] LandData => ref _landData;
+        public ref StaticTiles[] StaticData => ref _staticData;
 
         public override Task Load()
         {
@@ -316,7 +316,7 @@ namespace ClassicUO.IO.Resources
         }
     }
 
-    internal readonly struct LandTiles
+    internal struct LandTiles
     {
         public LandTiles(ulong flags, ushort textId, string name)
         {
@@ -329,24 +329,24 @@ namespace ClassicUO.IO.Resources
             IsNoDiagonal = (Flags & TileFlag.NoDiagonal) != 0;
         }
 
-        public readonly TileFlag Flags;
-        public readonly ushort TexID;
-        public readonly string Name;
+        public TileFlag Flags;
+        public ushort TexID;
+        public string Name;
 
-        public readonly bool IsWet;
-        public readonly bool IsImpassable;
-        public readonly bool IsNoDiagonal;
+        public bool IsWet;
+        public bool IsImpassable;
+        public bool IsNoDiagonal;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct LandGroup
+    internal struct LandGroup
     {
-        public readonly uint Unknown;
+        public uint Unknown;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public readonly LandTiles[] Tiles;
+        public LandTiles[] Tiles;
     }
 
-    internal readonly struct StaticTiles
+    internal struct StaticTiles
     {
         public StaticTiles(ulong flags, byte weight, byte layer, int count, ushort animId, ushort hue, ushort lightIndex, byte height, string name)
         {
@@ -384,122 +384,122 @@ namespace ClassicUO.IO.Resources
             IsMultiMovable = (Flags & TileFlag.MultiMovable) != 0;
         }
 
-        public readonly TileFlag Flags;
-        public readonly byte Weight;
-        public readonly byte Layer;
-        public readonly int Count;
-        public readonly ushort AnimID;
-        public readonly ushort Hue;
-        public readonly ushort LightIndex;
-        public readonly byte Height;
-        public readonly string Name;
+        public TileFlag Flags;
+        public byte Weight;
+        public byte Layer;
+        public int Count;
+        public ushort AnimID;
+        public ushort Hue;
+        public ushort LightIndex;
+        public byte Height;
+        public string Name;
 
-        public readonly bool IsAnimated;
-        public readonly bool IsBridge;
-        public readonly bool IsImpassable;
-        public readonly bool IsSurface;
-        public readonly bool IsWearable;
-        public readonly bool IsInternal;
-        public readonly bool IsBackground;
-        public readonly bool IsNoDiagonal;
-        public readonly bool IsWet;
-        public readonly bool IsFoliage;
-        public readonly bool IsRoof;
-        public readonly bool IsTranslucent;
-        public readonly bool IsPartialHue;
-        public readonly bool IsStackable;
-        public readonly bool IsTransparent;
-        public readonly bool IsContainer;
-        public readonly bool IsDoor;
-        public readonly bool IsWall;
-        public readonly bool IsLight;
-        public readonly bool IsNoShoot;
-        public readonly bool IsWeapon;
-        public readonly bool IsMultiMovable;
+        public bool IsAnimated;
+        public bool IsBridge;
+        public bool IsImpassable;
+        public bool IsSurface;
+        public bool IsWearable;
+        public bool IsInternal;
+        public bool IsBackground;
+        public bool IsNoDiagonal;
+        public bool IsWet;
+        public bool IsFoliage;
+        public bool IsRoof;
+        public bool IsTranslucent;
+        public bool IsPartialHue;
+        public bool IsStackable;
+        public bool IsTransparent;
+        public bool IsContainer;
+        public bool IsDoor;
+        public bool IsWall;
+        public bool IsLight;
+        public bool IsNoShoot;
+        public bool IsWeapon;
+        public bool IsMultiMovable;
     }
 
     // old
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct LandGroupOld
+    internal struct LandGroupOld
     {
-        public readonly uint Unknown;
+        public uint Unknown;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public readonly LandTilesOld[] Tiles;
+        public LandTilesOld[] Tiles;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct LandTilesOld
+    internal struct LandTilesOld
     {
-        public readonly uint Flags;
-        public readonly ushort TexID;
+        public uint Flags;
+        public ushort TexID;
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
-        public readonly string Name;
+        public string Name;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct StaticGroupOld
+    internal struct StaticGroupOld
     {
-        public readonly uint Unk;
+        public uint Unk;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public readonly StaticTilesOld[] Tiles;
+        public StaticTilesOld[] Tiles;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct StaticTilesOld
+    internal struct StaticTilesOld
     {
-        public readonly uint Flags;
-        public readonly byte Weight;
-        public readonly byte Layer;
-        public readonly int Count;
-        public readonly ushort AnimID;
-        public readonly ushort Hue;
-        public readonly ushort LightIndex;
-        public readonly byte Height;
+        public uint Flags;
+        public byte Weight;
+        public byte Layer;
+        public int Count;
+        public ushort AnimID;
+        public ushort Hue;
+        public ushort LightIndex;
+        public byte Height;
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
-        public readonly string Name;
+        public string Name;
     }
 
     // new 
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct LandGroupNew
+    internal struct LandGroupNew
     {
-        public readonly uint Unknown;
+        public uint Unknown;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public readonly LandTilesNew[] Tiles;
+        public LandTilesNew[] Tiles;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct LandTilesNew
+    internal struct LandTilesNew
     {
-        public readonly TileFlag Flags;
-        public readonly ushort TexID;
+        public TileFlag Flags;
+        public ushort TexID;
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
-        public readonly string Name;
+        public string Name;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct StaticGroupNew
+    internal struct StaticGroupNew
     {
-        public readonly uint Unk;
+        public uint Unk;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public readonly StaticTilesNew[] Tiles;
+        public StaticTilesNew[] Tiles;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct StaticTilesNew
+    internal struct StaticTilesNew
     {
-        public readonly TileFlag Flags;
-        public readonly byte Weight;
-        public readonly byte Layer;
-        public readonly int Count;
-        public readonly ushort AnimID;
-        public readonly ushort Hue;
-        public readonly ushort LightIndex;
-        public readonly byte Height;
+        public TileFlag Flags;
+        public byte Weight;
+        public byte Layer;
+        public int Count;
+        public ushort AnimID;
+        public ushort Hue;
+        public ushort LightIndex;
+        public byte Height;
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
-        public readonly string Name;
+        public string Name;
     }
 
     [Flags]
