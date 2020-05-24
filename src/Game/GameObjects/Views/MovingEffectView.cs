@@ -80,7 +80,7 @@ namespace ClassicUO.Game.GameObjects
             //Select(posX, posY);
             Texture.Ticks = Time.Ticks;
 
-            ref readonly StaticTiles data = ref TileDataLoader.Instance.StaticData[_displayedGraphic];
+            ref StaticTiles data = ref TileDataLoader.Instance.StaticData[_displayedGraphic];
 
             if (data.IsLight && Source != null)
             {

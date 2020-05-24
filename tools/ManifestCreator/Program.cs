@@ -58,7 +58,7 @@ namespace ManifestCreator
             "libs/x64/SDL2_image.dll",
             "libs/x64/zlib.dll",
             "libs/x64/libtheorafile.dll",
-
+            "libs/x64/vcruntime140.dll",
 
             // dlls
             "Accessibility.dll",

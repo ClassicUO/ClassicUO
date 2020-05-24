@@ -162,6 +162,17 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 World.Mobiles.Add(_character);
             }
 
+            var first = _character.Items;
+
+            while (first != null)
+            {
+                var next = first.Next;
+
+                World.RemoveItem((Item) first, true);
+
+                first = next;
+            }
+
             _character.Clear();
             _character.Race = race;
             _character.IsFemale = isFemale;
@@ -494,6 +505,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // This is a workaround to avoid to see naked guy
             // We are simulating server objects into World.Items map.
             var item = World.GetOrCreateItem(0x4000_0000 + (uint)layer); // use layer as unique Serial
+            _character.Remove(item);
             item.Graphic = (ushort)id;
             item.Hue = hue;
             item.Layer = layer;

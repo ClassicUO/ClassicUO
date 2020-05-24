@@ -226,7 +226,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public ref readonly StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[IsMulti ? MultiGraphic : Graphic];
+        public ref StaticTiles ItemData => ref TileDataLoader.Instance.StaticData[IsMulti ? MultiGraphic : Graphic];
 
         public bool IsLootable =>
             ItemData.Layer != (int) Layer.Hair &&
@@ -897,10 +897,10 @@ namespace ClassicUO.Game.GameObjects
             if (TextContainer == null)
                 return;
 
-            TextOverhead last = (TextOverhead) TextContainer.Items;
+            TextObject last = (TextObject) TextContainer.Items;
 
             while (last?.Next != null)
-                last = (TextOverhead) last.Next;
+                last = (TextObject) last.Next;
 
             if (last == null)
                 return;
@@ -930,7 +930,7 @@ namespace ClassicUO.Game.GameObjects
                 x += (int) Offset.X;
                 y += (int) (Offset.Y - Offset.Z);
 
-                for (; last != null; last = (TextOverhead) last.Previous)
+                for (; last != null; last = (TextObject) last.Previous)
                 {
                     if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                     {
@@ -950,7 +950,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                for (; last != null; last = (TextOverhead) last.Previous)
+                for (; last != null; last = (TextObject) last.Previous)
                 {
                     if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                     {

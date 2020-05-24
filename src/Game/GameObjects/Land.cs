@@ -99,7 +99,7 @@ namespace ClassicUO.Game.GameObjects
         public Vector3 Normal0, Normal1, Normal2, Normal3;
         public Rectangle Rectangle;
 
-        public ref readonly LandTiles TileData => ref TileDataLoader.Instance.LandData[Graphic];
+        public ref LandTiles TileData => ref TileDataLoader.Instance.LandData[Graphic];
 
         public sbyte MinZ;
         public sbyte AverageZ;

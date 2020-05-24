@@ -247,7 +247,7 @@ namespace ClassicUO.Game.Map
                     goto default;
 
                 default:
-                    ref readonly StaticTiles data = ref TileDataLoader.Instance.StaticData[graphic];
+                    ref StaticTiles data = ref TileDataLoader.Instance.StaticData[graphic];
 
                     if (data.IsBackground)
                         priorityZ--;

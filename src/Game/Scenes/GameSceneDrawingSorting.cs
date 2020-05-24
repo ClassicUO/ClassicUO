@@ -60,7 +60,7 @@ namespace ClassicUO.Game.Scenes
         private static GameObject[] _foliages = new GameObject[100];
         private static readonly GameObject[] _objectHandles = new GameObject[Constants.MAX_OBJECT_HANDLES];
         private int _renderListCount, _foliageCount;
-        private readonly StaticTiles _empty;
+        private StaticTiles _empty;
         private sbyte _foliageIndex;
         private static readonly TreeUnion[] _treeInfos =
         {
@@ -290,7 +290,7 @@ namespace ClassicUO.Game.Scenes
 
                 int maxObjectZ = obj.PriorityZ;
 
-                ref readonly StaticTiles itemData = ref _empty;
+                ref StaticTiles itemData = ref _empty;
 
                 bool changinAlpha = false;
                 bool island = false;
@@ -426,7 +426,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (!island)
                 {
-                    obj.UpdateTextCoordsV();
+                    //obj.UpdateTextCoordsV();
                 }
                 else
                     goto SKIP_INTERNAL_CHECK;
