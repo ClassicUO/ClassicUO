@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Xml;
 
@@ -45,6 +46,41 @@ namespace ClassicUO.Configuration
             Username = username;
             ServerName = servername;
             CharacterName = charactername;
+        }
+
+        public Profile DefaultProfile()
+        {
+            string defaultProfilePath = Path.Combine( CUOEnviroment.ExecutablePath, "default_profile.json" );
+
+            if (!File.Exists( defaultProfilePath ))
+            {
+                return this;
+            }
+
+            Profile defaultProfile = ConfigurationResolver.Load<Profile>( defaultProfilePath,
+                new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.All,
+                    MetadataPropertyHandling = MetadataPropertyHandling.ReadAhead
+                } );
+
+            if (defaultProfile == null)
+            {
+                return this;
+            }
+
+            foreach (PropertyInfo property in defaultProfile.GetType()
+                .GetProperties( BindingFlags.Public | BindingFlags.Instance ))
+            {
+                object val = property.GetValue( defaultProfile );
+
+                if (val != null)
+                {
+                    property.SetValue( this, val );
+                }
+            }
+
+            return this;
         }
 
         [JsonIgnore] public string Username { get; set; }
