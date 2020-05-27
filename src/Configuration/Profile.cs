@@ -279,8 +279,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public bool WorldMapShowMarkers { get; set; } = true;
         [JsonProperty] public bool WorldMapShowMarkersNames { get; set; } = true;
         [JsonProperty] public bool WorldMapShowMultis { get; set; } = true;
-
-
+        [JsonProperty] public string WorldMapHiddenMarkerFiles { get; set; } = string.Empty;
 
 
         internal static string ProfilePath { get; } = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
