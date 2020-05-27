@@ -352,7 +352,7 @@ namespace ClassicUO.IO.Resources
             if (font >= FontCount || string.IsNullOrEmpty(str))
                 return string.Empty;
 
-            ref readonly var fd = ref _font[font];
+            ref var fd = ref _font[font];
 
             StringBuilder sb = new StringBuilder();
 
@@ -408,7 +408,7 @@ namespace ClassicUO.IO.Resources
             if (len == 0)
                 return;
 
-            ref readonly var fd = ref _font[font];
+            ref var fd = ref _font[font];
 
             if (width <= 0)
                 width = GetWidthASCII(font, str);
@@ -493,7 +493,7 @@ namespace ClassicUO.IO.Resources
                         index = 0;
                     else
                         index -= NOPRINT_CHARS;
-                    ref readonly FontCharacterData fcd = ref fd[index];
+                    ref FontCharacterData fcd = ref fd[index];
                     int dw = fcd.Width;
                     int dh = fcd.Height;
                     ushort charColor = color;
@@ -572,7 +572,7 @@ namespace ClassicUO.IO.Resources
             if (font >= FontCount)
                 return null;
 
-            ref readonly var fd = ref _font[font];
+            ref var fd = ref _font[font];
             MultilinesFontInfo info = new MultilinesFontInfo();
             info.Reset();
             info.Align = align;
@@ -613,7 +613,7 @@ namespace ClassicUO.IO.Resources
                 else
                     index = (byte)(si - NOPRINT_CHARS);
 
-                ref readonly FontCharacterData fcd = ref fd[index];
+                ref FontCharacterData fcd = ref fd[index];
 
                 if (si == '\n' || ptr.Width + readWidth + fcd.Width > width)
                 {
@@ -1261,7 +1261,7 @@ namespace ClassicUO.IO.Resources
 
                 for (int i = 0; i < dataSize; i++)
                 {
-                    ref readonly MultilinesFontData dataPtr = ref ptr.Data[i];
+                    ref MultilinesFontData dataPtr = ref ptr.Data[i];
                     char si = dataPtr.Item;
                     table = (uint*) _unicodeFontAddress[dataPtr.Font];
 
@@ -3164,13 +3164,13 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal readonly struct FontHeader
+    internal struct FontHeader
     {
         public readonly byte Width, Height, Unknown;
     }
 
 
-    internal readonly struct FontCharacterData
+    internal struct FontCharacterData
     {
         public FontCharacterData(byte w, byte h, ushort[] data)
         {
@@ -3179,8 +3179,8 @@ namespace ClassicUO.IO.Resources
             Data = data;
         }
 
-        public readonly byte Width, Height;
-        public readonly ushort[] Data;
+        public byte Width, Height;
+        public ushort[] Data;
     }
 
     internal sealed class MultilinesFontInfo
