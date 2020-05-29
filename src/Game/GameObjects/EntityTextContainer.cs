@@ -100,7 +100,7 @@ namespace ClassicUO.Game.GameObjects
             _messages.AddToFront(text_obj);
 
             if (_messages.Count > 10)
-                _messages.RemoveFromBack()?.RenderedText?.Destroy();
+                _messages.RemoveFromBack()?.Destroy();
         }
 
         public void Update()
@@ -124,7 +124,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (delta <= 0)
                 {
-                    c.RenderedText.Destroy();
+                    c.Destroy();
                     _rectangle.Height -= c.RenderedText.Height;
                     _messages.RemoveAt(i--);
                 }
@@ -245,7 +245,7 @@ namespace ClassicUO.Game.GameObjects
             IsDestroyed = true;
 
             foreach (var item in _messages)
-                item.RenderedText.Destroy();
+                item.Destroy();
 
             _messages.Clear();
         }
