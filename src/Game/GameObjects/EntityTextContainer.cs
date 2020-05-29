@@ -124,13 +124,13 @@ namespace ClassicUO.Game.GameObjects
 
                 if (delta <= 0)
                 {
+                    _rectangle.Height -= c.RenderedText?.Height ?? 0;
                     c.Destroy();
-                    _rectangle.Height -= c.RenderedText.Height;
                     _messages.RemoveAt(i--);
                 }
                 //else if (delta < 250)
                 //    c.Alpha = 1f - delta / 250;
-                else
+                else if (c.RenderedText != null)
                 {
                     if (_rectangle.Width < c.RenderedText.Width)
                         _rectangle.Width = c.RenderedText.Width;
@@ -219,6 +219,9 @@ namespace ClassicUO.Game.GameObjects
             foreach (var item in _messages)
             {
                 ushort hue = 0;
+
+                if (item.IsDestroyed || item.RenderedText == null || item.RenderedText.IsDestroyed)
+                    continue;
 
                 //if (ProfileManager.Current.HighlightGameObjects)
                 //{
