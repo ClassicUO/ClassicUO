@@ -57,7 +57,7 @@ namespace ClassicUO.Game.Data
                     break;
 
                 case 0x1647:
-                    color = 61;
+                    color = 51;
 
                     break;
 

@@ -306,15 +306,28 @@ namespace ClassicUO.Game
 
         public static Entity Get(uint serial)
         {
-            if (SerialHelper.IsItem(serial))
-                return Items.Get(serial);
+            Entity ent = null;
 
-            return SerialHelper.IsMobile(serial) ? Mobiles.Get(serial) : null;
+            if (SerialHelper.IsItem(serial))
+                ent = Items.Get(serial);
+            else if (SerialHelper.IsMobile(serial))
+                ent = Mobiles.Get(serial);
+
+            if (ent != null && ent.IsDestroyed)
+                ent = null;
+
+            return ent;
         }
 
         public static Item GetOrCreateItem(uint serial)
         {
             Item item = Items.Get(serial);
+
+            if (item != null && item.IsDestroyed)
+            {
+                Items.Remove(serial);
+                item = null;
+            }
 
             if (item == null /*|| item.IsDestroyed*/)
             {
@@ -328,6 +341,12 @@ namespace ClassicUO.Game
         public static Mobile GetOrCreateMobile(uint serial)
         {
             Mobile mob = Mobiles.Get(serial);
+
+            if (mob != null && mob.IsDestroyed)
+            {
+                Mobiles.Remove(serial);
+                mob = null;
+            }
 
             if (mob == null /*|| mob.IsDestroyed*/)
             {
@@ -405,6 +424,11 @@ namespace ClassicUO.Game
         internal static void AddEffect(GameEffect effect)
         {
             _effectManager.Add(effect);
+        }
+
+        internal static void RemoveEffect(GameEffect effect)
+        {
+            _effectManager.RemoveEffect(effect);
         }
 
         public static void AddEffect(GraphicEffectType type, uint source, uint target,

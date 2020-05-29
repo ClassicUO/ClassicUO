@@ -85,7 +85,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (Source != null && Source.IsDestroyed)
             {
-                Destroy();
+                World.RemoveEffect(this);
 
                 return;
             }
@@ -96,7 +96,7 @@ namespace ClassicUO.Game.GameObjects
             if (IsEnabled)
             {
                 if (Duration < totalMS && Duration >= 0)
-                    Destroy();
+                    World.RemoveEffect(this);
                 //else
                 //{
                 //    unsafe

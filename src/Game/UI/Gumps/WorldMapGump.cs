@@ -82,6 +82,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _showMarkers = true;
         private bool _showMarkerNames = true;
         private bool _showMarkerIcons = true;
+        private List<string> _hiddenMarkerFiles;
 
         private SpriteFont _markerFont = Fonts.Map1;
         private int _markerFontIndex = 1;
@@ -181,6 +182,11 @@ namespace ClassicUO.Game.UI.Gumps
             _showMarkers = ProfileManager.Current.WorldMapShowMarkers;
             _showMultis = ProfileManager.Current.WorldMapShowMultis;
             _showMarkerNames = ProfileManager.Current.WorldMapShowMarkersNames;
+
+
+            _hiddenMarkerFiles = string.IsNullOrEmpty(ProfileManager.Current.WorldMapHiddenMarkerFiles)
+                ? new List<string>()
+                : ProfileManager.Current.WorldMapHiddenMarkerFiles.Split(',').ToList();
         }
 
         public void SaveSettings()
@@ -209,6 +215,8 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.Current.WorldMapShowMarkers = _showMarkers;
             ProfileManager.Current.WorldMapShowMultis = _showMultis;
             ProfileManager.Current.WorldMapShowMarkersNames = _showMarkerNames;
+
+            ProfileManager.Current.WorldMapHiddenMarkerFiles = string.Join(",", _hiddenMarkerFiles);
         }
 
         private bool ParseBool(string boolStr)
@@ -284,7 +292,26 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 foreach (WMapMarkerFile markerFile in _markerFiles)
                 {
-                    var entry = new ContextMenuItemEntry($"Show/Hide '{markerFile.Name}'", () => { markerFile.Hidden = !markerFile.Hidden; }, true, !markerFile.Hidden);
+                    var entry = new ContextMenuItemEntry($"Show/Hide '{markerFile.Name}'", () =>
+                    {
+                        markerFile.Hidden = !markerFile.Hidden;
+                        
+                        if (!markerFile.Hidden)
+                        {
+                            string hiddenFile = _hiddenMarkerFiles.SingleOrDefault(x => x.Equals(markerFile.Name));
+
+                            if (!string.IsNullOrEmpty(hiddenFile))
+                            {
+                                _hiddenMarkerFiles.Remove(hiddenFile);
+                            }
+                        }
+                        else
+                        {
+                            _hiddenMarkerFiles.Add(markerFile.Name);
+                        }
+
+                    }, true, !markerFile.Hidden);
+
                     _options[$"show_marker_{markerFile.Name}"] = entry;
                     markersEntry.Add(entry);
                 }
@@ -539,6 +566,11 @@ namespace ClassicUO.Game.UI.Gumps
                                 FullPath = mapFile,
                                 Markers = new List<WMapMarker>()
                             };
+
+                            string hiddenFile = _hiddenMarkerFiles.FirstOrDefault(x => x.Contains(markerFile.Name));
+
+                            if (!string.IsNullOrEmpty(hiddenFile))
+                                markerFile.Hidden = true;
 
                             if (mapFile != null && Path.GetExtension(mapFile).ToLower().Equals(".xml")) // Ultima Mapper
                             {
