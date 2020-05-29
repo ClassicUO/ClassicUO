@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Managers
 
                 f.Update(totalMS, frameMS);
 
-                if (f.Distance > World.ClientViewRange)
+                if (!f.IsDestroyed && f.Distance > World.ClientViewRange)
                     RemoveEffect(f);
 
                 if (f.IsDestroyed)
@@ -51,7 +51,8 @@ namespace ClassicUO.Game.Managers
                     {
                         foreach (GameEffect child in f.Children)
                         {
-                            Add(child);
+                            if (!child.IsDestroyed)
+                                Add(child);
                         }
 
                         f.Children.Clear();
@@ -173,6 +174,7 @@ namespace ClassicUO.Game.Managers
                 }
                 
                 _root.Children.Clear();
+
                 RemoveEffect(_root);
 
                 _root = (GameEffect) n;
@@ -182,6 +184,9 @@ namespace ClassicUO.Game.Managers
 
         public void RemoveEffect(GameEffect effect)
         {
+            if (effect == null || effect.IsDestroyed)
+                return;
+
             if (effect.Previous == null)
             {
                 _root = (GameEffect) effect.Next;
