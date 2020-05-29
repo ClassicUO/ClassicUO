@@ -90,5 +90,9 @@ namespace ClassicUO.Game.GameObjects
 
             return true;
         }
+
+        public override void Select(int x, int y)
+        {
+        }
     }
 }

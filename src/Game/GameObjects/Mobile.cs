@@ -120,6 +120,7 @@ namespace ClassicUO.Game.GameObjects
                 mobile.Clear();
                 mobile.Next = null;
                 mobile.Previous = null;
+                mobile.Name = null;
 
                 mobile.CalculateRandomIdleTime();
 

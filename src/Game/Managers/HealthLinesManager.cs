@@ -94,6 +94,9 @@ namespace ClassicUO.Game.Managers
                 //if (World.Party.Contains(mobile) && mobile.Tile == null)
                 //    continue;
 
+                if (mobile.IsDestroyed)
+                    continue;
+
                 int current = mobile.Hits;
                 int max = mobile.HitsMax;
 

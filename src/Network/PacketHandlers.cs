@@ -1833,7 +1833,7 @@ namespace ClassicUO.Network
             {
                 var pageNum = p.ReadUShort();
 
-                if (pageNum <= pages.Length)
+                if (pageNum > 0 && pageNum <= pages.Length)
                 {
                     var lineCnt = p.ReadUShort();
 
@@ -4746,7 +4746,7 @@ namespace ClassicUO.Network
 
             bool created = false;
 
-            if (obj == null)
+            if (obj == null || obj.IsDestroyed)
             {
                 created = true;
 
