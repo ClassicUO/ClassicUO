@@ -2505,12 +2505,15 @@ namespace ClassicUO.Network
             {
                 uint item_serial = p.ReadUInt();
 
-                Item item = World.GetOrCreateItem(item_serial);
+                if (layer - 1 != Layer.Backpack)
+                {
+                    Item item = World.GetOrCreateItem(item_serial);
 
-                RemoveItemFromContainer(item);
-                item.Container = serial;
-                item.Layer = layer - 1;
-                corpse.PushToBack(item);
+                    RemoveItemFromContainer(item);
+                    item.Container = serial;
+                    item.Layer = layer - 1;
+                    corpse.PushToBack(item);
+                }
 
                 layer = (Layer) p.ReadByte();
             }
