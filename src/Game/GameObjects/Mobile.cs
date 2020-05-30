@@ -120,6 +120,7 @@ namespace ClassicUO.Game.GameObjects
                 mobile.Clear();
                 mobile.Next = null;
                 mobile.Previous = null;
+                mobile.Name = null;
 
                 mobile.CalculateRandomIdleTime();
 
@@ -880,6 +881,8 @@ namespace ClassicUO.Game.GameObjects
 
                         LastStepTime = Time.Ticks;
                     }
+
+                    UpdateTextCoordsV();
                 }
             }
         }
@@ -1072,10 +1075,10 @@ namespace ClassicUO.Game.GameObjects
             if (TextContainer == null)
                 return;
 
-            var last = (TextOverhead) TextContainer.Items;
+            var last = (TextObject) TextContainer.Items;
 
             while (last?.Next != null)
-                last = (TextOverhead) last.Next;
+                last = (TextObject) last.Next;
 
             if (last == null)
                 return;
@@ -1123,7 +1126,7 @@ namespace ClassicUO.Game.GameObjects
             x = (int) (x / scale);
             y = (int) (y / scale);
 
-            for (; last != null; last = (TextOverhead) last.Previous)
+            for (; last != null; last = (TextObject) last.Previous)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                 {

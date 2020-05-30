@@ -57,7 +57,7 @@ namespace ClassicUO.Game.GameObjects
             if (!IsDestroyed)
             {
                 if (AnimIndex >= 10) //TODO: fix time
-                    Destroy();
+                    World.RemoveEffect(this);
                 else
                 {
                     AnimationGraphic = (ushort) (Graphic + AnimIndex);

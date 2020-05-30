@@ -30,25 +30,36 @@ namespace ClassicUO.Game.Managers
 {
     internal class EffectManager : IUpdateable
     {
-        private readonly List<GameEffect> _effects = new List<GameEffect>();
+        private GameEffect _root;
 
         public void Update(double totalMS, double frameMS)
         {
-            for (int i = 0; i < _effects.Count; i++)
+            var f = _root;
+
+            while (f != null)
             {
-                GameEffect effect = _effects[i];
-                effect.Update(totalMS, frameMS);
+                var n = f.Next;
 
-                if (effect.IsDestroyed)
+                f.Update(totalMS, frameMS);
+
+                if (!f.IsDestroyed && f.Distance > World.ClientViewRange)
+                    RemoveEffect(f);
+
+                if (f.IsDestroyed)
                 {
-                    _effects.RemoveAt(i--);
-
-                    if (effect.Children.Count > 0)
+                    if (f.Children.Count != 0)
                     {
-                        foreach (GameEffect t in effect.Children)
-                            _effects.Add(t);
+                        foreach (GameEffect child in f.Children)
+                        {
+                            if (!child.IsDestroyed)
+                                Add(child);
+                        }
+
+                        f.Children.Clear();
                     }
                 }
+
+                f = (GameEffect) n;
             }
         }
 
@@ -134,13 +145,70 @@ namespace ClassicUO.Game.Managers
         public void Add(GameEffect effect)
         {
             if (effect != null)
-                _effects.Add(effect);
+            {
+                if (_root == null)
+                {
+                    _root = effect;
+                    effect.Previous = null;
+                    effect.Next = null;
+                }
+                else
+                {
+                    effect.Next = _root;
+                    _root.Previous = effect;
+                    effect.Previous = null;
+                    _root = effect;
+                }
+            }
         }
 
         public void Clear()
         {
-            _effects.ForEach(s => s.Destroy());
-            _effects.Clear();
+            while (_root != null)
+            {
+                var n = _root.Next;
+
+                foreach (GameEffect child in _root.Children)
+                {
+                    RemoveEffect(child);
+                }
+                
+                _root.Children.Clear();
+
+                RemoveEffect(_root);
+
+                _root = (GameEffect) n;
+            }
+        }
+
+
+        public void RemoveEffect(GameEffect effect)
+        {
+            if (effect == null || effect.IsDestroyed)
+                return;
+
+            if (effect.Previous == null)
+            {
+                _root = (GameEffect) effect.Next;
+
+                if (_root != null)
+                {
+                    _root.Previous = null;
+                }
+            }
+            else
+            {
+                effect.Previous.Next = effect.Next;
+
+                if (effect.Next != null)
+                {
+                    effect.Next.Previous = effect.Previous;
+                }
+            }
+
+            effect.Next = null;
+            effect.Previous = null;
+            effect.Destroy();
         }
     }
 }

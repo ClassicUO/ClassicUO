@@ -28,6 +28,7 @@ using System.Threading;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
@@ -372,6 +373,14 @@ namespace ClassicUO
 
             GraphicsDevice.SetRenderTarget(_buffer);
             UIManager.Draw(_uoSpriteBatch);
+
+            if (World.InGame && SelectedObject.LastObject is TextObject t)
+            {
+                if (t.IsTextGump)
+                    t.ToTopD();
+                else
+                    World.WorldTextManager?.MoveToTop(t);
+            }
 
             base.Draw(gameTime);
 

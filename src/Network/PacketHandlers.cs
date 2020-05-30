@@ -2577,12 +2577,15 @@ namespace ClassicUO.Network
             {
                 uint item_serial = p.ReadUInt();
 
+                if (layer - 1 != Layer.Backpack)
+                {
                 Item item = World.GetOrCreateItem(item_serial);
 
                 RemoveItemFromContainer(item);
                 item.Container = serial;
                 item.Layer = layer - 1;
                 corpse.PushToBack(item);
+                }
 
                 layer = (Layer) p.ReadByte();
             }
@@ -3957,6 +3960,7 @@ namespace ClassicUO.Network
             uint serial = p.ReadUInt();
 
             p.Skip(2);
+
             uint revision = p.ReadUInt();
 
             Entity entity = World.Mobiles.Get(serial);
@@ -3968,18 +3972,24 @@ namespace ClassicUO.Network
                 entity = World.Items.Get(serial);
             }
 
-            //if (entity != null)
+            List<string> list = new List<string>();
+
+            while (p.Position < p.Length)
             {
-                int cliloc;
+                int cliloc = (int) p.ReadUInt();
+                if (cliloc == 0)
+                    break;
 
-                List<string> list = new List<string>();
+                ushort length = p.ReadUShort();
 
-                while ((cliloc = (int) p.ReadUInt()) != 0)
+                string argument = string.Empty;
+
+                if (length != 0)
                 {
-                    string argument = p.ReadUnicodeReversed(p.ReadUShort());
+                    argument = p.ReadUnicodeReversed(length);
+                }
 
                     string str = ClilocLoader.Instance.Translate(cliloc, argument, true);
-
 
                     for (int i = 0; i < list.Count; i++)
                     {
@@ -4046,10 +4056,9 @@ namespace ClassicUO.Network
 
                 if (inBuyList && container != null && SerialHelper.IsValid(container.Serial))
                 {
-                    UIManager.GetGump<ShopGump>(container.RootContainer)?.SetNameTo((Item)entity, name);
+                UIManager.GetGump<ShopGump>(container.RootContainer)?.SetNameTo((Item) entity, name);
                 }
             }
-        }
 
         private static void GenericAOSCommandsR(Packet p)
         {
@@ -4856,7 +4865,7 @@ namespace ClassicUO.Network
 
             bool created = false;
 
-            if (obj == null)
+            if (obj == null || obj.IsDestroyed)
             {
                 created = true;
 

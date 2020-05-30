@@ -57,7 +57,7 @@ namespace ClassicUO.Game.Data
                     break;
 
                 case 0x1647:
-                    color = 61;
+                    color = 51;
 
                     break;
 
@@ -66,9 +66,12 @@ namespace ClassicUO.Game.Data
                     color = 40;
 
                     break;
+
+                case 0x9F66:
+                    color = 0;
+                    break;
             }
 
-            ;
 
             if (id < 0x09FB || id > 0x0A14)
             {
@@ -95,7 +98,7 @@ namespace ClassicUO.Game.Data
                                                         color = 62;
                                                 }
                                                 else
-                                                    color = 50;
+                                                    color = 30;
                                             }
                                             else
                                                 color = 51;
@@ -107,7 +110,7 @@ namespace ClassicUO.Game.Data
                                         color = 61;
                                 }
                                 else
-                                    color = 31;
+                                    color = 41;
                             }
                             else
                                 color = 0;
@@ -122,9 +125,10 @@ namespace ClassicUO.Game.Data
                     color = 0;
             }
             else
-                color = 47;
+                color = 40;
 
-            if (id == 0x1FD4 || id == 0x0F6C) color = 2;
+            if (id == 0x1FD4 || id == 0x0F6C)
+                color = 2;
 
             if (id < 0x0E2D || id > 0x0E30)
             {

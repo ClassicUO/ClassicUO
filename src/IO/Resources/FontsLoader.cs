@@ -49,11 +49,8 @@ namespace ClassicUO.IO.Resources
         private const int UOFONT_FIXEDHEIGHT = 0x0400;
         private const int UNICODE_SPACE_WIDTH = 8;
         private const int MAX_HTML_TEXT_HEIGHT = 18;
+        private const byte NOPRINT_CHARS = 32;
         private const float ITALIC_FONT_KOEFFICIENT = 3.3f;
-        private readonly byte[] _fontIndex =
-        {
-            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 136, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 152, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223
-        };
         private readonly IntPtr[] _unicodeFontAddress = new IntPtr[20];
         private readonly long[] _unicodeFontSize = new long[20];
         private readonly Dictionary<ushort, WebLink> _webLinks = new Dictionary<ushort, WebLink>();
@@ -195,12 +192,6 @@ namespace ClassicUO.IO.Resources
                     _unicodeFontAddress[1] = _unicodeFontAddress[0];
                     _unicodeFontSize[1] = _unicodeFontSize[0];
                 }
-
-                for (int i = 0; i < 256; i++)
-                {
-                    if (_fontIndex[i] >= 0xE0)
-                        _fontIndex[i] = _fontIndex[' '];
-                }
             });
         }
 
@@ -252,7 +243,10 @@ namespace ClassicUO.IO.Resources
 
             foreach (char c in str)
             {
-                textLength += GetCharWidthASCII(font, c);
+                if(c < NOPRINT_CHARS)
+                    textLength += _font[font][0].Width;
+                else
+                    textLength += _font[font][c - NOPRINT_CHARS].Width;
             }
 
             return textLength;
@@ -263,7 +257,9 @@ namespace ClassicUO.IO.Resources
             if (font >= FontCount || c == 0 || c == '\r')
                 return 0;
 
-            return _font[font][_fontIndex[(byte) c]].Width;
+            if(c < NOPRINT_CHARS)
+                return _font[font][0].Width;
+            return _font[font][c - NOPRINT_CHARS].Width;
         }
 
         public int GetWidthExASCII(byte font, string text, int maxwidth, TEXT_ALIGN_TYPE align, ushort flags)
@@ -367,7 +363,7 @@ namespace ClassicUO.IO.Resources
             if (font >= FontCount || string.IsNullOrEmpty(str))
                 return string.Empty;
 
-            ref readonly var fd = ref _font[font];
+            ref var fd = ref _font[font];
 
             StringBuilder sb = new StringBuilder();
 
@@ -388,12 +384,16 @@ namespace ClassicUO.IO.Resources
             }
 
             if (isCropped)
-                width -= fd[_fontIndex[(byte) '.']].Width * 3;
+                width -= fd['.' - NOPRINT_CHARS].Width * 3;
             int textLength = 0;
 
             foreach (char c in str)
             {
-                textLength += fd[_fontIndex[(byte) c]].Width;
+
+                if (c < NOPRINT_CHARS)
+                    textLength += _font[font][0].Width;
+                else
+                    textLength += _font[font][c - NOPRINT_CHARS].Width;
 
                 if (textLength > width)
                     break;
@@ -419,7 +419,7 @@ namespace ClassicUO.IO.Resources
             if (len == 0)
                 return;
 
-            ref readonly var fd = ref _font[font];
+            ref var fd = ref _font[font];
 
             if (width <= 0)
                 width = GetWidthASCII(font, str);
@@ -500,7 +500,11 @@ namespace ClassicUO.IO.Resources
                 {
                     byte index = (byte) ptr.Data[i].Item;
                     int offsY = GetFontOffsetY(font, index);
-                    ref readonly FontCharacterData fcd = ref fd[_fontIndex[index]];
+                    if (index < NOPRINT_CHARS)
+                        index = 0;
+                    else
+                        index -= NOPRINT_CHARS;
+                    ref FontCharacterData fcd = ref fd[index];
                     int dw = fcd.Width;
                     int dh = fcd.Height;
                     ushort charColor = color;
@@ -579,7 +583,7 @@ namespace ClassicUO.IO.Resources
             if (font >= FontCount)
                 return null;
 
-            ref readonly var fd = ref _font[font];
+            ref var fd = ref _font[font];
             MultilinesFontInfo info = new MultilinesFontInfo();
             info.Reset();
             info.Align = align;
@@ -612,7 +616,13 @@ namespace ClassicUO.IO.Resources
                     charCount = 0;
                 }
 
-                ref readonly FontCharacterData fcd = ref fd[_fontIndex[(byte) si]];
+                byte index;
+                if (si < NOPRINT_CHARS)
+                    index = 0;
+                else
+                    index = (byte)(si - NOPRINT_CHARS);
+
+                ref FontCharacterData fcd = ref fd[index];
 
                 if (si == '\n' || ptr.Width + readWidth + fcd.Width > width)
                 {
@@ -1286,7 +1296,7 @@ namespace ClassicUO.IO.Resources
 
                 for (int i = 0; i < dataSize; i++)
                 {
-                    ref readonly MultilinesFontData dataPtr = ref ptr.Data[i];
+                    ref MultilinesFontData dataPtr = ref ptr.Data[i];
                     char si = dataPtr.Item;
                     table = (uint*) _unicodeFontAddress[dataPtr.Font];
 
@@ -1686,9 +1696,9 @@ namespace ClassicUO.IO.Resources
                 char si = htmlData[i].Char;
                 uint* table = (uint*) _unicodeFontAddress[htmlData[i].Font];
 
-                if ((byte) si == 0x000D || si == '\n')
+                if (si == 0x000D || si == '\n')
                 {
-                    if ((byte) si == 0x000D || isFixed || isCropped)
+                    if (si == 0x000D || isFixed || isCropped)
                         si = (char) 0;
                     else
                         si = '\n';
@@ -2978,8 +2988,13 @@ namespace ClassicUO.IO.Resources
 
                         for (int i = 0; i < len && i < info.Data.Count; i++)
                         {
-                            if (info.Data[i].Item != '\r')
-                                width += fd[_fontIndex[info.Data[i].Item]].Width;
+                            byte index;
+                            if (info.Data[i].Item < NOPRINT_CHARS)
+                                index = 0;
+                            else
+                                index = (byte) (info.Data[i].Item - NOPRINT_CHARS);
+
+                            width += fd[index].Width;
 
                             if (width > x)
                                 break;                           
@@ -3060,8 +3075,13 @@ namespace ClassicUO.IO.Resources
                 {
                     for (int i = 0; i < len; i++)
                     {
-                        if (info.Data[i].Item != '\r')
-                            x += fd[_fontIndex[info.Data[i].Item]].Width;
+
+                        byte index;
+                        if (info.Data[i].Item < NOPRINT_CHARS)
+                            index = 0;
+                        else
+                            index = (byte)(info.Data[i].Item - NOPRINT_CHARS);
+                        x += fd[index].Width;
 
                         if (info.CharStart + i + 1 == pos)
                             return (x, y);
@@ -3178,13 +3198,13 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal readonly struct FontHeader
+    internal struct FontHeader
     {
         public readonly byte Width, Height, Unknown;
     }
 
 
-    internal readonly struct FontCharacterData
+    internal struct FontCharacterData
     {
         public FontCharacterData(byte w, byte h, ushort[] data)
         {
@@ -3193,8 +3213,8 @@ namespace ClassicUO.IO.Resources
             Data = data;
         }
 
-        public readonly byte Width, Height;
-        public readonly ushort[] Data;
+        public byte Width, Height;
+        public ushort[] Data;
     }
 
     internal sealed class MultilinesFontInfo

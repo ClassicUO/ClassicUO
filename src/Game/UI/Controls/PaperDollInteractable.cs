@@ -402,10 +402,7 @@ namespace ClassicUO.Game.UI.Controls
                           Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK < Time.Ticks) ||
                          Mouse.LDroppedOffset != Point.Zero))
                     {
-                        Rectangle bounds = ArtLoader.Instance.GetTexture(Graphic)?.Bounds ?? Rectangle.Empty;
-                        int centerX = bounds.Width >> 1;
-                        int centerY = bounds.Height >> 1;
-                        GameActions.PickUp(LocalSerial, centerX, centerY);
+                        GameActions.PickUp(LocalSerial, 0, 0);
                         Mouse.LDropPosition = Mouse.Position;
 
                         if (_layer == Layer.OneHanded || _layer == Layer.TwoHanded)

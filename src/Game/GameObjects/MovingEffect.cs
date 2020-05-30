@@ -126,7 +126,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (Target != null && Target.IsDestroyed)
             {
-                Destroy();
+                World.RemoveEffect(this);
                 return;
             }
 
@@ -244,7 +244,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (newX == tX && newY == tY)
             {
-                Destroy();
+                World.RemoveEffect(this);
                 return;
             }
 
@@ -260,7 +260,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (distanceNow <= _distance)
             {
-                Destroy();
+                World.RemoveEffect(this);
                 return;
             }
 

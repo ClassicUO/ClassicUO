@@ -47,7 +47,8 @@ namespace ClassicUO.Network
             [MethodImpl(256)]
             get
             {
-                if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException("index");
+                if (index < 0 || index >= Length) 
+                    throw new ArgumentOutOfRangeException("index");
 
                 return _data[index];
             }

@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
@@ -120,14 +121,14 @@ namespace ClassicUO.Game.Managers
                     if (parent == null)
                         break;
 
-                    TextOverhead msg = CreateMessage(text, hue, font, unicode, type);
+                    TextObject msg = CreateMessage(text, hue, font, unicode, type);
                     msg.Owner = parent;
 
                     if (parent is Item it && !it.OnGround)
                     {
                         msg.X = DelayedObjectClickManager.X;
                         msg.Y = DelayedObjectClickManager.Y;
-
+                        msg.IsTextGump = true;
                         bool found = false;
 
                         for (var gump = UIManager.Gumps.Last; gump != null; gump = gump.Previous)
@@ -176,9 +177,7 @@ namespace ClassicUO.Game.Managers
                     if (parent == null)
                         break;
 
-                    msg = CreateMessage(text, hue, font, unicode, type);
-
-                    parent.AddMessage(msg);
+                    parent.AddMessage(type, text, font, hue, unicode);
 
                     break;
             }
@@ -192,7 +191,7 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        private static TextOverhead CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type)
+        public static TextObject CreateMessage(string msg, ushort hue, byte font, bool isunicode, MessageType type)
         {
             if (ProfileManager.Current != null && ProfileManager.Current.OverrideAllFonts)
             {
@@ -209,14 +208,14 @@ namespace ClassicUO.Game.Managers
 
             RenderedText rtext = RenderedText.Create(msg, hue, font, isunicode, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT, width, 30, false, false, true);
 
-            return new TextOverhead
-            {
-                Alpha = 255,
-                RenderedText = rtext,
-                Time = CalculateTimeToLive(rtext),
-                Type = type,
-                Hue = hue,
-            };
+            TextObject text_obj = TextObject.Create();
+            text_obj.RenderedText = rtext;
+            text_obj.Alpha = 0xFF;
+            text_obj.Time = CalculateTimeToLive(rtext);
+            text_obj.Type = type;
+            text_obj.Hue = hue;
+
+            return text_obj;
         }
 
         private static long CalculateTimeToLive(RenderedText rtext)
