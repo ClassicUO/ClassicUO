@@ -815,7 +815,7 @@ namespace ClassicUO.Game.Scenes
 
         private void DrawLights(UltimaBatcher2D batcher)
         {
-            if (_deathScreenActive || (!UseLights && !UseAltLights))
+            if (_deathScreenActive || (!UseLights && !UseAltLights) || (World.Player.IsDead && ProfileManager.Current.EnableBlackWhiteEffect))
                 return;
 
             batcher.GraphicsDevice.SetRenderTarget(_lightRenderTarget);
