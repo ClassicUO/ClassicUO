@@ -383,6 +383,17 @@ namespace ClassicUO.Renderer
             return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, srcX, srcY, srcWidth, srcHeight, ref _hueVector);
         }
 
+        public bool Draw(UltimaBatcher2D batcher, int dx, int dy, int sx, int sy, int swidth, int sheight)
+        {
+            if (string.IsNullOrEmpty(Text) || Texture == null)
+                return false;
+
+            if (sx + swidth > Texture.Width || sy + sheight > Texture.Height)
+                return false;
+
+            return batcher.Draw2D(Texture, dx, dy, sx, sy, swidth, sheight, ref _hueVector);
+        }
+
         public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 0, ushort hue = 0)
         {
             if (string.IsNullOrEmpty(Text) || Texture == null)

@@ -13,6 +13,7 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
+using Microsoft.Xna.Framework;
 
 using SDL2;
 
@@ -95,12 +96,12 @@ namespace ClassicUO.Game.UI.Gumps
                     SetActivePage(1);
             };
 
-            _bookPage = new StbPageTextBox(DefaultFont, BookPageCount, MAX_BOOK_CHARS_PER_LINE * MAX_BOOK_LINES, 160, IsNewBook, FontStyle.ExtraHeight, 2)
+            _bookPage = new StbPageTextBox(DefaultFont, BookPageCount, MAX_BOOK_CHARS_PER_LINE * MAX_BOOK_LINES, 154, IsNewBook, FontStyle.ExtraHeight, 2)
             {
                 X = 0,
                 Y = 0,
                 Height = 166 * BookPageCount,
-                Width = 160,
+                Width = 154,
                 IsEditable = IsEditable,
                 Multiline = true
             };
@@ -253,16 +254,18 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             base.Draw(batcher, x, y);
-            int startpage = (ActivePage - 1) * 2;
             var t = _bookPage.renderedText;
+            int startpage = (ActivePage - 1) * 2;
             if (startpage < BookPageCount)
             {
-                t.Draw(batcher, t.Width, _bookPage._pageCoords[startpage, 1], x + 223, y + 34, t.Width, _bookPage._pageCoords[startpage, 1], 0, 0);
+                int poy = _bookPage._pageCoords[startpage, 0], phy = _bookPage._pageCoords[startpage, 1];
+                t.Draw(batcher, x + 223, y + 34, 0, poy, t.Width, phy);
             }
             startpage--;
             if(startpage > 0)
             {
-                t.Draw(batcher, t.Width, _bookPage._pageCoords[startpage, 1], x + 38, y + 34, t.Width, _bookPage._pageCoords[startpage, 1], 0, 0);
+                int poy = _bookPage._pageCoords[startpage, 0], phy = _bookPage._pageCoords[startpage, 1];
+                t.Draw(batcher, x + 38, y + 34, 0, poy, t.Width, phy);
             }
             return true;
         }
