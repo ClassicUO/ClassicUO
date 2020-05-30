@@ -23,7 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-
+using System.Threading;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -1817,9 +1817,16 @@ namespace ClassicUO.Network
         {
             if (!World.InGame)
                 return;
+            bool old = false;
+            if(!old)
+            {
+                ModernBookData(p);
+                return;
+            }
 
             var serial = p.ReadUInt();
             var pageCnt = p.ReadUShort();
+            
             var gump = UIManager.GetGump<BookGump>(serial);
            
             if (gump == null || gump.IsDisposed) 
@@ -1830,9 +1837,8 @@ namespace ClassicUO.Network
             //packets sent from server can contain also an uneven amount of page, not counting that we could receive only part of them, not every page!
             for (int i = 0; i < pageCnt; i++, sb.Clear())
             {
-                var pageNum = p.ReadUShort();
-
-                if (pageNum <= pageCnt)
+                var pageNum = p.ReadUShort() - 1;
+                if (pageNum < pageCnt)
                 {
                     var lineCnt = p.ReadUShort();
 
@@ -1844,7 +1850,9 @@ namespace ClassicUO.Network
                     if(lineCnt < BookGump.MAX_BOOK_LINES)
                     {
                         for (int line = lineCnt; line < BookGump.MAX_BOOK_LINES; line++)
+                        {
                             sb.Append('\n');
+                        }
                     }
                     if (sb.Length > 0)
                         sb.Remove(sb.Length - 1, 1); //this removes the last, unwanted, newline
@@ -1856,6 +1864,66 @@ namespace ClassicUO.Network
                 else
                     Log.Error( "BOOKGUMP: The server is sending a page number GREATER than the allowed number of pages in BOOK!");
             }
+        }
+
+        private static void ModernBookData(Packet p)
+        {
+            var serial = p.ReadUInt();
+            var pageCnt = p.ReadUShort();
+
+            var gump = UIManager.GetGump<ModernBookGump>(serial);
+
+            if (gump == null || gump.IsDisposed)
+                return;
+            for (int i = 0; i < pageCnt; i++)
+            {
+                var pageNum = p.ReadUShort() - 1;
+
+                if (!gump.IsEditable)//other pages are blank
+                {
+                    int startline = pageNum * ModernBookGump.MAX_BOOK_LINES;
+                    if(pageNum % 2 == 0)
+                    {
+                        for (int n = 0; n < gump.BookLines.Length; n++)
+                        {
+                            if(n < (startline - 8) && n >= (startline + 8))
+                                gump.BookLines[n] = string.Empty;
+                        }
+                    }
+                    else
+                    {
+                        for (int n = 0; n < gump.BookLines.Length; n++)
+                        {
+                            if (n >= (startline + 16) && n < startline)
+                                gump.BookLines[n] = string.Empty;
+                        }
+                    }
+                }
+                if (pageNum < pageCnt)
+                {
+                    var lineCnt = p.ReadUShort();
+
+                    for (int line = 0; line < lineCnt; line++)
+                    {
+                        gump.BookLines[pageNum * BookGump.MAX_BOOK_LINES + line] = BookGump.IsNewBook ? p.ReadUTF8StringSafe() : p.ReadASCII();
+                    }
+                    if (lineCnt < BookGump.MAX_BOOK_LINES)
+                    {
+                        for (int line = lineCnt; line < BookGump.MAX_BOOK_LINES; line++)
+                        {
+                            gump.BookLines[pageNum * BookGump.MAX_BOOK_LINES + line] = string.Empty;
+                        }
+                    }
+                }
+                else
+                    Log.Error("BOOKGUMP: The server is sending a page number GREATER than the allowed number of pages in BOOK!");
+            }
+            StringBuilder sb = new StringBuilder();
+            for(int i = 0; i < gump.BookLines.Length; i++)
+            {
+                sb.Append(gump.BookLines[i]);
+            }
+            gump.SetBookText(sb.ToString());
         }
 
         private static void CharacterAnimation(Packet p)
@@ -2561,6 +2629,12 @@ namespace ClassicUO.Network
 
         private static void OpenBook(Packet p)
         {
+            bool old = false;
+            if(!old)
+            {
+                OpenModernBookGump(p);
+                return;
+            }
             uint serial = p.ReadUInt();
             bool oldpacket = p.ID == 0x93;
             bool editable = p.ReadBool();
@@ -2579,6 +2653,44 @@ namespace ClassicUO.Network
                 string author = oldpacket ? p.ReadUTF8StringSafe(30) : p.ReadUTF8StringSafe(p.ReadUShort());
 
                 UIManager.Add(new BookGump(serial,page_count, title, author, editable, oldpacket)
+                {
+                    X = 100,
+                    Y = 100
+                });
+                NetClient.Socket.Send(new PBookPageDataRequest(serial, 1));
+            }
+            else
+            {
+                p.Skip(2);
+                bgump.IsEditable = editable;
+                bgump.SetTile(oldpacket ? p.ReadUTF8StringSafe(60) : p.ReadUTF8StringSafe(p.ReadUShort()), editable);
+                bgump.SetAuthor(oldpacket ? p.ReadUTF8StringSafe(30) : p.ReadUTF8StringSafe(p.ReadUShort()), editable);
+                bgump.UseNewHeader = !oldpacket;
+                bgump.SetInScreen();
+                bgump.BringOnTop();
+            }
+        }
+
+        private static void OpenModernBookGump(Packet p)
+        {
+            uint serial = p.ReadUInt();
+            bool oldpacket = p.ID == 0x93;
+            bool editable = p.ReadBool();
+
+            if (!oldpacket)
+                editable = p.ReadBool();
+            else
+                p.Skip(1);
+
+            ModernBookGump bgump = UIManager.GetGump<ModernBookGump>(serial);
+
+            if (bgump == null || bgump.IsDisposed)
+            {
+                ushort page_count = p.ReadUShort();
+                string title = oldpacket ? p.ReadUTF8StringSafe(60) : p.ReadUTF8StringSafe(p.ReadUShort());
+                string author = oldpacket ? p.ReadUTF8StringSafe(30) : p.ReadUTF8StringSafe(p.ReadUShort());
+
+                UIManager.Add(new ModernBookGump(serial, page_count, title, author, editable, oldpacket)
                 {
                     X = 100,
                     Y = 100

@@ -113,7 +113,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             _pagesChanged = new bool[BookPageCount + 1];
-            Add(_titleTextBox = new StbTextBox(DefaultFont, 47, 150, IsNewBook, FontStyle.None, 0)
+            Add(_titleTextBox = new StbTextBox(DefaultFont, 47, 155, IsNewBook, FontStyle.None, 0)
             {
                 X = 40,
                 Y = 60,
@@ -123,7 +123,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Text = title
             }, 1);
             Add(new Label("by", true, 1) { X = 40, Y = 130 }, 1);
-            Add(_authorTextBox = new StbPageTextBox(DefaultFont, 29, 150, IsNewBook, FontStyle.None, 0)
+            Add(_authorTextBox = new StbTextBox(DefaultFont, 29, 155, IsNewBook, FontStyle.None, 0)
             {
                 X = 40,
                 Y = 160,
@@ -154,7 +154,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     X = x,
                     Y = y,
-                    Height = 166,
+                    Height = 150,
                     Width = 160,
                     IsEditable = IsEditable,
                     Multiline = true,
@@ -320,7 +320,6 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnButtonClick(int buttonID)
         {
-
         }
 
         protected override void CloseWithRightClick()
@@ -336,16 +335,10 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
-        {
-            int curpage = GetActivePage();
-
-            var box = curpage >= 0 ? _pagesTextBoxes[curpage] : null;
-        }
-
         private class StbPageTextBox : StbTextBox
         {
             private BookGump _bookGump;
+
             public StbPageTextBox(byte font, int max_char_count = -1, int maxWidth = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0, BookGump gump = null) : base(font, max_char_count, maxWidth, isunicode, style, hue, TEXT_ALIGN_TYPE.TS_LEFT)
             {
                 _bookGump = gump;

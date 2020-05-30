@@ -28,6 +28,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Network
@@ -1219,6 +1220,30 @@ namespace ClassicUO.Network
                 {
                     WriteBytes(Encoding.UTF8.GetBytes(text.Substring(x, chars[i])));
                     x += chars[i];
+                }
+                WriteByte(0);
+            }
+            WriteByte(0);
+        }
+
+        public PBookPageData(uint serial, string[] text, int page) : base(0x66)
+        {
+            if (text == null)
+            {
+                text = new string[BookGump.MAX_BOOK_LINES];
+                for (int i = 0; i < text.Length; i++)
+                    text[i] = string.Empty;
+            }
+
+            WriteUInt(serial);
+            WriteUShort(0x0001);
+            WriteUShort((ushort)page);
+            WriteUShort((ushort)text.Length);
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (text[i] != null && text[i].Length > 0)
+                {
+                    WriteBytes(Encoding.UTF8.GetBytes(text[i]));
                 }
                 WriteByte(0);
             }

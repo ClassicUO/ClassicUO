@@ -46,6 +46,7 @@ namespace ClassicUO.IO.Resources
         private const int UOFONT_BQ = 0x0080;
         private const int UOFONT_EXTRAHEIGHT = 0x0100;
         private const int UOFONT_CROPTEXTURE = 0x0200;
+        private const int UOFONT_FIXEDHEIGHT = 0x0400;
         private const int UNICODE_SPACE_WIDTH = 8;
         private const int MAX_HTML_TEXT_HEIGHT = 18;
         private const float ITALIC_FONT_KOEFFICIENT = 3.3f;
