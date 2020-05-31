@@ -24,6 +24,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
+using ClassicUO.Resources;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -71,19 +72,19 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 480
             });
 
-            Add(new Label("Tell", false, 0x0386, font: 1)
+            Add(new Label(ResGumps.Tell, false, 0x0386, font: 1)
             {
                 X = 40,
                 Y = 30
             });
 
-            Add(new Label("Kick", false, 0x0386, font: 1)
+            Add(new Label(ResGumps.Kick, false, 0x0386, font: 1)
             {
                 X = 80,
                 Y = 30
             });
 
-            Add(new Label("Party Manifest", false, 0x0386, font: 2)
+            Add(new Label(ResGumps.PartyManifest, false, 0x0386, font: 2)
             {
                 X = 153,
                 Y = 20
@@ -136,7 +137,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ButtonAction = ButtonAction.Activate,
             });
 
-            Add(new Label("Send the party a message", false, 0x0386, font: 2)
+            Add(new Label(ResGumps.SendThePartyAMessage, false, 0x0386, font: 2)
             {
                 X = 110,
                 Y = 307
@@ -151,7 +152,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ButtonAction = ButtonAction.Activate,
                 });
 
-                Add(new Label("Party can loot me", false, 0x0386, font: 2)
+                Add(new Label(ResGumps.PartyCanLootMe, false, 0x0386, font: 2)
                 {
                     X = 110,
                     Y = 334
@@ -166,7 +167,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ButtonAction = ButtonAction.Activate,
                 });
 
-                Add(new Label("Party CANNOT loot me", false, 0x0386, font: 2)
+                Add(new Label(ResGumps.PartyCannotLootMe, false, 0x0386, font: 2)
                 {
                     X = 110,
                     Y = 334
@@ -183,7 +184,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (isMemeber)
             {
-                Add(new Label("Leave the party", false, 0x0386, font: 2)
+                Add(new Label(ResGumps.LeaveTheParty, false, 0x0386, font: 2)
                 {
                     X = 110,
                     Y = 360
@@ -191,7 +192,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                Add(new Label("Disband the party", false, 0x0386, font: 2)
+                Add(new Label(ResGumps.DisbandTheParty, false, 0x0386, font: 2)
                 {
                     X = 110,
                     Y = 360
@@ -207,7 +208,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ButtonAction = ButtonAction.Activate,
                 });
 
-                Add(new Label("Add New Member", false, 0x0386, font: 2)
+                Add(new Label(ResGumps.AddNewMember, false, 0x0386, font: 2)
                 {
                     X = 110,
                     Y = 385
@@ -246,7 +247,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case Buttons.SendMessage:
                     if (World.Party.Leader == 0)
                     {
-                        GameActions.Print("You are not in a party.", 0, MessageType.System, 3, false);
+                        GameActions.Print(ResGumps.YouAreNotInAParty, 0, MessageType.System, 3, false);
                     }
                     else
                     {
@@ -260,7 +261,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case Buttons.Leave:
                     if (World.Party.Leader == 0)
                     {
-                        GameActions.Print("You are not in a party.", 0, MessageType.System, 3, false);
+                        GameActions.Print(ResGumps.YouAreNotInAParty, 0, MessageType.System, 3, false);
                     }
                     else
                     {
@@ -289,7 +290,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (World.Party.Members[index] == null || World.Party.Members[index].Serial == 0)
                         {
-                            GameActions.Print("There is no one in that party slot.", 0, MessageType.System, 3, false);
+                            GameActions.Print(ResGumps.ThereIsNoOneInThatPartySlot, 0, MessageType.System, 3, false);
                         }
                         else
                         {
@@ -304,7 +305,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (World.Party.Members[index] == null || World.Party.Members[index].Serial == 0)
                         {
-                            GameActions.Print("There is no one in that party slot.", 0, MessageType.System, 3, false);
+                            GameActions.Print(ResGumps.ThereIsNoOneInThatPartySlot, 0, MessageType.System, 3, false);
                         }
                         else
                         {

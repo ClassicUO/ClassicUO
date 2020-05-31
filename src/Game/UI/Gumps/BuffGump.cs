@@ -30,6 +30,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -364,11 +365,11 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_updateTooltipTime < totalMS && delta > 0)
                 {
                     TimeSpan span = TimeSpan.FromMilliseconds(delta);
-                    SetTooltip($"{Icon.Text}\nTime left: {span.Hours:00}:{span.Minutes:00}:{span.Seconds:00}");
+                    SetTooltip(string.Format(ResGumps.TimeLeft, Icon.Text, span.Hours, span.Minutes, span.Seconds));
                     _updateTooltipTime = (float) totalMS + 1000;
 
                     if (span.Hours > 0)
-                        _gText.Text = $"+{span.Hours}hr";
+                        _gText.Text = string.Format(ResGumps.Span0Hours, span.Hours);
                     else
                         _gText.Text = span.Minutes > 0 ? $"{span.Minutes}:{span.Seconds}" : $"{span.Seconds}";
                 }

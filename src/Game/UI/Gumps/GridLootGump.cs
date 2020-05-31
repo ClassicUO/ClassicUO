@@ -28,7 +28,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
+using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -85,11 +85,11 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _background.Width;
             Height = _background.Height;
 
-            _setlootbag = new NiceButton(3, Height - 23, 100, 20, ButtonAction.Activate, "Set loot bag") { ButtonParameter = 2, IsSelectable = false };
+            _setlootbag = new NiceButton(3, Height - 23, 100, 20, ButtonAction.Activate, ResGumps.SetLootBag) { ButtonParameter = 2, IsSelectable = false };
             Add(_setlootbag);
 
-            _buttonPrev = new NiceButton(Width - 80, Height - 20, 40, 20, ButtonAction.Activate, "<<") {ButtonParameter = 0, IsSelectable = false};
-            _buttonNext = new NiceButton(Width - 40, Height - 20, 40, 20, ButtonAction.Activate, ">>") {ButtonParameter = 1, IsSelectable = false};
+            _buttonPrev = new NiceButton(Width - 80, Height - 20, 40, 20, ButtonAction.Activate, ResGumps.Prev) {ButtonParameter = 0, IsSelectable = false};
+            _buttonNext = new NiceButton(Width - 40, Height - 20, 40, 20, ButtonAction.Activate, ResGumps.Next) {ButtonParameter = 1, IsSelectable = false};
 
             _buttonNext.IsVisible = _buttonPrev.IsVisible = false;
 
@@ -140,7 +140,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else if (buttonID == 2)
             {
-                GameActions.Print("Target the container to Grab items into.");
+                GameActions.Print(ResGumps.TargetContainerToGrabItemsInto);
                 TargetManager.SetTargeting(CursorTarget.SetGrabBag, 0, TargetType.Neutral);
             }
             else
@@ -232,7 +232,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (count == 0)
             {
-                GameActions.Print("[GridLoot]: Corpse is empty!");
+                GameActions.Print(ResGumps.CorpseIsEmpty);
                 Dispose();
             }
             else if ((_hideIfEmpty && !IsVisible))

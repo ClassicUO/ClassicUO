@@ -33,7 +33,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
+using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -291,7 +291,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (page == 1 && _spellBookType == SpellBookType.Chivalry)
                     {
-                        Label label = new Label("Tithing points\nAvailable: " + World.Player.TithingPoints, false, 0x0288, font: 6)
+                        Label label = new Label(ResGumps.TithingPointsAvailable + World.Player.TithingPoints, false, 0x0288, font: 6)
                         {
                             X = 62, Y = 162
                         };
@@ -309,7 +309,7 @@ namespace ClassicUO.Game.UI.Gumps
                         dataX = 225;
                     }
 
-                    Label text = new Label("INDEX", false, 0x0288, font: 6)
+                    Label text = new Label(ResGumps.Index, false, 0x0288, font: 6)
                     {
                         X = indexX, Y = 10
                     };
@@ -317,7 +317,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (_spellBookType == SpellBookType.Mastery && j >= 1)
                     {
-                        text = new Label("Abilities", false, 0x0288, font: 6)
+                        text = new Label(ResGumps.Abilities, false, 0x0288, font: 6)
                         {
                             X = dataX,
                             Y = 30
@@ -401,7 +401,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else if (_spellBookType == SpellBookType.Mastery)
                     {
-                        text = new Label(page == pagesToFill ? "Passive" : "Activated", false, 0x0288, font: 6)
+                        text = new Label(page == pagesToFill ? ResGumps.Passive : ResGumps.Activated, false, 0x0288, font: 6)
                         {
                             X = dataX,
                             Y = 30
@@ -638,7 +638,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (_spellBookType != SpellBookType.Mastery)
                         _dataBox.Add(new GumpPicTiled(iconX, 88, 120, 5, 0x0835), page1);
 
-                    Label text = new Label("Reagents:", false, 0x0288, font: 6)
+                    Label text = new Label(ResGumps.Reagents, false, 0x0288, font: 6)
                     {
                         X = iconX, Y = 92
                     };
@@ -1022,17 +1022,17 @@ namespace ClassicUO.Game.UI.Gumps
                     if (def.TithingCost > 0)
                     {
                         y = 148;
-                        text = $"Upkeep Cost: {def.TithingCost}\nMana cost: {manaCost}\nMin. Skill: {minSkill}";
+                        text = string.Format(ResGumps.Upkeep0Mana1MinSkill2, def.TithingCost, manaCost, minSkill);
                     }
                     else
                     {
-                        text = $"Mana cost: {manaCost}\nMin. Skill: {minSkill}";
+                        text = string.Format(ResGumps.ManaCost0MinSkill1, manaCost, minSkill);
                     }
 
                     return;
             }
 
-            text = $"Mana cost: {manaCost}\nMin. Skill: {minSkill}";
+            text = string.Format(ResGumps.ManaCost0MinSkill1, manaCost, minSkill);
         }
 
         private void SetActivePage(int page)

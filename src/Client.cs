@@ -36,6 +36,7 @@ using ClassicUO.IO.Resources;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ClassicUO.Game;
+using ClassicUO.Resources;
 
 namespace ClassicUO
 {
@@ -91,7 +92,7 @@ namespace ClassicUO
             if (!Directory.Exists(clientPath))
             {
                 Log.Error("Invalid client directory: " + clientPath);
-                ShowErrorMessage($"'{clientPath}' is not a valid UO directory");
+                ShowErrorMessage(string.Format(ResErrorMessages.ClientPathIsNotAValidUODirectory, clientPath));
                 throw new InvalidClientDirectory($"'{clientPath}' is not a valid directory");
             }
 
@@ -105,7 +106,7 @@ namespace ClassicUO
                     !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
                 {
                     Log.Error("Invalid client version: " + clientVersionText);
-                    ShowErrorMessage($"Impossible to define the client version.\nClient version: '{clientVersionText}'");
+                    ShowErrorMessage(string.Format(ResGumps.ImpossibleToDefineTheClientVersion0, clientVersionText));
                     throw new InvalidClientVersion($"Invalid client version: '{clientVersionText}'");
                 }
 

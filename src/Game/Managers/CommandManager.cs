@@ -24,6 +24,7 @@ using System.Collections.Generic;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
+using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
@@ -48,7 +49,7 @@ namespace ClassicUO.Game.Managers
             {
                 if(World.Player != null)
                 {
-                    GameActions.Print($"Current DateTime.Now is {DateTime.Now}");
+                    GameActions.Print(string.Format(ResGeneral.CurrentDateTimeNowIs0, DateTime.Now));
                 }
             });
             Register("hue", s =>
@@ -106,7 +107,7 @@ namespace ClassicUO.Game.Managers
             if (entity != null)
                 TargetManager.Target(entity);
             Mouse.LastLeftButtonClickTime = 0;
-            GameActions.Print($"Item ID: {entity.Graphic}\nHue: {entity.Hue}");
+            GameActions.Print(string.Format(ResGeneral.ItemID0Hue1, entity.Graphic, entity.Hue));
         }
     }
 }

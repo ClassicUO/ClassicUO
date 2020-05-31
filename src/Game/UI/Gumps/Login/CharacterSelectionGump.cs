@@ -29,7 +29,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
-
+using ClassicUO.Resources;
 using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps.Login
@@ -192,7 +192,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 if (existing != null)
                     Remove(existing);
 
-                Add(new LoadingGump($"Permanently delete character \"{charName}\" ?", LoginButtons.OK | LoginButtons.Cancel, buttonID =>
+                Add(new LoadingGump(string.Format(ResGumps.PermanentlyDelete0, charName), LoginButtons.OK | LoginButtons.Cancel, buttonID =>
                 {
                     if (buttonID == (int) LoginButtons.OK)
                         loginScene.DeleteCharacter(_selectedCharacter);

@@ -31,6 +31,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Data;
 using ClassicUO.Game;
 using ClassicUO.IO;
+using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -210,16 +211,16 @@ namespace ClassicUO
             {
                 if ((flags & INVALID_UO_DIRECTORY) != 0)
                 {
-                    Client.ShowErrorMessage("Your Ultima Online directory seems to be invalid.\nDownload the official Launcher to setup and run your game.\n\nLink: classicuo.eu");
+                    Client.ShowErrorMessage(ResGeneral.YourUODirectoryIsInvalid);
                 }
                 else if ((flags & INVALID_UO_VERSION) != 0)
                 {
-                    Client.ShowErrorMessage("Your Ultima Online client version seems to be invalid.\nDownload the official Launcher to setup and run your game.\n\nLink: classicuo.eu");
+                    Client.ShowErrorMessage(ResGeneral.YourUOClientVersionIsInvalid);
                 }
 
                 try
                 {
-                    Process.Start("https://classicuo.eu");
+                    Process.Start(ResGeneral.ClassicUOLink);
                 }
                 catch { }
             }

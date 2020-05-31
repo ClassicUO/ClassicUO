@@ -30,6 +30,7 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -62,7 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 UIManager.GetGump<BulletinBoardItem>(LocalSerial)?.Dispose();
 
-                UIManager.Add(new BulletinBoardItem(LocalSerial, 0, World.Player.Name, string.Empty, "Date/Time",
+                UIManager.Add(new BulletinBoardItem(LocalSerial, 0, World.Player.Name, string.Empty, ResGumps.DateTime,
                     string.Empty, 0)
                 { X = 400, Y = 335 });
             };
@@ -159,7 +160,7 @@ namespace ClassicUO.Game.UI.Gumps
                 textColor = 0;
             }
 
-            Label text = new Label("Author:", useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte)6)
+            Label text = new Label(ResGumps.Author, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte)6)
             {
                 X = 30,
                 Y = 40
@@ -174,7 +175,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(text);
 
 
-            text = new Label("Date:", useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte)6)
+            text = new Label(ResGumps.Date, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte)6)
             {
                 X = 30,
                 Y = 58
@@ -188,7 +189,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             Add(text);
 
-            text = new Label("Title:", useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte)6)
+            text = new Label(ResGumps.Title, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte)6)
             {
                 X = 30,
                 Y = 77
@@ -328,7 +329,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case ButtonType.Reply:
                     UIManager.Add(new BulletinBoardItem(LocalSerial, _msgSerial, World.Player.Name,
-                        "RE: " + _subjectTextbox.Text, _datatime, string.Empty, 0)
+                        ResGumps.RE + _subjectTextbox.Text, _datatime, string.Empty, 0)
                     { X = 400, Y = 335 });
                     Dispose();
 

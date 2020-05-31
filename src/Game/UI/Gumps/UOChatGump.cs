@@ -27,7 +27,7 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-
+using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new BorderControl(0, 0, Width, Height, 4));
 
-            Label text = new Label("You are about to choose your name for the Ultima Online chat system. This name will be PERMANENT and unique on this shard. It will apply to all characters using this account. Do not use your Ultima Online account name for this name as the name you choose will be public. Enter your chat name here:"
+            Label text = new Label(ResGumps.ChooseName
                                    , true, 23, Width - 17, 3)
             {
                 X = 6,
@@ -71,7 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
             BorderControl border = new BorderControl(0, text.Y + text.Height, Width, 27, BORDER_SIZE);
             Add(border);
 
-            text = new Label("Name:", true, 0x033, 0, 3)
+            text = new Label(ResGumps.Name, true, 0x033, 0, 3)
             {
                 X = 6,
                 Y = border.Y + 2
@@ -152,7 +152,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int startY = 25;
 
-            Label text = new Label("Channels", false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+            Label text = new Label(ResGumps.Channels, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 Y = startY
             };
@@ -178,7 +178,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY = 275;
 
-            text = new Label("Your current channel:", false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+            text = new Label(ResGumps.YourCurrentChannel, false, 0x0386, 345, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 Y = startY
             };
@@ -219,21 +219,21 @@ namespace ClassicUO.Game.UI.Gumps
             };
             Add(button);
 
-            text = new Label("Join", false, 0x0386, 0, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_LEFT)
+            text = new Label(ResGumps.Join, false, 0x0386, 0, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_LEFT)
             {
                 X = 65,
                 Y = startY
             };
             Add(text);
 
-            text = new Label("Leave", false, 0x0386, 0, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_LEFT)
+            text = new Label(ResGumps.Leave, false, 0x0386, 0, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_LEFT)
             {
                 X = 140,
                 Y = startY
             };
             Add(text);
 
-            text = new Label("Create", false, 0x0386, 0, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_LEFT)
+            text = new Label(ResGumps.Create, false, 0x0386, 0, 2, FontStyle.None, TEXT_ALIGN_TYPE.TS_LEFT)
             {
                 X = 233,
                 Y = startY
@@ -317,7 +317,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(new BorderControl(0, 0, Width, ROW_HEIGHT, BORDER_SIZE));
 
-                Label text = new Label("Create a channel:", true, 0x23, Width - 4, 1)
+                Label text = new Label(ResGumps.CreateAChannel, true, 0x23, Width - 4, 1)
                 {
                     X = 6,
                     Y = BORDER_SIZE
@@ -326,7 +326,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(new BorderControl(0, ROW_HEIGHT - BORDER_SIZE, Width, ROW_HEIGHT, BORDER_SIZE));
 
-                text = new Label("Name:", true, 0x23, Width - 4, 1)
+                text = new Label(ResGumps.Name, true, 0x23, Width - 4, 1)
                 {
                     X = 6,
                     Y = ROW_HEIGHT

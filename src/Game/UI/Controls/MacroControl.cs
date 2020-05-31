@@ -28,7 +28,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-
+using ClassicUO.Resources;
 using SDL2;
 
 namespace ClassicUO.Game.UI.Controls
@@ -50,10 +50,10 @@ namespace ClassicUO.Game.UI.Controls
 
             Add(_hotkeyBox);
 
-            Add(new NiceButton(0, _hotkeyBox.Height + 3, 170, 25, ButtonAction.Activate, "+ Create macro button", 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT) { ButtonParameter = 2, IsSelectable = false });
+            Add(new NiceButton(0, _hotkeyBox.Height + 3, 170, 25, ButtonAction.Activate, ResGumps.CreateMacroButton, 0, IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT) { ButtonParameter = 2, IsSelectable = false });
 
-            Add(new NiceButton(0, _hotkeyBox.Height + 30, 50, 25, ButtonAction.Activate, "Add") {IsSelectable = false});
-            Add(new NiceButton(52, _hotkeyBox.Height + 30, 50, 25, ButtonAction.Activate, "Remove") {ButtonParameter = 1, IsSelectable = false});
+            Add(new NiceButton(0, _hotkeyBox.Height + 30, 50, 25, ButtonAction.Activate, ResGumps.Add) {IsSelectable = false});
+            Add(new NiceButton(52, _hotkeyBox.Height + 30, 50, 25, ButtonAction.Activate, ResGumps.Remove) {ButtonParameter = 1, IsSelectable = false});
 
 
             Add(_collection = new MacroCollectionControl(name, 280, 280)
@@ -103,7 +103,7 @@ namespace ClassicUO.Game.UI.Controls
                         return;
 
                     SetupKeyByDefault();
-                    UIManager.Add(new MessageBoxGump(250, 150, "This key combination\nalready exists.", null));
+                    UIManager.Add(new MessageBoxGump(250, 150, ResGumps.ThisKeyCombinationAlreadyExists, null));
                     return;
                 }
             }

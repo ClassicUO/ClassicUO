@@ -28,6 +28,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -89,7 +90,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             if (city == null)
             {
-                Log.Error("No city found. Something wrong with the received cities.");
+                Log.Error(ResGumps.NoCityFound);
                 Dispose();
                 return;
             }

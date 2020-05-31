@@ -30,7 +30,7 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-
+using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 
 using SDL2;
@@ -89,8 +89,8 @@ namespace ClassicUO.Game.UI.Gumps
                 ContainsByBounds = true,
                 ButtonAction = ButtonAction.Activate
             });
-            Add(_checkReal = new Checkbox(0x938, 0x939, " - Show Real", 1, 0x0386, false) {X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y - 6});
-            Add(_checkCaps = new Checkbox(0x938, 0x939, " - Show Caps", 1, 0x0386, false) {X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y + 7});
+            Add(_checkReal = new Checkbox(0x938, 0x939, ResGumps.ShowReal, 1, 0x0386, false) {X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y - 6});
+            Add(_checkCaps = new Checkbox(0x938, 0x939, ResGumps.ShowCaps, 1, 0x0386, false) {X = _newGroupButton.X + _newGroupButton.Width + 30, Y = _newGroupButton.Y + 7});
             _checkReal.ValueChanged += UpdateSkillsValues;
             _checkCaps.ValueChanged += UpdateSkillsValues;
 
@@ -183,7 +183,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 SkillsGroup g = new SkillsGroup
                 {
-                    Name = "New Group"
+                    Name = ResGumps.NewGroup
                 };
 
                 SkillsGroupManager.Add(g);
@@ -502,7 +502,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (string.IsNullOrWhiteSpace(text))
                 {
-                    text = "No Name";
+                    text = ResGumps.NoName;
                     _textbox.SetText(text);
                 }
 

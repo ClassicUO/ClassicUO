@@ -28,6 +28,7 @@ using System.Text;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -63,9 +64,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Alpha = 0.5f
             });
-            Add(new Label("Object Information", true, 1153, font: 3) {X = 20, Y = 10});
+            Add(new Label(ResGumps.ObjectInformation, true, 1153, font: 3) {X = 20, Y = 10});
             Add(new Line(20, 30, WIDTH - 50, 1, 0xFFFFFFFF));
-            Add(new NiceButton(WIDTH - 115, 5, 100, 25, ButtonAction.Activate, "Dump")
+            Add(new NiceButton(WIDTH - 115, 5, 100, 25, ButtonAction.Activate, ResGumps.Dump)
             {
                 ButtonParameter = 0
             });

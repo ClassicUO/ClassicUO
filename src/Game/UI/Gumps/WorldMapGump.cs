@@ -40,6 +40,7 @@ using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -111,7 +112,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             LoadSettings();
 
-            GameActions.Print("WorldMap loading...", 0x35);
+            GameActions.Print(ResGumps.WorldMapLoading, 0x35);
             Load();
             OnResize();
 
@@ -246,28 +247,28 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _options.Clear();
 
-            _options["show_all_markers"] = new ContextMenuItemEntry("Show all markers", () => { _showMarkers = !_showMarkers; }, true, _showMarkers);
-            _options["show_marker_names"] = new ContextMenuItemEntry("Show marker names", () => { _showMarkerNames = !_showMarkerNames; }, true, _showMarkerNames);
-            _options["show_marker_icons"] = new ContextMenuItemEntry("Show marker icons", () => { _showMarkerIcons = !_showMarkerIcons; }, true, _showMarkerIcons);
-            _options["flip_map"] = new ContextMenuItemEntry("Flip map", () => { _flipMap = !_flipMap; }, true, _flipMap);
-            _options["top_most"] = new ContextMenuItemEntry("TopMost", () => { TopMost = !TopMost; }, true, _isTopMost);
-            _options["free_view"] = new ContextMenuItemEntry("Free view", () => { FreeView = !FreeView; }, true, FreeView);
-            _options["show_party_members"] = new ContextMenuItemEntry("Show party members", () =>
+            _options["show_all_markers"] = new ContextMenuItemEntry(ResGumps.ShowAllMarkers, () => { _showMarkers = !_showMarkers; }, true, _showMarkers);
+            _options["show_marker_names"] = new ContextMenuItemEntry(ResGumps.ShowMarkerNames, () => { _showMarkerNames = !_showMarkerNames; }, true, _showMarkerNames);
+            _options["show_marker_icons"] = new ContextMenuItemEntry(ResGumps.ShowMarkerIcons, () => { _showMarkerIcons = !_showMarkerIcons; }, true, _showMarkerIcons);
+            _options["flip_map"] = new ContextMenuItemEntry(ResGumps.FlipMap, () => { _flipMap = !_flipMap; }, true, _flipMap);
+            _options["top_most"] = new ContextMenuItemEntry(ResGumps.TopMost, () => { TopMost = !TopMost; }, true, _isTopMost);
+            _options["free_view"] = new ContextMenuItemEntry(ResGumps.FreeView, () => { FreeView = !FreeView; }, true, FreeView);
+            _options["show_party_members"] = new ContextMenuItemEntry(ResGumps.ShowPartyMembers, () =>
             {
                 _showPartyMembers = !_showPartyMembers;
 
                 World.WMapManager.SetEnable(_showPartyMembers);
 
             }, true, _showPartyMembers);
-            _options["show_mobiles"] = new ContextMenuItemEntry("Show mobiles", () => { _showMobiles = !_showMobiles; }, true, _showMobiles);
-            _options["show_multis"] = new ContextMenuItemEntry("Show houses/boats", () => { _showMultis = !_showMultis; }, true, _showMultis);
-            _options["show_your_name"] = new ContextMenuItemEntry("Show your name", () => { _showPlayerName = !_showPlayerName; }, true, _showPlayerName);
-            _options["show_your_healthbar"] = new ContextMenuItemEntry("Show your healthbar", () => { _showPlayerBar = !_showPlayerBar; }, true, _showPlayerBar);
-            _options["show_party_name"] = new ContextMenuItemEntry("Show group name", () => { _showGroupName = !_showGroupName; }, true, _showGroupName);
-            _options["show_party_healthbar"] = new ContextMenuItemEntry("Show group healthbar", () => { _showGroupBar = !_showGroupBar; }, true, _showGroupBar);
-            _options["show_coordinates"] = new ContextMenuItemEntry("Show your coordinates", () => { _showCoordinates = !_showCoordinates; }, true, _showCoordinates);
+            _options["show_mobiles"] = new ContextMenuItemEntry(ResGumps.ShowMobiles, () => { _showMobiles = !_showMobiles; }, true, _showMobiles);
+            _options["show_multis"] = new ContextMenuItemEntry(ResGumps.ShowHousesBoats, () => { _showMultis = !_showMultis; }, true, _showMultis);
+            _options["show_your_name"] = new ContextMenuItemEntry(ResGumps.ShowYourName, () => { _showPlayerName = !_showPlayerName; }, true, _showPlayerName);
+            _options["show_your_healthbar"] = new ContextMenuItemEntry(ResGumps.ShowYourHealthbar, () => { _showPlayerBar = !_showPlayerBar; }, true, _showPlayerBar);
+            _options["show_party_name"] = new ContextMenuItemEntry(ResGumps.ShowGroupName, () => { _showGroupName = !_showGroupName; }, true, _showGroupName);
+            _options["show_party_healthbar"] = new ContextMenuItemEntry(ResGumps.ShowGroupHealthbar, () => { _showGroupBar = !_showGroupBar; }, true, _showGroupBar);
+            _options["show_coordinates"] = new ContextMenuItemEntry(ResGumps.ShowYourCoordinates, () => { _showCoordinates = !_showCoordinates; }, true, _showCoordinates);
 
-            _options["saveclose"] = new ContextMenuItemEntry("Save & Close", Dispose);
+            _options["saveclose"] = new ContextMenuItemEntry(ResGumps.SaveClose, Dispose);
         }
 
         private void BuildContextMenu()
@@ -277,16 +278,16 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu?.Dispose();
             ContextMenu = new ContextMenuControl();
 
-            ContextMenuItemEntry markerFontEntry = new ContextMenuItemEntry("Font Style");
-            markerFontEntry.Add(new ContextMenuItemEntry("Style 1", () => { SetFont(1); }));
-            markerFontEntry.Add(new ContextMenuItemEntry("Style 2", () => { SetFont(2); }));
-            markerFontEntry.Add(new ContextMenuItemEntry("Style 3", () => { SetFont(3); }));
-            markerFontEntry.Add(new ContextMenuItemEntry("Style 4", () => { SetFont(4); }));
-            markerFontEntry.Add(new ContextMenuItemEntry("Style 5", () => { SetFont(5); }));
-            markerFontEntry.Add(new ContextMenuItemEntry("Style 6", () => { SetFont(6); }));
+            ContextMenuItemEntry markerFontEntry = new ContextMenuItemEntry(ResGumps.FontStyle);
+            markerFontEntry.Add(new ContextMenuItemEntry(string.Format(ResGumps.Style0, 1), () => { SetFont(1); }));
+            markerFontEntry.Add(new ContextMenuItemEntry(string.Format(ResGumps.Style0, 2), () => { SetFont(2); }));
+            markerFontEntry.Add(new ContextMenuItemEntry(string.Format(ResGumps.Style0, 3), () => { SetFont(3); }));
+            markerFontEntry.Add(new ContextMenuItemEntry(string.Format(ResGumps.Style0, 4), () => { SetFont(4); }));
+            markerFontEntry.Add(new ContextMenuItemEntry(string.Format(ResGumps.Style0, 5), () => { SetFont(5); }));
+            markerFontEntry.Add(new ContextMenuItemEntry(string.Format(ResGumps.Style0, 6), () => { SetFont(6); }));
 
-            ContextMenuItemEntry markersEntry = new ContextMenuItemEntry("Map Marker Options");
-            markersEntry.Add(new ContextMenuItemEntry("Reload markers", () => { LoadMarkers(); }));
+            ContextMenuItemEntry markersEntry = new ContextMenuItemEntry(ResGumps.MapMarkerOptions);
+            markersEntry.Add(new ContextMenuItemEntry(ResGumps.ReloadMarkers, () => { LoadMarkers(); }));
 
             markersEntry.Add(markerFontEntry);
 
@@ -300,7 +301,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 foreach (WMapMarkerFile markerFile in _markerFiles)
                 {
-                    ContextMenuItemEntry entry = new ContextMenuItemEntry($"Show/Hide '{markerFile.Name}'", () =>
+                    ContextMenuItemEntry entry = new ContextMenuItemEntry(string.Format(ResGumps.ShowHide0, markerFile.Name), () =>
                     {
                         markerFile.Hidden = !markerFile.Hidden;
                         
@@ -326,13 +327,13 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                markersEntry.Add(new ContextMenuItemEntry("No map files"));
+                markersEntry.Add(new ContextMenuItemEntry(ResGumps.NoMapFiles));
             }
 
 
             ContextMenu.Add(markersEntry);
 
-            ContextMenuItemEntry namesHpBarEntry = new ContextMenuItemEntry("Names & Healthbars");
+            ContextMenuItemEntry namesHpBarEntry = new ContextMenuItemEntry(ResGumps.NamesHealthbars);
             namesHpBarEntry.Add(_options["show_your_name"]);
             namesHpBarEntry.Add(_options["show_your_healthbar"]);
             namesHpBarEntry.Add(_options["show_party_name"]);
@@ -532,7 +533,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                    
 
-                    GameActions.Print("WorldMap loaded!", 0x48);
+                    GameActions.Print(ResGumps.WorldMapLoaded, 0x48);
                 }
             }
             );
@@ -549,7 +550,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _mapMarkersLoaded = false;
 
-                    GameActions.Print("Loading WorldMap markers..", 0x2A);
+                    GameActions.Print(ResGumps.LoadingWorldMapMarkers, 0x2A);
 
                     foreach (Texture2D t in _markerIcons.Values)
                     {
@@ -763,7 +764,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _mapMarkersLoaded = true;
 
-                    GameActions.Print($"WorldMap markers loaded ({count})", 0x2A);
+                    GameActions.Print(string.Format(ResGumps.WorldMapMarkersLoaded0, count), 0x2A);
                 }
             }
             //);
@@ -1233,7 +1234,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_showGroupName)
             {
-                string name = entity.Name ?? "<out of range>";
+                string name = entity.Name ?? ResGumps.OutOfRange;
                 Vector2 size = Fonts.Regular.MeasureString(entity.Name ?? name);
 
                 if (rotX + size.X / 2 > x + Width - 8)

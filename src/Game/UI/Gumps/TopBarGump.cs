@@ -32,6 +32,7 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -88,7 +89,7 @@ namespace ClassicUO.Game.UI.Gumps
                 new [] {1, (int) Buttons.GlobalChat },
             };
 
-            string[] texts = {"Map", "Paperdoll", "Inventory", "Journal", "Chat", "Help", "World Map", "< ? >", "Debug", "NetStats", "UOStore", "Global Chat"};
+            string[] texts = {ResGumps.Map, ResGumps.Paperdoll, ResGumps.Inventory, ResGumps.Journal, ResGumps.Chat, ResGumps.Help, ResGumps.WorldMap, ResGumps.Info, ResGumps.Debug, ResGumps.NetStats, ResGumps.UOStore, ResGumps.GlobalChat};
 
             bool hasUOStore = Client.Version >= ClientVersion.CV_706400;
 
@@ -151,7 +152,7 @@ namespace ClassicUO.Game.UI.Gumps
                     gump.ChangePage(2);
             }
             else
-                Log.Error( "TopBarGump already exists!!");
+                Log.Error( ResGumps.TopBarGumpAlreadyExists);
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
@@ -273,8 +274,8 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.GlobalChat:
-                    Log.Warn("Chat button pushed! Not implemented yet!");
-                    GameActions.Print("GlobalChat not implemented yet.", 0x23, MessageType.System);
+                    Log.Warn(ResGumps.ChatButtonPushedNotImplementedYet);
+                    GameActions.Print(ResGumps.GlobalChatNotImplementedYet, 0x23, MessageType.System);
                     break;
 
                 case Buttons.UOStore:

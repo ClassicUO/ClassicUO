@@ -27,6 +27,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
+using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
 using SDL2;
 
@@ -79,22 +80,22 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 ushort textColor = 0x0481;
 
-                Add(new Label("Select which shard to play on:", false, textColor, font: 9)
+                Add(new Label(ResGumps.SelectWhichShardToPlayOn, false, textColor, font: 9)
                 {
                     X = 155, Y = 70
                 });
 
-                Add(new Label("Latency:", false, textColor, font: 9)
+                Add(new Label(ResGumps.Latency, false, textColor, font: 9)
                 {
                     X = 400, Y = 70
                 });
 
-                Add(new Label("Packet Loss:", false, textColor, font: 9)
+                Add(new Label(ResGumps.PacketLoss, false, textColor, font: 9)
                 {
                     X = 470, Y = 70
                 });
 
-                Add(new Label("Sort by:", false, textColor, font: 9)
+                Add(new Label(ResGumps.SortBy, false, textColor, font: 9)
                 {
                     X = 153, Y = 368
                 });

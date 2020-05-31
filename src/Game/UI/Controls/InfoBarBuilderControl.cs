@@ -22,6 +22,7 @@
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
+using ClassicUO.Resources;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -50,7 +51,7 @@ namespace ClassicUO.Game.UI.Controls
 
             labelColor = new ClickableColorBox(150, 0, 13, 14, item.hue, color);
 
-            NiceButton deleteButton = new NiceButton(390, 0, 60, 25, ButtonAction.Activate, "Delete") { ButtonParameter = 999 };
+            NiceButton deleteButton = new NiceButton(390, 0, 60, 25, ButtonAction.Activate, ResGumps.Delete) { ButtonParameter = 999 };
             deleteButton.MouseUp += (sender, e) =>
             {
                 Dispose();

@@ -23,6 +23,7 @@ using System;
 
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Resources;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -50,24 +51,24 @@ namespace ClassicUO.Game.UI.Gumps
             });
 
 
-            Add(all = new RadioButton(0, 0x00D0, 0x00D1, "All", color: 0xFFFF)
+            Add(all = new RadioButton(0, 0x00D0, 0x00D1, ResGumps.All, color: 0xFFFF)
             {
                 IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.All
             });
 
-            Add(mobiles = new RadioButton(0, 0x00D0, 0x00D1, "Mobiles only", color: 0xFFFF)
+            Add(mobiles = new RadioButton(0, 0x00D0, 0x00D1, ResGumps.MobilesOnly, color: 0xFFFF)
             {
                 Y = all.Y + all.Height,
                 IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Mobiles
             });
 
-            Add(items = new RadioButton(0, 0x00D0, 0x00D1, "Items only", color: 0xFFFF)
+            Add(items = new RadioButton(0, 0x00D0, 0x00D1, ResGumps.ItemsOnly, color: 0xFFFF)
             {
                 Y = mobiles.Y + mobiles.Height,
                 IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Items
             });
 
-            Add(mobilesCorpses = new RadioButton(0, 0x00D0, 0x00D1, "Mobiles and Corpses only", color: 0xFFFF)
+            Add(mobilesCorpses = new RadioButton(0, 0x00D0, 0x00D1, ResGumps.MobilesAndCorpsesOnly, color: 0xFFFF)
             {
                 Y = items.Y + items.Height,
                 IsChecked = NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.MobilesCorpses

@@ -32,6 +32,7 @@ using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Platforms;
 
@@ -167,48 +168,48 @@ namespace ClassicUO.Game.UI.Gumps
                             break;
 
                         case ChatMode.Whisper:
-                            AppendChatModePrefix("[Whisper]: ", ProfileManager.Current.WhisperHue, TextBoxControl.Text);
+                            AppendChatModePrefix(ResGumps.Whisper, ProfileManager.Current.WhisperHue, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.Emote:
-                            AppendChatModePrefix("[Emote]: ", ProfileManager.Current.EmoteHue, TextBoxControl.Text);
+                            AppendChatModePrefix(ResGumps.Emote, ProfileManager.Current.EmoteHue, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.Yell:
-                            AppendChatModePrefix("[Yell]: ", ProfileManager.Current.YellHue, TextBoxControl.Text);
+                            AppendChatModePrefix(ResGumps.Yell, ProfileManager.Current.YellHue, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.Party:
-                            AppendChatModePrefix("[Party]: ", ProfileManager.Current.PartyMessageHue, TextBoxControl.Text);
+                            AppendChatModePrefix(ResGumps.Party, ProfileManager.Current.PartyMessageHue, TextBoxControl.Text);
 
                             break;
                         
                         case ChatMode.Guild:
-                            AppendChatModePrefix("[Guild]: ", ProfileManager.Current.GuildMessageHue, TextBoxControl.Text);
+                            AppendChatModePrefix(ResGumps.Guild, ProfileManager.Current.GuildMessageHue, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.Alliance:
-                            AppendChatModePrefix("[Alliance]: ", ProfileManager.Current.AllyMessageHue, TextBoxControl.Text);
+                            AppendChatModePrefix(ResGumps.Alliance, ProfileManager.Current.AllyMessageHue, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.ClientCommand:
-                            AppendChatModePrefix("[Command]: ", 1161, TextBoxControl.Text);
+                            AppendChatModePrefix(ResGumps.Command, 1161, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.UOAMChat:
                             DisposeChatModePrefix();
-                            AppendChatModePrefix("[UOAM]: ", 83, TextBoxControl.Text);
+                            AppendChatModePrefix(ResGumps.UOAM, 83, TextBoxControl.Text);
 
                             break;
                         case ChatMode.UOChat:
                             DisposeChatModePrefix();
-                            AppendChatModePrefix("Chat: ", ProfileManager.Current.ChatMessageHue, TextBoxControl.Text);
+                            AppendChatModePrefix(ResGumps.Chat, ProfileManager.Current.ChatMessageHue, TextBoxControl.Text);
                             break;
                     }
                 }
@@ -248,17 +249,17 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case MessageType.Party:
-                    AddLine($"[Party][{e.Name}]: {e.Text}", e.Font, ProfileManager.Current.PartyMessageHue, e.IsUnicode);
+                    AddLine(string.Format(ResGumps.PartyName0Text1, e.Name, e.Text), e.Font, ProfileManager.Current.PartyMessageHue, e.IsUnicode);
 
                     break;
 
                 case MessageType.Guild:
-                    AddLine($"[Guild][{e.Name}]: {e.Text}", e.Font, ProfileManager.Current.GuildMessageHue, e.IsUnicode);
+                    AddLine(string.Format(ResGumps.GuildName0Text1, e.Name, e.Text), e.Font, ProfileManager.Current.GuildMessageHue, e.IsUnicode);
 
                     break;
 
                 case MessageType.Alliance:
-                    AddLine($"[Alliance][{e.Name}]: {e.Text}", e.Font, ProfileManager.Current.AllyMessageHue, e.IsUnicode);
+                    AddLine(string.Format(ResGumps.AllianceName0Text1, e.Name, e.Text), e.Font, ProfileManager.Current.AllyMessageHue, e.IsUnicode);
 
                     break;
             }
@@ -353,11 +354,11 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 if (World.Party.Members[index - 1] != null && World.Party.Members[index - 1].Serial != 0)
                                 {
-                                    AppendChatModePrefix($"[Tell] [{World.Party.Members[index - 1].Name}]: ", ProfileManager.Current.PartyMessageHue, string.Empty);
+                                    AppendChatModePrefix(string.Format(ResGumps.Tell0, World.Party.Members[index - 1].Name), ProfileManager.Current.PartyMessageHue, string.Empty);
                                 }
                                 else
                                 {
-                                    AppendChatModePrefix("[Tell] []: ", ProfileManager.Current.PartyMessageHue, string.Empty);
+                                    AppendChatModePrefix(ResGumps.TellEmpty, ProfileManager.Current.PartyMessageHue, string.Empty);
                                 }
 
                                 Mode = ChatMode.Party;
@@ -530,7 +531,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
 
                     case ChatMode.Emote:
-                        text = "*" + text + "*";    
+                        text = ResGeneral.EmoteChar + text + ResGeneral.EmoteChar;    
                         GameActions.Say(text, ProfileManager.Current.EmoteHue, MessageType.Emote);
                         break;
 
@@ -546,7 +547,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (World.Party.Leader == 0 || World.Party.Leader == World.Player)
                                     GameActions.RequestPartyInviteByTarget();
                                 else
-                                    MessageManager.HandleMessage(null, "You are not party leader.", "System", 0xFFFF, MessageType.Regular, 3, TEXT_TYPE.SYSTEM);
+                                    MessageManager.HandleMessage(null, ResGumps.YouAreNotPartyLeader, "System", 0xFFFF, MessageType.Regular, 3, TEXT_TYPE.SYSTEM);
 
                                 break;
 
@@ -555,7 +556,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (World.Party.Leader != 0)
                                     World.Party.CanLoot = !World.Party.CanLoot;
                                 else
-                                    MessageManager.HandleMessage(null, "You are not in a party.", "System", 0xFFFF, MessageType.Regular, 3, TEXT_TYPE.SYSTEM);
+                                    MessageManager.HandleMessage(null, ResGumps.YouAreNotInAParty, "System", 0xFFFF, MessageType.Regular, 3, TEXT_TYPE.SYSTEM);
 
 
                                 break;
@@ -563,7 +564,7 @@ namespace ClassicUO.Game.UI.Gumps
                             case "quit":
 
                                 if (World.Party.Leader == 0)
-                                    MessageManager.HandleMessage(null, "You are not in a party.", "System", 0xFFFF, MessageType.Regular, 3, TEXT_TYPE.SYSTEM);
+                                    MessageManager.HandleMessage(null, ResGumps.YouAreNotInAParty, "System", 0xFFFF, MessageType.Regular, 3, TEXT_TYPE.SYSTEM);
                                 else
                                 {
                                     GameActions.RequestPartyQuit();
@@ -586,7 +587,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     World.Party.Inviter = 0;
                                 }
                                 else
-                                    MessageManager.HandleMessage(null, "No one has invited you to be in a party.", "System", 0xFFFF, MessageType.Regular, 3, TEXT_TYPE.SYSTEM);
+                                    MessageManager.HandleMessage(null, ResGumps.NoOneHasInvitedYouToBeInAParty, "System", 0xFFFF, MessageType.Regular, 3, TEXT_TYPE.SYSTEM);
 
                                 break;
 
@@ -599,7 +600,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     World.Party.Inviter = 0;
                                 }
                                 else
-                                    MessageManager.HandleMessage(null, "No one has invited you to be in a party.", "System", 0xFFFF, MessageType.Regular, 3, TEXT_TYPE.SYSTEM);
+                                    MessageManager.HandleMessage(null, ResGumps.NoOneHasInvitedYouToBeInAParty, "System", 0xFFFF, MessageType.Regular, 3, TEXT_TYPE.SYSTEM);
 
 
                                 break;
@@ -627,7 +628,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 }
                                 else
                                 {
-                                    GameActions.Print($"Note to self: {text}", 0, MessageType.System, 3, false);
+                                    GameActions.Print(string.Format(ResGumps.NoteToSelf0, text), 0, MessageType.System, 3, false);
                                 }
 
                                 break;

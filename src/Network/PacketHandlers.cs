@@ -37,6 +37,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Logging;
@@ -397,13 +398,13 @@ namespace ClassicUO.Network
                             int deltaInt = intell - currentInt;
 
                             if (deltaStr != 0)
-                                GameActions.Print($"Your strength has changed by {deltaStr}.  It is now {str}", 0x0170, MessageType.System, 3, false);
+                                GameActions.Print(string.Format(ResGeneral.Your0HasChangedBy1ItIsNow2, ResGeneral.Strength, deltaStr, str), 0x0170, MessageType.System, 3, false);
 
                             if (deltaDex != 0)
-                                GameActions.Print($"Your dexterity has changed by {deltaDex}.  It is now {dex}", 0x0170, MessageType.System, 3, false);
+                                GameActions.Print(string.Format(ResGeneral.Your0HasChangedBy1ItIsNow2, ResGeneral.Dexterity, deltaDex, dex), 0x0170, MessageType.System, 3, false);
 
                             if (deltaInt != 0)
-                                GameActions.Print($"Your intelligence has changed by {deltaInt}.  It is now {intell}", 0x0170, MessageType.System, 3, false);
+                                GameActions.Print(string.Format(ResGeneral.Your0HasChangedBy1ItIsNow2, ResGeneral.Intelligence, deltaInt, intell), 0x0170, MessageType.System, 3, false);
                         }
 
                         World.Player.Strength = str;
@@ -1561,7 +1562,7 @@ namespace ClassicUO.Network
 
                                 if (change != 0.0f && !Single.IsNaN(change))
                                 {
-                                    GameActions.Print($"Your skill in {skill.Name} has {(change < 0 ? "decreased" : "increased")} by {Math.Abs(change):F1}.  It is now {(skill.Value + change):F1}.",
+                                    GameActions.Print(string.Format(ResGeneral.YourSkillIn0Has1By2ItIsNow3, skill.Name, change < 0 ? ResGeneral.Decreased : ResGeneral.Increased, Math.Abs(change), skill.Value + change),
                                                       0x58,
                                                       MessageType.System,
                                                       3, 
@@ -1791,7 +1792,7 @@ namespace ClassicUO.Network
                 case 0:
                     if (showMessage)
                     { 
-                        GameActions.Print("It begins to rain.", 1154, MessageType.System, 3, false);
+                        GameActions.Print(ResGeneral.ItBeginsToRain, 1154, MessageType.System, 3, false);
                         weather.CurrentWeather = 0;
                     }
                     break;
@@ -1799,7 +1800,7 @@ namespace ClassicUO.Network
                 case 1:
                     if (showMessage)
                     {
-                        GameActions.Print("A fierce storm approaches.", 1154, MessageType.System, 3, false);
+                        GameActions.Print(ResGeneral.AFierceStormApproaches, 1154, MessageType.System, 3, false);
                         weather.CurrentWeather = 1;
                     }
                     break;
@@ -1807,7 +1808,7 @@ namespace ClassicUO.Network
                 case 2:
                     if (showMessage)
                     {
-                        GameActions.Print("It begins to snow.", 1154, MessageType.System, 3, false);
+                        GameActions.Print(ResGeneral.ItBeginsToSnow, 1154, MessageType.System, 3, false);
                         weather.CurrentWeather = 2;
                     }
                     break;
@@ -1815,7 +1816,7 @@ namespace ClassicUO.Network
                 case 3:
                     if (showMessage)
                     {
-                        GameActions.Print("A storm is brewing.", 1154, MessageType.System, 3, false);
+                        GameActions.Print(ResGeneral.AStormIsBrewing, 1154, MessageType.System, 3, false);
                         weather.CurrentWeather = 3;
                     }
                     break;
@@ -3054,12 +3055,12 @@ namespace ClassicUO.Network
                     UOChatManager.CurrentChannelName = channelName;
                     UIManager.GetGump<UOChatGump>()?.UpdateConference();
 
-                    GameActions.Print($"You have joined the '{channelName}' channel.", ProfileManager.Current.ChatMessageHue, MessageType.Regular, 1, true);
+                    GameActions.Print(string.Format(ResGeneral.YouHaveJoinedThe0Channel, channelName), ProfileManager.Current.ChatMessageHue, MessageType.Regular, 1, true);
                     break;
                 case 0x03F4:
                     p.Skip(4);
                     channelName = p.ReadUnicode();
-                    GameActions.Print($"You have left the '{channelName}' channel.", ProfileManager.Current.ChatMessageHue, MessageType.Regular, 1, true);
+                    GameActions.Print(string.Format(ResGeneral.YouHaveLeftThe0Channel, channelName), ProfileManager.Current.ChatMessageHue, MessageType.Regular, 1, true);
                     break;
                 case 0x0025:
                 case 0x0026:
@@ -3339,7 +3340,7 @@ namespace ClassicUO.Network
 
                         if (crafterNameLen > 0)
                         {
-                            strBuffer.Append("Crafted by ");
+                            strBuffer.Append(ResGeneral.CraftedBy);
                             strBuffer.Append(p.ReadASCII(crafterNameLen));
                         }
                     }

@@ -28,7 +28,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-
+using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -81,7 +81,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             Add(_scrollArea);
 
-            Add(new NiceButton(10, 10, 180, 25, ButtonAction.Activate, "Name")
+            Add(new NiceButton(10, 10, 180, 25, ButtonAction.Activate, ResGumps.Name)
             {
                 ButtonParameter = (int) Buttons.SortName,
                 IsSelected = true,
@@ -89,21 +89,21 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 25
             });
 
-            Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, "Real")
+            Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, ResGumps.Real)
             {
                 ButtonParameter = (int) Buttons.SortReal,
                 X = 220,
                 Y = 25
             });
 
-            Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, "Base")
+            Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, ResGumps.Base)
             {
                 ButtonParameter = (int) Buttons.SortBase,
                 X = 300,
                 Y = 25
             });
 
-            Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, "Cap")
+            Add(new NiceButton(10, 10, 80, 25, ButtonAction.Activate, ResGumps.Cap)
             {
                 ButtonParameter = (int) Buttons.SortCap,
                 X = 380,
@@ -178,7 +178,7 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (SkillListEntry t in _skillListEntries)
                 _scrollArea.Add(t);
 
-            Add(new Label("Total: ", true, 1153) { X = 40, Y = 320 });
+            Add(new Label(ResGumps.Total, true, 1153) { X = 40, Y = 320 });
             Add(new Label(_totalReal.ToString("F1"), true, 1153) { X = 220, Y = 320 });
             Add(new Label(_totalValue.ToString("F1"), true, 1153) { X = 300, Y = 320 });
         }

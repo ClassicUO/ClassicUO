@@ -25,6 +25,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
+using ClassicUO.Resources;
 using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;
@@ -98,7 +99,7 @@ namespace ClassicUO.Game.UI.Gumps
                         spellsOnPage = 4;
                     }
 
-                    Label text = new Label("INDEX", false, 0x0288, font: 6) {X = indexX, Y = 6};
+                    Label text = new Label(ResGumps.Index, false, 0x0288, font: 6) {X = indexX, Y = 6};
                     Add(text, page);
 
                     for (int i = 0; i < spellsOnPage; i++)
@@ -136,7 +137,7 @@ namespace ClassicUO.Game.UI.Gumps
                         byte bab1 = (byte) (((byte) World.Player.PrimaryAbility & 0x7F) - 1);
 
                         _primAbility = new GumpPic(215, 105, (ushort) (0x5200 + bab1), 0);
-                        text = new Label("Primary Ability Icon", false, 0x0288, 80, 6) {X = 265, Y = 105};
+                        text = new Label(ResGumps.PrimaryAbilityIcon, false, 0x0288, 80, 6) {X = 265, Y = 105};
                         Add(_primAbility, page);
                         Add(text, page);
                         _primAbility.SetTooltip(ClilocLoader.Instance.GetString(1028838 + bab1));
@@ -147,7 +148,7 @@ namespace ClassicUO.Game.UI.Gumps
                         byte bab2 = (byte) (((byte) World.Player.SecondaryAbility & 0x7F) - 1);
 
                         _secAbility = new GumpPic(215, 150, (ushort) (0x5200 + bab2), 0);
-                        text = new Label("Secondary Ability Icon", false, 0x0288, 80, 6) {X = 265, Y = 150};
+                        text = new Label(ResGumps.SecondaryAbilityIcon, false, 0x0288, 80, 6) {X = 265, Y = 150};
                         Add(_secAbility, page);
                         Add(text, page);
                         _secAbility.SetTooltip(ClilocLoader.Instance.GetString(1028838 + bab2));
