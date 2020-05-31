@@ -158,7 +158,7 @@ namespace ClassicUO.Game.UI.Controls
             private readonly EffectParameter _textureSizeParam;
             private Vector2 _vectorSize;
 
-            public XBREffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.xBREffect)
+            public XBREffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, ClassicUO.Renderer.Resources.xBREffect)
             {
                 _textureSizeParam = Parameters["textureSize"];
             }

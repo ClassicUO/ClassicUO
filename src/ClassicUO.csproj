@@ -210,6 +210,11 @@
     <Compile Include="Network\Encryption\LoginCryptBehaviour.cs" />
     <Compile Include="Network\Encryption\TwofishBehaviour.cs" />
     <Compile Include="Renderer\MatrixEffect.cs" />
+    <Compile Include="Resources\ResOptions.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ResOptions.resx</DependentUpon>
+    </Compile>
     <Compile Include="Time.cs" />
     <Compile Include="Utility\Collections\RawList.cs" />
     <Compile Include="Utility\Collections\ReadOnlyArrayView.cs" />
@@ -527,6 +532,10 @@
     <EmbeddedResource Include="Renderer\fonts\map6_font.xnb" />
     <None Include="shaders\compile_shaders.bat" />
     <None Include="shaders\IsometricWorld.fx" />
+    <EmbeddedResource Include="Resources\ResOptions.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ResOptions.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="shaders\IsometricWorld.fxc" />
     <None Include="libs\lib64\libmojoshader.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
