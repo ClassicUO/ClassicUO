@@ -23,6 +23,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
+using ClassicUO.Resources;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -42,14 +43,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Mobile mobile = World.Mobiles.Get(inviter);
 
-            Label text = new Label($"{ (mobile == null || string.IsNullOrEmpty(mobile.Name) ? "[no-name]" : mobile.Name) }\n has invited you to join a party.", true, 15)
+            Label text = new Label(string.Format(ResGumps.P0HasInvitedYouToParty, mobile == null || string.IsNullOrEmpty(mobile.Name) ? ResGumps.NoName : mobile.Name), true, 15)
             {
                 X = (ProfileManager.Current.GameWindowSize.X / 2) - 115,
                 Y = 165,
             };
 
-            NiceButton acceptButton = new NiceButton(((ProfileManager.Current.GameWindowSize.X / 2) + 70), 205, 45, 25, ButtonAction.Activate, "Accept");
-            NiceButton declineButton = new NiceButton(((ProfileManager.Current.GameWindowSize.X / 2) + 10), 205, 45, 25, ButtonAction.Activate, "Decline");
+            NiceButton acceptButton = new NiceButton(((ProfileManager.Current.GameWindowSize.X / 2) + 70), 205, 45, 25, ButtonAction.Activate, ResGumps.Accept);
+            NiceButton declineButton = new NiceButton(((ProfileManager.Current.GameWindowSize.X / 2) + 10), 205, 45, 25, ButtonAction.Activate, ResGumps.Decline);
 
             Add(partyGumpBackground);
             Add(text);

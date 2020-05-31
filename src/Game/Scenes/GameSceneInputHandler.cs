@@ -31,6 +31,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
+using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -516,7 +517,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (Keyboard.Alt && ent is Mobile)
                         {
-                            MessageManager.HandleMessage(World.Player, "Now following.", String.Empty, 0, MessageType.Regular, 3, TEXT_TYPE.CLIENT, false);
+                            MessageManager.HandleMessage(World.Player, ResGeneral.NowFollowing, String.Empty, 0, MessageType.Regular, 3, TEXT_TYPE.CLIENT, false);
                             _followingMode = true;
                             _followingTarget = ent;
                         }
@@ -640,13 +641,13 @@ namespace ClassicUO.Game.Scenes
 
                         if (itemdata.IsSurface && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                         {
-                            World.Player.AddMessage(MessageType.Label, "Pathfinding!", 3, 0, false, TEXT_TYPE.CLIENT);
+                            World.Player.AddMessage(MessageType.Label, ResGeneral.Pathfinding, 3, 0, false, TEXT_TYPE.CLIENT);
                             return true;
                         }
                     }
                     else if (obj is Land && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                     {
-                        World.Player.AddMessage(MessageType.Label, "Pathfinding!", 3, 0, false, TEXT_TYPE.CLIENT);
+                        World.Player.AddMessage(MessageType.Label, ResGeneral.Pathfinding, 3, 0, false, TEXT_TYPE.CLIENT);
                         return true;
                     }
                 }

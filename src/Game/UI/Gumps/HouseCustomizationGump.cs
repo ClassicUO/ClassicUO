@@ -27,7 +27,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
-
+using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 41,
                 ButtonAction = ButtonAction.Activate,
             };
-            button.SetTooltip("Walls");
+            button.SetTooltip(ResGumps.Walls);
             Add(button);
 
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_DOOR, 0x5657, 0x5659, 0x5658)
@@ -127,7 +127,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 40,
                 ButtonAction = ButtonAction.Activate
             };
-            button.SetTooltip("Doors");
+            button.SetTooltip(ResGumps.Doors);
             Add(button);
 
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_FLOOR, 0x565A, 0x565C, 0x565B)
@@ -136,7 +136,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 40,
                 ButtonAction = ButtonAction.Activate
             };
-            button.SetTooltip("Floors");
+            button.SetTooltip(ResGumps.Floors);
             Add(button);
 
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_STAIR, 0x565D, 0x565F, 0x565E)
@@ -145,7 +145,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 72,
                 ButtonAction = ButtonAction.Activate
             };
-            button.SetTooltip("Stairs");
+            button.SetTooltip(ResGumps.Stairs);
             Add(button);
 
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ROOF, 0x5788, 0x578A, 0x5789)
@@ -154,7 +154,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 72,
                 ButtonAction = ButtonAction.Activate
             };
-            button.SetTooltip("Roofs");
+            button.SetTooltip(ResGumps.Roofs);
             Add(button);
 
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_MISC, 0x5663, 0x5665, 0x5664)
@@ -163,7 +163,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 72,
                 ButtonAction = ButtonAction.Activate
             };
-            button.SetTooltip("Miscellaneous");
+            button.SetTooltip(ResGumps.Miscellaneous);
             Add(button);
 
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_MENU, 0x566C, 0x566E, 0x566D)
@@ -172,7 +172,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 100,
                 ButtonAction = ButtonAction.Activate
             };
-            button.SetTooltip("System Menu");
+            button.SetTooltip(ResGumps.SystemMenu);
             Add(button);
 
             _textComponents = new Label(string.Empty, false,
@@ -207,7 +207,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 142,
                 AcceptMouseInput =  true
             };
-            _textCost.SetTooltip("Cost");
+            _textCost.SetTooltip(ResGumps.Cost);
             Add(_textCost);
 
             //HitBox box = new HitBox(36, 137, 84, 23)
@@ -249,7 +249,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 100,
                 ButtonAction = ButtonAction.Activate
             };
-            button.SetTooltip("Erase");
+            button.SetTooltip(ResGumps.Erase);
             _dataBoxGUI.Add(button);
 
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_EYEDROPPER, (ushort) (0x5669 + (_customHouseManager.SeekTile ? 1 : 0)), 0x566B, 0x566A)
@@ -258,7 +258,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 100,
                 ButtonAction = ButtonAction.Activate
             };
-            button.SetTooltip("Eyedropper Tool");
+            button.SetTooltip(ResGumps.EyedropperTool);
             Add(button);
 
             ushort[] floorVisionGraphic1 = { 0x572E, 0x5734, 0x5731 };
@@ -280,7 +280,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 108,
                 ButtonAction = ButtonAction.Activate
             };
-            button.SetTooltip("Store 1 Visibility");
+            button.SetTooltip(string.Format(ResGumps.Store0Visibility, 1));
             _dataBoxGUI.Add(button);
 
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_1, (ushort) (0x56CD + graphicOffset2),
@@ -290,7 +290,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 96,
                 ButtonAction = ButtonAction.Activate
             };
-            button.SetTooltip("Go To Story 1");
+            button.SetTooltip(string.Format(ResGumps.GoToStory0, 1));
             _dataBoxGUI.Add(button);
 
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_1, (ushort) (0x56F6 + graphicOffset),
@@ -300,7 +300,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 103,
                 ButtonAction = ButtonAction.Activate
             };
-            button.SetTooltip("Go To Story 1");
+            button.SetTooltip(string.Format(ResGumps.GoToStory0, 1));
             _dataBoxGUI.Add(button);
 
 
@@ -315,7 +315,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 86,
                 ButtonAction = ButtonAction.Activate
             };
-            button.SetTooltip("Store 2 Visibility");
+            button.SetTooltip(string.Format(ResGumps.Store0Visibility, 2));
             _dataBoxGUI.Add(button);
 
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_2, (ushort) (0x56CE + graphicOffset2),
@@ -325,7 +325,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 73,
                 ButtonAction = ButtonAction.Activate
             };
-            button.SetTooltip("Go To Story 2");
+            button.SetTooltip(string.Format(ResGumps.GoToStory0, 2));
             _dataBoxGUI.Add(button);
 
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_2, (ushort) (0x56F0 + graphicOffset),
@@ -335,7 +335,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 86,
                 ButtonAction = ButtonAction.Activate
             };
-            button.SetTooltip("Go To Story 2");
+            button.SetTooltip(string.Format(ResGumps.GoToStory0, 2));
             _dataBoxGUI.Add(button);
 
 
@@ -352,7 +352,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 64,
                     ButtonAction = ButtonAction.Activate
                 };
-                button.SetTooltip("Store 3 Visibility");
+                button.SetTooltip(string.Format(ResGumps.Store0Visibility, 3));
                 _dataBoxGUI.Add(button);
 
                 button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort) (0x56CE + graphicOffset2),
@@ -362,7 +362,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 56,
                     ButtonAction = ButtonAction.Activate
                 };
-                button.SetTooltip("Go To Story 3");
+                button.SetTooltip(string.Format(ResGumps.GoToStory0, 3));
                 _dataBoxGUI.Add(button);
 
                 button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort) (0x56F0 + graphicOffset),
@@ -372,7 +372,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 69,
                     ButtonAction = ButtonAction.Activate
                 };
-                button.SetTooltip("Go To Story 3");
+                button.SetTooltip(string.Format(ResGumps.GoToStory0, 3));
                 _dataBoxGUI.Add(button);
 
 
@@ -388,7 +388,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 42,
                     ButtonAction = ButtonAction.Activate
                 };
-                button.SetTooltip("Store 4 Visibility");
+                button.SetTooltip(string.Format(ResGumps.Store0Visibility, 4));
                 _dataBoxGUI.Add(button);
 
                 button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_4, (ushort) (0x56D0 + graphicOffset2),
@@ -398,7 +398,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 42,
                     ButtonAction = ButtonAction.Activate
                 };
-                button.SetTooltip("Go To Story 4");
+                button.SetTooltip(string.Format(ResGumps.GoToStory0, 4));
                 _dataBoxGUI.Add(button);
 
                 button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_4, (ushort) (0x56EA + graphicOffset),
@@ -408,7 +408,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 50,
                     ButtonAction = ButtonAction.Activate
                 };
-                button.SetTooltip("Go To Story 4");
+                button.SetTooltip(string.Format(ResGumps.GoToStory0, 4));
                 _dataBoxGUI.Add(button);
             }
             else
@@ -422,7 +422,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 64,
                     ButtonAction = ButtonAction.Activate
                 };
-                button.SetTooltip("Store 3 Visibility");
+                button.SetTooltip(string.Format(ResGumps.Store0Visibility, 3));
                 _dataBoxGUI.Add(button);
 
                 button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort) (0x56D0 + graphicOffset2),
@@ -432,7 +432,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 56,
                     ButtonAction = ButtonAction.Activate
                 };
-                button.SetTooltip("Go To Story 3");
+                button.SetTooltip(string.Format(ResGumps.GoToStory0, 3));
                 _dataBoxGUI.Add(button);
 
                 button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3, (ushort) (0x56EA + graphicOffset),
@@ -442,7 +442,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 69,
                     ButtonAction = ButtonAction.Activate
                 };
-                button.SetTooltip("Go To Story 3");
+                button.SetTooltip(string.Format(ResGumps.GoToStory0, 3));
                 _dataBoxGUI.Add(button);
             }
 
@@ -479,7 +479,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 63,
                     ButtonAction = ButtonAction.Activate
                 };
-                button.SetTooltip("Previous Page");
+                button.SetTooltip(ResGumps.PreviousPage);
                 _dataBoxGUI.Add(button);
 
                 button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_LIST_RIGHT, 0x5628, 0x562A, 0x5629)
@@ -488,7 +488,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 63,
                     ButtonAction = ButtonAction.Activate
                 };
-                button.SetTooltip("Next Page");
+                button.SetTooltip(ResGumps.NextPage);
                 _dataBoxGUI.Add(button);
             }
 
@@ -715,7 +715,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 5,
                     ButtonAction = ButtonAction.Activate
                 };
-                button.SetTooltip("To _customHouseManager.Category");
+                button.SetTooltip(ResGumps.ToCustomHouseManagerCategory);
                 _dataBoxGUI.Add(button);
 
                 _dataBoxGUI.Add(new GumpPic(218, 4, 0x55F4, 0));
@@ -728,7 +728,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Y = 9,
                         ButtonAction = ButtonAction.Activate
                     };
-                    button.SetTooltip("Window Toggle");
+                    button.SetTooltip(ResGumps.WindowToggle);
                     _dataBoxGUI.Add(button);
                 }
                 else
@@ -739,7 +739,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Y = 9,
                         ButtonAction = ButtonAction.Activate
                     };
-                    button.SetTooltip("Window Toggle");
+                    button.SetTooltip(ResGumps.WindowToggle);
                     _dataBoxGUI.Add(button);
                 }
             }
@@ -1105,7 +1105,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 5,
                     ButtonAction = ButtonAction.Activate
                 };
-                button.SetTooltip("To _customHouseManager.Category");
+                button.SetTooltip(ResGumps.ToCustomHouseManagerCategory);
                 _dataBoxGUI.Add(button);
 
                 button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_ROOF_Z_DOWN, 0x578B, 0x578D, 0x578C)
@@ -1114,7 +1114,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 0,
                     ButtonAction = ButtonAction.Activate
                 };
-                button.SetTooltip("Lower Roof Placement Level");
+                button.SetTooltip(ResGumps.LowerRoofPlacementLevel);
                 _dataBoxGUI.Add(button);
 
                 button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_ROOF_Z_UP, 0x578E, 0x5790, 0x578F)
@@ -1123,7 +1123,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 0,
                     ButtonAction = ButtonAction.Activate
                 };
-                button.SetTooltip("Raise Roof Placement Level");
+                button.SetTooltip(ResGumps.RaiseRoofPlacementLevel);
                 _dataBoxGUI.Add(button);
 
                 _dataBoxGUI.Add(new GumpPic(583, 4, 0x55F4, 0));
@@ -1248,71 +1248,71 @@ namespace ClassicUO.Game.UI.Gumps
             const int TEXT_WIDTH = 108;
 
             Button button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_BACKUP,
-                                    0x098D, 0x098D, 0x098D, "Backup", 0, true, 0, 0x0036)
+                                    0x098D, 0x098D, 0x098D, ResGumps.Backup, 0, true, 0, 0x0036)
             {
                 X = 150,
                 Y = 50,
                 ButtonAction = ButtonAction.Activate,
                 FontCenter = true
             };
-            button.SetTooltip("Store design in progress in a back up buffer, but do not finalize design.");
+            button.SetTooltip(ResGumps.StoreDesignInProgress);
             _dataBox.Add(button);
 
 
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_RESTORE,
-                                0x098D, 0x098D, 0x098D, "Restore", 0, true, 0, 0x0036)
+                                0x098D, 0x098D, 0x098D, ResGumps.Restore, 0, true, 0, 0x0036)
             {
                 X = 150,
                 Y = 90,
                 ButtonAction = ButtonAction.Activate,
                 FontCenter = true
             };
-            button.SetTooltip("Restore your design in progress to a design you have previously backed up.");
+            button.SetTooltip(ResGumps.RestoreYourDesign);
             _dataBox.Add(button);
           
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_SYNCH,
-                                0x098D, 0x098D, 0x098D, "Synch", 0, true, 0, 0x0036)
+                                0x098D, 0x098D, 0x098D, ResGumps.Sync, 0, true, 0, 0x0036)
             {
                 X = 270,
                 Y = 50,
                 ButtonAction = ButtonAction.Activate,
                 FontCenter = true
             };
-            button.SetTooltip("Synchronize design state with server.");
+            button.SetTooltip(ResGumps.SynchronizeDesignStateWithServer);
             _dataBox.Add(button);
          
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_CLEAR,
-                                0x098D, 0x098D, 0x098D, "Clear", 0, true, 0, 0x0036)
+                                0x098D, 0x098D, 0x098D, ResGumps.Clear, 0, true, 0, 0x0036)
             {
                 X = 270,
                 Y = 90,
                 ButtonAction = ButtonAction.Activate,
                 FontCenter = true
             };
-            button.SetTooltip("Clear all changes, returning your design in progress to a blank foundation.");
+            button.SetTooltip(ResGumps.ClearAllChanges);
             _dataBox.Add(button);
            
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_COMMIT,
-                                0x098D, 0x098D, 0x098D, "Commit", 0, true, 0, 0x0036)
+                                0x098D, 0x098D, 0x098D, ResGumps.Commit, 0, true, 0, 0x0036)
             {
                 X = 390,
                 Y = 50,
                 ButtonAction = ButtonAction.Activate,
                 FontCenter = true
             };
-            button.SetTooltip("Save existing changes and finalize design.");
+            button.SetTooltip(ResGumps.SaveExistingChanges);
             _dataBox.Add(button);
            
 
             button = new Button((int) ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_REVERT,
-                                    0x098D, 0x098D, 0x098D, "Revert", 0, true, 0, 0x0036)
+                                    0x098D, 0x098D, 0x098D, ResGumps.Revert, 0, true, 0, 0x0036)
             {
                 X = 390,
                 Y = 90,
                 ButtonAction = ButtonAction.Activate,
                 FontCenter = true
             };
-            button.SetTooltip("Revert your design in progress to match your currently visible, finalized design.");
+            button.SetTooltip(ResGumps.RevertYourDesign);
             _dataBox.Add(button);
         }
 

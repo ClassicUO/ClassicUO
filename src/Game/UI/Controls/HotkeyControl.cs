@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Resources;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -62,7 +63,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                 }
                 else // show a popup
-                    UIManager.Add(new MessageBoxGump(400, 200, "Key combination already exists.", null));
+                    UIManager.Add(new MessageBoxGump(400, 200, ResGumps.KeyCombinationAlreadyExists, null));
             };
 
             box.HotkeyCancelled += (sender, e) =>

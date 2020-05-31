@@ -29,6 +29,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
@@ -48,7 +49,7 @@ namespace ClassicUO.Game.Managers
 
         public int Count;
         public bool IsMaximized;
-        public string Name = "No Name";
+        public string Name = ResGeneral.NoName;
         public SkillsGroup Left { get; set; }
         public SkillsGroup Right { get; set; }
 
@@ -182,7 +183,7 @@ namespace ClassicUO.Game.Managers
         {
             if (Groups[0] == g)
             {
-                MessageBoxGump messageBox = new MessageBoxGump(200, 125, "Cannot delete this group.", null)
+                MessageBoxGump messageBox = new MessageBoxGump(200, 125, ResGeneral.CannotDeleteThisGroup, null)
                 {
                     X = ProfileManager.Current.GameWindowPosition.X + ProfileManager.Current.GameWindowSize.X / 2 - 100,
                     Y = ProfileManager.Current.GameWindowPosition.Y + ProfileManager.Current.GameWindowSize.Y / 2 - 62,
@@ -306,7 +307,7 @@ namespace ClassicUO.Game.Managers
         private static void MakeDefaultMiscellaneous()
         {
             SkillsGroup g = new SkillsGroup();
-            g.Name = "Miscellaneous";
+            g.Name = ResGeneral.Miscellaneous;
             g.Add(4);
             g.Add(6);
             g.Add(10);
@@ -323,7 +324,7 @@ namespace ClassicUO.Game.Managers
             int count = SkillsLoader.Instance.SkillsCount;
 
             SkillsGroup g = new SkillsGroup();
-            g.Name = "Combat";
+            g.Name = ResGeneral.Combat;
             g.Add(1);
             g.Add(31);
             g.Add(42);
@@ -366,7 +367,7 @@ namespace ClassicUO.Game.Managers
         private static void MakeDefaultTradeSkills()
         {
             SkillsGroup g = new SkillsGroup();
-            g.Name = "Trade Skills";
+            g.Name = ResGeneral.TradeSkills;
             g.Add(0);
             g.Add(7);
             g.Add(8);
@@ -386,7 +387,7 @@ namespace ClassicUO.Game.Managers
             int count = SkillsLoader.Instance.SkillsCount;
 
             SkillsGroup g = new SkillsGroup();
-            g.Name = "Magic";
+            g.Name = ResGeneral.Magic;
             g.Add(16);
 
             if (count > 56)
@@ -422,7 +423,7 @@ namespace ClassicUO.Game.Managers
         private static void MakeDefaultWilderness()
         {
             SkillsGroup g = new SkillsGroup();
-            g.Name = "Wilderness";
+            g.Name = ResGeneral.Wilderness;
             g.Add(2);
             g.Add(35);
             g.Add(18);
@@ -436,7 +437,7 @@ namespace ClassicUO.Game.Managers
         private static void MakeDefaultThieving()
         {
             SkillsGroup g = new SkillsGroup();
-            g.Name = "Thieving";
+            g.Name = ResGeneral.Thieving;
             g.Add(14);
             g.Add(21);
             g.Add(24);
@@ -452,7 +453,7 @@ namespace ClassicUO.Game.Managers
         private static void MakeDefaultBard()
         {
             SkillsGroup g = new SkillsGroup();
-            g.Name = "Bard";
+            g.Name = ResGeneral.Bard;
             g.Add(15);
             g.Add(29);
             g.Add(9);
@@ -491,7 +492,7 @@ namespace ClassicUO.Game.Managers
                     StringBuilder sb = new StringBuilder(17);
 
                     SkillsGroup g = new SkillsGroup();
-                    g.Name = "Miscellaneous";
+                    g.Name = ResGeneral.Miscellaneous;
 
                     SkillsGroup[] groups = new SkillsGroup[count];
                     groups[0] = g;

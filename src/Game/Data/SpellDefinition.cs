@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using ClassicUO.Game.Managers;
+using ClassicUO.Resources;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Data
@@ -110,68 +111,68 @@ namespace ClassicUO.Game.Data
                 {
                     // britanian reagents
                     case Reagents.BlackPearl:
-                        sb.Append("Black Pearl");
+                        sb.Append(ResGeneral.BlackPearl);
 
                         break;
 
                     case Reagents.Bloodmoss:
-                        sb.Append("Bloodmoss");
+                        sb.Append(ResGeneral.Bloodmoss);
 
                         break;
 
                     case Reagents.Garlic:
-                        sb.Append("Garlic");
+                        sb.Append(ResGeneral.Garlic);
 
                         break;
 
                     case Reagents.Ginseng:
-                        sb.Append("Ginseng");
+                        sb.Append(ResGeneral.Ginseng);
 
                         break;
 
                     case Reagents.MandrakeRoot:
-                        sb.Append("Mandrake Root");
+                        sb.Append(ResGeneral.MandrakeRoot);
 
                         break;
 
                     case Reagents.Nightshade:
-                        sb.Append("Nightshade");
+                        sb.Append(ResGeneral.Nightshade);
 
                         break;
 
                     case Reagents.SulfurousAsh:
-                        sb.Append("Sulfurous Ash");
+                        sb.Append(ResGeneral.SulfurousAsh);
 
                         break;
 
                     case Reagents.SpidersSilk:
-                        sb.Append("Spiders Silk");
+                        sb.Append(ResGeneral.SpidersSilk);
 
                         break;
 
                     // pagan reagents
                     case Reagents.BatWing:
-                        sb.Append("Bat Wing");
+                        sb.Append(ResGeneral.BatWing);
 
                         break;
 
                     case Reagents.GraveDust:
-                        sb.Append("Grave Dust");
+                        sb.Append(ResGeneral.GraveDust);
 
                         break;
 
                     case Reagents.DaemonBlood:
-                        sb.Append("Daemon Blood");
+                        sb.Append(ResGeneral.DaemonBlood);
 
                         break;
 
                     case Reagents.NoxCrystal:
-                        sb.Append("Nox Crystal");
+                        sb.Append(ResGeneral.NoxCrystal);
 
                         break;
 
                     case Reagents.PigIron:
-                        sb.Append("Pig Iron");
+                        sb.Append(ResGeneral.PigIron);
 
                         break;
 

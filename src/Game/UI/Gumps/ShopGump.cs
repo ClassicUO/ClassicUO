@@ -30,6 +30,7 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework.Graphics;
@@ -613,7 +614,7 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                     return;
 
-                string subname = $"{itemName} at {Price}gp";
+                string subname = string.Format(ResGumps.Item0Price1, itemName, Price);
 
                 Add(_name = new Label(subname, true, 0x219, 110, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_LEFT, true)
                 {
@@ -668,7 +669,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void SetName(string s, bool new_name)
             {
-                _name.Text = new_name ? $"{s}: {Price}" : $"{s} at {Price}gp";
+                _name.Text = new_name ? $"{s}: {Price}" : string.Format(ResGumps.Item0Price1, s, Price);
                 WantUpdateSize = true;
             }
 

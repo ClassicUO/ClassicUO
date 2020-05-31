@@ -35,6 +35,7 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -209,7 +210,7 @@ namespace ClassicUO.Game.Scenes
                 case MessageType.Limit3Spell:
 
                     if (e.Parent == null || !SerialHelper.IsValid(e.Parent.Serial))
-                        name = "System";
+                        name = ResGeneral.System;
                     else
                         name = e.Name;
 
@@ -218,7 +219,7 @@ namespace ClassicUO.Game.Scenes
                     break;
 
                 case MessageType.System:
-                    name = string.IsNullOrEmpty(e.Name) || e.Name.ToLowerInvariant() == "system" ? "System" : e.Name;
+                    name = string.IsNullOrEmpty(e.Name) || e.Name.ToLowerInvariant() == "system" ? ResGeneral.System : e.Name;
                     text = e.Text;
 
                     break;
@@ -233,7 +234,7 @@ namespace ClassicUO.Game.Scenes
                     break;
 
                 case MessageType.Label:
-                    name = "You see";
+                    name = ResGeneral.YouSee;
                     text = e.Text;
 
                     break;
@@ -246,21 +247,21 @@ namespace ClassicUO.Game.Scenes
 
                 case MessageType.Party:
                     text = e.Text;
-                    name = $"[Party][{e.Name}]";
+                    name = string.Format(ResGeneral.Party0, e.Name);
                     hue = ProfileManager.Current.PartyMessageHue;
 
                     break;
 
                 case MessageType.Alliance:
                     text = e.Text;
-                    name = $"[Alliance][{e.Name}]";
+                    name = string.Format(ResGeneral.Alliance0, e.Name);
                     hue = ProfileManager.Current.AllyMessageHue;
 
                     break;
 
                 case MessageType.Guild:
                     text = e.Text;
-                    name = $"[Guild][{e.Name}]";
+                    name = string.Format(ResGeneral.Guild0, e.Name);
                     hue = ProfileManager.Current.GuildMessageHue;
 
                     break;
@@ -335,7 +336,7 @@ namespace ClassicUO.Game.Scenes
                 _forceStopScene = true;
             else
             {
-                UIManager.Add(new MessageBoxGump(200, 200, $"Connection lost:\n{StringHelper.AddSpaceBeforeCapital(e.ToString())}", s =>
+                UIManager.Add(new MessageBoxGump(200, 200, string.Format(ResGeneral.ConnectionLost0, StringHelper.AddSpaceBeforeCapital(e.ToString())), s =>
                 {
                     if (s)
                         Client.Game.SetScene(new LoginScene());
@@ -345,7 +346,7 @@ namespace ClassicUO.Game.Scenes
 
         public void RequestQuitGame()
         {
-            UIManager.Add(new QuestionGump("Quit\nUltima Online?", s =>
+            UIManager.Add(new QuestionGump(ResGeneral.QuitPrompt, s =>
             {
                 if (s)
                 {
@@ -761,7 +762,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (World.Player.IsDead && World.Player.DeathScreenTimer > Time.Ticks)
                     {
-                        UIManager.Add(_deathScreenLabel = new Label("You are dead.", false, 999, 200, 3)
+                        UIManager.Add(_deathScreenLabel = new Label(ResGeneral.YouAreDead, false, 999, 200, 3)
                         {
                             X = (Client.Game.Window.ClientBounds.Width >> 1) - 50,
                             Y = (Client.Game.Window.ClientBounds.Height >> 1) - 50
@@ -1045,7 +1046,7 @@ namespace ClassicUO.Game.Scenes
                 _followingTarget = 0;
                 Pathfinder.StopAutoWalk();
 
-                MessageManager.HandleMessage(World.Player, "Stopped following.", String.Empty, 0, MessageType.Regular, 3, TEXT_TYPE.CLIENT, false);
+                MessageManager.HandleMessage(World.Player, ResGeneral.StoppedFollowing, String.Empty, 0, MessageType.Regular, 3, TEXT_TYPE.CLIENT, false);
             }
         }
         

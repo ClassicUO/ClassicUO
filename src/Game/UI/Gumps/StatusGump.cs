@@ -31,7 +31,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
-
+using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -270,7 +270,7 @@ namespace ClassicUO.Game.UI.Gumps
             _labels[(int)MobileStats.Intelligence] = text;
             Add(text);
 
-            text = new Label(World.Player.IsFemale ? "F" : "M", false, 0x0386, font: 1)
+            text = new Label(World.Player.IsFemale ? ResGumps.Female : ResGumps.Male, false, 0x0386, font: 1)
             {
                 X = 86,
                 Y = 97
@@ -327,16 +327,16 @@ namespace ClassicUO.Game.UI.Gumps
             Add(text);
 
 
-            Add(new HitBox(86, 61, 34, 12, "Strength", 1) { CanMove = true });
-            Add(new HitBox(86, 73, 34, 12, "Dex", 1) { CanMove = true });
-            Add(new HitBox(86, 85, 34, 12, "Intelligence", 1) { CanMove = true });
-            Add(new HitBox(86, 97, 34, 12, "Sex", 1) { CanMove = true });
-            Add(new HitBox(86, 109, 34, 12, "Armor", 1) { CanMove = true });
-            Add(new HitBox(171, 61, 66, 12, "Hits", 1) { CanMove = true });
-            Add(new HitBox(171, 73, 66, 12, "Mana", 1) { CanMove = true });
-            Add(new HitBox(171, 85, 66, 12, "Stamina", 1) { CanMove = true });
-            Add(new HitBox(171, 97, 66, 12, "Gold", 1) { CanMove = true });
-            Add(new HitBox(171, 109, 66, 12, "Weight", 1) { CanMove = true });
+            Add(new HitBox(86, 61, 34, 12, ResGumps.Strength, 1) { CanMove = true });
+            Add(new HitBox(86, 73, 34, 12, ResGumps.Dex, 1) { CanMove = true });
+            Add(new HitBox(86, 85, 34, 12, ResGumps.Intelligence, 1) { CanMove = true });
+            Add(new HitBox(86, 97, 34, 12, ResGumps.Sex, 1) { CanMove = true });
+            Add(new HitBox(86, 109, 34, 12, ResGumps.Armor, 1) { CanMove = true });
+            Add(new HitBox(171, 61, 66, 12, ResGeneral.Hits, 1) { CanMove = true });
+            Add(new HitBox(171, 73, 66, 12, ResGeneral.Mana, 1) { CanMove = true });
+            Add(new HitBox(171, 85, 66, 12, ResGumps.Stamina, 1) { CanMove = true });
+            Add(new HitBox(171, 97, 66, 12, ResGumps.Gold, 1) { CanMove = true });
+            Add(new HitBox(171, 109, 66, 12, ResGeneral.Weight, 1) { CanMove = true });
 
             _point = p;
         }
@@ -354,7 +354,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _labels[(int)MobileStats.Strength].Text = World.Player.Strength.ToString();
                 _labels[(int)MobileStats.Dexterity].Text = World.Player.Dexterity.ToString();
                 _labels[(int)MobileStats.Intelligence].Text = World.Player.Intelligence.ToString();
-                _labels[(int)MobileStats.Sex].Text = World.Player.IsFemale ? "F" : "M";
+                _labels[(int)MobileStats.Sex].Text = World.Player.IsFemale ? ResGumps.Female : ResGumps.Male;
                 _labels[(int)MobileStats.AR].Text = World.Player.PhysicalResistance.ToString();
                 _labels[(int)MobileStats.HealthCurrent].Text = $"{World.Player.Hits}/{World.Player.HitsMax}";
                 _labels[(int)MobileStats.ManaCurrent].Text = $"{World.Player.Mana}/{World.Player.ManaMax}";
@@ -480,7 +480,7 @@ namespace ClassicUO.Game.UI.Gumps
                     xOffset = 80;
                     AddStatTextLabel(World.Player.HitChanceIncrease.ToString(), MobileStats.HitChanceInc, xOffset, 161);
 
-                    Add(new HitBox(58, 154, 59, 24, "Hit Chance Increase", 1) { CanMove = true });
+                    Add(new HitBox(58, 154, 59, 24, ResGumps.HitChanceIncrease, 1) { CanMove = true });
                 }
                 else
                 {
@@ -493,9 +493,9 @@ namespace ClassicUO.Game.UI.Gumps
                 AddStatTextLabel(World.Player.Intelligence.ToString(), MobileStats.Intelligence, xOffset, 133);
 
 
-                Add(new HitBox(58, 70, 59, 24, "Strength", 1) { CanMove = true });
-                Add(new HitBox(58, 98, 59, 24, "Dexterity", 1) { CanMove = true });
-                Add(new HitBox(58, 126, 59, 24, "Intelligence", 1) { CanMove = true });
+                Add(new HitBox(58, 70, 59, 24, ResGumps.Strength, 1) { CanMove = true });
+                Add(new HitBox(58, 98, 59, 24, ResGumps.Dexterity, 1) { CanMove = true });
+                Add(new HitBox(58, 126, 59, 24, ResGumps.Intelligence, 1) { CanMove = true });
 
                 int textWidth = 40;
 
@@ -504,7 +504,7 @@ namespace ClassicUO.Game.UI.Gumps
                     xOffset = 150;
 
                     AddStatTextLabel($"{World.Player.DefenseChanceIncrease}/{World.Player.MaxDefenseChanceIncrease}", MobileStats.DefenseChanceInc, xOffset, 161);
-                    Add(new HitBox(124, 154, 59, 24, "Defense Chance Increase", 1) { CanMove = true });
+                    Add(new HitBox(124, 154, 59, 24, ResGumps.DefenseChanceIncrease, 1) { CanMove = true });
                 }
                 else
                 {
@@ -529,16 +529,16 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(new Line(xOffset, 110, Math.Abs(xOffset - 185), 1, 0xFF383838));
                 Add(new Line(xOffset, 82, Math.Abs(xOffset - 185), 1, 0xFF383838));
 
-                Add(new HitBox(124, 70, 59, 24, "Hits Points", 1) { CanMove = true });
-                Add(new HitBox(124, 98, 59, 24, "Stamina", 1) { CanMove = true });
-                Add(new HitBox(124, 126, 59, 24, "Mana", 1) { CanMove = true });
+                Add(new HitBox(124, 70, 59, 24, ResGumps.HitPoints, 1) { CanMove = true });
+                Add(new HitBox(124, 98, 59, 24, ResGumps.Stamina, 1) { CanMove = true });
+                Add(new HitBox(124, 126, 59, 24, ResGeneral.Mana, 1) { CanMove = true });
                
                 if (Client.UseUOPGumps)
                 {
                     xOffset = 240;
 
                     AddStatTextLabel(World.Player.LowerManaCost.ToString(), MobileStats.LowerManaCost, xOffset, 162);
-                    Add(new HitBox(205, 154, 65, 24, "Lower Mana Cost", 1) { CanMove = true });
+                    Add(new HitBox(205, 154, 65, 24, ResGumps.LowerManaCost, 1) { CanMove = true });
                 }
                 else
                 {
@@ -558,9 +558,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 xOffset = Client.UseUOPGumps ? 205 : 188;
 
-                Add(new HitBox(xOffset, 70, 65, 24, "Maximum Stats", 1) { CanMove = true });
-                Add(new HitBox(xOffset, 98, 65, 24, "Luck", 1) { CanMove = true });
-                Add(new HitBox(xOffset, 126, 65, 24, "Weight", 1) { CanMove = true });
+                Add(new HitBox(xOffset, 70, 65, 24, ResGumps.MaximumStats, 1) { CanMove = true });
+                Add(new HitBox(xOffset, 98, 65, 24, ResGumps.Luck, 1) { CanMove = true });
+                Add(new HitBox(xOffset, 126, 65, 24, ResGeneral.Weight, 1) { CanMove = true });
 
                 if (Client.UseUOPGumps)
                 {
@@ -569,8 +569,8 @@ namespace ClassicUO.Game.UI.Gumps
                     AddStatTextLabel(World.Player.DamageIncrease.ToString(), MobileStats.DamageChanceInc, xOffset, 105);
                     AddStatTextLabel(World.Player.SwingSpeedIncrease.ToString(), MobileStats.SwingSpeedInc, xOffset, 161);
                  
-                    Add(new HitBox(285, 98, 69, 24, "Weapon Damage Increase", 1) { CanMove = true });
-                    Add(new HitBox(285, 154, 69, 24, "Swing Speed Increase", 1) { CanMove = true });
+                    Add(new HitBox(285, 98, 69, 24, ResGumps.WeaponDamageIncrease, 1) { CanMove = true });
+                    Add(new HitBox(285, 154, 69, 24, ResGumps.SwingSpeedIncrease, 1) { CanMove = true });
                 }
                 else
                 {
@@ -578,7 +578,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     AddStatTextLabel(World.Player.Gold.ToString(), MobileStats.Gold, xOffset, 105);
                     
-                    Add(new HitBox(260, 98, 69, 24, "Gold", 1) { CanMove = true });
+                    Add(new HitBox(260, 98, 69, 24, ResGumps.Gold, 1) { CanMove = true });
                 }
 
                 AddStatTextLabel($"{World.Player.DamageMin}-{World.Player.DamageMax}", MobileStats.Damage, xOffset, 77);
@@ -586,8 +586,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 xOffset = Client.UseUOPGumps ? 285 : 260;
 
-                Add(new HitBox(xOffset, 70, 69, 24, "Damage", 1) { CanMove = true });
-                Add(new HitBox(xOffset, 126, 69, 24, "Followers", 1) { CanMove = true });
+                Add(new HitBox(xOffset, 70, 69, 24, ResGumps.Damage, 1) { CanMove = true });
+                Add(new HitBox(xOffset, 126, 69, 24, ResGumps.Followers, 1) { CanMove = true });
 
                 if (Client.UseUOPGumps)
                 {
@@ -600,15 +600,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                     xOffset = 365;
 
-                    Add(new HitBox(xOffset, 70, 55, 24, "Lower Reagent Cost", 1) { CanMove = true });
-                    Add(new HitBox(xOffset, 98, 55, 24, "Spell Damage Increase", 1) { CanMove = true });
-                    Add(new HitBox(xOffset, 126, 55, 24, "Faster Casting", 1) { CanMove = true });
-                    Add(new HitBox(xOffset, 154, 55, 24, "Faster Cast Recovery", 1) { CanMove = true });
+                    Add(new HitBox(xOffset, 70, 55, 24, ResGumps.LowerReagentCost, 1) { CanMove = true });
+                    Add(new HitBox(xOffset, 98, 55, 24, ResGumps.SpellDamageIncrease, 1) { CanMove = true });
+                    Add(new HitBox(xOffset, 126, 55, 24, ResGumps.FasterCasting, 1) { CanMove = true });
+                    Add(new HitBox(xOffset, 154, 55, 24, ResGumps.FasterCastRecovery, 1) { CanMove = true });
 
                     xOffset = 480;
 
                     AddStatTextLabel(World.Player.Gold.ToString(), MobileStats.Gold, xOffset, 161);
-                    Add(new HitBox(445, 154, 55, 24, "Gold", 1) { CanMove = true });
+                    Add(new HitBox(445, 154, 55, 24, ResGumps.Gold, 1) { CanMove = true });
 
                     xOffset = 475;
 
@@ -631,11 +631,11 @@ namespace ClassicUO.Game.UI.Gumps
 
 
                 xOffset = Client.UseUOPGumps ? 445 : 334;
-                Add(new HitBox(xOffset, 76, 40, 14, "Physical Resistance", 1) { CanMove = true });
-                Add(new HitBox(xOffset, 92, 40, 14, "Fire Resistance", 1) { CanMove = true });
-                Add(new HitBox(xOffset, 106, 40, 14, "Cold Resistance", 1) { CanMove = true });
-                Add(new HitBox(xOffset, 120, 40, 14, "Poison Resistance", 1) { CanMove = true });
-                Add(new HitBox(xOffset, 134, 40, 14, "Energy Resistance", 1) { CanMove = true });
+                Add(new HitBox(xOffset, 76, 40, 14, ResGumps.PhysicalResistance, 1) { CanMove = true });
+                Add(new HitBox(xOffset, 92, 40, 14, ResGumps.FireResistance, 1) { CanMove = true });
+                Add(new HitBox(xOffset, 106, 40, 14, ResGumps.ColdResistance, 1) { CanMove = true });
+                Add(new HitBox(xOffset, 120, 40, 14, ResGumps.PoisonResistance, 1) { CanMove = true });
+                Add(new HitBox(xOffset, 134, 40, 14, ResGumps.EnergyResistance, 1) { CanMove = true });
             }
             else
             {
@@ -643,15 +643,15 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     AddStatTextLabel(World.Player.StatsCap.ToString(), MobileStats.StatCap, 171, 124);
 
-                    Add(new HitBox(171, 124, 34, 12, "Max Stats", 1) { CanMove = true });
+                    Add(new HitBox(171, 124, 34, 12, ResGumps.MaxStats, 1) { CanMove = true });
                 }
                 else if (Client.Version == ClientVersion.CV_308J)
                 {
                     AddStatTextLabel(World.Player.StatsCap.ToString(), MobileStats.StatCap, 180, 131);
                     AddStatTextLabel($"{World.Player.Followers}/{World.Player.FollowersMax}", MobileStats.Followers, 180, 144);
 
-                    Add(new HitBox(180, 131, 34, 12, "Max Stats", 1) { CanMove = true });
-                    Add(new HitBox(171, 144, 34, 12, "Followers", 1) { CanMove = true });
+                    Add(new HitBox(180, 131, 34, 12, ResGumps.MaxStats, 1) { CanMove = true });
+                    Add(new HitBox(171, 144, 34, 12, ResGumps.Followers, 1) { CanMove = true });
                 }
             }
 
@@ -662,7 +662,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            Add(new HitBox(p.X, p.Y, 16, 16, "Minimize", 1) { CanMove = true });
+            Add(new HitBox(p.X, p.Y, 16, 16, ResGumps.Minimize, 1) { CanMove = true });
 
             _point = p;
         }
@@ -809,7 +809,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = 40,
                     ButtonAction = ButtonAction.Activate
                 });
-                Add(new Label("Buffs", false, 0x0386, 60, 1) { X = 174, Y = 40 });
+                Add(new Label(ResGumps.Buffs, false, 0x0386, 60, 1) { X = 174, Y = 40 });
             }
 
             ushort gumpIdHp = 0x0806;

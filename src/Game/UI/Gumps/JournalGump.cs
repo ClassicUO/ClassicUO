@@ -30,6 +30,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -58,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             const ushort DARK_MODE_JOURNAL_HUE = 903;
 
-            string str = "Dark mode";
+            string str = ResGumps.DarkMode;
             int width = FontsLoader.Instance.GetWidthASCII(6, str);
 
             Checkbox darkMode;

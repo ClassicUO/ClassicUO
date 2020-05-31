@@ -30,6 +30,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Network;
+using ClassicUO.Resources;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
@@ -99,7 +100,7 @@ namespace ClassicUO.Game
 
                 if (m != null && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != World.Player)
                 {
-                    QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
+                    QuestionGump messageBox = new QuestionGump(ResGeneral.ThisMayFlagYouCriminal,
                                                                s =>
                                                                {
                                                                    if (s)
@@ -480,7 +481,7 @@ namespace ClassicUO.Game
 
             if (!World.Items.Contains(bag))
             {
-                Print("Grab Bag not found, setting to Backpack.");
+                Print(ResGeneral.GrabBagNotFound);
                 ProfileManager.Current.GrabBagSerial = 0;
                 bag = backpack.Serial;
             }

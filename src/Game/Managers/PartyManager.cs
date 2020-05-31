@@ -26,6 +26,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
+using ClassicUO.Resources;
 
 namespace ClassicUO.Game.Managers
 {
@@ -220,7 +221,7 @@ namespace ClassicUO.Game.Managers
                     _name = mobile.Name;
 
                     if (string.IsNullOrEmpty(_name))
-                        _name = "<not seeing>";
+                        _name = ResGeneral.NotSeeing;
                 }
 
                 return _name;

@@ -134,7 +134,7 @@ namespace ClassicUO.Game.UI.Gumps
             }, 1);
             _titleTextBox.SetText(title);
             _titleTextBox.TextChanged += PageZero_TextChanged;
-            Add(new Label("by", true, 1) { X = 40, Y = 130 }, 1);
+            Add(new Label(Resources.ResGumps.By, true, 1) { X = 40, Y = 130 }, 1);
             Add(_authorTextBox = new StbTextBox(DefaultFont, 29, 150, IsNewBook, FontStyle.None, 0)
             {
                 X = 40,

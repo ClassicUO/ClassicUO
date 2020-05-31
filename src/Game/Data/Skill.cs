@@ -59,7 +59,7 @@ namespace ClassicUO.Game.Data
 
         public override string ToString()
         {
-            return $"Name: {Name} - {Value:F1}";
+            return string.Format(Resources.ResGeneral.Name0Val1, Name, Value);
         }
     }
 }

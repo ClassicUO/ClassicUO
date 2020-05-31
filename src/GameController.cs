@@ -36,6 +36,7 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -542,7 +543,7 @@ namespace ClassicUO
                         {
                             texture.SetData(colors);
                             texture.SaveAsPng(fileStream, texture.Width, texture.Height);
-                            GameActions.Print($"Screenshot stored in: {path}", 0x44, MessageType.System);
+                            GameActions.Print(string.Format(ResGeneral.ScreenshotStoredIn0, path), 0x44, MessageType.System);
                         }
                     }
 

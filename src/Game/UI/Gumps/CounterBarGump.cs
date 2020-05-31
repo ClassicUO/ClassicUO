@@ -31,6 +31,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -285,7 +286,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        Log.Error("Index outbounds when parsing counter bar items");
+                        Log.Error(ResGumps.IndexOutOfbounds);
                     }
                 }
             }
@@ -319,8 +320,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_image);
 
                 ContextMenu = new ContextMenuControl();
-                ContextMenu.Add("Use object (Double click)", Use);
-                ContextMenu.Add("Remove (ALT + Right click)", RemoveItem);
+                ContextMenu.Add(ResGumps.UseObject, Use);
+                ContextMenu.Add(ResGumps.Remove, RemoveItem);
             }
 
             public ushort Graphic => _graphic;

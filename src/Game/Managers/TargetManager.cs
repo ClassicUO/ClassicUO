@@ -27,6 +27,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
+using ClassicUO.Resources;
 
 namespace ClassicUO.Game.Managers
 {
@@ -315,7 +316,7 @@ namespace ClassicUO.Game.Managers
                         if (SerialHelper.IsItem(serial))
                         {
                             ProfileManager.Current.GrabBagSerial = serial;
-                            GameActions.Print($"Grab Bag set: {serial}");
+                            GameActions.Print(string.Format(ResGeneral.GrabBagSet0, serial));
                         }
 
                         ClearTargetingWithoutTargetCancelPacket();

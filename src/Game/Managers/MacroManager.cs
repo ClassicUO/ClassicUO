@@ -33,6 +33,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Interfaces;
 using ClassicUO.Network;
+using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
 
 using SDL2;
@@ -145,7 +146,7 @@ namespace ClassicUO.Game.Managers
 
         private void CreateDefaultMacros()
         {
-            AppendMacro(new Macro("Paperdoll", (SDL.SDL_Keycode) 112, true, false, false)
+            AppendMacro(new Macro(ResGeneral.Paperdoll, (SDL.SDL_Keycode) 112, true, false, false)
             {
                 FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 10)
                 {
@@ -153,7 +154,7 @@ namespace ClassicUO.Game.Managers
                 }
             });
 
-            AppendMacro(new Macro("Options", (SDL.SDL_Keycode) 111, true, false, false)
+            AppendMacro(new Macro(ResGeneral.Options, (SDL.SDL_Keycode) 111, true, false, false)
             {
                 FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 9)
                 {
@@ -161,7 +162,7 @@ namespace ClassicUO.Game.Managers
                 }
             });
 
-            AppendMacro(new Macro("Journal", (SDL.SDL_Keycode) 106, true, false, false)
+            AppendMacro(new Macro(ResGeneral.Journal, (SDL.SDL_Keycode) 106, true, false, false)
             {
                 FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 12)
                 {
@@ -169,7 +170,7 @@ namespace ClassicUO.Game.Managers
                 }
             });
 
-            AppendMacro(new Macro("Backpack", (SDL.SDL_Keycode) 105, true, false, false)
+            AppendMacro(new Macro(ResGeneral.Backpack, (SDL.SDL_Keycode) 105, true, false, false)
             {
                 FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 16)
                 {
@@ -177,7 +178,7 @@ namespace ClassicUO.Game.Managers
                 }
             });
 
-            AppendMacro(new Macro("Radar", (SDL.SDL_Keycode) 114, true, false, false)
+            AppendMacro(new Macro(ResGeneral.Radar, (SDL.SDL_Keycode) 114, true, false, false)
             {
                 FirstNode = new MacroObject((MacroType) 8, (MacroSubType) 17)
                 {
@@ -185,7 +186,7 @@ namespace ClassicUO.Game.Managers
                 }
             });
 
-            AppendMacro(new Macro("Bow", (SDL.SDL_Keycode) 98, false, true, false)
+            AppendMacro(new Macro(ResGeneral.Bow, (SDL.SDL_Keycode) 98, false, true, false)
             {
                 FirstNode = new MacroObject((MacroType) 18, 0)
                 {
@@ -193,7 +194,7 @@ namespace ClassicUO.Game.Managers
                 }
             });
 
-            AppendMacro(new Macro("Salute", (SDL.SDL_Keycode) 115, false, true, false)
+            AppendMacro(new Macro(ResGeneral.Salute, (SDL.SDL_Keycode) 115, false, true, false)
             {
                 FirstNode = new MacroObject((MacroType) 19, 0)
                 {
@@ -365,7 +366,7 @@ namespace ClassicUO.Game.Managers
                         switch (macro.Code)
                         {
                             case MacroType.Emote:
-                                text = "*" + text + "*";
+                                text = ResGeneral.EmoteChar + text + ResGeneral.EmoteChar;
                                 type = MessageType.Emote;
                                 hue = ProfileManager.Current.EmoteHue;
 
@@ -1057,7 +1058,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.AlwaysRun:
                     ProfileManager.Current.AlwaysRun = !ProfileManager.Current.AlwaysRun;
-                    GameActions.Print($"Always run is now {(ProfileManager.Current.AlwaysRun ? "on" : "off")}.");
+                    GameActions.Print(ProfileManager.Current.AlwaysRun ? ResGeneral.AlwaysRunIsNowOn : ResGeneral.AlwaysRunIsNowOff);
 
                     break;
 
@@ -1120,7 +1121,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.TargetSystemOnOff:
 
-                    GameActions.Print("[WARN] - TargetSystem On/Off not implemented");
+                    GameActions.Print(ResGeneral.TargetSystemNotImplemented);
                     break;
 
                 case MacroType.BandageSelf:
@@ -1194,7 +1195,7 @@ namespace ClassicUO.Game.Managers
 
                         World.ClientViewRange = res;
 
-                        GameActions.Print($"ClientViewRange is now {res}.");
+                        GameActions.Print(string.Format(ResGeneral.ClientViewRangeIsNow0, res));
                     }
 
                     break;
@@ -1205,7 +1206,7 @@ namespace ClassicUO.Game.Managers
                     if (World.ClientViewRange > Constants.MAX_VIEW_RANGE)
                         World.ClientViewRange = Constants.MAX_VIEW_RANGE;
 
-                    GameActions.Print($"ClientViewRange is now {World.ClientViewRange}.");
+                    GameActions.Print(string.Format(ResGeneral.ClientViewRangeIsNow0, World.ClientViewRange));
 
                     break;
 
@@ -1214,25 +1215,25 @@ namespace ClassicUO.Game.Managers
 
                     if (World.ClientViewRange < Constants.MIN_VIEW_RANGE)
                         World.ClientViewRange = Constants.MIN_VIEW_RANGE;
-                    GameActions.Print($"ClientViewRange is now {World.ClientViewRange}.");
+                    GameActions.Print(string.Format(ResGeneral.ClientViewRangeIsNow0, World.ClientViewRange));
 
                     break;
 
                 case MacroType.MaxUpdateRange:
                     World.ClientViewRange = Constants.MAX_VIEW_RANGE;
-                    GameActions.Print($"ClientViewRange is now {World.ClientViewRange}.");
+                    GameActions.Print(string.Format(ResGeneral.ClientViewRangeIsNow0, World.ClientViewRange));
 
                     break;
 
                 case MacroType.MinUpdateRange:
                     World.ClientViewRange = Constants.MIN_VIEW_RANGE;
-                    GameActions.Print($"ClientViewRange is now {World.ClientViewRange}.");
+                    GameActions.Print(string.Format(ResGeneral.ClientViewRangeIsNow0, World.ClientViewRange));
 
                     break;
 
                 case MacroType.DefaultUpdateRange:
                     World.ClientViewRange = Constants.MAX_VIEW_RANGE;
-                    GameActions.Print($"ClientViewRange is now {World.ClientViewRange}.");
+                    GameActions.Print(string.Format(ResGeneral.ClientViewRangeIsNow0, World.ClientViewRange));
 
                     break;
 
@@ -1334,13 +1335,13 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.Grab:
-                    GameActions.Print("Target an Item to grab it.");
+                    GameActions.Print(ResGeneral.TargetAnItemToGrabIt);
                     TargetManager.SetTargeting(CursorTarget.Grab, 0, TargetType.Neutral);
 
                     break;
 
                 case MacroType.SetGrabBag:
-                    GameActions.Print("Target the container to Grab items into.");
+                    GameActions.Print(ResGumps.TargetContainerToGrabItemsInto);
                     TargetManager.SetTargeting(CursorTarget.SetGrabBag, 0, TargetType.Neutral);
 
                     break;
@@ -1412,7 +1413,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (ent != null)
                     {
-                        GameActions.MessageOverhead($"Target: {ent.Name}", Notoriety.GetHue(((Mobile) ent).NotorietyFlag), World.Player);
+                        GameActions.MessageOverhead(string.Format(ResGeneral.Target0, ent.Name), Notoriety.GetHue(((Mobile) ent).NotorietyFlag), World.Player);
                         TargetManager.SelectedTarget = serial;
                         TargetManager.LastTargetInfo.SetEntity(serial);
                         return;
@@ -1422,7 +1423,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (ent != null)
                     {
-                        GameActions.MessageOverhead($"Target: {ent.Name}", 992, World.Player);
+                        GameActions.MessageOverhead(string.Format(ResGeneral.Target0, ent.Name), 992, World.Player);
                         TargetManager.SelectedTarget = serial;
                         TargetManager.LastTargetInfo.SetEntity(serial);
                         return;
@@ -1430,7 +1431,7 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            GameActions.Print("Entity not found.");
+            GameActions.Print(ResGeneral.EntityNotFound);
         }
     }
 
