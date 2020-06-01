@@ -99,12 +99,12 @@ namespace ClassicUO.Game.UI.Gumps
                     SetActivePage(1);
             };
 
-            _bookPage = new StbPageTextBox(DefaultFont, BookPageCount, MAX_BOOK_CHARS_PER_LINE * MAX_BOOK_LINES, 154, IsNewBook, FontStyle.ExtraHeight, 2)
+            _bookPage = new StbPageTextBox(DefaultFont, BookPageCount, MAX_BOOK_CHARS_PER_LINE * MAX_BOOK_LINES, 156, IsNewBook, FontStyle.ExtraHeight, 2)
             {
                 X = 0,
                 Y = 0,
                 Height = PAGE_HEIGHT * BookPageCount,
-                Width = 154,
+                Width = 156,
                 IsEditable = IsEditable,
                 Multiline = true
             };
