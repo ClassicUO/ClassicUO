@@ -248,12 +248,6 @@ namespace ClassicUO.Game.UI.Gumps
             base.CloseWithRightClick();
         }
 
-        public override void Update(double totalMS, double frameMS)
-        {
-
-            base.Update(totalMS, frameMS);
-        }
-
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             base.Draw(batcher, x, y);
@@ -262,6 +256,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (startpage < BookPageCount)
             {
                 int poy = _bookPage._pageCoords[startpage, 0], phy = _bookPage._pageCoords[startpage, 1];
+                _bookPage.DrawSelection(batcher, x + RIGHT_X, y + UPPER_MARGIN, poy, poy + phy);
                 t.Draw(batcher, x + RIGHT_X, y + UPPER_MARGIN, 0, poy, t.Width, phy);
                 if (startpage == _bookPage._caretPage)
                 {
@@ -272,10 +267,11 @@ namespace ClassicUO.Game.UI.Gumps
             if(startpage > 0)
             {
                 int poy = _bookPage._pageCoords[startpage, 0], phy = _bookPage._pageCoords[startpage, 1];
+                _bookPage.DrawSelection(batcher, x + LEFT_X, y + UPPER_MARGIN, poy, poy + phy);
                 t.Draw(batcher, x + LEFT_X, y + UPPER_MARGIN, 0, poy, t.Width, phy);
                 if (startpage == _bookPage._caretPage)
                 {
-                    _bookPage.renderedCaret.Draw(batcher, _bookPage._caretPos.X + x + RIGHT_X, (_bookPage._caretPos.Y + y + UPPER_MARGIN) - poy, 0, 0, _bookPage.renderedCaret.Width, _bookPage.renderedCaret.Height);
+                    _bookPage.renderedCaret.Draw(batcher, _bookPage._caretPos.X + x + LEFT_X, (_bookPage._caretPos.Y + y + UPPER_MARGIN) - poy, 0, 0, _bookPage.renderedCaret.Width, _bookPage.renderedCaret.Height);
                 }
             }
             return true;
@@ -380,6 +376,81 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             private static readonly StringBuilder _sb = new StringBuilder();
+
+            internal void DrawSelection(UltimaBatcher2D batcher, int x, int y, int starty, int endy)
+            {
+                ResetHueVector();
+
+                int selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
+                int selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
+
+                if (selectStart < selectEnd)
+                {
+                    MultilinesFontInfo info = _rendererText.GetInfo();
+
+                    int drawY = 1;
+                    int start = 0;
+
+                    while (info != null && selectStart < selectEnd)
+                    {
+                        // ok we are inside the selection
+                        if (selectStart >= start && selectStart < start + info.CharCount)
+                        {
+                            int startSelectionIndex = selectStart - start;
+
+                            // calculate offset x
+                            int drawX = 0;
+                            for (int i = 0; i < startSelectionIndex; i++)
+                            {
+                                drawX += _rendererText.GetCharWidth(info.Data[i].Item);
+                            }
+
+                            // selection is gone. Bye bye
+                            if (selectEnd >= start && selectEnd < start + info.CharCount)
+                            {
+                                int count = selectEnd - selectStart;
+
+                                int endX = 0;
+
+                                // calculate width 
+                                for (int k = 0; k < count; k++)
+                                {
+                                    endX += _rendererText.GetCharWidth(info.Data[startSelectionIndex + k].Item);
+                                }
+
+                                if(drawY >= starty && drawY <= endy)
+                                    batcher.Draw2D(
+                                               Texture2DCache.GetTexture(Color.Magenta),
+                                               x + drawX,
+                                               y + drawY,
+                                               endX,
+                                               info.MaxHeight + 1,
+                                               ref _hueVector);
+
+                                break;
+                            }
+
+
+                            // do the whole line
+                            if (drawY >= starty && drawY <= endy)
+                                batcher.Draw2D(
+                                           Texture2DCache.GetTexture(Color.Magenta),
+                                           x + drawX,
+                                           y + drawY,
+                                           info.Width - drawX,
+                                            info.MaxHeight + 1,
+                                           ref _hueVector);
+
+                            // first selection is gone. M
+                            selectStart = start + info.CharCount;
+                        }
+
+                        start += info.CharCount;
+                        drawY += info.MaxHeight;
+                        info = info.Next;
+                    }
+                }
+            }
 
             protected override void OnTextChanged()
             {
