@@ -3613,22 +3613,36 @@ namespace ClassicUO.Network
                             break;
 
                         case 5:
-                            Mobile character = World.Mobiles.Get(serial);
 
-                            if (character != null)
+                            int pos = p.Position;
+                            byte zero = p.ReadByte();
+                            byte type2 = p.ReadByte();
+                            if (type2 == 0xFF)
                             {
-                                if (p.Length == 19)
+                                byte status = p.ReadByte();
+                                ushort animation = p.ReadUShort();
+                                ushort frame = p.ReadUShort();
+
+                                if (status == 0 && animation == 0 && frame == 0)
                                 {
-                                    character.IsDead = p.ReadBool();
+                                    p.Seek(pos);
+                                    goto case 0;
                                 }
-                                else if(p.Length == 17)//still animation
+                                else
                                 {
-                                    p.Skip(4);
-                                    byte animid = p.ReadByte();
-                                    p.Skip(1);
-                                    byte frameid = p.ReadByte();
-                                    character.SetAnimation(animid, frameid);
+                                    Mobile mobile = World.Mobiles.Get(serial);
+
+                                    if (mobile != null)
+                                    {
+                                        // TODO: animation for statues
+                                        //mobile.SetAnimation();
+                                    }
                                 }
+                            }
+                            else if (World.Player != null && serial == World.Player)
+                            {
+                                p.Seek(pos);
+                                goto case 2;
                             }
 
                             break;
