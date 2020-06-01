@@ -458,11 +458,11 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!NoReformat)
                 {
                     string[] split = Text.Split('\n');
-                    for (int i = 0; i < split.Length; i++, _sb.Append('\n'))
+                    for (int i = 0; i < split.Length; i++)
                     {
                         if (split[i].Length > 0)
                         {
-                            for (int p = 0, w = 0, pw = GetCharWidth(split[i][p]); ; p++, pw = GetCharWidth(split[i][p]))
+                            for (int p = 0, w = 0, pw = GetCharWidth(split[i][p]); ; pw = GetCharWidth(split[i][p]))
                             {
                                 if (w + pw > Width)
                                 {
@@ -471,10 +471,16 @@ namespace ClassicUO.Game.UI.Gumps
                                 }
                                 w += pw;
                                 _sb.Append(split[i][p]);
-                                if (p + 1 >= split[i].Length)
+                                p++;
+                                if (p >= split[i].Length)
+                                {
+                                    _sb.Append('\n');
                                     break;
+                                }
                             }
                         }
+                        else
+                            _sb.Append('\n');
                     }
                     split = _sb.ToString().Split('\n');
                     _sb.Clear();
