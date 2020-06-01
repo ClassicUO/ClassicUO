@@ -117,6 +117,7 @@ namespace ClassicUO.Game.UI.Gumps
                 IsEditable = IsEditable,
                 Text = title
             }, 1);
+            _titleTextBox.TextChanged += PageZero_TextChanged;
             Add(new Label("by", true, 1) { X = 40, Y = 130 }, 1);
             Add(_authorTextBox = new StbTextBox(DefaultFont, 29, 150, IsNewBook, FontStyle.None, 0)
             {
@@ -127,6 +128,7 @@ namespace ClassicUO.Game.UI.Gumps
                 IsEditable = IsEditable,
                 Text = author
             }, 1);
+            _authorTextBox.TextChanged += PageZero_TextChanged;
 
             for (int k = 1, x = 38; k <= BookPageCount; k++)
             {
@@ -146,6 +148,11 @@ namespace ClassicUO.Game.UI.Gumps
             UpdatePageButtonVisibility();
 
             Client.Game.Scene.Audio.PlaySound(0x0055);
+        }
+
+        private void PageZero_TextChanged(object sender, EventArgs e)
+        {
+            _pagesChanged[0] = true;
         }
 
         private void UpdatePageButtonVisibility()
