@@ -519,7 +519,7 @@ namespace ClassicUO.Game.UI.Gumps
                         if (i < split.Length)
                         {
                             if (!_pagesChanged[(i >> 3) + 1] && split[i] != _pageLines[i])
-                                _pagesChanged[(i >> 1) + 1] = true;
+                                _pagesChanged[(i >> 3) + 1] = true;
                             _sb.Append(_pageLines[i] = split[i]);
                         }
                         else
