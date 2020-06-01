@@ -331,7 +331,6 @@
     <Compile Include="Game\UI\Controls\DataBox.cs" />
     <Compile Include="Game\UI\Controls\HitBox.cs" />
     <Compile Include="Game\UI\Controls\Line.cs" />
-    <Compile Include="Game\UI\Gumps\BookGump.cs" />
     <Compile Include="Game\UI\Gumps\BuffGump.cs" />
     <Compile Include="Game\UI\Controls\Combobox.cs" />
     <Compile Include="Game\UI\Controls\HoveredLabel.cs" />

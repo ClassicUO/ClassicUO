@@ -1230,7 +1230,7 @@ namespace ClassicUO.Network
         {
             if (text == null)
             {
-                text = new string[BookGump.MAX_BOOK_LINES];
+                text = new string[ModernBookGump.MAX_BOOK_LINES];
                 for (int i = 0; i < text.Length; i++)
                     text[i] = string.Empty;
             }
