@@ -260,7 +260,22 @@ namespace ClassicUO.Game.UI.Gumps
                 t.Draw(batcher, x + RIGHT_X, y + UPPER_MARGIN, 0, poy, t.Width, phy);
                 if (startpage == _bookPage._caretPage)
                 {
-                    _bookPage.renderedCaret.Draw(batcher, _bookPage._caretPos.X + x + RIGHT_X, (_bookPage._caretPos.Y + y + UPPER_MARGIN) - poy, 0, 0, _bookPage.renderedCaret.Width, _bookPage.renderedCaret.Height);
+                    if (_bookPage._caretPos.Y < poy + phy)
+                    {
+                        if (_bookPage._caretPos.Y >= poy)
+                            _bookPage.renderedCaret.Draw(batcher, _bookPage._caretPos.X + x + RIGHT_X, (_bookPage._caretPos.Y + y + UPPER_MARGIN) - poy, 0, 0, _bookPage.renderedCaret.Width, _bookPage.renderedCaret.Height);
+                        else
+                            _bookPage._caretPage = _bookPage.GetCaretPage();
+                    }
+                    else if(_bookPage._caretPos.Y <= _bookPage.Height)
+                    {
+                        if (_bookPage._caretPage + 2 < _bookPage._pagesChanged.Length)
+                        {
+                            SetActivePage(_bookPage._caretPage / 2 + 2);
+                            _bookPage._caretPage++;
+                            _bookPage.MouseClick(_bookPage._caretPos.X, _bookPage._caretPos.Y);
+                        }
+                    }
                 }
             }
             startpage--;
@@ -271,7 +286,22 @@ namespace ClassicUO.Game.UI.Gumps
                 t.Draw(batcher, x + LEFT_X, y + UPPER_MARGIN, 0, poy, t.Width, phy);
                 if (startpage == _bookPage._caretPage)
                 {
-                    _bookPage.renderedCaret.Draw(batcher, _bookPage._caretPos.X + x + LEFT_X, (_bookPage._caretPos.Y + y + UPPER_MARGIN) - poy, 0, 0, _bookPage.renderedCaret.Width, _bookPage.renderedCaret.Height);
+                    if (_bookPage._caretPos.Y < poy + phy)
+                    {
+                        if (_bookPage._caretPos.Y >= poy)
+                            _bookPage.renderedCaret.Draw(batcher, _bookPage._caretPos.X + x + LEFT_X, (_bookPage._caretPos.Y + y + UPPER_MARGIN) - poy, 0, 0, _bookPage.renderedCaret.Width, _bookPage.renderedCaret.Height);
+                        else if (_bookPage._caretPage > 0)
+                        {
+                            SetActivePage(_bookPage._caretPage / 2);
+                            _bookPage._caretPage--;
+                            _bookPage.MouseClick(_bookPage._caretPos.X, _bookPage._caretPos.Y);
+                        }
+                    }
+                    else if (_bookPage._caretPos.Y <= _bookPage.Height)
+                    {
+                        if (_bookPage._caretPage + 2 < _bookPage._pagesChanged.Length)
+                            _bookPage._caretPage++;
+                    }
                 }
             }
             return true;
@@ -311,10 +341,10 @@ namespace ClassicUO.Game.UI.Gumps
             internal int _caretPage;
             internal int GetCaretPage()
             {
-                Point p = _rendererCaret.GetCaretPosition(CaretIndex);
+                Point p = _rendererText.GetCaretPosition(CaretIndex);
                 for(int i = 0, l = _pageCoords.GetLength(0); i < l; i++)
                 {
-                    if (p.Y >= _pageCoords[i, 0] || p.Y < _pageCoords[i, 1])
+                    if (p.Y >= _pageCoords[i, 0] && p.Y < _pageCoords[i,0] + _pageCoords[i, 1])
                         return i;
                 }
                 return 0;
@@ -334,7 +364,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (!NoSelection)
                         _leftWasDown = true;
                     
-                    Stb.Click(ScreenCoordinateX + x, ScreenCoordinateY + y);
+                    Stb.Click(x, y);
                     UpdateCaretScreenPosition();
                     _caretPage = GetCaretPage();
                 }
@@ -422,7 +452,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     batcher.Draw2D(
                                                Texture2DCache.GetTexture(Color.Magenta),
                                                x + drawX,
-                                               y + drawY,
+                                               y + drawY - starty,
                                                endX,
                                                info.MaxHeight + 1,
                                                ref _hueVector);
@@ -436,7 +466,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 batcher.Draw2D(
                                            Texture2DCache.GetTexture(Color.Magenta),
                                            x + drawX,
-                                           y + drawY,
+                                           y + drawY - starty,
                                            info.Width - drawX,
                                             info.MaxHeight + 1,
                                            ref _hueVector);
