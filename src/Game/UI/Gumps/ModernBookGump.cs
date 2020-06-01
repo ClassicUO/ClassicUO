@@ -488,8 +488,9 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!NoReformat)
                 {
                     string[] split = Text.Split('\n');
-                    for (int i = 0; i < split.Length; i++)
+                    for (int i = 0, t = 0; i < split.Length; i++)
                     {
+                        t += split[i].Length;
                         if (split[i].Length > 0)
                         {
                             for (int p = 0, w = 0, pw = GetCharWidth(split[i][p]); ; pw = GetCharWidth(split[i][p]))
@@ -497,6 +498,8 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (w + pw > Width)
                                 {
                                     _sb.Append('\n');
+                                    if(t + (i - 1) == CaretIndex)
+                                        CaretIndex++;
                                     w = 0;
                                 }
                                 w += pw;
