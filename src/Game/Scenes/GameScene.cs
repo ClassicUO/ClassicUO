@@ -273,8 +273,8 @@ namespace ClassicUO.Game.Scenes
 
                     break;
             }
-
-            World.Journal.Add(text, hue, name, e.IsUnicode);
+            if (!string.IsNullOrEmpty(text))
+                World.Journal.Add(text, hue, name, e.IsUnicode);
         }
 
         public override void Unload()
