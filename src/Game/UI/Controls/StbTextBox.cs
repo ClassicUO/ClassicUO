@@ -23,8 +23,8 @@ namespace ClassicUO.Game.UI.Controls
         protected RenderedText _rendererText, _rendererCaret;
 
         private int _maxCharCount = -1;
-        private Point _caretScreenPosition;
-        private bool _leftWasDown, _fromServer;
+        protected Point _caretScreenPosition;
+        protected bool _leftWasDown, _fromServer;
         private ushort _hue;
         private FontStyle _fontStyle;
 
@@ -195,7 +195,7 @@ namespace ClassicUO.Game.UI.Controls
             _stb.SelectEnd = Length;
         }
 
-        private void UpdateCaretScreenPosition()
+        protected void UpdateCaretScreenPosition()
         {
             _caretScreenPosition = _rendererText.GetCaretPosition(_stb.CursorIndex);
         }
