@@ -93,6 +93,7 @@ namespace ClassicUO
 
             IsFixedTimeStep = false; // Settings.GlobalSettings.FixedTimeStep;
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0f / 250);
+            InactiveSleepTime= TimeSpan.Zero;
 
             SetRefreshRate(Settings.GlobalSettings.FPS);
             _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice);
@@ -141,6 +142,7 @@ namespace ClassicUO
 
             AuraManager.CreateAuraTexture();
             UIManager.InitializeGameCursor();
+            AnimatedStaticsManager.Initialize();
 
             SetScene(new LoginScene());
             SetWindowPositionBySettings();

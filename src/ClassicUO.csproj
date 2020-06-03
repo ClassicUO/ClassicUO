@@ -133,6 +133,7 @@
     <Compile Include="Game\Data\RaceType.cs" />
     <Compile Include="Game\Data\Waypoints.cs" />
     <Compile Include="Game\Managers\ActiveIconsManager.cs" />
+    <Compile Include="Game\Managers\AnimatedStaticsManager.cs" />
     <Compile Include="Game\Managers\BoatMovingManager.cs" />
     <Compile Include="Game\Managers\DelayedObjectClickManager.cs" />
     <Compile Include="Game\Managers\Seasons.cs" />

@@ -155,7 +155,7 @@ namespace ClassicUO.IO.Resources
 
         public unsafe ushort[] GetGumpPixels(uint index, out int width, out int height)
         {
-            ref readonly var entry = ref GetValidRefEntry((int) index);
+            ref var entry = ref GetValidRefEntry((int) index);
 
             if (entry.Width <= 0 && entry.Height <= 0)
             {

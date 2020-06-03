@@ -93,7 +93,7 @@ namespace ClassicUO.IO.Resources
 
         private ushort[] GetLight(uint idx, out int width, out int height)
         {
-            ref readonly var entry = ref GetValidRefEntry((int) idx);
+            ref var entry = ref GetValidRefEntry((int) idx);
 
             width = entry.Width;
             height = entry.Height;

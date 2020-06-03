@@ -72,7 +72,7 @@ namespace ClassicUO.IO.Resources
             //
         }
 
-
+        public UOFile AnimDataFile => _file;
 
         public IntPtr GetAddressToAnim(ushort graphic)
         {

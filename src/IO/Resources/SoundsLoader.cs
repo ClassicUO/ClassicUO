@@ -223,7 +223,7 @@ namespace ClassicUO.IO.Resources
             if (sound < 0)
                 return false;
 
-            ref readonly var entry = ref GetValidRefEntry(sound);
+            ref var entry = ref GetValidRefEntry(sound);
 
             _file.Seek(entry.Offset);
 

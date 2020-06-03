@@ -559,6 +559,7 @@ namespace ClassicUO.Game.Scenes
 
             _healthLinesManager.Update();
             World.Update(totalMS, frameMS);
+            AnimatedStaticsManager.Process();
             BoatMovingManager.Update();
             Pathfinder.ProcessAutoWalk();
             DelayedObjectClickManager.Update();

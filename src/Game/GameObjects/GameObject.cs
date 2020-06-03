@@ -47,7 +47,6 @@ namespace ClassicUO.Game.GameObjects
         public sbyte Z;
         public ushort Hue;
         public ushort Graphic;
-        public sbyte AnimIndex;
         public int CurrentRenderIndex;
         public byte UseInRender;
         public short PriorityZ;
@@ -255,7 +254,6 @@ namespace ClassicUO.Game.GameObjects
             PriorityZ = 0;
             IsPositionChanged = false;
             Hue = 0;
-            AnimIndex = 0;
             Offset = Vector3.Zero;
             CurrentRenderIndex = 0;
             UseInRender = 0;
@@ -264,11 +262,8 @@ namespace ClassicUO.Game.GameObjects
             IsFlipped = false;
             Graphic = 0;
             UseObjectHandles = ClosedObjectHandles = ObjectHandlesOpened = false;
-            Bounds = Rectangle.Empty;
             FrameInfo = Rectangle.Empty;
             DrawTransparent = false;
-
-            Texture = null;
         }
     }
 }

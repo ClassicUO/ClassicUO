@@ -127,7 +127,7 @@ namespace ClassicUO.IO.Resources
 
             if (entry < _file.Length && entry >= 0)
             {
-                ref readonly UOFileIndex e = ref GetValidRefEntry(entry);
+                ref UOFileIndex e = ref GetValidRefEntry(entry);
 
                 address = _file.StartAddress.ToInt64() + e.Offset;
                 size = e.DecompressedLength == 0 ? e.Length : e.DecompressedLength;
@@ -177,7 +177,7 @@ namespace ClassicUO.IO.Resources
             imageRectangle.Width = 0;
             imageRectangle.Height = 0;
 
-            ref readonly var entry = ref GetValidRefEntry(graphic + 0x4000);
+            ref var entry = ref GetValidRefEntry(graphic + 0x4000);
 
             if (entry.Length == 0)
             {
@@ -322,7 +322,7 @@ namespace ClassicUO.IO.Resources
                 graphic = Constants.TREE_REPLACE_GRAPHIC;
             }
 
-            ref readonly var entry = ref GetValidRefEntry(graphic + 0x4000);
+            ref var entry = ref GetValidRefEntry(graphic + 0x4000);
 
             if (entry.Length == 0)
             {
@@ -457,6 +457,9 @@ namespace ClassicUO.IO.Resources
             imageRectangle.Width = maxX - minX;
             imageRectangle.Height = maxY - minY;
 
+            entry.Width = (short) ((width >> 1) - 22);
+            entry.Height = (short) (height - 44);
+
             texture = new ArtTexture(imageRectangle, width, height);
             texture.PushData(pixels);
         }
@@ -466,7 +469,7 @@ namespace ClassicUO.IO.Resources
             const int SIZE = 44 * 44;
 
             graphic &= _graphicMask;
-            ref readonly var entry = ref GetValidRefEntry(graphic);
+            ref var entry = ref GetValidRefEntry(graphic);
 
             if (entry.Length == 0)
             {

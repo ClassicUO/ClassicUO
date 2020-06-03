@@ -32,10 +32,9 @@ using IDrawable = ClassicUO.Interfaces.IDrawable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    internal abstract partial class GameObject : IDrawable
+    internal abstract partial class GameObject
     {
         protected static Vector3 HueVector;
-        public Rectangle Bounds;
         public Rectangle FrameInfo;
 
         protected bool IsFlipped;
@@ -52,7 +51,6 @@ namespace ClassicUO.Game.GameObjects
 
         public bool AllowedToDraw { get; set; } = true;
 
-        public UOTexture Texture { get; set; }
 
         private static readonly Lazy<DepthStencilState> _stencil = new Lazy<DepthStencilState>(() =>
         {
@@ -99,57 +97,57 @@ namespace ClassicUO.Game.GameObjects
 
 
 
-            if (DrawTransparent)
-            {
-                int maxDist = ProfileManager.Current.CircleOfTransparencyRadius + 44;
+            //if (DrawTransparent)
+            //{
+            //    int maxDist = ProfileManager.Current.CircleOfTransparencyRadius + 44;
 
-                int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
-                int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
+            //    int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
+            //    int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
 
-                fx -= posX;
-                fy -= posY;
-                int dist = (int) Math.Sqrt(fx * fx + fy * fy);
+            //    fx -= posX;
+            //    fy -= posY;
+            //    int dist = (int) Math.Sqrt(fx * fx + fy * fy);
 
-                //dist = Math.Max(Math.Abs(fx - x), Math.Abs(fy - y));
+            //    //dist = Math.Max(Math.Abs(fx - x), Math.Abs(fy - y));
 
-                if (dist <= maxDist)
-                {
-                    switch (ProfileManager.Current.CircleOfTransparencyType)
-                    {
-                        default:
-                        case 0:
-                            HueVector.Z = 0.75f;
-                            break;
-                        case 1:
-                            HueVector.Z = MathHelper.Lerp(1f, 0f, (dist / (float) maxDist));
-                            break;
-                    }
+            //    if (dist <= maxDist)
+            //    {
+            //        switch (ProfileManager.Current.CircleOfTransparencyType)
+            //        {
+            //            default:
+            //            case 0:
+            //                HueVector.Z = 0.75f;
+            //                break;
+            //            case 1:
+            //                HueVector.Z = MathHelper.Lerp(1f, 0f, (dist / (float) maxDist));
+            //                break;
+            //        }
 
-                    batcher.DrawSprite(Texture, posX - Bounds.X, posY - Bounds.Y, IsFlipped, ref HueVector);
+            //        batcher.DrawSprite(Texture, posX - Bounds.X, posY - Bounds.Y, IsFlipped, ref HueVector);
 
-                    if (AlphaHue != 255)
-                        HueVector.Z = 1f - AlphaHue / 255f;
-                    else
-                        HueVector.Z = 0;
+            //        if (AlphaHue != 255)
+            //            HueVector.Z = 1f - AlphaHue / 255f;
+            //        else
+            //            HueVector.Z = 0;
 
-                    batcher.SetStencil(_stencil.Value);
-                    batcher.DrawSprite(Texture, posX - Bounds.X, posY - Bounds.Y, IsFlipped, ref HueVector);
-                    batcher.SetStencil(null);
-                    goto COT;
-                }
-            }
+            //        batcher.SetStencil(_stencil.Value);
+            //        batcher.DrawSprite(Texture, posX - Bounds.X, posY - Bounds.Y, IsFlipped, ref HueVector);
+            //        batcher.SetStencil(null);
+            //        goto COT;
+            //    }
+            //}
 
-            if (AlphaHue != 255)
-                HueVector.Z = 1f - AlphaHue / 255f;
+            //if (AlphaHue != 255)
+            //    HueVector.Z = 1f - AlphaHue / 255f;
 
-            if (!batcher.DrawSprite(Texture, posX - Bounds.X, posY - Bounds.Y, IsFlipped, ref HueVector))
-                return false;
+            //if (!batcher.DrawSprite(Texture, posX - Bounds.X, posY - Bounds.Y, IsFlipped, ref HueVector))
+            //    return false;
 
-            COT:
+            //COT:
 
-            Select(posX, posY);
+            //Select(posX, posY);
 
-            Texture.Ticks = Time.Ticks;
+            //Texture.Ticks = Time.Ticks;
 
             return true;
         }
@@ -215,11 +213,6 @@ namespace ClassicUO.Game.GameObjects
             AlphaHue = (byte) alpha;
 
             return result;
-        }
-
-
-        public virtual void Select(int x, int y)
-        {
         }
     }
 }
