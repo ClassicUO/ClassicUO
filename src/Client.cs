@@ -31,6 +31,9 @@ using ClassicUO.Network;
 using ClassicUO.Utility.Platforms;
 
 using SDL2;
+using ClassicUO.Renderer;
+using ClassicUO.IO.Resources;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO
 {
@@ -166,6 +169,34 @@ namespace ClassicUO
             UoAssist.Start();
 
             Log.Trace(">>>>>>>>>>>>> DONE >>>>>>>>>>>>>");
+        }
+
+
+        public static void DrawLand(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
+        {
+            var texture = ArtLoader.Instance.GetLandTexture(graphic);
+            if (texture != null)
+            {
+                texture.Ticks = Time.Ticks;
+
+                batcher.DrawSprite(texture, x, y, false, ref hue);
+            }
+        }
+
+        public static void DrawLand(
+            UltimaBatcher2D batcher,
+            ushort graphic, int x, int y, 
+            ref Rectangle rectangle,
+            ref Vector3 n0, ref Vector3 n1, ref Vector3 n2, ref Vector3 n3,
+            ref Vector3 hue)
+        {
+            var texture = TexmapsLoader.Instance.GetTexture(graphic);
+            if (texture != null)
+            {
+                texture.Ticks = Time.Ticks;
+
+                batcher.DrawSpriteLand(texture, x, y, ref rectangle, ref n0, ref n1, ref n2, ref n3, ref hue);
+            }
         }
     }
 }
