@@ -181,27 +181,27 @@ namespace ClassicUO.Game.GameObjects
                     x += 22;
                     y += (int) (m.Offset.Y - m.Offset.Z - (height + centerY + 8));
                 }
-                else if (Parent.Texture != null)
+                else
                 {
-                    x += 22;
-                    int yValue = Parent.Texture.Height >> 1;
+                    ArtTexture texture = ArtLoader.Instance.GetTexture(Parent.Graphic);
 
-                    if (Parent is Item it)
+                    if (texture != null)
                     {
-                        if (it.IsCorpse)
-                            offY = -22;
-                        else if (it.ItemData.IsAnimated)
+                        x += 22;
+                        int yValue = texture.Height >> 1;
+
+                        if (Parent is Item it)
                         {
-                            ArtTexture texture = ArtLoader.Instance.GetTexture(it.Graphic);
-
-                            if (texture != null)
-                                yValue = texture.Height >> 1;
+                            if (it.IsCorpse)
+                                offY = -22;
                         }
-                    }
-                    else if (Parent is Static || Parent is Multi)
-                        offY = -44;
+                        else if (Parent is Static || Parent is Multi)
+                            offY = -44;
 
-                    y -= yValue;
+                        y -= yValue;
+                    }
+
+                   
                 }
             }
 

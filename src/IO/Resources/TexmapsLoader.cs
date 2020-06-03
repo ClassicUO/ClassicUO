@@ -172,7 +172,7 @@ namespace ClassicUO.IO.Resources
 
         private ushort[] GetTextmapTexture(ushort index, out int size)
         {
-            ref readonly var entry = ref GetValidRefEntry(index);
+            ref var entry = ref GetValidRefEntry(index);
 
             if (entry.Length <= 0)
             {

@@ -244,11 +244,11 @@ namespace ClassicUO.Game
         }
 
         [MethodImpl(256)]
-        public static bool IsPointInLand(UOTexture texture, int x, int y)
+        public static bool IsPointInLand(int x, int y)
         {
             x = TranslatedMousePositionByViewport.X - x;
             y = TranslatedMousePositionByViewport.Y - y;
-            return texture != null && x >= 0 && x < 44 && y >= 0 && y < 44 && _InternalArea[x, y];
+            return x >= 0 && x < 44 && y >= 0 && y < 44 && _InternalArea[x, y];
         }
 
         public static bool IsPointInStretchedLand(ref Rectangle rect, int x, int y)

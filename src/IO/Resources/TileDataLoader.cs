@@ -382,6 +382,8 @@ namespace ClassicUO.IO.Resources
             IsNoShoot = (Flags & TileFlag.NoShoot) != 0;
             IsWeapon = (Flags & TileFlag.Weapon) != 0;
             IsMultiMovable = (Flags & TileFlag.MultiMovable) != 0;
+
+            Offset = 0;
         }
 
         public TileFlag Flags;
@@ -416,6 +418,8 @@ namespace ClassicUO.IO.Resources
         public bool IsNoShoot;
         public bool IsWeapon;
         public bool IsMultiMovable;
+
+        public sbyte Offset;
     }
 
     // old

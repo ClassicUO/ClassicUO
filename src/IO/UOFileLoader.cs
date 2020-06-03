@@ -36,7 +36,7 @@ namespace ClassicUO.IO
 
         public abstract Task Load();
 
-        public ref readonly UOFileIndex GetValidRefEntry(int index)
+        public ref UOFileIndex GetValidRefEntry(int index)
         {
             if (index < 0 || Entries == null || index >= Entries.Length)
                 return ref UOFileIndex.Invalid;

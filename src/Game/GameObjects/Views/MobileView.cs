@@ -499,8 +499,10 @@ namespace ClassicUO.Game.GameObjects
                             owner.FrameInfo.Height = yy + frame.Height;
                     }
 
-                    owner.Texture = frame;
-                    owner.Select(mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y);
+                    if (frame.Contains(mirror ? x + frame.Width - SelectedObject.TranslatedMousePositionByViewport.X : SelectedObject.TranslatedMousePositionByViewport.X - x, SelectedObject.TranslatedMousePositionByViewport.Y - y))
+                    {
+                        SelectedObject.Object = owner;
+                    }
 
                     if (entity != null && entity.ItemData.IsLight)
                         Client.Game.GetScene<GameScene>().AddLight(owner, entity, mirror ? x + frame.Width : x, y);
@@ -510,12 +512,6 @@ namespace ClassicUO.Game.GameObjects
             }
 
             return 0;
-        }
-
-        public override void Select(int x, int y)
-        {
-            if (Texture.Contains(x, y)) 
-                SelectedObject.Object = this;
         }
 
         internal static bool IsCovered(Mobile mobile, Layer layer)

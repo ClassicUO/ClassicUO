@@ -31,6 +31,10 @@ using ClassicUO.Network;
 using ClassicUO.Utility.Platforms;
 
 using SDL2;
+using ClassicUO.Renderer;
+using ClassicUO.IO.Resources;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO
 {
@@ -167,5 +171,97 @@ namespace ClassicUO
 
             Log.Trace(">>>>>>>>>>>>> DONE >>>>>>>>>>>>>");
         }
+
+
+        public static void DrawLand(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
+        {
+            var texture = ArtLoader.Instance.GetLandTexture(graphic);
+            if (texture != null)
+            {
+                texture.Ticks = Time.Ticks;
+
+                batcher.DrawSprite(texture, x, y, false, ref hue);
+            }
+        }
+
+        public static void DrawLand(
+            UltimaBatcher2D batcher,
+            ushort graphic, int x, int y, 
+            ref Rectangle rectangle,
+            ref Vector3 n0, ref Vector3 n1, ref Vector3 n2, ref Vector3 n3,
+            ref Vector3 hue)
+        {
+            var texture = TexmapsLoader.Instance.GetTexture(graphic);
+            if (texture != null)
+            {
+                texture.Ticks = Time.Ticks;
+
+                batcher.DrawSpriteLand(texture, x, y, ref rectangle, ref n0, ref n1, ref n2, ref n3, ref hue);
+            }
+        }
+
+        public static void DrawStatic(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
+        {
+            var texture = ArtLoader.Instance.GetTexture(graphic);
+            if (texture != null)
+            {
+                texture.Ticks = Time.Ticks;
+                ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+
+                batcher.DrawSprite(texture, x - index.Width, y - index.Height, false, ref hue);
+            }
+        }
+
+        public static void DrawGump(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
+        {
+            var texture = GumpsLoader.Instance.GetTexture(graphic);
+            if (texture != null)
+            {
+                texture.Ticks = Time.Ticks;
+
+                batcher.DrawSprite(texture, x, y, false, ref hue);
+            }
+        }
+
+        public static void DrawStaticRotated(UltimaBatcher2D batcher, ushort graphic, int x, int y, int destX, int destY, float angle, ref Vector3 hue)
+        {
+            var texture = ArtLoader.Instance.GetTexture(graphic);
+            if (texture != null)
+            {
+                texture.Ticks = Time.Ticks;
+
+                batcher.DrawSpriteRotated(texture, x, y, destX, destY, ref hue, angle);
+            }
+        }
+
+        public static void DrawStaticAnimated(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
+        {
+            graphic = (ushort) (graphic + TileDataLoader.Instance.StaticData[graphic].Offset);
+
+            var texture = ArtLoader.Instance.GetTexture(graphic);
+            if (texture != null)
+            {
+                texture.Ticks = Time.Ticks;
+                ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+
+                batcher.DrawSprite(texture, x - index.Width, y - index.Height, false, ref hue);
+            }
+        }
+
+        public static readonly Lazy<DepthStencilState> StaticTransparentStencil = new Lazy<DepthStencilState>(() =>
+        {
+            DepthStencilState state = new DepthStencilState
+            {
+                StencilEnable = true,
+                StencilFunction = CompareFunction.GreaterEqual,
+                StencilPass = StencilOperation.Keep,
+                ReferenceStencil = 0,
+                //DepthBufferEnable = true,
+                //DepthBufferWriteEnable = true,
+            };
+
+
+            return state;
+        });
     }
 }

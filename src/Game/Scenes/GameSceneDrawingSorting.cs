@@ -401,17 +401,20 @@ namespace ClassicUO.Game.Scenes
                         _objectHandles[index] = obj;
                         obj.UseObjectHandles = true;
                         _objectHandlesCount++;
+                        obj.UpdateTextCoordsV();
                     }
                 }
                 else if (obj.ClosedObjectHandles)
                 {
                     obj.ClosedObjectHandles = false;
                     obj.ObjectHandlesOpened = false;
+                    obj.UpdateTextCoordsV();
                 }
                 else if (obj.UseObjectHandles)
                 {
                     obj.ObjectHandlesOpened = false;
                     obj.UseObjectHandles = false;
+                    obj.UpdateTextCoordsV();
                 }
 
 

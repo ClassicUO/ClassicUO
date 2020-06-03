@@ -42,9 +42,9 @@ namespace ClassicUO.Game.GameObjects
             Serial = serial;
         }
 
-
-        public uint LastStepTime;
         protected long LastAnimationChangeTime;
+        public sbyte AnimIndex;
+        public uint LastStepTime;
         public uint Serial;
         public bool IsClicked;
         public ushort Hits;
@@ -155,6 +155,8 @@ namespace ClassicUO.Game.GameObjects
         {
             base.Destroy();
 
+            AnimIndex = 0;
+            LastAnimationChangeTime = 0;
             HitsTexture?.Destroy();
             HitsTexture = null;
         }
