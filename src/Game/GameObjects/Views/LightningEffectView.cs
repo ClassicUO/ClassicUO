@@ -91,7 +91,7 @@ namespace ClassicUO.Game.GameObjects
             posY -= index.Height;
 
             batcher.SetBlendState(BlendState.Additive);
-            Client.DrawGump(batcher, AnimationGraphic, posX, posY, ref HueVector);
+            DrawGump(batcher, AnimationGraphic, posX, posY, ref HueVector);
             batcher.SetBlendState(null);
 
             return true;

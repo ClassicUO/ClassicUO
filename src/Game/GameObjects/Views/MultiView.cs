@@ -147,15 +147,15 @@ namespace ClassicUO.Game.GameObjects
                             break;
                     }
 
-                    Client.DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
+                    DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
 
                     if (AlphaHue != 255)
                         HueVector.Z = 1f - AlphaHue / 255f;
                     else
                         HueVector.Z = 0;
 
-                    batcher.SetStencil(Client.StaticTransparentStencil.Value);
-                    Client.DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
+                    batcher.SetStencil(StaticTransparentStencil.Value);
+                    DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
                     batcher.SetStencil(null);
                 }
                 else
@@ -163,7 +163,7 @@ namespace ClassicUO.Game.GameObjects
                     if (AlphaHue != 255)
                         HueVector.Z = 1f - AlphaHue / 255f;
 
-                    Client.DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
+                    DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
                 }
             }
             else
@@ -171,7 +171,7 @@ namespace ClassicUO.Game.GameObjects
                 if (AlphaHue != 255)
                     HueVector.Z = 1f - AlphaHue / 255f;
 
-                Client.DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
+                DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
             }
 
             if (ItemData.IsLight)

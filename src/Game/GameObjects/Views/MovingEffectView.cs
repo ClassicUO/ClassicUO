@@ -68,14 +68,14 @@ namespace ClassicUO.Game.GameObjects
 
             if (FixedDir)
             {
-                Client.DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
+                DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
             }
             else
             {
                 posX += (int) Offset.X;
                 posY += (int) (Offset.Y + Offset.Z);
 
-                Client.DrawStaticRotated(batcher, AnimationGraphic, posX, posY, 0, 0, AngleToTarget, ref HueVector);
+                DrawStaticRotated(batcher, AnimationGraphic, posX, posY, 0, 0, AngleToTarget, ref HueVector);
             }
 
             //if (FixedDir)

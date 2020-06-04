@@ -135,7 +135,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 case GraphicEffectBlendMode.Multiply:
                     batcher.SetBlendState(_multiplyBlendState.Value);
-                    Client.DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
+                    DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
                     batcher.SetBlendState(null);
 
                     break;
@@ -143,28 +143,28 @@ namespace ClassicUO.Game.GameObjects
                 case GraphicEffectBlendMode.Screen:
                 case GraphicEffectBlendMode.ScreenMore:
                     batcher.SetBlendState(_screenBlendState.Value);
-                    Client.DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
+                    DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
                     batcher.SetBlendState(null);
 
                     break;
 
                 case GraphicEffectBlendMode.ScreenLess:
                     batcher.SetBlendState(_screenLessBlendState.Value);
-                    Client.DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
+                    DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
                     batcher.SetBlendState(null);
 
                     break;
 
                 case GraphicEffectBlendMode.NormalHalfTransparent:
                     batcher.SetBlendState(_normalHalfBlendState.Value);
-                    Client.DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
+                    DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
                     batcher.SetBlendState(null);
 
                     break;
 
                 case GraphicEffectBlendMode.ShadowBlue:
                     batcher.SetBlendState(_shadowBlueBlendState.Value);
-                    Client.DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
+                    DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
                     batcher.SetBlendState(null);
 
                     break;
@@ -182,7 +182,7 @@ namespace ClassicUO.Game.GameObjects
                     //}
                     //else
 
-                    Client.DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
+                    DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
 
                     break;
             }

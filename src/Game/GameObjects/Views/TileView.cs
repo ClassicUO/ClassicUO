@@ -70,7 +70,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 posY += (Z << 2);
 
-                Client.DrawLand(
+                DrawLand(
                     batcher,
                     Graphic, posX, posY, 
                     ref Rectangle, ref Normal0, ref Normal1, ref Normal2, ref Normal3,
@@ -81,7 +81,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                Client.DrawLand(batcher, Graphic, posX, posY, ref HueVector);
+                DrawLand(batcher, Graphic, posX, posY, ref HueVector);
 
                 if (SelectedObject.IsPointInLand(posX, posY))
                     SelectedObject.Object = this;

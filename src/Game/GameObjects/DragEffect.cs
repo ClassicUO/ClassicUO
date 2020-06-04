@@ -104,7 +104,7 @@ namespace ClassicUO.Game.GameObjects
             //Engine.DebugInfo.EffectsRendered++;
             //base.Draw(batcher, posX, posY);
 
-            Client.DrawStatic(batcher, AnimationGraphic, posX - ((int) Offset.X + 22), posY - ((int) -Offset.Y + 22), ref HueVector);
+            DrawStatic(batcher, AnimationGraphic, posX - ((int) Offset.X + 22), posY - ((int) -Offset.Y + 22), ref HueVector);
 
             ref StaticTiles data = ref TileDataLoader.Instance.StaticData[_displayedGraphic];
 
