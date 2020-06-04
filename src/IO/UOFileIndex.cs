@@ -24,7 +24,6 @@ using System.Runtime.InteropServices;
 
 namespace ClassicUO.IO
 {
-    [StructLayout(LayoutKind.Explicit)]
     internal struct UOFileIndex
     {
         public UOFileIndex(IntPtr address, uint fileSize, long offset, int length, int decompressed, short width = 0, short height = 0, ushort hue = 0)
@@ -41,37 +40,19 @@ namespace ClassicUO.IO
             AnimOffset = 0;
         }
 
-        [FieldOffset(0)]
         public IntPtr Address;
-
-        [FieldOffset(8)]
         public uint FileSize;
-
-        [FieldOffset(8 + 8)]
         public long Offset;
-
-        [FieldOffset(8 + 8 + 8)]
         public int Length;
-
-        [FieldOffset(8 + 8 + 8 + 8)]
         public int DecompressedLength;
-
-        [FieldOffset(8 + 8 + 8 + 8 + 8)]
         public short Width;
-
-        [FieldOffset(8 + 8 + 8 + 8 + 8 + 4)]
         public short Height;
-
-        [FieldOffset(8 + 8 + 8 + 8 + 8 + 4 + 4)]
         public ushort Hue;
-
-        [FieldOffset(8 + 8 + 8 + 8 + 8 + 4 + 4 + 4 + 4)]
         public sbyte AnimOffset;
 
         public static UOFileIndex Invalid = new UOFileIndex(IntPtr.Zero, 0, 0, 0, 0, 0, 0);
     }
 
-    [StructLayout(LayoutKind.Sequential)]
     internal struct UOFileIndex5D
     {
         public UOFileIndex5D(uint file, uint index, uint offset, uint length, uint extra = 0)
