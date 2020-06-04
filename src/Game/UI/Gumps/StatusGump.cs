@@ -417,7 +417,6 @@ namespace ClassicUO.Game.UI.Gumps
                     ushort gumpid = GetStatLockGraphic(World.Player.StrLock);
 
                     _lockers[0].Graphic = gumpid;
-                    _lockers[0].Texture = GumpsLoader.Instance.GetTexture(gumpid);
                 };
 
                 //AddChildren(_lockers[0] = new Button((int)ButtonType.LockerStr, gumpID, gumpID)
@@ -439,7 +438,6 @@ namespace ClassicUO.Game.UI.Gumps
                     ushort gumpid = GetStatLockGraphic(World.Player.DexLock);
 
                     _lockers[1].Graphic = gumpid;
-                    _lockers[1].Texture = GumpsLoader.Instance.GetTexture(gumpid);
                 };
                 //AddChildren(_lockers[1] = new Button((int)ButtonType.LockerDex, gumpID, gumpID)
                 //{
@@ -460,7 +458,6 @@ namespace ClassicUO.Game.UI.Gumps
                     ushort gumpid = GetStatLockGraphic(World.Player.IntLock);
 
                     _lockers[2].Graphic = gumpid;
-                    _lockers[2].Texture = GumpsLoader.Instance.GetTexture(gumpid);
                 };
                 //AddChildren(_lockers[2] = new Button((int)ButtonType.LockerInt, gumpID, gumpID)
                 //{
@@ -797,7 +794,6 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Player.StrLock = (Lock)(((byte)World.Player.StrLock + 1) % 3);
                 GameActions.ChangeStatLock(0, World.Player.StrLock);
                 _lockers[(int)StatType.Str].Graphic = GetStatLockGraphic(World.Player.StrLock);
-                _lockers[(int)StatType.Str].Texture = GumpsLoader.Instance.GetTexture(GetStatLockGraphic(World.Player.StrLock));
             };
 
             _lockers[(int)StatType.Dex].MouseUp += (sender, e) =>
@@ -805,7 +801,6 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Player.DexLock = (Lock)(((byte)World.Player.DexLock + 1) % 3);
                 GameActions.ChangeStatLock(1, World.Player.DexLock);
                 _lockers[(int)StatType.Dex].Graphic = GetStatLockGraphic(World.Player.DexLock);
-                _lockers[(int)StatType.Dex].Texture = GumpsLoader.Instance.GetTexture(GetStatLockGraphic(World.Player.DexLock));
             };
 
             _lockers[(int)StatType.Int].MouseUp += (sender, e) =>
@@ -813,7 +808,6 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Player.IntLock = (Lock)(((byte)World.Player.IntLock + 1) % 3);
                 GameActions.ChangeStatLock(2, World.Player.IntLock);
                 _lockers[(int)StatType.Int].Graphic = GetStatLockGraphic(World.Player.IntLock);
-                _lockers[(int)StatType.Int].Texture = GumpsLoader.Instance.GetTexture(GetStatLockGraphic(World.Player.IntLock));
             };
 
             // Str/dex/int text labels
@@ -1057,7 +1051,6 @@ namespace ClassicUO.Game.UI.Gumps
                 //}
 
                 _fillBars[(int)id].Percent = CalculatePercents(max, current, 109);
-                _fillBars[(int)id].Texture = GumpsLoader.Instance.GetTexture(gumpId);
             }
         }
 

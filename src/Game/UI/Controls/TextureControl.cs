@@ -36,6 +36,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public ushort Hue { get; set; }
         public bool IsPartial { get; set; }
+        public UOTexture Texture { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -80,6 +81,12 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             return batcher.Draw2D(Texture, x, y, ref _hueVector);
+        }
+
+        public override void Dispose()
+        {
+            Texture = null;
+            base.Dispose();
         }
     }
 }

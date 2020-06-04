@@ -34,9 +34,16 @@ namespace ClassicUO.Game.UI.Controls
             IsPartialHue = TileDataLoader.Instance.StaticData[graphic].IsPartialHue;
             CanMove = true;
 
-            Texture = ArtLoader.Instance.GetTexture(graphic);
-            Width = Texture.Width;
-            Height = Texture.Height;
+            var texture = ArtLoader.Instance.GetTexture(graphic);
+
+            if (texture == null)
+            {
+                Dispose();
+                return;
+            }
+
+            Width = texture.Width;
+            Height = texture.Height;
             Graphic = graphic;
             WantUpdateSize = false;
         }
@@ -53,27 +60,26 @@ namespace ClassicUO.Game.UI.Controls
         public ushort Graphic { get; }
 
 
-
-        public override void Update(double totalMS, double frameMS)
-        {
-            if (Texture != null)
-                Texture.Ticks = (long) totalMS;
-            base.Update(totalMS, frameMS);
-        }
-
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
             ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, IsPartialHue, 0);
 
-            batcher.Draw2D(Texture, x, y, Width, Height, ref _hueVector);
+            var texture = ArtLoader.Instance.GetTexture(Graphic);
+
+            if (texture != null)
+            {
+                batcher.Draw2D(texture, x, y, Width, Height, ref _hueVector);
+            }
 
             return base.Draw(batcher, x, y);
         }
 
         public override bool Contains(int x, int y)
         {
-            return Texture.Contains(x, y);
+            var texture = ArtLoader.Instance.GetTexture(Graphic);
+
+            return texture != null && texture.Contains(x, y);
         }
     }
 }

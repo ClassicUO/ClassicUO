@@ -132,7 +132,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_arrow == null)
                 return true;
 
-            return _arrow.Texture.Contains(x, y);
+            return _arrow.Contains(x, y);
         }
     }
 }

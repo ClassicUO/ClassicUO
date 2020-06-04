@@ -23,12 +23,14 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
     internal class ColorBox : Control
     {
         private Color _colorRGBA;
+        private Texture2D _texture;
 
         public ColorBox(int width, int height, ushort hue, uint pol)
         {
@@ -55,28 +57,21 @@ namespace ClassicUO.Game.UI.Controls
             if (_colorRGBA.A == 0)
                 _colorRGBA.A = 0xFF;
 
-            if (Texture == null || Texture.IsDisposed)
-                Texture = new UOTexture32(1, 1);
-            Texture.SetData(new Color[1] {_colorRGBA});
+            if (_texture == null || _texture.IsDisposed)
+                _texture = new UOTexture32(1, 1);
+            _texture.SetData(new Color[1] {_colorRGBA});
         }
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            base.Update(totalMS, frameMS);
-
-            if (Texture != null && !Texture.IsDisposed)
-                Texture.Ticks = (long) totalMS;
-        }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
-            return batcher.Draw2D(Texture, x, y, Width, Height, ref _hueVector);
+            return batcher.Draw2D(_texture, x, y, Width, Height, ref _hueVector);
         }
 
         public override void Dispose()
         {
-            Texture?.Dispose();
+            _texture?.Dispose();
             base.Dispose();
         }
     }
