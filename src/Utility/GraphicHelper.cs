@@ -40,8 +40,8 @@ namespace ClassicUO.Utility
                 return null;
 
             UOTexture16[] r = new UOTexture16[partXYplusWidthHeight.GetLength(0)];
-            int pwidth = ((original.Width + 1) >> 1) << 1;
-            int pheight = ((original.Height + 1) >> 1) << 1;
+            int pwidth = original.Width; //((original.Width + 1) >> 1) << 1;
+            int pheight = original.Height; //((original.Height + 1) >> 1) << 1;
             ushort[] originalData = new ushort[pwidth * pheight];
             original.GetData(originalData, 0, pwidth * pheight);
 

@@ -123,8 +123,6 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showHouseContent;
         private Combobox _cotType;
 
-        //VendorGump Size Option
-        private ArrowNumbersTextBox _vendorGumpSize;
 
         private ScrollAreaItem _windowSizeArea;
         private ScrollAreaItem _zoomSizeArea;
@@ -492,12 +490,6 @@ namespace ClassicUO.Game.UI.Gumps
             hpAreaItem.Add(_fieldsType);
             rightArea.Add(hpAreaItem);
 
-
-            hpAreaItem = new ScrollAreaItem();
-            Control c = new Label("Shop Gump Size (multiple of 60): ", true, HUE_FONT) {Y = 10};
-            hpAreaItem.Add(c);
-            hpAreaItem.Add(_vendorGumpSize = new ArrowNumbersTextBox(c.Width + 5, 10, 60, 60, 60, 240, FONT, hue: 1) {Text = ProfileManager.Current.VendorGumpHeight.ToString(), Tag = ProfileManager.Current.VendorGumpHeight});
-            rightArea.Add(hpAreaItem);
 
             Add(rightArea, PAGE);
         }
@@ -1514,7 +1506,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _useCircleOfTransparency.IsChecked = false;
                     _healtbarType.SelectedIndex = 0;
                     _fieldsType.SelectedIndex = 0;
-                    _vendorGumpSize.Text = "60";
                     _useStandardSkillsGump.IsChecked = true;
                     _showCorpseNameIncoming.IsChecked = true;
                     _showMobileNameIncoming.IsChecked = true;
@@ -1757,8 +1748,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             ProfileManager.Current.CircleOfTransparencyType = _cotType.SelectedIndex;
-
-            ProfileManager.Current.VendorGumpHeight = (int) _vendorGumpSize.Tag;
             ProfileManager.Current.StandardSkillsGump = _useStandardSkillsGump.IsChecked;
 
             if (_useStandardSkillsGump.IsChecked)

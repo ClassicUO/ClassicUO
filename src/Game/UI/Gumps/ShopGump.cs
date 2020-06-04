@@ -89,7 +89,7 @@ namespace ClassicUO.Game.UI.Gumps
             var left_down = new GumpPicTexture(0, _middleGumpLeft.Height + _middleGumpLeft.Y, _shopGumpParts[2 + add]);
             Add(left_down);
 
-            _shopScrollArea = new ScrollArea(30, 60, 225, _middleGumpLeft.Height + _middleGumpLeft.Y + 50, false);
+            _shopScrollArea = new ScrollArea(30, 60, 225, _middleGumpLeft.Height + _middleGumpLeft.Y + 50, false, _middleGumpLeft.Height + _middleGumpLeft.Y);
             Add(_shopScrollArea);
 
 
@@ -194,7 +194,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ButtonAction = ButtonAction.Activate,
                 X = _shopGumpParts[0 + add].Width / 2 - 10,
-                Y = _middleGumpLeft.Height + _middleGumpLeft.Y + 183
+                Y = left_down.Y + left_down.Height
             });
 
             bool is_pressing = false;
@@ -223,6 +223,8 @@ namespace ClassicUO.Game.UI.Gumps
                         _middleGumpLeft.Height = 450;
                     }
 
+                    ProfileManager.Current.VendorGumpHeight = _middleGumpLeft.Height;
+
                     _middleGumpRight.Height = _middleGumpLeft.Height >> 1;
 
                     left_down.Y = _middleGumpLeft.Y + _middleGumpLeft.Height;
@@ -230,8 +232,9 @@ namespace ClassicUO.Game.UI.Gumps
                     boxAccept.Y = 306 + _middleGumpRight.Height;
                     boxClear.Y = 310 + _middleGumpRight.Height;
                     _transactionScrollArea.Height = _middleGumpRight.Height + 53;
-                    _shopScrollArea.Height = left_down.Y;
-                    _button_expander.Y = left_down.Y + 183;
+                    _shopScrollArea.Height = left_down.Y + 50;
+                    _shopScrollArea.ScrollMaxHeight = left_down.Y;
+                    _button_expander.Y = left_down.Y + left_down.Height;
                     downButton.Y = 130 + _middleGumpLeft.Height;
                     downButtonT.Y = 70 + _middleGumpRight.Height;
                     name.Y = 308 + _middleGumpRight.Height;
