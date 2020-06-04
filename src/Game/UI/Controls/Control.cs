@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Controls
         Low
     }
 
-    internal abstract class Control : IDrawableUI, IUpdateable
+    internal abstract class Control
     {
         internal static int _StepsDone = 1;
         internal static int _StepChanger = 1;
@@ -249,14 +249,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public int TooltipMaxLength { get; private set; }
 
-        public UOTexture Texture { get; set; }
-
         public virtual bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (IsDisposed) return false;
-
-            if (Texture != null && !Texture.IsDisposed)
-                Texture.Ticks = Time.Ticks;
+            if (IsDisposed) 
+                return false;
 
             foreach (Control c in Children)
             {

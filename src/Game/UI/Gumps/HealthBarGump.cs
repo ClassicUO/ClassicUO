@@ -983,8 +983,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _oldWarMode = World.Player.InWarMode;
                     Add(_background = new GumpPic(0, 0, _oldWarMode ? BACKGROUND_WAR : BACKGROUND_NORMAL, 0) { ContainsByBounds = true });
 
-                    Width = _background.Texture.Width;
-                    Height = _background.Texture.Height;
+                    Width = _background.Width;
+                    Height = _background.Height;
 
                     // add backgrounds
                     Add(_hpLineRed = new GumpPic(34, 12, LINE_RED, 0));
@@ -1018,8 +1018,8 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(_hpLineRed = new GumpPic(34, 38, LINE_RED, hitsColor));
                     Add(_bars[0] = new GumpPicWithWidth(34, 38, LINE_BLUE, 0, 0));
 
-                    Width = _background.Texture.Width;
-                    Height = _background.Texture.Height;
+                    Width = _background.Width;
+                    Height = _background.Height;
 
                     Add(_textBox = new TextBox(1, 32, width: 120, isunicode: false, hue: textColor, style: FontStyle.Fixed)
                     {

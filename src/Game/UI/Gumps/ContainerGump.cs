@@ -290,8 +290,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _corpseEyeTicks = (long) totalMS + 750;
                 _eyeGumpPic.Graphic = (ushort) (0x0045 + _eyeCorspeOffset);
                 float scale = UIManager.ContainerScale;
-                _eyeGumpPic.Width = (int)(_eyeGumpPic.Texture.Width * scale);
-                _eyeGumpPic.Height = (int)(_eyeGumpPic.Texture.Height * scale);
+                _eyeGumpPic.Width = (int)(_eyeGumpPic.Width * scale);
+                _eyeGumpPic.Height = (int)(_eyeGumpPic.Height * scale);
             }
         }
 

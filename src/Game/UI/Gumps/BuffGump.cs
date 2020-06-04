@@ -128,9 +128,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             foreach (BuffControlEntry entry in Children.OfType<BuffControlEntry>().Where(s => s.Icon.Type == type))
             {
-                if (Height > _background.Texture.Height)
+                if (Height > _background.Height)
                 {
-                    int delta = Height - _background.Texture.Height;
+                    int delta = Height - _background.Height;
 
                     if (_direction == GumpDirection.RIGHT_VERTICAL)
                     {
@@ -142,9 +142,9 @@ namespace ClassicUO.Game.UI.Gumps
                     else if (_direction == GumpDirection.LEFT_VERTICAL) Height -= delta;
                 }
 
-                if (Width > _background.Texture.Width)
+                if (Width > _background.Width)
                 {
-                    int delta = Width - _background.Texture.Width;
+                    int delta = Width - _background.Width;
 
                     if (_direction == GumpDirection.RIGHT_HORIZONTAL)
                     {
@@ -309,8 +309,8 @@ namespace ClassicUO.Game.UI.Gumps
             _background.X = 0;
             _background.Y = 0;
 
-            Width = _background.Texture.Width;
-            Height = _background.Texture.Height;
+            Width = _background.Width;
+            Height = _background.Height;
 
             UpdateElements();
         }
@@ -337,12 +337,10 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
 
                 Icon = icon;
-                Width = Texture.Width;
-                Height = Texture.Height;
                 _alpha = 0xFF;
                 _decreaseAlpha = true;
                 _timer = (uint) (icon.Timer <= 0 ? 0xFFFF_FFFF : Time.Ticks + icon.Timer * 1000);
-                _gText = RenderedText.Create("", 0xFFFF, 2, true, FontStyle.Fixed | FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, Texture.Width);
+                _gText = RenderedText.Create("", 0xFFFF, 2, true, FontStyle.Fixed | FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, Width);
 
 
                 AcceptMouseInput = true;
@@ -361,9 +359,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.Update(totalMS, frameMS);
 
-                Texture.Ticks = (long) totalMS;
                 int delta = (int) (_timer - totalMS);
-
 
                 if (_updateTooltipTime < totalMS && delta > 0)
                 {
@@ -417,13 +413,20 @@ namespace ClassicUO.Game.UI.Gumps
                 ResetHueVector();
                 ShaderHuesTraslator.GetHueVector(ref _hueVector, 0, false, 1.0f - _alpha / 255f, true);
 
-                if (ProfileManager.Current != null && ProfileManager.Current.BuffBarTime)
+                var texture = GumpsLoader.Instance.GetTexture(Graphic);
+
+                if (texture != null)
                 {
-                    batcher.Draw2D(Texture, x, y, ref _hueVector);
-                    return _gText.Draw(batcher, x - 3, y + Texture.Height / 2 - 3, _hueVector.Z);
+                    if (ProfileManager.Current != null && ProfileManager.Current.BuffBarTime)
+                    {
+                        batcher.Draw2D(texture, x, y, ref _hueVector);
+                        return _gText.Draw(batcher, x - 3, y + texture.Height / 2 - 3, _hueVector.Z);
+                    }
+                    else
+                        return batcher.Draw2D(texture, x, y, ref _hueVector);
                 }
-                else
-                    return batcher.Draw2D(Texture, x, y, ref _hueVector);
+
+                return false;
             }
 
             public override void Dispose()

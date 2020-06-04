@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using System.Collections.Generic;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -62,7 +63,6 @@ namespace ClassicUO.Game.UI.Controls
             Width = width;
             Height = heigth;
             Graphic = 0xFFFF;
-            Texture = texture;
         }
 
         public ushort Graphic
@@ -73,37 +73,35 @@ namespace ClassicUO.Game.UI.Controls
                 if (_graphic != value && value != 0xFFFF)
                 {
                     _graphic = value;
-                    Texture = GumpsLoader.Instance.GetTexture(value);
 
-                    if (Texture == null)
+                    var texture = GumpsLoader.Instance.GetTexture(_graphic);
+
+                    if (texture == null)
                     {
                         Dispose();
                         return;
                     }
 
-                    Width = Texture.Width;
-                    Height = Texture.Height;
+                    Width = texture.Width;
+                    Height = texture.Height;
                 }
             }
         }
 
         public ushort Hue { get; set; }
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            if (IsDisposed)
-                return;
-
-            Texture.Ticks = (long) totalMS;
-            base.Update(totalMS, frameMS);
-        }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
             ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue, false, Alpha, true);
 
-            batcher.Draw2DTiled(Texture, x, y, Width, Height, ref _hueVector);
+            var texture = GumpsLoader.Instance.GetTexture(Graphic);
+
+            if (texture != null)
+            {
+                batcher.Draw2DTiled(texture, x, y, Width, Height, ref _hueVector);
+            }
 
             return base.Draw(batcher, x, y);
         }
@@ -113,22 +111,29 @@ namespace ClassicUO.Game.UI.Controls
             int width = Width;
             int height = Height;
 
-            if (width == 0)
-                width = Texture.Width;
+            var texture = GumpsLoader.Instance.GetTexture(Graphic);
 
-            if (height == 0)
-                height = Texture.Height;
-
-            while (x > Texture.Width && width > Texture.Width)
+            if (texture == null)
             {
-                x -= Texture.Width;
-                width -= Texture.Width;
+                return false;
             }
 
-            while (y > Texture.Height && height > Texture.Height)
+            if (width == 0)
+                width = texture.Width;
+
+            if (height == 0)
+                height = texture.Height;
+
+            while (x > texture.Width && width > texture.Width)
             {
-                y -= Texture.Height;
-                height -= Texture.Height;
+                x -= texture.Width;
+                width -= texture.Width;
+            }
+
+            while (y > texture.Height && height > texture.Height)
+            {
+                y -= texture.Height;
+                height -= texture.Height;
             }
 
 
@@ -136,7 +141,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
 
 
-            return Texture.Contains(x, y);
+            return texture.Contains(x, y);
         }
     }
 }
