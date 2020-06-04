@@ -351,10 +351,6 @@ namespace ClassicUO.IO.Resources
             return result;
         }
 
-        public override void CleanResources()
-        {
-        }
-
         internal enum PROF_TYPE
         {
             NO_PROF = 0,

@@ -101,11 +101,6 @@ namespace ClassicUO.IO.Resources
 
             return -1;
         }
-
-        public override void CleanResources()
-        {
-            //
-        }
     }
 
     internal class SkillEntry

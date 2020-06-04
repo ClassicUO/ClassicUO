@@ -69,7 +69,7 @@ namespace ClassicUO.Game.Managers
             uint next_time = Time.Ticks + 250;
             bool no_animated_field = ProfileManager.Current != null && ProfileManager.Current.FieldsType != 0;
             var startAddr = file.StartAddress.ToInt64();
-            var static_data = TileDataLoader.Instance.StaticData;
+            var static_data = ArtLoader.Instance.Entries;
 
             for (int i = 0; i < _static_infos.Count; i++)
             {
@@ -99,7 +99,7 @@ namespace ClassicUO.Game.Managers
 
                     if (offset < info->FrameCount)
                     {
-                        static_data[o.index].Offset = info->FrameData[offset++];
+                        static_data[o.index + 0x4000].AnimOffset = info->FrameData[offset++];
                     }
 
                     if (offset >= info->FrameCount)

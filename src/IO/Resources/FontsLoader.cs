@@ -194,11 +194,6 @@ namespace ClassicUO.IO.Resources
             });
         }
 
-        public override void CleanResources()
-        {
-            // do nothing
-        }
-
 
         public bool UnicodeFontExists(byte font)
         {

@@ -1504,6 +1504,11 @@ namespace ClassicUO.Renderer
         [MethodImpl(256)]
         private bool PushSprite(Texture2D texture)
         {
+            if (texture == null || texture.IsDisposed)
+            {
+                return false;
+            }
+
             EnsureSize();
             _textureInfo[_numSprites++] = texture;
 

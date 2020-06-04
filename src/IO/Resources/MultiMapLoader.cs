@@ -73,7 +73,8 @@ namespace ClassicUO.IO.Resources
                 {
                     path = UOFileManager.GetUOFilePath($"facet0{i}.mul");
 
-                    if (File.Exists(path)) _facets[i] = new UOFileMul(path);
+                    if (File.Exists(path)) 
+                        _facets[i] = new UOFileMul(path);
                 }
             });
         }
@@ -252,12 +253,6 @@ namespace ClassicUO.IO.Resources
             texture.PushData(map);
 
             return texture;
-        }
-
-
-        public override void CleanResources()
-        {
-            // do nothing
         }
     }
 }

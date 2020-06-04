@@ -101,6 +101,10 @@ namespace ClassicUO.IO.Resources
                 ReadStaticArt(ref texture, (ushort) g);
                 SaveID(g);
             }
+            else
+            {
+                texture.Ticks = Time.Ticks;
+            }
 
             return texture;
         }
@@ -116,6 +120,10 @@ namespace ClassicUO.IO.Resources
             {
                 ReadLandArt(ref texture, (ushort) g);
                 _used_land_textures_ids.AddLast(g);
+            }
+            else
+            {
+                texture.Ticks = Time.Ticks;
             }
 
             return texture;
@@ -139,9 +147,9 @@ namespace ClassicUO.IO.Resources
             return base.TryGetEntryInfo(entry, out address, out size, out compressedsize);
         }
 
-        public override void CleanResources()
+        public override void ClearResources()
         {
-            base.CleanResources();
+            base.ClearResources();
 
             var first = _used_land_textures_ids.First;
 
@@ -326,8 +334,6 @@ namespace ClassicUO.IO.Resources
 
             if (entry.Length == 0)
             {
-                texture = new ArtTexture(imageRectangle, 0, 0);
-
                 return;
             }
 
@@ -338,8 +344,6 @@ namespace ClassicUO.IO.Resources
 
             if (width == 0 || height == 0)
             {
-                texture = new ArtTexture(imageRectangle, 0, 0);
-
                 return;
             }
 

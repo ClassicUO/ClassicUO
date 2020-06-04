@@ -1014,8 +1014,39 @@ namespace ClassicUO.IO.Resources
             return _animationSequenceReplacing.TryGetValue(graphic, out type);
         }
 
-        public override void CleanResources()
+        public override void ClearResources()
         {
+            var first = _usedTextures.First;
+
+            while (first != null)
+            {
+                var next = first.Next;
+
+                if (first.Value.LastAccessTime != 0)
+                {
+                    for (int j = 0; j < first.Value.FrameCount; j++)
+                    {
+                        ref var texture = ref first.Value.Frames[j];
+
+                        if (texture != null)
+                        {
+                            texture.Dispose();
+                            texture = null;
+                        }
+                    }
+
+                    first.Value.FrameCount = 0;
+                    first.Value.Frames = null;
+                    first.Value.LastAccessTime = 0;
+
+                    _usedTextures.Remove(first);
+                }
+
+                first = next;
+            }
+
+            if (_usedTextures.Count != 0)
+                _usedTextures.Clear();
         }
 
         public void UpdateAnimationTable(uint flags)
@@ -1748,41 +1779,6 @@ namespace ClassicUO.IO.Resources
                 first = next;
             }
         }
-
-        //public void Clear()
-        //{
-        //    var first = _usedTextures.First;
-
-        //    while (first != null)
-        //    {
-        //        var next = first.Next;
-
-        //        if (first.Value.LastAccessTime != 0)
-        //        {
-        //            for (int j = 0; j < first.Value.FrameCount; j++)
-        //            {
-        //                ref var texture = ref first.Value.Frames[j];
-
-        //                if (texture != null)
-        //                {
-        //                    texture.Dispose();
-        //                    texture = null;
-        //                }
-        //            }
-
-        //            first.Value.FrameCount = 0;
-        //            first.Value.Frames = null;
-        //            first.Value.LastAccessTime = 0;
-
-        //            _usedTextures.Remove(first);
-        //        }
-
-        //        first = next;
-        //    }
-
-        //    if (_usedTextures.Count != 0)
-        //        _usedTextures.Clear();
-        //}
 
         public readonly struct SittingInfoData
         {

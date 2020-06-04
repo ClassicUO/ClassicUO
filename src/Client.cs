@@ -35,6 +35,7 @@ using ClassicUO.Renderer;
 using ClassicUO.IO.Resources;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ClassicUO.Game;
 
 namespace ClassicUO
 {
@@ -54,10 +55,11 @@ namespace ClassicUO
 
             Log.Trace("Running game...");
             using (Game = new GameController())
+            //Game = new GameController();
             {
                 // https://github.com/FNA-XNA/FNA/wiki/7:-FNA-Environment-Variables#fna_graphics_enable_highdpi
                 CUOEnviroment.IsHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
-                Game.Run();
+                Game.Run();           
             }
             Log.Trace("Exiting game...");
         }
@@ -236,13 +238,14 @@ namespace ClassicUO
 
         public static void DrawStaticAnimated(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
         {
-            graphic = (ushort) (graphic + TileDataLoader.Instance.StaticData[graphic].Offset);
+            ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
+
+            graphic = (ushort) (graphic + index.AnimOffset);
 
             var texture = ArtLoader.Instance.GetTexture(graphic);
             if (texture != null)
             {
                 texture.Ticks = Time.Ticks;
-                ref var index = ref ArtLoader.Instance.GetValidRefEntry(graphic + 0x4000);
 
                 batcher.DrawSprite(texture, x - index.Width, y - index.Height, false, ref hue);
             }

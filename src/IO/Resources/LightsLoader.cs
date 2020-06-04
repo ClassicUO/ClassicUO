@@ -65,11 +65,6 @@ namespace ClassicUO.IO.Resources
             });
         }
 
-
-        public override void CleanResources()
-        {
-        }
-
         public override UOTexture16 GetTexture(uint id)
         {
             if (id >= Resources.Length)
@@ -85,6 +80,10 @@ namespace ClassicUO.IO.Resources
                 texture.PushData(pixels);
 
                 SaveID(id);
+            }
+            else
+            {
+                texture.Ticks = Time.Ticks;
             }
 
             return texture;

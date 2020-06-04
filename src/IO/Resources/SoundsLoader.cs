@@ -306,8 +306,23 @@ namespace ClassicUO.IO.Resources
             return music;
         }
 
-        public override void CleanResources()
+        public override void ClearResources()
         {
+            foreach (var m in _musics)
+            {
+                m.Value.Dispose();
+            }
+
+            _musics.Clear();
+
+            foreach (var s in _sounds)
+            {
+                s.Value.Dispose();
+            }
+
+            _sounds.Clear();
+
+            _mMusicData.Clear();
         }
     }
 }

@@ -148,14 +148,37 @@ namespace ClassicUO
             SetWindowPositionBySettings();
         }
 
+
         protected override void UnloadContent()
         {
             SDL.SDL_GetWindowBordersSize(Window.Handle, out int top, out int left, out int bottom, out int right);
             Settings.GlobalSettings.WindowPosition = new Point(Math.Max(0, Window.ClientBounds.X - left), Math.Max(0, Window.ClientBounds.Y - top));
-            
+
             _scene?.Unload();
             Settings.GlobalSettings.Save();
             Plugin.OnClosing();
+
+            _buffer?.Dispose();
+            ArtLoader.Instance.Dispose();
+            GumpsLoader.Instance.Dispose();
+            TexmapsLoader.Instance.Dispose();
+            AnimationsLoader.Instance.Dispose();
+            LightsLoader.Instance.Dispose();
+            TileDataLoader.Instance.Dispose();
+            AnimDataLoader.Instance.Dispose();
+            ClilocLoader.Instance.Dispose();
+            FontsLoader.Instance.Dispose();
+            HuesLoader.Instance.Dispose();
+            MapLoader.Instance.Dispose();
+            MultiLoader.Instance.Dispose();
+            MultiMapLoader.Instance.Dispose();
+            ProfessionLoader.Instance.Dispose();
+            SkillsLoader.Instance.Dispose();
+            SoundsLoader.Instance.Dispose();
+            SpeechesLoader.Instance.Dispose();
+            Verdata.File?.Dispose();
+            World.Map?.Destroy();
+
             base.UnloadContent();
         }
 
