@@ -24,8 +24,6 @@ using System.Collections.Generic;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility.Coroutines;
-using ClassicUO.Utility.Logging;
 using SDL2;
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
@@ -51,14 +49,11 @@ namespace ClassicUO.Game.Scenes
 
         public int RenderedObjectsCount { get; protected set; }
 
-        public CoroutineManager Coroutines { get; } = new CoroutineManager();
-
         public AudioManager Audio { get; private set; }
 
         public virtual void Update(double totalMS, double frameMS)
         {
             Audio?.Update();
-            Coroutines.Update();
 
             if (_time_cleanup < Time.Ticks)
             {

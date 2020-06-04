@@ -320,11 +320,6 @@
     <Compile Include="Renderer\SpriteFont.cs" />
     <Compile Include="Renderer\Texture2DCache.cs" />
     <Compile Include="Utility\Collections\CollectionHelper.cs" />
-    <Compile Include="Utility\Coroutines\Coroutine.cs" />
-    <Compile Include="Utility\Coroutines\CoroutineManager.cs" />
-    <Compile Include="Utility\Coroutines\CoroutineStatus.cs" />
-    <Compile Include="Utility\Coroutines\WaitCondition.cs" />
-    <Compile Include="Utility\Coroutines\WaitTime.cs" />
     <Compile Include="Utility\Crypter.cs" />
     <Compile Include="Utility\FileSystemHelper.cs" />
     <Compile Include="Utility\GameObjectHelper.cs" />
