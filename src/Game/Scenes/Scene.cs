@@ -33,7 +33,7 @@ namespace ClassicUO.Game.Scenes
 {
     internal abstract class Scene : IUpdateable, IDisposable
     {
-        private uint _time_cleanup;
+        private uint _time_cleanup = Time.Ticks + 5000;
 
         protected Scene(int sceneID,  bool canresize, bool maximized, bool loadaudio)
         {
