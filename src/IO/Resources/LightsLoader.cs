@@ -76,6 +76,9 @@ namespace ClassicUO.IO.Resources
             {
                 ushort[] pixels = GetLight(id, out int w, out int h);
 
+                if (w == 0 && h == 0)
+                    return null;
+
                 texture = new UOTexture16(w, h);
                 texture.PushData(pixels);
 
@@ -96,6 +99,11 @@ namespace ClassicUO.IO.Resources
 
             width = entry.Width;
             height = entry.Height;
+
+            if (width == 0 && height == 0)
+            {
+                return null;
+            }
 
             ushort[] pixels = new ushort[width * height];
 

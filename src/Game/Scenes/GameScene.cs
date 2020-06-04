@@ -850,6 +850,8 @@ namespace ClassicUO.Game.Scenes
                 ref var l = ref _lights[i];
 
                 UOTexture texture = LightsLoader.Instance.GetTexture(l.ID);
+                if (texture == null)
+                    continue;
 
                 hue.X = l.Color;
                 
