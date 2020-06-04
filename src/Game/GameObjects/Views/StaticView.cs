@@ -46,22 +46,6 @@ namespace ClassicUO.Game.GameObjects
             return r;
         }
 
-        //private void SetTextureByGraphic(ushort graphic)
-        //{
-        //    //ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
-        //    //Texture = texture;
-        //    //Bounds.X = (Texture.Width >> 1) - 22;
-        //    //Bounds.Y = Texture.Height - 44;
-        //    //Bounds.Width = Texture.Width;
-        //    //Bounds.Height = texture.Height;
-
-        //    //FrameInfo.Width = texture.ImageRectangle.Width;
-        //    //FrameInfo.Height = texture.ImageRectangle.Height;
-
-        //    //FrameInfo.X = (Texture.Width >> 1) - 22 - texture.ImageRectangle.X;
-        //    //FrameInfo.Y = Texture.Height - 44 - texture.ImageRectangle.Y;
-        //}
-
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (!AllowedToDraw || IsDestroyed)

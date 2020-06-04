@@ -92,21 +92,6 @@ namespace ClassicUO.Game.GameObjects
 
             ResetHueVector();
 
-
-            //if ((AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed) && AnimationGraphic != 0xFFFF)
-            //{
-            //    _displayedGraphic = AnimationGraphic;
-            //    Texture = ArtLoader.Instance.GetTexture(AnimationGraphic);
-            //    Bounds.Width = Texture.Width;
-            //    Bounds.Height = Texture.Height;
-            //}
-
-            //if (Texture != null)
-            //{
-            //    Bounds.X = (Texture.Width >> 1) - 22 - (int) Offset.X;
-            //    Bounds.Y = Texture.Height - 44 + (int) (Offset.Z - Offset.Y);
-            //}
-
             ref StaticTiles data = ref TileDataLoader.Instance.StaticData[Graphic];
 
             posX += (int) Offset.X;

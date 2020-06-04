@@ -28,28 +28,12 @@ namespace ClassicUO.Game.GameObjects
 {
     internal sealed partial class MovingEffect
     {
-        //private ushort _displayedGraphic = 0xFFFF;
-
-
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
             if (IsDestroyed || !AllowedToDraw)
                 return false;
 
             ResetHueVector();
-
-            //if (AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
-            //{
-            //    _displayedGraphic = AnimationGraphic;
-            //    Texture = ArtLoader.Instance.GetTexture(AnimationGraphic);
-            //    Bounds.X = -((Texture.Width >> 1) - 22);
-            //    Bounds.Y = -(Texture.Height - 44);
-            //    Bounds.Width = Texture.Width;
-            //    Bounds.Height = Texture.Height;
-            //}
-
-
-            
 
             if (ProfileManager.Current.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
@@ -78,13 +62,6 @@ namespace ClassicUO.Game.GameObjects
                 DrawStaticRotated(batcher, AnimationGraphic, posX, posY, 0, 0, AngleToTarget, ref HueVector);
             }
 
-            //if (FixedDir)
-            //    batcher.DrawSprite(Texture, posX, posY, false, ref HueVector);
-            //else
-            //    batcher.DrawSpriteRotated(Texture, posX, posY, Bounds.X, Bounds.Y, ref HueVector, AngleToTarget);
-
-            //Select(posX, posY);
-           // Texture.Ticks = Time.Ticks;
 
             ref StaticTiles data = ref TileDataLoader.Instance.StaticData[AnimationGraphic];
 

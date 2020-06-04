@@ -41,117 +41,15 @@ namespace ClassicUO.Game.GameObjects
         protected bool IsFlipped;
 
         public bool UseObjectHandles { get; set; }
-
         public bool ClosedObjectHandles { get; set; }
-
         public bool ObjectHandlesOpened { get; set; }
-
         public byte AlphaHue { get; set; }
-
         public bool DrawTransparent { get; set; }
-
         public bool AllowedToDraw { get; set; } = true;
 
 
-        private static readonly Lazy<DepthStencilState> _stencil = new Lazy<DepthStencilState>(() =>
-        {
-            DepthStencilState state = new DepthStencilState
-            {
-                StencilEnable = true,
-                StencilFunction = CompareFunction.GreaterEqual,
-                StencilPass = StencilOperation.Keep,
-                ReferenceStencil = 0,
-                //DepthBufferEnable = true,
-                //DepthBufferWriteEnable = true,
-            };
+        public abstract bool Draw(UltimaBatcher2D batcher, int posX, int posY);
 
-
-            return state;
-        });
-
-
-        public virtual bool Draw(UltimaBatcher2D batcher, int posX, int posY)
-        {
-            //if (DrawTransparent)
-            //{
-            //    int x = RealScreenPosition.X;
-            //    int y = RealScreenPosition.Y;
-            //    int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
-            //    int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
-
-            //    int dist = Math.Max(Math.Abs(x - fx), Math.Abs(y - fy));
-            //    int maxDist = ProfileManager.Current.CircleOfTransparencyRadius;
-
-            //    if (dist <= maxDist)
-            //    {
-            //        HueVector.Z = MathHelper.Lerp(1f, 1f - dist / (float)maxDist, 0.5f);
-            //        //HueVector.Z = 1f - (dist / (float)maxDist);
-            //    }
-            //    else
-            //        HueVector.Z = 1f - AlphaHue / 255f;
-            //}
-            //else if (AlphaHue != 255)
-            //    HueVector.Z = 1f - AlphaHue / 255f;
-
-            //if (!batcher.DrawSprite(Texture, posX - Bounds.X, posY - Bounds.Y, IsFlipped, ref HueVector))
-            //    return false;
-
-
-
-            //if (DrawTransparent)
-            //{
-            //    int maxDist = ProfileManager.Current.CircleOfTransparencyRadius + 44;
-
-            //    int fx = (int) (World.Player.RealScreenPosition.X + World.Player.Offset.X);
-            //    int fy = (int) (World.Player.RealScreenPosition.Y + (World.Player.Offset.Y - World.Player.Offset.Z));
-
-            //    fx -= posX;
-            //    fy -= posY;
-            //    int dist = (int) Math.Sqrt(fx * fx + fy * fy);
-
-            //    //dist = Math.Max(Math.Abs(fx - x), Math.Abs(fy - y));
-
-            //    if (dist <= maxDist)
-            //    {
-            //        switch (ProfileManager.Current.CircleOfTransparencyType)
-            //        {
-            //            default:
-            //            case 0:
-            //                HueVector.Z = 0.75f;
-            //                break;
-            //            case 1:
-            //                HueVector.Z = MathHelper.Lerp(1f, 0f, (dist / (float) maxDist));
-            //                break;
-            //        }
-
-            //        batcher.DrawSprite(Texture, posX - Bounds.X, posY - Bounds.Y, IsFlipped, ref HueVector);
-
-            //        if (AlphaHue != 255)
-            //            HueVector.Z = 1f - AlphaHue / 255f;
-            //        else
-            //            HueVector.Z = 0;
-
-            //        batcher.SetStencil(_stencil.Value);
-            //        batcher.DrawSprite(Texture, posX - Bounds.X, posY - Bounds.Y, IsFlipped, ref HueVector);
-            //        batcher.SetStencil(null);
-            //        goto COT;
-            //    }
-            //}
-
-            //if (AlphaHue != 255)
-            //    HueVector.Z = 1f - AlphaHue / 255f;
-
-            //if (!batcher.DrawSprite(Texture, posX - Bounds.X, posY - Bounds.Y, IsFlipped, ref HueVector))
-            //    return false;
-
-            //COT:
-
-            //Select(posX, posY);
-
-            //Texture.Ticks = Time.Ticks;
-
-            return true;
-        }
 
         [MethodImpl(256)]
         protected static void ResetHueVector()

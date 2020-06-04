@@ -82,20 +82,6 @@ namespace ClassicUO.Game.GameObjects
 
             ushort graphic = Graphic;
 
-
-            //if (Texture == null || Texture.IsDisposed || Graphic != graphic)
-            //{
-            //    ArtTexture texture = ArtLoader.Instance.GetTexture(graphic);
-            //    Texture = texture;
-            //    Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
-
-            //    FrameInfo.Width = texture.ImageRectangle.Width;
-            //    FrameInfo.Height = texture.ImageRectangle.Height;
-
-            //    FrameInfo.X = (Texture.Width >> 1) - 22 - texture.ImageRectangle.X;
-            //    FrameInfo.Y = Texture.Height - 44 - texture.ImageRectangle.Y;
-            //}
-
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
                 HueVector.X = 0x0023;

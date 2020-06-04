@@ -94,19 +94,6 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            //if (_originalGraphic != DisplayedGraphic || _force || Texture == null || Texture.IsDisposed)
-            //{
-            //    if (_originalGraphic == 0)
-            //        _originalGraphic = DisplayedGraphic;
-
-            //    Texture = ArtLoader.Instance.GetTexture(_originalGraphic);
-            //    Bounds.X = (Texture.Width >> 1) - 22;
-            //    Bounds.Y = Texture.Height - 44;
-            //    Bounds.Width = Texture.Width;
-            //    Bounds.Height = Texture.Height;
-
-            //    _force = false;
-            //}
 
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
