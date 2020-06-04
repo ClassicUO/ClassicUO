@@ -100,23 +100,6 @@ namespace ClassicUO.Game.UI.Controls
         {
         }
 
-        public GumpPic(int x, int y, UOTexture texture, ushort hue)
-        {
-            X = x;
-            Y = y;
-
-            Hue = hue;
-
-            if (texture == null)
-                Dispose();
-            else
-            {
-                Width = texture.Width;
-                Height = texture.Height;
-            }
-            WantUpdateSize = false;
-        }
-
         public bool IsPartialHue { get; set; }
         public bool ContainsByBounds { get; set; }
         public bool IsVirtue { get; set; }
