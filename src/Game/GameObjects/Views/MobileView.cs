@@ -73,6 +73,8 @@ namespace ClassicUO.Game.GameObjects
             bool isHuman = IsHuman;
             bool isGargoyle = Client.Version >= ClientVersion.CV_7000 && (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
 
+            if (AlphaHue != 255)
+                HueVector.Z = 1f - AlphaHue / 255f;
 
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
@@ -158,14 +160,14 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (hasShadow)
                     {
-                        DrawInternal(batcher, this, null, drawX, drawY + 10, IsFlipped, ref animIndex, true, graphic, isHuman);
+                        DrawInternal(batcher, this, null, drawX, drawY + 10, IsFlipped, ref animIndex, true, graphic, isHuman, alpha: HueVector.Z);
                         AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, mountGraphic);
-                        DrawInternal(batcher, this, mount, drawX, drawY, IsFlipped, ref animIndex, true, mountGraphic, isHuman);
+                        DrawInternal(batcher, this, mount, drawX, drawY, IsFlipped, ref animIndex, true, mountGraphic, isHuman, alpha: HueVector.Z);
                     }
                     else
                         AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, mountGraphic);
 
-                    drawY += DrawInternal(batcher, this, mount, drawX, drawY, IsFlipped, ref animIndex, false, mountGraphic, isHuman, isMount: true);
+                    drawY += DrawInternal(batcher, this, mount, drawX, drawY, IsFlipped, ref animIndex, false, mountGraphic, isHuman, isMount: true, alpha: HueVector.Z);
                 }
             }
             else
@@ -197,13 +199,13 @@ namespace ClassicUO.Game.GameObjects
                         _transform = true;
                 }
                 else if (hasShadow)
-                    DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, ref animIndex, true, graphic, isHuman);
+                    DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, ref animIndex, true, graphic, isHuman, alpha: HueVector.Z);
             }
 
             AnimationsLoader.Instance.AnimGroup = animGroup;
 
 
-            DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, ref animIndex, false, graphic, isHuman);
+            DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, ref animIndex, false, graphic, isHuman, alpha: HueVector.Z);
 
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
@@ -252,12 +254,12 @@ namespace ClassicUO.Game.GameObjects
                         if (AnimationsLoader.Instance.SittingValue == 0 && IsGargoyle && item.ItemData.IsWeapon)
                         {
                             AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, graphic);
-                            DrawInternal(batcher, this, item, drawX, drawY, IsFlipped, ref animIndex, false, graphic, isHuman, false);
+                            DrawInternal(batcher, this, item, drawX, drawY, IsFlipped, ref animIndex, false, graphic, isHuman, false, alpha: HueVector.Z);
                             AnimationsLoader.Instance.AnimGroup = animGroup;
                         }
                         else
                         {
-                            DrawInternal(batcher, this, item, drawX, drawY, IsFlipped, ref animIndex, false, graphic, isHuman, false);
+                            DrawInternal(batcher, this, item, drawX, drawY, IsFlipped, ref animIndex, false, graphic, isHuman, false, alpha: HueVector.Z);
                         }
                     }
                     else
@@ -309,7 +311,8 @@ namespace ClassicUO.Game.GameObjects
                                            ushort id,
                                            bool isHuman,
                                            bool isParent = true,
-                                           bool isMount = false)
+                                           bool isMount = false,
+                                           float alpha = 0)
         {
             if (id >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT || owner == null)
                 return 0;
@@ -394,7 +397,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
                     ResetHueVector();
-                    ShaderHuesTraslator.GetHueVector(ref HueVector, hue, partialHue, 0);
+                    ShaderHuesTraslator.GetHueVector(ref HueVector, hue, partialHue, alpha);
 
                     if (_transform)
                     {
