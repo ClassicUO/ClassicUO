@@ -47,6 +47,11 @@ namespace ClassicUO.Game.GameObjects
             posX += (int) Offset.X;
             posY += (int) (Offset.Y + Offset.Z);
 
+            if (ItemData.IsTranslucent)
+            {
+                HueVector.Z = 0.5f;
+            }
+
             if (AlphaHue != 255)
                 HueVector.Z = 1f - AlphaHue / 255f;
 
@@ -131,7 +136,7 @@ namespace ClassicUO.Game.GameObjects
                 else if (IsHidden)
                     hue = 0x038E;
 
-                ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, ItemData.IsTranslucent ? .5f : 0);
+                ShaderHuesTraslator.GetHueVector(ref HueVector, hue, isPartial, HueVector.Z);
             }
 
             if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
@@ -194,12 +199,12 @@ namespace ClassicUO.Game.GameObjects
                            MathHelper.InRange(Amount, 0x02B6, 0x02B7) ||
                            Amount == 0x03DB || Amount == 0x03DF || Amount == 0x03E2 || Amount == 0x02E8 || Amount == 0x02E9;
 
-            DrawLayer(batcher, posX, posY, this, Layer.Invalid, animIndex, ishuman, Hue, IsFlipped);
+            DrawLayer(batcher, posX, posY, this, Layer.Invalid, animIndex, ishuman, Hue, IsFlipped, HueVector.Z);
 
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
                 Layer layer = LayerOrder.UsedLayers[AnimationsLoader.Instance.Direction, i];
-                DrawLayer(batcher, posX, posY, this, layer, animIndex, ishuman, 0, IsFlipped);
+                DrawLayer(batcher, posX, posY, this, layer, animIndex, ishuman, 0, IsFlipped, HueVector.Z);
             }
 
             return true;
@@ -207,7 +212,7 @@ namespace ClassicUO.Game.GameObjects
 
         private static EquipConvData? _equipConvData;
 
-        private static void DrawLayer(UltimaBatcher2D batcher, int posX, int posY, Item owner, Layer layer, byte animIndex, bool ishuman, ushort color, bool flipped)
+        private static void DrawLayer(UltimaBatcher2D batcher, int posX, int posY, Item owner, Layer layer, byte animIndex, bool ishuman, ushort color, bool flipped, float alpha)
         {
             _equipConvData = null;
             bool ispartialhue = false;
@@ -319,7 +324,7 @@ namespace ClassicUO.Game.GameObjects
                     else if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == owner)
                         color = 0x0023;
 
-                    ShaderHuesTraslator.GetHueVector(ref HueVector, color, ispartialhue, 0);
+                    ShaderHuesTraslator.GetHueVector(ref HueVector, color, ispartialhue, alpha);
                 }
 
                 batcher.DrawSprite(frame, posX, posY, flipped, ref HueVector);
