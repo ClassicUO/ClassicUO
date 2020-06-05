@@ -211,6 +211,7 @@
     <Compile Include="Network\Encryption\LoginCryptBehaviour.cs" />
     <Compile Include="Network\Encryption\TwofishBehaviour.cs" />
     <Compile Include="Renderer\MatrixEffect.cs" />
+    <Compile Include="Renderer\XBREffect.cs" />
     <Compile Include="Time.cs" />
     <Compile Include="Utility\Collections\RawList.cs" />
     <Compile Include="Utility\Collections\ReadOnlyArrayView.cs" />

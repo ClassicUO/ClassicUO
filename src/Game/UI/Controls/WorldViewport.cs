@@ -50,7 +50,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private readonly GameScene _scene;
 
-        private readonly XBREffect _xBR;
+        private XBREffect _xBR;
 
         public WorldViewport(GameScene scene, int x, int y, int width, int height)
         {
@@ -60,8 +60,6 @@ namespace ClassicUO.Game.UI.Controls
             Height = height;
             _scene = scene;
             AcceptMouseInput = true;
-
-           // _xBR = new XBREffect(Client.Game.GraphicsDevice);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -77,20 +75,25 @@ namespace ClassicUO.Game.UI.Controls
 
                 ResetHueVector();
 
-                //if (ProfileManager.Current != null && ProfileManager.Current.UseXBR)
-                //{
-                //    // draw regular world
-                //    _xBR.SetSize(_scene.ViewportTexture.Width, _scene.ViewportTexture.Height);
+                if (ProfileManager.Current != null && ProfileManager.Current.UseXBR)
+                {
+                    // draw regular world
+                    if (_xBR == null)
+                    {
+                        _xBR = new XBREffect(Client.Game.GraphicsDevice);
+                    }
 
-                //    batcher.End();
+                    _xBR.SetSize(_scene.ViewportTexture.Width, _scene.ViewportTexture.Height);
 
-                //    batcher.Begin(_xBR);
-                //    batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _hueVector);
-                //    batcher.End();
+                    batcher.End();
 
-                //    batcher.Begin();
-                //}
-                //else
+                    batcher.Begin(_xBR);
+                    batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _hueVector);
+                    batcher.End();
+
+                    batcher.Begin();
+                }
+                else
                     batcher.Draw2D(_scene.ViewportTexture, x, y, Width, Height, ref _hueVector);
 
 
@@ -151,25 +154,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             base.OnMouseUp(x, y, button);
-        }
-
-        class XBREffect : MatrixEffect
-        {
-            private readonly EffectParameter _textureSizeParam;
-            private Vector2 _vectorSize;
-
-            public XBREffect(GraphicsDevice graphicsDevice) : base(graphicsDevice, Resources.xBREffect)
-            {
-                _textureSizeParam = Parameters["textureSize"];
-            }
-            
-            public void SetSize(int w, int h)
-            {
-                _vectorSize.X = w;
-                _vectorSize.Y = h;
-
-                _textureSizeParam.SetValue(_vectorSize);
-            }
         }
     }
 }
