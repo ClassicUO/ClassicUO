@@ -266,7 +266,8 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildContextMenu()
         {
             BuildOptionDictionary();
-
+            
+            ContextMenu?.Dispose();
             ContextMenu = new ContextMenuControl();
 
             ContextMenuItemEntry markerFontEntry = new ContextMenuItemEntry("Font Style");
