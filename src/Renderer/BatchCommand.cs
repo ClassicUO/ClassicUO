@@ -19,10 +19,16 @@ namespace ClassicUO.Renderer
 		[FieldOffset(0)] public cmd_viewport viewport;
         [FieldOffset(0)] public cmd_scissor scissor;
 
-        [FieldOffset(0)] public cmd_blend_state blend_state;
-        [FieldOffset(0)] public cmd_rasterize rasterize_state;
-        [FieldOffset(0)] public cmd_stencil_state stencil_state;
-        [FieldOffset(0)] public cmd_sampler_state sampler_state;
+        [FieldOffset(0)] public cmd_blend_factor new_blend_factor;
+        [FieldOffset(0)] public cmd_new_blend_state new_blend_state;
+        [FieldOffset(0)] public cmd_new_rasterize_state new_rasterize_state;
+        [FieldOffset(0)] public cmd_new_stencil_state new_stencil_state;
+        [FieldOffset(0)] public cmd_new_sampler_state new_sampler_state;
+
+        [FieldOffset(0)] public cmd_set_blend_state set_blend_state;
+        [FieldOffset(0)] public cmd_set_rasterize_state set_rasterize_state;
+        [FieldOffset(0)] public cmd_set_stencil_state set_stencil_state;
+        [FieldOffset(0)] public cmd_set_sampler_state set_sampler_state;
 
 
         [FieldOffset(0)] public cmd_set_vertex_buffer set_vertex_buffer;
@@ -72,10 +78,19 @@ namespace ClassicUO.Renderer
     }
 
     [StructLayout(LayoutKind.Sequential)]
-	struct cmd_blend_state
-	{
+    struct cmd_blend_factor
+    {
         public int type;
 
+        public Color color;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+	struct cmd_new_blend_state
+    {
+        public int type;
+
+        public IntPtr id;
 		public BlendFunction alpha_blend_func;
         public Blend alpha_dest_blend;
         public Blend alpha_src_blend;
@@ -91,11 +106,12 @@ namespace ClassicUO.Renderer
 	}
 
     [StructLayout(LayoutKind.Sequential)]
-	struct cmd_rasterize
-	{
+	struct cmd_new_rasterize_state
+    {
         public int type;
 
-		public CullMode cull_mode;
+        public IntPtr id;
+        public CullMode cull_mode;
         public FillMode fill_mode;
         public float depth_bias;
         public bool multi_sample_aa;
@@ -104,11 +120,12 @@ namespace ClassicUO.Renderer
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
-	struct cmd_stencil_state
-	{
+	struct cmd_new_stencil_state
+    {
         public int type;
 
-		public bool depth_buffer_enabled;
+        public IntPtr id;
+        public bool depth_buffer_enabled;
         public bool depth_buffer_write_enabled;
         public CompareFunction depth_buffer_func;
         public bool stencil_enabled;
@@ -127,10 +144,12 @@ namespace ClassicUO.Renderer
 	}
 
     [StructLayout(LayoutKind.Sequential)]
-    struct cmd_sampler_state
+    struct cmd_new_sampler_state
 	{
         public int type;
 
+        public IntPtr id;
+        public int index;
 		public TextureFilter filter;
         public TextureAddressMode address_u;
         public TextureAddressMode address_v;
@@ -139,6 +158,39 @@ namespace ClassicUO.Renderer
         public int max_mip_level;
         public float mip_map_level_of_detail_bias;
 	}
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct cmd_set_blend_state
+    {
+        public int type;
+
+        public IntPtr id;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct cmd_set_rasterize_state
+    {
+        public int type;
+
+        public IntPtr id;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct cmd_set_stencil_state
+    {
+        public int type;
+
+        public IntPtr id;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct cmd_set_sampler_state
+    {
+        public int type;
+
+        public IntPtr id;
+        public int index;
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     struct cmd_set_vertex_data
