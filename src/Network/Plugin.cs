@@ -30,6 +30,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 
@@ -67,10 +68,17 @@ namespace ClassicUO.Network
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnTick _tick;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnPacketSendRecv_new  _onRecv_new, _onSend_new;
         [MarshalAs(UnmanagedType.FunctionPtr)] private OnPacketSendRecv_new_intptr _recv_new, _send_new;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private OnDrawCmdList _draw_cmd_list;
+        [MarshalAs(UnmanagedType.FunctionPtr)] private OnWndProc _on_wnd_proc;
+
+
         private delegate void OnInstall(void* header);
-        
         private delegate bool OnPacketSendRecv_new(byte[] data, ref int length);
         private delegate bool OnPacketSendRecv_new_intptr(IntPtr data, ref int length);
+        private delegate int OnDrawCmdList([Out] out IntPtr cmdlist, ref int size);
+
+        private delegate int OnWndProc(SDL.SDL_Event* ev);
+
 
         [DllImport("kernel32", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -103,6 +111,10 @@ namespace ClassicUO.Network
             public IntPtr SetTitle;
 
             public IntPtr OnRecv_new, OnSend_new, Recv_new, Send_new;
+
+            public IntPtr OnDrawCmdList;
+            public IntPtr SDL_Window;
+            public IntPtr OnWndProc;
         }
 
         private Plugin(string path)
@@ -181,6 +193,8 @@ namespace ClassicUO.Network
                 SetTitle = Marshal.GetFunctionPointerForDelegate(_setTitle),
                 Recv_new = Marshal.GetFunctionPointerForDelegate(_recv_new),
                 Send_new = Marshal.GetFunctionPointerForDelegate(_send_new),
+
+                SDL_Window = Client.Game.Window.Handle
             };
 
             void* func = &header;
@@ -287,6 +301,11 @@ namespace ClassicUO.Network
                 _onRecv_new = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv_new>(header.OnRecv_new);
             if (header.OnSend_new != IntPtr.Zero)
                 _onSend_new = Marshal.GetDelegateForFunctionPointer<OnPacketSendRecv_new>(header.OnSend_new);
+
+            if (header.OnDrawCmdList != IntPtr.Zero)
+                _draw_cmd_list = Marshal.GetDelegateForFunctionPointer<OnDrawCmdList>(header.OnDrawCmdList);
+            if (header.OnWndProc != IntPtr.Zero)
+                _on_wnd_proc = Marshal.GetDelegateForFunctionPointer<OnWndProc>(header.OnWndProc);
 
 
             IsValid = true;
@@ -450,6 +469,25 @@ namespace ClassicUO.Network
                 plugin._onMouse?.Invoke(button, wheel);
         }
 
+        internal static void ProcessDrawCmdList(ref IntPtr cmd, ref int length)
+        {
+            foreach (Plugin plugin in Plugins)
+            {
+                plugin._draw_cmd_list?.Invoke(out cmd, ref length);
+            }
+        }
+
+        internal static int ProcessWndProc(SDL.SDL_Event* e)
+        {
+            int result = 0;
+            foreach (Plugin plugin in Plugins)
+            {
+                result |= plugin._on_wnd_proc?.Invoke(e) ?? 0;
+            }
+
+            return result;
+        }
+
         internal static void UpdatePlayerPosition(int x, int y, int z)
         {
             foreach (Plugin plugin in _plugins)
@@ -506,6 +544,7 @@ namespace ClassicUO.Network
 
             return true;
         }
+
         
         //Code from https://stackoverflow.com/questions/6374673/unblock-file-from-within-net-4-c-sharp
         private static void UnblockPath(string path)
