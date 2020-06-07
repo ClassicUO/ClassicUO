@@ -829,9 +829,16 @@ namespace ClassicUO
         {
             SDL_Event* e = (SDL_Event*) ptr;
 
-            if (Plugin.ProcessWndProc(e) == 0)
+            if (Plugin.ProcessWndProc(e) != 0)
             {
-               // return 0;
+                if (e->type == SDL_EventType.SDL_MOUSEMOTION)
+                {
+                    if (UIManager.GameCursor != null)
+                    {
+                        UIManager.GameCursor.AllowDrawSDLCursor = false;
+                    }
+                }
+                return 0;
             }
 
             switch (e->type)
@@ -926,6 +933,13 @@ namespace ClassicUO
                     break;
 
                 case SDL.SDL_EventType.SDL_MOUSEMOTION:
+
+                    if (UIManager.GameCursor != null && !UIManager.GameCursor.AllowDrawSDLCursor)
+                    {
+                        UIManager.GameCursor.AllowDrawSDLCursor = true;
+                        UIManager.GameCursor.Graphic = 0xFFFF;
+                    }
+
                     Mouse.Update();
 
                     if (Mouse.IsDragging)
