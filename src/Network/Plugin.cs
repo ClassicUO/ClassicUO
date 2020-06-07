@@ -583,15 +583,6 @@ namespace ClassicUO.Network
             return DeleteFile(fileName + ":Zone.Identifier");
         }
 
-        private RasterizerState _rasterizerState = new RasterizerState()
-        {
-            CullMode = CullMode.None,
-            DepthBias = 0,
-            FillMode = FillMode.Solid,
-            MultiSampleAntiAlias = false,
-            ScissorTestEnable = true,
-            SlopeScaleDepthBias = 0
-        };
         private void HandleCmdList(GraphicsDevice device, IntPtr ptr, int length, Dictionary<IntPtr, GraphicsResource> resources)
         {
             if (ptr == IntPtr.Zero || length <= 0)
@@ -633,12 +624,6 @@ namespace ClassicUO.Network
             var lastRasterizeState = device.RasterizerState;
             var lastDepthStencilState = device.DepthStencilState;
             var lastsampler = device.SamplerStates[0];
-
-            //device.BlendFactor = Color.White;
-            //device.BlendState = BlendState.NonPremultiplied;
-            //device.RasterizerState = _rasterizerState;
-            //device.DepthStencilState = DepthStencilState.DepthRead;
-            //device.SamplerStates[0] = SamplerState.PointClamp;
 
 
             //var blend_snap_AlphaBlendFunction = device.BlendState.AlphaBlendFunction;
