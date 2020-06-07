@@ -26,7 +26,7 @@ namespace ClassicUO.Utility
 {
     internal class TextFileParser
     {
-        private static StringBuilder _sb = new StringBuilder();
+        private StringBuilder _sb = new StringBuilder();
         private readonly char[] _delimiters, _comments, _quotes;
         private int _eol;
         private int _pos;
