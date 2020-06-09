@@ -328,6 +328,12 @@ namespace ClassicUO.Game.UI.Gumps
             return true;
         }
 
+        public override void Dispose()
+        {
+            base.Dispose();
+            _bookPage?.Dispose();
+        }
+
         public override void OnHitTestSuccess(int x, int y, ref Control res)
         {
             if (!IsDisposed)
