@@ -48,7 +48,7 @@ namespace ManifestCreator
             "libs/osx/libmojoshader.dylib",
             "libs/osx/libMonoPosixHelper.dylib",
             "libs/osx/libMonoSupportW.dylib",
-            "libs/osx/lib/libSDL2-2.0.0.dylib",
+            "libs/osx/libSDL2-2.0.0.dylib",
             "libs/osx/libSDL2_image-2.0.0.dylib",
             "libs/osx/libtheorafile.dylib",
 
