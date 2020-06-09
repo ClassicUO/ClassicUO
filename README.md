@@ -63,30 +63,28 @@ Follow instructions on https://brew.sh/
 2. Install Mono (https://www.mono-project.com/):
 `brew install mono`
 
-3. Install Paket, a dependency manager for .NET and mono projects (https://fsprojects.github.io/Paket/):
-`brew install paket`
+3. Install NuGet, a package manager for .NET (https://docs.microsoft.com/en-us/nuget/):
+`brew install nuget`
 
 4. Navigate to ClassicUO root folder:
 `cd /your/path/to/ClassicUO`
 
-5. Initialize Paket environment:
-`paket init`
+5. Restore packages (https://docs.microsoft.com/en-us/nuget/reference/cli-reference/cli-ref-restore):
+`nuget restore`
 
-6. Install required/missing dependencies:
-`paket add Newtonsoft.Json --version 12.0.2`
-
-7. Build:
+6. Build:
   - Debug version: `msbuild /t:Rebuild`
   - Release version: `msbuild /t:Rebuild /p:Configuration=Release`
 
-8. Start ClassicUO via Mono (to properly set up all required constants use provided bash script):
-  - Debug version: `./bin/Debug/ClassicUO-mono.sh`
-  - Release version: `./bin/Release/ClassicUO-mono.sh`
+7. Run ClassicUO via Mono:
+  - Debug version: `mono ./bin/Debug/ClassicUO.exe`
+  - Release version: `mono ./bin/Release/ClassicUO.exe`
+
+After the first run, ignore the error message and a new file named `settings.json` will be automatically created in the directory with ClassicUO.exe.
 
 Other useful commands:
 - `msbuild /t:Clean`
 - `msbuild /t:Clean /p:Configuration=Release`
-- `msbuild /t:RestorePackages`
 
 # Contribute
 Everyone is welcome to contribute! The GitHub issues and project tracker are kept up to date with tasks that need work.
