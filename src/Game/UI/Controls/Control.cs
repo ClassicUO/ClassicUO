@@ -397,7 +397,10 @@ namespace ClassicUO.Game.UI.Controls
                     if (AcceptMouseInput)
                     {
                         if (res == null || res.Priority >= this.Priority)
+                        {
                             res = this;
+                            OnHitTestSuccess(x, y, ref res);
+                        }
                     }
 
                     foreach (Control c in Children)
@@ -416,6 +419,9 @@ namespace ClassicUO.Game.UI.Controls
             HitTest(position.X, position.Y, ref res);
         }
 
+        public virtual void OnHitTestSuccess(int x, int y, ref Control res)
+        {
+        }
        
         public Control GetFirstControlAcceptKeyboardInput()
         {

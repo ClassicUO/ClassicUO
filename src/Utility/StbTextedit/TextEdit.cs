@@ -33,7 +33,13 @@ namespace StbTextEditSharp
 		{
 			get => Handler.Text;
 
-			set => Handler.Text = value;
+			set
+			{
+				Handler.InputSet = true;
+				Handler.Text = value;
+				Handler.InputSet = false;
+				Handler.AfterInput();
+			}
 		}
 
 		public void SortSelection()

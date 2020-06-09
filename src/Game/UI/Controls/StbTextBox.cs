@@ -90,6 +90,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
 
+        public bool InputSet { get; set; }
+
         public string Text
         {
             get => _rendererText.Text;
@@ -314,12 +316,15 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-
         protected virtual void OnTextChanged()
         {
             TextChanged?.Raise(this);
-
             UpdateCaretScreenPosition();
+        }
+
+        public void AfterInput()
+        {
+            OnTextChanged();
         }
 
         protected MultilinesFontInfo GetInfo() => _rendererText.GetInfo();
@@ -382,7 +387,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     break;
                 case SDL.SDL_Keycode.SDLK_v when Keyboard.Ctrl && IsEditable:
-                    OnTextInput(SDL.SDL_GetClipboardText());
+                    OnTextInput(StringHelper.GetClipboardText());
                     break;
                 case SDL.SDL_Keycode.SDLK_z when Keyboard.Ctrl && IsEditable:
                     stb_key = ControlKeys.Undo;
@@ -555,8 +560,6 @@ namespace ClassicUO.Game.UI.Controls
 
                 _stb.InputChar(c[i]);
             }
-
-            OnTextChanged();
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -582,7 +585,7 @@ namespace ClassicUO.Game.UI.Controls
             return true;
         }
 
-        private static readonly Color SELECTION_COLOR = new Color(0, 148, 216);
+        protected static readonly Color SELECTION_COLOR = new Color(0, 148, 216);
 
 
         private protected void DrawSelection(UltimaBatcher2D batcher, int x, int y)

@@ -417,14 +417,10 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.Paste:
+                    string txt = Utility.StringHelper.GetClipboardText();
 
-                    if (SDL.SDL_HasClipboardText() != SDL.SDL_bool.SDL_FALSE)
-                    {
-                        string s = SDL.SDL_GetClipboardText();
-
-                        if (!string.IsNullOrEmpty(s))
-                            UIManager.SystemChat.TextBoxControl.Text += s;
-                    }
+                    if (txt != null)
+                        UIManager.SystemChat.TextBoxControl.Text += txt;
 
                     break;
 

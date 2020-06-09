@@ -54,9 +54,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         internal void SetBookText(string text)
         {
-            _bookPage.NoReformat = true;
+            _bookPage.InputSet = true;
             _bookPage.Text = text;
-            _bookPage.NoReformat = false;
+            _bookPage.InputSet = false;
+            _bookPage.UpdatePageCoords();
         }
 
         public bool IntroChanges => _pagesChanged[0];
@@ -99,7 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
                     SetActivePage(1);
             };
 
-            _bookPage = new StbPageTextBox(DefaultFont, BookPageCount, MAX_BOOK_CHARS_PER_LINE * MAX_BOOK_LINES, 156, IsNewBook, FontStyle.ExtraHeight, 2)
+            _bookPage = new StbPageTextBox(DefaultFont, BookPageCount, this, MAX_BOOK_CHARS_PER_LINE * MAX_BOOK_LINES * BookPageCount, 156, IsNewBook, FontStyle.ExtraHeight, 2)
             {
                 X = 0,
                 Y = 0,
@@ -139,7 +140,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int page = k + 1;
                 if (page % 2 == 1)
                     page += 1;
-                
+
                 page >>= 1;
                 Add(new Label(k.ToString(), true, 1) { X = x + 80, Y = 200 }, page);
             }
@@ -225,7 +226,7 @@ namespace ClassicUO.Game.UI.Gumps
                         else
                         {
                             string[] text = new string[MAX_BOOK_LINES];
-                            for(int x = (i - 1) * MAX_BOOK_LINES, l = 0; x < ((i - 1) * MAX_BOOK_LINES) + 8; x++, l++)
+                            for (int x = (i - 1) * MAX_BOOK_LINES, l = 0; x < ((i - 1) * MAX_BOOK_LINES) + 8; x++, l++)
                             {
                                 text[l] = BookLines[x];
                             }
@@ -237,7 +238,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ActivePage = page;
             UpdatePageButtonVisibility();
-            if (UIManager.KeyboardFocusControl == null || (UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl && UIManager.KeyboardFocusControl.Page != page))
+            if (UIManager.KeyboardFocusControl == null || (UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl && UIManager.KeyboardFocusControl != _bookPage && page != (_bookPage._focusPage / 2 + 1)))
             {
                 UIManager.SystemChat.TextBoxControl.SetKeyboardFocus();
             }
@@ -274,7 +275,10 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_bookPage._caretPos.Y < poy + phy)
                         {
                             if (_bookPage._caretPos.Y >= poy)
-                                _bookPage.renderedCaret.Draw(batcher, _bookPage._caretPos.X + x + RIGHT_X, (_bookPage._caretPos.Y + y + UPPER_MARGIN) - poy, 0, 0, _bookPage.renderedCaret.Width, _bookPage.renderedCaret.Height);
+                            {
+                                if(_bookPage.HasKeyboardFocus)
+                                    _bookPage.renderedCaret.Draw(batcher, _bookPage._caretPos.X + x + RIGHT_X, (_bookPage._caretPos.Y + y + UPPER_MARGIN) - poy, 0, 0, _bookPage.renderedCaret.Width, _bookPage.renderedCaret.Height);
+                            }
                             else
                                 _bookPage._caretPage = _bookPage.GetCaretPage();
                         }
@@ -282,9 +286,9 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if (_bookPage._caretPage + 2 < _bookPage._pagesChanged.Length)
                             {
-                                SetActivePage(_bookPage._caretPage / 2 + 2);
-                                _bookPage._caretPage++;
-                                _bookPage.MouseClick(_bookPage._caretPos.X, _bookPage._caretPos.Y);
+                                _bookPage._focusPage = _bookPage._caretPage++;
+                                SetActivePage((_bookPage._caretPage / 2) + 2);
+                                //_bookPage.SetKeyboardFocus();//.On(_bookPage._caretPos.X, _bookPage._caretPos.Y);
                             }
                         }
                     }
@@ -300,12 +304,15 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_bookPage._caretPos.Y < poy + phy)
                         {
                             if (_bookPage._caretPos.Y >= poy)
-                                _bookPage.renderedCaret.Draw(batcher, _bookPage._caretPos.X + x + LEFT_X, (_bookPage._caretPos.Y + y + UPPER_MARGIN) - poy, 0, 0, _bookPage.renderedCaret.Width, _bookPage.renderedCaret.Height);
+                            {
+                                if (_bookPage.HasKeyboardFocus)
+                                    _bookPage.renderedCaret.Draw(batcher, _bookPage._caretPos.X + x + LEFT_X, (_bookPage._caretPos.Y + y + UPPER_MARGIN) - poy, 0, 0, _bookPage.renderedCaret.Width, _bookPage.renderedCaret.Height);
+                            }
                             else if (_bookPage._caretPage > 0)
                             {
-                                SetActivePage(_bookPage._caretPage / 2);
-                                _bookPage._caretPage--;
-                                _bookPage.MouseClick(_bookPage._caretPos.X, _bookPage._caretPos.Y);
+                                _bookPage._focusPage = _bookPage._caretPage--;
+                                SetActivePage((_bookPage._caretPage / 2) + 1);
+                                //_bookPage.SetKeyboardFocus(); //_bookPage.MouseClick(_bookPage._caretPos.X, _bookPage._caretPos.Y);
                             }
                         }
                         else if (_bookPage._caretPos.Y <= _bookPage.Height)
@@ -321,52 +328,44 @@ namespace ClassicUO.Game.UI.Gumps
             return true;
         }
 
-        protected override void OnMouseDown(int x, int y, MouseButtonType button)
+        public override void OnHitTestSuccess(int x, int y, ref Control res)
         {
-            base.OnMouseDown(x, y, button);
-            if(!IsDisposed && button == MouseButtonType.Left)
+            if (!IsDisposed)
             {
                 int page = -1;
-                if (ActivePage > 1 && x >= LEFT_X && x <= LEFT_X + _bookPage.Width)
+                if (ActivePage > 1 && x >= LEFT_X + X && x <= LEFT_X + X + _bookPage.Width)
                 {
-                    x -= LEFT_X;
                     page = (ActivePage - 1) * 2 - 1;
                 }
-                else if (ActivePage - 1 < (BookPageCount >> 1) && x >= RIGHT_X && x <= RIGHT_X + _bookPage.Width)
+                else if (ActivePage - 1 < (BookPageCount >> 1) && x >= RIGHT_X + X && x <= RIGHT_X + _bookPage.Width + X)
                 {
                     page = (ActivePage - 1) * 2;
-                    x -= RIGHT_X;
                 }
-                if (page >= 0 && page < BookPageCount && y >= UPPER_MARGIN && y <= UPPER_MARGIN + PAGE_HEIGHT)
+                if (page >= 0 && page < BookPageCount && y >= UPPER_MARGIN + Y && y <= UPPER_MARGIN + PAGE_HEIGHT + Y)
                 {
-                    y += _bookPage._pageCoords[page, 0] - UPPER_MARGIN;
-                    _bookPage.MouseClick(x, y);
+                    _bookPage._focusPage = page;
+                    res = _bookPage;
                 }
             }
         }
 
         private class StbPageTextBox : StbTextBox
         {
-            internal bool NoReformat { get; set; }
             internal readonly int[,] _pageCoords;
             internal readonly string[] _pageLines;
             internal bool[] _pagesChanged;
             internal Point _caretPos => _caretScreenPosition;
-            internal int _caretPage;
+            internal int _caretPage, _focusPage;
+            private ModernBookGump _gump;
             internal int GetCaretPage()
             {
                 Point p = _rendererText.GetCaretPosition(CaretIndex);
-                for(int i = 0, l = _pageCoords.GetLength(0); i < l; i++)
+                for (int i = 0, l = _pageCoords.GetLength(0); i < l; i++)
                 {
-                    if (p.Y >= _pageCoords[i, 0] && p.Y < _pageCoords[i,0] + _pageCoords[i, 1])
+                    if (p.Y >= _pageCoords[i, 0] && p.Y < _pageCoords[i, 0] + _pageCoords[i, 1])
                         return i;
                 }
                 return 0;
-            }
-
-            internal void MouseClick(int x, int y)
-            {
-                OnMouseDown(x, y, MouseButtonType.Left);
             }
 
             protected override void OnMouseDown(int x, int y, MouseButtonType button)
@@ -377,21 +376,59 @@ namespace ClassicUO.Game.UI.Gumps
                         SetKeyboardFocus();
                     if (!NoSelection)
                         _leftWasDown = true;
-                    
+                    if (_focusPage >= 0 && _focusPage < _pageCoords.GetLength(0))
+                    {
+                        if (_focusPage % 2 == 0)
+                            x -= RIGHT_X + _gump.X;
+                        else
+                            x -= LEFT_X + _gump.X;
+                        y += _pageCoords[_focusPage, 0] - (UPPER_MARGIN + _gump.Y);
+                    }
                     Stb.Click(x, y);
                     UpdateCaretScreenPosition();
                     _caretPage = GetCaretPage();
                 }
             }
 
+            protected override void OnMouseOver(int x, int y)
+            {
+                if (_leftWasDown)
+                {
+                    if (_focusPage >= 0 && _focusPage < _pageCoords.GetLength(0))
+                    {
+                        if (_focusPage % 2 == 0)
+                            x -= RIGHT_X + _gump.X;
+                        else
+                            x -= LEFT_X + _gump.X;
+                        y += _pageCoords[_focusPage, 0] - (UPPER_MARGIN + _gump.Y);
+                    }
+                    Stb.Drag(x, y);
+                }
+            }
+
+            protected override void OnMouseUp(int x, int y, MouseButtonType button)
+            {
+                if (_focusPage >= 0 && _focusPage < _pageCoords.GetLength(0))
+                {
+                    if (_focusPage % 2 == 0)
+                        x -= RIGHT_X + _gump.X;
+                    else
+                        x -= LEFT_X + _gump.X;
+                    y += _pageCoords[_focusPage, 0] - (UPPER_MARGIN + _gump.Y);
+                }
+                base.OnMouseUp(x, y, button);
+            }
+
             internal RenderedText renderedText => _rendererText;
             internal RenderedText renderedCaret => _rendererCaret;
 
-            public StbPageTextBox(byte font, int bookpages, int max_char_count = -1, int maxWidth = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0) : base(font, max_char_count, maxWidth, isunicode, style, hue, TEXT_ALIGN_TYPE.TS_LEFT)
+            public StbPageTextBox(byte font, int bookpages, ModernBookGump gump, int max_char_count = -1, int maxWidth = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0) : base(font, max_char_count, maxWidth, isunicode, style, hue, TEXT_ALIGN_TYPE.TS_LEFT)
             {
                 _pageCoords = new int[bookpages, 2];
                 _pageLines = new string[bookpages * MAX_BOOK_LINES];
                 _pagesChanged = new bool[bookpages + 1];
+                Priority = ClickPriority.High;
+                _gump = gump;
             }
 
             private int GetCharWidth(char c)
@@ -401,7 +438,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return FontsLoader.Instance.GetCharWidthASCII(_rendererText.Font, c);
             }
 
-            private void UpdatePageCoords()
+            internal void UpdatePageCoords()
             {
                 MultilinesFontInfo info = _rendererText.GetInfo();
                 for (int page = 0, y = 0; page < _pageCoords.GetLength(0); page++)
@@ -462,9 +499,9 @@ namespace ClassicUO.Game.UI.Gumps
                                     endX += _rendererText.GetCharWidth(info.Data[startSelectionIndex + k].Item);
                                 }
 
-                                if(drawY >= starty && drawY <= endy)
+                                if (drawY >= starty && drawY <= endy)
                                     batcher.Draw2D(
-                                               Texture2DCache.GetTexture(Color.Magenta),
+                                               Texture2DCache.GetTexture(SELECTION_COLOR),
                                                x + drawX,
                                                y + drawY - starty,
                                                endX,
@@ -478,7 +515,7 @@ namespace ClassicUO.Game.UI.Gumps
                             // do the whole line
                             if (drawY >= starty && drawY <= endy)
                                 batcher.Draw2D(
-                                           Texture2DCache.GetTexture(Color.Magenta),
+                                           Texture2DCache.GetTexture(SELECTION_COLOR),
                                            x + drawX,
                                            y + drawY - starty,
                                            info.Width - drawX,
@@ -499,7 +536,8 @@ namespace ClassicUO.Game.UI.Gumps
             protected override void OnTextChanged()
             {
                 base.OnTextChanged();
-                if (!NoReformat)
+
+                if (!InputSet)//this avoids multiple iteration on singlechar input from stb...or from lines transmitted by the server.
                 {
                     string[] split = Text.Split('\n');
                     for (int i = 0, t = 0; i < split.Length; i++)
@@ -512,7 +550,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (w + pw > Width)
                                 {
                                     _sb.Append('\n');
-                                    if(t + (i - 1) == CaretIndex)
+                                    if (t + (i - 1) == CaretIndex)
                                         CaretIndex++;
                                     w = 0;
                                 }
@@ -550,17 +588,16 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     _rendererText.Text = _sb.ToString();//whole reformatted book
                     _sb.Clear();
+                    UpdatePageCoords();
                 }
-                UpdatePageCoords();
-                if (HasKeyboardFocus)
-                    _caretPage = GetCaretPage();
-                else
-                    _caretPage = -1;
             }
 
-            protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+            protected override void CloseWithRightClick()
             {
-                base.OnKeyDown(key, mod);
+                if (_gump != null && !_gump.IsDisposed)
+                    _gump.CloseWithRightClick();
+                else
+                    base.CloseWithRightClick();
             }
         }
     }
