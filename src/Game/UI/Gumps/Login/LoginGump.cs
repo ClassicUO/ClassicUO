@@ -122,20 +122,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     Y = 453
                 });
 
-                string patch = "-1";
-                if (File.Exists(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "runuoi.log")))
-                {
-                    using (StreamReader reader = new StreamReader(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "runuoi.log")))
-                    {
-                        patch = reader.ReadLine();
-                    }
-                }
-
-                Add(new Label($"ClassicUO Version {CUOEnviroment.Version} (patch {patch})", false, 0x034E, font: 9)
+                Add(new Label($"ClassicUO Version {CUOEnviroment.Version}", false, 0x034E, font: 9)
                 {
                     X = 286,
                     Y = 465
                 });
+
 
                 Add(_checkboxAutologin = new Checkbox(0x00D2, 0x00D3, "Autologin", 1, 0x0386, false)
                 {
@@ -183,16 +175,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     Y = 453
                 });
 
-                string patch = "-1";
-                if (File.Exists(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "runuoi.log")))
-                {
-                    using (StreamReader reader = new StreamReader(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "runuoi.log")))
-                    {
-                        patch = reader.ReadLine();
-                    }
-                }
-
-                Add(new Label($"ClassicUO Version {CUOEnviroment.Version} (patch {patch})", false, 0x034E, font: 9)
+                Add(new Label($"ClassicUO Version {CUOEnviroment.Version}", false, 0x0481, font: 9)
                 {
                     X = 286,
                     Y = 465
