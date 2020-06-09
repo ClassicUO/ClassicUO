@@ -258,58 +258,65 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             base.Draw(batcher, x, y);
-            var t = _bookPage.renderedText;
-            int startpage = (ActivePage - 1) * 2;
-            if (startpage < BookPageCount)
+            Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
+            if (ScissorStack.PushScissors(scissor))
             {
-                int poy = _bookPage._pageCoords[startpage, 0], phy = _bookPage._pageCoords[startpage, 1];
-                _bookPage.DrawSelection(batcher, x + RIGHT_X, y + UPPER_MARGIN, poy, poy + phy);
-                t.Draw(batcher, x + RIGHT_X, y + UPPER_MARGIN, 0, poy, t.Width, phy);
-                if (startpage == _bookPage._caretPage)
+                batcher.EnableScissorTest(true);
+                var t = _bookPage.renderedText;
+                int startpage = (ActivePage - 1) * 2;
+                if (startpage < BookPageCount)
                 {
-                    if (_bookPage._caretPos.Y < poy + phy)
+                    int poy = _bookPage._pageCoords[startpage, 0], phy = _bookPage._pageCoords[startpage, 1];
+                    _bookPage.DrawSelection(batcher, x + RIGHT_X, y + UPPER_MARGIN, poy, poy + phy);
+                    t.Draw(batcher, x + RIGHT_X, y + UPPER_MARGIN, 0, poy, t.Width, phy);
+                    if (startpage == _bookPage._caretPage)
                     {
-                        if (_bookPage._caretPos.Y >= poy)
-                            _bookPage.renderedCaret.Draw(batcher, _bookPage._caretPos.X + x + RIGHT_X, (_bookPage._caretPos.Y + y + UPPER_MARGIN) - poy, 0, 0, _bookPage.renderedCaret.Width, _bookPage.renderedCaret.Height);
-                        else
-                            _bookPage._caretPage = _bookPage.GetCaretPage();
-                    }
-                    else if(_bookPage._caretPos.Y <= _bookPage.Height)
-                    {
-                        if (_bookPage._caretPage + 2 < _bookPage._pagesChanged.Length)
+                        if (_bookPage._caretPos.Y < poy + phy)
                         {
-                            SetActivePage(_bookPage._caretPage / 2 + 2);
-                            _bookPage._caretPage++;
-                            _bookPage.MouseClick(_bookPage._caretPos.X, _bookPage._caretPos.Y);
+                            if (_bookPage._caretPos.Y >= poy)
+                                _bookPage.renderedCaret.Draw(batcher, _bookPage._caretPos.X + x + RIGHT_X, (_bookPage._caretPos.Y + y + UPPER_MARGIN) - poy, 0, 0, _bookPage.renderedCaret.Width, _bookPage.renderedCaret.Height);
+                            else
+                                _bookPage._caretPage = _bookPage.GetCaretPage();
+                        }
+                        else if (_bookPage._caretPos.Y <= _bookPage.Height)
+                        {
+                            if (_bookPage._caretPage + 2 < _bookPage._pagesChanged.Length)
+                            {
+                                SetActivePage(_bookPage._caretPage / 2 + 2);
+                                _bookPage._caretPage++;
+                                _bookPage.MouseClick(_bookPage._caretPos.X, _bookPage._caretPos.Y);
+                            }
                         }
                     }
                 }
-            }
-            startpage--;
-            if(startpage > 0)
-            {
-                int poy = _bookPage._pageCoords[startpage, 0], phy = _bookPage._pageCoords[startpage, 1];
-                _bookPage.DrawSelection(batcher, x + LEFT_X, y + UPPER_MARGIN, poy, poy + phy);
-                t.Draw(batcher, x + LEFT_X, y + UPPER_MARGIN, 0, poy, t.Width, phy);
-                if (startpage == _bookPage._caretPage)
+                startpage--;
+                if (startpage > 0)
                 {
-                    if (_bookPage._caretPos.Y < poy + phy)
+                    int poy = _bookPage._pageCoords[startpage, 0], phy = _bookPage._pageCoords[startpage, 1];
+                    _bookPage.DrawSelection(batcher, x + LEFT_X, y + UPPER_MARGIN, poy, poy + phy);
+                    t.Draw(batcher, x + LEFT_X, y + UPPER_MARGIN, 0, poy, t.Width, phy);
+                    if (startpage == _bookPage._caretPage)
                     {
-                        if (_bookPage._caretPos.Y >= poy)
-                            _bookPage.renderedCaret.Draw(batcher, _bookPage._caretPos.X + x + LEFT_X, (_bookPage._caretPos.Y + y + UPPER_MARGIN) - poy, 0, 0, _bookPage.renderedCaret.Width, _bookPage.renderedCaret.Height);
-                        else if (_bookPage._caretPage > 0)
+                        if (_bookPage._caretPos.Y < poy + phy)
                         {
-                            SetActivePage(_bookPage._caretPage / 2);
-                            _bookPage._caretPage--;
-                            _bookPage.MouseClick(_bookPage._caretPos.X, _bookPage._caretPos.Y);
+                            if (_bookPage._caretPos.Y >= poy)
+                                _bookPage.renderedCaret.Draw(batcher, _bookPage._caretPos.X + x + LEFT_X, (_bookPage._caretPos.Y + y + UPPER_MARGIN) - poy, 0, 0, _bookPage.renderedCaret.Width, _bookPage.renderedCaret.Height);
+                            else if (_bookPage._caretPage > 0)
+                            {
+                                SetActivePage(_bookPage._caretPage / 2);
+                                _bookPage._caretPage--;
+                                _bookPage.MouseClick(_bookPage._caretPos.X, _bookPage._caretPos.Y);
+                            }
+                        }
+                        else if (_bookPage._caretPos.Y <= _bookPage.Height)
+                        {
+                            if (_bookPage._caretPage + 2 < _bookPage._pagesChanged.Length)
+                                _bookPage._caretPage++;
                         }
                     }
-                    else if (_bookPage._caretPos.Y <= _bookPage.Height)
-                    {
-                        if (_bookPage._caretPage + 2 < _bookPage._pagesChanged.Length)
-                            _bookPage._caretPage++;
-                    }
                 }
+                batcher.EnableScissorTest(false);
+                ScissorStack.PopScissors();
             }
             return true;
         }
