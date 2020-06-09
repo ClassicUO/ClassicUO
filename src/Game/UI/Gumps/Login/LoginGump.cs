@@ -240,7 +240,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             _checkboxAutologin.IsChecked = Settings.GlobalSettings.AutoLogin;
 
 
-            /*int htmlX = 130;
+            int htmlX = 130;
             int htmlY = 442;
 
             Add(new HtmlControl(htmlX, htmlY, 300, 100,
@@ -259,7 +259,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                                            false, false,
                                            false,
                                            text: "<body link=\"#6a6a62\" vlink=\"#00FF00\" ><a href=\"https://discord.gg/VdyCpjQ\">CUO Discord",
-                                           0x32, true, isunicode: true, style: FontStyle.Cropped));*/
+                                           0x32, true, isunicode: true, style: FontStyle.Cropped));
 
 
             if (!string.IsNullOrEmpty(_textboxAccount.Text))
