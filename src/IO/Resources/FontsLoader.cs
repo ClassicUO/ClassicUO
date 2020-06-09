@@ -233,6 +233,15 @@ namespace ClassicUO.IO.Resources
             return (width, height);
         }
 
+        /// <summary> Get the index in ASCII fonts of a character. </summary>
+        private int GetASCIIIndex(char c)
+        {
+            byte ch = (byte) c; // ASCII fonts cover only 256 characters
+            if (ch < NOPRINT_CHARS)
+                return 0;
+            else
+                return ch - NOPRINT_CHARS;
+        }
 
         public int GetWidthASCII(byte font, string str)
         {
@@ -243,10 +252,7 @@ namespace ClassicUO.IO.Resources
 
             foreach (char c in str)
             {
-                if(c < NOPRINT_CHARS)
-                    textLength += _font[font][0].Width;
-                else
-                    textLength += _font[font][c - NOPRINT_CHARS].Width;
+                textLength += _font[font][GetASCIIIndex(c)].Width;
             }
 
             return textLength;
@@ -282,6 +288,8 @@ namespace ClassicUO.IO.Resources
 
             return textWidth;
         }
+
+
 
         private int GetHeightASCII(MultilinesFontInfo info)
         {
@@ -389,11 +397,7 @@ namespace ClassicUO.IO.Resources
 
             foreach (char c in str)
             {
-
-                if (c < NOPRINT_CHARS)
-                    textLength += _font[font][0].Width;
-                else
-                    textLength += _font[font][c - NOPRINT_CHARS].Width;
+                textLength += _font[font][GetASCIIIndex(c)].Width;
 
                 if (textLength > width)
                     break;
@@ -500,11 +504,7 @@ namespace ClassicUO.IO.Resources
                 {
                     byte index = (byte) ptr.Data[i].Item;
                     int offsY = GetFontOffsetY(font, index);
-                    if (index < NOPRINT_CHARS)
-                        index = 0;
-                    else
-                        index -= NOPRINT_CHARS;
-                    ref FontCharacterData fcd = ref fd[index];
+                    ref FontCharacterData fcd = ref fd[GetASCIIIndex(ptr.Data[i].Item)];
                     int dw = fcd.Width;
                     int dh = fcd.Height;
                     ushort charColor = color;
@@ -616,13 +616,7 @@ namespace ClassicUO.IO.Resources
                     charCount = 0;
                 }
 
-                byte index;
-                if (si < NOPRINT_CHARS)
-                    index = 0;
-                else
-                    index = (byte)(si - NOPRINT_CHARS);
-
-                ref FontCharacterData fcd = ref fd[index];
+                ref FontCharacterData fcd = ref fd[GetASCIIIndex(si)];
 
                 if (si == '\n' || ptr.Width + readWidth + fcd.Width > width)
                 {
@@ -2988,13 +2982,7 @@ namespace ClassicUO.IO.Resources
 
                         for (int i = 0; i < len && i < info.Data.Count; i++)
                         {
-                            byte index;
-                            if (info.Data[i].Item < NOPRINT_CHARS)
-                                index = 0;
-                            else
-                                index = (byte) (info.Data[i].Item - NOPRINT_CHARS);
-
-                            width += fd[index].Width;
+                            width += fd[GetASCIIIndex(info.Data[i].Item)].Width;
 
                             if (width > x)
                                 break;                           
@@ -3075,13 +3063,7 @@ namespace ClassicUO.IO.Resources
                 {
                     for (int i = 0; i < len; i++)
                     {
-
-                        byte index;
-                        if (info.Data[i].Item < NOPRINT_CHARS)
-                            index = 0;
-                        else
-                            index = (byte)(info.Data[i].Item - NOPRINT_CHARS);
-                        x += fd[index].Width;
+                        x += fd[GetASCIIIndex(info.Data[i].Item)].Width;
 
                         if (info.CharStart + i + 1 == pos)
                             return (x, y);
