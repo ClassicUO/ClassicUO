@@ -582,12 +582,17 @@ namespace ClassicUO.Game.UI.Controls
             return true;
         }
 
+        private static readonly Color SELECTION_COLOR = new Color(0, 148, 216);
+
+
         private protected void DrawSelection(UltimaBatcher2D batcher, int x, int y)
         {
             ResetHueVector();
 
             int selectStart = Math.Min(_stb.SelectStart, _stb.SelectEnd);
             int selectEnd = Math.Max(_stb.SelectStart, _stb.SelectEnd);
+
+            _hueVector.Z = 0.5f;
 
             if (selectStart < selectEnd)
             {
@@ -624,7 +629,7 @@ namespace ClassicUO.Game.UI.Controls
                             }
 
                             batcher.Draw2D(
-                                           Texture2DCache.GetTexture(Color.Magenta),
+                                           Texture2DCache.GetTexture(SELECTION_COLOR),
                                            x + drawX,
                                            y + drawY,
                                            endX,
@@ -637,7 +642,7 @@ namespace ClassicUO.Game.UI.Controls
 
                         // do the whole line
                         batcher.Draw2D(
-                                       Texture2DCache.GetTexture(Color.Magenta),
+                                       Texture2DCache.GetTexture(SELECTION_COLOR),
                                        x + drawX,
                                        y + drawY,
                                        info.Width - drawX,
@@ -653,6 +658,9 @@ namespace ClassicUO.Game.UI.Controls
                     info = info.Next;
                 }
             }
+
+
+            ResetHueVector();
         }
 
         protected virtual void DrawCaret(UltimaBatcher2D batcher, int x, int y)
