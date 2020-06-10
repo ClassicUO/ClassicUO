@@ -176,28 +176,28 @@ namespace ClassicUO.IO.Resources
 
                 ushort* huesData = (ushort*) (byte*) (ptr + 30800);
 
-                ushort[] colorTable = new ushort[maxPixelValue];
+                uint[] colorTable = new uint[maxPixelValue];
 
                 int colorOffset = 31 * maxPixelValue;
 
                 for (int i = 0; i < maxPixelValue; i++)
                 {
                     colorOffset -= 31;
-                    colorTable[i] = (ushort) (0x8000 | huesData[colorOffset / maxPixelValue]);
+                    colorTable[i] = Utility.HuesHelper.Color16To32(huesData[colorOffset / maxPixelValue]);              
                 }
 
-                ushort[] worldMap = new ushort[mapSize];
+                uint[] worldMap = new uint[mapSize];
 
                 for (int i = 0; i < mapSize; i++)
                 {
                     byte bytepic = data[i];
 
-                    worldMap[i] = (ushort) (bytepic != 0 ? colorTable[bytepic - 1] : 0);
+                    worldMap[i] = (bytepic != 0 ? colorTable[bytepic - 1] : 0);
                 }
 
                 Marshal.FreeHGlobal(ptr);
 
-                UOTexture16 texture = new UOTexture16(width, height);
+                UOTexture32 texture = new UOTexture32(width, height);
                 texture.PushData(worldMap);
 
                 return texture;
@@ -206,7 +206,7 @@ namespace ClassicUO.IO.Resources
             return null;
         }
 
-        public UOTexture16 LoadFacet(int facet, int width, int height, int startx, int starty, int endx, int endy)
+        public UOTexture32 LoadFacet(int facet, int width, int height, int startx, int starty, int endx, int endy)
         {
             if (_file == null || facet < 0 || facet > 5 || _facets[facet] == null)
                 return null;
@@ -227,7 +227,7 @@ namespace ClassicUO.IO.Resources
             int pwidth = endX - startX;
             int pheight = endY - startY;
 
-            ushort[] map = new ushort[pwidth * pheight];
+            uint[] map = new uint[pwidth * pheight];
 
             for (int y = 0; y < h; y++)
             {
@@ -238,8 +238,7 @@ namespace ClassicUO.IO.Resources
                 {
                     int size = _facets[facet].ReadByte();
 
-                    ushort color = (ushort) (0x8000 | _facets[facet].ReadUShort());
-
+                    uint color = Utility.HuesHelper.Color16To32(_facets[facet].ReadUShort()) | 0xFF_00_00_00;
                     for (int j = 0; j < size; j++)
                     {
                         if (x >= startX && x < endX && y >= startY && y < endY)
@@ -249,7 +248,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            UOTexture16 texture = new UOTexture16(pwidth, pheight);
+            UOTexture32 texture = new UOTexture32(pwidth, pheight);
             texture.PushData(map);
 
             return texture;

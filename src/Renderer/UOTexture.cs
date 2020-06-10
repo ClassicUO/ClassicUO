@@ -116,7 +116,7 @@ namespace ClassicUO.Renderer
         public RawList<WebLinkRect> Links { get; }
     }
 
-    internal class AnimationFrameTexture : UOTexture16
+    internal class AnimationFrameTexture : UOTexture32
     {
         public AnimationFrameTexture(int width, int height) : base(width, height)
         {
@@ -127,7 +127,7 @@ namespace ClassicUO.Renderer
         public short CenterY { get; set; }
     }
 
-    internal class ArtTexture : UOTexture16
+    internal class ArtTexture : UOTexture32
     {
         public ArtTexture(int offsetX, int offsetY, int offsetW, int offsetH, int width, int height) : base(width, height)
         {
