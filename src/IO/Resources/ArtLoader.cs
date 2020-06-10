@@ -463,6 +463,7 @@ namespace ClassicUO.IO.Resources
             texture.PushData(pixels);
         }
         
+        private readonly ushort[] _land_pixels = new ushort[44 *44];
         private void ReadLandArt(ref UOTexture16 texture, ushort graphic)
         {
             const int SIZE = 44 * 44;
@@ -478,7 +479,7 @@ namespace ClassicUO.IO.Resources
 
             _file.Seek(entry.Offset);
 
-            ushort[] data = new ushort[SIZE];
+            ushort[] data = _land_pixels;
 
             for (int i = 0; i < 22; i++)
             {
@@ -504,7 +505,9 @@ namespace ClassicUO.IO.Resources
             }
 
             texture = new UOTexture16(44, 44);
-            texture.PushData(data);
+            // we don't need to store the data[] pointer because
+            // land is always hoverable
+            texture.SetData(data);
         }
     }
 }
