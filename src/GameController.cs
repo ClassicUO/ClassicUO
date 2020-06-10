@@ -76,7 +76,7 @@ namespace ClassicUO
             IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread;
 
             IsFixedTimeStep = false; // Settings.GlobalSettings.FixedTimeStep;
-            TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0f / 250);
+            TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / 250.0);
             InactiveSleepTime = TimeSpan.Zero;
         }
 
