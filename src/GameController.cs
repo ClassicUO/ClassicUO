@@ -58,11 +58,8 @@ namespace ClassicUO
         private UltimaBatcher2D _uoSpriteBatch;
         private readonly float[] _intervalFixedUpdate = new float[2];
         private double _statisticsTimer;
-        private RenderTarget2D _buffer;
         private double _totalElapsed, _currentFpsTime;
         private uint _totalFrames;
-        private Vector3 _hueVector;
-
 
 
         public GameController()
@@ -157,7 +154,6 @@ namespace ClassicUO
             Settings.GlobalSettings.Save();
             Plugin.OnClosing();
 
-            _buffer?.Dispose();
             ArtLoader.Instance.Dispose();
             GumpsLoader.Instance.Dispose();
             TexmapsLoader.Instance.Dispose();
@@ -231,21 +227,6 @@ namespace ClassicUO
             _graphicDeviceManager.PreferredBackBufferWidth = width;
             _graphicDeviceManager.PreferredBackBufferHeight = height;
             _graphicDeviceManager.ApplyChanges();
-
-
-            if (CUOEnviroment.IsHighDPI)
-            {
-                width *= 2;
-                height *= 2;
-            }
-
-            _buffer?.Dispose();
-            _buffer = new RenderTarget2D(GraphicsDevice,
-                                         width,
-                                         height,
-                                         false,
-                                         SurfaceFormat.Color,
-                                         DepthFormat.Depth24Stencil8);
         }
 
         public void SetWindowBorderless(bool borderless)
@@ -395,7 +376,6 @@ namespace ClassicUO
             if (_scene != null && _scene.IsLoaded && !_scene.IsDestroyed)
                 _scene.Draw(_uoSpriteBatch);
 
-            GraphicsDevice.SetRenderTarget(_buffer);
             UIManager.Draw(_uoSpriteBatch);
 
             if (World.InGame && SelectedObject.LastObject is TextObject t)
@@ -410,11 +390,6 @@ namespace ClassicUO
 
             Profiler.ExitContext("RenderFrame");
             Profiler.EnterContext("OutOfContext");
-
-            GraphicsDevice.SetRenderTarget(null);
-            _uoSpriteBatch.Begin();
-            _uoSpriteBatch.Draw2D(_buffer, 0, 0, ref _hueVector);
-            _uoSpriteBatch.End();
 
             Plugin.ProcessDrawCmdList(GraphicsDevice);
 
@@ -578,12 +553,20 @@ namespace ClassicUO
                     {
                         string path = Path.Combine(FileSystemHelper.CreateFolderIfNotExists(CUOEnviroment.ExecutablePath, "Data", "Client", "Screenshots"), $"screenshot_{DateTime.Now:yyyy-MM-dd_hh-mm-ss}.png");
 
-                        using (Stream stream = File.Create(path))
+                        Color[] colors = new Color[_graphicDeviceManager.PreferredBackBufferWidth * _graphicDeviceManager.PreferredBackBufferHeight];
+                        GraphicsDevice.GetBackBufferData(colors);
+                        using (Texture2D texture = new Texture2D(GraphicsDevice, _graphicDeviceManager.PreferredBackBufferWidth, _graphicDeviceManager.PreferredBackBufferHeight, false, SurfaceFormat.Color))
                         {
-                            _buffer.SaveAsPng(stream, _buffer.Width, _buffer.Height);
+                            texture.SetData(colors);
 
-                            GameActions.Print($"Screenshot stored in: {path}", 0x44, MessageType.System);
+                            using (Stream stream = File.Create(path))
+                            {
+                                texture.SaveAsPng(stream, texture.Width, texture.Height);
+
+                                GameActions.Print($"Screenshot stored in: {path}", 0x44, MessageType.System);
+                            }
                         }
+                       
                     }
 
                     break;
