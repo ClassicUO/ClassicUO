@@ -288,7 +288,6 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 _bookPage._focusPage = _bookPage._caretPage++;
                                 SetActivePage((_bookPage._caretPage / 2) + 2);
-                                //_bookPage.SetKeyboardFocus();//.On(_bookPage._caretPos.X, _bookPage._caretPos.Y);
                             }
                         }
                     }
@@ -312,7 +311,6 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 _bookPage._focusPage = _bookPage._caretPage--;
                                 SetActivePage((_bookPage._caretPage / 2) + 1);
-                                //_bookPage.SetKeyboardFocus(); //_bookPage.MouseClick(_bookPage._caretPos.X, _bookPage._caretPos.Y);
                             }
                         }
                         else if (_bookPage._caretPos.Y <= _bookPage.Height)
