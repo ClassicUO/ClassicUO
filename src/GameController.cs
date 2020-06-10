@@ -68,25 +68,10 @@ namespace ClassicUO
         public GameController()
         {
             _graphicDeviceManager = new GraphicsDeviceManager(this);
-        }
-
-        public Scene Scene => _scene;
-        public readonly uint[] FrameDelay = new uint[2];
-
-        private SDL_EventFilter _filter;
-
-        protected override void Initialize()
-        {
-            Log.Trace("Setup GraphicDeviceManager");
-
             _graphicDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.DiscardContents;
-            if (_graphicDeviceManager.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.HiDef))
-                _graphicDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
-
+           
             _graphicDeviceManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             _graphicDeviceManager.SynchronizeWithVerticalRetrace = false; // TODO: V-Sync option
-            _graphicDeviceManager.ApplyChanges();
-
 
             Window.ClientSizeChanged += WindowOnClientSizeChanged;
             Window.AllowUserResizing = true;
@@ -96,6 +81,18 @@ namespace ClassicUO
             IsFixedTimeStep = false; // Settings.GlobalSettings.FixedTimeStep;
             TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0f / 250);
             InactiveSleepTime = TimeSpan.Zero;
+        }
+
+        public Scene Scene => _scene;
+        public readonly uint[] FrameDelay = new uint[2];
+
+        private SDL_EventFilter _filter;
+
+        protected override void Initialize()
+        {
+            if (_graphicDeviceManager.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.HiDef))
+                _graphicDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
+            _graphicDeviceManager.ApplyChanges();
 
             SetRefreshRate(Settings.GlobalSettings.FPS);
             _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice);
