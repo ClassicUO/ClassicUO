@@ -325,11 +325,6 @@ namespace ClassicUO.IO.Resources
         {
             Rectangle imageRectangle = new Rectangle();
 
-            if (StaticFilters.IsTree(graphic, out int stumpidx))
-            {
-                graphic = Constants.TREE_REPLACE_GRAPHIC;
-            }
-
             ref var entry = ref GetValidRefEntry(graphic + 0x4000);
 
             if (entry.Length == 0)

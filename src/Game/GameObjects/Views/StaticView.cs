@@ -22,6 +22,7 @@
 using System;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -80,6 +81,10 @@ namespace ClassicUO.Game.GameObjects
             //    batcher.DrawSpriteShadow(Texture, posX - Bounds.X, posY - Bounds.Y /*- 10*/, false);
             //}
 
+            if (StaticFilters.IsTree(graphic, out _))
+            {
+                graphic = Constants.TREE_REPLACE_GRAPHIC;
+            }
 
             if (DrawTransparent)
             {
