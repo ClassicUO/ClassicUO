@@ -48,6 +48,8 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
+            ResetHueVector();
+
             _equipConvData = null;
             _transform = false;
             AnimationsLoader.Instance.SittingValue = 0;
