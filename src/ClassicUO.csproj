@@ -91,9 +91,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\api\cuoapi.dll</HintPath>
     </Reference>
-    <Reference Include="FNA, Version=20.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="FNA, Version=20.6.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>libs\FNA\FNA.dll</HintPath>
+      <HintPath>..\external\FNA\FNA.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -506,14 +506,8 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="ClassicUO.licenseheader" />
-    <None Include="libs\FNA\FNA.dll" />
-    <None Include="libs\FNA\FNA.dll.config" />
     <EmbeddedResource Include="Renderer\fonts\regular_font.xnb" />
     <EmbeddedResource Include="Renderer\fonts\bold_font.xnb" />
-    <None Include="libs\lib64\libFAudio.so.0" />
-    <None Include="libs\lib64\libFNA3D.so.0" />
-    <None Include="libs\osx\libFAudio.0.dylib" />
-    <None Include="libs\osx\libFNA3D.0.dylib" />
     <None Include="packages.config" />
     <EmbeddedResource Include="Renderer\fonts\map1_font.xnb" />
     <EmbeddedResource Include="Renderer\fonts\map2_font.xnb" />
@@ -524,10 +518,6 @@
     <None Include="shaders\compile_shaders.bat" />
     <None Include="shaders\IsometricWorld.fx" />
     <EmbeddedResource Include="shaders\IsometricWorld.fxc" />
-    <None Include="libs\lib64\libSDL2-2.0.so.0" />
-    <None Include="libs\lib64\libtheorafile.so" />
-    <None Include="libs\osx\libSDL2-2.0.0.dylib" />
-    <None Include="libs\osx\libtheorafile.dylib" />
     <EmbeddedResource Include="shaders\xBR.fxc" />
   </ItemGroup>
   <ItemGroup>
@@ -546,13 +536,6 @@
     <Content Include="cuoicon.ico" />
     <None Include="shaders\xBR.fx" />
     <EmbeddedResource Include="cuologo.png" />
-    <Content Include="libs\api\cuoapi.dll" />
-    <None Include="libs\x64\FAudio.dll" />
-    <None Include="libs\x64\FNA3D.dll" />
-    <None Include="libs\x64\libtheorafile.dll" />
-    <None Include="libs\x64\SDL2.dll" />
-    <None Include="libs\x64\vcruntime140.dll" />
-    <None Include="libs\x64\zlib.dll" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -561,9 +544,11 @@
 if not exist "$(TargetDir)osx\" mkdir  "$(TargetDir)osx\"
 
 
-xcopy $(ProjectDir)libs\lib64\*.*   $(TargetDir)lib64\   /Y
-xcopy $(ProjectDir)libs\osx\*.*      $(TargetDir)osx\    /Y
-xcopy $(ProjectDir)libs\x64\*.*      $(TargetDir)           /Y</PostBuildEvent>
+xcopy $(SolutionDir)external\lib64\*.*   $(TargetDir)lib64\   /Y
+xcopy $(SolutionDir)external\osx\*.*      $(TargetDir)osx\    /Y
+xcopy $(SolutionDir)external\x64\*.*      $(TargetDir)           /Y
+
+</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>
