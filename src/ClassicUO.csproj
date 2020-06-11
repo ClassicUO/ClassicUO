@@ -512,7 +512,6 @@
     <EmbeddedResource Include="Renderer\fonts\bold_font.xnb" />
     <None Include="libs\lib64\libFAudio.so.0" />
     <None Include="libs\lib64\libFNA3D.so.0" />
-    <None Include="libs\lib64\libz.so" />
     <None Include="libs\osx\libFAudio.0.dylib" />
     <None Include="libs\osx\libFNA3D.0.dylib" />
     <None Include="packages.config" />
