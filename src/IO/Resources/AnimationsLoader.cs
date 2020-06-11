@@ -1340,6 +1340,9 @@ namespace ClassicUO.IO.Resources
             if (animDir.FileIndex == -1 && animDir.Address == -1)
                 return false;
 
+            if (animDir.FileIndex >= _files.Length || AnimID >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                return false;
+
             if (animDir.IsUOP || (animDir.Address == 0 && animDir.Size == 0))
             {
                 var animData = DataIndex[AnimID].GetUopGroup(AnimGroup);
@@ -1367,6 +1370,11 @@ namespace ClassicUO.IO.Resources
         private unsafe bool ReadUOPAnimationFrame(ref AnimationDirection animDirection)
         {
             var animData = DataIndex[AnimID].GetUopGroup(AnimGroup);
+
+            if (animData.FileIndex <= 0 || animData.FileIndex >= _filesUop.Length)
+            {
+                return false;
+            }
 
             if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 && animData.Offset == 0)
             {

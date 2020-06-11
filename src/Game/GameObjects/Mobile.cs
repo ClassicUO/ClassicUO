@@ -335,6 +335,8 @@ namespace ClassicUO.Game.GameObjects
             AnimationDirection = frameDirection;
             AnimationFromServer = false;
             LastAnimationChangeTime = Time.Ticks;
+
+
             CalculateRandomIdleTime();
         }
 
