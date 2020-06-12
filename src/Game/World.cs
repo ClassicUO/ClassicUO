@@ -319,6 +319,35 @@ namespace ClassicUO.Game
             return ent;
         }
 
+        public static Entity GetNocheck(uint serial)
+        {
+            Entity ent;
+
+            if (SerialHelper.IsMobile(serial))
+            {
+                ent = Mobiles.Get(serial);
+
+                if (ent == null)
+                {
+                    ent = Items.Get(serial);
+                }
+            }
+            else
+            {
+                ent = Items.Get(serial);
+
+                if (ent == null)
+                {
+                    ent = Mobiles.Get(serial);
+                }
+            }
+
+            if (ent != null && ent.IsDestroyed)
+                ent = null;
+
+            return ent;
+        }
+
         public static Item GetOrCreateItem(uint serial)
         {
             Item item = Items.Get(serial);

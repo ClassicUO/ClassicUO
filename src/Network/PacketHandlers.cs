@@ -348,7 +348,7 @@ namespace ClassicUO.Network
                 return;
 
             uint serial = p.ReadUInt();
-            Entity entity = World.Get(serial);
+            Entity entity = World.GetNocheck(serial);
 
             if (entity == null)
                 return;
@@ -682,7 +682,7 @@ namespace ClassicUO.Network
         private static void Talk(Packet p)
         {
             uint serial = p.ReadUInt();
-            Entity entity = World.Get(serial);
+            Entity entity = World.GetNocheck(serial);
             ushort graphic = p.ReadUShort();
             MessageType type = (MessageType) p.ReadByte();
             ushort hue = p.ReadUShort();
@@ -1309,7 +1309,7 @@ namespace ClassicUO.Network
         {
             uint serial = p.ReadUInt();
 
-            Entity entity = World.Get(serial);
+            Entity entity = World.GetNocheck(serial);
             if (entity == null)
                 return;
 
@@ -2743,7 +2743,7 @@ namespace ClassicUO.Network
 
         private static void UpdateHitpoints(Packet p)
         {
-            Entity entity = World.Get(p.ReadUInt());
+            Entity entity = World.GetNocheck(p.ReadUInt());
 
             if (entity == null)
                 return;
@@ -2893,7 +2893,7 @@ namespace ClassicUO.Network
 
 
             uint serial = p.ReadUInt();
-            Entity entity = World.Get(serial);
+            Entity entity = World.GetNocheck(serial);
             ushort graphic = p.ReadUShort();
             MessageType type = (MessageType) p.ReadByte();
             ushort hue = p.ReadUShort();
@@ -3752,7 +3752,7 @@ namespace ClassicUO.Network
                 return;
 
             uint serial = p.ReadUInt();
-            Entity entity = World.Get(serial);
+            Entity entity = World.GetNocheck(serial);
             ushort graphic = p.ReadUShort();
             MessageType type = (MessageType) p.ReadByte();
             ushort hue = p.ReadUShort();
@@ -4912,7 +4912,7 @@ namespace ClassicUO.Network
 
             if (created && !obj.IsClicked)
             {
-                if (SerialHelper.IsMobile(serial))
+                if (mobile != null)
                 {
                     if (ProfileManager.Current.ShowNewMobileNameIncoming)
                         GameActions.SingleClick(serial);

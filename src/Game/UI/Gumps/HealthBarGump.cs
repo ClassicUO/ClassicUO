@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
         }
 
-        protected BaseHealthBarGump(uint serial) : this(World.Get(serial))
+        protected BaseHealthBarGump(uint serial) : this(World.GetNocheck(serial))
         {
 
         }
@@ -95,7 +95,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            var entity = World.Get(LocalSerial);
+            var entity = World.GetNocheck(LocalSerial);
 
             if (Client.Version >= ClientVersion.CV_200 && World.InGame && entity != null)
                 NetClient.Socket.Send(new PCloseStatusBarGump(entity));
@@ -224,7 +224,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (button != MouseButtonType.Left)
                 return false;
 
-            var entity = World.Get(LocalSerial);
+            var entity = World.GetNocheck(LocalSerial);
 
             if (entity != null)
             {
@@ -247,7 +247,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-            var entity = World.Get(LocalSerial);
+            var entity = World.GetNocheck(LocalSerial);
 
             if (entity == null || SerialHelper.IsItem(entity.Serial))
                 return;
@@ -262,7 +262,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseOver(int x, int y)
         {
-            var entity = World.Get(LocalSerial);
+            var entity = World.GetNocheck(LocalSerial);
 
             if (entity != null)
             {
@@ -275,7 +275,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseExit(int x, int y)
         {
-            var entity = World.Get(LocalSerial);
+            var entity = World.GetNocheck(LocalSerial);
 
             if (entity != null && SelectedObject.HealthbarObject == entity)
             {
@@ -394,10 +394,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ushort textColor = 0x0386;
 
-            Entity entity = World.Mobiles.Get(LocalSerial);
-
-            if (entity == null)
-                entity = World.Items.Get(LocalSerial);
+            Entity entity = World.GetNocheck(LocalSerial);
 
             if (entity == null || entity.IsDestroyed)
             {
@@ -676,7 +673,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             WantUpdateSize = false;
 
-            var entity = World.Get(LocalSerial);
+            var entity = World.GetNocheck(LocalSerial);
 
 
             if (World.Party.Contains(LocalSerial))
@@ -933,7 +930,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             WantUpdateSize = false;
 
-            var entity = World.Get(LocalSerial);
+            var entity = World.GetNocheck(LocalSerial);
 
             if (World.Party.Contains(LocalSerial))
             {
@@ -1058,7 +1055,7 @@ namespace ClassicUO.Game.UI.Gumps
             ushort textColor = 0x0386;
             ushort hitsColor = 0x0386;
 
-            Entity entity = World.Get(LocalSerial);
+            Entity entity = World.GetNocheck(LocalSerial);
 
             if (entity == null || entity.IsDestroyed)
             {
@@ -1305,7 +1302,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            var entity = World.Get(LocalSerial);
+            var entity = World.GetNocheck(LocalSerial);
 
             if (Client.Version >= ClientVersion.CV_200 && World.InGame && entity != null)
                 NetClient.Socket.Send(new PCloseStatusBarGump(entity));
