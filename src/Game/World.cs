@@ -65,7 +65,7 @@ namespace ClassicUO.Game
 
         public static EntityCollection<Mobile> Mobiles { get; } = new EntityCollection<Mobile>();
 
-        public static PlayerMobile Player { get; set; }
+        public static PlayerMobile Player;
 
         public static Map.Map Map { get; private set; }
 

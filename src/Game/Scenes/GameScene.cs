@@ -484,15 +484,10 @@ namespace ClassicUO.Game.Scenes
                         y = maxY;
                     }
 
-                    while (true)
+                    while (x >= minX && x <= maxX && y >= minY && y <= maxY)
                     {
-                        if (x < minX || x > maxX || y < minY || y > maxY)
-                            break;
+                        AddTileToRenderList(World.Map.GetTile(x, y), x, y, _useObjectHandles, 150/*, null*/);
 
-                        var tile = World.Map.GetTile(x, y);
-
-                        if (tile != null)
-                            AddTileToRenderList(tile, x, y, _useObjectHandles, 150/*, null*/);
                         x++;
                         y--;
                     }
