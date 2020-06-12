@@ -46,11 +46,11 @@ namespace ManifestCreator
             "osx/libtheorafile.dylib",
 
             // windows
-            "FAudio.dll",
-            "SDL2.dll",
-            "zlib.dll",
-            "libtheorafile.dll",
-            "vcruntime140.dll",
+            "x64/FAudio.dll",
+            "x64/SDL2.dll",
+            "x64/zlib.dll",
+            "x64/libtheorafile.dll",
+            "x64/vcruntime140.dll",
 
             // dlls
             "Accessibility.dll",
