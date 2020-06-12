@@ -225,7 +225,8 @@ namespace ClassicUO.Game.GameObjects
         public bool IsLootable =>
             ItemData.Layer != (int) Layer.Hair &&
             ItemData.Layer != (int) Layer.Beard &&
-            ItemData.Layer != (int) Layer.Face;
+            ItemData.Layer != (int) Layer.Face &&
+            Graphic != 0;
 
         private static readonly DataReader _reader = new DataReader();
 
