@@ -677,16 +677,22 @@ namespace ClassicUO.Game.UI.Controls
         
         internal virtual void OnFocusEnter()
         {
-            IsFocused = true;
-            FocusEnter.Raise(this);
-            //Parent?.OnFocusEnter();
+            if (!IsFocused)
+            {
+                IsFocused = true;
+                FocusEnter.Raise(this);
+                //Parent?.OnFocusEnter();
+            }
         }
 
         internal virtual void OnFocusLeft()
         {
-            IsFocused = false;
-            FocusLost.Raise(this);
-            //Parent?.OnFocusLeft();
+            if (IsFocused)
+            {
+                IsFocused = false;
+                FocusLost.Raise(this);
+                //Parent?.OnFocusLeft();
+            }
         }
 
         protected virtual void OnChildAdded()
