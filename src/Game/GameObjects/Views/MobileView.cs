@@ -162,14 +162,14 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (hasShadow)
                     {
-                        DrawInternal(batcher, this, null, drawX, drawY + 10, IsFlipped, ref animIndex, true, graphic, isHuman, alpha: HueVector.Z);
+                        DrawInternal(batcher, this, null, drawX, drawY + 10, IsFlipped, animIndex, true, graphic, isHuman, alpha: HueVector.Z);
                         AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, mountGraphic);
-                        DrawInternal(batcher, this, mount, drawX, drawY, IsFlipped, ref animIndex, true, mountGraphic, isHuman, alpha: HueVector.Z);
+                        DrawInternal(batcher, this, mount, drawX, drawY, IsFlipped, animIndex, true, mountGraphic, isHuman, alpha: HueVector.Z);
                     }
                     else
                         AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, mountGraphic);
 
-                    drawY += DrawInternal(batcher, this, mount, drawX, drawY, IsFlipped, ref animIndex, false, mountGraphic, isHuman, isMount: true, alpha: HueVector.Z);
+                    drawY += DrawInternal(batcher, this, mount, drawX, drawY, IsFlipped, animIndex, false, mountGraphic, isHuman, isMount: true, alpha: HueVector.Z);
                 }
             }
             else
@@ -201,13 +201,13 @@ namespace ClassicUO.Game.GameObjects
                         _transform = true;
                 }
                 else if (hasShadow)
-                    DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, ref animIndex, true, graphic, isHuman, alpha: HueVector.Z);
+                    DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, animIndex, true, graphic, isHuman, alpha: HueVector.Z);
             }
 
             AnimationsLoader.Instance.AnimGroup = animGroup;
 
 
-            DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, ref animIndex, false, graphic, isHuman, alpha: HueVector.Z);
+            DrawInternal(batcher, this, null, drawX, drawY, IsFlipped, animIndex, false, graphic, isHuman, alpha: HueVector.Z);
 
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
@@ -256,12 +256,12 @@ namespace ClassicUO.Game.GameObjects
                         if (AnimationsLoader.Instance.SittingValue == 0 && IsGargoyle && item.ItemData.IsWeapon)
                         {
                             AnimationsLoader.Instance.AnimGroup = GetGroupForAnimation(this, graphic);
-                            DrawInternal(batcher, this, item, drawX, drawY, IsFlipped, ref animIndex, false, graphic, isHuman, false, alpha: HueVector.Z);
+                            DrawInternal(batcher, this, item, drawX, drawY, IsFlipped, animIndex, false, graphic, isHuman, false, alpha: HueVector.Z);
                             AnimationsLoader.Instance.AnimGroup = animGroup;
                         }
                         else
                         {
-                            DrawInternal(batcher, this, item, drawX, drawY, IsFlipped, ref animIndex, false, graphic, isHuman, false, alpha: HueVector.Z);
+                            DrawInternal(batcher, this, item, drawX, drawY, IsFlipped, animIndex, false, graphic, isHuman, false, alpha: HueVector.Z);
                         }
                     }
                     else
@@ -308,7 +308,7 @@ namespace ClassicUO.Game.GameObjects
                                            int x,
                                            int y,
                                            bool mirror,
-                                           ref sbyte frameIndex,
+                                           sbyte frameIndex,
                                            bool hasShadow,
                                            ushort id,
                                            bool isHuman,
