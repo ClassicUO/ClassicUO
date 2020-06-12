@@ -542,11 +542,11 @@
   <PropertyGroup>
     <PostBuildEvent>if not exist "$(TargetDir)lib64\" mkdir  "$(TargetDir)lib64\"
 if not exist "$(TargetDir)osx\" mkdir  "$(TargetDir)osx\"
-
+if not exist "$(TargetDir)x64\" mkdir  "$(TargetDir)x64\"
 
 xcopy $(SolutionDir)external\lib64\*.*   $(TargetDir)lib64\   /Y
 xcopy $(SolutionDir)external\osx\*.*      $(TargetDir)osx\    /Y
-xcopy $(SolutionDir)external\x64\*.*      $(TargetDir)           /Y
+xcopy $(SolutionDir)external\x64\*.*      $(TargetDir)x64\    /Y
 
 </PostBuildEvent>
   </PropertyGroup>
