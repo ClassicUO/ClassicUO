@@ -394,7 +394,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             ushort textColor = 0x0386;
 
-            Entity entity = World.Get(LocalSerial);
+            Entity entity = World.Mobiles.Get(LocalSerial);
+
+            if (entity == null)
+                entity = World.Items.Get(LocalSerial);
 
             if (entity == null || entity.IsDestroyed)
             {
@@ -460,7 +463,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity != null && !entity.IsDestroyed)
             {
-                Mobile mobile = SerialHelper.IsMobile(entity.Serial) ? (Mobile) entity : null;
+                Mobile mobile = entity as Mobile;
 
                 if (!_isDead && entity != World.Player && (mobile != null && mobile.IsDead) && ProfileManager.Current.CloseHealthBarType == 2) // is dead
                 {
@@ -757,7 +760,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    Mobile mobile = entity != null && SerialHelper.IsMobile(entity.Serial) ? (Mobile) entity : null;
+                    Mobile mobile = entity as Mobile;
 
                     if (entity != null)
                     {
@@ -886,7 +889,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             _name = entity.Name;
-            _isDead = SerialHelper.IsMobile(entity.Serial) && ((Mobile) entity).IsDead;
+            _isDead = entity is Mobile m && m.IsDead;
             LocalSerial = entity.Serial;
 
             BuildGump();
@@ -1001,7 +1004,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ushort textColor = 0x0386;
                     ushort hitsColor = 0x0386;
 
-                    Mobile mobile = entity != null && SerialHelper.IsMobile(entity.Serial) ? (Mobile) entity : null;
+                    Mobile mobile = entity as Mobile;
 
                     if (entity != null)
                     {
@@ -1122,7 +1125,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity != null && !entity.IsDestroyed)
             {
-                Mobile mobile = SerialHelper.IsMobile(entity.Serial) ? (Mobile) entity : null;
+                Mobile mobile = entity as Mobile;
 
                 if (!_isDead && entity != World.Player && (mobile != null && mobile.IsDead) && ProfileManager.Current.CloseHealthBarType == 2) // is dead
                 {

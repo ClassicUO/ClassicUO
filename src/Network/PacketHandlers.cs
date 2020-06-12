@@ -4814,7 +4814,7 @@ namespace ClassicUO.Network
             }
             else
             {
-                if (SerialHelper.IsItem(serial))
+                if (obj is Item)
                 {
                     item = (Item) obj;
 
@@ -4823,7 +4823,7 @@ namespace ClassicUO.Network
                         RemoveItemFromContainer(item);
                     }
                 }
-                else if (SerialHelper.IsMobile(serial))
+                else
                 {
                     mobile = (Mobile) obj;
                 }
@@ -4832,13 +4832,8 @@ namespace ClassicUO.Network
             if (obj == null)
                 return;
 
-            if (SerialHelper.IsItem(serial))
+            if (item != null)
             {
-                if (item == null)
-                {
-                    return;
-                }
-
                 if (graphic != 0x2006)
                 {
                     graphic += graphic_inc;
@@ -4882,11 +4877,6 @@ namespace ClassicUO.Network
             }
             else
             {
-                if (mobile == null)
-                {
-                    return;
-                }
-
                 graphic += graphic_inc;
 
                 if (serial != World.Player)
@@ -4934,12 +4924,12 @@ namespace ClassicUO.Network
                 }
             }
 
-            if (SerialHelper.IsMobile(serial) && mobile != null)
+            if (mobile != null)
             {
                 mobile.AddToTile();
                 mobile.UpdateScreenPosition();
             }
-            else if (SerialHelper.IsItem(serial) && item != null)
+            else
             {
                 if (ItemHold.Serial == serial)
                 {
