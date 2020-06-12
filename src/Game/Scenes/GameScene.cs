@@ -462,7 +462,7 @@ namespace ClassicUO.Game.Scenes
             int maxX = _maxTile.X;
             int maxY = _maxTile.Y;
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 2; ++i)
             {
                 int minValue = minY;
                 int maxValue = maxY;
@@ -473,7 +473,7 @@ namespace ClassicUO.Game.Scenes
                     maxValue = maxX;
                 }
 
-                for (int lead = minValue; lead < maxValue; lead++)
+                for (int lead = minValue; lead < maxValue; ++lead)
                 {
                     int x = minX;
                     int y = lead;
@@ -488,8 +488,8 @@ namespace ClassicUO.Game.Scenes
                     {
                         AddTileToRenderList(World.Map.GetTile(x, y), x, y, _useObjectHandles, 150/*, null*/);
 
-                        x++;
-                        y--;
+                        ++x;
+                        --y;
                     }
                 }
             }
