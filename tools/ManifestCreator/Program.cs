@@ -47,6 +47,7 @@ namespace ManifestCreator
 
             // windows
             "x64/FAudio.dll",
+            "x64/FNA3D.dll",
             "x64/SDL2.dll",
             "x64/zlib.dll",
             "x64/libtheorafile.dll",
