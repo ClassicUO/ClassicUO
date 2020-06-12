@@ -89,7 +89,7 @@
   <ItemGroup>
     <Reference Include="cuoapi, Version=1.3.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>libs\api\cuoapi.dll</HintPath>
+      <HintPath>..\external\api\cuoapi.dll</HintPath>
     </Reference>
     <Reference Include="FNA, Version=20.6.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
