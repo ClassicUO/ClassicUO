@@ -208,7 +208,7 @@ namespace ClassicUO.Game.Managers
             if (!IsTargeting)
                 return;
 
-            Entity entity = World.InGame ? World.GetNoCheck(serial) : null;
+            Entity entity = World.InGame ? World.GetNocheck(serial) : null;
 
             if (entity != null)
             {
