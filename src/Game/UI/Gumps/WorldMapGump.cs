@@ -39,6 +39,8 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SpriteFont = ClassicUO.Renderer.SpriteFont;
@@ -531,15 +533,21 @@ namespace ClassicUO.Game.UI.Gumps
             );
         }
 
-        private unsafe Task LoadMarkers()
+        private unsafe void LoadMarkers()
         {
-            return Task.Run(() =>
+            //return Task.Run(() =>
             {
                 if (World.InGame)
                 {
                     _mapMarkersLoaded = false;
 
                     GameActions.Print("Loading WorldMap markers..", 0x2A);
+
+                    foreach (var t in _markerIcons.Values)
+                    {
+                        if (!t.IsDisposed)
+                            t.Dispose();
+                    }
 
                     _markerIcons.Clear();
 
@@ -553,13 +561,23 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         FileStream fs = new FileStream(icon, FileMode.Open, FileAccess.Read);
                         MemoryStream ms = new MemoryStream();
-
                         fs.CopyTo(ms);
+                        ms.Seek(0, SeekOrigin.Begin);
 
-                        _markerIcons.Add(Path.GetFileNameWithoutExtension(icon).ToLower(), Texture2D.FromStream(Client.Game.GraphicsDevice, ms));
-
-                        ms.Dispose();
-                        fs.Dispose();
+                        try
+                        {
+                            var texture = Texture2D.FromStream(Client.Game.GraphicsDevice, ms);
+                            _markerIcons.Add(Path.GetFileNameWithoutExtension(icon).ToLower(), texture);
+                        }
+                        catch (Exception ee)
+                        {
+                            Log.Error($"{ee}");
+                        }
+                        finally
+                        {
+                            ms.Dispose();
+                            fs.Dispose();
+                        }
                     }
 
                     string[] mapFiles = Directory.GetFiles(_mapFilesPath, "*.map").Union(Directory.GetFiles(_mapFilesPath, "*.csv"))
@@ -712,7 +730,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                     GameActions.Print($"WorldMap markers loaded ({count})", 0x2A);
                 }
-            });
+            }
+            //);
         }
 
         #endregion
