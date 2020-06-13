@@ -19,7 +19,8 @@ namespace StbTextEditSharp
 
 		public TextEdit(ITextEditHandler handler)
 		{
-			if (handler == null) throw new ArgumentNullException("handler");
+			if (handler == null)
+				throw new ArgumentNullException("handler");
 
 			Handler = handler;
 
@@ -33,13 +34,7 @@ namespace StbTextEditSharp
 		{
 			get => Handler.Text;
 
-			set
-			{
-				Handler.InputSet = true;
-				Handler.Text = value;
-				Handler.InputSet = false;
-				Handler.AfterInput();
-			}
+			set => Handler.Text = value;
 		}
 
 		public void SortSelection()
@@ -65,7 +60,7 @@ namespace StbTextEditSharp
 
 		public void PrepareSelectionAtCursor()
 		{
-			if (SelectStart == SelectEnd)
+			if (!(SelectStart != SelectEnd))
 				SelectStart = SelectEnd = CursorIndex;
 			else
 				CursorIndex = SelectEnd;
@@ -125,7 +120,7 @@ namespace StbTextEditSharp
 			return s.Length;
 		}
 
-		public int InsertChar(int pos, int codepoint)
+        public int InsertChar(int pos, int codepoint)
 		{
 			var s = char.ConvertFromUtf32(codepoint);
 			return InsertChars(pos, s);
@@ -135,7 +130,7 @@ namespace StbTextEditSharp
 		{
 			var r = new TextEditRow();
 			var n = Length;
-			var base_y = (float)0;
+			var base_y = (float) 0;
 			var i = 0;
 			var k = 0;
 			r.x0 = r.x1 = 0;
@@ -269,18 +264,19 @@ namespace StbTextEditSharp
 
 		private static bool IsSpace(int codepoint)
 		{
-			return char.IsWhiteSpace((char)codepoint);
+			return char.IsWhiteSpace((char) codepoint);
 		}
 
 		public bool IsWordBoundary(int idx)
 		{
-			return idx <= 0 || IsSpace(text[idx - 1]) && !IsSpace(text[idx]);
+			return idx > 0 ? IsSpace(text[idx - 1]) && !IsSpace(text[idx]) : true;
 		}
 
 		public int MoveToPreviousWord(int c)
 		{
 			--c;
-			while (c >= 0 && !IsWordBoundary(c)) --c;
+			while (c >= 0 && !IsWordBoundary(c))
+				--c;
 			if (c < 0)
 				c = 0;
 			return c;
@@ -290,7 +286,8 @@ namespace StbTextEditSharp
 		{
 			var len = Length;
 			++c;
-			while (c < len && !IsWordBoundary(c)) ++c;
+			while (c < len && !IsWordBoundary(c))
+				++c;
 			if (c > len)
 				c = len;
 			return c;
@@ -353,7 +350,7 @@ namespace StbTextEditSharp
 
 		public void Key(ControlKeys key)
 		{
-		retry:
+			retry:
 			switch (key)
 			{
 				case ControlKeys.InsertMode:
@@ -437,92 +434,92 @@ namespace StbTextEditSharp
 					break;
 				case ControlKeys.Down:
 				case ControlKeys.Down | ControlKeys.Shift:
+				{
+					var find = new FindState();
+					var row = new TextEditRow();
+					var sel = (key & ControlKeys.Shift) != 0;
+					if (SingleLine)
 					{
-						var find = new FindState();
-						var row = new TextEditRow();
-						var sel = (key & ControlKeys.Shift) != 0;
-						if (SingleLine)
-						{
-							key = ControlKeys.Right | (key & ControlKeys.Shift);
-							goto retry;
-						}
-
-						if (sel)
-							PrepareSelectionAtCursor();
-						else if (SelectStart != SelectEnd)
-							MoveToLast();
-						Clamp();
-						find.FindCharPosition(this, CursorIndex, SingleLine);
-						if (find.length != 0)
-						{
-							var goal_x = HasPreferredX ? PreferredX : find.x;
-							float x = 0;
-							var start = find.first_char + find.length;
-							CursorIndex = start;
-							row = Handler.LayoutRow(CursorIndex);
-							x = row.x0;
-							for (var i = 0; i < row.num_chars; ++i)
-							{
-								var dx = (float)1;
-								x += dx;
-								if (x > goal_x)
-									break;
-								++CursorIndex;
-							}
-
-							Clamp();
-							HasPreferredX = true;
-							PreferredX = goal_x;
-							if (sel)
-								SelectEnd = CursorIndex;
-						}
-
-						break;
+						key = ControlKeys.Right | (key & ControlKeys.Shift);
+						goto retry;
 					}
+
+					if (sel)
+						PrepareSelectionAtCursor();
+					else if (SelectStart != SelectEnd)
+						MoveToLast();
+					Clamp();
+					find.FindCharPosition(this, CursorIndex, SingleLine);
+					if (find.length != 0)
+					{
+						var goal_x = HasPreferredX ? PreferredX : find.x;
+						float x = 0;
+						var start = find.first_char + find.length;
+						CursorIndex = start;
+						row = Handler.LayoutRow(CursorIndex);
+						x = row.x0;
+						for (var i = 0; i < row.num_chars; ++i)
+						{
+							var dx = (float) 1;
+							x += dx;
+							if (x > goal_x)
+								break;
+							++CursorIndex;
+						}
+
+						Clamp();
+						HasPreferredX = true;
+						PreferredX = goal_x;
+						if (sel)
+							SelectEnd = CursorIndex;
+					}
+
+					break;
+				}
 				case ControlKeys.Up:
 				case ControlKeys.Up | ControlKeys.Shift:
+				{
+					var find = new FindState();
+					var row = new TextEditRow();
+					var i = 0;
+					var sel = (key & ControlKeys.Shift) != 0;
+					if (SingleLine)
 					{
-						var find = new FindState();
-						var row = new TextEditRow();
-						var i = 0;
-						var sel = (key & ControlKeys.Shift) != 0;
-						if (SingleLine)
-						{
-							key = ControlKeys.Left | (key & ControlKeys.Shift);
-							goto retry;
-						}
-
-						if (sel)
-							PrepareSelectionAtCursor();
-						else if (SelectStart != SelectEnd)
-							MoveToFirst();
-						Clamp();
-						find.FindCharPosition(this, CursorIndex, SingleLine);
-						if (find.prev_first != find.first_char)
-						{
-							var goal_x = HasPreferredX ? PreferredX : find.x;
-							float x = 0;
-							CursorIndex = find.prev_first;
-							row = Handler.LayoutRow(CursorIndex);
-							x = row.x0;
-							for (i = 0; i < row.num_chars; ++i)
-							{
-								var dx = (float)1;
-								x += dx;
-								if (x > goal_x)
-									break;
-								++CursorIndex;
-							}
-
-							Clamp();
-							HasPreferredX = true;
-							PreferredX = goal_x;
-							if (sel)
-								SelectEnd = CursorIndex;
-						}
-
-						break;
+						key = ControlKeys.Left | (key & ControlKeys.Shift);
+						goto retry;
 					}
+
+					if (sel)
+						PrepareSelectionAtCursor();
+					else if (SelectStart != SelectEnd)
+						MoveToFirst();
+					Clamp();
+					find.FindCharPosition(this, CursorIndex, SingleLine);
+					if (find.prev_first != find.first_char)
+					{
+						var goal_x = HasPreferredX ? PreferredX : find.x;
+						float x = 0;
+						CursorIndex = find.prev_first;
+						row = Handler.LayoutRow(CursorIndex);
+						x = row.x0;
+						for (i = 0; i < row.num_chars; ++i)
+						{
+							var dx = (float) 1;
+							x += dx;
+							if (x > goal_x)
+								break;
+							++CursorIndex;
+						}
+
+						Clamp();
+						HasPreferredX = true;
+						PreferredX = goal_x;
+						if (sel)
+							SelectEnd = CursorIndex;
+					}
+
+					break;
+				}
 				case ControlKeys.Delete:
 				case ControlKeys.Delete | ControlKeys.Shift:
 					if (SelectStart != SelectEnd)
@@ -586,18 +583,18 @@ namespace StbTextEditSharp
 					HasPreferredX = false;
 					break;
 				case ControlKeys.LineEnd:
-					{
-						var n = Length;
-						Clamp();
-						MoveToFirst();
-						if (SingleLine)
-							CursorIndex = n;
-						else
-							while (CursorIndex < n && text[CursorIndex] != '\n')
-								++CursorIndex;
-						HasPreferredX = false;
-						break;
-					}
+				{
+					var n = Length;
+					Clamp();
+					MoveToFirst();
+					if (SingleLine)
+						CursorIndex = n;
+					else
+						while (CursorIndex < n && text[CursorIndex] != '\n')
+							++CursorIndex;
+					HasPreferredX = false;
+					break;
+				}
 				case ControlKeys.LineStart | ControlKeys.Shift:
 					Clamp();
 					PrepareSelectionAtCursor();
@@ -610,19 +607,19 @@ namespace StbTextEditSharp
 					HasPreferredX = false;
 					break;
 				case ControlKeys.LineEnd | ControlKeys.Shift:
-					{
-						var n = Length;
-						Clamp();
-						PrepareSelectionAtCursor();
-						if (SingleLine)
-							CursorIndex = n;
-						else
-							while (CursorIndex < n && text[CursorIndex] != '\n')
-								++CursorIndex;
-						SelectEnd = CursorIndex;
-						HasPreferredX = false;
-						break;
-					}
+				{
+					var n = Length;
+					Clamp();
+					PrepareSelectionAtCursor();
+					if (SingleLine)
+						CursorIndex = n;
+					else
+						while (CursorIndex < n && text[CursorIndex] != '\n')
+							++CursorIndex;
+					SelectEnd = CursorIndex;
+					HasPreferredX = false;
+					break;
+				}
 			}
 		}
 
@@ -658,7 +655,7 @@ namespace StbTextEditSharp
 					s.undo_rec[rpos].char_storage = s.redo_char_point - u.delete_length;
 					s.redo_char_point = s.redo_char_point - u.delete_length;
 					for (i = 0; i < u.delete_length; ++i)
-						s.undo_char[s.undo_rec[rpos].char_storage + i] = (sbyte)text[u.where + i];
+						s.undo_char[s.undo_rec[rpos].char_storage + i] = (sbyte) text[u.where + i];
 				}
 
 				DeleteChars(u.where, u.delete_length);

@@ -90,11 +90,11 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
 
-        public bool InputSet { get; set; }
-
         public string Text
         {
             get => _rendererText.Text;
+
+            
             set
             {
                 if (_maxCharCount >= 0 && value != null && value.Length > _maxCharCount)
@@ -102,10 +102,12 @@ namespace ClassicUO.Game.UI.Controls
 
                 //Sanitize(ref value);
 
-
                 _rendererText.Text = value;
-                
-                OnTextChanged();
+
+                if (!_is_writing)
+                {
+                    OnTextChanged();
+                }
             }
         }
 
@@ -113,7 +115,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool AllowTAB { get; set; }
         public bool NoSelection { get; set; }
-     
+
         public int CaretIndex
         {
             get => _stb.CursorIndex;
@@ -121,7 +123,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _stb.CursorIndex = value;
                 UpdateCaretScreenPosition();
-            } 
+            }
         }
 
         public bool Multiline
@@ -149,7 +151,7 @@ namespace ClassicUO.Game.UI.Controls
         public ushort Hue
         {
             get => _hue;
-            set 
+            set
             {
                 if (_rendererText.Hue != value)
                 {
@@ -229,7 +231,7 @@ namespace ClassicUO.Game.UI.Controls
                     return;
 
 
-                
+
                 int realWidth = _rendererText.IsUnicode
                                     ? FontsLoader.Instance.GetWidthUnicode(_rendererText.Font, text)
                                     : FontsLoader.Instance.GetWidthASCII(_rendererText.Font, text);
@@ -316,15 +318,12 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+
         protected virtual void OnTextChanged()
         {
             TextChanged?.Raise(this);
-            UpdateCaretScreenPosition();
-        }
 
-        public void AfterInput()
-        {
-            OnTextChanged();
+            UpdateCaretScreenPosition();
         }
 
         protected MultilinesFontInfo GetInfo() => _rendererText.GetInfo();
@@ -387,7 +386,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     break;
                 case SDL.SDL_Keycode.SDLK_v when Keyboard.Ctrl && IsEditable:
-                    OnTextInput(StringHelper.GetClipboardText());
+                    OnTextInput(SDL.SDL_GetClipboardText());
                     break;
                 case SDL.SDL_Keycode.SDLK_z when Keyboard.Ctrl && IsEditable:
                     stb_key = ControlKeys.Undo;
@@ -528,10 +527,14 @@ namespace ClassicUO.Game.UI.Controls
             base.OnKeyDown(key, mod);
         }
 
+        private bool _is_writing = false;
+
         protected override void OnTextInput(string c)
         {
             if (c == null || !IsEditable)
                 return;
+
+            _is_writing = true;
 
             if (SelectionStart != SelectionEnd)
             {
@@ -543,23 +546,50 @@ namespace ClassicUO.Game.UI.Controls
             if (_maxCharCount >= 0)
             {
                 int remains = _maxCharCount - Length;
+
                 if (remains <= 0)
+                {
+                    _is_writing = false;
                     return;
+                }
 
                 count = Math.Min(remains, c.Length);
+
+                if (remains < c.Length && count > 0)
+                {
+                    c = c.Substring(0, count);
+                }
             }
             else
             {
                 count = c.Length;
-            } 
-
-            for (int i = 0; i < count; i++)
-            {             
-                if ((NumbersOnly && !char.IsNumber(c[i])) || c[i] == '\r')
-                    continue;
-
-                _stb.InputChar(c[i]);
             }
+
+            if (count > 0)
+            {
+                if (NumbersOnly)
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        if (!char.IsNumber(c[i]))
+                        {
+                            _is_writing = false;
+                            return;
+                        }
+                    }
+                }
+
+                if (count > 1)
+                    _stb.Paste(c);
+                else
+                {
+                    _stb.InputChar(c[0]);
+                }
+
+                OnTextChanged();
+            }
+
+            _is_writing = false;
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -581,7 +611,7 @@ namespace ClassicUO.Game.UI.Controls
                 batcher.EnableScissorTest(false);
                 ScissorStack.PopScissors();
             }
-         
+
             return true;
         }
 
@@ -683,7 +713,7 @@ namespace ClassicUO.Game.UI.Controls
                 _stb.Click(Mouse.Position.X, Mouse.Position.Y);
                 UpdateCaretScreenPosition();
             }
-          
+
             base.OnMouseDown(x, y, button);
         }
 

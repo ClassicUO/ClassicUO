@@ -54,9 +54,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         internal void SetBookText(string text)
         {
-            _bookPage.InputSet = true;
+            //_bookPage.InputSet = true;
             _bookPage.Text = text;
-            _bookPage.InputSet = false;
+            //_bookPage.InputSet = false;
             _bookPage.UpdatePageCoords();
         }
 
@@ -541,7 +541,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.OnTextChanged();
 
-                if (!InputSet)//this avoids multiple iteration on singlechar input from stb...or from lines transmitted by the server.
+                //if (!InputSet)//this avoids multiple iteration on singlechar input from stb...or from lines transmitted by the server.
                 {
                     string[] split = Text.Split('\n');
                     for (int i = 0, t = 0; i < split.Length; i++)

@@ -2,15 +2,13 @@
 {
 	public interface ITextEditHandler
 	{
-		bool InputSet { get; set; }
-
-		string Text { get; set; }
+        string Text { get; set; }
 
 		int Length { get; }
 
-		TextEditRow LayoutRow(int startIndex);
-		float GetWidth(int index);
+		TextEditRow LayoutRow(int startIndex); 
 
-		void AfterInput();
+        float GetWidth(int index);
+
 	}
 }
