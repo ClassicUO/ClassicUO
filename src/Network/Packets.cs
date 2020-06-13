@@ -684,8 +684,7 @@ namespace ClassicUO.Network
             WriteUInt(entity);
             WriteUShort(x);
             WriteUShort(y);
-            WriteByte(0xFF);
-            WriteSByte(z);
+            WriteUShort((ushort) z);
             WriteUShort(graphic);
         }
     }
