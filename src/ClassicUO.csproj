@@ -318,6 +318,7 @@
     <Compile Include="IO\Resources\TileDataLoader.cs" />
     <Compile Include="Network\Plugin.cs" />
     <Compile Include="Network\Updater.cs" />
+    <Compile Include="Utility\ImageLoader.cs" />
     <Compile Include="Utility\Platforms\PlatformHelper.cs" />
     <Compile Include="Utility\Platforms\UoAssist.cs" />
     <Compile Include="Renderer\Batcher2D.cs" />
@@ -397,6 +398,7 @@
     <Compile Include="Game\GameObjects\Multi.cs" />
     <Compile Include="Game\GameObjects\PlayerMobile.cs" />
     <Compile Include="Game\GameObjects\Static.cs" />
+    <Compile Include="Utility\SDL_image.cs" />
     <Compile Include="Utility\UInt16Converter.cs" />
     <Compile Include="Game\UI\Controls\Button.cs" />
     <Compile Include="Game\UI\Controls\Checkbox.cs" />

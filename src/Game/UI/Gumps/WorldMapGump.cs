@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,6 +44,9 @@ using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
+using SDL2;
+
 using SpriteFont = ClassicUO.Renderer.SpriteFont;
 
 
@@ -533,6 +537,9 @@ namespace ClassicUO.Game.UI.Gumps
             );
         }
 
+
+
+
         private unsafe void LoadMarkers()
         {
             //return Task.Run(() =>
@@ -566,8 +573,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                         try
                         {
-                            var texture = Texture2D.FromStream(Client.Game.GraphicsDevice, ms);
+                            ImageLoader.TextureDataFromStreamPtr(ms, out int width, out int height, out IntPtr pixels, out int len);
+
+                            var texture = new Texture2D(Client.Game.GraphicsDevice, width, height, false, SurfaceFormat.Color);
+                            texture.SetDataPointerEXT(0, new Rectangle(0, 0, width, height), pixels, len);
                             _markerIcons.Add(Path.GetFileNameWithoutExtension(icon).ToLower(), texture);
+
                         }
                         catch (Exception ee)
                         {
