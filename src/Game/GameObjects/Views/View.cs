@@ -133,7 +133,7 @@ namespace ClassicUO.Game.GameObjects
             ref Vector3 n0, ref Vector3 n1, ref Vector3 n2, ref Vector3 n3,
             ref Vector3 hue)
         {
-            var texture = TexmapsLoader.Instance.GetTexture(graphic);
+            var texture = TexmapsLoader.Instance.GetTexture(TileDataLoader.Instance.LandData[graphic].TexID);
             if (texture != null)
             {
                 texture.Ticks = Time.Ticks;
