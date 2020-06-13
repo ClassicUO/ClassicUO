@@ -243,16 +243,14 @@ namespace ClassicUO.Network
             }
         }
 
-        public void Send(byte[] data, bool ignorePlugin = false, bool skip_encryption = false)
+        public void Send(byte[] data, int length, bool ignorePlugin = false, bool skip_encryption = false)
         {
-            int length = data.Length;
-
             if (!ignorePlugin && !Plugin.ProcessSendPacket(ref data, ref length))
             {
                return;
             }
             
-            PacketSent.Raise(new PacketWriter(data));
+            PacketSent.Raise(new PacketWriter(data, length));
             Send(data, length, skip_encryption);
         }
 

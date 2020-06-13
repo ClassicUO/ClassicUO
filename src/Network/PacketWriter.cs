@@ -32,11 +32,11 @@ namespace ClassicUO.Network
             this[0] = id;
         }
 
-        public PacketWriter(byte[] data)
+        public PacketWriter(byte[] data, int length)
         {
-            Array.Resize(ref _data, data.Length);
+            Array.Resize(ref _data, length);
 
-            for (int i = 0; i < data.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 _data[i] = data[i];
             }

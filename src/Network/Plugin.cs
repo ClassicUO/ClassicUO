@@ -530,9 +530,9 @@ namespace ClassicUO.Network
         private static bool OnPluginSend(ref byte[] data, ref int length)
         {
             if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
-                NetClient.Socket.Send(data, true);
+                NetClient.Socket.Send(data, length, true);
             else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected)
-                NetClient.LoginSocket.Send(data, true);
+                NetClient.LoginSocket.Send(data, length, true);
 
             return true;
         }
@@ -552,9 +552,9 @@ namespace ClassicUO.Network
             Marshal.Copy(buffer, data, 0, length);
 
             if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
-                NetClient.Socket.Send(data, true);
+                NetClient.Socket.Send(data, length, true);
             else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected)
-                NetClient.LoginSocket.Send(data, true);
+                NetClient.LoginSocket.Send(data, length, true);
 
             return true;
         }

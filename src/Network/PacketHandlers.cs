@@ -2909,7 +2909,7 @@ namespace ClassicUO.Network
                     0x05, 0x4e, 0x18, 0x1e, 0x72, 0x0f, 0x59, 0xad, 0xf5, 0x00
                 };
 
-                NetClient.Socket.Send(buffer);
+                NetClient.Socket.Send(buffer, buffer.Length);
 
                 return;
             }
