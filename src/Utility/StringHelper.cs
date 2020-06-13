@@ -171,11 +171,11 @@ namespace ClassicUO.Utility
             }
         }
 
-        public static string GetClipboardText()
+        public static string GetClipboardText(bool multiline)
         {
             if (SDL.SDL_HasClipboardText() != SDL.SDL_bool.SDL_FALSE)
             {
-                string s = SDL.SDL_GetClipboardText();
+                string s = multiline ? SDL.SDL_GetClipboardText() : (SDL.SDL_GetClipboardText()?.Replace('\n', ' ') ?? null );
                 if(!string.IsNullOrEmpty(s))
                 {
                     if (s.IndexOf('\t') >= 0)

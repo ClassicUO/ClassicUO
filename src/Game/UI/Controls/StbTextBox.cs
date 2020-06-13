@@ -78,7 +78,7 @@ namespace ClassicUO.Game.UI.Controls
             Y = int.Parse(parts[2]);
             Width = int.Parse(parts[3]);
             Height = _rendererText.MaxHeight = int.Parse(parts[4]);
-            Multiline = true;
+            Multiline = false;
             _fromServer = true;
             LocalSerial = SerialHelper.Parse(parts[6]);
             int index = int.Parse(parts[7]);
@@ -386,7 +386,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     break;
                 case SDL.SDL_Keycode.SDLK_v when Keyboard.Ctrl && IsEditable:
-                    OnTextInput(SDL.SDL_GetClipboardText());
+                    OnTextInput(StringHelper.GetClipboardText(Multiline));
                     break;
                 case SDL.SDL_Keycode.SDLK_z when Keyboard.Ctrl && IsEditable:
                     stb_key = ControlKeys.Undo;

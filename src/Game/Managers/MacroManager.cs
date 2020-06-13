@@ -417,7 +417,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.Paste:
-                    string txt = Utility.StringHelper.GetClipboardText();
+                    string txt = Utility.StringHelper.GetClipboardText(true);
 
                     if (txt != null)
                         UIManager.SystemChat.TextBoxControl.Text += txt;
