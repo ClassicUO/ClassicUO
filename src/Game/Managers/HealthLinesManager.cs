@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Text.RegularExpressions;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -44,7 +45,7 @@ namespace ClassicUO.Game.Managers
 
 
 
-        private readonly UOTexture16 _background_texture, _hp_texture;
+        private readonly UOTexture _background_texture, _hp_texture;
 
         public HealthLinesManager()
         {
@@ -188,15 +189,15 @@ namespace ClassicUO.Game.Managers
 
         private void DrawHealthLineWithMath(UltimaBatcher2D batcher, uint serial, int screenX, int screenY, int screenW, int screenH, float scale)
         {
-            Mobile mobile = World.Mobiles.Get(serial);
-            if (mobile == null)
+            var entity = World.Get(serial);
+            if (entity == null)
                 return;
 
-            int x = screenX + mobile.RealScreenPosition.X;
-            int y = screenY + mobile.RealScreenPosition.Y;
+            int x = screenX + entity.RealScreenPosition.X;
+            int y = screenY + entity.RealScreenPosition.Y;
 
-            x += (int) mobile.Offset.X + 22;
-            y += (int) (mobile.Offset.Y - mobile.Offset.Z) + 22;
+            x += (int) entity.Offset.X + 22;
+            y += (int) (entity.Offset.Y - entity.Offset.Z) + 22;
 
             x = (int) (x / scale);
             y = (int) (y / scale);
@@ -217,22 +218,29 @@ namespace ClassicUO.Game.Managers
             if (y < screenY || y > screenY + screenH - BAR_HEIGHT)
                 return;
 
-            DrawHealthLine(batcher, mobile, x, y, false);
+            DrawHealthLine(batcher, entity, x, y, false);
         }
 
-        private void DrawHealthLine(UltimaBatcher2D batcher, Mobile mobile, int x, int y, bool passive)
+        private void DrawHealthLine(UltimaBatcher2D batcher, Entity entity, int x, int y, bool passive)
         {
-            if (mobile == null)
+            if (entity == null)
                 return;
 
-            int per = BAR_WIDTH * mobile.HitsPercentage / 100;
+            int per = BAR_WIDTH * entity.HitsPercentage / 100;
 
+            Mobile mobile = entity as Mobile;
+            
 
             float alpha = passive ? 0.5f : 0.0f;
 
-            _vectorHue.X = Notoriety.GetHue(mobile.NotorietyFlag);
+            _vectorHue.X = mobile != null ? Notoriety.GetHue(mobile.NotorietyFlag) : Notoriety.GetHue(NotorietyFlag.Gray);
             _vectorHue.Y = 1;
             _vectorHue.Z = alpha;
+
+            if (mobile == null)
+            {
+                y += 22;
+            }
 
 
             const int MULTIPLER = 1;
@@ -248,7 +256,7 @@ namespace ClassicUO.Game.Managers
 
 
 
-            if (mobile.Hits != mobile.HitsMax || mobile.HitsMax == 0)
+            if (entity.Hits != entity.HitsMax || entity.HitsMax == 0)
             {
                 int offset = 2;
 
@@ -268,15 +276,18 @@ namespace ClassicUO.Game.Managers
 
             if (per > 0)
             {
-                if (mobile.IsPoisoned)
+                if (mobile != null)
                 {
-                    hue = 63;
+                    if (mobile.IsPoisoned)
+                    {
+                        hue = 63;
+                    }
+                    else if (mobile.IsYellowHits)
+                    {
+                        hue = 53;
+                    }
                 }
-                else if (mobile.IsYellowHits)
-                {
-                    hue = 53;
-                }
-
+                
                 _vectorHue.X = hue;
 
 

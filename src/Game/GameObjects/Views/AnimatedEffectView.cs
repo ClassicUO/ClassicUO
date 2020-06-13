@@ -81,7 +81,6 @@ namespace ClassicUO.Game.GameObjects
 
             return state;
         });
-        private ushort _displayedGraphic = 0xFFFF;
 
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY)
         {
@@ -93,22 +92,10 @@ namespace ClassicUO.Game.GameObjects
 
             ResetHueVector();
 
-
-            if ((AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed) && AnimationGraphic != 0xFFFF)
-            {
-                _displayedGraphic = AnimationGraphic;
-                Texture = ArtLoader.Instance.GetTexture(AnimationGraphic);
-                Bounds.Width = Texture.Width;
-                Bounds.Height = Texture.Height;
-            }
-
-            if (Texture != null)
-            {
-                Bounds.X = (Texture.Width >> 1) - 22 - (int) Offset.X;
-                Bounds.Y = Texture.Height - 44 + (int) (Offset.Z - Offset.Y);
-            }
-
             ref StaticTiles data = ref TileDataLoader.Instance.StaticData[Graphic];
+
+            posX += (int) Offset.X;
+            posY -= (int) (Offset.Z - Offset.Y);
 
 
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
@@ -133,7 +120,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 case GraphicEffectBlendMode.Multiply:
                     batcher.SetBlendState(_multiplyBlendState.Value);
-                    base.Draw(batcher, posX, posY);
+                    DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
                     batcher.SetBlendState(null);
 
                     break;
@@ -141,28 +128,28 @@ namespace ClassicUO.Game.GameObjects
                 case GraphicEffectBlendMode.Screen:
                 case GraphicEffectBlendMode.ScreenMore:
                     batcher.SetBlendState(_screenBlendState.Value);
-                    base.Draw(batcher, posX, posY);
+                    DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
                     batcher.SetBlendState(null);
 
                     break;
 
                 case GraphicEffectBlendMode.ScreenLess:
                     batcher.SetBlendState(_screenLessBlendState.Value);
-                    base.Draw(batcher, posX, posY);
+                    DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
                     batcher.SetBlendState(null);
 
                     break;
 
                 case GraphicEffectBlendMode.NormalHalfTransparent:
                     batcher.SetBlendState(_normalHalfBlendState.Value);
-                    base.Draw(batcher, posX, posY);
+                    DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
                     batcher.SetBlendState(null);
 
                     break;
 
                 case GraphicEffectBlendMode.ShadowBlue:
                     batcher.SetBlendState(_shadowBlueBlendState.Value);
-                    base.Draw(batcher, posX, posY);
+                    DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
                     batcher.SetBlendState(null);
 
                     break;
@@ -179,7 +166,8 @@ namespace ClassicUO.Game.GameObjects
                     //    batcher.SetBlendState(null);
                     //}
                     //else
-                        base.Draw(batcher, posX, posY);
+
+                    DrawStatic(batcher, AnimationGraphic, posX, posY, ref HueVector);
 
                     break;
             }
@@ -194,15 +182,6 @@ namespace ClassicUO.Game.GameObjects
             }
 
             return true;
-        }
-
-        public override void Select(int x, int y)
-        {
-            /*if (SelectedObject.Object == this)
-                return;
-
-            if (SelectedObject.IsPointInStatic(Texture, x - Bounds.X, y - Bounds.Y))
-                SelectedObject.Object = this;*/
         }
     }
 }

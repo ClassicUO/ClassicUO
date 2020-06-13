@@ -98,8 +98,9 @@ namespace ClassicUO.IO.Resources
           
         }
 
-        public override void CleanResources()
+        public override void ClearResources()
         {
+            _entries.Clear();
         }
 
         public string GetString(int number)

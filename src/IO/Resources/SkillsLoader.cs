@@ -74,7 +74,7 @@ namespace ClassicUO.IO.Resources
 
                 for (int i = 0, count = 0; i < Entries.Length; i++)
                 { 
-                    ref readonly var entry = ref GetValidRefEntry(i);
+                    ref var entry = ref GetValidRefEntry(i);
 
                     if (entry.Length > 0)
                     {
@@ -100,11 +100,6 @@ namespace ClassicUO.IO.Resources
             }
 
             return -1;
-        }
-
-        public override void CleanResources()
-        {
-            //
         }
     }
 

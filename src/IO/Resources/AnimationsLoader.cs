@@ -1014,8 +1014,39 @@ namespace ClassicUO.IO.Resources
             return _animationSequenceReplacing.TryGetValue(graphic, out type);
         }
 
-        public override void CleanResources()
+        public override void ClearResources()
         {
+            var first = _usedTextures.First;
+
+            while (first != null)
+            {
+                var next = first.Next;
+
+                if (first.Value.LastAccessTime != 0)
+                {
+                    for (int j = 0; j < first.Value.FrameCount; j++)
+                    {
+                        ref var texture = ref first.Value.Frames[j];
+
+                        if (texture != null)
+                        {
+                            texture.Dispose();
+                            texture = null;
+                        }
+                    }
+
+                    first.Value.FrameCount = 0;
+                    first.Value.Frames = null;
+                    first.Value.LastAccessTime = 0;
+
+                    _usedTextures.Remove(first);
+                }
+
+                first = next;
+            }
+
+            if (_usedTextures.Count != 0)
+                _usedTextures.Clear();
         }
 
         public void UpdateAnimationTable(uint flags)
@@ -1309,6 +1340,9 @@ namespace ClassicUO.IO.Resources
             if (animDir.FileIndex == -1 && animDir.Address == -1)
                 return false;
 
+            if (animDir.FileIndex >= _files.Length || AnimID >= Constants.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                return false;
+
             if (animDir.IsUOP || (animDir.Address == 0 && animDir.Size == 0))
             {
                 var animData = DataIndex[AnimID].GetUopGroup(AnimGroup);
@@ -1336,6 +1370,11 @@ namespace ClassicUO.IO.Resources
         private unsafe bool ReadUOPAnimationFrame(ref AnimationDirection animDirection)
         {
             var animData = DataIndex[AnimID].GetUopGroup(AnimGroup);
+
+            if (animData.FileIndex < 0 || animData.FileIndex >= _filesUop.Length)
+            {
+                return false;
+            }
 
             if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 && animData.Offset == 0)
             {
@@ -1748,41 +1787,6 @@ namespace ClassicUO.IO.Resources
                 first = next;
             }
         }
-
-        //public void Clear()
-        //{
-        //    var first = _usedTextures.First;
-
-        //    while (first != null)
-        //    {
-        //        var next = first.Next;
-
-        //        if (first.Value.LastAccessTime != 0)
-        //        {
-        //            for (int j = 0; j < first.Value.FrameCount; j++)
-        //            {
-        //                ref var texture = ref first.Value.Frames[j];
-
-        //                if (texture != null)
-        //                {
-        //                    texture.Dispose();
-        //                    texture = null;
-        //                }
-        //            }
-
-        //            first.Value.FrameCount = 0;
-        //            first.Value.Frames = null;
-        //            first.Value.LastAccessTime = 0;
-
-        //            _usedTextures.Remove(first);
-        //        }
-
-        //        first = next;
-        //    }
-
-        //    if (_usedTextures.Count != 0)
-        //        _usedTextures.Clear();
-        //}
 
         public readonly struct SittingInfoData
         {

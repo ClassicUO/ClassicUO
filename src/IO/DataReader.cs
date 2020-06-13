@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -227,6 +228,7 @@ namespace ClassicUO.IO
             return sb.ToString();
         }
 
+        [Conditional("DEBUG")]
         [MethodImpl(256)]
         private void EnsureSize(int size)
         {

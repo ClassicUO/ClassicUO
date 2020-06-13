@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int WIDTH = 700;
         private const int HEIGHT = 500;
 
-        private static UOTexture _logoTexture2D;
+        private static Texture2D _logoTexture2D;
         private ScrollAreaItem _activeChatArea;
         private Combobox _autoOpenCorpseOptions;
         private StbTextBox _autoOpenCorpseRange;
@@ -123,8 +123,6 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showHouseContent;
         private Combobox _cotType;
 
-        //VendorGump Size Option
-        private ArrowNumbersTextBox _vendorGumpSize;
 
         private ScrollAreaItem _windowSizeArea;
         private ScrollAreaItem _zoomSizeArea;
@@ -145,7 +143,7 @@ namespace ClassicUO.Game.UI.Gumps
             });
 
 
-            TextureControl tc = new TextureControl
+            /*TextureControl tc = new TextureControl
             {
                 X = 150 + ((WIDTH - 150 - 350) >> 1),
                 Y = (HEIGHT - 365) >> 1,
@@ -156,7 +154,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Texture = LogoTexture
             };
 
-            Add(tc);
+            Add(tc);*/
 
             int i = 0;
             Add(new NiceButton(10, 10 + (30 * (i++)), 140, 25, ButtonAction.SwitchPage, "General") {IsSelected = true, ButtonParameter = 1});
@@ -220,17 +218,14 @@ namespace ClassicUO.Game.UI.Gumps
             ChangePage(1);
         }
 
-        private static UOTexture LogoTexture
+        private static Texture2D LogoTexture
         {
             get
             {
                 if (_logoTexture2D == null || _logoTexture2D.IsDisposed)
                 {
                     Stream stream = typeof(CUOEnviroment).Assembly.GetManifestResourceStream("ClassicUO.cuologo.png");
-                    Texture2D.TextureDataFromStreamEXT(stream, out int w, out int h, out byte[] pixels, 350, 365);
-
-                    _logoTexture2D = new UOTexture32(w, h);
-                    _logoTexture2D.SetData(pixels);
+                    _logoTexture2D = Texture2D.FromStream(Client.Game.GraphicsDevice, stream);
                 }
 
                 return _logoTexture2D;
@@ -492,12 +487,6 @@ namespace ClassicUO.Game.UI.Gumps
             hpAreaItem.Add(_fieldsType);
             rightArea.Add(hpAreaItem);
 
-
-            hpAreaItem = new ScrollAreaItem();
-            Control c = new Label("Shop Gump Size (multiple of 60): ", true, HUE_FONT) {Y = 10};
-            hpAreaItem.Add(c);
-            hpAreaItem.Add(_vendorGumpSize = new ArrowNumbersTextBox(c.Width + 5, 10, 60, 60, 60, 240, FONT, hue: 1) {Text = ProfileManager.Current.VendorGumpHeight.ToString(), Tag = ProfileManager.Current.VendorGumpHeight});
-            rightArea.Add(hpAreaItem);
 
             Add(rightArea, PAGE);
         }
@@ -1514,7 +1503,6 @@ namespace ClassicUO.Game.UI.Gumps
                     _useCircleOfTransparency.IsChecked = false;
                     _healtbarType.SelectedIndex = 0;
                     _fieldsType.SelectedIndex = 0;
-                    _vendorGumpSize.Text = "60";
                     _useStandardSkillsGump.IsChecked = true;
                     _showCorpseNameIncoming.IsChecked = true;
                     _showMobileNameIncoming.IsChecked = true;
@@ -1757,8 +1745,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             ProfileManager.Current.CircleOfTransparencyType = _cotType.SelectedIndex;
-
-            ProfileManager.Current.VendorGumpHeight = (int) _vendorGumpSize.Tag;
             ProfileManager.Current.StandardSkillsGump = _useStandardSkillsGump.IsChecked;
 
             if (_useStandardSkillsGump.IsChecked)
@@ -2179,6 +2165,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             ResetHueVector();
 
+            batcher.Draw2D(LogoTexture, x + 190, y + 20, WIDTH - 250, 400, ref _hueVector);
             batcher.DrawRectangle(Texture2DCache.GetTexture(Color.Gray), x, y, Width, Height, ref _hueVector);
 
             return base.Draw(batcher, x, y);

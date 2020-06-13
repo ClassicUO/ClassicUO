@@ -157,6 +157,8 @@ namespace ClassicUO.Game.UI.Gumps
             foreach (var v in _myBox.Children)
                 v.Dispose();
 
+            var loader = ArtLoader.Instance;
+
             for (var i = container.Items; i != null; i = i.Next)
             {
                 Item it = (Item) i;
@@ -169,11 +171,16 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                if (x + g.Texture.Width > 110)
-                    x = 110 - g.Texture.Width;
+                var texture = loader.GetTexture(it.DisplayedGraphic);
 
-                if (y + g.Texture.Height > 80)
-                    y = 80 - g.Texture.Height;
+                if (texture != null)
+                {
+                    if (x + texture.Width > 110)
+                        x = 110 - texture.Width;
+
+                    if (y + texture.Height > 80)
+                        y = 80 - texture.Height;
+                }
 
                 if (x < 0)
                     x = 0;
@@ -208,11 +215,16 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                if (x + g.Texture.Width > 110)
-                    x = 110 - g.Texture.Width;
+                var texture = loader.GetTexture(it.DisplayedGraphic);
 
-                if (y + g.Texture.Height > 80)
-                    y = 80 - g.Texture.Height;
+                if (texture != null)
+                {
+                    if (x + texture.Width > 110)
+                        x = 110 - texture.Width;
+
+                    if (y + texture.Height > 80)
+                        y = 80 - texture.Height;
+                }
 
                 if (x < 0)
                     x = 0;

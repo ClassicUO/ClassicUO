@@ -342,6 +342,7 @@ namespace ClassicUO.Game.Scenes
 
             if (UIManager.SystemChat != null && !UIManager.SystemChat.IsFocused)
             {
+                UIManager.KeyboardFocusControl = null;
                 UIManager.SystemChat.SetFocus();
             }
 
@@ -707,7 +708,6 @@ namespace ClassicUO.Game.Scenes
                     {
                         if (SerialHelper.IsMobile(obj.Serial) || obj is Item it && it.IsDamageable)
                         {
-                            GameActions.RequestMobileStatus(obj);
                             var customgump = UIManager.GetGump<BaseHealthBarGump>(obj);
                             customgump?.Dispose();
 

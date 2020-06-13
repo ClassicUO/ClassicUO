@@ -31,7 +31,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    internal sealed class UltimaBatcher2D : IDisposable
+    internal sealed unsafe class UltimaBatcher2D : IDisposable
     {
         private const int MAX_SPRITES = 0x800;
         private const int MAX_VERTICES = MAX_SPRITES * 4;
@@ -42,7 +42,7 @@ namespace ClassicUO.Renderer
         private readonly RasterizerState _rasterizerState;
         private readonly DynamicVertexBuffer _vertexBuffer;
         private readonly Texture2D[] _textureInfo;
-        private PositionNormalTextureColor4[] _vertexInfo;
+        private PositionNormalTextureColor4* _vertexInfo;
         private BlendState _blendState;
         private Effect _customEffect;
         private bool _started;
@@ -55,7 +55,7 @@ namespace ClassicUO.Renderer
         {
             GraphicsDevice = device;
             _textureInfo = new Texture2D[MAX_SPRITES];
-            _vertexInfo = new PositionNormalTextureColor4[MAX_SPRITES];
+            _vertexInfo = (PositionNormalTextureColor4*) Marshal.AllocHGlobal(sizeof(PositionNormalTextureColor4) * MAX_SPRITES);
             _vertexBuffer = new DynamicVertexBuffer(GraphicsDevice, typeof(PositionNormalTextureColor4), MAX_VERTICES, BufferUsage.WriteOnly);
             _indexBuffer = new IndexBuffer(GraphicsDevice, IndexElementSize.SixteenBits, MAX_INDICES, BufferUsage.WriteOnly);
             _indexBuffer.SetData(GenerateIndexArray());
@@ -1504,6 +1504,11 @@ namespace ClassicUO.Renderer
         [MethodImpl(256)]
         private bool PushSprite(Texture2D texture)
         {
+            if (texture == null || texture.IsDisposed)
+            {
+                return false;
+            }
+
             EnsureSize();
             _textureInfo[_numSprites++] = texture;
 
@@ -1645,14 +1650,11 @@ namespace ClassicUO.Renderer
                 hint = SetDataOptions.NoOverwrite;
             }
 
-            fixed (PositionNormalTextureColor4* p = &_vertexInfo[0])
-            {
-                _vertexBuffer.SetDataPointerEXT(
-                                                pos * PositionNormalTextureColor4.SIZE_IN_BYTES,
-                                                (IntPtr) p,
-                                                len * PositionNormalTextureColor4.SIZE_IN_BYTES,
-                                                hint);
-            }
+            _vertexBuffer.SetDataPointerEXT(
+                                            pos * PositionNormalTextureColor4.SIZE_IN_BYTES,
+                                            (IntPtr) _vertexInfo,
+                                            len * PositionNormalTextureColor4.SIZE_IN_BYTES,
+                                            hint);
            
             _currentBufferPosition = pos + len;
             return pos;
@@ -1677,6 +1679,12 @@ namespace ClassicUO.Renderer
 
         public void Dispose()
         {
+            if (_vertexInfo != null)
+            {
+                Marshal.FreeHGlobal((IntPtr) _vertexInfo);
+                _vertexInfo = null;
+            }
+
             DefaultEffect?.Dispose();
             _vertexBuffer.Dispose();
             _indexBuffer.Dispose();

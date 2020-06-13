@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
 {
@@ -36,7 +37,12 @@ namespace ClassicUO.IO
 
         public abstract Task Load();
 
-        public ref readonly UOFileIndex GetValidRefEntry(int index)
+        public virtual void ClearResources()
+        {
+
+        }
+
+        public ref UOFileIndex GetValidRefEntry(int index)
         {
             if (index < 0 || Entries == null || index >= Entries.Length)
                 return ref UOFileIndex.Invalid;
@@ -49,8 +55,6 @@ namespace ClassicUO.IO
             return ref entry;
         }
 
-        public abstract void CleanResources();
-
         public void Dispose()
         {
             if (IsDisposed)
@@ -58,7 +62,7 @@ namespace ClassicUO.IO
 
             IsDisposed = true;
 
-            CleanResources();
+            ClearResources();
         }
     }
 
@@ -82,7 +86,7 @@ namespace ClassicUO.IO
             ClearUnusedResources(Resources, count);
         }
 
-        public override void CleanResources()
+        public override void ClearResources()
         {
             var first = _usedTextures.First;
 
@@ -107,6 +111,9 @@ namespace ClassicUO.IO
 
         public void ClearUnusedResources<T1>(T1[] resource_cache, int maxCount) where T1 : UOTexture
         {
+            if (Time.Ticks <= Constants.CLEAR_TEXTURES_DELAY)
+                return;
+
             long ticks = Time.Ticks - Constants.CLEAR_TEXTURES_DELAY;
             int count = 0;
 

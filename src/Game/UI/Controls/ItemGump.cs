@@ -81,14 +81,19 @@ namespace ClassicUO.Game.UI.Controls
 
             ResetHueVector();
             ShaderHuesTraslator.GetHueVector(ref _hueVector, HighlightOnMouseOver && MouseIsOver ? 0x0035 : Hue, IsPartialHue, 0, false);
+          
+            var texture = ArtLoader.Instance.GetTexture(Graphic);
 
-            batcher.Draw2D(Texture, x, y, Width, Height, ref _hueVector);
-
-            Item item = World.Items.Get(LocalSerial);
-
-            if (item != null && !item.IsMulti && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
+            if (texture != null)
             {
-                batcher.Draw2D(Texture, x + 5, y + 5, Width, Height, ref _hueVector);
+                batcher.Draw2D(texture, x, y, Width, Height, ref _hueVector);
+
+                Item item = World.Items.Get(LocalSerial);
+
+                if (item != null && !item.IsMulti && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
+                {
+                    batcher.Draw2D(texture, x + 5, y + 5, Width, Height, ref _hueVector);
+                }
             }
 
             return true;
@@ -96,6 +101,13 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
+            var texture = ArtLoader.Instance.GetTexture(Graphic);
+
+            if (texture == null)
+            {
+                return false;
+            }
+
             if (ProfileManager.Current != null && ProfileManager.Current.ScaleItemsInsideContainers)
             {
                 float scale = UIManager.ContainerScale;
@@ -104,7 +116,7 @@ namespace ClassicUO.Game.UI.Controls
                 y = (int)(y / scale);
             }
 
-            if (Texture.Contains(x, y))
+            if (texture.Contains(x, y))
             {
                 return true;
             }
@@ -113,7 +125,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (item != null && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
             {
-                if (Texture.Contains(x - 5, y - 5))
+                if (texture.Contains(x - 5, y - 5))
                 {
                     return true;
                 }

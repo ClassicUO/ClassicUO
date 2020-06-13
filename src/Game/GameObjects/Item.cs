@@ -38,7 +38,6 @@ namespace ClassicUO.Game.GameObjects
 {
     internal partial class Item : Entity
     {
-        private int _animSpeed;
         private ushort? _displayedGraphic;
         private bool _isMulti;
 
@@ -65,13 +64,11 @@ namespace ClassicUO.Game.GameObjects
                 i.Graphic = 0;
                 i.Serial = serial;
                 i.Amount = 0;
-                i._animSpeed = 0;
                 i.Container = 0;
                 i._isMulti = false;
                 i.Layer = 0;
                 i.Price = 0;
                 i.UsedLayer = false;
-                i._originalGraphic = 0;
                 i._displayedGraphic = null;
                 i.X = 0;
                 i.Y = 0;
@@ -81,7 +78,6 @@ namespace ClassicUO.Game.GameObjects
                 i.MultiDistanceBonus = 0;
                 i.Flags = 0;
                 i.WantUpdateMulti = true;
-                i._force = false;
                 i.MultiInfo = null;
                 i.MultiGraphic = 0;
                 
@@ -103,7 +99,6 @@ namespace ClassicUO.Game.GameObjects
                 i.Opened = false;
                 i.TextContainer?.Clear();
                 i.IsFlipped = false;
-                i.Bounds = Rectangle.Empty;
                 i.FrameInfo = Rectangle.Empty;
                 i.UseObjectHandles = false;
                 i.ClosedObjectHandles = false;
@@ -111,7 +106,6 @@ namespace ClassicUO.Game.GameObjects
                 i.AlphaHue = 0;
                 i.DrawTransparent = false;
                 i.AllowedToDraw = true;
-                i.Texture = null;
 
                 return i;
             }
@@ -231,7 +225,8 @@ namespace ClassicUO.Game.GameObjects
         public bool IsLootable =>
             ItemData.Layer != (int) Layer.Hair &&
             ItemData.Layer != (int) Layer.Beard &&
-            ItemData.Layer != (int) Layer.Face;
+            ItemData.Layer != (int) Layer.Face &&
+            Graphic != 0;
 
         private static readonly DataReader _reader = new DataReader();
 
@@ -256,7 +251,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
 
-            ref readonly var entry = ref MultiLoader.Instance.GetValidRefEntry(Graphic);
+            ref var entry = ref MultiLoader.Instance.GetValidRefEntry(Graphic);
             MultiLoader.Instance.File.SetData(entry.Address, entry.FileSize);
 
             if (MultiLoader.Instance.IsUOP)
@@ -390,31 +385,6 @@ namespace ClassicUO.Game.GameObjects
                 if (!IsCorpse)
                 {
                     AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
-
-                    if (OnGround && ItemData.IsAnimated)
-                    {
-                        AnimIndex = animIndex;
-
-                        IntPtr ptr = AnimDataLoader.Instance.GetAddressToAnim(Graphic);
-
-                        if (ptr != IntPtr.Zero)
-                        {
-                            unsafe
-                            {
-                                AnimDataFrame2* animData = (AnimDataFrame2*) ptr;
-
-                                if (animData->FrameCount != 0)
-                                {
-                                    _animSpeed = animData->FrameInterval * Constants.ITEM_EFFECT_ANIMATION_DELAY;
-                                }
-                            }
-                        }
-
-                        LastAnimationChangeTime = Time.Ticks;
-                    }
-
-                    _originalGraphic = DisplayedGraphic;
-                    _force = true;
                 }
                 else
                 {
@@ -440,8 +410,6 @@ namespace ClassicUO.Game.GameObjects
                 {
                     LoadMulti();
                     AllowedToDraw = MultiGraphic > 2;
-                    _originalGraphic = MultiGraphic;
-                    _force = true;
                 }
             }
         }
@@ -919,8 +887,11 @@ namespace ClassicUO.Game.GameObjects
                 var scene = Client.Game.GetScene<GameScene>();
                 float scale = scene?.Scale ?? 1;
 
-                if (Texture != null)
-                    y -= Texture is ArtTexture t ? (t.ImageRectangle.Height >> 1) : (Texture.Height >> 1);
+                var texture = ArtLoader.Instance.GetTexture(Graphic);
+
+                if (texture != null)
+                    y -= (texture.ImageRectangle.Height >> 1);
+
                 x += 22;
                 y += 22;
 
@@ -1019,30 +990,6 @@ namespace ClassicUO.Game.GameObjects
                     }
 
                     LastAnimationChangeTime = Time.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
-                }
-            }
-            else if (OnGround && ItemData.IsAnimated && LastAnimationChangeTime < Time.Ticks)
-            {
-                IntPtr ptr = AnimDataLoader.Instance.GetAddressToAnim(Graphic);
-
-                if (ptr != IntPtr.Zero)
-                {
-                    unsafe
-                    {
-                        AnimDataFrame2* animData = (AnimDataFrame2*) ptr;
-
-                        if (animData->FrameCount != 0)
-                        {
-                            _originalGraphic = (ushort) (DisplayedGraphic + animData->FrameData[AnimIndex++]);
-
-                            if (AnimIndex >= animData->FrameCount)
-                                AnimIndex = 0;
-
-                            _force = _originalGraphic == DisplayedGraphic;
-
-                            LastAnimationChangeTime = Time.Ticks + _animSpeed;
-                        }
-                    }
                 }
             }
         }

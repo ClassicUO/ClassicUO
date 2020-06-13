@@ -39,7 +39,7 @@ namespace ClassicUO.Game.Map
                 _pool.Enqueue(new Chunk(0xFFFF, 0xFFFF));
         }
 
-        public static Chunk Create(ushort x, ushort y)
+        public static Chunk Create(int x, int y)
         {
             Chunk c;
 
@@ -63,7 +63,7 @@ namespace ClassicUO.Game.Map
 
 
 
-        private Chunk(ushort x, ushort y)
+        private Chunk(int x, int y)
         {
             X = x;
             Y = y;
@@ -71,8 +71,8 @@ namespace ClassicUO.Game.Map
             LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
         }
 
-        public ushort X { get; set; }
-        public ushort Y { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
 
         public bool IsDestroyed;
 
@@ -97,11 +97,11 @@ namespace ClassicUO.Game.Map
                 int bx = X << 3;
                 int by = Y << 3;
 
-                for (int x = 0; x < 8; x++)
+                for (int x = 0; x < 8; ++x)
                 {
                     ushort tileX = (ushort) (bx + x);
 
-                    for (int y = 0; y < 8; y++)
+                    for (int y = 0; y < 8; ++y)
                     {
                         int pos = (y << 3) + x;
                         ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
@@ -131,7 +131,7 @@ namespace ClassicUO.Game.Map
                     {
                         int count = (int) im.StaticCount;
 
-                        for (int i = 0; i < count; i++, sb++)
+                        for (int i = 0; i < count; ++i, ++sb)
                         {
                             if (sb->Color != 0 && sb->Color != 0xFFFF)
                             {
@@ -169,6 +169,7 @@ namespace ClassicUO.Game.Map
             return ref MapLoader.Instance.GetIndex(map, X, Y);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public GameObject GetHeadObject(int x, int y)
         {
             var obj = Tiles[x, y];

@@ -144,18 +144,17 @@ namespace ClassicUO.IO.Resources
 
                 SaveID(g);
             }
+            else
+            {
+                texture.Ticks = Time.Ticks;
+            }
 
             return texture;
         }
 
-        public override void CleanResources()
-        {
-           
-        }
-
         public unsafe ushort[] GetGumpPixels(uint index, out int width, out int height)
         {
-            ref readonly var entry = ref GetValidRefEntry((int) index);
+            ref var entry = ref GetValidRefEntry((int) index);
 
             if (entry.Width <= 0 && entry.Height <= 0)
             {

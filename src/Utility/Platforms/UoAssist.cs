@@ -143,7 +143,7 @@ namespace ClassicUO.Utility.Platforms
             {
                 SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
                 SDL.SDL_VERSION(out info.version);
-                SDL.SDL_GetWindowWMInfo(SDL.SDL_GL_GetCurrentWindow(), ref info);
+                SDL.SDL_GetWindowWMInfo(Client.Game.Window.Handle, ref info);
 
                 IntPtr hwnd = IntPtr.Zero;
 

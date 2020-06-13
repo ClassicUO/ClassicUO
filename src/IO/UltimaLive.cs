@@ -655,7 +655,7 @@ namespace ClassicUO.IO
 
             internal new UOFileIndex[][] Entries;
 
-            public override void CleanResources()
+            public override void ClearResources()
             {
                 try
                 {

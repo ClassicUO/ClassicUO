@@ -197,7 +197,6 @@ namespace ClassicUO.Game.UI.Gumps
                 if (UIManager.IsDragging)
                     return;
 
-                GameActions.RequestMobileStatus(LocalSerial);
                 BaseHealthBarGump gump = UIManager.GetGump<BaseHealthBarGump>(LocalSerial);
                 gump?.Dispose();
 
@@ -219,10 +218,12 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else if (entity != null)
             {
-                if (entity.Texture != null)
-                    GameActions.PickUp(LocalSerial, entity.Texture.Width >> 1, entity.Texture.Height >> 1);
-                else
-                    GameActions.PickUp(LocalSerial, 0, 0);
+                GameActions.PickUp(LocalSerial, 0, 0);
+
+                //if (entity.Texture != null)
+                //    GameActions.PickUp(LocalSerial, entity.Texture.Width >> 1, entity.Texture.Height >> 1);
+                //else
+                //    GameActions.PickUp(LocalSerial, 0, 0);
             }
         }
 
@@ -435,19 +436,12 @@ namespace ClassicUO.Game.UI.Gumps
                     return false;
                 }
 
-                if (item.Texture != null)
+                var texture = ArtLoader.Instance.GetTexture(item.Graphic);
+
+                if (texture != null)
                 {
-                    switch (item.Texture)
-                    {
-                        case ArtTexture artText:
-                            x = (int) ((item.RealScreenPosition.X + (int) item.Offset.X + 22) / scale);
-                            y = (int) ((item.RealScreenPosition.Y + (int) (item.Offset.Y - item.Offset.Z) - (artText.ImageRectangle.Height >> 1)) / scale);
-                            break;
-                        default:
-                            x = (int) ((item.RealScreenPosition.X + (int) item.Offset.X + 22) / scale);
-                            y = (int) ((item.RealScreenPosition.Y + (int) (item.Offset.Y - item.Offset.Z) - (item.Texture.Height >> 1)) / scale);
-                            break;
-                    }
+                    x = (int) ((item.RealScreenPosition.X + (int) item.Offset.X + 22) / scale);
+                    y = (int) ((item.RealScreenPosition.Y + (int) (item.Offset.Y - item.Offset.Z) - (texture.ImageRectangle.Height >> 1)) / scale);
                 }
                 else
                 {

@@ -40,18 +40,6 @@ namespace ClassicUO.Game.GameObjects
 
             ResetHueVector();
 
-            if (Texture == null || Texture.IsDisposed)
-            {
-                if (IsStretched)
-                    Texture = TexmapsLoader.Instance.GetTexture(TileData.TexID);
-                else
-                {
-                    Texture = ArtLoader.Instance.GetLandTexture(Graphic);
-                    Bounds.Width = 44;
-                    Bounds.Height = 44;
-                }
-            }
-
 
             if (ProfileManager.Current.HighlightGameObjects && SelectedObject.LastObject == this)
             {
@@ -78,35 +66,28 @@ namespace ClassicUO.Game.GameObjects
                     HueVector.Y = IsStretched ? ShaderHuesTraslator.SHADER_LAND : ShaderHuesTraslator.SHADER_NONE;
             }
 
-
-            return IsStretched ? Draw3DStretched(batcher, posX, posY) : base.Draw(batcher, posX, posY);
-        }
-
-
-        private bool Draw3DStretched(UltimaBatcher2D batcher, int posX, int posY)
-        {
-            Texture.Ticks = Time.Ticks;
-            batcher.DrawSpriteLand(Texture, posX, posY + (Z << 2), ref Rectangle, ref Normal0, ref Normal1, ref Normal2, ref Normal3, ref HueVector);
-            Select(posX, posY);
-
-            return true;
-        }
-
-        public override void Select(int x, int y)
-        {
-            if (SelectedObject.Object == this)
-                return;
-
             if (IsStretched)
             {
-                if (SelectedObject.IsPointInStretchedLand(ref Rectangle, x, y + (Z << 2)))
+                posY += (Z << 2);
+
+                DrawLand(
+                    batcher,
+                    Graphic, posX, posY, 
+                    ref Rectangle, ref Normal0, ref Normal1, ref Normal2, ref Normal3,
+                    ref HueVector);
+
+                if (SelectedObject.IsPointInStretchedLand(ref Rectangle, posX, posY))
                     SelectedObject.Object = this;
             }
             else
             {
-                if (SelectedObject.IsPointInLand(Texture, x - Bounds.X, y - Bounds.Y))
+                DrawLand(batcher, Graphic, posX, posY, ref HueVector);
+
+                if (SelectedObject.IsPointInLand(posX, posY))
                     SelectedObject.Object = this;
             }
+
+            return true;
         }
     }
 }

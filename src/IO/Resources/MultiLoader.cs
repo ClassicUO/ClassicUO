@@ -92,11 +92,6 @@ namespace ClassicUO.IO.Resources
 
             });
         }
-
-        public override void CleanResources()
-        {
-            // do nothing
-        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

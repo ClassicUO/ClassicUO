@@ -106,7 +106,6 @@ namespace ClassicUO.Game.GameObjects
                 mobile.HitsTexture?.Destroy();
                 mobile.HitsTexture = null;
                 mobile.IsFlipped = false;
-                mobile.Bounds = Rectangle.Empty;
                 mobile.FrameInfo = Rectangle.Empty;
                 mobile.UseObjectHandles = false;
                 mobile.ClosedObjectHandles = false;
@@ -114,7 +113,6 @@ namespace ClassicUO.Game.GameObjects
                 mobile.AlphaHue = 0;
                 mobile.DrawTransparent = false;
                 mobile.AllowedToDraw = true;
-                mobile.Texture = null;
                 mobile.IsClicked = false;
                 mobile.RemoveFromTile();
                 mobile.Clear();
@@ -134,48 +132,21 @@ namespace ClassicUO.Game.GameObjects
 
 
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);
-
         public CharacterSpeedType SpeedMode = CharacterSpeedType.Normal;
-
         public long DeathScreenTimer;
-
-        //private bool _isMale;
-
-        //public bool IsMale
-        //{
-        //    get => _isMale || (Flags & Flags.Female) == 0 || IsOtherMale || IsElfMale || (Graphic < 900 && Graphic % 2 == 0 && !IsOtherFemale && !IsElfFemale && IsHuman);
-        //    set => _isMale = value;
-        //}
-
-        //public bool IsOtherMale => Graphic == 183 || Graphic == 185;
-        //public bool IsElfMale => Graphic == 605 || Graphic == 607;
-        //public bool IsOtherFemale => Graphic == 184 || Graphic == 186;
-        //public bool IsElfFemale => Graphic == 606 || Graphic == 608;
-
         public bool IsFemale;
-
         public RaceType Race;
-
         public ushort Mana;
-
         public ushort ManaMax;
-
         public ushort Stamina;
-
         public ushort StaminaMax;
-
         public NotorietyFlag NotorietyFlag;
-
         public bool IsRenamable;
 
         public bool IsParalyzed => ((byte) Flags & 0x01) != 0;
-
         public bool IsYellowHits => ((byte) Flags & 0x08) != 0;
-
         public bool IsPoisoned => Client.Version >= ClientVersion.CV_7000 ? _isSA_Poisoned : ((byte) Flags & 0x04) != 0;
-
         public bool IgnoreCharacters => ((byte) Flags & 0x10) != 0;
-
         public bool IsDead
         {
             get => Graphic == 0x0192 ||
@@ -184,15 +155,12 @@ namespace ClassicUO.Game.GameObjects
                    Graphic == 0x2B6 || Graphic == 0x02B7 || _isDead;
             set => _isDead = value;
         }
-
         public bool IsFlying => Client.Version >= ClientVersion.CV_7000 && ((byte) Flags & 0x04) != 0;
-
         public virtual bool InWarMode
         {
             get => ((byte) Flags & 0x40) != 0;
             set { }
         }
-
         public bool IsHuman => (Graphic >= 0x0190 && Graphic <= 0x0193) ||
                                (Graphic >= 0x00B7 && Graphic <= 0x00BA) ||
                                (Graphic >= 0x025D && Graphic <= 0x0260) ||
@@ -200,7 +168,6 @@ namespace ClassicUO.Game.GameObjects
                                Graphic == 0x02B6 || Graphic == 0x02B7 ||
                                Graphic == 0x03DB || Graphic == 0x03DF || Graphic == 0x03E2 || Graphic == 0x02E8 || Graphic == 0x02E9|| Graphic == 0x04E5; 
         public bool IsGargoyle => Client.Version >= ClientVersion.CV_7000 && Graphic == 0x029A || Graphic == 0x029B;
-
         public bool IsMounted
         {
             get
@@ -215,7 +182,6 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
         }
-
         public bool IsDrivingBoat
         {
             get
@@ -227,32 +193,20 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public bool IsRunning;
-
         public byte AnimationInterval;
-
         public byte AnimationFrameCount;
-
         public byte AnimationRepeatMode = 1;
-
         public bool AnimationRepeat;
-
         public bool AnimationFromServer;
-
         public bool AnimationDirection;
-
-       // public long LastStepTime;
-
+        public byte AnimationGroup = 0xFF;
         public long LastStepSoundTime;
-
         public int StepSoundOffset;
-
         public string Title = string.Empty;
 
         protected virtual bool IsWalking => LastStepTime > Time.Ticks - Constants.WALKING_DELAY;
 
-        public byte AnimationGroup = 0xFF;
 
-        //internal bool IsMoving => AnimationGroup != 0xFF && Steps.Count != 0;
 
         public Item GetSecureTradeBox()
         {
@@ -381,6 +335,8 @@ namespace ClassicUO.Game.GameObjects
             AnimationDirection = frameDirection;
             AnimationFromServer = false;
             LastAnimationChangeTime = Time.Ticks;
+
+
             CalculateRandomIdleTime();
         }
 

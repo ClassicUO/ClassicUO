@@ -335,10 +335,11 @@ namespace ClassicUO.Network
             {
                 ushort damage = p.ReadUShort();
 
-                World.WorldTextManager
-                      .AddDamage(entity,
-                                 damage
-                                );
+                if (damage > 0)
+                    World.WorldTextManager
+                          .AddDamage(entity,
+                                     damage
+                                    );
             }
         }
 
@@ -726,9 +727,8 @@ namespace ClassicUO.Network
 
             bool updateAbilities = false;
 
-            if (SerialHelper.IsItem(serial))
+            if (entity is Item it)
             {
-                Item it = (Item)entity;
                 uint cont = it.Container & 0x7FFFFFFF;
 
                 if (SerialHelper.IsValid(it.Container))
@@ -779,10 +779,8 @@ namespace ClassicUO.Network
             if (World.CorpseManager.Exists(0, serial))
                 return;
 
-            if (SerialHelper.IsMobile(serial))
+            if (entity is Mobile m)
             {
-                Mobile m = (Mobile)entity;
-
                 if (World.Party.Contains(serial))
                 {
                     // m.RemoveFromTile();
@@ -792,30 +790,30 @@ namespace ClassicUO.Network
                     World.RemoveMobile(serial, true);
                 }
             }
-            else if (SerialHelper.IsItem(serial))
+            else
             {
-                Item it = (Item)entity;
+                Item item = (Item) entity;
 
-                if (it.IsMulti)
-                    World.HouseManager.Remove(it);
+                if (item.IsMulti)
+                    World.HouseManager.Remove(serial);
 
-                Entity cont = World.Get(it.Container);
+                Entity cont = World.Get(item.Container);
 
                 if (cont != null)
                 {
-                    cont.Remove(it);
+                    cont.Remove(item);
 
-                    if (it.Layer != Layer.Invalid)
+                    if (item.Layer != Layer.Invalid)
                     {
                         UIManager.GetGump<PaperDollGump>(cont)?.RequestUpdateContents();
                     }
                 }
-                else if (it.IsMulti)
+                else if (item.IsMulti)
                 {
                     UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
                 }
 
-                World.RemoveItem(it, true);
+                World.RemoveItem(serial, true);
 
                 if (updateAbilities)
                     World.Player.UpdateAbilities();
@@ -2915,7 +2913,7 @@ namespace ClassicUO.Network
                     0x05, 0x4e, 0x18, 0x1e, 0x72, 0x0f, 0x59, 0xad, 0xf5, 0x00
                 };
 
-                NetClient.Socket.Send(buffer);
+                NetClient.Socket.Send(buffer, buffer.Length);
 
                 return;
             }
@@ -3674,8 +3672,9 @@ namespace ClassicUO.Network
                     {
                         byte damage = p.ReadByte();
 
-                        World.WorldTextManager
-                              .AddDamage(en, damage);
+                        if (damage > 0)
+                            World.WorldTextManager
+                                  .AddDamage(en, damage);
                     }
 
                     break;
@@ -4824,7 +4823,7 @@ namespace ClassicUO.Network
             }
             else
             {
-                if (SerialHelper.IsItem(serial))
+                if (obj is Item)
                 {
                     item = (Item) obj;
 
@@ -4833,7 +4832,7 @@ namespace ClassicUO.Network
                         RemoveItemFromContainer(item);
                     }
                 }
-                else if (SerialHelper.IsMobile(serial))
+                else
                 {
                     mobile = (Mobile) obj;
                 }
@@ -4842,13 +4841,8 @@ namespace ClassicUO.Network
             if (obj == null)
                 return;
 
-            if (SerialHelper.IsItem(serial))
+            if (item != null)
             {
-                if (item == null)
-                {
-                    return;
-                }
-
                 if (graphic != 0x2006)
                 {
                     graphic += graphic_inc;
@@ -4892,11 +4886,6 @@ namespace ClassicUO.Network
             }
             else
             {
-                if (mobile == null)
-                {
-                    return;
-                }
-
                 graphic += graphic_inc;
 
                 if (serial != World.Player)
@@ -4932,7 +4921,7 @@ namespace ClassicUO.Network
 
             if (created && !obj.IsClicked)
             {
-                if (SerialHelper.IsMobile(serial))
+                if (mobile != null)
                 {
                     if (ProfileManager.Current.ShowNewMobileNameIncoming)
                         GameActions.SingleClick(serial);
@@ -4944,12 +4933,12 @@ namespace ClassicUO.Network
                 }
             }
 
-            if (SerialHelper.IsMobile(serial) && mobile != null)
+            if (mobile != null)
             {
                 mobile.AddToTile();
                 mobile.UpdateScreenPosition();
             }
-            else if (SerialHelper.IsItem(serial) && item != null)
+            else
             {
                 if (ItemHold.Serial == serial)
                 {

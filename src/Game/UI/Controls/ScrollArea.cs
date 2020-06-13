@@ -37,17 +37,16 @@ namespace ClassicUO.Game.UI.Controls
     internal class ScrollArea : Control
     {
         private readonly ScrollBarBase _scrollBar;
-        private readonly int _scrollbarHeight;
         private bool _isNormalScroll;
+        private int _scroll_max_height = -1;
 
-        public ScrollArea(int x, int y, int w, int h, bool normalScrollbar, int scrollbarHeight = -1)
+        public ScrollArea(int x, int y, int w, int h, bool normalScrollbar, int scroll_max_height = -1)
         {
             X = x;
             Y = y;
             Width = w;
             Height = h;
             _isNormalScroll = normalScrollbar;
-            _scrollbarHeight = scrollbarHeight;
 
             if (normalScrollbar)
                 _scrollBar = new ScrollBar(Width - 14, 0, Height);
@@ -60,16 +59,13 @@ namespace ClassicUO.Game.UI.Controls
                 Width += 15;
             }
 
-            if (scrollbarHeight < 0)
-                scrollbarHeight = Height;
+            _scroll_max_height = scroll_max_height;
 
             _scrollBar.MinValue = 0;
-            _scrollBar.MaxValue = scrollbarHeight;
-
+            _scrollBar.MaxValue = scroll_max_height >= 0 ? scroll_max_height : Height;
             //Add((Control)_scrollBar);
 
-            Control c = _scrollBar;
-            c.Parent = this;
+            _scrollBar.Parent = this;
 
             AcceptMouseInput = true;
             WantUpdateSize = false;
@@ -77,8 +73,15 @@ namespace ClassicUO.Game.UI.Controls
             ScrollbarBehaviour = ScrollbarBehaviour.ShowWhenDataExceedFromView;
         }
 
+
         public ScrollbarBehaviour ScrollbarBehaviour;
         public Rectangle ScissorRectangle;
+
+        public int ScrollMaxHeight
+        {
+            get => _scroll_max_height;
+            set => _scroll_max_height = value;
+        }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -96,7 +99,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
         }
-
 
         public void Scroll(bool isup)
         {
@@ -198,7 +200,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private void CalculateScrollBarMaxValue()
         {
-            _scrollBar.Height = _scrollbarHeight >= 0 ? _scrollbarHeight : Height;
+            _scrollBar.Height = _scroll_max_height >= 0 ? _scroll_max_height : Height;
             bool maxValue = _scrollBar.Value == _scrollBar.MaxValue && _scrollBar.MaxValue != 0;
             int height = ScissorRectangle.Y;
 

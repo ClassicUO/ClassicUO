@@ -561,8 +561,6 @@ namespace ClassicUO.Game.UI.Gumps
                         if (UIManager.GetGump<BaseHealthBarGump>(LocalSerial) != null)
                             break;
 
-                        GameActions.RequestMobileStatus(LocalSerial);
-
                         if (ProfileManager.Current.CustomBarsToggled)
                         {
                             Rectangle bounds = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);
@@ -695,11 +693,14 @@ namespace ClassicUO.Game.UI.Gumps
                     Height = h;
                     WantUpdateSize = false;
 
-                    ArtTexture texture = (ArtTexture)Texture;
+                    ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
+                    if (texture != null)
+                    {
+                        _rect = texture.ImageRectangle;
+                    }
 
                     _originalSize.X = Width;
                     _originalSize.Y = Height;
-                    _rect = texture.ImageRectangle;
 
                     if (_rect.Width < Width)
                     {
@@ -729,12 +730,19 @@ namespace ClassicUO.Game.UI.Gumps
 
                     ResetHueVector();
                     ShaderHuesTraslator.GetHueVector(ref _hueVector, MouseIsOver && HighlightOnMouseOver ? 0x0035 : item.Hue, item.ItemData.IsPartialHue, 0, true);
+                 
+                    ArtTexture texture = ArtLoader.Instance.GetTexture(item.DisplayedGraphic);
 
-                    return batcher.Draw2D(Texture, x + _point.X, y + _point.Y,
-                                          _originalSize.X, _originalSize.Y,
-                                          _rect.X, _rect.Y,
-                                          _rect.Width, _rect.Height,
-                                          ref _hueVector);
+                    if (texture != null)
+                    {
+                        return batcher.Draw2D(texture, x + _point.X, y + _point.Y,
+                                              _originalSize.X, _originalSize.Y,
+                                              _rect.X, _rect.Y,
+                                              _rect.Width, _rect.Height,
+                                              ref _hueVector);
+                    }
+
+                    return false;
                 }
 
                 public override bool Contains(int x, int y)

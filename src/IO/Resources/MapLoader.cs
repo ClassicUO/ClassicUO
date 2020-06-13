@@ -183,12 +183,6 @@ namespace ClassicUO.IO.Resources
             });
         }
 
-        public override void CleanResources()
-        {
-           
-        }
-
-
         internal unsafe void LoadMap(int i)
         {
             if (i < 0 || i + 1 > Constants.MAPS_COUNT || _filesMap[i] == null)
@@ -274,7 +268,6 @@ namespace ClassicUO.IO.Resources
                 data.OriginalStaticCount = realstaticcount;
             }
         }
-
 
         public void PatchMapBlock(ulong block, ulong address)
         {

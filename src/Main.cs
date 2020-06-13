@@ -125,8 +125,8 @@ namespace ClassicUO
                 Log.Trace("HIGH DPI - ENABLED");
                 Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             }
-            Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
-            Environment.SetEnvironmentVariable("FNA_OPENGL_FORCE_COMPATIBILITY_PROFILE", "1");
+            Environment.SetEnvironmentVariable("FNA3D_BACKBUFFER_SCALE_NEAREST", "1");
+            Environment.SetEnvironmentVariable("FNA3D_OPENGL_FORCE_COMPATIBILITY_PROFILE", "1");
             Environment.SetEnvironmentVariable(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
             Environment.SetEnvironmentVariable("PATH", Environment.GetEnvironmentVariable("PATH") + ";" + Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Plugins"));
 
@@ -159,13 +159,20 @@ namespace ClassicUO
 
             if (!CUOEnviroment.IsUnix)
             {
-                string libsPath = Path.Combine(CUOEnviroment.ExecutablePath, "libs", Environment.Is64BitProcess ? "x64" : "x86");
+                string libsPath = Path.Combine(CUOEnviroment.ExecutablePath, Environment.Is64BitProcess ? "x64" : "x86");
                 SetDllDirectory(libsPath);
             }
 
+            // FIXME: force to use OpenGL in osx and linux contexts. Metal wants texture converted in .Color instead of BGRA5551.
+            //        Check the branch "fna3d-macos-fix"
+            if (CUOEnviroment.IsUnix)
+            {
+                Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "OpenGL");
+            }
+
+
             if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.UltimaOnlineDirectory))
                 Settings.GlobalSettings.UltimaOnlineDirectory = CUOEnviroment.ExecutablePath;
-
 
 
             const uint INVALID_UO_DIRECTORY = 0x100;

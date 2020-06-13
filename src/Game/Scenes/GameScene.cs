@@ -461,8 +461,10 @@ namespace ClassicUO.Game.Scenes
             int minY = _minTile.Y;
             int maxX = _maxTile.X;
             int maxY = _maxTile.Y;
+            var map = World.Map;
+            var use_handles = _useObjectHandles;
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 2; ++i)
             {
                 int minValue = minY;
                 int maxValue = maxY;
@@ -473,7 +475,7 @@ namespace ClassicUO.Game.Scenes
                     maxValue = maxX;
                 }
 
-                for (int lead = minValue; lead < maxValue; lead++)
+                for (int lead = minValue; lead < maxValue; ++lead)
                 {
                     int x = minX;
                     int y = lead;
@@ -484,17 +486,12 @@ namespace ClassicUO.Game.Scenes
                         y = maxY;
                     }
 
-                    while (true)
+                    while (x >= minX && x <= maxX && y >= minY && y <= maxY)
                     {
-                        if (x < minX || x > maxX || y < minY || y > maxY)
-                            break;
+                        AddTileToRenderList(map.GetTile(x, y), x, y, use_handles, 150/*, null*/);
 
-                        var tile = World.Map.GetTile(x, y);
-
-                        if (tile != null)
-                            AddTileToRenderList(tile, x, y, _useObjectHandles, 150/*, null*/);
-                        x++;
-                        y--;
+                        ++x;
+                        --y;
                     }
                 }
             }
@@ -559,6 +556,7 @@ namespace ClassicUO.Game.Scenes
 
             _healthLinesManager.Update();
             World.Update(totalMS, frameMS);
+            AnimatedStaticsManager.Process();
             BoatMovingManager.Update();
             Pathfinder.ProcessAutoWalk();
             DelayedObjectClickManager.Update();
@@ -849,6 +847,8 @@ namespace ClassicUO.Game.Scenes
                 ref var l = ref _lights[i];
 
                 UOTexture texture = LightsLoader.Instance.GetTexture(l.ID);
+                if (texture == null)
+                    continue;
 
                 hue.X = l.Color;
                 

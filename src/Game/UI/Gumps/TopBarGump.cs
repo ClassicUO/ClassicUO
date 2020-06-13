@@ -58,8 +58,8 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             // big
-            UOTexture16 th1 = GumpsLoader.Instance.GetTexture(0x098B);
-            UOTexture16 th2 = GumpsLoader.Instance.GetTexture(0x098D);
+            UOTexture th1 = GumpsLoader.Instance.GetTexture(0x098B);
+            UOTexture th2 = GumpsLoader.Instance.GetTexture(0x098D);
 
             int smallWidth = 50;
 

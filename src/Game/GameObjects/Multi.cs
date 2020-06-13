@@ -67,6 +67,16 @@ namespace ClassicUO.Game.GameObjects
                 _canBeTransparent = 1;
             else
                 _canBeTransparent = 0;
+
+            var texture = ArtLoader.Instance.GetTexture(Graphic);
+
+            if (texture != null && ItemData.IsFoliage)
+            {
+                FrameInfo.X = (texture.Width >> 1) - 22 - texture.ImageRectangle.X;
+                FrameInfo.Y = texture.Height - 44 - texture.ImageRectangle.Y;
+                FrameInfo.Width = texture.ImageRectangle.Width;
+                FrameInfo.Height = texture.ImageRectangle.Height;
+            }
         }
 
         public static Multi Create(ushort graphic)
@@ -149,8 +159,10 @@ namespace ClassicUO.Game.GameObjects
             x += 22;
             y += 44;
 
-            if (Texture != null)
-                y -= Texture is ArtTexture t ? (t.ImageRectangle.Height >> 1) : (Texture.Height >> 1);
+            var texture = ArtLoader.Instance.GetTexture(Graphic);
+
+            if (texture != null)
+                y -= (texture.ImageRectangle.Height >> 1);
 
             x = (int)(x / scale);
             y = (int)(y / scale);

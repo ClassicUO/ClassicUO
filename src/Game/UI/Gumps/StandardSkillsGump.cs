@@ -305,7 +305,8 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = -5,
                     Text = group.Name,
                     Width = 200,
-                    Height = 17
+                    Height = 17,
+                    IsEditable = false,
                 });
 
                 int xx = width + 11 + 16;
@@ -341,18 +342,16 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         default:
                         case 0:
-                            _gumpPic.IsVisible = true;
-                            _textbox.IsEditable = false;
-                            UIManager.SystemChat?.TextBoxControl?.SetKeyboardFocus();
-                            break;
                         case 1:
                             _gumpPic.IsVisible = true;
                             _textbox.IsEditable = false;
-                            UIManager.KeyboardFocusControl = _textbox;
+                            UIManager.KeyboardFocusControl = null;
+                            UIManager.SystemChat.SetFocus();
                             break;
                         case 2:
                             _gumpPic.IsVisible = false;
                             _textbox.IsEditable = true;
+                            UIManager.KeyboardFocusControl = _textbox;
                             _textbox.SetKeyboardFocus();
                             break;
                     }
@@ -364,6 +363,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _status = 0;
                     _gumpPic.IsVisible = true;
                     _textbox.IsEditable = false;
+                    UIManager.KeyboardFocusControl = null;
+                    UIManager.SystemChat.SetFocus();
                 };
             }
 
@@ -510,7 +511,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _gumpPic.IsVisible = false;
                 }
 
-                UIManager.SystemChat?.TextBoxControl?.SetKeyboardFocus();
+                UIManager.KeyboardFocusControl = null;
+                UIManager.SystemChat.SetFocus();
 
                 _group.Name = text;
 

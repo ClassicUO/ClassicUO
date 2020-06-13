@@ -445,12 +445,16 @@ namespace ClassicUO.Game.Scenes
                 byte minor = (byte) (clientVersion >> 16);
                 byte build = (byte) (clientVersion >> 8);
                 byte extra = (byte) clientVersion;
-                
-                NetClient.LoginSocket.Send(new PSeed(NetClient.LoginSocket.ClientAddress, major, minor, build, extra).ToArray(), true, true);
+
+                PSeed packet = new PSeed(NetClient.LoginSocket.ClientAddress, major, minor, build, extra);
+
+                NetClient.LoginSocket.Send(packet.ToArray(), packet.Length, true, true);
             }
             else
             {
-                NetClient.LoginSocket.Send(BitConverter.GetBytes(NetClient.LoginSocket.ClientAddress), true, true);
+                byte[] packet = BitConverter.GetBytes(NetClient.LoginSocket.ClientAddress);
+
+                NetClient.LoginSocket.Send(packet, packet.Length, true, true);
             }
 
             NetClient.LoginSocket.Send(new PFirstLogin(Account, Password));
@@ -618,7 +622,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Connect(new IPAddress(ip), port);
             NetClient.Socket.EnableCompression();
             byte[] ss = new byte[4] {(byte) (seed >> 24), (byte) (seed >> 16), (byte) (seed >> 8), (byte) seed};
-            NetClient.Socket.Send(ss, true, true);
+            NetClient.Socket.Send(ss, 4, true, true);
             NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
         }
 

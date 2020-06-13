@@ -24,8 +24,6 @@ using System.Collections.Generic;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility.Coroutines;
-using ClassicUO.Utility.Logging;
 using SDL2;
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
@@ -33,6 +31,8 @@ namespace ClassicUO.Game.Scenes
 {
     internal abstract class Scene : IUpdateable, IDisposable
     {
+        private uint _time_cleanup = Time.Ticks + 5000;
+
         protected Scene(int sceneID,  bool canresize, bool maximized, bool loadaudio)
         {
             CanResize = canresize;
@@ -49,14 +49,23 @@ namespace ClassicUO.Game.Scenes
 
         public int RenderedObjectsCount { get; protected set; }
 
-        public CoroutineManager Coroutines { get; } = new CoroutineManager();
-
         public AudioManager Audio { get; private set; }
 
         public virtual void Update(double totalMS, double frameMS)
         {
             Audio?.Update();
-            Coroutines.Update();
+
+            if (_time_cleanup < Time.Ticks)
+            {
+                ArtLoader.Instance.CleaUnusedResources(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
+                GumpsLoader.Instance.CleaUnusedResources(Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
+                TexmapsLoader.Instance.CleaUnusedResources(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
+                AnimationsLoader.Instance.CleaUnusedResources(Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
+                World.Map?.ClearUnusedBlocks();
+                LightsLoader.Instance.CleaUnusedResources(20);
+
+                _time_cleanup = Time.Ticks + 500;
+            }
         }
 
         public virtual void FixedUpdate(double totalMS, double frameMS)
@@ -80,7 +89,6 @@ namespace ClassicUO.Game.Scenes
             {
                 Audio = new AudioManager();
                 Audio.Initialize();
-                Coroutine.Start(this, CleaningResources(), "cleaning resources");
             }
 
             IsLoaded = true;
@@ -89,7 +97,6 @@ namespace ClassicUO.Game.Scenes
         public virtual void Unload()
         {
             Audio?.StopMusic();
-            Coroutines.Clear();
         }
 
         public virtual bool Draw(UltimaBatcher2D batcher)
@@ -118,42 +125,5 @@ namespace ClassicUO.Game.Scenes
         internal virtual void OnTextInput(string text) { }
         internal virtual void OnKeyDown(SDL.SDL_KeyboardEvent e) { }
         internal virtual void OnKeyUp(SDL.SDL_KeyboardEvent e) { }
-
-
-        private IEnumerable<IWaitCondition> CleaningResources()
-        {
-            Log.Trace( "Cleaning routine running...");
-
-            yield return new WaitTime(TimeSpan.FromMilliseconds(10000));
-
-            while (!IsDestroyed)
-            {
-                ArtLoader.Instance.CleaUnusedResources(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
-
-                yield return new WaitTime(TimeSpan.FromMilliseconds(500));
-
-                GumpsLoader.Instance.CleaUnusedResources(Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
-
-                yield return new WaitTime(TimeSpan.FromMilliseconds(500));
-
-                TexmapsLoader.Instance.CleaUnusedResources(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
-
-                yield return new WaitTime(TimeSpan.FromMilliseconds(500));
-
-                AnimationsLoader.Instance.CleaUnusedResources(Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR);
-
-                yield return new WaitTime(TimeSpan.FromMilliseconds(500));
-
-                World.Map?.ClearUnusedBlocks();
-
-                yield return new WaitTime(TimeSpan.FromMilliseconds(500));
-
-                LightsLoader.Instance.CleaUnusedResources(20);
-
-                yield return new WaitTime(TimeSpan.FromMilliseconds(500));
-            }
-
-            Log.Trace( "Cleaning routine finished");
-        }
     }
 }

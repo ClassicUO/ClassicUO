@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Controls
@@ -39,7 +40,11 @@ namespace ClassicUO.Game.UI.Controls
             ResetHueVector();
             ShaderHuesTraslator.GetHueVector(ref _hueVector, Hue);
 
-            return batcher.Draw2DTiled(Texture, x, y, Percent, Height, ref _hueVector);
+            var texture = GumpsLoader.Instance.GetTexture(Graphic);
+            if (texture != null)
+                return batcher.Draw2DTiled(texture, x, y, Percent, Height, ref _hueVector);
+
+            return false;
         }
     }
 }

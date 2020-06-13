@@ -55,8 +55,6 @@ namespace ClassicUO.Game.GameObjects
                 l.Normal0 = l.Normal1 = l.Normal2 = l.Normal3 = Vector3.Zero;
                 l.Rectangle = Rectangle.Empty;
                 l.MinZ = l.AverageZ = 0;
-                l.Texture = null;
-                l.Bounds = Rectangle.Empty;
                 return l;
             }
 

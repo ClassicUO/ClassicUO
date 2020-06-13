@@ -34,16 +34,17 @@ namespace ClassicUO.Utility
         ///     for each part, in the second dimension, we specify:
         ///     starting x and y, plus width and height for that specified part (4 as size in second dimension).
         /// </param>
-        internal static UOTexture16[] SplitTexture16(UOTexture original, int[,] partXYplusWidthHeight)
+        internal static UOTexture16[] SplitTexture16(UOTexture16 original, int[,] partXYplusWidthHeight)
         {
             if (partXYplusWidthHeight.GetLength(0) == 0 || partXYplusWidthHeight.GetLength(1) < 4)
                 return null;
 
             UOTexture16[] r = new UOTexture16[partXYplusWidthHeight.GetLength(0)];
-            int pwidth = ((original.Width + 1) >> 1) << 1;
-            int pheight = ((original.Height + 1) >> 1) << 1;
-            ushort[] originalData = new ushort[pwidth * pheight];
-            original.GetData(originalData, 0, pwidth * pheight);
+            int pwidth = original.Width; //((original.Width + 1) >> 1) << 1;
+            int pheight = original.Height; //((original.Height + 1) >> 1) << 1;
+            ushort[] originalData = original.Data;
+
+            //original.GetData(originalData, 0, pwidth * pheight);
 
             int index = 0;
 

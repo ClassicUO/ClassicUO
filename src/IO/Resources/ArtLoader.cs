@@ -101,6 +101,10 @@ namespace ClassicUO.IO.Resources
                 ReadStaticArt(ref texture, (ushort) g);
                 SaveID(g);
             }
+            else
+            {
+                texture.Ticks = Time.Ticks;
+            }
 
             return texture;
         }
@@ -117,6 +121,10 @@ namespace ClassicUO.IO.Resources
                 ReadLandArt(ref texture, (ushort) g);
                 _used_land_textures_ids.AddLast(g);
             }
+            else
+            {
+                texture.Ticks = Time.Ticks;
+            }
 
             return texture;
         }
@@ -127,7 +135,7 @@ namespace ClassicUO.IO.Resources
 
             if (entry < _file.Length && entry >= 0)
             {
-                ref readonly UOFileIndex e = ref GetValidRefEntry(entry);
+                ref UOFileIndex e = ref GetValidRefEntry(entry);
 
                 address = _file.StartAddress.ToInt64() + e.Offset;
                 size = e.DecompressedLength == 0 ? e.Length : e.DecompressedLength;
@@ -139,9 +147,9 @@ namespace ClassicUO.IO.Resources
             return base.TryGetEntryInfo(entry, out address, out size, out compressedsize);
         }
 
-        public override void CleanResources()
+        public override void ClearResources()
         {
-            base.CleanResources();
+            base.ClearResources();
 
             var first = _used_land_textures_ids.First;
 
@@ -177,7 +185,7 @@ namespace ClassicUO.IO.Resources
             imageRectangle.Width = 0;
             imageRectangle.Height = 0;
 
-            ref readonly var entry = ref GetValidRefEntry(graphic + 0x4000);
+            ref var entry = ref GetValidRefEntry(graphic + 0x4000);
 
             if (entry.Length == 0)
             {
@@ -317,17 +325,10 @@ namespace ClassicUO.IO.Resources
         {
             Rectangle imageRectangle = new Rectangle();
 
-            if (StaticFilters.IsTree(graphic, out int stumpidx))
-            {
-                graphic = Constants.TREE_REPLACE_GRAPHIC;
-            }
-
-            ref readonly var entry = ref GetValidRefEntry(graphic + 0x4000);
+            ref var entry = ref GetValidRefEntry(graphic + 0x4000);
 
             if (entry.Length == 0)
             {
-                texture = new ArtTexture(imageRectangle, 0, 0);
-
                 return;
             }
 
@@ -338,8 +339,6 @@ namespace ClassicUO.IO.Resources
 
             if (width == 0 || height == 0)
             {
-                texture = new ArtTexture(imageRectangle, 0, 0);
-
                 return;
             }
 
@@ -457,16 +456,20 @@ namespace ClassicUO.IO.Resources
             imageRectangle.Width = maxX - minX;
             imageRectangle.Height = maxY - minY;
 
+            entry.Width = (short) ((width >> 1) - 22);
+            entry.Height = (short) (height - 44);
+
             texture = new ArtTexture(imageRectangle, width, height);
             texture.PushData(pixels);
         }
         
+        private readonly ushort[] _land_pixels = new ushort[44 *44];
         private void ReadLandArt(ref UOTexture16 texture, ushort graphic)
         {
             const int SIZE = 44 * 44;
 
             graphic &= _graphicMask;
-            ref readonly var entry = ref GetValidRefEntry(graphic);
+            ref var entry = ref GetValidRefEntry(graphic);
 
             if (entry.Length == 0)
             {
@@ -476,7 +479,7 @@ namespace ClassicUO.IO.Resources
 
             _file.Seek(entry.Offset);
 
-            ushort[] data = new ushort[SIZE];
+            ushort[] data = _land_pixels;
 
             for (int i = 0; i < 22; i++)
             {
@@ -502,7 +505,9 @@ namespace ClassicUO.IO.Resources
             }
 
             texture = new UOTexture16(44, 44);
-            texture.PushData(data);
+            // we don't need to store the data[] pointer because
+            // land is always hoverable
+            texture.SetData(data);
         }
     }
 }

@@ -31,6 +31,11 @@ using ClassicUO.Network;
 using ClassicUO.Utility.Platforms;
 
 using SDL2;
+using ClassicUO.Renderer;
+using ClassicUO.IO.Resources;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ClassicUO.Game;
 
 namespace ClassicUO
 {
@@ -50,10 +55,11 @@ namespace ClassicUO
 
             Log.Trace("Running game...");
             using (Game = new GameController())
+            //Game = new GameController();
             {
                 // https://github.com/FNA-XNA/FNA/wiki/7:-FNA-Environment-Variables#fna_graphics_enable_highdpi
                 CUOEnviroment.IsHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
-                Game.Run();
+                Game.Run();           
             }
             Log.Trace("Exiting game...");
         }

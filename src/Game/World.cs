@@ -65,7 +65,7 @@ namespace ClassicUO.Game
 
         public static EntityCollection<Mobile> Mobiles { get; } = new EntityCollection<Mobile>();
 
-        public static PlayerMobile Player { get; set; }
+        public static PlayerMobile Player;
 
         public static Map.Map Map { get; private set; }
 
@@ -306,12 +306,26 @@ namespace ClassicUO.Game
 
         public static Entity Get(uint serial)
         {
-            Entity ent = null;
+            Entity ent;
 
-            if (SerialHelper.IsItem(serial))
-                ent = Items.Get(serial);
-            else if (SerialHelper.IsMobile(serial))
+            if (SerialHelper.IsMobile(serial))
+            {
                 ent = Mobiles.Get(serial);
+
+                if (ent == null)
+                {
+                    ent = Items.Get(serial);
+                }
+            }
+            else
+            {
+                ent = Items.Get(serial);
+
+                if (ent == null)
+                {
+                    ent = Mobiles.Get(serial);
+                }
+            }
 
             if (ent != null && ent.IsDestroyed)
                 ent = null;

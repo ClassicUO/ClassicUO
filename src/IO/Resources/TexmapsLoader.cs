@@ -161,18 +161,17 @@ namespace ClassicUO.IO.Resources
 
                 SaveID(g);
             }
- 
-            return texture;
-        }
+            else
+            {
+                texture.Ticks = Time.Ticks;
+            }
 
-        public override void CleanResources()
-        {
-            
+            return texture;
         }
 
         private ushort[] GetTextmapTexture(ushort index, out int size)
         {
-            ref readonly var entry = ref GetValidRefEntry(index);
+            ref var entry = ref GetValidRefEntry(index);
 
             if (entry.Length <= 0)
             {
