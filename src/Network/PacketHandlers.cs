@@ -335,10 +335,11 @@ namespace ClassicUO.Network
             {
                 ushort damage = p.ReadUShort();
 
-                World.WorldTextManager
-                      .AddDamage(entity,
-                                 damage
-                                );
+                if (damage > 0)
+                    World.WorldTextManager
+                          .AddDamage(entity,
+                                     damage
+                                    );
             }
         }
 
@@ -3661,8 +3662,9 @@ namespace ClassicUO.Network
                     {
                         byte damage = p.ReadByte();
 
-                        World.WorldTextManager
-                              .AddDamage(en, damage);
+                        if (damage > 0)
+                            World.WorldTextManager
+                                  .AddDamage(en, damage);
                     }
 
                     break;
