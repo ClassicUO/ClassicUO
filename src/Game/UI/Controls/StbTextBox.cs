@@ -560,6 +560,8 @@ namespace ClassicUO.Game.UI.Controls
 
                 _stb.InputChar(c[i]);
             }
+
+            UpdateCaretScreenPosition();
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
