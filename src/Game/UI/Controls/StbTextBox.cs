@@ -527,7 +527,7 @@ namespace ClassicUO.Game.UI.Controls
             base.OnKeyDown(key, mod);
         }
 
-        private bool _is_writing = false;
+        protected bool _is_writing = false;
 
         protected override void OnTextInput(string c)
         {

@@ -539,61 +539,61 @@ namespace ClassicUO.Game.UI.Gumps
 
             protected override void OnTextChanged()
             {
-                base.OnTextChanged();
+                _is_writing = true;
 
-                //if (!InputSet)//this avoids multiple iteration on singlechar input from stb...or from lines transmitted by the server.
+                string[] split = Text.Split('\n');
+                for (int i = 0, t = 0; i < split.Length; i++)
                 {
-                    string[] split = Text.Split('\n');
-                    for (int i = 0, t = 0; i < split.Length; i++)
+                    t += split[i].Length;
+                    if (split[i].Length > 0)
                     {
-                        t += split[i].Length;
-                        if (split[i].Length > 0)
+                        for (int p = 0, w = 0, pw = GetCharWidth(split[i][p]); ; pw = GetCharWidth(split[i][p]))
                         {
-                            for (int p = 0, w = 0, pw = GetCharWidth(split[i][p]); ; pw = GetCharWidth(split[i][p]))
+                            if (w + pw > Width)
                             {
-                                if (w + pw > Width)
-                                {
-                                    _sb.Append('\n');
-                                    if (t + (i - 1) == CaretIndex)
-                                        CaretIndex++;
-                                    w = 0;
-                                }
-                                w += pw;
-                                _sb.Append(split[i][p]);
-                                p++;
-                                if (p >= split[i].Length)
-                                {
-                                    _sb.Append('\n');
-                                    break;
-                                }
+                                _sb.Append('\n');
+                                //if (t + (i - 0) == CaretIndex)
+                                CaretIndex++;
+                                w = 0;
+                            }
+                            w += pw;
+                            _sb.Append(split[i][p]);
+                            p++;
+                            if (p >= split[i].Length)
+                            {
+                                _sb.Append('\n');
+                                break;
                             }
                         }
-                        else
-                            _sb.Append('\n');
                     }
-                    split = _sb.ToString().Split('\n');
-                    _sb.Clear();
-                    for (int i = 0; i < _pageLines.Length; i++)
-                    {
-                        if (i < split.Length)
-                        {
-                            if (!_pagesChanged[(i >> 3) + 1] && split[i] != _pageLines[i])
-                                _pagesChanged[(i >> 3) + 1] = true;
-                            _sb.Append(_pageLines[i] = split[i]);
-                        }
-                        else
-                        {
-                            if (!string.IsNullOrEmpty(_pageLines[i]))
-                                _pagesChanged[(i >> 3) + 1] = true;
-                            _pageLines[i] = string.Empty;
-                        }
-                        if (i + 1 < _pageLines.Length)
-                            _sb.Append('\n');
-                    }
-                    _rendererText.Text = _sb.ToString();//whole reformatted book
-                    _sb.Clear();
-                    UpdatePageCoords();
+                    else
+                        _sb.Append('\n');
                 }
+                split = _sb.ToString().Split('\n');
+                _sb.Clear();
+                for (int i = 0; i < _pageLines.Length; i++)
+                {
+                    if (i < split.Length)
+                    {
+                        if (!_pagesChanged[(i >> 3) + 1] && split[i] != _pageLines[i])
+                            _pagesChanged[(i >> 3) + 1] = true;
+                        _sb.Append(_pageLines[i] = split[i]);
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(_pageLines[i]))
+                            _pagesChanged[(i >> 3) + 1] = true;
+                        _pageLines[i] = string.Empty;
+                    }
+                    if (i + 1 < _pageLines.Length)
+                        _sb.Append('\n');
+                }
+
+                _rendererText.Text = _sb.ToString(); //whole reformatted book
+                _sb.Clear();
+                UpdatePageCoords();
+                base.OnTextChanged();
+                _is_writing = false;
             }
 
             protected override void CloseWithRightClick()
