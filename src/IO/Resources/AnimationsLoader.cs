@@ -1371,7 +1371,7 @@ namespace ClassicUO.IO.Resources
         {
             var animData = DataIndex[AnimID].GetUopGroup(AnimGroup);
 
-            if (animData.FileIndex <= 0 || animData.FileIndex >= _filesUop.Length)
+            if (animData.FileIndex < 0 || animData.FileIndex >= _filesUop.Length)
             {
                 return false;
             }
