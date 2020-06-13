@@ -461,6 +461,8 @@ namespace ClassicUO.Game.Scenes
             int minY = _minTile.Y;
             int maxX = _maxTile.X;
             int maxY = _maxTile.Y;
+            var map = World.Map;
+            var use_handles = _useObjectHandles;
 
             for (int i = 0; i < 2; ++i)
             {
@@ -486,7 +488,7 @@ namespace ClassicUO.Game.Scenes
 
                     while (x >= minX && x <= maxX && y >= minY && y <= maxY)
                     {
-                        AddTileToRenderList(World.Map.GetTile(x, y), x, y, _useObjectHandles, 150/*, null*/);
+                        AddTileToRenderList(map.GetTile(x, y), x, y, use_handles, 150/*, null*/);
 
                         ++x;
                         --y;
