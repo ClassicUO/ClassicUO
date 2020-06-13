@@ -342,6 +342,7 @@ namespace ClassicUO.Game.Scenes
 
             if (UIManager.SystemChat != null && !UIManager.SystemChat.IsFocused)
             {
+                UIManager.KeyboardFocusControl = null;
                 UIManager.SystemChat.SetFocus();
             }
 

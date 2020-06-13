@@ -345,7 +345,8 @@ namespace ClassicUO.Game.UI.Gumps
                         case 1:
                             _gumpPic.IsVisible = true;
                             _textbox.IsEditable = false;
-                            UIManager.SystemChat?.TextBoxControl?.SetKeyboardFocus();
+                            UIManager.KeyboardFocusControl = null;
+                            UIManager.SystemChat.SetFocus();
                             break;
                         case 2:
                             _gumpPic.IsVisible = false;
@@ -362,7 +363,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _status = 0;
                     _gumpPic.IsVisible = true;
                     _textbox.IsEditable = false;
-                    UIManager.SystemChat?.TextBoxControl?.SetKeyboardFocus();
+                    UIManager.KeyboardFocusControl = null;
+                    UIManager.SystemChat.SetFocus();
                 };
             }
 
@@ -509,7 +511,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _gumpPic.IsVisible = false;
                 }
 
-                UIManager.SystemChat?.TextBoxControl?.SetKeyboardFocus();
+                UIManager.KeyboardFocusControl = null;
+                UIManager.SystemChat.SetFocus();
 
                 _group.Name = text;
 
