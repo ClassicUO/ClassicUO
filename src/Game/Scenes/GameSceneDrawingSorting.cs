@@ -272,6 +272,8 @@ namespace ClassicUO.Game.Scenes
                 }
             }*/
 
+            var loader = TileDataLoader.Instance;
+
             for (; obj != null; obj = obj.TNext)
             {
                 if (obj.CurrentRenderIndex == _renderIndex || !obj.AllowedToDraw)
@@ -349,7 +351,7 @@ namespace ClassicUO.Game.Scenes
 
                     default:
 
-                        itemData = ref TileDataLoader.Instance.StaticData[graphic];
+                        itemData = ref loader.StaticData[graphic];
 
                         //if (GameObjectHelper.TryGetStaticData(obj, out itemData))
                         {
