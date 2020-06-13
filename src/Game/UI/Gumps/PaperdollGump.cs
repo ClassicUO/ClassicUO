@@ -561,8 +561,6 @@ namespace ClassicUO.Game.UI.Gumps
                         if (UIManager.GetGump<BaseHealthBarGump>(LocalSerial) != null)
                             break;
 
-                        GameActions.RequestMobileStatus(LocalSerial);
-
                         if (ProfileManager.Current.CustomBarsToggled)
                         {
                             Rectangle bounds = new Rectangle(0, 0, HealthBarGumpCustom.HPB_WIDTH, HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE);

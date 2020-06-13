@@ -348,7 +348,7 @@ namespace ClassicUO.Network
                 return;
 
             uint serial = p.ReadUInt();
-            Entity entity = World.GetNocheck(serial);
+            Entity entity = World.Get(serial);
 
             if (entity == null)
                 return;
@@ -682,7 +682,7 @@ namespace ClassicUO.Network
         private static void Talk(Packet p)
         {
             uint serial = p.ReadUInt();
-            Entity entity = World.GetNocheck(serial);
+            Entity entity = World.Get(serial);
             ushort graphic = p.ReadUShort();
             MessageType type = (MessageType) p.ReadByte();
             ushort hue = p.ReadUShort();
@@ -726,9 +726,8 @@ namespace ClassicUO.Network
 
             bool updateAbilities = false;
 
-            if (SerialHelper.IsItem(serial))
+            if (entity is Item it)
             {
-                Item it = (Item)entity;
                 uint cont = it.Container & 0x7FFFFFFF;
 
                 if (SerialHelper.IsValid(it.Container))
@@ -779,10 +778,8 @@ namespace ClassicUO.Network
             if (World.CorpseManager.Exists(0, serial))
                 return;
 
-            if (SerialHelper.IsMobile(serial))
+            if (entity is Mobile m)
             {
-                Mobile m = (Mobile)entity;
-
                 if (World.Party.Contains(serial))
                 {
                     // m.RemoveFromTile();
@@ -792,30 +789,30 @@ namespace ClassicUO.Network
                     World.RemoveMobile(serial, true);
                 }
             }
-            else if (SerialHelper.IsItem(serial))
+            else
             {
-                Item it = (Item)entity;
+                Item item = (Item) entity;
 
-                if (it.IsMulti)
-                    World.HouseManager.Remove(it);
+                if (item.IsMulti)
+                    World.HouseManager.Remove(serial);
 
-                Entity cont = World.Get(it.Container);
+                Entity cont = World.Get(item.Container);
 
                 if (cont != null)
                 {
-                    cont.Remove(it);
+                    cont.Remove(item);
 
-                    if (it.Layer != Layer.Invalid)
+                    if (item.Layer != Layer.Invalid)
                     {
                         UIManager.GetGump<PaperDollGump>(cont)?.RequestUpdateContents();
                     }
                 }
-                else if (it.IsMulti)
+                else if (item.IsMulti)
                 {
                     UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
                 }
 
-                World.RemoveItem(it, true);
+                World.RemoveItem(serial, true);
 
                 if (updateAbilities)
                     World.Player.UpdateAbilities();
@@ -1309,7 +1306,7 @@ namespace ClassicUO.Network
         {
             uint serial = p.ReadUInt();
 
-            Entity entity = World.GetNocheck(serial);
+            Entity entity = World.Get(serial);
             if (entity == null)
                 return;
 
@@ -2743,7 +2740,7 @@ namespace ClassicUO.Network
 
         private static void UpdateHitpoints(Packet p)
         {
-            Entity entity = World.GetNocheck(p.ReadUInt());
+            Entity entity = World.Get(p.ReadUInt());
 
             if (entity == null)
                 return;
@@ -2893,7 +2890,7 @@ namespace ClassicUO.Network
 
 
             uint serial = p.ReadUInt();
-            Entity entity = World.GetNocheck(serial);
+            Entity entity = World.Get(serial);
             ushort graphic = p.ReadUShort();
             MessageType type = (MessageType) p.ReadByte();
             ushort hue = p.ReadUShort();
@@ -3752,7 +3749,7 @@ namespace ClassicUO.Network
                 return;
 
             uint serial = p.ReadUInt();
-            Entity entity = World.GetNocheck(serial);
+            Entity entity = World.Get(serial);
             ushort graphic = p.ReadUShort();
             MessageType type = (MessageType) p.ReadByte();
             ushort hue = p.ReadUShort();

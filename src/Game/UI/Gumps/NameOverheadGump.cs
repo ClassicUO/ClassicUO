@@ -197,7 +197,6 @@ namespace ClassicUO.Game.UI.Gumps
                 if (UIManager.IsDragging)
                     return;
 
-                GameActions.RequestMobileStatus(LocalSerial);
                 BaseHealthBarGump gump = UIManager.GetGump<BaseHealthBarGump>(LocalSerial);
                 gump?.Dispose();
 

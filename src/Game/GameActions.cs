@@ -128,8 +128,9 @@ namespace ClassicUO.Game
 
         public static void DoubleClick(uint serial)
         {
-            if (SerialHelper.IsMobile(serial) && World.Player.InWarMode)
+            if (serial != World.Player && SerialHelper.IsMobile(serial) && World.Player.InWarMode)
             {
+                RequestMobileStatus(serial);
                 Attack(serial);
             }
             else

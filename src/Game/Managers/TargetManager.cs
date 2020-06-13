@@ -208,7 +208,7 @@ namespace ClassicUO.Game.Managers
             if (!IsTargeting)
                 return;
 
-            Entity entity = World.InGame ? World.GetNocheck(serial) : null;
+            Entity entity = World.InGame ? World.Get(serial) : null;
 
             if (entity != null)
             {
@@ -231,32 +231,37 @@ namespace ClassicUO.Game.Managers
                             (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally))
                         {
                             Mobile mobile = entity as Mobile;
-                            bool showCriminalQuery = false;
 
-                            if (TargetingType == TargetType.Harmful && ProfileManager.Current.EnabledCriminalActionQuery && mobile.NotorietyFlag == NotorietyFlag.Innocent)
+                            if (mobile != null)
                             {
-                                showCriminalQuery = true;
-                            }
-                            else if (TargetingType == TargetType.Beneficial && ProfileManager.Current.EnabledBeneficialCriminalActionQuery &&
-                                    (mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Murderer || mobile.NotorietyFlag == NotorietyFlag.Gray))
-                            {
-                                showCriminalQuery = true;
-                            }
+                                bool showCriminalQuery = false;
 
-                            if (showCriminalQuery) {
-                                QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
-                                                                           s =>
-                                                                           {
-                                                                               if (s)
+                                if (TargetingType == TargetType.Harmful && ProfileManager.Current.EnabledCriminalActionQuery && mobile.NotorietyFlag == NotorietyFlag.Innocent)
+                                {
+                                    showCriminalQuery = true;
+                                }
+                                else if (TargetingType == TargetType.Beneficial && ProfileManager.Current.EnabledBeneficialCriminalActionQuery &&
+                                         (mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Murderer || mobile.NotorietyFlag == NotorietyFlag.Gray))
+                                {
+                                    showCriminalQuery = true;
+                                }
+
+                                if (showCriminalQuery)
+                                {
+                                    QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
+                                                                               s =>
                                                                                {
-                                                                                   NetClient.Socket.Send(new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargetingType));
-                                                                                   ClearTargetingWithoutTargetCancelPacket();
-                                                                               }
-                                                                           });
+                                                                                   if (s)
+                                                                                   {
+                                                                                       NetClient.Socket.Send(new PTargetObject(entity, entity.Graphic, entity.X, entity.Y, entity.Z, _targetCursorId, (byte) TargetingType));
+                                                                                       ClearTargetingWithoutTargetCancelPacket();
+                                                                                   }
+                                                                               });
 
-                                UIManager.Add(messageBox);
+                                    UIManager.Add(messageBox);
 
-                                return;
+                                    return;
+                                }
                             }
                         }
 
