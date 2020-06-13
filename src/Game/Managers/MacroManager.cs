@@ -980,6 +980,7 @@ namespace ClassicUO.Game.Managers
                         gs.WearHeldItem(World.Player);
 
                         _itemsInHand[handIndex] = 0;
+                        _nextTimer = Time.Ticks + 1000;
                     }
                     else
                     {
@@ -996,6 +997,7 @@ namespace ClassicUO.Game.Managers
 
                             GameActions.PickUp(item, 1);
                             gs.MergeHeldItem(backpack);
+                            _nextTimer = Time.Ticks + 1000;
                         }
                     }
 
