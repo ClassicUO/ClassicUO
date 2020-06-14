@@ -2260,9 +2260,8 @@ namespace ClassicUO.Network
             //    }
             //}
 
-            if (SerialHelper.IsMobile(serial))
+            if (obj is Mobile mob)
             {
-                Mobile mob = (Mobile) obj;
                 mob.NotorietyFlag = notoriety;
                 UIManager.GetGump<PaperDollGump>(serial)?.RequestUpdateContents();
 
