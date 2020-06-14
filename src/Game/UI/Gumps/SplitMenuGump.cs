@@ -81,46 +81,44 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _updating;
         private void UpdateText()
         {
-                if (_updating)
-                    return;
+            if (_updating)
+                return;
 
-                _updating = true;
+            _updating = true;
 
-                if (_slider.Value != _lastValue)
+            if (_slider.Value != _lastValue)
+            {
+                _textBox.Text = _slider.Value.ToString();
+            }
+            else
+            {
+                if (_textBox.Text.Length == 0)
+                    _slider.Value = _slider.MinValue;
+                else if (!int.TryParse(_textBox.Text, out int textValue))
                 {
                     _textBox.Text = _slider.Value.ToString();
                 }
                 else
                 {
-                    if (_textBox.Text.Length == 0)
-                        _slider.Value = _slider.MinValue;
-                    else if (!int.TryParse(_textBox.Text, out int textValue))
+                    if (textValue != _slider.Value)
                     {
-                        _textBox.Text = _slider.Value.ToString();
-                    }
-                    else
-                    {
-                        if (textValue != _slider.Value)
+                        if (textValue <= _slider.MaxValue)
+                            _slider.Value = textValue;
+                        else
                         {
-                            if (textValue <= _slider.MaxValue)
-                                _slider.Value = textValue;
-                            else
+                            if (!_firstChange)
                             {
-                                if (!_firstChange)
-                                {
-                                    string last = _textBox.Text[_textBox.Text.Length - 1].ToString();
-                                    _slider.Value = int.Parse(last);
-                                    _firstChange = true;
-                                }
-                                else
-                                    _slider.Value = _slider.MaxValue;
-
-                                _textBox.Text = _slider.Value.ToString();
+                                string last = _textBox.Text[_textBox.Text.Length - 1].ToString();
+                                _slider.Value = int.Parse(last);
+                                _firstChange = true;
                             }
+                            else
+                                _slider.Value = _slider.MaxValue;
+
+                            _textBox.Text = _slider.Value.ToString();
                         }
                     }
                 }
-                _inUpdate = false;
             }
             _lastValue = _slider.Value;
 
