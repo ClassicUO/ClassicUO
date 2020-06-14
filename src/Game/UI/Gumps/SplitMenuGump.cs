@@ -78,13 +78,14 @@ namespace ClassicUO.Game.UI.Gumps
             _textBox.SetKeyboardFocus();
             _slider.ValueChanged += (sender, args) => { UpdateText(); };
         }
-
-        private bool _inUpdate;
+        private bool _updating;
         private void UpdateText()
         {
-            if (!_inUpdate)
-            {
-                _inUpdate = true;
+                if (_updating)
+                    return;
+
+                _updating = true;
+
                 if (_slider.Value != _lastValue)
                 {
                     _textBox.Text = _slider.Value.ToString();
@@ -122,9 +123,10 @@ namespace ClassicUO.Game.UI.Gumps
                 _inUpdate = false;
             }
             _lastValue = _slider.Value;
+
+            _updating = false;
         }
 
-     
         private void OkButtonOnMouseClick(object sender, MouseEventArgs e)
         {
             if (_slider.Value > 0) GameActions.PickUp(LocalSerial, _offsert, _slider.Value);

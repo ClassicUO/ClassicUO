@@ -103,7 +103,7 @@ namespace ClassicUO.Game.UI.Controls
 
             int offsetTop = Math.Max(th_0_height, th_2_height) - th_1_height;
             int offsetBottom = Math.Max(th_5_height, th_7_height) - th_6_height;
-            int offsetLeft = Math.Max(th_0_width, th_5_width) - th_3_width;
+            int offsetLeft = Math.Max(th_0_width, th_5_width) - th_2_width;
             int offsetRight = Math.Max(th_2_width, th_7_width) - th_4_width;
 
 
@@ -214,7 +214,7 @@ namespace ClassicUO.Game.UI.Controls
                 height = textureHeight;
 
 
-            while (x > textureWidth && width > textureWidth)
+            while (x >= textureWidth && width >= textureWidth)
             {
                 x -= textureWidth;
                 width -= textureWidth;
@@ -223,7 +223,7 @@ namespace ClassicUO.Game.UI.Controls
             if (x < 0 || x > width)
                 return false;
 
-            while (y > textureHeight && height > textureHeight)
+            while (y >= textureHeight && height >= textureHeight)
             {
                 y -= textureHeight;
                 height -= textureHeight;
@@ -283,7 +283,7 @@ namespace ClassicUO.Game.UI.Controls
 
             int offsetTop = Math.Max(th_0_height, th_2_height) - th_1_height;
             int offsetBottom = Math.Max(th_5_height, th_7_height) - th_6_height;
-            int offsetLeft = Math.Max(th_0_width, th_5_width) - th_3_width;
+            int offsetLeft = Math.Max(th_0_width, th_5_width) - th_2_width;
             int offsetRight = Math.Max(th_2_width, th_7_width) - th_4_width;
 
 
@@ -316,7 +316,6 @@ namespace ClassicUO.Game.UI.Controls
                         drawX += Width - drawWidth;
                         drawY += offsetTop;
                         batcher.Draw2D(t, drawX, drawY, drawWidth, drawHeight, ref color);
-
                         break;
 
                     case 3:
@@ -361,7 +360,6 @@ namespace ClassicUO.Game.UI.Controls
                         drawY += th_0_height;
                         drawWidth = Width - th_0_width - th_2_width;
                         drawHeight = Height - th_2_height - th_7_height;
-
                         batcher.Draw2DTiled(t, drawX, drawY, drawWidth, drawHeight, ref color);
 
                         break;

@@ -38,7 +38,7 @@ namespace ManifestCreator
             "lib64/libFNA3D.so.0",
             "lib64/libSDL2-2.0.so.0",
             "lib64/libtheorafile.so",
-            "lib74/libSDL2_image-2.0.so.0",
+            "lib64/libSDL2_image-2.0.so.0",
 
             // osx
             "osx/libFAudio.0.dylib",
