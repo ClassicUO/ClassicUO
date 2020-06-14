@@ -79,8 +79,15 @@ namespace ClassicUO.Game.UI.Gumps
             _slider.ValueChanged += (sender, args) => { UpdateText(); };
         }
 
+        private bool _updating;
+
         private void UpdateText()
         {
+            if (_updating)
+                return;
+
+            _updating = true;
+
             if (_slider.Value != _lastValue)
                 _textBox.SetText(_slider.Value.ToString());
             else
@@ -113,6 +120,8 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             _lastValue = _slider.Value;
+
+            _updating = false;
         }
 
      
