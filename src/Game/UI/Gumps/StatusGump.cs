@@ -39,8 +39,6 @@ namespace ClassicUO.Game.UI.Gumps
     internal abstract class StatusGumpBase : Gump
     {
         protected readonly GumpPic[] _lockers = new GumpPic[3];
-        protected readonly bool _useUOPGumps = Client.UseUOPGumps;
-
         protected Label[] _labels;
         protected Point _point;
         protected long _refreshTime;
@@ -391,7 +389,7 @@ namespace ClassicUO.Game.UI.Gumps
                 p.Y = 152;
 
 
-                AddStatTextLabel(!string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty, MobileStats.Name, _useUOPGumps ? 90 : 58, 50, 320, 0x0386, TEXT_ALIGN_TYPE.TS_CENTER);
+                AddStatTextLabel(!string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty, MobileStats.Name, Client.UseUOPGumps ? 90 : 58, 50, 320, 0x0386, TEXT_ALIGN_TYPE.TS_CENTER);
 
 
                 if (Client.Version >= ClientVersion.CV_5020)
@@ -405,7 +403,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 Lock status = World.Player.StrLock;
-                xOffset = _useUOPGumps ? 28 : 40;
+                xOffset = Client.UseUOPGumps ? 28 : 40;
                 ushort gumpID = GetStatLockGraphic(status);
 
                 Add(_lockers[0] = new GumpPic(xOffset, 76, gumpID, 0));
@@ -426,7 +424,7 @@ namespace ClassicUO.Game.UI.Gumps
                 //    ButtonAction = ButtonAction.Activate,
                 //});
                 status = World.Player.DexLock;
-                xOffset = _useUOPGumps ? 28 : 40;
+                xOffset = Client.UseUOPGumps ? 28 : 40;
                 gumpID = GetStatLockGraphic(status);
 
                 Add(_lockers[1] = new GumpPic(xOffset, 102, gumpID, 0));
@@ -446,7 +444,7 @@ namespace ClassicUO.Game.UI.Gumps
                 //    ButtonAction = ButtonAction.Activate
                 //});
                 status = World.Player.IntLock;
-                xOffset = _useUOPGumps ? 28 : 40;
+                xOffset = Client.UseUOPGumps ? 28 : 40;
                 gumpID = GetStatLockGraphic(status);
 
                 Add(_lockers[2] = new GumpPic(xOffset, 132, gumpID, 0));
@@ -466,7 +464,7 @@ namespace ClassicUO.Game.UI.Gumps
                 //    ButtonAction = ButtonAction.Activate
                 //});
 
-                if (_useUOPGumps)
+                if (Client.UseUOPGumps)
                 {
                     xOffset = 80;
                     AddStatTextLabel(World.Player.HitChanceIncrease.ToString(), MobileStats.HitChanceInc, xOffset, 161);
@@ -481,7 +479,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int textWidth = 40;
 
-                if (_useUOPGumps)
+                if (Client.UseUOPGumps)
                 {
                     xOffset = 150;
 
@@ -508,7 +506,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(new Line(xOffset, 110, Math.Abs(xOffset - 185), 1, 0xFF383838));
                 Add(new Line(xOffset, 82, Math.Abs(xOffset - 185), 1, 0xFF383838));
 
-                if (_useUOPGumps)
+                if (Client.UseUOPGumps)
                 {
                     xOffset = 240;
 
@@ -523,14 +521,14 @@ namespace ClassicUO.Game.UI.Gumps
                 xOffset -= 10;
                 AddStatTextLabel(World.Player.Weight.ToString(), MobileStats.WeightCurrent, xOffset, 126, textWidth, alignment: TEXT_ALIGN_TYPE.TS_CENTER);
 
-                int lineX = _useUOPGumps ? 236 : 216;
-                Add(new Line(lineX, 138, Math.Abs(lineX - (_useUOPGumps ? 270 : 250)), 1, 0xFF383838));
+                int lineX = Client.UseUOPGumps ? 236 : 216;
+                Add(new Line(lineX, 138, Math.Abs(lineX - (Client.UseUOPGumps ? 270 : 250)), 1, 0xFF383838));
 
                 AddStatTextLabel(World.Player.WeightMax.ToString(), MobileStats.WeightMax, xOffset, 139, textWidth, alignment: TEXT_ALIGN_TYPE.TS_CENTER);
 
-                xOffset = _useUOPGumps ? 205 : 188;
+                xOffset = Client.UseUOPGumps ? 205 : 188;
 
-                if (_useUOPGumps)
+                if (Client.UseUOPGumps)
                 {
                     xOffset = 320;
 
@@ -548,9 +546,9 @@ namespace ClassicUO.Game.UI.Gumps
                 AddStatTextLabel($"{World.Player.Followers}-{World.Player.FollowersMax}", MobileStats.Followers, xOffset, 133);
 
 
-                xOffset = _useUOPGumps ? 285 : 260;
+                xOffset = Client.UseUOPGumps ? 285 : 260;
 
-                if (_useUOPGumps)
+                if (Client.UseUOPGumps)
                 {
                     xOffset = 400;
 
@@ -594,9 +592,9 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            xOffset = _useUOPGumps ? 445 : 334;
+            xOffset = Client.UseUOPGumps ? 445 : 334;
 
-            if (_useUOPGumps)
+            if (Client.UseUOPGumps)
             {
                 p.X = 540;
                 p.Y = 180;
@@ -629,13 +627,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _labels[(int)MobileStats.Name].Text = !string.IsNullOrEmpty(World.Player.Name) ? World.Player.Name : string.Empty;
 
-                if (_useUOPGumps)
+                if (Client.UseUOPGumps)
                     _labels[(int)MobileStats.HitChanceInc].Text = World.Player.HitChanceIncrease.ToString();
                 _labels[(int)MobileStats.Strength].Text = World.Player.Strength.ToString();
                 _labels[(int)MobileStats.Dexterity].Text = World.Player.Dexterity.ToString();
                 _labels[(int)MobileStats.Intelligence].Text = World.Player.Intelligence.ToString();
 
-                if (_useUOPGumps)
+                if (Client.UseUOPGumps)
                     _labels[(int)MobileStats.DefenseChanceInc].Text = $"{World.Player.DefenseChanceIncrease}/{World.Player.MaxDefenseChanceIncrease}";
                 _labels[(int)MobileStats.HealthCurrent].Text = World.Player.Hits.ToString();
                 _labels[(int)MobileStats.HealthMax].Text = World.Player.HitsMax.ToString();
@@ -644,14 +642,14 @@ namespace ClassicUO.Game.UI.Gumps
                 _labels[(int)MobileStats.ManaCurrent].Text = World.Player.Mana.ToString();
                 _labels[(int)MobileStats.ManaMax].Text = World.Player.ManaMax.ToString();
 
-                if (_useUOPGumps)
+                if (Client.UseUOPGumps)
                     _labels[(int)MobileStats.LowerManaCost].Text = World.Player.LowerManaCost.ToString();
                 _labels[(int)MobileStats.StatCap].Text = World.Player.StatsCap.ToString();
                 _labels[(int)MobileStats.Luck].Text = World.Player.Luck.ToString();
                 _labels[(int)MobileStats.WeightCurrent].Text = World.Player.Weight.ToString();
                 _labels[(int)MobileStats.WeightMax].Text = World.Player.WeightMax.ToString();
 
-                if (_useUOPGumps)
+                if (Client.UseUOPGumps)
                 {
                     _labels[(int)MobileStats.DamageChanceInc].Text = World.Player.DamageIncrease.ToString();
                     _labels[(int)MobileStats.SwingSpeedInc].Text = World.Player.SwingSpeedIncrease.ToString();
@@ -661,7 +659,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _labels[(int)MobileStats.Damage].Text = $"{World.Player.DamageMin}-{World.Player.DamageMax}";
                 _labels[(int)MobileStats.Followers].Text = $"{World.Player.Followers}/{World.Player.FollowersMax}";
 
-                if (_useUOPGumps)
+                if (Client.UseUOPGumps)
                 {
                     _labels[(int)MobileStats.LowerReagentCost].Text = World.Player.LowerReagentCost.ToString();
                     _labels[(int)MobileStats.SpellDamageInc].Text = World.Player.SpellDamageIncrease.ToString();
