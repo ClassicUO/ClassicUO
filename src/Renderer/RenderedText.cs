@@ -388,7 +388,7 @@ namespace ClassicUO.Renderer
             if (string.IsNullOrEmpty(Text) || Texture == null)
                 return false;
 
-            if (sx + swidth > Texture.Width || sy + sheight > Texture.Height)
+            if (sx > Texture.Width || sy > Texture.Height)
                 return false;
 
             if(hue != -1)
