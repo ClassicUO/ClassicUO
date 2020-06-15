@@ -35,7 +35,7 @@ namespace ClassicUO.Game.Managers
     internal static class UIManager
     {
         private static readonly Dictionary<uint, Point> _gumpPositionCache = new Dictionary<uint, Point>();
-        private static readonly Control[] _mouseDownControls = new Control[5];
+        private static readonly Control[] _mouseDownControls = new Control[(int)MouseButtonType.Size];
 
 
         //private static readonly Dictionary<uint, TargetLineGump> _targetLineGumps = new Dictionary<uint, TargetLineGump>();
@@ -141,12 +141,11 @@ namespace ClassicUO.Game.Managers
         {
             HandleMouseInput();
 
-            //if (_mouseDownControls[0] == MouseOverControl && MouseOverControl != null)
-            if (_mouseDownControls[0] != null)
+            if (_mouseDownControls[(int)MouseButtonType.Left] != null)
             {
                 if (ProfileManager.Current == null || !ProfileManager.Current.HoldAltToMoveGumps || Keyboard.Alt)
                 {
-                    AttemptDragControl(_mouseDownControls[0], Mouse.Position, true);
+                    AttemptDragControl(_mouseDownControls[(int)MouseButtonType.Left], Mouse.Position, true);
                 }
             }
 
@@ -403,14 +402,14 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public static void OnExtraMouseButtonDown(int btn)
+        public static void OnExtraMouseButtonDown(MouseButtonType btn)
         {
             HandleMouseInput();
 
             if (MouseOverControl != null)
             {
                 MakeTopMostGump(MouseOverControl);
-                MouseOverControl.InvokeMouseDown(Mouse.Position, (MouseButtonType) btn);
+                MouseOverControl.InvokeMouseDown(Mouse.Position, btn);
 
                 if (MouseOverControl.IsEnabled && MouseOverControl.IsVisible)
                 {
@@ -422,7 +421,7 @@ namespace ClassicUO.Game.Managers
                     }
                 }
 
-                _mouseDownControls[btn] = MouseOverControl;
+                _mouseDownControls[(int)btn] = MouseOverControl;
             }
             else
             {
@@ -439,31 +438,29 @@ namespace ClassicUO.Game.Managers
             ShowGamePopup(null);
         }
 
-        public static void OnExtraMouseButtonUp(int btn)
+        public static void OnExtraMouseButtonUp(MouseButtonType btn)
         {
             EndDragControl(Mouse.Position);
             HandleMouseInput();
 
             if (MouseOverControl != null)
             {
-                if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
+                if (_mouseDownControls[(int)btn] != null && MouseOverControl == _mouseDownControls[(int)btn])
                 {
-                    MouseOverControl.InvokeMouseUp(Mouse.Position, (MouseButtonType) btn);
+                    MouseOverControl.InvokeMouseUp(Mouse.Position, btn);
                 }
 
-                if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
+                if (_mouseDownControls[(int)btn] != null && MouseOverControl != _mouseDownControls[(int)btn])
                 {
-                    _mouseDownControls[btn]
-                        .InvokeMouseUp(Mouse.Position, (MouseButtonType) btn);
+                    _mouseDownControls[(int)btn].InvokeMouseUp(Mouse.Position, btn);
                 }
             }
             else
             {
-                _mouseDownControls[btn]
-                    ?.InvokeMouseUp(Mouse.Position, (MouseButtonType) btn);
+                _mouseDownControls[(int)btn]?.InvokeMouseUp(Mouse.Position, btn);
             }
 
-            _mouseDownControls[btn] = null;
+            _mouseDownControls[(int)btn] = null;
             _validForDClick = MouseOverControl;
         }
 
@@ -716,7 +713,7 @@ namespace ClassicUO.Game.Managers
 
             MouseOverControl = gump;
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < (int)MouseButtonType.Size; i++)
             {
                 if (_mouseDownControls[i] != null && _mouseDownControls[i] != gump)
                 {
@@ -850,7 +847,7 @@ namespace ClassicUO.Game.Managers
                     _dragOriginX = Mouse.LDropPosition.X;
                     _dragOriginY = Mouse.LDropPosition.Y;
 
-                    for (int i = 0; i < 5; i++)
+                    for (int i = 0; i < (int)MouseButtonType.Size; i++)
                     {
                         _mouseDownControls[i] = null;
                     }
