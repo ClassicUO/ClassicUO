@@ -635,11 +635,10 @@ namespace ClassicUO
                                 {
                                     Mouse.LastLeftButtonClickTime = 0;
 
-                                    bool res = Scene.OnLeftMouseDoubleClick() || UIManager.OnLeftMouseDoubleClick();
-
+                                    bool res = Scene.OnMouseDoubleClick(MouseButtonType.Left) || UIManager.OnLeftMouseDoubleClick();
                                     if (!res)
                                     {
-                                        if (!Scene.OnLeftMouseDown())
+                                        if (!Scene.OnMouseDown(MouseButtonType.Left))
                                         {
                                             UIManager.OnLeftMouseButtonDown();
                                         }
@@ -652,7 +651,7 @@ namespace ClassicUO
                                     break;
                                 }
 
-                                if (!Scene.OnLeftMouseDown())
+                                if (!Scene.OnMouseDown(MouseButtonType.Left))
                                 {
                                     UIManager.OnLeftMouseButtonDown();
                                 }
@@ -663,7 +662,7 @@ namespace ClassicUO
                             {
                                 if (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF)
                                 {
-                                    if (!Scene.OnLeftMouseUp() || UIManager.LastControlMouseDown(MouseButtonType.Left) != null)
+                                    if (!Scene.OnMouseUp(MouseButtonType.Left) || UIManager.LastControlMouseDown(MouseButtonType.Left) != null)
                                     {
                                         UIManager.OnLeftMouseButtonUp();
                                     }
@@ -689,11 +688,11 @@ namespace ClassicUO
                                 {
                                     Mouse.LastMidButtonClickTime = 0;
 
-                                    bool res = Scene.OnMiddleMouseDoubleClick() || UIManager.OnMiddleMouseDoubleClick();
+                                    bool res = Scene.OnMouseDoubleClick(MouseButtonType.Middle) || UIManager.OnMiddleMouseDoubleClick();
 
                                     if (!res)
                                     {
-                                        if (!Scene.OnMiddleMouseDown())
+                                        if (!Scene.OnMouseDown(MouseButtonType.Middle))
                                         {
                                             UIManager.OnMiddleMouseButtonDown();
                                         }
@@ -708,7 +707,7 @@ namespace ClassicUO
 
                                 Plugin.ProcessMouse(sdlEvent->button.button, 0);
 
-                                if (!Scene.OnMiddleMouseDown())
+                                if (!Scene.OnMouseDown(MouseButtonType.Middle))
                                 {
                                     UIManager.OnMiddleMouseButtonDown();
                                 }
@@ -719,7 +718,7 @@ namespace ClassicUO
                             {
                                 if (Mouse.LastMidButtonClickTime != 0xFFFF_FFFF)
                                 {
-                                    if (!Scene.OnMiddleMouseUp())
+                                    if (!Scene.OnMouseUp(MouseButtonType.Middle))
                                     {
                                         UIManager.OnMiddleMouseButtonUp();
                                     }
@@ -745,11 +744,10 @@ namespace ClassicUO
                                 {
                                     Mouse.LastRightButtonClickTime = 0;
 
-                                    bool res = Scene.OnRightMouseDoubleClick() || UIManager.OnRightMouseDoubleClick();
-
+                                    bool res = Scene.OnMouseDoubleClick(MouseButtonType.Right) || UIManager.OnRightMouseDoubleClick();
                                     if (!res)
                                     {
-                                        if (!Scene.OnRightMouseDown())
+                                        if (!Scene.OnMouseDown(MouseButtonType.Right))
                                         {
                                             UIManager.OnRightMouseButtonDown();
                                         }
@@ -762,7 +760,7 @@ namespace ClassicUO
                                     break;
                                 }
 
-                                if (!Scene.OnRightMouseDown())
+                                if (!Scene.OnMouseDown(MouseButtonType.Right))
                                 {
                                     UIManager.OnRightMouseButtonDown();
                                 }
@@ -773,7 +771,7 @@ namespace ClassicUO
                             {
                                 if (Mouse.LastRightButtonClickTime != 0xFFFF_FFFF)
                                 {
-                                    if (!Scene.OnRightMouseUp())
+                                    if (!Scene.OnMouseUp(MouseButtonType.Right))
                                     {
                                         UIManager.OnRightMouseButtonUp();
                                     }
@@ -793,8 +791,7 @@ namespace ClassicUO
                                 Mouse.XButtonPressed = true;
                                 Mouse.CancelDoubleClick = false;
                                 Plugin.ProcessMouse(sdlEvent->button.button, 0);
-
-                                if (!Scene.OnExtraMouseDown(mouse.button - 1))
+                                if (!Scene.OnMouseDown((MouseButtonType)(mouse.button - 1)))
                                 {
                                     UIManager.OnExtraMouseButtonDown(mouse.button - 1);
                                 }
@@ -803,7 +800,7 @@ namespace ClassicUO
                             }
                             else
                             {
-                                if (!Scene.OnExtraMouseUp(mouse.button - 1))
+                                if (!Scene.OnMouseUp((MouseButtonType)(mouse.button - 1)))
                                 {
                                     UIManager.OnExtraMouseButtonUp(mouse.button - 1);
                                 }

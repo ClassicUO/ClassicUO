@@ -23,6 +23,7 @@
 
 using System;
 using ClassicUO.Game.Managers;
+using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -110,82 +111,13 @@ namespace ClassicUO.Game.Scenes
             return true;
         }
 
-
-        internal virtual bool OnLeftMouseUp()
-        {
-            return false;
-        }
-
-        internal virtual bool OnLeftMouseDown()
-        {
-            return false;
-        }
-
-        internal virtual bool OnRightMouseUp()
-        {
-            return false;
-        }
-
-        internal virtual bool OnRightMouseDown()
-        {
-            return false;
-        }
-
-        internal virtual bool OnMiddleMouseUp()
-        {
-            return false;
-        }
-
-        internal virtual bool OnMiddleMouseDown()
-        {
-            return false;
-        }
-
-        internal virtual bool OnExtraMouseUp(int button)
-        {
-            return false;
-        }
-
-        internal virtual bool OnExtraMouseDown(int button)
-        {
-            return false;
-        }
-
-        internal virtual bool OnLeftMouseDoubleClick()
-        {
-            return false;
-        }
-
-        internal virtual bool OnRightMouseDoubleClick()
-        {
-            return false;
-        }
-
-        internal virtual bool OnMiddleMouseDoubleClick()
-        {
-            return false;
-        }
-
-        internal virtual bool OnMouseWheel(bool up)
-        {
-            return false;
-        }
-
-        internal virtual bool OnMouseDragging()
-        {
-            return false;
-        }
-
-        internal virtual void OnTextInput(string text)
-        {
-        }
-
-        internal virtual void OnKeyDown(SDL.SDL_KeyboardEvent e)
-        {
-        }
-
-        internal virtual void OnKeyUp(SDL.SDL_KeyboardEvent e)
-        {
-        }
+        internal virtual bool OnMouseUp(MouseButtonType button) => false;
+        internal virtual bool OnMouseDown(MouseButtonType button) => false;
+        internal virtual bool OnMouseDoubleClick(MouseButtonType button) => false;
+        internal virtual bool OnMouseWheel(bool up) => false;
+        internal virtual bool OnMouseDragging() => false;
+        internal virtual void OnTextInput(string text) { }
+        internal virtual void OnKeyDown(SDL.SDL_KeyboardEvent e) { }
+        internal virtual void OnKeyUp(SDL.SDL_KeyboardEvent e) { }
     }
 }
