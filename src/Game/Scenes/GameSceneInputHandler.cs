@@ -272,7 +272,46 @@ namespace ClassicUO.Game.Scenes
             _isSelectionActive = false;
         }
 
-        internal override bool OnLeftMouseDown()
+        internal override bool OnMouseDown(MouseButtonType button)
+        {
+            switch (button)
+            {
+                case MouseButtonType.Left:
+                    return OnLeftMouseDown();
+                case MouseButtonType.Right:
+                    return OnRightMouseDown();
+            }
+
+            return false;
+        }
+
+        internal override bool OnMouseUp(MouseButtonType button)
+        {
+            switch (button)
+            {
+                case MouseButtonType.Left:
+                    return OnLeftMouseUp();
+                case MouseButtonType.Right:
+                    return OnRightMouseUp();
+            }
+
+            return false;
+        }
+
+        internal override bool OnMouseDoubleClick(MouseButtonType button)
+        {
+            switch (button)
+            {
+                case MouseButtonType.Left:
+                    return OnLeftMouseDoubleClick();
+                case MouseButtonType.Right:
+                    return OnRightMouseDoubleClick();
+            }
+
+            return false;
+        }
+
+        private bool OnLeftMouseDown()
         {
             if (UIManager.PopupMenu != null && !UIManager.PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y))
             {
@@ -322,7 +361,7 @@ namespace ClassicUO.Game.Scenes
             return true;
         }
 
-        internal override bool OnLeftMouseUp()
+        private bool OnLeftMouseUp()
         {
             if (UIManager.PopupMenu != null && !UIManager.PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y))
             {
@@ -593,7 +632,7 @@ namespace ClassicUO.Game.Scenes
             return true;
         }
 
-        internal override bool OnLeftMouseDoubleClick()
+        private bool OnLeftMouseDoubleClick()
         {
             bool result = false;
 
@@ -660,7 +699,7 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-        internal override bool OnRightMouseDown()
+        private bool OnRightMouseDown()
         {
             if (UIManager.PopupMenu != null && !UIManager.PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y))
             {
@@ -680,7 +719,7 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-        internal override bool OnRightMouseUp()
+        private bool OnRightMouseUp()
         {
             if (UIManager.PopupMenu != null && !UIManager.PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y))
             {
@@ -699,7 +738,7 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-        internal override bool OnRightMouseDoubleClick()
+        private bool OnRightMouseDoubleClick()
         {
             if (!UIManager.IsMouseOverWorld)
             {
