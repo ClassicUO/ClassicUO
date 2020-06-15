@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Managers
         //private static readonly Dictionary<uint, TargetLineGump> _targetLineGumps = new Dictionary<uint, TargetLineGump>();
         private static int _dragOriginX, _dragOriginY;
         private static bool _isDraggingControl;
-        private static Control _keyboardFocusControl, _validForDClick, _lastFocus;
+        private static Control _keyboardFocusControl, _lastFocus;
         private static bool _needSort;
 
 
@@ -155,10 +155,9 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void OnLeftMouseButtonDown()
+        public static void OnMouseButtonDown(MouseButtonType button)
         {
             HandleMouseInput();
-            _validForDClick = null;
 
             if (MouseOverControl != null)
             {
@@ -173,14 +172,14 @@ namespace ClassicUO.Game.Managers
                 }
 
                 MakeTopMostGump(MouseOverControl);
-                MouseOverControl.InvokeMouseDown(Mouse.Position, MouseButtonType.Left);
+                MouseOverControl.InvokeMouseDown(Mouse.Position, button);
 
                 if (MouseOverControl.AcceptKeyboardInput)
                 {
                     _keyboardFocusControl = MouseOverControl;
                 }
 
-                _mouseDownControls[(int) MouseButtonType.Left] = MouseOverControl;
+                _mouseDownControls[(int)button] = MouseOverControl;
             }
             else
             {
@@ -200,44 +199,30 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public static void OnLeftMouseButtonUp()
+        public static void OnMouseButtonUp(MouseButtonType button)
         {
             EndDragControl(Mouse.Position);
             HandleMouseInput();
 
-            const int btn = (int) MouseButtonType.Left;
-
-            if (MouseOverControl != null)
+            _mouseDownControls[(int)button]?.InvokeMouseUp(Mouse.Position, button);
+            if (button == MouseButtonType.Right)
             {
-                if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn] || ItemHold.Enabled)
-                {
-                    MouseOverControl.InvokeMouseUp(Mouse.Position, MouseButtonType.Left);
-                }
-                else if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
-                {
-                    _mouseDownControls[btn]
-                        .InvokeMouseUp(Mouse.Position, MouseButtonType.Left);
-                }
-            }
-            else
-            {
-                _mouseDownControls[btn]
-                    ?.InvokeMouseUp(Mouse.Position, MouseButtonType.Left);
+                _mouseDownControls[(int)button]?.InvokeMouseCloseGumpWithRClick();
             }
 
-            _mouseDownControls[btn] = null;
-            _validForDClick = MouseOverControl;
+            _mouseDownControls[(int)button] = null;
         }
 
-        public static bool OnLeftMouseDoubleClick()
+        public static bool OnMouseDoubleClick(MouseButtonType button)
         {
             HandleMouseInput();
 
-            if (MouseOverControl != null && IsMouseOverAControl)
+            if (MouseOverControl != null)
             {
-                if (MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButtonType.Left))
+                if (MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, button))
                 {
-                    DelayedObjectClickManager.Clear();
+                    if (button == MouseButtonType.Left)
+                        DelayedObjectClickManager.Clear();
 
                     return true;
                 }
@@ -246,238 +231,12 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public static void OnRightMouseButtonDown()
-        {
-            HandleMouseInput();
-
-            if (MouseOverControl != null)
-            {
-                MakeTopMostGump(MouseOverControl);
-                MouseOverControl.InvokeMouseDown(Mouse.Position, MouseButtonType.Right);
-
-                if (MouseOverControl.AcceptKeyboardInput)
-                {
-                    _keyboardFocusControl = MouseOverControl;
-                }
-
-                _mouseDownControls[(int) MouseButtonType.Right] = MouseOverControl;
-            }
-            else
-            {
-                foreach (Control s in Gumps)
-                {
-                    if (s.IsModal && s.ModalClickOutsideAreaClosesThisControl)
-                    {
-                        s.Dispose();
-                        Mouse.CancelDoubleClick = true;
-                    }
-                }
-            }
-
-            ShowGamePopup(null);
-        }
-
-        public static void OnRightMouseButtonUp()
-        {
-            EndDragControl(Mouse.Position);
-            HandleMouseInput();
-
-            const int btn = (int) MouseButtonType.Right;
-
-            if (MouseOverControl != null)
-            {
-                if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
-                {
-                    MouseOverControl.InvokeMouseCloseGumpWithRClick();
-                }
-
-                MouseOverControl.InvokeMouseUp(Mouse.Position, MouseButtonType.Right);
-
-                if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
-                {
-                    _mouseDownControls[btn]
-                        .InvokeMouseUp(Mouse.Position, MouseButtonType.Right);
-
-                    _mouseDownControls[btn]
-                        .InvokeMouseCloseGumpWithRClick();
-                }
-            }
-            else if (_mouseDownControls[btn] != null)
-            {
-                _mouseDownControls[btn]
-                    .InvokeMouseUp(Mouse.Position, MouseButtonType.Right);
-
-                _mouseDownControls[btn]
-                    .InvokeMouseCloseGumpWithRClick();
-            }
-
-            _mouseDownControls[btn] = null;
-        }
-
-        public static bool OnRightMouseDoubleClick()
-        {
-            if (MouseOverControl != null && IsMouseOverAControl)
-            {
-                return MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButtonType.Right);
-            }
-
-            return false;
-        }
-
-        public static void OnMiddleMouseButtonDown()
-        {
-            HandleMouseInput();
-
-            const int btn = (int) MouseButtonType.Middle;
-
-            if (MouseOverControl != null)
-            {
-                MakeTopMostGump(MouseOverControl);
-                MouseOverControl.InvokeMouseDown(Mouse.Position, MouseButtonType.Middle);
-
-                if (MouseOverControl.IsEnabled && MouseOverControl.IsVisible)
-                {
-                    if (_lastFocus != MouseOverControl)
-                    {
-                        _lastFocus?.OnFocusLost();
-                        MouseOverControl.OnFocusEnter();
-                        _lastFocus = MouseOverControl;
-                    }
-                }
-
-                _mouseDownControls[btn] = MouseOverControl;
-            }
-            else
-            {
-                foreach (Control s in Gumps)
-                {
-                    if (s.IsModal && s.ModalClickOutsideAreaClosesThisControl)
-                    {
-                        s.Dispose();
-                        Mouse.CancelDoubleClick = true;
-                    }
-                }
-            }
-
-            ShowGamePopup(null);
-        }
-
-        public static void OnMiddleMouseButtonUp()
-        {
-            EndDragControl(Mouse.Position);
-            HandleMouseInput();
-
-            const int btn = (int) MouseButtonType.Middle;
-
-            if (MouseOverControl != null)
-            {
-                if (_mouseDownControls[btn] != null && MouseOverControl == _mouseDownControls[btn])
-                {
-                    MouseOverControl.InvokeMouseUp(Mouse.Position, MouseButtonType.Middle);
-                }
-
-                if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
-                {
-                    _mouseDownControls[btn]
-                        .InvokeMouseUp(Mouse.Position, MouseButtonType.Middle);
-                }
-            }
-            else
-            {
-                _mouseDownControls[btn]
-                    ?.InvokeMouseUp(Mouse.Position, MouseButtonType.Middle);
-            }
-
-            _mouseDownControls[btn] = null;
-            _validForDClick = MouseOverControl;
-        }
-
-        public static bool OnMiddleMouseDoubleClick()
-        {
-            if (MouseOverControl != null && IsMouseOverAControl)
-            {
-                return MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButtonType.Middle);
-            }
-
-            return false;
-        }
-
-        public static void OnExtraMouseButtonDown(MouseButtonType btn)
-        {
-            HandleMouseInput();
-
-            if (MouseOverControl != null)
-            {
-                MakeTopMostGump(MouseOverControl);
-                MouseOverControl.InvokeMouseDown(Mouse.Position, btn);
-
-                if (MouseOverControl.IsEnabled && MouseOverControl.IsVisible)
-                {
-                    if (_lastFocus != MouseOverControl)
-                    {
-                        _lastFocus?.OnFocusLost();
-                        MouseOverControl.OnFocusEnter();
-                        _lastFocus = MouseOverControl;
-                    }
-                }
-
-                _mouseDownControls[(int)btn] = MouseOverControl;
-            }
-            else
-            {
-                foreach (Control s in Gumps)
-                {
-                    if (s.IsModal && s.ModalClickOutsideAreaClosesThisControl)
-                    {
-                        s.Dispose();
-                        Mouse.CancelDoubleClick = true;
-                    }
-                }
-            }
-
-            ShowGamePopup(null);
-        }
-
-        public static void OnExtraMouseButtonUp(MouseButtonType btn)
-        {
-            EndDragControl(Mouse.Position);
-            HandleMouseInput();
-
-            if (MouseOverControl != null)
-            {
-                if (_mouseDownControls[(int)btn] != null && MouseOverControl == _mouseDownControls[(int)btn])
-                {
-                    MouseOverControl.InvokeMouseUp(Mouse.Position, btn);
-                }
-
-                if (_mouseDownControls[(int)btn] != null && MouseOverControl != _mouseDownControls[(int)btn])
-                {
-                    _mouseDownControls[(int)btn].InvokeMouseUp(Mouse.Position, btn);
-                }
-            }
-            else
-            {
-                _mouseDownControls[(int)btn]?.InvokeMouseUp(Mouse.Position, btn);
-            }
-
-            _mouseDownControls[(int)btn] = null;
-            _validForDClick = MouseOverControl;
-        }
-
         public static void OnMouseWheel(bool isup)
         {
             if (MouseOverControl != null && MouseOverControl.AcceptMouseInput)
             {
                 MouseOverControl.InvokeMouseWheel(isup ? MouseEventType.WheelScrollUp : MouseEventType.WheelScrollDown);
             }
-        }
-
-
-        public static bool HadMouseDownOnGump(MouseButtonType button)
-        {
-            Control c = LastControlMouseDown(button);
-
-            return c != null && !c.IsDisposed && !IsMouseOverWorld && !ItemHold.Enabled;
         }
 
         public static Control LastControlMouseDown(MouseButtonType button)

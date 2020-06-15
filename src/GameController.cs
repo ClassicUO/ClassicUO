@@ -638,12 +638,12 @@ namespace ClassicUO
                                 {
                                     Mouse.LastLeftButtonClickTime = 0;
 
-                                    bool res = Scene.OnMouseDoubleClick(buttonType) || UIManager.OnLeftMouseDoubleClick();
+                                    bool res = Scene.OnMouseDoubleClick(buttonType) || UIManager.OnMouseDoubleClick(buttonType);
                                     if (!res)
                                     {
                                         if (!Scene.OnMouseDown(buttonType))
                                         {
-                                            UIManager.OnLeftMouseButtonDown();
+                                            UIManager.OnMouseButtonDown(buttonType);
                                         }
                                     }
                                     else
@@ -656,7 +656,7 @@ namespace ClassicUO
 
                                 if (!Scene.OnMouseDown(buttonType))
                                 {
-                                    UIManager.OnLeftMouseButtonDown();
+                                    UIManager.OnMouseButtonDown(buttonType);
                                 }
 
                                 Mouse.LastLeftButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
@@ -667,7 +667,7 @@ namespace ClassicUO
                                 {
                                     if (!Scene.OnMouseUp(buttonType) || UIManager.LastControlMouseDown(buttonType) != null)
                                     {
-                                        UIManager.OnLeftMouseButtonUp();
+                                        UIManager.OnMouseButtonUp(buttonType);
                                     }
                                 }
 
@@ -691,13 +691,13 @@ namespace ClassicUO
                                 {
                                     Mouse.LastMidButtonClickTime = 0;
 
-                                    bool res = Scene.OnMouseDoubleClick(buttonType) || UIManager.OnMiddleMouseDoubleClick();
+                                    bool res = Scene.OnMouseDoubleClick(buttonType) || UIManager.OnMouseDoubleClick(buttonType);
 
                                     if (!res)
                                     {
                                         if (!Scene.OnMouseDown(buttonType))
                                         {
-                                            UIManager.OnMiddleMouseButtonDown();
+                                            UIManager.OnMouseButtonDown(buttonType);
                                         }
                                     }
                                     else
@@ -712,7 +712,7 @@ namespace ClassicUO
 
                                 if (!Scene.OnMouseDown(buttonType))
                                 {
-                                    UIManager.OnMiddleMouseButtonDown();
+                                    UIManager.OnMouseButtonDown(buttonType);
                                 }
 
                                 Mouse.LastMidButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
@@ -723,7 +723,7 @@ namespace ClassicUO
                                 {
                                     if (!Scene.OnMouseUp(buttonType))
                                     {
-                                        UIManager.OnMiddleMouseButtonUp();
+                                        UIManager.OnMouseButtonUp(buttonType);
                                     }
                                 }
 
@@ -747,12 +747,13 @@ namespace ClassicUO
                                 {
                                     Mouse.LastRightButtonClickTime = 0;
 
-                                    bool res = Scene.OnMouseDoubleClick(buttonType) || UIManager.OnRightMouseDoubleClick();
+                                    bool res = Scene.OnMouseDoubleClick(buttonType) || UIManager.OnMouseDoubleClick(buttonType);
+
                                     if (!res)
                                     {
                                         if (!Scene.OnMouseDown(buttonType))
                                         {
-                                            UIManager.OnRightMouseButtonDown();
+                                            UIManager.OnMouseButtonDown(buttonType);
                                         }
                                     }
                                     else
@@ -765,7 +766,7 @@ namespace ClassicUO
 
                                 if (!Scene.OnMouseDown(buttonType))
                                 {
-                                    UIManager.OnRightMouseButtonDown();
+                                    UIManager.OnMouseButtonDown(buttonType);
                                 }
 
                                 Mouse.LastRightButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
@@ -776,7 +777,7 @@ namespace ClassicUO
                                 {
                                     if (!Scene.OnMouseUp(buttonType))
                                     {
-                                        UIManager.OnRightMouseButtonUp();
+                                        UIManager.OnMouseButtonUp(buttonType);
                                     }
                                 }
 
@@ -796,7 +797,7 @@ namespace ClassicUO
                                 Plugin.ProcessMouse(sdlEvent->button.button, 0);
                                 if (!Scene.OnMouseDown(buttonType))
                                 {
-                                    UIManager.OnExtraMouseButtonDown(buttonType);
+                                    UIManager.OnMouseButtonDown(buttonType);
                                 }
 
                                 // TODO: doubleclick?
@@ -805,7 +806,7 @@ namespace ClassicUO
                             {
                                 if (!Scene.OnMouseUp(buttonType))
                                 {
-                                    UIManager.OnExtraMouseButtonUp(buttonType);
+                                    UIManager.OnMouseButtonUp(buttonType);
                                 }
 
                                 Mouse.XButtonPressed = false;
