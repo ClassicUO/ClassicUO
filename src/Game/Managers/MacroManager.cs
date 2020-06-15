@@ -411,7 +411,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.WarPeace:
-                    GameActions.ChangeWarMode();
+                    GameActions.ToggleWarMode();
 
                     break;
 
@@ -437,18 +437,7 @@ namespace ClassicUO.Game.Managers
                             switch (macro.SubCode)
                             {
                                 case MacroSubType.Configuration:
-                                    OptionsGump opt = UIManager.GetGump<OptionsGump>();
-
-                                    if (opt == null)
-                                    {
-                                        UIManager.Add(opt = new OptionsGump());
-                                        opt.SetInScreen();
-                                    }
-                                    else
-                                    {
-                                        opt.SetInScreen();
-                                        opt.BringOnTop();
-                                    }
+                                    GameActions.OpenSettings();
 
                                     break;
 
@@ -458,36 +447,17 @@ namespace ClassicUO.Game.Managers
                                     break;
 
                                 case MacroSubType.Status:
-
-                                    if (StatusGumpBase.GetStatusGump() == null)
-                                    {
-                                        UIManager.Add(StatusGumpBase.AddStatusGump(100, 100));
-                                    }
+                                    GameActions.OpenStatusBar();
 
                                     break;
 
                                 case MacroSubType.Journal:
-                                    JournalGump journalGump = UIManager.GetGump<JournalGump>();
-
-                                    if (journalGump == null)
-                                    {
-                                        UIManager.Add
-                                        (
-                                            new JournalGump
-                                                {X = 64, Y = 64}
-                                        );
-                                    }
-                                    else
-                                    {
-                                        journalGump.SetInScreen();
-                                        journalGump.BringOnTop();
-                                    }
+                                    GameActions.OpenJournal();
 
                                     break;
 
                                 case MacroSubType.Skills:
-                                    World.SkillsRequested = true;
-                                    NetClient.Socket.Send(new PSkillsRequest(World.Player));
+                                    GameActions.OpenSkills();
 
                                     break;
 

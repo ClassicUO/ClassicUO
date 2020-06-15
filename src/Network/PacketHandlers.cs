@@ -1554,7 +1554,7 @@ namespace ClassicUO.Network
                     World.Player.DeathScreenTimer = Time.Ticks + Constants.DEATH_SCREEN_TIMER;
                 }
 
-                GameActions.ChangeWarMode(0);
+                GameActions.RequestWarMode(false);
             }
         }
 

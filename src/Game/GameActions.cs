@@ -44,40 +44,75 @@ namespace ClassicUO.Game
         public static int LastSkillIndex { get; set; } = 1;
 
 
-        public static void ChangeWarMode(byte status = 0xFF)
+        public static void ToggleWarMode()
         {
-            bool newStatus = !World.Player.InWarMode;
+            RequestWarMode(!World.Player.InWarMode);
+        }
 
-            if (status != 0xFF)
+        public static void RequestWarMode(bool war)
+        {
+            if (war && ProfileManager.Current != null && ProfileManager.Current.EnableMusic)
             {
-                bool ok = status != 0;
-
-                if (World.Player.InWarMode == ok)
-                {
-                    return;
-                }
-
-                newStatus = ok;
+                Client.Game.Scene.Audio.PlayMusic((RandomHelper.GetValue(0, 3) % 3) + 38, true);
+            }
+            else if (!war)
+            {
+                Client.Game.Scene.Audio.StopWarMusic();
             }
 
-            //if (ProfileManager.Current != null && ProfileManager.Current.EnableCombatMusic)
-            {
-                if (newStatus && ProfileManager.Current != null && ProfileManager.Current.EnableMusic)
-                {
-                    Client.Game.Scene.Audio.PlayMusic(RandomHelper.GetValue(0, 3) % 3 + 38, true);
-                }
-                else if (!newStatus)
-                {
-                    Client.Game.Scene.Audio.StopWarMusic();
-                }
-            }
-
-            Socket.Send(new PChangeWarMode(newStatus));
+            Socket.Send(new PChangeWarMode(war));
         }
 
         public static void OpenPaperdoll(uint serial)
         {
             DoubleClick(serial | 0x80000000);
+        }
+
+        public static void OpenSettings()
+        {
+            OptionsGump opt = UIManager.GetGump<OptionsGump>();
+
+            if (opt == null)
+            {
+                UIManager.Add(opt = new OptionsGump());
+                opt.SetInScreen();
+            }
+            else
+            {
+                opt.SetInScreen();
+                opt.BringOnTop();
+            }
+        }
+
+        public static void OpenStatusBar()
+        {
+                    Client.Game.Scene.Audio.StopWarMusic();
+            if (StatusGumpBase.GetStatusGump() == null)
+            {
+                UIManager.Add(StatusGumpBase.AddStatusGump(100, 100));
+            }
+        }
+
+        public static void OpenJournal()
+        {
+            JournalGump journalGump = UIManager.GetGump<JournalGump>();
+
+            if (journalGump == null)
+            {
+                UIManager.Add(new JournalGump
+                { X = 64, Y = 64 });
+            }
+            else
+            {
+                journalGump.SetInScreen();
+                journalGump.BringOnTop();
+            }
+        }
+
+        public static void OpenSkills()
+        {
+            World.SkillsRequested = true;
+            NetClient.Socket.Send(new PSkillsRequest(World.Player));
         }
 
         public static bool OpenCorpse(uint serial)
