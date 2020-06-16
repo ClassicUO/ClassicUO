@@ -1,560 +1,114 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{71F289FA-0EF8-4F72-A26E-A8280C0931C5}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>ClassicUO</RootNamespace>
-    <AssemblyName>ClassicUO</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <UseSharedCompilation>false</UseSharedCompilation>
+    <TargetFramework>net47</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <PlatformTarget>x64</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>..\bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>7.3</LangVersion>
+    <OutputPath>$(SolutionDir)bin\Release\</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PlatformTarget>x64</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-    <LangVersion>7.3</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputPath>$(SolutionDir)bin\Debug\</OutputPath>
   </PropertyGroup>
+  
   <PropertyGroup>
-    <StartupObject />
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
+
   <PropertyGroup>
-    <ApplicationIcon>cuoicon.ico</ApplicationIcon>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>
+
   <PropertyGroup>
-    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+    <Company>ClassicUO</Company>
+    <Authors>Andrea Angelini</Authors>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>0.1.3.700</AssemblyVersion>
+    <FileVersion>0.1.3.700</FileVersion>
   </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="cuoapi, Version=1.3.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\external\api\cuoapi.dll</HintPath>
-    </Reference>
-    <Reference Include="FNA, Version=20.6.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\external\FNA\FNA.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.IO.Compression" />
-    <Reference Include="System.IO.Compression.FileSystem" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
+    <None Remove="cuologo.png" />
+    <None Remove="Renderer\fonts\bold_font.xnb" />
+    <None Remove="Renderer\fonts\map1_font.xnb" />
+    <None Remove="Renderer\fonts\map2_font.xnb" />
+    <None Remove="Renderer\fonts\map3_font.xnb" />
+    <None Remove="Renderer\fonts\map4_font.xnb" />
+    <None Remove="Renderer\fonts\map5_font.xnb" />
+    <None Remove="Renderer\fonts\map6_font.xnb" />
+    <None Remove="Renderer\fonts\regular_font.xnb" />
+    <None Remove="shaders\IsometricWorld.fxc" />
+    <None Remove="shaders\xBR.fxc" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Client.cs" />
-    <Compile Include="ClientException.cs" />
-    <Compile Include="Configuration\Profile.cs" />
-    <Compile Include="Configuration\ProfileManager.cs" />
-    <Compile Include="CUOEnviroment.cs" />
-    <Compile Include="GameController.cs" />
-    <Compile Include="Game\CircleOfTransparency.cs" />
-    <Compile Include="Game\Constants.cs" />
-    <Compile Include="Game\Data\Ability.cs" />
-    <Compile Include="Game\Data\BuffIcon.cs" />
-    <Compile Include="Game\Data\BuffTable.cs" />
-    <Compile Include="Game\Data\CharacterCreationValues.cs" />
-    <Compile Include="Game\Data\CharacterSpeedType.cs" />
-    <Compile Include="Game\Data\ClientFeatures.cs" />
-    <Compile Include="Game\Data\ClientProtocol.cs" />
-    <Compile Include="Game\Data\ContainerData.cs" />
-    <Compile Include="Game\Data\CustomHouse.cs" />
-    <Compile Include="Game\Data\EntityFlags.cs" />
-    <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
-    <Compile Include="Game\Data\GraphicEffectType.cs" />
-    <Compile Include="Game\Data\Layers.cs" />
-    <Compile Include="Game\Data\LightColors.cs" />
-    <Compile Include="Game\Data\MapMessageType.cs" />
-    <Compile Include="Game\Data\MessageType.cs" />
-    <Compile Include="Game\Data\NotorietyFlag.cs" />
-    <Compile Include="Game\Data\PopupMenuData.cs" />
-    <Compile Include="Game\Data\PopupMenuItem.cs" />
-    <Compile Include="Game\Data\PromptData.cs" />
-    <Compile Include="Game\Data\RaceType.cs" />
-    <Compile Include="Game\Data\Waypoints.cs" />
-    <Compile Include="Game\Managers\ActiveIconsManager.cs" />
-    <Compile Include="Game\Managers\AnimatedStaticsManager.cs" />
-    <Compile Include="Game\Managers\BoatMovingManager.cs" />
-    <Compile Include="Game\Managers\DelayedObjectClickManager.cs" />
-    <Compile Include="Game\Managers\Seasons.cs" />
-    <Compile Include="Game\Data\ServerErrorMessages.cs" />
-    <Compile Include="Game\Data\SpellsMastery.cs" />
-    <Compile Include="Game\Data\SpellsBushido.cs" />
-    <Compile Include="Game\Data\SpellsChivalry.cs" />
-    <Compile Include="Game\Data\SpellsMysticism.cs" />
-    <Compile Include="Game\Data\SpellsNecromancy.cs" />
-    <Compile Include="Game\Data\SpellsNinjitsu.cs" />
-    <Compile Include="Game\Data\SpellsSpellweaving.cs" />
-    <Compile Include="Game\Data\StaticFilters.cs" />
-    <Compile Include="Game\GameObjects\DragEffect.cs" />
-    <Compile Include="Game\GameObjects\Land.cs" />
-    <Compile Include="Game\GameObjects\EntityTextContainer.cs" />
-    <Compile Include="Game\GameObjects\TextObject.cs" />
-    <Compile Include="Game\ItemHold.cs" />
-    <Compile Include="Game\LinkedObject.cs" />
-    <Compile Include="Game\Managers\AnchorManager.cs" />
-    <Compile Include="Game\Managers\AuraManager.cs" />
-    <Compile Include="Game\Managers\CorpseManager.cs" />
-    <Compile Include="Game\Managers\HouseCustomizationManager.cs" />
-    <Compile Include="Game\Managers\HealthLinesManager.cs" />
-    <Compile Include="Game\Managers\HotkeysManager.cs" />
-    <Compile Include="Game\Managers\InfoBarManager.cs" />
-    <Compile Include="Game\Managers\MacroManager.cs" />
-    <Compile Include="Game\Managers\AudioManager.cs" />
-    <Compile Include="Game\Managers\NameOverHeadManager.cs" />
-    <Compile Include="Game\Managers\ObjectPropertiesListManager.cs" />
-    <Compile Include="Game\Managers\PoolsManager.cs" />
-    <Compile Include="Game\Managers\SkillsGroupManager.cs" />
-    <Compile Include="Game\Managers\UOChatManager.cs" />
-    <Compile Include="Game\Managers\WorldMapEntityManager.cs" />
-    <Compile Include="Game\Scenes\SceneType.cs" />
-    <Compile Include="Game\SelectedObject.cs" />
-    <Compile Include="Game\UI\Controls\AlphaBlendControl.cs" />
-    <Compile Include="Game\UI\Controls\ArrowNumbersTextBox.cs" />
-    <Compile Include="Game\UI\Controls\ButtonTileArt.cs" />
-    <Compile Include="Game\UI\Controls\ClickableColorBox.cs" />
-    <Compile Include="Game\UI\Controls\ContextMenuControl.cs" />
-    <Compile Include="Game\UI\Controls\InfoBarBuilderControl.cs" />
-    <Compile Include="Game\UI\Controls\ColorBox.cs" />
-    <Compile Include="Game\UI\Controls\GumpPicWithWidth.cs" />
-    <Compile Include="Game\UI\Controls\HorizontalScrollArea.cs" />
-    <Compile Include="Game\UI\Controls\HotkeyBox.cs" />
-    <Compile Include="Game\UI\Controls\HotkeyControl.cs" />
-    <Compile Include="Game\UI\Controls\MacroControl.cs" />
-    <Compile Include="Game\UI\Controls\MultiSelectionShrinkbox.cs" />
-    <Compile Include="Game\UI\Controls\NiceButton.cs" />
-    <Compile Include="Game\UI\Controls\ScissorControl.cs" />
-    <Compile Include="Game\UI\Controls\StbTextBox.cs" />
-    <Compile Include="Game\UI\Controls\TextureControl.cs" />
-    <Compile Include="Game\UI\Gumps\NetworkStatsGump.cs" />
-    <Compile Include="Game\UI\Gumps\GridLootGump.cs" />
-    <Compile Include="Game\UI\Gumps\HouseCustomizationGump.cs" />
-    <Compile Include="Game\UI\Gumps\InfoBarGump.cs" />
-    <Compile Include="Game\UI\Gumps\MacroButtonGump.cs" />
-    <Compile Include="Game\UI\Gumps\NameOverHeadHandlerGump.cs" />
-    <Compile Include="Game\UI\Gumps\ModernBookGump.cs" />
-    <Compile Include="Game\UI\Gumps\PartyGump.cs" />
-    <Compile Include="Game\UI\Gumps\PartyInviteGump.cs" />
-    <Compile Include="Game\UI\Gumps\RacialAbilityButton.cs" />
-    <Compile Include="Game\UI\Gumps\ResizableGump.cs" />
-    <Compile Include="Game\UI\Gumps\StandardSkillsGump.cs" />
-    <Compile Include="Game\UI\Gumps\TextContainerGump.cs" />
-    <Compile Include="Game\UI\Gumps\TipNoticeGump.cs" />
-    <Compile Include="Game\UI\Gumps\UOChatGump.cs" />
-    <Compile Include="Game\Weather.cs" />
-    <Compile Include="Main.cs" />
-    <Compile Include="Network\Encryption\BlowfishBehaviour.cs" />
-    <Compile Include="Network\Encryption\Encryption.cs" />
-    <Compile Include="Network\Encryption\LoginCryptBehaviour.cs" />
-    <Compile Include="Network\Encryption\TwofishBehaviour.cs" />
-    <Compile Include="Renderer\BatchCommand.cs" />
-    <Compile Include="Renderer\MatrixEffect.cs" />
-    <Compile Include="Renderer\XBREffect.cs" />
-    <Compile Include="Time.cs" />
-    <Compile Include="Utility\Collections\RawList.cs" />
-    <Compile Include="Utility\Collections\ReadOnlyArrayView.cs" />
-    <Compile Include="Utility\GraphicHelper.cs" />
-    <Compile Include="Utility\Collections\OrderedDictionary.cs" />
-    <Compile Include="Game\UI\Gumps\BulletinBoardGump.cs" />
-    <Compile Include="Game\UI\Gumps\CharCreation\CreateCharCityGump.cs" />
-    <Compile Include="Game\UI\Gumps\CharCreation\CreateCharProfessionGump.cs" />
-    <Compile Include="Game\UI\Gumps\CombatBookGump.cs" />
-    <Compile Include="Game\UI\Gumps\AnchorableGump.cs" />
-    <Compile Include="Game\UI\Gumps\CounterBarGump.cs" />
-    <Compile Include="Game\UI\Gumps\Login\LoginBackground.cs" />
-    <Compile Include="Game\UI\Gumps\DebugGump.cs" />
-    <Compile Include="Game\Managers\HouseManager.cs" />
-    <Compile Include="Game\Managers\UseItemQueue.cs" />
-    <Compile Include="Game\Managers\EffectManager.cs" />
-    <Compile Include="Game\GameObjects\LightningEffect.cs" />
-    <Compile Include="Game\Managers\JournalManager.cs" />
-    <Compile Include="Game\GameObjects\MovingEffect.cs" />
-    <Compile Include="Game\Managers\WalkerManager.cs" />
-    <Compile Include="Game\UI\Gumps\MapGump.cs" />
-    <Compile Include="Game\UI\Gumps\MenuGump.cs" />
-    <Compile Include="Game\UI\Gumps\NameOverheadGump.cs" />
-    <Compile Include="Game\UI\Gumps\ProfileGump.cs" />
-    <Compile Include="Game\UI\Gumps\QuestArrowGump.cs" />
-    <Compile Include="Game\UI\Gumps\RacialAbilitiesBookGump.cs" />
-    <Compile Include="Game\UI\Gumps\TextEntryDialogGump.cs" />
-    <Compile Include="Game\UI\Gumps\UseAbilityButtonGump.cs" />
-    <Compile Include="Game\GameObjects\Views\MultiView.cs" />
-    <Compile Include="Input\Keyboard.cs" />
-    <Compile Include="Interfaces\IPoolable.cs" />
-    <Compile Include="IO\Audio\Sound.cs" />
-    <Compile Include="IO\Audio\AudioEffects.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Buffer16BitStereo.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\ABuffer.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\BitReserve.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Bitstream.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\BitstreamErrors.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\BitstreamException.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\CircularByteBuffer.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Crc16.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoder.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\DecoderErrors.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\DecoderException.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\ASubband.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\IFrameDecoder.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerIDecoder.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerIIDecoder.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerIIIDecoder.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerIII\ChannelData.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerIII\GranuleInfo.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerIII\Layer3SideInfo.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerIII\SBI.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerIII\ScaleFactorData.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerIII\ScaleFactorTable.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerII\SubbandLayer2.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerII\SubbandLayer2IntensityStereo.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerII\SubbandLayer2Stereo.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerI\SubbandLayer1.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerI\SubbandLayer1IntensityStereo.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Decoders\LayerI\SubbandLayer1Stereo.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Equalizer.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Header.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\Huffman.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\OutputChannels.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\OutputChannelsEnum.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\PushbackStream.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\SampleBuffer.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Decoding\SynthesisFilter.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\IO\RandomAccessFileStream.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\IO\RiffFile.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\IO\WaveFile.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\IO\WaveFileBuffer.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\MP3SharpException.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\MP3Stream.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\SoundFormat.cs" />
-    <Compile Include="IO\Audio\MP3Sharp\Support\SupportClass.cs" />
-    <Compile Include="IO\Audio\UOMusic.cs" />
-    <Compile Include="IO\Audio\UOSound.cs" />
-    <Compile Include="IO\Audio\VolumeState.cs" />
-    <Compile Include="IO\DefReader.cs" />
-    <Compile Include="IO\UOFileLoader.cs" />
-    <Compile Include="IO\Resources\AnimationsLoader.cs" />
-    <Compile Include="IO\Resources\AnimDataLoader.cs" />
-    <Compile Include="IO\Resources\ArtLoader.cs" />
-    <Compile Include="IO\Resources\ClilocLoader.cs" />
-    <Compile Include="IO\Resources\FontsLoader.cs" />
-    <Compile Include="IO\Resources\GumpsLoader.cs" />
-    <Compile Include="IO\Resources\HuesLoader.cs" />
-    <Compile Include="IO\Resources\LightsLoader.cs" />
-    <Compile Include="IO\Resources\MapLoader.cs" />
-    <Compile Include="IO\Resources\MultiLoader.cs" />
-    <Compile Include="IO\Resources\MultiMapLoader.cs" />
-    <Compile Include="IO\Resources\ProfessionLoader.cs" />
-    <Compile Include="IO\Resources\SkillsLoader.cs" />
-    <Compile Include="IO\Resources\SoundsLoader.cs" />
-    <Compile Include="IO\Resources\SpeechesLoader.cs" />
-    <Compile Include="IO\Resources\TexmapsLoader.cs" />
-    <Compile Include="IO\Resources\TileDataLoader.cs" />
-    <Compile Include="Network\Plugin.cs" />
-    <Compile Include="Network\Updater.cs" />
-    <Compile Include="Utility\ImageLoader.cs" />
-    <Compile Include="Utility\Platforms\PlatformHelper.cs" />
-    <Compile Include="Utility\Platforms\UoAssist.cs" />
-    <Compile Include="Renderer\Batcher2D.cs" />
-    <Compile Include="Renderer\Fonts.cs" />
-    <Compile Include="Renderer\SpriteFont.cs" />
-    <Compile Include="Renderer\Texture2DCache.cs" />
-    <Compile Include="Utility\Collections\CollectionHelper.cs" />
-    <Compile Include="Utility\Crypter.cs" />
-    <Compile Include="Utility\FileSystemHelper.cs" />
-    <Compile Include="Utility\GameObjectHelper.cs" />
-    <Compile Include="Utility\HuesHelper.cs" />
-    <Compile Include="Utility\KeysTranslator.cs" />
-    <Compile Include="Utility\Platforms\Native.cs" />
-    <Compile Include="Utility\QueuedPool.cs" />
-    <Compile Include="Utility\ReflectionHolder.cs" />
-    <Compile Include="Game\UI\Controls\DataBox.cs" />
-    <Compile Include="Game\UI\Controls\HitBox.cs" />
-    <Compile Include="Game\UI\Controls\Line.cs" />
-    <Compile Include="Game\UI\Gumps\BuffGump.cs" />
-    <Compile Include="Game\UI\Controls\Combobox.cs" />
-    <Compile Include="Game\UI\Controls\HoveredLabel.cs" />
-    <Compile Include="Game\UI\Gumps\InspectorGump.cs" />
-    <Compile Include="Game\UI\Gumps\MessageBoxGump.cs" />
-    <Compile Include="Game\UI\Gumps\ShopGump.cs" />
-    <Compile Include="Game\UI\Gumps\CharCreation\CharCreationGump.cs" />
-    <Compile Include="Game\UI\Gumps\CharCreation\CreateCharTradeGump.cs" />
-    <Compile Include="Game\UI\Gumps\Login\CharacterSelectionGump.cs" />
-    <Compile Include="Game\UI\Gumps\CharCreation\CreateCharAppearanceGump.cs" />
-    <Compile Include="Game\UI\Gumps\Login\LoadingGump.cs" />
-    <Compile Include="Game\UI\Gumps\Login\LoginGump.cs" />
-    <Compile Include="Game\UI\Gumps\Login\ServerSelectionGump.cs" />
-    <Compile Include="Game\UI\Gumps\QuestionGump.cs" />
-    <Compile Include="Game\UI\Gumps\HealthBarGump.cs" />
-    <Compile Include="Game\UI\Gumps\OptionsGump.cs" />
-    <Compile Include="Game\UI\Gumps\PopupMenuGump.cs" />
-    <Compile Include="Game\UI\Gumps\SkillButtonGump.cs" />
-    <Compile Include="Game\UI\Gumps\SplitMenuGump.cs" />
-    <Compile Include="Game\UI\Gumps\TradingGump.cs" />
-    <Compile Include="Game\UI\Gumps\UseSpellButtonGump.cs" />
-    <Compile Include="Game\Scenes\GameSceneDragAndDropHandler.cs" />
-    <Compile Include="Game\Scenes\GameSceneDrawingSorting.cs" />
-    <Compile Include="Game\Scenes\GameSceneInputHandler.cs" />
-    <Compile Include="Game\Managers\CommandManager.cs" />
-    <Compile Include="Game\Managers\PartyManager.cs" />
-    <Compile Include="Game\Managers\TargetManager.cs" />
-    <Compile Include="Game\UI\Tooltip.cs" />
-    <Compile Include="Game\GameObjects\Views\LightningEffectView.cs" />
-    <Compile Include="Game\GameObjects\Views\MovingEffectView.cs" />
-    <Compile Include="Input\Mouse.cs" />
-    <Compile Include="Interfaces\INode.cs" />
-    <Compile Include="IO\UltimaLive.cs" />
-    <Compile Include="Network\NetStatistics.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Configuration\ConfigurationResolver.cs" />
-    <Compile Include="Configuration\Settings.cs" />
-    <Compile Include="Game\Managers\MessageManager.cs" />
-    <Compile Include="Game\Managers\ContainerManager.cs" />
-    <Compile Include="Game\Data\Direction.cs" />
-    <Compile Include="Game\Data\LockedFeatures.cs" />
-    <Compile Include="Game\Data\MovementSpeed.cs" />
-    <Compile Include="Game\Data\Reagents.cs" />
-    <Compile Include="Game\Data\Skill.cs" />
-    <Compile Include="Game\Data\SpellbookTypes.cs" />
-    <Compile Include="Game\Data\SpellDefinition.cs" />
-    <Compile Include="Game\Data\SpellsMagery.cs" />
-    <Compile Include="Game\GameActions.cs" />
-    <Compile Include="Game\GameObjects\AnimatedItemEffect.cs" />
-    <Compile Include="Game\GameObjects\Entity.cs" />
-    <Compile Include="Game\GameObjects\EntityCollection.cs" />
-    <Compile Include="Game\GameObjects\GameEffect.cs" />
-    <Compile Include="Game\GameObjects\GameObject.cs" />
-    <Compile Include="Game\GameObjects\House.cs" />
-    <Compile Include="Game\GameObjects\Item.cs" />
-    <Compile Include="Game\GameObjects\Mobile.cs" />
-    <Compile Include="Game\GameObjects\MobileAnimation.cs" />
-    <Compile Include="Game\GameObjects\Multi.cs" />
-    <Compile Include="Game\GameObjects\PlayerMobile.cs" />
-    <Compile Include="Game\GameObjects\Static.cs" />
-    <Compile Include="Utility\SDL_image.cs" />
-    <Compile Include="Utility\StbTextEdit.cs" />
-    <Compile Include="Utility\StbTextedit\Enums.cs" />
-    <Compile Include="Utility\StbTextedit\FindState.cs" />
-    <Compile Include="Utility\StbTextedit\ITextEditHandler.cs" />
-    <Compile Include="Utility\StbTextedit\TextEdit.cs" />
-    <Compile Include="Utility\StbTextedit\TextEditRow.cs" />
-    <Compile Include="Utility\StbTextedit\UndoRecord.cs" />
-    <Compile Include="Utility\StbTextedit\UndoState.cs" />
-    <Compile Include="Utility\UInt16Converter.cs" />
-    <Compile Include="Game\UI\Controls\Button.cs" />
-    <Compile Include="Game\UI\Controls\Checkbox.cs" />
-    <Compile Include="Game\UI\Controls\CheckerTrans.cs" />
-    <Compile Include="Game\UI\Controls\ColorPickerBox.cs" />
-    <Compile Include="Game\UI\Controls\CroppedText.cs" />
-    <Compile Include="Game\UI\Controls\ExpandableScroll.cs" />
-    <Compile Include="Game\UI\Controls\Control.cs" />
-    <Compile Include="Game\UI\Controls\GumpControlInfo.cs" />
-    <Compile Include="Game\UI\Controls\GumpPic.cs" />
-    <Compile Include="Game\UI\Controls\GumpPicTiled.cs" />
-    <Compile Include="Game\UI\Controls\HSliderBar.cs" />
-    <Compile Include="Game\UI\Controls\HtmlControl.cs" />
-    <Compile Include="Game\UI\Controls\ScrollBarBase.cs" />
-    <Compile Include="Game\UI\Controls\ItemGump.cs" />
-    <Compile Include="Game\UI\Controls\Label.cs" />
-    <Compile Include="Game\UI\Controls\Panel.cs" />
-    <Compile Include="Game\UI\Controls\PaperDollInteractable.cs" />
-    <Compile Include="Game\UI\Controls\RadioButton.cs" />
-    <Compile Include="Game\UI\Controls\ResizePic.cs" />
-    <Compile Include="Game\UI\Controls\ScrollArea.cs" />
-    <Compile Include="Game\UI\Controls\ScrollBar.cs" />
-    <Compile Include="Game\UI\Controls\ScrollFlag.cs" />
-    <Compile Include="Game\UI\Controls\StaticPic.cs" />
-    <Compile Include="Game\UI\Gumps\SystemChatControl.cs" />
-    <Compile Include="Game\UI\Gumps\ColorPickerGump.cs" />
-    <Compile Include="Game\UI\Gumps\ContainerGump.cs" />
-    <Compile Include="Game\UI\Gumps\Gump.cs" />
-    <Compile Include="Game\UI\Gumps\JournalGump.cs" />
-    <Compile Include="Game\UI\Gumps\WorldMapGump.cs" />
-    <Compile Include="Game\UI\Gumps\MiniMapGump.cs" />
-    <Compile Include="Game\UI\Gumps\PaperdollGump.cs" />
-    <Compile Include="Game\UI\Gumps\SkillGumpAdvanced.cs" />
-    <Compile Include="Game\UI\Gumps\SpellbookGump.cs" />
-    <Compile Include="Game\UI\Gumps\StatusGump.cs" />
-    <Compile Include="Game\UI\Gumps\TopBarGump.cs" />
-    <Compile Include="Game\UI\Controls\WorldViewport.cs" />
-    <Compile Include="Game\UI\Gumps\WorldViewportGump.cs" />
-    <Compile Include="Game\Managers\UIManager.cs" />
-    <Compile Include="Game\Map\Map.cs" />
-    <Compile Include="Game\Map\Chunk.cs" />
-    <Compile Include="Game\Pathfinder.cs" />
-    <Compile Include="Game\Scenes\GameScene.cs" />
-    <Compile Include="Game\Scenes\LoginScene.cs" />
-    <Compile Include="Game\Scenes\Scene.cs" />
-    <Compile Include="Game\SerialHelper.cs" />
-    <Compile Include="Game\GameObjects\Views\AnimatedEffectView.cs" />
-    <Compile Include="Game\GameObjects\Views\ItemView.cs" />
-    <Compile Include="Game\Data\LayerOrder.cs" />
-    <Compile Include="Game\GameObjects\Views\MobileView.cs" />
-    <Compile Include="Game\GameObjects\Views\StaticView.cs" />
-    <Compile Include="Game\GameObjects\Views\TileView.cs" />
-    <Compile Include="Game\GameObjects\Views\View.cs" />
-    <Compile Include="Game\World.cs" />
-    <Compile Include="Input\InputEventArgs.cs" />
-    <Compile Include="Input\KeyboardEventType.cs" />
-    <Compile Include="Input\MouseButtons.cs" />
-    <Compile Include="Input\MouseEventType.cs" />
-    <Compile Include="Interfaces\IDrawable.cs" />
-    <Compile Include="Interfaces\IUpdateable.cs" />
-    <Compile Include="Game\Data\ClientVersion.cs" />
-    <Compile Include="IO\DataReader.cs" />
-    <Compile Include="IO\UOFileManager.cs" />
-    <Compile Include="IO\Resources\Verdata.cs" />
-    <Compile Include="IO\UOFile.cs" />
-    <Compile Include="IO\UOFileIndex.cs" />
-    <Compile Include="IO\UOFileMul.cs" />
-    <Compile Include="IO\UOFileUop.cs" />
-    <Compile Include="Network\CircularBuffer.cs" />
-    <Compile Include="Network\Huffman.cs" />
-    <Compile Include="Network\NetClient.cs" />
-    <Compile Include="Network\Packet.cs" />
-    <Compile Include="Network\PacketBase.cs" />
-    <Compile Include="Network\PacketHandlers.cs" />
-    <Compile Include="Network\Packets.cs" />
-    <Compile Include="Network\PacketsTable.cs" />
-    <Compile Include="Network\PacketWriter.cs" />
-    <Compile Include="Game\GameCursor.cs" />
-    <Compile Include="Game\GameObjects\IsometricLight.cs" />
-    <Compile Include="Game\Managers\WorldTextManager.cs" />
-    <Compile Include="Renderer\RenderedText.cs" />
-    <Compile Include="Renderer\ShaderHuesTraslator.cs" />
-    <Compile Include="Renderer\ScissorStack.cs" />
-    <Compile Include="Renderer\UOTexture.cs" />
-    <Compile Include="Utility\Collections\Bag.cs" />
-    <Compile Include="Utility\Collections\Deque.cs" />
-    <Compile Include="Utility\Exstentions.cs" />
-    <Compile Include="Utility\Logging\Log.cs" />
-    <Compile Include="Utility\Logging\LogFile.cs" />
-    <Compile Include="Utility\Logging\Logger.cs" />
-    <Compile Include="Utility\Logging\LogTypes.cs" />
-    <Compile Include="Utility\MathHelper.cs" />
-    <Compile Include="Utility\Profiler.cs" />
-    <Compile Include="Utility\RandomHelper.cs" />
-    <Compile Include="Utility\SDL2EX.cs" />
-    <Compile Include="Utility\StringHelper.cs" />
-    <Compile Include="Utility\TextFileParser.cs" />
-    <Compile Include="Utility\UnsafeMemoryManager.cs" />
-    <Compile Include="Utility\ZLib.cs" />
-    <Compile Include="Utility\ZLib\Adler32.cs" />
-    <Compile Include="Utility\ZLib\ZLibManaged.cs" />
-    <Compile Include="Utility\ZLib\ZLibHeader.cs" />
-    <Compile Include="Utility\ZLib\ZLIBStream.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="ClassicUO.licenseheader" />
-    <EmbeddedResource Include="Renderer\fonts\regular_font.xnb" />
+    <EmbeddedResource Include="cuologo.png" />
     <EmbeddedResource Include="Renderer\fonts\bold_font.xnb" />
-    <None Include="packages.config" />
     <EmbeddedResource Include="Renderer\fonts\map1_font.xnb" />
     <EmbeddedResource Include="Renderer\fonts\map2_font.xnb" />
     <EmbeddedResource Include="Renderer\fonts\map3_font.xnb" />
     <EmbeddedResource Include="Renderer\fonts\map4_font.xnb" />
     <EmbeddedResource Include="Renderer\fonts\map5_font.xnb" />
     <EmbeddedResource Include="Renderer\fonts\map6_font.xnb" />
-    <None Include="shaders\compile_shaders.bat" />
-    <None Include="shaders\IsometricWorld.fx" />
+    <EmbeddedResource Include="Renderer\fonts\regular_font.xnb" />
     <EmbeddedResource Include="shaders\IsometricWorld.fxc" />
     <EmbeddedResource Include="shaders\xBR.fxc" />
   </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.7">
-      <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.7 %28x86 e x64%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="cuoicon.ico" />
-    <None Include="shaders\xBR.fx" />
-    <EmbeddedResource Include="cuologo.png" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>if not exist "$(TargetDir)lib64\" mkdir  "$(TargetDir)lib64\"
-if not exist "$(TargetDir)osx\" mkdir  "$(TargetDir)osx\"
-if not exist "$(TargetDir)x64\" mkdir  "$(TargetDir)x64\"
 
-xcopy $(SolutionDir)external\lib64\*.*   $(TargetDir)lib64\   /Y
-xcopy $(SolutionDir)external\osx\*.*      $(TargetDir)osx\    /Y
-xcopy $(SolutionDir)external\x64\*.*      $(TargetDir)x64\    /Y
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
 
-</PostBuildEvent>
-  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="cuoapi">
+      <HintPath>..\external\api\cuoapi.dll</HintPath>
+    </Reference>
+    <Reference Include="FNA">
+      <HintPath>..\external\FNA\FNA.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IO.Compression" />
+  </ItemGroup>
+
   <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
+    <PostBuildEvent Condition="'$(OS)' != 'UNIX'">
+      if not exist "$(TargetDir)lib64\" mkdir  "$(TargetDir)lib64\"
+      if not exist "$(TargetDir)osx\" mkdir  "$(TargetDir)osx\"
+      if not exist "$(TargetDir)x64\" mkdir  "$(TargetDir)x64\"
+
+      xcopy $(SolutionDir)external\lib64\*.*   $(TargetDir)lib64\   /Y
+      xcopy $(SolutionDir)external\osx\*.*      $(TargetDir)osx\    /Y
+      xcopy $(SolutionDir)external\x64\*.*      $(TargetDir)x64\    /Y
+    </PostBuildEvent>
+    <ApplicationIcon>cuoicon.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <PostBuildEvent Condition="'$(OS)' == 'UNIX'">
+
+      if ! [ -d "$(TargetDir)lib64/" ]; then
+      mkdir -p "$(TargetDir)lib64/"
+      fi
+
+      if ! [ -d "$(TargetDir)osx/" ]; then
+      mkdir -p "$(TargetDir)osx/"
+      fi
+
+      if ! [ -d "$(TargetDir)x64/" ]; then
+      mkdir -p "$(TargetDir)x64/"
+      fi
+
+      cp -i $(SolutionDir)external/lib64/*.*   $(TargetDir)lib64/
+      cp -i $(SolutionDir)external/osx/*.*     $(TargetDir)osx/
+      cp -i $(SolutionDir)external/x64/*.*     $(TargetDir)x64/
+    </PostBuildEvent>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
 </Project>
