@@ -103,7 +103,7 @@
       if ! [ -d "$(OutputPath)osx/" ]; then
       mkdir -p "$(OutputPath)osx/"
       fi
-
+ 
       if ! [ -d "$(OutputPath)x64/" ]; then
       mkdir -p "$(OutputPath)x64/"
       fi
