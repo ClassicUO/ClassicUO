@@ -52,12 +52,23 @@ namespace ClassicUO.Game.UI.Gumps
         public bool UseNewHeader { get; set; } = true;
         public static byte DefaultFont => (byte)(IsNewBook ? 1 : 4);
 
-        internal void SetBookText(string text)
+        internal void ServerSetBookText()
         {
-            //_bookPage.InputSet = true;
-            _bookPage.Text = text;
-            //_bookPage.InputSet = false;
+            if (BookLines == null || BookLines.Length <= 0)
+                return;
+            StringBuilder sb = new StringBuilder();
+            int sw = _bookPage.renderedText.GetCharWidth(' ');
+            for (int i = 0, l = BookLines.Length; i < l; i++)
+            {
+                int w = (IsNewBook ? FontsLoader.Instance.GetWidthUnicode(_bookPage.renderedText.Font, BookLines[i]) : FontsLoader.Instance.GetWidthASCII(_bookPage.renderedText.Font, BookLines[i]));
+                sb.Append(BookLines[i]);
+                if (i + 1 < l && (string.IsNullOrWhiteSpace(BookLines[i]) || w + sw < _bookPage.renderedText.MaxWidth))
+                    sb.Append('\n');
+            }
+            _bookPage._ServerUpdate = true;
+            _bookPage.Text = sb.ToString();
             _bookPage.UpdatePageCoords();
+            _bookPage._ServerUpdate = false;
         }
 
         public bool IntroChanges => _pagesChanged[0];
@@ -435,13 +446,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _gump = gump;
             }
 
-            private int GetCharWidth(char c)
-            {
-                if (IsNewBook)
-                    return FontsLoader.Instance.GetCharWidthUnicode(_rendererText.Font, c);
-                return FontsLoader.Instance.GetCharWidthASCII(_rendererText.Font, c);
-            }
-
             internal void UpdatePageCoords()
             {
                 MultilinesFontInfo info = _rendererText.GetInfo();
@@ -537,61 +541,64 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            internal bool _ServerUpdate = false;
+            private static string[] _handler;
             protected override void OnTextChanged()
             {
                 _is_writing = true;
-
-                string[] split = Text.Split('\n');
-                for (int i = 0, t = 0; i < split.Length; i++)
+                if (!_ServerUpdate)
                 {
-                    t += split[i].Length;
-                    if (split[i].Length > 0)
+                    if (_handler == null || _handler.Length < _pageLines.Length)
+                        _handler = new string[_pageLines.Length];
+                    string[] split = Text.Split('\n');
+                    for (int i = 0, l = 0; i < split.Length && l < _pageLines.Length; i++)
                     {
-                        for (int p = 0, w = 0, pw = GetCharWidth(split[i][p]); ; pw = GetCharWidth(split[i][p]))
+                        if (split[i].Length > 0)
                         {
-                            if (w + pw > Width)
+                            for (int p = 0, w = 0, pw = _rendererText.GetCharWidth(split[i][p]); ; pw = _rendererText.GetCharWidth(split[i][p]))
                             {
-                                _sb.Append('\n');
-                                //if (t + (i - 0) == CaretIndex)
-                                CaretIndex++;
-                                w = 0;
-                            }
-                            w += pw;
-                            _sb.Append(split[i][p]);
-                            p++;
-                            if (p >= split[i].Length)
-                            {
-                                _sb.Append('\n');
-                                break;
+                                if (w + pw > _rendererText.MaxWidth)
+                                {
+                                    _handler[l] = _sb.ToString();
+                                    _sb.Clear();
+                                    l++;
+                                    //CaretIndex++;
+                                    w = 0;
+                                    if (l >= _pageLines.Length)
+                                        break;
+                                }
+                                w += pw;
+                                _sb.Append(split[i][p]);
+                                p++;
+                                if (p >= split[i].Length)
+                                {
+                                    _sb.Append('\n');
+                                    _handler[l] = _sb.ToString();
+                                    _sb.Clear();
+                                    l++;
+                                    break;
+                                }
                             }
                         }
+                        else
+                        {
+                            _handler[l] = "\n";
+                            l++;
+                            //_sb.Append('\n');
+                        }
                     }
-                    else
-                        _sb.Append('\n');
-                }
-                split = _sb.ToString().Split('\n');
-                _sb.Clear();
-                for (int i = 0; i < _pageLines.Length; i++)
-                {
-                    if (i < split.Length)
+                    _sb.Clear();
+                    for (int i = 0; i < _pageLines.Length; i++)
                     {
-                        if (!_pagesChanged[(i >> 3) + 1] && split[i] != _pageLines[i])
+                        if (!_pagesChanged[(i >> 3) + 1] && _handler[i] != _pageLines[i])
                             _pagesChanged[(i >> 3) + 1] = true;
-                        _sb.Append(_pageLines[i] = split[i]);
+                        _sb.Append(_pageLines[i] = _handler[i]);
                     }
-                    else
-                    {
-                        if (!string.IsNullOrEmpty(_pageLines[i]))
-                            _pagesChanged[(i >> 3) + 1] = true;
-                        _pageLines[i] = string.Empty;
-                    }
-                    if (i + 1 < _pageLines.Length)
-                        _sb.Append('\n');
-                }
 
-                _rendererText.Text = _sb.ToString(); //whole reformatted book
-                _sb.Clear();
-                UpdatePageCoords();
+                    _rendererText.Text = _sb.ToString(); //whole reformatted book
+                    _sb.Clear();
+                    UpdatePageCoords();
+                }
                 base.OnTextChanged();
                 _is_writing = false;
             }

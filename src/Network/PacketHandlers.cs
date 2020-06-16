@@ -1866,14 +1866,7 @@ namespace ClassicUO.Network
                 else
                     Log.Error("BOOKGUMP: The server is sending a page number GREATER than the allowed number of pages in BOOK!");
             }
-            StringBuilder sb = new StringBuilder();
-            for(int i = 0, l = gump.BookLines.Length; i < l; i++)
-            {
-                sb.Append(gump.BookLines[i]);
-                if(i + 1 < l)
-                    sb.Append('\n');
-            }
-            gump.SetBookText(sb.ToString());
+            gump.ServerSetBookText();
         }
 
         private static void CharacterAnimation(Packet p)
