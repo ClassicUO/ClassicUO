@@ -38,14 +38,12 @@ namespace ManifestCreator
             "lib64/libFNA3D.so.0",
             "lib64/libSDL2-2.0.so.0",
             "lib64/libtheorafile.so",
-            "lib64/libSDL2_image-2.0.so.0",
 
             // osx
             "osx/libFAudio.0.dylib",
             "osx/libFNA3D.0.dylib",
             "osx/libSDL2-2.0.0.dylib",
             "osx/libtheorafile.dylib",
-            "osx/libSDL2_image-2.0.0.dylib",
 
             // windows
             "x64/FAudio.dll",
@@ -54,7 +52,6 @@ namespace ManifestCreator
             "x64/zlib.dll",
             "x64/libtheorafile.dll",
             "x64/vcruntime140.dll",
-            "x64/SDL2_image.dll",
 
             // dlls
             "Accessibility.dll",
