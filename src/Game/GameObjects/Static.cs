@@ -115,16 +115,6 @@ namespace ClassicUO.Game.GameObjects
             SetGraphic(SeasonManager.GetSeasonGraphic(World.Season, OriginalGraphic));
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(Graphic);
             IsVegetation = StaticFilters.IsVegetation(Graphic);
-
-            var texture = ArtLoader.Instance.GetTexture(Graphic);
-
-            if (texture != null && ItemData.IsFoliage)
-            {
-                FrameInfo.X = (texture.Width >> 1) - 22 - texture.ImageRectangle.X;
-                FrameInfo.Y = texture.Height - 44 - texture.ImageRectangle.Y;
-                FrameInfo.Width = texture.ImageRectangle.Width;
-                FrameInfo.Height = texture.ImageRectangle.Height;
-            }
         }
 
         public override void UpdateTextCoordsV()

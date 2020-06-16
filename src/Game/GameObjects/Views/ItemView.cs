@@ -142,7 +142,7 @@ namespace ClassicUO.Game.GameObjects
 
             DrawStaticAnimated(batcher, graphic, posX, posY, ref HueVector);
 
-            if (SelectedObject.Object == this && TargetManager.TargetingState == CursorTarget.MultiPlacement)
+            if (SelectedObject.Object == this || TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 return false;
 
             var texture = ArtLoader.Instance.GetTexture(graphic);
