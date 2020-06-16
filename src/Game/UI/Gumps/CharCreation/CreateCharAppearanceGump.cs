@@ -489,10 +489,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         }
 
         private Item CreateItem(int id, ushort hue, Layer layer)
-        {
-            if (id == 0)
-                return null;
-
+        {         
             Item existsItem = _character.FindItemByLayer(layer);
 
             if (existsItem != null)
@@ -500,6 +497,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 World.RemoveItem(existsItem, true);
                 _character.Remove(existsItem);
             }
+
+            if (id == 0)
+                return null;
 
             // This is a workaround to avoid to see naked guy
             // We are simulating server objects into World.Items map.
