@@ -29,14 +29,13 @@ namespace ClassicUO.Game.UI.Controls
     {
         private const int TIME_BETWEEN_CLICKS = 250;
         private readonly int _Min, _Max;
-        private readonly TextBox _textBox;
+        private readonly StbTextBox _textBox;
         private readonly Button _up, _down;
         private float _timeUntilNextClick;
 
         public ArrowNumbersTextBox(int x, int y, int width, int raiseamount, int minvalue, int maxvalue, byte font = 0, int maxcharlength = -1, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
         {
-            TextEntry txe = new TextEntry(font, maxcharlength, width, width, isunicode, style, hue) {NumericOnly = true};
-            int height = txe.Height + 5;
+            int height = 20;
             X = x;
             Y = y;
             Width = width;
@@ -82,13 +81,20 @@ namespace ClassicUO.Game.UI.Controls
                 }
             };
             Add(_down);
-            Add(_textBox = new TextBox(txe, true) {X = 2, Y = 2, Height = height, Width = width - 17});
+            Add(_textBox = new StbTextBox(font, maxcharlength, width, isunicode, style, hue)
+            {
+                X = 2, 
+                Y = 2, 
+                Height = height, 
+                Width = width - 17,
+                NumbersOnly = true
+            });
         }
 
         public string Text
         {
             get => _textBox.Text;
-            set => _textBox.SetText(value);
+            set => _textBox.Text = value;
         }
 
         private void UpdateValue()
@@ -114,7 +120,7 @@ namespace ClassicUO.Game.UI.Controls
         private void ValidateValue(int val)
         {
             Tag = val = Math.Max(_Min, Math.Min(_Max, val));
-            _textBox.SetText(val.ToString());
+            _textBox.Text = val.ToString();
         }
 
         public override void Update(double totalMS, double frameMS)

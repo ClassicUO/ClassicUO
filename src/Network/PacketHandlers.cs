@@ -23,7 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-
+using System.Threading;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -1815,41 +1815,65 @@ namespace ClassicUO.Network
         {
             if (!World.InGame)
                 return;
-
+            
             var serial = p.ReadUInt();
             var pageCnt = p.ReadUShort();
-            var gump = UIManager.GetGump<BookGump>(serial);
-           
-            if (gump == null) return;
 
-            var pages = gump.BookPages;
+            var gump = UIManager.GetGump<ModernBookGump>(serial);
 
-            StringBuilder sb = new StringBuilder();
-
-            //packets sent from server can contain also an uneven amount of page, not counting that we could receive only part of them, not every page!
-            for (int i = 0; i < pageCnt; i++, sb.Clear())
+            if (gump == null || gump.IsDisposed)
+                return;
+            for (int i = 0; i < pageCnt; i++)
             {
-                var pageNum = p.ReadUShort();
+                var pageNum = p.ReadUShort() - 1;
 
-                if (pageNum > 0 && pageNum <= pages.Length)
+                if (!gump.IsEditable)//other pages are blank
+                {
+                    int startline = pageNum * ModernBookGump.MAX_BOOK_LINES;
+                    if(pageNum % 2 == 0)
+                    {
+                        for (int n = 0; n < gump.BookLines.Length; n++)
+                        {
+                            if(n < (startline - 8) && n >= (startline + 8))
+                                gump.BookLines[n] = string.Empty;
+                        }
+                    }
+                    else
+                    {
+                        for (int n = 0; n < gump.BookLines.Length; n++)
+                        {
+                            if (n >= (startline + 16) && n < startline)
+                                gump.BookLines[n] = string.Empty;
+                        }
+                    }
+                }
+                if (pageNum < pageCnt)
                 {
                     var lineCnt = p.ReadUShort();
 
-                    for (int x = 0; x < lineCnt; x++)
+                    for (int line = 0; line < lineCnt; line++)
                     {
-                        sb.Append(BookGump.IsNewBook ? p.ReadUTF8StringSafe() : p.ReadASCII());
-                        sb.Append('\n');
+                        gump.BookLines[pageNum * ModernBookGump.MAX_BOOK_LINES + line] = ModernBookGump.IsNewBook ? p.ReadUTF8StringSafe() : p.ReadASCII();
                     }
-
-                    if (sb.Length > 0)
-                        sb.Remove(sb.Length - 1, 1); //this removes the last, unwanted, newline
-                    pages[pageNum - 1] = sb.ToString();
+                    if (lineCnt < ModernBookGump.MAX_BOOK_LINES)
+                    {
+                        for (int line = lineCnt; line < ModernBookGump.MAX_BOOK_LINES; line++)
+                        {
+                            gump.BookLines[pageNum * ModernBookGump.MAX_BOOK_LINES + line] = string.Empty;
+                        }
+                    }
                 }
                 else
-                    Log.Error( "BOOKGUMP: The server is sending a page number GREATER than the allowed number of pages in BOOK!");
+                    Log.Error("BOOKGUMP: The server is sending a page number GREATER than the allowed number of pages in BOOK!");
             }
-
-            gump.BookPages = pages;
+            StringBuilder sb = new StringBuilder();
+            for(int i = 0, l = gump.BookLines.Length; i < l; i++)
+            {
+                sb.Append(gump.BookLines[i]);
+                if(i + 1 < l)
+                    sb.Append('\n');
+            }
+            gump.SetBookText(sb.ToString());
         }
 
         private static void CharacterAnimation(Packet p)
@@ -1945,7 +1969,7 @@ namespace ClassicUO.Network
                             int x = (Client.Game.Window.ClientBounds.Width >> 1) - 245;
                             int y = (Client.Game.Window.ClientBounds.Height >> 1) - 205;
 
-                            bulletinBoard = new BulletinBoardGump(item, x, y, p.ReadASCII(22));
+                            bulletinBoard = new BulletinBoardGump(item, x, y, p.ReadUTF8StringSafe(22));//p.ReadASCII(22));
                             UIManager.Add(bulletinBoard);
 
                             item.Opened = true;
@@ -2504,12 +2528,12 @@ namespace ClassicUO.Network
 
                 if (layer - 1 != Layer.Backpack)
                 {
-                    Item item = World.GetOrCreateItem(item_serial);
+                Item item = World.GetOrCreateItem(item_serial);
 
-                    RemoveItemFromContainer(item);
-                    item.Container = serial;
-                    item.Layer = layer - 1;
-                    corpse.PushToBack(item);
+                RemoveItemFromContainer(item);
+                item.Container = serial;
+                item.Layer = layer - 1;
+                corpse.PushToBack(item);
                 }
 
                 layer = (Layer) p.ReadByte();
@@ -2565,39 +2589,19 @@ namespace ClassicUO.Network
                 editable = p.ReadBool();
             else
                 p.Skip(1);
-            BookGump bgump = UIManager.GetGump<BookGump>(serial);
+
+            ModernBookGump bgump = UIManager.GetGump<ModernBookGump>(serial);
 
             if (bgump == null || bgump.IsDisposed)
             {
-                UIManager.Add(new BookGump(serial)
+                ushort page_count = p.ReadUShort();
+                string title = oldpacket ? p.ReadUTF8StringSafe(60) : p.ReadUTF8StringSafe(p.ReadUShort());
+                string author = oldpacket ? p.ReadUTF8StringSafe(30) : p.ReadUTF8StringSafe(p.ReadUShort());
+
+                UIManager.Add(new ModernBookGump(serial, page_count, title, author, editable, oldpacket)
                 {
                     X = 100,
-                    Y = 100,
-                    BookPageCount = p.ReadUShort(),
-                    //title allows only 47 dots (. + \0) so 47 is the right number
-                    BookTitle =
-                        new TextBox(new TextEntry(BookGump.DefaultFont, 47, 150, 150, BookGump.IsNewBook, FontStyle.None, 0), editable)
-                        {
-                            X = 40,
-                            Y = 60,
-                            Height = 25,
-                            Width = 155,
-                            IsEditable = editable,
-                            Text = oldpacket ? p.ReadUTF8StringSafe(60) : p.ReadUTF8StringSafe(p.ReadUShort())
-                        },
-                    //as the old booktitle supports only 30 characters in AUTHOR and since the new clients only allow 29 dots (. + \0 character at end), we use 29 as a limitation
-                    BookAuthor =
-                        new TextBox(new TextEntry(BookGump.DefaultFont, 29, 150, 150, BookGump.IsNewBook, FontStyle.None, 0), editable)
-                        {
-                            X = 40,
-                            Y = 160,
-                            Height = 25,
-                            Width = 155,
-                            IsEditable = editable,
-                            Text = oldpacket ? p.ReadUTF8StringSafe(30) : p.ReadUTF8StringSafe(p.ReadUShort())
-                        },
-                    IsEditable = editable,
-                    UseNewHeader = !oldpacket
+                    Y = 100
                 });
                 NetClient.Socket.Send(new PBookPageDataRequest(serial, 1));
             }
@@ -2605,11 +2609,11 @@ namespace ClassicUO.Network
             {
                 p.Skip(2);
                 bgump.IsEditable = editable;
-                bgump.BookTitle.Text = oldpacket ? p.ReadUTF8StringSafe(60) : p.ReadUTF8StringSafe(p.ReadUShort());
-                bgump.BookTitle.IsEditable = editable;
-                bgump.BookAuthor.Text = oldpacket ? p.ReadUTF8StringSafe(30) : p.ReadUTF8StringSafe(p.ReadUShort());
-                bgump.BookAuthor.IsEditable = editable;
+                bgump.SetTile(oldpacket ? p.ReadUTF8StringSafe(60) : p.ReadUTF8StringSafe(p.ReadUShort()), editable);
+                bgump.SetAuthor(oldpacket ? p.ReadUTF8StringSafe(30) : p.ReadUTF8StringSafe(p.ReadUShort()), editable);
                 bgump.UseNewHeader = !oldpacket;
+                bgump.SetInScreen();
+                bgump.BringOnTop();
             }
         }
 
@@ -3230,7 +3234,10 @@ namespace ClassicUO.Network
         private static void ExtendedCommand(Packet p)
         {
             ushort cmd = p.ReadUShort();
+            if(cmd == 0x11)
+            {
 
+            }
             switch (cmd)
             {
                 case 0:
@@ -3387,7 +3394,11 @@ namespace ClassicUO.Network
                     NetClient.Socket.Send(new PMegaClilocRequestOld(item));
 
                     break;
+                //===========================================================================================
+                //===========================================================================================
+                case 0x11:
 
+                    break;
                 //===========================================================================================
                 //===========================================================================================
                 case 0x14: // display popup/context menu
@@ -3509,7 +3520,6 @@ namespace ClassicUO.Network
                             int pos = p.Position;
                             byte zero = p.ReadByte();
                             byte type2 = p.ReadByte();
-
                             if (type2 == 0xFF)
                             {
                                 byte status = p.ReadByte();
@@ -3899,76 +3909,76 @@ namespace ClassicUO.Network
                     argument = p.ReadUnicodeReversed(length);
                 }
 
-                string str = ClilocLoader.Instance.Translate(cliloc, argument, true);
+                    string str = ClilocLoader.Instance.Translate(cliloc, argument, true);
 
-                for (int i = 0; i < list.Count; i++)
-                {
-                    var tempstr = list[i];
-
-                    if (tempstr == str)
+                    for (int i = 0; i < list.Count; i++)
                     {
-                        list.RemoveAt(i);
-                        break;
-                    }
-                }
+                        var tempstr = list[i];
 
-                list.Add(str);
-            }
-
-            Item container = null;
-
-            if (entity is Item it && SerialHelper.IsValid(it.Container))
-            {
-                container = World.Items.Get(it.Container);
-            }
-
-            bool inBuyList = false;
-
-            if (container != null)
-            {
-                inBuyList = container.Layer == Layer.ShopBuy ||
-                            container.Layer == Layer.ShopBuyRestock ||
-                            container.Layer == Layer.ShopSell;
-            }
-
-
-            bool first = true;
-
-            string name = string.Empty;
-            string data = string.Empty;
-
-            if (list.Count != 0)
-            {
-                foreach (string str in list)
-                {
-                    if (first)
-                    {
-                        name = str;
-
-                        if (entity != null && !SerialHelper.IsMobile(serial))
+                        if (tempstr == str)
                         {
-                            entity.Name = str;
+                            list.RemoveAt(i);
+                            break;
                         }
-
-                        first = false;
                     }
-                    else
-                    {
-                        if (data.Length != 0)
-                            data += "\n";
 
-                        data += str;
+                    list.Add(str);
+                }
+
+                Item container = null;
+
+                if (entity is Item it && SerialHelper.IsValid(it.Container))
+                {
+                    container = World.Items.Get(it.Container);
+                }
+
+                bool inBuyList = false;
+
+                if (container != null)
+                {
+                    inBuyList = container.Layer == Layer.ShopBuy ||
+                                container.Layer == Layer.ShopBuyRestock ||
+                                container.Layer == Layer.ShopSell;
+                }
+
+
+                bool first = true;
+
+                string name = string.Empty;
+                string data = string.Empty;
+
+                if (list.Count != 0)
+                {
+                    foreach (string str in list)
+                    {
+                        if (first)
+                        {
+                            name = str;
+
+                            if (entity != null && !SerialHelper.IsMobile(serial))
+                            {
+                                entity.Name = str;
+                            }
+
+                            first = false;
+                        }
+                        else
+                        {
+                            if (data.Length != 0)
+                                data += "\n";
+
+                            data += str;
+                        }
                     }
                 }
-            }
 
-            World.OPL.Add(serial, revision, name, data);
+                World.OPL.Add(serial, revision, name, data);
 
-            if (inBuyList && container != null && SerialHelper.IsValid(container.Serial))
-            {
+                if (inBuyList && container != null && SerialHelper.IsValid(container.Serial))
+                {
                 UIManager.GetGump<ShopGump>(container.RootContainer)?.SetNameTo((Item) entity, name);
+                }
             }
-        }
 
         private static void GenericAOSCommandsR(Packet p)
         {
@@ -5323,7 +5333,7 @@ namespace ClassicUO.Network
 
                     case "textentrylimited":
                     case "textentry":
-                        TextBox textBox = new TextBox(gparams, lines);
+                        StbTextBox textBox = new StbTextBox(gparams, lines);
 
                         if (!textBoxFocused)
                         {

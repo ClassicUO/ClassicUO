@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
         protected bool _isDead;
         protected string _name;
         protected bool _canChangeName;
-        protected TextBox _textBox;
+        protected StbTextBox _textBox;
         protected bool _outOfRange;
 
         protected BaseHealthBarGump(Entity entity) : this(0, 0)
@@ -686,10 +686,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (LocalSerial == World.Player)
                 {
-                    Add(_textBox = new TextBoxCHB(1, 32, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue(World.Player.NotorietyFlag))
+                    Add(_textBox = new StbTextBox(1, 32, maxWidth: HPB_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue(World.Player.NotorietyFlag))
                     {
                         X = 8,
                         Y = 3,
+                        Width = HPB_BAR_WIDTH,
                         IsEditable = false,
                         CanMove = true,
                         Text = _name
@@ -697,10 +698,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    Add(_textBox = new TextBoxCHB(1, 32, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray))
+                    Add(_textBox = new StbTextBox(1, 32, maxWidth: HPB_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray))
                     {
                         X = 8,
                         Y = 3,
+                        Width = HPB_BAR_WIDTH,
                         IsEditable = false,
                         CanMove = true,
                         Text = _name
@@ -731,10 +733,11 @@ namespace ClassicUO.Game.UI.Gumps
                     Width = HPB_WIDTH;
                     Add(_background = new AlphaBlendControl(0.3f) { Width = Width, Height = Height, AcceptMouseInput = true, CanMove = true });
 
-                    Add(_textBox = new TextBoxCHB(1, 32, width: HPB_BAR_WIDTH, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray), maxWidth: Width)
+                    Add(_textBox = new StbTextBox(1, 32, isunicode: true, style: FontStyle.Cropped | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray), maxWidth: Width)
                     {
                         X = 8,
                         Y = 3,
+                        Width = HPB_BAR_WIDTH,
                         IsEditable = false,
                         CanMove = true,
                         Text = _name
@@ -780,7 +783,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(_border[3] = new LineCHB(HPB_WIDTH - HPB_BORDERSIZE, 0, HPB_BORDERSIZE, HPB_HEIGHT_SINGLELINE, HPB_COLOR_DRAW_BLACK.PackedValue));
 
 
-                    Add(_textBox = new TextBoxCHB(1, 32, width: HPB_BAR_WIDTH, isunicode: true, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray), style: FontStyle.Cropped | FontStyle.BlackBorder)
+                    Add(_textBox = new StbTextBox(1, 32, maxWidth: HPB_WIDTH, isunicode: true, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray), style: FontStyle.Cropped | FontStyle.BlackBorder)
                     {
                         X = 8,
                         Y = 0,
@@ -789,7 +792,6 @@ namespace ClassicUO.Game.UI.Gumps
                         IsEditable = false,
                         AcceptMouseInput = _canChangeName,
                         AcceptKeyboardInput = _canChangeName,
-                        SafeCharactersOnly = true,
                         WantUpdateSize = false,
                         CanMove = true,
                         Text = _name
@@ -839,23 +841,6 @@ namespace ClassicUO.Game.UI.Gumps
                 return batcher.Draw2D(LineColor, x, y, LineWidth, Height, ref _hueVector);
             }
         }
-
-        private class TextBoxCHB : TextBox
-        {
-            public TextBoxCHB(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0) : base(font, maxcharlength, maxWidth, width, isunicode, style, hue, TEXT_ALIGN_TYPE.TS_CENTER)
-            {
-            }
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-            {
-                TxEntry.RenderText.Draw(batcher, x + TxEntry.Offset, y);
-
-                if (IsEditable && HasKeyboardFocus)
-                    TxEntry.RenderCaret.Draw(batcher, x + TxEntry.Offset + TxEntry.CaretPosition.X, y + TxEntry.CaretPosition.Y);
-
-                return base.Draw(batcher, x, y);
-            }
-        }
-
     }
 
     internal class HealthBarGump : BaseHealthBarGump
@@ -935,10 +920,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (LocalSerial == World.Player)
                 {
-                    Add(_textBox = new TextBox(3, 32, width: 120, isunicode: false, style: FontStyle.Fixed, hue: Notoriety.GetHue(World.Player.NotorietyFlag))
+                    Add(_textBox = new StbTextBox(3, 32, maxWidth: 120, isunicode: false, style: FontStyle.Fixed, hue: Notoriety.GetHue(World.Player.NotorietyFlag))
                     {
                         X = 0,
                         Y = -2,
+                        Width = 120,
+                        Height = 50,
                         IsEditable = false,
                         CanMove = true,
                         Text = "[* SELF *]"
@@ -946,10 +933,12 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    Add(_textBox = new TextBox(3, 32, width: 109, isunicode: false, style: FontStyle.Fixed | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray))
+                    Add(_textBox = new StbTextBox(3, 32, maxWidth: 109, isunicode: false, style: FontStyle.Fixed | FontStyle.BlackBorder, hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray))
                     {
                         X = 0,
                         Y = -2,
+                        Width = 109,
+                        Height = 50,
                         IsEditable = false,
                         CanMove = true,
                         Text = _name
@@ -1012,7 +1001,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Width = _background.Width;
                     Height = _background.Height;
 
-                    Add(_textBox = new TextBox(1, 32, width: 120, isunicode: false, hue: textColor, style: FontStyle.Fixed)
+                    Add(_textBox = new StbTextBox(1, 32, 120, isunicode: false, hue: textColor, style: FontStyle.Fixed)
                     {
                         X = 16,
                         Y = 14,
@@ -1021,7 +1010,6 @@ namespace ClassicUO.Game.UI.Gumps
                         IsEditable = false,
                         AcceptMouseInput = _canChangeName,
                         AcceptKeyboardInput = _canChangeName,
-                        SafeCharactersOnly = true,
                         WantUpdateSize = false,
                         CanMove = true,
                         Text = _name

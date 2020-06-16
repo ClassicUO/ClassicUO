@@ -35,7 +35,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly OrderedDictionary<uint, string> _pages;
         private readonly Button _prev, _next;
         private readonly ScrollArea _scrollArea;
-        private readonly MultiLineBox _textBox;
+        private readonly StbTextBox _textBox;
         private int _idx;
 
         public TipNoticeGump(byte type, string page) : base(0, 0)
@@ -45,11 +45,13 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             _scrollArea = new ScrollArea(0, 32, 272, Height - 96, false);
 
-            _textBox = new MultiLineBox(new MultiLineEntry(1, -1, 0, 220, true, hue: 0), false)
+            _textBox = new StbTextBox(1, -1,220, true, hue: 0)
             {
                 Height = 20,
                 X = 35,
                 Y = 0,
+                Width = 220,
+                IsEditable = false,
                 Text = page
             };
             Add(_background = new ExpandableScroll(0, 0, Height, 0x0820));
@@ -96,16 +98,16 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (!_textBox.IsDisposed && _textBox.IsChanged)
-            {
-                _textBox.Height = Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
+            //if (!_textBox.IsDisposed && _textBox.IsChanged)
+            //{
+            //    _textBox.Height = Math.Max(FontsLoader.Instance.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
 
-                foreach (Control c in _scrollArea.Children)
-                {
-                    if (c is ScrollAreaItem)
-                        c.OnPageChanged();
-                }
-            }
+            //    foreach (Control c in _scrollArea.Children)
+            //    {
+            //        if (c is ScrollAreaItem)
+            //            c.OnPageChanged();
+            //    }
+            //}
 
             base.Update(totalMS, frameMS);
         }

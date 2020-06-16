@@ -31,13 +31,13 @@ namespace ClassicUO.Game.UI.Controls
         public InfoBarVars Var { get { return (InfoBarVars) varStat.SelectedIndex; } }
         public ushort Hue { get { return labelColor.Hue; } }
 
-        private TextBox infoLabel;
+        private StbTextBox infoLabel;
         private Combobox varStat;
         private ClickableColorBox labelColor;
 
         public InfoBarBuilderControl(InfoBarItem item)
         {
-            infoLabel = new TextBox(0xFF, 10, 80, 80) { X = 5, Y = 0, Width = 130, Height = 30, Text = item.label };
+            infoLabel = new StbTextBox(0xFF, 10, 80) { X = 5, Y = 0, Width = 130, Height = 30, Text = item.label };
 
             string[] dataVars = InfoBarManager.GetVars();
             varStat = new Combobox(200, 0, 170, dataVars, (int) item.var);

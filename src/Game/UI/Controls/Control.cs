@@ -375,6 +375,8 @@ namespace ClassicUO.Game.UI.Controls
 
         internal event EventHandler FocusEnter, FocusLost;
 
+        internal event EventHandler<KeyboardEventArgs> KeyDown, KeyUp;
+
 
         public void HitTest(int x, int y, ref Control res)
         {
@@ -391,7 +393,10 @@ namespace ClassicUO.Game.UI.Controls
                     if (AcceptMouseInput)
                     {
                         if (res == null || res.Priority >= this.Priority)
+                        {
                             res = this;
+                            OnHitTestSuccess(x, y, ref res);
+                        }
                     }
 
                     foreach (Control c in Children)
@@ -410,6 +415,9 @@ namespace ClassicUO.Game.UI.Controls
             HitTest(position.X, position.Y, ref res);
         }
 
+        public virtual void OnHitTestSuccess(int x, int y, ref Control res)
+        {
+        }
        
         public Control GetFirstControlAcceptKeyboardInput()
         {
@@ -546,11 +554,15 @@ namespace ClassicUO.Game.UI.Controls
         public void InvokeKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             OnKeyDown(key, mod);
+            KeyboardEventArgs arg = new KeyboardEventArgs(key, mod, KeyboardEventType.Down);
+            KeyDown?.Raise(arg);
         }
 
         public void InvokeKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             OnKeyUp(key, mod);
+            KeyboardEventArgs arg = new KeyboardEventArgs(key, mod, KeyboardEventType.Up);
+            KeyUp?.Raise(arg);
         }
 
         public void InvokeMouseWheel(MouseEventType delta)

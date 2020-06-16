@@ -312,19 +312,18 @@ namespace ClassicUO.Game.UI.Controls
                                 Height = b.Height * 2 + 4
                             });
 
-                            TextBox textbox = new TextBox(new TextEntry(0xFF, 80, 0, 236, true, FontStyle.BlackBorder), true)
+                            StbTextBox textbox = new StbTextBox(0xFF, 80, 236, true, FontStyle.BlackBorder)
                             {
                                 X = 20,
                                 Y = b.Height + 5,
                                 Width = 236,
                                 Height = b.Height * 2
                             };
-                            textbox.TxEntry.SetHeight(b.Height * 2);
 
                             textbox.TextChanged += (sss, eee) =>
                             {
                                 if (newmacro.HasString())
-                                    ((MacroObjectString) newmacro).Text = ((TextBox) sss).Text;
+                                    ((MacroObjectString) newmacro).Text = ((StbTextBox) sss).Text;
                             };
 
                             b.Parent.Add(textbox);
@@ -378,19 +377,18 @@ namespace ClassicUO.Game.UI.Controls
                             Height = box.Height * 2 + 4
                         });
 
-                        TextBox textbox = new TextBox(new TextEntry(0xFF, 80, 0, 236, true, FontStyle.BlackBorder), true)
+                        StbTextBox textbox = new StbTextBox(0xFF, 80,236, true, FontStyle.BlackBorder)
                         {
                             X = 20,
                             Y = box.Height + 5,
                             Width = 236,
                             Height = box.Height * 2
                         };
-                        textbox.TxEntry.SetHeight(box.Height * 2);
-                        textbox.SetText(obj.HasString() ? ((MacroObjectString)obj).Text : string.Empty);
+                        textbox.Text = obj.HasString() ? ((MacroObjectString) obj).Text : string.Empty;
                         textbox.TextChanged += (sss, eee) =>
                         {
                             if (obj.HasString())
-                                ((MacroObjectString) obj).Text = ((TextBox) sss).Text;
+                                ((MacroObjectString) obj).Text = ((StbTextBox) sss).Text;
                         };
 
                         box.Parent.Add(textbox);

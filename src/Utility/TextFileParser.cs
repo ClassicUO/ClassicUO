@@ -26,14 +26,13 @@ namespace ClassicUO.Utility
 {
     internal class TextFileParser
     {
+        private StringBuilder _sb = new StringBuilder();
         private readonly char[] _delimiters, _comments, _quotes;
         private int _eol;
         private int _pos;
         private int _Size;
         private string _string;
         private bool _trim;
-
-        private string RawLine;
 
         public TextFileParser(string str, char[] delimiters, char[] comments, char[] quotes)
         {
@@ -135,10 +134,8 @@ namespace ClassicUO.Utility
             return result;
         }
 
-        private string ObtainData()
+        private void ObtainData()
         {
-            StringBuilder result = new StringBuilder();
-
             while (_pos < _Size && _string[_pos] != '\n')
             {
                 if (IsDelimiter())
@@ -157,23 +154,20 @@ namespace ClassicUO.Utility
                     {
                         if (_string[_pos] == _quotes[i])
                         {
-                            return result.ToString();
+                            return;
                         }
                     }
 
-                    result.Append(_string[_pos]);
+                    _sb.Append(_string[_pos]);
                 }
 
                 _pos++;
             }
-
-            return result.ToString();
         }
 
-        private string ObtainQuotedData()
+        private void ObtainQuotedData(bool save = true)
         {
             bool exit = false;
-            string result = "";
 
             for (int i = 0; i < _quotes.Length; i += 2)
             {
@@ -190,7 +184,7 @@ namespace ClassicUO.Utility
                         if (_string[pos] == _quotes[i]) // another {
                         {
                             _pos = pos;
-                            ObtainQuotedData(); // skip
+                            ObtainQuotedData(false); // skip
                             pos = _pos;
                         }
 
@@ -202,7 +196,8 @@ namespace ClassicUO.Utility
 
                     if (size > 0)
                     {
-                        result = _string.Substring(start, size).TrimEnd('\r', '\n');
+                        if(save)
+                            _sb.Append(_string.Substring(start, size).TrimEnd('\r', '\n'));
                         _pos = pos;
 
                         if (_pos < _eol && _string[_pos] == endQuote)
@@ -215,20 +210,8 @@ namespace ClassicUO.Utility
 
             if (!exit)
             {
-                result = ObtainData();
+                ObtainData();
             }
-
-            return result;
-        }
-
-        private void SaveRawLine()
-        {
-            int size = _eol - _pos;
-
-            if (size > 0)
-                RawLine = _string.Substring(_pos, size).TrimEnd('\r', '\n');
-            else
-                RawLine = "";
         }
 
         internal List<string> ReadTokens(bool trim = true)
@@ -240,8 +223,6 @@ namespace ClassicUO.Utility
             {
                 GetEOL();
 
-                SaveRawLine();
-
                 while (_pos < _eol)
                 {
                     SkipToData();
@@ -249,10 +230,13 @@ namespace ClassicUO.Utility
                     if (IsComment())
                         break;
 
-                    string buf = ObtainQuotedData();
+                    ObtainQuotedData();
 
-                    if (buf.Length > 0)
-                        result.Add(buf);
+                    if (_sb.Length > 0)
+                    {
+                        result.Add(_sb.ToString());
+                        _sb.Clear();
+                    }
                     else if (IsSecondQuote())
                         _pos++;
                 }
@@ -273,8 +257,6 @@ namespace ClassicUO.Utility
             _Size = str.Length;
             _eol = _Size - 1;
 
-            SaveRawLine();
-
             while (_pos < _eol)
             {
                 SkipToData();
@@ -282,10 +264,12 @@ namespace ClassicUO.Utility
                 if (IsComment())
                     break;
 
-                string buf = ObtainQuotedData();
-
-                if (buf.Length > 0)
-                    result.Add(buf);
+                ObtainQuotedData();
+                if (_sb.Length > 0)
+                {
+                    result.Add(_sb.ToString());
+                    _sb.Clear();
+                }
             }
 
             return result;

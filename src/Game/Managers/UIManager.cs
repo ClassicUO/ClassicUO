@@ -149,12 +149,6 @@ namespace ClassicUO.Game.Managers
             _validForDClick = null;
             if (MouseOverControl != null)
             {
-                MakeTopMostGump(MouseOverControl);
-                MouseOverControl.InvokeMouseDown(Mouse.Position, MouseButtonType.Left);
-
-                if (MouseOverControl.AcceptKeyboardInput)
-                    _keyboardFocusControl = MouseOverControl;
-
                 if (MouseOverControl.IsEnabled && MouseOverControl.IsVisible)
                 {
                     if (_lastFocus != MouseOverControl)
@@ -165,6 +159,12 @@ namespace ClassicUO.Game.Managers
                     }
                 }
 
+                MakeTopMostGump(MouseOverControl);
+                MouseOverControl.InvokeMouseDown(Mouse.Position, MouseButtonType.Left);
+
+                if (MouseOverControl.AcceptKeyboardInput)
+                    _keyboardFocusControl = MouseOverControl;
+                
                 _mouseDownControls[(int) MouseButtonType.Left] = MouseOverControl;
             }
             else

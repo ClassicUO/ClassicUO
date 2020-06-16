@@ -81,6 +81,9 @@ namespace ClassicUO
                 sb.AppendLine($"Thread: {Thread.CurrentThread.Name}");
                 sb.AppendLine();
 
+                sb.AppendLine($"Protocol: {Client.Protocol}");
+                sb.AppendLine($"ClientFeatures: {World.ClientFeatures.Flags}");
+                sb.AppendLine($"ClientLockedFeatures: {World.ClientLockedFeatures.Flags}");
                 sb.AppendLine($"ClientVersion: {Client.Version}");
 
                 sb.AppendLine();

@@ -25,6 +25,7 @@ using ClassicUO.Data;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
+using StbTextEditSharp;
 
 namespace ClassicUO.Renderer
 {
@@ -157,9 +158,25 @@ namespace ClassicUO.Renderer
                         Links.Clear();
                         _texture?.Dispose();
                         _texture = null;
+                        _info = null;
                     }
                     else
+                    {
                         CreateTexture();
+
+                        if (IsUnicode)
+                        {
+                            _info = FontsLoader.Instance.GetInfoUnicode(Font,
+                                                                        Text, Text.Length, Align, (ushort) FontStyle,
+                                                                        MaxWidth > 0 ? MaxWidth : Width, true, true);
+                        }
+                        else
+                        {
+                            _info = FontsLoader.Instance.GetInfoASCII(Font,
+                                                                      Text, Text.Length, Align, (ushort) FontStyle,
+                                                                      MaxWidth > 0 ? MaxWidth : Width, true, true);
+                        }
+                    }
                 }
             }
         }
@@ -180,6 +197,133 @@ namespace ClassicUO.Renderer
 
 
         private static Vector3 _hueVector = Vector3.Zero;
+
+        public Point GetCaretPosition(int caret_index)
+        {
+            Point p;
+
+            if (IsUnicode)
+            {
+                (p.X, p.Y) = FontsLoader.Instance.GetCaretPosUnicode(
+                    Font,
+                    Text,
+                    caret_index,
+                    MaxWidth,
+                    Align, 
+                    (ushort) FontStyle);
+            }
+            else
+            {
+                (p.X, p.Y) = FontsLoader.Instance.GetCaretPosASCII(
+                    Font,
+                    Text,
+                    caret_index,
+                    MaxWidth,
+                    Align,
+                    (ushort) FontStyle);
+            }
+
+            return p;
+        }
+
+        private MultilinesFontInfo _info;
+
+        public MultilinesFontInfo GetInfo()
+        {
+            return _info;
+        }
+
+        public TextEditRow GetLayoutRow(int startIndex)
+        {
+            TextEditRow r = new TextEditRow();
+
+            if (string.IsNullOrEmpty(Text))
+                return r;
+
+            MultilinesFontInfo info = _info;
+
+            if (info == null)
+                return r;
+
+            switch (Align)
+            {
+                case TEXT_ALIGN_TYPE.TS_LEFT:
+                    r.x0 = 0;
+                    r.x1 = Width;
+                    break;
+                case TEXT_ALIGN_TYPE.TS_CENTER:
+                    r.x0 = (Width - info.Width) >> 1;
+
+                    if (r.x0 < 0)
+                        r.x0 = 0;
+
+                    r.x1 = r.x0;
+
+                    break;
+                case TEXT_ALIGN_TYPE.TS_RIGHT:
+                    r.x0 = Width;
+                    // TODO: r.x1 ???  i don't know atm :D
+                    break;
+            }
+
+            int start = 0;
+            while (info != null)
+            {
+                if (startIndex >= start && startIndex < start + info.CharCount)
+                {
+                    r.num_chars = info.CharCount;
+                    r.ymax = info.MaxHeight;
+                    r.baseline_y_delta = info.MaxHeight;
+                    break;
+                }
+
+                start += info.CharCount;
+                info = info.Next;
+            }
+
+            return r;
+        }
+
+        public int GetCharWidthAtIndex(int index)
+        {
+            if (string.IsNullOrEmpty(Text))
+                return 0;
+
+            MultilinesFontInfo info = _info;
+
+            int start = 0;
+            while (info != null)
+            {
+                if (index >= start && index < start + info.CharCount)
+                {
+                    int x = index - start;
+
+                    if (x >= 0)
+                    {
+                        char c = x >= info.Data.Count ? '\n' : info.Data[x].Item;
+
+                        if (IsUnicode)
+                            return FontsLoader.Instance.GetCharWidthUnicode(Font, c);
+
+                        return FontsLoader.Instance.GetCharWidthASCII(Font, c);
+                    }
+                }
+
+                start += info.CharCount;
+                info = info.Next;
+            }
+
+            return 0;
+        }
+
+        public int GetCharWidth(char c)
+        {
+            if (IsUnicode)
+                return FontsLoader.Instance.GetCharWidthUnicode(Font, c);
+
+            return FontsLoader.Instance.GetCharWidthASCII(Font, c);
+        }
+
 
         public bool Draw(UltimaBatcher2D batcher, 
             int swidth, int sheight,
@@ -237,6 +381,37 @@ namespace ClassicUO.Renderer
             _hueVector.Z = alpha;
 
             return batcher.Draw2D(Texture, dx, dy, dwidth, dheight, srcX, srcY, srcWidth, srcHeight, ref _hueVector);
+        }
+
+        public bool Draw(UltimaBatcher2D batcher, int dx, int dy, int sx, int sy, int swidth, int sheight, int hue = -1)
+        {
+            if (string.IsNullOrEmpty(Text) || Texture == null)
+                return false;
+
+            if (sx > Texture.Width || sy > Texture.Height)
+                return false;
+
+            if(hue != -1)
+            {
+                _hueVector.X = hue;
+
+                if (hue != 0)
+                {
+                    if (IsUnicode)
+                        _hueVector.Y = ShaderHuesTraslator.SHADER_TEXT_HUE_NO_BLACK;
+                    else if (Font == 3)
+                        _hueVector.Y = 5;
+                    else if (Font != 5 && Font != 8)
+                        _hueVector.Y = ShaderHuesTraslator.SHADER_PARTIAL_HUED;
+                    else
+                        _hueVector.Y = ShaderHuesTraslator.SHADER_HUED;
+                }
+                else
+                    _hueVector.Y = 0;
+            }
+            _hueVector.Z = 0;
+
+            return batcher.Draw2D(Texture, dx, dy, sx, sy, swidth, sheight, ref _hueVector);
         }
 
         public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 0, ushort hue = 0)
