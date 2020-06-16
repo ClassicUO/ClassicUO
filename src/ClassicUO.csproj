@@ -82,13 +82,13 @@
 
   <PropertyGroup>
     <PostBuildEvent Condition="'$(OS)' != 'UNIX'">
-      if not exist "$(TargetDir)lib64\" mkdir  "$(TargetDir)lib64\"
-      if not exist "$(TargetDir)osx\" mkdir  "$(TargetDir)osx\"
-      if not exist "$(TargetDir)x64\" mkdir  "$(TargetDir)x64\"
+      if not exist "$(TargetDir)lib64\" mkdir  "$(OutputPath)lib64\"
+      if not exist "$(TargetDir)osx\" mkdir  "$(OutputPath)osx\"
+      if not exist "$(TargetDir)x64\" mkdir  "$(OutputPath)x64\"
 
-      xcopy $(SolutionDir)external\lib64\*.*   $(TargetDir)lib64\   /Y
-      xcopy $(SolutionDir)external\osx\*.*      $(TargetDir)osx\    /Y
-      xcopy $(SolutionDir)external\x64\*.*      $(TargetDir)x64\    /Y
+      xcopy $(SolutionDir)external\lib64\*.*   $(OutputPath)lib64\   /Y
+      xcopy $(SolutionDir)external\osx\*.*      $(OutputPath)osx\    /Y
+      xcopy $(SolutionDir)external\x64\*.*      $(OutputPath)x64\    /Y
     </PostBuildEvent>
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
   </PropertyGroup>
@@ -96,21 +96,21 @@
   <PropertyGroup>
     <PostBuildEvent Condition="'$(OS)' == 'UNIX'">
 
-      if ! [ -d "$(TargetDir)lib64/" ]; then
-      mkdir -p "$(TargetDir)lib64/"
+      if ! [ -d "$(OutputPath)lib64/" ]; then
+      mkdir -p "$(OutputPath)lib64/"
       fi
 
-      if ! [ -d "$(TargetDir)osx/" ]; then
-      mkdir -p "$(TargetDir)osx/"
+      if ! [ -d "$(OutputPath)osx/" ]; then
+      mkdir -p "$(OutputPath)osx/"
       fi
 
-      if ! [ -d "$(TargetDir)x64/" ]; then
-      mkdir -p "$(TargetDir)x64/"
+      if ! [ -d "$(OutputPath)x64/" ]; then
+      mkdir -p "$(OutputPath)x64/"
       fi
 
-      cp -i $(SolutionDir)external/lib64/*.*   $(TargetDir)lib64/
-      cp -i $(SolutionDir)external/osx/*.*     $(TargetDir)osx/
-      cp -i $(SolutionDir)external/x64/*.*     $(TargetDir)x64/
+      cp -ru $(SolutionDir)external/lib64/*.*   $(OutputPath)lib64/
+      cp -ru $(SolutionDir)external/osx/*.*     $(OutputPath)osx/
+      cp -ru $(SolutionDir)external/x64/*.*     $(OutputPath)x64/
     </PostBuildEvent>
    
   </PropertyGroup>
