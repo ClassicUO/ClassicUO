@@ -63,7 +63,10 @@ namespace ClassicUO.Game.UI.Gumps
                 int w = (IsNewBook ? FontsLoader.Instance.GetWidthUnicode(_bookPage.renderedText.Font, BookLines[i]) : FontsLoader.Instance.GetWidthASCII(_bookPage.renderedText.Font, BookLines[i]));
                 sb.Append(BookLines[i]);
                 if (i + 1 < l && (string.IsNullOrWhiteSpace(BookLines[i]) || w + sw < _bookPage.renderedText.MaxWidth))
+                {
                     sb.Append('\n');
+                    BookLines[i] += '\n';
+                }
             }
             _bookPage._ServerUpdate = true;
             _bookPage.Text = sb.ToString();
