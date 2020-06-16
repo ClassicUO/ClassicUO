@@ -2851,7 +2851,6 @@ namespace ClassicUO.IO.Resources
 
             uint* table = (uint*) _unicodeFontAddress[font];
 
-
             while (info != null)
             {
                 switch (info.Align)
@@ -2868,7 +2867,6 @@ namespace ClassicUO.IO.Resources
                         x = 0;
                         break;
                 }
-
                 int len = info.CharCount;
 
                 if (info.CharStart == pos)
@@ -2889,7 +2887,7 @@ namespace ClassicUO.IO.Resources
                         else if (ch == ' ')
                             x += UNICODE_SPACE_WIDTH;
 
-                        if (info.CharStart + i + 1 == pos)
+                        if (info.CharStart + i + (info.CharStart != 1 ? 1 : 0) == pos)
                             return (x, y);
                     }
                 }
@@ -3060,7 +3058,7 @@ namespace ClassicUO.IO.Resources
                     {
                         x += fd[GetASCIIIndex(info.Data[i].Item)].Width;
 
-                        if (info.CharStart + i + 1 == pos)
+                        if (info.CharStart + i + (info.CharStart != 1 ? 1 : 0) == pos)
                             return (x, y);
                     }
                 }

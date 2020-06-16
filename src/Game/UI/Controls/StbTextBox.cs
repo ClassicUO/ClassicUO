@@ -76,7 +76,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
-            Width = int.Parse(parts[3]);
+            Width = _rendererText.MaxWidth;//int.Parse(parts[3]);
             Height = _rendererText.MaxHeight = int.Parse(parts[4]);
             Multiline = false;
             _fromServer = true;
