@@ -176,7 +176,7 @@ namespace ClassicUO.Game.GameObjects
                                   CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW)) != 0)
                         return true;
                 }
-
+                 
                 if (DrawTransparent)
                 {
                     int d = Distance;

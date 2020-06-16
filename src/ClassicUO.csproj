@@ -109,7 +109,7 @@
       fi
 
       cp -ru $(SolutionDir)external/lib64/*.*   $(OutputPath)lib64/
-      cp -ru $(SolutionDir)external/osx/*.*     $(OutputPath)osx/
+      cp -ru $(SolutionDir)external/osx/*.*     $(OutputPath)osx/ 
       cp -ru $(SolutionDir)external/x64/*.*     $(OutputPath)x64/
     </PostBuildEvent>
    
