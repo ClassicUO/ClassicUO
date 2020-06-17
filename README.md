@@ -28,8 +28,13 @@ ClassicUO is natively cross platform and supports:
 * MacOS
 
 # Download & Play!
-Follow the [Wiki](https://github.com/andreakarasho/ClassicUO/wiki) to setup correctly ClassicUO
+| Platform | Link |
+| --- | --- |
+| Windows x64 | [Download](https://www.classicuo.eu/launcher/win-x64/ClassicUOLauncher-win-x64-release.zip) |
+| Linux x64 | [Download](https://www.classicuo.eu/launcher/linux-x64/ClassicUOLauncher-linux-x64-release.zip) |
+| macOS | [Download](https://www.classicuo.eu/launcher/osx/ClassicUOLauncher-osx-x64-release.zip) |
 
+Or visit the [ClassicUO Website](https://www.classicuo.eu/)
 # Code building
 ### Windows
 The binary produced will work on all supported platforms.
