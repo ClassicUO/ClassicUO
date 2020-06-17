@@ -25,7 +25,6 @@ namespace ClassicUO.Game.UI.Controls
         private int _maxCharCount = -1;
         protected Point _caretScreenPosition;
         protected bool _leftWasDown, _fromServer;
-        private ushort _hue;
         private FontStyle _fontStyle;
 
 
@@ -36,7 +35,6 @@ namespace ClassicUO.Game.UI.Controls
             CanMove = false;
             IsEditable = true;
 
-            _hue = hue;
             _maxCharCount = max_char_count;
 
             _stb = new TextEdit(this);
@@ -150,7 +148,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public ushort Hue
         {
-            get => _hue;
+            get => _rendererText.Hue;
             set
             {
                 if (_rendererText.Hue != value)
