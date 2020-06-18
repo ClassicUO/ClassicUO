@@ -1470,7 +1470,7 @@ namespace ClassicUO.IO.Resources
                         continue;
                     }
 
-                    ushort[] data = new ushort[imageWidth * imageHeight];
+                    uint[] data = new uint[imageWidth * imageHeight];
 
                     uint header = _reader.ReadUInt();
 
@@ -1501,9 +1501,10 @@ namespace ClassicUO.IO.Resources
 
                             // FIXME: same of MUL ? Keep it as original for the moment
                             if (val != 0)
-                                data[block] = (ushort) (0x8000 | val);
-                            else
-                                data[block] = 0;
+                            {
+                                data[block] = Utility.HuesHelper.Color16To32(val) | 0xFF_00_00_00;
+                            }
+
                             block++;
                         }
 
@@ -1565,7 +1566,7 @@ namespace ClassicUO.IO.Resources
                 if (imageWidth == 0 || imageHeight == 0)
                     continue;
 
-                ushort[] data = new ushort[imageWidth * imageHeight];
+                uint[] data = new uint[imageWidth * imageHeight];
 
                 uint header = reader.ReadUInt();
 
@@ -1590,7 +1591,7 @@ namespace ClassicUO.IO.Resources
 
                     for (int k = 0; k < runLength; k++)
                     {
-                        data[block++] = (ushort) (0x8000 | palette[reader.ReadByte()]);
+                        data[block++] = Utility.HuesHelper.Color16To32(palette[reader.ReadByte()]) | 0xFF_00_00_00;
                     }
 
                     header = reader.ReadUInt();

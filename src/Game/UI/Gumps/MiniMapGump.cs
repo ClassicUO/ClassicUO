@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private bool _draw;
         //private bool _forceUpdate;
-        private UOTexture16 _gumpTexture, _mapTexture;
+        private UOTexture32 _gumpTexture, _mapTexture;
         private int _lastMap = -1;
         private Texture2D _playerIndicator, _mobilesIndicator;
         private long _timeMS;
@@ -240,7 +240,7 @@ namespace ClassicUO.Game.UI.Gumps
                 minBlockY = 0;
             int maxBlockIndex = World.Map.BlocksCount;
             int mapBlockHeight = MapLoader.Instance.MapBlocksSize[World.MapIndex, 1];
-            ushort[] data = GumpsLoader.Instance.GetGumpPixels(_useLargeMap ? (uint) 5011 : 5010, out _, out _);
+            var data = GumpsLoader.Instance.GetGumpPixels(_useLargeMap ? (uint) 5011 : 5010, out _, out _);
 
             Point[] table = new Point[2]
             {
@@ -316,11 +316,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            _mapTexture = new UOTexture16(Width, Height);
+            _mapTexture = new UOTexture32(Width, Height);
             _mapTexture.PushData(data);
         }
 
-        private void CreatePixels(ushort[] data, int color, int x, int y, int w, int h, Point[] table, int count)
+        private void CreatePixels(uint[] data, int color, int x, int y, int w, int h, Point[] table, int count)
         {
             int px = x;
             int py = y;
@@ -341,8 +341,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int block = gy * w + gx;
 
-                if (data[block] == 0x8421)
-                    data[block] = (ushort) color;
+                if (data[block] == 0xFF080808)
+                    data[block] = Utility.HuesHelper.Color16To32((ushort) color) | 0xFF_00_00_00;
             }
         }
 
