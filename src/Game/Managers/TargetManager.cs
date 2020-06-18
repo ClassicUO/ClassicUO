@@ -321,7 +321,7 @@ namespace ClassicUO.Game.Managers
                 if (graphic >= TileDataLoader.Instance.StaticData.Length)
                     return;
 
-                ref readonly var itemData = ref TileDataLoader.Instance.StaticData[graphic];
+                ref var itemData = ref TileDataLoader.Instance.StaticData[graphic];
 
                 if (Client.Version >= ClientVersion.CV_7090 && itemData.IsSurface)
                 {

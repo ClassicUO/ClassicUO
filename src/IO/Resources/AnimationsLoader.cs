@@ -1140,7 +1140,7 @@ namespace ClassicUO.IO.Resources
         [MethodImpl(256)]
         public void FixSittingDirection(ref byte layerDirection, ref bool mirror, ref int x, ref int y)
         {
-            ref readonly var data = ref SittingInfos[SittingValue - 1];
+            ref var data = ref SittingInfos[SittingValue - 1];
 
             switch (Direction)
             {

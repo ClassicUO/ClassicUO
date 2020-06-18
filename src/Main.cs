@@ -165,11 +165,11 @@ namespace ClassicUO
 
             // FIXME: force to use OpenGL in osx and linux contexts. Metal wants texture converted in .Color instead of BGRA5551.
             //        Check the branch "fna3d-macos-fix"
-            if (CUOEnviroment.IsUnix)
+            /*if (CUOEnviroment.IsUnix)
             {
                 Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "OpenGL");
             }
-
+            */
 
             if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.UltimaOnlineDirectory))
                 Settings.GlobalSettings.UltimaOnlineDirectory = CUOEnviroment.ExecutablePath;

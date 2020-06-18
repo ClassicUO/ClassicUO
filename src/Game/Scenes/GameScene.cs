@@ -406,7 +406,7 @@ namespace ClassicUO.Game.Scenes
                         light.ID = 1;
                     else
                     {
-                        ref readonly var data = ref TileDataLoader.Instance.StaticData[obj.Graphic];
+                        ref var data = ref TileDataLoader.Instance.StaticData[obj.Graphic];
                         light.ID = data.Layer;
                     }
                 }
@@ -827,7 +827,7 @@ namespace ClassicUO.Game.Scenes
                 var lightColor = World.Light.IsometricLevel;
 
                 if (ProfileManager.Current.UseDarkNights)
-                    lightColor -= 0.02f;
+                    lightColor -= 0.04f;
 
                 _vectorClear.X = _vectorClear.Y = _vectorClear.Z = lightColor;
 

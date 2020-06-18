@@ -36,7 +36,7 @@ namespace ClassicUO.Game.Scenes
 {
     internal partial class GameScene
     {
-        private readonly struct TreeUnion
+        private struct TreeUnion
         {
             public TreeUnion(ushort start, ushort end)
             {
@@ -44,7 +44,7 @@ namespace ClassicUO.Game.Scenes
                 End = end;
             }
 
-            public readonly ushort Start, End;
+            public ushort Start, End;
         }
 
 
@@ -62,7 +62,7 @@ namespace ClassicUO.Game.Scenes
         private int _renderListCount, _foliageCount;
         private StaticTiles _empty;
         private sbyte _foliageIndex;
-        private static readonly TreeUnion[] _treeInfos =
+        private static TreeUnion[] _treeInfos =
         {
             new TreeUnion(0x0D45, 0x0D4C),
             new TreeUnion(0x0D5C, 0x0D62),
@@ -140,7 +140,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (tileZ > pz14 && _maxZ > tileZ)
                     {
-                        ref readonly var itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
+                        ref var itemdata = ref TileDataLoader.Instance.StaticData[obj.Graphic];
 
                         //if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && ((ulong) itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
                         if (((ulong) itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
@@ -178,7 +178,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             if (!(obj2 is Land))
                             {
-                                ref readonly var itemdata = ref TileDataLoader.Instance.StaticData[obj2.Graphic];
+                                ref var itemdata = ref TileDataLoader.Instance.StaticData[obj2.Graphic];
 
                                 if (((ulong) itemdata.Flags & 0x204) == 0 && itemdata.IsRoof)
                                 {
@@ -218,7 +218,7 @@ namespace ClassicUO.Game.Scenes
         {
             for (int i = 0; i < _treeInfos.Length; i++)
             {
-                ref readonly var info = ref _treeInfos[i];
+                ref var info = ref _treeInfos[i];
 
                 if (info.Start <= graphic && graphic <= info.End)
                 {
@@ -300,7 +300,7 @@ namespace ClassicUO.Game.Scenes
                 bool ismobile = false;
                 bool push_with_priority = false;
 
-                ushort graphic = obj.Graphic;
+                ref ushort graphic = ref obj.Graphic;
 
                 switch (obj)
                 {
