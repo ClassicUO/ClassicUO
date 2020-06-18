@@ -187,8 +187,9 @@ namespace ClassicUO.IO.Resources
                 int pos2 = baseCliloc.IndexOf('_', pos + 1);
                 if (pos2 == -1)
                     break;
-                string str = baseCliloc.Substring(pos + 1, pos2 - (pos + 1));
-                if (!int.TryParse(str, out index) || index > arguments.Count)
+                if (!int.TryParse(baseCliloc.Substring(pos + 1, pos2 - (pos + 1)), out index))
+                    return $"MegaCliloc: error for {clilocNum}";
+                else if (index > arguments.Count)
                     return $"MegaCliloc: error for {clilocNum}, index exceeds number of arguments {index}";
                 --index;
 
