@@ -28,40 +28,6 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    internal class UOTexture16 : UOTexture
-    {
-        private ushort[] _data;
-
-        public UOTexture16(int width, int height) : base(width, height, SurfaceFormat.Bgra5551)
-        {
-
-        }
-
-        public void PushData(ushort[] data)
-        {
-            _data = data;
-            SetData(data);
-        }
-
-        public ushort[] Data => _data;
-
-        public override bool Contains(int x, int y, bool pixelCheck = true)
-        {
-            if (_data != null && x >= 0 && y >= 0 && x < Width && y < Height)
-            {
-                if (!pixelCheck)
-                    return true;
-
-                int pos = y * Width + x;
-
-                if (pos < _data.Length)
-                    return _data[pos] != 0;
-            }
-
-            return false;
-        }
-    }
-
     internal class UOTexture32 : UOTexture
     {
         private uint[] _data;
@@ -70,6 +36,8 @@ namespace ClassicUO.Renderer
         {
 
         }
+
+        public uint[] Data => _data;
 
         public void PushData(uint[] data)
         {

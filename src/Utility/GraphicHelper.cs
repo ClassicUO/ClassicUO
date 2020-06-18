@@ -34,7 +34,7 @@ namespace ClassicUO.Utility
         ///     for each part, in the second dimension, we specify:
         ///     starting x and y, plus width and height for that specified part (4 as size in second dimension).
         /// </param>
-        internal static UOTexture32[] SplitTexture16(UOTexture original, int[,] partXYplusWidthHeight)
+        internal static UOTexture32[] SplitTexture16(UOTexture32 original, int[,] partXYplusWidthHeight)
         {
             if (partXYplusWidthHeight.GetLength(0) == 0 || partXYplusWidthHeight.GetLength(1) < 4)
                 return null;

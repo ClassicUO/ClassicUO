@@ -255,7 +255,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void GenerateVirtualTextures()
         {
             _shopGumpParts = new UOTexture[12];
-            UOTexture16 t = GumpsLoader.Instance.GetTexture(0x0870);
+            var t = GumpsLoader.Instance.GetTexture(0x0870);
             UOTexture[][] splits = new UOTexture[4][];
 
             splits[0] = Utility.GraphicHelper.SplitTexture16(t,
