@@ -132,13 +132,9 @@ namespace ClassicUO.IO.Resources
             return s;
         }
 
-        public string Translate(int baseCliloc, string arg = "", bool capitalize = false)
+        public string Translate(int clilocNum, string arg = "", bool capitalize = false)
         {
-            return Translate(GetString(baseCliloc), arg, capitalize);
-        }
-
-        public string Translate(string baseCliloc, string arg = "", bool capitalize = false)
-        {
+            string baseCliloc = GetString(clilocNum);
             if (baseCliloc == null)
                 return null;
 
@@ -180,7 +176,7 @@ namespace ClassicUO.IO.Resources
             //    }
             //}
 
-            int index = 0;
+            int index;
             while (true)
             {
                 int pos = baseCliloc.IndexOf('~');
@@ -188,7 +184,15 @@ namespace ClassicUO.IO.Resources
                 if (pos == -1)
                     break;
 
-                int pos2 = baseCliloc.IndexOf('~', pos + 1);
+                int pos2 = baseCliloc.IndexOf('_', pos + 1);
+                if (pos2 == -1)
+                    break;
+                string str = baseCliloc.Substring(pos + 1, pos2 - (pos + 1));
+                if (!int.TryParse(str, out index) || index > arguments.Count)
+                    return $"MegaCliloc: error for {clilocNum}, index exceeds number of arguments {index}";
+                --index;
+
+                pos2 = baseCliloc.IndexOf('~', pos2 + 1);
 
                 if (pos2 == -1)
                     break;
@@ -212,7 +216,6 @@ namespace ClassicUO.IO.Resources
                 }
 
                 baseCliloc = baseCliloc.Remove(pos, pos2 - pos + 1).Insert(pos, index >= arguments.Count ? string.Empty : arguments[index]);
-                index++;
             }
 
             //for (int i = 0; i < arguments.Count; i++)

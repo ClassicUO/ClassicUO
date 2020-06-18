@@ -5379,7 +5379,7 @@ namespace ClassicUO.Network
 
                         if (World.ClientFeatures.TooltipsEnabled)
                         {
-                            string text = ClilocLoader.Instance.GetString(int.Parse(gparams[1]));
+                            string text = null;
 
                             if (gparams.Count > 2 && gparams[2].Length != 0)
                             {
@@ -5388,11 +5388,17 @@ namespace ClassicUO.Network
                                 for (int i = 3; i < gparams.Count; i++)
                                     args += '\t' + gparams[i];
 
-                                if (args.Length != 0)
-                                    text = ClilocLoader.Instance.Translate(text, args, true);
-                                else
+                                if (args.Length == 0)
+                                {
+                                    text = ClilocLoader.Instance.GetString(int.Parse(gparams[1]));
                                     Log.Error($"String '{args}' too short, something wrong with gump tooltip: {text}");
+                                }
+                                else
+                                    text = ClilocLoader.Instance.Translate(int.Parse(gparams[1]), args, true);
+                                
                             }
+                            else
+                                 text = ClilocLoader.Instance.GetString(int.Parse(gparams[1]));
 
                             var last = gump.Children.Count != 0 ? gump.Children[gump.Children.Count - 1] : null;
 
