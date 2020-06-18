@@ -109,6 +109,6 @@ namespace ClassicUO.Renderer
             ImageRectangle = rect;
         }
 
-        public readonly Rectangle ImageRectangle;
+        public Rectangle ImageRectangle;
     }
 }
