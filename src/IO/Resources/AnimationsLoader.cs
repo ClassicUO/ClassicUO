@@ -2109,7 +2109,7 @@ namespace ClassicUO.IO.Resources
         public uint Size;
     }
 
-    internal readonly struct EquipConvData : IEquatable<EquipConvData>
+    internal struct EquipConvData : IEquatable<EquipConvData>
     {
         public EquipConvData(ushort graphic, ushort gump, ushort color)
         {
@@ -2118,9 +2118,9 @@ namespace ClassicUO.IO.Resources
             Color = color;
         }
 
-        public readonly ushort Graphic;
-        public readonly ushort Gump;
-        public readonly ushort Color;
+        public ushort Graphic;
+        public ushort Gump;
+        public ushort Color;
 
 
         public override int GetHashCode()
