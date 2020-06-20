@@ -5425,7 +5425,7 @@ namespace ClassicUO.Network
                         {
                             gump.Children[gump.Children.Count - 1].SetTooltip(SerialHelper.Parse(gparams[1]));
 
-                            if (uint.TryParse(gparams[1], out uint s) && !World.OPL.Contains(s))
+                            if (uint.TryParse(gparams[1], out uint s) && (!World.OPL.TryGetRevision(s, out uint rev) || rev == 0))
                             {
                                 AddMegaClilocRequest(s);
                             }
