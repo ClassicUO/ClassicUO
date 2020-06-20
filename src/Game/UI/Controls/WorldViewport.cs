@@ -80,7 +80,7 @@ namespace ClassicUO.Game.UI.Controls
                     // draw regular world
                     if (_xBR == null)
                     {
-                        _xBR = new XBREffect(Client.Game.GraphicsDevice);
+                        _xBR = new XBREffect(batcher.GraphicsDevice);
                     }
 
                     _xBR.SetSize(_scene.ViewportTexture.Width, _scene.ViewportTexture.Height);
