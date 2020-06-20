@@ -742,5 +742,20 @@ namespace ClassicUO.Game.UI.Controls
 
             base.Dispose();
         }
+
+        internal int TotalHeight
+        {
+            get
+            {
+                int h = 20;
+                var info = GetInfo();
+                while (info != null)
+                {
+                    h += info.MaxHeight;
+                    info = info.Next;
+                }
+                return h;
+            }
+        }
     }
 }

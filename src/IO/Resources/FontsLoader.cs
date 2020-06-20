@@ -2887,7 +2887,7 @@ namespace ClassicUO.IO.Resources
                         else if (ch == ' ')
                             x += UNICODE_SPACE_WIDTH;
 
-                        if (info.CharStart + i + (info.CharStart != 1 ? 1 : 0) == pos)
+                        if (info.CharStart + i + 1 == pos)
                             return (x, y);
                     }
                 }
