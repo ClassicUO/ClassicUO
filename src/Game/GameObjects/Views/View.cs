@@ -140,6 +140,10 @@ namespace ClassicUO.Game.GameObjects
 
                 batcher.DrawSpriteLand(texture, x, y, ref rectangle, ref n0, ref n1, ref n2, ref n3, ref hue);
             }
+            else
+            {
+                DrawStatic(batcher, graphic, x, y, ref hue);
+            }
         }
 
         protected static void DrawStatic(UltimaBatcher2D batcher, ushort graphic, int x, int y, ref Vector3 hue)
