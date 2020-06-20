@@ -138,7 +138,6 @@ namespace ClassicUO.IO.Resources
             if (baseCliloc == null)
                 return null;
 
-
             while (arg.Length != 0 && arg[0] == '\t')
                 arg = arg.Remove(0, 1);
 
@@ -189,8 +188,6 @@ namespace ClassicUO.IO.Resources
                     break;
                 if (!int.TryParse(baseCliloc.Substring(pos + 1, pos2 - (pos + 1)), out index))
                     return $"MegaCliloc: error for {clilocNum}";
-                else if (index > arguments.Count)
-                    return $"MegaCliloc: error for {clilocNum}, index exceeds number of arguments {index}";
                 --index;
 
                 pos2 = baseCliloc.IndexOf('~', pos2 + 1);
