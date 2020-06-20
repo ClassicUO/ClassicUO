@@ -424,7 +424,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             switch (key)
             {
-                case SDL.SDL_Keycode.SDLK_q when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && _messageHistoryIndex > -1 && !ProfileManager.Current.DisableCtrlQWBtn:
+                case SDL.SDL_Keycode.SDLK_q when Keyboard.Ctrl && _messageHistoryIndex > -1 && !ProfileManager.Current.DisableCtrlQWBtn:
 
                     var scene = Client.Game.GetScene<GameScene>();
                     if (scene == null)
@@ -444,7 +444,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_w when Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && !ProfileManager.Current.DisableCtrlQWBtn:
+                case SDL.SDL_Keycode.SDLK_w when Keyboard.Ctrl && !ProfileManager.Current.DisableCtrlQWBtn:
 
                     scene = Client.Game.GetScene<GameScene>();
                     if (scene == null)

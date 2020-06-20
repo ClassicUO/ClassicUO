@@ -577,14 +577,17 @@ namespace ClassicUO.Game.UI.Controls
                     }
                 }
 
+
                 if (count > 1)
+                {
                     _stb.Paste(c);
-                else
+                    OnTextChanged();
+                }
+                else if (_rendererText.GetCharWidth(c[0]) > 0)
                 {
                     _stb.InputChar(c[0]);
-                }
-
-                OnTextChanged();
+                    OnTextChanged();
+                }     
             }
 
             _is_writing = false;
