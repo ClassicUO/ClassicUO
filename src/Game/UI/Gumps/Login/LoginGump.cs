@@ -432,7 +432,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
 
-                if (ScissorStack.PushScissors(scissor))
+                if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
                 {
                     batcher.EnableScissorTest(true);
                     DrawSelection(batcher, x, y);
@@ -442,7 +442,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     DrawCaret(batcher, x, y);
 
                     batcher.EnableScissorTest(false);
-                    ScissorStack.PopScissors();
+                    ScissorStack.PopScissors(batcher.GraphicsDevice);
                 }
 
                 return true;

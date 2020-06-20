@@ -594,7 +594,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
 
-            if (ScissorStack.PushScissors(scissor))
+            if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
             {
                 batcher.EnableScissorTest(true);
 
@@ -607,7 +607,7 @@ namespace ClassicUO.Game.UI.Controls
                 DrawCaret(batcher, x, y);
 
                 batcher.EnableScissorTest(false);
-                ScissorStack.PopScissors();
+                ScissorStack.PopScissors(batcher.GraphicsDevice);
             }
 
             return true;

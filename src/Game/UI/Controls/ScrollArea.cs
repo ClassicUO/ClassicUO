@@ -115,7 +115,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x + ScissorRectangle.X, y + ScissorRectangle.Y, (Width - 14) + ScissorRectangle.Width, Height + ScissorRectangle.Height);
 
-            if (ScissorStack.PushScissors(scissor))
+            if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
             {
                 batcher.EnableScissorTest(true);
                 int height = ScissorRectangle.Y;
@@ -142,7 +142,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
 
                 batcher.EnableScissorTest(false);
-                ScissorStack.PopScissors();
+                ScissorStack.PopScissors(batcher.GraphicsDevice);
             }
 
             return true;
