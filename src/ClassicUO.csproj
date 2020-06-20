@@ -78,6 +78,10 @@
     <Reference Include="System.IO.Compression" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
   <PropertyGroup>
     <PostBuildEvent Condition="'$(OS)' != 'UNIX'">
       if not exist "$(TargetDir)lib64\" mkdir  "$(OutputPath)lib64\"

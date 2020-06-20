@@ -577,14 +577,17 @@ namespace ClassicUO.Game.UI.Controls
                     }
                 }
 
+
                 if (count > 1)
+                {
                     _stb.Paste(c);
-                else
+                    OnTextChanged();
+                }
+                else if (_rendererText.GetCharWidth(c[0]) > 0)
                 {
                     _stb.InputChar(c[0]);
-                }
-
-                OnTextChanged();
+                    OnTextChanged();
+                }     
             }
 
             _is_writing = false;
@@ -594,7 +597,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
 
-            if (ScissorStack.PushScissors(scissor))
+            if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
             {
                 batcher.EnableScissorTest(true);
 
@@ -607,7 +610,7 @@ namespace ClassicUO.Game.UI.Controls
                 DrawCaret(batcher, x, y);
 
                 batcher.EnableScissorTest(false);
-                ScissorStack.PopScissors();
+                ScissorStack.PopScissors(batcher.GraphicsDevice);
             }
 
             return true;

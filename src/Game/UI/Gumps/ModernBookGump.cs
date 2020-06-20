@@ -274,7 +274,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Draw(batcher, x, y);
             Rectangle scissor = ScissorStack.CalculateScissors(Matrix.Identity, x, y, Width, Height);
-            if (ScissorStack.PushScissors(scissor))
+            if (ScissorStack.PushScissors(batcher.GraphicsDevice, scissor))
             {
                 batcher.EnableScissorTest(true);
                 var t = _bookPage.renderedText;
@@ -335,7 +335,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
                 batcher.EnableScissorTest(false);
-                ScissorStack.PopScissors();
+                ScissorStack.PopScissors(batcher.GraphicsDevice);
             }
             return true;
         }
