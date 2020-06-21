@@ -1847,7 +1847,7 @@ namespace ClassicUO.Network
                         }
                     }
                 }
-                if (pageNum < pageCnt)
+                if (pageNum < pageCnt && pageNum >= 0)
                 {
                     var lineCnt = p.ReadUShort();
 
