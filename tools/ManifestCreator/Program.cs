@@ -59,7 +59,6 @@ namespace ManifestCreator
             "Mono.Posix.dll",
             "Mono.Security.dll",
             "mscorlib.dll",
-            "Newtonsoft.Json.dll",
             "System.Configuration.dll",
             "System.Core.dll",
             "System.Data.dll",
