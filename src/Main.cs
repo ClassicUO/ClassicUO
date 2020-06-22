@@ -120,7 +120,6 @@ namespace ClassicUO
                 if (CheckUpdate(args))
                     return;
             
-            //Environment.SetEnvironmentVariable("FNA_GRAPHICS_FORCE_GLDEVICE", "ModernGLDevice");
             if (CUOEnviroment.IsHighDPI)
             {
                 Log.Trace("HIGH DPI - ENABLED");
@@ -229,6 +228,9 @@ namespace ClassicUO
             }
             else
             {
+                if (Settings.GlobalSettings.UseOpenGL)
+                    Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "OpenGL");
+
                 Client.Run();
             }
             
@@ -409,6 +411,10 @@ namespace ClassicUO
 
                     case "encryption":
                         Settings.GlobalSettings.Encryption = byte.Parse(value);
+                        break;
+
+                    case "use_opengl":
+                        Settings.GlobalSettings.UseOpenGL = bool.Parse(value);
                         break;
 
                 }

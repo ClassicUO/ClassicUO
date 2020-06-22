@@ -99,6 +99,9 @@ namespace ClassicUO.Configuration
         [JsonProperty("run_mouse_in_separate_thread")]
         public bool RunMouseInASeparateThread { get; set; } = true;
 
+        [JsonProperty("use_opengl")]
+        public bool UseOpenGL { get; set; }
+
         [JsonProperty("use_verdata")]
         public bool UseVerdata { get; set; }
 
@@ -107,8 +110,6 @@ namespace ClassicUO.Configuration
 
         [JsonProperty("plugins")]
         public string[] Plugins { get; set; } = { @"./Assistant/Razor.dll" };
-
-
 
 
         public const string SETTINGS_FILENAME = "settings.json";
