@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://i.imgur.com/CgpwyIQ.png" width="200" height="200" >
+    <img src="https://i.imgur.com/CgpwyIQ.png" width="190" height="200" >
 </p>
 
 An open source implementation of the Ultima Online Classic Client.
@@ -23,9 +23,9 @@ ClassicUO is an open source implementation of the Ultima Online Classic Client. 
 The client is currently under heavy development but is functional. The code is based on the [FNA-XNA](https://fna-xna.github.io/) framework. C# is chosen because there is a large community of developers working on Ultima Online server emulators in C#, because FNA-XNA exists and seems reasonably suitable for creating this type of game.
 
 ClassicUO is natively cross platform and supports:
-* Windows
-* Linux
-* MacOS
+* Windows [DirectX 11 or OpenGL]
+* Linux   [OpenGL]
+* macOS   [Metal or OpenGL]
 
 # Download & Play!
 | Platform | Link |
@@ -35,7 +35,8 @@ ClassicUO is natively cross platform and supports:
 | macOS | [Download](https://www.classicuo.eu/launcher/osx/ClassicUOLauncher-osx-x64-release.zip) |
 
 Or visit the [ClassicUO Website](https://www.classicuo.eu/)
-# Code building
+
+# How to build the project
 ### Windows
 The binary produced will work on all supported platforms.
 
@@ -59,7 +60,7 @@ Open a terminal instance and put the following commands:
 
 4. Hit F5 to build. The output will be in the "bin/Release" or "bin/Debug" directory.
 
-### MacOS
+### macOS
 All the commands should be executed in terminal. All global package installs should be done only if not yet installed.
 
 1. Install Homebrew, a package manager for macOS (if not yet installed):
