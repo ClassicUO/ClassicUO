@@ -52,7 +52,7 @@ namespace ClassicUO.Input
         {
             var mod = e.keysym.mod & ~IgnoreKeyMod;
 
-            if (mod == (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL))
+            if ((mod & (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL)) == (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL))
             {
                 e.keysym.sym = SDL.SDL_Keycode.SDLK_UNKNOWN;
                 e.keysym.mod = SDL.SDL_Keymod.KMOD_NONE;
@@ -69,7 +69,7 @@ namespace ClassicUO.Input
         {
             var mod = e.keysym.mod & ~IgnoreKeyMod;
 
-            if (mod == (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL))
+            if ((mod & (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL)) == (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL))
             {
                 e.keysym.sym = SDL.SDL_Keycode.SDLK_UNKNOWN;
                 e.keysym.mod = SDL.SDL_Keymod.KMOD_NONE;
