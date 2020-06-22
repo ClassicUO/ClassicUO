@@ -260,7 +260,12 @@ namespace ClassicUO.IO.Resources
 
             if(c < NOPRINT_CHARS)
                 return _font[font][0].Width;
-            return _font[font][c - NOPRINT_CHARS].Width;
+
+            int index = c - NOPRINT_CHARS;
+            if (index < _font[font].Length)
+                return _font[font][index].Width;
+
+            return 0;
         }
 
         public int GetWidthExASCII(byte font, string text, int maxwidth, TEXT_ALIGN_TYPE align, ushort flags)

@@ -783,8 +783,8 @@ namespace ClassicUO.Game.Scenes
 
                 // chat system activation
 
-                case SDL.SDL_Keycode.SDLK_1 when Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT): // !
-                case SDL.SDL_Keycode.SDLK_BACKSLASH when Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT): // \
+                case SDL.SDL_Keycode.SDLK_1 when Keyboard.Shift: // !
+                case SDL.SDL_Keycode.SDLK_BACKSLASH when Keyboard.Shift: // \
 
                     if (ProfileManager.Current.ActivateChatAfterEnter && ProfileManager.Current.ActivateChatAdditionalButtons && !UIManager.SystemChat.IsActive)
                         UIManager.SystemChat.IsActive = true;
@@ -805,9 +805,9 @@ namespace ClassicUO.Game.Scenes
                     if (ProfileManager.Current.ActivateChatAfterEnter &&
                         ProfileManager.Current.ActivateChatAdditionalButtons && !UIManager.SystemChat.IsActive)
                     {
-                        if (Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_NONE))
+                        if (!Keyboard.Shift && !Keyboard.Alt && !Keyboard.Ctrl)
                             UIManager.SystemChat.IsActive = true;
-                        else if (Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT) && e.keysym.sym == SDL.SDL_Keycode.SDLK_SEMICOLON)
+                        else if (Keyboard.Shift && e.keysym.sym == SDL.SDL_Keycode.SDLK_SEMICOLON)
                             UIManager.SystemChat.IsActive = true;
                     }
                     break;
@@ -820,7 +820,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             UIManager.SystemChat.Mode = ChatMode.Default;
 
-                            if (!(Keyboard.IsModPressed(e.keysym.mod, SDL.SDL_Keymod.KMOD_SHIFT) && ProfileManager.Current.ActivateChatShiftEnterSupport))
+                            if (!(Keyboard.Shift && ProfileManager.Current.ActivateChatShiftEnterSupport))
                                 UIManager.SystemChat.ToggleChatVisibility();
                         }
 
