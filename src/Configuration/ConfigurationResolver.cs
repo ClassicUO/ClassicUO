@@ -24,13 +24,13 @@ using System.Text.RegularExpressions;
 
 using ClassicUO.Utility.Logging;
 
-using Newtonsoft.Json;
+using TinyJson;
 
 namespace ClassicUO.Configuration
 {
     internal static class ConfigurationResolver
     {
-        public static T Load<T>(string file, JsonSerializerSettings jsonsettings = null) where T : class
+        public static T Load<T>(string file) where T : class
         {
             if (!File.Exists(file))
             {
@@ -46,15 +46,14 @@ namespace ClassicUO.Configuration
                                                 (?!\\)     # lookahead: Check that the following character isn't a \",
                                     @"\\", RegexOptions.IgnorePatternWhitespace);
 
-            T settings = JsonConvert.DeserializeObject<T>(text, jsonsettings);
+            T settings = text.Decode<T>();
 
             return settings;
         }
 
-        public static void Save<T>(T obj, string file, JsonSerializerSettings jsonsettings = null) where T : class
+        public static void Save<T>(T obj, string file) where T : class
         {
-            string t = JsonConvert.SerializeObject(obj, Formatting.Indented, jsonsettings);
-            File.WriteAllText(file, t);
+            File.WriteAllText(file, obj.Encode(true));
         }
     }
 }

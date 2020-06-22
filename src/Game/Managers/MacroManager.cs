@@ -35,8 +35,6 @@ using ClassicUO.Interfaces;
 using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 
-using Newtonsoft.Json;
-
 using SDL2;
 
 namespace ClassicUO.Game.Managers
@@ -1440,10 +1438,8 @@ namespace ClassicUO.Game.Managers
 
 
 
-    [JsonObject]
     internal class Macro : IEquatable<Macro>, INode<Macro>
     {
-        [JsonConstructor]
         public Macro(string name, SDL.SDL_Keycode key, bool alt, bool ctrl, bool shift) : this(name)
         {
             Key = key;
@@ -1457,14 +1453,14 @@ namespace ClassicUO.Game.Managers
             Name = name;
         }
 
-        [JsonProperty] public string Name { get; }
+        public string Name { get; }
 
-        [JsonProperty] public SDL.SDL_Keycode Key { get; set; }
-        [JsonProperty] public bool Alt { get; set; }
-        [JsonProperty] public bool Ctrl { get; set; }
-        [JsonProperty] public bool Shift { get; set; }
+        public SDL.SDL_Keycode Key { get; set; }
+        public bool Alt { get; set; }
+        public bool Ctrl { get; set; } 
+        public bool Shift { get; set; }
 
-        [JsonProperty] public MacroObject FirstNode { get; set; }
+        public MacroObject FirstNode { get; set; }
 
         public bool Equals(Macro other)
         {
@@ -1474,8 +1470,8 @@ namespace ClassicUO.Game.Managers
             return Key == other.Key && Alt == other.Alt && Ctrl == other.Ctrl && Shift == other.Shift && Name == other.Name;
         }
 
-        [JsonIgnore] public Macro Left { get; set; }
-        [JsonIgnore] public Macro Right { get; set; }
+        public Macro Left { get; set; }
+        public Macro Right { get; set; }
 
         private void AppendMacro(MacroObject item)
         {
@@ -1684,10 +1680,8 @@ namespace ClassicUO.Game.Managers
     }
 
 
-    [JsonObject]
     internal class MacroObject : INode<MacroObject>
     {
-        [JsonConstructor]
         public MacroObject(MacroType code, MacroSubType sub)
         {
             Code = code;
@@ -1741,12 +1735,12 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        [JsonProperty] public MacroType Code { get; set; }
-        [JsonProperty] public MacroSubType SubCode { get; set; }
-        [JsonProperty] public sbyte SubMenuType { get; set; }
+        public MacroType Code { get; set; }
+        public MacroSubType SubCode { get; set; }
+        public sbyte SubMenuType { get; set; }
 
-        [JsonIgnore] public MacroObject Left { get; set; }
-        [JsonIgnore] public MacroObject Right { get; set; }
+        public MacroObject Left { get; set; }
+        public MacroObject Right { get; set; }
 
         public virtual bool HasString()
         {
@@ -1754,16 +1748,14 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    [JsonObject]
     internal class MacroObjectString : MacroObject
     {
-        [JsonConstructor]
         public MacroObjectString(MacroType code, MacroSubType sub, string str = "") : base(code, sub)
         {
             Text = str;
         }
 
-        [JsonProperty] public string Text { get; set; }
+        public string Text { get; set; }
 
         public override bool HasString()
         {

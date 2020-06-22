@@ -36,19 +36,7 @@
     <Description>An open source implementation of the Ultima Online Classic Client.</Description>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="cuologo.png" />
-    <None Remove="Renderer\fonts\bold_font.xnb" />
-    <None Remove="Renderer\fonts\map1_font.xnb" />
-    <None Remove="Renderer\fonts\map2_font.xnb" />
-    <None Remove="Renderer\fonts\map3_font.xnb" />
-    <None Remove="Renderer\fonts\map4_font.xnb" />
-    <None Remove="Renderer\fonts\map5_font.xnb" />
-    <None Remove="Renderer\fonts\map6_font.xnb" />
-    <None Remove="Renderer\fonts\regular_font.xnb" />
-    <None Remove="shaders\IsometricWorld.fxc" />
-    <None Remove="shaders\xBR.fxc" />
-  </ItemGroup>
+
 
   <ItemGroup>
     <EmbeddedResource Include="cuologo.png" />
@@ -64,9 +52,6 @@
     <EmbeddedResource Include="shaders\xBR.fxc" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="cuoapi">
@@ -82,7 +67,9 @@
     <Folder Include="Properties\" />
   </ItemGroup>
 
-  <PropertyGroup>
+
+
+   <PropertyGroup>
     <PostBuildEvent Condition="'$(OS)' != 'UNIX'">
       if not exist "$(TargetDir)lib64\" mkdir  "$(OutputPath)lib64\"
       if not exist "$(TargetDir)osx\" mkdir  "$(OutputPath)osx\"
